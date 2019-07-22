@@ -1,0 +1,1001 @@
+@charset "UTF-8";
+
+/* ----PROPER-STYLE-START ----*/
+html, body {
+	height: 100%;
+	width: 100%;
+}
+
+body {
+	overflow-y: scroll;
+}
+
+textarea {
+	height: 35px;
+	width: 250px;
+	resize: none;
+}
+
+button {
+	min-height: 30px;
+	min-width: 100px;
+	background: #F5F5F5;
+	border: 1px solid #999;
+}
+
+article {
+	left: 200px;
+	height: calc(100% - 60px);
+	height: -webkit-calc(100% - 60px);
+	width: calc(100%);
+	width: -webkit-calc(100%);
+}
+
+.floatEracerLeft {
+	display: none;
+	clear: left;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+}
+.floatEracerRight {
+	display: none;
+	clear: right;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+}
+.floatEracerBoth {
+	display: none;
+	float: none;
+	clear: both;
+	height: 0px;
+	width: 0px;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+}
+
+/* ----sortableAreaFunctionOn */
+
+.sortable_area {
+	min-height: 400px;
+	padding: 10px;
+	margin: 0 10px;
+}
+
+.start, .end {
+	position: relative;
+	margin: 0 20px;
+	text-align: left;
+	border-radius: 20px;
+	background: #AAA;
+	color: #FFF;
+	font-weight: bold;
+	text-indent: 38px;
+	font-size: 20px;
+	line-height: 32px;
+}
+.start {
+	margin-bottom: 28px;
+}
+.end {
+	margin-top: 20px;
+}
+.start::before {
+	content: '▼ ';
+}
+.end::before {
+	content: '▲ ';
+}
+.start::after {
+	position: absolute;
+	top: 32px;
+	left: 45px;
+	content: "";
+	width: 5px;
+	height: 450px;
+	background: #AAA;
+}
+.end::after {
+	position: absolute;
+	bottom: 32px;
+	left: 45px;
+	content: "";
+	width: 5px;
+	height: 21px;
+	background: #AAA;
+}
+
+
+.arrow::after,
+.highlight::after {
+	position: absolute;
+	top: 90px;
+	left: 43px;
+	content: "";
+	width: 5px;
+	height: 64px;
+	background: #AAA;
+}
+.highlight {
+	position: relative;
+	box-sizing: border-box;
+	height: 94px;
+	margin-bottom: 48px; padding: 16px;
+	border: 2px solid #CCC;
+	border-radius: 8px;
+	background-color: #EFEFEF;
+}
+.highlight::before {
+	content: '';
+	display: block;
+	position: absolute;
+	top: 16px; left: 16px;
+	height: 60px;
+	width: 60px;
+	border-radius: 50%;
+	background: #CCC;
+	opacity: 0.3;
+}
+
+
+
+/* symphony flow body */
+.movement2 {
+	position: relative;
+	box-sizing: border-box;
+	height: 94px;
+	margin-bottom: 48px; padding: 16px 16px 0;
+	border: 2px solid #AAA;
+	border-radius: 8px;
+	background-color: #FFF;
+}
+.ui-sortable .movement2
+{
+	animation: fadeIn 0.3s linear 1;
+}
+@keyframes fadeIn {
+	0% { opacity: 0.5; }
+	100% { opacity: 1; }
+}
+.movement2::after {
+	content: '';
+	display: block;
+	clear: both;
+}
+.draggable_area .movement.ui-draggable-dragging {
+	left: 36px!important;
+	box-sizing: border-box;
+	padding: 16px; height: auto!important;
+	width: calc( 100% - 90px ) !important;
+	border: 2px solid #AAA;
+	border-radius: 8px;
+	background-color: #FFF;
+}
+.movement2 .draggable-handle {
+	border-radius: 50%;
+	width: 60px;
+	height: 60px;
+	float: left;
+}
+.movement2 .seqNum {
+	position: absolute;
+	top: 16px;
+	left: 16px;
+	color:#F5F5F5;
+	font-size:18px;
+	font-weight:bold;
+	width:60px;
+	height:60px;
+	text-align:center;
+	line-height:60px;
+	border-radius:50%;
+}
+.ui-sortable {
+	position: relative;
+	animation: backgrounColor 2s linear infinite;
+	border-radius: 16px;
+}
+@keyframes backgrounColor {
+	0% { background-color: rgba( 255, 255, 0, 0 ); }
+	50% { background-color: rgba( 255, 255, 0, 0.3 ); }
+	100% { background-color: rgba( 255, 255, 0, 0 ); }
+}
+.ui-sortable-helper,
+.ui-sortable-helper textarea {
+	left: 10px!important;
+	cursor: s-resize!important;
+}
+.ui-sortable .movement2 .draggable-handle,
+.ui-sortable .movement2 .seqNum {
+	cursor: s-resize;
+}
+
+.movement2 .statusIcon{
+	position: absolute;
+	top: 16px;
+	left: 16px;
+	color:#F5F5F5;
+	font-size:10px;
+	font-weight:bold;
+	width:60px;
+	height:60px;
+	text-align:center;
+	line-height:60px;
+	border-radius:50%;
+}
+
+
+.movement2 .operation_box {
+	position: absolute;
+	top: 8px; left: 92px;
+	width: calc( 100% - 140px );
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: 14px;
+}
+.movement2 .operation_box span.inLineTitle{
+	display: inline;
+	white-space: nowrap;
+}
+
+.movement2 .tips_box {
+	margin: 20px 0 0 76px;
+}
+.movement2 .tips_box textarea + .areaRight {
+	width: 50%!important;
+	box-sizing: border-box;
+}
+
+
+.movement2 .tips_box::after {
+	content: '';
+	display: block;
+	clear: both;
+}
+.movement2 .tips_box div.areaLeft {
+	width: 50%;
+	padding-right: 8px;
+	box-sizing: border-box;
+	float: left;
+}
+#KIZI .movement2 .tips_box textarea.areaLeft,
+#KIZI .movement2 .tips_box textarea.tips_box_textarea {
+	width: calc( 50% - 8px ) !important;
+	box-sizing: border-box;
+	float: left;
+	min-height: 40px;
+	margin: 0;
+}
+.movement2 .tips_box .areaRight {
+	width: 50%;
+	padding-left: 8px;
+	box-sizing: border-box;
+	float: right;
+}
+.movement2 .tips_box .areaRight .areaRight {
+	width: 100%;
+	float: none;
+	padding: 0;
+}
+#KIZI .movement2 .tips_box .areaLeft textarea {
+	width: 100%!important;
+	min-height: 40px;
+	margin: 0;
+}
+
+.movement2 .tips_box .areaRight .inLineDiv {
+	margin: 0px; padding: 2px 8px 0;
+    width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+    background-color: #FFF;
+    border: 1px solid #AAA;
+    border-bottom: 1px dotted #AAA;
+    border-radius: 4px 4px 0 0;
+    font-size: 90%;
+    box-sizing: border-box;
+}
+.movement2 .tips_box .areaRight .inLineDiv:last-child {
+padding: 1px 8px 2px;
+border: 1px solid #AAA;
+border-top: none;border-radius: 0 0 4px 4px;
+}
+
+.movement2 .tips_box .areaRight .inLineDiv span.inLineTitle{
+	display: inline;
+	white-space: nowrap;
+}
+
+.movement2 .pause_box {
+	position: absolute;
+	top: 106px;
+	left: 4px;
+	z-index: 10;
+	background-color: #AAA;
+	border-radius: 20px;
+}
+.movement2 .pause_box label {
+	display: inline-block;
+	box-sizing: border-box;
+	width: 80px;
+	line-height: 20px;
+	color: #FFF;
+	background-color: #AAA;
+	border-radius: 20px;
+	text-align: center;
+	box-shadow: 0 0 0 2px #AAA;
+}
+.movement2 .pause_box label.pause_exists_label {
+	background-color: #C00;
+	box-shadow: 0 0 0 2px #C00;
+}
+.movement2 .pause_box label.pause_box_label {
+	width: 100px; padding-left: 42px;
+	text-align: left;
+}
+.movement2 .pause_box label.pause_box_label::after {
+	content: '';
+	display: block;
+	position: absolute;
+	left: 2px; top: 2px;
+	width: 32px;
+	height: 16px;
+	background-color: #FFF;
+	border-radius: 16px;
+}
+.movement2 .pause_box label.pause_box_label::before {
+	content: '';
+	display: block;
+	position: absolute;
+	left: 4px; top: 4px;
+	width: 12px; height: 12px;
+	border-radius: 50%;
+	background-color: #CCC;
+	transition-duration: 0.3s;
+	z-index: 20;
+}
+.movement2 .pause_box:hover label.pause_box_label::before {
+	left: 6px;
+	background-color: #BBB;
+}
+.movement2 .pause_box input.pause_box_check {
+	position: absolute;
+	top: 0; left: 0;
+	width: 100px; height: 20px;
+	margin: 0; padding: 0;
+	z-index: 30;
+	opacity: 0;
+	cursor: pointer;
+}
+.movement2 .pause_box input.pause_box_check:checked + label.pause_box_label {
+	background-color: #CC0000;
+	box-shadow: 0 0 0 2px #CC0000;
+}
+.movement2 .pause_box input.pause_box_check:checked + label.pause_box_label::after {
+	background-color: #FFDDDD;
+}
+.movement2 .pause_box input.pause_box_check:checked + label.pause_box_label::before {
+	left: 20px;
+	background-color: #CC0000;
+}.movement2 .pause_box:hover input.pause_box_check:checked + label.pause_box_label::before {
+	left: 18px;
+	background-color: #BB0000;
+}
+
+.movement2 .delete {
+	position: absolute;
+	overflow: visible;
+	width: 32px; min-width: inherit;
+	height: 32px; min-height: inherit;
+	top: 8px; right: 8px;
+	background-color: #CCC;
+	border-radius: 50%;
+	border: none;
+	text-indent: -9999px;
+	cursor: pointer;
+	transition-duration: 0.3s;
+}
+.movement2 .delete:hover {
+	background-color: #CC0000;
+}
+.movement2 .delete::after {
+	content: '×';
+	display: table-cell;
+	width: 100%;
+	position: absolute;
+	top: 0; right: 0;
+	text-indent: 0;
+	text-align: center;
+	height: 32px;
+	font-size: 24px;
+	font-weight: bold;
+	color: #FFF;
+	line-height: 32px;
+	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+}
+.movement2 .delete:hover::before {
+	content: 'DELETE';
+	display: block;
+	width: 5em;
+	position: absolute;
+	top: 0; right: 32px;
+	text-indent: 0;
+	text-align: center;
+	font-size: 12px;
+	font-weight: bold;
+	color: #999;
+}
+
+.movement2 .holdRelease {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+}
+
+.pause_box input {
+	margin-right: 5px;
+}
+
+.pause_box label {
+	color: #002B62;
+	font-size: 10.5px;
+}
+
+#startMark + .sortable_area .pause_box {
+	overflow: hidden;
+	background-color: #C00;
+	border-radius: 8px;
+	transition-duration: 0.3s;
+}
+#startMark + .sortable_area .pause_box:hover {
+	opacity: 0.3;
+}
+#startMark + .sortable_area .pause_box input {
+	width: 200px; height: 20px;
+	line-height: 20px;
+	background-color: transparent;
+	border: none;
+	transform: none;
+	box-shadow: none;
+	margin: 0; padding: 0;
+}
+#startMark + .sortable_area .pause_box input:active {
+	top: 0;
+}
+#startMark + .sortable_area .pause_box input:disabled {
+	display: none;
+}
+#startMark + .sortable_area .pause_box::before,
+#startMark + .sortable_area .pause_box::after {
+	content: '';
+	display: block;
+	position: absolute;
+	left: 0; top: 0;
+	width: 48px; height: 20px;
+	background-image: repeating-linear-gradient( 45deg, transparent, transparent 10px, #B00 10px, #B00 20px);
+	z-index: 10;
+	pointer-events: none;
+}
+#startMark + .sortable_area .pause_box::after {
+	left: auto; right: 0;
+	background-image: repeating-linear-gradient( -45deg, transparent, transparent 10px, #B00 10px, #B00 20px);	
+}
+
+/* sortableAreaFunctionOn---- */
+
+/* ----materialAreaFunctionOn */
+
+.movement {
+	padding: 8px;
+	overflow: hidden;
+}
+
+.movement:nth-child(2n+1){
+	background: #E5EAEF;
+}
+
+.movement .operation_box {
+	line-height: 35px;
+	margin-left: 48px;
+}
+.movement .operation_box .inLineTitle {
+	display: block;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+.draggable-handle {
+	border-radius: 50%;
+	width: 35px;
+	height: 35px;
+	background: #0070FF;
+	float: left;
+	margin-right: 10px;
+}
+
+/* materialAreaFunctionOn---- */
+
+.cmdButton {
+	min-height: 30px;
+	min-width: 100px;
+	background: #F5F5F5;
+	border: 1px solid #999;
+}
+
+/* ----theme colors */
+
+.red {
+	background: #FF0070;
+}
+.green {
+	background: #00FF8F;
+}
+.blue {
+	background: #0000FF;
+}
+.orange {
+	background: #FF8F00;
+}
+.black {
+	background: #010101;
+}
+.brown {
+        background: #8D4513;
+}
+
+/* OpenAudIT ------- */
+.auditgreen {
+        background: #67BA42;
+}
+/* ------- OpenAudIT */
+
+/* OpenStack ------- */
+.dahliapurple {
+        background: #A50082;
+}
+/* ------- OpenStack */
+
+/* DSC ------- */
+.DSCblue {
+        background: #0C5C9C;
+}
+/* ------- DSC */
+
+/* TestPlayer ------- */
+.TPpink {
+        background: #FF1493;
+}
+/*  ------- TestPlayer  */
+
+/* OpenShift ------- */
+.darkcyan {
+        background: #008B8B;
+}
+/* ------- OpenShift */
+
+/* AnsibleTower ------- */
+.naplesyellow {
+        background: #FDD35C;
+}
+/* ------- AnsibleTower */
+
+.ttc_red {
+    color: #FF0070;
+}
+.ttc_green {
+	color: #00FF8F;
+}
+.ttc_blue {
+	color: #0000FF;
+}
+.ttc_orange {
+	color: #FF8F00;
+}
+.ttc_black {
+	color: #010101;
+}
+.ttc_brown {
+        color: #8D4513;
+}
+
+/* OpenAudIT ------- */
+.ttc_auditgreen {
+        color: #67BA42;
+}
+/* ------- OpenAudIT */
+
+/* OpenStack ------- */
+.ttc_dahliapurple {
+        color: #A50082;
+}
+/* ------- OpenStack */
+
+/* DSC ------- */
+.ttc_DSCblue {
+        color: #0C5C9C;
+}
+/* ------- DSC */
+
+/* TestPlayer ------- */
+.ttc_TPpink {
+        color: #FF1493;
+}
+/*  ------- TestPlayer  */
+
+/* OpenShift ------- */
+.ttc_darkcyan {
+        color: #008B8B;
+}
+/* ------- OpenShift */
+
+/* AnsibleTower ------- */
+.ttc_naplesyellow {
+        color: #FDD35C;
+}
+/* ------- AnsibleTower */
+
+/* theme colors---- */
+
+/* ----status colors */
+
+
+#startMark,
+#endMark {
+	background-image: repeating-linear-gradient( 90deg, #AAA, #AAA 10px, #BBB 10px, #BBB 20px);
+	animation: startRunning 0.5s linear infinite;
+}
+@keyframes startRunning {
+	0% { background-position: 0 0; }
+	100% { background-position: 20px 0; }
+}
+.symStatusEnd,
+#startMark.symStatusEnd,
+#endMark.symStatusEnd {
+    /* (緑系)実行完了・保留中・正常終了 */
+    color:#F5F5F5;
+	background: #60c60d; /* [2.1] */
+}
+.symStatusAbort,
+#startMark.symStatusAbort,
+#endMark.symStatusAbort {
+    /* (赤系)準備エラー・緊急停止・異常終了*/
+    color:#F5F5F5;
+    background: #FF0000; /* [2.1] */
+}
+
+.movStatusNotStart {
+    /* (灰系)未実行 */
+	font-size:10px;
+	background: #999999; /* [2.1] */
+}
+.movStatusRunningOnTime {
+    /* (水系)準備中・実行中 */
+	font-size:10px;
+	background: #29adc0; /* [2.1] */
+	background-image: repeating-linear-gradient( 90deg, #29adc0, #29adc0 5px, #1199ad 5px, #1199ad 10px);
+	animation: statusRunningOnTime 0.5s linear infinite;
+}
+@keyframes statusRunningOnTime {
+	0% { background-position: 0 0; transform: scale( 1 ); }
+	50% { background-position: 5px 0; transform: scale( 1.05 ); }
+	100% { background-position: 10px 0; transform: scale( 1 ); }
+}
+
+
+
+.movStatusRunningDelay {
+    /* (黄色系)実行中(遅延)*/
+	font-size:10px;
+	background: #f4b82b; /* [2.2] */
+}
+.movStatusEnd {
+    /* (緑系)実行完了・保留中・正常終了 */
+	font-size:10px;
+	background: #60c60d; /* [2.1] */
+}
+.movStatusAbort {
+    /* (赤系)準備エラー・緊急停止・異常終了*/
+	font-size:10px;
+    background: #FF0000; /* [2.1] */
+}
+.movStatusSkip {
+    /* (灰系)SKIP完了・SKIP後保留中・SKIP終了*/
+	font-size:10px;
+	background: #999999; /* [2.1] */
+}
+.ovrd_ope_box {
+	line-height: 26px;
+}
+.ovrd_ope_box .textExistsLikeSprit {
+	cursor: pointer;
+	color: #C8C8C8;
+}
+.ovrd_ope_box .ovrd_ope_box_label {
+
+}
+.ovrd_ope_box .ovrd_ope_box_input {
+	width: 40px; /*calc(35%);*/
+}
+
+/* status colors---- */
+
+#symphonyInfoShowContainer {
+
+}
+
+#symphonyInfoShowContainer .rightSideBar-TypeA {
+	float: right;
+	width: 300px;
+	overflow: hidden;
+	border-top: 5px solid #6680A1;
+	border-bottom: 1px solid #CCC;
+}
+
+#symphonyInfoShowContainer .leftMainArea-TypeA {
+	float: left;
+	width: calc(100% - 316px);
+	overflow: hidden;
+	border: 1px solid #CCC;
+	border-top: none;
+}
+
+/* ----シンフォニー情報欄 */
+#symphony_header {
+	padding: 8px 0;
+	border-top: 5px solid #6680A1;
+	border-bottom: 1px dashed #CCC;
+}
+#symphony_header::after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
+#symphony_header * {
+	box-sizing: border-box;
+}
+
+#symphony_header .sub1 {
+	float: left;
+	width: 50%;
+	padding: 0 8px 0 16px;
+}
+#symphony_header .sub2 {
+	float: right;
+	width: calc( 50% - 64px );
+	min-height: 16px;
+	padding: 0 16px 0 8px;
+}
+#symphony_header .sub3 {
+	float: right;
+	width: 64px;
+	text-align: center;
+}
+#symphony_header .sub1 .heightAndWidthFixed01:first-child {
+	margin-bottom: 8px;
+	line-height: 24px;
+}
+#symphony_header .sub1 .heightAndWidthFixed01 label,
+#symphony_header .sub3 label {
+	display: block;
+	vertical-align: bottom;
+	float: left;
+	width: 150px;
+	margin: 0;
+	text-align: center;
+	background-color: #666;
+	border-radius: 4px;
+	color: #FFF;
+	font-size: 11px;
+	line-height: 24px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+#symphony_header .sub3 label {
+	width: 100%;
+}
+#symphony_header .sub1 .heightAndWidthFixed01 span {
+	display: inline-block;
+	vertical-align: bottom;
+	width: calc( 100% - 165px );
+	margin: 0;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	font-size: 12px;
+	line-height: 24px;
+}
+#symphony_header .sub1 .heightAndWidthFixed01 span input {
+	width: 100%;
+    height: 24px;
+    padding: 0 0.5em;
+    border-radius: 2px;
+    border: 1px solid #AAA;
+}
+
+#print_symphony_id {
+
+}
+#print_symphony_name input{
+	width: calc(50%);
+	width: -webkit-calc(50%);
+	display: inline;
+}
+#print_shyphony_tips textarea {
+	width: 100%;
+	height: 56px;
+}
+
+/* シンフォニー情報欄---- */
+
+/* ----シンフォニーフロー表示エリア */
+article.draggable_area {
+	position: relative;
+	width: auto; height: auto;
+	left: auto;
+}
+#symphony_area {
+	max-height: 560px;
+	margin: 8px; padding: 16px 0;
+	border: 1px solid #CCC;
+	overflow-y: scroll;
+	background: #EFEFEF;
+	background-image: repeating-linear-gradient( 0deg, #EFEFEF, #EFEFEF 3px, #EAEAEA 3px, #EAEAEA 6px);
+}
+#action_alert_area {
+	margin: 0 16px 16px;
+	padding: 8px 16px;
+	border: 2px solid #D00;
+	border-radius: 16px;
+	background-color: #FFF;
+	font-weight: bold;
+	animation: error 0.6s linear 1;
+}
+@keyframes error {
+	0% { transform: translateX( 0 ); }
+	10% { transform: translateX( -20px ); }
+	20% { transform: translateX( 20px ); }
+	30% { transform: translateX( -10px ); }
+	45% { transform: translateX( 10px ); }
+	60% { transform: translateX( -5px ); }
+	80% { transform: translateX( 5px ); }
+	1000% { transform: translateX( 0 ); }
+}
+/* シンフォニーフロー表示エリア---- */
+
+/* ----シンフォニー・コマンドエリア */
+
+#symphony_footer {
+	padding: 16px;
+	border-top: 1px dashed #CCC;
+}
+#symphony_footer input {
+	margin-right: 16px;
+}
+/* シンフォニー・コマンドエリア---- */
+
+
+
+/* ----ここからクラス編集ページ固有要素 */
+
+/* ----作業パターン選択 */
+#pattern_filter_area {
+    border-left: 1px solid #CCC;
+	border-right: 1px solid #CCC;
+	padding: 16px;
+}
+#pattern_filter_area p {
+	margin-bottom: 4px;
+}
+#pattern_filter_area button {
+	box-sizing: border-box;
+	width: calc( 50% - 8px );
+	cursor: pointer;
+	font-size: 12px;
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: #EEE;
+    border: 1px solid #EEE;
+    box-shadow: 0 2px 0 #CCC;
+    transform: translateY(-2px);
+}
+#pattern_filter_area button:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 1px 0 #BBB;
+	background-color: #DDD;
+	border-color: #DDD;
+	outline: none;
+}
+#pattern_filter_area button:active {
+	transform: translateY(0);
+	box-shadow: none;
+	background-color: #CCC;
+	border-color: #CCC;
+}
+
+#material_area_wrapper {
+	box-sizing: border-box;
+	width: 300px;
+	overflow-y: scroll;
+	border: 1px solid #CCC;
+	border-bottom: none;
+	border-top: 1px dashed #CCC;
+	max-height: 590px;
+}
+#material_area_wrapper .draggable-handle {
+	cursor: s-resize;
+}
+
+#material_area {
+	
+}
+/* 作業パターン選択---- */
+
+/* ここまでクラス編集ページ固有要素---- */
+
+/* ----ここからシンフォニー実行オーダ発令集ページ固有要素 */
+#operation_info_area {
+	padding: 16px;
+	border-right: 1px solid #CCC;
+	border-left: 1px solid #CCC;
+}
+
+#operation_info_area .heightAndWidthFixed01 {
+	border-bottom: 1px dotted #CCC;
+	padding: 0 0.5em 8px;
+	vertical-align: bottom;
+}
+#operation_info_area .heightAndWidthFixed01:first-child {
+	margin-bottom: 16px;
+}
+#operation_info_area .heightAndWidthFixed01::after {
+	content: '';
+	display: block;
+	clear: both;
+}
+#operation_info_area .heightAndWidthFixed01 label {
+	display: inline-block;
+	font-size: 11px;
+	font-weight: bold;
+	color: #335581;
+	line-height: 1.5;
+}
+#operation_info_area .heightAndWidthFixed01 {
+	line-height: 1.5;
+	font-size: 14px;
+}
+
+#operation_info_area .heightAndWidthFixed01 span.inLineTitle{
+	
+}
+
+#instance_status_wrapper {
+	border-top: 1px dashed #CCC;
+	border-right: 1px solid #CCC;
+	border-left: 1px solid #CCC;
+	padding: 16px;
+	line-height: 2;
+}
+#instance_status_wrapper label {
+	display: inline-block;
+	padding: 2px 8px;
+	background-color: #6680A1;
+	border-radius: 4px;
+	line-height: 1.2;
+	color: #FFF;
+}
+#instance_status_wrapper span {
+    word-break: break-all;
+    display: inline-block;
+}
+
+
+/* ここからシンフォニー実行オーダ発令集ページ固有要素---- */
+
+/* ----PROPER-STYLE-ENDED ----*/

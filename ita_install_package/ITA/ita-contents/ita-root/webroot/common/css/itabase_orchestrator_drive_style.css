@@ -1,0 +1,227 @@
+@charset "UTF-8";
+
+/* ----PROPER-STYLE-START ----*/
+html, body {
+	height: 100%;
+	width: 100%;
+}
+
+body {
+	overflow-y: scroll;
+}
+
+textarea {
+	height: 35px;
+	width: 300px;
+	resize: none;
+}
+
+button {
+	min-height: 30px;
+	min-width: 100px;
+	background: #F5F5F5;
+	border: 1px solid #999;
+}
+
+article {
+	left: 200px;
+	height: calc(100% - 60px);
+	height: -webkit-calc(100% - 60px);
+	width: calc(100%);
+	width: -webkit-calc(100%);
+}
+
+.floatEracerLeft {
+	display: none;
+	clear: left;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+}
+.floatEracerRight {
+	display: none;
+	clear: right;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+}
+.floatEracerBoth {
+	display: none;
+	float: none;
+	clear: both;
+	height: 0px;
+	width: 0px;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+}
+
+#orchestratorInfoShowContainer {
+	margin: 0px;
+	padding: 0px;
+	padding-top: 10px;
+	border: 0px;
+	width: calc(100%);
+	width: -webkit-calc(100%);
+	height: calc(100%);
+	height: -webkit-calc(100%);
+	overflow: hidden;
+}
+
+#orchestratorInfoHeader {
+	height: 55px;
+	width: calc(100%);
+	width: -webkit-calc(100%);
+	background: #EBEBEB;
+	padding: 0px;
+	overflow: auto;
+}
+
+#orchestratorInfoHeader .rightSideBar-TypeA {
+	float: right;
+	width: 300px;
+	height: calc(100%);
+	height: -webkit-calc(100%);
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+	overflow: hidden;
+}
+
+#sorchestratorInfoHeader .leftMainArea-TypeA {
+	float: left;
+	width: calc(100% - 300px);
+	width: -webkit-calc(100% - 300px);
+	height: calc(100%);
+	height: -webkit-calc(100%);
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+	overflow: hidden;
+}
+
+/* ----シンフォニー情報欄 */
+
+#pattern_info_area .sub1 {
+	float: left;
+	margin-left: 10px;
+	bottom: 5px;
+	left: 10px;
+	height: 45px;
+	width: calc(68%);
+	width: -webkit-calc(68%);
+	padding: 5px;
+}
+
+#pattern_info_area .sub1 .heightAndWidthFixed01{
+	margin: 0px;
+	padding: 0px;
+	height: 22px;
+	width: calc(100%);
+	width: -webkit-calc(100%);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#pattern_info_area .sub1 .heightAndWidthFixed01 span.inLineTitle{
+	display: inline;
+	white-space: nowrap;
+}
+
+#print_pattern_id {
+}
+
+#print_pattern_name input{
+	width: calc(50%);
+	width: -webkit-calc(50%);
+	display: inline;
+}
+
+#print_pattern_tips textarea {
+	width: calc(100%);
+	width: -webkit-calc(100%);
+	height: 40px;
+}
+
+/* ----シンフォニー・コマンドエリア */
+
+#orchestratorInfoFooter {
+	width: calc(100%);
+	width: -webkit-calc(100%);
+	height: 38px;
+	padding: 5px;
+	background: #EBEBEB;
+}
+#orchestratorInfoFooter input + input {
+margin-left: 8px;
+}
+/* シンフォニー・コマンドエリア---- */
+
+
+
+/* ----ここからシンフォニー実行オーダ発令集ページ固有要素 */
+#operation_info_area {
+	width: 280px;
+	height:45px; /*95px*/
+	top: 0;
+	right: 0;
+	padding:5px;
+	background:#F0F0F0;
+}
+#operation_info_area .heightAndWidthFixed01{
+	margin: 0px;
+	padding: 0px;
+	height: 22px;
+	width: calc(100%);
+	width: -webkit-calc(100%);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#operation_info_area .heightAndWidthFixed01 span.inLineTitle{
+	display: inline;
+	white-space: nowrap;
+}
+
+#instance_status_wrapper {
+	width: 280px;
+	height:auto;
+
+	padding:5px;
+	background:#F0F0F0;
+}
+/* ここからシンフォニー実行オーダ発令集ページ固有要素---- */
+
+/* ----PROPER-STYLE-ENDED ----*/
+
+/* ----Orchestrator's log output */
+#iframeInDispTail {
+	margin: 0 auto;
+	height: 365px;/* 1200px; */
+	color: #303030;
+	background: #FFFFFF;
+}
+
+#console {
+    width:900px;
+    height:300px;
+    overflow:scroll;
+    border:1px solid #999999;
+    font-size:12px;
+    font-family:consolas;
+}
+/* Orchestrator's log output---- */
+
+th.noBorderRight {
+    border-right: none;
+}
+
+th.noBorderBoth {
+    border-left: none;
+    border-right: none;
+}
+
+th.noBorderLeft {
+    border-left: none;
+}

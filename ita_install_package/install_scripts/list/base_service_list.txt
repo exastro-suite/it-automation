@@ -1,0 +1,6 @@
+/ita-root/backyards/ita_base/ky_data_portability_execute-workflow
+/ita-root/backyards/webdbcore/ky_mail
+/ita-root/backyards/webdbcore/ky_std_checkcondition-linklist
+/ita-root/backyards/ita_base/ky_std_synchronize-symphony
+/ita-root/backyards/ita_base/ky_cmdbmenuanalysis-workflow
+/ita-root/backyards/ita_base/ky_activedirectory_roleuser_replication-workflow

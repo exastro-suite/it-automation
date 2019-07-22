@@ -1,0 +1,13 @@
+[Unit]
+Description=ky_create_master_menu_execute
+After=syslog.target network.target mysqld.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/ita_env
+ExecStart=/bin/sh ${ITA_ROOT_DIR}/backyards/common/ky_loopcall-php-procedure.sh /bin/php /bin/php ${ITA_ROOT_DIR}/backyards/create_param_menu/ky_create_master_menu_execute.php ${ITA_ROOT_DIR}/logs/backyardlogs 5 ${ITA_LOG_LEVEL} > /dev/null 2>&1
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+

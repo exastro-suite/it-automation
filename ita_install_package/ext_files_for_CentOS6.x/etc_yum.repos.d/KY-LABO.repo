@@ -1,0 +1,6 @@
+[KY-LABO]
+name=CentOS-$releasever - KY-LABO
+baseurl=file:///var/cache/ky_yum/
+gpgcheck=0
+enabled=1
+

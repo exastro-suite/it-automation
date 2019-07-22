@@ -1,0 +1,6 @@
+#主キー
+ROW_ID
+#オペレーション日付
+OPERATION_DATE_DISP
+#オペレーション名
+OPERATION_NAME

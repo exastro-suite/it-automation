@@ -1,0 +1,13 @@
+[Unit]
+Description=ky_mail
+After=syslog.target network.target
+
+[Service]
+EnvironmentFile=/etc/sysconfig/ita_env
+ExecStart=/bin/sh ${ITA_ROOT_DIR}/backyards/common/ky_loopcall-sh-script.sh /bin/sh ${ITA_ROOT_DIR}/backyards/webdbcore/ky_mail.sh  ${ITA_ROOT_DIR}/logs/backyardlogs 60 ${ITA_LOG_LEVEL} > /dev/null 2>&1
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+

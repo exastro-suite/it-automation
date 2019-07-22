@@ -1,0 +1,2 @@
+01 00 * * * su - -c '%%%%%ITA_DIRECTORY%%%%%/ita-root/backyards/common/ky_execinstance_dataautoclean-workflow.sh'
+02 00 * * * su - -c '%%%%%ITA_DIRECTORY%%%%%/ita-root/backyards/common/ky_file_autoclean-workflow.sh'

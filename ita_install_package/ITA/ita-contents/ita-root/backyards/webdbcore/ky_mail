@@ -1,0 +1,192 @@
+#!/bin/bash
+# chkconfig: 2345 99 01
+######################################################################
+##
+##  【概要】
+##      ky_mail.sh
+##      の起動スクリプト
+##
+######################################################################
+
+#----------------------------------------------------#
+# ルートディレクトリ取得
+#----------------------------------------------------#
+source /etc/sysconfig/ita_env
+ROOT_DIR_PATH=$ITA_ROOT_DIR
+
+#----------------------------------------------------#
+# 定数
+#----------------------------------------------------#
+PROG='ky_mail'
+LOCK="/var/lock/subsys/${PROG}"
+PROCESS=${ROOT_DIR_PATH}'/backyards/common/ky_loopcall-sh-script.sh'
+SH_SCRIPT=${ROOT_DIR_PATH}'/backyards/webdbcore/ky_mail.sh'
+LOG_DIR=${ROOT_DIR_PATH}'/logs/backyardlogs'
+ITA_ENV=${ROOT_DIR_PATH}'/confs/backyardconfs/ita_env'
+
+#----------------------------------------------------#
+# パラメータ設定
+#----------------------------------------------------#
+# 無限ループのインターバル(0以上を指定、180未満にすること)
+INTERVAL=60
+
+# ログ出力レベル
+LOG_LEVEL=`cat ${ITA_ENV} | grep "^ITA_LOG_LEVEL" | cut -d "=" -f 2`
+
+#----------------------------------------------------#
+# FUNCTION定義
+#----------------------------------------------------#
+function start()
+{
+    # 変数初期化
+    CHECK=0
+    
+    if [ ! -x ${PROCESS} ]
+    then
+        CHECK=1
+        echo "Starting ${PROG}: ERROR (${PROCESS} NOT FOUND OR NO EXECUTE PERMISSION)"
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ! -x ${SH_SCRIPT} ]
+        then
+            CHECK=3
+            if [ ! -f ${SH_SCRIPT} ]
+            then
+                echo "Starting ${PROG}: ERROR (${SH_SCRIPT} NOT FOUND)"
+            else
+                echo "Starting ${PROG}: ERROR (${SH_SCRIPT} PERMISSION DENIED)"
+            fi
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        expr ${INTERVAL} + 1 > /dev/null 2>&1
+        if [ $? -ge 2 ]
+        then
+            CHECK=4
+            echo "Starting ${PROG}: ERROR (INTERVAL IS NOT NUMERIC)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ${INTERVAL} -lt 0 ]
+        then
+            CHECK=5
+            echo "Starting ${PROG}: ERROR (INTERVAL IS TOO SMALL)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ${LOG_LEVEL} != 'NORMAL' -a ${LOG_LEVEL} != 'DEBUG' ]
+        then
+            CHECK=6
+            echo "Starting ${PROG}: ERROR (LOG_LEVEL STATEMENT ILLEGAL)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ! -d ${LOG_DIR} ]
+        then
+            CHECK=7
+            echo "Starting ${PROG}: ERROR (LOG_DIR NOT FOUND OR NOT DIRECTORY)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ `which mailx | wc -l` -ne 1 ]
+        then
+            CHECK=8
+            echo "Starting ${PROG}: ERROR (COMMAND mailx HAS NOT BEEN PREPARED)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        # ロックファイル作成
+        /bin/touch ${LOCK}
+        
+        # プロセス実行
+        nohup ${PROCESS} ${LOCK} ${SH_SCRIPT} ${LOG_DIR} ${INTERVAL} ${LOG_LEVEL} > /dev/null 2>&1 &
+        
+        # 3秒間のインターバル
+        sleep 3
+        
+        # プロセス確認
+        if [ `ps -ef | grep ${SH_SCRIPT} | grep -v grep | wc -l` -eq 0 ]
+        then
+            # メッセージ出力
+            echo "Starting ${PROG}: [ NG ]"
+            
+            # 異常終了
+            return 1
+        else
+            # メッセージ出力
+            echo "Starting ${PROG}: [ OK ]"
+            
+            # 正常終了
+            return 0
+        fi
+    fi
+}
+stop()
+{
+    # フラグ
+    flag=0
+    
+    # ロックファイル存在確認
+    if [ -f ${LOCK} ]
+    then
+        # ロックファイル削除
+        /bin/rm -f ${LOCK}
+        
+        # プロセス終了確認ループ(約180sec)
+        for i in `seq 1 1 180`
+        do
+            # プロセス確認
+            if [ `ps -ef | grep ${SH_SCRIPT} | grep -v grep | wc -l` -eq 0 ]
+            then
+                flag=1
+                break
+            fi
+            
+            # 1秒間のインターバル
+            sleep 1
+        done
+    fi
+    
+    #フラグ判定しメッセージ出力＆リターン
+    if [ ${flag} -eq 1 ]
+    then
+        echo "Stopping ${PROG}: [ OK ]"
+        return 0
+    else
+        echo "Stopping ${PROG}: [ NG ]"
+        return 1
+    fi
+}
+
+#----------------------------------------------------#
+# 実処理
+#----------------------------------------------------#
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 1
+esac

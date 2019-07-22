@@ -1,0 +1,13 @@
+[Unit]
+Description=ky_cobbler_systemSync_side_ITA
+After=syslog.target network.target mysqld.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/ita_env
+ExecStart=/bin/sh ${ITA_ROOT_DIR}/backyards/common/ky_loopcall-php-procedure.sh /bin/php /bin/php ${ITA_ROOT_DIR}/backyards/cobbler_driver/ky_cobbler_systemSync_side_ITA.php ${ITA_ROOT_DIR}/logs/backyardlogs 60 ${ITA_LOG_LEVEL} > /dev/null 2>&1
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+

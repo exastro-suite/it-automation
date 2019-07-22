@@ -1,0 +1,223 @@
+#!/bin/bash
+# chkconfig: 2345 99 01
+######################################################################
+##
+##  【概要】
+##      ky_legacy_role_varsautolistup-workflow.php
+##      の起動スクリプト
+##
+######################################################################
+
+#----------------------------------------------------#
+# ルートディレクトリ取得
+#----------------------------------------------------#
+source /etc/sysconfig/ita_env
+ROOT_DIR_PATH=$ITA_ROOT_DIR
+#----------------------------------------------------#
+# 定数
+#----------------------------------------------------#
+PROG='ky_legacy_role_varsautolistup-workflow'
+LOCK="/var/lock/subsys/${PROG}"
+PROCESS=${ROOT_DIR_PATH}'/backyards/common/ky_loopcall-php-procedure.sh'
+PHP_PROCEDURE=${ROOT_DIR_PATH}'/backyards/ansible_driver/ky_legacy_role_varsautolistup-workflow.php'
+LOG_DIR=${ROOT_DIR_PATH}'/logs/backyardlogs'
+PHP_MODULE=${ROOT_DIR_PATH}'/confs/backyardconfs/path_PHP_MODULE.txt'
+DB_MODEL=${ROOT_DIR_PATH}'/confs/commonconfs/db_model_string.txt'
+ORACLE_ENV_SH=${ROOT_DIR_PATH}'/confs/backyardconfs/path_ORACLE_ENV_SH.txt'
+ITA_ENV=${ROOT_DIR_PATH}'/confs/backyardconfs/ita_env'
+
+#----------------------------------------------------#
+# パラメータ設定
+#----------------------------------------------------#
+# 無限ループのインターバル(0以上を指定、180未満にすること)
+INTERVAL=60
+
+# ログ出力レベル
+LOG_LEVEL=`cat ${ITA_ENV} | grep "^ITA_LOG_LEVEL" | cut -d "=" -f 2`
+
+#----------------------------------------------------#
+# FUNCTION定義
+#----------------------------------------------------#
+function start()
+{
+    # 変数初期化
+    CHECK=0
+    
+    if [ ! -x ${PROCESS} ]
+    then
+        CHECK=1
+        echo "Starting ${PROG}: ERROR (${PROCESS} NOT FOUND OR NO EXECUTE PERMISSION)"
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ! -f ${PHP_MODULE} ]
+        then
+            CHECK=2
+            echo "Starting ${PROG}: ERROR (PHP_MODULE DEFINE FILE NOT FOUND)"
+        elif [ ! -x `cat ${PHP_MODULE}` ]
+        then
+            CHECK=3
+            echo "Starting ${PROG}: ERROR (PHP_MODULE NOT FOUND OR NO EXECUTE PERMISSION)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ! -f ${PHP_PROCEDURE} ]
+        then
+            CHECK=4
+            echo "Starting ${PROG}: ERROR (${PHP_PROCEDURE} NOT FOUND)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        expr ${INTERVAL} + 1 > /dev/null 2>&1
+        if [ $? -ge 2 ]
+        then
+            CHECK=5
+            echo "Starting ${PROG}: ERROR (INTERVAL IS NOT NUMERIC)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ${INTERVAL} -lt 0 ]
+        then
+            CHECK=6
+            echo "Starting ${PROG}: ERROR (INTERVAL IS TOO SMALL)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ${LOG_LEVEL} != 'NORMAL' -a ${LOG_LEVEL} != 'DEBUG' ]
+        then
+            CHECK=7
+            echo "Starting ${PROG}: ERROR (LOG_LEVEL STATEMENT ILLEGAL)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ! -d ${LOG_DIR} ]
+        then
+            CHECK=8
+            echo "Starting ${PROG}: ERROR (LOG_DIR NOT FOUND OR NOT DIRECTORY)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        if [ ! -f ${DB_MODEL} ]
+        then
+            CHECK=9
+            echo "Starting ${PROG}: ERROR (DB MODEL DEFINE FILE NOT FOUND)"
+        elif [ `cat ${DB_MODEL}` = "0" ]
+        then
+            if [ ! -f ${ORACLE_ENV_SH} ]
+            then
+                CHECK=10
+                echo "Starting ${PROG}: ERROR (ORACLE_ENV_SH DEFINE FILE NOT FOUND)"
+            elif [ ! -x `cat ${ORACLE_ENV_SH}` ]
+            then
+                CHECK=11
+                echo "Starting ${PROG}: ERROR (ORACLE_ENV_SH NOT FOUND OR NO EXECUTE PERMISSION)"
+            else
+                # execute oracle_env.sh
+                . `cat ${ORACLE_ENV_SH}`
+                CHECK=0
+            fi
+        elif [ `cat ${DB_MODEL}` = "1" ]
+        then
+            CHECK=0
+        else
+            CHECK=12
+            echo "Starting ${PROG}: ERROR (DB MODEL DEFINITION INCORRECT)"
+        fi
+    fi
+    
+    if [ ${CHECK} -eq 0 ]
+    then
+        # ロックファイル作成
+        /bin/touch ${LOCK}
+        
+        # プロセス実行
+        nohup ${PROCESS} ${LOCK} `cat ${PHP_MODULE}` ${PHP_PROCEDURE} ${LOG_DIR} ${INTERVAL} ${LOG_LEVEL} > /dev/null 2>&1 &
+        
+        # 3秒間のインターバル
+        sleep 3
+        
+        # プロセス確認
+        if [ `ps -ef | grep ${PHP_PROCEDURE} | grep -v grep | wc -l` -eq 0 ]
+        then
+            # メッセージ出力
+            echo "Starting ${PROG}: [ NG ]"
+            
+            # 異常終了
+            return 1
+        else
+            # メッセージ出力
+            echo "Starting ${PROG}: [ OK ]"
+            
+            # 正常終了
+            return 0
+        fi
+    fi
+}
+stop()
+{
+    # フラグ
+    flag=0
+    
+    # ロックファイル存在確認
+    if [ -f ${LOCK} ]
+    then
+        # ロックファイル削除
+        /bin/rm -f ${LOCK}
+        
+        # プロセス終了確認ループ(約180sec)
+        for i in `seq 1 1 180`
+        do
+            # プロセス確認
+            if [ `ps -ef | grep ${PHP_PROCEDURE} | grep -v grep | wc -l` -eq 0 ]
+            then
+                flag=1
+                break
+            fi
+            
+            # 1秒間のインターバル
+            sleep 1
+        done
+    fi
+    
+    #フラグ判定しメッセージ出力＆リターン
+    if [ ${flag} -eq 1 ]
+    then
+        echo "Stopping ${PROG}: [ OK ]"
+        return 0
+    else
+        echo "Stopping ${PROG}: [ NG ]"
+        return 1
+    fi
+}
+
+#----------------------------------------------------#
+# 実処理
+#----------------------------------------------------#
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 1
+esac

@@ -1,0 +1,5 @@
+// Super Tables v0.30 - MIT Style License
+// Copyright (c) 2008 Matt Murphy --- www.matts411.com
+//
+// Contributors:
+// Joe Gallo

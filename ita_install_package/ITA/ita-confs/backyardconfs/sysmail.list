@@ -1,0 +1,25 @@
+# [説明]
+# FROM、TOを指定する場合は5要素が必須。
+# (CCは任意だが利用しない場合は「null」を記載することで5要素とする)
+# FROM、TOを指定しない場合は2要素が必須。
+# 置き換え文言数に「X」を記載するとモードXと判断される。
+# モードXでは、メールキューファイルにメール本文を直接記載することができる。
+# (その際、メール本文ファイル(テンプレート)は作成不要。)
+# 各要素はタブ(\t)で区切ること。
+# (スペース区切りは不可)
+# 
+# [サンプル]
+# 001	3	from_address@xxxxxxxx.com	to_address@xxxxxxxx.com	null
+# 002	3	from_address@xxxxxxxx.com	to_address@xxxxxxxx.com	cc_address@xxxxxxxx.com
+# 003	7
+# 004	X	from_address@xxxxxxxx.com	to_address@xxxxxxxx.com	null
+# 005	X	from_address@xxxxxxxx.com	to_address@xxxxxxxx.com	cc_address@xxxxxxxx.com
+# 006	X
+# 
+# [注意]
+# メールID「000」はNEC IT AutomationのWebDBCore機能で利用するのでデフォルト定義。
+# (削除不可)
+
+メール本文ID	置き換え文言数	FROM_MAIL_ADDRESS	TO_MAIL_ADDRESS	(CC_MAIL_ADDRESS)
+000	X
+

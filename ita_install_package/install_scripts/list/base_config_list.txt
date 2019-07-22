@@ -1,0 +1,17 @@
+/ita-root/confs/backyardconfs/ita_base/data_portability_running_limit.txt
+/ita-root/confs/backyardconfs/ita_base/hide_menu_column_list.txt
+/ita-root/confs/backyardconfs/ita_env
+/ita-root/confs/backyardconfs/path_PHP_MODULE.txt
+/ita-root/confs/backyardconfs/sysmail.list
+/ita-root/confs/commonconfs/app_mail_from.txt
+/ita-root/confs/commonconfs/app_msg_language.txt
+/ita-root/confs/commonconfs/db_connection_string.txt
+/ita-root/confs/commonconfs/db_model_string.txt
+/ita-root/confs/commonconfs/db_password.txt
+/ita-root/confs/commonconfs/db_username.txt
+/ita-root/confs/webconfs/admin_mail_addr.txt
+/ita-root/confs/webconfs/L7Protocol.txt
+/ita-root/confs/webconfs/path_HTML_AJAX.txt
+/ita-root/confs/webconfs/path_PHPExcel_Classes.txt
+/ita-root/confs/webconfs/symphony_ins_monitor_interval.txt
+/ita-root/confs/commonconfs/path_PHPSpyc_Classes.txt

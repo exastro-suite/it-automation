@@ -1,0 +1,13 @@
+/ita-root/backyards/ansible_driver/ky_legacy_execute-workflow
+/ita-root/backyards/ansible_driver/ky_legacy_checkcondition-workflow
+/ita-root/backyards/ansible_driver/ky_legacy_varsautolistup-workflow
+/ita-root/backyards/ansible_driver/ky_legacy_valautostup-workflow
+/ita-root/backyards/ansible_driver/ky_legacy_role_execute-workflow
+/ita-root/backyards/ansible_driver/ky_legacy_role_checkcondition-workflow
+/ita-root/backyards/ansible_driver/ky_legacy_role_varsautolistup-workflow
+/ita-root/backyards/ansible_driver/ky_legacy_role_valautostup-workflow
+/ita-root/backyards/ansible_driver/ky_pioneer_execute-workflow
+/ita-root/backyards/ansible_driver/ky_pioneer_checkcondition-workflow
+/ita-root/backyards/ansible_driver/ky_pioneer_varsautolistup-workflow
+/ita-root/backyards/ansible_driver/ky_pioneer_valautostup-workflow
+/ita-root/backyards/ansible_driver/ky_ansible_towermasterSync-workflow

@@ -1,0 +1,4 @@
+/ita-root/backyards/dsc_driver/ky_dsc_execute-workflow
+/ita-root/backyards/dsc_driver/ky_dsc_checkcondition-workflow
+/ita-root/backyards/dsc_driver/ky_dsc_varsautolistup-workflow
+/ita-root/backyards/dsc_driver/ky_dsc_valautostup-workflow

@@ -1,0 +1,2 @@
+/ita-root/confs/restapiconfs/ansible_driver/accesskey.txt
+/ita-root/confs/restapiconfs/ansible_driver/secret_accesskey.txt

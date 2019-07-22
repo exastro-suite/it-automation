@@ -1,0 +1,16 @@
+/**
+ * OO AJAX Implementation for PHP
+ *
+ * SVN Rev: $Id$
+ *
+ * @category  HTML
+ * @package   AJAX
+ * @author    Joshua Eichorn <josh@bluga.net>
+ * @author    Arpad Ray <arpad@php.net>
+ * @author    David Coallier <davidc@php.net>
+ * @author    Elizabeth Smith <auroraeosrose@gmail.com>
+ * @copyright 2005-2008 Joshua Eichorn, Arpad Ray, David Coallier, Elizabeth Smith
+ * @license   http://www.opensource.org/licenses/lgpl-license.php   LGPL
+ * @version   Release: 0.5.8
+ * @link      http://pear.php.net/package/HTML_AJAX
+ */

@@ -1,0 +1,4 @@
+/ita-root/backyards/cobbler_driver/ky_cobbler_profileSync_side_ITA
+/ita-root/backyards/cobbler_driver/ky_cobbler_profileSync_side_Cobbler
+/ita-root/backyards/cobbler_driver/ky_cobbler_systemSync_side_ITA
+/ita-root/backyards/cobbler_driver/ky_cobbler_systemSync_side_Cobbler

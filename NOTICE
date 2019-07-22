@@ -1,0 +1,92 @@
+Copyright 2019 NEC Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+The following components are included in this product:
+
+Auth
+http://pear.php.net/package/Auth
+2001-2006 The PHP Group
+Licensed under the PHP License 3.01
+see licenses/Auth.txt for license details
+
+HTML_AJAX
+http://pear.php.net/package/HTML_AJAX
+2005-2008 Joshua Eichorn, Arpad Ray, David Coallier, Elizabeth Smith
+Licensed under the LGPLv3
+see licenses/HTML_AJAX-beta.txt for license details
+
+HTTP_Request2
+http://pear.php.net/package/HTTP_Request2
+Copyright (c) 2008-2016, Alexey Borzov <avb@php.net>
+Licensed under the 3-Clause BSD
+see licenses/HTTP_Request2.txt for license details
+
+MDB2
+http://pear.php.net/package/MDB2
+Copyright (c) 1998-2007 Manuel Lemos, Tomas V.V.Cox, Stig. S. Bakken, Lukas Smith
+see licenses/MDB2.txt for license details
+
+PHPExcel
+https://github.com/PHPOffice/PHPExcel
+Copyright (c) 2006 - 2015 PHPExcel
+Licensed under the LGPLv3
+see licenses/PHPExcel.txt for license details
+
+Spyc
+https://github.com/mustangostang/spyc
+Copyright 2005-2006 Chris Wanstrath, 2006-2011 Vlad Andersen
+Licensed under the MIT License
+see licenses/Spyc.txt for license details
+
+Twig
+https://twig.symfony.com/
+Copyright (c) 2009-2017 by the Twig Team.
+Licensed under the 3-Clause BSD
+see licenses/Twig.txt for license details
+
+DateTimePicker
+https://xdsoft.net/jqplugins/datetimepicker/
+Copyright (c) 2013 http://xdsoft.net
+Licensed under the MIT License
+see licenses/jquery-datetimepicker.txt for license details
+
+jQuery UI
+http://jqueryui.com/
+Copyright 2014 jQuery Foundation and other contributors
+Licensed under the MIT License
+see licenses/jquery-ui.txt for license details
+
+jQuery
+http://jquery.com/
+Copyright 2005, 2014 jQuery Foundation, Inc. and other contributors
+Licensed under the MIT License
+see licenses/jquery.txt for license details
+
+Plotly
+https://plot.ly/javascript/
+Copyright 2012-2018, Plotly, Inc.
+Licensed under the MIT License
+see licenses/ploty.js.txt for license details
+
+Select2
+https://select2.org/
+Copyright (c) 2012-2017 Kevin Brown, Igor Vaynberg, and Select2 contributors
+Licensed under the MIT License
+see licenses/select2.txt for license details
+
+Super Tables
+http://www.matts411.com
+Copyright (c) 2008 Matt Murphy
+see licenses/supertables.txt for license details

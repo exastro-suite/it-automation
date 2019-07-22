@@ -1,0 +1,8 @@
+# Enter the root directory path for ITA.
+# (The root directory name must be "ita-root".)
+# e.g) ITA_ROOT_DIR=/nec/ita-root
+ITA_ROOT_DIR=%%%%%ITA_DIRECTORY%%%%%/ita-root
+
+# Select ITA Log Level. ("NORMAL" or "DEBUG")
+# e.g) ITA_LOG_LEVEL=NORMAL
+ITA_LOG_LEVEL=NORMAL
