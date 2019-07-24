@@ -15,7 +15,7 @@
 //
 ////en_US_UTF-8_ITACREPAR_MNU
 $ary[102001] = "Maintenance (view/register/update/discard) can be performed on the menu name of the parameter sheet to be created.<br>
-You cannot use \\"Main menu\\" as the menu name.";
+You cannot use \"Main menu\" as the menu name.";
 $ary[102002] = "Id";
 $ary[102003] = "Parameter list creation information";
 $ary[102004] = "Parameter list creation information";
@@ -96,7 +96,7 @@ $ary[102409] = "Menu file";
 $ary[102410] = "PHP file and SQL file used in the menu.";
 $ary[102411] = "Created menu";
 $ary[102412] = "Created menu";
-$ary[102501] = "A parameter sheet menu can be created in the menu group specified in \\"Parameter list creation information\\".<br/>* If a menu with the same menu name or menu with the same \\"Parameter list creation information\\" ID already exists, the existing data will be deleted and overwritten by the new menu.<br/>If you need to retain the existing data, select \\"Cancel\\" and perform a backup.";
+$ary[102501] = "A parameter sheet menu can be created in the menu group specified in \"Parameter list creation information\".<br/>* If a menu with the same menu name or menu with the same \"Parameter list creation information\" ID already exists, the existing data will be deleted and overwritten by the new menu.<br/>If you need to retain the existing data, select \"Cancel\" and perform a backup.";
 $ary[102502] = "Create Parameter list";
 $ary[102503] = "Start Parameter list creation";
 $ary[102504] = "There is no target to create.";
@@ -105,7 +105,7 @@ $ary[102506] = "Parameter list creation was accepted.";
 $ary[102507] = "Id";
 $ary[102508] = "Parameter list creation list";
 $ary[102509] = "Select the Parameter list that you want to create.";
-$ary[102510] = "Do you want to create the Parameter list?\\n\\n*If a menu with the same menu name or a menu the same \\"Parameter list creation information\\" ID already exists, the existing data will be deleted and overwritten by the new data.\\nIf you need to retain the existing data, select \\"Cancel\\" and perform a backup.";
+$ary[102510] = "Do you want to create the Parameter list?\\n\\n*If a menu with the same menu name or a menu the same \"Parameter list creation information\" ID already exists, the existing data will be deleted and overwritten by the new data.\\nIf you need to retain the existing data, select \"Cancel\" and perform a backup.";
 $ary[102601] = "Host name";
 $ary[102602] = "Host group name";
 $ary[102603] = "Operation";
@@ -121,10 +121,10 @@ $ary[102612] = "Parameter";
 $ary[102613] = "Input order";
 $ary[102614] = "When converting from the vertical menu of the parameter sheet to the horizontal menu, items will be arranged in ascending order from left to right.";
 $ary[102615] = "Reference date";
-$ary[102616] = "If \\"Last execute date\\" of \\"Basic console / input operation list\\" has a value, \\"Last execution date\\" is displayed, otherwise \\"Scheduled date for execution\\" is displayed.";
+$ary[102616] = "If \"Last execute date\" of \"Basic console / input operation list\" has a value, \"Last execution date\" is displayed, otherwise \"Scheduled date for execution\" is displayed.";
 $ary[102617] = "Last execution date";
 $ary[102618] = "[Original data] Basic console/Input operation list";
-$ary[102701] = "Menu for creating items to be selected for \\"Reference other menu\\" in the \\"Parameter list item creation information\\" menu.<br/>
+$ary[102701] = "Menu for creating items to be selected for \"Reference other menu\" in the \"Parameter list item creation information\" menu.<br/>
 Automatically created.";
 $ary[102702] = "Id";
 $ary[102703] = "Reference other menu";
@@ -146,7 +146,7 @@ $ary[102718] = "";
 $ary[102719] = "Menu group: Menu";
 $ary[102720] = "";
 $ary[103001] = "Maintenance (view/register/update/discard) can be performed on the menu name of the master to be created.<br>
-You cannot use \\"Main menu\\" as the menu name.";
+You cannot use \"Main menu\" as the menu name.";
 $ary[103002] = "Id";
 $ary[103003] = "Master creation information";
 $ary[103004] = "Master creation information";
@@ -215,7 +215,7 @@ $ary[103409] = "Menu file";
 $ary[103410] = "PHP file and SQL file used in the menu.";
 $ary[103411] = "Created menu";
 $ary[103412] = "Created menu";
-$ary[103501] = "A parameter sheet menu can be created in the menu group specified in \\"Master creation information\\".<br/>* If a menu with the same menu name or a menu with the same \\"Master creation information\\" item already exists, the existing data will be deleted and overwritten by the new menu.<br/>If you need to retain the existing data, select \\"Cancel\\" and perform a backup.";
+$ary[103501] = "A parameter sheet menu can be created in the menu group specified in \"Master creation information\".<br/>* If a menu with the same menu name or a menu with the same \"Master creation information\" item already exists, the existing data will be deleted and overwritten by the new menu.<br/>If you need to retain the existing data, select \"Cancel\" and perform a backup.";
 $ary[103502] = "Create master";
 $ary[103503] = "Start master creation";
 $ary[103504] = "There is no target to create.";
@@ -224,7 +224,7 @@ $ary[103506] = "Master creation was accepted.";
 $ary[103507] = "Id";
 $ary[103508] = "Master creation list";
 $ary[103509] = "Select the master that you want to create.";
-$ary[103510] = "Do you want to create the Master?\\n\\n*If a menu with the same menu name or a menu with the same \\"Master creation information\\" ID already exists, the existing data will be deleted and overwritten by the new menu].\\nIf you need to retain the existing data, select \\"Cancel\\" and perform a backup.";
+$ary[103510] = "Do you want to create the Master?\\n\\n*If a menu with the same menu name or a menu with the same \"Master creation information\" ID already exists, the existing data will be deleted and overwritten by the new menu].\\nIf you need to retain the existing data, select \"Cancel\" and perform a backup.";
 $ary[103601] = "Maintenance (view/register/update/discard) can be performed on the column group of the parameter sheet to be created.";
 $ary[103602] = "Id";
 $ary[103603] = "Column group list";

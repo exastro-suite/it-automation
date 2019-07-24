@@ -15,8 +15,8 @@
 //
 ////en_US_UTF-8_ITAHOSTGROUP_ERR
 $ary[5001] = "Failed to execute SQL. SQL error = [{}].";
-$ary[5002] = "Processing ended due to a loop occurring in the \\"HostGroup parent-child link list\\" table.";
-$ary[5003] = "Processing ended due to the \\"parent-child\\" heirarchy exceeding the upper limit {[]}.";
+$ary[5002] = "Processing ended due to a loop occurring in the \"HostGroup parent-child link list\" table.";
+$ary[5003] = "Processing ended due to the \"parent-child\" heirarchy exceeding the upper limit {[]}.";
 $ary[5004] = "Failed to get Information of LoadTable. Menu ID = [{}]";
 $ary[5005] = "The table was not in a format that can be processed. Table name = [{}].";
 $ary[5006] = "The format of the splitting target table is different from the registration target table. Splitting target table = [{}], registration target table = [{}]";

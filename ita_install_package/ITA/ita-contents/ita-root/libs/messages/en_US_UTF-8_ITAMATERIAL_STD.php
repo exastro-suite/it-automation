@@ -33,6 +33,6 @@ $ary[50005] = "Discard due to parent directory being discarded.";
 $ary[50006] = "Register with initial synchronization";
 $ary[50007] = "Discard in initial synchronization";
 $ary[50008] = "Discard due to parent directory being discarded.";
-$ary[50009] = "Update the file name due to the data of \\"File master\\" being updated.";
-$ary[50010] = "Discard due to the data of \\"File master\\" being discarded.";
+$ary[50009] = "Update the file name due to the data of \"File master\" being updated.";
+$ary[50010] = "Discard due to the data of \"File master\" being discarded.";
 ?>
