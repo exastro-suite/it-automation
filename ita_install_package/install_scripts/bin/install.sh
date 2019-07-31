@@ -293,9 +293,9 @@ func_services_set() {
         else
             sed -i -e '/^$/d' "$LIST_DIR/${DRIVER,,}_service_list.txt" 2>> "$LOG_FILE"
             if [ ${ITA_OS} = 'RHEL6' ]; then
-                "$BIN_DIR/register-services_RHEL6.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" 2>> "$LOG_FILE"
+                "$BIN_DIR/register-services_RHEL6.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             else
-                "$BIN_DIR/register-services_RHEL7.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" 2>> "$LOG_FILE"
+                "$BIN_DIR/register-services_RHEL7.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             fi
             while read LINE; do
                 service=`basename ${LINE}`
