@@ -14,15 +14,15 @@
 #   limitations under the License.
 #
 
-input_text=${1}
+INPUT_TEXT=${1}
+ITA_DIRECTORY=${2}
 
 while read line
 do
-    cp -p `dirname ${0}`/../../ITA/ita-contents/${line} /etc/init.d/.
-
+    cp -p ${ITA_DIRECTORY}/${line} /etc/init.d/.
     chkconfig --add `basename ${line}`
     chkconfig `basename ${line}` on
     /etc/init.d/`basename ${line}` start
-done < ${input_text}
+done < ${INPUT_TEXT}
 
 exit
