@@ -14,12 +14,13 @@
 #   limitations under the License.
 #
 
-input_text=${1}
+INPUT_TEXT=${1}
+ITA_DIRECTORY=${2}
 
 while read line
 do
-    cp -p `dirname ${0}`/../../ITA/ita-contents/${line}.service /usr/lib/systemd/system/.
-done < ${input_text}
+    cp -p ${ITA_DIRECTORY}/${line}.service /usr/lib/systemd/system/.
+done < ${INPUT_TEXT}
 
 systemctl daemon-reload
 
@@ -29,6 +30,6 @@ do
         systemctl enable `basename ${line}`.service
         systemctl start `basename ${line}`.service
     fi
-done < ${input_text}
+done < ${INPUT_TEXT}
 
 exit
