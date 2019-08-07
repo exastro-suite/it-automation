@@ -238,6 +238,9 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(128)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
+VARS_LIST                         %VARCHR%(1024)                   , -- 変数定義
+ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
+VAR_STRUCT_ANAL_JSON_STRING       %VARCHR%(20480)                  , -- 変数構造解析結果 JSON形式 
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -260,6 +263,9 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(128)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
+VARS_LIST                         %VARCHR%(1024)                   , -- 変数定義
+ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
+VAR_STRUCT_ANAL_JSON_STRING       %VARCHR%(20480)                  , -- 変数構造解析結果 JSON形式 
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -430,6 +436,121 @@ LAST_UPDATE_USER                  %INT%                            , -- 最終�
 PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- 履歴系テーブル作成----
+
+-- ----------------------------------------------------------
+-- - ansible playbook等でのGBL/TPF/CPL変数利用リスト
+-- ----------------------------------------------------------
+CREATE TABLE B_ANS_COMVRAS_USLIST
+(
+ROW_ID                            %INT%                            ,
+-- ----
+FILE_ID                           %INT%                            , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
+VRA_ID                            %INT%                            , -- 変数種別      1:GBL/2:CPF/3:TPF
+CONTENTS_ID                       %INT%                            , -- コンテンツID  該当ファイルが格納されているデータベースのPkeyID
+VAR_NAME                          %VARCHR%(256)                    , -- 変数名
+REVIVAL_FLAG                      %VARCHR%(1)                      , -- 復活時の有効レコードフラグ
+-- ----
+DISP_SEQ                          %INT%                            , -- 表示順序
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_ANS_COMVRAS_USLIST_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+-- ----
+ROW_ID                            %INT%                            ,
+-- ----
+FILE_ID                           %INT%                            , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
+VRA_ID                            %INT%                            , -- 変数種別      1:GBL/2:CPF/3:TPF
+CONTENTS_ID                       %INT%                            , -- コンテンツID  該当ファイルが格納されているデータベースのPkeyID
+VAR_NAME                          %VARCHR%(256)                    , -- 変数名
+REVIVAL_FLAG                      %VARCHR%(1)                      , -- 復活時の有効レコードフラグ
+-- ----
+DISP_SEQ                          %INT%                            , -- 表示順序
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+
+-- ----------------------------------------------------------
+-- - ansible playbook等でのGBL/TPF/CPL変数利用リスト 変数種別マスタ
+-- ----------------------------------------------------------
+CREATE TABLE B_ANS_COMVRAS_USLIST_V_ID
+(
+ROW_ID                            %INT%                            ,
+-- ----
+NAME                              %VARCHR%(64)                     , -- 変数種別　1:GBL/2:CPF/3:TPF
+-- ----
+DISP_SEQ                          %INT%                            , -- 表示順序
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_ANS_COMVRAS_USLIST_V_ID_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+-- ----
+ROW_ID                            %INT%                            ,
+-- ----
+NAME                              %VARCHR%(64)                     , -- 変数種別　1:GBL/2:CPF/3:TPF
+-- ----
+DISP_SEQ                          %INT%                            , -- 表示順序
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+
+-- ----------------------------------------------------------
+-- - ansible playbook等でのGBL/TPF/CPL変数利用リスト ファイル種別マスタ
+-- ----------------------------------------------------------
+CREATE TABLE B_ANS_COMVRAS_USLIST_F_ID
+(
+ROW_ID                            %INT%                            ,
+-- ----
+NAME                              %VARCHR%(64)                     , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
+-- ----
+DISP_SEQ                          %INT%                            , -- 表示順序
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_ANS_COMVRAS_USLIST_F_ID_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+-- ----
+ROW_ID                            %INT%                            ,
+-- ----
+NAME                              %VARCHR%(64)                     , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
+-- ----
+DISP_SEQ                          %INT%                            , -- 表示順序
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
 
 -- *****************************************************************************
 -- ***  Ansible Common Tables *****                                          ***
