@@ -111,7 +111,7 @@ yum_install() {
 download_check() {
     DOWNLOAD_CHK=`echo $?`
     if [ $DOWNLOAD_CHK -ne 0 ]; then
-        log "ERROR:Download of materials failed[$key]"
+        log "ERROR:Download of file failed"
         func_exit
     fi
 }
@@ -127,7 +127,7 @@ yum_repository() {
         if [ "$LINUX_OS" == "RHEL7" ]; then
             rpm -ivh "$repo" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             CREATEREPO_CHK=`echo $?`
-            if [ $? -ne 0 ]; then
+            if [ $CREATEREPO_CHK -ne 0 ]; then
                 log "ERROR:Failed to get repository"
                 func_exit
             fi
@@ -137,7 +137,7 @@ yum_repository() {
         if [[ "$repo" =~ ^[^-] ]]; then
             yum install -y "$repo" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             CREATEREPO_CHK=`echo $?`
-            if [ $? -ne 0 ]; then
+            if [ $CREATEREPO_CHK -ne 0 ]; then
                 log "ERROR:Failed to get repository"
                 func_exit
             fi
@@ -379,6 +379,15 @@ configure_php() {
 
     # Install some pear packages.
     pear install ${PEAR_PACKAGE["php"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    PEAR_INSTALL_CHECK=`echo $?`
+    echo "----------Installation[${PEAR_PACKAGE["php"]}]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+    if [ $PEAR_INSTALL_CHECK == 1 ] || [ $PEAR_INSTALL_CHECK == 0 ]; then
+        echo "Success pear Install" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    else
+        log "ERROR:Installation failed[${PEAR_PACKAGE["php"]}]"
+        func_exit
+    fi
 
     # WORKAROUND! Symbolic link must exist.
     ln -s /usr/share/pear-data/HTML_AJAX/js /usr/share/pear/HTML/js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
@@ -594,32 +603,29 @@ download() {
     # Download pear packages.
     yum -y install php-pear >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
+	cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     for key in ${!PEAR_PACKAGE[@]}; do
         local download_dir="${PEAR_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
         mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        (
-            cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-            log "Download packages[${PEAR_PACKAGE[$key]}]"
-            pear download ${PEAR_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            download_check
-        )
+        log "Download packages[${PEAR_PACKAGE[$key]}]"
+        pear download ${PEAR_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        download_check
     done
+    cd $ITA_INSTALL_SCRIPTS_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1;
 
     #----------------------------------------------------------------------
     # download PHP tar.gz packages
+    cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     for key in ${!PHP_TAR_GZ_PACKAGE[@]}; do
         local download_dir="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
         mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        (
-            cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-            log "Download packages[$key]"
-            curl -L ${PHP_TAR_GZ_PACKAGE[$key]} -O >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            download_check
-        )
+        log "Download packages[$key]"
+        curl -L ${PHP_TAR_GZ_PACKAGE[$key]} -O >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        download_check    
     done
-
+    cd $ITA_INSTALL_SCRIPTS_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     #----------------------------------------------------------------------
     # Download pip packages.
     
@@ -1015,7 +1021,7 @@ PEAR_PACKAGE_DOWNLOAD_DIR=(
 # pear package (for php)
 declare -A PEAR_PACKAGE_PHP;
 PEAR_PACKAGE_PHP=(
-    ["remote"]="MDB2 HTTP_Request2 Auth HTML_AJAX-beta"
+    ["remote"]="Auth HTML_AJAX-beta"
     ["local"]="-O `list_pear_package ${PEAR_PACKAGE_LOCAL_DIR["php"]}`"
 )
 
