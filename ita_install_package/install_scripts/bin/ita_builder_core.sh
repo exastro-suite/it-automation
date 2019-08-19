@@ -603,11 +603,11 @@ download() {
     # Download pear packages.
     yum -y install php-pear >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
-	cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     for key in ${!PEAR_PACKAGE[@]}; do
         local download_dir="${PEAR_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-
         mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
+        
         log "Download packages[${PEAR_PACKAGE[$key]}]"
         pear download ${PEAR_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
         download_check
@@ -616,16 +616,17 @@ download() {
 
     #----------------------------------------------------------------------
     # download PHP tar.gz packages
-    cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     for key in ${!PHP_TAR_GZ_PACKAGE[@]}; do
         local download_dir="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-
         mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
+    
         log "Download packages[$key]"
         curl -L ${PHP_TAR_GZ_PACKAGE[$key]} -O >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        download_check    
+        download_check
     done
     cd $ITA_INSTALL_SCRIPTS_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1;
+    
     #----------------------------------------------------------------------
     # Download pip packages.
     
@@ -649,11 +650,12 @@ download() {
         ln -s /usr/local/bin/pip /usr/bin/pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
         rm -rf $ITA_INSTALL_SCRIPTS_DIR/python27 >> "$ITA_BUILDER_LOG_FILE" 2>&1
         python -V >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        
     elif [ "$LINUX_OS" == "CentOS6" ]; then
         yum -y install python-pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
         yum -y install centos-release-scl-rh >> "$ITA_BUILDER_LOG_FILE" 2>&1
         yum -y install python27 >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        sed -i '$a\source /opt/rh/python27/enable' /etc/profile.d/python27.sh >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        echo 'source /opt/rh/python27/enable' > /etc/profile.d/python27.sh
         source /etc/profile >> "$ITA_BUILDER_LOG_FILE" 2>&1
         python -V >> "$ITA_BUILDER_LOG_FILE" 2>&1
     else
