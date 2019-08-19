@@ -655,7 +655,6 @@ download() {
         yum -y install python-pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
         yum -y install centos-release-scl-rh >> "$ITA_BUILDER_LOG_FILE" 2>&1
         yum -y install python27 >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        sed -i '$a\source /opt/rh/python27/enable' /etc/profile.d/python27.sh >> "$ITA_BUILDER_LOG_FILE" 2>&1
         echo 'source /opt/rh/python27/enable' > /etc/profile.d/python27.sh
         source /etc/profile >> "$ITA_BUILDER_LOG_FILE" 2>&1
         python -V >> "$ITA_BUILDER_LOG_FILE" 2>&1
