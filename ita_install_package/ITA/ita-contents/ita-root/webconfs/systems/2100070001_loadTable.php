@@ -71,7 +71,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-	$objVldt = new SingleTextValidator(1,128,false);
+	$objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('OPENST_HOSTNAME',$g['objMTS']->getSomeMessage("ITAOPENST-MNU-100060"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAOPENST-MNU-100070"));//エクセル・ヘッダでの説明
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
