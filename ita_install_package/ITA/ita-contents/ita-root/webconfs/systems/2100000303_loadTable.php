@@ -119,7 +119,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setValidator($objVldt);
         $cg->addColumn($c);
 
-        $objVldt = new SingleTextValidator(0,32,false);
+        $objVldt = new SingleTextValidator(0,256,false);
         $c = new TextColumn('ETH_WOL_NET_DEVICE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102160"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102170"));//エクセル・ヘッダでの説明
         $c->setValidator($objVldt);
@@ -407,7 +407,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-103030"));//エクセル・ヘッダでの説明
             $cg->addColumn($c);
 
-            $objVldt = new SingleTextValidator(0,64,false);
+            $objVldt = new SingleTextValidator(0,256,false);
             $c = new TextColumn('INTERFACE_TYPE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-103040"));
             $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-103050"));//エクセル・ヘッダでの説明
             $c->setValidator($objVldt);
