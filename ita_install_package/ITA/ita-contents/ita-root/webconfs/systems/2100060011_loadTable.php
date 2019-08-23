@@ -174,7 +174,7 @@ Ansible(Dsc)作業管理
     //*************************************************************************************************************
     //----オペレーション名
     //*************************************************************************************************************
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('I_OPERATION_NAME',$g['objMTS']->getSomeMessage("ITADSCH-MNU-401040"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITADSCH-MNU-401050"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
