@@ -48,7 +48,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // 検索機能の制御----
 
 
-	$objVldt = new SingleTextValidator(1,32,false);
+	$objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('FILE_STATUS_NAME',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101205"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101206"));//エクセル・ヘッダでの説明
     $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :active"');
