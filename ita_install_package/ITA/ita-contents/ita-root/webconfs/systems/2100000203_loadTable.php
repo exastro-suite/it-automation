@@ -55,7 +55,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // メモ
     $c = new TextColumn('IP_INFO',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1020301"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1020302"));
-    $c->setValidator(new SingleTextValidator(0, 64, false));
+    $c->setValidator(new SingleTextValidator(0, 256, false));
     $table->addColumn($c);
 
     $table->fixColumn();    
