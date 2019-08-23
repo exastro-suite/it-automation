@@ -58,7 +58,7 @@ Ansible（Legacy）変数名管理
 
 
 
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('VARS_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305010"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305011"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
@@ -66,7 +66,7 @@ Ansible（Legacy）変数名管理
     $c->setUnique(true);
     $table->addColumn($c);
 
-    $objVldt = new SingleTextValidator(0,128,false);
+    $objVldt = new SingleTextValidator(0,256,false);
     $c = new TextColumn('VARS_DESCRIPTION',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305020"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305030"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
