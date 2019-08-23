@@ -56,7 +56,7 @@ ANSIBLE_EXEC_USER               VARCHAR (64)                      , -- ansible-p
 ANSIBLE_ACCESS_KEY_ID           VARCHAR (64)                      , 
 ANSIBLE_SECRET_ACCESS_KEY       VARCHAR (64)                      , 
 -- ansible Tower独自情報
-ANSTWR_ORGANIZATION             VARCHAR (64)                      , -- 組織名
+ANSTWR_ORGANIZATION             VARCHAR (512)                      , -- 組織名
 ANSTWR_AUTH_TOKEN               VARCHAR (256)                     , -- 接続トークン
 ANSTWR_DEL_RUNTIME_DATA         INT                               , 
 -- 共通
@@ -95,7 +95,7 @@ ANSIBLE_EXEC_USER               VARCHAR (64)                      , -- ansible-p
 ANSIBLE_ACCESS_KEY_ID           VARCHAR (64)                      , 
 ANSIBLE_SECRET_ACCESS_KEY       VARCHAR (64)                      , 
 -- ansible Tower独自情報
-ANSTWR_ORGANIZATION             VARCHAR (64)                      , -- 組織名
+ANSTWR_ORGANIZATION             VARCHAR (512)                      , -- 組織名
 ANSTWR_AUTH_TOKEN               VARCHAR (256)                     , -- 接続トークン
 ANSTWR_DEL_RUNTIME_DATA         INT                               , 
 -- 共通
@@ -240,7 +240,7 @@ ANS_TEMPLATE_VARS_NAME            VARCHAR (128)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
 VARS_LIST                         VARCHAR (1024)                   , -- 変数定義
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
-VAR_STRUCT_ANAL_JSON_STRING       VARCHAR (20480)                  , -- 変数構造解析結果 JSON形式 
+VAR_STRUCT_ANAL_JSON_STRING       VARCHAR (16000)                  , -- 変数構造解析結果 JSON形式 
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -265,7 +265,7 @@ ANS_TEMPLATE_VARS_NAME            VARCHAR (128)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
 VARS_LIST                         VARCHAR (1024)                   , -- 変数定義
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
-VAR_STRUCT_ANAL_JSON_STRING       VARCHAR (20480)                  , -- 変数構造解析結果 JSON形式 
+VAR_STRUCT_ANAL_JSON_STRING       VARCHAR (16000)                  , -- 変数構造解析結果 JSON形式 
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -564,7 +564,7 @@ CREATE TABLE B_ANSIBLE_LNS_PLAYBOOK
 (
 PLAYBOOK_MATTER_ID                INT                              ,
 
-PLAYBOOK_MATTER_NAME              VARCHAR (32)                     ,
+PLAYBOOK_MATTER_NAME              VARCHAR (256)                     ,
 PLAYBOOK_MATTER_FILE              VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -586,7 +586,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 PLAYBOOK_MATTER_ID                INT                              ,
 
-PLAYBOOK_MATTER_NAME              VARCHAR (32)                     ,
+PLAYBOOK_MATTER_NAME              VARCHAR (256)                     ,
 PLAYBOOK_MATTER_FILE              VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -685,8 +685,8 @@ CREATE TABLE B_ANSIBLE_LNS_VARS_MASTER
 (
 VARS_NAME_ID                      INT                              ,
 
-VARS_NAME                         VARCHAR (128)                    ,
-VARS_DESCRIPTION                  VARCHAR (128)                    ,
+VARS_NAME                         VARCHAR (256)                    ,
+VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -707,8 +707,8 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 VARS_NAME_ID                      INT                              ,
 
-VARS_NAME                         VARCHAR (128)                    ,
-VARS_DESCRIPTION                  VARCHAR (128)                    ,
+VARS_NAME                         VARCHAR (256)                    ,
+VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -811,7 +811,7 @@ CREATE TABLE C_ANSIBLE_LNS_EXE_INS_MNG
 EXECUTION_NO                      INT                              ,
 
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 STATUS_ID                         INT                              ,
 SYMPHONY_INSTANCE_NO              INT                              ,
 PATTERN_ID                        INT                              ,
@@ -823,7 +823,7 @@ I_ANS_WINRM_ID                    INT                              ,
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
@@ -853,7 +853,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 EXECUTION_NO                      INT                              ,
 
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 STATUS_ID                         INT                              ,
 SYMPHONY_INSTANCE_NO              INT                              ,
 PATTERN_ID                        INT                              ,
@@ -865,7 +865,7 @@ I_ANS_WINRM_ID                    INT                              ,
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
@@ -1214,7 +1214,7 @@ CREATE TABLE B_ANSIBLE_PNS_DIALOG_TYPE
 (
 DIALOG_TYPE_ID                    INT                              , -- 識別シーケンス
 
-DIALOG_TYPE_NAME                  VARCHAR (32)                     ,
+DIALOG_TYPE_NAME                  VARCHAR (256)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1235,7 +1235,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 DIALOG_TYPE_ID                    INT                              , -- 識別シーケンス
 
-DIALOG_TYPE_NAME                  VARCHAR (32)                     ,
+DIALOG_TYPE_NAME                  VARCHAR (256)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1374,8 +1374,8 @@ CREATE TABLE B_ANSIBLE_PNS_VARS_MASTER
 (
 VARS_NAME_ID                      INT                              , -- 識別シーケンス
 
-VARS_NAME                         VARCHAR (128)                    ,
-VARS_DESCRIPTION                  VARCHAR (128)                    ,
+VARS_NAME                         VARCHAR (256)                    ,
+VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1396,8 +1396,8 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 VARS_NAME_ID                      INT                              , -- 識別シーケンス
 
-VARS_NAME                         VARCHAR (128)                    ,
-VARS_DESCRIPTION                  VARCHAR (128)                    ,
+VARS_NAME                         VARCHAR (256)                    ,
+VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1499,7 +1499,7 @@ CREATE TABLE C_ANSIBLE_PNS_EXE_INS_MNG
 (
 EXECUTION_NO                      INT                              , -- 識別シーケンス
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 
 STATUS_ID                         INT                              ,
 SYMPHONY_INSTANCE_NO              INT                              ,
@@ -1512,7 +1512,7 @@ I_ANS_WINRM_ID                    INT                              ,
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
@@ -1541,7 +1541,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 EXECUTION_NO                      INT                              , -- 識別シーケンス
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 
 STATUS_ID                         INT                              ,
 SYMPHONY_INSTANCE_NO              INT                              ,
@@ -1554,7 +1554,7 @@ I_ANS_WINRM_ID                    INT                              ,
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
@@ -1909,7 +1909,7 @@ CREATE TABLE C_ANSIBLE_LRL_EXE_INS_MNG
 (
 EXECUTION_NO                      INT                              ,
 EXECUTION_USER                    VARCHAR (80)                     , -- 作業パターン名
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 
 STATUS_ID                         INT                              , -- 状態
 SYMPHONY_INSTANCE_NO              INT                              ,
@@ -1922,7 +1922,7 @@ I_ANS_WINRM_ID                    INT                              , -- WINRM接
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションNo
-I_OPERATION_NAME                  VARCHAR (128)                    , -- オペレーション名
+I_OPERATION_NAME                  VARCHAR (256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
@@ -1951,7 +1951,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 EXECUTION_NO                      INT                              ,
 EXECUTION_USER                    VARCHAR (80)                     , -- 作業パターン名
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 
 STATUS_ID                         INT                              , -- 状態
 SYMPHONY_INSTANCE_NO              INT                              ,
@@ -1964,7 +1964,7 @@ I_ANS_WINRM_ID                    INT                              , -- WINRM接
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションNo
-I_OPERATION_NAME                  VARCHAR (128)                    , -- オペレーション名
+I_OPERATION_NAME                  VARCHAR (256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
@@ -1993,7 +1993,7 @@ CREATE TABLE B_ANSIBLE_LRL_ROLE_PACKAGE
 (
 ROLE_PACKAGE_ID                   INT                              , -- 識別シーケンス
 
-ROLE_PACKAGE_NAME                 VARCHAR (128)                    , -- ロールパッケージ名
+ROLE_PACKAGE_NAME                 VARCHAR (256)                    , -- ロールパッケージ名
 ROLE_PACKAGE_FILE                 VARCHAR (256)                    , -- ロールパッケージファイル(ZIP形式)
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -2015,7 +2015,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 ROLE_PACKAGE_ID                   INT                              , -- 識別シーケンス
 
-ROLE_PACKAGE_NAME                 VARCHAR (128)                    , -- ロールパッケージ名
+ROLE_PACKAGE_NAME                 VARCHAR (256)                    , -- ロールパッケージ名
 ROLE_PACKAGE_FILE                 VARCHAR (256)                    , -- ロールパッケージファイル(ZIP形式)
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -2038,7 +2038,7 @@ CREATE TABLE B_ANSIBLE_LRL_ROLE
 ROLE_ID                           INT                              , -- 識別シーケンス
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
-ROLE_NAME                         VARCHAR (128)                    , -- ロール名
+ROLE_NAME                         VARCHAR (256)                    , -- ロール名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2060,7 +2060,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 ROLE_ID                           INT                              , -- 識別シーケンス
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
-ROLE_NAME                         VARCHAR (128)                    , -- ロール名
+ROLE_NAME                         VARCHAR (256)                    , -- ロール名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2083,7 +2083,7 @@ VARS_NAME_ID                      INT                              , -- 識別�
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
 ROLE_ID                           INT                              , -- ロール名
-VARS_NAME                         VARCHAR (128)                    , -- 変数名
+VARS_NAME                         VARCHAR (256)                    , -- 変数名
 VARS_ATTRIBUTE_01                 INT                              , -- 変数属性
                                                                      -- -- 1:一般変数
                                                                      -- -- 2:複数具体値変数
@@ -2110,7 +2110,7 @@ VARS_NAME_ID                      INT                              , -- 識別�
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
 ROLE_ID                           INT                              , -- ロール名
-VARS_NAME                         VARCHAR (128)                    , -- 変数名
+VARS_NAME                         VARCHAR (256)                    , -- 変数名
 VARS_ATTRIBUTE_01                 INT                              , -- 変数属性
                                                                      -- -- 1:一般変数
                                                                      -- -- 2:複数具体値変数
@@ -2183,9 +2183,9 @@ CREATE TABLE B_ANSIBLE_LRL_VARS_MASTER
 (
 VARS_NAME_ID                      INT                              ,
 
-VARS_NAME                         VARCHAR (128)                    , -- 変数名
+VARS_NAME                         VARCHAR (256)                    , -- 変数名
 VARS_ATTRIBUTE_01                 INT                              , 
-VARS_DESCRIPTION                  VARCHAR (128)                    , -- 変数説明
+VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2206,9 +2206,9 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 VARS_NAME_ID                      INT                              ,
 
-VARS_NAME                         VARCHAR (128)                    , -- 変数名
+VARS_NAME                         VARCHAR (256)                    , -- 変数名
 VARS_ATTRIBUTE_01                 INT                              , 
-VARS_DESCRIPTION                  VARCHAR (128)                    , -- 変数説明
+VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2476,7 +2476,7 @@ ARRAY_MEMBER_ID                   INT                              , -- 識別�
 VARS_NAME_ID                      INT                              , -- 変数名一覧 Pkey
 PARENT_VARS_KEY_ID                INT                              , -- 親メンバー変数へのキー 
 VARS_KEY_ID                       INT                              , -- 自メンバー変数のキー
-VARS_NAME                         VARCHAR (128)                    , -- メンバー変数名　　0:配列変数を示す
+VARS_NAME                         VARCHAR (256)                    , -- メンバー変数名　　0:配列変数を示す
 ARRAY_NEST_LEVEL                  INT                              , -- 階層 1～
 ASSIGN_SEQ_NEED                   INT                              , -- 代入順序有無　1:必要　初期値:NULL
 COL_SEQ_NEED                      INT                              , -- 列順序有無  　1:必要　初期値:NULL
@@ -2507,7 +2507,7 @@ ARRAY_MEMBER_ID                   INT                              , -- 識別�
 VARS_NAME_ID                      INT                              , -- 変数名一覧 Pkey
 PARENT_VARS_KEY_ID                INT                              , -- 親メンバー変数へのキー 
 VARS_KEY_ID                       INT                              , -- 自メンバー変数のキー
-VARS_NAME                         VARCHAR (128)                    , -- メンバー変数名　　0:配列変数を示す
+VARS_NAME                         VARCHAR (256)                    , -- メンバー変数名　　0:配列変数を示す
 ARRAY_NEST_LEVEL                  INT                              , -- 階層 1～
 ASSIGN_SEQ_NEED                   INT                              , -- 代入順序有無　1:必要　初期値:NULL
 COL_SEQ_NEED                      INT                              , -- 列順序有無  　1:必要　初期値:NULL
@@ -2625,8 +2625,8 @@ CREATE TABLE B_ANS_LRL_RP_REP_VARS_LIST
 ROW_ID                            INT                              , -- 識別シーケンス
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージID
 ROLE_ID                           INT                              , -- ロールID
-REP_VARS_NAME                     VARCHAR (128)                    , -- 読替変数名
-ANY_VARS_NAME                     VARCHAR (128)                    , -- 任意変数名
+REP_VARS_NAME                     VARCHAR (256)                    , -- 読替変数名
+ANY_VARS_NAME                     VARCHAR (256)                    , -- 任意変数名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2646,8 +2646,8 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 ROW_ID                            INT                              , -- 識別シーケンス
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージID
 ROLE_ID                           INT                              , -- ロールID
-REP_VARS_NAME                     VARCHAR (128)                    , -- 読替変数名
-ANY_VARS_NAME                     VARCHAR (128)                    , -- 任意変数名
+REP_VARS_NAME                     VARCHAR (256)                    , -- 読替変数名
+ANY_VARS_NAME                     VARCHAR (256)                    , -- 任意変数名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -3576,7 +3576,7 @@ GBL_VARS_NAME_ID                  INT                              , -- 識別�
 
 VARS_NAME                         VARCHAR (128)                    , -- グローバル変数名
 VARS_ENTRY                        VARCHAR (1024)                   , -- 具体値
-VARS_DESCRIPTION                  VARCHAR (128)                    , -- 変数説明
+VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -3599,7 +3599,7 @@ GBL_VARS_NAME_ID                  INT                              , -- 識別�
 
 VARS_NAME                         VARCHAR (128)                    , -- グローバル変数名
 VARS_ENTRY                        VARCHAR (1024)                   , -- 具体値
-VARS_DESCRIPTION                  VARCHAR (128)                    , -- 変数説明
+VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
