@@ -58,7 +58,7 @@ Ansible(Legacy)ファイル管理
 
 
     // ファイル埋込変数名
-    $objVldt = new TextValidator(1, 128, false, '/^CPF_[_a-zA-Z0-9]+$/', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1800010"));
+    $objVldt = new TextValidator(1, 256, false, '/^CPF_[_a-zA-Z0-9]+$/', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1800010"));
     $objVldt->setRegexp("/^[^\r\n]*$/s","DTiS_filterDefault");
     $c = new TextColumn('CONTENTS_FILE_VARS_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1800010"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1800011"));//エクセル・ヘッダでの説明
