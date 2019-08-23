@@ -43,7 +43,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     // ホストグループ変数名
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('VARS_NAME',$g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100307"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100308"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
