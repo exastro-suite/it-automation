@@ -58,7 +58,7 @@ OS種別マスタ情報
     $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
     // 検索機能の制御----
 
-	$objVldt = new SingleTextValidator(1,128,false);
+	$objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('OS_TYPE_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-106060"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-106070"));//エクセル・ヘッダでの説明
 	$c->setValidator($objVldt);
