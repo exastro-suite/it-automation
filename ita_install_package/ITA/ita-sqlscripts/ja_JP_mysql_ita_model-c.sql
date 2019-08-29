@@ -196,7 +196,7 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 CREATE TABLE B_ANS_CONTENTS_FILE
 (
 CONTENTS_FILE_ID                  INT                              , -- ファイルID
-CONTENTS_FILE_VARS_NAME           VARCHAR (128)                    , -- 変数名
+CONTENTS_FILE_VARS_NAME           VARCHAR (256)                    , -- 変数名
 CONTENTS_FILE                     VARCHAR (256)                    , -- コンテンツ ファイル名
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -216,7 +216,7 @@ JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴�
 JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
 
 CONTENTS_FILE_ID                  INT                              , -- ファイルID
-CONTENTS_FILE_VARS_NAME           VARCHAR (128)                    , -- 変数名
+CONTENTS_FILE_VARS_NAME           VARCHAR (256)                    , -- 変数名
 CONTENTS_FILE                     VARCHAR (256)                    , -- コンテンツ ファイル名
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -236,7 +236,7 @@ CREATE TABLE B_ANS_TEMPLATE_FILE
 (
 ANS_TEMPLATE_ID                   INT                              ,
 
-ANS_TEMPLATE_VARS_NAME            VARCHAR (128)                    ,
+ANS_TEMPLATE_VARS_NAME            VARCHAR (256)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
 VARS_LIST                         VARCHAR (1024)                   , -- 変数定義
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
@@ -261,7 +261,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 ANS_TEMPLATE_ID                   INT                              ,
 
-ANS_TEMPLATE_VARS_NAME            VARCHAR (128)                    ,
+ANS_TEMPLATE_VARS_NAME            VARCHAR (256)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
 VARS_LIST                         VARCHAR (1024)                   , -- 変数定義
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
