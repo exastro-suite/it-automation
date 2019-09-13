@@ -432,6 +432,7 @@
     // P0029  作業パターン詳細を元に作業パターン変数紐付マスタに紐付を登録
     // P0030  作業パターン変数紐付マスタあって作業パターン詳細にない紐付情報を廃止する。
     // P0031  コミット(レコードロックを解除)
+    // P0032  代入値管理の具体値に登録されているテンプレート変数を取得
     //
     // F0001  getRolePackageDB
     // F0002  getRolePackageInfo
@@ -492,7 +493,8 @@
     $php_req_gate_php    = '/libs/commonlibs/common_php_req_gate.php';
     $db_connect_php      = '/libs/commonlibs/common_db_connect.php';
     $hostvar_search_php  = '/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php';
-    $ansible_common_php  = '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php';
+    $ansible_common_php1  = '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php';
+    $ansible_common_php2  = '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php';
     $legacy_role_common_php = '/libs/backyardlibs/ansible_driver/CheckAnsibleRoleFiles.php';
     $ansible_nestedVariableExpanders_php = '/libs/backyardlibs/ansible_driver/ansible_nestedVariableExpander.php';   
 
@@ -938,7 +940,8 @@
         ////////////////////////////////
         // 共通モジュールの呼び出し   //
         ////////////////////////////////
-        require_once ($root_dir_path . $ansible_common_php);
+        require_once ($root_dir_path . $ansible_common_php1);
+        require_once ($root_dir_path . $ansible_common_php2);
         require_once ($root_dir_path . $legacy_role_common_php);
 
         require_once ($root_dir_path . $hostvar_search_php);
@@ -963,7 +966,6 @@
             require ($root_dir_path . $log_output_php );
         }
 
-
         ///////////////////////////////////////////////////////////////////////////
         // 関連データベースが更新されバックヤード処理が必要か判定
         ///////////////////////////////////////////////////////////////////////////
@@ -977,8 +979,6 @@
             $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90303");
             throw new Exception($errorMsg);
         }
-
-
         if(count($lv_UpdateRecodeInfo) == 0) {
             // トレースメッセージ
             if($log_level === "DEBUG") {
@@ -1040,6 +1040,49 @@
             }
         }
         //デッドロック防止のために、昇順でロック----
+
+        $dbObj = new AnsibleCommonLibs();
+
+        //////////////////////////////////////////////////////////////////////////////
+        // グローバル変数の情報を取得
+        //////////////////////////////////////////////////////////////////////////////
+        $lva_global_vars_master_list = array();
+        $sql = "SELECT                           \n" .
+              "    VARS_NAME,                    \n" .
+              "    VARS_ENTRY                    \n" .
+              "FROM                              \n" .
+              "    B_ANS_GLOBAL_VARS_MASTER      \n" .
+              "WHERE                             \n" .
+              "    DISUSE_FLAG            = '0'; \n";
+
+        $errmsg       = "";
+        $errdetailmsg = "";
+        $ret = $dbObj->selectDBRecodes($objMTS,$objDBCA,$sql,"VARS_NAME",$lva_global_vars_master_list,
+                                       $errmsg,$errdetailmsg);
+        if($ret === false) {
+            throw new Exception($errmsg . "\n" . $errdetailmsg);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////
+        // テンプレート管理の情報を取得
+        //////////////////////////////////////////////////////////////////////////////
+        $lva_template_master_list = array();
+        $sql = "SELECT                           \n" .
+              "    ANS_TEMPLATE_VARS_NAME,       \n" .
+              "    VAR_STRUCT_ANAL_JSON_STRING   \n" .
+              "FROM                              \n" .
+              "    B_ANS_TEMPLATE_FILE           \n" .
+              "WHERE                             \n" .
+              "    DISUSE_FLAG            = '0'; \n";
+        $errmsg       = "";
+        $errdetailmsg = "";
+        $ret = $dbObj->selectDBRecodes($objMTS,$objDBCA,$sql,"ANS_TEMPLATE_VARS_NAME",$lva_template_master_list,
+                                       $errmsg,$errdetailmsg);
+        if($ret === false) {
+            throw new Exception($errmsg . "\n" . $errdetailmsg);
+        }
+
+        unset($dbObj);
 
         //////////////////////////////////////////////////////////////////////////////
         // P0002
@@ -1177,13 +1220,23 @@ if ( $log_level === 'DEBUG' ){
                     $ifa_User2ITA_var_list[$role_package_name] = $User2ITA_var_list;
                     $ifa_ITA2User_var_list_pkgid[$role_package_id] = $ITA2User_var_list;
                 }
-                exec("/bin/rm -rf " . $roledir);
+                $r_array = array();
+                $r_code  = "";
+                exec("/bin/rm -rf " . $roledir,$r_array,$r_code);
+                if($r_code != 0) {
+                    LocalLogPrint(basename(__FILE__),__LINE__,'Delete error. file:'.$roledir);
+                    LocalLogPrint(basename(__FILE__),__LINE__,'Return code:'.$r_code);
+                    LocalLogPrint(basename(__FILE__),__LINE__,print_r($r_array,true));
+                }
 
                 //リソース解放
                 unset($objRole);
 
             }
         }
+
+        unset($lva_global_vars_master_list);
+        unset($lva_template_master_list);
 
         ///////////////////////////////////////////////////////////////////////////
         // P0005-2
@@ -1217,6 +1270,12 @@ if ( $log_level === 'DEBUG' ){
         // T0006
         $lva_role_nameTOrole_id = array();
 
+        // T0007
+        $lva_use_role_vars_name_list       = array();
+
+        // T0015
+        $lva_use_role_child_vars_name_list = array();
+
         foreach($ifa_role_name_list as $role_package_id=>$role_name_list){
             // ロールパッケージファイル ロール名
             foreach($role_name_list as $role_name){
@@ -1235,14 +1294,29 @@ if ( $log_level === 'DEBUG' ){
             }
         }
 
+        /////////////////////////////////////////////////////////////////////////////////
+        // P0010
+        // ロール管理に登録されているロールでロールパッケージファイルで使用していない
+        // ロールを廃止する。
+        /////////////////////////////////////////////////////////////////////////////////
+        $ret = delRolesDB($strCurTableRole,                $strJnlTableRole,
+                          $strSeqOfCurTableRole,           $strSeqOfJnlTableRole,
+                          $arrayConfigOf_Rol_Table,        $arrayValueTmplOf_Rol_Table,
+                          $strCurTableRoleVars,            $strJnlTableRoleVars,
+                          $strSeqOfCurTableRoleVars,       $strSeqOfJnlTableRoleVars,
+                          $arrayConfigOf_RolVars_Table,    $arrayValueTmplOf_RolVars_Table,
+                          "ROLE",$lva_use_role_name_list,  $lva_use_role_vars_name_list,
+                          $lva_use_role_child_vars_name_list,
+                          $db_access_user_id);
+        if($ret === false){
+            $error_flag = 1;
+            throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00001040")) );
+        }
+
         //////////////////////////////////////////////////////////////////////////////////
         // P0007
         // ロール内のPlaybookで使用している変数名をロール変数管理に反映
         //////////////////////////////////////////////////////////////////////////////////
-        // T0007
-        $lva_use_role_vars_name_list       = array();
-        // T0015 現在未使用     
-        $lva_use_role_child_vars_name_list = array();
         // T0016 現在未使用
         $aryChildVarNameFromFiles          = array();
         // T0024 現在未使用
@@ -1376,24 +1450,6 @@ if ( $log_level === 'DEBUG' ){
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-        // P0010
-        // ロール管理に登録されているロールでロールパッケージファイルで使用していない
-        // ロールを廃止する。
-        /////////////////////////////////////////////////////////////////////////////////
-        $ret = delRolesDB($strCurTableRole,                $strJnlTableRole,
-                          $strSeqOfCurTableRole,           $strSeqOfJnlTableRole,
-                          $arrayConfigOf_Rol_Table,        $arrayValueTmplOf_Rol_Table,
-                          $strCurTableRoleVars,            $strJnlTableRoleVars,
-                          $strSeqOfCurTableRoleVars,       $strSeqOfJnlTableRoleVars,
-                          $arrayConfigOf_RolVars_Table,    $arrayValueTmplOf_RolVars_Table,
-                          "ROLE",$lva_use_role_name_list,  $lva_use_role_vars_name_list,
-                          $lva_use_role_child_vars_name_list,
-                          $db_access_user_id);
-        if($ret === false){
-            $error_flag = 1;
-            throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00001040")) );
-        }
 
         //////////////////////////////////////////////////////////////////////////////////////////
         // P0011-1
@@ -3505,18 +3561,21 @@ if ( $log_level === 'DEBUG' ){
                                 $in_roledir,
                                 &$ina_role_name_list,
                                 &$ina_role_var_list,
-                                $in_role_package_name,        // #1081 2016/10/31 Append
-                                &$ina_role_def_var_list,      // #1081 2016/10/31 Append
-                                &$ina_role_def_varsval_list,  // #1182 2017/03/23 Append
-                                &$ina_role_def_array_vars_list,     // #1186 2017/05/18 Append
-                                &$ina_ITA2User_var_list,      // #1241 2017/09/20 Append
-                                &$ina_User2ITA_var_list)      // #1241 2017/09/20 Append
+                                $in_role_package_name,
+                                &$ina_role_def_var_list,
+                                &$ina_role_def_varsval_list,
+                                &$ina_role_def_array_vars_list,
+                                &$ina_ITA2User_var_list,
+                                &$ina_User2ITA_var_list)
     {
         global          $objMTS;
         global          $objDBCA;
         global          $objRole;
         global          $root_dir_path;
         global          $log_level;
+
+        global          $lva_global_vars_master_list;
+        global          $lva_template_master_list;
  
         $ina_role_name_list = array();
         $ina_role_var_list  = array();
@@ -3558,7 +3617,8 @@ if ( $log_level === 'DEBUG' ){
         
         $def_array_vars_list = array();
         
-        $dummy_array = array();
+        $cpf_vars_list      = array();
+        $tpf_vars_list      = array();
 
         $ITA2User_var_list  = array();
         $User2ITA_var_list  = array();
@@ -3572,8 +3632,10 @@ if ( $log_level === 'DEBUG' ){
                                        $err_vars_list,
                                        $def_varsval_list,
                                        $def_array_vars_list,
-                                       false,
-                                       $dummy_array,
+                                       true,
+                                       $cpf_vars_list,
+                                       true,
+                                       $tpf_vars_list,
                                        $ITA2User_var_list,
                                        $User2ITA_var_list,
                                        $comb_err_vars_list,
@@ -3610,6 +3672,78 @@ if ( $log_level === 'DEBUG' ){
             return false;
 
         }
+       
+        $objAnal = new VarStructAnalysisFileAccess($objMTS,$objDBCA,$lva_global_vars_master_list,$lva_template_master_list,$log_level);
+
+        // 使用しているテンプレート変数の変数構造を取得する。
+        $tpf_vars_struct  = array();
+        $gbl_vars_list    = $objRole->getglobalvarname();
+        if( ! is_array($gbl_vars_list)) {
+             $gbl_vars_list = array();
+        }
+        $errormsg         = "";
+        $objAnal->getTemplateUseVarsStructiMain($tpf_vars_list,$ITA2User_var_list,$gbl_vars_list,$tpf_vars_struct,$errormsg);
+        // 戻りはチェックしない、エラーメッセージを出力して先に進む
+        if(strlen($errormsg) != 0) {
+            LocalLogPrint(basename(__FILE__),__LINE__,$errormsg);
+        }
+
+        // 使用しているグローバル変数の具体値に設定されているテンプレート変数を取得する。
+        $wk_tpf_vars_list = array();
+        $errormsg         = "";
+        $objAnal->getGlobalVarsUseTemplateUseVars($gbl_vars_list,$wk_tpf_vars_list,$errormsg);
+        // 戻りはチェックしない、エラーメッセージを出力して先に進む
+        if(strlen($errormsg) != 0) {
+            LocalLogPrint(basename(__FILE__),__LINE__,$errormsg);
+        }
+
+        // 代入値管理の具体値に設定されているテンプレート変数を取得する。
+        $ret = $objAnal->getVarEntryISTPFvars($in_role_package_name,$objRole->getrolename(),$wk_tpf_vars_list,false);
+        if($ret === false) {
+            $errary = $objAnal->GetLastError();
+            LocalLogPrint(basename(__FILE__),__LINE__,$errary[1]);
+            return false;
+        }
+
+        // 使用しているグローバル変数の具体値に設定されているテンプレート変数の変数構造を取得する。
+        $errormsg         = "";
+        $objAnal->getTemplateUseVarsStructiMain($wk_tpf_vars_list,$ITA2User_var_list,$gbl_vars_list,$tpf_vars_struct,$errormsg);
+        // 戻りはチェックしない、エラーメッセージを出力して先に進む
+        if(strlen($errormsg) != 0) {
+            LocalLogPrint(basename(__FILE__),__LINE__,$errormsg);
+        }
+
+        unset($objAnal);
+
+        // テンプレートで使用している変数とロール内の変数リストをマージする。
+        // 両方にある変数は、なにもしない
+        // テンプレートのみに定義されている変数をロール内の変数リストに追加 
+        // 追加した変数の具体値は空とする。
+        foreach($tpf_vars_struct as $var_type=>$tpf_vars_struct_array1) {
+            foreach($tpf_vars_struct_array1 as $rolename=>$tpf_vars_struct_array2) {
+                foreach($tpf_vars_struct_array2 as $var_name=>$vars_struct) {
+                    switch($var_type) {
+                    case 'Vars_list':
+                        if((isset($def_vars_list[$rolename][$var_name])       === true) ||
+                           (isset($def_array_vars_list[$rolename][$var_name]) === true)) {
+                            continue;
+                        } else {
+                            $def_vars_list[$rolename][$var_name] = $vars_struct;
+                        }
+                        break;
+                    case 'Array_vars_list':
+                        if((isset($def_vars_list[$rolename][$var_name])       === true) ||
+                           (isset($def_array_vars_list[$rolename][$var_name]) === true)) {
+                            continue;
+                        } else {
+                            $def_array_vars_list[$rolename][$var_name] = $vars_struct;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
         // rolesディレクトリ内のロール名取得
         // $ina_role_name_list[role名]
         $ina_role_name_list = $objRole->getrolename();
@@ -3623,6 +3757,7 @@ if ( $log_level === 'DEBUG' ){
         // ロール内の変数具体値取得
         $ina_role_def_varsval_list = $def_varsval_list;
         
+        // ロール内の多段変数取得
         $ina_role_def_array_vars_list = $def_array_vars_list;
 
         $ina_ITA2User_var_list = $ITA2User_var_list;
