@@ -796,18 +796,72 @@ Ansible（Pioneer）代入値管理
         $strFxName = "";
 
         $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
-        if( $modeValue=="DTUP_singleRecDelete" ){
-            // 廃止の場合のみ
-            $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
-            if( $modeValue_sub == "on" ){
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+            if( $modeValue=="DTUP_singleRecDelete" ){
+                // 廃止の場合のみ
+                $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
+                if( $modeValue_sub == "on" ){
+
+                    $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                               ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                               ."WHERE ROW_ID IN (2100020004) ";
+
+                    $aryForBind = array();
+
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+                    if( $aryRetBody[0] !== true ){
+                        $boolRet = false;
+                        $strErrMsg = $aryRetBody[2];
+                        $intErrorType = 500;
+                    }
+                }
+            }
+            // 具体値にテンプレート変数が登録されているか判定する。
+            $var_match = array();
+            $match_str = "/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/";
+            $var_exec  = false;
+            if($modeValue == "DTUP_singleRecRegister") {
+                $val          = isset($aryVariant['arySqlExe_register_table']['VARS_ENTRY'])?
+                                      $aryVariant['arySqlExe_register_table']['VARS_ENTRY']:'';
+                $ret = preg_match_all($match_str,$val,$var_match);
+                if(($ret !== false) && ($ret > 0)){
+                    $var_exec  = true;
+                }
+            }
+            if($modeValue == "DTUP_singleRecUpdate") {
+                // 変更前と変更後の具体値確認
+                $val          = isset($aryVariant['edit_target_row']['VARS_ENTRY'])?
+                                      $aryVariant['edit_target_row']['VARS_ENTRY']:'';
+                $ret = preg_match_all($match_str,$val,$var_match);
+                if(($ret !== false) && ($ret > 0)){
+                    $var_exec  = true;
+                }else{
+                    $val          = isset($aryVariant['arySqlExe_update_table']['VARS_ENTRY'])?
+                                          $aryVariant['arySqlExe_update_table']['VARS_ENTRY']:'';
+                    $ret = preg_match_all($match_str,$val,$var_match);
+                    if(($ret !== false) && ($ret > 0)){
+                        $var_exec  = true;
+                    }
+                }
+            }
+            if($modeValue == "DTUP_singleRecDelete") {
+                $val          = isset($aryVariant['edit_target_row']['VARS_ENTRY'])?
+                                      $aryVariant['edit_target_row']['VARS_ENTRY']:'';
+                $ret = preg_match_all($match_str,$val,$var_match);
+                if(($ret !== false) && ($ret > 0)){
+                    $var_exec  = true;
+                }
+            }
+            if( $var_exec === true)
+            {
                 $strQuery = "UPDATE A_PROC_LOADED_LIST "
                            ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                           ."WHERE ROW_ID in (2100020004) ";
+                           ."WHERE ROW_ID IN (2100020003) ";
 
                 $aryForBind = array();
 
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-
 
                 if( $aryRetBody[0] !== true ){
                     $boolRet = false;
@@ -819,6 +873,7 @@ Ansible（Pioneer）代入値管理
         $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
         return $retArray;
     };
+
     $tmpAryColumn = $table->getColumns();
     $tmpAryColumn['ASSIGN_ID']->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
