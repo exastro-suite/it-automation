@@ -1603,7 +1603,10 @@
         global $objMTS;
 
         require_once ($root_dir_path . "/libs/backyardlibs/common/common_db_access.php");
-        $dbobj = new BackyardCommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,-1);
+
+        //$dbobj = new BackyardCommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,-1);
+        $dbobj = new CommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,-1);
+
         $in_JobTemplatePropertyInfo = array();
 
         $sql =            " SELECT * FROM B_ANS_TWR_JOBTP_PROPERTY ";
@@ -1782,7 +1785,8 @@
         global $objMTS;
 
         require_once ($root_dir_path . "/libs/backyardlibs/common/common_db_access.php");
-        $dbobj = new BackyardCommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,-1);
+        $dbobj = new CommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,-1);
+
         $in_JobTemplatePropertyInfo = array();
 
         $sql =            " SELECT ANS_EXEC_OPTIONS FROM C_PATTERN_PER_ORCH ";
