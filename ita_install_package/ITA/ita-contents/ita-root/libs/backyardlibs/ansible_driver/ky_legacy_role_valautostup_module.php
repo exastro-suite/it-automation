@@ -38,6 +38,9 @@
     $warning_flag               = 0;        // 警告フラグ(1：警告発生)
     $error_flag                 = 0;        // 異常フラグ(1：異常発生)
 
+    $db_update_flg                       = false;
+    $lv_a_proc_loaded_list_varsetup_pkey = 2100020005;
+
     $g_null_data_handling_def   = "";
 
     try {
@@ -444,7 +447,21 @@
             throw new Exception($errorMsg);
         }
 
-
+        ///////////////////////////////////////////////////////////////////////////
+        // 関連データベースを更新している場合、変数刈取りのバックヤード起動を登録
+        ///////////////////////////////////////////////////////////////////////////
+        if($db_update_flg === true) {
+            if($log_level === "DEBUG") {
+                $traceMsg = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70056");
+                LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
+            }
+            $ret = setBackyardExecute($lv_a_proc_loaded_list_varsetup_pkey);
+            if($ret === false) {
+                $error_flag = 1;
+                $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90306");
+                throw new Exception($errorMsg);
+            }
+        }
 
     } catch(Exception $e) {
 
@@ -1565,13 +1582,13 @@ function getCMDBdata($in_tableNameToSqlList,
                         // fetch行数を取得
                         $count = $objQuery->effectedRowCount();
 
-                        // 1件ではない場合
-                        if(1 != $count){
-                            continue;
+                        $col_val = "";
+                        // 0件ではない場合
+                        if(0 != $count){
+                            // fetch行を取得
+                            $tgt_row = $objQuery->resultFetch();
+                            $col_val = $tgt_row[$col_data['REF_COL_NAME']];
                         }
-                        // fetch行を取得
-                        $tgt_row = $objQuery->resultFetch();
-                        $col_val = $tgt_row[$col_data['REF_COL_NAME']];
                         unset($objQuery);
                     }
 
@@ -1909,6 +1926,7 @@ function addStg1StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
     global $arrayConfigOfVarAss;
     global $arrayValueTmplOfVarAss;
 
+    global $db_update_flg;
 
     $strCurTable      = $strCurTableVarsAss;
     $strJnlTable      = $strJnlTableVarsAss;
@@ -1951,6 +1969,12 @@ function addStg1StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
         } else {
             $hit_flg = true;
             $tgt_row = $in_VarsAssignRecodes[$key];
+      
+            // 具体値を退避
+            $val_list = array();
+            $val_list[] = $in_varsAssignList['VARS_ENTRY'];
+            $val_list[] = $in_VarsAssignRecodes[$key]['VARS_ENTRY'];
+
             // 代入値管理に必要なレコードを削除
             unset($in_VarsAssignRecodes[$key]);
         }
@@ -1992,6 +2016,18 @@ function addStg1StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
                                                   $in_varsAssignList['VARS_LINK_ID'],
                                                   $in_varsAssignList['ASSIGN_SEQ']));
             LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
+        }
+    }
+    // 具体値にテンプレート変数が記述されているか判定
+    if( $db_update_flg === false) {
+        foreach($val_list as $val) {
+            $var_match = array();
+            $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
+            if(($ret !== false) && ($ret > 0)){
+                // テンプレート変数が記述されていることを記録
+                $db_update_flg = true;
+                break;
+            }
         }
     }
 
@@ -2056,6 +2092,8 @@ function addStg1ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
     global $arrayConfigOfVarAss;
     global $arrayValueTmplOfVarAss;
 
+    global $db_update_flg;
+
     $strCurTable      = $strCurTableVarsAss;
     $strJnlTable      = $strJnlTableVarsAss;
 
@@ -2085,6 +2123,12 @@ function addStg1ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
             return true; 
         }
         $hit_flg = true;
+
+        // 具体値を退避
+        $val_list = array();
+        $val_list[] = $in_ArryVarsAssignRecodes[$key]['VARS_ENTRY'];
+        $val_list[] = $in_varsAssignList['VARS_ENTRY'];
+
         $tgt_row = $in_ArryVarsAssignRecodes[$key];
         // 代入値管理に必要なレコードはリストから削除
         unset($in_ArryVarsAssignRecodes[$key]);
@@ -2127,6 +2171,19 @@ function addStg1ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
                                                   $in_varsAssignList['COL_SEQ_COMBINATION_ID'],
                                                   $in_varsAssignList['ASSIGN_SEQ']));
             LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
+        }
+    }
+
+    // 具体値にテンプレート変数が記述されているか判定
+    if( $db_update_flg === false) {
+        foreach($val_list as $val) {
+            $var_match = array();
+            $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
+            if(($ret !== false) && ($ret > 0)){
+                // テンプレート変数が記述されていることを記録
+                $db_update_flg = true;
+                break;
+            }
         }
     }
 
@@ -2190,6 +2247,8 @@ function deleteVarsAssign($in_VarsAssignRecodes) {
     global $arrayConfigOfVarAss;
     global $arrayValueTmplOfVarAss;
 
+    global $db_update_flg;
+
     $strCurTable      = $strCurTableVarsAss;
     $strJnlTable      = $strJnlTableVarsAss;
 
@@ -2227,6 +2286,16 @@ function deleteVarsAssign($in_VarsAssignRecodes) {
         if($log_level === "DEBUG") {
             $traceMsg = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70031", array($tgt_row['ASSIGN_ID']));
             LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
+        }
+
+        // 具体値にテンプレート変数が記述されているか判定
+        if( $db_update_flg === false) {
+            $var_match = array();
+            $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$tgt_row['VARS_ENTRY'],$var_match);
+            if(($ret !== false) && ($ret > 0)){
+                // テンプレート変数が記述されていることを記録
+                $db_update_flg = true;
+            }
         }
 
         // ロール管理ジャーナルに登録する情報設定
@@ -2437,6 +2506,8 @@ function addStg2StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
     global $arrayConfigOfVarAss;
     global $arrayValueTmplOfVarAss;
 
+    global $db_update_flg;
+
     $strCurTable      = $strCurTableVarsAss;
     $strJnlTable      = $strJnlTableVarsAss;
 
@@ -2506,6 +2577,16 @@ function addStg2StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
 
     }
 
+    // 具体値にテンプレート変数が記述されているか判定
+    if( $db_update_flg === false) {
+        $var_match = array();
+        $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$in_varsAssignList['VARS_ENTRY'],$var_match);
+        if(($ret !== false) && ($ret > 0)){
+            // テンプレート変数が記述されていることを記録
+            $db_update_flg = true;
+        }
+    }
+
     // ロール管理ジャーナルに登録する情報設定
     $seqValueOfJnlTable = getAndLockSeq($strSeqOfJnlTable);
     if($seqValueOfJnlTable == -1) {
@@ -2566,6 +2647,8 @@ function addStg2ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
     global $strSeqOfJnlTableVarsAss;
     global $arrayConfigOfVarAss;
     global $arrayValueTmplOfVarAss;
+
+    global $db_update_flg;
 
     $strCurTable      = $strCurTableVarsAss;
     $strJnlTable      = $strJnlTableVarsAss;
@@ -2642,6 +2725,17 @@ function addStg2ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
         // 追加する代入値管理主キー値を退避
         $inout_assingId = $tgt_row['ASSIGN_ID'];
     }
+
+    // 具体値にテンプレート変数が記述されているか判定
+    if( $db_update_flg === false) {
+        $var_match = array();
+        $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$in_varsAssignList['VARS_ENTRY'],$var_match);
+        if(($ret !== false) && ($ret > 0)){
+            // テンプレート変数が記述されていることを記録
+            $db_update_flg = true;
+        }
+    }
+
 
     // ロール管理ジャーナルに登録する情報設定
     $seqValueOfJnlTable = getAndLockSeq($strSeqOfJnlTable);
@@ -3354,6 +3448,36 @@ function setBackyardExecuteComplete($inout_UpdateRecodeInfo)
 
     return true;
 }
+////////////////////////////////////////////////////////////////////////////////
+// 処理内容
+//   バックヤード処理の起動が必要なことを記録
+//
+// パラメータ
+//   $row_id:                      バックヤード処理ID
+//
+// 戻り値
+//   True:正常　　False:異常
+////////////////////////////////////////////////////////////////////////////////
+function setBackyardExecute($row_id)
+{
+    $sql =            " UPDATE A_PROC_LOADED_LIST SET                              \n";
+    $sql = $sql .     "   LOADED_FLG = '0' ,LAST_UPDATE_TIMESTAMP = NOW(6)         \n";
+    $sql = $sql .     " WHERE                                                      \n";
+    $sql = $sql .     "   ROW_ID = :ROW_ID                                         \n";
+
+    $sqlUtnBody = $sql;
+    $arrayUtnBind = array("ROW_ID"=>$row_id);
+
+    $objQuery = recordSelect($sqlUtnBody, $arrayUtnBind);
+    if($objQuery == null) {
+       return false;
+    }
+
+    unset($objQuery);
+
+    return true;
+}
+
 $beforeTime = 0;
 function TimeStampPrint($logdata)
 {
