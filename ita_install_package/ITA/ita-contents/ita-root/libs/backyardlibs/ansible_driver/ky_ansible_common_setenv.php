@@ -41,6 +41,9 @@
     // テンプレートファイルからグローバル変数を取り出す場合の区分
     define("DF_HOST_TEMP_GBL_HED"          ,"TEMP_GBL_");
 
+    // テンプレートファイルからグローバル変数を取り出す場合の区分
+    define("DF_LOCAL_VAR_HED"              ,"LOCAL_VAR");
+
     // ITA側で管理している ロールパッケージ管理 ロールパッケージファイル(ZIP)格納先ディレクトリ
     define("DF_ROLE_PACKAGE_FILE_CONTENTS_DIR"  ,"/uploadfiles/2100020303/ROLE_PACKAGE_FILE");
     // ITA側で管理している legacy用 子playbookファイル格納先ディレクトリ
