@@ -22,7 +22,8 @@
     //
     // T0001
     // aryTmplFilePerTmplVarName      テンプレート管理マスタ
-    //                                [テンプレート変数][Pkey] = テンプレートファイル
+    //                                [テンプレート変数][Pkey]['FILE'] = テンプレートファイル
+    //                                [テンプレート変数][Pkey]['VARS_LIST'] = 変数リスト
     // T0002
     // aryMatterFilePerMatterId       素材管理マスタ
     //                                [Pkey] = 素材ファイル
@@ -96,9 +97,10 @@
     $db_connect_php      = '/libs/commonlibs/common_db_connect.php';
     $hostvar_search_php  = '/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php';
 
-    $ansible_common_php  = '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php';
+    $ansible_common_php1  = '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php';
+    $ansible_common_php2  = '/libs/backyardlibs/ansible_driver/CheckAnsibleRoleFiles.php';
 
-// <<<<<<<<<<pioneer/legacy差分箇所>>>>>>>>>
+// <<<<<<<<<<pioneer/legacy差分箇所>>>>>>>>>>
     $db_access_user_id   = -100009;  // LEG(-100009):::PIO(-100010)
 
     //----変数名テーブル関連
@@ -107,7 +109,6 @@
     $strJnlTableAnsVarsTable = "B_ANSIBLE_LNS_VARS_MASTER_JNL";
     $strSeqOfCurTableAnsVars = "B_ANSIBLE_LNS_VARS_MASTER_RIC";
     $strSeqOfJnlTableAnsVars = "B_ANSIBLE_LNS_VARS_MASTER_JSQ";
-
 
 // <<<<<<<<<<pioneer/legacy差分箇所>>>>>>>>>>
     $arrayConfigOfAnsVarsTable = array(
@@ -181,7 +182,6 @@
     $warning_flag               = 0;        // 警告フラグ(1：警告発生)
     $error_flag                 = 0;        // 異常フラグ(1：異常発生)
 
-    // #20181221 2019/01/17 Append 
     $db_update_flg              = false;    // DB更新フラグ
     $lv_a_proc_loaded_list_varsetup_pkey = 2100020001;
     $lv_a_proc_loaded_list_valsetup_pkey = 2100020002;
@@ -190,7 +190,8 @@
         ////////////////////////////////
         // 共通モジュールの呼び出し   //
         ////////////////////////////////
-        require_once ($root_dir_path . $ansible_common_php);
+        require_once ($root_dir_path . $ansible_common_php1);
+        require_once ($root_dir_path . $ansible_common_php2);
 
         require_once ($root_dir_path . $hostvar_search_php);
 
@@ -202,12 +203,10 @@
             require ($root_dir_path . $log_output_php );
         }
 
-        //----2018/06/11
 // <<<<<<<<<<pioneer/legacy差分箇所>>>>>>>>>>
         // ITA側で管理している 子playbookファイル格納先ディレクトリ
-        $vg_playbook_contents_dir  = $vg_legacy_playbook_contents_dir;
+        $vg_playbook_contents_dir = $vg_legacy_playbook_contents_dir;
 // <<<<<<<<<<pioneer/legacy差分箇所>>>>>>>>>>
-        //2018/06/11----
 
         ////////////////////////////////
         // DBコネクト                 //
@@ -320,6 +319,8 @@
         $sqlUtnBody = "SELECT " 
                      ."ANS_TEMPLATE_ID, "
                      ."ANS_TEMPLATE_VARS_NAME ,"
+                     ."VARS_LIST ,"
+                     ."VAR_STRUCT_ANAL_JSON_STRING, "
                      ."ANS_TEMPLATE_FILE "
                      ."FROM {$strTableCurAnsTemplate} "
                      ."WHERE DISUSE_FLAG = '0' ";
@@ -356,7 +357,11 @@
 // <<<<<<<<<<pioneer/legacy差分箇所>>>>>>>>>>
             // T0001
             //aryTmplFilePerTmplVarName:[テンプレート変数][Pkey] = テンプレートファイル(テンプレート管理マスタ)
-            $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]] = $row["ANS_TEMPLATE_FILE"];
+            $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]] = array();
+            $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]]['FILE'] = $row["ANS_TEMPLATE_FILE"];
+            $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]]['VARS_LIST'] = $row["VARS_LIST"];
+            $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]]['VAR_STRUCT_ANAL_JSON_STRING'] = $row["VAR_STRUCT_ANAL_JSON_STRING"];
+
         }
         // fetch行数を取得
         $intFetchedFromAnsTmpl = $objQueryUtn->effectedRowCount();
@@ -427,7 +432,7 @@
         /////////////////////////////////////////////////////////////
         $lva_global_vars_list              = array();
         $lva_global_vars_use_tpf_vars_list = array();
-        $ret = getDBGlobalVarsMaster($lva_global_vars_list,$lva_global_vars_use_tpf_vars_list);
+        $ret = getDBGBLVarsMaster($lva_global_vars_list,$lva_global_vars_use_tpf_vars_list);
         if($ret === false){
             $error_flag = 1;
             throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00001601")) );
@@ -444,7 +449,7 @@
                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55266",array($intMatterId)); 
                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 }
-                
+
                 continue;
             }
 
@@ -561,9 +566,7 @@
         $arrayConfig = $arrayConfigOfAnsVarsTable;
         $arrayValue = $arrayValueTmplOfAnsVarsTable;
 
-        //$temp_array = array('WHERE'=>" VARS_NAME_ID = :VARS_NAME_ID AND DISUSE_FLAG = '0' ");
         $temp_array = array('WHERE'=>" DISUSE_FLAG IN ('0','1') ");
-
         
         $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                              "SELECT",
@@ -711,7 +714,6 @@
             $arrayValue = $aryRowOfTableUpdate;
             $temp_array = array();
 
-            // #0016 2016/08/15 Update start
             // DEBUGログに変更
             if ( $log_level === 'DEBUG' ){
 // 更新ログ
@@ -721,7 +723,7 @@ $msgstr = ob_get_contents();
 ob_clean();
 LocalLogPrint(basename(__FILE__),__LINE__,"変数マスタ 更新($strSqlType)\n$msgstr");
             }
-            $db_update_flg = true;   // DB更新をマーク
+            $db_update_flg = true;
 
             $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                                  $strSqlType,
@@ -799,7 +801,9 @@ LocalLogPrint(basename(__FILE__),__LINE__,"変数マスタ 更新($strSqlType)\n
         unset($tmpAryKeysOfVarIdPerVarNameFromFiles);
         //実際にあるべき変数名をテーブルに反映させる【活性化】----
 
+        // テンプレートファイル内で使用されている変数を取得
         $lva_var_value_tpf_vars_list       = array();
+
         $lva_use_VarsMaster_pkey_list      = array();
         $lva_use_PatternVarsLink_pkey_list = array();
         ////////////////////////////////////////////////////////////////
@@ -1271,7 +1275,6 @@ LocalLogPrint(basename(__FILE__),__LINE__,"変数マスタ　廃止($strSqlType)
                     $arrayValue  = $aryRowOfTableUpdate;
                     $temp_array  = array();
 
-                    // #0016 2016/08/15 Update start
                     // DEBUGログに変更
                     if ( $log_level === 'DEBUG' ){
 // 更新ログ
@@ -1371,23 +1374,23 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
                 $vars_name_id  = $pattern_info['VARS_NAME_ID'];
                 $tpf_var_name  = $pattern_info['TPF_VAR_NAME'];
                 if(@count($lva_var_value_tpf_vars_list['TFP_VARS_LIST'][$tpf_var_name]) == 0){
-                   continue;
+                    continue;
                 }
                 // 作業パターン変数紐付に登録されていないMovementと変数組合せは登録しない。
                 if(@count($aryVarNameIdsPerPattern[$pattern_id][$vars_name_id]) == 0){
                     continue;
                 }
                 // テンプレート変数で使用している変数の情報を作業パターン変数紐付に登録。
-                    foreach($lva_var_value_tpf_vars_list['TFP_VARS_LIST'][$tpf_var_name] as $var_name=>$dummy){
+                foreach($lva_var_value_tpf_vars_list['TFP_VARS_LIST'][$tpf_var_name] as $var_name=>$dummy){
                     // 該当変数の変数一覧のPKey取得
                     $vars_master_pkey = $lva_var_value_tpf_vars_list['VARS_LIST'][$var_name];
                     $ret = AddPatternVarsLinkTable($pattern_id,
                                                    $vars_master_pkey,
-                                                   $strCurTableAnsPatternVarsLink,     
-                                                   $strJnlTableAnsPatternVarsLink,     
+                                                   $strCurTableAnsPatternVarsLink,
+                                                   $strJnlTableAnsPatternVarsLink,
                                                    $strSeqOfCurTableAnsPatternVarsLink,
                                                    $strSeqOfJnlTableAnsPatternVarsLink,
-                                                   $arrayConfigOfAnsPatternVarsLink,   
+                                                   $arrayConfigOfAnsPatternVarsLink,
                                                    $arrayValueTmplOfAnsPatternVarsLink,
                                                    $db_access_user_id,
                                                    $pkey);
@@ -1442,7 +1445,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
                         }
                     }
                 }
-                //
+
                 if( $boolDisuseOnFlag === false ){
                     //----登録されて活性されているべきレコードなので、なにもしない
                     continue;
@@ -1507,7 +1510,7 @@ $msgstr = ob_get_contents();
 ob_clean();
 LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マスタ  廃止($strSqlType)\n$msgstr");
                 }
-                $db_update_flg = true;   // DB更新をマーク
+                $db_update_flg = true;
 
                 $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                                      $strSqlType,
@@ -1640,8 +1643,6 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
                 throw new Exception($errorMsg);
             }
         }
-
-
     }
     catch (Exception $e){
         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55272");
@@ -1697,6 +1698,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
     elseif( $warning_flag != 0 ){
         // 終了メッセージ
         if ( $log_level === 'DEBUG' ){
+            //$FREE_LOG = 'プロシージャ終了(警告)';
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55268");
             require ($root_dir_path . $log_output_php );
         }        
@@ -1734,10 +1736,12 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
     //                       [変数名]
     //   $ina_aryTmplFilePerTmplVarName:
     //                       テンプレート管理情報配列
-    //                       [テンプレート変数][Pkey] = テンプレートファイル
+    //                       [テンプレート変数][Pkey]['FILE'] = テンプレートファイル
+    //                       [テンプレート変数][Pkey]['VARS_LIST'] = 変数リスト
+    //                       [テンプレート変数][Pkey]['VAR_STRUCT_ANAL_JSON_STRING'] = 変数構造解析リスト(JSON)
     //   $ina_global_vars_use_tpf_vars_list:  グローバル変数の具体値で使用している
     //                                        テンプレート変数リスト
-    // 
+    //
     // 戻り値
     //   子PlayBookファイル名(Legacy)
     ////////////////////////////////////////////////////////////////////////////////
@@ -1845,60 +1849,43 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
             // テンプレート情報取得
             // $ina_aryTmplFilePerTmplVarName:[テンプレート変数][Pkey] = テンプレートファイル(テンプレート管理マスタ)
             $tpf_info = $ina_aryTmplFilePerTmplVarName[$tpf_var_name];
-            foreach( $tpf_info as $tpf_pkey => $tpf_file_name );
-            // テンプレートファイル名が未登録の場合
-            if((strlen($tpf_pkey) === 0 ) || 
-               (strlen($tpf_file_name) === 0)){
-                if($log_level == 'DEBUG')
-                {
-                    $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55273",
-                                                      array(basename($in_filename),
-                                                            $line_no,
-                                                            $tpf_var_name)); 
-                    LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                }
-                
-                $result_code = false;
-                continue;
-            }
-            //////////////////////////////////////////////////////////
-            // テンプレートファイルに登録されている変数を抜出す。
-            //////////////////////////////////////////////////////////
-            // ITAで管理しているテンプレートファイルのパスを取得
-            // テンプレートファイル名は Pkey(10桁)-子テンプレートファイル名 する。
-            $file_name = sprintf("%s/%s/%s",
-                                 $vg_template_contents_dir,
-                                 str_pad( $tpf_pkey, $intNumPadding, "0", STR_PAD_LEFT ),
-                                 $tpf_file_name);
-            // テンプレートファイルの存在確認
-            if( file_exists($file_name) === false ){
-                if($log_level == 'DEBUG')
-                {
-                    //$ary[55239] = "システムで管理しているテンプレートファイル(｛｝:｛｝)が存在しない。";
-                    $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55239",
-                                                      array($tpf_pkey,basename($tpf_file_name))); 
-                    LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                }
-                $result_code = false;
-                continue;
-            }
+            foreach( $tpf_info as $tpf_pkey => $tpf_file_info );
 
-            // テンプレートファイルの内容読込
-            $dataString = file_get_contents($file_name);
-    
-            // ホスト変数を抜出す
-            $local_vars = array();
-            $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$local_vars);
-            $file_vars_list = $objWSRA->getTPFVARSParsedResult();
-            unset($objWSRA);
-    
-            // テンプレートで使用している変数を退避
-            foreach( $file_vars_list as $tfp_var ){
-                // 子PlayBookに登録されている変数として退避
-                // 変数名を一意とする。
-                $ina_vars[$tfp_var] = 1;
+            if(strlen(trim($tpf_file_info['VARS_LIST'])) != 0) {
+                $tpf_vars_list = array();
+                $params = array();
+                $params['item_name']      = $in_filename;
+                $params['tpf_var_name']   = $tpf_var_name;
+                $params['vars_list']      = $tpf_file_info['VARS_LIST'];
+                $params['vars_struct_json'] = $tpf_file_info['VAR_STRUCT_ANAL_JSON_STRING'];
+
+                // (Playbook:{} テンプレート埋込変数:{} line={})
+                $params['param_msg_code'] = "ITAANSIBLEH-ERR-6000045";
+                list($ret,$msgstr) = getTempfileUseVarsList($objMTS,$params,$tpf_vars_list);
+                if($ret === false) {
+                    // DEBUGログに変更
+                    if ( $log_level === 'DEBUG' ){
+                        LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    }
+                    $result_code = false;
+                    continue;
+                }
+                // テンプレートで使用している変数を退避
+                if(isset($tpf_vars_list['VAR'])) {
+                    foreach( $tpf_vars_list['VAR'] as $tfp_var=>$dummy ){
+                        // 子PlayBookに登録されている変数として退避
+                        // 変数名を一意とする。
+                        $ina_vars[$tfp_var] = 1;
+                    }
+                }
+                if(isset($tpf_vars_list['VAR_list'])) {
+                    foreach( $tpf_vars_list['VAR_list'] as $tfp_var=>$dummy ){
+                        // 子PlayBookに登録されている変数として退避
+                        // 変数名を一意とする。
+                        $ina_vars[$tfp_var] = 1;
+                    }
+                }
             }
-            
             // テンプレート情報取得済みのテンプレート変数更新
             $chk_tfp_var_name_list[$tpf_var_name] = 0;
         }
@@ -1910,8 +1897,17 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
         $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_GBL_HED,$playbookdataString,$local_vars);
         $aryResultParse = $objWSRA->getParsedResult();
         $file_global_vars_list = $aryResultParse[1];
-
         unset($objWSRA);
+
+        if(isset($tpf_vars_list['GBL_list'])) {
+            foreach($tpf_vars_list['GBL_list'] as $gbl_var_name=>$dummy) {
+                $ret = array_search($gbl_var_name, $file_global_vars_list);
+                if($ret === false) {
+                    $file_global_vars_list[] = $gbl_var_name;
+                }
+            }
+        }
+
         if(count($file_global_vars_list) != 0){
             foreach($file_global_vars_list as $global_var_name){
                 // Playbookから抜き出したグローバル変数にテンプレート変数が使用されているか判定
@@ -1942,56 +1938,43 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
 
                 // テンプレート情報取得
                 $tpf_info = $ina_aryTmplFilePerTmplVarName[$tpf_var_name];
-                foreach( $tpf_info as $tpf_pkey => $tpf_file_name );
-                // テンプレートファイル名が未登録の場合
-                if((strlen($tpf_pkey) === 0 ) || 
-                   (strlen($tpf_file_name) === 0)){
-                    if($log_level == 'DEBUG')
-                    {
-                        $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000033",
-                                                                   array(basename($in_filename),
-                                                                         $global_var_name,
-                                                                         $tpf_var_name)); 
-                        LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+                foreach( $tpf_info as $tpf_pkey => $tpf_file_info );
+
+                if(strlen(trim($tpf_file_info['VARS_LIST'])) != 0) {
+                    $tpf_vars_list = array();
+                    $params = array();
+                    $params['item_name']      = $global_var_name;
+                    $params['tpf_var_name']   = $tpf_var_name;
+                    $params['vars_list']      = $tpf_file_info['VARS_LIST'];
+                    $params['vars_struct_json'] = $tpf_file_info['VAR_STRUCT_ANAL_JSON_STRING'];
+
+                    // "(グローバル変数:{} テンプレート埋込変数:{} line={})";
+                    $params['param_msg_code'] = "ITAANSIBLEH-ERR-6000043";
+                    list($ret,$msgstr) = getTempfileUseVarsList($objMTS,$params,$tpf_vars_list);
+                    if($ret === false) {
+                        // DEBUGログに変更
+                        if ( $log_level === 'DEBUG' ){
+                            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        }
+                        $result_code = false;
+                        continue;
                     }
-                    $result_code = false;
-                    continue;
-                }
-                //////////////////////////////////////////////////////////
-                // テンプレートファイルに登録されている変数を抜出す。
-                //////////////////////////////////////////////////////////
-                // ITAで管理しているテンプレートファイルのパスを取得
-                // テンプレートファイル名は Pkey(10桁)-子テンプレートファイル名 する。
-                $file_name = sprintf("%s/%s/%s",
-                                     $vg_template_contents_dir,
-                                     str_pad( $tpf_pkey, $intNumPadding, "0", STR_PAD_LEFT ),
-                                     $tpf_file_name);
-                // テンプレートファイルの存在確認
-                if( file_exists($file_name) === false ){
-                    if($log_level == 'DEBUG')
-                    {
-                        $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55239",
-                                                          array($tpf_pkey,basename($tpf_file_name))); 
-                         LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    // テンプレートで使用している変数を退避
+                    if(isset($tpf_vars_list['VAR'])) {
+                        foreach( $tpf_vars_list['VAR'] as $tfp_var=>$dummy ){
+                            // 子PlayBookに登録されている変数として退避
+                            // 変数名を一意とする。
+                            $ina_vars[$tfp_var] = 1;
+                        }
                     }
-                    $result_code = false;
-                    continue;
-                }
-         
-                // テンプレートファイルの内容読込
-                $dataString = file_get_contents($file_name);
-    
-                // ホスト変数を抜出す
-                $local_vars = array();
-                $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$local_vars);
-                $file_vars_list = $objWSRA->getTPFVARSParsedResult();
-                unset($objWSRA);
-    
-                // テンプレートで使用している変数を退避
-                foreach( $file_vars_list as $tfp_var ){
-                    // 子PlayBookに登録されている変数として退避
-                    // 変数名を一意とする。
-                    $ina_vars[$tfp_var] = 1;
+                    if(isset($tpf_vars_list['VAR_list'])) {
+                        foreach( $tpf_vars_list['VAR_list'] as $tfp_var=>$dummy ){
+                            // 子PlayBookに登録されている変数として退避
+                            // 変数名を一意とする。
+                            $ina_vars[$tfp_var] = 1;
+                        }
+                    }
                 }
             }
         }
@@ -2034,57 +2017,53 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
             if( ! isset($ina_aryTmplFilePerTmplVarName[$tpf_var_name])){
                 if($log_level == 'DEBUG'){
                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000031",
-                                                          array($tpf_var_name)); 
+                                                      array($tpf_var_name));
                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 }
                 $result_code = false;
                 continue;
+
             }
             $tpf_info = $ina_aryTmplFilePerTmplVarName[$tpf_var_name];
-            foreach( $tpf_info as $tpf_pkey => $tpf_file_name );
+            foreach( $tpf_info as $tpf_pkey => $tpf_file_info );
 
-            // テンプレートファイル名が未登録の場合
-            if((strlen($tpf_pkey) === 0 ) || 
-               (strlen($tpf_file_name) === 0)){
-                if($log_level == 'DEBUG'){
-                    $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000031",
-                                                          array($tpf_var_name)); 
-                    LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                }
-                $result_code = false;
-                continue;
-            }
-            //////////////////////////////////////////////////////////
-            // テンプレートファイルに登録されている変数を抜出す。
-            //////////////////////////////////////////////////////////
-            // ITAで管理しているテンプレートファイルのパスを取得
-            // テンプレートファイル名は Pkey(10桁)-子テンプレートファイル名 する。
-            $file_name = sprintf("%s/%s/%s",
-                                     $vg_template_contents_dir,
-                                     str_pad( $tpf_pkey, $intNumPadding, "0", STR_PAD_LEFT ),
-                                     $tpf_file_name);
-            // テンプレートファイルの存在確認
-            if( file_exists($file_name) === false ){
-                if($log_level == 'DEBUG'){
-                    $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55239",
-                                                           array($tpf_pkey,basename($tpf_file_name))); 
-                    LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                }
-                $result_code = false;
-                continue;
-            }
-    
-            // テンプレートファイルの内容読込
-            $dataString = file_get_contents($file_name);
-        
             // ホスト変数を抜出す
-            $local_vars = array();
-            $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$local_vars);
-            $file_vars_list = $objWSRA->getTPFVARSParsedResult();
-            unset($objWSRA);
+            $tpf_vars_list = array();
+            $params = array();
+            $params['item_name']      = '';
+            $params['tpf_var_name']   = $tpf_var_name;
+            $params['vars_list']      = $tpf_file_info['VARS_LIST'];
+            $params['vars_struct_json'] = $tpf_file_info['VAR_STRUCT_ANAL_JSON_STRING'];
 
+            // "(変数:{} テンプレート埋込変数:{} line={})";
+            $params['param_msg_code'] = "ITAANSIBLEH-ERR-6000044";
+            list($ret,$msgstr) = getTempfileUseVarsList($objMTS,$params,$tpf_vars_list);
+            if($ret === false) {
+                // DEBUGログに変更
+                if ( $log_level === 'DEBUG' ){
+                    LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                }
+                $result_code = false;
+                continue;
+            }
+            $file_vars_list = array();
             // テンプレートで使用している変数を退避
-            foreach( $file_vars_list as $var_name ){
+            if(isset($tpf_vars_list['VAR'])) {
+                foreach( $tpf_vars_list['VAR'] as $tfp_var=>$dummy ){
+                    // 子PlayBookに登録されている変数として退避
+                    // 変数名を一意とする。
+                    $file_vars_list[$tfp_var] = 1;
+                }
+            }
+            if(isset($tpf_vars_list['VAR_list'])) {
+                foreach( $tpf_vars_list['VAR_list'] as $tfp_var=>$dummy ){
+                    // 子PlayBookに登録されている変数として退避
+                    // 変数名を一意とする。
+                    $file_vars_list[$tfp_var] = 1;
+                }
+            }
+            // テンプレートで使用している変数を退避
+            foreach( $file_vars_list as $var_name=>$dummy ){
                 // 変数名を一意とする。
                 $ina_var_value_tpf_vars_list['TFP_VARS_LIST'][$tpf_var_name][$var_name] = 0;
                 $ina_var_value_tpf_vars_list['VARS_LIST'][$var_name] = 0;
@@ -2100,7 +2079,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
     //   $in_var_name:                   変数名
     //   $in_strCurTable:                テーブル名
     //   $in_strJnlTable:                ジャーナルテーブル名
-    //   $in_strSeqOfCurTable:           テーブル　シーケンス名
+    //   $in_strSeqOfCurTable:           テーブルシーケンス名
     //   $in_strSeqOfJnlTable:           ジャーナルテーブル シーケンス名
     //   $in_arrayConfig:                テーブル構造
     //   $in_arrayValue:                 テーブル構造
@@ -2109,7 +2088,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
     //   &$in_pkey:                      削除対象外リスト
     //
     // 戻り値
-    //   True:正常　　False:異常
+    //   True:正常 False:異常
     ////////////////////////////////////////////////////////////////////////////////
     function AddVarsMasterTable($in_var_name,
                                 $in_strCurTable,
@@ -2124,7 +2103,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
         global    $objMTS;
         global    $objDBCA;
 
-        global $db_update_flg;
+        global    $db_update_flg;
 
         $temp_array = array('WHERE'=>"VARS_NAME = :VARS_NAME");
 
@@ -2174,8 +2153,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
         if ($count == 0){
             $action  = "INSERT";
             $tgt_row = $in_arrayValue;
-        }
-        else{
+        } else {
             $action = "UPDATE";
             // キー値が同値の場合は更新しない
             if($tgt_row["DISUSE_FLAG"] == "0"){
@@ -2210,8 +2188,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
             $tgt_row["DISUSE_FLAG"]        = '0';
             $tgt_row["LAST_UPDATE_USER"]   = $in_access_user_id;
 
-        }
-        else{
+        } else {
             ////////////////////////////////////////////////////////////////
             // テーブルシーケンスをロック                                 //
             ////////////////////////////////////////////////////////////////
@@ -2268,7 +2245,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
 
         $in_pkey = $tgt_row["VARS_NAME_ID"];
 
-        $db_update_flg = true;   // DB更新をマーク
+        $db_update_flg = true;
 
         $temp_array = array();
         $retArray = makeSQLForUtnTableUpdate($db_model_ch,
@@ -2351,7 +2328,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
     //   $in_vars_master_pkey:           変数一覧 Pkey
     //   $in_strCurTable:                テーブル名
     //   $in_strJnlTable:                ジャーナルテーブル名
-    //   $in_strSeqOfCurTable:           テーブル　シーケンス名
+    //   $in_strSeqOfCurTable:           テーブルシーケンス名
     //   $in_strSeqOfJnlTable:           ジャーナルテーブル シーケンス名
     //   $in_arrayConfig:                テーブル構造
     //   $in_arrayValue:                 テーブル構造
@@ -2359,7 +2336,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
     //   $in_pkey:                       削除対象外リスト
     //
     // 戻り値
-    //   True:正常　　False:異常
+    //   True:正常 False:異常
     ////////////////////////////////////////////////////////////////////////////////
     function AddPatternVarsLinkTable($in_pattern_id,
                                      $in_vars_master_pkey,
@@ -2375,7 +2352,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
         global    $objMTS;
         global    $objDBCA;
 
-        global $db_update_flg;
+        global    $db_update_flg;
 
         $temp_array = array('WHERE'=>"PATTERN_ID = :PATTERN_ID AND VARS_NAME_ID = :VARS_NAME_ID");
 
@@ -2426,8 +2403,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
         if ($count == 0){
             $action  = "INSERT";
             $tgt_row = $in_arrayValue;
-        }
-        else{
+        } else {
             $action = "UPDATE";
             // キー値が同値の場合は更新しない
             if($tgt_row["DISUSE_FLAG"] == "0"){
@@ -2460,9 +2436,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
             $tgt_row["JOURNAL_SEQ_NO"]     = $retArray[0];
             $tgt_row["DISUSE_FLAG"]        = '0';
             $tgt_row["LAST_UPDATE_USER"]   = $in_access_user_id;
-
-        }
-        else{
+        } else {
             ////////////////////////////////////////////////////////////////
             // テーブルシーケンスをロック                                 //
             ////////////////////////////////////////////////////////////////
@@ -2519,7 +2493,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
 
         $in_pkey = $tgt_row["VARS_LINK_ID"];
 
-        $db_update_flg = true;   // DB更新をマーク
+        $db_update_flg = true;
 
         $temp_array = array();
         $retArray = makeSQLForUtnTableUpdate($db_model_ch,
@@ -2604,7 +2578,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
-    function getDBGlobalVarsMaster(&$ina_global_vars_list,&$ina_global_vars_use_tpf_vars_list){
+    function getDBGBLVarsMaster(&$ina_global_vars_list,&$ina_global_vars_use_tpf_vars_list){
         global $objMTS;
         global $objDBCA;
         global $log_output_dir;
@@ -2702,6 +2676,40 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
             $inout_UpdateRecodeInfo['ROW_ID']                = $row['ROW_ID'];
             $inout_UpdateRecodeInfo['LAST_UPDATE_TIMESTAMP'] = $row['LAST_UPDATE_TIMESTAMP'];
         }
+
+        unset($objQuery);
+
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   関連するデータベースが更新さりれバックヤード処理が完了したことを記録
+    //
+    // パラメータ
+    //   &$inout_UpdateRecodeInfo:    バックヤード処理が完了したことを記録する情報
+    //                                A_PROC_LOADED_LISTのROW_IDとLAST_UPDATE_TIMESTAMP
+    //
+    // 戻り値
+    //   True:正常　　False:異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function setBackyardExecuteComplete($inout_UpdateRecodeInfo)
+    {
+        $sql =            " UPDATE A_PROC_LOADED_LIST SET                              \n";
+        $sql = $sql .     "   LOADED_FLG = '1' ,LAST_UPDATE_TIMESTAMP = NOW(6)         \n";
+        $sql = $sql .     " WHERE                                                      \n";
+        $sql = $sql .     "   ROW_ID = :ROW_ID AND                                     \n";
+        $sql = $sql .     "   DATE_FORMAT(LAST_UPDATE_TIMESTAMP,'%Y%m%d%H%i%s%f') = :LAST_UPDATE_TIMESTAMP \n";
+
+        $sqlUtnBody = $sql;
+        $arrayUtnBind = array("ROW_ID"=>$inout_UpdateRecodeInfo['ROW_ID'],
+                              "LAST_UPDATE_TIMESTAMP"=>$inout_UpdateRecodeInfo['LAST_UPDATE_TIMESTAMP']);
+
+        $objQuery = recordSelect($sqlUtnBody, $arrayUtnBind);
+        if($objQuery == null) {
+            return false;
+        }
+
         unset($objQuery);
 
         return true;
@@ -2725,38 +2733,6 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
 
         $sqlUtnBody = $sql;
         $arrayUtnBind = array("ROW_ID"=>$row_id);
-
-        $objQuery = recordSelect($sqlUtnBody, $arrayUtnBind);
-        if($objQuery == null) {
-            return false;
-        }
-
-        unset($objQuery);
-
-        return true;
-    }
-    ////////////////////////////////////////////////////////////////////////////////
-    // 処理内容
-    //   関連するデータベースが更新さりれバックヤード処理が完了したことを記録
-    //
-    // パラメータ
-    //   &$inout_UpdateRecodeInfo:    バックヤード処理が完了したことを記録する情報
-    //                                A_PROC_LOADED_LISTのROW_IDとLAST_UPDATE_TIMESTAMP
-    //
-    // 戻り値
-    //   True:正常　　False:異常
-    ////////////////////////////////////////////////////////////////////////////////
-    function setBackyardExecuteComplete($inout_UpdateRecodeInfo)
-    {
-        $sql =            " UPDATE A_PROC_LOADED_LIST SET                              \n";
-        $sql = $sql .     "   LOADED_FLG = '1' ,LAST_UPDATE_TIMESTAMP = NOW(6)         \n";
-        $sql = $sql .     " WHERE                                                      \n";
-        $sql = $sql .     "   ROW_ID = :ROW_ID AND                                     \n";
-        $sql = $sql .     "   DATE_FORMAT(LAST_UPDATE_TIMESTAMP,'%Y%m%d%H%i%s%f') = :LAST_UPDATE_TIMESTAMP \n";
-
-        $sqlUtnBody = $sql;
-        $arrayUtnBind = array("ROW_ID"=>$inout_UpdateRecodeInfo['ROW_ID'],
-                              "LAST_UPDATE_TIMESTAMP"=>$inout_UpdateRecodeInfo['LAST_UPDATE_TIMESTAMP']);
 
         $objQuery = recordSelect($sqlUtnBody, $arrayUtnBind);
         if($objQuery == null) {
@@ -2815,5 +2791,34 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
         }
 
         return $objQueryUtn;
+    }
+    function getTempfileUseVarsList($objMTS,$in_dara,&$ina_vars_list){
+        $php_array        = json_decode($in_dara['vars_struct_json'],true);
+
+        $vars_list        = $php_array['Vars_list'];
+        $parent_vars_list = $php_array['Array_vars_list'];
+        $LCA_vars_use     = $php_array['LCA_vars_use'];
+        $Array_vars_use   = $php_array['Array_vars_use'];
+        $GBL_vars_info    = $php_array['GBL_vars_info'];
+        $VarVal_list      = $php_array['VarVal_list'];
+
+        $ina_vars_list = array();
+        foreach($vars_list as $var_name=>$attr) {
+            $ret = preg_match("/^VAR_[a-zA-Z0-9_]*/",$var_name);
+            if($ret != 0) {
+                if($vars_list[$var_name] == 0) {
+                    $ina_vars_list['VAR'][$var_name] = 0;
+                } else {
+                    $ina_vars_list['VAR_list'][$var_name] = 0;
+                }
+            } else {
+                $ret = preg_match("/^GBL_[a-zA-Z0-9_]*/",$var_name);
+                if($ret != 0) {
+                    $ina_vars_list['GBL_list'][$var_name] = 0;
+                }
+            }
+        }
+
+        return array(true,"");
     }
 ?>
