@@ -1241,7 +1241,7 @@ function relayout() {
     var footer_h = $('#FOOTER').height();
     var menu_header_h = $('#MENU h2').height();
 
-    $('#MENU').css('height', window_h - heaer_h - footer_h - menu_header_h + 'px');
+    $('#MENU').css('height', window_h - heaer_h - footer_h - menu_header_h -10 + 'px');
     $('#MENU').css({overflow:'auto'});
 
     
