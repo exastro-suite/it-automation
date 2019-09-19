@@ -8770,7 +8770,7 @@ class CreateAnsibleExecFiles {
                             $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
                             $ret = $this->LegacyRoleCheckConcreteValueIsVar($objLibs,
                                                                             $val,
-                                                                            $ina_legacy_Role_cpf_vars_list.
+                                                                            $ina_legacy_Role_cpf_vars_list,
                                                                             $ina_legacy_Role_tpf_vars_list);
                             unset($objLibs);
                             if($ret == false){
