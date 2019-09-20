@@ -68,6 +68,7 @@ function callback() {}
                     var $html=$('<h3>' + getSomeMessage("ITAOPENSTC101010") + '</h3>'+
                         '<div class="timeArea">'+
                             '<div class="subText">'+(node.I_OPERATION_NAME || getSomeMessage("ITAOPENSTC101020"))+'</div>'+
+                            '<br>'+
                             '<div class="timeTo">'+tmeTo+'</div>'+
                             '<div class="timeFrom">'+timeFrom+'</div>'+
                             '<div style="clear:both"></div>'+
