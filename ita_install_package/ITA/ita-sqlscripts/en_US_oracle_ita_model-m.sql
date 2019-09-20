@@ -228,7 +228,7 @@ CREATE TABLE F_OTHER_MENU_LINK
 (
 LINK_ID                             NUMBER                          , -- 識別シーケンス項番
 MENU_ID                             NUMBER                          ,
-COLUMN_DISP_NAME                    VARCHAR2(256)                   ,
+COLUMN_DISP_NAME                    VARCHAR2(512)                   ,
 TABLE_NAME                          VARCHAR2(64)                    ,
 PRI_NAME                            VARCHAR2(64)                    ,
 COLUMN_NAME                         VARCHAR2(64)                    ,
@@ -247,7 +247,7 @@ JOURNAL_ACTION_CLASS                VARCHAR2 (8)                    , -- 履歴�
 
 LINK_ID                             NUMBER                          , -- 識別シーケンス項番
 MENU_ID                             NUMBER                          ,
-COLUMN_DISP_NAME                    VARCHAR2(256)                   ,
+COLUMN_DISP_NAME                    VARCHAR2(512)                   ,
 TABLE_NAME                          VARCHAR2(64)                    ,
 PRI_NAME                            VARCHAR2(64)                    ,
 COLUMN_NAME                         VARCHAR2(64)                    ,
