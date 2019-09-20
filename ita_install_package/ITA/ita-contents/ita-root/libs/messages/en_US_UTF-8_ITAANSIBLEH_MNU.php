@@ -77,6 +77,22 @@ $ary[106045] = "(Prefix string TPF_) Alphanumeric characters and available symbo
 $ary[106050] = "Make sure to assign \"TPF_\" as prefix string.";
 $ary[106060] = "Template files";
 $ary[106070] = "Files that can be used as template are limited to the Jinja2 template file. \n (Ansible specifications)";
+$ary[106075] = "Variable definition";
+$ary[106076] = "Define the structure of the variable (VAR_) used in Template file in YAML format.
+The structure of variables can be defined by the following three types.
+・Variable that can define one specific value for variable name.
+    exp)
+  　　VAR_sample:
+・Variable that can define multiple concrete values for variable name.
+    exp)
+    　VAR_sample: []
+・Nested variable.
+    exp)
+      VAR_sample:
+        name:
+        value:";
+$ary[106077] = "Nested variable abd Translation variable use flag";
+$ary[106078] = "Nested variable abd Translation variable use flag";
 $ary[106080] = "Display order";
 $ary[106090] = "To control display order";
 $ary[108020] = "You can view execution list (execution history). <br>When you click “Check execution status”, you transition to Check execution status menu.";
