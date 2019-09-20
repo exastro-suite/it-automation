@@ -89,7 +89,7 @@ CREATE TABLE B_OPENST_PROJECT_INFO
 (
 
 OPENST_PROJECT_ID                 VARCHAR (128)                    ,
-OPENST_PROJECT_NAME               VARCHAR (128)                    ,
+OPENST_PROJECT_NAME               VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -208,7 +208,7 @@ STATUS_ID                         INT                              ,
 STACK_ID                          VARCHAR (64)                     ,
 STACK_URL                         VARCHAR (512)                    ,
 SYSTEM_ID                         VARCHAR (256)                     ,
-SYSTEM_NAME                       VARCHAR (45)                     ,
+SYSTEM_NAME                       VARCHAR (256)                     ,
 REQUEST_TEMPLATE                  VARCHAR (2014)                   ,
 RESPONSE_JSON                     VARCHAR (4000)                   ,
 RESPONSE_MESSAGE                  VARCHAR (256)                    ,
@@ -235,7 +235,7 @@ STATUS_ID                         INT                              ,
 STACK_ID                          VARCHAR (64)                     ,
 STACK_URL                         VARCHAR (512)                    ,
 SYSTEM_ID                         VARCHAR (256)                     ,
-SYSTEM_NAME                       VARCHAR (45)                     ,
+SYSTEM_NAME                       VARCHAR (256)                     ,
 REQUEST_TEMPLATE                  VARCHAR (2014)                   ,
 RESPONSE_JSON                     VARCHAR (4000)                   ,
 RESPONSE_MESSAGE                  VARCHAR (256)                    ,
