@@ -1019,7 +1019,7 @@ declare -A YUM_PACKAGE;
 YUM_PACKAGE=(
     ["mariadb"]="MariaDB MariaDB-server expect"
     ["httpd"]="httpd mod_ssl"
-    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mcrypt php-mysql php-mysqlnd php-pear php-pecl-crypto php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip"
+    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mcrypt php-mysqlnd php-pear php-pecl-crypto php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip"
     ["git"]="git"
     ["ansible"]="ansible python-pip expect"
     ["cobbler"]="${YUM_PACKAGE_COBBLER[${LINUX_OS}]}"
