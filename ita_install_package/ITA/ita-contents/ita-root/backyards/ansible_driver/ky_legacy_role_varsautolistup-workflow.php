@@ -2806,8 +2806,11 @@ if ( $log_level === 'DEBUG' ){
                                     $col_seq_str = "-";
                                 }
                                 if(@count($lva_MemberColComb_list[$vars_name_id][$member_vars_name][$col_seq_str]) == 0){
+// enomoto
+if ( $log_level === 'DEBUG' ){
                                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90222",array($role_package_id,$role_name,$role_vars_name,$member_vars_name,$col_seq_str));
                                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+}
 
                                     continue 2;
                                 }
@@ -2846,8 +2849,11 @@ if ( $log_level === 'DEBUG' ){
                                         $col_seq_str = "-";
                                     }
                                     if(@count($lva_MemberColComb_list[$vars_name_id][$member_vars_name][$col_seq_str]) == 0){
+// enomoto
+if ( $log_level === 'DEBUG' ){
                                         $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90222",array($role_package_id,$role_name,$role_vars_name,$member_vars_name,$col_seq_str));
                                         LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+}
 
                                         continue 2;
                                     }
@@ -3685,7 +3691,11 @@ if ( $log_level === 'DEBUG' ){
         $objAnal->getTemplateUseVarsStructiMain($tpf_vars_list,$ITA2User_var_list,$gbl_vars_list,$tpf_vars_struct,$errormsg);
         // 戻りはチェックしない、エラーメッセージを出力して先に進む
         if(strlen($errormsg) != 0) {
+
+// 情報不足のメッセージはデバックモード時のみ出力
+//if ( $log_level === 'DEBUG' ){
             LocalLogPrint(basename(__FILE__),__LINE__,$errormsg);
+//}
         }
 
         // 使用しているグローバル変数の具体値に設定されているテンプレート変数を取得する。
@@ -3694,12 +3704,16 @@ if ( $log_level === 'DEBUG' ){
         $objAnal->getGlobalVarsUseTemplateUseVars($gbl_vars_list,$wk_tpf_vars_list,$errormsg);
         // 戻りはチェックしない、エラーメッセージを出力して先に進む
         if(strlen($errormsg) != 0) {
+// 情報不足のメッセージはデバックモード時のみ出力
+if ( $log_level === 'DEBUG' ){
             LocalLogPrint(basename(__FILE__),__LINE__,$errormsg);
+}
         }
 
         // 代入値管理の具体値に設定されているテンプレート変数を取得する。
         $ret = $objAnal->getVarEntryISTPFvars($in_role_package_name,$objRole->getrolename(),$wk_tpf_vars_list,false);
         if($ret === false) {
+            // DBアクセスエラー
             $errary = $objAnal->GetLastError();
             LocalLogPrint(basename(__FILE__),__LINE__,$errary[1]);
             return false;
@@ -3710,7 +3724,10 @@ if ( $log_level === 'DEBUG' ){
         $objAnal->getTemplateUseVarsStructiMain($wk_tpf_vars_list,$ITA2User_var_list,$gbl_vars_list,$tpf_vars_struct,$errormsg);
         // 戻りはチェックしない、エラーメッセージを出力して先に進む
         if(strlen($errormsg) != 0) {
+// 情報不足のメッセージはデバックモード時のみ出力
+if ( $log_level === 'DEBUG' ){
             LocalLogPrint(basename(__FILE__),__LINE__,$errormsg);
+}
         }
 
         unset($objAnal);
