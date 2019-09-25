@@ -238,7 +238,7 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(256)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
-VARS_LIST                         %VARCHR%(1024)                   , -- 変数定義
+VARS_LIST                         %VARCHR%(4000)                   , -- 変数定義
 ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
 VAR_STRUCT_ANAL_JSON_STRING       %VARCHR%(16000)                  , -- 変数構造解析結果 JSON形式 
 
@@ -263,7 +263,7 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(256)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
-VARS_LIST                         %VARCHR%(1024)                   , -- 変数定義
+VARS_LIST                         %VARCHR%(4000)                   , -- 変数定義
 ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
 VAR_STRUCT_ANAL_JSON_STRING       %VARCHR%(16000)                  , -- 変数構造解析結果 JSON形式 
 
@@ -2038,7 +2038,7 @@ CREATE TABLE B_ANSIBLE_LRL_ROLE
 ROLE_ID                           %INT%                            , -- 識別シーケンス
 
 ROLE_PACKAGE_ID                   %INT%                            , -- ロールパッケージ名
-ROLE_NAME                         %VARCHR%(256)                    , -- ロール名
+ROLE_NAME                         %VARCHR%(1024)                    , -- ロール名
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -2060,7 +2060,7 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴�
 ROLE_ID                           %INT%                            , -- 識別シーケンス
 
 ROLE_PACKAGE_ID                   %INT%                            , -- ロールパッケージ名
-ROLE_NAME                         %VARCHR%(256)                    , -- ロール名
+ROLE_NAME                         %VARCHR%(1024)                    , -- ロール名
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
