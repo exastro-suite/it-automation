@@ -81,7 +81,7 @@ Ansibleテンプレート
     $table->addColumn($c);
 
     /* 変数定義 */
-    $objVldt = new MultiTextValidator(0,1024,false);
+    $objVldt = new MultiTextValidator(0,4000,false);
     $c = new MultiTextColumn('VARS_LIST',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106075"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106076"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
@@ -306,7 +306,17 @@ Ansibleテンプレート
                 $User2ITA_var_list = array();
                 $parent_vars_list  = array();
 
-                $ret = $chkObj->VarsFileAnalysis($tmp_file_name,$parent_vars_list,$Vars_list,$Array_vars_list,$VarVal_list,$role_pkg_name,$rolename,$display_file_name,$ITA2User_var_list,$User2ITA_var_list);
+                $ret = $chkObj->VarsFileAnalysis(LC_RUN_MODE_VARFILE,
+                                                 $tmp_file_name,
+                                                 $parent_vars_list,
+                                                 $Vars_list,
+                                                 $Array_vars_list,
+                                                 $VarVal_list,
+                                                 $role_pkg_name,
+                                                 $rolename,
+                                                 $display_file_name,
+                                                 $ITA2User_var_list,
+                                                 $User2ITA_var_list);
 
                 if($ret === false) {
                     // 解析結果にエラーがある場合
