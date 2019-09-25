@@ -938,6 +938,7 @@ class CreateAnsibleExecFiles {
                     }
                 }
 
+
                 // 作業パターンIDに紐づけられているロール名取得
                 $w_RoleInfoList = array();
                 $w_RoleNameList = array();
@@ -973,6 +974,26 @@ class CreateAnsibleExecFiles {
                          unset($ina_roleglobalvars[$w_rolename]);
                     }
                 }
+
+                // グローバル変数管理からグローバル変数の情報を取得
+                $global_vars_list = array();
+                $msgstr = "";
+                $ret = getDBGlobalVarsMaster($global_vars_list,$msgstr);
+                if($ret === false){
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return(false);
+                }
+
+                $chkObj = new DefaultVarsFileAnalysis($this->lv_objMTS);
+                $msgstr = "";
+                // ロールパッケージ内のPlaybookで定義しているグローバル変数がグローバル変数管理にあるか
+                $ret = $chkObj->chkDefVarsListPlayBookGlobalVarsList($ina_roleglobalvars, $global_vars_list, $msgstr);
+                if($ret === false){
+                    unset($chkObj);
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return(false);
+                }
+                unset($chkObj);
 
                 // copy変数がファイル管理に登録されているか判定
                 $strErrMsg = "";;
@@ -2582,7 +2603,7 @@ class CreateAnsibleExecFiles {
                     // Playbookから抜き出したグローバル変数がグローバル変数管理に登録されているか判定
                     foreach( $file_global_vars_list as $var_name ){
                         if(@count($this->lva_global_vars_list[$var_name]) == 0){
-                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90239",array($var_name));
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90239",array(basename($file_name),$var_name));
                             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                             // エラーリターンする
                             $result_code = false;
@@ -2830,7 +2851,8 @@ class CreateAnsibleExecFiles {
                             // 対話ファイルから抜き出したグローバル変数がグローバル変数管理に登録されているか判定
                             foreach( $file_global_vars_list as $var_name ){
                                 if(@count($this->lva_global_vars_list[$var_name]) == 0){
-                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90237",array($var_name));
+                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90237",
+                                                                                array(basename($file_name),$var_name));
                                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                                     return false;
                                 }
@@ -8315,12 +8337,11 @@ class CreateAnsibleExecFiles {
                         }
                         // copy変数名が未登録の場合
                         if( $cpf_key == "" ){
-                            //OK
-
-                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90090",
+                            $prastr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000066",
                                                                        array(basename($playbook),
                                                                        $line_no,
                                                                        $cpf_var_name)); 
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90090",array($prastr));
                             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                             //copy変数名が未登録
                             $result_code = false;
@@ -8329,11 +8350,11 @@ class CreateAnsibleExecFiles {
                         else{
                             // copyファイル名が未登録の場合
                             if($cpf_file_name == "" ){
-                                //OK
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90091",
+                                $prastr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000066",
                                                                            array(basename($playbook),
                                                                            $line_no,
-                                                                           $cpf_var_name));
+                                                                           $cpf_var_name)); 
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90091",array($prastr));
                                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
                                 $result_code = false;
@@ -10080,11 +10101,11 @@ class CreateAnsibleExecFiles {
                             }
                             // copy変数名が未登録の場合
                             if( $cpf_key == "" ){
-                                //OK
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90090",
+                                $prastr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000067",
                                                                            array(basename($playbook),
                                                                            $line_no,
                                                                            $cpf_var_name)); 
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90090",array($prastr));
                                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                                 //copy変数名が未登録
                                 $result_code = false;
@@ -10092,11 +10113,11 @@ class CreateAnsibleExecFiles {
                             } else {
                                 // copyファイル名が未登録の場合
                                 if($cpf_file_name == "" ){
-                                    //OK
-                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90091",
+                                    $prastr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000067",
                                                                                array(basename($playbook),
                                                                                $line_no,
-                                                                               $cpf_var_name));
+                                                                               $cpf_var_name)); 
+                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90091",array($prastr));
                                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
                                     $result_code = false;
@@ -10323,7 +10344,7 @@ class CreateAnsibleExecFiles {
 
                             // template変数名が未登録の場合
                             if( $tpf_key == "" ) {
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55241",
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000068",
                                                                            array(basename($playbook),
                                                                            $line_no,
                                                                            $tpf_var_name));
@@ -10335,7 +10356,7 @@ class CreateAnsibleExecFiles {
                             } else {
                                 // テンプレートファイル名が未登録の場合
                                 if($tpf_file_name == "" ) {
-                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55273",
+                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000069",
                                                                                array(basename($playbook),
                                                                                $line_no,
                                                                                $tpf_var_name));
