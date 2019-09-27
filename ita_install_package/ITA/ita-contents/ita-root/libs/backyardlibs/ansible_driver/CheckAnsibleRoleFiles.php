@@ -3876,13 +3876,12 @@ class YAMLFileAnalysis{
         return $this->lv_lasterrmsg;
     }
 
-// enomoto /astroll/ita-root/webconfs/systems/2100040704_loadTable.php でcall
-    function VarsFileAnalysis($in_mode,    // enomoto appen
+    function VarsFileAnalysis($in_mode,    
                               $in_yaml_file,
                              &$in_parent_vars_list,
                              &$ina_vars_list,
                              &$ina_array_vars_list,
-                             &$ina_varval_list,   // enomoto append
+                             &$ina_varval_list,   
                               $in_role_pkg_name,
                               $in_rolename,
                               $in_display_file_name,
@@ -3965,7 +3964,6 @@ class YAMLFileAnalysis{
         $in_parent_vars_list = $parent_vars_list;
         $ina_vars_list       = $vars_list;
         $ina_array_vars_list = $array_vars_list;
-// enomoto append
         $ina_varval_list     = $varsval_list;
 
         return true;
