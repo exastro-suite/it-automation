@@ -17,9 +17,8 @@ log-error=/var/log/mariadb/mariadb.log
 
 skip-character-set-client-handshake
 explicit_defaults_for_timestamp = true
-max_connections=100
+transaction-isolation=READ-COMMITTED
 innodb_buffer_pool_size = 256MB
-innodb_file_per_table=1
 innodb_log_buffer_size=32M
 innodb_log_file_size=128M
 min_examined_row_limit=100
@@ -28,7 +27,6 @@ query_cache_size=256M
 query_cache_type=1
 max_heap_table_size=32M
 tmp_table_size=32M
-transaction-isolation=READ-COMMITTED
 mrr_buffer_size=32M
 
 
@@ -60,10 +58,7 @@ mrr_buffer_size=32M
 # you can put MariaDB-only options here
 [mariadb]
 disable_unix_socket
-character-set-server = utf8mb4
-
-[client-mariadb]
-default-character-set = utf8mb4
+character-set-server = utf8
 
 # This group is only read by MariaDB-10.4 servers.
 # If you use the same .cnf file for MariaDB of different versions,
