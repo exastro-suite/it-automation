@@ -2806,7 +2806,6 @@ if ( $log_level === 'DEBUG' ){
                                     $col_seq_str = "-";
                                 }
                                 if(@count($lva_MemberColComb_list[$vars_name_id][$member_vars_name][$col_seq_str]) == 0){
-// enomoto
 if ( $log_level === 'DEBUG' ){
                                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90222",array($role_package_id,$role_name,$role_vars_name,$member_vars_name,$col_seq_str));
                                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -2849,7 +2848,6 @@ if ( $log_level === 'DEBUG' ){
                                         $col_seq_str = "-";
                                     }
                                     if(@count($lva_MemberColComb_list[$vars_name_id][$member_vars_name][$col_seq_str]) == 0){
-// enomoto
 if ( $log_level === 'DEBUG' ){
                                         $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90222",array($role_package_id,$role_name,$role_vars_name,$member_vars_name,$col_seq_str));
                                         LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -3693,9 +3691,9 @@ if ( $log_level === 'DEBUG' ){
         if(strlen($errormsg) != 0) {
 
 // 情報不足のメッセージはデバックモード時のみ出力
-//if ( $log_level === 'DEBUG' ){
+if ( $log_level === 'DEBUG' ){
             LocalLogPrint(basename(__FILE__),__LINE__,$errormsg);
-//}
+}
         }
 
         // 使用しているグローバル変数の具体値に設定されているテンプレート変数を取得する。
