@@ -22,6 +22,7 @@
 
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/CheckAnsibleRoleFiles.php');
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php');
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
@@ -111,36 +112,6 @@ Ansibleテンプレート
         return $retArray;
     };
 
-    $aftObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
-        global $g;
-        $boolRet = true;
-        $intErrorType = null;
-        $aryErrMsgBody = array();
-        $strErrMsg = "";
-        $strErrorBuf = "";
-        $strFxName = "";
-        
-        $modeValue     = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
-        if(isset($g['VAR_STRUCT_ANAL_JSON_STRING'])) {
-            if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ) {
-
-                // 変数構造の解析結果を登録
-                $strQuery = sprintf("UPDATE %s SET VAR_STRUCT_ANAL_JSON_STRING=:VAR_STRUCT_ANAL_JSON_STRING WHERE ANS_TEMPLATE_ID='%s'"
-                                      ,'B_ANS_TEMPLATE_FILE'
-                                      ,$exeQueryData['ANS_TEMPLATE_ID']);
-                $aryForBind = array('VAR_STRUCT_ANAL_JSON_STRING'=>$g['VAR_STRUCT_ANAL_JSON_STRING']);
-                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-                if( $aryRetBody[0] !== true ){
-                    $boolRet = false;
-                    $strErrMsg = $aryRetBody[2];
-                    $intErrorType = 500;
-                }
-            }
-        }
-        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
-        return $retArray;
-    };
-
     /* 多段変数や読替変数定義有無 */
     $c = new TextColumn('ROLE_ONLY_FLAG',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106077"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106078"));//エクセル・ヘッダでの説明
@@ -155,7 +126,6 @@ Ansibleテンプレート
     $c->getOutputType('csv')->setVisible(false);
     $c->getOutputType('json')->setVisible(false);
     $c->setFunctionForEvent('beforeTableIUDAction',$updObjFunction);
-    $c->setFunctionForEvent('afterTableIUDAction',$aftObjFunction);
 
     $table->addColumn($c);
 
@@ -215,7 +185,6 @@ Ansibleテンプレート
         $aryVariantForIsValid = $objClientValidator->getVariantForIsValid();
 
         unset($g['ROLE_ONLY_FLAG']);
-        unset($g['VAR_STRUCT_ANAL_JSON_STRING']);
 
         if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
             if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
@@ -255,144 +224,58 @@ Ansibleテンプレート
         switch($strModeId) {
         case "DTUP_singleRecDelete":
             if($modeValue_sub == 'off') {
-                $dbObj = new CommonDBAccessCoreClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
-                $dbObj->ClearLastErrorMsg();
-                // 変数構造の解析結果を取得
-                $sqlBody = sprintf("SELECT * FROM %s WHERE ANS_TEMPLATE_ID='%s'"
-                                  ,'B_ANS_TEMPLATE_FILE'
-                                  ,$PkeyID);
-                $arrayBind = array();
-                $objQuery  = "";
-                $ret = $dbObj->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
+
+web_log("DTUP_singleRecDelete off");
+                // 変数定義の解析結果を取得
+                $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
+
+                // 変数定義の解析結果をファイルから取得
+                // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
+                $ret = $fileObj->getVarStructAnalysis($PkeyID,
+                                                      $strVarName,
+                                                      $strVarsList,
+                                                      $Vars_list,
+                                                      $Array_vars_list,
+                                                      $LCA_vars_use,
+                                                      $Array_vars_use,
+                                                      $GBL_vars_info,
+                                                      $VarVal_list);
                 if($ret === false) {
-                    web_log($dbObj->GetLastErrorMsg());
+                    $errmsg = $fileObj->GetLastError();
+                    $retStrBody = $errmsg[0];
                     $retBool = false;
-                    $retStrBody = $dbObj->GetLastErrorMsg();
-                } else {
-                    if($objQuery->effectedRowCount()!=1) {
-                       $retStrBody .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-80000",array(__FILE__,__LINE__));
-                       $retBool    = false;
-                    } else {
-                        $row = $objQuery->resultFetch();
-                        $json_Ary = $row['VAR_STRUCT_ANAL_JSON_STRING'];
-                        $php_array       = json_decode($json_Ary,true);
-                        $Vars_list       = $php_array['Vars_list'];
-                        $Array_vars_list = $php_array['Array_vars_list'];
-                        $LCA_vars_use    = $php_array['LCA_vars_use'];
-                        $Array_vars_use  = $php_array['Array_vars_use'];
-                        $GBL_vars_info   = $php_array['GBL_vars_info'];
-                        $VarVal_list     = $php_array['VarVal_list'];
-                    }
-                }    
-                unset($objQuery);
-                unset($dbObj);
+                    $boolExecuteContinue = false;
+                }
+                unset($fileObj);
             }
             break;
         case "DTUP_singleRecUpdate":
         case "DTUP_singleRecRegister":
-            if(strlen(trim($strVarsList)) != 0)
-            {
-                // 変数定義を解析
-                $tmp_file_name = '/tmp/.TemplateVarList' . getmypid() . ".yaml";
-                @file_put_contents( $tmp_file_name,$strVarsList);
-  
-                global $objMTS;
-                $chkObj = new YAMLFileAnalysis($g['objMTS']);
-  
-                $role_pkg_name = $strVarName;
-                $rolename      = 'dummy';
-                $display_file_name = '';
-                $ITA2User_var_list = array();
-                $User2ITA_var_list = array();
-                $parent_vars_list  = array();
+web_log("DTUP_singleRecUpdate DTUP_singleRecRegister");
+            // 変数定義を解析しファイルに保存
+            $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
+            $ret = $fileObj->putVarStructAnalysis($PkeyID,
+                                              $strVarName,
+                                              $strVarsList,
+                                              $Vars_list,
+                                              $Array_vars_list,
+                                              $LCA_vars_use,
+                                              $Array_vars_use,
+                                              $GBL_vars_info,
+                                              $VarVal_list);
 
-                $ret = $chkObj->VarsFileAnalysis(LC_RUN_MODE_VARFILE,
-                                                 $tmp_file_name,
-                                                 $parent_vars_list,
-                                                 $Vars_list,
-                                                 $Array_vars_list,
-                                                 $VarVal_list,
-                                                 $role_pkg_name,
-                                                 $rolename,
-                                                 $display_file_name,
-                                                 $ITA2User_var_list,
-                                                 $User2ITA_var_list);
-
-                if($ret === false) {
-                    // 解析結果にエラーがある場合
-                    $errmsg = $chkObj->GetLastError();
-                    $retStrBody = $errmsg[0];
-                    $retBool = false;
-                    $boolExecuteContinue = false;
-                } else {
-                    foreach($parent_vars_list as $vars_info) {
-                        $var_name = $vars_info['VAR_NAME'];
-                        $line     = $vars_info['LINE'];
-                        $ret = preg_match("/^VAR_[a-zA-Z0-9_]*/",$var_name);
-                        if($ret != 0) {
-                            // 多段変数の場合
-                            if(isset($Array_vars_list[$var_name])) {   
-                                $Array_vars_use = true;
-                            } 
-                        } else {
-                            // 読替変数の場合
-                            $ret = preg_match("/^LCA_[a-zA-Z0-9_]*/",$var_name);
-                            if($ret != 0) {
-                                $LCA_vars_use = true;
-                            } else {
-                                // グローバル変数の場合
-                                $ret = preg_match("/^GBL_[a-zA-Z0-9_]*/",$var_name);
-                                if($ret != 0) {
-                                    // 多段定義の場合
-                                    if( ! isset($Vars_list[$var_name])) {   
-                                        if(strlen($retStrBody)!=0) $retStrBody .= "\n";
-                                        $retStrBody .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000020",array($line,$var_name));
-                                        $retBool = false;
-                                        $boolExecuteContinue = false;
-                                    } else {
-                                        if($Vars_list[$var_name] == 0) {
-                                            $GBL_vars_info['1'][$var_name] = '0';
-                                        } else {
-                                            // 複数具体値定義の場合
-                                            if(strlen($retStrBody)!=0) $retStrBody .= "\n";
-                                            $retStrBody .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000020",array($line,$var_name));
-                                            $retBool = false;
-                                            $boolExecuteContinue = false;
-                                        }
-                                    }
-                                } else {
-                                    // 変数名がastrollで扱えない場合
-                                    if(strlen($retStrBody)!=0) $retStrBody .= "\n";
-                                    $retStrBody .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000017",array($line,$var_name));
-                                    $retBool = false;
-                                    $boolExecuteContinue = false;
-                                }
-                            }
-                        }
-                    }
-                }
-                // 一時ファイル削除
-                @unlink($file_name);
-            }
-            $php_array                        = array();
-            $php_array['Vars_list']           = $Vars_list;
-            $php_array['Array_vars_list']     = $Array_vars_list;
-            $php_array['LCA_vars_use']        = $LCA_vars_use;
-            $php_array['Array_vars_use']      = $Array_vars_use;
-            $php_array['GBL_vars_info']       = $GBL_vars_info;
-            $php_array['VarVal_list']         = $VarVal_list;
-            $g['VAR_STRUCT_ANAL_JSON_STRING'] = json_encode($php_array);
-
-            // 変数構造解析結果のサイズが16000バイトを超過していないか確認
-            if(strlen($g['VAR_STRUCT_ANAL_JSON_STRING']) > 16000) {
-                $retBool    = false;
-                $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000061");
+            if($ret === false) {
+                $errmsg = $fileObj->GetLastError();
+                $retStrBody = $errmsg[0];
+                $retBool = false;
                 $boolExecuteContinue = false;
             }
+            unset($fileObj);
             break;
         }
         // 各テンプレート変数の定義変数で変数の構造に差異がないか確認
         if($retBool === true) {
+web_log("各テンプレート変数の定義変数で変数の構造に差異がないか確認");
             if(( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) ||
                ( $strModeId == "DTUP_singleRecDelete" && $modeValue_sub == 'off')) {
                 $dbObj = new CommonDBAccessCoreClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
@@ -408,38 +291,75 @@ Ansibleテンプレート
                     $retStrBody = $dbObj->GetLastErrorMsg();
                 } else {
                     while($row = $objQuery->resultFetch()) {
+web_log("B_ANS_TEMPLATE_FILE read");
+web_log($row);
                         // 自レコードはスキップ
                         if($row['ANS_TEMPLATE_ID'] == $PkeyID) {
+web_log("read continue");
                             continue;
                         }
-                        $chk_vars_list          = array();
-                        $chk_array_vars_list    = array();
-                        $chk_json_Ary           = $row['VAR_STRUCT_ANAL_JSON_STRING'];
-                        $chk_tpf_var_name       = $row['ANS_TEMPLATE_VARS_NAME'];
-                        $chk_php_array          = json_decode($chk_json_Ary,true);
-                        // 変数構造解析結果
-                        $chk_vars_list[$chk_tpf_var_name]['dummy']       = $chk_php_array['Vars_list'];
-                        $chk_Array_vars_list[$chk_tpf_var_name]['dummy'] = $chk_php_array['Array_vars_list'];
+                        $chk_PkeyID           = $row['ANS_TEMPLATE_ID'];
+                        $chk_strVarName       = $row['ANS_TEMPLATE_VARS_NAME'];
+                        $chk_strVarsList      = $row['VARS_LIST'];
+                        $chk_LCA_vars_use     = false;
+                        $chk_GBL_vars_info    = array();
+                        $chk_Array_vars_use   = false;
+                        $chk_Vars_list        = array();
+                        $chk_Array_vars_list  = array();
+                        $chk_VarVal_list      = array();
 
-                        // 自レコードの変数構造解析結果
-                        $chk_vars_list[$strVarName]['dummy']             = $Vars_list;
-                        $chk_Array_vars_list[$strVarName]['dummy']       = $Array_vars_list;
+                        // 変数定義の解析結果を取得
+                        $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
 
-                        $chkObj = new DefaultVarsFileAnalysis($objMTS);
-
-                        $err_vars_list = array();
-
-                        $ret = $chkObj->chkallVarsStruct($chk_vars_list, $chk_Array_vars_list, $err_vars_list);
-                        if($ret === false){
-                            // 変数構造が一致していない変数があるか確認
-                            foreach ($err_vars_list as $err_var_name=>$dummy){
-                                if(strlen($retStrBody)!=0) $retStrBody .= "\n";
-                                $retStrBody .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000046",array($err_var_name,$chk_tpf_var_name));
-                                $retBool = false;
-                                $boolExecuteContinue = false;
-                            }
+                        // 変数定義の解析結果をファイルから取得
+                        // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
+                        $ret = $fileObj->getVarStructAnalysis($chk_PkeyID,
+                                                              $chk_strVarName,
+                                                              $chk_strVarsList,
+                                                              $chk_Vars_list,
+                                                              $chk_Array_vars_list,
+                                                              $chk_LCA_vars_use,
+                                                              $chk_Array_vars_use,
+                                                              $chk_GBL_vars_info,
+                                                              $chk_VarVal_list);
+                        if($ret === false) {
+                            $errmsg = $fileObj->GetLastError();
+                            $retStrBody = $errmsg[0];
+                            $retBool = false;
+                            $boolExecuteContinue = false;
                         }
-                        unset($chkObj);
+                        unset($fileObj);
+                        if($retBool === true) {
+                            $cmp_vars_list          = array();
+                            $cmp_Array_vars_list    = array();
+
+                            // 変数構造解析結果
+                            $cmp_Vars_list[$chk_strVarName]['dummy']       = $chk_Vars_list;
+                            $cmp_Array_vars_list[$chk_strVarName]['dummy'] = $chk_Array_vars_list;
+
+                            // 自レコードの変数構造解析結果
+                            $cmp_Vars_list[$strVarName]['dummy']           = $Vars_list;
+                            $cmp_Array_vars_list[$strVarName]['dummy']     = $Array_vars_list;
+    
+                            $chkObj = new DefaultVarsFileAnalysis($objMTS);
+
+                            $err_vars_list = array();
+
+                            $ret = $chkObj->chkallVarsStruct($cmp_Vars_list, $cmp_Array_vars_list, $err_vars_list);
+                            if($ret === false){
+                                // 変数構造が一致していない変数があるか確認
+                                foreach ($err_vars_list as $err_var_name=>$dummy){
+                                    if(strlen($retStrBody)!=0) $retStrBody .= "\n";
+                                    $retStrBody .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000046",array($err_var_name,$chk_strVarName));
+                                    $retBool = false;
+                                    $boolExecuteContinue = false;
+                                }
+                            }
+                            unset($chkObj);
+                        }
+                        if($retBool === false) {
+                            break;
+                        }
                     }
                 }    
                 unset($objQuery);
@@ -585,4 +505,3 @@ Ansibleテンプレート
 loadTableFunctionAdd($tmpFx,__FILE__);
 unset($tmpFx);
 ?>
-
