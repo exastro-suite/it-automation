@@ -495,6 +495,8 @@
     $hostvar_search_php  = '/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php';
     $ansible_common_php1  = '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php';
     $ansible_common_php2  = '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php';
+    $ansible_common_php3  = "/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php";
+
     $legacy_role_common_php = '/libs/backyardlibs/ansible_driver/CheckAnsibleRoleFiles.php';
     $ansible_nestedVariableExpanders_php = '/libs/backyardlibs/ansible_driver/ansible_nestedVariableExpander.php';   
 
@@ -942,6 +944,8 @@
         ////////////////////////////////
         require_once ($root_dir_path . $ansible_common_php1);
         require_once ($root_dir_path . $ansible_common_php2);
+        require_once ($root_dir_path . $ansible_common_php3);
+
         require_once ($root_dir_path . $legacy_role_common_php);
 
         require_once ($root_dir_path . $hostvar_search_php);
@@ -1068,19 +1072,67 @@
         //////////////////////////////////////////////////////////////////////////////
         $lva_template_master_list = array();
         $sql = "SELECT                           \n" .
+              "    ANS_TEMPLATE_ID,              \n" .
               "    ANS_TEMPLATE_VARS_NAME,       \n" .
-              "    VAR_STRUCT_ANAL_JSON_STRING   \n" .
+              "    VARS_LIST                     \n" .
               "FROM                              \n" .
               "    B_ANS_TEMPLATE_FILE           \n" .
               "WHERE                             \n" .
               "    DISUSE_FLAG            = '0'; \n";
         $errmsg       = "";
         $errdetailmsg = "";
-        $ret = $dbObj->selectDBRecodes($objMTS,$objDBCA,$sql,"ANS_TEMPLATE_VARS_NAME",$lva_template_master_list,
+        $ret = $dbObj->selectDBRecodes($objMTS,$objDBCA,$sql,
+                                       "ANS_TEMPLATE_VARS_NAME",
+                                       $lva_template_master_list,
                                        $errmsg,$errdetailmsg);
         if($ret === false) {
             throw new Exception($errmsg . "\n" . $errdetailmsg);
         }
+
+        foreach($lva_template_master_list as $strVarName=>$row) {
+            $Vars_list        = array();
+            $Array_vars_list  = array();
+            $LCA_vars_use     = false;
+            $Array_vars_use   = false;
+            $GBL_vars_info    = array();
+            $VarVal_list      = array();
+            $PkeyID           = $row['ANS_TEMPLATE_ID'];
+            $strVarsList      = $row['VARS_LIST'];
+
+            // 変数定義の解析結果を取得
+            $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
+
+            // 変数定義の解析結果をファイルから取得
+            // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
+            $ret = $fileObj->getVarStructAnalysis($PkeyID,
+                                                  $strVarName,
+                                                  $strVarsList,
+                                                  $Vars_list,
+                                                  $Array_vars_list,
+                                                  $LCA_vars_use,
+                                                  $Array_vars_use,
+                                                  $GBL_vars_info,
+                                                  $VarVal_list);
+            if($ret === false) {
+if ( $log_level === 'DEBUG' ){
+                $errmsg = $fileObj->GetLastError();
+                LocalLogPrint(basename(__FILE__),__LINE__,$errmsg[1]);
+}
+                // 解析でエラーが発生している場合は、該当変数ほ無効なする。
+                unset($lva_template_master_list[$strVarName]);
+            } else {
+                //変数定義の解析結果をjson形式の文字列に変換
+                $php_array = $fileObj->ArrayTOjsonString($Vars_list,
+                                                         $Array_vars_list,
+                                                         $LCA_vars_use,
+                                                         $Array_vars_use,
+                                                         $GBL_vars_info,
+                                                         $VarVal_list);
+                //配列に保存
+                $lva_template_master_list[$strVarName]['VAR_STRUCT_ANAL_JSON_STRING'] = $php_array;
+            }
+            unset($fileObj);
+       }
 
         unset($dbObj);
 
