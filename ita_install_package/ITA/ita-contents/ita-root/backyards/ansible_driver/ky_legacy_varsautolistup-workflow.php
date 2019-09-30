@@ -99,6 +99,8 @@
 
     $ansible_common_php1  = '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php';
     $ansible_common_php2  = '/libs/backyardlibs/ansible_driver/CheckAnsibleRoleFiles.php';
+    $ansible_common_php3  = "/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php";
+
 
 // <<<<<<<<<<pioneer/legacy差分箇所>>>>>>>>>>
     $db_access_user_id   = -100009;  // LEG(-100009):::PIO(-100010)
@@ -192,6 +194,7 @@
         ////////////////////////////////
         require_once ($root_dir_path . $ansible_common_php1);
         require_once ($root_dir_path . $ansible_common_php2);
+        require_once ($root_dir_path . $ansible_common_php3);
 
         require_once ($root_dir_path . $hostvar_search_php);
 
@@ -354,13 +357,56 @@
             throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00001300")) );
         }
         while ( $row = $objQueryUtn->resultFetch() ){
+
+            $Vars_list        = array();
+            $Array_vars_list  = array();
+            $LCA_vars_use     = false;
+            $Array_vars_use   = false;
+            $GBL_vars_info    = array();
+            $VarVal_list      = array();
+            $PkeyID           = $row['ANS_TEMPLATE_ID'];
+            $strVarsList      = $row['VARS_LIST'];
+            $strVarName       = $row['ANS_TEMPLATE_VARS_NAME'];
+
+            // 変数定義の解析結果を取得
+            $fileObj = new TemplateVarsStructAnalFileAccess($objMTS,$objDBCA);
+
+            // 変数定義の解析結果をファイルから取得
+            // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
+            $ret = $fileObj->getVarStructAnalysis($PkeyID,
+                                                  $strVarName,
+                                                  $strVarsList,
+                                                  $Vars_list,
+                                                  $Array_vars_list,
+                                                  $LCA_vars_use,
+                                                  $Array_vars_use,
+                                                  $GBL_vars_info,
+                                                  $VarVal_list);
+            if($ret === false) {
+                // 解析でエラーが発生した場合は、該当変数の情報をスキップする。
+//if ( $log_level === 'DEBUG' ){
+                $errmsg = $fileObj->GetLastError();
+                $FREE_LOG = sprintf("FILE:%s LINE:%s %s",basename(__FILE__),__LINE__,$errmsg[1]);
+                require ($root_dir_path . $log_output_php );
+//}
+                continue;
+            }
+            //変数定義の解析結果をjson形式の文字列に変換
+            $php_array = $fileObj->ArrayTOjsonString($Vars_list,
+                                                     $Array_vars_list,
+                                                     $LCA_vars_use,
+                                                     $Array_vars_use,
+                                                     $GBL_vars_info,
+                                                     $VarVal_list);
+            unset($fileObj);
+
 // <<<<<<<<<<pioneer/legacy差分箇所>>>>>>>>>>
             // T0001
             //aryTmplFilePerTmplVarName:[テンプレート変数][Pkey] = テンプレートファイル(テンプレート管理マスタ)
             $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]] = array();
             $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]]['FILE'] = $row["ANS_TEMPLATE_FILE"];
             $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]]['VARS_LIST'] = $row["VARS_LIST"];
-            $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]]['VAR_STRUCT_ANAL_JSON_STRING'] = $row["VAR_STRUCT_ANAL_JSON_STRING"];
+            $aryTmplFilePerTmplVarName[$row["ANS_TEMPLATE_VARS_NAME"]][$row["ANS_TEMPLATE_ID"]]['VAR_STRUCT_ANAL_JSON_STRING'] = $php_array;
 
         }
         // fetch行数を取得
