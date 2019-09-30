@@ -19,6 +19,7 @@ if ( empty($root_dir_path) ){
     $root_dir_path = $root_dir_temp[0] . "ita-root";
 }
 require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibleMakeMessage.php");
+require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php");
 ////////////////////////////////////////////////////////////////////////////////////
 //
 //  【処理概要】
@@ -384,12 +385,51 @@ class AnsibleCommonLibs {
                                 continue;
                             }
                         }
+                        $Vars_list        = array();
+                        $Array_vars_list  = array();
+                        $LCA_vars_use     = false;
+                        $Array_vars_use   = false;
+                        $GBL_vars_info    = array();
+                        $VarVal_list      = array();
+                        $strVarName       = $tpf_var_name;
+                        $PkeyID           = $row['ANS_TEMPLATE_ID'];
+                        $strVarsList      = $row['VARS_LIST'];
+
+                        // 変数定義の解析結果を取得
+                        $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
+
+                        // 変数定義の解析結果をファイルから取得
+                        // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
+                        $ret = $fileObj->getVarStructAnalysis($PkeyID,
+                                                              $strVarName,
+                                                              $strVarsList,
+                                                              $Vars_list,
+                                                              $Array_vars_list,
+                                                              $LCA_vars_use,
+                                                              $Array_vars_use,
+                                                              $GBL_vars_info,
+                                                              $VarVal_list);
+                        if($ret === false) {
+                            $errmsg = $fileObj->GetLastError();
+                            if($in_errmsg != "") $in_errmsg = $in_errmsg . "\n";
+                            $boolRet = false;
+                            continue;
+                        }
+                        //変数定義の解析結果をjson形式の文字列に変換
+                        $php_array = $fileObj->ArrayTOjsonString($Vars_list,
+                                                                 $Array_vars_list,
+                                                                 $LCA_vars_use,
+                                                                 $Array_vars_use,
+                                                                 $GBL_vars_info,
+                                                                 $VarVal_list);
+                        unset($fileObj);
+
                         $ina_tpf_vars_list[$role_name][$tgt_file][$line_no][$tpf_var_name] = array();
                         $ina_tpf_vars_list[$role_name][$tgt_file][$line_no][$tpf_var_name]['CONTENTS_FILE_ID'] = $tpf_key;
                         $ina_tpf_vars_list[$role_name][$tgt_file][$line_no][$tpf_var_name]['CONTENTS_FILE']    = $tpf_file_name;
                         $ina_tpf_vars_list[$role_name][$tgt_file][$line_no][$tpf_var_name]['ROLE_ONLY_FLAG']   = $row['ROLE_ONLY_FLAG'];
-                        $ina_tpf_vars_list[$role_name][$tgt_file][$line_no][$tpf_var_name]['VAR_STRUCT_ANAL_JSON_STRING']   = $row['VAR_STRUCT_ANAL_JSON_STRING'];
                         $ina_tpf_vars_list[$role_name][$tgt_file][$line_no][$tpf_var_name]['VARS_LIST']        = $row['VARS_LIST'];
+                        $ina_tpf_vars_list[$role_name][$tgt_file][$line_no][$tpf_var_name]['VAR_STRUCT_ANAL_JSON_STRING']   = $php_array;
                     }
                     if($fatal_error === true){
                         break;
@@ -929,228 +969,6 @@ class WebDBAccessClass extends CommonDBAccessCoreClass {
             }
         }
         return true;
-    }
-    ////////////////////////////////////////////////////////////////////////////////
-    // F0009
-    // 処理内容
-    //   Legacy/PioneerでアップロードされるPlaybook素材よの共通変数を抜き出す
-    //   FileUploadColumn:checkTempFileBeforeMoveOnPreLoadイベント用
-    //
-    // パラメータ
-    //   $inFilename:           アップロードされたデータが格納されているファイル名
-    //   $outFilename:          抜き出した共通変数をJSON形式で退避するファイル名
-    //
-    // 戻り値
-    //   checkTempFileBeforeMoveOnPreLoadイベントと同様
-    ////////////////////////////////////////////////////////////////////////////////
-    function CommonVarssAanalys_moto($inFilename,$outFilename) {
-
-        if ( empty($root_dir_path) ){
-            $root_dir_temp = array();
-            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
-            $root_dir_path = $root_dir_temp[0] . "ita-root";
-        }
-
-        // 共通モジュールをロード
-        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
-        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php' );
-        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php' );
-        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/CheckAnsibleRoleFiles.php' );
-
-        global $g;
-
-        $boolRet = true;
-        $intErrorType = null;
-        $aryErrMsgBody = array();
-        $strErrMsg = null;
-
-        // 子PlayBookの内容読込
-        $playbookdataString = file_get_contents($inFilename);
-
-        // ファイル内で定義されていたCPF変数を抜き出す
-        $vars_list = array();
-        $cpf_vars_list = array();
-        SimpleVerSearch(DF_HOST_CPF_HED,$playbookdataString,$vars_list);
-        foreach( $vars_list as $no => $vars_info ){
-            foreach( $vars_info as $line_no  => $var_name ){
-                $cpf_vars_list['dummy']['Upload file'][$line_no][$var_name] = 0;
-            }
-        }
-
-        // ファイル内で定義されていたTPF変数を抜き出す
-        $vars_list = array();
-        $tpf_vars_list = array();
-        SimpleVerSearch(DF_HOST_TPF_HED,$playbookdataString,$vars_list);
-        foreach( $vars_list as $no => $vars_info ){
-            foreach( $vars_info as $line_no  => $var_name ){
-                $tpf_vars_list['dummy']['Upload file'][$line_no][$var_name] = 0;
-            }
-        }
-
-        // ファイル内で定義されていたGBL変数を抜き出す
-        $vars_list = array();
-        $gbl_vars_list = array();
-        SimpleVerSearch(DF_HOST_GBL_HED,$playbookdataString,$vars_list);
-        foreach( $vars_list as $no => $vars_info ){
-            foreach( $vars_info as $line_no  => $var_name ){
-                $gbl_vars_list['dummy']['Upload file'][$line_no][$var_name] = 0;
-            }
-        }
-
-        $GBLVars = '1';
-        $CPFVars = '2';
-        $TPFVars = '3';
-        $save_vars_list = array();
-        $save_vars_list[$GBLVars] = array();
-        $save_vars_list[$CPFVars] = array();
-        $save_vars_list[$TPFVars] = array();
-        $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);
-
-        if($boolRet === true){
-            $strErrMsg = "";
-            $strErrDetailMsg = "";
-            // CPF変数がファイル管理に登録されているか判定
-            $boolRet = $objLibs->chkCPFVarsMasterReg($g['objMTS'],$g['objDBCA'],$cpf_vars_list,$strErrMsg,$strErrDetailMsg);
-            if($boolRet === false){
-                if($strErrDetailMsg != ""){
-                    web_log($strErrDetailMsg);
-                }
-            }
-            else {
-                foreach( $cpf_vars_list as $role_name => $tgt_file_list ){
-                    foreach( $tgt_file_list as $tgt_file => $line_no_list ){
-                        foreach( $line_no_list as $line_no => $cpf_var_name_list ){
-                            foreach( $cpf_var_name_list as $cpf_var_name => $dummy ){
-                                $save_vars_list[$CPFVars][$cpf_var_name] = 0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if($boolRet === true){
-            $strErrMsg = "";
-            $strErrDetailMsg = "";
-            // TPF変数がファイル管理に登録されているか判定
-            $boolRet = $objLibs->chkTPFVarsMasterReg($g['objMTS'],$g['objDBCA'],$tpf_vars_list,$strErrMsg,$strErrDetailMsg);
-            if($boolRet === false){
-                if($strErrDetailMsg != ""){
-                    web_log($strErrDetailMsg);
-                }
-            } else {
-                foreach( $tpf_vars_list as $role_name => $tgt_file_list ){
-                    foreach( $tgt_file_list as $tgt_file => $line_no_list ){
-                        foreach( $line_no_list as $line_no => $tpf_var_name_list ){
-                            foreach( $tpf_var_name_list as $tpf_var_name => $tpf_info ){
-                                // 変数定義にLCA/多段定義がある場合はエラーにする。
-                                if($tpf_info['ROLE_ONLY_FLAG'] == '1') {
-                                    if(strlen($strErrMsg)!= 0) $strErrMsg .= '\n';
-                                    $parammsg   = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000031",array($tpf_var_name));
-                                    $strErrMsg .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000030",array($parammsg));
-                                    $boolRet = false;
-                                }
-                                $save_vars_list[$TPFVars][$tpf_var_name] = 0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if($boolRet === true){
-            $strErrMsg = "";
-            $strErrDetailMsg = "";
-            // GBL変数がファイル管理に登録されているか判定
-            $boolRet = $objLibs->chkGBLVarsMasterReg($g['objMTS'],$g['objDBCA'],$gbl_vars_list,$strErrMsg,$strErrDetailMsg);
-            if($boolRet === false){
-                if($strErrDetailMsg != ""){
-                    web_log($strErrDetailMsg);
-                }
-            } else {
-                foreach( $gbl_vars_list as $role_name => $tgt_file_list ){
-                    foreach( $tgt_file_list as $tgt_file => $line_no_list ){
-                        foreach( $line_no_list as $line_no => $gbl_var_name_list ){
-                            foreach( $gbl_var_name_list as $gbl_var_name => $dummy ){
-                                $save_vars_list[$GBLVars][$gbl_var_name] = 0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if($boolRet === true){
-            $dbObj = new CommonDBAccessCoreClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
-            foreach( $tpf_vars_list as $role_name => $tgt_file_list ){
-                foreach( $tgt_file_list as $tgt_file => $line_no_list ){
-                    foreach( $line_no_list as $line_no => $tpf_var_name_list ){
-                        foreach( $tpf_var_name_list as $tpf_var_name => $tpf_info ){
-                            if($boolRet === false) {
-                                continue;
-                            }
-                            // テンプレートで使用しているグローバル変数を取得
-                            $dbObj->ClearLastErrorMsg();
-                            $sqlBody = sprintf("SELECT * FROM %s WHERE FILE_ID ='4' AND VRA_ID = '1' AND CONTENTS_ID = '%s' AND  DISUSE_FLAG='0'"
-                                               ,'B_ANS_COMVRAS_USLIST'
-                                               ,$tpf_info['CONTENTS_FILE_ID']);
-                            $arrayBind = array();
-                            $objQuery_tpf  = "";
-                            $ret = $dbObj->dbaccessExecute($sqlBody, $arrayBind, $objQuery_tpf);
-                            if($ret === false) {
-                                web_log($dbObj->GetLastErrorMsg());
-                                $retBool = false;
-                                $retStrBody = $dbObj->GetLastErrorMsg();
-
-                                break;
-                            } else {
-                                while($row = $objQuery_tpf->resultFetch()) {
-                                    // テンプレートで使用しているグローバル変数がグローバル変数管理に登録されているか確認
-                                    $gbl_var_name = $row['VAR_NAME'];
-                                    $dbObj->ClearLastErrorMsg();
-                                    $sqlBody = sprintf("SELECT * FROM %s WHERE VARS_NAME = '%s' AND  DISUSE_FLAG='0'"
-                                                      ,'B_ANS_GLOBAL_VARS_MASTER'
-                                                      ,$gbl_var_name);
-                                    $arrayBind = array();
-                                    $objQuery_gbl  = "";
-                                    $ret = $dbObj->dbaccessExecute($sqlBody, $arrayBind, $objQuery_gbl);
-                                    if($ret === false) {
-                                        web_log($dbObj->GetLastErrorMsg());
-                                        $retBool = false;
-                                        $retStrBody = $dbObj->GetLastErrorMsg();
-                                       
-                                        break;
-                                    } else {
-                                        if($objQuery_gbl->effectedRowCount() == 0) {
-                                            if(strlen($strErrMsg)!= 0) $strErrMsg .= '\n';
-                                            $parammsg   = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000033",array($tpf_var_name,$gbl_var_name));
-                                            $strErrMsg .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000032",array($parammsg));
-                                            $boolRet = false;
-                                        }
-                                    }
-                                    unset($objQuery_gbl);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            unset($dbObj);
-        }
-        if($boolRet === true){
-            $json = json_encode($save_vars_list);
-            $path = $outFilename;
-            $Ret = file_put_contents($path, $json);
-            if($Ret === false) {
-                $boolRet = false;
-                $strErrMsg = $g['objMTS']->getSomeMessage('ITABASEH-ERR-6000018');
-            }
-            unset($objLibs);
-        }
-        unset($roleObj);
-
-        if(strlen($strErrMsg) != 0) {
-            $strErrMsg = str_replace('\n', "<BR>", $strErrMsg);
-        }
-        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg);
-        return $retArray;
     }
 }
 ?>
