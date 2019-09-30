@@ -89,6 +89,9 @@ require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/CheckAnsibleRo
 
 // 共通モジュールをロード
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
+// enomotp
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php');
+
 
 class CreateAnsibleExecFiles {
     // Ansible 作業ディレクトリ名
@@ -6818,7 +6821,7 @@ class CreateAnsibleExecFiles {
         $sql = "SELECT                         \n" .
                "  ANS_TEMPLATE_ID,             \n" .
                "  ANS_TEMPLATE_FILE,           \n" .
-               "  VAR_STRUCT_ANAL_JSON_STRING, \n" .
+               "  VARS_LIST,                   \n" .
                "  ROLE_ONLY_FLAG               \n" .
                "FROM                           \n" .
                "  B_ANS_TEMPLATE_FILE          \n" .
@@ -6862,10 +6865,48 @@ class CreateAnsibleExecFiles {
             unset($objQuery);
             return true;
         }
+        $Vars_list        = array();
+        $Array_vars_list  = array();
+        $LCA_vars_use     = false;
+        $Array_vars_use   = false;
+        $GBL_vars_info    = array();
+        $VarVal_list      = array();
+        $PkeyID           = $row['ANS_TEMPLATE_ID'];
+        $strVarsList      = $row['VARS_LIST'];
+        $strVarName       = $in_tpf_var_name;
+
+        // 変数定義の解析結果を取得
+        $fileObj = new TemplateVarsStructAnalFileAccess($this->lv_objMTS,$this->lv_objDBCA);
+
+        // 変数定義の解析結果をファイルから取得
+        // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
+        $ret = $fileObj->getVarStructAnalysis($PkeyID,
+                                              $strVarName,
+                                              $strVarsList,
+                                              $Vars_list,
+                                              $Array_vars_list,
+                                              $LCA_vars_use,
+                                              $Array_vars_use,
+                                              $GBL_vars_info,
+                                              $VarVal_list);
+        if($ret === false) {
+            $errmsg = $fileObj->GetLastError();
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg[1]);
+            return false;
+        }
+        //変数定義の解析結果をjson形式の文字列に変換
+        $php_array = $fileObj->ArrayTOjsonString($Vars_list,
+                                                 $Array_vars_list,
+                                                 $LCA_vars_use,
+                                                 $Array_vars_use,
+                                                 $GBL_vars_info,
+                                                 $VarVal_list);
+        unset($fileObj);
+
         $in_tpf_key           = $row["ANS_TEMPLATE_ID"];
         $in_tpf_file_name     = $row["ANS_TEMPLATE_FILE"];
         $in_tpf_role_only     = $row["ROLE_ONLY_FLAG"];
-        $ina_tpf_vars_struct  = json_decode($row["VAR_STRUCT_ANAL_JSON_STRING"],true);
+        $ina_tpf_vars_struct  = json_decode($php_array,true);
 
         // DBアクセス事後処理
         unset($objQuery);
