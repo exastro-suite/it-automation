@@ -22,6 +22,7 @@ if ( empty($root_dir_path) ){
     $root_dir_path = $root_dir_temp[0] . "ita-root";
 }
 require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibleMakeMessage.php");
+require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php");
 //////////////////////////////////////////////////////////////////////
 //
 //  【処理概要】
@@ -4001,7 +4002,6 @@ class VarStructAnalysisFileAccess{
                 $this->web_mode  = true;
             }
         }
-        $this->web_mode                    = true;
     }
 
     function SetLastError($p1,$p2,$p3){
@@ -4814,19 +4814,66 @@ class VarStructAnalysisFileAccess{
                 //////////////////////////////////////////////////////////////////////////////
                 $this->lva_template_master_list = array();
                 $sql = "SELECT                           \n" .
+                      "    ANS_TEMPLATE_ID,              \n" .
                       "    ANS_TEMPLATE_VARS_NAME,       \n" .
-                      "    VAR_STRUCT_ANAL_JSON_STRING   \n" .
+                      "    VARS_LIST                     \n" .
                       "FROM                              \n" .
                       "    B_ANS_TEMPLATE_FILE           \n" .
                       "WHERE                             \n" .
                       "    DISUSE_FLAG            = '0'; \n";
                 $errmsg       = "";
                 $errdetailmsg = "";
-                $ret = $dbObj->selectDBRecodes($this->lv_objMTS,$this->lv_objDBCA,$sql,"ANS_TEMPLATE_VARS_NAME",$this->lva_template_master_list,
+                $ret = $dbObj->selectDBRecodes($this->lv_objMTS,$this->lv_objDBCA,$sql,
+                                               "ANS_TEMPLATE_VARS_NAME",
+                                               $this->lva_template_master_list,
                                                $errmsg,$errdetailmsg);
                 if($ret === false) {
                     $strErrMsg = $errmsg;
                     $boolRet   = false;
+                } else {
+                    foreach($this->lva_template_master_list as $strVarName=>$row) {
+                        $Vars_list        = array();
+                        $Array_vars_list  = array();
+                        $LCA_vars_use     = false;
+                        $Array_vars_use   = false;
+                        $GBL_vars_info    = array();
+                        $VarVal_list      = array();
+                        $PkeyID           = $row['ANS_TEMPLATE_ID']; 
+                        $strVarsList      = $row['VARS_LIST']; 
+
+                        // 変数定義の解析結果を取得
+                        $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
+
+                        // 変数定義の解析結果をファイルから取得
+                        // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
+                        $ret = $fileObj->getVarStructAnalysis($PkeyID,
+                                                              $strVarName,
+                                                              $strVarsList,
+                                                              $Vars_list,
+                                                              $Array_vars_list,
+                                                              $LCA_vars_use,
+                                                              $Array_vars_use,
+                                                              $GBL_vars_info,
+                                                              $VarVal_list);
+                        if($ret === false) {
+                            $errmsg = $fileObj->GetLastError();
+                            $strErrMsg = $errmsg[0];
+                            $boolRet   = false;
+                        }
+                        //変数定義の解析結果をjson形式の文字列に変換
+                        $php_array = $fileObj->ArrayTOjsonString($Vars_list,
+                                                                 $Array_vars_list,
+                                                                 $LCA_vars_use,
+                                                                 $Array_vars_use,
+                                                                 $GBL_vars_info,
+                                                                 $VarVal_list);
+                        //配列に保存 
+                        $this->lva_template_master_list[$strVarName]['VAR_STRUCT_ANAL_JSON_STRING'] = $php_array;
+                        unset($fileObj);
+                        if($boolRet === false) {
+                            break;
+                        }
+                    }
                 }
             }
             unset($dbObj);
@@ -5159,7 +5206,7 @@ class VarStructAnalysisFileAccess{
                      $err_files = $err_files . $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000060",
                                                                  array($err_pkg_name,$err_role_name));
 
-                     $err_files = $err_files . "roles/" . $err_role_name . "\n";
+                     $err_files = $err_files . "\n";
                  }
              }
              if($err_files != ""){
