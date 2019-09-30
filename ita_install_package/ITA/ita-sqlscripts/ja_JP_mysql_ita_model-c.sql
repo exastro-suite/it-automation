@@ -240,7 +240,6 @@ ANS_TEMPLATE_VARS_NAME            VARCHAR (256)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
 VARS_LIST                         VARCHAR (4000)                   , -- 変数定義
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
-VAR_STRUCT_ANAL_JSON_STRING       VARCHAR (16000)                  , -- 変数構造解析結果 JSON形式 
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -265,7 +264,6 @@ ANS_TEMPLATE_VARS_NAME            VARCHAR (256)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
 VARS_LIST                         VARCHAR (4000)                   , -- 変数定義
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
-VAR_STRUCT_ANAL_JSON_STRING       VARCHAR (16000)                  , -- 変数構造解析結果 JSON形式 
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2028,7 +2026,6 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 -- 履歴系テーブル作成----
 -- END----------------------------------------------------
 
-
 -- -------------------------------------------------------
 -- T-0003 ロール名管理
 -- -------------------------------------------------------
@@ -2038,7 +2035,7 @@ CREATE TABLE B_ANSIBLE_LRL_ROLE
 ROLE_ID                           INT                              , -- 識別シーケンス
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
-ROLE_NAME                         VARCHAR (1024)                    , -- ロール名
+ROLE_NAME                         VARCHAR (1024)                   , -- ロール名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2060,7 +2057,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 ROLE_ID                           INT                              , -- 識別シーケンス
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
-ROLE_NAME                         VARCHAR (1024)                    , -- ロール名
+ROLE_NAME                         VARCHAR (1024)                   , -- ロール名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -3657,7 +3654,6 @@ CREATE        INDEX IND_B_ANS_PNS_VAL_ASSIGN_01       ON B_ANS_PNS_VAL_ASSIGN   
 CREATE        INDEX IND_C_ANSIBLE_LRL_EXE_INS_MNG_01  ON C_ANSIBLE_LRL_EXE_INS_MNG     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_ROLE_PACKAGE_01 ON B_ANSIBLE_LRL_ROLE_PACKAGE    (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_ROLE_01         ON B_ANSIBLE_LRL_ROLE            (DISUSE_FLAG);
-CREATE UNIQUE INDEX IND_B_ANSIBLE_LRL_ROLE_02         ON B_ANSIBLE_LRL_ROLE            (ROLE_PACKAGE_ID, ROLE_NAME);
 CREATE        INDEX IND_B_ANSIBLE_LRL_ROLE_VARS_01    ON B_ANSIBLE_LRL_ROLE_VARS       (DISUSE_FLAG);
 CREATE UNIQUE INDEX IND_B_ANSIBLE_LRL_ROLE_VARS_02    ON B_ANSIBLE_LRL_ROLE_VARS       (ROLE_PACKAGE_ID, ROLE_ID , VARS_NAME);
 CREATE        INDEX IND_B_ANSIBLE_LRL_PATTERN_LINK_01 ON B_ANSIBLE_LRL_PATTERN_LINK    (DISUSE_FLAG);
