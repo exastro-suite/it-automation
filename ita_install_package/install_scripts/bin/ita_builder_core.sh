@@ -276,15 +276,21 @@ configure_os() {
 
 # MariaDB
 configure_mariadb() {
+
+    # make log directory
+    if [ ! -e /var/log/mariadb ]; then
+        mkdir -p -m 777 /var/log/mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
+
     #Confirm whether it is installed
-    yum list installed mysql >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    yum list installed MariaDB-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? == 0 ]; then
         log "MariaDB has already been installed."
         
         #Confirm whether root password has been changed
         mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         if [ $? == 0 ]; then
-            log "Root password changed"
+            log "Root password of MariaDB is already setting."
         else
             expect -c "
                 set timeout -1
