@@ -57,11 +57,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // 検索機能の制御----
 
     $c = new IDColumn('FILE_ID','File Type','B_ANS_COMVRAS_USLIST_F_ID','ROW_ID','NAME','',array('OrderByThirdColumn'=>'ROW_ID'));
-    $c->setDescription('File Type\n1:Playbook\n2:Dialog file\n3:Role package\n4:Template file');
+    $c->setDescription("File Type\nPlaybook: Legacy playbook\nDialog file: Pioneer dialog file\nRole package: LegacyRole role package\nTemplate file: Ansible common template file");
     $table->addColumn($c);
 
     $c = new IDColumn('VRA_ID','Variable Type','B_ANS_COMVRAS_USLIST_V_ID','ROW_ID','NAME','',array('OrderByThirdColumn'=>'ROW_ID'));
-    $c->setDescription('Variable Type\n1:Global Variable\n2:File Variable\n3:Template Variable');
+    $c->setDescription("Variable Type\nGBL:Global Variable\nCPF:File Variable\nTPF:Template Variable");
     $table->addColumn($c);
 
     $c = new NumColumn('CONTENTS_ID','Primary key');
