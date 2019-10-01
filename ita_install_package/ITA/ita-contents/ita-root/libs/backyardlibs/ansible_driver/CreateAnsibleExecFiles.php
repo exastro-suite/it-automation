@@ -2784,6 +2784,55 @@ class CreateAnsibleExecFiles {
                  return($result_code);
             }
         }
+        $errmsg = "";
+        $f_name = "";
+        $f_line = "";
+        // Spycモジュールの読み込み
+        $ret = $this->LoadSpycModule($errmsg, $f_name, $f_line);
+        if($ret === false){
+            $errmsg = $errmsg . "(" . $f_line . ")";
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg);
+            return(false);
+        }
+        // 対話ファイル配列のホスト分繰返し
+        foreach( $ina_hosts as $no=>$host_name ){
+            // 対話ファイル配列より該当ホストの対話ファイル配列取得            
+            $dialog_file_list = $ina_dialog_files[$host_name];
+            foreach( $dialog_file_list as $includeno=>$pkeylist ){
+                foreach( $pkeylist as $playbook_pkey=>$playbook ){
+                    // 対話ファイルのパス取得(オリジナル版)
+                    foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
+                    $dialog_file    = $this->getAnsible_org_dialog_file($hostname,$playbook_pkey,$playbook);
+                    try {
+                        $dialog_file_array = Spyc::YAMLLoad($dialog_file);
+                    } catch ( Exception $ex ) {
+                        //$ary[6000073] = "対話ファイルがYAML形式が確認して下さい。(対話ファイル:{})";
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                                      $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000073",
+                                                                                       array($playbook)));
+                        return false;
+                    }
+                    // ホスト変数ファイルのパス取得
+                    $host_vars_file = $this->getAnsible_host_var_file($hostname);
+                    try {
+                        $host_vars_file_array = Spyc::YAMLLoad($host_vars_file);
+                    } catch ( Exception $ex ) {
+                        //$ary[6000074] = "ホスト変数ファイルがYAML形式で生成されていません。(ホスト名:{})";
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                                      $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000074",
+                                                                                       array($hostname)));
+                        return false;
+                    }
+                    // 複数具体値変数の使い方が正しいか確認
+                    $dialog_file_vars=array();
+                    $ret = $this->value_extraction($dialog_file_array,"",$dialog_file_vars);
+                    $ret = $this->var_check($playbook,$hostname,$dialog_file_vars,$host_vars_file_array);
+                    if($ret === false) {
+                        return false;
+                    }
+                }
+            }
+        }
 
         $ProcessedFileList = array();
         // 対話ファイル配列のホスト分繰返し
@@ -5779,11 +5828,13 @@ class CreateAnsibleExecFiles {
                         }
                         else{
                             if(@count($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . $row['VARS_ENTRY'];
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . $row['VARS_ENTRY'];
                             }
                             else{
+                                // △-に変更
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . $row['VARS_ENTRY'];
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] . "\n - " . $row['VARS_ENTRY'];
                             }
                         }
                     }
@@ -6113,10 +6164,12 @@ class CreateAnsibleExecFiles {
                             switch($this->getAnsibleDriverID()){
                             case DF_PIONEER_DRIVER_ID:
                                 // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . "\"" . $row['VARS_ENTRY'] . "\"";
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
                                 break;
                             case DF_LEGACY_DRIVER_ID:
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . $row['VARS_ENTRY'];
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . $row['VARS_ENTRY'];
                                 break;
                             }
                         }
@@ -6124,12 +6177,14 @@ class CreateAnsibleExecFiles {
                             switch($this->getAnsibleDriverID()){
                             case DF_PIONEER_DRIVER_ID:
                                 // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
+                                // △-に変更
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . "\"" . $row['VARS_ENTRY'] . "\"";
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
                                 break;
                             case DF_LEGACY_DRIVER_ID:
+                                // △-に変更
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . $row['VARS_ENTRY'];
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . $row['VARS_ENTRY'];
                                 break;
                             }
                         }
@@ -6215,10 +6270,12 @@ class CreateAnsibleExecFiles {
                             switch($this->getAnsibleDriverID()){
                             case DF_PIONEER_DRIVER_ID:
                                 // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . "\"" . $row['VARS_ENTRY'] . "\"";
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
                                 break;
                             case DF_LEGACY_DRIVER_ID:
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . $row['VARS_ENTRY'];
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . $row['VARS_ENTRY'];
                                 break;
                             }
                         }
@@ -6227,11 +6284,13 @@ class CreateAnsibleExecFiles {
                             case DF_PIONEER_DRIVER_ID:
                                 // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . "\"" . $row['VARS_ENTRY'] . "\"";
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
                                 break;
                             case DF_LEGACY_DRIVER_ID:
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . $row['VARS_ENTRY'];
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . $row['VARS_ENTRY'];
                                 break;
                             }
                         }
@@ -10648,6 +10707,72 @@ class CreateAnsibleExecFiles {
             fputs($fp,$write);
         }
         fclose($fp);
+        return true;
+    }
+    // 変数をvarふぁいる読み取って配列か判断変換する関数
+    function var_check ($dialog_file_name,$hostname,$dialog_file_vars,$host_variable_file_array){
+        foreach($dialog_file_vars as $var_1) {
+            $command = "";
+            foreach($var_1 as $key=>$var_2) {
+                if($command == "") $command = $key;
+                if(preg_match("/{{(\s)VAR_[a-zA-Z0-9_]*(\s)}}/",$var_2)) {
+    
+                    #複数具体値かどうかを見る
+                    foreach($host_variable_file_array as $key_1=>$var_3) {
+    
+                        $ret = preg_match_all("/{{(\s)$key_1(\s)}}/",$var_2);
+                        if($ret == true){
+                            if(is_array($var_3)){
+                                #複数具体値
+                                #with_items以外はエラー
+                                if(!preg_match("/with_items/",$key)){
+                                    //$ary[6000070] = "commandのwith_item以外は複数具体値変数は記述出来ません。(ホスト:{} 対話ファイル:{} 変数:{})";
+                                    $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                                                  $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000070",
+                                                                                                    array($hostname, 
+                                                                                                          $dialog_file_name, 
+                                                                                                          $key_1)));
+                                    return false;
+                                }
+    
+                            }else{
+                                #単一具体値
+                                #with_itemsがあればエラーにする
+                                if(preg_match("/with_items/",$key)){
+                                    //$ary[6000071] = "commandのwith_itemは複数具体値変数しか記述出来ません。(ホスト:{} 対話ファイル:{} 変数:{})";
+                                    $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                                                  $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000071",
+                                                                                                    array($hostname, 
+                                                                                                          $dialog_file_name, 
+                                                                                                          $key_1)));
+                                    return false;
+                                }
+                            }
+                        }
+    
+                    }
+                }
+                $ret = preg_match_all("/{{(\s)VAR_[a-zA-Z0-9_]*(\s)}}/",$var_2);
+                if($ret > 1 && "with_items" == $key){
+                    //$ary[6000072] = "commandのwith_itemに複数の変数が記述されています。(対話ファイル:{})";
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                         $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000072",
+                                                                          array($dialog_file_name)));
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    function value_extraction ($array,$mae,&$dialog_file_vars){
+        #playbookの値だけを読み取り
+        foreach($array as $key=>$array_1) {
+            if(is_array($array_1)){
+                $this->value_extraction($array_1,$key,$dialog_file_vars);
+            }else{
+                $dialog_file_vars[] = array($mae=>$array_1);
+            }
+        }
         return true;
     }
 }
