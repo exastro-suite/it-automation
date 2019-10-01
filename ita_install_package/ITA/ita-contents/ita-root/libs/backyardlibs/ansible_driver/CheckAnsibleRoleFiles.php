@@ -647,11 +647,6 @@ class CheckAnsibleRoleFiles {
                    $tasks_dir      = true;
                    // p1:ロール変数取得有(true)/無(false)
                    // p2:main.yml必須有(true)/無(false)
-                   // p3:main.ymlと他ファイルの依存有(true)/無(false)
-                   // p4:main.ymlファイル以外のファイルは存在不可
-
-                   // p1:ロール変数取得有(true)/無(false)
-                   // p2:main.yml必須有(true)/無(false)
                    // p3:サブディレクトリ(許可(true)/許可しない(false))
                    // p4:main.ymlファイル以外のファイル(許可(true)/許可しない(false))
                    // p5:TPF/CPF変数取得有(true)/無(false)
@@ -671,7 +666,7 @@ class CheckAnsibleRoleFiles {
                                               $ina_system_vars);
                    break;
                case "meta":
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  false, true, true, true,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false,  false, true, true, false,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
