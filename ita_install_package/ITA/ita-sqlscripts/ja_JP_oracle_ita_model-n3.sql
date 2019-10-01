@@ -8,7 +8,7 @@ ROW_ID                             NUMBER                          , -- 識別�
 OPERATION_NO_UAPK                  NUMBER                          ,
 PATTERN_ID                         NUMBER                          ,
 SYSTEM_ID                          NUMBER                          ,
-VARS_NAME                          VARCHAR2(256)                   ,
+VARS_NAME                          VARCHAR2(512)                   ,
 
 DISP_SEQ                           NUMBER                          , -- 表示順序
 NOTE                               VARCHAR2(4000)                  , -- 備考
@@ -30,7 +30,7 @@ ROW_ID                             NUMBER                          , -- 識別�
 OPERATION_NO_UAPK                  NUMBER                          ,
 PATTERN_ID                         NUMBER                          ,
 SYSTEM_ID                          NUMBER                          ,
-VARS_NAME                          VARCHAR2(256)                   ,
+VARS_NAME                          VARCHAR2(512)                   ,
 
 DISP_SEQ                           NUMBER                          , -- 表示順序
 NOTE                               VARCHAR2(4000)                  , -- 備考
@@ -47,7 +47,7 @@ ROW_ID                             NUMBER                          , -- 識別�
 OPERATION_NO_UAPK                  NUMBER                          ,
 PATTERN_ID                         NUMBER                          ,
 SYSTEM_ID                          NUMBER                          ,
-VARS_NAME                          VARCHAR2(256)                   ,
+VARS_NAME                          VARCHAR2(512)                   ,
 
 DISP_SEQ                           NUMBER                          , -- 表示順序
 NOTE                               VARCHAR2(4000)                  , -- 備考
@@ -69,7 +69,7 @@ ROW_ID                             NUMBER                          , -- 識別�
 OPERATION_NO_UAPK                  NUMBER                          ,
 PATTERN_ID                         NUMBER                          ,
 SYSTEM_ID                          NUMBER                          ,
-VARS_NAME                          VARCHAR2(256)                   ,
+VARS_NAME                          VARCHAR2(512)                   ,
 
 DISP_SEQ                           NUMBER                          , -- 表示順序
 NOTE                               VARCHAR2(4000)                  , -- 備考
