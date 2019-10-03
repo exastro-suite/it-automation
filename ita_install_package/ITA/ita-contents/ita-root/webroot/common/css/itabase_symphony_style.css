@@ -666,6 +666,13 @@ border-top: none;border-radius: 0 0 4px 4px;
     color:#F5F5F5;
     background: #FF0000; /* [2.1] */
 }
+.symStatusCancel,
+#startMark.symStatusCancel,
+#endMark.symStatusCancel {
+    /* (灰系)予約取消*/
+    color:#F5F5F5;
+    background: #999999; /* [2.1] */
+}
 
 .movStatusNotStart {
     /* (灰系)未実行 */
