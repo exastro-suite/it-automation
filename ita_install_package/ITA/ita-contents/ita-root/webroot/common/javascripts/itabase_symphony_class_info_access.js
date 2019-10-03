@@ -439,6 +439,10 @@ function printSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
         if( intSymStartFlag === 1 ){
             strClassOfStartMark = strClassOfStartMark + ' symStatusEnd';
         }
+        // 予約取消
+        if("9" == arySymInfo[3]){
+            strClassOfStartMark = strClassOfStartMark + ' symStatusCancel';
+        }
         objStartPrintArea.className = strClassOfStartMark;
         
         var strClassOfEndMark = 'end';
@@ -448,6 +452,10 @@ function printSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
         }
         else if( intSymEndFlag === 2 ){
             strClassOfEndMark = strClassOfEndMark + ' symStatusAbort';
+        }
+        // 予約取消
+        if("9" == arySymInfo[3]){
+            strClassOfEndMark = strClassOfEndMark + ' symStatusCancel';
         }
         objEndPrintArea.className = strClassOfEndMark;
         //シンフォニーのSTART/ENDの表示----
