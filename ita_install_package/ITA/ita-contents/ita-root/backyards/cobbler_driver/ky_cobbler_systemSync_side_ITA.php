@@ -225,7 +225,7 @@
         }
 
         //ファイルをロック
-        $lock_result = flock($open_resource, 'LOCK_EX');
+        $lock_result = flock($open_resource, LOCK_EX);
 
         // レコードFETCH
         while ( $row = $objQueryUtn->resultFetch() ){
