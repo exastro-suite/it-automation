@@ -179,7 +179,7 @@
         $file_in_one = false;//読み込み結果が来ない間はループ
         $roop_time = 0;
         while(!$file_in_one){
-            $file_in_one = file($file_dir);
+            $file_in_one = @file($file_dir);
             if(!$file_in_one){
                 // ファイルが存在し、かつそのファイルサイズが0の場合はデータが空として以降の処理を継続
                 if(is_file($file_dir) && (filesize($file_dir) === 0)){
