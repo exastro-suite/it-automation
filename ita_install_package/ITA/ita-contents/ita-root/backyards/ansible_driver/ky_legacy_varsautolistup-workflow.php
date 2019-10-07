@@ -323,7 +323,6 @@
                      ."ANS_TEMPLATE_ID, "
                      ."ANS_TEMPLATE_VARS_NAME ,"
                      ."VARS_LIST ,"
-                     ."VAR_STRUCT_ANAL_JSON_STRING, "
                      ."ANS_TEMPLATE_FILE "
                      ."FROM {$strTableCurAnsTemplate} "
                      ."WHERE DISUSE_FLAG = '0' ";
