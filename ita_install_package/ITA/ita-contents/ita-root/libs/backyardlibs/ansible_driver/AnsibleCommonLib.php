@@ -396,7 +396,7 @@ class AnsibleCommonLibs {
                         $strVarsList      = $row['VARS_LIST'];
 
                         // 変数定義の解析結果を取得
-                        $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
+                        $fileObj = new TemplateVarsStructAnalFileAccess($in_objMTS,$in_objDBCA);
 
                         // 変数定義の解析結果をファイルから取得
                         // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
