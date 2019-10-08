@@ -56,7 +56,7 @@ ANSIBLE_EXEC_USER               VARCHAR (64)                      , -- ansible-p
 ANSIBLE_ACCESS_KEY_ID           VARCHAR (64)                      , 
 ANSIBLE_SECRET_ACCESS_KEY       VARCHAR (64)                      , 
 -- ansible Tower独自情報
-ANSTWR_ORGANIZATION             VARCHAR (64)                      , -- 組織名
+ANSTWR_ORGANIZATION             VARCHAR (512)                      , -- 組織名
 ANSTWR_AUTH_TOKEN               VARCHAR (256)                     , -- 接続トークン
 ANSTWR_DEL_RUNTIME_DATA         INT                               , 
 -- 共通
@@ -95,7 +95,7 @@ ANSIBLE_EXEC_USER               VARCHAR (64)                      , -- ansible-p
 ANSIBLE_ACCESS_KEY_ID           VARCHAR (64)                      , 
 ANSIBLE_SECRET_ACCESS_KEY       VARCHAR (64)                      , 
 -- ansible Tower独自情報
-ANSTWR_ORGANIZATION             VARCHAR (64)                      , -- 組織名
+ANSTWR_ORGANIZATION             VARCHAR (512)                      , -- 組織名
 ANSTWR_AUTH_TOKEN               VARCHAR (256)                     , -- 接続トークン
 ANSTWR_DEL_RUNTIME_DATA         INT                               , 
 -- 共通
@@ -196,7 +196,7 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 CREATE TABLE B_ANS_CONTENTS_FILE
 (
 CONTENTS_FILE_ID                  INT                              , -- ファイルID
-CONTENTS_FILE_VARS_NAME           VARCHAR (128)                    , -- 変数名
+CONTENTS_FILE_VARS_NAME           VARCHAR (256)                    , -- 変数名
 CONTENTS_FILE                     VARCHAR (256)                    , -- コンテンツ ファイル名
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -216,7 +216,7 @@ JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴�
 JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
 
 CONTENTS_FILE_ID                  INT                              , -- ファイルID
-CONTENTS_FILE_VARS_NAME           VARCHAR (128)                    , -- 変数名
+CONTENTS_FILE_VARS_NAME           VARCHAR (256)                    , -- 変数名
 CONTENTS_FILE                     VARCHAR (256)                    , -- コンテンツ ファイル名
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -236,8 +236,10 @@ CREATE TABLE B_ANS_TEMPLATE_FILE
 (
 ANS_TEMPLATE_ID                   INT                              ,
 
-ANS_TEMPLATE_VARS_NAME            VARCHAR (128)                    ,
+ANS_TEMPLATE_VARS_NAME            VARCHAR (256)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
+VARS_LIST                         VARCHAR (4000)                   , -- 変数定義
+ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -258,8 +260,10 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 ANS_TEMPLATE_ID                   INT                              ,
 
-ANS_TEMPLATE_VARS_NAME            VARCHAR (128)                    ,
+ANS_TEMPLATE_VARS_NAME            VARCHAR (256)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
+VARS_LIST                         VARCHAR (4000)                   , -- 変数定義
+ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -431,6 +435,121 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 -- 履歴系テーブル作成----
 
+-- ----------------------------------------------------------
+-- - ansible playbook等でのGBL/TPF/CPL変数利用リスト
+-- ----------------------------------------------------------
+CREATE TABLE B_ANS_COMVRAS_USLIST
+(
+ROW_ID                            INT                              ,
+-- ----
+FILE_ID                           INT                              , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
+VRA_ID                            INT                              , -- 変数種別      1:GBL/2:CPF/3:TPF
+CONTENTS_ID                       INT                              , -- コンテンツID  該当ファイルが格納されているデータベースのPkeyID
+VAR_NAME                          VARCHAR (256)                    , -- 変数名
+REVIVAL_FLAG                      VARCHAR (1)                      , -- 復活時の有効レコードフラグ
+-- ----
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE B_ANS_COMVRAS_USLIST_JNL
+(
+JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
+-- ----
+ROW_ID                            INT                              ,
+-- ----
+FILE_ID                           INT                              , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
+VRA_ID                            INT                              , -- 変数種別      1:GBL/2:CPF/3:TPF
+CONTENTS_ID                       INT                              , -- コンテンツID  該当ファイルが格納されているデータベースのPkeyID
+VAR_NAME                          VARCHAR (256)                    , -- 変数名
+REVIVAL_FLAG                      VARCHAR (1)                      , -- 復活時の有効レコードフラグ
+-- ----
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+
+-- ----------------------------------------------------------
+-- - ansible playbook等でのGBL/TPF/CPL変数利用リスト 変数種別マスタ
+-- ----------------------------------------------------------
+CREATE TABLE B_ANS_COMVRAS_USLIST_V_ID
+(
+ROW_ID                            INT                              ,
+-- ----
+NAME                              VARCHAR (64)                     , -- 変数種別　1:GBL/2:CPF/3:TPF
+-- ----
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE B_ANS_COMVRAS_USLIST_V_ID_JNL
+(
+JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
+-- ----
+ROW_ID                            INT                              ,
+-- ----
+NAME                              VARCHAR (64)                     , -- 変数種別　1:GBL/2:CPF/3:TPF
+-- ----
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+
+-- ----------------------------------------------------------
+-- - ansible playbook等でのGBL/TPF/CPL変数利用リスト ファイル種別マスタ
+-- ----------------------------------------------------------
+CREATE TABLE B_ANS_COMVRAS_USLIST_F_ID
+(
+ROW_ID                            INT                              ,
+-- ----
+NAME                              VARCHAR (64)                     , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
+-- ----
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE B_ANS_COMVRAS_USLIST_F_ID_JNL
+(
+JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
+-- ----
+ROW_ID                            INT                              ,
+-- ----
+NAME                              VARCHAR (64)                     , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
+-- ----
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
 -- *****************************************************************************
 -- ***  Ansible Common Tables *****                                          ***
 -- *****************************************************************************
@@ -443,7 +562,7 @@ CREATE TABLE B_ANSIBLE_LNS_PLAYBOOK
 (
 PLAYBOOK_MATTER_ID                INT                              ,
 
-PLAYBOOK_MATTER_NAME              VARCHAR (32)                     ,
+PLAYBOOK_MATTER_NAME              VARCHAR (256)                     ,
 PLAYBOOK_MATTER_FILE              VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -465,7 +584,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 PLAYBOOK_MATTER_ID                INT                              ,
 
-PLAYBOOK_MATTER_NAME              VARCHAR (32)                     ,
+PLAYBOOK_MATTER_NAME              VARCHAR (256)                     ,
 PLAYBOOK_MATTER_FILE              VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -564,8 +683,8 @@ CREATE TABLE B_ANSIBLE_LNS_VARS_MASTER
 (
 VARS_NAME_ID                      INT                              ,
 
-VARS_NAME                         VARCHAR (128)                    ,
-VARS_DESCRIPTION                  VARCHAR (128)                    ,
+VARS_NAME                         VARCHAR (256)                    ,
+VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -586,8 +705,8 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 VARS_NAME_ID                      INT                              ,
 
-VARS_NAME                         VARCHAR (128)                    ,
-VARS_DESCRIPTION                  VARCHAR (128)                    ,
+VARS_NAME                         VARCHAR (256)                    ,
+VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -690,7 +809,7 @@ CREATE TABLE C_ANSIBLE_LNS_EXE_INS_MNG
 EXECUTION_NO                      INT                              ,
 
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 STATUS_ID                         INT                              ,
 SYMPHONY_INSTANCE_NO              INT                              ,
 PATTERN_ID                        INT                              ,
@@ -702,7 +821,7 @@ I_ANS_WINRM_ID                    INT                              ,
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
@@ -732,7 +851,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 EXECUTION_NO                      INT                              ,
 
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 STATUS_ID                         INT                              ,
 SYMPHONY_INSTANCE_NO              INT                              ,
 PATTERN_ID                        INT                              ,
@@ -744,7 +863,7 @@ I_ANS_WINRM_ID                    INT                              ,
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
@@ -1093,7 +1212,7 @@ CREATE TABLE B_ANSIBLE_PNS_DIALOG_TYPE
 (
 DIALOG_TYPE_ID                    INT                              , -- 識別シーケンス
 
-DIALOG_TYPE_NAME                  VARCHAR (32)                     ,
+DIALOG_TYPE_NAME                  VARCHAR (256)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1114,7 +1233,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 DIALOG_TYPE_ID                    INT                              , -- 識別シーケンス
 
-DIALOG_TYPE_NAME                  VARCHAR (32)                     ,
+DIALOG_TYPE_NAME                  VARCHAR (256)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1253,8 +1372,8 @@ CREATE TABLE B_ANSIBLE_PNS_VARS_MASTER
 (
 VARS_NAME_ID                      INT                              , -- 識別シーケンス
 
-VARS_NAME                         VARCHAR (128)                    ,
-VARS_DESCRIPTION                  VARCHAR (128)                    ,
+VARS_NAME                         VARCHAR (256)                    ,
+VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1275,8 +1394,8 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 VARS_NAME_ID                      INT                              , -- 識別シーケンス
 
-VARS_NAME                         VARCHAR (128)                    ,
-VARS_DESCRIPTION                  VARCHAR (128)                    ,
+VARS_NAME                         VARCHAR (256)                    ,
+VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1378,7 +1497,7 @@ CREATE TABLE C_ANSIBLE_PNS_EXE_INS_MNG
 (
 EXECUTION_NO                      INT                              , -- 識別シーケンス
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 
 STATUS_ID                         INT                              ,
 SYMPHONY_INSTANCE_NO              INT                              ,
@@ -1391,7 +1510,7 @@ I_ANS_WINRM_ID                    INT                              ,
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
@@ -1420,7 +1539,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 EXECUTION_NO                      INT                              , -- 識別シーケンス
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 
 STATUS_ID                         INT                              ,
 SYMPHONY_INSTANCE_NO              INT                              ,
@@ -1433,7 +1552,7 @@ I_ANS_WINRM_ID                    INT                              ,
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
@@ -1788,7 +1907,7 @@ CREATE TABLE C_ANSIBLE_LRL_EXE_INS_MNG
 (
 EXECUTION_NO                      INT                              ,
 EXECUTION_USER                    VARCHAR (80)                     , -- 作業パターン名
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 
 STATUS_ID                         INT                              , -- 状態
 SYMPHONY_INSTANCE_NO              INT                              ,
@@ -1801,7 +1920,7 @@ I_ANS_WINRM_ID                    INT                              , -- WINRM接
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションNo
-I_OPERATION_NAME                  VARCHAR (128)                    , -- オペレーション名
+I_OPERATION_NAME                  VARCHAR (256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
@@ -1830,7 +1949,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 EXECUTION_NO                      INT                              ,
 EXECUTION_USER                    VARCHAR (80)                     , -- 作業パターン名
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 
 STATUS_ID                         INT                              , -- 状態
 SYMPHONY_INSTANCE_NO              INT                              ,
@@ -1843,7 +1962,7 @@ I_ANS_WINRM_ID                    INT                              , -- WINRM接
 I_ANS_PLAYBOOK_HED_DEF            VARCHAR (512)                    ,
 I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションNo
-I_OPERATION_NAME                  VARCHAR (128)                    , -- オペレーション名
+I_OPERATION_NAME                  VARCHAR (256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
@@ -1872,7 +1991,7 @@ CREATE TABLE B_ANSIBLE_LRL_ROLE_PACKAGE
 (
 ROLE_PACKAGE_ID                   INT                              , -- 識別シーケンス
 
-ROLE_PACKAGE_NAME                 VARCHAR (128)                    , -- ロールパッケージ名
+ROLE_PACKAGE_NAME                 VARCHAR (256)                    , -- ロールパッケージ名
 ROLE_PACKAGE_FILE                 VARCHAR (256)                    , -- ロールパッケージファイル(ZIP形式)
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -1894,7 +2013,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 ROLE_PACKAGE_ID                   INT                              , -- 識別シーケンス
 
-ROLE_PACKAGE_NAME                 VARCHAR (128)                    , -- ロールパッケージ名
+ROLE_PACKAGE_NAME                 VARCHAR (256)                    , -- ロールパッケージ名
 ROLE_PACKAGE_FILE                 VARCHAR (256)                    , -- ロールパッケージファイル(ZIP形式)
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -1907,7 +2026,6 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 -- 履歴系テーブル作成----
 -- END----------------------------------------------------
 
-
 -- -------------------------------------------------------
 -- T-0003 ロール名管理
 -- -------------------------------------------------------
@@ -1917,7 +2035,7 @@ CREATE TABLE B_ANSIBLE_LRL_ROLE
 ROLE_ID                           INT                              , -- 識別シーケンス
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
-ROLE_NAME                         VARCHAR (128)                    , -- ロール名
+ROLE_NAME                         VARCHAR (1024)                   , -- ロール名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1939,7 +2057,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 ROLE_ID                           INT                              , -- 識別シーケンス
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
-ROLE_NAME                         VARCHAR (128)                    , -- ロール名
+ROLE_NAME                         VARCHAR (1024)                   , -- ロール名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1962,7 +2080,7 @@ VARS_NAME_ID                      INT                              , -- 識別�
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
 ROLE_ID                           INT                              , -- ロール名
-VARS_NAME                         VARCHAR (128)                    , -- 変数名
+VARS_NAME                         VARCHAR (256)                    , -- 変数名
 VARS_ATTRIBUTE_01                 INT                              , -- 変数属性
                                                                      -- -- 1:一般変数
                                                                      -- -- 2:複数具体値変数
@@ -1989,7 +2107,7 @@ VARS_NAME_ID                      INT                              , -- 識別�
 
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージ名
 ROLE_ID                           INT                              , -- ロール名
-VARS_NAME                         VARCHAR (128)                    , -- 変数名
+VARS_NAME                         VARCHAR (256)                    , -- 変数名
 VARS_ATTRIBUTE_01                 INT                              , -- 変数属性
                                                                      -- -- 1:一般変数
                                                                      -- -- 2:複数具体値変数
@@ -2062,9 +2180,9 @@ CREATE TABLE B_ANSIBLE_LRL_VARS_MASTER
 (
 VARS_NAME_ID                      INT                              ,
 
-VARS_NAME                         VARCHAR (128)                    , -- 変数名
+VARS_NAME                         VARCHAR (256)                    , -- 変数名
 VARS_ATTRIBUTE_01                 INT                              , 
-VARS_DESCRIPTION                  VARCHAR (128)                    , -- 変数説明
+VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2085,9 +2203,9 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 VARS_NAME_ID                      INT                              ,
 
-VARS_NAME                         VARCHAR (128)                    , -- 変数名
+VARS_NAME                         VARCHAR (256)                    , -- 変数名
 VARS_ATTRIBUTE_01                 INT                              , 
-VARS_DESCRIPTION                  VARCHAR (128)                    , -- 変数説明
+VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2355,7 +2473,7 @@ ARRAY_MEMBER_ID                   INT                              , -- 識別�
 VARS_NAME_ID                      INT                              , -- 変数名一覧 Pkey
 PARENT_VARS_KEY_ID                INT                              , -- 親メンバー変数へのキー 
 VARS_KEY_ID                       INT                              , -- 自メンバー変数のキー
-VARS_NAME                         VARCHAR (128)                    , -- メンバー変数名　　0:配列変数を示す
+VARS_NAME                         VARCHAR (256)                    , -- メンバー変数名　　0:配列変数を示す
 ARRAY_NEST_LEVEL                  INT                              , -- 階層 1～
 ASSIGN_SEQ_NEED                   INT                              , -- 代入順序有無　1:必要　初期値:NULL
 COL_SEQ_NEED                      INT                              , -- 列順序有無  　1:必要　初期値:NULL
@@ -2386,7 +2504,7 @@ ARRAY_MEMBER_ID                   INT                              , -- 識別�
 VARS_NAME_ID                      INT                              , -- 変数名一覧 Pkey
 PARENT_VARS_KEY_ID                INT                              , -- 親メンバー変数へのキー 
 VARS_KEY_ID                       INT                              , -- 自メンバー変数のキー
-VARS_NAME                         VARCHAR (128)                    , -- メンバー変数名　　0:配列変数を示す
+VARS_NAME                         VARCHAR (256)                    , -- メンバー変数名　　0:配列変数を示す
 ARRAY_NEST_LEVEL                  INT                              , -- 階層 1～
 ASSIGN_SEQ_NEED                   INT                              , -- 代入順序有無　1:必要　初期値:NULL
 COL_SEQ_NEED                      INT                              , -- 列順序有無  　1:必要　初期値:NULL
@@ -2504,8 +2622,8 @@ CREATE TABLE B_ANS_LRL_RP_REP_VARS_LIST
 ROW_ID                            INT                              , -- 識別シーケンス
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージID
 ROLE_ID                           INT                              , -- ロールID
-REP_VARS_NAME                     VARCHAR (128)                    , -- 読替変数名
-ANY_VARS_NAME                     VARCHAR (128)                    , -- 任意変数名
+REP_VARS_NAME                     VARCHAR (256)                    , -- 読替変数名
+ANY_VARS_NAME                     VARCHAR (256)                    , -- 任意変数名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2525,8 +2643,8 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 ROW_ID                            INT                              , -- 識別シーケンス
 ROLE_PACKAGE_ID                   INT                              , -- ロールパッケージID
 ROLE_ID                           INT                              , -- ロールID
-REP_VARS_NAME                     VARCHAR (128)                    , -- 読替変数名
-ANY_VARS_NAME                     VARCHAR (128)                    , -- 任意変数名
+REP_VARS_NAME                     VARCHAR (256)                    , -- 読替変数名
+ANY_VARS_NAME                     VARCHAR (256)                    , -- 任意変数名
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -3455,7 +3573,7 @@ GBL_VARS_NAME_ID                  INT                              , -- 識別�
 
 VARS_NAME                         VARCHAR (128)                    , -- グローバル変数名
 VARS_ENTRY                        VARCHAR (1024)                   , -- 具体値
-VARS_DESCRIPTION                  VARCHAR (128)                    , -- 変数説明
+VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -3478,7 +3596,7 @@ GBL_VARS_NAME_ID                  INT                              , -- 識別�
 
 VARS_NAME                         VARCHAR (128)                    , -- グローバル変数名
 VARS_ENTRY                        VARCHAR (1024)                   , -- 具体値
-VARS_DESCRIPTION                  VARCHAR (128)                    , -- 変数説明
+VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -3536,7 +3654,6 @@ CREATE        INDEX IND_B_ANS_PNS_VAL_ASSIGN_01       ON B_ANS_PNS_VAL_ASSIGN   
 CREATE        INDEX IND_C_ANSIBLE_LRL_EXE_INS_MNG_01  ON C_ANSIBLE_LRL_EXE_INS_MNG     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_ROLE_PACKAGE_01 ON B_ANSIBLE_LRL_ROLE_PACKAGE    (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_ROLE_01         ON B_ANSIBLE_LRL_ROLE            (DISUSE_FLAG);
-CREATE UNIQUE INDEX IND_B_ANSIBLE_LRL_ROLE_02         ON B_ANSIBLE_LRL_ROLE            (ROLE_PACKAGE_ID, ROLE_NAME);
 CREATE        INDEX IND_B_ANSIBLE_LRL_ROLE_VARS_01    ON B_ANSIBLE_LRL_ROLE_VARS       (DISUSE_FLAG);
 CREATE UNIQUE INDEX IND_B_ANSIBLE_LRL_ROLE_VARS_02    ON B_ANSIBLE_LRL_ROLE_VARS       (ROLE_PACKAGE_ID, ROLE_ID , VARS_NAME);
 CREATE        INDEX IND_B_ANSIBLE_LRL_PATTERN_LINK_01 ON B_ANSIBLE_LRL_PATTERN_LINK    (DISUSE_FLAG);
@@ -4107,6 +4224,18 @@ INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_JOBTP_PROPERTY_RIC',12);
 
 INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_JOBTP_PROPERTY_JSQ',12);
 
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_RIC',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_JSQ',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_V_ID_RIC',4);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_V_ID_JSQ',4);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_F_ID_RIC',5);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_F_ID_JSQ',5);
+
 
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100020000,'Ansible共通','anscmn.png',70,'Ansible共通','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20000,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100020000,'Ansible共通','anscmn.png',70,'Ansible共通','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -4211,6 +4340,8 @@ INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRI
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20322,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100020322,2100020003,'読替変数一覧',NULL,NULL,NULL,1,0,1,2,1000,'role_replace_vars_list','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040705,2100020000,'インスタンスグループリスト',NULL,NULL,NULL,1,0,1,1,280,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-140027,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040705,2100020000,'インスタンスグループリスト',NULL,NULL,NULL,1,0,1,1,280,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040707,2100020000,'共通変数利用リスト',NULL,NULL,NULL,1,0,1,1,290,'ans_comvers_usedlist','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40707,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040707,2100020000,'共通変数利用リスト',NULL,NULL,NULL,1,0,1,1,290,'ans_comvers_usedlist','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100003,'a3c','5ebbc37e034d6874a2af59eb04beaa52','legacy状態確認プロシージャ','sample@xxx.bbb.ccc','legacy状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100003,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100003,'a3c','5ebbc37e034d6874a2af59eb04beaa52','legacy状態確認プロシージャ','sample@xxx.bbb.ccc','legacy状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -4337,6 +4468,8 @@ INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40704,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040704,1,2100040704,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040705,1,2100040705,1,'システム管理者','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40705,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040705,1,2100040705,1,'システム管理者','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040707,1,2100040707,1,'システム管理者','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40707,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040707,1,2100040707,1,'システム管理者','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_DEL_OPERATION_LIST (ROW_ID,LG_DAYS,PH_DAYS,TABLE_NAME,PKEY_NAME,OPE_ID_COL_NAME,GET_DATA_STRAGE_SQL,DATA_PATH_1,DATA_PATH_2,DATA_PATH_3,DATA_PATH_4,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000004,3600,7200,'B_ANSIBLE_LNS_PHO_LINK','PHO_LINK_ID','OPERATION_NO_UAPK',NULL,NULL,NULL,NULL,NULL,'作業対象ホスト(Ansible-Legacy)','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_DEL_OPERATION_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,LG_DAYS,PH_DAYS,TABLE_NAME,PKEY_NAME,OPE_ID_COL_NAME,GET_DATA_STRAGE_SQL,DATA_PATH_1,DATA_PATH_2,DATA_PATH_3,DATA_PATH_4,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-2100000004,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000004,3600,7200,'B_ANSIBLE_LNS_PHO_LINK','PHO_LINK_ID','OPERATION_NO_UAPK',NULL,NULL,NULL,NULL,NULL,'作業対象ホスト(Ansible-Legacy)','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -4445,6 +4578,22 @@ INSERT INTO B_ANS_TWR_JOBTP_PROPERTY_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JO
 
 INSERT INTO B_ANS_TWER_RUNDATA_DEL_FLAG (FLAG_ID,FLAG_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'削除する',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_ANS_TWER_RUNDATA_DEL_FLAG_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,FLAG_ID,FLAG_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'削除する',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO B_ANS_COMVRAS_USLIST_V_ID (ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'GBL',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_V_ID_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'GBL',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_V_ID (ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'CPF',2,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_V_ID_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'CPF',2,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_V_ID (ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,'TPF',3,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_V_ID_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',3,'TPF',3,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO B_ANS_COMVRAS_USLIST_F_ID (ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Playbook',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_F_ID_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Playbook',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_F_ID (ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Dialog file',2,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_F_ID_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'Dialog file',2,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_F_ID (ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,'Role package',3,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_F_ID_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',3,'Role package',3,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_F_ID (ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(4,'Template file',4,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANS_COMVRAS_USLIST_F_ID_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(4,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',4,'Template file',4,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 
 COMMIT;

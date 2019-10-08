@@ -161,7 +161,11 @@ def main():
     # telnet/sshに接続時の追加パラメータ適用
 
     # SSH接続でSSH秘密鍵ファイルが設定されているか判定
-    append_param = " -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+    if protocol == "ssh":
+      append_param = " -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+    else:
+      append_param = "" 
+
     if ssh_key_file != "__undefinesymbol__" and protocol == "ssh":
       append_param = append_param + " -o 'IdentityFile=\"" + ssh_key_file + "\"' "
 

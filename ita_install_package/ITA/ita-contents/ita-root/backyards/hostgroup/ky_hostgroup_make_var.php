@@ -44,6 +44,7 @@ try{
     $updateCnt = 0;             // 更新件数
     $insertCnt = 0;             // 登録件数
     $disuseCnt = 0;             // 廃止件数
+    $tranStartFlg = false;
 
     //////////////////////////
     // ホストグループ一覧テーブルを検索

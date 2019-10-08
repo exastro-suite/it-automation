@@ -165,7 +165,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     //////////////////////////////////////
     // グループ
     //////////////////////////////////////
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $objVldt->setRegexp('/^[a-zA-Z0-9]+$/');
     $c = new TextColumn('GROUP_AUTH',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100811"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100812"));//エクセル・ヘッダでの説明

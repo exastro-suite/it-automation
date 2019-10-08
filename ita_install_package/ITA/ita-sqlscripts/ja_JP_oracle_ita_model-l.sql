@@ -5,7 +5,7 @@ CREATE TABLE F_MM_STATUS_MASTER
 (
 FILE_STATUS_ID                     NUMBER                           , -- 識別シーケンス項番
 
-FILE_STATUS_NAME                   VARCHAR2(32)                     ,
+FILE_STATUS_NAME                   VARCHAR2(256)                     ,
 DISP_FLAG_1                        NUMBER                           ,
 DISP_FLAG_2                        NUMBER                           ,
 DISP_FLAG_3                        NUMBER                           ,
@@ -30,7 +30,7 @@ JOURNAL_ACTION_CLASS               VARCHAR2 (8)                     , -- 履歴�
 
 FILE_STATUS_ID                     NUMBER                           , -- 識別シーケンス項番
 
-FILE_STATUS_NAME                   VARCHAR2(32)                     ,
+FILE_STATUS_NAME                   VARCHAR2(256)                     ,
 DISP_FLAG_1                        NUMBER                           ,
 DISP_FLAG_2                        NUMBER                           ,
 DISP_FLAG_3                        NUMBER                           ,
@@ -54,7 +54,7 @@ DIR_NAME                           VARCHAR2(128)                    ,
 PARENT_DIR_ID                      NUMBER                           ,
 DIR_NAME_FULLPATH                  VARCHAR2(1024)                   ,
 CHMOD                              VARCHAR2(3)                      ,
-GROUP_AUTH                         VARCHAR2(128)                    ,
+GROUP_AUTH                         VARCHAR2(256)                    ,
 USER_AUTH                          VARCHAR2(128)                    ,
 DIR_USAGE                          VARCHAR2(4000)                   ,
 
@@ -79,7 +79,7 @@ DIR_NAME                           VARCHAR2(128)                    ,
 PARENT_DIR_ID                      NUMBER                           ,
 DIR_NAME_FULLPATH                  VARCHAR2(1024)                   ,
 CHMOD                              VARCHAR2(3)                      ,
-GROUP_AUTH                         VARCHAR2(128)                    ,
+GROUP_AUTH                         VARCHAR2(256)                    ,
 USER_AUTH                          VARCHAR2(128)                    ,
 DIR_USAGE                          VARCHAR2(4000)                   ,
 
@@ -134,7 +134,7 @@ FILE_NAME                          VARCHAR2(128)                    ,
 DIR_ID                             NUMBER                           ,
 AUTO_RETURN_FLAG                   NUMBER                           ,
 CHMOD                              VARCHAR2(3)                      ,
-GROUP_AUTH                         text(128)                        ,
+GROUP_AUTH                         text(256)                        ,
 USER_AUTH                          text(128)                        ,
 DIR_USAGE                          VARCHAR2(4000)                   ,
 
@@ -159,7 +159,7 @@ FILE_NAME                          VARCHAR2(128)                    ,
 DIR_ID                             NUMBER                           ,
 AUTO_RETURN_FLAG                   NUMBER                           ,
 CHMOD                              VARCHAR2(3)                      ,
-GROUP_AUTH                         text(128)                        ,
+GROUP_AUTH                         text(256)                        ,
 USER_AUTH                          text(128)                        ,
 DIR_USAGE                          VARCHAR2(4000)                   ,
 

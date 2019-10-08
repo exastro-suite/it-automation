@@ -93,10 +93,10 @@
 
 
         //cobblerから、プロファイルのリストを取得
-        exec($cobbler_profile_command, $exec_array, $exec_result);
+        exec($cobbler_profile_command . ' 2>&1', $exec_array, $exec_result);
         if ($exec_result != 0){
             // 異常フラグON
-            // $error_flag = 1;
+             $error_flag = 1;
             // 例外処理へ
             throw new Exception( $objMTS->getSomeMessage("ITACBLH-ERR-3001", array(__LINE__)) );
         }

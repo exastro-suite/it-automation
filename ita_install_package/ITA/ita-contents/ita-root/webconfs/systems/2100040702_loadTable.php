@@ -154,7 +154,7 @@ Ansibleインターフェース情報
     $tcg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000005"));
 
         /* 組織         */
-	$objVldt = new SingleTextValidator(0,64,false);
+	$objVldt = new SingleTextValidator(0,512,false);
 	$c = new TextColumn('ANSTWR_ORGANIZATION',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000002"));
 	$c -> setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000003")); // エクセル・ヘッダでの説明
 	$c -> setValidator($objVldt);

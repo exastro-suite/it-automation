@@ -77,6 +77,22 @@ $ary[106045] = "(Prefix string TPF_) Alphanumeric characters and available symbo
 $ary[106050] = "Make sure to assign \"TPF_\" as prefix string.";
 $ary[106060] = "Template files";
 $ary[106070] = "Files that can be used as template are limited to the Jinja2 template file. \n (Ansible specifications)";
+$ary[106075] = "Variable definition";
+$ary[106076] = "Define the structure of the variable (VAR_) used in Template file in YAML format.
+The structure of variables can be defined by the following three types.
+・Variable that can define one specific value for variable name.
+    exp)
+  　　VAR_sample:
+・Variable that can define multiple concrete values for variable name.
+    exp)
+    　VAR_sample: []
+・Nested variable.
+    exp)
+      VAR_sample:
+        name:
+        value:";
+$ary[106077] = "Nested variable abd Translation variable use flag";
+$ary[106078] = "Nested variable abd Translation variable use flag";
 $ary[106080] = "Display order";
 $ary[106090] = "To control display order";
 $ary[108020] = "You can view execution list (execution history). <br>When you click “Check execution status”, you transition to Check execution status menu.";
@@ -228,7 +244,7 @@ $ary[301040] = "Playbook ID";
 $ary[301050] = "Legacy Playbook files";
 $ary[301060] = "Legacy Playbook files";
 $ary[301070] = "Playbook name";
-$ary[301080] = "[Maximum length] 32 byte";
+$ary[301080] = "[Maximum length] 256 byte";
 $ary[301090] = "Playbook files";
 $ary[302010] = "[Maximum size] 20MB";
 $ary[302020] = "Display order";
@@ -262,7 +278,7 @@ $ary[304070] = "Item No.";
 $ary[304080] = "Legacy var name list";
 $ary[304090] = "Legacy var name list";
 $ary[305010] = "Variable name";
-$ary[305011] = "[Maximum length] 128 byte";
+$ary[305011] = "[Maximum length] 256 byte";
 $ary[305020] = "Variable name description";
 $ary[305030] = "Single line text input";
 $ary[305040] = "Display order";
@@ -284,7 +300,7 @@ $ary[307010] = "Item No.";
 $ary[307020] = "Pioneer dialog type list";
 $ary[307030] = "Pioneer dialog type list";
 $ary[307040] = "Dialog type name";
-$ary[307050] = "[Maximum length] 32 byte";
+$ary[307050] = "[Maximum length] 256 byte";
 $ary[307060] = "Display order";
 $ary[307070] = "To control display order";
 $ary[308090] = "You can view execution list (execution history). <br>When you click “Check execution status”, you transition to Check execution status menu.";
@@ -454,9 +470,9 @@ $ary[504020] = "Item No.";
 $ary[504030] = "Pioneer var name list";
 $ary[504040] = "Pioneer var name list";
 $ary[504050] = "Variable name";
-$ary[504060] = "[Maximum length] 128 byte";
+$ary[504060] = "[Maximum length] 256 byte";
 $ary[504070] = "Variable name description";
-$ary[504080] = "[Maximum length] 128 byte";
+$ary[504080] = "[Maximum length] 256 byte";
 $ary[504090] = "Display order";
 $ary[505010] = "To control display order";
 $ary[505020] = "Description";
@@ -741,11 +757,11 @@ $ary[1304200] = "Following items are duplicated with the records of [Item No.]:(
 $ary[1304201] = ",(Member variable name)]";
 $ary[1304203] = ",(Substitution order)]";
 $ary[1305010] = "Variable name";
-$ary[1305013] = "[Maximum length] 128 byte";
+$ary[1305013] = "[Maximum length] 256 byte";
 $ary[1305015] = "Variable type";
 $ary[1305016] = "In case of array variable, set 1. In cases other than array variable, set as blank.\n";
 $ary[1305020] = "Variable name description";
-$ary[1305030] = "[Maximum length] 128 byte";
+$ary[1305030] = "[Maximum length] 256 byte";
 $ary[1305040] = "Display order";
 $ary[1305050] = "To control display order";
 $ary[1305060] = "Group variable name";
@@ -778,7 +794,7 @@ $ary[1601060] = "[Original data] Role package list";
 $ary[1601070] = "Role name";
 $ary[1601080] = "[Original data] Role name list";
 $ary[1601090] = "Variable name";
-$ary[1602010] = "[Maximum length] 128 byte";
+$ary[1602010] = "[Maximum length] 256 byte";
 $ary[1602020] = "Display order";
 $ary[1602030] = "To control display order";
 $ary[1603010] = "Associate role name and role package of Ansible-Legacy Role.";
@@ -788,7 +804,7 @@ $ary[1603040] = "Role role name list";
 $ary[1603050] = "Role package name";
 $ary[1603060] = "[Original data] Role package list";
 $ary[1603070] = "Role name";
-$ary[1603080] = "[Maximum length] 128 byte";
+$ary[1603080] = "[Maximum length] 1024 byte";
 $ary[1603090] = "Display order";
 $ary[1604010] = "To control display order";
 $ary[1605010] = "You can perform maintenance (view/register/update/discard) of the role package of Ansible-Legacy Role. ";
@@ -796,7 +812,7 @@ $ary[1605020] = "Item No.";
 $ary[1605030] = "Role role package list";
 $ary[1605040] = "Role role package list";
 $ary[1605050] = "Role package name";
-$ary[1605060] = "[Maximum length] 128 byte";
+$ary[1605060] = "[Maximum length] 256 byte";
 $ary[1605070] = "Role package file (ZIP format)";
 $ary[1605080] = "[Maximum size] 20MB";
 $ary[1605090] = "Display order";
@@ -1050,7 +1066,7 @@ $ary[1940011] = "Make sure to assign \"GBL_\" as prefix string.";
 $ary[1940020] = "Specific value";
 $ary[1940021] = "[Maximum length] 1024 byte";
 $ary[1940030] = "Variable name description";
-$ary[1940031] = "[Maximum length] 128 byte";
+$ary[1940031] = "[Maximum length] 256 byte";
 $ary[1950000] = "You can perform maintenance (view/register/update/discard) of the files used in the Playbook. <br><br> In file embedded variable name, enter a variable name that starts with \"CPF_\". <br> This variable name is written in a Playbook. <br>(Example)<br>　　　- copy: src={{ CPF_sample }} dest=/usr/local/src<br>　　　- unarchive src={{ CPF_sample }} dest=/usr/local/bin remote_src=yes<br>";
 $ary[1950001] = "Role ID";
 $ary[1950002] = "Role Files";

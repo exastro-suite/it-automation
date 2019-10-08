@@ -176,7 +176,7 @@ Ansible(Legacy)作業管理
     $cg->addColumn($c);
 
 
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('I_OPERATION_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109080"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

@@ -221,7 +221,7 @@ func_create_tables() {
                     log "WARNING : $FILE_PATH does not be found."
                 else
                     FILE_SIZE=`wc -c < "$FILE_PATH"`
-                    if [ "$FILE_SIZE" -ne 81 ]; then
+                    if [ "$FILE_SIZE" -ne 0 ]; then
                         log "WARNING : The size of $FILE_PATH is incorrect."
                     fi
                 fi

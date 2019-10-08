@@ -157,6 +157,20 @@ function symphonyUpdateCancel(){
     sortableAreaFunctionOff();
 }
 
+// 流用新規
+function symphonyDiversionEdit(){
+    var exec_flag = true;
+    if( window.confirm(getSomeMessage("ITABASEC010114")) == false ){
+        exec_flag = false;
+    }
+    
+    if( exec_flag ){
+        var objSymphonyNoArea = document.getElementById('print_symphony_id');
+        // 現在のシンフォニーを、読み込みする
+        printSymphonyClass(true,objSymphonyNoArea.innerHTML,"12");
+    }
+}
+
 //----作業パターン一覧を、素材領域へ展開する
 function printMatchedPatternList(boolCallProxy,strStream){
     var intElementSetLength = 4;

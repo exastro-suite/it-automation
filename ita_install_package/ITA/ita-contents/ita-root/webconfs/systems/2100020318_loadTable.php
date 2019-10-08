@@ -77,7 +77,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new IntNumValidator(null,null));
     $table->addColumn($c);
 
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('VARS_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1706110"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1706120"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

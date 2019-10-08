@@ -8,7 +8,7 @@ ROW_ID                             %INT%                           , -- 識別�
 OPERATION_NO_UAPK                  %INT%                           ,
 PATTERN_ID                         %INT%                           ,
 SYSTEM_ID                          %INT%                           ,
-VARS_NAME                          %VARCHR%(128)                   ,
+VARS_NAME                          %VARCHR%(512)                   ,
 
 DISP_SEQ                           %INT%                           , -- 表示順序
 NOTE                               %VARCHR%(4000)                  , -- 備考
@@ -30,7 +30,7 @@ ROW_ID                             %INT%                           , -- 識別�
 OPERATION_NO_UAPK                  %INT%                           ,
 PATTERN_ID                         %INT%                           ,
 SYSTEM_ID                          %INT%                           ,
-VARS_NAME                          %VARCHR%(128)                   ,
+VARS_NAME                          %VARCHR%(512)                   ,
 
 DISP_SEQ                           %INT%                           , -- 表示順序
 NOTE                               %VARCHR%(4000)                  , -- 備考
@@ -47,7 +47,7 @@ ROW_ID                             %INT%                           , -- 識別�
 OPERATION_NO_UAPK                  %INT%                           ,
 PATTERN_ID                         %INT%                           ,
 SYSTEM_ID                          %INT%                           ,
-VARS_NAME                          %VARCHR%(128)                   ,
+VARS_NAME                          %VARCHR%(512)                   ,
 
 DISP_SEQ                           %INT%                           , -- 表示順序
 NOTE                               %VARCHR%(4000)                  , -- 備考
@@ -69,7 +69,7 @@ ROW_ID                             %INT%                           , -- 識別�
 OPERATION_NO_UAPK                  %INT%                           ,
 PATTERN_ID                         %INT%                           ,
 SYSTEM_ID                          %INT%                           ,
-VARS_NAME                          %VARCHR%(128)                   ,
+VARS_NAME                          %VARCHR%(512)                   ,
 
 DISP_SEQ                           %INT%                           , -- 表示順序
 NOTE                               %VARCHR%(4000)                  , -- 備考

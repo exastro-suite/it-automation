@@ -101,7 +101,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 	$c->setValidator($objVldt);
     $table->addColumn($c);
 
-	$objVldt = new SingleTextValidator(0,128,false);
+	$objVldt = new SingleTextValidator(0,256,false);
     $c = new TextColumn('I_OPERATION_NAME',$g['objMTS']->getSomeMessage("ITAOPENST-MNU-150150"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAOPENST-MNU-150160"));//エクセル・ヘッダでの説明
     $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :active"');

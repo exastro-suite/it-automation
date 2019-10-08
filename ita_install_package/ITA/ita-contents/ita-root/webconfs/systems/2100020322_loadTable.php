@@ -80,7 +80,7 @@ Ansible（Legacy Role）パッケージ内読替変数管理
 
 
     // 読替変数
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('REP_VARS_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-5000300"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-5000301"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
@@ -88,7 +88,7 @@ Ansible（Legacy Role）パッケージ内読替変数管理
     $table->addColumn($c);
 
     // 任意変数
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('ANY_VARS_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-5000400"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-5000401"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須

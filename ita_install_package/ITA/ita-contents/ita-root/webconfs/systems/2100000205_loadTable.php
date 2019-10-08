@@ -19,6 +19,14 @@
 //    ・WebDBCore機能を用いたWebページの中核設定を行う。
 //
 //////////////////////////////////////////////////////////////////////
+/* ルートディレクトリの取得 */
+if ( empty($root_dir_path) ){
+    $root_dir_temp = array();
+    $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+    $root_dir_path = $root_dir_temp[0] . "ita-root";
+}
+
+require_once ( $root_dir_path . "/libs/webindividuallibs/systems/2100000205/validator.php");
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
@@ -117,7 +125,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040602"));
     $c->getOutputType('update_table')->setAttr('size','60');
     $c->getOutputType('register_table')->setAttr('size','60');
-    $c->setValidator(new SingleTextValidator(1, 64, false));
+    $c->setValidator(new MenuNameValidator_2100000205(1, 64, false));
     $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
     

@@ -45,7 +45,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);
     $c->setUnique(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1060202"));
-    $c->setValidator(new SingleTextValidator(1, 64, false));
+    $c->setValidator(new SingleTextValidator(1, 256, false));
     $table->addColumn($c);
 
     // ユーザ情報

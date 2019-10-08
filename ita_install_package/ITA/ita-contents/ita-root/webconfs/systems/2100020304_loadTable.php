@@ -68,7 +68,7 @@ Ansible（Legacy Role）ロール名管理
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('ROLE_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1603070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1603080"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

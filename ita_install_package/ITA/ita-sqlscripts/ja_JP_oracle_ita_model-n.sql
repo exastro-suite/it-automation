@@ -6,7 +6,7 @@ CREATE TABLE F_HOSTGROUP_LIST
 (
 ROW_ID                             NUMBER                          , -- 識別シーケンスホストグループID
 
-HOSTGROUP_NAME                     VARCHAR2(128)                    ,
+HOSTGROUP_NAME                     VARCHAR2(256)                    ,
 STRENGTH                           NUMBER                          ,
 
 DISP_SEQ                           NUMBER                          , -- 表示順序
@@ -26,7 +26,7 @@ JOURNAL_ACTION_CLASS               VARCHAR2(8)                     , -- 履歴�
 
 ROW_ID                             NUMBER                          , -- 識別シーケンスホストグループID
 
-HOSTGROUP_NAME                     VARCHAR2(128)                    ,
+HOSTGROUP_NAME                     VARCHAR2(256)                    ,
 STRENGTH                           NUMBER                          ,
 
 DISP_SEQ                           NUMBER                          , -- 表示順序

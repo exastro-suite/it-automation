@@ -47,7 +47,7 @@
 //  F0017 getDBLegacyPlaybookList
 //  F0018 getDBPioneerDialogFileList
 //  F0019 addSystemvars
-//  F0020 getDBLegacyTemplateMaster
+//  F0020 getDBTemplateMaster
 //  F0021 CreateTemplatefiles
 //  F0022 CreateLegacytemplatefiles
 //  F0023 CheckTemplatefile
@@ -60,7 +60,7 @@
 //  F0034 getDBChildVarsList
 //  F0037 CreateCopyfiles
 //  F0038 CreateLegacyCopyFiles
-//  F0039 getDBLegacyCopyMaster
+//  F0039 getDBCopyMaster
 //  F0040 makeHostVarsPath
 //  F0041 makeHostVarsArray
 //  F0042 MultiArrayVarsToYamlFormatSub
@@ -68,18 +68,18 @@
 //  F0044 getDBGlobalVarsMaster
 //  F0045 CreateLegacyRoleCopyFiles
 //  F0046 getDBTranslationTable
-//  F0047 LegacyCheckConcreteValueIsVar
-//  F0048 LegacyCheckConcreteValueIsVarTemplatefile
+//  F0047 CheckConcreteValueIsVar
+//  F0048 CheckConcreteValueIsVarTemplatefile
 //  F0049 LegacyRoleCheckConcreteValueIsVar
 //  F0050 CommitHostVarsfiles
 //  F0051 initCommandInfo
 //  F0052 errorCommand
 //  F0053 checkCommand
 //  F0054 CreatePioneerCopyFiles
-//  F0055 getDBPioneerCopyMaster
+//  F0055 getDBPioneeropyMaster
 //  F0056 CreatePioneertemplatefiles
-//  F0057 getDBPioneerTemplateMaster
 //  F0058 CopyPioneerTemplatefiles
+//  F0059 CreateLegacyRoleTemplateFiles
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php");
@@ -89,6 +89,9 @@ require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/CheckAnsibleRo
 
 // 共通モジュールをロード
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
+// enomotp
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php');
+
 
 class CreateAnsibleExecFiles {
     // Ansible 作業ディレクトリ名
@@ -199,6 +202,8 @@ class CreateAnsibleExecFiles {
     private $lv_Ansible_original_hosts_vars_Dir;   //original_hosts_varsディレクトリ
     private $lv_Ansible_template_files_Dir;        //template_filesディレクトリ
 
+    private $lv_Ansible_in_original_dialog_files_Dir; //in/original_dialog_filesディレクトリ
+
     //親PlayBook内各ディレクトリ変数
     private $lv_Playbook_child_playbooks_Dir;      //PlayBook内 子PlayBookパス
     private $lv_Hostvarsfile_template_file_Dir;    //inディレクトリ配下 テンプレートファイルパス
@@ -254,6 +259,8 @@ class CreateAnsibleExecFiles {
 
     // ロール内のplaybookで定義されているcopy変数のリスト
     private $lva_cpf_vars_list = array();
+    // ロール内のplaybookで定義されているtemplate変数のリスト
+    private $lva_tpf_vars_list = array();
 
     // ユーザー公開用データリレイストレージパス
     private $lv_user_out_Dir;
@@ -290,10 +297,15 @@ class CreateAnsibleExecFiles {
     private $lv_Ansible_win_ca_files_Dir;
 
     private  $lv_legacy_Role_cpf_vars_list;
-    private  $lv_legacy_tpf_vars_list;
-    private  $lv_legacy_cpf_vars_list;
-    private  $lv_legacy_tfp_use_gbl_vars_list;
-    private  $lv_legacy_parent_vars_list;
+    private  $lv_legacy_Role_tpf_vars_list;
+
+    private  $lv_tpf_vars_list;           // lv_legacy_tpf_vars_list  lv_tpf_vars_list
+    private  $lv_cpf_vars_list;           // lv_legacy_cpf_vars_list  lv_cpf_vars_list
+    private  $lv_use_gbl_vars_list;       // lv_legacy_tfp_use_gbl_vars_list  lv_tpf_use_gbl_vars_list
+    private  $lv_parent_vars_list;        // lv_legacy_parent_vars_list       lv_parent_vars_list
+   
+    private  $lv_tpf_var_file_path_list;
+    private  $lv_cpf_var_file_path_list;
 
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
@@ -423,10 +435,14 @@ class CreateAnsibleExecFiles {
         $this->lv_objDBCA = $in_objDBCA;
 
         $this->lv_legacy_Role_cpf_vars_list = array();
-        $this->lv_legacy_tpf_vars_list      = array();
-        $this->lv_legacy_cpf_vars_list      = array();
-        $this->lv_legacy_tfp_use_gbl_vars_list = array();
-        $this->lv_legacy_parent_vars_list      = array();
+        $this->lv_legacy_Role_tpf_vars_list = array();
+
+        $this->lv_tpf_vars_list             = array();
+        $this->lv_cpf_vars_list             = array();
+        $this->lv_use_gbl_vars_list     = array();
+        $this->lv_parent_vars_list          = array();
+        $this->lv_tpf_var_file_path_list    = array();
+        $this->lv_cpf_var_file_path_list    = array();
 
     }
 
@@ -716,7 +732,8 @@ class CreateAnsibleExecFiles {
 
         // ドライバ区分がLEGACYまたはPioneerの場合にtemplate_filesディレクトリを作成する。
         if (($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
-            ($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID)){
+            ($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) ||
+            ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)){
             //template_filesディレクトリ作成
             $c_dirwk = $c_indir . "/" . self::LC_ANS_TEMPLATE_FILES_DIR;
             if( !mkdir( $c_dirwk, 0777 ) ){
@@ -802,6 +819,23 @@ class CreateAnsibleExecFiles {
     
             // dialog_filesディレクトリ名を記憶
             $this->setAnsible_dialog_files_Dir($c_dirwk);
+
+            // original_dialog_filesディレクトリ作成
+            $c_dirwk = $c_indir . "/" . self::LC_ANS_ORG_DIALOG_FILES_DIR;
+            if( !mkdir( $c_dirwk, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            if( !chmod( $c_dirwk, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+    
+            // original_dialog_filesディレクトリ名を記憶
+            $this->setAnsible_in_original_dialog_files_Dir($c_dirwk);
+
         }
 
         // ドライバ区分がLegacy-Roleの場合
@@ -855,12 +889,16 @@ class CreateAnsibleExecFiles {
                 // ロール内のplaybookで定義されているcopy変数のリスト
                 $this->lva_cpf_vars_list = array();
 
+                // ロール内のplaybookで定義されているcopy変数のリスト
+                $this->lva_tpf_vars_list = array();
+
                 $ITA2User_var_list = array();
                 $User2ITA_var_list = array();
                 $comb_err_vars_list = array();
 
-                // $this->lva_cpf_vars_listの構造
+                // $this->lva_cpf/tpf_vars_listの構造
                 // $lva_cpf_vars_list[ロール名][ロール名/--/Playbook名][行番号][変数名] = 1
+                // $lva_tpf_vars_list[ロール名][ロール名/--/Playbook名][行番号][変数名] = 1
                 $ret = $roleObj->chkRolesDirectory($this->getAnsible_in_Dir(),
                                                $system_vars,
                                                "",
@@ -870,6 +908,8 @@ class CreateAnsibleExecFiles {
                                                // ロール内のplaybookからcopy変数を抽出する。
                                                true,
                                                $this->lva_cpf_vars_list,
+                                               true,
+                                               $this->lva_tpf_vars_list,
                                                $ITA2User_var_list,
                                                $User2ITA_var_list,
                                                $comb_err_vars_list,
@@ -901,8 +941,8 @@ class CreateAnsibleExecFiles {
                     }
                 }
 
-                // 紐づけされていないロールで使用しているCopy変数を
-                // $this->lva_cpf_vars_listから取り除く
+
+                // 作業パターンIDに紐づけられているロール名取得
                 $w_RoleInfoList = array();
                 $w_RoleNameList = array();
                 $this->getDBLegactRoleList($in_pattern_id,$w_RoleInfoList);
@@ -911,16 +951,57 @@ class CreateAnsibleExecFiles {
                         $w_RoleNameList[$w_rolename] = 0;
                     }
                 }
+                // 紐づけされていないロールで使用しているCopy変数を
+                // $this->lva_cpf_vars_listから取り除く
                 foreach($this->lva_cpf_vars_list as $w_rolename=>$array1) {
                     if( ! isset($w_RoleNameList[$w_rolename]) ) {
                          unset($this->lva_cpf_vars_list[$w_rolename]);
                     }
                 }
 
+                // 紐づけされていないロールで使用しているTemplate変数を
+                // $this->lva_tpf_vars_listから取り除く
+                foreach($this->lva_tpf_vars_list as $w_rolename=>$array1) {
+                    if( ! isset($w_RoleNameList[$w_rolename]) ) {
+                         unset($this->lva_tpf_vars_list[$w_rolename]);
+                    }
+                }
+                // 紐づけされていないロールで使用しているグローバル変数を
+                // $ina_roleglobalvarsから取り除く
+                $ina_roleglobalvars  = $roleObj->getglobalvarname();
+                if( ! is_array($ina_roleglobalvars)) {
+                    $ina_roleglobalvars = array();
+                }
+                foreach($ina_roleglobalvars as $w_rolename=>$array1) {
+                    if( ! isset($w_RoleNameList[$w_rolename]) ) {
+                         unset($ina_roleglobalvars[$w_rolename]);
+                    }
+                }
+
+                // グローバル変数管理からグローバル変数の情報を取得
+                $global_vars_list = array();
+                $msgstr = "";
+                $ret = getDBGlobalVarsMaster($global_vars_list,$msgstr);
+                if($ret === false){
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return(false);
+                }
+
+                $chkObj = new DefaultVarsFileAnalysis($this->lv_objMTS);
+                $msgstr = "";
+                // ロールパッケージ内のPlaybookで定義しているグローバル変数がグローバル変数管理にあるか
+                $ret = $chkObj->chkDefVarsListPlayBookGlobalVarsList($ina_roleglobalvars, $global_vars_list, $msgstr);
+                if($ret === false){
+                    unset($chkObj);
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return(false);
+                }
+                unset($chkObj);
+
                 // copy変数がファイル管理に登録されているか判定
                 $strErrMsg = "";;
                 $strErrDetailMsg = "";
-                $objLibs = new AnsibleCommonLibs();
+                $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
 
                 // $this->lva_cpf_vars_listの構造 CONTENTS_FILE_ID/CONTENTS_FILEはchkCPFVarsMasterRegの戻り値
                 // $lva_cpf_vars_list[ロール名][ロール名/--/Playbook名][行番号][変数名]['CONTENTS_FILE_ID'] = Pkey
@@ -928,14 +1009,31 @@ class CreateAnsibleExecFiles {
                 $ret = $objLibs->chkCPFVarsMasterReg($this->lv_objMTS,$this->lv_objDBCA,
                                                      $this->lva_cpf_vars_list,
                                                      $strErrMsg,$strErrDetailMsg);
-                unset($objLibs);
                 if($ret === false){
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$strErrMsg);
                     if($strErrDetailMsg != ""){
                         $this->DebugLogPrint(basename(__FILE__),__LINE__,$strErrDetailMsg);
                     }
+                    unset($objLibs);
                     return false;
                 }
+
+                // template変数がファイル管理に登録されているか判定
+                $strErrMsg = "";;
+                $strErrDetailMsg = "";
+
+                $ret = $objLibs->chkTPFVarsMasterReg($this->lv_objMTS,$this->lv_objDBCA,
+                                                     $this->lva_tpf_vars_list,
+                                                     $strErrMsg,$strErrDetailMsg);
+                if($ret === false){
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$strErrMsg);
+                    if($strErrDetailMsg != ""){
+                        $this->DebugLogPrint(basename(__FILE__),__LINE__,$strErrDetailMsg);
+                    }
+                    unset($objLibs);
+                    return false;
+                }
+                unset($objLibs);
 
                 // ロール名取得
                 // $ina_rolename[role名]
@@ -944,8 +1042,6 @@ class CreateAnsibleExecFiles {
                 // $ina_varname[role名][変数名]=0
                 $ina_rolevars  = $roleObj->getvarname();
                 
-                // ロール内のグローバル変数取得
-                $ina_roleglobalvars  = $roleObj->getglobalvarname();
 
             }
             unset($roleObj);
@@ -1136,6 +1232,17 @@ class CreateAnsibleExecFiles {
             return false;
         }
 
+        // 作業パターンに紐づいているグローバル変数を退避
+        switch($this->getAnsibleDriverID()){
+        case DF_LEGACY_ROLE_DRIVER_ID:
+             foreach($ina_role_roleglobalvars as $rokename=>$global_vars_array) {
+                 foreach($global_vars_array as $gbl_vars_name=>$dummy) {
+                     $this->lv_use_gbl_vars_list[$gbl_vars_name] = 0;
+                 }
+             }
+            break;
+        }
+
         //////////////////////////////////////
         // 読替表のデータを取得する。
         //////////////////////////////////////
@@ -1188,6 +1295,12 @@ class CreateAnsibleExecFiles {
                 return false;
             }
 
+            //////////////////////////////////////////////////////////////////////////
+            // Role内で使用しているtemplateモジュール変数をホスト変数定義ファイルに追加 //
+            //////////////////////////////////////////////////////////////////////////
+            if( $this->CreateLegacyRoleTemplateFiles($ina_hosts,$ina_hostprotcollist,$ina_rolenames,$this->lva_tpf_vars_list) === false){
+                return false;
+            }
             break;
         }
         //ドライバ区分を判定
@@ -1256,9 +1369,35 @@ class CreateAnsibleExecFiles {
             }
             /////////////////////////////////////////////////
             // 対話ファイルのフォーマットと変数定義チェック//
+            // 変数具体値の置換え　　　　　　　　　　　　  //
             /////////////////////////////////////////////////
-            if ( $this->CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist) === false){
+            if ( $this->CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist,false) === false){
                 return false;
+            }
+
+            ////////////////////////////////////////////////
+            // ホスト変数ファイルにグローバル変数・コピー変数
+            // テンプレート変数の情報を出力する。
+            ////////////////////////////////////////////////
+            if( $this->CommitHostVarsfiles($ina_hosts,$ina_hostprotcollist,$ina_host_vars) === false){
+                return false;
+            }
+
+            /////////////////////////////////////////////////
+            // 具体値がTPF/CPF変数の場合の具体値の置換え　 //
+            /////////////////////////////////////////////////
+            if ( $this->CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist,true) === false){
+                return false;
+            }
+
+            ///////////////////////////////////////////////
+            // テンプレート管理を使用している場合、
+            // 親PlaybookにTemplateMmoduleを追加して
+            // テンプレート内の変数解決する。
+            ///////////////////////////////////////////////
+            if(count($this->lv_tpf_var_file_path_list) > 0 )
+            {
+                $this->TemplateMmoduleAddPlaybook($this->lv_tpf_var_file_path_list);
             }
             break;
         case DF_LEGACY_ROLE_DRIVER_ID:
@@ -1373,7 +1512,8 @@ class CreateAnsibleExecFiles {
                  // 対象ホストがwindowsの場合
                 (($this->lv_winrm_id == 1) ||
                  // パスワード認証の場合
-                 ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_PW)) ){
+                 ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_PW) ||
+                 ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_KEY)) ){
                 // sshの接続パラメータを作成する。
                 // ユーザー名
                 $win_param = $win_param . " ansible_ssh_user=" . $ina_hostinfolist[$host_name]['LOGIN_USER'];
@@ -1556,6 +1696,7 @@ class CreateAnsibleExecFiles {
             // ホスト変数ファイル名もホスト名にする
             foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
             $host_vars_file = $hostname;
+
             //ドライバ区分を判定しホスト変数定義ファイル名を取得
             switch($this->getAnsibleDriverID()){
             case DF_LEGACY_DRIVER_ID:
@@ -1565,8 +1706,9 @@ class CreateAnsibleExecFiles {
                 break;
             case DF_PIONEER_DRIVER_ID:
                 // ホストアドレス方式がホスト名方式の場合はhost_varsをホスト名する。
-                //PIONEER用のオリジナルホスト変数定義ファイル名を取得
-                $file_name = $this->getAnsible_org_host_var_file($host_vars_file);        
+                ////PIONEER用のオリジナルホスト変数定義ファイル名を取得
+                //$file_name = $this->getAnsible_org_host_var_file($host_vars_file);        
+                $file_name = $this->getAnsible_host_var_file($host_vars_file);
                 break;
             default:
                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55200",array(basename(__FILE__) . "-" . __LINE__)); //"内部処理異常  FILE:｛｝  LINE:｛｝が見つからない。"
@@ -1588,7 +1730,8 @@ class CreateAnsibleExecFiles {
             }
 
             // ホスト変数定義ファイル作成
-            if($this->CreateHostvarsfile("VAR",$host_name,
+            //if($this->CreateHostvarsfile("VAR",$host_name,
+            if($this->CreateHostvarsfile("VAR",$hostname,
                                          $file_name,$vars_list,
                                          $chl_vars_list,$ina_DB_child_vars_master) === false)
             {
@@ -1628,8 +1771,12 @@ class CreateAnsibleExecFiles {
         if(@is_array($this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr]) === false){
             $this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr] = array();
         }
+        if(@is_array($this->lv_legacy_Role_tpf_vars_list[$in_host_ipaddr]) === false){
+            $this->lv_legacy_Role_tpf_vars_list[$in_host_ipaddr] = array();
+        }
 
         $var_str = "";
+
         foreach( $ina_var_list as $var=>$val ){
             // 変数の重複出力防止
             if(@count($parent_vars_list[$var]) != 0)
@@ -1639,6 +1786,14 @@ class CreateAnsibleExecFiles {
             // 使用されているコピー変数か確認する。
             if($in_var_type == "CPF"){
                 if(@strlen($this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr][$var]) != 0)
+                {
+                    continue;
+                }
+            }
+            // テンプレート変数の登録の場合に、VAR変数の具体値に
+            // 使用されているテンプレート変数か確認する。
+            if($in_var_type == "TPF"){
+                if(@strlen($this->lv_legacy_Role_tpf_vars_list[$in_host_ipaddr][$var]) != 0)
                 {
                     continue;
                 }
@@ -1655,12 +1810,13 @@ class CreateAnsibleExecFiles {
             //変数名: 具体値
             $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
 
-            // 変数の具体値に使用しているコピー変数の情報を確認
+            // 変数の具体値に使用しているテンプレート/コピー変数の情報を確認
             if($in_var_type == "VAR"){
-                $objLibs = new AnsibleCommonLibs();
+                $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
                 $ret = $this->LegacyRoleCheckConcreteValueIsVar($objLibs,
                                                                 $val,
-                                                                $this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr]);
+                                                                $this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr],
+                                                                $this->lv_legacy_Role_tpf_vars_list[$in_host_ipaddr]);
                 unset($objLibs);
                 if($ret == false){
                     //エラーメッセージは出力しているので、ここでは何も出さない。
@@ -1669,12 +1825,14 @@ class CreateAnsibleExecFiles {
             }
         }
 
-        // copyモジュール変数のみ登録で呼ばれるケースの対応
+        // copy/templateモジュール変数のみ登録で呼ばれるケースの対応
         if($in_mode == "w"){
             $parent_vars_list = array();
             $MultiArrayVars_str = "";
             $ret = $this->MultiArrayVarsToYamlFormatMain($ina_MultiArray_vars_list,$MultiArrayVars_str,$parent_vars_list,
-                                                         $in_host_ipaddr,$this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr]);
+                                                         $in_host_ipaddr,
+                                                         $this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr], 
+                                                         $this->lv_legacy_Role_tpf_vars_list[$in_host_ipaddr]);
             if($ret === false){
                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90234");
                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -1685,6 +1843,12 @@ class CreateAnsibleExecFiles {
 
             // グローバル変数をホスト変数ファイルに登録する。
             foreach( $this->lva_global_vars_list as $var=>$val ){
+                // 作業パターンに紐づいているロール以外で使用しているグローバル変数を除外
+                if(@count($this->lv_use_gbl_vars_list[$var]) == 0) {
+                    continue;
+                }
+
+                // 二重処理防止
                 if(@count($parent_vars_list[$var]) != 0){
                     continue;
                 }
@@ -1694,10 +1858,11 @@ class CreateAnsibleExecFiles {
                 //変数名: 具体値
                 $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
                 //グローバル変数の具体値にコピー変数があるか確認
-                $objLibs = new AnsibleCommonLibs();
+                $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
                 $ret = $this->LegacyRoleCheckConcreteValueIsVar($objLibs,
                                                                 $val,
-                                                                $this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr]);
+                                                                $this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr], 
+                                                                $this->lv_legacy_Role_tpf_vars_list[$in_host_ipaddr]);
                 unset($objLibs);
                 if($ret == false){
                     //エラーメッセージは出力しているので、ここでは何も出さない。
@@ -1708,6 +1873,12 @@ class CreateAnsibleExecFiles {
             // "VAR"でしかこないルート 多段変数と他変数と同時に出力する。
             // 変数の具体値に使用しているコピー変数の情報をホスト変数ファイルに出力
             foreach($this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr] as $var=>$val){
+                //ホスト変数ファイルのレコード生成
+                //変数名: 具体値
+                $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+            }
+            // 変数の具体値に使用しているテンプレート変数の情報をホスト変数ファイルに出力
+            foreach($this->lv_legacy_Role_tpf_vars_list[$in_host_ipaddr] as $var=>$val){
                 //ホスト変数ファイルのレコード生成
                 //変数名: 具体値
                 $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
@@ -1772,56 +1943,14 @@ class CreateAnsibleExecFiles {
                                 $in_mode="w"){
         switch($this->getAnsibleDriverID()){
         case DF_PIONEER_DRIVER_ID:
-            $parent_vars_list = array();
-            $var_str = "";
-            foreach( $ina_var_list as $var=>$val ){
-                if(@count($parent_vars_list[$var]) != 0){
-                    continue;
-                }
-                $parent_vars_list[$var] = 0;
-                //ホスト変数ファイルのレコード生成
-                //変数名: 具体値
-                $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
-            }
-
-            // ファイル管理とテンプレート管理の変数登録でも呼ばれるので、この場合は
-            // グローバル変数をホスト変数ファイルに登録しない。
-            if($in_mode == "w"){
-                // グローバル変数をホスト変数ファイルに登録する。
-                foreach( $this->lva_global_vars_list as $var=>$val ){
-                    if(@count($parent_vars_list[$var]) != 0){
-                        continue;
-                    }
-                    $parent_vars_list[$var] = 0;
-                    //ホスト変数ファイルのレコード生成
-                    //変数名: 具体値
-                    $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
-                }
-            }
-            break;
         case DF_LEGACY_DRIVER_ID:
             $var_str = "";
             if($in_var_type != "CMT"){
                 foreach( $ina_var_list as $var=>$val ){
-                    if(@count($this->lv_legacy_parent_vars_list[$in_host_name][$var]) != 0){
+                    if(@count($this->lv_parent_vars_list[$in_host_name][$var]) != 0){
                         continue;
                     }
-                    // テンプレート変数の登録の場合に、VAR変数の具体値に
-                    // 使用されているテンプレート変数か確認する。
-                    if($in_var_type == "TPF"){
-                        if(@strlen($this->lv_legacy_tpf_vars_list[$in_host_name][$var]) != 0){
-                            continue;
-                        }
-                    }
-                    // コピー変数の登録の場合に、VAR変数の具体値に
-                    // 使用されているコピー変数か確認する。
-                    if($in_var_type == "CPF"){
-                        if(@strlen($this->lv_legacy_cpf_vars_list[$in_host_name][$var]) != 0){
-                            continue;
-                        }
-                    }
-    
-                    $this->lv_legacy_parent_vars_list[$in_host_name][$var] = 0;
+                    $this->lv_parent_vars_list[$in_host_name][$var] = 0;
                     //ホスト変数ファイルのレコード生成
                     //変数名: 具体値
                     $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
@@ -1835,12 +1964,12 @@ class CreateAnsibleExecFiles {
                         //各変数に紐づくファイルを所定のディレクトリにコピーする。
                         //テンプレート変数の場合、テンプレートファイル内に変数がある場合
                         //変数の具体値が登録されているか判定する。
-                        $ret = $this->LegacyCheckConcreteValueIsVar($templ_vars_chk,
-                                                                    $val,
-                                                                    $ina_var_list,
-                                                                    $in_host_name,
-                                                                    $this->lv_legacy_tpf_vars_list,
-                                                                    $this->lv_legacy_cpf_vars_list);
+                        $ret = $this->CheckConcreteValueIsVar($templ_vars_chk,
+                                                              $val,
+                                                              $ina_var_list,
+                                                              $in_host_name,
+                                                              $this->lv_tpf_vars_list,
+                                                              $this->lv_cpf_vars_list);
                         if($ret === false){
                             return false;
                         }
@@ -1853,45 +1982,45 @@ class CreateAnsibleExecFiles {
             if($in_var_type == "CMT"){
                 // グローバル変数をホスト変数ファイルに登録する。
                 foreach( $this->lva_global_vars_list as $var=>$val ){
-                    if(@count($this->lv_legacy_parent_vars_list[$in_host_name][$var]) != 0){
-                        continue;
-                    }
-                    $this->lv_legacy_parent_vars_list[$in_host_name][$var] = 0;
+                    // Playbookで使用しているグローバル変数のみを対象にする。
+                    if(@count($this->lv_use_gbl_vars_list[$var]) != 0){
+                        if(@count($this->lv_parent_vars_list[$in_host_name][$var]) != 0){
+                            continue;
+                        }
+                        $this->lv_parent_vars_list[$in_host_name][$var] = 0;
 
-                    //ホスト変数ファイルのレコード生成
-                    //変数名: 具体値
-                    $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+                        //ホスト変数ファイルのレコード生成
+                        //変数名: 具体値
+                        $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
 
-                    // playbookのテンプレートモジュールでグローバル変数を使用している場合
-                    // テンプレートファイル内の変数具体値登録をチェックする設定にする。
-                    $templ_vars_chk = false;
-                    if(@count($this->lv_legacy_tfp_use_gbl_vars_list[$var]) != 0){
+                        // playbookのテンプレートモジュールでグローバル変数を使用している場合
+                        // テンプレートファイル内の変数具体値登録をチェックする設定にする。
                         $templ_vars_chk = true;
-                    }
 
-                    //具体値にコピー/テンプレート変数が使用されているか判定する。
-                    //変数の具体値にテンプレート変数かコピー変数が設定されている場合
-                    //各変数に紐づくファイルを所定のディレクトリにコピーする。
-                    //テンプレート変数の場合、テンプレートファイル内に変数がある場合
-                    //変数の具体値が登録されているか判定する。
-                    $ret = $this->LegacyCheckConcreteValueIsVar($templ_vars_chk,
-                                                                $val,
-                                                                $ina_var_list,
-                                                                $in_host_name,
-                                                                $this->lv_legacy_tpf_vars_list,
-                                                                $this->lv_legacy_cpf_vars_list);
-                    if($ret === false){
-                        return false;
+                        //具体値にコピー/テンプレート変数が使用されているか判定する。
+                        //変数の具体値にテンプレート変数かコピー変数が設定されている場合
+                        //各変数に紐づくファイルを所定のディレクトリにコピーする。
+                        //テンプレート変数の場合、テンプレートファイル内に変数がある場合
+                        //変数の具体値が登録されているか判定する。
+                        $ret = $this->CheckConcreteValueIsVar(true,
+                                                              $val,
+                                                              $ina_var_list,
+                                                              $in_host_name,
+                                                              $this->lv_tpf_vars_list,
+                                                              $this->lv_cpf_vars_list);
+                        if($ret === false){
+                            return false;
+                        }
                     }
                 }
 
                 // 変数の具体値に使用しているテンプレート変数の情報をホスト変数ファイルに出力
-                if(@count($this->lv_legacy_tpf_vars_list[$in_host_name]) != 0){
-                    foreach($this->lv_legacy_tpf_vars_list[$in_host_name] as $var=>$val){
-                        if(@count($this->lv_legacy_parent_vars_list[$in_host_name][$var]) != 0){
+                if(@count($this->lv_tpf_vars_list[$in_host_name]) != 0){
+                    foreach($this->lv_tpf_vars_list[$in_host_name] as $var=>$val){
+                        if(@count($this->lv_parent_vars_list[$in_host_name][$var]) != 0){
                             continue;
                         }
-                        $this->lv_legacy_parent_vars_list[$in_host_name][$var] = 0;
+                        $this->lv_parent_vars_list[$in_host_name][$var] = 0;
 
                         //ホスト変数ファイルのレコード生成
                         //変数名: 具体値
@@ -1899,13 +2028,13 @@ class CreateAnsibleExecFiles {
                     }
                 }
                 // 変数の具体値に使用しているコピー変数の情報をホスト変数ファイルに出力
-                if(@count($this->lv_legacy_cpf_vars_list[$in_host_name]) != 0){
-                    foreach($this->lv_legacy_cpf_vars_list[$in_host_name] as $var=>$val){
-                        if(@count($this->lv_legacy_parent_vars_list[$in_host_name][$var]) != 0){
+                if(@count($this->lv_cpf_vars_list[$in_host_name]) != 0){
+                    foreach($this->lv_cpf_vars_list[$in_host_name] as $var=>$val){
+                        if(@count($this->lv_parent_vars_list[$in_host_name][$var]) != 0){
                             continue;
                         }
-                        $this->lv_legacy_parent_vars_list[$in_host_name][$var] = 0;
-
+                        $this->lv_parent_vars_list[$in_host_name][$var] = 0;
+                        
                         //ホスト変数ファイルのレコード生成
                         //変数名: 具体値
                         $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
@@ -1924,7 +2053,6 @@ class CreateAnsibleExecFiles {
                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 return false;
             }
-        
             if( @fputs($fd, $var_str) === false ){
                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55207",array(__LINE__));
                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -1962,7 +2090,6 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     function CreatePlaybookfile($in_file_name,$ina_playbook_list,$in_exec_mode,$in_exec_playbook_hed_def){
         global $root_dir_path;
-
         $fd = @fopen($in_file_name, "w");
         if($fd == null){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55208",array(__LINE__));
@@ -2012,6 +2139,7 @@ class CreateAnsibleExecFiles {
                 if($in_exec_mode == DF_EXEC_MODE_ANSIBLE) {
                     $value =          "- hosts: all\n";
                     $value = $value . "  remote_user: \"{{ " . self::LC_ANS_USERNAME_VAR_NAME . " }}\"\n";
+                    $value = $value . "  gather_facts: no\n";
 
                     // 対象ホストがwindowsか判別。windows以外の場合は becom: yes を設定
                     if($this->lv_winrm_id != 1){
@@ -2313,7 +2441,8 @@ class CreateAnsibleExecFiles {
             //////////////////////////////////////////
             // ホスト変数ファイル作成(Pioneer)      //
             //////////////////////////////////////////
-            if($this->CreateHostvarsfile("VAR",$host_name,$file_name,$host_vars_list,"","") === false)
+            //if($this->CreateHostvarsfile("SYS_VAR",$host_name,$file_name,$host_vars_list,"","","a") === false)
+            if($this->CreateHostvarsfile("SYS_VAR",$hostname,$file_name,$host_vars_list,"","","a") === false)
             {
                 return false;
             }
@@ -2404,6 +2533,12 @@ class CreateAnsibleExecFiles {
                 }
             }
         }
+
+        // in/original_dialog_filesに加工前の対話ファイルをコピー
+        $cmd = sprintf("/bin/cp -rfp %s/* %s/.",$this->getAnsible_original_dialog_files_Dir(),
+                                                $this->getAnsible_in_original_dialog_files_Dir());
+        system($cmd);
+
         return true;
     }
     ////////////////////////////////////////////////////////////////////////////////
@@ -2471,11 +2606,13 @@ class CreateAnsibleExecFiles {
                     // Playbookから抜き出したグローバル変数がグローバル変数管理に登録されているか判定
                     foreach( $file_global_vars_list as $var_name ){
                         if(@count($this->lva_global_vars_list[$var_name]) == 0){
-                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90239",array($var_name));
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90239",array(basename($file_name),$var_name));
                             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                             // エラーリターンする
                             $result_code = false;
                         }
+                        // 対話ファイルで使用されているグローバル変数退避
+                        $this->lv_use_gbl_vars_list[$var_name] = "1";
                     }
                 }
 
@@ -2520,11 +2657,7 @@ class CreateAnsibleExecFiles {
 
                     // ホスト配列のホスト分繰り返し
                     foreach( $ina_hosts as $no=>$host_name ){
-
-                        if((@strlen($ina_host_vars[$host_name][$var_name])==0) &&
-                           (array_key_exists($var_name,$ina_host_vars[$host_name])==false))
-
-                        {
+                        if(@strlen($ina_host_vars[$host_name][$var_name])==0) {
                             if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
                                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56213",
                                                                                array($playbook,
@@ -2554,6 +2687,9 @@ class CreateAnsibleExecFiles {
                                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                             }
                             else{
+                                if((array_key_exists($var_name,$ina_host_vars[$host_name])===true)) {
+                                    continue;
+                                }
                                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55214",
                                                                                 array($playbook,
                                                                                       $var_name,
@@ -2627,11 +2763,14 @@ class CreateAnsibleExecFiles {
     //   $ina_dialog_files:     対話ファイル配列
     //                          [ホストIP][INCLUDE順番][素材管理Pkey]=対話ファイル
     // 
+    //   $in_SpecialVarValReplace:
+    //                          true:   変数具体値がTPF/CPF変数の場合の具体値置換
+    //                          false:  変数具体値の具体値置換
     // 戻り値
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
-    function CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist){
+    function CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist,$in_SpecialVarValReplace=false){
         $result_code = true;
 
         // 対話ファイル配列よりホストリストを取得
@@ -2645,6 +2784,55 @@ class CreateAnsibleExecFiles {
                  return($result_code);
             }
         }
+        $errmsg = "";
+        $f_name = "";
+        $f_line = "";
+        // Spycモジュールの読み込み
+        $ret = $this->LoadSpycModule($errmsg, $f_name, $f_line);
+        if($ret === false){
+            $errmsg = $errmsg . "(" . $f_line . ")";
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg);
+            return(false);
+        }
+        // 対話ファイル配列のホスト分繰返し
+        foreach( $ina_hosts as $no=>$host_name ){
+            // 対話ファイル配列より該当ホストの対話ファイル配列取得            
+            $dialog_file_list = $ina_dialog_files[$host_name];
+            foreach( $dialog_file_list as $includeno=>$pkeylist ){
+                foreach( $pkeylist as $playbook_pkey=>$playbook ){
+                    // 対話ファイルのパス取得(オリジナル版)
+                    foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
+                    $dialog_file    = $this->getAnsible_org_dialog_file($hostname,$playbook_pkey,$playbook);
+                    try {
+                        $dialog_file_array = Spyc::YAMLLoad($dialog_file);
+                    } catch ( Exception $ex ) {
+                        //$ary[6000073] = "対話ファイルがYAML形式が確認して下さい。(対話ファイル:{})";
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                                      $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000073",
+                                                                                       array($playbook)));
+                        return false;
+                    }
+                    // ホスト変数ファイルのパス取得
+                    $host_vars_file = $this->getAnsible_host_var_file($hostname);
+                    try {
+                        $host_vars_file_array = Spyc::YAMLLoad($host_vars_file);
+                    } catch ( Exception $ex ) {
+                        //$ary[6000074] = "ホスト変数ファイルがYAML形式で生成されていません。(ホスト名:{})";
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                                      $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000074",
+                                                                                       array($hostname)));
+                        return false;
+                    }
+                    // 複数具体値変数の使い方が正しいか確認
+                    $dialog_file_vars=array();
+                    $ret = $this->value_extraction($dialog_file_array,"",$dialog_file_vars);
+                    $ret = $this->var_check($playbook,$hostname,$dialog_file_vars,$host_vars_file_array);
+                    if($ret === false) {
+                        return false;
+                    }
+                }
+            }
+        }
 
         $ProcessedFileList = array();
         // 対話ファイル配列のホスト分繰返し
@@ -2656,10 +2844,10 @@ class CreateAnsibleExecFiles {
                     // Movement詳細に同一対話ファイル(TPF/CPF変数を使用)が複数登録された場合
                     // 複数回処理されないようにガードする。
                     // ガードしないと対話ファイル内のTPF/CPF変数が具体値に置き換わる場合がある。
-                    if( isset($ProcessedFileList[$host_name][$playbook])) {
+                    if( isset($ProcessedFileList[$host_name][$playbook_pkey][$playbook])) {
                         continue;
                     }
-                    $ProcessedFileList[$host_name][$playbook] = 1;
+                    $ProcessedFileList[$host_name][$playbook_pkey][$playbook] = 1;
                 
                     // Ansible実行時の対話ファイル名は Pkey(10桁)-対話ファイル名 する。
                     // 対話ファイルのパス取得
@@ -2667,13 +2855,16 @@ class CreateAnsibleExecFiles {
                     
                     $file_name = $this->getAnsible_dialog_file($hostname,$playbook_pkey,$playbook);
 
-                    ///////////////////////////////////////////////////////////////////
-                    // 対話ファイルのフォーマットチェックを行う。
-                    ///////////////////////////////////////////////////////////////////
-                    if($this->CheckDialogfileFormat($file_name,$host_name) === false){
-                        //フォーマットチェックでエラーが発生した場合は変数チェックはしない。
-                        $result_code = false;
-                        continue;
+                    // 変数具体値がTPF/CPF変数の場合の具体値置換えでない場合
+                    if($in_SpecialVarValReplace === false) {
+                        ///////////////////////////////////////////////////////////////////
+                        // 対話ファイルのフォーマットチェックを行う。
+                        ///////////////////////////////////////////////////////////////////
+                        if($this->CheckDialogfileFormat($file_name,$host_name) === false){
+                            //フォーマットチェックでエラーが発生した場合は変数チェックはしない。
+                            $result_code = false;
+                            continue;
+                        }
                     }
                 
                     ///////////////////////////////////////////////////////////////////
@@ -2689,33 +2880,40 @@ class CreateAnsibleExecFiles {
                         return($result_code);
                     }
 
-                    // ローカル変数のリスト作成
-                    $local_vars = array();
+                    // 変数具体値がTPF/CPF変数の場合の具体値置換えでない場合
+                    if($in_SpecialVarValReplace === false) {
+                        // ローカル変数のリスト作成
+                        $local_vars = array();
 
-                    // グローバル変数を対話ファイルから抜出しグローバル変数管理に登録されていることを確認する。
-                    // グローバル変数を対話ファイルから抜きす
-                    $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_GBL_HED,$dataString,$local_vars);
-                    $aryResultParse = $objWSRA->getParsedResult();
-                    $file_global_vars_list = $aryResultParse[1];
-                    unset($objWSRA);
+                        // グローバル変数を対話ファイルから抜出しグローバル変数管理に登録されていることを確認する。
+                        // グローバル変数を対話ファイルから抜きす
+                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_GBL_HED,$dataString,$local_vars);
+                        $aryResultParse = $objWSRA->getParsedResult();
+                        $file_global_vars_list = $aryResultParse[1];
+                        unset($objWSRA);
 
-                    $globalvarSetTo = array();
-                    if(count($file_global_vars_list) != 0){
-                        // グローバル変数管理にグローバル変数が未定義の判定
-                        if(count($this->lva_global_vars_list) == 0){
-                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90236");
-                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            return false;
-                        }
-                        // 対話ファイルから抜き出したグローバル変数がグローバル変数管理に登録されているか判定
-                        foreach( $file_global_vars_list as $var_name ){
-                            if(@count($this->lva_global_vars_list[$var_name]) == 0){
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90237",array($var_name));
+                        $globalvarSetTo = array();
+                        if(count($file_global_vars_list) != 0){
+                            // グローバル変数管理にグローバル変数が未定義の判定
+                            if(count($this->lva_global_vars_list) == 0){
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90236");
                                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                                 return false;
                             }
-                            // グローバル変数の具体値を退避
-                            $globalvarSetTo[$var_name] = $this->lva_global_vars_list[$var_name];
+                            // 対話ファイルから抜き出したグローバル変数がグローバル変数管理に登録されているか判定
+                            foreach( $file_global_vars_list as $var_name ){
+                                if(@count($this->lva_global_vars_list[$var_name]) == 0){
+                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90237",
+                                                                                array(basename($file_name),$var_name));
+                                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                    return false;
+                                }
+                                // 対話ファイルで使用されているグローバル変数退避
+                                $this->lv_use_gbl_vars_list[$var_name] = "1";
+
+                                // グローバル変数の具体値を退避
+                                $globalvarSetTo[$var_name] = $this->lva_global_vars_list[$var_name];
+                            }
                         }
                     }
 
@@ -2744,7 +2942,8 @@ class CreateAnsibleExecFiles {
                     $copyvarSetTo = array();
                     $copy_list = array();
                     $host_vars_file = $hostname;
-                    $file_name2 = $this->getAnsible_org_host_var_file($host_vars_file);
+                    //$file_name2 = $this->getAnsible_org_host_var_file($host_vars_file);
+                    $file_name2 = $this->getAnsible_host_var_file($host_vars_file);
                     $copy_list = Spyc::YAMLLoad($file_name2);
 
                     // $copy_list[ 変数名 ]=>具体値
@@ -2780,7 +2979,8 @@ class CreateAnsibleExecFiles {
                     $tpfvarSetTo = array();
                     $tpf_list = array();
                     $host_vars_file2 = $hostname;
-                    $file_name3 = $this->getAnsible_org_host_var_file($host_vars_file2);
+                    //$file_name3 = $this->getAnsible_org_host_var_file($host_vars_file2);
+                    $file_name3 = $this->getAnsible_host_var_file($host_vars_file2);
                     $tpf_list = Spyc::YAMLLoad($file_name3);
 
                     foreach( $la_tpf_vars as $no => $tpf_var_list ) {
@@ -2796,136 +2996,147 @@ class CreateAnsibleExecFiles {
                         }
                     }
 
-                    // ローカル変数のリスト作成
-                    $local_vars = array();
-                    $local_vars[] = self::LC_ANS_PROTOCOL_VAR_NAME;
-                    $local_vars[] = self::LC_ANS_USERNAME_VAR_NAME;
-                    $local_vars[] = self::LC_ANS_PASSWD_VAR_NAME;
-                    $local_vars[] = self::LC_ANS_LOGINHOST_VAR_NAME;
+                    // 変数具体値がTPF/CPF変数の場合の具体値置換えでない場合
+                    if($in_SpecialVarValReplace === false) {
+                        // ローカル変数のリスト作成
+                        $local_vars = array();
+                        $local_vars[] = self::LC_ANS_PROTOCOL_VAR_NAME;
+                        $local_vars[] = self::LC_ANS_USERNAME_VAR_NAME;
+                        $local_vars[] = self::LC_ANS_PASSWD_VAR_NAME;
+                        $local_vars[] = self::LC_ANS_LOGINHOST_VAR_NAME;
 
-                    // ユーザー公開用データリレイストレージパス 変数の名前
-                    $local_vars[] = self::LC_ANS_OUTDIR_VAR_NAME;
+                        // ユーザー公開用データリレイストレージパス 変数の名前
+                        $local_vars[] = self::LC_ANS_OUTDIR_VAR_NAME;
 
-                    // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
-                    $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
+                        // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
+                        $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
  
-                    $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$local_vars);
+                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$local_vars);
 
-                    $aryResultParse = $objWSRA->getParsedResult();
+                        $aryResultParse = $objWSRA->getParsedResult();
 
-                    $file_vars_list = $aryResultParse[1];
-                    // 対話ファイルで変数が使用されているか判定
-                    if(count($file_vars_list) == 0){
-                        // 対話ファイルで変数が使用されていない場合は以降のチェックをスキップ
-                    }
-                    else{
-                        // 該当ホストのホスト変数が登録されているか判定
-                        if(array_key_exists($host_name,$ina_host_vars)===false){
-                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55215",
-                                                                       array($host_name));
-                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            $result_code = false;
-                            // ホスト変数が登録されていないので以降のチェックをスキップ
-                            continue;            
-                        }
-                    }
-                    //該当ホストの変数配列を取得
-                    $varSetTo = array();
-                    $vars_list = $ina_host_vars[$host_name];
-                    //$vars_list[ 変数名 ]=>具体値
-                    foreach( $file_vars_list as $var_name ){
-                        // 対話ファイルで使用している変数がホストの変数に登録されているか判定
-                        if(array_key_exists($var_name,$vars_list)===false){
-                            if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56209",
-                                                                               array($playbook,
-                                                                               $var_name,
-                                                                               $host_name));
-                                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            }
-                            elseif($var_name == self::LC_ANS_USERNAME_VAR_NAME){
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56207",
-                                                                               array($playbook,
-                                                                               $var_name,
-                                                                               $host_name));
-                                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            }
-                            elseif($var_name == self::LC_ANS_PASSWD_VAR_NAME){
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56208",
-                                                                               array($playbook,
-                                                                               $var_name,
-                                                                               $host_name));
-                                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            }
-                            elseif($var_name == self::LC_ANS_LOGINHOST_VAR_NAME){
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56206",
-                                                                               array($playbook,
-                                                                               $var_name,
-                                                                               $host_name));
-                                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            }
-                            else{
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55216",
-                                                                               array($host_name,
-                                                                               $playbook,
-                                                                               $var_name));
-
-                                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            }
-                            $result_code = false;
-                            // 未登録でも処理は続行する。
+                        $file_vars_list = $aryResultParse[1];
+                        // 対話ファイルで変数が使用されているか判定
+                        if(count($file_vars_list) == 0){
+                            // 対話ファイルで変数が使用されていない場合は以降のチェックをスキップ
                         }
                         else{
-                            //予約変数を使用している場合に対象システム一覧に該当データが登録されているか判定
-                            if($vars_list[$var_name] == self::LC_ANS_UNDEFINE_NAME){
-                                // プロトコル未登録
+                            // 該当ホストのホスト変数が登録されているか判定
+                            if(array_key_exists($host_name,$ina_host_vars)===false){
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55215",
+                                                                           array($host_name));
+                                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                $result_code = false;
+                                // ホスト変数が登録されていないので以降のチェックをスキップ
+                                continue;            
+                            }
+                        }
+                        //該当ホストの変数配列を取得
+                        $varSetTo = array();
+                        $vars_list = $ina_host_vars[$host_name];
+                        //$vars_list[ 変数名 ]=>具体値
+                        foreach( $file_vars_list as $var_name ){
+                            // 対話ファイルで使用している変数がホストの変数に登録されているか判定
+                            if(array_key_exists($var_name,$vars_list)===false){
                                 if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
                                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56209",
                                                                                array($playbook,
                                                                                $var_name,
                                                                                $host_name));
                                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                                    $result_code = false;
                                 }
-                                // ユーザー名未登録
                                 elseif($var_name == self::LC_ANS_USERNAME_VAR_NAME){
                                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56207",
                                                                                array($playbook,
                                                                                $var_name,
                                                                                $host_name));
                                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                                    $result_code = false;
                                 }
-                                // ログインパスワード未登録
                                 elseif($var_name == self::LC_ANS_PASSWD_VAR_NAME){
                                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56208",
                                                                                array($playbook,
                                                                                $var_name,
                                                                                $host_name));
                                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                                    $result_code = false;
                                 }
-                                // ホスト名未登録
                                 elseif($var_name == self::LC_ANS_LOGINHOST_VAR_NAME){
                                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56206",
                                                                                array($playbook,
                                                                                $var_name,
                                                                                $host_name));
                                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                                    $result_code = false;
                                 }
+                                else{
+                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55216",
+                                                                               array($host_name,
+                                                                               $playbook,
+                                                                               $var_name));
+
+                                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                }
+                                $result_code = false;
+                                // 未登録でも処理は続行する。
                             }
-                            // 変数を置換える具体値を設定
-                            $varSetTo[$var_name]=$vars_list[$var_name];
+                            else{
+                                //予約変数を使用している場合に対象システム一覧に該当データが登録されているか判定
+                                if($vars_list[$var_name] == self::LC_ANS_UNDEFINE_NAME){
+                                    // プロトコル未登録
+                                    if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
+                                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56209",
+                                                                                   array($playbook,
+                                                                                   $var_name,
+                                                                                   $host_name));
+                                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                        $result_code = false;
+                                    }
+                                    // ユーザー名未登録
+                                    elseif($var_name == self::LC_ANS_USERNAME_VAR_NAME){
+                                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56207",
+                                                                                   array($playbook,
+                                                                                   $var_name,
+                                                                                   $host_name));
+                                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                        $result_code = false;
+                                    }
+                                    // ログインパスワード未登録
+                                    elseif($var_name == self::LC_ANS_PASSWD_VAR_NAME){
+                                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56208",
+                                                                                   array($playbook,
+                                                                                   $var_name,
+                                                                                   $host_name));
+                                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                        $result_code = false;
+                                    }
+                                    // ホスト名未登録
+                                    elseif($var_name == self::LC_ANS_LOGINHOST_VAR_NAME){
+                                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56206",
+                                                                                   array($playbook,
+                                                                                   $var_name,
+                                                                                   $host_name));
+                                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                        $result_code = false;
+                                    }
+                                }
+                                // 変数を置換える具体値を設定
+                                $varSetTo[$var_name]=$vars_list[$var_name];
+                            }
                         }
                     }
 
                     // グローバル変数を具体値で置換える
                     $book_upd = false;
-                    if(count($globalvarSetTo) != 0){
-                        $objWSRA->stringReplace($dataString,$globalvarSetTo);
-                        $dataString = $objWSRA->getReplacedString();
-                        $book_upd = true;
+
+                    // 変数具体値がTPF/CPF変数の場合の具体値置換えでない場合
+                    if($in_SpecialVarValReplace === false) {
+                        if(count($globalvarSetTo) != 0){
+                            $objWSRA->stringReplace($dataString,$globalvarSetTo);
+                            $dataString = $objWSRA->getReplacedString();
+                            $book_upd = true;
+                        }
+                    }
+                    else {
+                        $local_vars = array();
+                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_CPF_HED,$dataString,$local_vars);
                     }
                     if(count($copyvarSetTo) != 0){
                         $objWSRA->stringReplace($dataString,$copyvarSetTo);
@@ -2937,11 +3148,15 @@ class CreateAnsibleExecFiles {
                         $dataString = $objWSRA->getReplacedString();
                         $book_upd = true;
                     }
-                    if(count($varSetTo) != 0){
-                        // 変数を具体値で置換える
-                        $objWSRA->stringReplace($dataString,$varSetTo);
-                        $dataString = $objWSRA->getReplacedString();
-                        $book_upd = true;
+
+                    // 変数具体値がTPF/CPF変数の場合の具体値置換えでない場合
+                    if($in_SpecialVarValReplace === false) {
+                        if(count($varSetTo) != 0){
+                            // 変数を具体値で置換える
+                            $objWSRA->stringReplace($dataString,$varSetTo);
+                            $dataString = $objWSRA->getReplacedString();
+                            $book_upd = true;
+                        }
                     }
                     if($book_upd === true){
                         if(file_put_contents( $file_name,$dataString) === false){
@@ -4631,6 +4846,30 @@ class CreateAnsibleExecFiles {
     }
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
+    //   inディレクトリ配下のoriginal_dialog_filesディレクトリ名を記憶
+    // パラメータ
+    //   $in_dir:      in/original_dialog_filesディレクトリ
+    // 
+    // 戻り値
+    //   なし
+    ////////////////////////////////////////////////////////////////////////////////
+    function setAnsible_in_original_dialog_files_Dir($in_indir){
+            $this->lv_Ansible_in_original_dialog_files_Dir = $in_indir;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   inディレクトリ配下のdialog_filesディレクトリ名を取得
+    // パラメータ
+    //   なし
+    // 
+    // 戻り値
+    //   in/dialog_filesディレクトリ名
+    ////////////////////////////////////////////////////////////////////////////////
+    function getAnsible_in_original_dialog_files_Dir(){
+        return($this->lv_Ansible_in_original_dialog_files_Dir);
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
     //   original_hosts_varsディレクトリ名を記憶
     // パラメータ
     //   $in_dir:      original_hosts_varsディレクトリ
@@ -5096,7 +5335,6 @@ class CreateAnsibleExecFiles {
                     }
                     break;
                 }
-
                 $login_auth_type = '';
                 if(strlen($row['LOGIN_AUTH_TYPE']) === 0){
                     // 未設定なのでデフォルト値設定
@@ -5590,11 +5828,13 @@ class CreateAnsibleExecFiles {
                         }
                         else{
                             if(@count($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . $row['VARS_ENTRY'];
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . $row['VARS_ENTRY'];
                             }
                             else{
+                                // △-に変更
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . $row['VARS_ENTRY'];
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] . "\n - " . $row['VARS_ENTRY'];
                             }
                         }
                     }
@@ -5924,10 +6164,12 @@ class CreateAnsibleExecFiles {
                             switch($this->getAnsibleDriverID()){
                             case DF_PIONEER_DRIVER_ID:
                                 // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . "\"" . $row['VARS_ENTRY'] . "\"";
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
                                 break;
                             case DF_LEGACY_DRIVER_ID:
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . $row['VARS_ENTRY'];
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . $row['VARS_ENTRY'];
                                 break;
                             }
                         }
@@ -5935,12 +6177,14 @@ class CreateAnsibleExecFiles {
                             switch($this->getAnsibleDriverID()){
                             case DF_PIONEER_DRIVER_ID:
                                 // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
+                                // △-に変更
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . "\"" . $row['VARS_ENTRY'] . "\"";
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
                                 break;
                             case DF_LEGACY_DRIVER_ID:
+                                // △-に変更
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . $row['VARS_ENTRY'];
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . $row['VARS_ENTRY'];
                                 break;
                             }
                         }
@@ -6026,10 +6270,12 @@ class CreateAnsibleExecFiles {
                             switch($this->getAnsibleDriverID()){
                             case DF_PIONEER_DRIVER_ID:
                                 // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . "\"" . $row['VARS_ENTRY'] . "\"";
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
                                 break;
                             case DF_LEGACY_DRIVER_ID:
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n- " . $row['VARS_ENTRY'];
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . $row['VARS_ENTRY'];
                                 break;
                             }
                         }
@@ -6038,11 +6284,13 @@ class CreateAnsibleExecFiles {
                             case DF_PIONEER_DRIVER_ID:
                                 // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . "\"" . $row['VARS_ENTRY'] . "\"";
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
                                 break;
                             case DF_LEGACY_DRIVER_ID:
                                 $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n- " . $row['VARS_ENTRY'];
+                                // △-に変更
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . $row['VARS_ENTRY'];
                                 break;
                             }
                         }
@@ -6069,7 +6317,8 @@ class CreateAnsibleExecFiles {
 
     function MultiArrayVarsToYamlFormatMain($ina_MultiArray_vars_list,&$in_str_hostvars,&$ina_parent_vars_list,
                                             $in_host_ipaddr,
-                                           &$ina_legacy_Role_cpf_vars_list)
+                                           &$ina_legacy_Role_cpf_vars_list,
+                                           &$ina_legacy_Role_tpf_vars_list)
     {
         $ina_parent_vars_list = array();
 
@@ -6105,7 +6354,8 @@ class CreateAnsibleExecFiles {
                                                         $indent,
                                                         $nest_level,
                                                         $error_code,$line,
-                                                        $ina_legacy_Role_cpf_vars_list);
+                                                        $ina_legacy_Role_cpf_vars_list,
+                                                        $ina_legacy_Role_tpf_vars_list);
             if($ret === false){
                 // 変数の具体値にコピー変数が使用されているかの判定では
                 // メッセージを直接出力している。
@@ -6614,18 +6864,24 @@ class CreateAnsibleExecFiles {
     //   $in_tpf_var_name:      テンプレート変数名
     //   $in_tpf_key:           テンプレートKey格納変数
     //   $in_tpf_file_name:     テンプレートファイル格納変数
+    //   $in_tpf_role_only:     多段/読替表変数を含むテンプレート
+    //                          1:Yes  0:No
+    //   $ina_tpf_vars_struct:  変数構造定義
     // 
     // 戻り値
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
-    function getDBLegacyTemplateMaster($in_tpf_var_name,&$in_tpf_key,&$in_tpf_file_name){
+    function getDBTemplateMaster($in_tpf_var_name,&$in_tpf_key,&$in_tpf_file_name,
+                                &$in_tpf_role_only,&$ina_tpf_vars_struct){
         global $log_output_dir;
         global $log_file_prefix;
         global $log_level;
         $sql = "SELECT                         \n" .
                "  ANS_TEMPLATE_ID,             \n" .
-               "  ANS_TEMPLATE_FILE            \n" .
+               "  ANS_TEMPLATE_FILE,           \n" .
+               "  VARS_LIST,                   \n" .
+               "  ROLE_ONLY_FLAG               \n" .
                "FROM                           \n" .
                "  B_ANS_TEMPLATE_FILE          \n" .
                "WHERE                          \n" .
@@ -6668,8 +6924,48 @@ class CreateAnsibleExecFiles {
             unset($objQuery);
             return true;
         }
-        $in_tpf_key       = $row["ANS_TEMPLATE_ID"];
-        $in_tpf_file_name = $row["ANS_TEMPLATE_FILE"];
+        $Vars_list        = array();
+        $Array_vars_list  = array();
+        $LCA_vars_use     = false;
+        $Array_vars_use   = false;
+        $GBL_vars_info    = array();
+        $VarVal_list      = array();
+        $PkeyID           = $row['ANS_TEMPLATE_ID'];
+        $strVarsList      = $row['VARS_LIST'];
+        $strVarName       = $in_tpf_var_name;
+
+        // 変数定義の解析結果を取得
+        $fileObj = new TemplateVarsStructAnalFileAccess($this->lv_objMTS,$this->lv_objDBCA);
+
+        // 変数定義の解析結果をファイルから取得
+        // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
+        $ret = $fileObj->getVarStructAnalysis($PkeyID,
+                                              $strVarName,
+                                              $strVarsList,
+                                              $Vars_list,
+                                              $Array_vars_list,
+                                              $LCA_vars_use,
+                                              $Array_vars_use,
+                                              $GBL_vars_info,
+                                              $VarVal_list);
+        if($ret === false) {
+            $errmsg = $fileObj->GetLastError();
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg[1]);
+            return false;
+        }
+        //変数定義の解析結果をjson形式の文字列に変換
+        $php_array = $fileObj->ArrayTOjsonString($Vars_list,
+                                                 $Array_vars_list,
+                                                 $LCA_vars_use,
+                                                 $Array_vars_use,
+                                                 $GBL_vars_info,
+                                                 $VarVal_list);
+        unset($fileObj);
+
+        $in_tpf_key           = $row["ANS_TEMPLATE_ID"];
+        $in_tpf_file_name     = $row["ANS_TEMPLATE_FILE"];
+        $in_tpf_role_only     = $row["ROLE_ONLY_FLAG"];
+        $ina_tpf_vars_struct  = json_decode($php_array,true);
 
         // DBアクセス事後処理
         unset($objQuery);
@@ -6916,25 +7212,26 @@ class CreateAnsibleExecFiles {
                 ///////////////////////////////////////////////////////////////////
                 $la_tpf_files = array();
                 foreach( $la_tpf_vars as $line_no => $tpf_var_name ){
-                    // グローバル変数か一般変数が定義されているか判定。グローバル変数の場合は、グローバル変数を退避
-                    $ret = preg_match_all('/(' . DF_HOST_VAR_HED . '|' . DF_HOST_GBL_HED . ')[a-zA-Z0-9_]*/',$tpf_var_name,$var_match1);
-                    if($ret == 1){
-                        //グローバル変数か判定
-                        $ret = preg_match_all('/' . DF_HOST_GBL_HED . '[a-zA-Z0-9_]*' . '/',$var_match1[0][0],$var_match2);
-                        if($ret == 1){
-                            // グローバル変数を退避
-                            $this->lv_legacy_tfp_use_gbl_vars_list[$var_match2[0][0]] = 0;
-                        }
-                        continue;
-                    }
-                    $tpf_key = "";
+                    $tpf_key       = "";
                     $tpf_file_name = "";
+                    $tpf_role_only = "";
+                    $tpf_vars_struct_array = array();
                     // テンプレート変数名からテンプレートファイル名とPkeyを取得する。
-                    $ret = $this->getDBLegacyTemplateMaster($tpf_var_name,$tpf_key,$tpf_file_name);
+                    $ret = $this->getDBTemplateMaster($tpf_var_name,$tpf_key,$tpf_file_name,$tpf_role_only,$tpf_vars_struct_array);
                     if( $ret == false ){
                         //エラーが発生した場合は処理終了
                         return false;
                     }
+                    
+                    // 多段/読替変数を含んでいるか判定
+                    if($tpf_role_only == 1) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000050",array($tpf_var_name));
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000030",
+                                                                   array($msgstr));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        return false;
+                    }
+
                     // テンプレート変数名が未登録の場合
                     if( $tpf_key == "" ){
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55241",
@@ -6967,11 +7264,19 @@ class CreateAnsibleExecFiles {
 
                     // ホスト変数ファイル内のテンプレートファイルバスを取得
                     $tpf_path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
+
+                    // ファイルパスをansible側から見たパスに変更する。
+                    $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                            $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                            $tpf_path);
+
                     // $la_tpf_path[テンプレート変数]=ホスト変数ファイル内のテンプレートファイルパス
                     $la_tpf_path[$tpf_var_name] = $tpf_path;
 
                     // テンプレートファイル内のホスト変数を確認
-                    $ret = $this->CheckTemplatefile($ina_hosts,$ina_host_vars,$playbook,$tpf_key,$tpf_file_name);
+                    $ret = $this->CheckTemplatefile($ina_hosts,$ina_host_vars,$playbook,$tpf_key,$tpf_file_name,
+                                                    $tpf_vars_struct_array,
+                                                    $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000009"));
                     if( $ret === false ){
                         $result_code = false;
                     }
@@ -7005,7 +7310,8 @@ class CreateAnsibleExecFiles {
                 //LEGACY用のホスト変数定義ファイル名を取得
                 $file_name = $this->getAnsible_host_var_file($host_vars_file);
                 // ホスト変数定義ファイルにテンプレート変数を追加
-                if($this->CreateHostvarsfile("TPF",$host_name,$file_name,$la_tpf_path,"","","a") === false)
+                //if($this->CreateHostvarsfile("TPF",$host_name,$file_name,$la_tpf_path,"","","a") === false)
+                if($this->CreateHostvarsfile("TPF",$hostname,$file_name,$la_tpf_path,"","","a") === false)
                 {
                     return false;
                 }
@@ -7031,11 +7337,33 @@ class CreateAnsibleExecFiles {
     // 
     //   $in_tpf_file_name:     テンプレートファイル名
     // 
+    //   $ina_tpf_vars_struct_array:
+    //                          テンプレートで使用している変数の変数構造
+    //                          [Vars_list] => stdClass Object
+    //                          (
+    //                              [VAR_legacy_VAR] => 0
+    //                              [GBL_legacy_VAR] => 0
+    //                          )
+    //                          [GBL_vars_info] => stdClass Object
+    //                          (
+    //                              [1] => stdClass Object
+    //                              (
+    //                                  [GBL_legacy_VAR] => 0
+    //                              )
+    //                      
+    //                          )
+    //                          [Array_vars_list] => Array
+    //                          [LCA_vars_use] => 
+    //                          [Array_vars_use] => 
+    //                          [VarVal_list] => Array
+    //   $in_file_type_name:    Playybook/対話ファイル
     // 戻り値
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
-    function CheckTemplatefile($ina_hosts,$ina_host_vars,$in_child_playbook,$in_tpf_key,$in_tpf_file_name){
+    function CheckTemplatefile($ina_hosts,$ina_host_vars,$in_child_playbook,$in_tpf_key,$in_tpf_file_name,
+                               $ina_tpf_vars_struct_array,
+                               $in_file_type_name){
         $result_code = true;
 
         ///////////////////////////////////////////////////////////////////
@@ -7050,34 +7378,34 @@ class CreateAnsibleExecFiles {
 
         if($dataString === false){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55265",
-                                                       array(basename($in_child_playbook),
+                                                       array($in_file_type_name, basename($in_child_playbook),
                                                        basename($templatefile)));
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             $result_code = false;
             return $result_code;
         }
 
-        // ローカル変数のリスト初期化
-        $local_vars = array();
-
-        $file_global_vars_list = array();
-        // テンプレートに登録されているグローバル変数を抜出す
-        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_TEMP_GBL_HED,$dataString,$local_vars);
-        $file_global_vars_list = $objWSRA->getTPFVARSParsedResult();
-        unset($objWSRA);
-
-        // テンプレートに登録されているグローバル変数のデータベース登録確認 
-        foreach( $file_global_vars_list as $var_name ){
-            if(@count($this->lva_global_vars_list[$var_name]) == 0){
-                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90240",
-                                                            array(basename($in_child_playbook),
-                                                                  basename($templatefile),
-                                                                  $var_name));
-                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                $result_code = false;
+        $use_gbl_vars_list = array();
+        if(isset($ina_tpf_vars_struct_array['GBL_vars_info']['1'])) {
+            // テンプレートに登録されているグローバル変数のデータベース登録確認 
+            foreach($ina_tpf_vars_struct_array['GBL_vars_info']['1'] as $var_name=>$dummy) {
+                if(@count($this->lva_global_vars_list[$var_name]) == 0){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90240",
+                                                                array($in_file_type_name, basename($in_child_playbook),
+                                                                      basename($templatefile),
+                                                                      $var_name));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    $result_code = false;
+                } else {
+                    // テンプレート使用されているグローバル変数退避
+                    $this->lv_use_gbl_vars_list[$var_name] = "1";
+                    $use_gbl_vars_list[$var_name] = 1;
+                }
             }
         }
 
+        // ローカル変数のリスト初期化
+        $local_vars   = array();
         // ローカル変数のリスト作成
         $local_vars[] = self::LC_ANS_PROTOCOL_VAR_NAME;
         $local_vars[] = self::LC_ANS_USERNAME_VAR_NAME;
@@ -7091,18 +7419,37 @@ class CreateAnsibleExecFiles {
         $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
 
         $file_vars_list = array();
-        // ホスト変数を抜出す
+        // テンプレートからローカル変数を抜出す
         $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$local_vars);
         $file_vars_list = $objWSRA->getTPFVARSParsedResult();
         unset($objWSRA);
+
+        // VAR変数ほ除外する。
+        foreach($file_vars_list as $no=>$var_name) {
+            $ret = preg_match("/^VAR_/",$var_name); 
+            if($ret == 1) {
+                unset($file_vars_list[$no]);
+            }
+        }
     
+        if(isset($ina_tpf_vars_struct_array['Vars_list'])) {
+            foreach($ina_tpf_vars_struct_array['Vars_list'] as $var_name=>$dummy) {
+               // グローバル変数を除外する。
+               if(isset($use_gbl_vars_list[$var_name])) {
+                  continue;
+               }
+               // ローカル変数のリストにテンプレートで使用している変数を追加
+               $file_vars_list[] = $var_name;
+            }
+        }
+        
         // テンプレートで変数が使用されているか判定
         if(count($file_vars_list) > 0){
             // 各ホストのホスト変数があるか判定
             foreach( $ina_hosts as $no => $host_name ){
                 if(empty($ina_host_vars[$host_name])===true){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55255",
-                                                                array(basename($in_child_playbook),
+                                                                array($in_file_type_name, basename($in_child_playbook),
                                                                       basename($templatefile),
                                                                       $host_name)); 
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -7120,7 +7467,7 @@ class CreateAnsibleExecFiles {
                     {
                         if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
                             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55256",
-                                                                       array(basename($in_child_playbook),
+                                                                       array($in_file_type_name, basename($in_child_playbook),
                                                                              basename($templatefile),
                                                                              $var_name,
                                                                              $host_name));
@@ -7128,7 +7475,7 @@ class CreateAnsibleExecFiles {
                         }
                         elseif($var_name == self::LC_ANS_USERNAME_VAR_NAME){
                             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55257",
-                                                                       array(basename($in_child_playbook),
+                                                                       array($in_file_type_name, basename($in_child_playbook),
                                                                              basename($templatefile),
                                                                              $var_name,
                                                                              $host_name));
@@ -7136,7 +7483,7 @@ class CreateAnsibleExecFiles {
                         }
                         elseif($var_name == self::LC_ANS_PASSWD_VAR_NAME){
                             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55258",
-                                                                       array(basename($in_child_playbook),
+                                                                       array($in_file_type_name, basename($in_child_playbook),
                                                                              basename($templatefile),
                                                                              $var_name,
                                                                              $host_name));
@@ -7144,15 +7491,18 @@ class CreateAnsibleExecFiles {
                         }
                         elseif($var_name == self::LC_ANS_LOGINHOST_VAR_NAME){
                             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55259",
-                                                                       array(basename($in_child_playbook),
+                                                                       array($in_file_type_name, basename($in_child_playbook),
                                                                              basename($templatefile),
                                                                              $var_name,
                                                                              $host_name));
                             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                         }
                         else{
+                            if((array_key_exists($var_name,$ina_host_vars[$host_name])===true)) {
+                                continue;
+                            }
                             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55260",
-                                                                       array(basename($in_child_playbook),
+                                                                       array($in_file_type_name, basename($in_child_playbook),
                                                                              basename($templatefile),
                                                                              $var_name,
                                                                              $host_name));
@@ -7166,7 +7516,7 @@ class CreateAnsibleExecFiles {
                             // プロトコル未登録
                             if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
                                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55261",
-                                                                           array(basename($in_child_playbook),
+                                                                           array($in_file_type_name, basename($in_child_playbook),
                                                                                  basename($templatefile),
                                                                                  $var_name,
                                                                                  $host_name));
@@ -7176,7 +7526,7 @@ class CreateAnsibleExecFiles {
                             // ユーザー名未登録
                             elseif($var_name == self::LC_ANS_USERNAME_VAR_NAME){
                                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55262",
-                                                                           array(basename($in_child_playbook),
+                                                                           array($in_file_type_name, basename($in_child_playbook),
                                                                                  basename($templatefile),
                                                                                  $var_name,
                                                                                  $host_name));
@@ -7186,7 +7536,7 @@ class CreateAnsibleExecFiles {
                             // ログインパスワード未登録
                             elseif($var_name == self::LC_ANS_PASSWD_VAR_NAME){
                                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55263",
-                                                                           array(basename($in_child_playbook),
+                                                                           array($in_file_type_name, basename($in_child_playbook),
                                                                                  basename($templatefile),
                                                                                  $var_name,
                                                                                  $host_name));
@@ -7196,7 +7546,7 @@ class CreateAnsibleExecFiles {
                             // ホスト名未登録
                             elseif($var_name == self::LC_ANS_LOGINHOST_VAR_NAME){
                                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55264",
-                                                                           array(basename($in_child_playbook),
+                                                                           array($in_file_type_name, basename($in_child_playbook),
                                                                                  basename($templatefile),
                                                                                  $var_name,
                                                                                  $host_name));
@@ -8080,19 +8430,18 @@ class CreateAnsibleExecFiles {
                         $cpf_key = "";
                         $cpf_file_name = "";
                         // copy変数名からコピーファイル名とPkeyを取得する。
-                        $ret = $this->getDBLegacyCopyMaster($cpf_var_name,$cpf_key,$cpf_file_name);
+                        $ret = $this->getDBCopyMaster($cpf_var_name,$cpf_key,$cpf_file_name);
                         if( $ret == false ){
                             //エラーが発生した場合は処理終了
                             return false;
                         }
                         // copy変数名が未登録の場合
                         if( $cpf_key == "" ){
-                            //OK
-
-                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90090",
+                            $prastr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000066",
                                                                        array(basename($playbook),
                                                                        $line_no,
                                                                        $cpf_var_name)); 
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90090",array($prastr));
                             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                             //copy変数名が未登録
                             $result_code = false;
@@ -8101,11 +8450,11 @@ class CreateAnsibleExecFiles {
                         else{
                             // copyファイル名が未登録の場合
                             if($cpf_file_name == "" ){
-                                //OK
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90091",
+                                $prastr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000066",
                                                                            array(basename($playbook),
                                                                            $line_no,
-                                                                           $cpf_var_name));
+                                                                           $cpf_var_name)); 
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90091",array($prastr));
                                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
                                 $result_code = false;
@@ -8118,6 +8467,12 @@ class CreateAnsibleExecFiles {
 
                         // inディレクトリ配下のcopyファイルバスを取得
                         $cpf_path = $this->getHostvarsfile_copy_file_value($cpf_key,$cpf_file_name);
+
+                        // ファイルパスをansible側から見たパスに変更する。
+                        $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                $cpf_path);
+
                         $la_cpf_path[$cpf_var_name] = $cpf_path;
                     }
                 }
@@ -8150,7 +8505,8 @@ class CreateAnsibleExecFiles {
                 //LEGACY用のホスト変数定義ファイル名を取得
                 $file_name = $this->getAnsible_host_var_file($host_vars_file);
                 // ホスト変数定義ファイルにコピー変数を追加
-                if($this->CreateHostvarsfile("CPF",$host_name,$file_name,$la_cpf_path,"","","a") === false)
+                //if($this->CreateHostvarsfile("CPF",$host_name,$file_name,$la_cpf_path,"","","a") === false)
+                if($this->CreateHostvarsfile("CPF",$hostname,$file_name,$la_cpf_path,"","","a") === false)
                 {
                     return false;
                 }
@@ -8173,7 +8529,7 @@ class CreateAnsibleExecFiles {
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
-    function getDBLegacyCopyMaster($in_cpf_var_name,&$in_cpf_key,&$in_cpf_file_name){
+    function getDBCopyMaster($in_cpf_var_name,&$in_cpf_key,&$in_cpf_file_name){
         global $log_output_dir;
         global $log_file_prefix;
         global $log_level;
@@ -8441,7 +8797,8 @@ class CreateAnsibleExecFiles {
                                            $nest_level,
                                           &$in_error_code,
                                           &$in_line,
-                                          &$ina_legacy_Role_cpf_vars_list)
+                                          &$ina_legacy_Role_cpf_vars_list,
+                                          &$ina_legacy_Role_tpf_vars_list)
     {
         $idx = 0;
 
@@ -8494,10 +8851,11 @@ class CreateAnsibleExecFiles {
                 // 具体値があるか判定
                 if( ! is_array($val)){
                     // 変数の具体値にコピー変数が使用されていないか確認
-                    $objLibs = new AnsibleCommonLibs();
+                    $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
                     $ret = $this->LegacyRoleCheckConcreteValueIsVar($objLibs,
                                                                     $val,
-                                                                    $ina_legacy_Role_cpf_vars_list);
+                                                                    $ina_legacy_Role_cpf_vars_list,
+                                                                    $ina_legacy_Role_tpf_vars_list);
                     unset($objLibs);
                     if($ret == false){
                         //エラーメッセージは出力しているので、ここでは何も出さない。
@@ -8530,10 +8888,11 @@ class CreateAnsibleExecFiles {
                         // Key-Value変数の場合
                         if($idx == 1){
                             // 変数の具体値にコピー変数が使用されていないか確認
-                            $objLibs = new AnsibleCommonLibs();
+                            $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
                             $ret = $this->LegacyRoleCheckConcreteValueIsVar($objLibs,
                                                                             $val,
-                                                                            $ina_legacy_Role_cpf_vars_list);
+                                                                            $ina_legacy_Role_cpf_vars_list,
+                                                                            $ina_legacy_Role_tpf_vars_list);
                             unset($objLibs);
                             if($ret == false){
                                 //エラーメッセージは出力しているので、ここでは何も出さない。
@@ -8552,10 +8911,11 @@ class CreateAnsibleExecFiles {
                         }
                         else{
                             // 変数の具体値にコピー変数が使用されていないか確認
-                            $objLibs = new AnsibleCommonLibs();
+                            $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
                             $ret = $this->LegacyRoleCheckConcreteValueIsVar($objLibs,
                                                                             $val,
-                                                                            $ina_legacy_Role_cpf_vars_list);
+                                                                            $ina_legacy_Role_cpf_vars_list,
+                                                                            $ina_legacy_Role_tpf_vars_list);
                             unset($objLibs);
                             if($ret == false){
                                 //エラーメッセージは出力しているので、ここでは何も出さない。
@@ -8595,10 +8955,11 @@ class CreateAnsibleExecFiles {
                     // Key-Value変数か判定
                     if( ! is_array($val)){
                         // 変数の具体値にコピー変数が使用されていないか確認
-                        $objLibs = new AnsibleCommonLibs();
+                        $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
                         $ret = $this->LegacyRoleCheckConcreteValueIsVar($objLibs,
                                                                         $val,
-                                                                        $ina_legacy_Role_cpf_vars_list);
+                                                                        $ina_legacy_Role_cpf_vars_list,
+                                                                        $ina_legacy_Role_tpf_vars_list);
                         unset($objLibs);
                         if($ret == false){
                             //エラーメッセージは出力しているので、ここでは何も出さない。
@@ -8629,7 +8990,8 @@ class CreateAnsibleExecFiles {
                                                         $nest_level,
                                                         $in_error_code,
                                                         $in_line,
-                                                        $ina_legacy_Role_cpf_vars_list);
+                                                        $ina_legacy_Role_cpf_vars_list,
+                                                        $ina_legacy_Role_tpf_vars_list);
             if($ret === false){
                 return false;
             }
@@ -9123,7 +9485,7 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     // F0047
     // 処理内容
-    //   Legacy用 
+    //   Legacy/Pioneer用 
     //   変数の具体値にコピー/テンプレート変数が使用されてるかを判定
     //   使用されている場合に各ファイルを所定のディレクトリにコピーする。
     // パラメータ
@@ -9137,21 +9499,21 @@ class CreateAnsibleExecFiles {
     //
     //   $in_host_name:              ホスト名
     //
-    //   $ina_legacy_tpf_vars_list:  変数の具体値にテンプレート変数が使用されているコピー変数のリスト
+    //   $ina_tpf_vars_list:         変数の具体値にテンプレート変数が使用されているコピー変数のリスト
     //
-    //   $ina_legacy_cpf_vars_list:  変数の具体値にコピー変数が使用されているコピー変数のリスト
+    //   $ina_cpf_vars_list:         変数の具体値にコピー変数が使用されているコピー変数のリスト
     // 
     // 戻り値
     //   true:   正常
     //   false:  異常
     // 
     ////////////////////////////////////////////////////////////////////////////////
-    function LegacyCheckConcreteValueIsVar($in_templ_vars_chk,
-                                           $in_var_val,
-                                           $ina_var_list,
-                                           $in_host_name,
-                                          &$ina_legacy_tpf_vars_list,
-                                          &$ina_legacy_cpf_vars_list){
+    function CheckConcreteValueIsVar($in_templ_vars_chk,
+                                     $in_var_val,
+                                     $ina_var_list,
+                                     $in_host_name,
+                                    &$ina_tpf_vars_list,
+                                    &$ina_cpf_vars_list){
         $tpf_vars_list = array();
         $cpf_vars_list = array();
         // テンプレート変数　{{ TPF_[a-zA-Z0-9_] }} を取出す
@@ -9160,7 +9522,7 @@ class CreateAnsibleExecFiles {
             foreach($var_match[0] as $var_name){
                 $ret = preg_match_all("/TPF_" . "[a-zA-Z0-9_]*/",$var_name,$var_name_match);
                 $var_name = trim($var_name_match[0][0]);
-                if(@strlen($ina_legacy_tpf_vars_list[$in_host_name][$var_name]) == 0){
+                if(@strlen($ina_tpf_vars_list[$in_host_name][$var_name]) == 0){
                     $tpf_vars_list[$var_name] = "";
                 }
             }
@@ -9171,7 +9533,7 @@ class CreateAnsibleExecFiles {
             foreach($var_match[0] as $var_name){
                 $ret = preg_match_all("/CPF_" . "[a-zA-Z0-9_]*/",$var_name,$var_name_match);
                 $var_name = trim($var_name_match[0][0]);
-                if(@strlen($ina_legacy_cpf_vars_list[$in_host_name][$var_name]) == 0){
+                if(@strlen($ina_cpf_vars_list[$in_host_name][$var_name]) == 0){
                     $cpf_vars_list[$var_name] = "";
                 }
             }
@@ -9181,18 +9543,29 @@ class CreateAnsibleExecFiles {
         ///////////////////////////////////////////////////////////////////
         $la_tpf_files = array();
         foreach( $tpf_vars_list as $tpf_var_name=>$dummy){
-            if(@strlen($ina_legacy_tpf_vars_list[$in_host_name][$tpf_var_name]) == 0){
+            if(@strlen($ina_tpf_vars_list[$in_host_name][$tpf_var_name]) == 0){
                 ///////////////////////////////////////////////////////////////////
                 // テンプレート変数に紐づくテンプレートファイルの情報を取得
                 ///////////////////////////////////////////////////////////////////
                 $tpf_key = "";
                 $tpf_file_name = "";
+                $tpf_role_only = "";
+                $tpf_vars_struct_array = array();
                 // テンプレート変数名からテンプレートファイル名とPkeyを取得する。
-                $ret = $this->getDBLegacyTemplateMaster($tpf_var_name,$tpf_key,$tpf_file_name);
+                $ret = $this->getDBTemplateMaster($tpf_var_name,$tpf_key,$tpf_file_name,$tpf_role_only,$tpf_vars_struct_array);
                 if( $ret == false ){
                     //エラーが発生した場合は処理終了
                     return false;
                 }
+                // 多段/読替変数を含んでいるか判定
+                if($tpf_role_only == 1) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000050",array($tpf_var_name));
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000030",
+                                                               array($msgstr));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+
                 // テンプレート変数名が未登録の場合
                 if( $tpf_key == "" ){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000017",
@@ -9216,19 +9589,43 @@ class CreateAnsibleExecFiles {
                 ///////////////////////////////////////////////////////////////////
                 // テンプレート変数に紐づくテンプレートファイル内の変数確認
                 ///////////////////////////////////////////////////////////////////
-                // テンプレートファイルバスを取得
-                $tpf_path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
-
-                // テンプレートファイルパスのパスを退避
-                $ina_legacy_tpf_vars_list[$in_host_name][$tpf_var_name] = $tpf_path;
-
                 // テンプレートファイルのpkeyとファイル名を退避 
                 $la_tpf_files[$tpf_key]=$tpf_file_name;
+                switch($this->getAnsibleDriverID()){
+                case DF_LEGACY_DRIVER_ID:
+                    // テンプレートファイルバスを取得
+                    $tpf_path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
+                    $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                            $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                            $tpf_path);
+                    break;
+                case DF_PIONEER_DRIVER_ID:
+                    // templateモジュールのコピー先パス生成 ホスト名は__loginhostname__
+                    $tpf_path = $this->getHostvarsfile_pioneer_template_file_value($tpf_key,$tpf_file_name,$in_host_name);
+                    $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                            $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                            $tpf_path);
+
+                    // templateモジュールのコピー先パス生成 ホスト名は__loginhostname__
+                    $tmpmod_tpf_path = $this->getHostvarsfile_pioneer_template_file_value($tpf_key,$tpf_file_name,'{{ ' . self::LC_ANS_LOGINHOST_VAR_NAME . ' }}');
+                    $tmpmod_tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                   $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                   $tmpmod_tpf_path);
+
+                    // templateモジュールのsrc/destパス退避
+                    $this->lv_tpf_var_file_path_list[$tpf_var_name] = array();
+                    $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
+                    $this->lv_tpf_var_file_path_list[$tpf_var_name]['dest'] = $tmpmod_tpf_path;
+                    break;
+                }
+                // テンプレートファイルパスのパスを退避
+                $ina_tpf_vars_list[$in_host_name][$tpf_var_name] = $tpf_path;
 
                 if($in_templ_vars_chk === true){
                     // テンプレートファイル内のホスト変数を確認
-                    $ret = $this->LegacyCheckConcreteValueIsVarTemplatefile($in_host_name,$ina_var_list,
-                                                                        $tpf_var_name,$tpf_key,$tpf_file_name);
+                    $ret = $this->CheckConcreteValueIsVarTemplatefile($in_host_name,$ina_var_list,
+                                                                      $tpf_var_name,$tpf_key,$tpf_file_name,
+                                                                      $tpf_vars_struct_array);
                     if( $ret === false ){
                         return false;
                     }
@@ -9251,14 +9648,14 @@ class CreateAnsibleExecFiles {
         ///////////////////////////////////////////////////////////////////
         $la_cpf_files = array();
         foreach( $cpf_vars_list as $cpf_var_name=>$dummy){
-            if(@strlen($ina_legacy_cpf_vars_list[$in_host_name][$cpf_var_name]) == 0){
+            if(@strlen($ina_cpf_vars_list[$in_host_name][$cpf_var_name]) == 0){
                 ///////////////////////////////////////////////////////////////////
                 // コピー変数に紐づくファイルの情報を取得
                 ///////////////////////////////////////////////////////////////////
                 $cpf_key = "";
                 $cpf_file_name = "";
                 // copy変数名からコピーファイル名とPkeyを取得する。
-                $ret = $this->getDBLegacyCopyMaster($cpf_var_name,$cpf_key,$cpf_file_name);
+                $ret = $this->getDBCopyMaster($cpf_var_name,$cpf_key,$cpf_file_name);
                 if( $ret == false ){
                     //エラーが発生した場合は処理終了
                     return false;
@@ -9282,14 +9679,25 @@ class CreateAnsibleExecFiles {
                         return false;
                     }
                 }
-                // inディレクトリ配下のcopyファイルバスを取得
-                $cpf_path = $this->getHostvarsfile_copy_file_value($cpf_key,$cpf_file_name);
-
-                // $ina_legacy_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
-                $ina_legacy_cpf_vars_list[$in_host_name][$cpf_var_name] = $cpf_path;
-
                 // copyファイルのpkeyとファイル名を退避 
                 $la_cpf_files[$cpf_key]=$cpf_file_name;
+
+                switch($this->getAnsibleDriverID()){
+                case DF_LEGACY_DRIVER_ID:
+                    // inディレクトリ配下のcopyファイルバスを取得
+                    $cpf_path = $this->getHostvarsfile_copy_file_value($cpf_key,$cpf_file_name);
+                    break;
+                case DF_PIONEER_DRIVER_ID:
+                    $cpf_path = $this->getHostvarsfile_pioneer_copy_file_value($cpf_key,$cpf_file_name);
+                    break;
+                }
+                $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                        $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                        $cpf_path);
+                // $ina_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
+                $ina_cpf_vars_list[$in_host_name][$cpf_var_name] = $cpf_path;
+                $this->lv_cpf_var_file_path_list[$cpf_var_name] = $cpf_path;
+
 
             }
         }
@@ -9323,12 +9731,32 @@ class CreateAnsibleExecFiles {
     // 
     //   $in_tpf_file_name:     テンプレートファイル名
     // 
+    //   $ina_tpf_vars_struct_array:
+    //                          テンプレートで使用している変数の変数構造
+    //                          [Vars_list] => stdClass Object
+    //                          (
+    //                              [VAR_legacy_VAR] => 0
+    //                              [GBL_legacy_VAR] => 0
+    //                          )
+    //                          [GBL_vars_info] => stdClass Object
+    //                          (
+    //                              [1] => stdClass Object
+    //                              (
+    //                                  [GBL_legacy_VAR] => 0
+    //                              )
+    //
+    //                          )
+    //                          [Array_vars_list] => Array
+    //                          [LCA_vars_use] =>
+    //                          [Array_vars_use] =>
+    //
     // 戻り値
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
-    function LegacyCheckConcreteValueIsVarTemplatefile($in_host_name,$ina_var_list,
-                                                       $in_tpf_val_name,$in_tpf_key,$in_tpf_file_name){
+    function CheckConcreteValueIsVarTemplatefile($in_host_name,$ina_var_list,
+                                                 $in_tpf_val_name,$in_tpf_key,$in_tpf_file_name,
+                                                 $ina_tpf_vars_struct_array){
         $result_code = true;
         ///////////////////////////////////////////////////////////////////
         // テンプレートで使用している変数がホストの変数に登録されているか判定
@@ -9345,23 +9773,18 @@ class CreateAnsibleExecFiles {
             return false;
         }
 
-        // ローカル変数のリスト初期化
-        $local_vars = array();
-        
-        $file_global_vars_list = array();
-        // テンプレートに登録されているグローバル変数を抜出す
-        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_TEMP_GBL_HED,$dataString,$local_vars);
-        $file_global_vars_list = $objWSRA->getTPFVARSParsedResult();
-        unset($objWSRA);
-
-        // テンプレートに登録されているグローバル変数のデータベース登録確認 
-        foreach( $file_global_vars_list as $var_name ){
-            if(@count($this->lva_global_vars_list[$var_name]) == 0){
-                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000016",
-                                                            array(basename($templatefile),
-                                                                  $var_name));
-                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                return false;
+        $use_gbl_vars_list = array();
+        if(isset($ina_tpf_vars_struct_array['GBL_vars_info']['1'])) {
+            // テンプレートに登録されているグローバル変数のデータベース登録確認
+            foreach($ina_tpf_vars_struct_array['GBL_vars_info']['1'] as $var_name=>$dummy) {
+                if(@count($this->lva_global_vars_list[$var_name]) == 0){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000016",
+                                                                array(basename($templatefile),
+                                                                      $var_name));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                $use_gbl_vars_list[$var_name] = 1;
             }
         }
 
@@ -9372,15 +9795,32 @@ class CreateAnsibleExecFiles {
         $local_vars[] = self::LC_ANS_PASSWD_VAR_NAME;
         $local_vars[] = self::LC_ANS_LOGINHOST_VAR_NAME;
         $local_vars[] = self::LC_ANS_OUTDIR_VAR_NAME;
-  
-        // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
         $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
 
         $file_vars_list = array();
-        // ホスト変数を抜出す
+        // テンプレートからローカル変数を抜出す
         $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$local_vars);
         $file_vars_list = $objWSRA->getTPFVARSParsedResult();
         unset($objWSRA);
+
+        // VAR変数ほ除外する。
+        foreach($file_vars_list as $no=>$var_name) {
+            $ret = preg_match("/^VAR_/",$var_name); 
+            if($ret == 1) {
+                unset($file_vars_list[$no]);
+            }
+        }
+
+        if(isset($ina_tpf_vars_struct_array['Vars_list'])) {
+            foreach($ina_tpf_vars_struct_array['Vars_list'] as $var_name=>$dummy) {
+                // グローバル変数を除外する。
+                if(isset($use_gbl_vars_list[$var_name])) {
+                    continue;
+                }
+                // テンプレートで使用している変数を追加
+                $file_vars_list[] = $var_name;
+            }
+        }
     
         // テンプレートで変数が使用されているか判定
         if(count($file_vars_list) > 0){
@@ -9394,7 +9834,8 @@ class CreateAnsibleExecFiles {
         }
         // テンプレートに登録されている変数のデータベース登録確認 
         foreach( $file_vars_list as $var_name ){
-            if(@strlen($ina_var_list[$var_name])==0){
+            if((@strlen($ina_var_list[$var_name])==0) &&
+               ( ! isset($ina_var_list[$var_name]))) {
                 if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000020",
                                                                 array(basename($templatefile),
@@ -9502,74 +9943,133 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     function LegacyRoleCheckConcreteValueIsVar($in_objLibs,
                                                $in_var_val,
-                                              &$ina_legacy_Role_cpf_vars_list){
-        $cpf_vars_list = array();
-        // コピー変数　{{ CPF_[a-zA-Z0-9_] }} を取出す
-        $ret = preg_match_all("/{{(\s)" . "CPF_" . "[a-zA-Z0-9_]*(\s)}}/",$in_var_val,$var_match);
-        if(($ret !== false) && ($ret > 0)){
-            foreach($var_match[0] as $var_name){
-                $ret = preg_match_all("/CPF_" . "[a-zA-Z0-9_]*/",$var_name,$var_name_match);
+                                              &$ina_legacy_Role_cpf_vars_list,
+                                              &$ina_legacy_Role_tpf_vars_list) {
+        $vars_list = array();
+        $var_type   = "";
+
+        // テンプレート/コピー変数　{{ CPF/TPF_[a-zA-Z0-9_] }} を取出す
+        $ret = preg_match_all("/{{(\s)" . "(CPF_|TPF_)" . "[a-zA-Z0-9_]*(\s)}}/",$in_var_val,$var_match);
+        if(($ret !== false) && ($ret > 0)) {
+            foreach($var_match[0] as $var_name) {
+                $ret = preg_match_all("/(CPF_|TPF)" . "[a-zA-Z0-9_]*/",$var_name,$var_name_match);
                 $var_name = trim($var_name_match[0][0]);
-                if(@strlen($ina_legacy_Role_cpf_vars_list[$var_name]) == 0){
-                    $cpf_vars_list[$var_name] = "";
+                if(@strlen($ina_legacy_Role_cpf_vars_list[$var_name]) == 0) {
+                    $ret = preg_match("/^CPF_/",$var_name);
+                    if($ret == 1) {
+                        $vars_list[$var_name] = "CPF";
+                    } else {
+                        $vars_list[$var_name] = "TPF";
+                    }
                 }
             }
         }
-        if(count($cpf_vars_list) == 0){
+        if(count($vars_list) == 0) {
             return true;
         }
-        $objLibs = new AnsibleCommonLibs();
+
         ///////////////////////////////////////////////////////////////////
         // コピー変数の情報処理
         ///////////////////////////////////////////////////////////////////
-        $la_cpf_files = array();
-        foreach( $cpf_vars_list as $cpf_var_name=>$dummy){
-            if(@strlen($ina_legacy_Role_cpf_vars_list[$cpf_var_name]) == 0){
-                $strErrMsg       = "";
-                $strErrDetailMsg = "";
-                $cpf_key         = "";
-                $cpf_file_name   = "";
-                ///////////////////////////////////////////////////////////////////
-                // コピー変数に紐づくファイルの情報を取得
-                ///////////////////////////////////////////////////////////////////
-                $ret = $in_objLibs->getDBLegacyRoleCopyMaster($this->lv_objMTS,$this->lv_objDBCA,
-                                                       $cpf_var_name,$cpf_key,$cpf_file_name,
-                                                       $strErrMsg,$strErrDetailMsg);
-                if($ret === false){
-                    //エラーが発生した場合は処理終了
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$strErrMsg);
-                    if($strErrDetailMsg != ""){
-                        $this->DebugLogPrint(basename(__FILE__),__LINE__,$strErrDetailMsg);
-                    }
-                    return false;
-                }
-                else{
-                    // コピーファイル名が未登録の場合
-                    if($cpf_file_name == "" ){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000030",
-                                                                    array($cpf_var_name)); 
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-    
+        $tpf_fileInfo    = array();
+        $cpf_fileInfo    = array();
+        $strErrMsg       = "";
+        $strErrDetailMsg = "";
+        $key             = "";
+        $file_name       = "";
+        foreach( $vars_list as $var_name=>$var_type){
+            if($var_type== "CPF") { 
+                if(@strlen($ina_legacy_Role_cpf_vars_list[$var_name]) == 0){
+                    ///////////////////////////////////////////////////////////////////
+                    // コピー変数に紐づくファイルの情報を取得
+                    ///////////////////////////////////////////////////////////////////
+                    $key = "";
+                    $file_name = "";
+                    // copy変数名からコピーファイル名とPkeyを取得する。
+                    $ret = $this->getDBCopyMaster($var_name,$key,$file_name);
+                    if( $ret == false ){
+                        //エラーが発生した場合は処理終了
                         return false;
                     }
-                }
-                // inディレクトリ配下のcopyファイルバスを取得
-                $cpf_path = $this->getHostvarsfile_copy_file_value($cpf_key,$cpf_file_name);
-   
-                // $ina_legacy_Role_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
-                $ina_legacy_Role_cpf_vars_list[$cpf_var_name] = $cpf_path;
-    
-                // copyファイルのpkeyとファイル名を退避 
-                $la_cpf_files[$cpf_key]=$cpf_file_name;
+                    else{
+                        // コピーファイル名が未登録の場合
+                        if($file_name == "" ){
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000030",
+                                                                        array($var_name)); 
+                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+        
+                            return false;
+                        }
+                    }
+                    // inディレクトリ配下のcopyファイルバスを取得
+                    $path = $this->getHostvarsfile_copy_file_value($key,$file_name);
 
+                    $path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                            $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                            $path);
+
+                    // $ina_legacy_Role_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
+                    $ina_legacy_Role_cpf_vars_list[$var_name] = $path;
+        
+                    // copyファイルのpkeyとファイル名を退避 
+                    $cpf_fileInfo[$key]=$file_name;
+                }
             }
+            else {
+                if(@strlen($ina_legacy_Role_tpf_vars_list[$var_name]) == 0){
+                    ///////////////////////////////////////////////////////////////////
+                    // テンプレート変数に紐づくファイルの情報を取得
+                    ///////////////////////////////////////////////////////////////////
+                    $key       = "";
+                    $file_name = "";
+                    $role_only = "";
+                    $vars_struct_array = array();
+                    // template変数名からtemplateファイル名とPkeyを取得する。
+                    $ret = $this->getDBTemplateMaster($var_name,$key,$file_name,$role_only,
+                                                      $vars_struct_array);
+                    if( $ret == false ) {
+                        //エラーが発生した場合は処理終了
+                        return false;
+                    }
+                    else{
+                        // テンプレートファイル名が未登録の場合
+                        if($file_name == "" ){
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000006",
+                                                                        array($var_name));
+                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+                            return false;
+                        }
+                    }
+                    // inディレクトリ配下のテンプレートファイルバスを取得
+                    $path = $this->getHostvarsfile_template_file_value($key,$file_name);
+
+                    $path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                        $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                        $path);
+
+                    // $ina_legacy_Role_tpf_vars_list[copy変数]=inディレクトリ配下のテンプレートファイルパス
+                    $ina_legacy_Role_tpf_vars_list[$var_name] = $path;
+
+                    // テンプレートファイルのpkeyとファイル名を退避
+                    $tpf_fileInfo[$key]=$file_name;
+                }
+            }
+
         }
         ///////////////////////////////////////////////////////////////////
         // コピー変数に紐づくファイルを所定のディレクトリに配置
         ///////////////////////////////////////////////////////////////////
-        if(count($la_cpf_files) > 0){
+        if(count($cpf_fileInfo) > 0){
             // copyファイルを所定のディレクトリにコピーする。
-            $ret = $this->CreateCopyfiles($la_cpf_files);
+            $ret = $this->CreateCopyfiles($cpf_fileInfo);
+            if( $ret == false ){
+                return false;
+            }
+        }
+        if(count($tpf_fileInfo) > 0){
+            // テンプレートファイルを所定のディレクトリにコピーする。
+            $ret = $this->CreateTemplatefiles($tpf_fileInfo);
             if( $ret == false ){
                 return false;
             }
@@ -9604,8 +10104,16 @@ class CreateAnsibleExecFiles {
             $vars_list = $ina_host_vars[$host_name];
             $file_name = $this->getAnsible_host_var_file($host_vars_file);
             // グローバル変数・テンプレート変数・コピー変数をホスト変数ファイルに出力
-            if($this->CreateHostvarsfile("CMT",$host_name,$file_name,$vars_list,"","","a") === false){
+            //if($this->CreateHostvarsfile("CMT",$host_name,$file_name,$vars_list,"","","a") === false){
+            if($this->CreateHostvarsfile("CMT",$hostname,$file_name,$vars_list,"","","a") === false){
                 return false;
+            }
+            // Pioneerの場合、オリジナル ホスト変数ファイルを生成
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $src_file  = $this->getAnsible_host_var_file($host_vars_file);
+                $dest_file = $this->getAnsible_org_host_var_file($host_vars_file);
+                copy($src_file,$dest_file);
             }
         }
         return true;
@@ -9654,18 +10162,20 @@ class CreateAnsibleExecFiles {
     function CreatePioneerCopyFiles($ina_hosts,$ina_dialog_files,$ina_hostprotcollist,$ina_host_vars){
         $result_code = true;
 
-        $la_cpf_path  = array();
+        $la_cpf_files = array();
 
         // 対話ファイル配列のホスト分繰返し
         foreach( $ina_hosts as $no=>$host_name ){
+            $la_cpf_path  = array();
+
+            foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
+
             // 対話ファイル配列より該当ホストの対話ファイル配列取得
             $dialog_file_list = $ina_dialog_files[$host_name];
             foreach( $dialog_file_list as $includeno=>$pkeylist ){
                 foreach( $pkeylist as $playbook_pkey=>$playbook ){
                     // Ansible実行時の対話ファイル名は Pkey(10桁)-対話ファイル名 する
                     // 対話ファイルのパス取得
-                    foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
-
                     $file_name = $this->getAnsible_dialog_file($hostname,$playbook_pkey,$playbook);
 
                     // 対話ファイルの内容を取得 ここまでの過程でファイルの存在は確認
@@ -9679,24 +10189,23 @@ class CreateAnsibleExecFiles {
                     ///////////////////////////////////////////////////////////////////
                     // copy変数に紐づくファイルの情報を取得
                     ///////////////////////////////////////////////////////////////////
-                    $la_cpf_files = array();
                     foreach( $la_cpf_vars as $no => $cpf_var_list ){
                         foreach( $cpf_var_list as $line_no  => $cpf_var_name ){
                             $cpf_key = "";
                             $cpf_file_name = "";
                             // copy変数名からコピーファイル名とPkeyを取得する。
-                            $ret = $this->getDBPioneerCopyMaster($cpf_var_name,$cpf_key,$cpf_file_name);
+                            $ret = $this->getDBCopyMaster($cpf_var_name,$cpf_key,$cpf_file_name);
                             if( $ret == false ){
                                 //エラーが発生した場合は処理終了
                                 return false;
                             }
                             // copy変数名が未登録の場合
                             if( $cpf_key == "" ){
-                                //OK
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90090",
+                                $prastr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000067",
                                                                            array(basename($playbook),
                                                                            $line_no,
                                                                            $cpf_var_name)); 
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90090",array($prastr));
                                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                                 //copy変数名が未登録
                                 $result_code = false;
@@ -9704,11 +10213,11 @@ class CreateAnsibleExecFiles {
                             } else {
                                 // copyファイル名が未登録の場合
                                 if($cpf_file_name == "" ){
-                                    //OK
-                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90091",
+                                    $prastr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000067",
                                                                                array(basename($playbook),
                                                                                $line_no,
-                                                                               $cpf_var_name));
+                                                                               $cpf_var_name)); 
+                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90091",array($prastr));
                                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
                                     $result_code = false;
@@ -9729,21 +10238,30 @@ class CreateAnsibleExecFiles {
 
                             // $la_cpf_path[copy変数]=inディレクトリ配下のcopyファイルパス
                             $la_cpf_path[$cpf_var_name] = $cpf_path;
+                            $this->lv_cpf_var_file_path_list[$cpf_var_name] = $cpf_path;
                         }
                     }
                 }
-
                 // 前処理でエラーが発生している場合は次のファイルへ
                 if($result_code === false){
                     continue;
                 }
-
-                if(count($la_cpf_files) > 0){
-                    // copyファイルを所定のディレクトリにコピーする。
-                    $ret = $this->CreateCopyfiles($la_cpf_files);
-                    if( $ret == false ){
-                        return false;
-                    }
+            }
+            // 前処理でエラーが発生している場合は次のホストへ
+            if($result_code === false){
+                continue;
+            }
+            if ( count($la_cpf_path) > 0 ){
+                $host_vars_file = $hostname;
+    
+                //Pioneer用のホスト変数定義ファイル名を取得
+                //$file_name = $this->getAnsible_org_host_var_file($host_vars_file);
+                $file_name = $this->getAnsible_host_var_file($host_vars_file);
+                // ホスト変数定義ファイルにコピー変数を追加
+                //if($this->CreateHostvarsfile("CPF",$host_name,$file_name,$la_cpf_path,"","","a") === false)
+                if($this->CreateHostvarsfile("CPF",$hostname,$file_name,$la_cpf_path,"","","a") === false)
+                {
+                    return false;
                 }
             }
         }
@@ -9751,99 +10269,17 @@ class CreateAnsibleExecFiles {
         if($result_code === false){
             return false;
         }
-
-        if ( count($la_cpf_path) > 0 ){
-            // ホスト変数配列のホスト)分繰返し
-            foreach( $ina_hosts as $host_name){
-                // ホスト変数ファイルはホストアドレス方式に関係なく ホスト名にする。
-                foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
-                $host_vars_file = $hostname;
-
-                //Pioneer用のホスト変数定義ファイル名を取得
-                $file_name = $this->getAnsible_org_host_var_file($host_vars_file);
-                // ホスト変数定義ファイルにコピー変数を追加
-                if($this->CreateHostvarsfile("CPF",$host_name,$file_name,$la_cpf_path,"","","a") === false)
-                {
-                    return false;
-                }
+        if(count($la_cpf_files) > 0){
+            // copyファイルを所定のディレクトリにコピーする。
+            $ret = $this->CreateCopyfiles($la_cpf_files);
+            if( $ret == false ){
+                return false;
             }
         }
-        return true;
-    }
-    ////////////////////////////////////////////////////////////////////////////////
-    // F0055
-    // 処理内容
-    //   copyファイルの情報をデータベースより取得する。(Pioneer用)
-    // 
-    // パラメータ
-    //   $in_cpf_var_name:      copy変数名
-    //   $in_cpf_key:           PKey格納変数
-    //   $in_cpf_file_name:     copyファイル格納変数
-    // 
-    // 戻り値
-    //   true:   正常
-    //   false:  異常
-    ////////////////////////////////////////////////////////////////////////////////
-    function getDBPioneerCopyMaster($in_cpf_var_name,&$in_cpf_key,&$in_cpf_file_name){
-        global $log_output_dir;
-        global $log_file_prefix;
-        global $log_level;
-        $sql = "SELECT                         \n" .
-               "  CONTENTS_FILE_ID,            \n" .
-               "  CONTENTS_FILE                \n" .
-               "FROM                           \n" .
-               "  B_ANS_CONTENTS_FILE          \n" .
-               "WHERE                          \n" .
-               "  CONTENTS_FILE_VARS_NAME = :CONTENTS_FILE_VARS_NAME AND \n" .
-               "  DISUSE_FLAG            = '0';\n";
-
-        $in_cpf_key       = "";
-        $in_cpf_file_name = "";
-
-        $objQuery = $this->lv_objDBCA->sqlPrepare($sql);
-        if($objQuery->getStatus()===false){
-            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
-            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,$sql);
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,"CONTENTS_FILE_VARS_NAME=>$in_cpf_var_name");
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
-
-            return false;
-        }
-        $objQuery->sqlBind( array('CONTENTS_FILE_VARS_NAME'=>$in_cpf_var_name));
-
-        $r = $objQuery->sqlExecute();
-        if (!$r){
-            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
-            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,$sql);
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,"CONTENTS_FILE_VARS_NAME=>$in_cpf_var_name");
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
-
-            unset($objQuery);
-            return false;
-        }
-
-        $ina_child_playbooks = array();
-        $row = $objQuery->resultFetch();
-
-        // fetch行数を取得
-        $fetch_counter = $objQuery->effectedRowCount();
-        if ($fetch_counter < 1){
-            // copyファイルが未登録の場合のエラー処理は呼び側にまかせる。
-            unset($objQuery);
-            return true;
-        }
-        $in_cpf_key       = $row["CONTENTS_FILE_ID"];
-        $in_cpf_file_name = $row["CONTENTS_FILE"];
-
-        // DBアクセス事後処理
-        unset($objQuery);
 
         return true;
     }
+
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
     //   ITA側テンプレートファイル格納ディレクトリ名を記憶
@@ -9954,21 +10390,22 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function CreatePioneertemplatefiles($ina_hosts,$ina_dialog_files,$ina_hostprotcollist,$ina_host_vars) {
-        $result_code = true;
 
-        $la_tpf_path  = array();
-        $la_tpf_file  = array();
-        $Template_Flg = 0;
+        $result_code = true;
+        $la_tpf_files = array();
 
         // 対話ファイル配列のホスト分繰返し
         foreach( $ina_hosts as $no=>$host_name ) {
+            foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
+
+            $la_tpf_path = array();
+
             // 対話ファイル配列より該当ホストの対話ファイル配列取得
             $dialog_file_list = $ina_dialog_files[$host_name];
             foreach( $dialog_file_list as $includeno=>$pkeylist ) {
                 foreach( $pkeylist as $playbook_pkey=>$playbook ) {
                     // Ansible実行時の対話ファイル名は Pkey(10桁)-対話ファイル名 とする
                     // 対話ファイルのパス取得
-                    foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
 
                     $file_name = $this->getAnsible_dialog_file($hostname,$playbook_pkey,$playbook);
 
@@ -9983,20 +10420,31 @@ class CreateAnsibleExecFiles {
                     ///////////////////////////////////////////////////////////////////
                     // template変数に紐づくファイルの情報を取得
                     ///////////////////////////////////////////////////////////////////
-                    $la_tpf_files = array();
                     foreach( $la_tpf_vars as $no => $tpf_var_list ) {
                         foreach( $tpf_var_list as $line_no  => $tpf_var_name ) {
-                            $tpf_key = "";
+                            $tpf_key       = "";
                             $tpf_file_name = "";
+                            $tpf_role_only = "";
+                            $tpf_vars_struct_array = array();
                             // template変数名からtemplateファイル名とPkeyを取得する。
-                            $ret = $this->getDBPioneerTemplateMaster($tpf_var_name,$tpf_key,$tpf_file_name);
+                            $ret = $this->getDBTemplateMaster($tpf_var_name,$tpf_key,$tpf_file_name,$tpf_role_only,
+                                                              $tpf_vars_struct_array);
                             if( $ret == false ) {
                                 //エラーが発生した場合は処理終了
                                 return false;
                             }
+                            // 多段/読替変数を含んでいるか判定
+                            if($tpf_role_only == 1) {
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000050",array($tpf_var_name));
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000030",
+                                                                           array($msgstr));
+                                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                return false;
+                            }
+
                             // template変数名が未登録の場合
                             if( $tpf_key == "" ) {
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55241",
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000068",
                                                                            array(basename($playbook),
                                                                            $line_no,
                                                                            $tpf_var_name));
@@ -10008,7 +10456,7 @@ class CreateAnsibleExecFiles {
                             } else {
                                 // テンプレートファイル名が未登録の場合
                                 if($tpf_file_name == "" ) {
-                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55273",
+                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000069",
                                                                                array(basename($playbook),
                                                                                $line_no,
                                                                                $tpf_var_name));
@@ -10034,8 +10482,23 @@ class CreateAnsibleExecFiles {
                             // $la_tpf_path[template変数]=inディレクトリ配下のtemplateファイルパス
                             $la_tpf_path[$tpf_var_name] = $tpf_path;
 
-                            $tpf_file = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
-                            $la_tpf_file[$tpf_var_name] = $tpf_file;
+                            // templateモジュールのコピー先パス生成 ホスト名は__loginhostname__
+                            $tmpmod_tpf_path = $this->getHostvarsfile_pioneer_template_file_value($tpf_key,$tpf_file_name,'{{ ' . self::LC_ANS_LOGINHOST_VAR_NAME . ' }}');
+                            $tmpmod_tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                    $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                    $tmpmod_tpf_path);
+
+                            // templateモジュールのsrc/destパス退避
+                            $this->lv_tpf_var_file_path_list[$tpf_var_name] = array();
+                            $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
+                            $this->lv_tpf_var_file_path_list[$tpf_var_name]['dest'] = $tmpmod_tpf_path;
+                            // テンプレートファイル内のホスト変数を確認
+                            $ret = $this->CheckTemplatefile($ina_hosts,$ina_host_vars,$playbook,$tpf_key,$tpf_file_name,
+                                                            $tpf_vars_struct_array,
+                                                            $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000008"));
+                            if( $ret === false ){
+                                $result_code = false;
+                            }
                         }
                     }
                 }
@@ -10045,12 +10508,21 @@ class CreateAnsibleExecFiles {
                     continue;
                 }
 
-                if ( count($la_tpf_files) > 0 ) {
-                    // templateファイルを所定のディレクトリにコピーする。
-                    $ret = $this->CopyPioneerTemplatefiles($la_tpf_files);
-                    if( $ret == false ) {
-                        return false;
-                    }
+            }
+            // 前処理でエラーが発生している場合は次のホストへ
+            if ( $result_code === false ) {
+                continue;
+            }
+            if ( count($la_tpf_path) > 0 ) {
+                $host_vars_file = $hostname;
+    
+                //Pioneer用のホスト変数定義ファイル名を取得
+                //$file_name = $this->getAnsible_org_host_var_file($host_vars_file);
+                $file_name = $this->getAnsible_host_var_file($host_vars_file);
+                // ホスト変数定義ファイルにテンプレート変数を追加
+                //if($this->CreateHostvarsfile("TPF",$host_name,$file_name,$la_tpf_path,"","","a") === false) {
+                if($this->CreateHostvarsfile("TPF",$hostname,$file_name,$la_tpf_path,"","","a") === false) {
+                    return false;
                 }
             }
         }
@@ -10059,132 +10531,13 @@ class CreateAnsibleExecFiles {
             return false;
         }
 
-        if ( count($la_tpf_path) > 0 ) {
-            // ホスト変数配列のホスト)分繰返し
-            foreach( $ina_hosts as $no=>$host_name ) {
-                // ホスト変数ファイルはホストアドレス方式に関係なく ホスト名にする。
-                foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
-                $host_vars_file = $hostname;
-
-                //Pioneer用のホスト変数定義ファイル名を取得
-                $file_name = $this->getAnsible_org_host_var_file($host_vars_file);
-                // ホスト変数定義ファイルにテンプレート変数を追加
-                if($this->CreateHostvarsfile("TPF",$host_name,$file_name,$la_tpf_path,"","","a") === false) {
-                    return false;
-                }
-                $Template_Flg = 1;
+        if ( count($la_tpf_files) > 0 ) {
+            // templateファイルを所定のディレクトリにコピーする。
+            $ret = $this->CopyPioneerTemplatefiles($la_tpf_files);
+            if( $ret == false ) {
+                return false;
             }
         }
-
-        if ( $Template_Flg == 1 ) {
-
-            $playbookread  = array();
-            $playbookwrite = array();
-
-            // playbookの読み込み
-            $playbookread = file($this->getAnsible_playbook_file());
-
-            $j = 0;
-            // Templateファイルがある場合、追加でplaybookに書き込み
-            for ( $i = 0; $i < count($playbookread); $i++ ) {
-
-                // 読み込みデータを書き込みデータに代入
-                $playbookwrite[$j] = $playbookread[$i];
-
-                if( strpos($playbookread[$i],'tasks:') !== false ) {
-                    // "  tasks:" の後に追記
-                    $j = $j + 1;
-                    $playbookwrite[$j] = "    - name: include\n";
-                    $j = $j + 1;
-                    $playbookwrite[$j] = "      include_vars: " . $this->getAnsible_original_hosts_vars_Dir() . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}\n";
-                    foreach( $la_tpf_path as $var=>$val ) {
-                        $j = $j + 1;
-                        $playbookwrite[$j] = "    - name: Templatefile Create " . sprintf("[%s]\n", $var);
-                        $j = $j + 1;
-                        $playbookwrite[$j] = "      template: src=" . sprintf("%s", $la_tpf_file[$var]) . " dest=" . sprintf("%s\n", $val);
-                        $j = $j + 1;
-                        $playbookwrite[$j] = "      delegate_to: 127.0.0.1\n";
-                    }
-                }
-                $j = $j + 1;
-            }
-            $fp = fopen($this->getAnsible_playbook_file(),"w");
-            foreach ($playbookwrite as $write) {
-                fputs($fp,$write);
-            }
-            fclose($fp);
-        }
-        return true;
-    }
-    ////////////////////////////////////////////////////////////////////////////////
-    // F0057
-    // 処理内容
-    //   テンプレートファイルの情報をデータベースより取得する。
-    //
-    // パラメータ
-    //   $in_tpf_var_name:      テンプレート変数名
-    //   $in_tpf_key:           テンプレートKey格納変数
-    //   $in_tpf_file_name:     テンプレートファイル格納変数
-    //
-    // 戻り値
-    //   true:   正常
-    //   false:  異常
-    ////////////////////////////////////////////////////////////////////////////////
-    function getDBPioneerTemplateMaster($in_tpf_var_name,&$in_tpf_key,&$in_tpf_file_name) {
-        global $log_output_dir;
-        global $log_file_prefix;
-        global $log_level;
-        $sql = "SELECT                         \n" .
-               "  ANS_TEMPLATE_ID,             \n" .
-               "  ANS_TEMPLATE_FILE            \n" .
-               "FROM                           \n" .
-               "  B_ANS_TEMPLATE_FILE          \n" .
-               "WHERE                          \n" .
-               "  ANS_TEMPLATE_VARS_NAME = :ANS_TEMPLATE_VARS_NAME AND \n" .
-               "  DISUSE_FLAG            = '0';\n";
-
-        $objQuery = $this->lv_objDBCA->sqlPrepare($sql);
-        if($objQuery->getStatus()===false){
-            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
-            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,$sql);
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,"ANS_TEMPLATE_VARS_NAME=>$in_tpf_var_name");
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
-
-            return false;
-        }
-        $objQuery->sqlBind( array('ANS_TEMPLATE_VARS_NAME'=>$in_tpf_var_name));
-
-        $r = $objQuery->sqlExecute();
-        if (!$r){
-            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
-            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,$sql);
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,"ANS_TEMPLATE_VARS_NAME=>$in_tpf_var_name");
-            $this->DebugLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
-
-            unset($objQuery);
-            return false;
-        }
-
-        $ina_child_playbooks = array();
-        $row = $objQuery->resultFetch();
-
-        // fetch行数を取得
-        $fetch_counter = $objQuery->effectedRowCount();
-        if ($fetch_counter < 1) {
-            // テンプレートが未登録の場合のエラー処理は呼び側にまかせる。
-            unset($objQuery);
-            return true;
-        }
-        $in_tpf_key       = $row["ANS_TEMPLATE_ID"];
-        $in_tpf_file_name = $row["ANS_TEMPLATE_FILE"];
-
-        // DBアクセス事後処理
-        unset($objQuery);
-
         return true;
     }
     ////////////////////////////////////////////////////////////////////////////////
@@ -10226,6 +10579,198 @@ class CreateAnsibleExecFiles {
                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55240",array(basename($src_file)));
                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 return false;
+            }
+        }
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // F0059
+    // 処理内容
+    //   Legacy Role用 Role内で使用しているテンプレート変数
+    //   抜出しホスト変数ファイルに追加する。
+    // パラメータ
+    //   $ina_hosts:            ホスト名(IP)配列
+    //                          [管理システム項番]=ホスト名(IP)
+    //
+    //   $ina_hostprotcollist:  ホスト毎プロトコル一覧
+    //                          [ホスト名(IP)][ホスト名][PROTOCOL_NAME][LOGIN_USER]=LOGIN_PASSWD
+    //
+    //   $ina_rolenames:        処理対象ロールリスト
+    //                          [INCLUDE_SEQ][ROLE_ID]=ROLE_NAME
+    //
+    //   $ina_tpf_vars_list:    テンプレート変数リスト
+    //                          [使用Playbookファイル名][行番号][変数名][CONTENTS_FILE_ID]
+    //                          [使用Playbookファイル名][行番号][変数名][CONTENTS_FILE]
+    // 戻り値
+    //   true:   正常
+    //   false:  異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreateLegacyRoleTemplateFiles($ina_hosts,$ina_hostprotcollist,$ina_rolenames,$ina_tpf_vars_list){
+        ///////////////////////////////////////////////////////////////////
+        // 処理対象のロール名抽出
+        ///////////////////////////////////////////////////////////////////
+        // 処理対象のロール名抽出
+        $tgt_role_list = array();
+        foreach( $ina_rolenames as $no=>$rolename_list ){
+            foreach( $rolename_list as $rolepkey=>$rolename ){
+                $tgt_role_list[$rolename] = 1;
+            }
+        }
+        ///////////////////////////////////////////////////////////////////
+        // テンプレート変数に紐づくファイルの情報を取得
+        ///////////////////////////////////////////////////////////////////
+        $la_tpf_files = array();
+        $la_tpf_path = array();
+        foreach( $ina_tpf_vars_list as $role_name => $tgt_file_list ){
+            if(@strlen($tgt_role_list[$role_name]) == 0){
+                continue;
+            }
+            foreach( $tgt_file_list as $tgt_file => $line_no_list ){
+                foreach( $line_no_list as $line_no => $tpf_var_name_list ){
+                    foreach( $tpf_var_name_list as $tpf_var_name => $file_info_list ){
+                        // inディレクトリ配下のcopyファイルバスを取得
+                        $tpf_path = $this->getHostvarsfile_template_file_value($file_info_list['CONTENTS_FILE_ID'],
+                                                                               $file_info_list['CONTENTS_FILE']);
+                        // $la_tpf_path[テンプレート変数]=inディレクトリ配下ののcopyファイルパス
+                        $la_tpf_path[$tpf_var_name] = $tpf_path;
+
+                        // テンプレートファイルのpkeyとファイル名を退避
+                        $la_tpf_files[$file_info_list['CONTENTS_FILE_ID']]=$file_info_list['CONTENTS_FILE'];
+                    }
+                }
+            }
+        }
+        ///////////////////////////////////////////////////////////////////
+        // テンプレートファイルを所定のディレクトリにコピー
+        ///////////////////////////////////////////////////////////////////
+        if(count($la_tpf_files) > 0){
+            $ret = $this->CreateTemplatefiles($la_tpf_files);
+            if( $ret == false ){
+                return false;
+            }
+        }
+        ///////////////////////////////////////////////////////////////////
+        // ホスト変数定義ファイルにテンプレート変数を追加
+        ///////////////////////////////////////////////////////////////////
+        if ( count($la_tpf_path) > 0 ){
+            // ホスト変数配列のホスト)分繰返し
+            foreach( $ina_hosts as $host_name){
+                foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
+                //ホスト変数定義ファイル名を取得
+                $file_name = $this->getAnsible_host_var_file($hostname);
+                // ホスト変数定義ファイルにテンプレート変数を追加
+                if($this->CreateRoleHostvarsfile("TPF",$file_name,$la_tpf_path,"","","","","a") === false)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    // テンプレート管理を使用している場合、親PlaybookにTemplateMmoduleを追加してテンプレート内の変数解決する。
+    function TemplateMmoduleAddPlaybook($in_tpf_path) {
+        $playbookread  = array();
+        $playbookwrite = array();
+
+        // playbookの読み込み
+        $playbookread = file($this->getAnsible_playbook_file());
+
+        $j = 0;
+        // Templateファイルがある場合、追加でplaybookに書き込み
+        for ( $i = 0; $i < count($playbookread); $i++ ) {
+
+            // 読み込みデータを書き込みデータに代入
+            $playbookwrite[$j] = $playbookread[$i];
+
+            if( strpos($playbookread[$i],'tasks:') !== false ) {
+                // "  tasks:" の後に追記
+                $j = $j + 1;
+                $playbookwrite[$j] = "    - name: include\n";
+                $j = $j + 1;
+                $playbookwrite[$j] = "      include_vars: " . $this->getAnsible_original_hosts_vars_Dir() . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}\n";
+                foreach( $in_tpf_path as $var_name=>$fileinfo ) {
+                    $j = $j + 1;
+                    $playbookwrite[$j] = "    - name: Templatefile Create " . sprintf("[%s]\n", $var_name);
+                    $j = $j + 1;
+                    $playbookwrite[$j] = "      template: src=" . sprintf("%s", $in_tpf_path[$var_name]['src']) . " dest=" . sprintf("%s\n", $in_tpf_path[$var_name]['dest']);
+                    $j = $j + 1;
+                    $playbookwrite[$j] = "      delegate_to: 127.0.0.1\n";
+                    $j = $j + 1;
+                    $playbookwrite[$j] = "      when: " . sprintf("%s  is  defined\n",$var_name);
+                }
+            }
+            $j = $j + 1;
+        }
+        $fp = fopen($this->getAnsible_playbook_file(),"w");
+        foreach ($playbookwrite as $write) {
+            fputs($fp,$write);
+        }
+        fclose($fp);
+        return true;
+    }
+    // 変数をvarふぁいる読み取って配列か判断変換する関数
+    function var_check ($dialog_file_name,$hostname,$dialog_file_vars,$host_variable_file_array){
+        foreach($dialog_file_vars as $var_1) {
+            $command = "";
+            foreach($var_1 as $key=>$var_2) {
+                if($command == "") $command = $key;
+                if(preg_match("/{{(\s)VAR_[a-zA-Z0-9_]*(\s)}}/",$var_2)) {
+    
+                    #複数具体値かどうかを見る
+                    foreach($host_variable_file_array as $key_1=>$var_3) {
+    
+                        $ret = preg_match_all("/{{(\s)$key_1(\s)}}/",$var_2);
+                        if($ret == true){
+                            if(is_array($var_3)){
+                                #複数具体値
+                                #with_items以外はエラー
+                                if(!preg_match("/with_items/",$key)){
+                                    //$ary[6000070] = "commandのwith_item以外は複数具体値変数は記述出来ません。(ホスト:{} 対話ファイル:{} 変数:{})";
+                                    $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                                                  $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000070",
+                                                                                                    array($hostname, 
+                                                                                                          $dialog_file_name, 
+                                                                                                          $key_1)));
+                                    return false;
+                                }
+    
+                            }else{
+                                #単一具体値
+                                #with_itemsがあればエラーにする
+                                if(preg_match("/with_items/",$key)){
+                                    //$ary[6000071] = "commandのwith_itemは複数具体値変数しか記述出来ません。(ホスト:{} 対話ファイル:{} 変数:{})";
+                                    $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                                                  $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000071",
+                                                                                                    array($hostname, 
+                                                                                                          $dialog_file_name, 
+                                                                                                          $key_1)));
+                                    return false;
+                                }
+                            }
+                        }
+    
+                    }
+                }
+                $ret = preg_match_all("/{{(\s)VAR_[a-zA-Z0-9_]*(\s)}}/",$var_2);
+                if($ret > 1 && "with_items" == $key){
+                    //$ary[6000072] = "commandのwith_itemに複数の変数が記述されています。(対話ファイル:{})";
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,
+                                         $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000072",
+                                                                          array($dialog_file_name)));
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    function value_extraction ($array,$mae,&$dialog_file_vars){
+        #playbookの値だけを読み取り
+        foreach($array as $key=>$array_1) {
+            if(is_array($array_1)){
+                $this->value_extraction($array_1,$key,$dialog_file_vars);
+            }else{
+                $dialog_file_vars[] = array($mae=>$array_1);
             }
         }
         return true;
