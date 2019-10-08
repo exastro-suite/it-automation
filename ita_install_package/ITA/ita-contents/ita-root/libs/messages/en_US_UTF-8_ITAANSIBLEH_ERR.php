@@ -464,7 +464,7 @@ Please set extra_vars in the following format.
 $ary[6000100] = "Access_key_id is not registered in the Ansible interface information.";
 $ary[6000101] = "Secret_access_key is not registered in the Ansible interface information.";
 $ary[6000102] = "Authentication token is not registered in the Ansible interface information.";
-$ary[6000103] = "Exastro 1.1 does not support the job slice count '-jsc, job_slice_count' of optional parameters.";
+$ary[6000103] = "This version, the option parameter '-jsc, job_slice_count' is not supported.";
 $ary[6000104] = "Optional parameters that are not supported by Ansible Tower are set. (parameter:{})";
 $ary[6040001] = "Failed to update SCM operation.";
 $ary[6040002] = "Failed to get the hosts information.";
