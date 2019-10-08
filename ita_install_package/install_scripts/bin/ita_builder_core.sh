@@ -871,6 +871,9 @@ fi
 # set subscription
 if [ "$exec_mode" != "2" ]; then
     if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "RHEL6" ]; then
+
+        log "setting subscriction of RHEL"
+
         #IDPW
         REDHAT_USER_NAME="${redhat_user_name}"
         REDHAT_USER_PASSWORD="${redhat_user_password}"
@@ -881,20 +884,34 @@ if [ "$exec_mode" != "2" ]; then
         #subscription-manager unsubscribe --serial="${SUBSCRIPTION_SERIAL_NUM}"
 
         #Subscription registration
-        subscription-manager register --username=${REDHAT_USER_NAME} --password=${REDHAT_USER_PASSWORD}
+        subscription-manager register --username=${REDHAT_USER_NAME} --password=${REDHAT_USER_PASSWORD} >> "$ITA_BUILDER_LOG_FILE" 2>&1
         REGISTER_CHK=`echo $?`
         
         if [ "${REGISTER_CHK}" -ne 0 -a "${REGISTER_CHK}" -ne 64 ]; then
-            log "user not found"
+            log "ERROR:The Red Hat user is not available."
             func_exit
         fi
-        
-        #Subscribe
-        SUBSCRIPTION_POOL_ID=`subscription-manager list --available | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
-        if [ "${SUBSCRIPTION_POOL_ID}" != "" ]; then
-            subscription-manager attach --pool="${POOL_ID}"
+
+        #Check consumed
+        CONSUMED_POOL_ID=`subscription-manager list --consumed | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
+
+        if [ "${CONSUMED_POOL_ID}" != "" ]; then
+            echo "Subscription is already attached." >> "$ITA_BUILDER_LOG_FILE" 2>&1
         else
-            func_exit
+            #Check available
+            SUBSCRIPTION_POOL_ID=`subscription-manager list --available | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
+
+            if [ "${SUBSCRIPTION_POOL_ID}" != "" ]; then
+                #Attach
+                subscription-manager attach --pool="${POOL_ID}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                if [ $? -ne 0 ]; then
+                    log "ERROR:Command[subscription-manager attach] is failed."
+                    func_exit
+                fi
+            else
+                log "ERROR:No subscriptions are available from the pool with ID \"${POOL_ID}\"."
+                func_exit
+            fi
         fi
     fi
 fi
