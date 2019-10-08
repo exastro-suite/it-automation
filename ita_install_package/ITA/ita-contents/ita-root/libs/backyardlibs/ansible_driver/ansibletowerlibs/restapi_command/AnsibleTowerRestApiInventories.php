@@ -102,8 +102,6 @@ class AnsibleTowerRestApiInventories extends AnsibleTowerRestApiBase {
             $response_array['responseContents']['errorMessage'] = "Need 'execution_no' and 'loopCount'.";
             return $response_array;
         }
-// enomoto_app
-//        $content['organization'] = self::ORG_DEFAULT; // 現在[Default]固定
         if(!empty($param['organization'])) {
             $content['organization']       = $param['organization'];
         } else {

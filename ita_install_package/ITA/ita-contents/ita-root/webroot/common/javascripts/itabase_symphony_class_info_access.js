@@ -224,7 +224,7 @@ function holdReleaseMovementInstance(boolCallProxy, intSeqNo, aryResultOfCalledP
 //----シンフォニーインスタンス(単一)の（全部/一部）再描画
 function printSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
     var strSymphonyInstanceNoArea = 'print_symphony_id';
-    var strFlowPrintAreaWrapArea = 'symphony_area';;
+    var strFlowPrintAreaWrapArea = 'symphony_area';
     var strFlowPrintAreaClassName = 'sortable_area';
     var intElementSetLength = 8;
     
@@ -439,6 +439,10 @@ function printSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
         if( intSymStartFlag === 1 ){
             strClassOfStartMark = strClassOfStartMark + ' symStatusEnd';
         }
+        // 予約取消
+        if("9" == arySymInfo[3]){
+            strClassOfStartMark = strClassOfStartMark + ' symStatusCancel';
+        }
         objStartPrintArea.className = strClassOfStartMark;
         
         var strClassOfEndMark = 'end';
@@ -448,6 +452,10 @@ function printSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
         }
         else if( intSymEndFlag === 2 ){
             strClassOfEndMark = strClassOfEndMark + ' symStatusAbort';
+        }
+        // 予約取消
+        if("9" == arySymInfo[3]){
+            strClassOfEndMark = strClassOfEndMark + ' symStatusCancel';
         }
         objEndPrintArea.className = strClassOfEndMark;
         //シンフォニーのSTART/ENDの表示----
@@ -466,7 +474,7 @@ function printSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
 //コールバック相互呼出系----
 
 function releaseHoldButtonAllControl(boolDisabled){
-    var strFlowPrintAreaWrapArea = 'symphony_area';;
+    var strFlowPrintAreaWrapArea = 'symphony_area';
     var strFlowPrintAreaClassName = 'sortable_area';
     var strMovementClassName = 'movement2';
     var objMovementCollection = $('#'+strFlowPrintAreaWrapArea+' .'+ strFlowPrintAreaClassName+' .'+strMovementClassName).get();
@@ -478,7 +486,7 @@ function releaseHoldButtonAllControl(boolDisabled){
 
 function releaseHoldButtonControl(intSeqNo, boolDisabled){
     var boolRet = false;
-    var strFlowPrintAreaWrapArea = 'symphony_area';;
+    var strFlowPrintAreaWrapArea = 'symphony_area';
     var strFlowPrintAreaClassName = 'sortable_area';
     var strMovementClassName = 'movement2';
     
@@ -524,7 +532,7 @@ function jumpDriverMonitorPage(url, execution_no){
 //----コールバック相互呼出系
 //----構築済シンフォニーフローを表示する
 function printSymphonyClass(boolCallProxy, symphony_class_id, strModeNumeric, strStreamOfMovements, strStreamOfSymphonyInfos){
-    var strFlowPrintAreaWrapArea = 'symphony_area';;
+    var strFlowPrintAreaWrapArea = 'symphony_area';
     var strFlowPrintAreaClassName = 'sortable_area';
     var intElementSetLength = 8;
     if( boolCallProxy===true ){
@@ -555,17 +563,26 @@ function printSymphonyClass(boolCallProxy, symphony_class_id, strModeNumeric, st
         }
         //シンフォニーclass情報(Mov要素の反映)----
 
-        if( strModeNumeric == "10" )
-        {
+        if( strModeNumeric == "10" ){
             //----編集可能状態
             editPrepare();
             deleteButtonFunctionOn();
             //編集可能状態----
         }
-        if( strModeNumeric == "10" || strModeNumeric == "11" || strModeNumeric == "20" )
-        {
+        if( strModeNumeric == "10" || strModeNumeric == "11" || strModeNumeric == "20" ){
             var arySymInfo = getArrayBySafeSeparator(strStreamOfSymphonyInfos);
             printSymphonyInfoArea(strModeNumeric, symphony_class_id, arySymInfo[0], arySymInfo[1], arySymInfo[2]);
+        }
+        // 流用新規
+        else if( strModeNumeric == "12" ){
+            //----編集可能状態
+            editPrepare();
+            deleteButtonFunctionOn();
+            //編集可能状態----
+            // シンフォニー№に自動採番を表示する
+            printSymphonyInfoArea("10",getSomeMessage("ITABASEC010107"));
+            // ボタン「登録」を配置する
+            drawCommandButtons(0);
         }
 
         if( strModeNumeric == "20" ){
@@ -579,7 +596,7 @@ function printSymphonyClass(boolCallProxy, symphony_class_id, strModeNumeric, st
 
 //----オペレーション情報の表示
 function printOperationInfo(boolCallProxy, operation_no_uapk, operation_no_idbh, operation_name){
-    var strOperationNoArea = 'print_operation_no_uapk';;
+    var strOperationNoArea = 'print_operation_no_uapk';
     var strOperationIdArea = 'print_operation_id';
     var strOperationNameArea = 'print_operation_name';
     if( boolCallProxy===true ){
@@ -608,7 +625,7 @@ function activateExecuteButton(){
     
     if( pageMode == "instanceConstruct" ){
         //----実行開始ページの場合は、条件を満たしたら、活性化された「ボタン「実行」」を配置する
-        var strOperationNoArea = 'print_operation_no_uapk';;
+        var strOperationNoArea = 'print_operation_no_uapk';
         var objOperationNoArea = document.getElementById(strOperationNoArea);
         
         var strSymphonyNoArea = 'print_symphony_id';
@@ -673,13 +690,22 @@ function drawCommandButtons(minorPhase){
                 objButtonCancel50.type = 'button';
                 objButtonCancel50.className = 'cmdButton disableAfterPush';
                 if( minorPhase==1 ){
-                    objButtonCancel50.value = getSomeMessage("ITABASEC010411");;
+                    objButtonCancel50.value = getSomeMessage("ITABASEC010411");
                     objButtonCancel50.onclick = new Function( "symphonyUpdateCancel();" );
                 }else{
                     objButtonCancel50 = null;
                 }
                 if( objButtonCancel50 != null ){
                     objCommandAreaWrap.insertBefore(objButtonCancel50, null);
+                }
+                //流用新規ボタン用
+                if( minorPhase==2 ){
+                    var objButtonDiversion50 = document.createElement('input');
+                    objButtonDiversion50.type = 'button';
+                    objButtonDiversion50.className = 'cmdButton disableAfterPush';
+                    objButtonDiversion50.value = getSomeMessage("ITABASEC010412");
+                    objButtonDiversion50.onclick = new Function( "symphonyDiversionEdit();" );
+                    objCommandAreaWrap.insertBefore(objButtonDiversion50, null);
                 }
 
                 break;
@@ -781,6 +807,7 @@ function makeElementForSortableArea(strModeNumeric,aryInfoOfClass,aryInfoOfInsta
     var strMarkFaceClassName = '';
     switch(strModeNumeric){
         case "10": //編集時(編集)モード
+        case "12": //流用新規モード
         case "11": //編集時(表示)モード
         case "20": //実行直前確認モード
             strMarkFaceBody = intSeqNo;
@@ -885,6 +912,7 @@ function makeElementForSortableArea(strModeNumeric,aryInfoOfClass,aryInfoOfInsta
     var objHtmlSubElement1 = document.createElement("div");
     switch(strModeNumeric){
         case "10": //編集時(編集)モード
+        case "12": //流用新規モード
         case "11": //編集時(表示)モード
         case "20": //実行直前確認モード
             objHtmlSubElement1.className = strDraggableHandleClass+' '+strPatternColorClass;
@@ -903,6 +931,7 @@ function makeElementForSortableArea(strModeNumeric,aryInfoOfClass,aryInfoOfInsta
     objHtmlSubElement2.className = strPatternWrapClass;
     switch(strModeNumeric){
         case "10": //編集時(編集)モード
+        case "12": //流用新規モード
         case "11": //編集時(表示)モード
         case "20": //実行直前確認モード
             var tmpInnerHTML = '<span class="inLineTitle" title="'+strPatternName+'">'+strPatternName+'</span>';
@@ -922,6 +951,7 @@ function makeElementForSortableArea(strModeNumeric,aryInfoOfClass,aryInfoOfInsta
     objHtmlSubElement3.className = strPatternNoteClass;
     switch(strModeNumeric){
         case "10": //編集時(編集)モード
+        case "12": //流用新規モード
             var objHtmlSubElement3_1 = document.createElement("textarea");
             objHtmlSubElement3_1.className = strTextAreaClass;
             objHtmlSubElement3_1.title = strExplainOfNote;
@@ -1040,6 +1070,7 @@ function makeElementForSortableArea(strModeNumeric,aryInfoOfClass,aryInfoOfInsta
     objHtmlSubElement4.className = strPauseBoxClass;
     switch(strModeNumeric){
         case "10": //編集時(編集)モード
+        case "12": //流用新規モード
             var objHtmlSubElement4_1 = document.createElement("input");
             objHtmlSubElement4_1.className = "pause_box_check";
             objHtmlSubElement4_1.type = 'checkbox';
@@ -1087,6 +1118,7 @@ function makeElementForSortableArea(strModeNumeric,aryInfoOfClass,aryInfoOfInsta
     objHtmlSubElement5.innerHTML = strMarkFaceBody;
     switch(strModeNumeric){
         case "10": //編集時(編集)モード
+        case "12": //流用新規モード
         case "11": //編集時(表示)モード
         case "20": //実行直前確認モード
             break;
@@ -1106,6 +1138,7 @@ function makeElementForSortableArea(strModeNumeric,aryInfoOfClass,aryInfoOfInsta
     //----削除ボタン
     switch(strModeNumeric){
         case "10": //編集時(編集)モード
+        case "12": //流用新規モード
             //フロー編集時用（ムーブメント要素削除ボタン）
             var objHtmlSubElement6 = document.createElement("button");
             objHtmlSubElement6.className = strDeleteButtonClass;
@@ -1244,8 +1277,7 @@ function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symph
         symphony_lt4u = '';
     }
     
-    if( strModeNumeric == "10" )
-    {
+    if( strModeNumeric == "10" ){
         // 更新作業用のモード
         
         // シンフォニー名、を出力

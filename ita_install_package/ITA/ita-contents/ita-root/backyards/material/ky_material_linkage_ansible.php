@@ -558,7 +558,7 @@ function linkAnsPlaybook($materialLinkageData, $fileName, $base64File) {
 
     global $objMTS, $objDBCA, $db_model_ch, $ansPlaybookCnt;
     $tranStartFlg = false;
-    $ansibleLnsPlaybookTable = new AnsibleLnsPlaybookTable($objDBCA, $db_model_ch);
+    $ansibleCommonPlaybookTable = new AnsibleCommonPlaybookTable($objDBCA, $db_model_ch);
     $cntFlg = false;
 
     try{
@@ -574,10 +574,10 @@ function linkAnsPlaybook($materialLinkageData, $fileName, $base64File) {
         //////////////////////////
         // プレイブック素材集テーブルを検索
         //////////////////////////
-        $sql = $ansibleLnsPlaybookTable->createSselect("WHERE DISUSE_FLAG = '0'");
+        $sql = $ansibleCommonPlaybookTable->createSselect("WHERE DISUSE_FLAG = '0'");
 
         // SQL実行
-        $result = $ansibleLnsPlaybookTable->selectTable($sql);
+        $result = $ansibleCommonPlaybookTable->selectTable($sql);
         if(!is_array($result)){
             $msg = $objMTS->getSomeMessage('ITAMATERIAL-ERR-5001', $result);
             outputLog($msg);
@@ -623,7 +623,7 @@ function linkAnsPlaybook($materialLinkageData, $fileName, $base64File) {
                 //////////////////////////
                 // プレイブック素材集テーブルを更新
                 //////////////////////////
-                $result = $ansibleLnsPlaybookTable->updateTable($updateData, $jnlSeqNo);
+                $result = $ansibleCommonPlaybookTable->updateTable($updateData, $jnlSeqNo);
                 if(true !== $result){
                     $msg = $objMTS->getSomeMessage('ITAMATERIAL-ERR-5001', $result);
                     outputLog($msg);
@@ -655,7 +655,7 @@ function linkAnsPlaybook($materialLinkageData, $fileName, $base64File) {
             //////////////////////////
             // プレイブック素材集テーブルに登録
             //////////////////////////
-            $result = $ansibleLnsPlaybookTable->insertTable($insertData, $seqNo, $jnlSeqNo);
+            $result = $ansibleCommonPlaybookTable->insertTable($insertData, $seqNo, $jnlSeqNo);
             if(true !== $result){
                 $msg = $objMTS->getSomeMessage('ITAMATERIAL-ERR-5001', $result);
                 outputLog($msg);

@@ -1876,7 +1876,6 @@ function exportData($record){
                 exec($cmd, $output, $return_var);
 
                 if(0 != $return_var){
-                    web_log($objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
                     outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
                     outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
                     return false;
@@ -1889,6 +1888,26 @@ function exportData($record){
     $res = file_put_contents($exportPath . '/COPY_DIR_FILE_LIST', $json);
     if ($res === false) {
         outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $exportPath . '/COPY_DIR_FILE_LIST' . "],Value={$json}");
+        return false;
+    }
+
+    // リリースファイルをコピーする
+    $releaseFilePath = ROOT_DIR_PATH . '/libs/release/ita_base';
+    if(file_exists($releaseFilePath)){
+
+        $output = NULL;
+        $cmd = "cp -p " . $releaseFilePath . " " . $exportPath . "/. 2>&1";
+
+        exec($cmd, $output, $return_var);
+
+        if(0 != $return_var){
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+            outputLog(LOG_PREFIX, "command=[{$cmd}]");
+            return false;
+        }
+    }
+    else{
+        outputLog(LOG_PREFIX, "File[{$releaseFilePath}] does not exists.");
         return false;
     }
 

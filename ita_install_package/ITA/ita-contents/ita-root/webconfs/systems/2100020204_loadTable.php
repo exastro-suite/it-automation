@@ -59,7 +59,7 @@ Ansible（Pioneer）対話種別リスト
 
 
 
-    $objVldt = new SingleTextValidator(1,32,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('DIALOG_TYPE_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-307040"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-307050"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

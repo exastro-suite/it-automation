@@ -71,7 +71,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-	$objVldt = new SingleTextValidator(0,45,false);
+	$objVldt = new SingleTextValidator(0,256,false);
    $c = new IDColumn('SYSTEM_ID',$g['objMTS']->getSomeMessage("ITAOPENST-MNU-120030"),'B_OPENST_PROJECT_INFO','OPENST_PROJECT_ID','OPENST_PROJECT_NAME','',array('OrderByThirdColumn'=>'OPENST_PROJECT_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAOPENST-MNU-170040"));//エクセル・ヘッダでの説明
     $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :active"');

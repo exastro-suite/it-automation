@@ -1865,8 +1865,6 @@ function resultDetailUpdate($array){
         "JOURNAL_REG_DATETIME"=>"",
         "RESULT_DETAIL_ID"=>"",
         "EXECUTION_NO"=>"",
-        "EXECUTION_USER"=>"",
-		"SYMPHONY_NAME"=>"",
         "STATUS_ID"=>"",
         "STACK_ID"=>"",
         "STACK_URL"=>"",

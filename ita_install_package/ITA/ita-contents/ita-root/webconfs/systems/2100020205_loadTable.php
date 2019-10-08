@@ -20,6 +20,14 @@
 //    ・WebDBCore機能を用いたWebページの中核設定を行う。
 //
 //////////////////////////////////////////////////////////////////////
+if ( empty($root_dir_path) ){
+    $root_dir_temp = array();
+    $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+    $root_dir_path = $root_dir_temp[0] . "ita-root";
+}
+
+// 共通モジュールをロード
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
@@ -79,6 +87,28 @@ Ansible(Pioneer)対話素材集
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
+    // FileUpload時にファイルの内容をチェック
+    $objFunction = function($objColumn, $functionCaller, $strTempFileFullname, $strOrgFileName, $aryVariant, $arySetting){
+
+        if ( empty($root_dir_path) ){
+            $root_dir_temp = array();
+            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+            $root_dir_path = $root_dir_temp[0] . "ita-root";
+        }
+        // 共通モジュールをロード
+        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
+        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php' );
+        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php' );
+        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/CheckAnsibleRoleFiles.php' );
+
+        // 共通変数を抜き出す。
+        $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);
+        $outFilename = $root_dir_path . "/temp/file_up_column/" . basename($strTempFileFullname) . "_vars_list";
+        $retArray = $obj->CommonVarssAanalys($strTempFileFullname,$outFilename);
+        unset($obj);
+        return $retArray;
+    };
+
     $c = new FileUploadColumn('DIALOG_MATTER_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306050"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306060"));//エクセル・ヘッダでの説明
     $c->setMaxFileSize(268435456);//単位はバイト
@@ -87,6 +117,9 @@ Ansible(Pioneer)対話素材集
     $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
 
     $c->setRequired(true);//登録/更新時には、入力必須
+
+    // FileUpload時にファイルの内容をチェックするモジュール登録
+    $c->setFunctionForEvent('checkTempFileBeforeMoveOnPreLoad',$objFunction);
 
     $table->addColumn($c);
 
@@ -129,9 +162,110 @@ Ansible(Pioneer)対話素材集
 
     $table->fixColumn();
 
+    //----組み合わせバリデータ----
+    $tmpAryColumn = $table->getColumns();
+    $objLU4UColumn = $tmpAryColumn[$table->getRequiredUpdateDate4UColumnID()];
+
+    $objFunction = function($objClientValidator, $value, $strNumberForRI, $arrayRegData, $arrayVariant){
+        global $g;
+        global $root_dir_path;
+        $retBool = true;
+        $retStrBody = '';
+
+        $strModeId = "";
+        $modeValue_sub = "";
+
+        $query = "";
+
+        $boolExecuteContinue = true;
+        $boolSystemErrorFlag = false;
+
+        $aryVariantForIsValid = $objClientValidator->getVariantForIsValid();
+
+        if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                $strModeId = $aryTcaAction["ACTION_MODE"];
+            }
+        }
+        $tmpFile        = '';
+        $TPFVarListfile = '';
+        $FileID         = '2';
+        if($strModeId == "DTUP_singleRecDelete"){
+            $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
+            $PkeyID = $strNumberForRI;
+        }else if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
+            if($strModeId == "DTUP_singleRecUpdate") {
+                $PkeyID = $strNumberForRI;
+            } else {
+                $PkeyID = array_key_exists('DIALOG_MATTER_ID',$arrayRegData)?$arrayRegData['DIALOG_MATTER_ID']:null;
+            }
+            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_9',$arrayRegData)?
+                               $arrayRegData['tmp_file_COL_IDSOP_9']:null;
+            $TPFVarListfile = $root_dir_path . "/temp/file_up_column/" . $tmpFile . "_vars_list";
+        }
+        
+        // 一時ファイルから使用しているテンプレート変数のリストを取得
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
+                if(strlen($tmpFile) != 0) {
+                    $json_VarsAry = file_get_contents($TPFVarListfile);
+                    $VarsAry = json_decode($json_VarsAry,true);
+                    $dbObj = new WebDBAccessClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
+                    @unlink($TPFVarListfile);
+                    $ret = $dbObj->CommnVarsUsedListUpdate($PkeyID,$FileID,$VarsAry);
+                    if($ret === false) {
+                        web_log($dbObj->GetLastErrorMsg());
+                        $retBool = false;
+                        $retStrBody = $dbObj->GetLastErrorMsg();
+                    }
+                    unset($dbObj);
+                }
+            }
+            elseif($strModeId == "DTUP_singleRecDelete"){
+                switch($modeValue_sub) {
+                case 'on':
+                case 'off':
+                    // 廃止の場合、関連レコードを廃止
+                    // 復活の場合、関連レコードを復活
+                    $dbObj = new WebDBAccessClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
+                    $ret = $dbObj->CommnVarsUsedListDisuseSet($PkeyID,$FileID,$modeValue_sub);
+                    if($ret === false) {
+                        web_log($dbObj->GetLastErrorMsg());
+                        $retBool = false;
+                        $retStrBody = $dbObj->GetLastErrorMsg();
+                    }
+                    unset($dbObj);
+                    break;
+                }
+            }
+        }
+        if( $boolSystemErrorFlag === true ){
+            $retBool = false;
+            //----システムエラー
+            $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
+        }
+        if($retBool===false){
+            $objClientValidator->setValidRule($retStrBody);
+        }
+        return $retBool;
+    };
+
+    $objVarVali = new VariableValidator();
+    $objVarVali->setErrShowPrefix(false);
+    $objVarVali->setFunctionForIsValid($objFunction);
+    $objVarVali->setVariantForIsValid(array());
+
+    $objLU4UColumn->addValidator($objVarVali);
+    //組み合わせバリデータ----
+
+
     $table->setGeneObject('webSetting', $arrayWebSetting);
     return $table;
 };
 loadTableFunctionAdd($tmpFx,__FILE__);
 unset($tmpFx);
 ?>
+
+
+

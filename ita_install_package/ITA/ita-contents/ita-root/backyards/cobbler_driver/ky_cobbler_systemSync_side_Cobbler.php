@@ -140,6 +140,8 @@
                 sleep(3);
                 if($roop_time > 9)    //3秒おきに10回ループしても読み込めなかったら処理スキップ
                 {
+                    // 異常フラグON
+                    $error_flag = 1;
                     // 例外処理へ
                     throw new Exception( $objMTS->getSomeMessage("ITACBLH-ERR-4001", array(__LINE__)) );
                 }
@@ -176,8 +178,11 @@
         }
 
         //cobblerから、システムのリストを取得
-        exec($cobbler_sys_list_command, $exec_sys_array, $exec_result);
+        exec($cobbler_sys_list_command . ' 2>&1', $exec_sys_array, $exec_result);
+
         if ($exec_result != 0){
+            // 異常フラグON
+            $error_flag = 1;
             // 例外処理へ
             throw new Exception( $objMTS->getSomeMessage("ITACBLH-ERR-4003", array(__LINE__)) . "\n" . $exec_sys_array[0] );
         }
@@ -187,6 +192,8 @@
         //cobblerから、プロファイルのリストを取得
         exec($cobbler_prof_list_command, $exec_prof_array, $exec_result);
         if ($exec_result != 0){
+            // 異常フラグON
+            $error_flag = 1;
             // 例外処理へ
             throw new Exception( $objMTS->getSomeMessage("ITACBLH-ERR-4004", array(__LINE__)) . "\n" . $exec_prof_array[0] );
         }

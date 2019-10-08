@@ -1810,7 +1810,7 @@ function validationCheckForTableIUD($aryMovementOfRawRecept, $aryExecuteData){
         if( array_key_exists("symphony_name",$aryExecuteData) === true ){
             $strSymphonyName = $aryExecuteData["symphony_name"];
         }
-        $objSLTxtVali = new SingleTextValidator(1,128,false);
+        $objSLTxtVali = new SingleTextValidator(1,256,false);
         if( $objSLTxtVali->isValid($strSymphonyName) === false ){
             // エラーフラグをON
             // 例外処理へ

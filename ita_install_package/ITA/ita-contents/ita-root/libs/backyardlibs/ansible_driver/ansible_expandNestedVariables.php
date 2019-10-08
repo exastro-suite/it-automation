@@ -396,7 +396,7 @@ class ExpandableElement extends MemberColCombElement {
         for($seq = 0; $seq < $this->expandTimes; $seq++) {
 
             $this->memberColCombRecord = MemberColCombElement::createMemberColCombRecord($this->arrayMemberValues);
-            $this->memberColCombRecord['COL_SEQ_VALUE'] = $this->baseColSeqValue . sprintf('%03d', $seq);
+            $this->memberColCombRecord['COL_SEQ_VALUE'] = $this->baseColSeqValue . sprintf('%08d', $seq);
             $this->memberColCombRecord['COL_COMBINATION_MEMBER_ALIAS'] = $this->baseColCombMemberAlias . '[' . $seq .']';
 
             if($this->arrayMemberValues['MEMBER_DISP'] == "1") {

@@ -65,10 +65,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102603"));
 
         // オペレーションID
-        $c = new NumColumn('OPERATION_ID_DISP',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102606"));
+        $c = new IDColumn('OPERATION_ID_DISP', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102606"), 'G_OPERATION_LIST', 'OPERATION_ID', 'OPERATION_ID');
         $c->setHiddenMainTableColumn(false);
         $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102607"));
-        $c->setSubtotalFlag(false);
         $c->getOutputType("update_table")->setVisible(false);
         $c->getOutputType("register_table")->setVisible(false);
         $c->getOutputType("delete_table")->setVisible(false);

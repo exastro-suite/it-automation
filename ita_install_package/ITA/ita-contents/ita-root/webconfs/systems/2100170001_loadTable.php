@@ -36,7 +36,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // ホストグループ名
     $c = new TextColumn('HOSTGROUP_NAME',$g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100005"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100006"));
-    $c->setValidator( new SingleTextValidator(1,128,false) );
+    $c->setValidator( new SingleTextValidator(1,256,false) );
     $c->setRequired(true);
     $c->setUnique(true);
     $table->addColumn($c);

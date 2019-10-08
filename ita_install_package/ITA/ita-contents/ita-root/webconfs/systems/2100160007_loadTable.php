@@ -72,7 +72,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
 
     // 項目名
-    $objVldt = new SingleTextValidator(1,64,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('COLUMN_DISP_NAME',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102709"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102710"));//エクセル・ヘッダでの説明
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。

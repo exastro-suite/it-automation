@@ -37,7 +37,7 @@ CREATE TABLE B_OPENST_IF_INFO
 
 OPENST_IF_INFO_ID                 INT                              ,
 OPENST_PROTOCOL                   VARCHAR (8)                      ,
-OPENST_HOSTNAME                   VARCHAR (128)                    ,
+OPENST_HOSTNAME                   VARCHAR (256)                    ,
 OPENST_PORT                       INT                              ,
 OPENST_USER                       VARCHAR (30)                     ,
 OPENST_PASSWORD                   VARCHAR (30)                     ,
@@ -59,7 +59,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 
 OPENST_IF_INFO_ID                 INT                              ,
 OPENST_PROTOCOL                   VARCHAR (8)                      ,
-OPENST_HOSTNAME                   VARCHAR (128)                    ,
+OPENST_HOSTNAME                   VARCHAR (256)                    ,
 OPENST_PORT                       INT                              ,
 OPENST_USER                       VARCHAR (30)                     ,
 OPENST_PASSWORD                   VARCHAR (30)                     ,
@@ -89,7 +89,7 @@ CREATE TABLE B_OPENST_PROJECT_INFO
 (
 
 OPENST_PROJECT_ID                 VARCHAR (128)                    ,
-OPENST_PROJECT_NAME               VARCHAR (128)                    ,
+OPENST_PROJECT_NAME               VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -207,8 +207,8 @@ EXECUTION_NO                      INT                              ,
 STATUS_ID                         INT                              ,
 STACK_ID                          VARCHAR (64)                     ,
 STACK_URL                         VARCHAR (512)                    ,
-SYSTEM_ID                         VARCHAR (64)                     ,
-SYSTEM_NAME                       VARCHAR (45)                     ,
+SYSTEM_ID                         VARCHAR (256)                     ,
+SYSTEM_NAME                       VARCHAR (256)                     ,
 REQUEST_TEMPLATE                  VARCHAR (2014)                   ,
 RESPONSE_JSON                     VARCHAR (4000)                   ,
 RESPONSE_MESSAGE                  VARCHAR (256)                    ,
@@ -234,8 +234,8 @@ EXECUTION_NO                      INT                              ,
 STATUS_ID                         INT                              ,
 STACK_ID                          VARCHAR (64)                     ,
 STACK_URL                         VARCHAR (512)                    ,
-SYSTEM_ID                         VARCHAR (64)                     ,
-SYSTEM_NAME                       VARCHAR (45)                     ,
+SYSTEM_ID                         VARCHAR (256)                     ,
+SYSTEM_NAME                       VARCHAR (256)                     ,
 REQUEST_TEMPLATE                  VARCHAR (2014)                   ,
 RESPONSE_JSON                     VARCHAR (4000)                   ,
 RESPONSE_MESSAGE                  VARCHAR (256)                    ,
@@ -256,12 +256,12 @@ CREATE TABLE C_OPENST_RESULT_MNG
 EXECUTION_NO                      INT                              ,
 STATUS_ID                         INT                              ,
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 PATTERN_ID                        INT                              ,
 I_PATTERN_NAME                    VARCHAR (256)                    ,
 I_TIME_LIMIT                      INT                              ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
@@ -287,12 +287,12 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 EXECUTION_NO                      INT                              ,
 STATUS_ID                         INT                              ,
 EXECUTION_USER                    VARCHAR (80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR (128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR (256)                    , -- シンフォニークラス名
 PATTERN_ID                        INT                              ,
 I_PATTERN_NAME                    VARCHAR (256)                    ,
 I_TIME_LIMIT                      INT                              ,
 OPERATION_NO_UAPK                 INT                              ,
-I_OPERATION_NAME                  VARCHAR (128)                    ,
+I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,

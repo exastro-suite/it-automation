@@ -66,7 +66,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setSequenceID('C_OPERATION_LIST_ANR1');
     $table->addColumn($c);
 
-	$objVldt = new SingleTextValidator(1,128,false);
+	$objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('OPERATION_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-105020"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-105030"));//エクセル・ヘッダでの説明
 	$c->setValidator($objVldt);

@@ -1236,6 +1236,14 @@ function remove_newline( text ){
 function relayout() {
     var wh = $(window).height() - 135;//減算する値は#KIZI以外の高さ要素(CSSと連動)
     var mh = $('#MENU').outerHeight();
+    var window_h = $(window).height();
+    var heaer_h = $('#HEADER').height();
+    var footer_h = $('#FOOTER').height();
+    var menu_header_h = $('#MENU h2').height();
+
+    $('#MENU').css('height', window_h - heaer_h - footer_h - menu_header_h -10 + 'px');
+    $('#MENU').css({overflow:'auto'});
+
     
     // 読み込み完了1秒後に開閉速度を変える
     if ( slideOpenSpeed == 0 ) setTimeout( function(){ slideOpenSpeed = 500; }, 1000 );

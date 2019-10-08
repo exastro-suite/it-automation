@@ -134,10 +134,15 @@
             $http_response_header = null;
     
             $URL = $RequestURI;
+            $ResponsContents = null;
 
-            $ResponsContents = file_get_contents( $URL,
+            $ResponsContents = @file_get_contents( $URL,
                                                   false,
                                                   stream_context_create($HttpContext) );
+
+            if(null === $ResponsContents){
+                return(array('StatusCode' => '999'));
+            }
 
             ////////////////////////////////
             // 通信結果を判定             //

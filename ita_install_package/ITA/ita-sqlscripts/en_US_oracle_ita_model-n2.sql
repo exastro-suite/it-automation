@@ -6,7 +6,7 @@ CREATE TABLE F_HOSTGROUP_VAR
 ROW_ID                             NUMBER                          , -- 識別シーケンス項番
 
 HOSTGROUP_NAME                     NUMBER                          ,
-VARS_NAME                          VARCHAR2 (128)                  ,
+VARS_NAME                          VARCHAR2 (512)                  ,
 HOSTNAME                           NUMBER                          ,
 
 DISP_SEQ                           NUMBER                          , -- 表示順序
@@ -27,7 +27,7 @@ JOURNAL_ACTION_CLASS               VARCHAR2 (8)                    , -- 履歴�
 ROW_ID                             NUMBER                          , -- 識別シーケンス項番
 
 HOSTGROUP_NAME                     NUMBER                          ,
-VARS_NAME                          VARCHAR2 (128)                  ,
+VARS_NAME                          VARCHAR2 (512)                  ,
 HOSTNAME                           NUMBER                          ,
 
 DISP_SEQ                           NUMBER                          , -- 表示順序

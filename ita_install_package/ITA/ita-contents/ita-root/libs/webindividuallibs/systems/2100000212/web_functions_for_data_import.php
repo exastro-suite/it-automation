@@ -141,14 +141,41 @@ function checkZipFile(){
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
     }
 
-    if ($errCnt > 0) {
+    // リリースファイルの確認
+    $releaseFile = $g['root_dir_path'] . '/libs/release/ita_base';
+    $exportReleaseFile = $uploadPath . $uploadId . '/ita_base';
+    if(file_exists($releaseFile)){
+        $releaseVersion = file_get_contents($releaseFile);
+
+        if(file_exists($exportReleaseFile)){
+
+            $exportReleaseVersion = file_get_contents($exportReleaseFile);
+
+            if($releaseVersion != $exportReleaseVersion){
+                if (file_exists($uploadPath . $fileName) === true) {
+                    unlink($uploadPath . $fileName);
+                }
+                removeFiles($uploadPath . $uploadId);
+                web_log("Version of ITA = [{$releaseVersion}].  Version of import file = [{$exportReleaseVersion}].");
+                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900070'));
+            }
+        }
+        else{
+            if (file_exists($uploadPath . $fileName) === true) {
+                unlink($uploadPath . $fileName);
+            }
+            removeFiles($uploadPath . $uploadId);
+            web_log("Version of ITA = [{$releaseVersion}].  Version of import file = [].");
+            throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900070'));
+        }
+    }
+    else{
         if (file_exists($uploadPath . $fileName) === true) {
             unlink($uploadPath . $fileName);
         }
         removeFiles($uploadPath . $uploadId);
-        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900016',
-                                             array(basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
+        web_log("File[{$releaseFile}] does not exists.");
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
 
     // ファイル移動

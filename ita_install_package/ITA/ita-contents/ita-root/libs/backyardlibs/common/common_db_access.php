@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////////////////////
 // Backyard common database access class
 /////////////////////////////////////////////////////////////////////
-class BackyardCommonDBAccessClass extends BackyardCommonDBAccessCoreClass {
+class BackyardCommonDBAccessClass extends CommonDBAccessCoreClass {
 
     /////////////////////////////////////////////////////////////////////
     // construct
@@ -80,9 +80,9 @@ class BackyardCommonDBAccessClass extends BackyardCommonDBAccessCoreClass {
 }
 
 /////////////////////////////////////////////////////////////////////
-// Backyard common database access core class
+// common database access core class
 /////////////////////////////////////////////////////////////////////
-class BackyardCommonDBAccessCoreClass {
+class CommonDBAccessCoreClass {
     private $objDBCA;
     private $objMTS;
     private $db_access_user_id;
@@ -98,7 +98,12 @@ class BackyardCommonDBAccessCoreClass {
         $this->ClearLastErrorMsg();
         $this->db_access_user_id = $db_access_user_id;
     }
-
+    /////////////////////////////////////////////////////////////////////
+    // Get DB access user ID
+    /////////////////////////////////////////////////////////////////////
+    function GetDBAccessUserID() {
+        return $this->db_access_user_id;
+    }
     /////////////////////////////////////////////////////////////////////
     // Sequence no allocation
     /////////////////////////////////////////////////////////////////////
@@ -277,5 +282,54 @@ class BackyardCommonDBAccessCoreClass {
         $this->ClearLastErrorMsg();
         return($LastMsg);
     }
+    /////////////////////////////////////////////////////////////////////
+    // DB Insert
+    /////////////////////////////////////////////////////////////////////
+    function dbaccessInsert($targetTable, $PkeyMember, $arrayConfig, $arrayValue, &$in_PkeyID) {
+        $strCurTable      = $targetTable;
+        $strJnlTable      = $strCurTable . "_JNL";
+        $strSeqOfCurTable = $strCurTable . "_RIC";
+        $strSeqOfJnlTable = $strCurTable . "_JSQ";
+
+        $in_PkeyID = $this->dbaccessGetSequence($strSeqOfCurTable);
+        if(!$in_PkeyID) {
+            return false;
+        }
+
+        $jnlId = $this->dbaccessGetSequence($strSeqOfJnlTable);
+        if(!$jnlId) {
+            return false;
+        }
+
+        $arrayValue[$PkeyMember]            = $in_PkeyID;
+        $arrayValue['JOURNAL_SEQ_NO']       = $jnlId;
+        $arrayValue['LAST_UPDATE_USER']     = $this->db_access_user_id;
+
+        $temp_array = array();
+        $retArray = makeSQLForUtnTableUpdate($this->db_model_ch,
+                                             "INSERT",
+                                             $PkeyMember,
+                                             $strCurTable,
+                                             $strJnlTable,
+                                             $arrayConfig,
+                                             $arrayValue,
+                                             $temp_array);
+
+        $sqlCurBody = $retArray[1];
+        $arrayCurBind = $retArray[2];
+
+        $sqlJnlBody = $retArray[3];
+        $arrayJnlBind = $retArray[4];
+
+        if(!$this->dbaccessExecute($sqlCurBody, $arrayCurBind)) {
+            return false;
+        }
+        if(!$this->dbaccessExecute($sqlJnlBody, $arrayJnlBind)) {
+            return false;
+        }
+
+        return true;
+    }
 }
+?>
 

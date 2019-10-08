@@ -44,9 +44,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $tmpAryColumn['ROW_EDIT_BY_FILE']->setCommandArrayForEdit(array(1=>$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101353"),
                                                                    )
                                                              );
-    $outputType = new OutputType(new TabHFmt(), new DelTabBFmt());
-    $tmpAryColumn['WEB_BUTTON_UPDATE']->setOutputType("print_table", $outputType);
-    $tmpAryColumn['DISUSE_FLAG']->setOutputType("print_table", $outputType);
+    $tmpAryColumn['WEB_BUTTON_UPDATE']->getOutputType('print_table')->setVisible(false);;
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_table')->setVisible(false);;
     unset($tmpAryColumn);
 
     // ----VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定

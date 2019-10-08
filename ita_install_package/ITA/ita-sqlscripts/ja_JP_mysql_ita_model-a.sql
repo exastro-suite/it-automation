@@ -62,7 +62,7 @@ CREATE TABLE A_PERMISSIONS_LIST
 (
 PERMISSIONS_ID          INT                     ,
 IP_ADDRESS              VARCHAR (15)            ,
-IP_INFO                 VARCHAR (64)            ,
+IP_INFO                 VARCHAR (256)            ,
 NOTE                    VARCHAR (4000)          ,
 DISUSE_FLAG             VARCHAR (1)             ,
 LAST_UPDATE_TIMESTAMP   DATETIME(6)             ,
@@ -73,7 +73,7 @@ PRIMARY KEY(PERMISSIONS_ID)
 CREATE TABLE A_ROLE_LIST
 (
 ROLE_ID                 INT                     ,
-ROLE_NAME               VARCHAR (64)            ,
+ROLE_NAME               VARCHAR (256)            ,
 NOTE                    VARCHAR (4000)          ,
 DISUSE_FLAG             VARCHAR (1)             ,
 LAST_UPDATE_TIMESTAMP   DATETIME(6)             ,
@@ -241,7 +241,7 @@ JOURNAL_REG_DATETIME    DATETIME(6)             ,
 JOURNAL_ACTION_CLASS    VARCHAR (8)             ,
 PERMISSIONS_ID          INT                     ,
 IP_ADDRESS              VARCHAR (15)            ,
-IP_INFO                 VARCHAR (64)            ,
+IP_INFO                 VARCHAR (256)            ,
 NOTE                    VARCHAR (4000)          ,
 DISUSE_FLAG             VARCHAR (1)             ,
 LAST_UPDATE_TIMESTAMP   DATETIME(6)             ,
@@ -255,7 +255,7 @@ JOURNAL_SEQ_NO          INT                     ,
 JOURNAL_REG_DATETIME    DATETIME(6)             ,
 JOURNAL_ACTION_CLASS    VARCHAR (8)             ,
 ROLE_ID                 INT                     ,
-ROLE_NAME               VARCHAR (64)            ,
+ROLE_NAME               VARCHAR (256)            ,
 NOTE                    VARCHAR (4000)          ,
 DISUSE_FLAG             VARCHAR (1)             ,
 LAST_UPDATE_TIMESTAMP   DATETIME(6)             ,
@@ -575,7 +575,7 @@ CREATE TABLE B_OS_TYPE
 (
 OS_TYPE_ID                        INT                       ,
 
-OS_TYPE_NAME                      VARCHAR (128)             ,
+OS_TYPE_NAME                      VARCHAR (256)             ,
 HARDAWRE_TYPE_SV                  INT                       ,
 HARDAWRE_TYPE_ST                  INT                       ,
 HARDAWRE_TYPE_NW                  INT                       ,
@@ -599,7 +599,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)               , -- 履歴用変更
 
 OS_TYPE_ID                        INT                       ,
 
-OS_TYPE_NAME                      VARCHAR (128)             ,
+OS_TYPE_NAME                      VARCHAR (256)             ,
 HARDAWRE_TYPE_SV                  INT                       ,
 HARDAWRE_TYPE_ST                  INT                       ,
 HARDAWRE_TYPE_NW                  INT                       ,
@@ -623,7 +623,7 @@ HOSTNAME                          VARCHAR (128)             ,
 IP_ADDRESS                        VARCHAR (15)              ,
 
 ETH_WOL_MAC_ADDRESS               VARCHAR (17)              , -- ETH_WAKE_ON_LAN
-ETH_WOL_NET_DEVICE                VARCHAR (32)              , -- ETH_WAKE_ON_LAN
+ETH_WOL_NET_DEVICE                VARCHAR (256)              , -- ETH_WAKE_ON_LAN
 
 PROTOCOL_ID                       INT                       ,
 LOGIN_USER                        VARCHAR (30)              ,
@@ -638,7 +638,7 @@ HOSTS_EXTRA_ARGS                  VARCHAR (512)             , -- インベント
 --
 SYSTEM_NAME                       VARCHAR (64)              ,
 COBBLER_PROFILE_ID                INT                       , -- FOR COBLLER
-INTERFACE_TYPE                    VARCHAR (64)              , -- FOR COBLLER
+INTERFACE_TYPE                    VARCHAR (256)              , -- FOR COBLLER
 MAC_ADDRESS                       VARCHAR (17)              , -- FOR COBLLER
 NETMASK                           VARCHAR (15)              , -- FOR COBLLER
 GATEWAY                           VARCHAR (15)              , -- FOR COBLLER
@@ -676,7 +676,7 @@ HOSTNAME                          VARCHAR (128)             ,
 IP_ADDRESS                        VARCHAR (15)              ,
 
 ETH_WOL_MAC_ADDRESS               VARCHAR (17)              , -- ETH_WAKE_ON_LAN
-ETH_WOL_NET_DEVICE                VARCHAR (32)              , -- ETH_WAKE_ON_LAN
+ETH_WOL_NET_DEVICE                VARCHAR (256)              , -- ETH_WAKE_ON_LAN
 
 PROTOCOL_ID                       INT                       ,
 LOGIN_USER                        VARCHAR (30)              ,
@@ -691,7 +691,7 @@ HOSTS_EXTRA_ARGS                  VARCHAR (512)             , -- インベント
 
 SYSTEM_NAME                       VARCHAR (64)              ,
 COBBLER_PROFILE_ID                INT                       , -- FOR COBLLER
-INTERFACE_TYPE                    VARCHAR (64)              , -- FOR COBLLER
+INTERFACE_TYPE                    VARCHAR (256)              , -- FOR COBLLER
 MAC_ADDRESS                       VARCHAR (17)              , -- FOR COBLLER
 NETMASK                           VARCHAR (15)              , -- FOR COBLLER
 GATEWAY                           VARCHAR (15)              , -- FOR COBLLER
@@ -780,7 +780,7 @@ CREATE TABLE C_OPERATION_LIST
 (
 OPERATION_NO_UAPK                 INT                        ,
 
-OPERATION_NAME                    VARCHAR (128)              ,
+OPERATION_NAME                    VARCHAR (256)              ,
 OPERATION_DATE                    DATETIME(6)                ,
 OPERATION_NO_IDBH                 INT                        ,
 LAST_EXECUTE_TIMESTAMP            DATETIME(6)                ,
@@ -804,7 +804,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                , -- 履歴用変�
 
 OPERATION_NO_UAPK                 INT                        ,
 
-OPERATION_NAME                    VARCHAR (128)              ,
+OPERATION_NAME                    VARCHAR (256)              ,
 OPERATION_DATE                    DATETIME(6)                ,
 OPERATION_NO_IDBH                 INT                        ,
 LAST_EXECUTE_TIMESTAMP            DATETIME(6)                ,
@@ -863,7 +863,7 @@ CREATE TABLE C_SYMPHONY_CLASS_MNG
 (
 SYMPHONY_CLASS_NO                 INT                        ,
 
-SYMPHONY_NAME                     VARCHAR (128)              ,
+SYMPHONY_NAME                     VARCHAR (256)              ,
 DESCRIPTION                       VARCHAR (4000)             ,
 
 DISP_SEQ                          INT                        , -- 表示順序
@@ -885,7 +885,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                , -- 履歴用変�
 
 SYMPHONY_CLASS_NO                 INT                        ,
 
-SYMPHONY_NAME                     VARCHAR (128)              ,
+SYMPHONY_NAME                     VARCHAR (256)              ,
 DESCRIPTION                       VARCHAR (4000)             ,
 
 DISP_SEQ                          INT                        , -- 表示順序
@@ -903,10 +903,10 @@ CREATE TABLE C_SYMPHONY_INSTANCE_MNG
 SYMPHONY_INSTANCE_NO              INT                        ,
 
 I_SYMPHONY_CLASS_NO               INT                        ,
-I_SYMPHONY_NAME                   VARCHAR (128)              ,
+I_SYMPHONY_NAME                   VARCHAR (256)              ,
 I_DESCRIPTION                     VARCHAR (4000)             ,
 OPERATION_NO_UAPK                 INT                        ,
-I_OPERATION_NAME                  VARCHAR (128)              , 
+I_OPERATION_NAME                  VARCHAR (256)              , 
 STATUS_ID                         INT                        ,
 EXECUTION_USER                    VARCHAR (80)               ,
 ABORT_EXECUTE_FLAG                INT                        ,
@@ -934,10 +934,10 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                , -- 履歴用変�
 SYMPHONY_INSTANCE_NO              INT                        ,
 --
 I_SYMPHONY_CLASS_NO               INT                        ,
-I_SYMPHONY_NAME                   VARCHAR (128)              ,
+I_SYMPHONY_NAME                   VARCHAR (256)              ,
 I_DESCRIPTION                     VARCHAR (4000)             ,
 OPERATION_NO_UAPK                 INT                        ,
-I_OPERATION_NAME                  VARCHAR (128)              ,
+I_OPERATION_NAME                  VARCHAR (256)              ,
 STATUS_ID                         INT                        ,
 EXECUTION_USER                    VARCHAR (80)               ,
 ABORT_EXECUTE_FLAG                INT                        ,
@@ -1031,7 +1031,7 @@ RELEASED_FLAG                     INT                        ,
 
 EXE_SKIP_FLAG                     INT                        ,
 OVRD_OPERATION_NO_UAPK            INT                        ,
-OVRD_I_OPERATION_NAME             VARCHAR (128)              ,
+OVRD_I_OPERATION_NAME             VARCHAR (256)              ,
 OVRD_I_OPERATION_NO_IDBH          INT                        ,
 
 DISP_SEQ                          INT                        , -- 表示順序
@@ -1076,7 +1076,7 @@ RELEASED_FLAG                     INT                        ,
 
 EXE_SKIP_FLAG                     INT                        ,
 OVRD_OPERATION_NO_UAPK            INT                        ,
-OVRD_I_OPERATION_NAME             VARCHAR (128)              ,
+OVRD_I_OPERATION_NAME             VARCHAR (256)              ,
 OVRD_I_OPERATION_NO_IDBH          INT                        ,
 
 DISP_SEQ                          INT                        , -- 表示順序

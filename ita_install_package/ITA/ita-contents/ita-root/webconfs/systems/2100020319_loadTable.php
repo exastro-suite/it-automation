@@ -197,7 +197,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setAllowSendFromFile(true);    
 
     $c->setSubtotalFlag(false);
-    $c->setValidator(new IntNumValidator(1, 999));
+    $c->setValidator(new IntNumValidator(1, 99999999));
     $c->setRequired(true);//登録/更新時には、入力必須
 
     $table->addColumn($c);

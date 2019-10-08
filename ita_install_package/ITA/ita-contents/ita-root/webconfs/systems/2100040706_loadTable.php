@@ -71,7 +71,7 @@ Ansible 共通 グローバル変数管理
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-    $objVldt = new SingleTextValidator(0,128,false);
+    $objVldt = new SingleTextValidator(0,256,false);
     $c = new TextColumn('VARS_DESCRIPTION',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1940030"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1940031"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

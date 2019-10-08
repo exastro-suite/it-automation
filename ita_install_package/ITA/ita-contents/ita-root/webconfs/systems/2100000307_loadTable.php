@@ -127,7 +127,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     //リンクボタン----
 
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('SYMPHONY_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-109070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-109080"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

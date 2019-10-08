@@ -803,25 +803,21 @@
             throw new Exception($errorMsg);
         }
 
-        if($vg_driver_name == DF_LEGACY_DRIVER) {
-            ///////////////////////////////////////////////////////////////////////////
-            // 関連データベースを更新している場合、変数刈取りのバックヤード起動を登録
-            ///////////////////////////////////////////////////////////////////////////
-            if($db_update_flg === true) {
-                if($log_level === "DEBUG") {
-                    $traceMsg = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70056");
-                    LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
-                }
-                $ret = setBackyardExecute($lv_a_proc_loaded_list_varsetup_pkey);
-                if($ret === false) {
-                    $error_flag = 1;
-                    $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90306");
-                    throw new Exception($errorMsg);
-                }
+        ///////////////////////////////////////////////////////////////////////////
+        // 関連データベースを更新している場合、変数刈取りのバックヤード起動を登録
+        ///////////////////////////////////////////////////////////////////////////
+        if($db_update_flg === true) {
+            if($log_level === "DEBUG") {
+                $traceMsg = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70056");
+                LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
+            }
+            $ret = setBackyardExecute($lv_a_proc_loaded_list_varsetup_pkey);
+            if($ret === false) {
+                $error_flag = 1;
+                $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90306");
+                throw new Exception($errorMsg);
             }
         }
-
-
     }
     catch (Exception $e){
         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80004");
@@ -1897,13 +1893,13 @@
                                 // fetch行数を取得
                                 $count = $objQuery->effectedRowCount();
 
-                                // 1件ではない場合
-                                if(1 != $count){
-                                    continue;
+                                $col_val = "";
+                                // 0件ではない場合
+                                if(0 != $count){
+                                    // fetch行を取得
+                                    $tgt_row = $objQuery->resultFetch();
+                                    $col_val = $tgt_row[$ina_col_list['REF_COL_NAME']];
                                 }
-                                // fetch行を取得
-                                $tgt_row = $objQuery->resultFetch();
-                                $col_val = $tgt_row[$ina_col_list['REF_COL_NAME']];
                                 unset($objQuery);
                             }
 
@@ -2404,22 +2400,21 @@
                 return true;
             }
 
-            if($vg_driver_name == DF_LEGACY_DRIVER) {
-                // 具体値にテンプレート変数が記述されているか判定
-                if( $db_update_flg === false) {
-                    $var_match = array();
-                    $val_list[] = $tgt_row["VARS_ENTRY"];
-                    $val_list[] = $ina_varsass_list['VARS_ENTRY'];
-                    foreach($val_list as $val) {
-                        $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
-                        if(($ret !== false) && ($ret > 0)){
-                            // テンプレート変数が記述されていることを記録
-                            $db_update_flg = true;
-                            break;
-                        }
+            // 具体値にテンプレート変数が記述されているか判定
+            if( $db_update_flg === false) {
+                $var_match = array();
+                $val_list[] = $tgt_row["VARS_ENTRY"];
+                $val_list[] = $ina_varsass_list['VARS_ENTRY'];
+                foreach($val_list as $val) {
+                    $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
+                    if(($ret !== false) && ($ret > 0)){
+                        // テンプレート変数が記述されていることを記録
+                        $db_update_flg = true;
+                        break;
                     }
                 }
             }
+
             // トレースメッセージ
             if ( $log_level === 'DEBUG' ){
                 $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70025",
@@ -2595,15 +2590,13 @@
                 continue;
             }
                 
-            if($vg_driver_name == DF_LEGACY_DRIVER) {
-                // 具体値にテンプレート変数が記述されているか判定
-                if( $db_update_flg === false) {
-                    $var_match = array();
-                    $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$tgt_row["VARS_ENTRY"],$var_match);
-                    if(($ret !== false) && ($ret > 0)){
-                        // テンプレート変数が記述されていることを記録
-                        $db_update_flg = true;
-                    }
+            // 具体値にテンプレート変数が記述されているか判定
+            if( $db_update_flg === false) {
+                $var_match = array();
+                $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$tgt_row["VARS_ENTRY"],$var_match);
+                if(($ret !== false) && ($ret > 0)){
+                    // テンプレート変数が記述されていることを記録
+                    $db_update_flg = true;
                 }
             }
 
@@ -3140,15 +3133,13 @@
 
         }
 
-        if($vg_driver_name == DF_LEGACY_DRIVER) {
-            // 具体値にテンプレート変数が記述されているか判定
-            if( $db_update_flg === false) {
-                $var_match = array();
-                $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$tgt_row["VARS_ENTRY"],$var_match);
-                if(($ret !== false) && ($ret > 0)){
-                    // テンプレート変数が記述されていることを記録
-                    $db_update_flg = true;
-                }
+        // 具体値にテンプレート変数が記述されているか判定
+        if( $db_update_flg === false) {
+            $var_match = array();
+            $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$tgt_row["VARS_ENTRY"],$var_match);
+            if(($ret !== false) && ($ret > 0)){
+                // テンプレート変数が記述されていることを記録
+                $db_update_flg = true;
             }
         }
 

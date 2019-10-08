@@ -62,7 +62,7 @@ DSC変数名管理
     //************************************************************************************
     //----変数名
     //************************************************************************************
-    $objVldt = new SingleTextValidator(1,128,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('VARS_NAME',$g['objMTS']->getSomeMessage("ITADSCH-MNU-305010"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITADSCH-MNU-305011"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
@@ -73,7 +73,7 @@ DSC変数名管理
     //************************************************************************************
     //----変数名説
     //************************************************************************************
-    $objVldt = new SingleTextValidator(0,128,false);
+    $objVldt = new SingleTextValidator(0,256,false);
     $c = new TextColumn('VARS_DESCRIPTION',$g['objMTS']->getSomeMessage("ITADSCH-MNU-305020"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITADSCH-MNU-305030"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

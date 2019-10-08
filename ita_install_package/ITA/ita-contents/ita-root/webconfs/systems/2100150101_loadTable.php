@@ -17,6 +17,10 @@
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
+    if(!array_key_exists('page_dir', $g)){
+        $g['page_dir'] = '2100150101';
+    }
+
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101401");
 

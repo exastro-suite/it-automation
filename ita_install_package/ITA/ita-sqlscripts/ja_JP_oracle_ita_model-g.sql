@@ -290,8 +290,8 @@ CREATE TABLE B_DSC_VARS_MASTER
 (
 VARS_NAME_ID                      NUMBER                           ,
 
-VARS_NAME                         VARCHAR2(128)                    , -- 代入値名称
-VARS_DESCRIPTION                  VARCHAR2(128)                    , -- 代入値
+VARS_NAME                         VARCHAR2(256)                    , -- 代入値名称
+VARS_DESCRIPTION                  VARCHAR2(256)                    , -- 代入値
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
 NOTE                              VARCHAR2(4000)                   , -- 備考
@@ -313,8 +313,8 @@ JOURNAL_ACTION_CLASS              VARCHAR2(8)                      , -- 履歴�
 
 VARS_NAME_ID                      NUMBER                           ,
 
-VARS_NAME                         VARCHAR2(128)                    , -- 代入値名称
-VARS_DESCRIPTION                  VARCHAR2(128)                    , -- 代入値
+VARS_NAME                         VARCHAR2(256)                    , -- 代入値名称
+VARS_DESCRIPTION                  VARCHAR2(256)                    , -- 代入値
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
 NOTE                              VARCHAR2(4000)                   , -- 備考
@@ -427,7 +427,7 @@ EXECUTION_NO                      NUMBER                           ,
 
 STATUS_ID                         NUMBER                           , -- 実行ステータスID
 EXECUTION_USER                    VARCHAR2(80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR2(128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR2(256)                    , -- シンフォニークラス名
 SYMPHONY_INSTANCE_NO              NUMBER                           , -- Symphonyインスタンス番号
 PATTERN_ID                        NUMBER                           , -- パターンID
 I_PATTERN_NAME                    VARCHAR2(256)                    ,
@@ -436,7 +436,7 @@ I_ANS_HOST_DESIGNATE_TYPE_ID      NUMBER                           ,
 I_ANS_PARALLEL_EXE                NUMBER                           ,
 I_DSC_RETRY_TIMEOUT               NUMBER                           , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
 OPERATION_NO_UAPK                 NUMBER                           , -- オペレーションI
-I_OPERATION_NAME                  VARCHAR2(128)                    ,
+I_OPERATION_NAME                  VARCHAR2(256)                    ,
 I_OPERATION_NO_IDBH               NUMBER                           ,
 TIME_BOOK                         TIMESTAMP                        ,
 TIME_START                        TIMESTAMP                        , -- 開始時間
@@ -467,7 +467,7 @@ EXECUTION_NO                      NUMBER                           ,
 
 STATUS_ID                         NUMBER                           , -- 実行ステータスID
 EXECUTION_USER                    VARCHAR2(80)                     , -- 実行ユーザ
-SYMPHONY_NAME                     VARCHAR2(128)                    , -- シンフォニークラス名
+SYMPHONY_NAME                     VARCHAR2(256)                    , -- シンフォニークラス名
 SYMPHONY_INSTANCE_NO              NUMBER                           , -- Symphonyインスタンス番号
 PATTERN_ID                        NUMBER                           , -- パターンID
 I_PATTERN_NAME                    VARCHAR2(256)                    ,
@@ -476,7 +476,7 @@ I_ANS_HOST_DESIGNATE_TYPE_ID      NUMBER                           ,
 I_ANS_PARALLEL_EXE                NUMBER                           ,
 I_DSC_RETRY_TIMEOUT               NUMBER                           , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
 OPERATION_NO_UAPK                 NUMBER                           , -- オペレーションI
-I_OPERATION_NAME                  VARCHAR2(128)                    ,
+I_OPERATION_NAME                  VARCHAR2(256)                    ,
 I_OPERATION_NO_IDBH               NUMBER                           ,
 TIME_BOOK                         TIMESTAMP                        ,
 TIME_START                        TIMESTAMP                        , -- 開始時間

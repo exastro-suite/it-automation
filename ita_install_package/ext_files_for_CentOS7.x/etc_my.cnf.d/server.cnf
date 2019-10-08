@@ -1,0 +1,67 @@
+#
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+#
+# See the examples of server my.cnf files in /usr/share/mysql/
+#
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+# this is only for the mysqld standalone daemon
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+symbolic-links=0
+log-error=/var/log/mariadb/mariadb.log
+
+skip-character-set-client-handshake
+explicit_defaults_for_timestamp = true
+transaction-isolation=READ-COMMITTED
+innodb_buffer_pool_size = 256MB
+innodb_log_buffer_size=32M
+innodb_log_file_size=128M
+min_examined_row_limit=100
+join_buffer_size=64M
+query_cache_size=256M
+query_cache_type=1
+max_heap_table_size=32M
+tmp_table_size=32M
+mrr_buffer_size=32M
+
+
+#
+# * Galera-related settings
+#
+[galera]
+# Mandatory settings
+#wsrep_on=ON
+#wsrep_provider=
+#wsrep_cluster_address=
+#binlog_format=row
+#default_storage_engine=InnoDB
+#innodb_autoinc_lock_mode=2
+#
+# Allow server to accept connections on all interfaces.
+#
+#bind-address=0.0.0.0
+#
+# Optional setting
+#wsrep_slave_threads=1
+#innodb_flush_log_at_trx_commit=0
+
+# this is only for embedded server
+[embedded]
+
+# This group is only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here
+[mariadb]
+disable_unix_socket
+character-set-server = utf8
+
+# This group is only read by MariaDB-10.4 servers.
+# If you use the same .cnf file for MariaDB of different versions,
+# use this group for options that older servers don't understand
+[mariadb-10.4]
+
