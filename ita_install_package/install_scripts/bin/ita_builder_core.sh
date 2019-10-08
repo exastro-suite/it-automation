@@ -121,38 +121,55 @@ download_check() {
 #   yum_repository http://example.com/example-repo.rpm --enable test-repo
 yum_repository() {
     if [ $# -gt 0 ]; then
-    
         local repo=$1
         
-        if [ "$LINUX_OS" == "RHEL7" ]; then
-            rpm -ivh "$repo" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            CREATEREPO_CHK=`echo $?`
-            if [ $CREATEREPO_CHK -ne 0 ]; then
-                log "ERROR:Failed to get repository"
-                func_exit
-            fi
-        fi
-
         # no repo to be installed if the first argument starts "-".
         if [[ "$repo" =~ ^[^-] ]]; then
-            yum install -y "$repo" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            CREATEREPO_CHK=`echo $?`
-            if [ $CREATEREPO_CHK -ne 0 ]; then
+            if [ "$LINUX_OS" == "RHEL7" ]; then
+                rpm -ivh "$repo" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                CREATEREPO_CHK=`echo $?`
+            else
+                yum install -y "$repo" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                CREATEREPO_CHK=`echo $?`
+            fi
+            
+            if [ $CREATEREPO_CHK == 0 ] || [ $CREATEREPO_CHK == 1 ]; then
+                echo "Successful repository acquisition" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            else
                 log "ERROR:Failed to get repository"
                 func_exit
             fi
             shift
         fi
-    fi
 
-    if [ $# -gt 0 ]; then
+        
+        
         yum-config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
-    
-    yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
 }
 
+# enable mariadb repository
+mariadb_repository() {
+    #Not used for offline installation
+    if [ "${REPOSITORY}" != "yum_all" ]; then
+
+        local repo=$1
+
+        curl -sS "$repo" | bash >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        CREATEREPO_CHK=`echo $?`
+
+        if [ $CREATEREPO_CHK == 0 ] || [ $CREATEREPO_CHK == 1 ]; then
+            echo "Successful repository acquisition" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        else
+            log "ERROR:Failed to get repository"
+            func_exit
+        fi
+        
+        yum-config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
+}
 
 cat_tar_gz() {
     local location=$1
@@ -257,100 +274,115 @@ configure_os() {
 }
 
 
-# MySQL
-configure_mysql() {
+# MariaDB
+configure_mariadb() {
+
+    # make log directory
+    if [ ! -e /var/log/mariadb ]; then
+        mkdir -p -m 777 /var/log/mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
+
     #Confirm whether it is installed
-    yum list installed mysql >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    yum list installed MariaDB-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? == 0 ]; then
-        log "MySQL has already been installed."
+        log "MariaDB has already been installed."
         
         #Confirm whether root password has been changed
         mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         if [ $? == 0 ]; then
-            log "Root password changed"
+            log "Root password of MariaDB is already setting."
         else
             expect -c "
-            set timeout -1
-            spawn mysql_secure_installation
-            expect \"Enter password for user root:\"
-            send \""${db_root_tmp_password}\\r"\"
-            expect \"New password:\"
-            send \""${db_root_password}\\r"\"
-            expect \"Re-enter new password:\"
-            send \""${db_root_password}\\r"\"
-            expect \"Change the password for root \\? \\(\\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"n\\r\"
-            expect \"Remove anonymous users\\? \\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"y\\r\"
-            expect \"Disallow root login remotely\\? \\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"y\\r\"
-            expect \"Remove test database and access to it\\? \\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"y\\r\"
-            expect \"Reload privilege tables now\\? \\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"y\\r\"
+                set timeout -1
+                spawn mysql_secure_installation
+                expect \"Enter current password for root \\(enter for none\\):\"
+                send \"\\r\"
+                expect -re \"Switch to unix_socket authentication.* $\"
+                send \"n\\r\"
+                expect -re \"Change the root password\\?.* $\"
+                send \"Y\\r\"
+                expect \"New password:\"
+                send \""${db_root_password}\\r"\"
+                expect \"Re-enter new password:\"
+                send \""${db_root_password}\\r"\"
+                expect -re \"Remove anonymous users\\?.* $\"
+                send \"Y\\r\"
+                expect -re \"Disallow root login remotely\\?.* $\"
+                send \"Y\\r\"
+                expect -re \"Remove test database and access to it\\?.* $\"
+                send \"Y\\r\"
+                expect -re \"Reload privilege tables now\\?.* $\"
+                send \"Y\\r\"
             " >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            
+            # copy MariaDB charset file
+            copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            
+            # restart MariaDB Server
+            if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
+                #--------CentOS6,RHEL6--------
+                service mysql restart >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            else
+                #--------CentOS7,RHEL7--------
+                systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            fi
         fi
+        
     else
-        # enable yum repository
-        yum_repository ${YUM_REPO_PACKAGE["mysql"]}
+        # enable MariaDB repository
+        mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
 
         # install some packages
-        yum_install ${YUM_PACKAGE["mysql"]}
+        yum_install ${YUM_PACKAGE["mariadb"]}
         
-        # enable and start (initialize) MySQL Server
+        # enable and start (initialize) MariaDB Server
         if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
             #--------CentOS6,RHEL6--------
-            chkconfig mysqld on >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            service mysqld start >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            chkconfig mysql on >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            service mysql start >> "$ITA_BUILDER_LOG_FILE" 2>&1
         else
             #--------CentOS7,RHEL7--------
-            systemctl enable mysqld >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            systemctl start mysqld >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
         fi
         
-        # copy MySQL config file
-        copy_and_backup $ITA_EXT_FILE_DIR/etc/my.cnf /etc/
-
-        # change password policy
-        cat /etc/my.cnf | grep "validate-password=OFF"
-        if [ $? != 0 ]; then
-            sed -i '$a\validate-password=OFF' /etc/my.cnf >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        fi
-        
-        # restart MySQL Server
-        if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
-            #--------CentOS6,RHEL6--------
-            service mysqld restart >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        else
-            #--------CentOS7,RHEL7--------
-            systemctl restart mysqld >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        fi
-        
-        # get temporary password
-        db_root_tmp_password=`cat /var/log/mysqld.log | grep 'temporary password' | awk '{print $11}'`
-
-        # run mysql_secure_installation
         expect -c "
             set timeout -1
             spawn mysql_secure_installation
-            expect \"Enter password for user root:\"
-            send \""${db_root_tmp_password}\\r"\"
+            expect \"Enter current password for root \\(enter for none\\):\"
+            send \"\\r\"
+            expect -re \"Switch to unix_socket authentication.* $\"
+            send \"n\\r\"
+            expect -re \"Change the root password\\?.* $\"
+            send \"Y\\r\"
             expect \"New password:\"
             send \""${db_root_password}\\r"\"
             expect \"Re-enter new password:\"
             send \""${db_root_password}\\r"\"
-            expect \"Change the password for root \\? \\(\\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"n\\r\"
-            expect \"Remove anonymous users\\? \\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"y\\r\"
-            expect \"Disallow root login remotely\\? \\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"y\\r\"
-            expect \"Remove test database and access to it\\? \\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"y\\r\"
-            expect \"Reload privilege tables now\\? \\(Press y\\|Y for Yes, any other key for No\\) :\"
-            send \"y\\r\"
+            expect -re \"Remove anonymous users\\?.* $\"
+            send \"Y\\r\"
+            expect -re \"Disallow root login remotely\\?.* $\"
+            send \"Y\\r\"
+            expect -re \"Remove test database and access to it\\?.* $\"
+            send \"Y\\r\"
+            expect -re \"Reload privilege tables now\\?.* $\"
+            send \"Y\\r\"
         " >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        
+        # copy MariaDB charset file
+        copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        
+        # restart MariaDB Server
+        if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
+            #--------CentOS6,RHEL6--------
+            service mysql restart >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        else
+            #--------CentOS7,RHEL7--------
+            systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        fi
     fi
+    
+    
 }
 
 # Apache HTTP Server
@@ -539,8 +571,8 @@ make_ita() {
     log "OS setting"
     configure_os
     
-    log "MySQL install and setting"
-    configure_mysql
+    log "MariaDB install and setting"
+    configure_mariadb
 
     log "Apache install and setting"
     configure_httpd
@@ -586,11 +618,13 @@ download() {
     log "yum-utils and createrepo install"
     configure_yum_env
 
-    # Enable all yum repositories.
+    # Enable all yum repositories(Other than mariadb).
     log "Enable all yum repositories."
     for key in ${!YUM_REPO_PACKAGE[@]}; do
         yum_repository ${YUM_REPO_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
     done
+    # Enable mariadb repositories.
+    mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
 
     # Download packages.
     for key in ${!YUM_PACKAGE[@]}; do
@@ -639,7 +673,7 @@ download() {
             curl -O https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz >> "$ITA_BUILDER_LOG_FILE" 2>&1;
             tar zxf Python-2.7.11.tgz >> "$ITA_BUILDER_LOG_FILE" 2>&1;
             cd $ITA_INSTALL_SCRIPTS_DIR/python27/Python-2.7.11 >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-            $ITA_INSTALL_SCRIPTS_DIR/configure --with-ensurepip >> "$ITA_BUILDER_LOG_FILE" 2>&1;
+#            $ITA_INSTALL_SCRIPTS_DIR/python27/Python-2.7.11/configure --with-ensurepip >> "$ITA_BUILDER_LOG_FILE" 2>&1;
             make && make altinstall >> "$ITA_BUILDER_LOG_FILE" 2>&1
         )
         mv /usr/bin/python /usr/bin/python.26 >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -684,7 +718,7 @@ download() {
 	
 	OFFLINE_INSTALL_FILE="ita_Ver"$ITA_VERSION"_offline_"$DATE".tar.gz"
 	
-    log "Create an offline installer archive in [$ITA_PACKAGE_OPEN_DIR/$OFFLINE_INSTALL_FILE]."
+    log "Create an offline installer archive in [$ITA_PACKAGE_OPEN_DIR/$OFFLINE_INSTALL_FILE]"
     (
         if [ ! -e "ITA_PACKAGE_OPEN_DIR/$OFFLINE_INSTALL_FILE" ]; then
             cd $ITA_PACKAGE_OPEN_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1;
@@ -837,6 +871,9 @@ fi
 # set subscription
 if [ "$exec_mode" != "2" ]; then
     if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "RHEL6" ]; then
+
+        log "setting subscriction of RHEL"
+
         #IDPW
         REDHAT_USER_NAME="${redhat_user_name}"
         REDHAT_USER_PASSWORD="${redhat_user_password}"
@@ -847,20 +884,34 @@ if [ "$exec_mode" != "2" ]; then
         #subscription-manager unsubscribe --serial="${SUBSCRIPTION_SERIAL_NUM}"
 
         #Subscription registration
-        subscription-manager register --username=${REDHAT_USER_NAME} --password=${REDHAT_USER_PASSWORD}
+        subscription-manager register --username=${REDHAT_USER_NAME} --password=${REDHAT_USER_PASSWORD} >> "$ITA_BUILDER_LOG_FILE" 2>&1
         REGISTER_CHK=`echo $?`
         
         if [ "${REGISTER_CHK}" -ne 0 -a "${REGISTER_CHK}" -ne 64 ]; then
-            log "user not found"
+            log "ERROR:The Red Hat user is not available."
             func_exit
         fi
-        
-        #Subscribe
-        SUBSCRIPTION_POOL_ID=`subscription-manager list --available | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
-        if [ "${SUBSCRIPTION_POOL_ID}" != "" ]; then
-            subscription-manager attach --pool="${POOL_ID}"
+
+        #Check consumed
+        CONSUMED_POOL_ID=`subscription-manager list --consumed | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
+
+        if [ "${CONSUMED_POOL_ID}" != "" ]; then
+            echo "Subscription is already attached." >> "$ITA_BUILDER_LOG_FILE" 2>&1
         else
-            func_exit
+            #Check available
+            SUBSCRIPTION_POOL_ID=`subscription-manager list --available | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
+
+            if [ "${SUBSCRIPTION_POOL_ID}" != "" ]; then
+                #Attach
+                subscription-manager attach --pool="${POOL_ID}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                if [ $? -ne 0 ]; then
+                    log "ERROR:Command[subscription-manager attach] is failed."
+                    func_exit
+                fi
+            else
+                log "ERROR:No subscriptions are available from the pool with ID \"${POOL_ID}\"."
+                func_exit
+            fi
         fi
     fi
 fi
@@ -923,14 +974,14 @@ YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO=(
     ["yum_all"]="--disable base extras updates epel"
 )
 
-# yum repository package (for mysql)
-declare -A YUM_REPO_PACKAGE_MYSQL;
-YUM_REPO_PACKAGE_MYSQL=(
-    ["RHEL7"]="https://repo.mysql.com/mysql57-community-release-el7-11.noarch.rpm"
-    ["RHEL6"]="https://repo.mysql.com/mysql57-community-release-el6-11.noarch.rpm"
-    ["CentOS7"]="https://repo.mysql.com/mysql57-community-release-el7-11.noarch.rpm"
-    ["CentOS6"]="https://repo.mysql.com/mysql57-community-release-el6-11.noarch.rpm"
-    ["yum_all"]="--enable ita-mysql"
+# yum repository package (for mariadb)
+declare -A YUM_REPO_PACKAGE_MARIADB;
+YUM_REPO_PACKAGE_MARIADB=(
+    ["RHEL7"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
+    ["RHEL6"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
+    ["CentOS7"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
+    ["CentOS6"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
+    ["yum_all"]=""
 )
 
 # yum repository package (for php)
@@ -940,7 +991,7 @@ YUM_REPO_PACKAGE_PHP=(
     ["RHEL6"]="http://rpms.remirepo.net/enterprise/remi-release-6.rpm --enable remi-php56"
     ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php56"
     ["CentOS6"]="http://rpms.remirepo.net/enterprise/remi-release-6.rpm --enable remi-php56"
-    ["yum_all"]="--enable ita-php"
+    ["yum_all"]=""
 )
 
 # all yum repository packages
@@ -948,7 +999,6 @@ declare -A YUM_REPO_PACKAGE;
 YUM_REPO_PACKAGE=(
     ["yum-env-enable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO[${REPOSITORY}]}
     ["yum-env-disable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO[${REPOSITORY}]}
-    ["mysql"]=${YUM_REPO_PACKAGE_MYSQL[${REPOSITORY}]}
     ["php"]=${YUM_REPO_PACKAGE_PHP[${REPOSITORY}]}
 )
 
@@ -990,9 +1040,9 @@ YUM__ENV_PACKAGE="${YUM_PACKAGE_YUM_ENV[${MODE}]}"
 # yum install packages
 declare -A YUM_PACKAGE;
 YUM_PACKAGE=(
-    ["mysql"]="mysql-community-server expect"
+    ["mariadb"]="MariaDB MariaDB-server expect"
     ["httpd"]="httpd mod_ssl"
-    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mcrypt php-mysql php-mysqlnd php-pear php-pecl-crypto php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip"
+    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mcrypt php-mysqlnd php-pear php-pecl-crypto php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip"
     ["git"]="git"
     ["ansible"]="ansible python-pip expect"
     ["cobbler"]="${YUM_PACKAGE_COBBLER[${LINUX_OS}]}"
