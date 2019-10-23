@@ -87,6 +87,7 @@ import exceptions
 import re
 from collections import defaultdict
 from collections import OrderedDict
+import binascii
 
 
 exec_log = [] 
@@ -121,7 +122,8 @@ def main():
   host_name = module.params['inventory_hostname']
   host_vars_file = module.params['host_vars_file']
   shell_name = module.params['grep_shell_dir']
-  shell_name = shell_name + '/backyards/ansible_driver/ky_pionner_grep_side_Ansible.sh'
+#  shell_name = shell_name + '/backyards/ansible_driver/ky_pionner_grep_side_Ansible.sh'
+  shell_name = shell_name + '/ky_pionner_grep_side_Ansible.sh'
   log_file_name = module.params['log_file_dir'] + '/private.log'
   ssh_key_file   = module.params['ssh_key_file']
   extra_args = module.params['extra_args']
@@ -427,12 +429,14 @@ def main():
         private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
         private_log(log_file_name,host_name,"Ok")
 
+        # 最後のESCコードから後ろを削除
+        edit_stdout_data = last_escstr_cut(p.before)
         # stdout log file create
         if stdout_file:
-          craete_stdout_file(stdout_file,p.before)
+          craete_stdout_file(stdout_file,edit_stdout_data)
         else:
           stdout_file="/tmp/.ita_pioneer_module_stdout." + str(os.getpid())
-          craete_stdout_file(stdout_file,p.before)
+          craete_stdout_file(stdout_file,edit_stdout_data)
 
         if shell_cmd:
           # user shell execute
@@ -1226,7 +1230,9 @@ def main():
                                 temp_cmd3 = temp_cmd3.lstrip()
                                 temp_cmd3 = temp_cmd3.rstrip()
 
-                                register_temp = p.before
+                                #register_temp = p.before
+                                # 最後のESCコードから後ろを削除
+                                register_temp = last_escstr_cut(p.before)
 
                                 # failed_whenチェック
                                 temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
@@ -1246,7 +1252,9 @@ def main():
 
                                 temp_cmd2 = temp_cmd2.rstrip()
 
-                                register_temp = p.before
+                                #register_temp = p.before
+                                # 最後のESCコードから後ろを削除
+                                register_temp = last_escstr_cut(p.before)
 
                                 # failed_whenチェック
                                 temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -1270,6 +1278,9 @@ def main():
 
                           # ORがない場合
                           else:
+                            # 最後のESCコードから後ろを削除
+                            register_temp = last_escstr_cut(p.before)
+
                             # failed_whenチェック
                             tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
 
@@ -1318,7 +1329,9 @@ def main():
                                 temp_cmd3 = temp_cmd3.lstrip()
                                 temp_cmd3 = temp_cmd3.rstrip()
 
-                                register_temp = p.before
+                                #register_temp = p.before
+                                # 最後のESCコードから後ろを削除
+                                register_temp = last_escstr_cut(p.before)
 
                                 # failed_whenチェック
                                 temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
@@ -1338,7 +1351,9 @@ def main():
 
                                 temp_cmd2 = temp_cmd2.rstrip()
 
-                                register_temp = p.before
+                                #register_temp = p.before
+                                # 最後のESCコードから後ろを削除
+                                register_temp = last_escstr_cut(p.before)
 
                                 # failed_whenチェック
                                 temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -1362,7 +1377,9 @@ def main():
 
                           # ORがない場合
                           else:
-                            register_temp = p.before
+                            #register_temp = p.before
+                            # 最後のESCコードから後ろを削除
+                            register_temp = last_escstr_cut(p.before)
 
                             # failed_whenチェック
                             tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -1613,7 +1630,9 @@ def main():
                               temp_cmd3 = temp_cmd3.lstrip()
                               temp_cmd3 = temp_cmd3.rstrip()
 
-                              register_temp = p.before
+                              #register_temp = p.before
+                              # 最後のESCコードから後ろを削除
+                              register_temp = last_escstr_cut(p.before)
 
                               # failed_whenチェック
                               temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
@@ -1633,7 +1652,9 @@ def main():
 
                               temp_cmd2 = temp_cmd2.rstrip()
 
-                              register_temp = p.before
+                              #register_temp = p.before
+                              # 最後のESCコードから後ろを削除
+                              register_temp = last_escstr_cut(p.before)
 
                               # failed_whenチェック
                               temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -1657,7 +1678,9 @@ def main():
 
                         # ORがない場合
                         else:
-                          register_temp = p.before
+                          #register_temp = p.before
+                          # 最後のESCコードから後ろを削除
+                          register_temp = last_escstr_cut(p.before)
 
                           # failed_whenチェック
                           tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -1707,7 +1730,9 @@ def main():
                               temp_cmd3 = temp_cmd3.lstrip()
                               temp_cmd3 = temp_cmd3.rstrip()
 
-                              register_temp = p.before
+                              #register_temp = p.before
+                              # 最後のESCコードから後ろを削除
+                              register_temp = last_escstr_cut(p.before)
 
                               # failed_whenチェック
                               temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
@@ -1727,7 +1752,9 @@ def main():
 
                               temp_cmd2 = temp_cmd2.rstrip()
 
-                              register_temp = p.before
+                              #register_temp = p.before
+                              # 最後のESCコードから後ろを削除
+                              register_temp = last_escstr_cut(p.before)
                               
                               # failed_whenチェック
                               temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -1751,7 +1778,9 @@ def main():
 
                         # ORがない場合
                         else:
-                          register_temp = p.before
+                          #register_temp = p.before
+                          # 最後のESCコードから後ろを削除
+                          register_temp = last_escstr_cut(p.before)
 
                           # failed_whenチェック
                           tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -2205,7 +2234,9 @@ def main():
                                 temp_cmd3 = temp_cmd3.lstrip()
                                 temp_cmd3 = temp_cmd3.rstrip()
 
-                                register_temp = p.before
+                                #register_temp = p.before
+                                # 最後のESCコードから後ろを削除
+                                register_temp = last_escstr_cut(p.before)
 
                                 # failed_whenチェック
                                 temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
@@ -2225,7 +2256,9 @@ def main():
 
                                 temp_cmd2 = temp_cmd2.rstrip()
 
-                                register_temp = p.before
+                                #register_temp = p.before
+                                # 最後のESCコードから後ろを削除
+                                register_temp = last_escstr_cut(p.before)
 
                                 # failed_whenチェック
                                 temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -2250,7 +2283,9 @@ def main():
                           # ORがない場合
                           else:
 
-                            register_temp = p.before
+                            #register_temp = p.before
+                            # 最後のESCコードから後ろを削除
+                            register_temp = last_escstr_cut(p.before)
 
                             # failed_whenチェック
                             tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -2300,7 +2335,9 @@ def main():
                                 temp_cmd3 = temp_cmd3.lstrip()
                                 temp_cmd3 = temp_cmd3.rstrip()
 
-                                register_temp = p.before
+                                #register_temp = p.before
+                                # 最後のESCコードから後ろを削除
+                                register_temp = last_escstr_cut(p.before)
 
                                 # failed_whenチェック
                                 temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
@@ -2320,7 +2357,9 @@ def main():
 
                                 temp_cmd2 = temp_cmd2.rstrip()
 
-                                register_temp = p.before
+                                #register_temp = p.before
+                                # 最後のESCコードから後ろを削除
+                                register_temp = last_escstr_cut(p.before)
 
                                 # failed_whenチェック
                                 temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -2345,7 +2384,9 @@ def main():
                           # ORがない場合
                           else:
 
-                            register_temp = p.before
+                            #register_temp = p.before
+                            # 最後のESCコードから後ろを削除
+                            register_temp = last_escstr_cut(p.before)
 
                             # failed_whenチェック
                             tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -2596,7 +2637,9 @@ def main():
                               temp_cmd3 = temp_cmd3.lstrip()
                               temp_cmd3 = temp_cmd3.rstrip()
 
-                              register_temp = p.before
+                              #register_temp = p.before
+                              # 最後のESCコードから後ろを削除
+                              register_temp = last_escstr_cut(p.before)
 
                               # failed_whenチェック
                               temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
@@ -2616,7 +2659,9 @@ def main():
 
                               temp_cmd2 = temp_cmd2.rstrip()
 
-                              register_temp = p.before
+                              #register_temp = p.before
+                              # 最後のESCコードから後ろを削除
+                              register_temp = last_escstr_cut(p.before)
 
                               # failed_whenチェック
                               temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -2641,7 +2686,9 @@ def main():
                         # ORがない場合
                         else:
 
-                          register_temp = p.before
+                          #register_temp = p.before
+                          # 最後のESCコードから後ろを削除
+                          register_temp = last_escstr_cut(p.before)
 
                           # failed_whenチェック
                           tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -2692,6 +2739,8 @@ def main():
                               temp_cmd3 = temp_cmd3.rstrip()
 
                               register_temp = p.before
+                              # 最後のESCコードから後ろを削除
+                              register_temp = last_escstr_cut(p.before)
 
                               # failed_whenチェック
                               temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
@@ -2711,7 +2760,9 @@ def main():
 
                               temp_cmd2 = temp_cmd2.rstrip()
 
-                              register_temp = p.before
+                              #register_temp = p.before
+                              # 最後のESCコードから後ろを削除
+                              register_temp = last_escstr_cut(p.before)
 
                               # failed_whenチェック
                               temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -2736,7 +2787,9 @@ def main():
                         # ORがない場合
                         else:
 
-                          register_temp = p.before
+                          #register_temp = p.before
+                          # 最後のESCコードから後ろを削除
+                          register_temp = last_escstr_cut(p.before)
 
                           # failed_whenチェック
                           tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
@@ -3182,6 +3235,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
         # register取得
         tmp1 = register_cmd
+
+        if len(tmp1) == 0:
+
+          # 空の場合、1を返却する
+          return 1
+
         m = r.match(tmp1)
         tmp1 = m.group(1)
         tmp1 = tmp1.lstrip()
@@ -3302,6 +3361,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
         # register取得
         tmp1 = register_cmd
+
+        if len(tmp1) == 0:
+
+          # 空の場合、1を返却する
+          return 1
+
         m = r.match(tmp1)
         tmp1 = m.group(1)
         tmp1 = tmp1.lstrip()
@@ -3424,6 +3489,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
         # 左辺の文字列を取得
         tmp2 = register_cmd
+
+        if len(tmp2) == 0:
+
+          # 空の場合、1を返却する
+          return 1
+
         m = r.match(tmp2)
         tmp2 = m.group(1)
         tmp2 = tmp2.lstrip()
@@ -3543,6 +3614,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
         # 左辺の文字列を取得
         tmp2 = register_cmd
+
+        if len(tmp2) == 0:
+
+          # 空の場合、1を返却する
+          return 1
+
         m = r.match(tmp2)
         tmp2 = m.group(1)
         tmp2 = tmp2.lstrip()
@@ -3658,6 +3735,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
         # 左辺の文字列を取得
         tmp2 = register_cmd
+
+        if len(tmp2) == 0:
+
+          # 空の場合、1を返却する
+          return 1
+
         m = r.match(tmp2)
         tmp2 = m.group(1)
         tmp2 = tmp2.lstrip()
@@ -3778,6 +3861,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
         # 左辺の文字列を取得
         tmp2 = register_cmd
+
+        if len(tmp2) == 0:
+
+          # 空の場合、1を返却する
+          return 1
+
         m = r.match(tmp2)
         tmp2 = m.group(1)
         tmp2 = tmp2.lstrip()
@@ -4178,5 +4267,18 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
     else:
       # 一致しない場合、1を返却する
       return 1
+
+def last_escstr_cut(sometext):
+  m_split = re.split('\x1b',sometext)
+  stdout_data = ""
+  idx = 1
+  max = len(m_split)
+  for data in m_split:
+    stdout_data += data
+    idx  += 1
+    if idx == max:
+      break;
+    stdout_data += binascii.a2b_hex(b'1b')
+  return stdout_data
 
 main()
