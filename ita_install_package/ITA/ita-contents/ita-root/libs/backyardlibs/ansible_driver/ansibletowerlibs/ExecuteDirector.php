@@ -632,10 +632,24 @@ class ExecuteDirector {
             // 配列のキーに使いたいだけ
             $key = $hostInfo['LOGIN_USER'] . $hostInfo['LOGIN_PW'] . $sshPrivateKey . $instanceGroupId;
 
+            $username        = $hostInfo['LOGIN_USER'];
+            $password        = $hostInfo['LOGIN_PW'];
+            switch($hostInfo['LOGIN_AUTH_TYPE']) {
+            case 1:   // 鍵認証
+                $password      = "";
+                break;
+            case 2:   // パスワード認証
+                $sshPrivateKey = "";
+                break;
+            default:  // 認証未指定
+                $password      = "";
+                $sshPrivateKey = "";
+                break;
+            }
             $credential = array(
-                "username" => $hostInfo['LOGIN_USER'],
-                "password" => $hostInfo['LOGIN_PW'],
-                "ssh_private_key" => $sshPrivateKey,
+                "username"        => $username,
+                "password"        => $password,
+                "ssh_private_key" => $sshPrivateKey
             );
 
             $inventory = array();
@@ -1453,11 +1467,46 @@ class ExecuteDirector {
                 }
                 $execlogContent .= $jobFileContent . "\n";
             }
-            if(file_put_contents($execlogFullPath, $execlogContent) === false){
+            $execlogFullPath_org  = $execlogFullPath . ".org";
+            $execlogFullPath_tmp1 = $execlogFullPath . ".tmp1";
+            $execlogFullPath_tmp2 = $execlogFullPath . ".tmp2";
+            $execlogFullPath_tmp3 = $execlogFullPath . ".tmp3";
+
+            if(file_put_contents($execlogFullPath_org, $execlogContent) === false){
                 $this->logger->error("Faild to write file. " . $execlogFullPath);
                 return false;
             }
+            // /exastro/ita-root/libs/restapiindividuallibs/ansible_driver/execute_statuscheck.phpに同等の処理あり
+            if($vg_tower_driver_type == "pioneer") {
+                // ユーザログ("xxx", )を改行する
+                $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $execlogFullPath_org  .  " > " . $execlogFullPath_tmp1;
+                exec($cmd);
 
+                // 改行文字 \\r\\nを改行コードに置換える
+                $cmd = "sed -e 's/\\\\\\\\r\\\\\\\\n/\\n/g' "  . $execlogFullPath_tmp1 . " > " . $execlogFullPath;
+                exec($cmd);
+
+                exec("/bin/rm -f " . $execlogFullPath_tmp1 );
+            } else {
+                // ログ(", ")  =>  (",\n")を改行する
+                $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $execlogFullPath_org  .  " > " . $execlogFullPath_tmp1;
+                exec($cmd);
+
+                // ログ(=> {)  =>  (=> {\n)を改行する
+                $cmd = "sed -e 's/=> {/=> {\\n/g' "    . $execlogFullPath_tmp1 .  " > " . $execlogFullPath_tmp2;
+                exec($cmd);
+
+                // ログ(, ")  =>  (,\n")を改行する
+                $cmd = "sed -e 's/, \"/,\\n\"/g' "     . $execlogFullPath_tmp2 .  " > " . $execlogFullPath_tmp3;
+                exec($cmd);
+
+                // 改行文字を改行コードに置換える
+                $cmd = "sed -e 's/\\\\\\\\r\\\\\\\\n/\\n/g' "  . $execlogFullPath_tmp3 .  " > " . $execlogFullPath;
+                exec($cmd);
+
+                exec("/bin/rm -f " . $execlogFullPath_tmp1 . " " . $execlogFullPath_tmp2 . " " . $execlogFullPath_tmp3);
+
+            }
         } finally {
             // ロック解除
             sem_release($semaphore);

@@ -19,6 +19,7 @@
 //    ・WebDBCore機能を用いたWebページの中核設定を行う。
 //
 //////////////////////////////////////////////////////////////////////
+
 if ( empty($root_dir_path) ){
     $root_dir_temp = array();
     $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -249,4 +250,3 @@ Ansible(Legacy(NS))プレイブック素材集
 loadTableFunctionAdd($tmpFx,__FILE__);
 unset($tmpFx);
 ?>
-

@@ -89,7 +89,6 @@ require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/CheckAnsibleRo
 
 // 共通モジュールをロード
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
-// enomotp
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php');
 
 
@@ -119,6 +118,9 @@ class CreateAnsibleExecFiles {
 
     // ユーザー公開用データリレイストレージパス 変数の名前
     const LC_ANS_OUTDIR_DIR                  = "user_files";
+
+    // 対話ファイル実行に必要な資材配置ディレクトリ
+    const LC_ANS_PIONEER_LIBRARY_DIR         = "library";
 
     // 親playbook(pioneer)に埋め込まれるリモート接続コマンド用変数の名前
     const LC_ANS_PROTOCOL_VAR_NAME           = "__loginprotocol__";
@@ -573,6 +575,8 @@ class CreateAnsibleExecFiles {
                                      &$ina_def_array_vars_list,
                                      $in_symphony_instance_no
                                      ){
+        global $root_dir_path;
+
         $this->run_pattern_id = $in_pattern_id;
 
         // null or 1:IP方式  2:ホスト名方式
@@ -836,6 +840,35 @@ class CreateAnsibleExecFiles {
             // original_dialog_filesディレクトリ名を記憶
             $this->setAnsible_in_original_dialog_files_Dir($c_dirwk);
 
+            // 対話ファイル実行に必要な資材配置ディレクトリ
+            $c_dirwk = $c_indir . "/" . self::LC_ANS_PIONEER_LIBRARY_DIR;
+            if( !mkdir( $c_dirwk, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            if( !chmod( $c_dirwk, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            $src_files    = array();
+            $src_files[]  = $root_dir_path . "/backyards/ansible_driver/ky_pionner_grep_side_Ansible.sh";
+            $src_files[]  = $root_dir_path . "/libs/restapiindividuallibs/ansible_driver/pioneer_module.py";
+            foreach($src_files as $src_file) {
+                $dst_file     = $c_dirwk . "/" . basename($src_file);
+                //対話ファイル実行に必要な資材をコピーする。
+                if( copy($src_file,$dst_file) === false ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000075",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( !chmod( $dst_file, 0755 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
         }
 
         // ドライバ区分がLegacy-Roleの場合
@@ -1542,16 +1575,21 @@ class CreateAnsibleExecFiles {
                                                      $ina_hostinfolist[$host_name]['SSH_KEY_FILE'],
                                                      $ssh_key_file_path);
 
+
+                    $file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                             $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                             $ssh_key_file_path);
+
                     if($ret === false){
                         return false;
                     }
                     if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
                        ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)){
                         // hostsファイルに追加するSSH鍵認証ファイルのパラメータ生成
-                        $ssh_key_file = ' ansible_ssh_private_key_file=' . $ssh_key_file_path;
+                        $ssh_key_file = ' ansible_ssh_private_key_file=' . $file_path;
                     }
                     else{
-                        $ina_pioneer_sshkeyfilelist[$host_name]=$ssh_key_file_path;
+                        $ina_pioneer_sshkeyfilelist[$host_name]=$file_path;
                     }
                 }
             }
@@ -1565,13 +1603,17 @@ class CreateAnsibleExecFiles {
                                                     $ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'],
                                                     $win_ca_file_path);
 
+                    $file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                             $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                             $win_ca_file_path);
+
                     if($ret === false){
                         return false;
                     }
                     if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
                        ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)){
                         // hostsファイルに追加するサーバー証明書ファイルのパラメータ生成
-                        $win_ca_file = ' ansible_winrm_ca_trust_path=' . $win_ca_file_path;
+                        $win_ca_file = ' ansible_winrm_ca_trust_path=' . $file_path;
                     }
                 }
             }
@@ -2177,18 +2219,27 @@ class CreateAnsibleExecFiles {
                     $value = $value . "    - include: " . $this->getPlaybook_child_playbook_file($key,$file) . "\n";
                     break;
                 case DF_PIONEER_DRIVER_ID:
+                    //"log_file_dir='" . $this->getAnsible_out_Dir() . "' " . 
+                    //"host_vars_file='" . $this->getAnsible_original_hosts_vars_Dir() . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}' ".
+                    $log_file_path  = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                  $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                  $this->getAnsible_out_Dir());
+                    $host_vars_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                  $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                  $this->getAnsible_original_hosts_vars_Dir());
                     $value = $value . "    - name: pioneer_module exec\n";
                     $value = $value . "      pioneer_module: username={{ " . self::LC_ANS_USERNAME_VAR_NAME . " }} " .
                                                   "protocol={{ " . self::LC_ANS_PROTOCOL_VAR_NAME . " }} " .
                                                   "exec_file={{ " . $file . " }} " .
                                                   "inventory_hostname={{ " . self::LC_ANS_LOGINIP_VAR_NAME . " }} " .
-                                                  "host_vars_file='" . $this->getAnsible_original_hosts_vars_Dir() . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}' ".
-                                                  "grep_shell_dir='" . $root_dir_path . "'" . " " .
-                                                  "log_file_dir='" . $this->getAnsible_out_Dir() . "' " . 
+                                                  "host_vars_file='" . $host_vars_path . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}' ".
+                                                  "grep_shell_dir='./library' " .
+                                                  "log_file_dir='" . $log_file_path . "' " . 
                                                   "ssh_key_file={{ " . self::LC_ANS_SSH_KEY_FILE_VAR_NAME . " }} " .
                                                   "extra_args={{ " . self::LC_ANS_SSH_EXTRA_ARGS_VAR_NAME . " }}\n";
 
                     $value = $value . "      delegate_to: 127.0.0.1\n";
+
                     break;
 
                 case DF_LEGACY_ROLE_DRIVER_ID:
@@ -2377,8 +2428,13 @@ class CreateAnsibleExecFiles {
                                          str_pad( $pkey, $intNumPadding, "0", STR_PAD_LEFT ),       
                                          $dialog_file);
 
+                     $file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                              $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                              $arry_val);
+
+
                      //[対話ファイル変数名]=対話ファイル名
-                     $host_vars_list[$arry_key] = $arry_val;
+                     $host_vars_list[$arry_key] = $file_path;
                 }
             }
             //対話ファイル数が他ホストより少ないか判定
@@ -10488,9 +10544,15 @@ class CreateAnsibleExecFiles {
                                                     $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                                     $tmpmod_tpf_path);
 
+                            // templateモジュールのコピー元パス生成
+                            $src_tpf_path = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
+                            $src_tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                        $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                        $src_tpf_path);
+
                             // templateモジュールのsrc/destパス退避
                             $this->lv_tpf_var_file_path_list[$tpf_var_name] = array();
-                            $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
+                            $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $src_tpf_path;
                             $this->lv_tpf_var_file_path_list[$tpf_var_name]['dest'] = $tmpmod_tpf_path;
                             // テンプレートファイル内のホスト変数を確認
                             $ret = $this->CheckTemplatefile($ina_hosts,$ina_host_vars,$playbook,$tpf_key,$tpf_file_name,
@@ -10688,7 +10750,10 @@ class CreateAnsibleExecFiles {
                 $j = $j + 1;
                 $playbookwrite[$j] = "    - name: include\n";
                 $j = $j + 1;
-                $playbookwrite[$j] = "      include_vars: " . $this->getAnsible_original_hosts_vars_Dir() . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}\n";
+                $host_vars_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                              $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                              $this->getAnsible_original_hosts_vars_Dir());
+                $playbookwrite[$j] = "      include_vars: " . $host_vars_path . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}\n";
                 foreach( $in_tpf_path as $var_name=>$fileinfo ) {
                     $j = $j + 1;
                     $playbookwrite[$j] = "    - name: Templatefile Create " . sprintf("[%s]\n", $var_name);
