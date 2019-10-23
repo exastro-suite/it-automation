@@ -563,4 +563,5 @@ $ary[6000071] = "with_item of command can only describe array-type variable. (Ho
 $ary[6000072] = "Multiple variables are described in with_item of command. (Dialog file:{})";
 $ary[6000073] = "Check if the dialog file is written in YAML format. (Dialog file:{})";
 $ary[6000074] = "Host vars file is not generated in YAML format. (Host:{})";
+$ary[6000075] = "Copy File has failed. (line:{})";
 ?>
