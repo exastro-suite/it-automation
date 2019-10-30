@@ -65,9 +65,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102603"));
 
         // オペレーションID
-        $c = new IDColumn('OPERATION_ID_DISP', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102606"), 'G_OPERATION_LIST', 'OPERATION_ID', 'OPERATION_ID');
+        $c = new NumColumn('OPERATION_ID_DISP',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102606"));
         $c->setHiddenMainTableColumn(false);
         $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102607"));
+        $c->setSubtotalFlag(false);
         $c->getOutputType("filter_table")->setVisible(false);
         $c->getOutputType("update_table")->setVisible(false);
         $c->getOutputType("register_table")->setVisible(false);
@@ -75,7 +76,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg->addColumn($c);
 
         // オペレーション名
-        $c = new TextColumn('OPERATION_NAME',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102608"));
+        $c = new IDColumn('OPERATION_ID_NAME_DISP', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102608"), 'C_OPERATION_LIST', 'OPERATION_NO_IDBH', 'OPERATION_NAME');
         $c->setHiddenMainTableColumn(false);
         $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102609"));
         $c->getOutputType("filter_table")->setVisible(false);

@@ -445,7 +445,7 @@ def main():
             private_log(log_file_name,host_name,logstr)
             exec_log.append(logstr)
 
-            shell_ret = subprocess.call(shell_cmd + ' ' + parameter_cmd, shell=True)
+            shell_ret = subprocess.call('sh ' + shell_cmd + ' ' + parameter_cmd, shell=True)
           except:
             error_type, error_value, traceback = sys.exc_info()
             logstr='user shell execute error ' + str(error_type) + ' ' + str(error_value)
@@ -464,7 +464,7 @@ def main():
             private_log(log_file_name,host_name,logstr)
             exec_log.append(logstr)
 
-            def_shell_cmd=shell_name + " " + stdout_file + " " + str(parameter_cmd)
+            def_shell_cmd="sh " + shell_name + " " + stdout_file + " " + str(parameter_cmd)
             shell_ret = subprocess.call(def_shell_cmd, shell=True)
           except:
             error_type, error_value, traceback = sys.exc_info()
