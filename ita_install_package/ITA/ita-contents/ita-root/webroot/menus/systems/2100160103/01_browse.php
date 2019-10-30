@@ -41,6 +41,13 @@ $(function() {
             return false;
         }
     });
+    $('._create_').change(function() {
+        if ($('#creat_div :checked').length == $('#creat_div :input').length) {
+            $('#create_all').prop('checked', true);
+        } else {
+            $('#create_all').prop('checked', false);
+        }
+    });
 });
 </script>
 
@@ -90,7 +97,7 @@ $(function() {
         <form method="post" action="/default/menu/01_browse.php?no=2100160103" id="create_menu_form">
             
             <h3><label><strong><input type="checkbox" value="" id="create_all"><?php echo $g['objMTS']->getSomeMessage("ITACREPAR-MNU-103505");?></strong></label></h3>
-                <div style="margin-left:20px;">
+                <div style="margin-left:20px;" id="creat_div">
 <?php foreach($menuNameAry as $key => $value): ?>
                 <p><label><input type="checkbox" value="<?php echo $key; ?>" class="_create_" name="<?php echo $key; ?>[]" ><strong><?php echo $value; ?></strong></label></p>
 <?php endforeach; ?>

@@ -412,7 +412,7 @@ try{
 
             // 文字列の場合
             if(1 == $itemInfo['INPUT_METHOD_ID']){
-                $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    VARCHAR(" . $itemInfo['MAX_LENGTH'] . "),\n";
+                $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
             }
             // 他メニュー参照の場合
             else{
@@ -600,7 +600,7 @@ try{
 
                 // 文字列の場合
                 if(1 == $itemInfo['INPUT_METHOD_ID']){
-                    $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    VARCHAR(" . $itemInfo['MAX_LENGTH'] . "),\n";
+                    $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
                 }
                 // 他メニュー参照の場合
                 else{
