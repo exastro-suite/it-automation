@@ -546,8 +546,17 @@ class MaxLengthValidator extends IntNumValidator {
             $boolExeContinue = false;
         }
         else{
+            // パラメータシート作成の場合
+            if(2100160002 == $g['page_dir']){
+                $tableName = "F_CREATE_ITEM_INFO";
+            }
+            // マスタ作成の場合
+            else if(2100160102 == $g['page_dir']){
+                $tableName = "F_CREATE_MST_ITEM_INFO";
+            }
+
             $query01 = "SELECT CREATE_ITEM_ID, MAX_LENGTH "
-                        ." FROM F_CREATE_ITEM_INFO "
+                        ." FROM {$tableName} "
                         ." WHERE CREATE_MENU_ID = :CREATE_MENU_ID "
                         ." AND DISUSE_FLAG = '0' ";
 
