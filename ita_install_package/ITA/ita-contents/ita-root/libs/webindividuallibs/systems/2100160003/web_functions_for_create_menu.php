@@ -66,15 +66,6 @@ function makeMenuCheckbox(){
     return $retAry;
 
 }
-/**
- * タイムスタンプ文字列作成
- *
- * @return    string       タイムスタンプ文字列
- */
-function getTimeStampString($time){
-    $dt = new DateTime(date_create($time));
-    return $dt->format("Y/m/d H:i:s").".".substr(explode(".",($time.""))[1],0,6);
-}
 
 /**
  * ユーザID取得
@@ -92,7 +83,7 @@ function getUserId($username){
         web_log($objQuery->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
                                              array('A_SEQUENCE', 'F_CREATE_MENU_STATUS_RIC', basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
     $res = $objQuery->sqlExecute();
     if ($res === false) {
@@ -100,7 +91,7 @@ function getUserId($username){
         web_log($objQuery->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
                                              array('A_SEQUENCE', 'F_CREATE_MENU_STATUS_RIC', basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
     $tmpAry = array();
     $row = $objQuery->resultFetch();
@@ -123,7 +114,7 @@ function getSeq($seqKey){
         web_log($objQuery->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
                                              array('A_SEQUENCE', $seqKey, basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
     $res = $objQuery->sqlExecute();
     if ($res === false) {
@@ -131,7 +122,7 @@ function getSeq($seqKey){
         web_log($objQuery->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
                                              array('A_SEQUENCE', $seqKey, basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
     $row = $objQuery->resultFetch();
     return $row['VALUE'];
@@ -152,7 +143,7 @@ function updateSeq($seqKey){
         web_log($objQuery->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900017',
                                              array(basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
     $res = $objQuery->sqlExecute();
     if ($res === false) {
@@ -160,7 +151,7 @@ function updateSeq($seqKey){
         web_log($objQuery->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900017',
                                              array(basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
     return $res;
 
@@ -175,7 +166,7 @@ function startTransaction(){
     if ($varTrzStart === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900015',
                                              array(basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
 }
 /**
@@ -188,7 +179,7 @@ function endTransaction(){
     if ($res === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900036',
                                              array(basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
     $g['objDBCA']->transactionExit();
 }
@@ -216,7 +207,8 @@ function insertCMStatus($create_menu_id){
     $seqj = getSeq("F_CREATE_MENU_STATUS_JSQ");
 
     //タイムスタンプ文字列取得
-    $tsString = getTimeStampString( sprintf("%6F",microtime(true)));
+    $now = \DateTime::createFromFormat("U.u", sprintf("%6F", microtime(true)));
+    $tsString = date("Y/m/d H:i:s") . "." . $now->format("u");
 
 
     $sql  = "INSERT INTO F_CREATE_MENU_STATUS SET ";
@@ -249,14 +241,14 @@ function insertCMStatus($create_menu_id){
         web_log($objQuery->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900020',
                                              array('F_CREATE_MENU_STATUS', basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
     if ($insert_res_j === false) {
         web_log($sql_j);
         web_log($objQueryJ->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900020',
                                              array('F_CREATE_MENU_STATUS_JNL', basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
 
     //シーケンス更新
