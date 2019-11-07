@@ -169,6 +169,28 @@ class ExecuteDirector {
 
         $this->logger->trace(__METHOD__);
 
+        global $vg_tower_driver_type;
+        $allResult = true;
+
+        // ジョブスライス設定有無判定
+        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,$vg_tower_driver_type,addPadding($execution_no));
+        $query = sprintf("?name__startswith=%s",$search_name);
+        $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
+
+        $job_slice_use = false;
+        $dummy = array();
+        $IDData = array();
+        $this->logger->trace(var_export($response_array, true));
+        if($response_array['success'] == true) {
+            if(@count($response_array['responseContents']) != 0) {
+                if($response_array['responseContents'][0]['job_slice_count'] > 1) {
+                    $job_slice_use = true;
+                    // ジョブスライスされたジョブの情報を取得
+                    $this->SliceJobsMonitoring($execution_no,$dummy,false, $IDData);
+                    // 戻り値は判定しない
+                }
+            }
+        }
         $allResult = true;
         $ret = $this->cleanUpPreparedProjectDirectory($execution_no);
         if($ret == false) {
@@ -190,6 +212,10 @@ class ExecuteDirector {
         if($ret == false) {
             $allResult = false;
         }
+        if($job_slice_use = true) {
+            // ジョブスライスされたワークフロージョブを削除
+            $this->cleanUpSliceJobs($execution_no,$job_slice_use,$IDData);
+        }
         $ret = $this->cleanUpProject($execution_no);
         if($ret == false) {
             $allResult = false;
@@ -202,7 +228,6 @@ class ExecuteDirector {
         if($ret == false) {
             $allResult = false;
         }
-
         return $allResult;
     }
 
@@ -1152,21 +1177,68 @@ class ExecuteDirector {
 
         return true;
     }
+    private function cleanUpSliceJobs($execution_no,$job_slice_use,$IDData) {
+
+        $this->logger->trace(__METHOD__);
+
+        if($job_slice_use === false) {
+            return true;
+        }
+
+        // ジョブスライスされたジョブは後方の処理で削除される。
+
+        // ジョブスライスされたワークフロージョブを削除
+        if(isset($IDData['workflow_job_id']) === true) {
+            foreach($IDData['workflow_job_id'] as $workflow_job_id) {
+                // エラーでも先に進む
+                $response_array = AnsibleTowerRestApiWorkflowJobs::delete($this->restApiCaller, $workflow_job_id);
+                if($response_array['success'] == false) {
+                    $this->logger->error(var_export($response_array, true));
+                }
+            }
+        }
+        return true;
+    }
+
 
     function monitoring($toProcessRow, $ansibleTowerIfInfo) {
+
+        global $vg_tower_driver_type;
 
         $this->logger->trace(__METHOD__);
 
         $execution_no = $toProcessRow['EXECUTION_NO'];
 
+        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,$vg_tower_driver_type,addPadding($execution_no));
+        $query = sprintf("?name__startswith=%s",$search_name);
+        $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
+
+        $this->logger->trace(var_export($response_array, true));
+        if($response_array['success'] == false) {
+            $this->logger->error("Faild to RestAPI access job templates. query:".$query);
+            return EXCEPTION;
+        }
+        if(@count($response_array['responseContents']) === 0) {
+            $this->logger->error("Faild to get job templates contents. query:".$query);
+            $this->logger->error(var_export($response_array, true));
+            return EXCEPTION;
+        }
+
+        // ジョブスライス数を判定
+        $job_slice_use = true;
+        if($response_array['responseContents'][0]['job_slice_count'] == 1) {
+            $job_slice_use = false;
+        }
+
+        $SliceJobsData = array();
         // AnsibleTower Status チェック
-        list($status, $wfJobId) = $this->checkWorkflowJobStatus($execution_no);
+        list($status, $wfJobId) = $this->checkWorkflowJobStatus($execution_no,$SliceJobsData,$job_slice_use);
         if($status == EXCEPTION || $wfJobId == -1) {
             return $status;
         }
 
         // Ansibleログ書き出し
-        $ret = $this->createAnsibleLogs($execution_no, $ansibleTowerIfInfo['ANSIBLE_STORAGE_PATH_LNX'], $wfJobId);  
+        $ret = $this->createAnsibleLogs($execution_no, $ansibleTowerIfInfo['ANSIBLE_STORAGE_PATH_LNX'], $wfJobId, $SliceJobsData, $job_slice_use);  
         if($ret == false) {
             $status = EXCEPTION;
         }
@@ -1174,7 +1246,167 @@ class ExecuteDirector {
         return $status;
     }
 
-    function checkWorkflowJobStatus($execution_no) {
+    function SliceJobsMonitoring($execution_no,&$SliceJobsData,$stdout_get,&$IDData=array()) {
+
+        global $vg_tower_driver_type;
+
+        $this->logger->trace(__METHOD__);
+
+        // ジョブテンプレート情報検索　ita_%s_executions_jobtpl_%s"
+        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,
+                               $vg_tower_driver_type,addPadding($execution_no));
+        $query = sprintf("?name__startswith=%s",$search_name);
+        $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
+
+        $this->logger->trace(var_export($response_array, true));
+        if($response_array['success'] == false) {
+            $this->logger->error("Faild to RestAPI access job template. query:".$query);
+            return EXCEPTION;
+        }
+        if(@count($response_array['responseContents']) === 0) {
+            $this->logger->error("Faild to get job template contents. query:".$query);
+            $this->logger->error(var_export($response_array, true));
+            return EXCEPTION;
+        }
+
+        foreach($response_array['responseContents'] as $job_tmp_row) {
+            // ジョブテンプレート有無判定
+            if(isset($job_tmp_row['id']) === false) {
+                $this->logger->error("Faild to get job template id. query:".$query);
+                $this->logger->error(var_export($response_array, true));
+                return EXCEPTION;
+            }
+
+            //$this->logger->error("job templates id:[".$job_tmp_row['id']."]");
+
+            $query = sprintf("%s/slice_workflow_jobs/",$job_tmp_row['id']);
+
+            // ジョブテンプレートIDから分割されたワークフロージョブ情報取得
+            $response_array_workflow_jobs_templates = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
+            if($response_array_workflow_jobs_templates['success'] == false) {
+                $this->logger->error("Faild to RestAPI access slice workflow job. query:" . $query);
+                return EXCEPTION;
+            }
+            if(@count($response_array_workflow_jobs_templates['responseContents']) === 0 ) {
+                $this->logger->error("Faild to get lice workflow job query:".$query);
+                $this->logger->error(var_export($response_array_workflow_jobs_templates, true));
+                return EXCEPTION;
+            }
+            foreach($response_array_workflow_jobs_templates['responseContents'] as $workflow_jobs_templates_row) {
+                // ワークフロージョブ有無判定
+                if(isset($job_tmp_row['id']) === false) {
+                    $this->logger->error("Faild to get workflow job. query:".$query);
+                    $this->logger->error(var_export($response_array_workflow_jobs_templates, true));
+                    return EXCEPTION;
+                }
+ 
+                // ワークフロージョブID
+                $workflow_job_id = $workflow_jobs_templates_row['id'];
+                $query = sprintf("%s/workflow_nodes/",$workflow_job_id);
+
+                // ワークフロージョブID退避
+                $IDData['workflow_job_id'][] = $workflow_job_id;
+
+               //$this->logger->error("workflow job id:[" . $workflow_job_id . "]");
+
+                // ワークフロージョブIDからワークフロージョブノード情報取得 
+                $response_array_workflow_nodes = AnsibleTowerRestApiWorkflowJobs::getAll($this->restApiCaller, $query);
+                if($response_array_workflow_nodes['success'] == false) {
+                    $this->logger->error("Faild to RestAPI access workflow job node. query:" . $query);
+                    return EXCEPTION;
+                }
+                if(@count($response_array_workflow_nodes['responseContents']) === 0 ) {
+                    $this->logger->error("Faild to get workflow job node contents. query:".$query);
+                    $this->logger->error(var_export($response_array_workflow_nodes, true));
+                    return EXCEPTION;
+                }
+                $stdout_log = "";
+                foreach($response_array_workflow_nodes['responseContents'] as $workflow_nodes_row) {
+                    // ワークフロージョブノード有無
+                    if(isset($workflow_nodes_row['id']) === false) {
+                        $this->logger->error("Faild to get workflow job node. query:".$query);
+                        $this->logger->error(var_export($response_array_workflow_nodes, true));
+                        return EXCEPTION;
+                    }
+                    // ワークフロージョブノードID退避
+                    $IDData['workflow_job_node_id'][] = $workflow_nodes_row['id'];
+
+                    // ジョブ有無判定
+                    if(isset($workflow_nodes_row['summary_fields']['job']["id"]) === false) {
+                        $this->logger->error("Faild to get jobs id. query:".$query);
+                        $this->logger->error(var_export($response_array_workflow_nodes, true));
+                        return EXCEPTION;
+                    }
+
+                    // ジョブ名
+                    $workflow_job_name = $workflow_nodes_row['summary_fields']['workflow_job']["name"];
+                    // ジョブID
+                    $jobId = $workflow_nodes_row['summary_fields']['job']["id"];
+
+                    // ジョブID退避
+                    $IDData['job_id'][] = $jobId;
+
+                    //$this->logger->error("job id:[". $jobId ."]");
+
+                    if($stdout_get === false) {
+                        continue;
+                    }
+
+                    $query = sprintf("%s",$jobId);
+                    // ジョブ情報取得
+                    $response_array_jobs = AnsibleTowerRestApiJobs::get($this->restApiCaller, $query);
+                    if($response_array_jobs['success'] == false) {
+                        $this->logger->error("Faild to RestAPI access job detail. query:".$query);
+                        return EXCEPTION;
+                    }
+                    if(@count($response_array_jobs['responseContents']) === 0 ) {
+                        $this->logger->error("Faild to get job detail. query:".$query);
+                        $this->logger->error(var_export($response_array_jobs, true));
+                        return EXCEPTION;
+                    }
+
+                    // ジョブ実行状態判定
+                    $jobData = $response_array_jobs['responseContents'];
+                    if(!array_key_exists("id",     $jobData) ||
+                       !array_key_exists("status", $jobData) ||
+                       !array_key_exists("failed", $jobData)) {
+                        $this->logger->error("Not expected data. query:".$query);
+                        $this->logger->error(var_export($response_array_jobs, true));
+                        return EXCEPTION;
+                    }
+                    if($jobData['status'] != "successful") {
+                        return FAILURE;
+                    }
+
+                    // 標準出力情報取得
+                    $response_array_stdout = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
+                    if($response_array_stdout['success'] == false) {
+                        return FAILURE;
+                        $this->logger->error("Faild to RestAPI access stdout. jobid:".$jobId);
+                        return EXCEPTION;
+                    }
+                    if(@count($response_array_stdout['responseContents']) === 0 ) {
+                        $this->logger->error("Faild to get stdout. jobid:".$jobId);
+                        $this->logger->error(var_export($response_array_stdout, true));
+                        return EXCEPTION;
+                    }
+
+                    // inventory/project/credentialsの情報退避
+                    // 複数Jobの場合は最後の情報を使用
+                    $SliceJobsData[$workflow_job_name] = $jobData;
+
+                    // ログを退避
+                    $page = sprintf("(%d/%d)\n",$jobData['job_slice_number'],$jobData['job_slice_count']);
+                    $stdout_log .= $page;
+                    $stdout_log .= $response_array_stdout['responseContents'];
+                    $SliceJobsData[$workflow_job_name]['result_stdout'] = $stdout_log;
+                }
+            }
+        }
+        return COMPLETE;
+    }
+
+    function checkWorkflowJobStatus($execution_no,&$SliceJobsData,$job_slice_use) {
 
         $this->logger->trace(__METHOD__);
         $wfJobId = -1;
@@ -1209,7 +1441,13 @@ class ExecuteDirector {
                 break;
             case "successful":
                 // 子Jobが全て成功であればCOMPLETE、ひとつでも失敗していればFAILURE
-                $status = $this->checkAllJobsStatus($wfJobId);
+                // ジョブスライスの有無判定
+                if($job_slice_use === true) {
+                    $dummy = array();
+                    $status = $this->SliceJobsMonitoring($execution_no,$SliceJobsData,true, $dummy);
+                } else {
+                    $status = $this->checkAllJobsStatus($wfJobId);
+                }
                 break;
             case "failed":
             case "error":
@@ -1240,6 +1478,7 @@ class ExecuteDirector {
         }
 
         $workflowJobNodeArray_restResult = $response_array['responseContents'];
+
         $this->logger->trace(var_export($workflowJobNodeArray_restResult, true));
 
         $workflowJobNodeArray_jobDataAdded = array();
@@ -1274,7 +1513,7 @@ class ExecuteDirector {
         return COMPLETE;
     }
 
-    function createAnsibleLogs($execution_no, $dataRelayStoragePath, $wfJobId) {
+    function createAnsibleLogs($execution_no, $dataRelayStoragePath, $wfJobId, $SliceJobsData, $job_slice_use) {
         global $vg_tower_driver_type;
         global $vg_tower_driver_id;
 
@@ -1298,6 +1537,7 @@ class ExecuteDirector {
         }
 
         $workflowJobData = $response_array['responseContents'];
+
         $this->logger->trace(var_export($workflowJobData, true));
 
         $query = "?workflow_job=" . $wfJobId;
@@ -1318,27 +1558,41 @@ class ExecuteDirector {
                 continue;
             }
             $jobId = $workflowJobNodeData['job'];
-            $this->logger->trace("AnsibleTowerRestApiJobs::get / param = " . $jobId);
-            $response_array = AnsibleTowerRestApiJobs::get($this->restApiCaller, $jobId);
-            if($response_array['success'] == false) {
-                $this->logger->error("Faild to get job detail. " . $response_array['responseContents']['errorMessage']);
-                return false;
+
+            if($job_slice_use === false) {
+                $this->logger->trace("AnsibleTowerRestApiJobs::get / param = " . $jobId);
+                $response_array = AnsibleTowerRestApiJobs::get($this->restApiCaller, $jobId);
+                if($response_array['success'] == false) {
+                    $this->logger->error("Faild to get job detail. " . $response_array['responseContents']['errorMessage']);
+                    return false;
+                }
+
+                $jobData = $response_array['responseContents'];
+                $this->logger->trace(var_export($jobData, true));
+
+                $response_array = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
+
+                if($response_array['success'] == false) {
+                    throw new Exception("Faild to get job stdout. " . $response_array['responseContents']['errorMessage']);
+                }
+                $jobData['result_stdout'] = $response_array['responseContents'];
+
+                $workflowJobNodeData['jobData'] = $jobData;
+
+                $workflowJobNodeArray_jobDataAdded[] = $workflowJobNodeData;
+            } else {
+                $jobName = $workflowJobNodeData['summary_fields']['job']['name'];
+
+                $jobData = "";
+                if(isset($SliceJobsData[$jobName]) === true) {
+                    $jobData = $SliceJobsData[$jobName];
+                } else {
+                    continue;
+                }
+                $workflowJobNodeData['jobData'] = $jobData;
+
+                $workflowJobNodeArray_jobDataAdded[] = $workflowJobNodeData;
             }
-
-            $jobData = $response_array['responseContents'];
-            $this->logger->trace(var_export($jobData, true));
-
-            $response_array = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
-
-            if($response_array['success'] == false) {
-                throw new Exception("Faild to get job stdout. " . $response_array['responseContents']['errorMessage']);
-            }
-
-            $jobData['result_stdout'] = $response_array['responseContents'];
-
-            $workflowJobNodeData['jobData'] = $jobData;
-
-            $workflowJobNodeArray_jobDataAdded[] = $workflowJobNodeData;
         }
 
         ////////////////////////////////////////////////////////////////
@@ -1348,6 +1602,15 @@ class ExecuteDirector {
             $this->logger->error("Error: '" . $joblistFullPath . "' is directory. Remove this.");
             return false;
         }
+
+        ////////////////////////////////////////////////////////////////
+        // ログファイル生成
+        ////////////////////////////////////////////////////////////////
+        $ret = $this->CreateLogs($workflowJobData,$workflowJobNodeArray_jobDataAdded,$joblistFullPath,$outDirectoryPath,$execlogFullPath,$job_slice_use);
+        return $ret;
+    }
+    function CreateLogs($workflowJobData,$workflowJobNodeArray_jobDataAdded,$joblistFullPath,$outDirectoryPath,$execlogFullPath,$job_slice_use) {
+        global  $vg_tower_driver_type;
 
         $contentArray = array();
 
@@ -1382,6 +1645,20 @@ class ExecuteDirector {
             $contentArray[] = "  credential_name: " . $credentialData['name'];
             $contentArray[] = "  credential_type: " . $credentialData['credential_type'];
             $contentArray[] = "  credential_inputs: " . json_encode($credentialData['inputs']);
+            if($job_slice_use === true) {
+                $contentArray[] = "  job_slice_count: " . $jobData["job_slice_count"];
+            }
+            $query = sprintf("%s/instance_groups/",$jobData['inventory']);
+            $response_array  = AnsibleTowerRestApiInventories::getAll($this->restApiCaller, $query);
+            if($response_array['success'] == false) {
+                $this->logger->error("Faild to get inventory. " . $response_array['responseContents']['errorMessage']);
+                return false;
+            }
+            $instance_group = "";
+            if(isset($response_array['responseContents'][0]['name']) === true) {
+                $instance_group = $response_array['responseContents'][0]['name'];
+            }
+            $contentArray[] = "  instance_group: " . $instance_group;
 
             $response_array = AnsibleTowerRestApiInventories::get($this->restApiCaller, $jobData['inventory']);
             if($response_array['success'] == false) {
@@ -1454,6 +1731,8 @@ class ExecuteDirector {
                 $this->logger->error("Faild to read file. " . $joblistFullPath);
                 return false;
             }
+
+
             $execlogContent = $joblistContent;
             foreach($jobFileList as $jobName => $jobFileFullPath) {
                 $execlogContent .= "\n";
