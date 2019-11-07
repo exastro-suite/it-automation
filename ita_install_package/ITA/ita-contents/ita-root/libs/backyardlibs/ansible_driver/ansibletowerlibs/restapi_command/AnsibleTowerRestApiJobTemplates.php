@@ -41,6 +41,8 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
     const CLEANUP_PREPARED_BUILD_NAME_PREFIX = "ita_%s_executions_cleanup_%s";
     const SEARCH_NAME_PREFIX = "ita_%s_executions_jobtpl_%s_";
 
+    const SEARCH_IDENTIFIED_NAME_PREFIX = "ita_%s_executions_jobtpl_%s";
+
     // static only
     private function __construct() {
     }
