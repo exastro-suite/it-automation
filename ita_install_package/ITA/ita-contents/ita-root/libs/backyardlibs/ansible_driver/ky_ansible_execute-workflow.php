@@ -1660,13 +1660,6 @@
                         $result = false;
                         break;
                     }
-                    // Exastro1.1ではジョブスライス数は未対応
-                    if($PropertyName == "job_slice_count") {
-                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000103",array($ChkParamString));
-                        $ErrorMsgAry[] = $FREE_LOG;
-                        $result = false;
-                        break;
-                    }
 
                     $JobTemplatePropertyParameterAry[$PropertyName] = trim($PropertyAry[1]);
                     break;
