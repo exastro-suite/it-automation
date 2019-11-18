@@ -46,6 +46,8 @@ require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlib
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/ExecuteDirector.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/AnsibleTowerCommonLib.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiInstanceGroups.php");
+require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiOrganization.php");
+require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiConfig.php");
 
 ////////////////////////////////
 // ログ出力設定
@@ -132,14 +134,6 @@ try {
     }
 
     $ansibleTowerIfInfo = $ifInfoRows[0];
-    $logger->trace('$ansibleTowerIfInfo : ' . var_export($ansibleTowerIfInfo, true));
-
-    ////////////////////////////////
-    // ITA側の既に登録済みのインスタンスグループ情報を取得する
-    ////////////////////////////////
-    // トレースメッセージ
-    $logger->debug("Get instance groups from table.");
-    $instanceGroupRows = $dbAccess->selectRows("B_ANS_TWR_INSTANCE_GROUP", true);   
 
     ////////////////////////////////
     // RESTの認証
@@ -161,108 +155,150 @@ try {
         throw new Exception("Faild to authorize to ansible_tower. " . $response_array['responseContents']['errorMessage']);
     }
 
-    ////////////////////////////////
-    // Towerのインスタンスグループ情報を取得する
-    ////////////////////////////////
-    // トレースメッセージ
-    $logger->debug("Get instance groups from ansible_tower.");
-
-    $response_array = AnsibleTowerRestApiInstanceGroups::getAll($restApiCaller);
-    if($response_array['success'] == false) {
-        throw new Exception("Faild to get data from ansible_tower. " . $response_array['responseContents']['errorMessage']);
-    }
-
-    $logger->trace("DEBUG_LOG| FILE: " . __FILE__ . "| LINE: " . __LINE__ . "| \n" . var_export($response_array['responseContents'], true));
-
-    ////////////////////////////////
-    // トランザクション開始
-    ////////////////////////////////
-    // トレースメッセージ
-    $logger->debug("Begin transaction.");
-
-    $dbAccess->beginTransaction();
-
-    // --------------------------------------------------
-    // 
-    // 名称ユニークとしてデータ更新の比較のキーをNameとした。
-    // クラスタ初期構築時に、"Tower"がデフォルトのはずがID:2が振られ、その他のグループも法則性が無くランダムにIDが振られるようなので、
-    // もしクラスタを再構築した際に振られるIDが変わってしまう危険性があると判断したため。
-    // ITAもTowerも、ユーザは画面上では名称しか気にしないので、そこを間違えなければ内部のIDは差し換わってもいいはず。
-    // 
-    // --------------------------------------------------
-
-    // 既存データの検索用Idカラムを作成する
-    $instanceGroupNames_inTable = array_column($instanceGroupRows, 'INSTANCE_GROUP_NAME');
-
-    $livingIds = array();
-    $tableName = "B_ANS_TWR_INSTANCE_GROUP";  
-    // 新規追加 or 更新
-    foreach($response_array['responseContents'] as $instanceGroupData_fromTower) {
-
-        $target_index = array_search($instanceGroupData_fromTower['name'], $instanceGroupNames_inTable);
-        if($target_index === false) {
-            // 見つからない場合は新規
-            $logger->trace("new record.");
-            $newRow = array(
-                "INSTANCE_GROUP_NAME" => $instanceGroupData_fromTower['name'],
-                "INSTANCE_GROUP_ID"   => $instanceGroupData_fromTower['id'],
+    //==========================================================
+    // インスタンスグループ情報更新
+    //==========================================================
+    try {
+        ////////////////////////////////////////////////////////////
+        // Towerのインスタンスグループ情報取得
+        ////////////////////////////////////////////////////////////
+        $response_array = AnsibleTowerRestApiInstanceGroups::getAll($restApiCaller);
+        if($response_array['success'] == false) {
+            throw new Exception("Faild to get instance groups data from ansible_tower. " . $response_array['responseContents']['errorMessage']);
+        }
+    
+        ////////////////////////////////////////////////////////////
+        // トランザクション開始
+        ////////////////////////////////////////////////////////////
+        $dbAccess->beginTransaction();
+    
+        ////////////////////////////////////////////////////////////
+        // ITA側の登録済みのインスタンスグループ情報取得
+        ////////////////////////////////////////////////////////////
+        $instanceGroupRows = $dbAccess->selectRows("B_ANS_TWR_INSTANCE_GROUP", true);   
+    
+        ////////////////////////////////////////////////////////////
+        // データベース更新
+        ////////////////////////////////////////////////////////////
+        $TableName      = "B_ANS_TWR_INSTANCE_GROUP";
+        $PkeyItem       = "INSTANCE_GROUP_ITA_MANAGED_ID";
+        $NameItem       = "INSTANCE_GROUP_NAME";
+        $IDItem         = "INSTANCE_GROUP_ID";
+        $Contents_array = array();
+        foreach($response_array['responseContents'] as $info) {
+            $Contents_array[] = array(
+                'name' => $info['name'],
+                'id'   => $info['id'],
             );
+        }
+        DBUpdate($Contents_array,$TableName,$instanceGroupRows,$PkeyItem,$NameItem,$IDItem);
 
-            $rowId = $dbAccess->insertRow($tableName, $newRow);
-            $livingIds[] = $rowId;
-        } else {
-            // 見つかるのであれば更新の可能性 ... 差分があれば更新/復活
-            $updateRow = $instanceGroupRows[$target_index];
-            if($instanceGroupData_fromTower['id'] != $updateRow['INSTANCE_GROUP_ID']) {
-                $logger->trace("update record. [name: " . $updateRow['INSTANCE_GROUP_NAME'] . "]");
-                $updateRow['INSTANCE_GROUP_ID'] = $instanceGroupData_fromTower['id'];
-                $updateRow['DISUSE_FLAG'] = '0';
-                $dbAccess->updateRow($tableName, $updateRow);
+        ////////////////////////////////////////////////////////////
+        // トランザクション終了(分割コミット)
+        ////////////////////////////////////////////////////////////
+        $dbAccess->commit();
+
+    } catch (Exception $e) {
+        $logger->error("Faild to make instance group data.");
+        throw new Exception($e->getMessage());
+    }
+    
+
+    //==========================================================
+    // 組織情報更新
+    //==========================================================
+    try {
+        ////////////////////////////////////////////////////////////
+        // Towerの組織情報取得
+        ////////////////////////////////////////////////////////////
+        $response_array = AnsibleTowerRestApiOrganizations::getAll($restApiCaller);
+        if($response_array['success'] == false) {
+            throw new Exception("Faild to get organizations data from ansible_tower. " . $response_array['responseContents']['errorMessage']);
+        }
+    
+        ////////////////////////////////////////////////////////////
+        // トランザクション開始
+        ////////////////////////////////////////////////////////////
+        $dbAccess->beginTransaction();
+    
+        ////////////////////////////////////////////////////////////
+        // ITA側の既に登録済みの組織名情報を取得する
+        ////////////////////////////////////////////////////////////
+        $OrganizationRows = $dbAccess->selectRows("B_ANS_TWR_ORGANIZATION", true);   
+    
+        ////////////////////////////////////////////////////////////
+        // データベース更新
+        ////////////////////////////////////////////////////////////
+        $TableName      = "B_ANS_TWR_ORGANIZATION";
+        $PkeyItem       = "ROW_ID";
+        $NameItem       = "ORGANIZATION_NAME";
+        $IDItem         = "ORGANIZATION_ID";
+        $Contents_array = array();
+        foreach($response_array['responseContents'] as $info) {
+            $Contents_array[] = array(
+                'name' => $info['name'],
+                'id'   => $info['id'],
+            );
+        }
+        DBUpdate($Contents_array,$TableName,$OrganizationRows,$PkeyItem,$NameItem,$IDItem);
+    
+        ////////////////////////////////////////////////////////////
+        // トランザクション終了
+        ////////////////////////////////////////////////////////////
+        $dbAccess->commit();
+    
+    } catch (Exception $e) {
+        $logger->error("Faild to make organization data.");
+        throw new Exception($e->getMessage());
+    }
+    
+    //==========================================================
+    // virtualenv情報更新
+    //==========================================================
+    try {
+        ////////////////////////////////////////////////////////////
+        // Towerのvirtualenv情報取得
+        ////////////////////////////////////////////////////////////
+        $response_array = AnsibleTowerRestApiConfig::get($restApiCaller);
+        if($response_array['success'] == false) {
+            throw new Exception("Faild to get virtualenv data from ansible_tower. " . $response_array['responseContents']['errorMessage']);
+        }
+    
+        ////////////////////////////////////////////////////////////
+        // トランザクション開始
+        ////////////////////////////////////////////////////////////
+        $dbAccess->beginTransaction();
+    
+        ////////////////////////////////////////////////////////////
+        // ITA側の既に登録済みのVIRTUALENV情報取得
+        ////////////////////////////////////////////////////////////
+        $VirtualEnvRows = $dbAccess->selectRows("B_ANS_TWR_VIRTUALENV", true);   
+    
+        ////////////////////////////////////////////////////////////
+        // データベース更新
+        ////////////////////////////////////////////////////////////
+        $TableName      = "B_ANS_TWR_VIRTUALENV";
+        $PkeyItem       = "ROW_ID";
+        $NameItem       = "VIRTUALENV_NAME";
+        $IDItem         = "VIRTUALENV_NO";
+        $Contents_array = array();
+        if( isset($response_array['responseContents']['custom_virtualenvs'] )) {
+            foreach($response_array['responseContents']['custom_virtualenvs'] as $no=>$name) {
+                $Contents_array[] = array(
+                    'name' => $name,
+                    'id'   => $no,
+                );
             }
-
-            if($updateRow['DISUSE_FLAG'] != '0') {
-                $updateRow['DISUSE_FLAG'] = '0';
-                $dbAccess->updateRow($tableName, $updateRow);
-            }
-            $livingIds[] = $updateRow['INSTANCE_GROUP_ITA_MANAGED_ID'];
         }
+        DBUpdate($Contents_array,$TableName,$VirtualEnvRows,$PkeyItem,$NameItem,$IDItem);
+    } catch (Exception $e) {
+        $logger->error("Faild to make virtualenv data.");
+        throw new Exception($e->getMessage());
     }
-
-    // 廃止
-    foreach($instanceGroupRows as $row) {
-
-        if($row['DISUSE_FLAG'] != "0") {
-            // 既に廃止されているレコードは対象外。
-            continue;
-        }
-
-        if(in_array($row['INSTANCE_GROUP_ITA_MANAGED_ID'], $livingIds)) {
-            // 登録されている場合はなにもしない。
-            continue;
-        }
-
-        $logger->trace("discard record. [name: " . $row['INSTANCE_GROUP_NAME'] . "]");
-        $row['DISUSE_FLAG'] = "1";
-        $dbAccess->updateRow($tableName, $row);
-    }
-
-    // 名称でデータ操作しているので、最後にIDユニークチェックを入れておきたい
-    $livingRows = $dbAccess->selectRows("B_ANS_TWR_INSTANCE_GROUP"); 
-    $checker = array();
-    $dummy_value = 1;
-    foreach($livingRows as $data) {
-        if(array_key_exists($data['INSTANCE_GROUP_ID'], $checker)) {
-            throw new Exception("Duplicate entry [" . $data['INSTANCE_GROUP_ID'] . "] for 'INSTANCE_GROUP_ID'");
-        }
-        $checker[$data['INSTANCE_GROUP_ID']] = $dummy_value;
-    }
-
-    ////////////////////////////////
+    
+    ////////////////////////////////////////////////////////////
     // トランザクション終了
-    ////////////////////////////////
-    // トレースメッセージ
-    $logger->debug("Commit transaction.");
-
+    ////////////////////////////////////////////////////////////
     $dbAccess->commit();
 
 } catch (Exception $e) {
@@ -312,3 +348,58 @@ if($error_flag != 0) {
 }
 
 // end Main Logic
+function  DBUpdate($Contents_array,$TableName,$TableRows,$PkeyItem,$NameItem,$IDItem) {
+   global $logger;
+   global $dbAccess;
+
+   $livingIds = array();
+   // 既存データの検索用Idカラムを作成する
+   $Names_inTable = array_column($TableRows, $NameItem);
+
+   // 新規追加 or 更新
+   foreach($Contents_array as $Contents_fromTower) {
+       $target_index = array_search($Contents_fromTower['name'], $Names_inTable);
+       if($target_index === false) {
+           // 見つからない場合は新規
+           $logger->trace("new record.");
+           $newRow = array(
+               $NameItem => $Contents_fromTower['name'],
+               $IDItem   => $Contents_fromTower['id'],
+           );
+           $rowId = $dbAccess->insertRow($TableName, $newRow);
+           $livingIds[] = $rowId;
+       } else {
+           // 見つかるのであれば更新の可能性 ... 差分があれば更新/復活
+           $updateRow = $TableRows[$target_index];
+           if($Contents_fromTower['id'] != $updateRow[$IDItem]) {
+               $logger->trace("update record. [name: " . $updateRow[$NameItem] . "]        ");
+               $updateRow[$IDItem] = $Contents_fromTower['id'];
+               $updateRow['DISUSE_FLAG'] = '0';
+               $dbAccess->updateRow($TableName, $updateRow);
+           }
+    
+           if($updateRow['DISUSE_FLAG'] != '0') {
+               $updateRow['DISUSE_FLAG'] = '0';
+               $dbAccess->updateRow($TableName, $updateRow);
+           }
+           $livingIds[] = $updateRow[$PkeyItem];
+       }
+   }
+   // 廃止
+   foreach($TableRows as $row) {
+       if($row['DISUSE_FLAG'] != "0") {
+           // 既に廃止されているレコードは対象外。
+           continue;
+       }
+       if(in_array($row[$PkeyItem], $livingIds)) {
+           // 登録されている場合はなにもしない。
+           continue;
+       }
+
+       $logger->trace("discard record. [name: " . $row[$NameItem] . "]");
+       $row['DISUSE_FLAG'] = "1";
+       $dbAccess->updateRow($TableName, $row);
+   }
+   return true;
+}
+?>
