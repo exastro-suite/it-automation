@@ -638,7 +638,7 @@ HOSTS_EXTRA_ARGS                  VARCHAR2(512)             , -- インベント
 --
 SYSTEM_NAME                       VARCHAR2(64)              ,
 COBBLER_PROFILE_ID                NUMBER                    , -- FOR COBLLER
-INTERFACE_TYPE                    VARCHAR2(256)              , -- FOR COBLLER
+INTERFACE_TYPE                    VARCHAR2(256)             , -- FOR COBLLER
 MAC_ADDRESS                       VARCHAR2(17)              , -- FOR COBLLER
 NETMASK                           VARCHAR2(15)              , -- FOR COBLLER
 GATEWAY                           VARCHAR2(15)              , -- FOR COBLLER
@@ -649,7 +649,7 @@ CONN_SSH_KEY_FILE                 VARCHAR2(256)             ,
 DSC_CERTIFICATE_FILE              VARCHAR2(256)             , -- DSC利用情報 認証キーファイル
 DSC_CERTIFICATE_THUMBPRINT        VARCHAR2(256)             , -- DSC利用情報 サムプリント
 
-ANSTWR_INSTANCE_GROUP_NAME        VARCHAR2(512)
+ANSTWR_INSTANCE_GROUP_NAME        VARCHAR2(512)             , -- インスタンスグループ名
 
 DISP_SEQ                          NUMBER                    , -- 表示順序
 NOTE                              VARCHAR2(4000)            , -- 備考
@@ -675,7 +675,7 @@ HOSTNAME                          VARCHAR2(128)             ,
 IP_ADDRESS                        VARCHAR2(15)              ,
 
 ETH_WOL_MAC_ADDRESS               VARCHAR2(17)              , -- ETH_WAKE_ON_LAN
-ETH_WOL_NET_DEVICE                VARCHAR2(256)              , -- ETH_WAKE_ON_LAN
+ETH_WOL_NET_DEVICE                VARCHAR2(256)             , -- ETH_WAKE_ON_LAN
 
 PROTOCOL_ID                       NUMBER                    ,
 LOGIN_USER                        VARCHAR2(30)              ,
@@ -690,7 +690,7 @@ HOSTS_EXTRA_ARGS                  VARCHAR2(512)             , -- インベント
 
 SYSTEM_NAME                       VARCHAR2(64)              ,
 COBBLER_PROFILE_ID                NUMBER                    , -- FOR COBLLER
-INTERFACE_TYPE                    VARCHAR2(256)              , --FOR COBLLER
+INTERFACE_TYPE                    VARCHAR2(256)             , -- FOR COBLLER
 MAC_ADDRESS                       VARCHAR2(17)              , -- FOR COBLLER
 NETMASK                           VARCHAR2(15)              , -- FOR COBLLER
 GATEWAY                           VARCHAR2(15)              , -- FOR COBLLER
@@ -701,7 +701,7 @@ CONN_SSH_KEY_FILE                 VARCHAR2(256)             ,
 DSC_CERTIFICATE_FILE              VARCHAR2(256)             , -- DSC利用情報 認証キーファイル
 DSC_CERTIFICATE_THUMBPRINT        VARCHAR2(256)             , -- DSC利用情報 サムプリント
 
-ANSTWR_INSTANCE_GROUP_NAME        VARCHAR2(512)
+ANSTWR_INSTANCE_GROUP_NAME        VARCHAR2(512)             , -- インスタンスグループ名
 
 DISP_SEQ                          NUMBER                    , -- 表示順序
 NOTE                              VARCHAR2(4000)            , -- 備考
