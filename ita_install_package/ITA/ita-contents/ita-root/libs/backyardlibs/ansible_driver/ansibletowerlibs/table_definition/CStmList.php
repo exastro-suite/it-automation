@@ -64,7 +64,7 @@ class CStmList extends TableBaseDefinition {
             "CONN_SSH_KEY_FILE"               => "",
             "DSC_CERTIFICATE_FILE"            => "",
             "DSC_CERTIFICATE_THUMBPRINT"      => "",
-            "ANSTWR_INSTANCE_GRP_ITA_MNG_ID"  => "",
+            "ANSTWR_INSTANCE_GROUP_NAME"      => "",
         );
 
     public static function getRowDiffKeyColumns() {
