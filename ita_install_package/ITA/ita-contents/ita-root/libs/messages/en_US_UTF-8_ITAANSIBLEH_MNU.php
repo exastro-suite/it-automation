@@ -1182,4 +1182,9 @@ Ansible Tower:
     gather_facts: no
     become: yes
 become is omitted for winrm connection.";
+$ary[9010000013] = "Tower Dedicated information";
+$ary[9010000014] = "virtualenv";
+$ary[9010000015] = "Ansible execution environment directory built with virtualenv is displayed.\nChoose the ansible execution environment you want to run.\nIf it is not choose, the ansible execution environment installed at the time of Tower installation will be used.";
+$ary[9010000016] = "virtualenv";
+$ary[9010000017] = "Ansible execution environment directory built with virtualenv is displayed.";
 ?>
