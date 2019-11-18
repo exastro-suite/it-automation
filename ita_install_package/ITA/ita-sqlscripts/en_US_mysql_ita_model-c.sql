@@ -378,6 +378,76 @@ CREATE TABLE B_ANS_TWR_INSTANCE_GROUP_JNL (
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8; 
 -- 履歴系テーブル作成----
 
+-- ------------------------------
+-- -- Tower VIRTUALENVマスタ
+-- ------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_TWR_VIRTUALENV ( 
+  ROW_ID                          INT                               , 
+  VIRTUALENV_NAME                 VARCHAR (512)                     , 
+  VIRTUALENV_NO                   INT                               , 
+  DISP_SEQ                        INT                               , 
+  NOTE                            VARCHAR (4000)                    , 
+  DISUSE_FLAG                     VARCHAR (1)                       , 
+  LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
+  LAST_UPDATE_USER                INT                               , 
+  PRIMARY KEY (ROW_ID) 
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_TWR_VIRTUALENV_JNL ( 
+  JOURNAL_SEQ_NO                  INT                               , 
+  JOURNAL_REG_DATETIME            DATETIME(6)                       , 
+  JOURNAL_ACTION_CLASS            VARCHAR (8)                       , 
+  ROW_ID                          INT                               , 
+  VIRTUALENV_NAME                 VARCHAR (512)                     , 
+  VIRTUALENV_NO                   INT                               , 
+  DISP_SEQ                        INT                               , 
+  NOTE                            VARCHAR (4000)                    , 
+  DISUSE_FLAG                     VARCHAR (1)                       , 
+  LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
+  LAST_UPDATE_USER                INT                               , 
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8; 
+-- 履歴系テーブル作成----
+
+-- ------------------------------
+-- -- Tower 組織名マスタ
+-- ------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE 
+B_ANS_TWR_ORGANIZATION ( 
+  ROW_ID                          INT                               , 
+  ORGANIZATION_NAME               VARCHAR (512)                     , 
+  ORGANIZATION_ID                 INT                               , 
+  DISP_SEQ                        INT                               , 
+  NOTE                            VARCHAR (4000)                    , 
+  DISUSE_FLAG                     VARCHAR (1)                       , 
+  LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
+  LAST_UPDATE_USER                INT                               , 
+  PRIMARY KEY (ROW_ID) 
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE 
+B_ANS_TWR_ORGANIZATION_JNL ( 
+  JOURNAL_SEQ_NO                  INT                               , 
+  JOURNAL_REG_DATETIME            DATETIME(6)                       , 
+  JOURNAL_ACTION_CLASS            VARCHAR (8)                       , 
+  ROW_ID                          INT                               , 
+  ORGANIZATION_NAME               VARCHAR (512)                     , 
+  ORGANIZATION_ID                 INT                               , 
+  DISP_SEQ                        INT                               , 
+  NOTE                            VARCHAR (4000)                    , 
+  DISUSE_FLAG                     VARCHAR (1)                       , 
+  LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
+  LAST_UPDATE_USER                INT                               , 
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8; 
+-- 履歴系テーブル作成----
+
 
 -- ----------------------------------------------------------------------------------------
 -- -- ansible-playbookのオプションパラメータとAnsible Tower JobTemplate プロパティの紐づけ
@@ -823,6 +893,7 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
 I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
+I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -865,6 +936,7 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
 I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
+I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -951,8 +1023,9 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_WINRM_ID                  ,
-        ANS_PLAYBOOK_HED_DEF      ,
+        ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -984,6 +1057,7 @@ SELECT
         ANS_WINRM_ID                  ,
         ANS_PLAYBOOK_HED_DEF      ,
         ANS_EXEC_OPTIONS              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -1081,6 +1155,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1128,6 +1203,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1512,6 +1588,7 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
 I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
+I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -1554,6 +1631,7 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
 I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
+I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -1646,6 +1724,7 @@ SELECT
         TIME_LIMIT                    ,
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -1675,6 +1754,7 @@ SELECT
         TIME_LIMIT                    ,
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -1774,6 +1854,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,         
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1821,6 +1902,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,         
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1922,6 +2004,7 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションNo
 I_OPERATION_NAME                  VARCHAR (256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
+I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
 TIME_END                          DATETIME(6)                      , -- 終了日時
@@ -1964,6 +2047,7 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションNo
 I_OPERATION_NAME                  VARCHAR (256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
+I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
 TIME_END                          DATETIME(6)                      , -- 終了日時
@@ -2699,6 +2783,7 @@ SELECT
         ANS_WINRM_ID                  ,
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -2730,6 +2815,7 @@ SELECT
         ANS_WINRM_ID                  ,
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -2771,6 +2857,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2818,6 +2905,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -4236,6 +4324,14 @@ INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_F_ID_RIC',5);
 
 INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_F_ID_JSQ',5);
 
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_VIRTUALENV_RIC',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_VIRTUALENV_JSQ',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_ORGANIZATION_RIC',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_ORGANIZATION_JSQ',1);
+
 
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100020000,'Ansible Common','anscmn.png',70,'Ansible Common','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20000,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100020000,'Ansible Common','anscmn.png',70,'Ansible Common','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -4338,8 +4434,6 @@ INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRI
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20320,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100020320,2100020003,'Nested variable array combination list',NULL,NULL,NULL,1,0,1,2,180,'menber_col_comb','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100020322,2100020003,'Reading variable list',NULL,NULL,NULL,1,0,1,2,1000,'role_replace_vars_list','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20322,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100020322,2100020003,'Reading variable list',NULL,NULL,NULL,1,0,1,2,1000,'role_replace_vars_list','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040705,2100020000,'Instance group list',NULL,NULL,NULL,1,0,1,1,280,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-140027,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040705,2100020000,'Instance group list',NULL,NULL,NULL,1,0,1,1,280,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040707,2100020000,'共通変数利用リスト',NULL,NULL,NULL,1,0,1,1,290,'ans_comvers_usedlist','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40707,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040707,2100020000,'共通変数利用リスト',NULL,NULL,NULL,1,0,1,1,290,'ans_comvers_usedlist','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
@@ -4466,8 +4560,6 @@ INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40703,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040703,1,2100040703,1,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040704,1,2100040704,1,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40704,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040704,1,2100040704,1,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040705,1,2100040705,1,'System Administrator','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40705,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040705,1,2100040705,1,'System Administrator','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040707,1,2100040707,1,'システム管理者','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40707,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040707,1,2100040707,1,'システム管理者','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
