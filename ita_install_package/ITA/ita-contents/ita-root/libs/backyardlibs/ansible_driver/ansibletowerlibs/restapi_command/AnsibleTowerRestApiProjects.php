@@ -116,6 +116,10 @@ class AnsibleTowerRestApiProjects extends AnsibleTowerRestApiBase {
             return $response_array;
         }
 
+        if(isset($param['custom_virtualenv'])) {
+            $content['custom_virtualenv']       = $param['custom_virtualenv'];
+        }
+
         // REST APIアクセス
         $method = "POST";
         $response_array = $RestApiCaller->restCall($method, self::API_PATH, $content);
