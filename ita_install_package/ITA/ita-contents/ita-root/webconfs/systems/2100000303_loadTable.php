@@ -390,7 +390,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-102026"));
 
            // インスタンスグループ
-           $c = new IDColumn('ANSTWR_INSTANCE_GRP_ITA_MNG_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104630"),'B_ANS_TWR_INSTANCE_GROUP','INSTANCE_GROUP_ITA_MANAGED_ID','INSTANCE_GROUP_NAME','');
+           $c = new IDColumn('ANSTWR_INSTANCE_GROUP_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104630"),
+                              'B_ANS_TWR_INSTANCE_GROUP', 'INSTANCE_GROUP_NAME', 'INSTANCE_GROUP_NAME','');
            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104631"));
            $cg->addColumn($c);
 
