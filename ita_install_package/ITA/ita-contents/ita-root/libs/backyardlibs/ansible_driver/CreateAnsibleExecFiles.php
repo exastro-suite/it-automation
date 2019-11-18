@@ -1507,8 +1507,9 @@ class CreateAnsibleExecFiles {
         //固定ファイル出力
         $header  = "";
         $header .= "all:\n";
-        $header .= "  hostgroups:\n";
-        $header .= "    hosts:\n";
+        $header .= "  children:\n";
+        $header .= "    hostgroups:\n";
+        $header .= "      hosts:\n";
         
         if( @fputs($fd, $header) === false ){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55205",array(__LINE__));
@@ -1542,7 +1543,7 @@ class CreateAnsibleExecFiles {
             if(strlen(trim($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'])) != 0){
                 $this->KeyValueStringToYamlFormat($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'],$hosts_extra_args);
                 $hosts_extra_args = implode(",",$hosts_extra_args);
-                $hosts_extra_args = str_replace(',' , "\n        ",$hosts_extra_args);
+                $hosts_extra_args = str_replace(',' , "\n          ",$hosts_extra_args);
             }
 
             $param = "";
@@ -1573,10 +1574,9 @@ class CreateAnsibleExecFiles {
                  ($this->lv_winrm_id == 1) ) {
                     // WINRM接続プロトコルよりポート番号取得
                     $port = "ansible_ssh_port: " . $ina_hostinfolist[$host_name]['WINRM_PORT'];
-                    $port = $port . "\n" . "        ansible_connection: winrm";
+                    $port = $port . "\n" . "          ansible_connection: winrm";
                 }
             }
-            
 
             $ssh_key_file = '';
             // 認証方式が鍵認証でWinRM接続でないか判定
@@ -1588,6 +1588,9 @@ class CreateAnsibleExecFiles {
                                                      $ina_hostinfolist[$host_name]['SSH_KEY_FILE'],
                                                      $ssh_key_file_path);
 
+                    $ssh_key_file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                     $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                     $ssh_key_file_path);
                     if($ret === false){
                         return false;
                     }
@@ -1604,13 +1607,15 @@ class CreateAnsibleExecFiles {
 
             $win_ca_file = '';
             // WinRM接続か判定
-            if($this->lv_winrm_id == 1){
+            if($this->lv_winrm_id == 1) {
                 if(strlen(trim($ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'])) != 0){
                     // 機器一覧にサーバー証明書ファイルが登録されている場合はサーバー証明書ファイルをinディレクトリ配下にコピーする
                     $ret = $this->CreateWIN_cs_file($ina_hostinfolist[$host_name]['SYSTEM_ID'],
                                                     $ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'],
                                                     $win_ca_file_path);
-
+                    $win_ca_file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                    $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                    $win_ca_file_path);
                     if($ret === false){
                         return false;
                     }
@@ -1624,33 +1629,33 @@ class CreateAnsibleExecFiles {
              
             // ホストアドレス方式がホスト名方式の場合はホスト名をhostsに登録する。
             if($this->lv_hostaddress_type == 2) {       
-                $host_name  = '      ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n";
+                $host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n";
             } 
             else {
                 // ホストアドレス方式がIPアドレスの場合   
-                $host_name  = '      ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n" . '        ansible_ssh_host: ' . $host_name . "\n";     
+                $host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n" . '          ansible_ssh_host: ' . $host_name . "\n";     
             }
              
              if(strlen($param) !== 0) {
-                 $host_name .= "        $param" . "\n";
+                 $host_name .= "          $param" . "\n";
              }
              if(strlen($pass) !== 0) {
-                 $host_name .= "        $pass" . "\n";
+                 $host_name .= "          $pass" . "\n";
              }
              if(strlen($port) !== 0) {
-                 $host_name .= "        $port" . "\n";
+                 $host_name .= "          $port" . "\n";
              }
              if(strlen($ssh_key_file) !== 0) {
-                 $host_name .= "        $ssh_key_file" . "\n";
+                 $host_name .= "          $ssh_key_file" . "\n";
              }
              if(strlen($ssh_extra_args) !== 0) {
-                 $host_name .= "        $ssh_extra_args" . "\n";
+                 $host_name .= "          $ssh_extra_args" . "\n";
              }
              if(strlen($hosts_extra_args) !== 0) {
-                 $host_name .= "        $hosts_extra_args" . "\n";
+                 $host_name .= "          $hosts_extra_args" . "\n";
              }
              if(strlen($win_ca_file) !== 0) {
-                 $host_name .= "        $win_ca_file". "\n";
+                 $host_name .= "          $win_ca_file". "\n";
              }
             
 
@@ -2402,7 +2407,11 @@ class CreateAnsibleExecFiles {
                     }
                 } else {
                     $value =          "- hosts: all\n";
-                    $value = $value . "  become: yes\n";
+                    $value = $value . "  gather_facts: no\n";
+                    // 対象ホストがwindowsか判別。windows以外の場合は become: yes を設定
+                    if($this->lv_winrm_id != 1){
+                        $value = $value . "  become: yes\n";
+                    }
                 }
             } else {
                 $value  = $in_exec_playbook_hed_def;
