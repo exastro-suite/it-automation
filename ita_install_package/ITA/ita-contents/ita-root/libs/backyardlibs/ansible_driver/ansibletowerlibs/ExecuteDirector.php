@@ -47,6 +47,8 @@ require_once($rest_api_command . "AnsibleTowerRestApiWorkflowJobTemplates.php");
 require_once($rest_api_command . "AnsibleTowerRestApiWorkflowJobTemplateNodes.php");
 
 require_once($rest_api_command . "AnsibleTowerRestApiOrganization.php");
+require_once($rest_api_command . "AnsibleTowerRestApiInstanceGroups.php");
+require_once($rest_api_command . "AnsibleTowerRestApiConfig.php");
 
 class ExecuteDirector {
 
@@ -72,8 +74,34 @@ class ExecuteDirector {
 
         $execution_no = $exeInsRow['EXECUTION_NO'];
 
+        $virtualenv_name = $exeInsRow['I_VIRTUALENV_NAME'];
+
+        // Towerのvirtualenv確認
+        $virtualenv_name_ok = false;
+        if($virtualenv_name != "") {
+            $response_array = AnsibleTowerRestApiConfig::get($this->restApiCaller);
+            if($response_array['success'] == false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040026",array($virtualenv_name));
+                $this->errorLogOut($errorMessage);
+                return false;
+            }
+            if( isset($response_array['responseContents']['custom_virtualenvs'] )) {
+                foreach($response_array['responseContents']['custom_virtualenvs'] as $no=>$name) {
+                    if($name == $virtualenv_name) {
+                        $virtualenv_name_ok = true;
+                        break;
+                    }
+                }
+            }
+            if($virtualenv_name_ok === false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040027",array($virtualenv_name));
+                $this->errorLogOut($errorMessage);
+                return false;
+            }
+        }
+
+
         $OrganizationName = trim($ifInfoRow['ANSTWR_ORGANIZATION']);
-        $OrganizationId = '1';  // 組織名が未入力の場合 Default を設定
         if(strlen($OrganizationName) != 0) {
             //組織情報取得
             //   [[Inventory]]
@@ -94,15 +122,11 @@ class ExecuteDirector {
                 return false;
             }
             $OrganizationId = $response_array['responseContents'][0]['id'];
-        }
-//------------
-
-        $ret = $this->prepareProject($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_ANS']); 
-        if($ret == false) {
-            // array[40001] = "SCM更新作業に失敗しました。";
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040001");
+        } else {
+            // 組織名未登録
+            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040030");
             $this->errorLogOut($errorMessage);
-            return -1;
+            return false;
         }
 
         // Host情報取得
@@ -114,9 +138,18 @@ class ExecuteDirector {
             $this->errorLogOut($errorMessage);
             return -1;
         }
+//------------
+
+        $ret = $this->prepareProject($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_ANS']); 
+        if($ret == false) {
+            // array[40001] = "SCM更新作業に失敗しました。";
+            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040001");
+            $this->errorLogOut($errorMessage);
+            return -1;
+        }
 
         // project生成
-        $projectId = $this->createProject($execution_no,$OrganizationId);
+        $projectId = $this->createProject($execution_no,$OrganizationId,$virtualenv_name);
         if($projectId == -1) {
             $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040003");
             $this->errorLogOut($errorMessage);
@@ -169,11 +202,11 @@ class ExecuteDirector {
 
         $this->logger->trace(__METHOD__);
 
-        global $vg_tower_driver_type;
+        global $vg_tower_driver_name;
         $allResult = true;
 
         // ジョブスライス設定有無判定
-        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,$vg_tower_driver_type,addPadding($execution_no));
+        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,$vg_tower_driver_name,addPadding($execution_no));
         $query = sprintf("?name__startswith=%s",$search_name);
         $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
 
@@ -645,13 +678,27 @@ class ExecuteDirector {
             }
 
             $instanceGroupId = null;
-            if(!empty($hostInfo['ANSTWR_INSTANCE_GRP_ITA_MNG_ID'])) {
-                $instanceGroup = $this->dbAccess->selectRow("B_ANS_TWR_INSTANCE_GROUP", $hostInfo['ANSTWR_INSTANCE_GRP_ITA_MNG_ID']);  
-                if(empty($instanceGroup)) {
-                    $this->logger->error("Not exists or disabled instance group. ANSTWR_INSTANCE_GRP_ITA_MNG_ID: " . $hostInfo['ANSTWR_INSTANCE_GRP_ITA_MNG_ID']);
+            if(!empty($hostInfo['ANSTWR_INSTANCE_GROUP_NAME'])) {
+                // Towerのインスタンスグループ情報取得
+                $response_array = AnsibleTowerRestApiInstanceGroups::getAll($this->restApiCaller);
+                if($response_array['success'] == false) {
+                    // 組織名未登録
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040028",array($hostInfo['ANSTWR_INSTANCE_GROUP_NAME']));
+                    $this->errorLogOut($errorMessage);
                     return false;
                 }
-                $instanceGroupId = $instanceGroup['INSTANCE_GROUP_ID'];
+
+                foreach($response_array['responseContents'] as $info) {
+                    if($info['name'] == $hostInfo['ANSTWR_INSTANCE_GROUP_NAME']) {
+                        $instanceGroupId = $info['id'];
+                    }
+                }
+                if($instanceGroupId == null) {
+                    // インスタンスグループ未登録
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040029",array($hostInfo['ANSTWR_INSTANCE_GROUP_NAME']));
+                    $this->errorLogOut($errorMessage);
+                    return false;
+                }                
             }
 
             // 配列のキーに使いたいだけ
@@ -735,7 +782,7 @@ class ExecuteDirector {
         return true;
     }
 
-    private function createProject($execution_no,$OrganizationId) {
+    private function createProject($execution_no,$OrganizationId,$virtualenv_name) {
         $this->logger->trace(__METHOD__);
 
         $param = array();
@@ -743,6 +790,10 @@ class ExecuteDirector {
         $param['organization'] = $OrganizationId;
 
         $param['execution_no'] = $execution_no;
+
+        if(strlen($virtualenv_name) != 0) {
+            $param['custom_virtualenv'] = $virtualenv_name;
+        }
 
         $this->logger->trace(var_export($param, true));
 
@@ -1203,13 +1254,13 @@ class ExecuteDirector {
 
     function monitoring($toProcessRow, $ansibleTowerIfInfo) {
 
-        global $vg_tower_driver_type;
+        global $vg_tower_driver_name;
 
         $this->logger->trace(__METHOD__);
 
         $execution_no = $toProcessRow['EXECUTION_NO'];
 
-        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,$vg_tower_driver_type,addPadding($execution_no));
+        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,$vg_tower_driver_name,addPadding($execution_no));
         $query = sprintf("?name__startswith=%s",$search_name);
         $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
 
@@ -1248,13 +1299,13 @@ class ExecuteDirector {
 
     function SliceJobsMonitoring($execution_no,&$SliceJobsData,$stdout_get,&$IDData=array()) {
 
-        global $vg_tower_driver_type;
+        global $vg_tower_driver_name;
 
         $this->logger->trace(__METHOD__);
 
         // ジョブテンプレート情報検索　ita_%s_executions_jobtpl_%s"
         $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,
-                               $vg_tower_driver_type,addPadding($execution_no));
+                               $vg_tower_driver_name,addPadding($execution_no));
         $query = sprintf("?name__startswith=%s",$search_name);
         $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
 
@@ -1645,6 +1696,7 @@ class ExecuteDirector {
             $contentArray[] = "  credential_name: " . $credentialData['name'];
             $contentArray[] = "  credential_type: " . $credentialData['credential_type'];
             $contentArray[] = "  credential_inputs: " . json_encode($credentialData['inputs']);
+            $contentArray[] = "  virtualenv: " . $projectData['custom_virtualenv'];
             if($job_slice_use === true) {
                 $contentArray[] = "  job_slice_count: " . $jobData["job_slice_count"];
             }
