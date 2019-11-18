@@ -76,6 +76,7 @@
                         TAB_A.EXEC_MODE_NAME,
                         TAB_A.I_ANS_WINRM_ID,
                         TAB_A.ANS_WINRM_FLAG_NAME,
+                        TAB_A.I_VIRTUALENV_NAME,
 
                         TAB_A.NOTE,
                         {$strSelectLastUpdateTimestamp4} AS LAST_UPDATE_TIMESTAMP,
@@ -166,6 +167,10 @@
         // 表示フィルター用 MovementID生成
         $movement_param = sprintf("%s",rawurlencode($showTgtRow['PATTERN_ID']));
 
+        $exec_mode       = nl2br(htmlspecialchars($showTgtRow['EXEC_MODE']));
+        $exec_mode_name  = nl2br(htmlspecialchars($showTgtRow['EXEC_MODE_NAME']));
+        $virturlenv_name = nl2br(htmlspecialchars($showTgtRow['I_VIRTUALENV_NAME']));
+
         // 作業対象ホストへ遷移するボタン生成
         $url = sprintf("/default/menu/01_browse.php?no=2100020209&ope_id=%s&movement_id=%s", $ope_param,$movement_param);
         $caption = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-5010001");
@@ -207,12 +212,28 @@
                         <td                                     >{$COLUMN_14}</td>
                     </tr>
                     <tr>
-                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-104100")}</span><!--実行ユーザ//--></td>
-                        <td                                     >{$COLUMN_42}</td>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203065")}</span><!--実行エンジン//--></td>
+                        <td                                     >{$exec_mode_name}</td>
                     </tr>
+EOD;
+        if($exec_mode == 2) {
+            $output_str .=
+<<< EOD
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000016")}</span><!--virturlenv//--></td>
+                        <td                                     >{$virturlenv_name}</td>
+                    </tr>
+EOD;
+        }
+        $output_str .=
+<<< EOD
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-103110")}</span><!--シンフォニークラス//--></td>
                         <td                                     >{$COLUMN_43}</td>
+                    </tr>
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-104100")}</span><!--実行ユーザ//--></td>
+                        <td                                     >{$COLUMN_42}</td>
                     </tr>
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="5" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-104020")}</span><!--作業パターン//--></td>
