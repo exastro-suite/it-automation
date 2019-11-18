@@ -649,8 +649,7 @@ CONN_SSH_KEY_FILE                 VARCHAR2(256)             ,
 DSC_CERTIFICATE_FILE              VARCHAR2(256)             , -- DSC利用情報 認証キーファイル
 DSC_CERTIFICATE_THUMBPRINT        VARCHAR2(256)             , -- DSC利用情報 サムプリント
 
-ANSTWR_INSTANCE_GRP_ITA_MNG_ID    NUMBER                    , -- AnsibleTower利用情報 インスタンスグループID
-
+ANSTWR_INSTANCE_GROUP_NAME        VARCHAR2(512)
 
 DISP_SEQ                          NUMBER                    , -- 表示順序
 NOTE                              VARCHAR2(4000)            , -- 備考
@@ -691,7 +690,7 @@ HOSTS_EXTRA_ARGS                  VARCHAR2(512)             , -- インベント
 
 SYSTEM_NAME                       VARCHAR2(64)              ,
 COBBLER_PROFILE_ID                NUMBER                    , -- FOR COBLLER
-INTERFACE_TYPE                    VARCHAR2(256)              , -- FOR COBLLER
+INTERFACE_TYPE                    VARCHAR2(256)              , --FOR COBLLER
 MAC_ADDRESS                       VARCHAR2(17)              , -- FOR COBLLER
 NETMASK                           VARCHAR2(15)              , -- FOR COBLLER
 GATEWAY                           VARCHAR2(15)              , -- FOR COBLLER
@@ -702,8 +701,7 @@ CONN_SSH_KEY_FILE                 VARCHAR2(256)             ,
 DSC_CERTIFICATE_FILE              VARCHAR2(256)             , -- DSC利用情報 認証キーファイル
 DSC_CERTIFICATE_THUMBPRINT        VARCHAR2(256)             , -- DSC利用情報 サムプリント
 
-ANSTWR_INSTANCE_GRP_ITA_MNG_ID    NUMBER                    , -- AnsibleTower利用情報 インスタンスグループID
-
+ANSTWR_INSTANCE_GROUP_NAME        VARCHAR2(512)
 
 DISP_SEQ                          NUMBER                    , -- 表示順序
 NOTE                              VARCHAR2(4000)            , -- 備考
@@ -728,6 +726,7 @@ ANS_PARALLEL_EXE                  NUMBER                           ,
 ANS_WINRM_ID                      NUMBER                           ,
 ANS_PLAYBOOK_HED_DEF              VARCHAR2(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  VARCHAR2(512)                    ,
+ANS_VIRTUALENV_NAME               VARCHAR2(512)                     , 
 OPENST_TEMPLATE                   VARCHAR2(256)                    ,
 OPENST_ENVIRONMENT                VARCHAR2(256)                    ,
 
@@ -761,6 +760,7 @@ ANS_PARALLEL_EXE                  NUMBER                           ,
 ANS_WINRM_ID                      NUMBER                           ,
 ANS_PLAYBOOK_HED_DEF              VARCHAR2(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  VARCHAR2(512)                    ,
+ANS_VIRTUALENV_NAME               VARCHAR2(512)                     , 
 OPENST_TEMPLATE                   VARCHAR2(256)                    ,
 OPENST_ENVIRONMENT                VARCHAR2(256)                    ,
 
