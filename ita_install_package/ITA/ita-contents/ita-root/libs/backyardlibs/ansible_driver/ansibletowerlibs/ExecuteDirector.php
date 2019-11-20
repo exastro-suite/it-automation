@@ -218,8 +218,12 @@ class ExecuteDirector {
             if(@count($response_array['responseContents']) != 0) {
                 if($response_array['responseContents'][0]['job_slice_count'] > 1) {
                     $job_slice_use = true;
-                    // ジョブスライスされたジョブの情報を取得
-                    $this->SliceJobsMonitoring($execution_no,$dummy,false, $IDData);
+                    // ジョブスライスされたジョブIDを取得
+                    $dummy1 = array();
+                    $job_id_get     = true;
+                    $job_status_get = false;
+                    $job_stdout_get = false;
+                    $this->SliceJobsMonitoring($execution_no,$dummy1,$job_id_get,$job_status_get,$job_stdout_get, $IDData);
                     // 戻り値は判定しない
                 }
             }
@@ -763,6 +767,11 @@ class ExecuteDirector {
                     return false;
                 }
                 $hostData['password'] = $hostInfo['LOGIN_PW'];
+
+                if(strlen($hostInfo['WINRM_SSL_CA_FILE']) != 0) {
+                    $filePath = "winrm_ca_files/" . addPadding($hostInfo['SYSTEM_ID']) . "-" . $hostInfo['WINRM_SSL_CA_FILE'];
+                    $hostData['ansible_winrm_ca_trust_path'] = $filePath;
+                }
             }
 
             $hostData['hosts_extra_args'] = $hostInfo['HOSTS_EXTRA_ARGS'];
@@ -908,6 +917,9 @@ class ExecuteDirector {
             if($hostData['winrm'] == 1) {
                 $variables_array[] = "ansible_connection: winrm";
                 $variables_array[] = "ansible_ssh_port: " . $hostData['winrmPort'];
+                if( isset($hostData['ansible_winrm_ca_trust_path']) ) {
+                    $variables_array[] = "ansible_winrm_ca_trust_path: " . $hostData['ansible_winrm_ca_trust_path'];
+                }
             }
 
             if(strlen(trim($hostData['ansible_ssh_extra_args'])) != 0) {
@@ -1281,15 +1293,14 @@ class ExecuteDirector {
             $job_slice_use = false;
         }
 
-        $SliceJobsData = array();
         // AnsibleTower Status チェック
-        list($status, $wfJobId) = $this->checkWorkflowJobStatus($execution_no,$SliceJobsData,$job_slice_use);
+        list($status, $wfJobId) = $this->checkWorkflowJobStatus($execution_no,$job_slice_use);
         if($status == EXCEPTION || $wfJobId == -1) {
             return $status;
         }
 
         // Ansibleログ書き出し
-        $ret = $this->createAnsibleLogs($execution_no, $ansibleTowerIfInfo['ANSIBLE_STORAGE_PATH_LNX'], $wfJobId, $SliceJobsData, $job_slice_use);  
+        $ret = $this->createAnsibleLogs($execution_no, $ansibleTowerIfInfo['ANSIBLE_STORAGE_PATH_LNX'], $wfJobId, $job_slice_use);  
         if($ret == false) {
             $status = EXCEPTION;
         }
@@ -1297,7 +1308,9 @@ class ExecuteDirector {
         return $status;
     }
 
-    function SliceJobsMonitoring($execution_no,&$SliceJobsData,$stdout_get,&$IDData=array()) {
+    function SliceJobsMonitoring($execution_no,&$SliceJobsData,
+                                 $job_id_get,$job_status_get,$job_stdout_get,
+                                &$IDData=array()) {
 
         global $vg_tower_driver_name;
 
@@ -1372,6 +1385,7 @@ class ExecuteDirector {
                     return EXCEPTION;
                 }
                 $stdout_log = "";
+
                 foreach($response_array_workflow_nodes['responseContents'] as $workflow_nodes_row) {
                     // ワークフロージョブノード有無
                     if(isset($workflow_nodes_row['id']) === false) {
@@ -1384,8 +1398,11 @@ class ExecuteDirector {
 
                     // ジョブ有無判定
                     if(isset($workflow_nodes_row['summary_fields']['job']["id"]) === false) {
-                        $this->logger->error("Faild to get jobs id. query:".$query);
-                        $this->logger->error(var_export($response_array_workflow_nodes, true));
+                        // summary_fields が生成されていない場合がある。
+                        if($job_stdout_get === false) {
+                            $this->logger->error("Faild to get jobs id. query:".$query);
+                            $this->logger->error(var_export($response_array_workflow_nodes, true));
+                        }
                         return EXCEPTION;
                     }
 
@@ -1395,11 +1412,12 @@ class ExecuteDirector {
                     $jobId = $workflow_nodes_row['summary_fields']['job']["id"];
 
                     // ジョブID退避
-                    $IDData['job_id'][] = $jobId;
-
-                    //$this->logger->error("job id:[". $jobId ."]");
-
-                    if($stdout_get === false) {
+                    if($job_id_get === true) {
+                        $IDData['job_id'][] = $jobId;
+                    }
+                    if(($job_status_get === false) &&
+                       ($job_stdout_get === false))
+                    {
                         continue;
                     }
 
@@ -1425,21 +1443,25 @@ class ExecuteDirector {
                         $this->logger->error(var_export($response_array_jobs, true));
                         return EXCEPTION;
                     }
-                    if($jobData['status'] != "successful") {
-                        return FAILURE;
+                    // ジョブの実行状態か必要な場合
+                    if($job_status_get === true) {
+                       if($jobData['status'] != "successful") {
+                           return FAILURE;
+                       }
+                    }  
+                    // ジョブの標準出力が必要か判定
+                    if($job_stdout_get === false) {
+                       continue;
                     }
 
                     // 標準出力情報取得
                     $response_array_stdout = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
                     if($response_array_stdout['success'] == false) {
-                        return FAILURE;
-                        $this->logger->error("Faild to RestAPI access stdout. jobid:".$jobId);
-                        return EXCEPTION;
+                        $this->logger->error("Faild to get job stdout.. " . print_r($response_array_stdout,true));
+                        $response_array['responseContents'] = "Faild to get job stdout. " . $response_array['responseContents']['errorMessage'];
                     }
                     if(@count($response_array_stdout['responseContents']) === 0 ) {
-                        $this->logger->error("Faild to get stdout. jobid:".$jobId);
-                        $this->logger->error(var_export($response_array_stdout, true));
-                        return EXCEPTION;
+                        $response_array_stdout['responseContents'] = "";
                     }
 
                     // inventory/project/credentialsの情報退避
@@ -1457,7 +1479,7 @@ class ExecuteDirector {
         return COMPLETE;
     }
 
-    function checkWorkflowJobStatus($execution_no,&$SliceJobsData,$job_slice_use) {
+    function checkWorkflowJobStatus($execution_no,&$job_slice_use) {
 
         $this->logger->trace(__METHOD__);
         $wfJobId = -1;
@@ -1494,8 +1516,12 @@ class ExecuteDirector {
                 // 子Jobが全て成功であればCOMPLETE、ひとつでも失敗していればFAILURE
                 // ジョブスライスの有無判定
                 if($job_slice_use === true) {
-                    $dummy = array();
-                    $status = $this->SliceJobsMonitoring($execution_no,$SliceJobsData,true, $dummy);
+                    $dummy1 = array();
+                    $dummy2 = array();
+                    $job_id_get     = false;
+                    $job_status_get = true;
+                    $job_stdout_get = false;
+                    $status = $this->SliceJobsMonitoring($execution_no,$dummy1,$job_id_get,$job_status_get,$job_stdout_get, $dummy2);
                 } else {
                     $status = $this->checkAllJobsStatus($wfJobId);
                 }
@@ -1564,7 +1590,7 @@ class ExecuteDirector {
         return COMPLETE;
     }
 
-    function createAnsibleLogs($execution_no, $dataRelayStoragePath, $wfJobId, $SliceJobsData, $job_slice_use) {
+    function createAnsibleLogs($execution_no, $dataRelayStoragePath, $wfJobId, $job_slice_use) {
         global $vg_tower_driver_type;
         global $vg_tower_driver_id;
 
@@ -1577,6 +1603,20 @@ class ExecuteDirector {
         $execlogFullPath        = $outDirectoryPath . "/" . $execlogFilename;
         $joblistFullPath        = $outDirectoryPath . "/" . $joblistFilename;
 
+        ////////////////////////////////////////////////////////////////
+        // ジョブスライスの場合にジョブの標準出力を取得
+        ////////////////////////////////////////////////////////////////
+        $SliceJobsData          = array();
+        if($job_slice_use === true) {
+            $dummy = array();
+            $job_id_get     = false;
+            $job_status_get = false;
+            $job_stdout_get = true;
+            $status = $this->SliceJobsMonitoring($execution_no,$SliceJobsData,
+                                                 $job_id_get,$job_status_get,$job_stdout_get, 
+                                                 $dummyx2);
+            // 戻り値はチェックしない
+        }
         ////////////////////////////////////////////////////////////////
         // データ取得
         ////////////////////////////////////////////////////////////////
@@ -1624,7 +1664,9 @@ class ExecuteDirector {
                 $response_array = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
 
                 if($response_array['success'] == false) {
-                    throw new Exception("Faild to get job stdout. " . $response_array['responseContents']['errorMessage']);
+                    $this->logger->error("Faild to get job stdout.. " . print_r($response_array,true));
+                    // 標準出力が取得できなかった場合
+                    $response_array['responseContents'] = "Faild to get job stdout. " . $response_array['responseContents']['errorMessage'];
                 }
                 $jobData['result_stdout'] = $response_array['responseContents'];
 
