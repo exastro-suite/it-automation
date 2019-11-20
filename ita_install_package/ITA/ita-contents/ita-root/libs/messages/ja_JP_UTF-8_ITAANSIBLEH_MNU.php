@@ -1187,7 +1187,7 @@ Ansible Tower:
 winrm接続の場合は「become: yes」は省略されます。";
 $ary[9010000013] = "Tower利用情報";
 $ary[9010000014] = "virtualenv";
-$ary[9010000015] = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。\n実行したいansible実>行環境を選択します。\n未選択の場合はTowerインストール時にインストールされたansible実行環境を使用します。";
+$ary[9010000015] = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。\n実行したいansible実行環境を選択します。\n未選択の場合はTowerインストール時にインストールされたansible実行環境を使用します。";
 $ary[9010000016] = "virtualenv";
 $ary[9010000017] = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。";
 ?>
