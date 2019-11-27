@@ -380,8 +380,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setValidator($objVldt);
         $cg2->addColumn($c);
 
-        $objVldt = new SingleTextValidator(0,512,false);
-        $c = new TextColumn('HOSTS_EXTRA_ARGS',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104620"));
+        $objVldt = new MultiTextValidator(0,512,false);
+        $c = new MultiTextColumn('HOSTS_EXTRA_ARGS',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104620"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104621"));
         $c->setValidator($objVldt);
         $cg2->addColumn($c);
