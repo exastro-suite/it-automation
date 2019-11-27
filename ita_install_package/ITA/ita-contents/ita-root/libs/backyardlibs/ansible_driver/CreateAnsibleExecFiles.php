@@ -1541,7 +1541,14 @@ class CreateAnsibleExecFiles {
             $hosts_extra_args = "";
             // hosts_extra_argsの設定の有無を判定しhosts_extra_argsの内容を退避
             if(strlen(trim($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'])) != 0){
-                $this->KeyValueStringToYamlFormat($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'],$hosts_extra_args);
+                //$ret = $this->KeyValueStringToYamlFormat($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'],$hosts_extra_args);
+                $error_line = "";
+                $ret = $this->InventryFileAddOptionCheckFormat($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'],$hosts_extra_args,$error_line);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000076",array($host_name,$error_line));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
                 $hosts_extra_args = implode(",",$hosts_extra_args);
                 $hosts_extra_args = str_replace(',' , "\n          ",$hosts_extra_args);
             }
@@ -1672,192 +1679,30 @@ class CreateAnsibleExecFiles {
         }
         return true;
     } 
-  
-    function KeyValueStringToYamlFormat($in_string,&$out_yaml_array) {
+
+    function InventryFileAddOptionCheckFormat($in_string,&$out_yaml_array,&$error_line) {
         $out_yaml_array = array();
-        // インベントりファイル追加オプションをYAML形式に変換
+        $SplitVarKageName = array();
+        // インベントリファイル追加オプションをYAML形式を検査する
         $String = $in_string;
-        $String = " " . $String . " ";
-        $ValList = preg_split("/(\s)+(\S)+(\s)*=/", $String);
-        if(count($ValList) > 1)
-        {
-            // 先頭に空が入るので取り除く
-            if(strlen(trim($ValList[0])) == 0)
-            {
-                unset($ValList[0]);
+        $out_yaml_array = explode("\n", $String);
+        $error_line = 0;
+        foreach($out_yaml_array as $record) {
+            $error_line++;
+            $VarKageName  = trim($record);
+            if(empty($VarKageName)){ // 空文字列 正常
+                // スペースを取り除くと空の時
+                continue;
             }
-        } 
-        $VarCount = preg_match_all("/(\s)+(\S)+(\s)*=/", $String,$VarList);
-        // 具体値の設定を確認
-        $ValAry = array();
-        foreach($ValList as $Val) {
-            if(strlen(trim($Val)) == 0) {
-                $ValAry[] = '';
-            } else {
-                $ValAry[] = $Val;
+            $ret = preg_match("/^(\S)+(\s)*:(\s)+(\S)/", $record);
+            if($ret !== 1){
+                // 式が正しくない
+                return false;
             }
         }
-        $idx = 0;
-        foreach($VarList[0] as $VarName)
-        {
-            $VarName = preg_split("/(\s)*=(\s)*/", $VarName);
-            $out_yaml_array[]  = trim($VarName[0]) . ': ' .  $ValAry[$idx];
-            $idx++;
-        }
+        return true;
     }
 
-//    function CreateHostsfile($in_group_name,$ina_hosts,$ina_hostprotcollist,
-//                             $ina_hostinfolist,
-//                            &$ina_pioneer_sshkeyfilelist,
-//                            &$ina_pioneer_sshextraargslist) 
-//    {
-//
-//        $ina_pioneer_sshkeyfilelist   = array();
-//        $ina_pioneer_sshextraargslist = array();
-//
-//        $file_name = $this->getAnsible_hosts_file();
-//        $fd = @fopen($file_name, "w");
-//        if($fd == null){
-//            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55204",array(__LINE__));
-//            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-//            return false;
-//        }
-//    
-//        $value = "[" . $in_group_name . "]\n";
-//        if( @fputs($fd, $value) === false ){
-//            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55205",array(__LINE__));
-//            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-//            return false;
-//        }
-//
-//        foreach( $ina_hosts as $host_name ){
-//            $ssh_extra_args = "";
-//            // ssh_extra_argsの設定の有無を判定しssh_extra_argsの内容を退避
-//            if(strlen(trim($ina_hostinfolist[$host_name]['SSH_EXTRA_ARGS'])) != 0){
-//                $ssh_extra_args = trim($ina_hostinfolist[$host_name]['SSH_EXTRA_ARGS']);
-//                // "を\"に置き換え
-//                $ssh_extra_args = str_replace('"','\\"',trim($ina_hostinfolist[$host_name]['SSH_EXTRA_ARGS']));
-//                if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
-//                   ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)){
-//                    // hostsファイルに追加するssh_extra_argsを生成
-//                    $ssh_extra_args = ' ansible_ssh_extra_args="' . $ssh_extra_args . '"';
-//                }
-//                else{
-//                    // Pioneer用にssh_extra_argsを退避
-//                    $ina_pioneer_sshextraargslist[$host_name] = $ssh_extra_args;
-//                    $ssh_extra_args = "";
-//                }
-//            }
-//
-//            $hosts_extra_args = "";
-//            // hosts_extra_argsの設定の有無を判定しhosts_extra_argsの内容を退避
-//            if(strlen(trim($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'])) != 0){
-//                $hosts_extra_args = trim($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS']);
-//            }
-//
-//            $win_param = "";
-//
-//            // legacyの場合で対象ホストがwindowsの場合またはパスワード認証か判定
-//            if( (($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
-//                 ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)) &&
-//                 // 対象ホストがwindowsの場合
-//                (($this->lv_winrm_id == 1) ||
-//                 // パスワード認証の場合
-//                 ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_PW) ||
-//                 ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_KEY)) ){
-//                // sshの接続パラメータを作成する。
-//                // ユーザー名
-//                $win_param = $win_param . " ansible_ssh_user=" . $ina_hostinfolist[$host_name]['LOGIN_USER'];
-//                // パスワードが設定されているか(windowsの場合に有効)
-//                // パスワード
-//                if($ina_hostinfolist[$host_name]['LOGIN_PW'] != self::LC_ANS_UNDEFINE_NAME)
-//                {
-//                    $win_param = $win_param . " ansible_ssh_pass=" . $ina_hostinfolist[$host_name]['LOGIN_PW'];
-//                }
-//                // 対象ホストがwindowsの場合
-//                if($this->lv_winrm_id == 1){
-//                    // WINRM接続プロトコルよりポート番号取得
-//                    $win_param = $win_param . " ansible_ssh_port=" 
-//                                              . $ina_hostinfolist[$host_name]['WINRM_PORT'];
-//                    $win_param = $win_param . " ansible_connection=winrm";
-//                }
-//            }
-//
-//            $ssh_key_file = '';
-//            // 認証方式が鍵認証でWinRM接続でないか判定
-//            if(($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_KEY ) &&
-//               ($this->lv_winrm_id != 1)){
-//                if(strlen(trim($ina_hostinfolist[$host_name]['SSH_KEY_FILE'])) != 0){
-//                    // 機器一覧にSSH鍵認証ファイルが登録されている場合はSSH鍵認証ファイルをinディレクトリ配下にコピーする。
-//                    $ret = $this->CreateSSH_key_file($ina_hostinfolist[$host_name]['SYSTEM_ID'],
-//                                                     $ina_hostinfolist[$host_name]['SSH_KEY_FILE'],
-//                                                     $ssh_key_file_path);
-//
-//
-//                    $file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-//                                             $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-//                                             $ssh_key_file_path);
-//
-//                    if($ret === false){
-//                        return false;
-//                    }
-//                    if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
-//                       ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)){
-//                        // hostsファイルに追加するSSH鍵認証ファイルのパラメータ生成
-//                        $ssh_key_file = ' ansible_ssh_private_key_file=' . $file_path;
-//                    }
-//                    else{
-//                        $ina_pioneer_sshkeyfilelist[$host_name]=$file_path;
-//                    }
-//                }
-//            }
-//
-//            $win_ca_file = '';
-//            // WinRM接続か判定
-//            if($this->lv_winrm_id == 1){
-//                if(strlen(trim($ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'])) != 0){
-//                    // 機器一覧にサーバー証明書ファイルが登録されている場合はサーバー証明書ファイルをinディレクトリ配下にコピーする
-//                    $ret = $this->CreateWIN_cs_file($ina_hostinfolist[$host_name]['SYSTEM_ID'],
-//                                                    $ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'],
-//                                                    $win_ca_file_path);
-//
-//                    $file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-//                                             $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-//                                             $win_ca_file_path);
-//
-//                    if($ret === false){
-//                        return false;
-//                    }
-//                    if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
-//                       ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)){
-//                        // hostsファイルに追加するサーバー証明書ファイルのパラメータ生成
-//                        $win_ca_file = ' ansible_winrm_ca_trust_path=' . $file_path;
-//                    }
-//                }
-//            }
-//
-//            // ホストアドレス方式がホスト名方式の場合はホスト名をhostsに登録する。
-//            if($this->lv_hostaddress_type == 2){
-//                $host_name = $ina_hostinfolist[$host_name]['HOSTNAME'] . $win_param . ' ' .  $ssh_key_file . ' ' . $ssh_extra_args . ' ' . $hosts_extra_args . ' ' . $win_ca_file . "\n";
-//            }
-//            else{
-//                // ホストアドレス方式がIPアドレスの場合
-//                $host_name = $ina_hostinfolist[$host_name]['HOSTNAME'] . ' ansible_ssh_host=' . $host_name . ' ' .  $win_param . ' ' . $ssh_key_file . ' ' . $ssh_extra_args . ' ' . $hosts_extra_args . ' ' . $win_ca_file . "\n";
-//            }
-//
-//            if( @fputs($fd, $host_name) === false ){
-//                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55205",array(__LINE__));
-//                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-//                return false;
-//            }
-//        }
-//        if( @fclose($fd) === false ){
-//            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55205",array(__LINE__));
-//            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-//            return false;
-//        }
-//        return true;
-//    }
     ////////////////////////////////////////////////////////////////////////////////
     // F0004-1
     // 処理内容
