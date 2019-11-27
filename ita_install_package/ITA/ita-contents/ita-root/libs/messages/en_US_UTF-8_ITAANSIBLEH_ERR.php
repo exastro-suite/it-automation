@@ -569,5 +569,6 @@ $ary[6000072] = "Multiple variables are described in with_items of command. (Dia
 $ary[6000073] = "Check if the dialog file is written in YAML format. (Dialog file:{})";
 $ary[6000074] = "Host vars file is not generated in YAML format. (Host:{})";
 $ary[6000075] = "Copy File has failed. (line:{})";
-$ary[6000076] = "The Inventory file addition option setting of the device list is not valid. (host:{})";
+$ary[6000076] = "The nventory file additional option setting of the device list is not valid. (host:{} line:{})";
+$ary[6000077] = "ansible-vault command has failed.\n{}";
 ?>
