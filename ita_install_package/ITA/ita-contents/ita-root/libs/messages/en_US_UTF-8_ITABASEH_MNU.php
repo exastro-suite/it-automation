@@ -127,13 +127,18 @@ $ary[104504] = "Thumbprint";
 $ary[104505] = "To encrypt credentials, enter a thumbprint.";
 $ary[104600] = "WinRM connection information";
 $ary[104605] = "Port no";
-$ary[104606] = "Specify the port number to use for WinRM connections to Windows Server. \nIf no port number is specified, the default port number (5985) will be used.";
+$ary[104606] = "Specify the port number to use for WinRM connections to Windows Server. \nIf no port number is specified, the default port number (http:5985) will be used.";
 $ary[104610] = "Server certificate";
-$ary[104611] = "Enter the server certificate to use for WinRM connections to Windows Server over https.";
+$ary[104611] = "Enter the server certificate to use for WinRM connections to Windows Server over https.
+If the Python version is 2.7 or later and does not verify the https server certificate.
+    ansible_winrm_server_cert_validation=ignore";
 $ary[104615] = "Connection options";
 $ary[104616] = "When the protocol is ssh\nTo set options other than the ssh option set in ssh_args in /etc/ansible/ansible.cfg, specify the desired options.\n(Example)\n    To specify the ssh config file.\n      -F /root/.ssh/ssh_config\n\nWhen the protocol is telnet\nTo set options for telnet connections, specify the desired options.\n(Example)\n    To specify 11123 as the port number.\n      11123";
 $ary[104620] = "Inventory file\nAdditional option";
-$ary[104621] = "Enter additional options to set options for inventory files that ITA does not set.\n(Example)\n    If the Python version is 2.7 or later and does not verify the https server certificate.\n  ansible_winrm_server_cert_validation=ignore";
+$ary[104621] = "Enter additional options in YAML format to set inventory file options that ITA does not set.
+(Example)
+    ansible_connection: network_cli
+    ansible_network_os: nxos";
 $ary[104630] = "Instance group name";
 $ary[104631] = "Specify the instance group to be set as the inventory of AnsibleTower / AWX.";
 $ary[105010] = "Input operation list information";
