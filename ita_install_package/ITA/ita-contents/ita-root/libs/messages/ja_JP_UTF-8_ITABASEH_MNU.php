@@ -129,13 +129,19 @@ $ary[104504] = "サムプリント";
 $ary[104505] = "証資格情報を暗号化する場合にサムプリントを入力します。";
 $ary[104600] = "WinRM接続情報";
 $ary[104605] = "ポート番号";
-$ary[104606] = "WindowsServerにWinRM接続する際のポート番号を指定します。\n未指定の場合はデフォルト(5985)でのWinRM接続となります。";
+$ary[104606] = "WindowsServerにWinRM接続する際のポート番号を入力します。
+未指定の場合はデフォルト(http:5985)でのWinRM接続となります。";
 $ary[104610] = "サーバー証明書";
-$ary[104611] = "WindowsServerにhttpsでWinRM接続する際のサーバー証明書を入力します。";
+$ary[104611] = "WindowsServerにhttpsでWinRM接続する際のサーバー証明書を入力します。
+Pythonのバージョンが2.7以降でhttpsのサーバー証明書の検証を行わない場合、インベントリファイル追加オプションに下記のパラメータを入力して下さい。
+    ansible_winrm_server_cert_validation: ignore";
 $ary[104615] = "接続オプション";
 $ary[104616] = "プロトコルがsshの場合\n/etc/ansible/ansible.cfgのssh_argsに設定しているsshオプション以外のオプションを設定したい場合>、設定したいオプションを入力します。\n(例)\n    sshコンフィグファイルを指定する場合\n      -F /root/.ssh/ssh_config\n\nプロトコルがtelnetの場合\ntelnet接続時のオプションを設定したい場合、設定したいオプションを入力します。\n(例)\n    ポート番号を11123に指定する場合\n      11123";
 $ary[104620] = "インベントリファイル\n追加オプション";
-$ary[104621] = "ITAが設定しないインベントリファイルのオプションを設定したい場合に追加するオプションを入力します。\n(例)\n    Pythonのバージョンが2.7以降でhttpsのサーバー証明書の検証を行わない場合。\n  ansible_winrm_server_cert_validation=ignore";
+$ary[104621] = "ITAが設定していないインベントリファイルのオプションパラメータをyaml形式で入力します。
+(例)
+    ansible_connection: network_cli
+    ansible_network_os: nxos";
 $ary[104630] = "インスタンスグループ名";
 $ary[104631] = "AnsibleTower/AWX のインベントリに設定するインスタンスグループを指定します。";
 $ary[105010] = "投入オペレーション一覧情報";
