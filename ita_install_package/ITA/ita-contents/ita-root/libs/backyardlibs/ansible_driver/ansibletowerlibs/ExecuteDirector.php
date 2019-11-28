@@ -926,38 +926,18 @@ class ExecuteDirector {
                 $variables_array[] = "ansible_ssh_extra_args: " . trim($hostData['ansible_ssh_extra_args']);
             }
 
-            // インベントりファイル追加オプションをYAML形式に変換
-            $String = $hostData['hosts_extra_args'];
-            $String = " " . $String . " ";
-            $ValList = preg_split("/(\s)+(\S)+(\s)*=/", $String);
-            if(count($ValList) > 1)
-            {
-                // 先頭に空が入るので取り除く
-                if(strlen(trim($ValList[0])) == 0)
-                {
-                    unset($ValList[0]);
+            // インベントりファイル追加オプションの空白行を取り除く
+            $variables_array = array();
+            $yaml_array = explode("\n", $hostData['hosts_extra_args']);
+            foreach($yaml_array as $record) {
+                if(strlen(trim($record)) == 0) {
+                    continue;
                 }
+                $variables_array[] = $record;   
             }
-            $VarCount = preg_match_all("/(\s)+(\S)+(\s)*=/", $String,$VarList);
-            // 具体値の設定を確認
-            $Val = array();
-            foreach($ValList as $Val) {
-                if(strlen(trim($Val)) == 0) {
-                    $ValAry[] = '';
-                } else {
-                    $ValAry[] = $Val;
-                }
-            }
-            $idx = 0;
-            foreach($VarList[0] as $VarName)
-            {
-                $VarName = preg_split("/(\s)*=(\s)*/", $VarName);
-                $variables_array[]  = trim($VarName[0]) . ': ' .  $ValAry[$idx];
-                $idx++;
-            }
-            // インベントりファイル追加オプションをYAML形式に変換
 
-            if(!empty($variables_array)) {
+            // インベントりファイル追加オプションを設定
+            if(count($variables_array) != 0) {
                 $param['variables'] = implode("\n", $variables_array);
             }
 
