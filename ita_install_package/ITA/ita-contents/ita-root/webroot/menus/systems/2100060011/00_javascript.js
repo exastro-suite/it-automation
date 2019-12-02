@@ -894,6 +894,6 @@ function monitor_execution( execution_no ){
     var url = '/default/menu/01_browse.php?no=2100060010&execution_no=' + execution_no;
     
     // 作業状態確認メニューに遷移
-    location.href=url;
+    open( url, "_blank");
 }
 // ここまでカスタマイズした場合の一般メソッド配置域----
