@@ -887,9 +887,9 @@ function queryDataToFilter(){
 
 
 function monitor_execution(execution_no){
-    location.href="/default/menu/01_browse.php?no=2100070005&execution_no="+execution_no;
+    open( "/default/menu/01_browse.php?no=2100070005&execution_no="+execution_no, "_blank");
 }
 
 function result_detail_jump(execution_no){
-    location.href="/default/menu/01_browse.php?no=2100070007&execution_no="+execution_no;
+    open( "/default/menu/01_browse.php?no=2100070007&execution_no="+execution_no, "_blank");
 }
