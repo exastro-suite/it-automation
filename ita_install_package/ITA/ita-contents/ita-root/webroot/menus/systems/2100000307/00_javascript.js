@@ -850,6 +850,6 @@ function Mix1_1_jumpToSymphonyClassEdit(symphony_class_id){
     var url = '/default/menu/01_browse.php?no=2100000306&symphony_class_id=' + symphony_class_id;
     
     // 作業状態確認メニューに遷移
-    location.href=url;
+    open( url, "_blank");
 }
 // ここまでカスタマイズした場合の一般メソッド配置域----
