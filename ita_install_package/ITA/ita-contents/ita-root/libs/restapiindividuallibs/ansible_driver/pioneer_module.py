@@ -88,8 +88,9 @@ import re
 from collections import defaultdict
 from collections import OrderedDict
 import binascii
+from ansible.module_utils.basic import *
 
-
+exit_dict = {}
 exec_log = [] 
 host_name=''
 
@@ -99,6 +100,8 @@ class SignalReceive(Exception): pass
 
 def signal_handle(signum,frame):
   raise SignalReceive('Urgency stop (signal=' + str(signum) + ')')
+
+class AnsibleModule_exit(Exception): pass
 
 def main():
   module = AnsibleModule(
@@ -131,7 +134,7 @@ def main():
     #########################################################
     # normal exit
     #########################################################
-    module.fail_json(msg='exec_file no found fail exit')
+    private_fail_json(obj=module,msg='exec_file no found fail exit')
   config = yaml.load(open(module.params['exec_file']).read())
   private_log(log_file_name,host_name,str(config))
 
@@ -256,7 +259,7 @@ def main():
             #########################################################
             # fail exit
             #########################################################
-            module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+            private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
         # expect command log output
         private_log(log_file_name,host_name,expect_name)
@@ -269,7 +272,7 @@ def main():
 
 # ドライランモードの場合は接続確認したら終了
         if module.check_mode:
-          module.exit_json(msg=host_name + chk_mode,changed=False, exec_log=exec_log)
+          private_exit_json(obj=module,msg=host_name + chk_mode,changed=False, exec_log=exec_log)
 
         # expect match log output
         exec_log.append('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
@@ -338,20 +341,24 @@ def main():
               logstr = 'success_exit=(' + str(input[cmd]) + '): only yes or no set'
               exec_log.append(logstr)
               private_log(log_file_name,host_name,logstr)
+
               #########################################################
               # fail exit
               #########################################################
-              module.fail_json(msg=host_name + ':' + logstr,exec_log=exec_log)
+              private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
+
           elif 'ignore_errors' == cmd:
             ignore_errors = str(input[cmd])
             if ignore_errors != str(False) and ignore_errors != str(True):
               logstr = 'ignore_errors=(' + str(input[cmd]) + '): Only yes or no set'
               exec_log.append(logstr)
               private_log(log_file_name,host_name,logstr)
+
               #########################################################
               # fail exit
               #########################################################
-              module.fail_json(msg=host_name + ':' + logstr,exec_log=exec_log)
+              private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
+
           else:
             # error log
             logstr = 'command(state->' + cmd + ') not service'
@@ -361,7 +368,7 @@ def main():
             #########################################################
             # fail exit
             #########################################################
-            module.fail_json(msg=host_name + ':' + logstr,exec_log=exec_log)
+            private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
 
           # debug
           # log output
@@ -378,7 +385,7 @@ def main():
 
 # ドライランモードの場合は接続確認したら終了
         if module.check_mode:
-          module.exit_json(msg=host_name + chk_mode,changed=False, exec_log=exec_log)
+          private_exit_json(obj=module,msg=host_name + chk_mode,changed=False, exec_log=exec_log)
 
         # expect match log output
         exec_log.append('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
@@ -455,8 +462,8 @@ def main():
             #########################################################
             # fail exit
             #########################################################
-            module.fail_json(msg=host_name + ':' + logstr,exec_log=exec_log)
-            pass
+            private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
+
         else:
           # default shell execute
           try:
@@ -475,8 +482,7 @@ def main():
             #########################################################
             # fail exit
             #########################################################
-            module.fail_json(msg=host_name + ':' + logstr,exec_log=exec_log)
-            pass
+            private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
 
         # shell result check
         if shell_ret == 0:
@@ -494,7 +500,7 @@ def main():
             #########################################################
             # normal exit
             #########################################################
-            module.exit_json(msg=host_name + ':' + logstr,changed=False, exec_log=exec_log)
+            private_exit_json(obj=module,msg=host_name + ':' + logstr,changed=True, exec_log=exec_log)
 
           else:
             private_log(log_file_name,host_name,'success_exit no')
@@ -514,7 +520,8 @@ def main():
             #########################################################
             # fail exit
             #########################################################
-            module.fail_json(msg=host_name + ':' + logstr,exec_log=exec_log)
+            private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
+
           else:
             logstr = 'ignore_errors yes dialog_file execut continue'
             private_log(log_file_name,host_name,logstr)
@@ -619,7 +626,7 @@ def main():
             #########################################################
             # fail exit
             #########################################################
-            module.fail_json(msg=host_name + ':' + logstr,exec_log=exec_log)
+            private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
 
           # debug
           # log output
@@ -632,7 +639,7 @@ def main():
 
         #ドライランモードの場合は接続確認したら終了
         if module.check_mode:
-          module.exit_json(msg=host_name + chk_mode,changed=False, exec_log=exec_log)
+          private_exit_json(obj=module,msg=host_name + chk_mode,changed=False, exec_log=exec_log)
 
         # command command log output
         private_log(log_file_name,host_name,exec_name)
@@ -1034,7 +1041,7 @@ def main():
                                 #########################################################
                                 # fail exit
                                 #########################################################
-                                module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                                private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                               # 置換
                               temp_cmd4 = temp_cmd4.replace( temp2, def_cmd[k][prompt_count] )
@@ -1069,7 +1076,7 @@ def main():
                                 #########################################################
                                 # fail exit
                                 #########################################################
-                                module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                                private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                               # 置換
                               temp_cmd5 = temp_cmd5.replace( temp2, def_cmd[k][timeout_count] )
@@ -1127,7 +1134,7 @@ def main():
                               #########################################################
                               # fail exit
                               #########################################################
-                              module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                              private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                             # 置換
                             temp_cmd4 = temp_cmd4.replace( temp2, def_cmd[k][prompt_count] )
@@ -1162,7 +1169,7 @@ def main():
                               #########################################################
                               # fail exit
                               #########################################################
-                              module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                              private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                             # 置換
                             temp_cmd5 = temp_cmd5.replace( temp2, def_cmd[k][timeout_count] )
@@ -1302,7 +1309,7 @@ def main():
                             #########################################################
                             # fail exit
                             #########################################################
-                            module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                            private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                         # with_itemsあるがitem.Xがない場合、そのままfailed_whenチェック
                         else:
@@ -1402,7 +1409,7 @@ def main():
                             #########################################################
                             # fail exit
                             #########################################################
-                            module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                            private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                 # exec_whenがない場合
                 else:
@@ -1434,7 +1441,7 @@ def main():
                               #########################################################
                               # fail exit
                               #########################################################
-                              module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                              private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                             # 置換
                             temp_cmd4 = temp_cmd4.replace( temp2, def_cmd[k][prompt_count] )
@@ -1469,7 +1476,7 @@ def main():
                               #########################################################
                               # fail exit
                               #########################################################
-                              module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                              private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                             # 置換
                             temp_cmd5 = temp_cmd5.replace( temp2, def_cmd[k][timeout_count] )
@@ -1527,7 +1534,7 @@ def main():
                             #########################################################
                             # fail exit
                             #########################################################
-                            module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                            private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                           # 置換
                           temp_cmd4 = temp_cmd4.replace( temp2, def_cmd[k][prompt_count] )
@@ -1562,7 +1569,7 @@ def main():
                             #########################################################
                             # fail exit
                             #########################################################
-                            module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                            private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                           # 置換
                           temp_cmd5 = temp_cmd5.replace( temp2, def_cmd[k][timeout_count] )
@@ -1703,7 +1710,7 @@ def main():
                           #########################################################
                           # fail exit
                           #########################################################
-                          module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                          private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                       # with_itemsあるがitem.Xがない場合、そのままfailed_whenチェック
                       else:
@@ -1803,7 +1810,7 @@ def main():
                           #########################################################
                           # fail exit
                           #########################################################
-                          module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                          private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
               # コマンドにitem.Xの記述がない場合そのまま実行
               else:
@@ -2038,7 +2045,7 @@ def main():
                                 #########################################################
                                 # fail exit
                                 #########################################################
-                                module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                                private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                               # 置換
                               temp_cmd4 = temp_cmd4.replace( temp2, def_cmd[k][prompt_count] )
@@ -2073,7 +2080,7 @@ def main():
                                 #########################################################
                                 # fail exit
                                 #########################################################
-                                module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                                private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                               # 置換
                               temp_cmd5 = temp_cmd5.replace( temp2, def_cmd[k][timeout_count] )
@@ -2131,7 +2138,7 @@ def main():
                               #########################################################
                               # fail exit
                               #########################################################
-                              module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                              private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                             # 置換
                             temp_cmd4 = temp_cmd4.replace( temp2, def_cmd[k][prompt_count] )
@@ -2166,7 +2173,7 @@ def main():
                               #########################################################
                               # fail exit
                               #########################################################
-                              module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                              private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                             # 置換
                             temp_cmd5 = temp_cmd5.replace( temp2, def_cmd[k][timeout_count] )
@@ -2308,7 +2315,7 @@ def main():
                             #########################################################
                             # fail exit
                             #########################################################
-                            module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                            private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                         # with_itemsあるがitem.Xがない場合、そのままfailed_whenチェック
                         else:
@@ -2409,7 +2416,7 @@ def main():
                             #########################################################
                             # fail exit
                             #########################################################
-                            module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                            private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                 # exec_whenがない場合
                 else:
@@ -2441,7 +2448,7 @@ def main():
                               #########################################################
                               # fail exit
                               #########################################################
-                              module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                              private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                             # 置換
                             temp_cmd4 = temp_cmd4.replace( temp2, def_cmd[k][prompt_count] )
@@ -2476,7 +2483,7 @@ def main():
                               #########################################################
                               # fail exit
                               #########################################################
-                              module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                              private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                             # 置換
                             temp_cmd5 = temp_cmd5.replace( temp2, def_cmd[k][timeout_count] )
@@ -2534,7 +2541,7 @@ def main():
                             #########################################################
                             # fail exit
                             #########################################################
-                            module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                            private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                           # 置換
                           temp_cmd4 = temp_cmd4.replace( temp2, def_cmd[k][prompt_count] )
@@ -2569,7 +2576,7 @@ def main():
                             #########################################################
                             # fail exit
                             #########################################################
-                            module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                            private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                           # 置換
                           temp_cmd5 = temp_cmd5.replace( temp2, def_cmd[k][timeout_count] )
@@ -2711,7 +2718,7 @@ def main():
                           #########################################################
                           # fail exit
                           #########################################################
-                          module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                          private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
                       # with_itemsあるがitem.Xがない場合、そのままwhenチェック
                       else:
@@ -2812,7 +2819,7 @@ def main():
                           #########################################################
                           # fail exit
                           #########################################################
-                          module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+                          private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
           # with_itemsを使用していないので、そのまま実行
           else:
@@ -2912,28 +2919,38 @@ def main():
         #########################################################
         # fail exit
         #########################################################
-        module.fail_json(msg=host_name + ":" + logstr,exec_log=exec_log)
+        private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
+
+    #########################################################
+    # normal exit
+    #########################################################
+    private_exit_json(obj=module,msg=host_name + ':nomal exit',changed=True, exec_log=exec_log)
 
   except pexpect.TIMEOUT:
-    exec_log.append('TIMEOUT------> ' + str(p))
-    private_log(log_file_name,host_name,'timout')
+    exec_log.append('except command timeout')
+    private_log(log_file_name,host_name,'except command timeout')
     #########################################################
     # fail exit
     #########################################################
-    module.fail_json(msg=host_name + ':command timeout' + ' ' + chk_mode,exec_log=exec_log)
+    module.fail_json(msg=host_name + ': ' + 'except command timeout',exec_log=exec_log)
   except SignalReceive, e:
     exec_log.append(str(e))
     private_log(log_file_name,host_name,str(e))
     #########################################################
     # fail exit
     #########################################################
-    module.fail_json(msg=host_name + ":" + str(e) + chk_mode,exec_log=exec_log)
+    module.fail_json(msg=host_name + ": " + str(e),exec_log=exec_log)
   # try chuu no module.fail_json de exceptions.SystemExit 
   except exceptions.SystemExit:
+    private_log(log_file_name,host_name,"except exceptions.SystemExit")
     #########################################################
     # fail exit
     #########################################################
-    module.fail_json(exec_log=exec_log)
+    module,fail_json(msg=host_name + ": " + "except exceptions.SystemExit",exec_log=exec_log)
+  except AnsibleModule_exit as e:
+    ## try内でexit_json/fail_jsonをcallするとpythonでexceptが発生
+    ## try外でexit_json/fail_jsonをcall
+    pass 
   except:
     import sys
     import traceback
@@ -2953,14 +2970,61 @@ def main():
     #########################################################
     # fail exit
     #########################################################
-    module.fail_json(msg=host_name + ':exception' + chk_mode,exec_log=exec_log)
+    module.fail_json(msg=host_name + ':exception',exec_log=exec_log)
 
   #########################################################
-  # normal exit
+  # AnsibleModule exit
   #########################################################
-  module.exit_json(msg=host_name + ':nomal exit',changed=True, exec_log=exec_log)
+  if exit_dict['code'] == 'exit_json':
+    module.exit_json(msg=exit_dict['msg'],changed=exit_dict['changed'], exec_log=exit_dict['exec_log'])
+  else:
+    module.fail_json(msg=exit_dict['msg'],exec_log=exit_dict['exec_log'])
 
-from ansible.module_utils.basic import *
+def private_fail_json(**args) :
+  global exit_dict 
+
+  obj          = args.get('obj', 'error')
+  ret_msg      = args.get('msg', '')
+  ret_exec_log = args.get('exec_log', 'None')
+  ret_exp      = args.get('exp', False)
+
+  if type(ret_exec_log) is str:
+    ret_exec_log = []
+  output_log = []
+  for recode in ret_exec_log:
+    output_log.append(recode.decode('utf-8','replace'))
+
+  exit_dict = {}
+  exit_dict['code']      = 'fail_json'
+  exit_dict['msg']       = ret_msg
+  exit_dict['exec_log']  = output_log
+
+  if ret_exp == False:
+    raise AnsibleModule_exit()
+  else:
+    ubj.fail_json(msg=ret_msg,exec_log=ret_exec_log)
+
+def private_exit_json(**args) :
+  global exit_dict 
+
+  obj          = args.get('obj', 'error')
+  ret_msg      = args.get('msg', '')
+  ret_changed  = args.get('changed', False)
+  ret_exec_log = args.get('exec_log', 'None')
+
+  if type(ret_exec_log) is str:
+    ret_exec_log = []
+  output_log = []
+  for recode in ret_exec_log:
+    output_log.append(recode.decode('utf-8','replace'))
+
+  exit_dict = {}
+  exit_dict['code']      = 'exit_json'
+  exit_dict['msg']       = ret_msg
+  exit_dict['changed']   = ret_changed
+  exit_dict['exec_log']  = output_log
+  raise AnsibleModule_exit()
+  ###obj.exit_json(msg=ret_msg,changed=ret_changed, exec_log=output_log)
 
 def private_log(log_file_name,host,var):
   now = datetime.datetime.now()
