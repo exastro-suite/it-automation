@@ -34,6 +34,8 @@ require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlib
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/setenv.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/MessageTemplateStorageHolder.php");
 
+require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
+
 $rest_api_command = $root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/";
 require_once($rest_api_command . "AnsibleTowerRestApiProjects.php");
 require_once($rest_api_command . "AnsibleTowerRestApiCredentials.php");
@@ -69,6 +71,8 @@ class ExecuteDirector {
     }
 
     function build($exeInsRow, $ifInfoRow) {
+
+        global $vg_tower_driver_name;
 
         $this->logger->trace(__METHOD__);
 
@@ -156,6 +160,20 @@ class ExecuteDirector {
             return -1;
         }
 
+        // ansible vault認証情報生成
+        $vault_credentialId = -1;
+        if($vg_tower_driver_name != "pioneer") {
+           $vaultobj = new AnsibleVault();
+           list($dir,$file,$vault_password) = $vaultobj->getValutPasswdFileInfo();
+           unset($vaultobj);
+           $vault_credentialId = $this->createVaultCredential($execution_no, $vault_password, $OrganizationId);
+           if($vault_credentialId == -1) {
+               $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040031");
+               $this->errorLogOut($errorMessage);
+               return -1;
+           }
+        }
+
         $jobTemplateIds = array();
         $loopCount = 1;
         foreach($inventoryForEachCredentials as $dummy => $data) {
@@ -176,7 +194,7 @@ class ExecuteDirector {
             }
 
             // ジョブテンプレート生成
-            $jobTemplateId = $this->createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $inventoryId, $exeInsRow['RUN_MODE']);
+            $jobTemplateId = $this->createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $vault_credentialId, $inventoryId, $exeInsRow['RUN_MODE']);
             if($jobTemplateId == -1) {
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040006");
                 $this->errorLogOut($errorMessage);
@@ -260,6 +278,12 @@ class ExecuteDirector {
         $ret = $this->cleanUpCredential($execution_no);
         if($ret == false) {
             $allResult = false;
+        }
+        if($vg_tower_driver_name != "pioneer") {
+            $ret = $this->cleanUpVaultCredential($execution_no);
+            if($ret == false) {
+                $allResult = false;
+            }
         }
         $ret = $this->cleanUpInventory($execution_no);
         if($ret == false) {
@@ -864,6 +888,37 @@ class ExecuteDirector {
         return $credentialId;
     }
 
+    private function createVaultCredential($execution_no, $vault_password, $OrganizationId) {
+
+        $this->logger->trace(__METHOD__);
+
+        $param = array();
+        $param['organization'] = $OrganizationId;
+
+        $param['execution_no'] = $execution_no;
+
+        $param['vault_password'] = $vault_password;
+
+        $this->logger->trace(var_export($param, true));
+
+        $response_array = AnsibleTowerRestApiCredentials::vault_post($this->restApiCaller, $param);
+
+        $this->logger->trace(var_export($response_array, true));
+
+        if($response_array['success'] == false) {
+            $this->logger->debug($response_array['responseContents']['errorMessage']);
+            return -1;
+        }
+
+        if(array_key_exists("id", $response_array['responseContents']) == false) {
+            $this->logger->debug("No vault credential id.");
+            return -1;
+        }
+
+        $vault_credentialId = $response_array['responseContents']['id'];
+        return $vault_credentialId;
+    }
+
     private function createEachInventory($execution_no, $loopCount, $inventory, $OrganizationId) {
 
         $this->logger->trace(__METHOD__);
@@ -927,7 +982,6 @@ class ExecuteDirector {
             }
 
             // インベントりファイル追加オプションの空白行を取り除く
-            $variables_array = array();
             $yaml_array = explode("\n", $hostData['hosts_extra_args']);
             foreach($yaml_array as $record) {
                 if(strlen(trim($record)) == 0) {
@@ -957,7 +1011,7 @@ class ExecuteDirector {
         return $inventoryId;
     }
 
-    private function createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $inventoryId, $runMode) {
+    private function createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $vault_credentialId, $inventoryId, $runMode) {
         global $vg_parent_playbook_name;
 
         $this->logger->trace(__METHOD__);
@@ -970,6 +1024,10 @@ class ExecuteDirector {
         $param['project'] = $projectId;
         $param['playbook'] = $vg_parent_playbook_name;
         $param['credential'] = $credentialId;
+
+        if($vault_credentialId != -1) {
+            $param['vault_credential'] = $vault_credentialId;
+        }
 
         $addparam = array();
         foreach($this->JobTemplatePropertyParameterAry as $key=>$val)
@@ -1091,6 +1149,24 @@ class ExecuteDirector {
         }
 
         $this->logger->trace("Clean up credentials finished. (execution_no: $execution_no)");
+
+        return true;
+    }
+
+    private function cleanUpVaultCredential($execution_no) {
+
+        $this->logger->trace(__METHOD__);
+
+        $response_array = AnsibleTowerRestApiCredentials::deleteVault($this->restApiCaller, $execution_no);
+
+        $this->logger->trace(var_export($response_array, true));
+
+        if($response_array['success'] == false) {
+            $this->logger->debug($response_array['responseContents']['errorMessage']);
+            return false;
+        }
+
+        $this->logger->trace("Clean up vault credentials finished. (execution_no: $execution_no)");
 
         return true;
     }
@@ -1683,7 +1759,7 @@ class ExecuteDirector {
         return $ret;
     }
     function CreateLogs($workflowJobData,$workflowJobNodeArray_jobDataAdded,$joblistFullPath,$outDirectoryPath,$execlogFullPath,$job_slice_use) {
-        global  $vg_tower_driver_type;
+        global  $vg_tower_driver_name;
 
         $contentArray = array();
 
@@ -1830,7 +1906,7 @@ class ExecuteDirector {
                 return false;
             }
             // /exastro/ita-root/libs/restapiindividuallibs/ansible_driver/execute_statuscheck.phpに同等の処理あり
-            if($vg_tower_driver_type == "pioneer") {
+            if($vg_tower_driver_name == "pioneer") {
                 // ユーザログ("xxx", )を改行する
                 $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $execlogFullPath_org  .  " > " . $execlogFullPath_tmp1;
                 exec($cmd);
