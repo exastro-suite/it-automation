@@ -119,6 +119,13 @@
     $strExecLog          = 'exec.log.org';
     $strErrorLog         = 'error.log';
 
+
+    require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
+    $vaultobj = new AnsibleVault();
+    list($dir,$file,$password) = $vaultobj->getValutPasswdFileInfo();
+    unset($vaultobj);
+    $vault_password_file = $strDRSRootPlayBookDirPath . "/" . $dir . "/" . $file;
+
     try{
         ////////////////////////////////
         // 共通モジュールの呼び出し   //
@@ -179,8 +186,9 @@
         $stroptions = file_get_contents($stroptionfile);
 
         // Ansible実行Commnad発行
-        //$strBuildCommand     = "sudo -u {$strExecUser} -i ansible-playbook {$stroptions} -M " . $root_dir_path . "/libs/restapiindividuallibs/ansible_driver -i {$strhosts} {$strPlaybookPath} {$stransibleplaybook_options}";
-        $strBuildCommand     = "sudo -u {$strExecUser} -i ansible-playbook {$stroptions} -i {$strhosts} {$strPlaybookPath} {$stransibleplaybook_options}";
+        //$strBuildCommand     = "sudo -u {$strExecUser} -i ansible-playbook {$stroptions} -i {$strhosts} {$strPlaybookPath} {$stransibleplaybook_options}";
+        //$strBuildCommand     = "sudo -u {$strExecUser} -i ansible-playbook {$stroptions} -i {$strhosts} {$strPlaybookPath} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} ";
+        $strBuildCommand     = "sudo -u {$strExecUser} -i ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
 
         $resProcess = proc_open($strBuildCommand, $objDescriptorspec, $aryPipe);
 
