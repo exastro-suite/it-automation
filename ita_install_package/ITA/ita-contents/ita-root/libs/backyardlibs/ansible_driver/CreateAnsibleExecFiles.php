@@ -90,6 +90,7 @@ require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/CheckAnsibleRo
 // 共通モジュールをロード
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php');
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
 
 
 class CreateAnsibleExecFiles {
@@ -308,6 +309,8 @@ class CreateAnsibleExecFiles {
    
     private  $lv_tpf_var_file_path_list;
     private  $lv_cpf_var_file_path_list;
+
+    private  $ansible_vault_password_file; // ansible_vault password file
 
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
@@ -1164,6 +1167,34 @@ class CreateAnsibleExecFiles {
             $this->setAnsible_original_hosts_vars_Dir($c_dirwk);
     
         }
+
+        // 機器一覧のパスワードをansible-vaultで暗号化
+        // ansible vault passwordファイル情報取得
+        $vaultobj = new AnsibleVault();
+        list($dir,$file,$password) = $vaultobj->getValutPasswdFileInfo();
+        unset($vaultobj);
+        $c_tmpdir = $c_dir . "/" . $dir;
+        // ディレクトリが既に作成されている場合を判定
+        if( ! is_dir($c_tmpdir)) {
+            // ディレクトリ作成
+            if( !mkdir( $c_tmpdir, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+        if( !chmod( $c_tmpdir, 0777 ) ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+        // ansible vault passwordファイル作成
+        $this->ansible_vault_password_file = $c_tmpdir . "/" . $file;
+        if(file_put_contents( $this->ansible_vault_password_file,$password) === false){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70082");
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
         return true;
     }
 
@@ -1541,7 +1572,6 @@ class CreateAnsibleExecFiles {
             $hosts_extra_args = "";
             // hosts_extra_argsの設定の有無を判定しhosts_extra_argsの内容を退避
             if(strlen(trim($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'])) != 0){
-                //$ret = $this->KeyValueStringToYamlFormat($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'],$hosts_extra_args);
                 $error_line = "";
                 $ret = $this->InventryFileAddOptionCheckFormat($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'],$hosts_extra_args,$error_line);
                 if($ret === false) {
@@ -1549,8 +1579,8 @@ class CreateAnsibleExecFiles {
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     return false;
                 }
-                $hosts_extra_args = implode(",",$hosts_extra_args);
-                $hosts_extra_args = str_replace(',' , "\n          ",$hosts_extra_args);
+                $hosts_extra_args = implode("<<<__TAB__>>>",$hosts_extra_args);
+                $hosts_extra_args = str_replace('<<<__TAB__>>>' , "\n          ",$hosts_extra_args);
             }
 
             $param = "";
@@ -1573,7 +1603,21 @@ class CreateAnsibleExecFiles {
                 // パスワード
                 if($ina_hostinfolist[$host_name]['LOGIN_PW'] != self::LC_ANS_UNDEFINE_NAME)
                 {
-                    $pass = "ansible_ssh_pass: " . $ina_hostinfolist[$host_name]['LOGIN_PW'];
+                    // 機器一覧のパスワードをansible-vaultで暗号化
+                    $encode_val = "";
+                    $indento_sp12 = str_pad( " ", 12 , " ", STR_PAD_LEFT );
+                    $vaultobj = new AnsibleVault();
+                    $ret = $vaultobj->Vault($this->ansible_vault_password_file,
+                                            $ina_hostinfolist[$host_name]['LOGIN_PW'],
+                                            $encodeval,$indento_sp12);
+                    unset($vaultobj);
+                    if($ret === false) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",
+                                                                          array($encodeval));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        return false;
+                    }
+                    $pass = "ansible_ssh_pass: " . " !vault |\n" . $encodeval;
                 }
                 // 対象ホストがwindowsの場合かつPioneer以外
                 if( (($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
@@ -1911,6 +1955,22 @@ class CreateAnsibleExecFiles {
                 $var = $this->translationtable_list[$var];
             }
             
+            // 機器一覧のパスワードをansible-vaultで暗号化
+            if(($var == self::LC_ANS_PASSWD_VAR_NAME) &&
+               ($val != self::LC_ANS_UNDEFINE_NAME)) {
+                $encode_val = "";
+                // ansible-vaultで暗号化
+                $vaultobj = new AnsibleVault();
+                $ret = $vaultobj->Vault($this->ansible_vault_password_file,$val,$encodeval);
+                unset($vaultobj);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",
+                                                                array($encodeval));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                $val = " !vault |\n" . $encodeval;
+            }
             //ホスト変数ファイルのレコード生成
             //変数名: 具体値
             $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
@@ -2058,6 +2118,32 @@ class CreateAnsibleExecFiles {
                     $this->lv_parent_vars_list[$in_host_name][$var] = 0;
                     //ホスト変数ファイルのレコード生成
                     //変数名: 具体値
+
+                    // 機器一覧のパスワードをansible-vaultで暗号化
+                    if(($var == self::LC_ANS_PASSWD_VAR_NAME) &&
+                       ($val != self::LC_ANS_UNDEFINE_NAME)) {
+                        $encode_val = "";
+                        $driver_id = $this->getAnsibleDriverID();
+                        switch($driver_id){
+                        case DF_PIONEER_DRIVER_ID:
+                            // rot13+base64で暗号化
+                            $val = ky_encrypt($val);
+                            break;
+                        default:
+                            // ansible-vaultで暗号化
+                            $vaultobj = new AnsibleVault();
+                            $ret = $vaultobj->Vault($this->ansible_vault_password_file,$val,$encodeval);
+                            unset($vaultobj);
+                            if($ret === false) {
+                               $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",
+                                                                          array($encodeval));
+                               $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                               return false;
+                            }
+                            $val = " !vault |\n" . $encodeval;
+                            break;
+                        }
+                    }
                     $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
 
                     if($in_var_type == "VAR"){
@@ -3125,8 +3211,9 @@ class CreateAnsibleExecFiles {
                         $local_vars = array();
                         $local_vars[] = self::LC_ANS_PROTOCOL_VAR_NAME;
                         $local_vars[] = self::LC_ANS_USERNAME_VAR_NAME;
-                        $local_vars[] = self::LC_ANS_PASSWD_VAR_NAME;
                         $local_vars[] = self::LC_ANS_LOGINHOST_VAR_NAME;
+                        // パスワードを暗号化するまで、パスワードの具体値置き換えはpioneerモジュールで行う
+                        //$local_vars[] = self::LC_ANS_PASSWD_VAR_NAME;
 
                         // ユーザー公開用データリレイストレージパス 変数の名前
                         $local_vars[] = self::LC_ANS_OUTDIR_VAR_NAME;
