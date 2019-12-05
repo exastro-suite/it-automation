@@ -496,6 +496,7 @@ $ary[6040027] = "virtualenv is not registered in the ansible_tower. (virtualenv:
 $ary[6040028] = "Faild to get instance groups data from ansible_tower. (instance group:{})";
 $ary[6040029] = "Instance group is not registered in the ansible_tower. (instance group:{})";
 $ary[6040030] = "Organization is not registered in the Ansible interface information.";
+$ary[6040031] = "Failed to create ansible vault credential.";
 $ary[6101010] = "Function to connect with REST API is not defined.";
 $ary[6101100] = "Faild to emergency stop. Check Ansible/AnsibleTower state. (Execution No.:{})";
 $ary[6000005] = "Files associated with the template embedded variables are not registered in the Template list. {}";
