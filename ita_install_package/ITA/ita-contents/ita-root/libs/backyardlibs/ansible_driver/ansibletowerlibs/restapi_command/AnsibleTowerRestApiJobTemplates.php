@@ -144,6 +144,10 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
             return $response_array;
         }
 
+        if(!empty($param['vault_credential'])) {
+            $content['vault_credential'] = $param['vault_credential'];
+        }
+
         if(!empty($param['job_type'])) {
             $content['job_type'] = $param['job_type'];
         } // 任意パラメータは無くてもNG返さない
