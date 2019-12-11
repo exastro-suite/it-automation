@@ -37,7 +37,9 @@ function symphonyNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRece
     $strErrorPlaceFmt = "%08d";
     
     $aryOverrideForErrorData = array();
-    
+
+    $intResultInfoCode="000";//結果コード(正常終了)
+
     // 各種ローカル変数を定義
     
     $strFxName = __FUNCTION__;
@@ -77,41 +79,49 @@ function symphonyNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRece
         
         //----ここから、オペIDからオペNOを取得
         $aryRetBody = getInfoOfOneOperation($intOperationId,1);
-        if( $aryRetBody[1] !== null ){
+        //ここから、オペIDからオペNOを取得----
+        
+        if( $aryRetBody[0] == 1 ){
+            $aryRowOfOperationTable = $aryRetBody[4];
+            $intOperationNo = $aryRowOfOperationTable['OPERATION_NO_UAPK'];
+            
+            
+            $aryRetBody = symphonyInstanceConstuct($intSymphonyClassId, $intOperationNo, $strPreserveDatetime, $strOptionOrderStream, $aryForOptionOrderOvRd);
+            //SymphonyクラスIDの不備
+            if( $aryRetBody[1] !== null ){
+                $intErrorType = $aryRetBody[1];
+                $intErrorPlaceMark = 3000;
+                if( $intErrorType == 2 || $intErrorType == 3 ){
+                    $strExpectedErrMsgBodyForUI = $aryRetBody[5];
+                    $intResultStatusCode = 400;
+                    $intResultInfoCode="001";
+                }
+            }
+            
+            if( headers_sent() === true ){
+                $intErrorType = 900;
+                $intErrorPlaceMark = 4000;
+                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $strSymphonyInstanceId = (string)$aryRetBody[4];
+            $intResultStatusCode = 200;   
+
+        }else{
+            // オペレーションID不備
             $intErrorType = $aryRetBody[1];
             $intErrorPlaceMark = 2000;
             if( $intErrorType == 2 || $intErrorType == 3 ){
                 $strExpectedErrMsgBodyForUI = $aryRetBody[5];
-                $intResultStatusCode = 400;
+                $intResultInfoCode="001";
             }
-            throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
-        $aryRowOfOperationTable = $aryRetBody[4];
-        $intOperationNo = $aryRowOfOperationTable['OPERATION_NO_UAPK'];
-        //ここから、オペIDからオペNOを取得----
-        
-        $aryRetBody = symphonyInstanceConstuct($intSymphonyClassId, $intOperationNo, $strPreserveDatetime, $strOptionOrderStream, $aryForOptionOrderOvRd);
-        if( $aryRetBody[1] !== null ){
-            $intErrorType = $aryRetBody[1];
-            $intErrorPlaceMark = 3000;
-            if( $intErrorType == 2 || $intErrorType == 3 ){
-                $strExpectedErrMsgBodyForUI = $aryRetBody[5];
-                $intResultStatusCode = 400;
-            }
-            throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-        }
-        
-        if( headers_sent() === true ){
-            $intErrorType = 900;
-            $intErrorPlaceMark = 4000;
-            throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-        }
-        $strSymphonyInstanceId = (string)$aryRetBody[4];
-        $intResultStatusCode = 200;
-        
+
         // 成功時のデータテンプレを取得
         $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
         $aryForResultData['resultdata'] = array('SYMPHONY_INSTANCE_ID'=>$strSymphonyInstanceId);
+        $aryForResultData['resultdata']['RESULTCODE'] = $intResultInfoCode;
+        $aryForResultData['resultdata']['RESULTINFO'] = $aryRetBody[5];
+
     }
     catch (Exception $e){
         // 失敗時のデータテンプレを取得
@@ -190,4 +200,5 @@ function symphonyNoRegister($intShmphonyClassId, $intOperationNo, $strPreserveDa
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     return $arrayResult;
 }
+
 ?>
