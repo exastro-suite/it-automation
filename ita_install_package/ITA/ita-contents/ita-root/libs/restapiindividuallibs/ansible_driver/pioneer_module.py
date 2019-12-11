@@ -14,7 +14,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-
 ######################################################################
 ##
 ##  【概要】
@@ -79,6 +78,7 @@ author: Hiroyuki Seike
 import yaml
 import pexpect
 import sys
+import traceback
 import datetime
 import signal
 import subprocess
@@ -90,7 +90,18 @@ from collections import OrderedDict
 import binascii
 from ansible.module_utils.basic import *
 
+import base64
+password  = ''
+output_password = '********'
+log_file_name = ''
 exit_dict = {}
+
+# log format
+when_log_str = "%s: [%s] %s"
+prompt_log_str = "prompt: [%s]"
+command_log_str = "command: [%s]"
+execute_when_log_str = "%s: [%s]"
+
 exec_log = [] 
 host_name=''
 
@@ -104,6 +115,10 @@ def signal_handle(signum,frame):
 class AnsibleModule_exit(Exception): pass
 
 def main():
+
+  global log_file_name
+  global password
+  global output_password
   module = AnsibleModule(
     argument_spec = dict(
       username=dict(required=True),
@@ -125,7 +140,6 @@ def main():
   host_name = module.params['inventory_hostname']
   host_vars_file = module.params['host_vars_file']
   shell_name = module.params['grep_shell_dir']
-#  shell_name = shell_name + '/backyards/ansible_driver/ky_pionner_grep_side_Ansible.sh'
   shell_name = shell_name + '/ky_pionner_grep_side_Ansible.sh'
   log_file_name = module.params['log_file_dir'] + '/private.log'
   ssh_key_file   = module.params['ssh_key_file']
@@ -136,7 +150,8 @@ def main():
     #########################################################
     private_fail_json(obj=module,msg='exec_file no found fail exit')
   config = yaml.load(open(module.params['exec_file']).read())
-  private_log(log_file_name,host_name,str(config))
+
+  private_log_output(log_file_name,host_name,str(config))
 
   timeout = config['conf']['timeout']
   exec_cmd=''
@@ -163,6 +178,14 @@ def main():
     fp.write(str(pid))
     fp.close()
 
+    # パスワードをデコードする
+    host_vars = yaml.load(open(module.params['host_vars_file']).read())
+    password = host_vars['__loginpassword__']
+    if password != "__undefinesymbol__" :
+      password = base64.b64decode(password.encode("rot13"))
+    # ログに表示するパスワード
+    output_password = '********'
+
     # telnet/sshに接続時の追加パラメータ適用
 
     # SSH接続でSSH秘密鍵ファイルが設定されているか判定
@@ -183,11 +206,13 @@ def main():
     else:
       exec_cmd = protocol + " " + host_name + " -l " + user_name  + " " + append_param
     exec_name = 'remote login:[' + exec_cmd + ']'
-    private_log(log_file_name,host_name,exec_name)
 
-    exec_log.append(exec_name)
+    private_log_output(log_file_name,host_name,exec_name)
+    exec_log_output(exec_name)
+
     p = pexpect.spawn(exec_cmd)
-    private_log(log_file_name,host_name,"Ok")
+
+    private_log_output(log_file_name,host_name,"Ok")
 
 # ドライランモードを退避しタイムアウト値を5秒にする。
     if module.check_mode:
@@ -237,8 +262,13 @@ def main():
       timeout_num = 256
 
       # log output
-      private_log(log_file_name,host_name,'input command' + str(input))
-      exec_log.append('input command' + str(input))
+      private_log_output(log_file_name,host_name,'=== input command =================================================')
+      input_cmd = password_replace(output_password,str(input))
+      private_log_output(log_file_name,host_name,'input command:' + input_cmd)
+      private_log_output(log_file_name,host_name,'===================================================================')
+      exec_log_output('=== input command: =================================================')
+      exec_log_output('input command: ' + input_cmd)
+      exec_log_output('====================================================================')
 
       # expect command ?
       if 'expect' in input:
@@ -253,64 +283,58 @@ def main():
           else:
             # error log
             logstr = 'command(expect->' + cmd + ') not service'
-            exec_log.append(logstr)
-            private_log(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
+            private_log_output(log_file_name,host_name,logstr)
              
             #########################################################
             # fail exit
             #########################################################
             private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
-        # expect command log output
-        private_log(log_file_name,host_name,expect_name)
-        exec_log.append(expect_name)
-
         ####################################################
         # expect command execute
         ####################################################
-        p.expect(expect_cmd, timeout=timeout)
+        pass_rep_expect_cmd = password_replace(password,expect_cmd)
+        expect_name  = password_replace(output_password,expect_name)
 
-# ドライランモードの場合は接続確認したら終了
+        # expect command log output
+        private_log_output(log_file_name,host_name,expect_name)
+        exec_log_output(expect_name)
+
+        # expect command execute
+        p.expect(pass_rep_expect_cmd, timeout=timeout)
+
+        # ドライランモードの場合は接続確認したら終了
         if module.check_mode:
           private_exit_json(obj=module,msg=host_name + chk_mode,changed=False, exec_log=exec_log)
 
         # expect match log output
-        exec_log.append('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
-        private_log(log_file_name,host_name,"expect Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"expect Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"expect Match:buffer [" + p.buffer + "]")
-        private_log(log_file_name,host_name,"Ok")
+        exec_log_output('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
+        private_log_output(log_file_name,host_name,"expect Match:before [" + p.before + "]")
+        private_log_output(log_file_name,host_name,"expect Match:after  [" + p.after + "]")
+        private_log_output(log_file_name,host_name,"expect Match:buffer [" + p.buffer + "]")
+        private_log_output(log_file_name,host_name,"Ok")
 
-        # exec command log output
-        private_log(log_file_name,host_name,exec_name)
-        exec_log.append(exec_name)
 
         ####################################################
         # exec command execute
         ####################################################
-        p.sendline(exec_cmd)
+        pass_rep_exec_cmd = password_replace(password,exec_cmd)
+        exec_name  = password_replace(output_password,exec_name)
 
-        # debug
-        # exec match log output
-        private_log(log_file_name,host_name,"sendline Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"sendline Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"sendline Match:buffer [" + p.buffer + "]")
+        # exec command log output
+        private_log_output(log_file_name,host_name,exec_name)
+        exec_log_output(exec_name)
 
-        exec_log.append('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
-        
+        #p.sendline(exec_cmd)
+        p.sendline(pass_rep_exec_cmd)
+
         ####################################################
         # read line
         ####################################################
-        p.readline()               # if no p.readline(), input(by p.sendline()) include next expec()!!
+        p.readline()
 
-        # debug
-        # readline match log output
-        private_log(log_file_name,host_name,"readline Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"readline Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"readline Match:buffer [" + p.buffer + "]")
-
-        exec_log.append('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
-        private_log(log_file_name,host_name,"Ok")
+        private_log_output(log_file_name,host_name,"Ok")
 
       # state command ?
       elif 'state' in input:
@@ -327,10 +351,8 @@ def main():
             idx = 0
             max = len(input[cmd])
             while idx < max:
-              private_log(log_file_name,host_name,str(input[cmd][idx]))
               parameter_cmd = parameter_cmd + input[cmd][idx] + ' '
               idx = idx + 1
-            private_log(log_file_name,host_name,parameter_cmd)
           elif 'shell' == cmd:
             shell_cmd = str(input[cmd])
           elif 'stdout_file' == cmd:
@@ -339,8 +361,8 @@ def main():
             success_exit = str(input[cmd])
             if success_exit != str(False) and success_exit != str(True):
               logstr = 'success_exit=(' + str(input[cmd]) + '): only yes or no set'
-              exec_log.append(logstr)
-              private_log(log_file_name,host_name,logstr)
+              exec_log_output(logstr)
+              private_log_output(log_file_name,host_name,logstr)
 
               #########################################################
               # fail exit
@@ -351,96 +373,88 @@ def main():
             ignore_errors = str(input[cmd])
             if ignore_errors != str(False) and ignore_errors != str(True):
               logstr = 'ignore_errors=(' + str(input[cmd]) + '): Only yes or no set'
-              exec_log.append(logstr)
-              private_log(log_file_name,host_name,logstr)
-
+              exec_log_output(logstr)
+              private_log_output(log_file_name,host_name,logstr)
               #########################################################
               # fail exit
               #########################################################
               private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
-
           else:
             # error log
             logstr = 'command(state->' + cmd + ') not service'
-            exec_log.append(logstr)
-            private_log(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
+            private_output(log_file_name,host_name,logstr)
              
             #########################################################
             # fail exit
             #########################################################
             private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
 
-          # debug
-          # log output
-          private_log(log_file_name,host_name,cmd + ':' + str(input[cmd]))
-
-        # prompt command log output
-        private_log(log_file_name,host_name,expect_name)
-        exec_log.append(expect_name)
-
         ####################################################
         # expect(prompt) command execute
         ####################################################
-        p.expect(expect_cmd, timeout=timeout)
+        pass_rep_expect_cmd = password_replace(password,expect_cmd)
+        expect_name  = password_replace(output_password,expect_name)
 
-# ドライランモードの場合は接続確認したら終了
+        private_log_output(log_file_name,host_name,expect_name)
+        exec_log_output(expect_name)
+
+        p.expect(pass_rep_expect_cmd, timeout=timeout)
+
+        # ドライランモードの場合は接続確認したら終了
         if module.check_mode:
           private_exit_json(obj=module,msg=host_name + chk_mode,changed=False, exec_log=exec_log)
 
         # expect match log output
-        exec_log.append('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
-        private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-        private_log(log_file_name,host_name,"Ok")
+        exec_log_output('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
+        private_log_output(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
+        private_log_output(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
+        private_log_output(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
+        private_log_output(log_file_name,host_name,"Ok")
 
-        # state command log output
-        private_log(log_file_name,host_name,exec_name)
-        exec_log.append(exec_name)
 
         ####################################################
         # state command execute
         ####################################################
-        p.sendline(exec_cmd)
+        pass_rep_exec_cmd = password_replace(password,exec_cmd)
+        exec_name  = password_replace(output_password,exec_name)
 
-        # debug
-        # state match log output
-        private_log(log_file_name,host_name,"sendline Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"sendline Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"sendline Match:buffer [" + p.buffer + "]")
-        
-        ####################################################
-        # read line
-        ####################################################
-        p.readline()       # if no p.readline(), input(by p.sendline()) include next expec()!!
+        # state command log output
+        private_log_output(log_file_name,host_name,exec_name)
+        exec_log_output(exec_name)
 
-        # readline match log output
-        private_log(log_file_name,host_name,"readline Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"readline Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"readline Match:buffer [" + p.buffer + "]")
-        private_log(log_file_name,host_name,"Ok")
+        p.sendline(pass_rep_exec_cmd)
+
+        p.readline() 
+
+        private_log_output(log_file_name,host_name,"Ok")
 
         # expect(prompt) command log output
-        private_log(log_file_name,host_name,expect_name)
-        exec_log.append(expect_name)
+        private_log_output(log_file_name,host_name,expect_name)
+        exec_log_output(expect_name)
 
         ####################################################
         # expect(prompt) command execute
         ####################################################
-        p.expect(expect_cmd, timeout=timeout)
+        pass_rep_expect_cmd = password_replace(password,expect_cmd)
+        expect_name  = password_replace(output_password,expect_name)
+
+        p.expect(pass_rep_expect_cmd, timeout=timeout)
 
         # expect match log output
-        exec_log.append('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
-        private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-        private_log(log_file_name,host_name,"Ok")
+        exec_log_output('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
+        private_log_output(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
+        private_log_output(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
+        private_log_output(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
+        private_log_output(log_file_name,host_name,"Ok")
 
         # 最後のESCコードから後ろを削除
         edit_stdout_data = last_escstr_cut(p.before)
         # stdout log file create
         if stdout_file:
-          craete_stdout_file(stdout_file,edit_stdout_data)
+          pass_rep_stdout_file = password_replace(password,stdout_file)
+
+          craete_stdout_file(pass_rep_stdout_file,edit_stdout_data)
         else:
           stdout_file="/tmp/.ita_pioneer_module_stdout." + str(os.getpid())
           craete_stdout_file(stdout_file,edit_stdout_data)
@@ -448,36 +462,50 @@ def main():
         if shell_cmd:
           # user shell execute
           try:
-            logstr = 'user shell(' + shell_cmd + ' ' + parameter_cmd + ') execute'
-            private_log(log_file_name,host_name,logstr)
-            exec_log.append(logstr)
+            pass_rep_shell_cmd = password_replace(password,shell_cmd)
+            output_shell_cmd  = password_replace(output_password,shell_cmd)
+            pass_rep_parameter_cmd = password_replace(password,parameter_cmd)
+            output_parameter_cmd  = password_replace(output_password,parameter_cmd)
+            pass_rep_stdout_file = password_replace(password,stdout_file)
 
-            shell_ret = subprocess.call('sh ' + shell_cmd + ' ' + parameter_cmd, shell=True)
+            logstr = 'user shell ' + output_shell_cmd + ' parameter(' + output_parameter_cmd + ') execute'
+            private_log_output(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
+
+            def_shell_cmd="sh " + pass_rep_shell_cmd + " " + pass_rep_stdout_file + " " + str(pass_rep_parameter_cmd)
+            shell_ret = subprocess.call(def_shell_cmd, shell=True)
           except:
+            import sys
+            import traceback
             error_type, error_value, traceback = sys.exc_info()
             logstr='user shell execute error ' + str(error_type) + ' ' + str(error_value)
-            private_log(log_file_name,host_name,logstr)
-            exec_log.append(logstr)
+            private_log_output(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
 
             #########################################################
             # fail exit
             #########################################################
             private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
-
         else:
           # default shell execute
           try:
-            logstr = 'default shell parameter(' + str(parameter_cmd) + ') execute'
-            private_log(log_file_name,host_name,logstr)
-            exec_log.append(logstr)
+            pass_rep_parameter_cmd = password_replace(password,parameter_cmd)
+            pass_rep_stdout_file = password_replace(password,stdout_file)
+            output_parameter_cmd  = password_replace(output_password,parameter_cmd)
 
-            def_shell_cmd="sh " + shell_name + " " + stdout_file + " " + str(parameter_cmd)
+            logstr = 'default shell parameter(' + output_parameter_cmd + ') execute'
+            private_log_output(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
+
+            def_shell_cmd="sh " + shell_name + " " + pass_rep_stdout_file + " " + str(pass_rep_parameter_cmd)
             shell_ret = subprocess.call(def_shell_cmd, shell=True)
           except:
+            import sys
+            import traceback
             error_type, error_value, traceback = sys.exc_info()
             logstr='default shell execute error ' + str(error_type) + ' ' + str(error_value)
-            private_log(log_file_name,host_name,logstr)
-            exec_log.append(logstr)
+            private_log_output(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
 
             #########################################################
             # fail exit
@@ -488,14 +516,14 @@ def main():
         if shell_ret == 0:
           # shell result log output
           logstr = 'execute result OK'
-          private_log(log_file_name,host_name,logstr)
-          exec_log.append(logstr)
+          private_log_output(log_file_name,host_name,logstr)
+          exec_log_output(logstr)
 
           # success_exit check
           if success_exit == str(True):
-            logstr = 'success_exit yes dialog_file normal exit'
-            private_log(log_file_name,host_name,logstr)
-            exec_log.append(logstr)
+            logstr = 'dialog_file normal exit. (success_exit: yes)'
+            private_log_output(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
           
             #########################################################
             # normal exit
@@ -503,19 +531,19 @@ def main():
             private_exit_json(obj=module,msg=host_name + ':' + logstr,changed=True, exec_log=exec_log)
 
           else:
-            private_log(log_file_name,host_name,'success_exit no')
+            private_log_output(log_file_name,host_name,'success_exit no')
 
         else:
           # shell result log output
           logstr='execute result NG exit code=(' + str(shell_ret) + ')'
-          private_log(log_file_name,host_name,logstr)
-          exec_log.append(logstr)
+          private_log_output(log_file_name,host_name,logstr)
+          exec_log_output(logstr)
 
           # ignore_errors check
           if ignore_errors == str(False):
-            logstr = 'ignore_errors no dialog_file fail exit'
-            private_log(log_file_name,host_name,logstr)
-            exec_log.append(logstr)
+            logstr = 'dialog_file fail exit. (ignore_errors: no)'
+            private_log_output(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
  
             #########################################################
             # fail exit
@@ -523,29 +551,16 @@ def main():
             private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
 
           else:
-            logstr = 'ignore_errors yes dialog_file execut continue'
-            private_log(log_file_name,host_name,logstr)
-            exec_log.append(logstr)
+            logstr = 'dialog_file execut continue. (ignore_errors: yes)'
+            private_log_output(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
 
         ####################################################
         # LF send
         ####################################################
         p.sendline('')
 
-        # debug
-        private_log(log_file_name,host_name,"LF sendline Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"LF sendline Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"LF sendline Match:buffer [" + p.buffer + "]")
-        
-        ####################################################
-        # dummy read line
-        ####################################################
-        p.readline()       # if no p.readline(), input(by p.sendline()) include next expec()!!
-
-        # debug
-        private_log(log_file_name,host_name,"LF readline Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"LF readline Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"LF readline Match:buffer [" + p.buffer + "]")
+        p.readline() 
 
       # command?
       elif 'command' in input:
@@ -570,7 +585,9 @@ def main():
             with_tmp = module.params['exec_file']
             with_tmp = with_tmp.replace("/in/", "/tmp/")
             with_tmp = with_tmp.replace("/dialog_files/", "/original_dialog_files/")
+
             with_file = yaml.load(open(with_tmp).read())
+
             with_def = yaml.load(open(module.params['host_vars_file']).read())
 
             # playbookから変数を取得
@@ -620,30 +637,20 @@ def main():
           else:
             # error log
             logstr = 'command(command->' + cmd + ') not service'
-            exec_log.append(logstr)
-            private_log(log_file_name,host_name,logstr)
+            exec_log_output(logstr)
+            private_log_output(log_file_name,host_name,logstr)
 
             #########################################################
             # fail exit
             #########################################################
             private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
 
-          # debug
-          # log output
-          private_log(log_file_name,host_name,cmd + ':' + str(input[cmd]))
-
         ####################################################
         # expect(prompt) command execute
         ####################################################
-        # p.expect(expect_cmd, timeout=timeout2)
-
         #ドライランモードの場合は接続確認したら終了
         if module.check_mode:
           private_exit_json(obj=module,msg=host_name + chk_mode,changed=False, exec_log=exec_log)
-
-        # command command log output
-        private_log(log_file_name,host_name,exec_name)
-        exec_log.append(exec_name)
 
         ####################################################
         # command command execute
@@ -658,8 +665,7 @@ def main():
             tmp1 = 0
             count = 0
 
-            exec_log.append('when: [' + temp_cmd2 + ']')
-            private_log(log_file_name,host_name,'when:(' + temp_cmd2 + ')')
+            execute_when_log('when',log_file_name,host_name,temp_cmd2)
 
             # ORがある場合
             if re.search( " OR ", temp_cmd2 ):
@@ -676,34 +682,33 @@ def main():
                   temp_cmd3 = temp_cmd3.lstrip()
                   temp_cmd3 = temp_cmd3.rstrip()
 
+                  # When結果ログ初期設定
+                  when_command = temp_cmd3
+                  when_name = 'when'
+
                   # When実施
-                  temp3[count] = when_check(temp_cmd3,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                  temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                  if temp3[count] == 0:
-                    exec_log.append('when: [' + temp_cmd3 + '] Match')
-                    private_log(log_file_name,host_name,'when:(' + temp_cmd3 + ') Match')
-
-                  else:
-                    exec_log.append('when: [' + temp_cmd3 + '] No Match')
-                    private_log(log_file_name,host_name,'when:(' + temp_cmd3 + ') No Match')
+                  # When結果ログ出力
+                  when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                   tmp1 = int(tmp2)+3
                   count = count+1
 
                 else:
 
+                  # When結果ログ初期設定
                   temp_cmd2 = temp_cmd2.rstrip()
 
+                  # When結果ログ初期設定
+                  when_command = temp_cmd2
+                  when_name = 'when'
+
                   # When実施
-                  temp3[count] = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                  temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                  if temp3[count] == 0:
-                    exec_log.append('when: [' + temp_cmd2 + '] Match')
-                    private_log(log_file_name,host_name,'when:(' + temp_cmd2 + ') Match')
-
-                  else:
-                    exec_log.append('when: [' + temp_cmd2 + '] No Match')
-                    private_log(log_file_name,host_name,'when:(' + temp_cmd2 + ') No Match')
+                  # When結果ログ出力
+                  when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                   count = count+1
                   break
@@ -717,16 +722,15 @@ def main():
             # ORがない場合
             else:
 
+              # When結果ログ初期設定
+              when_command = temp_cmd2
+              when_name = 'when'
+
               # When実施
-              tmp[i] = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+              tmp[i] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-              if tmp[i] == 0:
-                exec_log.append('when: [' + temp_cmd2 + '] Match')
-                private_log(log_file_name,host_name,'when:(' + temp_cmd2 + ') Match')
-
-              else:
-                exec_log.append('when: [' + temp_cmd2 + '] No Match')
-                private_log(log_file_name,host_name,'when:(' + temp_cmd2 + ') No Match')
+              # When結果ログ出力
+              when_check_result(when_name,tmp[i],log_file_name,host_name,when_command)
 
           # スキップフラグ確認
           for i in range(0,when_max,1):
@@ -851,8 +855,7 @@ def main():
                       # ORがある場合
                       if re.search( " OR ", temp_cmd2 ):
 
-                        exec_log.append('exec_when: [' + temp_cmd2 + ']')
-                        private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ')')
+                        execute_when_log('exec_when',log_file_name,host_name,temp_cmd2)
 
                         # OR実施数分ループ
                         while 1:
@@ -866,16 +869,16 @@ def main():
                             temp_cmd3 = temp_cmd3.lstrip()
                             temp_cmd3 = temp_cmd3.rstrip()
 
+                            # When結果ログ初期設定
+                            when_command = temp_cmd3
+                            when_name = 'exec_when'
+
                             # exec_whenチェック
-                            temp3[count] = when_check(temp_cmd3,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                            #temp3[count] = when_check(temp_cmd3,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                            temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                            if temp3[count] == 0:
-                              exec_log.append('exec_when: [' + temp_cmd3 + '] Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd3 + ') Match')
-
-                            else:
-                              exec_log.append('exec_when: [' + temp_cmd3 + '] No Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd3 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                             tmp1 = int(tmp2)+3
                             count = count+1
@@ -884,16 +887,15 @@ def main():
 
                             temp_cmd2 = temp_cmd2.rstrip()
 
-                            # exec_whenチェック
-                            temp3[count] = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
-                            
-                            if temp3[count] == 0:
-                              exec_log.append('exec_when: [' + temp_cmd2 + '] Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') Match')
+                            # When結果ログ初期設定
+                            when_command = temp_cmd2
+                            when_name = 'exec_when'
 
-                            else:
-                              exec_log.append('exec_when: [' + temp_cmd2 + '] No Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') No Match')
+                            # exec_whenチェック
+                            temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                            
+                            # When結果ログ出力
+                            when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                             count = count+1
                             break
@@ -907,24 +909,23 @@ def main():
                       # ORがない場合
                       else:
 
+                        # When結果ログ初期設定
+                        when_command = temp_cmd2
+                        when_name = 'exec_when'
+
                         # exec_whenチェック
-                        tmp = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                        tmp = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                        if tmp == 0:
-                          exec_log.append('exec_when: [' + temp_cmd2 + '] Match')
-                          private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') Match')
-
-                        else:
-                          exec_log.append('exec_when: [' + temp_cmd2 + '] No Match')
-                          private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') No Match')
+                        # When結果ログ出力
+                        when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                       # continue確認
                       if tmp == 1:
 
                         continue_flg = 1
                         logstr = 'exec_when not match continue'
-                        private_log(log_file_name,host_name,logstr)
-                        exec_log.append(logstr)
+                        private_log_output(log_file_name,host_name,logstr)
+                        exec_log_output(logstr)
                         break
 
                     # item.Xの記述がない場合、そのままexec_whenチェック
@@ -937,8 +938,7 @@ def main():
                       # ORがある場合
                       if re.search( " OR ", temp_cmd2 ):
 
-                        exec_log.append('exec_when: [' + temp_cmd2 + ']')
-                        private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ')')
+                        execute_when_log('exec_when',log_file_name,host_name,temp_cmd2)
 
                         # OR実施数分ループ
                         while 1:
@@ -952,16 +952,15 @@ def main():
                             temp_cmd3 = temp_cmd3.lstrip()
                             temp_cmd3 = temp_cmd3.rstrip()
 
+                            # When結果ログ初期設定
+                            when_command = temp_cmd3
+                            when_name = 'exec_when'
+
                             # exec_whenチェック
-                            temp3[count] = when_check(temp_cmd3,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                            temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                            if temp3[count] == 0:
-                              exec_log.append('exec_when: [' + temp_cmd3 + '] Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd3 + ') Match')
-
-                            else:
-                              exec_log.append('exec_when: [' + temp_cmd3 + '] No Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd3 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                             tmp1 = int(tmp2)+3
                             count = count+1
@@ -970,16 +969,14 @@ def main():
 
                             temp_cmd2 = temp_cmd2.rstrip()
 
+                            # When結果ログ初期設定
+                            when_command = temp_cmd2
+                            when_name = 'exec_when'
+
                             # exec_whenチェック
-                            temp3[count] = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
-
-                            if temp3[count] == 0:
-                              exec_log.append('exec_when: [' + temp_cmd2 + '] Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') Match')
-
-                            else:
-                              exec_log.append('exec_when: [' + temp_cmd2 + '] No Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') No Match')
+                            temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                            # When結果ログ出力
+                            when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                             count = count+1
                             break
@@ -992,24 +989,23 @@ def main():
 
                       # ORがない場合
                       else:
+                        # When結果ログ初期設定
+                        when_command = temp_cmd2
+                        when_name = 'exec_when'
+
                         # exec_whenチェック
-                        tmp = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                        tmp = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                        if tmp == 0:
-                          exec_log.append('exec_when: [' + temp_cmd2 + '] Match')
-                          private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') Match')
-
-                        else:
-                          exec_log.append('exec_when: [' + temp_cmd2 + '] No Match')
-                          private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') No Match')
+                        # When結果ログ出力
+                        when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                       # continue確認
                       if tmp == 1:
 
                         continue_flg = 1
                         logstr = 'exec_when not match continue'
-                        private_log(log_file_name,host_name,logstr)
-                        exec_log.append(logstr)
+                        private_log_output(log_file_name,host_name,logstr)
+                        exec_log_output(logstr)
                         break
 
                   if continue_flg == 0:
@@ -1035,8 +1031,8 @@ def main():
                               if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
                                 logstr = 'The number of prompts is incorrect.'
-                                private_log(log_file_name,host_name,logstr)
-                                exec_log.append(logstr)
+                                private_log_output(log_file_name,host_name,logstr)
+                                exec_log_output(logstr)
 
                                 #########################################################
                                 # fail exit
@@ -1070,8 +1066,8 @@ def main():
                               if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
                                 logstr = 'The number of timeouts is incorrect.'
-                                private_log(log_file_name,host_name,logstr)
-                                exec_log.append(logstr)
+                                private_log_output(log_file_name,host_name,logstr)
+                                exec_log_output(logstr)
 
                                 #########################################################
                                 # fail exit
@@ -1087,27 +1083,15 @@ def main():
                             break
 
                       # プロンプト待ち
-                      p.expect(temp_cmd4, timeout=int(temp_cmd5))
-                      exec_log.append('prompt:(' + temp_cmd4 + ')')
-                      private_log(log_file_name,host_name,'prompt:(' + temp_cmd4 + ')')
-                      private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-                      private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-                      private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-                      private_log(log_file_name,host_name,"Ok")
+                      expect_prompt(p,log_file_name,host_name,temp_cmd4,temp_cmd5)
+
                       prompt_count2 = prompt_count2 + 1
 
-                    exec_log.append('command: [' + temp_cmd + ']')
-                    private_log(log_file_name,host_name,'command:(' + temp_cmd + ')')
-
                     # コマンド実行
-                    p.sendline(temp_cmd)
+                    exec_command(p,log_file_name,host_name,temp_cmd)
 
                     # 出力結果読み込み
                     p.readline()
-                    private_log(log_file_name,host_name,"readline Match:before [" + p.before + "]")
-                    private_log(log_file_name,host_name,"readline Match:after  [" + p.after + "]")
-                    private_log(log_file_name,host_name,"readline Match:buffer [" + p.buffer + "]")
-                    private_log(log_file_name,host_name,"Ok")
 
                     # prompt文を退避
                     temp_cmd4 = expect_cmd
@@ -1128,8 +1112,8 @@ def main():
                             if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
                               logstr = 'The number of prompts is incorrect.'
-                              private_log(log_file_name,host_name,logstr)
-                              exec_log.append(logstr)
+                              private_log_output(log_file_name,host_name,logstr)
+                              exec_log_output(logstr)
 
                               #########################################################
                               # fail exit
@@ -1163,8 +1147,8 @@ def main():
                             if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
                               logstr = 'The number of timeouts is incorrect.'
-                              private_log(log_file_name,host_name,logstr)
-                              exec_log.append(logstr)
+                              private_log_output(log_file_name,host_name,logstr)
+                              exec_log_output(logstr)
 
                               #########################################################
                               # fail exit
@@ -1180,13 +1164,7 @@ def main():
                           break
 
                     # プロンプト待ち
-                    p.expect(temp_cmd4, timeout=int(temp_cmd5))
-                    exec_log.append('prompt:(' + temp_cmd4 + ')')
-                    private_log(log_file_name,host_name,'prompt:(' + temp_cmd4 + ')')
-                    private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-                    private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-                    private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-                    private_log(log_file_name,host_name,"Ok")
+                    expect_prompt(p,log_file_name,host_name,temp_cmd4,temp_cmd5)
 
                     if failed_cmd:
 
@@ -1222,8 +1200,7 @@ def main():
                           # ORがある場合
                           if re.search( " OR ", temp_cmd2 ):
 
-                            exec_log.append('failed_when: [' + temp_cmd2 + ']')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ')')
+                            execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
                             # OR実施数分ループ
                             while 1:
@@ -1241,16 +1218,17 @@ def main():
                                 # 最後のESCコードから後ろを削除
                                 register_temp = last_escstr_cut(p.before)
 
-                                # failed_whenチェック
-                                temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
-                                
-                                if temp3[count] == 0:
-                                  exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') Match')
+                                # When結果ログ初期設定
+                                when_command = temp_cmd3
+                                when_name = 'failed_when'
 
-                                else:
-                                  exec_log.append('failed_when: [' + temp_cmd3 + '] No Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') No Match')
+                                # failed_whenチェック
+                                temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
+                                
+                                # When結果ログ出力
+                                when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
+#                                if temp3[count] == 0:
+#                                  exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
 
                                 tmp1 = int(tmp2)+3
                                 count = count+1
@@ -1263,16 +1241,15 @@ def main():
                                 # 最後のESCコードから後ろを削除
                                 register_temp = last_escstr_cut(p.before)
 
+                                # When結果ログ初期設定
+                                when_command = temp_cmd2
+                                when_name = 'failed_when'
+
                                 # failed_whenチェック
-                                temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                                temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                                if temp3[count] == 0:
-                                  exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                                else:
-                                  exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                                # When結果ログ出力
+                                when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                                 count = count+1
                                 break
@@ -1288,23 +1265,22 @@ def main():
                             # 最後のESCコードから後ろを削除
                             register_temp = last_escstr_cut(p.before)
 
+                            # When結果ログ初期設定
+                            when_command = temp_cmd2
+                            when_name = 'failed_when'
+
                             # failed_whenチェック
-                            tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                            tmp = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                            if tmp == 0:
-                              exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                              private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                            else:
-                              exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                              private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                           # エラー確認
                           if tmp == 1:
 
                             logstr = 'failed_when not match fail exit'
-                            private_log(log_file_name,host_name,logstr)
-                            exec_log.append(logstr)
+                            private_log_output(log_file_name,host_name,logstr)
+                            exec_log_output(logstr)
 
                             #########################################################
                             # fail exit
@@ -1321,8 +1297,7 @@ def main():
                           # ORがある場合
                           if re.search( " OR ", temp_cmd2 ):
 
-                            exec_log.append('failed_when: [' + temp_cmd2 + ']')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ')')
+                            execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
                             # OR実施数分ループ
                             while 1:
@@ -1340,16 +1315,15 @@ def main():
                                 # 最後のESCコードから後ろを削除
                                 register_temp = last_escstr_cut(p.before)
 
+                                # When結果ログ初期設定
+                                when_command = temp_cmd3
+                                when_name = 'failed_when'
+
                                 # failed_whenチェック
-                                temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
+                                temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                                if temp3[count] == 0:
-                                  exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') Match')
-
-                                else:
-                                  exec_log.append('failed_when: [' + temp_cmd3 + '] No Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') No Match')
+                                # When結果ログ出力
+                                when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                                 tmp1 = int(tmp2)+3
                                 count = count+1
@@ -1362,16 +1336,15 @@ def main():
                                 # 最後のESCコードから後ろを削除
                                 register_temp = last_escstr_cut(p.before)
 
+                                # When結果ログ初期設定
+                                when_command = temp_cmd2
+                                when_name = 'failed_when'
+
                                 # failed_whenチェック
-                                temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                                temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                                if temp3[count] == 0:
-                                  exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                                else:
-                                  exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                                # When結果ログ出力
+                                when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                                 count = count+1
                                 break
@@ -1388,23 +1361,22 @@ def main():
                             # 最後のESCコードから後ろを削除
                             register_temp = last_escstr_cut(p.before)
 
+                            # When結果ログ初期設定
+                            when_command = temp_cmd2
+                            when_name = 'failed_when'
+
                             # failed_whenチェック
-                            tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                            tmp = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                            if tmp == 0:
-                              exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                              private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                            else:
-                              exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                              private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                           # エラー確認
                           if tmp == 1:
 
                             logstr = 'failed_when not match fail exit'
-                            private_log(log_file_name,host_name,logstr)
-                            exec_log.append(logstr)
+                            private_log_output(log_file_name,host_name,logstr)
+                            exec_log_output(logstr)
 
                             #########################################################
                             # fail exit
@@ -1435,8 +1407,8 @@ def main():
                             if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
                               logstr = 'The number of prompts is incorrect.'
-                              private_log(log_file_name,host_name,logstr)
-                              exec_log.append(logstr)
+                              private_log_output(log_file_name,host_name,logstr)
+                              exec_log_output(logstr)
 
                               #########################################################
                               # fail exit
@@ -1470,8 +1442,8 @@ def main():
                             if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
                               logstr = 'The number of timeouts is incorrect.'
-                              private_log(log_file_name,host_name,logstr)
-                              exec_log.append(logstr)
+                              private_log_output(log_file_name,host_name,logstr)
+                              exec_log_output(logstr)
 
                               #########################################################
                               # fail exit
@@ -1487,27 +1459,16 @@ def main():
                           break
 
                     # プロンプト待ち
-                    p.expect(temp_cmd4, timeout=int(temp_cmd5))
-                    exec_log.append('prompt:(' + temp_cmd4 + ')')
-                    private_log(log_file_name,host_name,'prompt:(' + temp_cmd4 + ')')
-                    private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-                    private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-                    private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-                    private_log(log_file_name,host_name,"Ok")
+                    expect_prompt(p,log_file_name,host_name,temp_cmd4,temp_cmd5)
+
                     prompt_count2 = prompt_count2 + 1
 
-                  exec_log.append('command: [' + temp_cmd + ']')
-                  private_log(log_file_name,host_name,'command:(' + temp_cmd + ')')
-
+# pass   
                   # コマンド実行
-                  p.sendline(temp_cmd)
+                  exec_command(p,log_file_name,host_name,temp_cmd)
 
                   # 出力結果読み込み
                   p.readline()
-                  private_log(log_file_name,host_name,"readline Match:before [" + p.before + "]")
-                  private_log(log_file_name,host_name,"readline Match:after  [" + p.after + "]")
-                  private_log(log_file_name,host_name,"readline Match:buffer [" + p.buffer + "]")
-                  private_log(log_file_name,host_name,"Ok")
 
                   # prompt文を退避
                   temp_cmd4 = expect_cmd
@@ -1528,8 +1489,8 @@ def main():
                           if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
                             logstr = 'The number of prompts is incorrect.'
-                            private_log(log_file_name,host_name,logstr)
-                            exec_log.append(logstr)
+                            private_log_output(log_file_name,host_name,logstr)
+                            exec_log_output(logstr)
 
                             #########################################################
                             # fail exit
@@ -1563,8 +1524,8 @@ def main():
                           if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
                             logstr = 'The number of timeouts is incorrect.'
-                            private_log(log_file_name,host_name,logstr)
-                            exec_log.append(logstr)
+                            private_log_output(log_file_name,host_name,logstr)
+                            exec_log_output(logstr)
 
                             #########################################################
                             # fail exit
@@ -1580,13 +1541,7 @@ def main():
                         break
 
                   # プロンプト待ち
-                  p.expect(temp_cmd4, timeout=int(temp_cmd5))
-                  exec_log.append('prompt:(' + temp_cmd4 + ')')
-                  private_log(log_file_name,host_name,'prompt:(' + temp_cmd4 + ')')
-                  private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-                  private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-                  private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-                  private_log(log_file_name,host_name,"Ok")
+                  expect_prompt(p,log_file_name,host_name,temp_cmd4,temp_cmd5)
 
                   if failed_cmd:
 
@@ -1622,8 +1577,7 @@ def main():
                         # ORがある場合
                         if re.search( " OR ", temp_cmd2 ):
 
-                          exec_log.append('failed_when: [' + temp_cmd2 + ']')
-                          private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ')')
+                          execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
                           # OR実施数分ループ
                           while 1:
@@ -1641,38 +1595,35 @@ def main():
                               # 最後のESCコードから後ろを削除
                               register_temp = last_escstr_cut(p.before)
 
+                              # When結果ログ初期設定
+                              when_command = temp_cmd3
+                              when_name = 'failed_when'
+
                               # failed_whenチェック
-                              temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
+                              temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                              if temp3[count] == 0:
-                                exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') Match')
-
-                              else:
-                                exec_log.append('failed_when: [' + temp_cmd3 + '] No Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') No Match')
+                              # When結果ログ出力
+                              when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                               tmp1 = int(tmp2)+3
                               count = count+1
 
                             else:
-
                               temp_cmd2 = temp_cmd2.rstrip()
 
                               #register_temp = p.before
                               # 最後のESCコードから後ろを削除
                               register_temp = last_escstr_cut(p.before)
 
+                              # When結果ログ初期設定
+                              when_command = temp_cmd2
+                              when_name = 'failed_when'
+
                               # failed_whenチェック
-                              temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                              temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                              if temp3[count] == 0:
-                                exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                              else:
-                                exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                              # When結果ログ出力
+                              when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                               count = count+1
                               break
@@ -1689,23 +1640,22 @@ def main():
                           # 最後のESCコードから後ろを削除
                           register_temp = last_escstr_cut(p.before)
 
+                          # When結果ログ初期設定
+                          when_command = temp_cmd2
+                          when_name = 'failed_when'
+
                           # failed_whenチェック
-                          tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                          tmp = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                          if tmp == 0:
-                            exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                          else:
-                            exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                          # When結果ログ出力
+                          when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                         # エラー確認
                         if tmp == 1:
 
                           logstr = 'failed_when not match fail exit'
-                          private_log(log_file_name,host_name,logstr)
-                          exec_log.append(logstr)
+                          private_log_output(log_file_name,host_name,logstr)
+                          exec_log_output(logstr)
 
                           #########################################################
                           # fail exit
@@ -1722,8 +1672,7 @@ def main():
                         # ORがある場合
                         if re.search( " OR ", temp_cmd2 ):
 
-                          exec_log.append('failed_when: [' + temp_cmd2 + ']')
-                          private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ')')
+                          execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
                           # OR実施数分ループ
                           while 1:
@@ -1741,16 +1690,16 @@ def main():
                               # 最後のESCコードから後ろを削除
                               register_temp = last_escstr_cut(p.before)
 
+# enomoto
+                              # When結果ログ初期設定
+                              when_command = temp_cmd3
+                              when_name = 'failed_when'
+
                               # failed_whenチェック
-                              temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
+                              temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                              if temp3[count] == 0:
-                                exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') Match')
-
-                              else:
-                                exec_log.append('failed_when: [' + temp_cmd3 + '] No Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') No Match')
+                              # When結果ログ出力
+                              when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                               tmp1 = int(tmp2)+3
                               count = count+1
@@ -1763,16 +1712,15 @@ def main():
                               # 最後のESCコードから後ろを削除
                               register_temp = last_escstr_cut(p.before)
                               
+                              # When結果ログ初期設定
+                              when_command = temp_cmd2
+                              when_name = 'failed_when'
+
                               # failed_whenチェック
-                              temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                              temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                              if temp3[count] == 0:
-                                exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                              else:
-                                exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                              # When結果ログ出力
+                              when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                               count = count+1
                               break
@@ -1789,23 +1737,22 @@ def main():
                           # 最後のESCコードから後ろを削除
                           register_temp = last_escstr_cut(p.before)
 
+                          # When結果ログ初期設定
+                          when_command = temp_cmd2
+                          when_name = 'failed_when'
+
                           # failed_whenチェック
-                          tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                          tmp = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                          if tmp == 0:
-                            exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                          else:
-                            exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                          # When結果ログ出力
+                          when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                         # エラー確認
                         if tmp == 1:
 
                           logstr = 'failed_when not match fail exit'
-                          private_log(log_file_name,host_name,logstr)
-                          exec_log.append(logstr)
+                          private_log_output(log_file_name,host_name,logstr)
+                          exec_log_output(logstr)
 
                           #########################################################
                           # fail exit
@@ -1854,8 +1801,7 @@ def main():
                       # ORがある場合
                       if re.search( " OR ", temp_cmd2 ):
 
-                        exec_log.append('exec_when: [' + temp_cmd2 + ']')
-                        private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ')')
+                        execute_when_log('exec_when',log_file_name,host_name,temp_cmd2)
 
                         # OR実施数分ループ
                         while 1:
@@ -1869,16 +1815,15 @@ def main():
                             temp_cmd3 = temp_cmd3.lstrip()
                             temp_cmd3 = temp_cmd3.rstrip()
 
+                            # When結果ログ初期設定
+                            when_command = temp_cmd3
+                            when_name = 'exec_when'
+
                             # exec_whenチェック
-                            temp3[count] = when_check(temp_cmd3,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                            temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                            if temp3[count] == 0:
-                              exec_log.append('exec_when: [' + temp_cmd3 + '] Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd3 + ') Match')
-
-                            else:
-                              exec_log.append('exec_when: [' + temp_cmd3 + '] No Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd3 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                             tmp1 = int(tmp2)+3
                             count = count+1
@@ -1887,16 +1832,16 @@ def main():
 
                             temp_cmd2 = temp_cmd2.rstrip()
 
+# enomoto
+                            # When結果ログ初期設定
+                            when_command = temp_cmd2
+                            when_name = 'exec_when'
+
                             # exec_whenチェック
-                            temp3[count] = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                            temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                            if temp3[count] == 0:
-                              exec_log.append('exec_when: [' + temp_cmd2 + '] Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') Match')
-
-                            else:
-                              exec_log.append('exec_when: [' + temp_cmd2 + '] No Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                             count = count+1
                             break
@@ -1910,24 +1855,25 @@ def main():
                       # ORがない場合
                       else:
 
+# enomoto
+                        # When結果ログ初期設定
+                        when_command = temp_cmd2
+                        when_name = 'exec_when'
+
                         # exec_whenチェック
-                        tmp = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                        #tmp = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                        tmp = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                        if tmp == 0:
-                          exec_log.append('exec_when: [' + temp_cmd2 + '] Match')
-                          private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') Match')
-
-                        else:
-                          exec_log.append('exec_when: [' + temp_cmd2 + '] No Match')
-                          private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') No Match')
+                        # When結果ログ出力
+                        when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                       # continue確認
                       if tmp == 1:
 
                         continue_flg = 1
                         logstr = 'exec_when not match continue'
-                        private_log(log_file_name,host_name,logstr)
-                        exec_log.append(logstr)
+                        private_log_output(log_file_name,host_name,logstr)
+                        exec_log_output(logstr)
                         break
 
                     # item.Xの記述がない場合、そのままexec_whenチェック
@@ -1940,8 +1886,7 @@ def main():
                       # ORがある場合
                       if re.search( " OR ", temp_cmd2 ):
 
-                        exec_log.append('exec_when: [' + temp_cmd2 + ']')
-                        private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ')')
+                        execute_when_log('exec_when',log_file_name,host_name,temp_cmd2)
 
                         # OR実施数分ループ
                         while 1:
@@ -1955,16 +1900,15 @@ def main():
                             temp_cmd3 = temp_cmd3.lstrip()
                             temp_cmd3 = temp_cmd3.rstrip()
 
+                            # When結果ログ初期設定
+                            when_command = temp_cmd3
+                            when_name = 'exec_when'
+
                             # exec_whenチェック
-                            temp3[count] = when_check(temp_cmd3,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                            temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                            if temp3[count] == 0:
-                              exec_log.append('exec_when: [' + temp_cmd3 + '] Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd3 + ') Match')
-
-                            else:
-                              exec_log.append('exec_when: [' + temp_cmd3 + '] No Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd3 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                             tmp1 = int(tmp2)+3
                             count = count+1
@@ -1973,16 +1917,16 @@ def main():
 
                             temp_cmd2 = temp_cmd2.rstrip()
 
+# enomoto
+                            # When結果ログ初期設定
+                            when_command = temp_cmd2
+                            when_name = 'exec_when'
+
                             # exec_whenチェック
-                            temp3[count] = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                            temp3[count] = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                            if temp3[count] == 0:
-                              exec_log.append('exec_when: [' + temp_cmd2 + '] Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') Match')
-
-                            else:
-                              exec_log.append('exec_when: [' + temp_cmd2 + '] No Match')
-                              private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                             count = count+1
                             break
@@ -1996,24 +1940,23 @@ def main():
                       # ORがない場合
                       else:
 
+                        # When結果ログ初期設定
+                        when_command = temp_cmd2
+                        when_name = 'exec_when'
+
                         # exec_whenチェック
-                        tmp = when_check(temp_cmd2,register_cmd,register_name,host_vars_file,log_file_name,host_name)
+                        tmp = when_check(when_command,register_cmd,register_name,host_vars_file,log_file_name,host_name)
 
-                        if tmp == 0:
-                          exec_log.append('exec_when: [' + temp_cmd2 + '] Match')
-                          private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') Match')
-
-                        else:
-                          exec_log.append('exec_when: [' + temp_cmd2 + '] No Match')
-                          private_log(log_file_name,host_name,'exec_when:(' + temp_cmd2 + ') No Match')
+                        # When結果ログ出力
+                        when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                       # continue確認
                       if tmp == 1:
 
                         continue_flg = 1
                         logstr = 'exec_when not match continue'
-                        private_log(log_file_name,host_name,logstr)
-                        exec_log.append(logstr)
+                        private_log_output(log_file_name,host_name,logstr)
+                        exec_log_output(logstr)
                         break
 
                   if continue_flg == 0:
@@ -2039,8 +1982,8 @@ def main():
                               if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
                                 logstr = 'The number of prompts is incorrect.'
-                                private_log(log_file_name,host_name,logstr)
-                                exec_log.append(logstr)
+                                private_log_output(log_file_name,host_name,logstr)
+                                exec_log_output(logstr)
 
                                 #########################################################
                                 # fail exit
@@ -2074,8 +2017,8 @@ def main():
                               if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
                                 logstr = 'The number of timeouts is incorrect.'
-                                private_log(log_file_name,host_name,logstr)
-                                exec_log.append(logstr)
+                                private_log_output(log_file_name,host_name,logstr)
+                                exec_log_output(logstr)
 
                                 #########################################################
                                 # fail exit
@@ -2091,27 +2034,16 @@ def main():
                             break
 
                       # プロンプト待ち
-                      p.expect(temp_cmd4, timeout=int(temp_cmd5))
-                      exec_log.append('prompt:(' + temp_cmd4 + ')')
-                      private_log(log_file_name,host_name,'prompt:(' + temp_cmd4 + ')')
-                      private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-                      private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-                      private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-                      private_log(log_file_name,host_name,"Ok")
+                      expect_prompt(p,log_file_name,host_name,temp_cmd4,temp_cmd5)
+
                       prompt_count2 = prompt_count2 + 1
 
-                    exec_log.append('command: [' + exec_cmd + ']')
-                    private_log(log_file_name,host_name,'command:(' + exec_cmd + ')')
-
+# pass      
                     # コマンド実行
-                    p.sendline(exec_cmd)
+                    exec_command(p,log_file_name,host_name,exec_cmd)
 
                     # 出力結果読み込み
                     p.readline()
-                    private_log(log_file_name,host_name,"readline Match:before [" + p.before + "]")
-                    private_log(log_file_name,host_name,"readline Match:after  [" + p.after + "]")
-                    private_log(log_file_name,host_name,"readline Match:buffer [" + p.buffer + "]")
-                    private_log(log_file_name,host_name,"Ok")
 
                     # prompt文を退避
                     temp_cmd4 = expect_cmd
@@ -2132,8 +2064,8 @@ def main():
                             if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
                               logstr = 'The number of prompts is incorrect.'
-                              private_log(log_file_name,host_name,logstr)
-                              exec_log.append(logstr)
+                              private_log_output(log_file_name,host_name,logstr)
+                              exec_log_output(logstr)
 
                               #########################################################
                               # fail exit
@@ -2167,8 +2099,8 @@ def main():
                             if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
                               logstr = 'The number of timeouts is incorrect.'
-                              private_log(log_file_name,host_name,logstr)
-                              exec_log.append(logstr)
+                              private_log_output(log_file_name,host_name,logstr)
+                              exec_log_output(logstr)
 
                               #########################################################
                               # fail exit
@@ -2184,13 +2116,7 @@ def main():
                           break
 
                     # プロンプト待ち
-                    p.expect(temp_cmd4, timeout=int(temp_cmd5))
-                    exec_log.append('prompt:(' + temp_cmd4 + ')')
-                    private_log(log_file_name,host_name,'prompt:(' + temp_cmd4 + ')')
-                    private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-                    private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-                    private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-                    private_log(log_file_name,host_name,"Ok")
+                    expect_prompt(p,log_file_name,host_name,temp_cmd4,temp_cmd5)
 
                     if failed_cmd:
 
@@ -2226,8 +2152,7 @@ def main():
                           # ORがある場合
                           if re.search( " OR ", temp_cmd2 ):
 
-                            exec_log.append('failed_when: [' + temp_cmd2 + ']')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ')')
+                            execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
                             # OR実施数分ループ
                             while 1:
@@ -2245,16 +2170,15 @@ def main():
                                 # 最後のESCコードから後ろを削除
                                 register_temp = last_escstr_cut(p.before)
 
+                                # When結果ログ初期設定
+                                when_command = temp_cmd3
+                                when_name = 'failed_when'
+
                                 # failed_whenチェック
-                                temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
+                                temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                                if temp3[count] == 0:
-                                  exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') Match')
-
-                                else:
-                                  exec_log.append('failed_when: [' + temp_cmd3 + '] No Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') No Match')
+                                # When結果ログ出力
+                                when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                                 tmp1 = int(tmp2)+3
                                 count = count+1
@@ -2267,16 +2191,16 @@ def main():
                                 # 最後のESCコードから後ろを削除
                                 register_temp = last_escstr_cut(p.before)
 
+                                # When結果ログ初期設定
+                                when_command = temp_cmd2
+                                when_name = 'failed_when'
+
                                 # failed_whenチェック
-                                temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                                #temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                                temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                                if temp3[count] == 0:
-                                  exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                                else:
-                                  exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                                # When結果ログ出力
+                                when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                                 count = count+1
                                 break
@@ -2294,23 +2218,22 @@ def main():
                             # 最後のESCコードから後ろを削除
                             register_temp = last_escstr_cut(p.before)
 
+                            # When結果ログ初期設定
+                            when_command = temp_cmd2
+                            when_name = 'failed_when'
+
                             # failed_whenチェック
-                            tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                            tmp = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                            if tmp == 0:
-                              exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                              private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                            else:
-                              exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                              private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                           # エラー確認
                           if tmp == 1:
 
                             logstr = 'failed_when not match fail exit'
-                            private_log(log_file_name,host_name,logstr)
-                            exec_log.append(logstr)
+                            private_log_output(log_file_name,host_name,logstr)
+                            exec_log_output(logstr)
 
                             #########################################################
                             # fail exit
@@ -2327,8 +2250,7 @@ def main():
                           # ORがある場合
                           if re.search( " OR ", temp_cmd2 ):
 
-                            exec_log.append('failed_when: [' + temp_cmd2 + ']')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ')')
+                            execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
                             # OR実施数分ループ
                             while 1:
@@ -2346,16 +2268,15 @@ def main():
                                 # 最後のESCコードから後ろを削除
                                 register_temp = last_escstr_cut(p.before)
 
+                                # When結果ログ初期設定
+                                when_command = temp_cmd3
+                                when_name = 'failed_when'
+
                                 # failed_whenチェック
-                                temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
+                                temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                                if temp3[count] == 0:
-                                  exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') Match')
-
-                                else:
-                                  exec_log.append('failed_when: [' + temp_cmd3 + '] No Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') No Match')
+                                # When結果ログ出力
+                                when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                                 tmp1 = int(tmp2)+3
                                 count = count+1
@@ -2368,16 +2289,18 @@ def main():
                                 # 最後のESCコードから後ろを削除
                                 register_temp = last_escstr_cut(p.before)
 
+                                # When結果ログ初期設定
+                                when_command = temp_cmd2
+                                when_name = 'failed_when'
+
                                 # failed_whenチェック
-                                temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                                #temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                                temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                                if temp3[count] == 0:
-                                  exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                                else:
-                                  exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                                  private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                                # When結果ログ出力
+                                when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
+#                                if temp3[count] == 0:
+#                                  exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
 
                                 count = count+1
                                 break
@@ -2395,23 +2318,23 @@ def main():
                             # 最後のESCコードから後ろを削除
                             register_temp = last_escstr_cut(p.before)
 
+                            # When結果ログ初期設定
+                            when_command = temp_cmd2
+                            when_name = 'failed_when'
+
                             # failed_whenチェック
-                            tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                            #tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                            tmp = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                            if tmp == 0:
-                              exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                              private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                            else:
-                              exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                              private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                            # When結果ログ出力
+                            when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                           # エラー確認
                           if tmp == 1:
 
                             logstr = 'failed_when not match fail exit'
-                            private_log(log_file_name,host_name,logstr)
-                            exec_log.append(logstr)
+                            private_log_output(log_file_name,host_name,logstr)
+                            exec_log_output(logstr)
 
                             #########################################################
                             # fail exit
@@ -2442,8 +2365,8 @@ def main():
                             if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
                               logstr = 'The number of prompts is incorrect.'
-                              private_log(log_file_name,host_name,logstr)
-                              exec_log.append(logstr)
+                              private_log_output(log_file_name,host_name,logstr)
+                              exec_log_output(logstr)
 
                               #########################################################
                               # fail exit
@@ -2477,8 +2400,8 @@ def main():
                             if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
                               logstr = 'The number of timeouts is incorrect.'
-                              private_log(log_file_name,host_name,logstr)
-                              exec_log.append(logstr)
+                              private_log_output(log_file_name,host_name,logstr)
+                              exec_log_output(logstr)
 
                               #########################################################
                               # fail exit
@@ -2494,27 +2417,15 @@ def main():
                           break
 
                     # プロンプト待ち
-                    p.expect(temp_cmd4, timeout=int(temp_cmd5))
-                    exec_log.append('prompt:(' + temp_cmd4 + ')')
-                    private_log(log_file_name,host_name,'prompt:(' + temp_cmd4 + ')')
-                    private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-                    private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-                    private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-                    private_log(log_file_name,host_name,"Ok")
+                    expect_prompt(p,log_file_name,host_name,temp_cmd4,temp_cmd5)
+
                     prompt_count2 = prompt_count2 + 1
 
-                  exec_log.append('command: [' + exec_cmd + ']')
-                  private_log(log_file_name,host_name,'command:(' + exec_cmd + ')')
-
                   # コマンド実行
-                  p.sendline(exec_cmd)
+                  exec_command(p,log_file_name,host_name,exec_cmd)
 
                   # 出力結果読み込み
                   p.readline()
-                  private_log(log_file_name,host_name,"readline Match:before [" + p.before + "]")
-                  private_log(log_file_name,host_name,"readline Match:after  [" + p.after + "]")
-                  private_log(log_file_name,host_name,"readline Match:buffer [" + p.buffer + "]")
-                  private_log(log_file_name,host_name,"Ok")
 
                   # prompt文を退避
                   temp_cmd4 = expect_cmd
@@ -2535,8 +2446,8 @@ def main():
                           if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
                             logstr = 'The number of prompts is incorrect.'
-                            private_log(log_file_name,host_name,logstr)
-                            exec_log.append(logstr)
+                            private_log_output(log_file_name,host_name,logstr)
+                            exec_log_output(logstr)
 
                             #########################################################
                             # fail exit
@@ -2570,8 +2481,8 @@ def main():
                           if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
                             logstr = 'The number of timeouts is incorrect.'
-                            private_log(log_file_name,host_name,logstr)
-                            exec_log.append(logstr)
+                            private_log_output(log_file_name,host_name,logstr)
+                            exec_log_output(logstr)
 
                             #########################################################
                             # fail exit
@@ -2587,13 +2498,7 @@ def main():
                         break
 
                   # プロンプト待ち
-                  p.expect(temp_cmd4, timeout=int(temp_cmd5))
-                  exec_log.append('prompt:(' + temp_cmd4 + ')')
-                  private_log(log_file_name,host_name,'prompt:(' + temp_cmd4 + ')')
-                  private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-                  private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-                  private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-                  private_log(log_file_name,host_name,"Ok")
+                  expect_prompt(p,log_file_name,host_name,temp_cmd4,temp_cmd5)
 
                   if failed_cmd:
 
@@ -2629,8 +2534,7 @@ def main():
                         # ORがある場合
                         if re.search( " OR ", temp_cmd2 ):
 
-                          exec_log.append('failed_when: [' + temp_cmd2 + ']')
-                          private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ')')
+                          execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
                           # OR実施数分ループ
                           while 1:
@@ -2648,16 +2552,18 @@ def main():
                               # 最後のESCコードから後ろを削除
                               register_temp = last_escstr_cut(p.before)
 
+                              # When結果ログ初期設定
+                              when_command = temp_cmd3
+                              when_name = 'failed_when'
+
                               # failed_whenチェック
-                              temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
+                              #temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
+                              temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                              if temp3[count] == 0:
-                                exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') Match')
-
-                              else:
-                                exec_log.append('failed_when: [' + temp_cmd3 + '] No Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') No Match')
+                              # When結果ログ出力
+                              when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
+#                              if temp3[count] == 0:
+#                                exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
 
                               tmp1 = int(tmp2)+3
                               count = count+1
@@ -2670,16 +2576,15 @@ def main():
                               # 最後のESCコードから後ろを削除
                               register_temp = last_escstr_cut(p.before)
 
+                              # When結果ログ初期設定
+                              when_command = temp_cmd2
+                              when_name = 'failed_when'
+
                               # failed_whenチェック
-                              temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                              temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                              if temp3[count] == 0:
-                                exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                              else:
-                                exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                              # When結果ログ出力
+                              when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                               count = count+1
                               break
@@ -2697,23 +2602,22 @@ def main():
                           # 最後のESCコードから後ろを削除
                           register_temp = last_escstr_cut(p.before)
 
+                          # When結果ログ初期設定
+                          when_command = temp_cmd2
+                          when_name = 'failed_when'
+
                           # failed_whenチェック
-                          tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                          tmp = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                          if tmp == 0:
-                            exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                          else:
-                            exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                          # When結果ログ出力
+                          when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                         # エラー確認
                         if tmp == 1:
 
                           logstr = 'failed_when not match fail exit'
-                          private_log(log_file_name,host_name,logstr)
-                          exec_log.append(logstr)
+                          private_log_output(log_file_name,host_name,logstr)
+                          exec_log_output(logstr)
 
                           #########################################################
                           # fail exit
@@ -2730,8 +2634,7 @@ def main():
                         # ORがある場合
                         if re.search( " OR ", temp_cmd2 ):
 
-                          exec_log.append('failed_when: [' + temp_cmd2 + ']')
-                          private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ')')
+                          execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
                           # OR実施数分ループ
                           while 1:
@@ -2749,16 +2652,15 @@ def main():
                               # 最後のESCコードから後ろを削除
                               register_temp = last_escstr_cut(p.before)
 
+                              # When結果ログ初期設定
+                              when_command = temp_cmd3
+                              when_name = 'failed_when'
+
                               # failed_whenチェック
-                              temp3[count] = failed_when_check(temp_cmd3,register_temp,log_file_name,host_name)
+                              temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                              if temp3[count] == 0:
-                                exec_log.append('failed_when: [' + temp_cmd3 + '] Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') Match')
-
-                              else:
-                                exec_log.append('failed_when: [' + temp_cmd3 + '] No Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd3 + ') No Match')
+                              # When結果ログ出力
+                              when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                               tmp1 = int(tmp2)+3
                               count = count+1
@@ -2771,16 +2673,15 @@ def main():
                               # 最後のESCコードから後ろを削除
                               register_temp = last_escstr_cut(p.before)
 
+                              # When結果ログ初期設定
+                              when_command = temp_cmd2
+                              when_name = 'failed_when'
+
                               # failed_whenチェック
-                              temp3[count] = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                              temp3[count] = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                              if temp3[count] == 0:
-                                exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                              else:
-                                exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                                private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                              # When結果ログ出力
+                              when_check_result(when_name,temp3[count],log_file_name,host_name,when_command)
 
                               count = count+1
                               break
@@ -2798,23 +2699,22 @@ def main():
                           # 最後のESCコードから後ろを削除
                           register_temp = last_escstr_cut(p.before)
 
+                          # When結果ログ初期設定
+                          when_command = temp_cmd2
+                          when_name = 'failed_when'
+
                           # failed_whenチェック
-                          tmp = failed_when_check(temp_cmd2,register_temp,log_file_name,host_name)
+                          tmp = failed_when_check(when_command,register_temp,log_file_name,host_name)
 
-                          if tmp == 0:
-                            exec_log.append('failed_when: [' + temp_cmd2 + '] Match')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') Match')
-
-                          else:
-                            exec_log.append('failed_when: [' + temp_cmd2 + '] No Match')
-                            private_log(log_file_name,host_name,'failed_when:(' + temp_cmd2 + ') No Match')
+                          # When結果ログ出力
+                          when_check_result(when_name,tmp,log_file_name,host_name,when_command)
 
                         # エラー確認
                         if tmp == 1:
 
                           logstr = 'failed_when not match fail exit'
-                          private_log(log_file_name,host_name,logstr)
-                          exec_log.append(logstr)
+                          private_log_output(log_file_name,host_name,logstr)
+                          exec_log_output(logstr)
 
                           #########################################################
                           # fail exit
@@ -2823,98 +2723,55 @@ def main():
 
           # with_itemsを使用していないので、そのまま実行
           else:
-
-            # prompt command log output
-            private_log(log_file_name,host_name,expect_name)
-            exec_log.append(expect_name)
-
-            ####################################################
-            # expect(prompt) command execute
-            ####################################################
-            p.expect(expect_cmd, timeout=timeout2)
-
-            exec_log.append('command: [' + exec_cmd + ']')
-            private_log(log_file_name,host_name,'command:(' + exec_cmd + ')')
+            expect_prompt(p,log_file_name,host_name,expect_cmd,timeout2)
 
             # コマンド実行
-            p.sendline(exec_cmd)
+            exec_command(p,log_file_name,host_name,exec_cmd)
 
         # スキップフラグが1であった場合
         else:
           # スキップする。
           logstr = 'Skip ...'
-          exec_log.append(logstr)
-          private_log(log_file_name,host_name,logstr)
+          exec_log_output(logstr)
+          private_log_output(log_file_name,host_name,logstr)
 
         if register_used_flg == 1:
           register_cmd == ''
           register_name == ''
 
-        # debug
-        # command match log output
-        private_log(log_file_name,host_name,"sendline Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"sendline Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"sendline Match:buffer [" + p.buffer + "]")
-
         ####################################################
         # read line
         ####################################################
         if skip_flg != 1 and with_items_flg != 1 and exec_when_flg != 1:
-          p.readline()       # if no p.readline(), input(by p.sendline()) include next expec()!!
-
-          # readline match log output
-          private_log(log_file_name,host_name,"readline Match:before [" + p.before + "]")
-          private_log(log_file_name,host_name,"readline Match:after  [" + p.after + "]")
-          private_log(log_file_name,host_name,"readline Match:buffer [" + p.buffer + "]")
-          private_log(log_file_name,host_name,"Ok")
+          p.readline()
 
         ####################################################
         # expect(prompt) command execute
         ####################################################
         if skip_flg != 1 and with_items_flg != 1 and exec_when_flg != 1:
-
-          private_log(log_file_name,host_name,expect_name)
-          exec_log.append(expect_name)
-
-          p.expect(expect_cmd, timeout=timeout2)
-
-          # expect match log output
-          private_log(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-          private_log(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-          private_log(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-          private_log(log_file_name,host_name,"Ok")
+          expect_prompt(p,log_file_name,host_name,expect_cmd,timeout2)
 
         if register_flg == 1:
           register_cmd = p.before
           register_name = register_tmp_name
-          private_log(log_file_name,host_name,register_cmd)
-          private_log(log_file_name,host_name,register_name)
+          private_log_output(log_file_name,host_name,register_cmd)
+          private_log_output(log_file_name,host_name,register_name)
 
         ####################################################
         # LF send
         ####################################################
         p.sendline('')
 
-        # debug
-        private_log(log_file_name,host_name,"LF sendline Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"LF sendline Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"LF sendline Match:buffer [" + p.buffer + "]")
-        
         ####################################################
         # dummy read line
         ####################################################
-        p.readline()       # if no p.readline(), input(by p.sendline()) include next expec()!!
-
-        # debug
-        private_log(log_file_name,host_name,"LF readline Match:before [" + p.before + "]")
-        private_log(log_file_name,host_name,"LF readline Match:after  [" + p.after + "]")
-        private_log(log_file_name,host_name,"LF readline Match:buffer [" + p.buffer + "]")
+        p.readline()       
 
       else:
         # error log
         logstr = 'command not service fail exit'
-        private_log(log_file_name,host_name,logstr)
-        exec_log.append(logstr)
+        private_log_output(log_file_name,host_name,logstr)
+        exec_log_output(logstr)
 
         #########################################################
         # fail exit
@@ -2927,22 +2784,22 @@ def main():
     private_exit_json(obj=module,msg=host_name + ':nomal exit',changed=True, exec_log=exec_log)
 
   except pexpect.TIMEOUT:
-    exec_log.append('except command timeout')
-    private_log(log_file_name,host_name,'except command timeout')
+    exec_log_output('except command timeout')
+    private_log_output(log_file_name,host_name,'except command timeout')
     #########################################################
     # fail exit
     #########################################################
     module.fail_json(msg=host_name + ': ' + 'except command timeout',exec_log=exec_log)
   except SignalReceive, e:
-    exec_log.append(str(e))
-    private_log(log_file_name,host_name,str(e))
+    exec_log_output(str(e))
+    private_log_output(log_file_name,host_name,str(e))
     #########################################################
     # fail exit
     #########################################################
     module.fail_json(msg=host_name + ": " + str(e),exec_log=exec_log)
   # try chuu no module.fail_json de exceptions.SystemExit 
   except exceptions.SystemExit:
-    private_log(log_file_name,host_name,"except exceptions.SystemExit")
+    private_log_output(log_file_name,host_name,"except exceptions.SystemExit")
     #########################################################
     # fail exit
     #########################################################
@@ -2960,12 +2817,12 @@ def main():
     edit_trace = ''
     for line in stack_trace:
         edit_trace = edit_trace  + line
-    private_log(log_file_name,host_name,"Exception-------------------------------------------")
-    private_log(log_file_name,host_name, edit_trace)
-    private_log(log_file_name,host_name,"----------------------------------------------------")
-    exec_log.append(                    'EXCEPTION-------------------------------------------')
-    exec_log.append(edit_trace)
-    exec_log.append(                    '----------------------------------------------------')
+    private_log_output(log_file_name,host_name,"Exception-------------------------------------------")
+    private_log_output(log_file_name,host_name, edit_trace)
+    private_log_output(log_file_name,host_name,"----------------------------------------------------")
+    exec_log_output('EXCEPTION-------------------------------------------')
+    exec_log_output(edit_trace)
+    exec_log_output('----------------------------------------------------')
 
     #########################################################
     # fail exit
@@ -3040,8 +2897,12 @@ def craete_stdout_file(file,data):
 
 def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,host_name):
 
+ # pass
+  global password
   global register_used_flg
   r = re.compile("(.*)(\n)(.*)")
+
+  when_cmd = password_replace(password,when_cmd)
 
   # whenが"no match"である場合
   if re.search( "no match", when_cmd ):
@@ -4077,7 +3938,11 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
 def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
 
+ # pass
+  global password
   r = re.compile("(.*)(\n)(.*)")
+
+  when_cmd = password_replace(password,when_cmd)
 
   # whenが"no match"である場合
   if re.search( "no match", when_cmd ):
@@ -4344,5 +4209,86 @@ def last_escstr_cut(sometext):
       break;
     stdout_data += binascii.a2b_hex(b'1b')
   return stdout_data
+
+def password_replace(password,str):
+  rep_str = str.replace('<<__loginpassword__>>', password)
+  return rep_str
+
+def exec_log_output(log,replace_flg = True):
+  global exec_log
+  global output_password
+  if replace_flg == True:
+    output_log = password_replace(output_password,str(log))
+  exec_log.append(output_log)
+
+def private_log_output(log_file_name,host_name,log,replace_flg = True):
+  global output_password
+  if replace_flg == True:
+    output_log = password_replace(output_password,str(log))
+  private_log(log_file_name,host_name,output_log)
+
+def expect_prompt(p,log_file_name,host_name,cmd,timeout):
+  global password
+  global prompt_log_str
+
+  # 隠蔽文字デコード
+  pass_rep_cmd = password_replace(password,cmd)
+
+  # promptログ生成
+  # prompt: [%s]
+  logstr =  prompt_log_str % (cmd)
+
+  # promptログ出力
+  exec_log_output(logstr)
+  private_log_output(log_file_name,host_name,logstr)
+
+  # prompt待ち
+  p.expect(pass_rep_cmd, timeout=int(timeout))
+
+  # 標準出力ログ
+  exec_log_output('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
+  private_log_output(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
+  private_log_output(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
+  private_log_output(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
+
+  private_log_output(log_file_name,host_name,"Ok")
+
+def exec_command(p,log_file_name,host_name,cmd):
+  global password
+  global command_log_str
+
+  # 隠蔽文字デコード
+  pass_rep_cmd = password_replace(password,cmd)
+
+  # execコマンドログ生成
+  # "command: [%s]"
+  logstr =  command_log_str % (cmd)
+
+  # execコマンドログ出力
+  exec_log_output(logstr)
+  private_log_output(log_file_name,host_name,logstr)
+
+  # コマンド実行
+  p.sendline(pass_rep_cmd)
+
+  private_log_output(log_file_name,host_name,"Ok")
+
+def when_check_result(when_name,ret,log_file_name,host_name,cmd):
+  global when_log_str
+  if ret == 0:
+    # "%s: [%s] %s"
+    logstr = when_log_str % (when_name, cmd, 'Match')
+  else:
+    # "%s: [%s] %s"
+    logstr = when_log_str % (when_name, cmd, 'No Match')
+  exec_log_output(logstr)
+  private_log_output(log_file_name,host_name,logstr)
+
+def execute_when_log(when_name,log_file_name,host_name,logstr):
+  global execute_when_log_str
+  # "%s: [%s]"
+  logstr = execute_when_log_str % (when_name,logstr)
+  # exec_log_output(logstr)
+  # private_log_output(log_file_name,host_name,logstr)
 
 main()
