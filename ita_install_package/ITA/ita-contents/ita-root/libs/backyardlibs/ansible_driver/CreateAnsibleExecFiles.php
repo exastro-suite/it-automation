@@ -3212,8 +3212,7 @@ class CreateAnsibleExecFiles {
                         $local_vars[] = self::LC_ANS_PROTOCOL_VAR_NAME;
                         $local_vars[] = self::LC_ANS_USERNAME_VAR_NAME;
                         $local_vars[] = self::LC_ANS_LOGINHOST_VAR_NAME;
-                        // パスワードを暗号化するまで、パスワードの具体値置き換えはpioneerモジュールで行う
-                        //$local_vars[] = self::LC_ANS_PASSWD_VAR_NAME;
+                        $local_vars[] = self::LC_ANS_PASSWD_VAR_NAME;
 
                         // ユーザー公開用データリレイストレージパス 変数の名前
                         $local_vars[] = self::LC_ANS_OUTDIR_VAR_NAME;
@@ -3362,6 +3361,11 @@ class CreateAnsibleExecFiles {
                     // 変数具体値がTPF/CPF変数の場合の具体値置換えでない場合
                     if($in_SpecialVarValReplace === false) {
                         if(count($varSetTo) != 0){
+                            // ansible_vaultの対応により、機器一覧のパスワードの具体値を<<>>に置き換える
+                            // pioneerモジュール側で置換をする。
+                            if(@count($varSetTo[self::LC_ANS_PASSWD_VAR_NAME]) == 1) {
+                                $varSetTo[self::LC_ANS_PASSWD_VAR_NAME] = "<<" . self::LC_ANS_PASSWD_VAR_NAME . ">>";
+                            }
                             // 変数を具体値で置換える
                             $objWSRA->stringReplace($dataString,$varSetTo);
                             $dataString = $objWSRA->getReplacedString();
