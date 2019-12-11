@@ -648,6 +648,22 @@ class sqlStatementGripper{
         return $resultRow;
     }
 
+    public function resultFetchALL(){
+        $resultRow = false;
+        $this->boolFetch = true;
+        if($this->intModelChannel===0){
+            // オラクルの場合
+            $resultRow = oci_fetch_all($this->varStatementBody, OCI_ASSOC);
+        }else if ($this->intModelChannel===1){
+            // mySQL系の場合
+            $resultRow = $this->varStatementBody->fetchALL(PDO::FETCH_ASSOC);
+        }
+        if( $resultRow !== false ){
+            $this->intEffectedRow += 1;
+        }
+        return $resultRow;
+    }
+
     public function effectedRowCount(){
         $retInt = null;
         if( $this->boolFetch === true ){
