@@ -218,4 +218,5 @@ $ary[900067] = "Symphony interface information is not registered.";
 $ary[900068] = "Multiple Symphony interface information is registered.";
 $ary[900069] = "Data relay storage path set in Symphony interface information can not be found.";
 $ary[900070] = "It cannot be imported as the ITA version and the version from which the file was exported do not match.";
+$ary[806] = "Target execution No are incorrect. ({})";
 ?>
