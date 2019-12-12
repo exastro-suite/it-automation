@@ -310,7 +310,7 @@ class CreateAnsibleExecFiles {
     private  $lv_tpf_var_file_path_list;
     private  $lv_cpf_var_file_path_list;
 
-    private  $ansible_vault_password_file; // ansible_vault password file
+    private  $ansible_vault_password_file_dir; // ansible_vault password file dir
 
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
@@ -1168,11 +1168,19 @@ class CreateAnsibleExecFiles {
     
         }
 
+        $this->ansible_vault_password_file_dir = $c_dir;
+
         // 機器一覧のパスワードをansible-vaultで暗号化
         // ansible vault passwordファイル情報取得
         $vaultobj = new AnsibleVault();
-        list($dir,$file,$password) = $vaultobj->getValutPasswdFileInfo();
+        list($ret, $dir,$file,$password) = $vaultobj->getValutPasswdFileInfo();
         unset($vaultobj);
+        if($ret === false) {
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000078");
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+
         $c_tmpdir = $c_dir . "/" . $dir;
         // ディレクトリが既に作成されている場合を判定
         if( ! is_dir($c_tmpdir)) {
@@ -1185,13 +1193,6 @@ class CreateAnsibleExecFiles {
         }
         if( !chmod( $c_tmpdir, 0777 ) ){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
-            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            return false;
-        }
-        // ansible vault passwordファイル作成
-        $this->ansible_vault_password_file = $c_tmpdir . "/" . $file;
-        if(file_put_contents( $this->ansible_vault_password_file,$password) === false){
-            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70082");
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             return false;
         }
@@ -1607,13 +1608,26 @@ class CreateAnsibleExecFiles {
                     $encode_val = "";
                     $indento_sp12 = str_pad( " ", 12 , " ", STR_PAD_LEFT );
                     $vaultobj = new AnsibleVault();
-                    $ret = $vaultobj->Vault($this->ansible_vault_password_file,
+                    $password_file = '';
+                    // ansible-vault パスワードファイル生成
+                    $ret = $vaultobj->CraeteValutPasswdFile($this->ansible_vault_password_file_dir,
+                                                            $password_file);
+                    if($ret === false) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000079");
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        return false;
+                    }
+                    // パスワード暗号化
+                    $ret = $vaultobj->Vault($password_file,
                                             $ina_hostinfolist[$host_name]['LOGIN_PW'],
                                             $encodeval,$indento_sp12);
+
+                    // パスワードファイル削除
+                    @unlink($password_file);
+
                     unset($vaultobj);
                     if($ret === false) {
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",
-                                                                          array($encodeval));
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($encodeval));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                         return false;
                     }
@@ -1959,10 +1973,27 @@ class CreateAnsibleExecFiles {
             if(($var == self::LC_ANS_PASSWD_VAR_NAME) &&
                ($val != self::LC_ANS_UNDEFINE_NAME)) {
                 $encode_val = "";
+
                 // ansible-vaultで暗号化
                 $vaultobj = new AnsibleVault();
-                $ret = $vaultobj->Vault($this->ansible_vault_password_file,$val,$encodeval);
+
+                // ansible-vault パスワードファイル生成
+                $password_file = '';
+                $ret = $vaultobj->CraeteValutPasswdFile($this->ansible_vault_password_file_dir,
+                                                        $password_file);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000079");
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+
+                // パスワード暗号化
+                $ret = $vaultobj->Vault($password_file,$val,$encodeval);
+
+                // パスワードファイル削除
+                @unlink($password_file);
                 unset($vaultobj);
+
                 if($ret === false) {
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",
                                                                 array($encodeval));
@@ -2132,8 +2163,24 @@ class CreateAnsibleExecFiles {
                         default:
                             // ansible-vaultで暗号化
                             $vaultobj = new AnsibleVault();
-                            $ret = $vaultobj->Vault($this->ansible_vault_password_file,$val,$encodeval);
+
+                            // ansible-vault パスワードファイル生成
+                            $password_file = '';
+                            $ret = $vaultobj->CraeteValutPasswdFile($this->ansible_vault_password_file_dir,
+                                                                    $password_file);
+                            if($ret === false) {
+                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000079");
+                                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                return false;
+                            }
+
+                            // パスワード暗号化
+                            $ret = $vaultobj->Vault($password_file,$val,$encodeval);
+
+                            // パスワードファイル削除
+                            @unlink($password_file);
                             unset($vaultobj);
+
                             if($ret === false) {
                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",
                                                                           array($encodeval));
