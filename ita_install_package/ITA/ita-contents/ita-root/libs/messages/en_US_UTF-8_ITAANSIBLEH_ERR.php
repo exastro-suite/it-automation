@@ -572,4 +572,7 @@ $ary[6000074] = "Host vars file is not generated in YAML format. (Host:{})";
 $ary[6000075] = "Copy File has failed. (line:{})";
 $ary[6000076] = "The nventory file additional option setting of the device list is not valid. (host:{} line:{})";
 $ary[6000077] = "ansible-vault command has failed.\n{}";
+$ary[6000078] = "temporary directory has failed.";
+$ary[6000079] = "ansible-vault password file has failed.";
+$ary[6000080] = "ansible-vault password has failed.";
 ?>
