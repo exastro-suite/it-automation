@@ -20,11 +20,27 @@
 //
 //////////////////////////////////////////////////////////////////////
 class  AnsibleVault {
-    function __construct() {}
+    private $root_dir_path;
+    function __construct() {
+        // ルートディレクトリを取得
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $this->root_dir_path = $root_dir_temp[0] . "ita-root";
+    }
     function Vault($password_file,$value ,&$encode_value,$indento="  ") {
         $result = true;
         $encode_value = ""; 
-        exec("echo -n $value | ansible-vault encrypt --vault-password-file $password_file 2>&1",$output,$return_var);
+
+        $path = sprintf('%s/confs/commonconfs/path_ANSIBLE_MODULE.txt',$this->root_dir_path);
+        // 改行コードが付いている場合に取り除く
+        $ansible_path = @file_get_contents($path);
+        $ansible_path = str_replace("\n","",$ansible_path);
+        if($ansible_path === false) {
+            $encode_value = 'ansible path file not found';
+            return false;
+        }
+        $cmd = "echo -n $value | $ansible_path/ansible-vault encrypt --vault-password-file $password_file 2>&1";
+        exec($cmd,$output,$return_var);
         foreach($output as $line) {
             if(strlen(trim($line)) == 0) {
                 continue;
@@ -41,8 +57,30 @@ class  AnsibleVault {
         return $result;
     }
     function getValutPasswdFileInfo() {
+        $ret      = true;
+        $dir      = '.tmp';
+        $file     = '.tmpkey';
+        $password = '';
+        $file_path = sprintf('%s/confs/commonconfs/ansible_vault_accesskey.txt',$this->root_dir_path);
+        $ret = @file_get_contents($file_path);
+        if( $ret !== false){
+            $password = base64_decode(str_rot13($ret));
+        }
                      // ディレクトリ ファイル パスワード
-        return array(".tmp",".key","passord");
+        return array($ret,$dir,$file,$password);
+    }
+    function CraeteValutPasswdFile($base_dir,&$pass_file) {
+        $pass_file = '';
+        list($ret,$dir,$file,$password) = $this->getValutPasswdFileInfo();
+        if($ret === false) {
+            return false;
+        }
+        //$pass_file= sprintf('%s%s/%s/%s',$this->root_dir_path,$base_dir,$dir,$file);
+        $pass_file = sprintf('%s/%s/%s',$base_dir,$dir,$file);
+        if(file_put_contents( $pass_file,$password) === false){
+            return false;
+        }
+        return true;
     }
 }
 ?>
