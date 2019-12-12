@@ -164,7 +164,12 @@ class ExecuteDirector {
         $vault_credentialId = -1;
         if($vg_tower_driver_name != "pioneer") {
            $vaultobj = new AnsibleVault();
-           list($dir,$file,$vault_password) = $vaultobj->getValutPasswdFileInfo();
+           list($ret,$dir,$file,$vault_password) = $vaultobj->getValutPasswdFileInfo();
+           if($ret === false) {
+               $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000080");
+               $this->errorLogOut($errorMessage);
+               return -1;
+           }
            unset($vaultobj);
            $vault_credentialId = $this->createVaultCredential($execution_no, $vault_password, $OrganizationId);
            if($vault_credentialId == -1) {
