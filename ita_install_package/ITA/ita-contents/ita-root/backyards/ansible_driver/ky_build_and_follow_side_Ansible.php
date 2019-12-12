@@ -122,9 +122,15 @@
 
     require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
     $vaultobj = new AnsibleVault();
-    list($dir,$file,$password) = $vaultobj->getValutPasswdFileInfo();
+    list($ret,$dir,$file,$password) = $vaultobj->getValutPasswdFileInfo();
+
+    // ansible-vault パスワードファイル生成
+    $ret = $vaultobj->CraeteValutPasswdFile($strDRSRootPlayBookDirPath,
+                                            $vault_password_file);
+    if($ret === false) {
+        throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00050001");
+    }
     unset($vaultobj);
-    $vault_password_file = $strDRSRootPlayBookDirPath . "/" . $dir . "/" . $file;
 
     try{
         ////////////////////////////////
@@ -185,15 +191,23 @@
         // ansible-playbookコマンド実行時のオプション取得
         $stroptions = file_get_contents($stroptionfile);
 
+        $path = sprintf('%s/confs/commonconfs/path_ANSIBLE_MODULE.txt',$root_dir_path);
+        // 改行コードが付いている場合に取り除く
+        $ansible_path = @file_get_contents($path);
+        $ansible_path = str_replace("\n","",$ansible_path);
+
         // Ansible実行Commnad発行
-        //$strBuildCommand     = "sudo -u {$strExecUser} -i ansible-playbook {$stroptions} -i {$strhosts} {$strPlaybookPath} {$stransibleplaybook_options}";
         //$strBuildCommand     = "sudo -u {$strExecUser} -i ansible-playbook {$stroptions} -i {$strhosts} {$strPlaybookPath} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} ";
-        $strBuildCommand     = "sudo -u {$strExecUser} -i ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
+        $strBuildCommand     = "sudo -u {$strExecUser} -i {$ansible_path}/ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
 
         $resProcess = proc_open($strBuildCommand, $objDescriptorspec, $aryPipe);
 
         // 起動できたかを確認する
         if (is_resource($resProcess)===false ){
+
+            // vault パスワードファイル削除
+            @unlink($vault_password_file);
+
             // 異常フラグON
             $error_flag = 1;
 
@@ -210,6 +224,10 @@
         // PIDファイルを作成する
         $boolTouchResult = touch("{$strDataFollowDirPath}/{$intFollowTargetPid}.pid");
         if ( $boolTouchResult===false ){
+
+            // vault パスワードファイル削除
+            @unlink($vault_password_file);
+
             // 異常フラグON
             $error_flag = 1;
 
@@ -220,6 +238,9 @@
         // アンシブルが終了するまで待つ
         // ansible-playbookの終了ステータス = $ansible_return
         pcntl_waitpid($intFollowTargetPid, $refIntReturnStatus);
+
+        // vault パスワードファイル削除
+        @unlink($vault_password_file);
 
         // プロセスが終了した以降の処理
         if ( pcntl_wifexited($refIntReturnStatus)===true ){
