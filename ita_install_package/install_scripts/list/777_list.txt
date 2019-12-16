@@ -17,6 +17,10 @@
 /ita-root/temp/ky_mail_queues/ky_sysmail_0_queue
 /ita-root/temp/ky_mail_queues/ky_sysmail_1_success
 /ita-root/temp/ky_mail_queues/ky_sysmail_2_error
+/ita-root/temp/sym_ope_export
+/ita-root/temp/sym_ope_import
+/ita-root/temp/sym_ope_import/import
+/ita-root/temp/sym_ope_import/upload
 /ita-root/temp/update_by_file_error
 /ita-root/uploadfiles
 /ita-root/webroot/uploadfiles
