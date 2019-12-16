@@ -726,7 +726,7 @@ ANS_PARALLEL_EXE                  %INT%                            ,
 ANS_WINRM_ID                      %INT%                            ,
 ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
-ANS_VIRTUALENV_NAME               %VARCHR%(512)                     , 
+ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 
@@ -760,7 +760,7 @@ ANS_PARALLEL_EXE                  %INT%                            ,
 ANS_WINRM_ID                      %INT%                            ,
 ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
-ANS_VIRTUALENV_NAME               %VARCHR%(512)                     , 
+ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 
@@ -1669,6 +1669,91 @@ LAST_UPDATE_USER                  %INT%                             , -- 最終�
 PRIMARY KEY (JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- メインメニューパネル化対応 -
+
+
+-- -------------------------------------------------------
+-- --Symphony/オペレーション エクスポート/インポート機能用
+-- -------------------------------------------------------
+-- エクスポート/インポート管理 -
+CREATE TABLE B_DP_SYM_OPE_STATUS
+(
+TASK_ID                           %INT%                             , -- タスクID
+--
+TASK_STATUS                       %INT%                             , -- ステータス
+DP_TYPE                           %INT%                             , -- 処理種別
+FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
+DISP_SEQ                          %INT%                             , -- 表示順序
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (TASK_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_DP_SYM_OPE_STATUS_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                             , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴用変更種別
+--
+TASK_ID                           %INT%                             , -- 識別シーケンス
+TASK_STATUS                       %INT%                             , -- ステータス
+DP_TYPE                           %INT%                             , -- 処理種別
+FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
+DISP_SEQ                          %INT%                             , -- 表示順序
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- エクスポート/インポート管理 -
+
+-- Symphonyエクスポート紐付 -
+CREATE TABLE B_SYMPHONY_EXPORT_LINK
+(
+ROW_ID                          %INT%                               , -- ID
+
+HIERARCHY                       %INT%                               , -- 階層
+SRC_ROW_ID                      %INT%                               , -- 検索元項番
+SRC_ITEM                        %VARCHR%(128)                       , -- 検索元項目名
+DEST_MENU_ID                    %INT%                               , -- 検索先メニュー
+DEST_ITEM                       %VARCHR%(128)                       , -- 検索先項目名
+OTHER_CONDITION                 %VARCHR%(1024)                      , -- その他検索条件
+SPECIAL_SELECT_FUNC             %VARCHR%(1024)                      , -- 検索専用特別関数
+
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Symphonyエクスポート紐付 -
+
+-- オペレーションエクスポート紐付 -
+CREATE TABLE B_OPERATION_EXPORT_LINK
+(
+ROW_ID                          %INT%                               , -- ID
+
+HIERARCHY                       %INT%                               , -- 階層
+SRC_ROW_ID                      %INT%                               , -- 検索元項番
+SRC_ITEM                        %VARCHR%(128)                       , -- 検索元項目名
+DEST_MENU_ID                    %INT%                               , -- 検索先メニュー
+DEST_ITEM                       %VARCHR%(128)                       , -- 検索先項目名
+OTHER_CONDITION                 %VARCHR%(1024)                      , -- その他検索条件
+SPECIAL_SELECT_FUNC             %VARCHR%(1024)                      , -- 検索専用特別関数
+
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- オペレーションエクスポート紐付 -
+
+-- Symオペインポート時停止サービス -
+CREATE TABLE B_SVC_TO_STOP_IMP_SYM_OPE
+(
+ROW_ID                          %INT%                               , -- ID
+
+SERVICE_NAME                    %VARCHR%(128)                       , -- サービス名
+
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Symオペインポート時停止サービス -
+
 
 
 -- *****************************************************************************
