@@ -136,21 +136,37 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     list($strTmpValue,$tmpKeyExists) = isSetInArrayNestThenAssign($aryVariant,array('callType'),null);
     if( $tmpKeyExists===true ){
-        if( $strTmpValue=="insConstruct" ){
+        if( $strTmpValue=="insConstruct" ||
+           ($strTmpValue=="insConstruct_OperationExport" )){
+
             $objRadioColumn = $tmpAryColumn['WEB_BUTTON_UPDATE'];
             $objRadioColumn->setColLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-106010"));
-            
-            $objFunctionB = function ($objOutputType, $rowData, $aryVariant, $objColumn){
-                $strInitedColId = $objColumn->getID();
-                
-                $aryVariant['callerClass'] = get_class($objOutputType);
-                $aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
-                $strRIColId = $objColumn->getTable()->getRIColumnID();
-                
-                $rowData[$strInitedColId] = '<input type="radio" name="opeNo" onclick="javascript:operationLoadForExecute(' . $rowData[$strRIColId] . ')"/>';
-                
-                return $objOutputType->getBody()->getData($rowData,$aryVariant);
-            };
+
+            if($strTmpValue=="insConstruct" ) {
+                $objFunctionB = function ($objOutputType, $rowData, $aryVariant, $objColumn){
+                    $strInitedColId = $objColumn->getID();
+
+                    $aryVariant['callerClass'] = get_class($objOutputType);
+                    $aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+                    $strRIColId = $objColumn->getTable()->getRIColumnID();
+
+                    $rowData[$strInitedColId] = '<input type="radio" name="opeNo" onclick="javascript:operationLoadForExecute(' . $rowData[$strRIColId] . ')"/>';
+
+                    return $objOutputType->getBody()->getData($rowData,$aryVariant);
+                };
+            }
+            else{
+                $objFunctionB = function ($objOutputType, $rowData, $aryVariant, $objColumn){
+                    $strInitedColId = $objColumn->getID();
+                    $aryVariant['callerClass'] = get_class($objOutputType);
+                    $aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+                    $strRIColId = $objColumn->getTable()->getRIColumnID();
+
+                    $rowData[$strInitedColId] = '<input type="checkBox" name="opeNo" value="' . $rowData[$strRIColId] .'"/>';
+
+                    return $objOutputType->getBody()->getData($rowData,$aryVariant);
+                };
+            }
             
             $objTTBF = new TextTabBFmt();
             $objTTHF = new TabHFmt();//new SortedTabHFmt();
