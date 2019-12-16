@@ -1,1 +1,1 @@
-/usr/bin/local
+/usr/local/bin
