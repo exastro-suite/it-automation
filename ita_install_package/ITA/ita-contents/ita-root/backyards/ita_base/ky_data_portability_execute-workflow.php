@@ -46,6 +46,8 @@ try {
     require_once ROOT_DIR_PATH . '/libs/webcommonlibs/web_php_functions.php';
     require_once ROOT_DIR_PATH . '/libs/webcommonlibs/web_parts_for_request_init.php';
 
+    $execFlg = false;
+
     if (LOG_LEVEL === 'DEBUG') {
         // 処理開始ログ
         outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-STD-900003'));
@@ -57,25 +59,9 @@ try {
     define('DB_HOST',   $paramAry['host']);
     define('DB_NAME',   $paramAry['dbname']);
 
-    // 設定時間を超えても実行中のレコードがある場合は処理を終了する
-    $recordCnt = (int)getRunningRecord();
-    if ($recordCnt > 0) {
-        $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900062',
-                                          array(basename(__FILE__), __LINE__));
-        throw new Exception($logMsg);
-    }
-
-    // 未実行のレコードがない場合は処理を終了する
+    // 未実行のレコードを取得する
     $recordAry = getUnexecutedRecord();
     if (is_array($recordAry) === true) {
-        if (count($recordAry) === 0) {
-            if (LOG_LEVEL === 'DEBUG') {
-                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-STD-900004',
-                                                  array(basename(__FILE__), __LINE__)));
-                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-STD-900005'));
-            }
-            exit;
-        }
     } else {
         throw new Exception($objMTS->getSomeMessage('ITABASEH-STD-900005'));
     }
@@ -86,6 +72,8 @@ try {
     $importedTableAry = array();
     foreach ($recordAry as $record) {
 
+        $execFlg = true;
+
         $res = setStatus($record['TASK_ID'], STATUS_RUNNING);
         if ($res === false) {
             $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
@@ -95,7 +83,9 @@ try {
             continue;
         }
 
-        // データエクスポートを行う
+        /////////////////////////////////
+        // メニューエクスポートを行う
+        /////////////////////////////////
         if(1 == $record['DP_TYPE']){
             $result = exportData($record);
 
@@ -159,91 +149,147 @@ try {
 
             continue;
         }
+        /////////////////////////////////
+        // メニューインポートを行う
+        /////////////////////////////////
+        else if(2 == $record['DP_TYPE']){
 
-        // サービスを停止する
-        stopService($serviceAry);
+            // サービスを停止する
+            stopService($serviceAry);
 
-        $taskId = registData($record, $importedTableAry);
-        if ($taskId === false) {
-            restoreTables();
-            setStatus($record['TASK_ID'], STATUS_FAILURE);
+            $taskId = registData($record, $importedTableAry);
+            if ($taskId === false) {
+                restoreTables();
+                setStatus($record['TASK_ID'], STATUS_FAILURE);
+                // サービスを開始する
+                startpService($serviceAry);
+                continue;
+            }
+
+            $dstPath = UPLOADFILES_PATH . $taskId;
+            $res = mkdir($dstPath);
+            if ($res === false) {
+                outputLog(LOG_PREFIX, "Failed to create directory[{$dstPath}]. FILE:" . basename(__FILE__) . " LINE:" . __LINE__);
+                restoreTables();
+                setStatus($record['TASK_ID'], STATUS_FAILURE);
+                // サービスを開始する
+                startpService($serviceAry);
+                continue;
+            }
+
+            // ファイルをバックアップする
+            $res = fileBackup($taskId);
+            if ($res === false) {
+                restoreTables();
+                setStatus($record['TASK_ID'], STATUS_FAILURE);
+                // サービスを開始する
+                startpService($serviceAry);
+                continue;
+            }
+
+            // ファイルをコピーする
+            $res = fileImport($taskId);
+            if ($res === false) {
+                restoreTables();
+                restoreFiles($taskId);
+                setStatus($record['TASK_ID'], STATUS_FAILURE);
+                // サービスを開始する
+                startpService($serviceAry);
+                continue;
+            }
+
+            // ファイルの確認
+            $res = checkCopyFiles($taskId);
+            if ($res === false) {
+                restoreTables();
+                restoreFiles($taskId);
+                setStatus($record['TASK_ID'], STATUS_FAILURE);
+                // サービスを開始する
+                startpService($serviceAry);
+                continue;
+            }
+
+            $dstPath = UPLOADFILES_PATH . $taskId;
+            $res = removeFiles($dstPath);
+
+            $dstPath = IMPORT_PATH . $taskId;
+            $res = removeFiles($dstPath);
+
+            // ステータスを処理済みにする
+            $res = setStatus($record['TASK_ID'], STATUS_PROCESSED);
+
+            if ($res === false) {
+                restoreTables();
+                restoreFiles($taskId);
+                setStatus($record['TASK_ID'], STATUS_FAILURE);
+                // サービスを開始する
+                startpService($serviceAry);
+                continue;
+            }
+
+            // 正常終了時はバックアップファイルを削除する
+            if (file_exists(BACKUP_PATH . 'backup.sql') === true) {
+                unlink(BACKUP_PATH . 'backup.sql');
+            }
+
             // サービスを開始する
             startpService($serviceAry);
-            continue;
         }
-
-        $dstPath = UPLOADFILES_PATH . $taskId;
-        $res = mkdir($dstPath);
-        if ($res === false) {
-            outputLog(LOG_PREFIX, "Failed to create directory[{$dstPath}]. FILE:" . basename(__FILE__) . " LINE:" . __LINE__);
-            restoreTables();
-            setStatus($record['TASK_ID'], STATUS_FAILURE);
-            // サービスを開始する
-            startpService($serviceAry);
-            continue;
-        }
-
-        // ファイルをバックアップする
-        $res = fileBackup($taskId);
-        if ($res === false) {
-            restoreTables();
-            setStatus($record['TASK_ID'], STATUS_FAILURE);
-            // サービスを開始する
-            startpService($serviceAry);
-            continue;
-        }
-
-        // ファイルをコピーする
-        $res = fileImport($taskId);
-        if ($res === false) {
-            restoreTables();
-            restoreFiles($taskId);
-            setStatus($record['TASK_ID'], STATUS_FAILURE);
-            // サービスを開始する
-            startpService($serviceAry);
-            continue;
-        }
-
-        // ファイルの確認
-        $res = checkCopyFiles($taskId);
-        if ($res === false) {
-            restoreTables();
-            restoreFiles($taskId);
-            setStatus($record['TASK_ID'], STATUS_FAILURE);
-            // サービスを開始する
-            startpService($serviceAry);
-            continue;
-        }
-
-        $dstPath = UPLOADFILES_PATH . $taskId;
-        $res = removeFiles($dstPath);
-
-        $dstPath = IMPORT_PATH . $taskId;
-        $res = removeFiles($dstPath);
-
-        // ステータスを処理済みにする
-        $res = setStatus($record['TASK_ID'], STATUS_PROCESSED);
-
-        if ($res === false) {
-            restoreTables();
-            restoreFiles($taskId);
-            setStatus($record['TASK_ID'], STATUS_FAILURE);
-            // サービスを開始する
-            startpService($serviceAry);
-            continue;
-        }
-
-        // 正常終了時はバックアップファイルを削除する
-        if (file_exists(BACKUP_PATH . 'backup.sql') === true) {
-            unlink(BACKUP_PATH . 'backup.sql');
-        }
-
-        // サービスを開始する
-        startpService($serviceAry);
     }
 
-    // 処理済みフラグをクリアする
-    clearExecFlg();
+    /////////////////////////////////
+    // Symphony/オペレーションの処理を行う
+    /////////////////////////////////
+    $lastUpdateUser = NULL;
+
+    // 未実行のレコードを取得する
+    $recordAry = getUnexecutedRecordSymOpe();
+    if (is_array($recordAry) === true) {
+    } else {
+        throw new Exception($objMTS->getSomeMessage('ITABASEH-STD-900005'));
+    }
+
+    foreach ($recordAry as $record) {
+
+        $execFlg = true;
+
+        $res = setStatusSymOpe($record['TASK_ID'], STATUS_RUNNING, NULL, $lastUpdateUser);
+        if ($res === false) {
+            $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
+                                              array('B_DP_STATUS',basename(__FILE__), __LINE__));
+            outputLog(LOG_PREFIX, $logMsg);
+            setStatusSymOpe($record['TASK_ID'], STATUS_FAILURE);
+            continue;
+        }
+
+        /////////////////////////////////
+        // Symphony/オペレーションエクスポートを行う
+        /////////////////////////////////
+        else if(1 == $record['DP_TYPE']){
+            $res = exportSymOpe($record);
+
+            if ($res === false) {
+                setStatusSymOpe($record['TASK_ID'], STATUS_FAILURE);
+            }
+        }
+        /////////////////////////////////
+        // Symphony/オペレーションインポートを行う
+        /////////////////////////////////
+        else if(2 == $record['DP_TYPE']){
+            $res = importSymOpe($record, $lastUpdateUser);
+
+            if ($res === false) {
+                setStatusSymOpe($record['TASK_ID'], STATUS_FAILURE);
+            }
+
+        }
+    }
+
+    if(true === $execFlg){
+
+        // 処理済みフラグをクリアする
+        clearExecFlg();
+    }
 
     if (LOG_LEVEL === 'DEBUG') {
         outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-STD-900005'));
@@ -434,7 +480,7 @@ function getUnexecutedRecord(){
                                           array(basename(__FILE__), __LINE__)));
     }
 
-    $sql  = 'SELECT TASK_ID, DP_TYPE, IMPORT_TYPE, FILE_NAME';
+    $sql  = 'SELECT TASK_ID, DP_TYPE, IMPORT_TYPE, FILE_NAME, NOTE';
     $sql .= ' FROM B_DP_STATUS';
     $sql .= ' WHERE TASK_STATUS = 1';
     $sql .= " AND DISUSE_FLAG = '0'";
@@ -1159,7 +1205,7 @@ function setStatus($taskId, $status, $uploadFile=NULL){
             $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900015',
                                               array(basename(__FILE__), __LINE__));
             outputLog(LOG_PREFIX, $logMsg);
-            return;
+            return false;
         }
     }
     $errFlg = 0;
@@ -1265,7 +1311,7 @@ function setStatus($taskId, $status, $uploadFile=NULL){
         'NOTE' => $resAry[0]['NOTE'],
         'DISUSE_FLAG' => $resAry[0]['DISUSE_FLAG'],
         'LAST_UPDATE_TIMESTAMP' => $resAry[0]['LAST_UPDATE_TIMESTAMP'],
-        'LAST_UPDATE_USER' => $resAry[0]['LAST_UPDATE_USER']
+        'LAST_UPDATE_USER' => LAST_UPDATE_USER
     );
 
     $tmpAry = array();
@@ -1365,7 +1411,7 @@ function getRecordById($id){
     $sql  = 'SELECT TASK_ID, TASK_STATUS, DP_TYPE, IMPORT_TYPE, FILE_NAME, DISP_SEQ, NOTE, DISUSE_FLAG,';
     $sql .= ' LAST_UPDATE_TIMESTAMP, LAST_UPDATE_USER';
     $sql .= ' FROM B_DP_STATUS';
-    $sql .= ' WHERE TASK_ID = :TASK_ID';
+    $sql .= ' WHERE DISUSE_FLAG="0" AND TASK_ID = :TASK_ID';
 
     if (LOG_LEVEL === 'DEBUG') {
         outputLog(LOG_PREFIX, $sql);
@@ -1431,7 +1477,7 @@ function getRunningRecord(){
     $sql  = 'SELECT COUNT(*) AS COUNT';
     $sql .= ' FROM B_DP_STATUS';
     $sql .= ' WHERE TASK_STATUS = ' . STATUS_RUNNING;
-    $sql .= " AND LAST_UPDATE_TIMESTAMP < '" . $limitDatetime . "'";
+    $sql .= " AND DISUSE_FLAG='0' AND LAST_UPDATE_TIMESTAMP < '" . $limitDatetime . "'";
 
     if (LOG_LEVEL === 'DEBUG') {
         outputLog(LOG_PREFIX, $sql);
@@ -1924,7 +1970,7 @@ function exportData($record){
     }
 
     $output = NULL;
-    $cmd = "cd '" . $exportPath . "';sudo tar cvfz '" . ROOT_DIR_PATH . '/temp/data_export/' . $exportFile . "' -T target_list.txt 2>&1";
+    $cmd = "cd '" . $exportPath . "';sudo tar cfz '" . ROOT_DIR_PATH . '/temp/data_export/' . $exportFile . "' -T target_list.txt 2>&1";
     exec($cmd, $output, $return_var);
 
     if(0 != $return_var){
@@ -2288,4 +2334,1450 @@ function getInfoOfLoadTable($strMenuIdNumeric){
                       ,"SEQ_IDS"          =>$aryOtherSeqIds
                        );
     return array($aryValues,$intErrorType,$strErrMsg);
+}
+
+/*
+ * 未実行レコードを取得する(Symphony/オペレーション用)
+ */
+function getUnexecutedRecordSymOpe(){
+    global $objDBCA, $objMTS;
+
+    if (LOG_LEVEL === 'DEBUG') {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-STD-900009',
+                                          array(basename(__FILE__), __LINE__)));
+    }
+
+    $sql  = 'SELECT TASK_ID, DP_TYPE, FILE_NAME, NOTE';
+    $sql .= ' FROM B_DP_SYM_OPE_STATUS';
+    $sql .= ' WHERE TASK_STATUS = 1';
+    $sql .= " AND DISUSE_FLAG = '0'";
+    $sql .= ' ORDER BY TASK_ID ASC';
+
+    if (LOG_LEVEL === 'DEBUG') {
+        outputLog(LOG_PREFIX, $sql);
+    }
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                          array(basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+    $resObj = $objQuery->sqlExecute();
+    if ($resObj === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                      array(basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+
+    $resAry = array();
+    while ($row = $objQuery->resultFetch()) {
+        $resAry[] = $row;
+    }
+
+    return $resAry;
+}
+
+/**
+ * ステータスを更新する(Symphony/オペレーション用)
+ *
+ * @param    int    $taskId        タスクID（プライマリキー)
+ * @param    int    $status        ステータス
+ *                                     1:未実行
+ *                                     2:実行中
+ *                                     3:処理済み
+ *                                     4:失敗
+ */
+function setStatusSymOpe($taskId, $status, $uploadFile=NULL, &$lastUpdateUser=0, &$jnlSeqNo=0){
+    global $objMTS, $objDBCA, $db_model_ch;
+
+    if (LOG_LEVEL === 'DEBUG') {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-STD-900025',
+                                                      array($taskId, $status,
+                                                            basename(__FILE__), __LINE__)));
+    }
+
+    if($status != STATUS_PROCESSED){
+        $res = $objDBCA->transactionStart();
+        if ($res === false) {
+            $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900015',
+                                              array(basename(__FILE__), __LINE__));
+            outputLog(LOG_PREFIX, $logMsg);
+            return false;
+        }
+    }
+    $errFlg = 0;
+    $resArray = getSequenceLockInTrz('B_DP_SYM_OPE_STATUS_RIC', 'A_SEQUENCE');
+    if ($resArray[1] != 0) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900052',
+                                                      array('A_SEQUENCE', 'B_DP_SYM_OPE_STATUS_RIC',
+                                                      basename(__FILE__), __LINE__)));
+        $res = $objDBCA->transactionRollback();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900050',
+                                                          array(basename(__FILE__), __LINE__)));
+        }
+        return false;
+    }
+
+    $resArray = getSequenceLockInTrz('B_DP_SYM_OPE_STATUS_JSQ', 'A_SEQUENCE');
+    if ($resArray[1] != 0) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900052',
+                                                      array('A_SEQUENCE', 'B_DP_SYM_OPE_STATUS_RIC',
+                                                      basename(__FILE__), __LINE__)));
+        $res = $objDBCA->transactionRollback();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900050', 
+                                                      array(basename(__FILE__), __LINE__)));
+        }
+        return false;
+    }
+
+    $sql = "SELECT VALUE FROM A_SEQUENCE WHERE NAME = 'B_DP_SYM_OPE_STATUS_RIC'";
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900053',
+                                          array('A_SEQUENCE', 'B_DP_SYM_OPE_STATUS_RIC', basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900053',
+                                                      array('A_SEQUENCE', 'B_DP_SYM_OPE_STATUS_RIC',
+                                                      basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+    $p_execution_utn_no = $resArray[0];
+
+    // Jnl№を取得する
+    $resArray = getSequenceValueFromTable('B_DP_SYM_OPE_STATUS_JSQ', 'A_SEQUENCE', FALSE);
+    if ($resArray[1] != 0) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900017',
+                                                      array(basename(__FILE__), __LINE__)));
+        $res = $objDBCA->transactionRollback();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900050',
+                                                          array(basename(__FILE__), __LINE__)));
+        }
+        return false;
+    }
+    $jnlSeqNo = $resArray[0];
+
+    // 更新系テーブルの情報取得
+    $resAry = getRecordByIdSymOpe($taskId);
+    if ($resAry === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900058',
+                                                      array(basename(__FILE__), __LINE__)));
+        return false;
+    }
+
+    $arrayConfig = array(
+        'JOURNAL_SEQ_NO' => '',
+        'JOURNAL_ACTION_CLASS' => '',
+        'JOURNAL_REG_DATETIME' => '',
+        'TASK_ID' => '',
+        'TASK_STATUS' => '',
+        'DP_TYPE' => '',
+        'FILE_NAME' => '',
+        'DISP_SEQ' => '',
+        'NOTE' => '',
+        'DISUSE_FLAG' => '',
+        'LAST_UPDATE_TIMESTAMP' => '',
+        'LAST_UPDATE_USER' => ''
+    );
+
+    if(NULL !== $uploadFile){
+        $fileName = $uploadFile;
+    }
+    else{
+        $fileName = $resAry[0]['FILE_NAME'];
+    }
+    $lastUpdateUser = $resAry[0]['LAST_UPDATE_USER'];
+
+    $arrayValue = array(
+        'JOURNAL_SEQ_NO' => $jnlSeqNo,
+        'JOURNAL_ACTION_CLASS' => '',
+        'JOURNAL_REG_DATETIME' => '',
+        'TASK_ID' => $resAry[0]['TASK_ID'],
+        'TASK_STATUS' => $status,
+        'DP_TYPE' => $resAry[0]['DP_TYPE'],
+        'FILE_NAME' => $fileName,
+        'DISP_SEQ' => $resAry[0]['DISP_SEQ'],
+        'NOTE' => $resAry[0]['NOTE'],
+        'DISUSE_FLAG' => $resAry[0]['DISUSE_FLAG'],
+        'LAST_UPDATE_TIMESTAMP' => $resAry[0]['LAST_UPDATE_TIMESTAMP'],
+        'LAST_UPDATE_USER' => LAST_UPDATE_USER
+    );
+
+    $tmpAry = array();
+
+    $resAry = makeSQLForUtnTableUpdate($db_model_ch,
+                                         'UPDATE',
+                                         'TASK_ID',
+                                         'B_DP_SYM_OPE_STATUS',
+                                         'B_DP_SYM_OPE_STATUS_JNL',
+                                         $arrayConfig,
+                                         $arrayValue,
+                                         $tmpAry );
+
+    $sqlUtnBody = $resAry[1];
+    $arrayUtnBind = $resAry[2];
+    $sqlJnlBody = $resAry[3];
+    $arrayJnlBind = $resAry[4];
+
+    $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
+    $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
+
+    if ($objQueryUtn->getStatus() === false || $objQueryJnl->getStatus() === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900048',
+                                                      array(basename(__FILE__), __LINE__, $taskId)));
+        outputLog(LOG_PREFIX, $objQueryUtn->getLastError());
+        $res = $objDBCA->transactionRollback();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900050',
+                                                          array(basename(__FILE__), __LINE__)));
+        }
+        return false;
+    }
+
+    if ($objQueryUtn->sqlBind($arrayUtnBind) != "" || $objQueryJnl->sqlBind($arrayJnlBind) != "") {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900048',
+                                                      array(basename(__FILE__), __LINE__, $taskId)));
+        $res = $objDBCA->transactionRollback();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900050',
+                                                          array(basename(__FILE__), __LINE__)));
+        }
+        return false;
+    }
+
+    $objQueryUtn->sqlBind(array('TASK_ID' => $taskId));
+
+    $rUtn = $objQueryUtn->sqlExecute();
+    if ($rUtn !== true) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900048',
+                                                      array(basename(__FILE__), __LINE__, $taskId)));
+        outputLog(LOG_PREFIX, $objQueryUtn->getLastError());
+        $res = $objDBCA->transactionRollback();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900050',
+                                                          array(basename(__FILE__), __LINE__)));
+        }
+        return false;
+    }
+
+    $objQueryJnl->sqlBind($arrayJnlBind);
+
+    $rJnl = $objQueryJnl->sqlExecute();
+    if ($rJnl !== true) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900048',
+                                                      array(basename(__FILE__), __LINE__, $taskId)));
+        outputLog(LOG_PREFIX, $objQueryJnl->getLastError());
+        $res = $objDBCA->transactionRollback();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900050',
+                                                          array(basename(__FILE__), __LINE__)));
+        }
+        return false;
+    }
+
+    if($status != STATUS_PROCESSED){
+        $res = $objDBCA->transactionCommit();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900036',
+                                                          array(basename(__FILE__), __LINE__)));
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * プライマリキーをもとにレコードを一件取得する(Symphony/オペレーション用)
+ *
+ * @param    string    $id                プライマリキー
+ * @return   array     $retAry            取得したレコード  
+ */
+function getRecordByIdSymOpe($id){
+    global $objDBCA, $objMTS;
+
+    $errFlg = 0;
+    $sql  = 'SELECT TASK_ID, TASK_STATUS, DP_TYPE, FILE_NAME, DISP_SEQ, NOTE, DISUSE_FLAG,';
+    $sql .= ' LAST_UPDATE_TIMESTAMP, LAST_UPDATE_USER';
+    $sql .= ' FROM B_DP_SYM_OPE_STATUS';
+    $sql .= ' WHERE DISUSE_FLAG="0" AND TASK_ID = :TASK_ID';
+
+    if (LOG_LEVEL === 'DEBUG') {
+        outputLog(LOG_PREFIX, $sql);
+    }
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                      array(basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+
+    $res = $objQuery->sqlBind(array('TASK_ID' => $id));
+    if ($res != '') {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                      array(basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+    
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                      array(baename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+
+    $retAry = array();
+    while ($row = $objQuery->resultFetch()) {
+        $retAry[] = $row;
+    }
+
+    if (count($retAry) === 0) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900048',
+                                                      array(basename(__FILE__), __LINE__, $id)));
+        return false;
+    }
+
+    return $retAry;
+}
+
+/**
+ * Symphony/オペレーションエクスポート
+ */
+function exportSymOpe($record){
+
+    global $objDBCA, $objMTS;
+    $targetSymArray = array();
+    $targetOpeArray = array();
+    $taskId = $record['TASK_ID'];
+    $exportPath = ROOT_DIR_PATH . '/temp/sym_ope_export/' . $taskId;
+    $symphonyPath = $exportPath . "/symphony";
+    $operationPath = $exportPath . "/operation";
+
+    try{
+
+        // エクスポート対象のSymphonyを特定する
+        $tmpArray = explode("\n", $record['NOTE']);
+        $tmpSymArray = explode(":", $tmpArray[0]);
+        if(null != $tmpSymArray[1]){
+            $targetSymArray = explode(",", $tmpSymArray[1]);
+        }
+
+        // エクスポート対象のオペレーションを特定する
+        $tmpArray = explode("\n", $record['NOTE']);
+        $tmpOpeArray = explode(":", $tmpArray[1]);
+        if(null != $tmpOpeArray[1]){
+            $targetOpeArray = explode(",", $tmpOpeArray[1]);
+        }
+
+        // 作業ディレクトリ作成
+        $res = mkdir($exportPath);
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "Creation of directory[{$exportPath}] failed. FileName=[" . basename(__FILE__) . "],Line=[" . __LINE__ . "].");
+            // 例外処理へ
+            throw new Exception();
+        }
+        chmod($exportPath, 0777);
+
+        $res = mkdir($symphonyPath);
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "Creation of directory[{$symphonyPath}] failed. FileName=[" . basename(__FILE__) . "],Line=[" . __LINE__ . "].");
+            // 例外処理へ
+            throw new Exception();
+        }
+        chmod($symphonyPath, 0777);
+
+        $res = mkdir($operationPath);
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "Creation of directory[{$operationPath}] failed. FileName=[" . basename(__FILE__) . "],Line=[" . __LINE__ . "].");
+            // 例外処理へ
+            throw new Exception();
+        }
+        chmod($operationPath, 0777);
+
+        // Symphonyエクスポート紐付テーブルを検索する
+        $sql  = "SELECT ROW_ID, HIERARCHY, SRC_ROW_ID, SRC_ITEM, DEST_MENU_ID, DEST_ITEM, OTHER_CONDITION, SPECIAL_SELECT_FUNC ";
+        $sql .= " FROM B_SYMPHONY_EXPORT_LINK ";
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if ($objQuery->getStatus() === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            // 例外処理へ
+            throw new Exception();
+        }
+        $res = $objQuery->sqlExecute();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        $symExpLinktAry = array();
+        while ($row = $objQuery->resultFetch()){
+            $symExpLinktAry[] = $row;
+        }
+
+        // メニューの情報を取得する
+        foreach($symExpLinktAry as &$symExpLink){
+
+            $tmpAryRetBody = getInfoOfLoadTable($symExpLink['DEST_MENU_ID']);
+
+            if( $tmpAryRetBody[1] !== null ){
+                // 例外処理へ
+                throw new Exception();
+            }
+            $aryValues = $tmpAryRetBody[0];
+            $symExpLink['PRIMARY_KEY']      = $aryValues['TABLE_INFO']['UTN_ROW_INDENTIFY'];
+            $symExpLink['TABLE_NAME']       = $aryValues['TABLE_INFO']['UTN']['OBJECT_ID'];
+            $symExpLink['JNL_TABLE_NAME']   = $aryValues['TABLE_INFO']['JNL']['OBJECT_ID'];
+            $symExpLink['SEQUENCE_RIC']     = $aryValues['TABLE_INFO']['REQUIRED_COLUMNS']['UtnSeqName'];
+            $symExpLink['SEQUENCE_JSQ']     = $aryValues['TABLE_INFO']['REQUIRED_COLUMNS']['JnlSeqName'];
+            $symExpLink['UPLOAD_DIRS']      = $aryValues['UPLOAD_DIRS'];
+        }
+        unset($symExpLink);
+
+        $symInfoArray = array();
+
+        // エクスポート対象のSymphonyごとにループ
+        foreach($targetSymArray as $targetSym){
+
+            // 作業ディレクトリ作成
+            $workSymphonyPath = $symphonyPath . "/" . $targetSym;
+            $res = mkdir($workSymphonyPath);
+            if ($res === false) {
+                outputLog(LOG_PREFIX, "Creation of directory[{$workSymphonyPath}] failed. FileName=[" . basename(__FILE__) . "],Line=[" . __LINE__ . "].");
+                // 例外処理へ
+                throw new Exception();
+            }
+            chmod($workSymphonyPath, 0777);
+
+            $dataListArray = array();
+            $uploadFilesArray = array();
+
+            // エクスポートデータ取得
+            $result = getExportData($workSymphonyPath, $symExpLinktAry, array($targetSym), "", $symInfoArray, $dataListArray, $uploadFilesArray);
+
+            if (false === $result){
+                // 例外処理へ
+                throw new Exception();
+            }
+
+            // エクスポートデータの情報を書込み
+            $json = json_encode($dataListArray);
+            $result = file_put_contents($workSymphonyPath . "/INFO_EXPORT_DATA", $json);
+            if (false === $result){
+                outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $workPath . "/INFO_EXPORT_DATA],Value={$json}");
+                // 例外処理へ
+                throw new Exception();
+            }
+
+            // アップロードファイルの情報を書込み
+            $json = json_encode($uploadFilesArray);
+            $result = file_put_contents($workSymphonyPath . "/INFO_UPLOAD_FILES", $json);
+            if (false === $result){
+                outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $workPath . "/INFO_UPLOAD_FILES],Value={$json}");
+                // 例外処理へ
+                throw new Exception();
+            }
+        }
+
+        // Symphonyの情報を書込み
+        $json = json_encode($symInfoArray);
+        $result = file_put_contents($exportPath . "/INFO_SYMPHONY", $json);
+        if (false === $result){
+            outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $workPath . "/INFO_SYMPHONY],Value={$json}");
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        // オペレーションエクスポート紐付テーブルを検索する
+        $sql  = "SELECT ROW_ID, HIERARCHY, SRC_ROW_ID, SRC_ITEM, DEST_MENU_ID, DEST_ITEM, OTHER_CONDITION, SPECIAL_SELECT_FUNC ";
+        $sql .= " FROM B_OPERATION_EXPORT_LINK ";
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if ($objQuery->getStatus() === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            // 例外処理へ
+            throw new Exception();
+        }
+        $res = $objQuery->sqlExecute();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        $opeExpLinktAry = array();
+        while ($row = $objQuery->resultFetch()){
+            $opeExpLinktAry[] = $row;
+        }
+
+        // メニューの情報を取得する
+        foreach($opeExpLinktAry as &$opeExpLink){
+
+            $tmpAryRetBody = getInfoOfLoadTable($opeExpLink['DEST_MENU_ID']);
+
+            if( $tmpAryRetBody[1] !== null ){
+                // 例外処理へ
+                throw new Exception();
+            }
+            $aryValues = $tmpAryRetBody[0];
+            $opeExpLink['PRIMARY_KEY']      = $aryValues['TABLE_INFO']['UTN_ROW_INDENTIFY'];
+            $opeExpLink['TABLE_NAME']       = $aryValues['TABLE_INFO']['UTN']['OBJECT_ID'];
+            $opeExpLink['JNL_TABLE_NAME']   = $aryValues['TABLE_INFO']['JNL']['OBJECT_ID'];
+            $opeExpLink['SEQUENCE_RIC']     = $aryValues['TABLE_INFO']['REQUIRED_COLUMNS']['UtnSeqName'];
+            $opeExpLink['SEQUENCE_JSQ']     = $aryValues['TABLE_INFO']['REQUIRED_COLUMNS']['JnlSeqName'];
+            $opeExpLink['UPLOAD_DIRS']      = $aryValues['UPLOAD_DIRS'];
+        }
+        unset($opeExpLink);
+
+        $opeInfoArray = array();
+
+        // エクスポート対象のオペレーションごとにループ
+        foreach($targetOpeArray as $targetope){
+
+            // 作業ディレクトリ作成
+            $workOperationPath = $operationPath . "/" . $targetope;
+            $res = mkdir($workOperationPath);
+            if ($res === false) {
+                outputLog(LOG_PREFIX, "Creation of directory[{$workOperationPath}] failed. FileName=[" . basename(__FILE__) . "],Line=[" . __LINE__ . "].");
+                // 例外処理へ
+                throw new Exception();
+            }
+            chmod($workOperationPath, 0777);
+
+            $dataListArray = array();
+            $uploadFilesArray = array();
+
+            // エクスポートデータ取得
+            $result = getExportData($workOperationPath, $opeExpLinktAry, array($targetope), "", $opeInfoArray, $dataListArray, $uploadFilesArray);
+
+            if (false === $result){
+                // 例外処理へ
+                throw new Exception();
+            }
+
+            // エクスポートデータの情報を書込み
+            $json = json_encode($dataListArray);
+            $result = file_put_contents($workOperationPath . "/INFO_EXPORT_DATA", $json);
+            if (false === $result){
+                outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $workPath . "/INFO_EXPORT_DATA],Value={$json}");
+                // 例外処理へ
+                throw new Exception();
+            }
+
+            // アップロードファイルの情報を書込み
+            $json = json_encode($uploadFilesArray);
+            $result = file_put_contents($workOperationPath . "/INFO_UPLOAD_FILES", $json);
+            if (false === $result){
+                outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $workPath . "/INFO_UPLOAD_FILES],Value={$json}");
+                // 例外処理へ
+                throw new Exception();
+            }
+        }
+
+        // オペレーションの情報を書込み
+        $json = json_encode($opeInfoArray);
+        $result = file_put_contents($exportPath . "/INFO_OPERATION", $json);
+        if (false === $result){
+            outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $workPath . "/INFO_OPERATION],Value={$json}");
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        // リリースファイルをコピーする
+        $releaseFilePath = ROOT_DIR_PATH . '/libs/release/ita_base';
+        if(file_exists($releaseFilePath)){
+
+            $output = NULL;
+            $cmd = "cp -p {$releaseFilePath} {$exportPath}/. 2>&1";
+
+            exec($cmd, $output, $return_var);
+
+            if(0 != $return_var){
+                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                outputLog(LOG_PREFIX, "command=[{$cmd}]");
+                // 例外処理へ
+                throw new Exception();
+            }
+        }
+        else{
+            outputLog(LOG_PREFIX, "File[{$releaseFilePath}] does not exists.");
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        $exportFile = 'ita_exportdata_' . date('YmdHis') . '.kym2';
+
+        // ステータスを処理済みにする
+        $res = setStatusSymOpe($record['TASK_ID'], STATUS_PROCESSED, $exportFile, $dummy, $jnlSeqNo);
+
+        // uploadfilesにディレクトリを作成
+        $pathArray = array();
+        $pathArray[0] = ROOT_DIR_PATH . '/uploadfiles/2100000403/';
+        $pathArray[1] = $pathArray[0] . 'FILE_NAME/';
+        $pathArray[2] = $pathArray[1] . sprintf("%010d", $record['TASK_ID']) . '/';
+        $pathArray[3] = $pathArray[2] . 'old/';
+        $pathArray[4] = $pathArray[3] . sprintf("%010d", $jnlSeqNo) . '/';
+        $uploadDir = $pathArray[2];
+        $uploadDirJnl = $pathArray[4];
+
+        foreach($pathArray as $path){
+
+            if(!file_exists($path)){
+                $mask = umask();
+                umask(000);
+                $result = mkdir($path, 0777, true);
+                umask($mask);
+
+                if(true != $result){
+                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', ""));
+                    outputLog(LOG_PREFIX, "Creation of directory[{$path}] failed. FileName=[" . basename(__FILE__) . "],Line=[" . __LINE__ . "].");
+                    // 例外処理へ
+                    throw new Exception();
+
+                }
+                chmod($path, 0777);
+            }
+        }
+
+
+        // kym2に固める
+        $output = NULL;
+        $cmd = "cd '" . $exportPath . "';find . > target_list.txt 2>&1";
+        exec($cmd, $output, $return_var);
+
+        if(0 != $return_var){
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+            outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        $output = NULL;
+        $cmd = "cd '{$exportPath}';sudo tar cfz '{$uploadDir}/{$exportFile}' -T target_list.txt 2>&1";
+        exec($cmd, $output, $return_var);
+
+        if(0 != $return_var){
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+            outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        // エクスポートファイルをコピー
+        $output = NULL;
+        $cmd = "cp -rp {$uploadDir}/{$exportFile} {$uploadDirJnl}/{$exportFile} 2>&1";
+
+        exec($cmd, $output, $return_var);
+
+        if(0 != $return_var){
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+            outputLog(LOG_PREFIX, "command=[{$cmd}]");
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        // 作業ディレクトリ削除
+        removeFiles($exportPath, true);
+
+        return true;
+    }
+    catch (Exception $e){
+        // 作業ディレクトリ削除
+        if(file_exists($exportPath)){
+            removeFiles($exportPath, true);
+        }
+        // ステータスを更新
+        setStatusSymOpe($record['TASK_ID'], STATUS_FAILURE);
+
+        return false;
+    }
+}
+/**
+ * エクスポートデータ取得
+ */
+function getExportData($workPath, $linkArray, $parentData, $parentSrcNo, &$infoArray, &$dataListArray, &$uploadFilesArray){
+
+    $linkKeyArray = array_keys(array_column($linkArray, 'SRC_ROW_ID'), $parentSrcNo);
+
+    foreach($linkKeyArray as $linkKey){
+
+        $linkData = $linkArray[$linkKey];
+
+        if($linkData['SRC_ITEM'] == null){
+            $parentKey = 0;
+        }
+        else{
+            $parentKey = $linkData['SRC_ITEM'];
+        }
+
+        // 現行データ検索
+        if("" == $linkData['SPECIAL_SELECT_FUNC']){
+            $currentDataArray = selectCurrentData($linkData['TABLE_NAME'], $linkData['DEST_ITEM'], $parentData, $parentKey, $linkData['OTHER_CONDITION']);
+        }
+        else{
+            // 特別な検索関数が用意されている場合は、それを使う
+            $func = $linkData['SPECIAL_SELECT_FUNC'];
+            if(is_callable($func) !== true){
+                outputLog(LOG_PREFIX, "Function[$func] is not callable. File=[" . $workPath . "/" . $linkData['TABLE_NAME'] . "],Value={$json}");
+                return false;
+            }
+            $currentDataArray = $func($linkData['TABLE_NAME'], $linkData['DEST_ITEM'], $parentData, $parentKey, $linkData['OTHER_CONDITION']);
+        }
+
+        if (false === $currentDataArray){
+            return false;
+        }
+
+        if(0 === count($currentDataArray)){
+            continue;
+        }
+
+        // Symphonyまたはオペレーションの名前を取得
+        if(1 == $linkData['HIERARCHY']){
+            if(array_key_exists('SYMPHONY_NAME', $currentDataArray[0])){
+                $infoArray[$parentData[$parentKey]] = $currentDataArray[0]['SYMPHONY_NAME'];
+            }
+            else if(array_key_exists('OPERATION_NAME', $currentDataArray[0])){
+                $infoArray[$parentData[$parentKey]] = $currentDataArray[0]['OPERATION_NAME'];
+            }
+        }
+
+        // 現行データの主キーを取得
+        $primaryKeyArray = array_column($currentDataArray, $linkData['PRIMARY_KEY']);
+
+        // 履歴データ検索
+        $jurnalDataArray = selectJurnalData($linkData['JNL_TABLE_NAME'], $linkData['PRIMARY_KEY'], $primaryKeyArray);
+        if (false === $jurnalDataArray){
+            return false;
+        }
+
+        // 現行データ書込み
+        $path = $workPath . "/" . $linkData['TABLE_NAME'];
+        if(file_exists($path)){
+            $nowDataArray = json_decode(file_get_contents($path));
+            $json = json_encode(array_merge($nowDataArray, $currentDataArray));
+
+        }
+        else{
+            $json = json_encode($currentDataArray);
+        }
+        $result = file_put_contents($path, $json);
+        if (false === $result){
+            outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[{$path}],Value={$json}");
+            return false;
+        }
+
+        // 履歴データ書込み
+        $path = $workPath . "/" . $linkData['JNL_TABLE_NAME'];
+        if(file_exists($path)){
+            $nowDataArray = json_decode(file_get_contents($path));
+            $json = json_encode(array_merge($nowDataArray, $jurnalDataArray));
+
+        }
+        else{
+            $json = json_encode($jurnalDataArray);
+        }
+        $result = file_put_contents($path, $json);
+        if (false === $result){
+            outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[{$path}],Value={$json}");
+            return false;
+        }
+
+        // エクスポートデータの情報を設定
+        $dataListIdArray = array_column($dataListArray, 'ROW_ID');
+        if(false === array_search($linkData['ROW_ID'], $dataListIdArray)){
+            $dataListArray[] = $linkData;
+        }
+
+        // アップロードファイル取得
+        foreach( $linkData['UPLOAD_DIRS'] as $uploadDir){
+            foreach( $primaryKeyArray as $primaryKey){
+
+                $targetDir = substr($uploadDir, 1) . "/" . sprintf("%010d", $primaryKey);
+
+                if (file_exists(ROOT_DIR_PATH . "/{$targetDir}") === false ) {
+                    continue;
+                }
+
+                $uploadFilesArray[] = $targetDir;
+
+                $output = NULL;
+                $cmd = "cd '" . ROOT_DIR_PATH . "';sudo cp -frp --parents '{$targetDir}' '{$workPath}' 2>&1";
+                exec($cmd, $output, $return_var);
+
+                if(0 != $return_var){
+                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                    outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+                    return false;
+                }
+            }
+        }
+
+        // 次の階層のデータの取得を行う
+        foreach($currentDataArray as $currentData){
+            // エクスポートデータ取得
+            $resultArray = getExportData($workPath, $linkArray, $currentData, $linkData['ROW_ID'], $infoArray, $dataListArray, $uploadFilesArray);
+            if (false === $resultArray){
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+/**
+ * 現行データ検索
+ */
+function selectCurrentData($destTableName, $destItem, $parentData, $parentKey, $otherCondition){
+
+    global $objDBCA, $objMTS;
+    $destValue = $parentData[$parentKey];
+
+    // テーブルを検索する
+    $sql  = "SELECT * FROM {$destTableName} ";
+    $sql .= "WHERE {$destItem}=:{$destItem} ";
+    if($otherCondition != null){
+        $sql .= " AND {$otherCondition}";
+    }
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+    if( $objQuery->sqlBind(array($destItem => $destValue)) != "" ){
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+
+    $resultArray = array();
+    while ($row = $objQuery->resultFetch()){
+        $resultArray[] = $row;
+    }
+
+    return $resultArray;
+}
+
+/**
+ * 履歴データ検索
+ */
+function selectJurnalData($destTableJnlName, $primaryKeyName, $primaryKeyArray){
+
+    global $objDBCA, $objMTS;
+
+    // テーブルを検索する
+    $sql  = "SELECT * FROM {$destTableJnlName} ";
+    $sql .= "WHERE {$primaryKeyName} IN(" . implode(",", $primaryKeyArray) . ")";
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+
+    $resultArray = array();
+    while ($row = $objQuery->resultFetch()){
+        $resultArray[] = $row;
+    }
+
+    return $resultArray;
+}
+
+/**
+ * ファイル管理、テンプレート管理検索（LIKE検索用特別版）
+ */
+function selectFileTemplData($destTableName, $destItem, $parentData, $parentKey, $otherCondition){
+
+    global $objDBCA, $objMTS;
+    $resultArray = array();
+    $destValue = $parentData[$parentKey];
+
+    // 検索項目からCPF_XXXまたはTPF_XXXを抽出する
+    if('B_ANS_CONTENTS_FILE' === $destTableName){
+        $pattern = '/{{\sCPF\_[a-zA-Z0-9_]+\s}}/';
+    }
+    else if('B_ANS_TEMPLATE_FILE' === $destTableName){
+        $pattern = '/{{\sTPF\_[a-zA-Z0-9_]+\s}}/';
+    }
+    else{
+        return array();
+    }
+    $return = preg_match($pattern, $destValue, $match);
+
+    if(1 !== $return){
+        return array();
+    }
+
+    $destValueExtract = str_replace(array('{{ ', ' }}'), '', $match[0]);
+
+    // テーブルを検索する
+    $sql  = "SELECT * FROM {$destTableName} ";
+    $sql .= "WHERE {$destItem}=:{$destItem} ";
+    if($otherCondition != null){
+        $sql .= " AND {$otherCondition}";
+    }
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+    if( $objQuery->sqlBind(array($destItem => $destValueExtract)) != "" ){
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+
+    while ($row = $objQuery->resultFetch()){
+        $resultArray[] = $row;
+    }
+
+    return $resultArray;
+}
+
+/**
+ * DSC資格情報管理検索（特別版）
+ */
+function selectDscCredential($destTableName, $destItem, $parentData, $parentKey, $otherCondition){
+
+    global $objDBCA, $objMTS;
+    $resultArray = array();
+
+    // コンフィグファイルを取得する
+    $matterFilePath = ROOT_DIR_PATH . "/uploadfiles/2100060003/RESOURCE_MATTER_FILE/" . sprintf("%010d", $parentData['RESOURCE_MATTER_ID']) . "/" . $parentData['RESOURCE_MATTER_FILE'];
+
+    if(!file_exists($matterFilePath)){
+        return array();
+    }
+    $matterFile = file_get_contents($matterFilePath);
+
+    $return = preg_match_all('/{{\sCDT\_[a-zA-Z0-9_]+\s}}/', $matterFile, $match);
+
+    if(false === $return || 1 > $return){
+        return array();
+    }
+
+    $destValue = array();
+    foreach($match[0] as $matchData){
+        $destValue[] = str_replace(array('{{ ', ' }}'), '', $matchData);
+    }
+
+    // テーブルを検索する
+    $sql  = "SELECT * FROM {$destTableName} ";
+    $sql .= "WHERE {$destItem} IN (:{$destItem}) ";
+    if($otherCondition != null){
+        $sql .= " AND {$otherCondition}";
+    }
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+    if( $objQuery->sqlBind(array($destItem => implode(',', $destValue))) != "" ){
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+
+    while ($row = $objQuery->resultFetch()){
+        $resultArray[] = $row;
+    }
+
+    return $resultArray;
+}
+
+/**
+ * Symphony/オペレーションインポート
+ */
+function importSymOpe($record, $lastUpdateUser){
+
+    global $objDBCA, $objMTS;
+    $targetSymArray = array();
+    $targetOpeArray = array();
+    $transactionFlg = false;
+    $stopSvcFlg = false;
+    $stopSvcArray = array();
+    $taskId = $record['TASK_ID'];
+    $importPath = ROOT_DIR_PATH . "/temp/sym_ope_import/import/{$taskId}";
+    $fileBackupPath = "{$importPath}/backup";
+    $symphonyPath = "{$importPath}/symphony";
+    $operationPath = "{$importPath}/operation";
+    $fileBackupArray = array();
+
+    try{
+
+        // インポート対象のSymphonyを特定する
+        $tmpArray = explode("\n", $record['NOTE']);
+        $tmpSymArray = explode(":", $tmpArray[0]);
+        if(null != $tmpSymArray[1]){
+            $targetSymArray = explode(",", $tmpSymArray[1]);
+        }
+
+        // インポート対象のオペレーションを特定する
+        $tmpArray = explode("\n", $record['NOTE']);
+        $tmpOpeArray = explode(":", $tmpArray[1]);
+        if(null != $tmpOpeArray[1]){
+            $targetOpeArray = explode(",", $tmpOpeArray[1]);
+        }
+
+        // 作業ディレクトリ削除
+        if(file_exists($importPath)){
+            removeFiles($importPath, true);
+        }
+
+        // 作業ディレクトリ作成
+        $res = mkdir($importPath);
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "Creation of directory[{$importPath}] failed. FileName=[" . basename(__FILE__) . "],Line=[" . __LINE__ . "].");
+            // 例外処理へ
+            throw new Exception();
+        }
+        chmod($importPath, 0777);
+
+        $res = mkdir($fileBackupPath);
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "Creation of directory[{$fileBackupPath}] failed. FileName=[" . basename(__FILE__) . "],Line=[" . __LINE__ . "].");
+            // 例外処理へ
+            throw new Exception();
+        }
+        chmod($fileBackupPath, 0777);
+
+        // インポートファイルをコピー
+        $uploadFilePath = ROOT_DIR_PATH . '/uploadfiles/2100000403/FILE_NAME/' . sprintf("%010d", $record['TASK_ID']) . '/' . $record['FILE_NAME'];
+        $output = NULL;
+        $cmd = "cp -rp {$uploadFilePath} {$importPath}/. 2>&1";
+
+        exec($cmd, $output, $return_var);
+
+        if(0 != $return_var){
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+            outputLog(LOG_PREFIX, "command=[{$cmd}]");
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        // インポートファイルを解凍
+        $output = NULL;
+        $cmd = "cd '{$importPath}';sudo tar xfz '{$importPath}/" . $record['FILE_NAME'] . "' 2>&1";
+        exec($cmd, $output, $return_var);
+
+        if(0 != $return_var){
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+            outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        // 起動中のサービスを取得する
+        $serviceAry = getService();
+
+        // 停止するサービスを取得する
+        $sql  = "SELECT ROW_ID,SERVICE_NAME FROM B_SVC_TO_STOP_IMP_SYM_OPE ";
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if ($objQuery->getStatus() === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            // 例外処理へ
+            throw new Exception();
+        }
+        $res = $objQuery->sqlExecute();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        while ($row = $objQuery->resultFetch()){
+            $resultArray[] = $row;
+        }
+
+        $tmpArray = array_column($resultArray, 'SERVICE_NAME');
+
+        // 停止するサービスを特定する
+        foreach($tmpArray as $value){
+            if(false !== array_search($value, $serviceAry)){
+                $stopSvcArray[] = $value;
+            }
+        }
+
+        // サービスを停止する
+        stopService($stopSvcArray);
+        $stopSvcFlg = true;
+
+        // トランザクション開始
+        $res = $objDBCA->transactionStart();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900015', array(basename(__FILE__), __LINE__)));
+            // 例外処理へ
+            throw new Exception();
+        }
+        $transactionFlg = true;
+
+        // インポート対象のSymphonyごとにループ
+        foreach($targetSymArray as $targetSym){
+
+            $targetPath = "{$symphonyPath}/" .  $targetSym;
+            $infoExportDataArray = json_decode(file_get_contents("{$targetPath}/INFO_EXPORT_DATA"), true);
+            $infoUploadFiles = json_decode(file_get_contents("{$targetPath}/INFO_UPLOAD_FILES"), true);
+
+            foreach($infoExportDataArray as $infoExportData){
+
+                // カレントデータをインポート
+                $res = importRecord($targetPath, $infoExportData['TABLE_NAME'], $infoExportData['PRIMARY_KEY'], $infoExportData['SEQUENCE_RIC'], $lastUpdateUser);
+
+                if ($res === false) {
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                // 履歴データをインポート
+                $res = importRecord($targetPath, $infoExportData['JNL_TABLE_NAME'], 'JOURNAL_SEQ_NO', $infoExportData['SEQUENCE_JSQ'], $lastUpdateUser);
+
+                if ($res === false) {
+                    // 例外処理へ
+                    throw new Exception();
+                }
+            }
+
+            foreach($infoUploadFiles as $uploadFile){
+
+                $fileBackupArray[] = $uploadFile;
+                if(file_exists(ROOT_DIR_PATH . "/{$uploadFile}")){
+
+                    // ファイルバックアップ
+                    $output = NULL;
+                    $cmd = "cd '" . ROOT_DIR_PATH . "';sudo cp -frp --parents '{$uploadFile}' '{$fileBackupPath}' 2>&1";
+                    exec($cmd, $output, $return_var);
+
+                    if(0 != $return_var){
+                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                        outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+                        // 例外処理へ
+                        throw new Exception();
+                    }
+
+                    // ファイル削除
+                    $output = NULL;
+                    $cmd = "rm -rf '" . ROOT_DIR_PATH . "/{$uploadFile}' 2>&1";
+                    exec($cmd, $output, $return_var);
+
+                    if(0 != $return_var){
+                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                        outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+                        // 例外処理へ
+                        throw new Exception();
+                    }
+
+                }
+
+                // ファイルコピー
+                $output = NULL;
+                $cmd = "cd '{$targetPath}';sudo cp -frp --parents '{$uploadFile}' '" . ROOT_DIR_PATH . "' 2>&1";
+                exec($cmd, $output, $return_var);
+
+                if(0 != $return_var){
+                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                    outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+                    // 例外処理へ
+                    throw new Exception();
+                }
+            }
+        }
+
+        // インポート対象のオペレーションごとにループ
+        foreach($targetOpeArray as $targetOpe){
+
+            $targetPath = "{$operationPath}/" .  $targetOpe;
+            $infoExportDataArray = json_decode(file_get_contents("{$targetPath}/INFO_EXPORT_DATA"), true);
+            $infoUploadFiles = json_decode(file_get_contents("{$targetPath}/INFO_UPLOAD_FILES"), true);
+
+            foreach($infoExportDataArray as $infoExportData){
+
+                // カレントデータをインポート
+                $res = importRecord($targetPath, $infoExportData['TABLE_NAME'], $infoExportData['PRIMARY_KEY'], $infoExportData['SEQUENCE_RIC'], $lastUpdateUser);
+
+                if ($res === false) {
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                // 履歴データをインポート
+                $res = importRecord($targetPath, $infoExportData['JNL_TABLE_NAME'], 'JOURNAL_SEQ_NO', $infoExportData['SEQUENCE_JSQ'], $lastUpdateUser);
+
+                if ($res === false) {
+                    // 例外処理へ
+                    throw new Exception();
+                }
+            }
+
+            foreach($infoUploadFiles as $uploadFile){
+
+                $fileBackupArray[] = $uploadFile;
+                if(file_exists(ROOT_DIR_PATH . "/{$uploadFile}")){
+
+                    // ファイルバックアップ
+                    $output = NULL;
+                    $cmd = "cd '" . ROOT_DIR_PATH . "';sudo cp -frp --parents '{$uploadFile}' '{$fileBackupPath}' 2>&1";
+                    exec($cmd, $output, $return_var);
+
+                    if(0 != $return_var){
+                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                        outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+                        // 例外処理へ
+                        throw new Exception();
+                    }
+
+                    // ファイル削除
+                    $output = NULL;
+                    $cmd = "rm -rf '" . ROOT_DIR_PATH . "/{$uploadFile}' 2>&1";
+                    exec($cmd, $output, $return_var);
+
+                    if(0 != $return_var){
+                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                        outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+                        // 例外処理へ
+                        throw new Exception();
+                    }
+                }
+
+                // ファイルコピー
+                $output = NULL;
+                $cmd = "cd '{$targetPath}';sudo cp -frp --parents '{$uploadFile}' '" . ROOT_DIR_PATH . "' 2>&1";
+                exec($cmd, $output, $return_var);
+
+                if(0 != $return_var){
+                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                    outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+                    // 例外処理へ
+                    throw new Exception();
+                }
+            }
+        }
+
+        // ステータスを処理済みにする
+        $res = setStatusSymOpe($record['TASK_ID'], STATUS_PROCESSED);
+        if ($res === false) {
+            // 例外処理へ
+            throw new Exception();
+        }
+
+        // コミットする
+        $res = $objDBCA->transactionCommit();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900036', array(basename(__FILE__), __LINE__)));
+            // 例外処理へ
+            throw new Exception();
+        }
+        $transactionFlg = false;
+
+        // サービスを起動する
+        startpService($stopSvcArray);
+        $stopSvcFlg = false;
+
+        // 作業ディレクトリ削除
+        removeFiles($importPath, true);
+
+        return true;
+    }
+    catch (Exception $e){
+
+        // ファイルをバックアップに戻す
+        restoreUploadfiles($fileBackupPath, $fileBackupArray);
+
+        if(true === $transactionFlg){
+            // ロールバックする
+            $res = $objDBCA->transactionRollback();
+        }
+
+        if(true === $stopSvcFlg){
+            // サービスを起動する
+            startpService($stopSvcArray);
+        }
+
+        // 作業ディレクトリ削除
+        if(file_exists($importPath)){
+            removeFiles($importPath, true);
+        }
+
+        return false;
+    }
+}
+
+/**
+ * レコードインポート
+ */
+function importRecord($targetPath, $tableName, $primaryKey, $sequenceKey, $lastUpdateUser){
+
+    global $objDBCA, $objMTS;
+
+    // レコード取得
+    $recordDataArray = json_decode(file_get_contents("{$targetPath}/" . $tableName), true);
+
+    // レコードの件数分ループ
+    foreach($recordDataArray as $recordData){
+
+        // 最終更新者を変更
+        $recordData['LAST_UPDATE_USER'] = $lastUpdateUser;
+
+        // レコードインポート
+        $keys = array_keys($recordData);
+        $insertPartsArray = array();
+        $updatePartsArray = array();
+        foreach($keys as $key){
+            $insertPartsArray[] = ":{$key}";
+            $updatePartsArray[] = "{$key}=:{$key}";
+        }
+
+        $sql  = "INSERT INTO {$tableName} (" . implode(',', $keys) . ") ";
+        $sql .= "VALUES(" . implode(',', $insertPartsArray) . ") ";
+        $sql .= "ON DUPLICATE KEY UPDATE " . implode(',', $updatePartsArray);
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if ($objQuery->getStatus() === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            return false;
+        }
+        if( $objQuery->sqlBind($recordData) != "" ){
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            return false;
+        }
+        $res = $objQuery->sqlExecute();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            return false;
+        }
+
+        // シーケンステーブル更新
+        $sql  = "UPDATE A_SEQUENCE SET ";
+        $sql .= "VALUE=(SELECT MAX({$primaryKey}) FROM {$tableName} WHERE {$primaryKey} < 2000000000)+1 ";
+        $sql .= "WHERE NAME= '{$sequenceKey}'";
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if ($objQuery->getStatus() === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            return false;
+        }
+        $res = $objQuery->sqlExecute();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+            return false;
+        }
+    }
+}
+
+/**
+ * アップロードファイルのリストア
+ */
+function restoreUploadfiles($fileBackupPath, $fileBackupArray){
+
+    global $objDBCA, $objMTS;
+
+    foreach($fileBackupArray as $uploadFile){
+
+        if(file_exists(ROOT_DIR_PATH . "/{$uploadFile}")){
+
+            // ファイル削除
+            $output = NULL;
+            $cmd = "rm -rf '" . ROOT_DIR_PATH . "/{$uploadFile}' 2>&1";
+            exec($cmd, $output, $return_var);
+
+            if(0 != $return_var){
+                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+            }
+
+        }
+
+        if(file_exists("{$fileBackupPath}/{$uploadFile}")){
+
+            // ファイルコピー
+            $output = NULL;
+            $cmd = "cd '{$fileBackupPath}';sudo cp -frp --parents '{$uploadFile}' '" . ROOT_DIR_PATH . "' 2>&1";
+            exec($cmd, $output, $return_var);
+
+            if(0 != $return_var){
+                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                outputLog(LOG_PREFIX, "Command=[{$cmd}],Error=[" . print_r($output, true) . "].");
+            }
+        }
+    }
 }
