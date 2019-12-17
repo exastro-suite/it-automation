@@ -95,7 +95,7 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
             // データ登録
             insertTask($targetList, $taskNo, $jnlSeqNo);
 
-            $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900009', array($taskNo));
+            $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900060', array($taskNo));
             $_SESSION['data_import_task_no'] = $taskNo;
 
             moveImportFile($taskNo, $jnlSeqNo);
