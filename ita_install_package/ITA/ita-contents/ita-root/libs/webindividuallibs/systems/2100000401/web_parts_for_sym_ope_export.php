@@ -51,7 +51,7 @@ try {
     $OperationClassList = $_REQUEST['operation'];
     $taskNo = registerExportInfo($SymphonyClassList, $OperationClassList);
 
-    $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900024', array($taskNo));
+    $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900058', array($taskNo));
     $_SESSION['data_export_task_no'] = $taskNo;
     $resultFlg = true;
 
