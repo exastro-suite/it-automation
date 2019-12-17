@@ -66,7 +66,7 @@ if (isset($_SESSION['data_export_task_no']) === true && strlen($_SESSION['data_e
     $task_no = $_SESSION['data_export_task_no'];
 }
 ?>
-<h2><?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-900006'); ?></h2>
+<h2><?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-900057'); ?></h2>
 <?php if ($resultFlg === true): ?>
 <form method="post" action="/default/menu/01_browse.php?no=2100000403&task_no=<?php echo $task_no; ?>">
     <div style="margin:10px 0 0 10px;">
