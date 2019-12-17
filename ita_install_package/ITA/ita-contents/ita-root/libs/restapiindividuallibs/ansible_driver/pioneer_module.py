@@ -83,11 +83,12 @@ import datetime
 import signal
 import subprocess
 import os
-import exceptions
 import re
 from collections import defaultdict
 from collections import OrderedDict
 import binascii
+import codecs
+
 from ansible.module_utils.basic import *
 
 import base64
@@ -180,9 +181,10 @@ def main():
 
     # パスワードをデコードする
     host_vars = yaml.load(open(module.params['host_vars_file']).read())
-    password = host_vars['__loginpassword__']
-    if password != "__undefinesymbol__" :
-      password = base64.b64decode(password.encode("rot13"))
+    if '__loginpassword__' in host_vars:
+      password = host_vars['__loginpassword__']
+      password = base64.b64decode(codecs.encode(password, "rot-13"))
+      password = password.decode('utf-8','replace')
     # ログに表示するパスワード
     output_password = '********'
 
@@ -210,11 +212,9 @@ def main():
     private_log_output(log_file_name,host_name,exec_name)
     exec_log_output(exec_name)
 
-    p = pexpect.spawn(exec_cmd)
+    p = pexpect.spawn(exec_cmd,  encoding='utf-8',codec_errors='replace')
 
-    private_log_output(log_file_name,host_name,"Ok")
-
-# ドライランモードを退避しタイムアウト値を5秒にする。
+    # ドライランモードを退避しタイムアウト値を5秒にする。
     if module.check_mode:
       chk_mode = ':exit check mode'
       timeout  = 5;
@@ -294,47 +294,21 @@ def main():
         ####################################################
         # expect command execute
         ####################################################
-        pass_rep_expect_cmd = password_replace(password,expect_cmd)
-        expect_name  = password_replace(output_password,expect_name)
-
-        # expect command log output
-        private_log_output(log_file_name,host_name,expect_name)
-        exec_log_output(expect_name)
-
-        # expect command execute
-        p.expect(pass_rep_expect_cmd, timeout=timeout)
+        expect_prompt(p,log_file_name,host_name,expect_cmd,timeout)
 
         # ドライランモードの場合は接続確認したら終了
         if module.check_mode:
           private_exit_json(obj=module,msg=host_name + chk_mode,changed=False, exec_log=exec_log)
 
-        # expect match log output
-        exec_log_output('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
-        private_log_output(log_file_name,host_name,"expect Match:before [" + p.before + "]")
-        private_log_output(log_file_name,host_name,"expect Match:after  [" + p.after + "]")
-        private_log_output(log_file_name,host_name,"expect Match:buffer [" + p.buffer + "]")
-        private_log_output(log_file_name,host_name,"Ok")
-
-
         ####################################################
         # exec command execute
         ####################################################
-        pass_rep_exec_cmd = password_replace(password,exec_cmd)
-        exec_name  = password_replace(output_password,exec_name)
-
-        # exec command log output
-        private_log_output(log_file_name,host_name,exec_name)
-        exec_log_output(exec_name)
-
-        #p.sendline(exec_cmd)
-        p.sendline(pass_rep_exec_cmd)
+        exec_command(p,log_file_name,host_name,exec_cmd)
 
         ####################################################
         # read line
         ####################################################
         p.readline()
-
-        private_log_output(log_file_name,host_name,"Ok")
 
       # state command ?
       elif 'state' in input:
@@ -393,60 +367,23 @@ def main():
         ####################################################
         # expect(prompt) command execute
         ####################################################
-        pass_rep_expect_cmd = password_replace(password,expect_cmd)
-        expect_name  = password_replace(output_password,expect_name)
-
-        private_log_output(log_file_name,host_name,expect_name)
-        exec_log_output(expect_name)
-
-        p.expect(pass_rep_expect_cmd, timeout=timeout)
+        expect_prompt(p,log_file_name,host_name,expect_cmd,timeout)
 
         # ドライランモードの場合は接続確認したら終了
         if module.check_mode:
           private_exit_json(obj=module,msg=host_name + chk_mode,changed=False, exec_log=exec_log)
 
-        # expect match log output
-        exec_log_output('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
-        private_log_output(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-        private_log_output(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-        private_log_output(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-        private_log_output(log_file_name,host_name,"Ok")
-
-
         ####################################################
         # state command execute
         ####################################################
-        pass_rep_exec_cmd = password_replace(password,exec_cmd)
-        exec_name  = password_replace(output_password,exec_name)
-
-        # state command log output
-        private_log_output(log_file_name,host_name,exec_name)
-        exec_log_output(exec_name)
-
-        p.sendline(pass_rep_exec_cmd)
+        exec_command(p,log_file_name,host_name,exec_cmd)
 
         p.readline() 
-
-        private_log_output(log_file_name,host_name,"Ok")
-
-        # expect(prompt) command log output
-        private_log_output(log_file_name,host_name,expect_name)
-        exec_log_output(expect_name)
 
         ####################################################
         # expect(prompt) command execute
         ####################################################
-        pass_rep_expect_cmd = password_replace(password,expect_cmd)
-        expect_name  = password_replace(output_password,expect_name)
-
-        p.expect(pass_rep_expect_cmd, timeout=timeout)
-
-        # expect match log output
-        exec_log_output('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
-        private_log_output(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-        private_log_output(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-        private_log_output(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
-        private_log_output(log_file_name,host_name,"Ok")
+        expect_prompt(p,log_file_name,host_name,expect_cmd,timeout)
 
         # 最後のESCコードから後ろを削除
         edit_stdout_data = last_escstr_cut(p.before)
@@ -2790,7 +2727,7 @@ def main():
     # fail exit
     #########################################################
     module.fail_json(msg=host_name + ': ' + 'except command timeout',exec_log=exec_log)
-  except SignalReceive, e:
+  except SignalReceive as e:
     exec_log_output(str(e))
     private_log_output(log_file_name,host_name,str(e))
     #########################################################
@@ -2798,7 +2735,7 @@ def main():
     #########################################################
     module.fail_json(msg=host_name + ": " + str(e),exec_log=exec_log)
   # try chuu no module.fail_json de exceptions.SystemExit 
-  except exceptions.SystemExit:
+  except SystemExit:
     private_log_output(log_file_name,host_name,"except exceptions.SystemExit")
     #########################################################
     # fail exit
@@ -2849,7 +2786,8 @@ def private_fail_json(**args) :
     ret_exec_log = []
   output_log = []
   for recode in ret_exec_log:
-    output_log.append(recode.decode('utf-8','replace'))
+    ##############output_log.append(recode.decode('utf-8','replace'))
+    output_log.append(recode)
 
   exit_dict = {}
   exit_dict['code']      = 'fail_json'
@@ -2873,7 +2811,8 @@ def private_exit_json(**args) :
     ret_exec_log = []
   output_log = []
   for recode in ret_exec_log:
-    output_log.append(recode.decode('utf-8','replace'))
+    ####output_log.append(recode.decode('utf-8','replace'))
+    output_log.append(recode)
 
   exit_dict = {}
   exit_dict['code']      = 'exit_json'
@@ -4207,11 +4146,14 @@ def last_escstr_cut(sometext):
     idx  += 1
     if idx == max:
       break;
-    stdout_data += binascii.a2b_hex(b'1b')
+    newline = binascii.a2b_hex(b'1b')
+    newline = newline.decode('utf-8','replace')
+    stdout_data += newline
   return stdout_data
 
-def password_replace(password,str):
-  rep_str = str.replace('<<__loginpassword__>>', password)
+def password_replace(password,data):
+  global exec_log
+  rep_str = data.replace('<<__loginpassword__>>', password)
   return rep_str
 
 def exec_log_output(log,replace_flg = True):
@@ -4246,10 +4188,14 @@ def expect_prompt(p,log_file_name,host_name,cmd,timeout):
   p.expect(pass_rep_cmd, timeout=int(timeout))
 
   # 標準出力ログ
-  exec_log_output('Match: [' + p.before + ']:::[' + p.after + ']:::[' + p.buffer + ']')
-  private_log_output(log_file_name,host_name,"prompt Match:before [" + p.before + "]")
-  private_log_output(log_file_name,host_name,"prompt Match:after  [" + p.after + "]")
-  private_log_output(log_file_name,host_name,"prompt Match:buffer [" + p.buffer + "]")
+  exec_log_output('prompt match')
+  exec_log_output('before:[' + p.before + ']')
+  exec_log_output('match:[' + p.after + ']')
+  exec_log_output('after:[' + p.buffer + ']')
+  private_log_output(log_file_name,host_name,"prompt match")
+  private_log_output(log_file_name,host_name,"before:[" + p.before + "]")
+  private_log_output(log_file_name,host_name,"match:[" + p.after + "]")
+  private_log_output(log_file_name,host_name,"after:[" + p.buffer + "]")
 
   private_log_output(log_file_name,host_name,"Ok")
 
