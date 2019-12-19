@@ -346,7 +346,7 @@ function sortableAreaFunctionOn(){
             var strDAreaWrapperClass = 'tips_box';
             var strDAreaClass = 'tips_box_textarea';
             //var strDAreaTitle = '備考';
-            var strDAreaTitle = getSomeMessage("ITABASEC010104");
+            var strDAreaTitle = getSomeMessage("ITABASEC010409");
 
             // [H]old[P]oint[S]etting
             var strHPSAreaWrapperClass = 'pause_box';
