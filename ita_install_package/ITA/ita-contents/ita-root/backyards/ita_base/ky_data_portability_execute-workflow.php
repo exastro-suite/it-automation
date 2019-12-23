@@ -622,7 +622,7 @@ function removeFiles($path, $recursive=false){
     }
 
     $output = NULL;
-    $cmd = "rm -rf $path/* 2>&1";
+    $cmd = "rm -rf '$path/'* 2>&1";
 
     exec($cmd, $output, $return_var);
 
@@ -632,7 +632,7 @@ function removeFiles($path, $recursive=false){
 
     if ($recursive === true) {
         $output = NULL;
-        $cmd = "rm -rf $path 2>&1";
+        $cmd = "rm -rf '$path' 2>&1";
 
         exec($cmd, $output, $return_var);
 
@@ -1083,7 +1083,7 @@ function restoreFiles($taskId){
 
             // コピー
             $output = NULL;
-            $cmd = "cp -rp $dstPath$dir " . ROOT_DIR_PATH . " 2>&1";
+            $cmd = "cp -rp '{$dstPath}{$dir}' '" . ROOT_DIR_PATH . "' 2>&1";
 
             exec($cmd, $output, $return_var);
 
@@ -1120,7 +1120,7 @@ function recursiveCopyFiles($srcPath, $dstPath){
     }
 
     $output = NULL;
-    $cmd = "cp -rp " . $srcPath . "/* " . $dstPath . "/. 2>&1";
+    $cmd = "cp -rp '" . $srcPath . "/'* '" . $dstPath . "/.' 2>&1";
 
     exec($cmd, $output, $return_var);
 
@@ -2988,7 +2988,7 @@ function exportSymOpe($record){
 
         // エクスポートファイルをコピー
         $output = NULL;
-        $cmd = "cp -rp {$uploadDir}/{$exportFile} {$uploadDirJnl}/{$exportFile} 2>&1";
+        $cmd = "cp -rp '{$uploadDir}/{$exportFile}' '{$uploadDirJnl}/{$exportFile}' 2>&1";
 
         exec($cmd, $output, $return_var);
 
@@ -3410,7 +3410,7 @@ function importSymOpe($record, $lastUpdateUser){
         // インポートファイルをコピー
         $uploadFilePath = ROOT_DIR_PATH . '/uploadfiles/2100000403/FILE_NAME/' . sprintf("%010d", $record['TASK_ID']) . '/' . $record['FILE_NAME'];
         $output = NULL;
-        $cmd = "cp -rp {$uploadFilePath} {$importPath}/. 2>&1";
+        $cmd = "cp -rp '{$uploadFilePath}' '{$importPath}/.' 2>&1";
 
         exec($cmd, $output, $return_var);
 
