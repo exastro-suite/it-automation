@@ -219,4 +219,7 @@ $ary[900068] = "Multiple Symphony interface information is registered.";
 $ary[900069] = "Data relay storage path set in Symphony interface information can not be found.";
 $ary[900070] = "It cannot be imported as the ITA version and the version from which the file was exported do not match.";
 $ary[806] = "Target execution No are incorrect. ({})";
+$ary[900071] = "Target menu No are incorrect. ({})";
+$ary[900072] = "File export failed.";
+$ary[900073] = "Must have uploaded kym file.";
 ?>
