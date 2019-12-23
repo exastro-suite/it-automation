@@ -106,7 +106,7 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
 
     } catch (Exception $e) {
         web_log($e->getMessage());
-        $res = $g['objDBCA']->transactionRollBack();
+        $res = $g['objDBCA']->transactionExit();
         if ($res === false) {
             web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900050', array(__FILE__, __LINE__)));
             throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
