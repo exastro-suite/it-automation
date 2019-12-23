@@ -65,11 +65,17 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900021'));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
-    $filePath = $g['scheme_n_authority'] . "/default/menu/05_preupload.php?no={$g['page_dir']}&fn=";
-    $c = new HostInsideLinkTextColumn('FILE_NAME', $g['objMTS']->getSomeMessage('ITABASEH-MNU-900015'), $filePath);
-    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900017'));
-    $c->setValidator(new SingleTextValidator(0, 256, false));
-    $c->setSubtotalFlag(false);
+    //ファイル名
+    $c = new FileUploadColumn('FILE_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-900015"));
+    $filePath = "uploadfiles/{$g['page_dir']}";
+    $c->setNRPathAnyToBranchPerFUC($filePath);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-900017"));//エクセル・ヘッダでの説明
+    $c->setMaxFileSize(20971520);//単位はバイト
+    $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+    $c->setFileHideMode(true);
+    $c->setWkPkSprintFormat(false);//メニューNo直下の実行No桁埋め無効
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+    $c->setRequired(false);//登録/更新時には、入力必須
     $table->addColumn($c);
 
     $table->fixColumn();
@@ -78,6 +84,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $tmpAryColumn['NOTE']->getOutputType('filter_table')->setVisible(false);
     $tmpAryColumn['NOTE']->getOutputType('print_table')->setVisible(false);
     $tmpAryColumn['NOTE']->getOutputType('excel')->setVisible(false);
+
+    $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true);//Excel出力廃止
 
     $table->setGeneObject('webSetting', $arrayWebSetting);
     return $table;
