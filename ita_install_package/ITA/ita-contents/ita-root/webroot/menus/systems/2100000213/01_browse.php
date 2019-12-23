@@ -183,24 +183,6 @@ EOD;
 
     $allDumpMsg = ($privilege=="2")?$g['objMTS']->getSomeMessage("ITAWDCH-STD-30061"):$g['objMTS']->getSomeMessage("ITAWDCH-STD-30062");
 
-    print 
-<<<EOD
-    <!-------------------------------- 全件ダウンロードとファイルアップロード編集 -------------------------------->
-    <h2>
-        <table width="100%">
-            <tr>
-                <td><div onClick=location.href="javascript:show('AllDumpMidashi','AllDumpNakami');" class="midashi_class" >{$allDumpMsg}</div></td>
-                <td>
-                    <div id="AllDumpMidashi" align="right">
-                        <input type="button" value="{$strCmdWordAreaClose}" class="showbutton" onClick=location.href="javascript:show('AllDumpMidashi','AllDumpNakami');" >
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </h2>
-{$strHtmlFileEditCommnad}
-    <!-------------------------------- 全件ダウンロードとファイルアップロード編集 -------------------------------->
-EOD;
 
     print 
 <<<EOD
