@@ -487,7 +487,7 @@ function moveImportFile($taskNo, $jnlSeqNo){
     // ファイルを移動
     $src = $uploadPath . $_SESSION['upload_file_name'];
     $output = NULL;
-    $cmd = "sudo mv {$src} {$uploadFilesDir} 2>&1";
+    $cmd = "sudo mv '{$src}' '{$uploadFilesDir}' 2>&1";
     exec($cmd, $output, $return_var);
 
     if(0 != $return_var){
@@ -498,7 +498,7 @@ function moveImportFile($taskNo, $jnlSeqNo){
 
     // ファイルをコピー(JNL)
     $output = NULL;
-    $cmd = "sudo cp -p {$uploadFilesDir}" . $_SESSION['upload_file_name'] . " {$uploadFilesDirJnl} 2>&1";
+    $cmd = "sudo cp -p '{$uploadFilesDir}" . $_SESSION['upload_file_name'] . "' '{$uploadFilesDirJnl}' 2>&1";
     exec($cmd, $output, $return_var);
 
     if(0 != $return_var){
