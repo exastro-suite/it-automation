@@ -92,7 +92,7 @@ import codecs
 from ansible.module_utils.basic import *
 
 import base64
-password  = ''
+password  = 'undefine'
 output_password = '********'
 log_file_name = ''
 exit_dict = {}
@@ -184,7 +184,8 @@ def main():
     if '__loginpassword__' in host_vars:
       password = host_vars['__loginpassword__']
       password = base64.b64decode(codecs.encode(password, "rot-13"))
-      password = password.decode('utf-8','replace')
+    password = password.decode('utf-8','replace')
+      
     # ログに表示するパスワード
     output_password = '********'
 
