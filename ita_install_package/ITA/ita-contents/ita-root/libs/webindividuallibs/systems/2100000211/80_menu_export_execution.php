@@ -20,8 +20,7 @@
 function menuExportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData){
 
     global $g;
-    debug_output($g,$g,__FUNCTION__ . " " . __LINE__ );
-    //exit;
+
     // 各種ローカル定数を定義
     $intControlDebugLevel01 = 250;
     
