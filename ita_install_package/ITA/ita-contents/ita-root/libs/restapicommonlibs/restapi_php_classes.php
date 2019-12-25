@@ -428,14 +428,13 @@ class RestAPIInfoAdmin{
 
     function requireWrap(){
         $boolExeContinue = true;
-        $boolRequire = @require($this->strBufferRequirePath);
+        $boolRequire = require($this->strBufferRequirePath);
         if( $boolRequire===false ){
             // 呼び出し失敗
             $boolExeContinue = false;
             $this->intResultStatusCode       = 500;
             //
             $this->aryErrorInfo['Exception'] = 'RestAPI submodule['.$this->strBufferRequirePath.'] call error';
-            break;
         }
         else{
             if(isset($boolExeContinue)===false){
