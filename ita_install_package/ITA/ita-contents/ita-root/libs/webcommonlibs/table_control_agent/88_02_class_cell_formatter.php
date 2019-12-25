@@ -814,7 +814,7 @@ class SortedTabHFmt extends TabHFmt {
 		$this->setSortSelectedDescTagClass("sortSelectedDesc");
 	}
 
-	public function getData($colNo, $attr=""){
+	public function getData($colNo="", $attr=""){
 		$attr2 = "";
 		$strPrintBody = $this->makeSafeHeaderForBrowse($this->getStaticPrintRawData());
 		$strPrintBody = nl2br($strPrintBody);
@@ -2640,7 +2640,7 @@ class SelectTabBFmt extends InputTabBFmt {
 		//FADタグ属性----
 	}
 
-	public function getSettingDataBeforeEdit($arraySelectElement,$rowData,$aryVariant){
+	public function getSettingDataBeforeEdit($boolDelete=false,$boolArrayIgnore=false,$rowData=array(),$aryVariant=array()){
 		//----selectedを返す
 		$data = parent::getSettingDataBeforeEdit(false,false,$rowData,$aryVariant); //----設定値が配列の場合も取得
 		
@@ -2741,7 +2741,7 @@ class SelectTabBFmt extends InputTabBFmt {
 					$strTagInnerBody .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12002");
 				}else{
 					// null,数値,配列が、$dataに返ってくる
-					$data = $this->getSettingDataBeforeEdit($arraySelectElement,$rowData,$aryVariant);
+					$data = $this->getSettingDataBeforeEdit(false,false,$rowData,$aryVariant);
 
 					$boolWhiteKeyAdd = true;
 					if( $this->getRequired() === true ){
@@ -4560,7 +4560,7 @@ class NumRangeFilterTabBFmt extends TextFilterTabBFmt {
 
 class SelectFilterTabBFmt extends TextFilterTabBFmt {
 
-	public function getSettingDataBeforeEdit($arraySelectElement,$rowData,$aryVariant){
+	public function getSettingDataBeforeEdit($boolDelete=false,$boolArrayIgnore=false,$rowData=array(),$aryVariant=array()){
 		//----selectedを返す
 		$data = parent::getSettingDataBeforeEdit(false,false,$rowData,$aryVariant); //----設定値が配列の場合も取得
 		
@@ -4647,7 +4647,7 @@ class SelectFilterTabBFmt extends TextFilterTabBFmt {
 				$body = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12202");
 			}else{
 				
-				$selected = $this->getSettingDataBeforeEdit($arraySelectElement,$rowData,$aryVariant);
+				$selected = $this->getSettingDataBeforeEdit(false,false,$rowData,$aryVariant);
 				
 				//$strBlankBody = "空白";
 				$strBlankBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-651");
