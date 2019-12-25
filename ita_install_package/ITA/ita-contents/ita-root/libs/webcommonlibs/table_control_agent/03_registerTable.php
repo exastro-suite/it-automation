@@ -247,7 +247,7 @@
                         if(array_key_exists($key,$arrayObjColumn)){
                             $objColumn = $arrayObjColumn[$key];
                             if(gettype($value)=="object"){
-                                if( get_class($value) === "PHPExcel_RichText" ){
+                                if( get_class($value) === "\PhpOffice\PhpSpreadsheet\RichText\RichText" ){
                                     $value = $value->getPlainText();
                                 }
                                 else{
