@@ -599,7 +599,7 @@
 
                 $objListFormatter->cashModeAdjust();
 
-                $objReader = PHPExcel_IOFactory::createReader("Excel2007");
+                $objReader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader("Xlsx");
                 $objWorkBook = $objReader->load($strIUDSourceFullname);
                 $objWorkBook->setActiveSheetIndex(0);
                 //
@@ -886,7 +886,7 @@
                 $intRowNoOfFirstBodyRow = $intLengthOfHeaderRows + 8;
                 $intColNoOfLastColumn = $objWorkSheet->getHighestDataColumn();
                 $intRowNoOfLastBodyRow = $objWorkSheet->getHighestDataRow();
-                $excelHeaderData = $objWorkSheet->rangeToArray(ExcelFormatter::cr2s(2, $intRowNoOfFirstBodyRow - 1).":".$intColNoOfLastColumn.($intRowNoOfFirstBodyRow - 1));
+                $excelHeaderData = $objWorkSheet->rangeToArray(ExcelFormatter::cr2s(3, $intRowNoOfFirstBodyRow - 1).":".$intColNoOfLastColumn.($intRowNoOfFirstBodyRow - 1));
                 //
                 $boolLabelFull = false;
                 //EXCELモード----
@@ -1099,7 +1099,7 @@
 
                     $excelBodyData = array();
                     for($focusCol = 0; $focusCol < count($tableHeaderId) ; $focusCol++ ){
-                        $excelBodyData[] = $objWorkSheet->getCellByColumnAndRow(2+$focusCol,$row_i)->getValue();
+                        $excelBodyData[] = $objWorkSheet->getCellByColumnAndRow(3+$focusCol,$row_i)->getValue();
                     }
 
                     //----第1引数の配列値をキーに、第2引数の配列値を値とする連想配列を形成
