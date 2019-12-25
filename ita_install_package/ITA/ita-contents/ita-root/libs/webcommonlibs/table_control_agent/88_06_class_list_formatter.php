@@ -183,7 +183,7 @@ class CSVFormatter extends ListFormatter {
         return $tmpRet;
     }
 
-    function format(){
+    function format($tableTagId = null){
         //----クラス(Table)のメソッド(getPrintFormat)から呼ばれる。
 
         $aryObjColumn = $this->objTable->getColumns();
@@ -707,7 +707,7 @@ class JSONFormatter extends ListFormatter {
     }
     //RestAPI(Gate)で公開されている、カラム情報を出力する----
 
-    function format(){
+    function format($tableTagId = null){
         $aryObjColumn = $this->objTable->getColumns();
 
         foreach($aryObjColumn as $objColumn){
@@ -827,10 +827,17 @@ class JSONFormatter extends ListFormatter {
     }
 }
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Collection\CellsFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Settings;
+
 class ExcelFormatter extends ListFormatter {
 
     protected $templateFilePath; // as string フルパス指定
-    protected $requireFormatFlag; // as boolean PHPExcel側でのフォーマット設定変換の要否
+    protected $requireFormatFlag; // as boolean \PhpOffice\PhpSpreadsheet\Spreadsheet側でのフォーマット設定変換の要否
     protected $strExportFilePath;
 
     protected $bodyTopRow;
@@ -857,15 +864,15 @@ class ExcelFormatter extends ListFormatter {
 
     protected $aryValidationTailHeader; // バリデーションデータを適用するデータシート最下部白行のヘッダーのセル範囲情報(Column/Row)とマスターテーブルのIDを格納する配列  function ValidationDataWorkSheetTailerFixから参照される
 
-    const DATA_START_COL = 3;
+    const DATA_START_COL = 4;
     const WHITE_ROWS = 10;
     const DATA_START_ROW_ON_MASTER = 2;
 
     function __construct($strFormatterId, $objTable, $strPrintTableId){
         global $g;
         parent::__construct($strFormatterId, $objTable, $strPrintTableId);
-        ky_include_path_add(getApplicationRootDirPath()."/confs/webconfs/path_PHPExcel_Classes.txt", 1);
-        require_once "PHPExcel.php";
+        ky_include_path_add(getApplicationRootDirPath()."/confs/webconfs/path_PhpSpreadsheet.txt", 1);
+        require_once "vendor/autoload.php";
 
         $this->setTemplateFilePath($g['objMTS']->getTemplateDirPath()."/".$g['objMTS']->getLanguageFullVersion()."_dumpTemplate.xlsx");
 
@@ -880,7 +887,7 @@ class ExcelFormatter extends ListFormatter {
         $this->aryValidationTailHeader = array();
     }
     static function cr2s($column, $row){
-        return PHPExcel_Cell::stringFromColumnIndex($column).$row;
+        return \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column).$row;
     }
 
     function cashModeAdjust($intMode=0){
@@ -889,9 +896,7 @@ class ExcelFormatter extends ListFormatter {
         switch($intMode){
             default:
                 $strCacheDirPath = $g['root_dir_path'] . "/temp";
-                $casheMethod = PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
                 $cashSettings = array('dir'=>$strCacheDirPath);
-                PHPExcel_Settings::setCacheStorageMethod($casheMethod,$cashSettings);
                 break;
         }
     }
@@ -1016,7 +1021,7 @@ class ExcelFormatter extends ListFormatter {
                     $intSetRow = self::DATA_START_ROW_ON_MASTER;
                 }
                 $range = self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, self::DATA_START_ROW_ON_MASTER).":".self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, $intSetRow);
-                $namedRange = new PHPExcel_NamedRange("FILTER_".$objColumn->getID(), $sheet, $range);
+                $namedRange = new \PhpOffice\PhpSpreadsheet\NamedRange("FILTER_".$objColumn->getID(), $sheet, $range);
                 $X->addNamedRange($namedRange);
             }
             $intCountAddColOfEditSheet++;
@@ -1037,7 +1042,7 @@ class ExcelFormatter extends ListFormatter {
         }
         
         $range = self::cr2s(self::DATA_START_COL-1, self::DATA_START_ROW_ON_MASTER).":".self::cr2s(self::DATA_START_COL-1, $intSetRow);
-        $namedRange = new PHPExcel_NamedRange("FILTER_".$objREBFColumn->getID(), $sheet, $range);
+        $namedRange = new \PhpOffice\PhpSpreadsheet\NamedRange("FILTER_".$objREBFColumn->getID(), $sheet, $range);
         $X->addNamedRange($namedRange);
 
         //処理種別を追加----
@@ -1155,7 +1160,7 @@ class ExcelFormatter extends ListFormatter {
                     }
                 }
                 foreach($aryFilterElement as $value){
-                    $sheet->setCellValueExplicitByColumnAndRow(self::DATA_START_COL+$i_col, $i_row++ ,$value, PHPExcel_Cell_DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicitByColumnAndRow(self::DATA_START_COL+$i_col, $i_row++ ,$value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 }
                 //条件を付加----
                 $i_col++;
@@ -1255,17 +1260,16 @@ class ExcelFormatter extends ListFormatter {
             }
         }
         //結合する----
-        
+
         //----名前を置き換える
         foreach($this->tempBufferForHeader as $strSafeName=>$aryValue){
             $strRealName = $aryValue[0];
             $sheet->setCellValue(self::cr2s($aryValue[1][0], $aryValue[1][1]), $strRealName);
         }
         //名前を置き換える----
-        
         //ヘッダの左側も縦にマージする
         if($rows>1){
-            $sheet->mergeCells(self::cr2s(0,1).":".self::cr2s(1, $rows));
+            $sheet->mergeCells(self::cr2s(1,1).":".self::cr2s(1, $rows));
             $sheet->mergeCells(self::cr2s(2,1).":".self::cr2s(2, $rows));
         }
     }
@@ -1274,11 +1278,11 @@ class ExcelFormatter extends ListFormatter {
         $objWB = null;
         $this->objFocusWB = null;
         if( file_exists($this->getTemplateFilePath()) === true ){
-            $objReader = PHPExcel_IOFactory::createReader("Excel2007");
+            $objReader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader("Xlsx");
             $objWB = $objReader->load($this->getTemplateFilePath());
         }
         else{
-            $objWB = new PHPExcel();
+            $objWB = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         }
         $this->objFocusWB = $objWB;
         $this->headerRows = $this->objTable->getColGroup()->getHRowCount($this->strPrintTargetListFormatterId) - 1;
@@ -1339,7 +1343,6 @@ class ExcelFormatter extends ListFormatter {
         }
 
         $colREBFName = $aryObjColumn[$lcRequiredRowEditByFileColumnId]->getColLabel();
-
         $strSheetName = $this->getSheetNameForEditSheet();
 
         $sheet->setTitle($strSheetName);
@@ -1356,9 +1359,9 @@ class ExcelFormatter extends ListFormatter {
 
         if( $varMinorPrintTypeMode == "" ){
             //----処理種別にバリデーション設定
-            $dataValidation = new PHPExcel_Cell_DataValidation();
+            $dataValidation = new \PhpOffice\PhpSpreadsheet\Cell\DataValidation();
             $dataValidation->setFormula1("FILTER_".$lcRequiredRowEditByFileColumnId);
-            $dataValidation->setType(PHPExcel_Cell_DataValidation::TYPE_LIST);
+            $dataValidation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
             $dataValidation->setShowErrorMessage(true);
             $dataValidation->setShowDropDown(true);
             $tmpAddress = self::cr2s(self::DATA_START_COL-1, $this->bodyTopRow);
@@ -1392,16 +1395,16 @@ class ExcelFormatter extends ListFormatter {
             $cellAddress = self::cr2s(self::DATA_START_COL+$i_col, $this->bodyTopRow);
             if( $objColumn->isAllowSendFromFile() == false ){
                 //----更新不可をグレーアウト
-                $sheet->getStyle($cellAddress)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($strRRGGBBSendForbiddenColumn);
+                $sheet->getStyle($cellAddress)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($strRRGGBBSendForbiddenColumn);
                 //更新不可をグレーアウト----
             }else{
                 //----更新可能は網掛けしない
-                $sheet->getStyle($cellAddress)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_NONE);
+                $sheet->getStyle($cellAddress)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_NONE);
                 //更新可能は網掛けしない----
             }
             if( $objColumn->getID() == $lcRequiredUpdateDate4UColumnId ){
-                $sheet->getStyle($cellAddress)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($strRRGGBBSendForbiddenColumn);
-                $sheet->getCell($cellAddress)->setDataType(PHPExcel_Cell_DataType::TYPE_STRING);
+                $sheet->getStyle($cellAddress)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($strRRGGBBSendForbiddenColumn);
+                $sheet->getCell($cellAddress)->setDataType(\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 $sheet->getColumnDimensionByColumn(self::DATA_START_COL+$i_col)->setVisible(false);
             }
             if( is_a($objColumn, "MultiTextColumn") ===true ){
@@ -1411,7 +1414,7 @@ class ExcelFormatter extends ListFormatter {
 
             //ヘッダのスタイル設定----
         }
-    
+
         //ヘッダの横方向のマージ
         $this->mergeHeader($sheet);
 
@@ -1483,7 +1486,7 @@ class ExcelFormatter extends ListFormatter {
         //----ヘッダの二次元配列をExcelに張り付ける[ボディに適用するとバグるのでヘッダのみに利用(2014-08-11-1901)]
         $sheet->fromArray($tmp_array, "null",  self::cr2s(self::DATA_START_COL, $this->headerRows+1));
         //ヘッダの二次元配列をExcelに張り付ける[ボディに適用するとバグるのでヘッダのみに利用(2014-08-11-1901)]----
-        
+
         $this->intEditSheetMaxCol = $maxCol;
         $this->aryEditSheetDescription = $description_array;
         
@@ -1591,10 +1594,10 @@ class ExcelFormatter extends ListFormatter {
                                     $localPath = $objColumn->getLAPathToFUCItemPerRow($rowData);
 
                                     if(file_exists($localPath)===true){
-                                        $hyperLink = new PHPExcel_Cell_Hyperlink($url);
+                                        $hyperLink = new \PhpOffice\PhpSpreadsheet\Cell\Hyperlink($url);
                                         //ハイパーリンクのスタイル(下線、青色)
-                                        $sheet->getStyle(self::cr2s($i_col, $i_row))->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_BLUE);
-                                        $sheet->getStyle(self::cr2s($i_col, $i_row))->getFont()->setUnderline(PHPExcel_Style_Font::UNDERLINE_SINGLE);
+                                        $sheet->getStyle(self::cr2s($i_col, $i_row))->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
+                                        $sheet->getStyle(self::cr2s($i_col, $i_row))->getFont()->setUnderline(\PhpOffice\PhpSpreadsheet\Style\Font::UNDERLINE_SINGLE);
                                         $sheet->setHyperLink(self::cr2s($i_col, $i_row), $hyperLink);
                                     }
                                     //ファイル隠蔽モードではない----
@@ -1607,7 +1610,7 @@ class ExcelFormatter extends ListFormatter {
 
                         if($inputType == 0){
                             //----文字列として
-                            $sheet->setCellValueExplicitByColumnAndRow($i_col, $i_row ,$focusValue, PHPExcel_Cell_DataType::TYPE_STRING);
+                            $sheet->setCellValueExplicitByColumnAndRow($i_col, $i_row ,$focusValue, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                             //文字列として----
                         }else{
                             $sheet->setCellValueByColumnAndRow($i_col, $i_row ,$focusValue);
@@ -1645,13 +1648,13 @@ class ExcelFormatter extends ListFormatter {
 
                     if($varMinorPrintTypeMode == "forDeveloper"){
                         // 開発者用
-                        $sheet->setCellValueExplicitByColumnAndRow($i_col, $i_row ,$focusValue, PHPExcel_Cell_DataType::TYPE_STRING);
+                        $sheet->setCellValueExplicitByColumnAndRow($i_col, $i_row ,$focusValue, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     }else{
                         // 素材用
-                        $sheet->setCellValueExplicitByColumnAndRow($i_col, $i_row ,"-", PHPExcel_Cell_DataType::TYPE_STRING);
+                        $sheet->setCellValueExplicitByColumnAndRow($i_col, $i_row ,"-", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     }
                     if( array_key_exists($focusValue,$tempArrayRoleName)===true ){
-                        $sheet->setCellValueExplicitByColumnAndRow($i_col, $i_row+1 ,$tempArrayRoleName[$focusValue], PHPExcel_Cell_DataType::TYPE_STRING);
+                        $sheet->setCellValueExplicitByColumnAndRow($i_col, $i_row+1 ,$tempArrayRoleName[$focusValue], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     }
                     $i_col++;
                 }
@@ -1736,9 +1739,9 @@ class ExcelFormatter extends ListFormatter {
     
                         $strPreAreaAddress = $strTopAddress . ":" . $strLastAddress;
     
-                        $dataValidation = new PHPExcel_Cell_DataValidation();
+                        $dataValidation = new \PhpOffice\PhpSpreadsheet\Cell\DataValidation();
                         $dataValidation->setFormula1( "FILTER_".$strFormula1FilterIDTopRow );
-                        $dataValidation->setType(PHPExcel_Cell_DataValidation::TYPE_LIST);
+                        $dataValidation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
                         $dataValidation->setShowErrorMessage(true);
                         $dataValidation->setShowDropDown(true);
                         $sheet->setDataValidation( $strPreAreaAddress , $dataValidation);
@@ -1843,7 +1846,7 @@ class ExcelFormatter extends ListFormatter {
         //処理種別の書式設定
         //ボディのスタイル(データ1行目のスタイルをコピー)
         $sheet->duplicateStyle($sheet->getStyleByColumnAndRow(self::DATA_START_COL-1, $this->bodyTopRow),
-                 self::cr2s(self::DATA_START_COL-1, $intThisStartRow).":".self::cr2s(self::DATA_START_COL-1, $intThisStartRow+self::WHITE_ROWS));
+                               self::cr2s(self::DATA_START_COL-1, $intThisStartRow).":".self::cr2s(self::DATA_START_COL-1, $intThisStartRow+self::WHITE_ROWS));
 
         //----処理種別カラムの設定
 
@@ -1869,11 +1872,13 @@ class ExcelFormatter extends ListFormatter {
         //$strMessage = "行を増やす場合は、この行より上の行をコピーして挿入下さい。";
         $strMessage = $strTextExplain08;
 
-        $sheet->getStyleByColumnAndRow(0, $lastRowNumber+1)->getFont()->getColor()->setARGB("FFFFFFFF");
-        $sheet->setCellValueExplicitByColumnAndRow(0, $lastRowNumber+1 ,$strMessage, PHPExcel_Cell_DataType::TYPE_STRING);
+        $sheet->getStyleByColumnAndRow(1, $lastRowNumber+1)->getFont()->getColor()->setARGB("FFFFFFFF");
+        $sheet->setCellValueExplicitByColumnAndRow(1, $lastRowNumber+1 ,$strMessage, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 
-        for($fnv1=0;$fnv1<=$lastColNumber;$fnv1++){
-            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+        $sheet->getStyleByColumnAndRow(1, $lastRowNumber+1)->getAlignment()->setWrapText(false);
+
+        for($fnv1=1;$fnv1<=$lastColNumber;$fnv1++){
+            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
             $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFill()->getStartColor()->setARGB($strRRBBGGLastContentRow);
             $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFont()->setName($strFontNameOnExcel);
             $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFont()->setSize(8);
@@ -1882,11 +1887,11 @@ class ExcelFormatter extends ListFormatter {
         //幅指定とウィンドウ枠の固定とオートフィルタ
         //オートに設定後、幅を計算、オート設定を戻す
         for($i_col = self::DATA_START_COL-1; $i_col <= $maxCol; ++$i_col){
-            $sheet->getColumnDimension(PHPExcel_Cell::stringFromColumnIndex($i_col))->setAutoSize(true);
+            $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i_col))->setAutoSize(true);
         }
         $sheet->calculateColumnWidths();
         for($i_col = self::DATA_START_COL-1; $i_col <= $maxCol; ++$i_col){
-            $sheet->getColumnDimension(PHPExcel_Cell::stringFromColumnIndex($i_col))->setAutoSize(false);
+            $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i_col))->setAutoSize(false);
         }
 
         $description_array = $this->aryEditSheetDescription;
@@ -1894,7 +1899,6 @@ class ExcelFormatter extends ListFormatter {
         $sheet->fromArray($description_array, "null", self::cr2s(self::DATA_START_COL, $this->bodyTopRow-2));
         $sheet->freezePane(self::cr2s(self::DATA_START_COL, $this->bodyTopRow));
         $sheet->setAutoFilter(self::cr2s(self::DATA_START_COL-1, $this->bodyTopRow-1).":".self::cr2s(self::DATA_START_COL-1+$maxCol,$intThisStartRow+self::WHITE_ROWS));
-    
 
         foreach($aryObjColumn as $objColumn){
             $objColumn->setFormatterRef(null);
@@ -1934,9 +1938,9 @@ class ExcelFormatter extends ListFormatter {
                 $strTailTopAddress = self::cr2s( $ColumnNum, $intPositionTailTopRow );
                 $strTailLastAddress = self::cr2s( $ColumnNum, $intPositionTailLastRow );
                 $strTailPreAreaAddress = $strTailTopAddress . ":" . $strTailLastAddress;
-                $dataValidation = new PHPExcel_Cell_DataValidation();
+                $dataValidation = new \PhpOffice\PhpSpreadsheet\Cell\DataValidation();
                 $dataValidation->setFormula1( "FILTER_".$strFormula1FilterTailID );
-                $dataValidation->setType(PHPExcel_Cell_DataValidation::TYPE_LIST );
+                $dataValidation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST );
                 $dataValidation->setShowErrorMessage(true);
                 $dataValidation->setShowDropDown(true);
                 $sheet->setDataValidation( $strTailPreAreaAddress , $dataValidation );
@@ -1971,14 +1975,14 @@ class ExcelFormatter extends ListFormatter {
     }
 
     // クラス(Table)のメソッド(getPrintFormat)から呼ばれる。
-    function format(){
+    function format($tableTagId = null){
         $retBool = false;
 
         try{
             $X = $this->objFocusWB;
 
             //----保存
-            $objWriter = PHPExcel_IOFactory::createWriter($X, "Excel2007");
+            $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($X, "Xlsx");
             //----ファイルへの保存または（引数が空白の場合）標準出力へ
             $ret = $objWriter->save($this->getExportFilePath());
             //ファイルへの保存または（引数が空白の場合）標準出力へ----
