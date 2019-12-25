@@ -69,7 +69,7 @@ class ColumnGroup {
 	}
 
 	//NEW[2]
-	public function initTable(TableControlAgent $objTable, $intDummy){
+	public function initTable($objTable, $colNo=null){
 		$intCgNo = $objTable->getCgNo();
 		$this->objTable = $objTable;
 		$this->intCgNo = $intCgNo;
@@ -639,7 +639,7 @@ class Column extends ColumnGroup {
 	}
 
 	//----オブジェクト間・値連絡系
-	function initTable(TableControlAgent $objTable, $colNo=null){
+	function initTable($objTable, $colNo=null){
 		$this->objTable = $objTable;
 		$this->intColAddedSeq = $colNo;
 	}
@@ -1858,7 +1858,7 @@ class IDColumn extends Column {
 	}
 
 	//OVR[ignored]::[01]
-	function initTable($objTable, $colNo){
+	function initTable($objTable, $colNo=null){
 		parent::initTable($objTable, $colNo);
 	}
 
@@ -1940,7 +1940,7 @@ class IDColumn extends Column {
 	//PULLDOWN検索系----
 
 	//OVR[-]::[54]
-	function setRichFilterValues($value){
+	function setRichFilterValues($value=array()){
 		$this->aryRichFilterValueRawBase = $value;
 	}
 
@@ -2667,7 +2667,7 @@ class EditStatusControlIDColumn extends IDColumn {
     }
 
     //----AddColumnイベント系
-    function initTable(TemplateTableForReview $table, $colNo){
+    function initTable($table, $colNo=null){
         parent::initTable($table, $colNo);
     }
     //AddColumnイベント系----
@@ -4115,7 +4115,7 @@ class TextColumn extends Column {
 
 	}
 
-	function setRichFilterValues($value){
+	function setRichFilterValues($value=array()){
 		$this->aryRichFilterValueRawBase = $value;
 	}
 
@@ -4702,7 +4702,7 @@ class NumColumn extends Column {
 		//クラス(Table)のメソッド(getFilterQuery)から呼び出される----
 	}
 
-	function setRichFilterValues($value){
+	function setRichFilterValues($value=array()){
 		$this->aryRichFilterValueRawBase = $value;
 	}
 
@@ -5210,7 +5210,7 @@ class RowIdentifyColumn extends AutoNumColumn {
 	}
 
 	//----AddColumnイベント系
-	function initTable($objTable, $colNo){
+	function initTable($objTable, $colNo=null){
 		parent::initTable($objTable, $colNo);
 	}
 	//AddColumnイベント系----
@@ -5488,7 +5488,7 @@ class DateColumn extends Column {
 		return $retStrQuery;
 	}
 
-	function setRichFilterValues($value){
+	function setRichFilterValues($value=array()){
 		$this->aryRichFilterValueRawBase = $value;
 	}
 
@@ -8764,7 +8764,7 @@ class FileUploadColumn extends Column{
 		$this->setValidator(new FileNameValidator());
 	}
 
-	function setRichFilterValues($value){
+	function setRichFilterValues($value=array()){
 		$this->aryRichFilterValueRawBase = $value;
 	}
 
@@ -9617,7 +9617,7 @@ class UpdBtnColumn extends Column {
 	}
 
 	//----AddColumnイベント系
-	function initTable($objTable, $colNo){
+	function initTable($objTable, $colNo=null){
 		parent::initTable($objTable, $colNo);
 		$this->setEvent("print_table", "onclick", "update_async", array(1, ":".$this->objTable->getRIColumnID()));
 	}
@@ -9825,7 +9825,7 @@ class EditStatusControlBtnColumn extends Column {
 	}
 
 	//----AddColumnイベント系
-	function initTable($table, $colNo){
+	function initTable($table, $colNo=null){
 		parent::initTable($table, $colNo);
 	}
 	//AddColumnイベント系----
