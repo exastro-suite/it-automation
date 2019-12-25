@@ -95,7 +95,7 @@ class FileUploadColumnFileAccessBase{
         return($dir);
     }
 
-    function getFilePath($pkey,$FileName) {
+    function getFilePath($pkey,$FileName = Null) {
         $root_dir_temp = array();
         $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
         $root_dir_path = $root_dir_temp[0] . "ita-root";
@@ -143,7 +143,7 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
     function GetLastError() {
         return $this->lv_lasterrmsg;
     }
-    function getFilePath($pkey) {
+    function getFilePath($pkey,$FileName = Null) {
         return(parent::getFilePath($pkey,'AnalysFile.json'));
     }
 
