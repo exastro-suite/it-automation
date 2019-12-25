@@ -607,7 +607,7 @@ class OrchestratorLinkAgent {
     //存在しているオーケストレータ情報を取得する
     
     //----存在している作業パターンを取得する
-    function getLivePatternFromMaster($aryOrchestratorId=null,$strSearchKeyValue="",$aryPatternId=null){
+    function getLivePatternFromMaster($aryOrchestratorId=array(),$strSearchKeyValue="",$aryPatternId=array()){
         /////////////////////////////////////////////////////////////
         // 作業パターン情報を取得                                  //
         /////////////////////////////////////////////////////////////
