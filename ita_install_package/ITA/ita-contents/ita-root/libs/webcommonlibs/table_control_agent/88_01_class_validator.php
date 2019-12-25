@@ -275,7 +275,7 @@ class Validator {
 		return $retBool;
 	}
 
-	function makeValidRule(){
+	function makeValidRule($value = Null, $strDispValue = Null, $strMsgMode = Null, $arrayDispSelectTag = Null){
 		//return "バリデーションのルール説明文を作成します。";
 		$retStrBody = '';
 		return $retStrBody;
@@ -421,7 +421,7 @@ class NumberValidator extends Validator {
 		return $retBool;
 	}
 
-	function makeValidRule(){
+	function makeValidRule($value = Null, $strDispValue = Null, $strMsgMode = Null, $arrayDispSelectTag = Null){
 		//----パラメータ「NOT_NULL」が、setRequired(NULL禁止)と役割が重複して、混乱の原因になっている。廃止の方向で[2015-03-10]
 		global $g;
 		$retStrMsgBody = '';
@@ -578,7 +578,7 @@ class TextValidator extends Validator {
 		return $retBool;
 	}
 
-	function makeValidRule(){
+	function makeValidRule($value = Null, $strDispValue = Null, $strMsgMode = Null, $arrayDispSelectTag = Null){
 		global $g;
 		$retStrMsgBody = '';
 
@@ -740,7 +740,7 @@ class DateValidator extends Validator {
 		return $retBool;
 	}
 
-	function makeValidRule(){
+	function makeValidRule($value = Null, $strDispValue = Null, $strMsgMode = Null, $arrayDispSelectTag = Null){
 		global $g;
 		$retStrMsgBody = '';
 
@@ -983,20 +983,20 @@ class LinkRequireValidator extends Validator {
 			}
 		}
 		if( $retBool === false ){
-			$this->setValidRule($this->makeValidRule($value,$strModeId));
+			$this->setValidRule($this->makeValidRule($value, Null, $strModeId));
 		}
 		return $retBool;
 	}
 
-	function makeValidRule($value,$strModeId){
-		global $g;
+	function makeValidRule($value = Null, $strDispValue = Null, $strMsgMode = Null, $arrayDispSelectTag = Null){
+         	global $g;
 		$retStrBody = '';
 		$objTable = $this->objOwnerColumn->getTable();
 		$aryObjColumn = $objTable->getColumns();
 		$objLinkColumn = $aryObjColumn[$this->strLinkColumnId];
 		$strColumnLabel = $objLinkColumn->getColLabel(true);
 		if(is_a($this->objOwnerColumn,'IDColumn')){
-			$arrayDispSelectTag = $this->objOwnerColumn->getArrayMasterTableByFormatName($strModeId);
+			$arrayDispSelectTag = $this->objOwnerColumn->getArrayMasterTableByFormatName($strMsgMode);
 			if($arrayDispSelectTag === null){
 				if($this->objOwnerColumn->getMasterTableBodyForInput() != ""){
 					$arrayDispSelectTag = $this->objOwnerColumn->getMasterTableArrayForInput();
@@ -1286,7 +1286,7 @@ class IDValidator extends Validator{
 		return $retBool;
 	}
 
-	function makeValidRule($value, $strDispValue, $strMsgMode, $arrayDispSelectTag){
+	function makeValidRule($value = Null, $strDispValue = Null, $strMsgMode = Null, $arrayDispSelectTag = Null){
 		global $g;
 		$retStrMsgBody = '';
 		if( $strDispValue == "" ){
