@@ -87,6 +87,12 @@ function uploadZipFile(){
     $fileName = $_FILES['zipfile']['name'];
     $uploadFilePath = $uploadPath . $fileName;
 
+    // ファイル名に'が含まれているかチェック
+    if(false !== strpos($_FILES['zipfile']['name'], "'")){
+        web_log("The file name contains single quotes.");
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
+    }
+
     // ファイル移動
     if (move_uploaded_file($_FILES['zipfile']['tmp_name'], $uploadFilePath) === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900019',
@@ -128,7 +134,7 @@ function unzipImportData($fileName){
         if(0 != $return_var){
             web_log("COMMAND=[{$cmd}].");
             web_log($g['objMTS']->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
-            throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900001'));
+            throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
         }
     }
     return;
@@ -207,7 +213,7 @@ function checkZipFile($fileName){
         }
         removeFiles($uploadWorkPath, true);
         web_log("File[{$releaseFile}] does not exists.");
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
     }
 
     return;
@@ -233,7 +239,7 @@ function makeImportCheckbox(){
     if (file_exists("{$uploadWorkPath}/INFO_OPERATION") === false || file_exists("{$uploadWorkPath}/INFO_SYMPHONY") === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-MNU-900005',
                                              array(basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-MNU-900005'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-MNU-900003'));
     } else {
         $requestJson = file_get_contents("{$uploadWorkPath}/INFO_OPERATION");
         $ImportOpeAry = json_decode($requestJson, true);
@@ -276,25 +282,18 @@ function makeImportIdList(){
 function insertTask($targetList, &$seqNo, &$jnlSeqNo){
     global $g;
 
-    // トランザクション開始
-    $varTrzStart = $g['objDBCA']->transactionStart();
-    if ($varTrzStart === false) {
-        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900015',
-                                             array(basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
-    }
     $resArray = getSequenceLockInTrz('B_DP_SYM_OPE_STATUS_RIC','A_SEQUENCE');
     if ($resArray[1] != 0) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900052',
                                              array('A_SEQUENCE', 'B_DP_SYM_OPE_STATUS_RIC', basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     $resArray = getSequenceLockInTrz('B_DP_SYM_OPE_STATUS_JSQ','A_SEQUENCE');
     if ($resArray[1] != 0) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900052',
                                              array('A_SEQUENCE', 'B_DP_SYM_OPE_STATUS_JSQ', basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     // 作業No.を取得する
@@ -303,13 +302,13 @@ function insertTask($targetList, &$seqNo, &$jnlSeqNo){
     if ($objQuery === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
                                              array('A_SEQUENCE', 'B_DP_SYM_OPE_STATUS_RIC', basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
     $res = $objQuery->sqlExecute();
     if ($res === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
                                              array('A_SEQUENCE', 'B_DP_SYM_OPE_STATUS_RIC', basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     $seqAry = array();
@@ -325,7 +324,7 @@ function insertTask($targetList, &$seqNo, &$jnlSeqNo){
     if ($resArray[1] != 0) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
                                              array('A_SEQUENCE', 'B_DP_SYM_OPE_STATUS_JSQ', basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
     $jnlSeqNo = $resArray[0];
 
@@ -372,7 +371,7 @@ function insertTask($targetList, &$seqNo, &$jnlSeqNo){
     if ($resAry[0] === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900046',
                                              array('B_DP_SYM_OPE_STATUS', basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     $sqlUtnBody = $resAry[1];
@@ -386,13 +385,13 @@ function insertTask($targetList, &$seqNo, &$jnlSeqNo){
     if ($objQueryUtn->getStatus() === false || $objQueryJnl->getStatus() === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
                                              array(basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     if ($objQueryUtn->sqlBind($arrayUtnBind) != "" || $objQueryJnl->sqlBind($arrayJnlBind) != "") {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
                                              array(basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     $rUtn = $objQueryUtn->sqlExecute();
@@ -401,7 +400,7 @@ function insertTask($targetList, &$seqNo, &$jnlSeqNo){
         web_log($objQueryUtn->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900055',
                                              array(basename(__FILE__), __LINE__, 'B_DP_SYM_OPE_STATUS')));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     $rJnl = $objQueryJnl->sqlExecute();
@@ -410,7 +409,7 @@ function insertTask($targetList, &$seqNo, &$jnlSeqNo){
         web_log($objQueryJnl->getLastError());
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900055',
                                              array(basename(__FILE__), __LINE__, 'B_DP_SYM_OPE_STATUS_JNL')));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     // 更新系のシーケンスを増やす
@@ -420,29 +419,21 @@ function insertTask($targetList, &$seqNo, &$jnlSeqNo){
     if ($objQuery->getStatus() === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
                                              array(basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
     
     $res = $objQuery->sqlBind(array('value' => $p_execution_utn_next_no));
     if ($res != "") {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
                                              array(basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
     $res = $objQuery->sqlExecute();
     if ($res != true) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900055',
                                              array(basename(__FILE__), __LINE__, 'B_DP_SYM_OPE_STATUS')));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
-
-    $res = $g['objDBCA']->transactionCommit();
-    if ($res === false) {
-        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900036',
-                                             array(basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
-    }
-    $g['objDBCA']->transactionExit();
 
     return;
 }
@@ -478,7 +469,7 @@ function moveImportFile($taskNo, $jnlSeqNo){
             if(true != $result){
                 web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900051',
                                                      array(basename(__FILE__), __LINE__)));
-                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
             }
             chmod($path, 0777);
         }
@@ -493,7 +484,7 @@ function moveImportFile($taskNo, $jnlSeqNo){
     if(0 != $return_var){
         web_log("COMMAND=[{$cmd}].");
         web_log($g['objMTS']->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900001'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     // ファイルをコピー(JNL)
@@ -504,7 +495,7 @@ function moveImportFile($taskNo, $jnlSeqNo){
     if(0 != $return_var){
         web_log("COMMAND=[{$cmd}].");
         web_log($g['objMTS']->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900001'));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
     }
 
     unset($_SESSION['upload_file_name']);
@@ -525,7 +516,7 @@ function removeFiles($path, $recursive=false){
 
             if(0 != $return_var){
                 web_log($g['objMTS']->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
-                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900001'));
+                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
             }
         }
     }
@@ -537,7 +528,7 @@ function removeFiles($path, $recursive=false){
 
             if(0 != $return_var){
                 web_log($g['objMTS']->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
-                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900001'));
+                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
             }
         }
     }
