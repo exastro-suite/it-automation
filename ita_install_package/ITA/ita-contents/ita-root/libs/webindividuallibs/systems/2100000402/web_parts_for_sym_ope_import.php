@@ -92,6 +92,14 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
             // POSTされたIDリストを作成
             $targetList = makeImportIdList();
 
+            // トランザクション開始
+            $varTrzStart = $g['objDBCA']->transactionStart();
+            if ($varTrzStart === false) {
+                web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900015',
+                                                     array(basename(__FILE__), __LINE__)));
+                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
+            }
+
             // データ登録
             insertTask($targetList, $taskNo, $jnlSeqNo);
 
@@ -99,6 +107,13 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
             $_SESSION['data_import_task_no'] = $taskNo;
 
             moveImportFile($taskNo, $jnlSeqNo);
+
+            $res = $g['objDBCA']->transactionCommit();
+            if ($res === false) {
+                web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900036',
+                                                     array(basename(__FILE__), __LINE__)));
+                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900074'));
+            }
         }
 
         $resultFlg = true;
@@ -109,13 +124,7 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
         $res = $g['objDBCA']->transactionExit();
         if ($res === false) {
             web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900050', array(__FILE__, __LINE__)));
-            throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
         }
-        $resultMsg = $e->getMessage();
-        $resultFlg = false;
-
-    } catch (Exception $e) {
-        web_log($e->getMessage());
         $resultMsg = $e->getMessage();
         $resultFlg = false;
     }
