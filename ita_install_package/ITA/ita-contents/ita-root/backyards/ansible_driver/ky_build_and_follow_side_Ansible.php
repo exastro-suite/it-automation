@@ -59,6 +59,8 @@
     $strPlayBookFileName = '/playbook.yml';
     $strInFolderName     = '/in';
     $strOutFolderName    = '/out';
+    $strTempFolderName   = '/.tmp';
+    $strExecshellName    = $strTempFolderName .'/.playbook_execute_shell.sh';
 
     ////////////////////////////////
     // ローカル変数(全体)宣言     //
@@ -181,6 +183,9 @@
                                 2 => ["file", "{$strOutDirPath}/{$strErrorLog}", "a"],
                             ];
 
+        // 実行shellのパス
+        $strExecshellName =  $strDRSRootPlayBookDirPath.$strExecshellName;
+        $strCurrentPath   =  $strDRSRootPlayBookDirPath.$strInFolderName;
         // hostsフルパス
         $strhosts = $strDRSRootPlayBookDirPath.$strInFolderName.'/hosts';
         // playbookフルパス
@@ -193,12 +198,35 @@
 
         $path = sprintf('%s/confs/commonconfs/path_ANSIBLE_MODULE.txt',$root_dir_path);
         // 改行コードが付いている場合に取り除く
-        $ansible_path = @file_get_contents($path);
+        $ansible_path = file_get_contents($path);
         $ansible_path = str_replace("\n","",$ansible_path);
 
+        //$strBuildCommand     .= "sudo -u {$strExecUser} -i {$ansible_path}/ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
+
+        // roleでansible.cfgを有効にする為にinをカレントディレクトリにしてAnsible実行するshellを作成
+        $strBuildCommand      = "#!/bin/bash\n";
+        $strBuildCommand     .= "cd {$strCurrentPath}\n";
+        $strBuildCommand     .= "{$ansible_path}/ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
+
+        // Ansible実行shell作成
+        $boolFilePut = file_put_contents($strExecshellName, $strBuildCommand);
+        if( $boolFilePut===false ){
+            // 異常フラグON
+            $error_flag = 1;
+
+            // 例外処理へ
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000010");
+        }
+        if( !chmod( $strExecshellName, 0777 ) ){
+            // 異常フラグON
+            $error_flag = 1;
+
+            // 例外処理へ
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000020");
+        }
+
         // Ansible実行Commnad発行
-        //$strBuildCommand     = "sudo -u {$strExecUser} -i ansible-playbook {$stroptions} -i {$strhosts} {$strPlaybookPath} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} ";
-        $strBuildCommand     = "sudo -u {$strExecUser} -i {$ansible_path}/ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
+        $strBuildCommand     = "sudo -u {$strExecUser} -i {$strExecshellName}";
 
         $resProcess = proc_open($strBuildCommand, $objDescriptorspec, $aryPipe);
 
@@ -225,6 +253,9 @@
         $boolTouchResult = touch("{$strDataFollowDirPath}/{$intFollowTargetPid}.pid");
         if ( $boolTouchResult===false ){
 
+            // Ansible実行shellを削除
+            @unlink($strExecshellName);
+
             // vault パスワードファイル削除
             @unlink($vault_password_file);
 
@@ -238,6 +269,9 @@
         // アンシブルが終了するまで待つ
         // ansible-playbookの終了ステータス = $ansible_return
         pcntl_waitpid($intFollowTargetPid, $refIntReturnStatus);
+
+        // Ansible実行shellを削除
+        @unlink($strExecshellName);
 
         // vault パスワードファイル削除
         @unlink($vault_password_file);
