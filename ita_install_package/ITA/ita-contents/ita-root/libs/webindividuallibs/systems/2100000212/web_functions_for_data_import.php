@@ -86,6 +86,12 @@ function uploadZipFile(){
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
     }
 
+    // ファイル名に'が含まれているかチェック
+    if(false !== strpos($_FILES['zipfile']['name'], "'")){
+        web_log("The file name contains single quotes.");
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
+    }
+
     // ファイル移動
     if (move_uploaded_file($_FILES['zipfile']['tmp_name'], $uploadFilePath) === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900019',
