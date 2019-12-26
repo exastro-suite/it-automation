@@ -702,12 +702,12 @@ class CreateAnsibleExecFiles {
         //inディレクトリ作成
         $c_indir = $aryRetAnsibleWorkingDir[3];
         
-        if( !mkdir( $c_indir, 0777 ) ){
+        if( !mkdir( $c_indir, 0755 ) ){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             return false;
         }
-        if( !chmod( $c_indir, 0777 ) ){
+        if( !chmod( $c_indir, 0755 ) ){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             return false;
