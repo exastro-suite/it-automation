@@ -222,4 +222,5 @@ $ary[806] = "Target execution No are incorrect. ({})";
 $ary[900071] = "Target menu No are incorrect. ({})";
 $ary[900072] = "File export failed.";
 $ary[900073] = "Must have uploaded kym file.";
+$ary[900074] = "Import Symphony/Operation has failed.";
 ?>
