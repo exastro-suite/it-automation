@@ -1370,7 +1370,7 @@ class CheckAnsibleRoleFiles {
         }
         if($result_code === true) {
             // ディレクトリのパーミッションを変更
-            $cmd = sprintf("find %s -type d -exec chmod 777 {} +",$BaseDir);
+            $cmd = sprintf("find %s -type d -exec chmod 755 {} +",$BaseDir);
             system($cmd);
         }
         return $result_code;
