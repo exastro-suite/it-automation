@@ -72,6 +72,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setFileHideMode(true);
     $table->addColumn($c);
 
+    $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true);//Excel出力廃止
+
     $table->fixColumn();
 
     $table->setGeneObject('webSetting', $arrayWebSetting);
