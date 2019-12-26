@@ -411,7 +411,6 @@ window.onload = function(){
 
     show('SetsumeiMidashi'      ,'SetsumeiNakami'       );
     show('Mix1_Midashi'         ,'Mix1_Nakami'          );
-    show('AllDumpMidashi'       ,'AllDumpNakami'        );
     show('Journal1_Midashi'     ,'Journal1_Nakami'      );
 
 // ----サイト個別メニュー、ここから
