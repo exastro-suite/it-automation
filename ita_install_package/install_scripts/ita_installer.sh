@@ -204,8 +204,8 @@ while read LINE; do
         elif [ "$key" = 'ita_os' ]; then
             func_answer_format_check
             ITA_OS="$val"
-            if [ "${ITA_OS}" != 'RHEL6' -a "${ITA_OS}" != 'RHEL7' ]; then
-                log "ERROR : $key should be set to RHEL6 or RHEL7."
+            if [ "${ITA_OS}" != 'RHEL7' -a "${ITA_OS}" != 'RHEL8' ]; then
+                log "ERROR : $key should be set to RHEL7 or RHEL8."
                 log 'INFO : Abort installation.'
                 func_exit_and_delete_file
             fi
