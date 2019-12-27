@@ -116,6 +116,14 @@ download_check() {
     fi
 }
 
+error_check() {
+    DOWNLOAD_CHK=`echo $?`
+    if [ $DOWNLOAD_CHK -ne 0 ]; then
+        log "ERROR:Stop installation"
+        exit
+    fi
+}
+
 # enable yum repository
 # ex.
 #   yum_repository http://example.com/example-repo.rpm --enable test-repo
@@ -153,23 +161,26 @@ yum_repository() {
 mariadb_repository() {
     #Not used for offline installation
     if [ "${REPOSITORY}" != "yum_all" ]; then
+        if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+            local repo=$1
 
-        local repo=$1
+            curl -sS "$repo" | bash >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            CREATEREPO_CHK=`echo $?`
 
-        curl -sS "$repo" | bash >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        CREATEREPO_CHK=`echo $?`
-
-        if [ $CREATEREPO_CHK == 0 ] || [ $CREATEREPO_CHK == 1 ]; then
-            echo "Successful repository acquisition" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        else
-            log "ERROR:Failed to get repository"
-            func_exit
+            if [ $CREATEREPO_CHK == 0 ] || [ $CREATEREPO_CHK == 1 ]; then
+                echo "Successful repository acquisition" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            else
+                log "ERROR:Failed to get repository"
+                func_exit
+            fi
+            
+            yum-config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
         fi
-        
-        yum-config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 }
+
+
 
 cat_tar_gz() {
     local location=$1
@@ -201,23 +212,20 @@ configure_yum_env() {
 
     #mirror list is Japan only.
     if [ ! -e /etc/yum/pluginconf.d/fastestmirror.conf ]; then
-        if [ "$LINUX_OS" == "RHEL6" ]; then
-            yum --enablerepo=rhel-6-server-optional-rpms info yum-plugin-fastestmirror >> "$ITA_BUILDER_LOG_FILE" 2>&1
-
-        elif [ "$LINUX_OS" == "RHEL7" ]; then
+        if [ "$LINUX_OS" == "RHEL7" ]; then
             yum --enablerepo=rhel-7-server-optional-rpms info yum-plugin-fastestmirror >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            ls /etc/yum/pluginconf.d/fastestmirror.conf >> "$ITA_BUILDER_LOG_FILE" 2>&1 | xargs grep "include_only=.jp" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         fi
-    fi
 
-    ls /etc/yum/pluginconf.d/fastestmirror.conf >> "$ITA_BUILDER_LOG_FILE" 2>&1 | xargs grep "include_only=.jp" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    if [ $? -ne 0 ]; then
-        sed -i '$a\include_only=.jp' /etc/yum/pluginconf.d/fastestmirror.conf >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            sed -i '$a\include_only=.jp' /etc/yum/pluginconf.d/fastestmirror.conf >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        fi   
     fi
     
+
     # install yum-utils and createrepo
     if [ "${MODE}" == "remote" ]; then
         yum_install ${YUM__ENV_PACKAGE}
-
     else
         yum localinstall -y --nogpgcheck ${YUM__ENV_PACKAGE} >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
@@ -258,15 +266,9 @@ enabled=0
 configure_os() {
 
     # stop and disable firewalld
-    if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
-        #--------CentOS6,RHEL6--------
-        service iptables stop >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        chkconfig iptables off >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    else
-        #--------CentOS7,RHEL7--------
-        systemctl stop firewalld >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        systemctl disable firewalld >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    fi
+    #--------CentOS7/8,RHEL7/8--------
+    systemctl stop firewalld >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    systemctl disable firewalld >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
     # disable SELinux
     setenforce 0 >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -282,16 +284,71 @@ configure_mariadb() {
         mkdir -p -m 777 /var/log/mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
-    #Confirm whether it is installed
-    yum list installed MariaDB-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    if [ $? == 0 ]; then
-        log "MariaDB has already been installed."
-        
-        #Confirm whether root password has been changed
-        mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "CentOS7" ]; then
+        #Confirm whether it is installed
+        yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
         if [ $? == 0 ]; then
-            log "Root password of MariaDB is already setting."
+            log "MariaDB has already been installed."
+            
+            #Confirm whether root password has been changed
+            mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? == 0 ]; then
+                log "Root password of MariaDB is already setting."
+            else
+                expect -c "
+                    set timeout -1
+                    spawn mysql_secure_installation
+                    expect \"Enter current password for root \\(enter for none\\):\"
+                    send \"\\r\"
+                    expect -re \"Switch to unix_socket authentication.* $\"
+                    send \"\\r\"
+                    expect -re \"Change the root password\\?.* $\"
+                    send \"\\r\"
+                    expect \"New password:\"
+                    send \""${db_root_password}\\r"\"
+                    expect \"Re-enter new password:\"
+                    send \""${db_root_password}\\r"\"
+                    expect -re \"Remove anonymous users\\?.* $\"
+                    send \"Y\\r\"
+                    expect -re \"Disallow root login remotely\\?.* $\"
+                    send \"Y\\r\"
+                    expect -re \"Remove test database and access to it\\?.* $\"
+                    send \"Y\\r\"
+                    expect -re \"Reload privilege tables now\\?.* $\"
+                    send \"Y\\r\"
+                " >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                
+                # copy MariaDB charset file
+                copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                
+                # restart MariaDB Server
+                #--------CentOS7/8,RHEL7/8--------
+                systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                error_check
+            fi
+            
         else
+            # enable MariaDB repository
+            mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
+
+            # install some packages
+            echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            #Installation
+            yum install -y MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+            #Check installation
+            if [ $? != 0 ]; then
+                log "ERROR:Installation failed[MariaDB]"
+                func_exit
+            fi
+            
+            # enable and start (initialize) MariaDB Server
+            #--------CentOS7,RHEL7--------
+            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+            
             expect -c "
                 set timeout -1
                 spawn mysql_secure_installation
@@ -319,70 +376,107 @@ configure_mariadb() {
             copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
             
             # restart MariaDB Server
-            if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
-                #--------CentOS6,RHEL6--------
-                service mysql restart >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            else
-                #--------CentOS7,RHEL7--------
-                systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            fi
-        fi
-        
-    else
-        # enable MariaDB repository
-        mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
-
-        # install some packages
-        yum_install ${YUM_PACKAGE["mariadb"]}
-        
-        # enable and start (initialize) MariaDB Server
-        if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
-            #--------CentOS6,RHEL6--------
-            chkconfig mysql on >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            service mysql start >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        else
-            #--------CentOS7,RHEL7--------
-            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        fi
-        
-        expect -c "
-            set timeout -1
-            spawn mysql_secure_installation
-            expect \"Enter current password for root \\(enter for none\\):\"
-            send \"\\r\"
-            expect -re \"Switch to unix_socket authentication.* $\"
-            send \"n\\r\"
-            expect -re \"Change the root password\\?.* $\"
-            send \"Y\\r\"
-            expect \"New password:\"
-            send \""${db_root_password}\\r"\"
-            expect \"Re-enter new password:\"
-            send \""${db_root_password}\\r"\"
-            expect -re \"Remove anonymous users\\?.* $\"
-            send \"Y\\r\"
-            expect -re \"Disallow root login remotely\\?.* $\"
-            send \"Y\\r\"
-            expect -re \"Remove test database and access to it\\?.* $\"
-            send \"Y\\r\"
-            expect -re \"Reload privilege tables now\\?.* $\"
-            send \"Y\\r\"
-        " >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        
-        # copy MariaDB charset file
-        copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        
-        # restart MariaDB Server
-        if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
-            #--------CentOS6,RHEL6--------
-            service mysql restart >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        else
             #--------CentOS7,RHEL7--------
             systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+
         fi
     fi
-    
-    
+
+    if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "CentOS8" ]; then
+        #Confirm whether it is installed
+        yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ $? == 0 ]; then
+            log "MariaDB has already been installed."
+            
+            #Confirm whether root password has been changed
+            mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? == 0 ]; then
+                log "Root password of MariaDB is already setting."
+            else
+                expect -c "
+                    set timeout -1
+                    spawn mysql_secure_installation
+                    expect \"Enter current password for root \\(enter for none\\):\"
+                    send \"\\r\"
+                    expect -re \"Set root password\\?.* $\"
+                    send \"Y\\r\"
+                    expect \"New password:\"
+                    send \""${db_root_password}\\r"\"
+                    expect \"Re-enter new password:\"
+                    send \""${db_root_password}\\r"\"
+                    expect -re \"Remove anonymous users\\?.* $\"
+                    send \"Y\\r\"
+                    expect -re \"Disallow root login remotely\\?.* $\"
+                    send \"Y\\r\"
+                    expect -re \"Remove test database and access to it\\?.* $\"
+                    send \"Y\\r\"
+                    expect -re \"Reload privilege tables now\\?.* $\"
+                    send \"Y\\r\"
+                " >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                
+                # copy MariaDB charset file
+                copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                
+                # restart MariaDB Server
+                #--------CentOS8,RHEL8--------
+                systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                error_check
+            fi
+            
+        else
+            # enable MariaDB repository
+            mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
+
+            # install some packages
+            echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            #Installation
+            yum install -y mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+            #Check installation
+            if [ $? != 0 ]; then
+                log "ERROR:Installation failed[MariaDB]"
+                func_exit
+            fi
+            
+            # enable and start (initialize) MariaDB Server
+            #--------CentOS8,RHEL8--------
+            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+            
+            expect -c "
+                set timeout -1
+                spawn mysql_secure_installation
+                expect \"Enter current password for root \\(enter for none\\):\"
+                send \"\\r\"
+                expect -re \"Set root password\\?.* $\"
+                send \"Y\\r\"
+                expect \"New password:\"
+                send \""${db_root_password}\\r"\"
+                expect \"Re-enter new password:\"
+                send \""${db_root_password}\\r"\"
+                expect -re \"Remove anonymous users\\?.* $\"
+                send \"Y\\r\"
+                expect -re \"Disallow root login remotely\\?.* $\"
+                send \"Y\\r\"
+                expect -re \"Remove test database and access to it\\?.* $\"
+                send \"Y\\r\"
+                expect -re \"Reload privilege tables now\\?.* $\"
+                send \"Y\\r\"
+            " >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            
+            # copy MariaDB charset file
+            copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            
+            # restart MariaDB Server
+            #--------CentOS8,RHEL8--------
+            systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+
+        fi
+    fi
 }
 
 # Apache HTTP Server
@@ -391,13 +485,8 @@ configure_httpd() {
     yum_install ${YUM_PACKAGE["httpd"]}
 
     # enable and start Apache HTTP Server
-    if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
-        #--------CentOS6,RHEL6--------
-        chkconfig httpd on >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    else
-        #--------CentOS7,RHEL7--------
-        systemctl enable httpd >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    fi
+    #--------CentOS7/8,RHEL7/8--------
+    systemctl enable httpd >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
 }
 
@@ -424,10 +513,11 @@ configure_php() {
     # WORKAROUND! Symbolic link must exist.
     ln -s /usr/share/pear-data/HTML_AJAX/js /usr/share/pear/HTML/js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
 
-    # Install PHPExcel.
-    echo "----------Installation[PHPExcel]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    mkdir -p /usr/share/php/PHPExcel >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    cat_tar_gz ${PHP_TAR_GZ_PACKAGE["phpexcel"]} | tar zx --strip-components=1 -C /usr/share/php/PHPExcel >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    # Auth.php file modification 
+    sed -i 's/$obj =& new $storage_class($options);/$obj = new $storage_class($options);/g' /usr/share/pear/Auth.php
+
+    # Array.php file modification
+    sed -i 's/function fetchData($user, $pass)/function fetchData($user=null, $pass=null, $username=null, $password=null, $isChallengeResponse = false)/g' /usr/share/pear/Auth/Container/Array.php
 
     # Install Spyc.
     echo "----------Installation[Spyc]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -438,6 +528,22 @@ configure_php() {
     echo "----------Installation[Twig]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     cat_tar_gz ${PHP_TAR_GZ_PACKAGE["twig"]} | tar zx -C /usr/share/php >> "$ITA_BUILDER_LOG_FILE" 2>&1
     
+    # Install Composer.
+    if [ "${exec_mode}" == "3" ]; then
+        echo "----------Installation[Composer]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        curl -sS $COMPOSER | php -- --install-dir=/usr/bin  >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
+
+    # Install PhpSpreadsheet.
+    echo "----------Installation[PhpSpreadsheet]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ "${exec_mode}" == "3" ]; then
+        /usr/bin/composer.phar require $PHPSPREADSHEET >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        mv vendor /usr/share/php/  >> "$ITA_BUILDER_LOG_FILE" 2>&1;
+    else
+        mkdir -p /usr/share/php/vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        cat_tar_gz rpm_files/php-tar-gz/PhpSpreadsheet/vendor.tar.gz | tar zx --strip-components=1 -C /usr/share/php/vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
+
     #clean
     rm -rf /tmp/pear
 }
@@ -452,101 +558,20 @@ configure_git() {
 
 # Ansible
 configure_ansible() {
-    # Install some packages.
+    #python3 install
+    #if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "CentOS7" ]; then
+    #    yum -y install python3 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    #else 
+        yum -y install python3-pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    #fi
+
     yum_install ${YUM_PACKAGE["ansible"]}
     
     # Replace Ansible config file.
     copy_and_backup "$ITA_EXT_FILE_DIR/etc_ansible/ansible.cfg" "/etc/ansible/"
     
     # Install some pip packages.
-    pip install ${PIP_PACKAGE["ansible"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
-}
-
-
-# cobbler
-configure_cobbler() {
-    # Install some packages.
-    if [ "$LINUX_OS" == "RHEL7" ]; then
-        yum_install ${YUM_PACKAGE["cobbler"]} --enablerepo=rhel-7-server-optional-rpms
-    else
-        yum_install ${YUM_PACKAGE["cobbler"]}
-    fi
-    
-    #Replace with ITA file(tftp)
-    copy_and_backup "$ITA_EXT_FILE_DIR/etc_xinetd.d/tftp" "/etc/xinetd.d/"
-    
-    #Create rsync file
-    cp -p $ITA_EXT_FILE_DIR/etc_xinetd.d/rsync /etc/xinetd.d/. >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
-    #Replace with ITA file(debmirror.conf)
-    copy_and_backup "$ITA_EXT_FILE_DIR/etc/debmirror.conf" "/etc/"
-    
-    #Replace with ITA file(pxedefault.template)
-    copy_and_backup "$ITA_EXT_FILE_DIR/etc_cobbler_pxe/pxedefault.template" "/etc/cobbler/pxe/"
-    
-    #File editing(/etc/cobbler/settings)
-    cp -p "/etc/cobbler/settings" "/etc/cobbler/settings`backup_suffix`" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    sed -ri "s/(^server: ).*/\1$server_address/" /etc/cobbler/settings >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    sed -ri "s/(^next_server: ).*/\1$server_address/" /etc/cobbler/settings >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    HASH_DEFAULT_PASSWORD=`openssl passwd -1 -salt "cobbler" "$default_password"`
-    sed -ri "s/(^default_password_crypted: ).*/\1$HASH_DEFAULT_PASSWORD/" /etc/cobbler/settings >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    sed -ri "s/(^manage_dhcp: ).*/\11/" /etc/cobbler/settings >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
-    #File editing(/etc/cobbler/dhcp.template)
-    cp -p  "/etc/cobbler/dhcp.template" "/etc/cobbler/dhcp.template`backup_suffix`" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    sed -ri "s/(^subnet ).+( netmask ).+/\1$cobbler_ip\2$cobbler_subnet {/" /etc/cobbler/dhcp.template >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    sed -ri "s/(^ +option routers +).*/\1$cobbler_gateway;/" /etc/cobbler/dhcp.template >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    sed -ri "s/(^ +option domain-name-servers +).*/\1$cobbler_dns;/" /etc/cobbler/dhcp.template >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    sed -ri "s/(^ +option subnet-mask +).*/\1$cobbler_subnet;/" /etc/cobbler/dhcp.template >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    sed -ri "s/(^ +range dynamic-bootp +).*/\1$dynamic_address_min $dynamic_address_max;/" /etc/cobbler/dhcp.template >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
-    if [ "$LINUX_OS" == "CentOS6" -o "$LINUX_OS" == "RHEL6" ]; then
-        #--------CentOS6,RHEL6--------
-        #start and startup setting(cobbler)
-        service cobblerd start >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        chkconfig cobblerd on >> "$ITA_BUILDER_LOG_FILE" 2>&1
-
-        #start and startup setting(xinetd)
-        service xinetd start >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        chkconfig xinetd on >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        
-        #restart cobbler
-        #service cobbler restart
-        service cobblerd stop >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        service cobblerd start >> "$ITA_BUILDER_LOG_FILE" 2>&1
-
-        cobbler sync >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        if [ $? -ne 0 ]; then
-            "ERROR:Cobbler configuration failed"
-            func_exit
-        fi
-        #start and startup setting(dhcpd)
-        service dhcpd start >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        chkconfig dhcpd on >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
-    else
-        #--------CentOS7,RHEL7--------
-        #start and startup setting(cobbler)
-        systemctl enable cobblerd >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        systemctl start cobblerd >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        
-        #start and startup setting(xinetd)
-        systemctl enable xinetd >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        systemctl start xinetd >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        
-        #restart Apache(httpd)
-        systemctl restart httpd >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        
-        cobbler sync >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        if [ $? -ne 0 ]; then
-            log "ERROR:Cobbler configuration failed"
-            func_exit
-        fi
-        #start and startup setting(dhcpd)
-        systemctl enable dhcpd >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        systemctl start dhcpd >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    fi
+    pip3 install ${PIP_PACKAGE["ansible"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
 }
 
 
@@ -590,11 +615,6 @@ make_ita() {
         configure_ansible
     fi
 
-    if [ "$cobbler_driver" == "yes" ]; then
-        log "cobbler install and setting"
-        configure_cobbler
-    fi
-
     log "Running the ITA installer"
     configure_ita
 }
@@ -625,6 +645,13 @@ download() {
     done
     # Enable mariadb repositories.
     mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
+    
+    # MriaDB download packages.
+    if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+        yumdownloader --resolve --destdir rpm_files/yum/yum_all MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    else
+        yumdownloader --resolve --destdir rpm_files/yum/yum_all mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
 
     # Download packages.
     for key in ${!YUM_PACKAGE[@]}; do
@@ -649,7 +676,7 @@ download() {
     cd $ITA_INSTALL_SCRIPTS_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1;
 
     #----------------------------------------------------------------------
-    # download PHP tar.gz packages
+    # Download PHP tar.gz packages
     for key in ${!PHP_TAR_GZ_PACKAGE[@]}; do
         local download_dir="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -664,52 +691,37 @@ download() {
     #----------------------------------------------------------------------
     # Download pip packages.
     
-    #update python(Var2.7) and pip install
-    if [ "$LINUX_OS" == "RHEL6" ]; then
-        yum -y install zlib-devel openssl-devel gcc >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        mkdir $ITA_INSTALL_SCRIPTS_DIR/python27 >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        (
-            cd $ITA_INSTALL_SCRIPTS_DIR/python27 >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-            curl -O https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-            tar zxf Python-2.7.11.tgz >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-            cd $ITA_INSTALL_SCRIPTS_DIR/python27/Python-2.7.11 >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-#            $ITA_INSTALL_SCRIPTS_DIR/python27/Python-2.7.11/configure --with-ensurepip >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-            make && make altinstall >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        )
-        mv /usr/bin/python /usr/bin/python.26 >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        cp $ITA_INSTALL_SCRIPTS_DIR/python27/Python-2.7.11/python /usr/bin/python >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        sed -i -e "1s:/usr/bin/python:/usr/bin/python.26:" "/usr/bin/yum" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        curl -kL https://bootstrap.pypa.io/get-pip.py |  python >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        mv /usr/bin/pip /usr/bin/pip_org >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        ln -s /usr/local/bin/pip /usr/bin/pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        rm -rf $ITA_INSTALL_SCRIPTS_DIR/python27 >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        python -V >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        
-    elif [ "$LINUX_OS" == "CentOS6" ]; then
-        yum -y install python-pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        yum -y install centos-release-scl-rh >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        yum -y install python27 >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        echo 'source /opt/rh/python27/enable' > /etc/profile.d/python27.sh
-        source /etc/profile >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        python -V >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    else
-        yum -y install python-pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    fi
+    #pip install
+    yum -y install python3-pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
     
     for key in ${!PIP_PACKAGE[@]}; do
         local download_dir="${DOWNLOAD_DIR["pip"]}/$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-
-        if [ "$LINUX_OS" == "CentOS6" ]; then
-            log "Download packages[${PIP_PACKAGE[$key]}]"
-            pip download -d "$download_dir" ${PIP_PACKAGE[$key]} --trusted-host ${PIP_PACKAGE_HOST[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            download_check
-        else
-            mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            log "Download packages[${PIP_PACKAGE[$key]}]"
-            pip download -d "$download_dir" ${PIP_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            download_check
-        fi
+        mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        log "Download packages[${PIP_PACKAGE[$key]}]"
+        pip3 download -d "$download_dir" ${PIP_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        download_check
     done
+
+    #----------------------------------------------------------------------
+    # Download PhpSpreadsheet tar.gz packages
+    
+    #Composer install
+    yum -y install php php-json php-zip php-xml php-gd php-mbstring unzip
+    
+    mkdir -p vendor/composer
+    curl -sS $COMPOSER | php -- --install-dir=vendor/composer >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+    for key in ${!PHPSPREADSHEET_TAR_GZ_PACKAGE[@]}; do
+        local download_dir="${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        
+        log "Download packages[$key]"
+        ./vendor/composer/composer.phar require $PHPSPREADSHEET >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        download_check
+        tar -zcvf "$download_dir"/vendor.tar.gz vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    done
+
+    rm -rf composer.json composer.lock vendor
 
     #----------------------------------------------------------------------
     #Create the installer archive
@@ -756,14 +768,14 @@ log "read setting file"
 read_setting_file "$ITA_BUILDER_SETTING_FILE"
 
 #check (ita_builder_setting.txt)
-if [ "${linux_os}" != 'CentOS6' -a "${linux_os}" != 'CentOS7' -a "${linux_os}" != 'RHEL6' -a "${linux_os}" != 'RHEL7' ]; then
-    log "ERROR:should be set to CentOS6 or CentOS7 or RHEL6 or RHEL7"
+if [ "${linux_os}" != 'CentOS7' -a "${linux_os}" != 'CentOS8' -a "${linux_os}" != 'RHEL7' -a "${linux_os}" != 'RHEL8' ]; then
+    log "ERROR:should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8"
     func_exit
 else
     LINUX_OS="${linux_os}"
 fi
 
-if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "RHEL6" ]; then
+if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ]; then
     if [ ! -n "$redhat_user_name" ]; then
         log "ERROR:should be set[redhat_user_name]"
         func_exit
@@ -776,41 +788,6 @@ if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "RHEL6" ]; then
 
     if [ ! -n "$pool_id" ]; then
         log "ERROR:should be set[pool_id]"
-        func_exit
-    fi
-fi
-
-if [ "$cobbler_driver" == "yes" ]; then
-    if [ ! -n "$server_address" ]; then
-        log "ERROR:should be set[server_address]"
-        func_exit
-    fi
-    if [ ! -n "$default_password" ]; then
-        log "ERROR:should be set[default_password]"
-        func_exit
-    fi
-    if [ ! -n "$cobbler_ip" ]; then
-        log "ERROR:should be set[cobbler_ip]"
-        func_exit
-    fi
-    if [ ! -n "$cobbler_subnet" ]; then
-        log "ERROR:should be set[cobbler_subnet]"
-        func_exit
-    fi
-    if [ ! -n "$cobbler_gateway" ]; then
-        log "ERROR:should be set[cobbler_gateway]"
-        func_exit
-    fi
-    if [ ! -n "$cobbler_dns" ]; then
-        log "ERROR:should be set[cobbler_dns]"
-        func_exit
-    fi
-    if [ ! -n "$dynamic_address_min" ]; then
-        log "ERROR:should be set[dynamic_address_min]"
-        func_exit
-    fi
-    if [ ! -n "$dynamic_address_max" ]; then
-        log "ERROR:should be set[dynamic_address_max]"
         func_exit
     fi
 fi
@@ -831,8 +808,8 @@ if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
     fi
 
     if [ "${cobbler_driver}" != 'yes' -a "${cobbler_driver}" != 'no' ]; then
-        log "ERROR:cobbler_driver should be set to yes or no"
-        func_exit
+       log "ERROR:cobbler_driver should be set to yes or no"
+       func_exit
     fi
 
     if [ ! -n "$db_root_password" ]; then
@@ -861,16 +838,16 @@ elif [ "${exec_mode}" == "2" ]; then
     REPOSITORY="yum_all"
 fi
 
-if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+    ITA_EXT_FILE_DIR=$ITA_INSTALL_PACKAGE_DIR/ext_files_for_CentOS8.x
+elif [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
     ITA_EXT_FILE_DIR=$ITA_INSTALL_PACKAGE_DIR/ext_files_for_CentOS7.x
-elif [ "${LINUX_OS}" == "CentOS6" -o "${LINUX_OS}" == "RHEL6" ]; then
-    ITA_EXT_FILE_DIR=$ITA_INSTALL_PACKAGE_DIR/ext_files_for_CentOS6.x
 fi
 
 ################################################################################
 # set subscription
 if [ "$exec_mode" != "2" ]; then
-    if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "RHEL6" ]; then
+    if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ]; then
 
         log "setting subscriction of RHEL"
 
@@ -927,6 +904,7 @@ LOCAL_DIR=(
     ["pear"]="$ITA_EXT_FILE_DIR/pear"
     ["pip"]="$ITA_EXT_FILE_DIR/pip"
     ["php-tar-gz"]="$ITA_EXT_FILE_DIR/php-tar-gz"
+    ["phpspreadsheet-tar-gz"]="$ITA_EXT_FILE_DIR/phpspreadsheet-tar-gz"
 )
 
 DOWNLOAD_BASE_DIR=$ITA_INSTALL_SCRIPTS_DIR/rpm_files
@@ -937,6 +915,7 @@ DOWNLOAD_DIR=(
     ["pear"]="$DOWNLOAD_BASE_DIR/pear"
     ["php-tar-gz"]="$DOWNLOAD_BASE_DIR/php-tar-gz"
     ["pip"]="$DOWNLOAD_BASE_DIR/pip"
+    ["phpspreadsheet-tar-gz"]="$DOWNLOAD_BASE_DIR/phpspreadsheet-tar-gz"
 )
 
 ################################################################################
@@ -957,20 +936,18 @@ fi
 # yum repository package (for yum-env-enable-repo)
 declare -A YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO;
 YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO=(
-    ["RHEL7"]="http://ftp-srv2.kddilabs.jp/Linux/distributions/fedora/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm"
-    ["RHEL6"]="http://ftp-srv2.kddilabs.jp/Linux/distributions/fedora/epel/6/x86_64/Packages/e/epel-release-6-8.noarch.rpm"
+    ["RHEL7"]="https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
     ["CentOS7"]="epel-release"
-    ["CentOS6"]="epel-release"
     ["yum_all"]="--enable yum_all"
 )
 
 # yum repository package (for yum-env-disable-repo)
 declare -A YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO;
 YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO=(
+    ["RHEL8"]=""
     ["RHEL7"]=""
-    ["RHEL6"]=""
+    ["CentOS8"]=""
     ["CentOS7"]=""
-    ["CentOS6"]=""
     ["yum_all"]="--disable base extras updates epel"
 )
 
@@ -978,19 +955,15 @@ YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO=(
 declare -A YUM_REPO_PACKAGE_MARIADB;
 YUM_REPO_PACKAGE_MARIADB=(
     ["RHEL7"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
-    ["RHEL6"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
     ["CentOS7"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
-    ["CentOS6"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
     ["yum_all"]=""
 )
 
 # yum repository package (for php)
 declare -A YUM_REPO_PACKAGE_PHP;
 YUM_REPO_PACKAGE_PHP=(
-    ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php56"
-    ["RHEL6"]="http://rpms.remirepo.net/enterprise/remi-release-6.rpm --enable remi-php56"
-    ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php56"
-    ["CentOS6"]="http://rpms.remirepo.net/enterprise/remi-release-6.rpm --enable remi-php56"
+    ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
+    ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
     ["yum_all"]=""
 )
 
@@ -1025,27 +998,16 @@ YUM_PACKAGE_YUM_ENV=(
     ["local"]="`list_yum_package ${YUM_ENV_PACKAGE_LOCAL_DIR}`"
 )
 
-# cobbler package (for yum)
-declare -A YUM_PACKAGE_COBBLER;
-YUM_PACKAGE_COBBLER=(
-    ["RHEL7"]="cobbler cobbler-web dhcp pykickstart fence-agents debmirror xinetd python-cheetah"
-    ["RHEL6"]="cobbler dhcp pykickstart fence-agents debmirror xinetd"
-    ["CentOS7"]="cobbler cobbler-web dhcp pykickstart fence-agents debmirror xinetd"
-    ["CentOS6"]="cobbler dhcp pykickstart fence-agents debmirror xinetd"
-)
-
 # yum first install packages
 YUM__ENV_PACKAGE="${YUM_PACKAGE_YUM_ENV[${MODE}]}"
 
 # yum install packages
 declare -A YUM_PACKAGE;
 YUM_PACKAGE=(
-    ["mariadb"]="MariaDB MariaDB-server expect"
     ["httpd"]="httpd mod_ssl"
-    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mcrypt php-mysqlnd php-pear php-pecl-crypto php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip"
+    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd"
     ["git"]="git"
-    ["ansible"]="ansible python-pip expect"
-    ["cobbler"]="${YUM_PACKAGE_COBBLER[${LINUX_OS}]}"
+    ["ansible"]="expect"
 )
 
 
@@ -1093,7 +1055,6 @@ PEAR_PACKAGE=(
 # local directory
 declare -A PHP_TAR_GZ_PACKAGE_LOCAL_DIR;
 PHP_TAR_GZ_PACKAGE_LOCAL_DIR=(
-    ["phpexcel"]="${LOCAL_DIR["php-tar-gz"]}/PHPExcel"
     ["spyc"]="${LOCAL_DIR["php-tar-gz"]}/Spyc"
     ["twig"]="${LOCAL_DIR["php-tar-gz"]}/Twig"
 )
@@ -1101,20 +1062,12 @@ PHP_TAR_GZ_PACKAGE_LOCAL_DIR=(
 # download directory
 declare -A PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR;
 PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR=(
-    ["phpexcel"]="${DOWNLOAD_DIR["php-tar-gz"]}/PHPExcel"
     ["spyc"]="${DOWNLOAD_DIR["php-tar-gz"]}/Spyc"
     ["twig"]="${DOWNLOAD_DIR["php-tar-gz"]}/Twig"
 )
 
 #-----------------------------------------------------------
 # package
-
-# PHPExcel
-declare -A PHP_TAR_GZ_PACKAGE_PHPEXCEL;
-PHP_TAR_GZ_PACKAGE_PHPEXCEL=(
-    ["remote"]="https://github.com/PHPOffice/PHPExcel/archive/e465130.tar.gz"
-    ["local"]="${PHP_TAR_GZ_PACKAGE_LOCAL_DIR["phpexcel"]}/e465130.tar.gz"
-)
 
 # Spyc
 declare -A PHP_TAR_GZ_PACKAGE_SPYC;
@@ -1133,7 +1086,6 @@ PHP_TAR_GZ_PACKAGE_TWIG=(
 # all php tar.gz packages
 declare -A PHP_TAR_GZ_PACKAGE;
 PHP_TAR_GZ_PACKAGE=(
-    ["phpexcel"]=${PHP_TAR_GZ_PACKAGE_PHPEXCEL[${MODE}]}
     ["spyc"]=${PHP_TAR_GZ_PACKAGE_SPYC[${MODE}]}
     ["twig"]=${PHP_TAR_GZ_PACKAGE_TWIG[${MODE}]}
 )
@@ -1163,7 +1115,7 @@ PIP_PACKAGE_DOWNLOAD_DIR=(
 # pip package (for ansible)
 declare -A PIP_PACKAGE_ANSIBLE;
 PIP_PACKAGE_ANSIBLE=(
-    ["remote"]="pexpect pywinrm"
+    ["remote"]="ansible pexpect pywinrm"
     ["local"]=`list_pip_package ${PIP_PACKAGE_LOCAL_DIR["ansible"]}`
 )
 
@@ -1173,11 +1125,43 @@ PIP_PACKAGE=(
     ["ansible"]=${PIP_PACKAGE_ANSIBLE[${MODE}]}
 )
 
-#all pip packages host
-#For CentOS6
-declare -A PIP_PACKAGE_HOST;
-PIP_PACKAGE_HOST=(
-    ["ansible"]="files.pythonhosted.org"
+
+################################################################################
+# PHPSPREADSHEET tar.gz packages
+
+#-----------------------------------------------------------
+# directory
+
+# local directory
+declare -A PHPSPREADSHEET_TAR_GZ_PACKAGE_LOCAL_DIR;
+PHPSPREADSHEET_TAR_GZ_PACKAGE_LOCAL_DIR=(
+    ["phpspreadsheet"]="${LOCAL_DIR["phpspreadsheet-tar-gz"]}/PhpSpreadsheet"
+)
+
+# download directory
+declare -A PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR;
+PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR=(
+    ["phpspreadsheet"]="${DOWNLOAD_DIR["php-tar-gz"]}/PhpSpreadsheet"
+)
+
+#-----------------------------------------------------------
+# package
+
+# Composer
+COMPOSER=https://getcomposer.org/installer
+
+# PhpSpreadsheet
+PHPSPREADSHEET=""phpoffice/phpspreadsheet":"*""
+
+declare -A PHPSPREADSHEET_TAR_GZ_PACKAGE_SPREADSHEET;
+PHPSPREADSHEET_TAR_GZ_PACKAGE_SPREADSHEET=(
+    ["local"]="${PHP_TAR_GZ_PACKAGE_LOCAL_DIR["phpspreadsheet"]}/vendor.tar.gz"
+)
+
+#all php tar.gz packages
+declare -A PHPSPREADSHEET_TAR_GZ_PACKAGE;
+PHPSPREADSHEET_TAR_GZ_PACKAGE=(
+    ["phpspreadsheet"]=${PHPSPREADSHEET_TAR_GZ_PACKAGE_SPREADSHEET[${MODE}]}
 )
 
 ################################################################################
