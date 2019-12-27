@@ -292,18 +292,10 @@ func_services_set() {
             log "WARNING : ${DRIVER,,}_service_list.txt does not be found."
         else
             sed -i -e '/^$/d' "$LIST_DIR/${DRIVER,,}_service_list.txt" 2>> "$LOG_FILE"
-            if [ ${ITA_OS} = 'RHEL6' ]; then
-                "$BIN_DIR/register-services_RHEL6.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
-            else
-                "$BIN_DIR/register-services_RHEL7.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
-            fi
+            "$BIN_DIR/register-services_RHEL.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             while read LINE; do
                 service=`basename ${LINE}`
-                if [ ${ITA_OS} = 'RHEL6' ]; then
-                    RES=`/etc/init.d/"$service" status | grep 'running' -c`
-                else
-                    RES=`systemctl | grep "$service" | grep 'running'`
-                fi
+                RES=`systemctl | grep "$service" | grep 'running'`
                 if [ ${#RES} -eq 0 ]; then
                     log "WARNING : Failed to set up $LINE."
                 fi
@@ -724,19 +716,19 @@ if [ "$BASE_FLG" -eq 1 ]; then
     #################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Place the self-signed certificate for https access."
     #################################################################################################
-    if [ ${ITA_OS} = 'RHEL6' ]; then
-        cp -p ../ext_files_for_CentOS6.x/etc_pki_tls_certs/exastro-it-automation.crt /etc/pki/tls/certs/ 2>> "$LOG_FILE"
-    else
+    if [ ${ITA_OS} = 'RHEL7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc_pki_tls_certs/exastro-it-automation.crt /etc/pki/tls/certs/ 2>> "$LOG_FILE"
+    else
+        cp -p ../ext_files_for_CentOS8.x/etc_pki_tls_certs/exastro-it-automation.crt /etc/pki/tls/certs/ 2>> "$LOG_FILE"
     fi
     if ! test -e /etc/pki/tls/certs/exastro-it-automation.crt ; then
         log 'WARNING : Failed to place /etc/pki/tls/certs/exastro-it-automation.crt.'
     fi
 
-    if [ ${ITA_OS} = 'RHEL6' ]; then
-        cp -p ../ext_files_for_CentOS6.x/etc_pki_tls_certs/exastro-it-automation.key /etc/pki/tls/certs/ 2>> "$LOG_FILE"
-    else
+    if [ ${ITA_OS} = 'RHEL7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc_pki_tls_certs/exastro-it-automation.key /etc/pki/tls/certs/ 2>> "$LOG_FILE"
+    else
+        cp -p ../ext_files_for_CentOS8.x/etc_pki_tls_certs/exastro-it-automation.key /etc/pki/tls/certs/ 2>> "$LOG_FILE"
     fi
 
     if ! test -e /etc/pki/tls/certs/exastro-it-automation.key ; then
@@ -752,40 +744,39 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log 'WARNING : Failed to place /etc/php.ini_original.'
     fi
 
-    if [ ${ITA_OS} = 'RHEL6' ]; then
-        cp -p ../ext_files_for_CentOS6.x/etc/php.ini /etc/ 2>> "$LOG_FILE"
-    else
+    if [ ${ITA_OS} = 'RHEL7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc/php.ini /etc/ 2>> "$LOG_FILE"
+    else
+        cp -p ../ext_files_for_CentOS8.x/etc/php.ini /etc/ 2>> "$LOG_FILE"
     fi
     if ! test -e /etc/php.ini ; then
         log 'WARNING : Failed to place /etc/php.ini.'
+    fi
+    
+    if [ ${ITA_OS} = 'RHEL8' ]; then
+        mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.conf_original 2>> "$LOG_FILE"
+        if ! test -e /etc/php-fpm.d/www.conf_original ; then
+            log 'WARNING : Failed to place /etc/php-fpm.d/www.conf_original.'
+        fi
+        cp -p ../ext_files_for_CentOS8.x/etc_php-fpm.d/www.conf /etc/php-fpm.d/ 2>> "$LOG_FILE"
+        if ! test -e /etc/php-fpm.d/www.conf ; then
+            log 'WARNING : Failed to place /etc/php-fpm.d/www.conf.'
+        fi
     fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
 
     #################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Place Apache(httpd) configuration file."
     #################################################################################################
-    if [ ${ITA_OS} = 'RHEL6' ]; then
-        cp -p ../ext_files_for_CentOS6.x/etc_httpd_conf.d/vhosts_exastro-it-automation.conf /etc/httpd/conf.d/ 2>> "$LOG_FILE"
-    else
+    if [ ${ITA_OS} = 'RHEL7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc_httpd_conf.d/vhosts_exastro-it-automation.conf /etc/httpd/conf.d/ 2>> "$LOG_FILE"
+    else
+        cp -p ../ext_files_for_CentOS8.x/etc_httpd_conf.d/vhosts_exastro-it-automation.conf /etc/httpd/conf.d/ 2>> "$LOG_FILE"
     fi
     if test -e /etc/httpd/conf.d/vhosts_exastro-it-automation.conf ; then
         sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" /etc/httpd/conf.d/vhosts_exastro-it-automation.conf 2>> "$LOG_FILE"
     else
         log 'WARNING : Failed to place /etc/httpd/conf.d/vhosts_exastro-it-automation.conf.'
-    fi
-    
-    if [ ${ITA_OS} = 'RHEL6' ]; then
-        mv /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf_original
-        if ! test -e /etc/httpd/conf.d/ssl.conf_original ; then
-            log 'WARNING : Failed to place /etc/httpd/conf.d/ssl.conf_original.'
-        fi
-        
-        cp -p ../ext_files_for_CentOS6.x/etc_httpd_conf.d/ssl.conf /etc/httpd/conf.d/.
-        if ! test -e /etc/httpd/conf.d/ssl.conf ; then
-            log 'WARNING : Failed to place /etc/httpd/conf.d/ssl.conf.'
-        fi
     fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
 
@@ -905,9 +896,6 @@ if [ "$BASE_FLG" -eq 1 ]; then
     if ! test -e "$ITA_DIRECTORY"/ita-root/confs/commonconfs/db_password.txt ; then
         log "WARNING : Failed to place db_password.txt."
     fi
-    if [ ${ITA_OS} = 'RHEL6' ]; then
-        echo '/usr/bin/php' > "$ITA_DIRECTORY"/ita-root/confs/backyardconfs/path_PHP_MODULE.txt 2>> "$LOG_FILE"
-    fi
     #PROCCESS_CNT=$((PROCCESS_CNT+1))
 
     #################################################################################################
@@ -923,9 +911,6 @@ if [ "$BASE_FLG" -eq 1 ]; then
     ################################################################################################
     #Set up ITA services for base functions."
     ################################################################################################
-    if [ ${ITA_OS} = 'RHEL6' ]; then
-        yum -y install mailx  2>> "$LOG_FILE" 1>&2
-    fi
     func_services_set BASE_FLG
 
     #################################################################################################
@@ -973,10 +958,8 @@ if [ "$DRIVER_CNT" -ne 0 ]; then
     ###################################################
     #サービス登録
     ###################################################
-    if [ ${ITA_OS} = 'RHEL6' -a ! -e "$BIN_DIR/register-services_RHEL6.sh" ]; then
-        log 'WARNING : register-services_RHEL6.sh does not be found.'
-    elif [ ${ITA_OS} = 'RHEL7' -a ! -e "$BIN_DIR/register-services_RHEL7.sh" ]; then
-        log 'WARNING : register-services_RHEL7.sh does not be found.'
+    if [ ! -e "$BIN_DIR/register-services_RHEL.sh" ]; then
+        log 'WARNING : register-services_RHEL.sh does not be found.'
     else
         for VAL in ${SERVICES_SET[@]}; do
             func_services_set $VAL
@@ -1001,23 +984,26 @@ if [ "$BASE_FLG" -eq 1 ]; then
     ################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Modify Apache(httpd) configuration file."
     ################################################################################################
-	RES=`cat /etc/sysconfig/httpd | grep "^LANG=\"*ja_JP.UTF-8\"*" -c`
-	if [ "$RES" -eq 0 ]; then
-		sed -i -e '/^LANG/s/^/# /g' '/etc/sysconfig/httpd' 2>> "$LOG_FILE"
-		echo -e "LANG=\"ja_JP.UTF-8\"\n" >> /etc/sysconfig/httpd
-	fi
+    if [ ${ITA_OS} = 'RHEL7' ]; then
+        RES=`cat /etc/sysconfig/httpd | grep "^LANG=\"*ja_JP.UTF-8\"*" -c`
+        if [ "$RES" -eq 0 ]; then
+            sed -i -e '/^LANG/s/^/# /g' '/etc/sysconfig/httpd' 2>> "$LOG_FILE"
+            echo -e "LANG=\"ja_JP.UTF-8\"\n" >> /etc/sysconfig/httpd
+        fi
+    else
+        cp -p /usr/lib/systemd/system/httpd.service /etc/systemd/system/ 2>> "$LOG_FILE"
+        RES=`cat /etc/systemd/system/httpd.service | grep "^LANG=\"*ja_JP.UTF-8\"*" -c`
+        if [ "$RES" -eq 0 ]; then
+            sed -i -e 's/Environment=LANG=C/Environment=LANG=ja_JP.UTF-8/g' /etc/systemd/system/httpd.service 2>> "$LOG_FILE"
+        fi
+    fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
 
     ################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Restart Apache(httpd) service."
     ################################################################################################
-    if [ ${ITA_OS} = 'RHEL6' ]; then
-        /etc/init.d/httpd restart 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
-        RES=`/etc/init.d/httpd status | grep "running" -c`
-    else
-        systemctl restart httpd 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
-        RES=`systemctl status httpd | grep "running"`
-    fi
+    systemctl restart httpd 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
+    RES=`systemctl status httpd | grep "running"`
     if [ ${#RES} -eq 0 ]; then
         log "WARNING : Failed to restart Apache(httpd) service."
     fi
