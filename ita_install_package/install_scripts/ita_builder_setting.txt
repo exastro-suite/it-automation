@@ -1,9 +1,9 @@
-# Select Operation System. ("CentOS6","CentOS7","RHEL6","RHEL7")
-# e.g) linux_os:RHEL7
+# Select Operation System. ("CentOS7","CentOS8","RHEL7","RHEL8")
+# e.g) linux_os:RHEL8
 linux_os:
 
 #####################################################
-#Only when you select linux_os with RHEL7
+#Only when you select linux_os with RHEL7 or RHEL8
 
 # Enter the Red Hat user name and user password
 # e.g) redhat_user_name:sample_user
@@ -16,29 +16,3 @@ redhat_user_password:
 pool_id:
 
 #####################################################
-#Only when you install cobbler drriver
-
-#Cobra server IP address
-server_address:
-
-#Password set for OS installation target server
-default_password:
-
-#DHCP setting
-#Network address of cobbler server
-cobbler_ip:
-
-#subnet mask of cobbler server
-cobbler_subnet:
-
-#default gateway of cobbler server
-cobbler_gateway:
-
-#DNS server IP address (Separate space if more than one)
-cobbler_dns:
-
-#dynamic dhcp IP address(min)
-dynamic_address_min:
-
-#dynamic dhcp IP address(max)
-dynamic_address_max:
