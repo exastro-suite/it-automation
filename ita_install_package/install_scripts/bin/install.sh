@@ -1003,8 +1003,8 @@ if [ "$BASE_FLG" -eq 1 ]; then
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Restart Apache(httpd) service."
     ################################################################################################
     systemctl restart httpd 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
-    RES=`systemctl status httpd | grep "running"`
-    if [ ${#RES} -eq 0 ]; then
+    systemctl status httpd 2>&1 >> "$LOG_FILE"
+    if [ $? -ne 0 ]; then
         log "WARNING : Failed to restart Apache(httpd) service."
     fi
 fi
