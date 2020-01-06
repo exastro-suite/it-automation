@@ -48,8 +48,8 @@
         $in_Exception        = "";
 
         // リクエストで送られてきた情報
-        $strHeaderAuthorization     = $ina_ReqHeaderData['Authorization'];
-        $strHeaderDate              = $ina_ReqHeaderData['Date'];
+        $strHeaderAuthorization     = $ina_ReqHeaderData['authorization'];
+        $strHeaderDate              = $ina_ReqHeaderData['date'];
         $strRequestURIOnRest        = $_SERVER['PHP_SELF'];
 
         // サーバー上にある認証情報取得
@@ -116,29 +116,26 @@
             $in_Exception        = 'Request header unknown error';
             return false;
         }
+        $ina_ReqHeaderData = array_change_key_case($ina_ReqHeaderData);
+
         //----http(s)リクエストヘッダに所定の項目があるかをチェック
-        if( array_key_exists('Content-Type', $ina_ReqHeaderData) !== true ){
+        if( array_key_exists('content-type', $ina_ReqHeaderData) !== true ){
             $in_ResultStatusCode = 400;
             $in_Exception        = 'Required request header item[Content-Type] is not exists';
             return false;
         }
 
-        if( array_key_exists('X-UMF-API-Version', $ina_ReqHeaderData) !== true ){
+        if( array_key_exists('x-umf-api-version', $ina_ReqHeaderData) !== true ){
             $in_ResultStatusCode = 400;
             $in_Exception        = 'Required request header item[X-UMF-API-Version] is not exists';
             return false;
         }
-        if( array_key_exists('Date', $ina_ReqHeaderData) !== true ){
+        if( array_key_exists('date', $ina_ReqHeaderData) !== true ){
             $in_ResultStatusCode = 400;
             $in_Exception        = 'Required request header item[Date] is not exists';
             return false;
         }
-        if( array_key_exists('Date', $ina_ReqHeaderData) !== true ){
-            $in_ResultStatusCode = 400;
-            $in_Exception        = 'Required request header item[Date] is not exists';
-            return false;
-        }
-        if( array_key_exists('Authorization', $ina_ReqHeaderData) !== true ){
+        if( array_key_exists('authorization', $ina_ReqHeaderData) !== true ){
             $in_ResultStatusCode = 400;
             $in_Exception        = 'Required request header item[Authorization] is not exists';
             return false;
