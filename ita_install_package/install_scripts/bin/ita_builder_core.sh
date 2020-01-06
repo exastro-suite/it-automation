@@ -648,8 +648,10 @@ download() {
     
     # MriaDB download packages.
     if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+        log "Download packages[MariaDB MariaDB-server expect]"
         yumdownloader --resolve --destdir rpm_files/yum/yum_all MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
     else
+        log "Download packages[mariadb mariadb-server expect]"
         yumdownloader --resolve --destdir rpm_files/yum/yum_all mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
@@ -706,7 +708,7 @@ download() {
     # Download PhpSpreadsheet tar.gz packages
     
     #Composer install
-    yum -y install php php-json php-zip php-xml php-gd php-mbstring unzip
+    yum -y install php php-json php-zip php-xml php-gd php-mbstring unzip >> "$ITA_BUILDER_LOG_FILE" 2>&1
     
     mkdir -p vendor/composer
     curl -sS $COMPOSER | php -- --install-dir=vendor/composer >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -936,7 +938,9 @@ fi
 # yum repository package (for yum-env-enable-repo)
 declare -A YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO;
 YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO=(
+    ["RHEL8"]="https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
     ["RHEL7"]="https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+    ["CentOS8"]="epel-release"
     ["CentOS7"]="epel-release"
     ["yum_all"]="--enable yum_all"
 )
@@ -1007,7 +1011,7 @@ YUM_PACKAGE=(
     ["httpd"]="httpd mod_ssl"
     ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd"
     ["git"]="git"
-    ["ansible"]="expect"
+    ["ansible"]="sshpass expect"
 )
 
 
