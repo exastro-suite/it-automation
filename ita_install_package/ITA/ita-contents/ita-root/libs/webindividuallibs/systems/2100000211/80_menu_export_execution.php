@@ -128,7 +128,6 @@ function validateMenuNo($objJSONOfReceptedData){
 
     //チェック用リストと比較
     $tmpJSONOfReceptedData = $objJSONOfReceptedData;
-    unset($tmpJSONOfReceptedData['no']);
     unset($tmpJSONOfReceptedData['zip']);
     unset($tmpJSONOfReceptedData['menu_on']);
 
@@ -160,7 +159,6 @@ function menuExportExecutionFromRest($objJSONOfReceptedData){
 
     //不要な要素の削除
     $tmpJSONOfReceptedData = $objJSONOfReceptedData;
-    unset($tmpJSONOfReceptedData['no']);
     unset($tmpJSONOfReceptedData['zip']);
     unset($tmpJSONOfReceptedData['menu_on']);
 
