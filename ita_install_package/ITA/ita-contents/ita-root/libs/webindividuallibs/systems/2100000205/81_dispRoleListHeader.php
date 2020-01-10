@@ -145,8 +145,8 @@
                     <td{$BG_COLOR}>{$COLUMN_05}</td>
                     <td class="number" {$BG_COLOR}>{$COLUMN_06}</td>
                     <td{$BG_COLOR}>{$COLUMN_07}</td>
-                    <th class="likeHeader" scope="row" >{$COLUMN_08}</td>
-                    <th class="likeHeader" scope="row" >{$COLUMN_09}</td>
+                    <td class="likeHeader" scope="row" >{$COLUMN_08}</td>
+                    <td class="likeHeader" scope="row" >{$COLUMN_09}</td>
                 </tr>
             </table>
             </div>
