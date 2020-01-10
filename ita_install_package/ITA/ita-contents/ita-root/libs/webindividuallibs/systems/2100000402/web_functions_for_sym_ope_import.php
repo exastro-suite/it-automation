@@ -87,23 +87,22 @@ function uploadZipFile(){
     $fileName = $_FILES['zipfile']['name'];
     $uploadFilePath = $uploadPath . $fileName;
 
-    // ファイル名に'が含まれているかチェック
-    if(false !== strpos($_FILES['zipfile']['name'], "'")){
-        web_log("The file name contains single quotes.");
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
+    if(preg_match("/^[^,\"'\t\/\r\n]*$/s", $fileName) !== 1){
+        web_log("The file name[{$fileName}] is invalid.");
+        throw new Exception($g['objMTS']->getSomeMessage('ITAWDCH-ERR-513'));
     }
 
     // ファイル移動
     if (move_uploaded_file($_FILES['zipfile']['tmp_name'], $uploadFilePath) === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900019',
                                              array(basename(__FILE__), __LINE__)));
-        if (file_exists($uploadPath . $fileName) === true) {
-            unlink($uploadPath . $fileName);
+        if (file_exists($uploadFilePath) === true) {
+            unlink($uploadFilePath);
         }
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
     }
 
-    $_SESSION['upload_file_name'] = $_FILES['zipfile']['name'];
+    $_SESSION['upload_file_name'] = $fileName;
 
     return $fileName;
 }
