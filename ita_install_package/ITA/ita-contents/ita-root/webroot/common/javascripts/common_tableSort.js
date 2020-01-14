@@ -81,7 +81,7 @@ function tableSort(header_rows, objTriggerTag, tablebodyid_prefix, num, sfunc, w
 
     // tbodyにIDがない場合はテーブルのIDを取得
     if( HTableID == '' ){
-        HTable.id = HTable.parentNode.id;
+        HTable.id = tablebodyid;
         HTableID = HTable.id;
     }else{
     }
