@@ -91,20 +91,22 @@ copy_and_backup() {
 
 
 yum_install() {
-    if [ $# -gt 0 ]; then
-        echo "----------Installation[$@]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        #Installation
-        yum install -y "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
-        #Check installation
-        for key in $@; do
-            echo "----------Check installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            yum install -y "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            if [ $? != 0 ]; then
-                log "ERROR:Installation failed[$key]"
-                func_exit
-            fi
-        done
+    if [ "${MODE}" == "remote" -o "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "CentOS7" ]; then
+        if [ $# -gt 0 ]; then
+            echo "----------Installation[$@]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            #Installation
+            yum install -y "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        
+            #Check installation
+            for key in $@; do
+                echo "----------Check installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                yum install -y "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                if [ $? != 0 ]; then
+                    log "ERROR:Installation failed[$key]"
+                    func_exit
+                fi
+            done
+        fi
     fi
 }
 
@@ -150,12 +152,18 @@ yum_repository() {
             shift
         fi
 
-        
-        
-        yum-config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ $# -gt 0 ]; then
+            if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+                yum-config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            elif [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+                dnf config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            fi
+
+            yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        fi
     fi
 }
+
 
 # enable mariadb repository
 mariadb_repository() {
@@ -173,13 +181,10 @@ mariadb_repository() {
                 log "ERROR:Failed to get repository"
                 func_exit
             fi
-            
-            yum-config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
         fi
     fi
 }
-
 
 
 cat_tar_gz() {
@@ -215,50 +220,81 @@ configure_yum_env() {
         if [ "$LINUX_OS" == "RHEL7" ]; then
             yum --enablerepo=rhel-7-server-optional-rpms info yum-plugin-fastestmirror >> "$ITA_BUILDER_LOG_FILE" 2>&1
             ls /etc/yum/pluginconf.d/fastestmirror.conf >> "$ITA_BUILDER_LOG_FILE" 2>&1 | xargs grep "include_only=.jp" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        fi
 
-        if [ $? -ne 0 ]; then
-            sed -i '$a\include_only=.jp' /etc/yum/pluginconf.d/fastestmirror.conf >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        fi   
+            if [ $? -ne 0 ]; then
+                sed -i '$a\include_only=.jp' /etc/yum/pluginconf.d/fastestmirror.conf >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            fi
+        fi
     fi
-    
 
     # install yum-utils and createrepo
-    if [ "${MODE}" == "remote" ]; then
-        yum_install ${YUM__ENV_PACKAGE}
-    else
-        yum localinstall -y --nogpgcheck ${YUM__ENV_PACKAGE} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+        log "yum-utils and createrepo install"
+        if [ "${MODE}" == "remote" ]; then
+            yum_install ${YUM__ENV_PACKAGE}
+        else
+            # initialize /var/lib/ita
+            rm -rf $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            mkdir -p $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            cp -R "$DOWNLOAD_BASE_DIR"/* "$ITA_EXT_FILE_DIR" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            cp -R $ITA_EXT_FILE_DIR/yum/ $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
-        ls /etc/yum.repos.d/ita.repo >> "$ITA_BUILDER_LOG_FILE" 2>&1 | xargs grep "yum_all" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        if [ $? != 0 ]; then
-            echo "["yum_all"]
+            yum localinstall -y --nogpgcheck ${YUM__ENV_PACKAGE} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+            ls /etc/yum.repos.d/ita.repo >> "$ITA_BUILDER_LOG_FILE" 2>&1 | xargs grep "yum_all" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+            if [ $? != 0 ]; then
+                echo "["yum_all"]
 name="yum_all"
 baseurl=file://"${YUM_ALL_PACKAGE_LOCAL_DIR}"
 gpgcheck=0
 enabled=0
 " >> /etc/yum.repos.d/ita.repo
 
-            #create repository "ita_repo"
-            createrepo "${YUM_ALL_PACKAGE_LOCAL_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            CREATEREPO_CHK=`echo $?`
-            if [ "${CREATEREPO_CHK}" -ne 0 ]; then
-                log "ERROR:Repository creation failure"
-                func_exit
+                #create repository "ita_repo"
+                createrepo "${YUM_ALL_PACKAGE_LOCAL_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                CREATEREPO_CHK=`echo $?`
+                if [ "${CREATEREPO_CHK}" -ne 0 ]; then
+                    log "ERROR:Repository creation failure"
+                    func_exit
+                fi
+            else
+                log "Already exist[/etc/yum.repos.d/ita.repo]"
+                log "nothing to do"
             fi
-        else
-            log "Already exist[/etc/yum.repos.d/ita.repo]"
-            log "nothing to do"
+
+            # disable yum repository
+            sed -i s/"enabled.*$"/"enabled=0"/g /etc/yum.repos.d/* >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+            yum_repository ${YUM_REPO_PACKAGE["yum-env-enable-repo"]}
+            yum_repository ${YUM_REPO_PACKAGE["yum-env-disable-repo"]}
         fi
     fi
 
-    # enable yum repository
-    if [ "$MODE" == "local" ]; then
-        sed -i s/"enabled.*$"/"enabled=0"/g /etc/yum.repos.d/* >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ "${MODE}" == "remote" ]; then
+        yum_repository ${YUM_REPO_PACKAGE["yum-env-enable-repo"]}
+        yum_repository ${YUM_REPO_PACKAGE["yum-env-disable-repo"]}
     fi
-
-    yum_repository ${YUM_REPO_PACKAGE["yum-env-enable-repo"]}
-    yum_repository ${YUM_REPO_PACKAGE["yum-env-disable-repo"]}
     yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
+}
+
+
+# RPM install
+install_rpm() {
+    RPM_INSTALL_CMD="rpm -ivh --replacepkgs"
+    LOOP_CNT=0
+
+    #get name of RPM
+    for pathfile in ${YUM_ALL_PACKAGE_DOWNLOAD_DIR}/*.rpm; do
+        RPM_INSTALL_CMD="${RPM_INSTALL_CMD} ${pathfile}"
+        LOOP_CNT=$(( LOOP_CNT+1 ))
+    done
+
+    #RPM install
+    if [ ${LOOP_CNT} -gt 0 ]; then
+        ${RPM_INSTALL_CMD} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        error_check
+    fi
 }
 
 
@@ -289,7 +325,12 @@ configure_mariadb() {
         yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
         if [ $? == 0 ]; then
             log "MariaDB has already been installed."
-            
+
+            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+
             #Confirm whether root password has been changed
             mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? == 0 ]; then
@@ -388,7 +429,12 @@ configure_mariadb() {
         yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
         if [ $? == 0 ]; then
             log "MariaDB has already been installed."
-            
+
+            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            error_check
+
             #Confirm whether root password has been changed
             mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? == 0 ]; then
@@ -425,9 +471,6 @@ configure_mariadb() {
             fi
             
         else
-            # enable MariaDB repository
-            mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
-
             # install some packages
             echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             #Installation
@@ -541,11 +584,12 @@ configure_php() {
         mv vendor /usr/share/php/  >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     else
         mkdir -p /usr/share/php/vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        cat_tar_gz rpm_files/php-tar-gz/PhpSpreadsheet/vendor.tar.gz | tar zx --strip-components=1 -C /usr/share/php/vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        cat_tar_gz ${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR}/vendor.tar.gz | tar zx --strip-components=1 -C /usr/share/php/vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
     #clean
     rm -rf /tmp/pear
+    rm -rf composer.json composer.lock vendor
 }
 
 
@@ -558,13 +602,6 @@ configure_git() {
 
 # Ansible
 configure_ansible() {
-    #python3 install
-    #if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "CentOS7" ]; then
-    #    yum -y install python3 >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    #else 
-        yum -y install python3-pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    #fi
-
     yum_install ${YUM_PACKAGE["ansible"]}
     
     # Replace Ansible config file.
@@ -572,6 +609,7 @@ configure_ansible() {
     
     # Install some pip packages.
     pip3 install ${PIP_PACKAGE["ansible"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+sleep 10
 }
 
 
@@ -590,8 +628,17 @@ configure_ita() {
 
 make_ita() {
 
-    log "Set up repository and installing yum-utils,createrepo"
+    # configure_yum_env() will setup repository.
+    log "Set up repository"
     configure_yum_env
+
+    # offline install(RHEL8 or CentOS8)
+    if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "CentOS8" ]; then
+        if [ "${MODE}" == "local" ]; then
+            log "RPM install"
+            install_rpm
+        fi
+    fi
     
     log "OS setting"
     configure_os
@@ -627,19 +674,21 @@ download() {
     # First yum-utils and createrepo must be downloaded, because dependencies
     # are not downloaded if they are already installed.
 
-    for key in ${YUM__ENV_PACKAGE}; do
-        log "Download packages[$key]"
-        yum install -y --downloadonly --downloaddir=${YUM_ENV_PACKAGE_DOWNLOAD_DIR["yum-env"]} ${YUMDOWNLOADER_REPO["yum-env"]} $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        download_check
-    done
+    # Download yum-utils and createrepo
+    if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+        for key in ${YUM__ENV_PACKAGE}; do
+                log "Download packages[$key]"
+                yum install -y --downloadonly --downloaddir=${YUM_ENV_PACKAGE_DOWNLOAD_DIR["yum-env"]} $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                download_check
+        done
+    fi
 
-
-    # configure_yum_env() will install yum-utils and createrepo.
-    log "yum-utils and createrepo install"
+    # configure_yum_env() will setup repository.
+    log "Set up repository"
     configure_yum_env
 
     # Enable all yum repositories(Other than mariadb).
-    log "Enable all yum repositories."
+    log "Enable the required yum repositories."
     for key in ${!YUM_REPO_PACKAGE[@]}; do
         yum_repository ${YUM_REPO_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
     done
@@ -647,24 +696,29 @@ download() {
     mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
     
     # MriaDB download packages.
-    if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
-        log "Download packages[MariaDB MariaDB-server expect]"
-        yumdownloader --resolve --destdir rpm_files/yum/yum_all MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    else
+    if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
         log "Download packages[mariadb mariadb-server expect]"
-        yumdownloader --resolve --destdir rpm_files/yum/yum_all mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        dnf download --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    elif [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+        log "Download packages[MariaDB MariaDB-server expect]"
+        yumdownloader --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
+    download_check
 
     # Download packages.
     for key in ${!YUM_PACKAGE[@]}; do
         log "Download packages[${YUM_PACKAGE[${key}]}]"
-        yumdownloader --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR[$key]} ${YUM_PACKAGE[${key}]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+            dnf download --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} ${YUM_PACKAGE[${key}]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        elif [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+            yumdownloader --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} ${YUM_PACKAGE[${key}]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        fi
         download_check
     done
 
     #----------------------------------------------------------------------
     # Download pear packages.
-    yum -y install php-pear >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    yum_install php-pear
 
     for key in ${!PEAR_PACKAGE[@]}; do
         local download_dir="${PEAR_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -694,7 +748,7 @@ download() {
     # Download pip packages.
     
     #pip install
-    yum -y install python3-pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    yum_install python3
     
     for key in ${!PIP_PACKAGE[@]}; do
         local download_dir="${DOWNLOAD_DIR["pip"]}/$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -708,20 +762,18 @@ download() {
     # Download PhpSpreadsheet tar.gz packages
     
     #Composer install
-    yum -y install php php-json php-zip php-xml php-gd php-mbstring unzip >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    yum_install php php-json php-zip php-xml php-gd php-mbstring unzip
     
     mkdir -p vendor/composer
     curl -sS $COMPOSER | php -- --install-dir=vendor/composer >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
-    for key in ${!PHPSPREADSHEET_TAR_GZ_PACKAGE[@]}; do
-        local download_dir="${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        
-        log "Download packages[$key]"
-        ./vendor/composer/composer.phar require $PHPSPREADSHEET >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        download_check
-        tar -zcvf "$download_dir"/vendor.tar.gz vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    done
+    local download_dir="${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    
+    log "Download packages[phpspreadsheet]"
+    ./vendor/composer/composer.phar require $PHPSPREADSHEET >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    download_check
+    tar -zcvf "$download_dir"/vendor.tar.gz vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
     rm -rf composer.json composer.lock vendor
 
@@ -729,9 +781,9 @@ download() {
     #Create the installer archive
     ITA_VERSION=`cat $ITA_INSTALL_PACKAGE_DIR/ITA/ita-releasefiles/ita_base | cut -f 7 -d " "`
     DATE=`date +"%Y%m%d%H%M%S"`
-	
-	OFFLINE_INSTALL_FILE="ita_Ver"$ITA_VERSION"_offline_"$DATE".tar.gz"
-	
+
+    OFFLINE_INSTALL_FILE="ita_Ver"$ITA_VERSION"_offline_"$DATE".tar.gz"
+
     log "Create an offline installer archive in [$ITA_PACKAGE_OPEN_DIR/$OFFLINE_INSTALL_FILE]"
     (
         if [ ! -e "ITA_PACKAGE_OPEN_DIR/$OFFLINE_INSTALL_FILE" ]; then
@@ -832,8 +884,6 @@ elif [ "${exec_mode}" == "2" ]; then
     MODE="local"
 fi
 
-
-
 if [ "${exec_mode}" == "1" -o "${exec_mode}" == "3" ]; then
     REPOSITORY="${LINUX_OS}"
 elif [ "${exec_mode}" == "2" ]; then
@@ -857,10 +907,6 @@ if [ "$exec_mode" != "2" ]; then
         REDHAT_USER_NAME="${redhat_user_name}"
         REDHAT_USER_PASSWORD="${redhat_user_password}"
         POOL_ID="${pool_id}"
-
-        #Delete subscription
-        #SUBSCRIPTION_SERIAL_NUM=`subscription-manager list --consumed | grep "Serial" | sed "s/ //g" | cut -f 2 -d ":"`
-        #subscription-manager unsubscribe --serial="${SUBSCRIPTION_SERIAL_NUM}"
 
         #Subscription registration
         subscription-manager register --username=${REDHAT_USER_NAME} --password=${REDHAT_USER_PASSWORD} >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -919,18 +965,6 @@ DOWNLOAD_DIR=(
     ["pip"]="$DOWNLOAD_BASE_DIR/pip"
     ["phpspreadsheet-tar-gz"]="$DOWNLOAD_BASE_DIR/phpspreadsheet-tar-gz"
 )
-
-################################################################################
-# initialize /var/lib/ita
-
-if [ "$MODE" == "local" ]; then
-    rm -rf $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    mkdir -p $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    cp -R "$DOWNLOAD_BASE_DIR"/* "$ITA_EXT_FILE_DIR" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    cp -R $ITA_EXT_FILE_DIR/yum/ $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
-fi
-################################################################################
-# yum repository
 
 #-----------------------------------------------------------
 # package
@@ -999,7 +1033,7 @@ YUM_ALL_PACKAGE_DOWNLOAD_DIR="${DOWNLOAD_DIR["yum"]}/yum_all"
 declare -A YUM_PACKAGE_YUM_ENV;
 YUM_PACKAGE_YUM_ENV=(
     ["remote"]="yum-utils createrepo"
-    ["local"]="`list_yum_package ${YUM_ENV_PACKAGE_LOCAL_DIR}`"
+    ["local"]="`list_yum_package ${YUM_ENV_PACKAGE_DOWNLOAD_DIR}`"
 )
 
 # yum first install packages
@@ -1009,7 +1043,7 @@ YUM__ENV_PACKAGE="${YUM_PACKAGE_YUM_ENV[${MODE}]}"
 declare -A YUM_PACKAGE;
 YUM_PACKAGE=(
     ["httpd"]="httpd mod_ssl"
-    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd"
+    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd python3"
     ["git"]="git"
     ["ansible"]="sshpass expect"
 )
@@ -1040,7 +1074,7 @@ PEAR_PACKAGE_DOWNLOAD_DIR=(
 declare -A PEAR_PACKAGE_PHP;
 PEAR_PACKAGE_PHP=(
     ["remote"]="Auth HTML_AJAX-beta"
-    ["local"]="-O `list_pear_package ${PEAR_PACKAGE_LOCAL_DIR["php"]}`"
+    ["local"]="-O `list_pear_package ${PEAR_PACKAGE_DOWNLOAD_DIR["php"]}`"
 )
 
 # all pear packages
@@ -1077,14 +1111,14 @@ PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR=(
 declare -A PHP_TAR_GZ_PACKAGE_SPYC;
 PHP_TAR_GZ_PACKAGE_SPYC=(
     ["remote"]="https://github.com/mustangostang/spyc/archive/0.6.2.tar.gz"
-    ["local"]="${PHP_TAR_GZ_PACKAGE_LOCAL_DIR["spyc"]}/0.6.2.tar.gz"
+    ["local"]="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR["spyc"]}/0.6.2.tar.gz"
 )
 
 # Twig
 declare -A PHP_TAR_GZ_PACKAGE_TWIG;
 PHP_TAR_GZ_PACKAGE_TWIG=(
     ["remote"]="https://github.com/twigphp/Twig/archive/v1.34.4.tar.gz"
-    ["local"]="${PHP_TAR_GZ_PACKAGE_LOCAL_DIR["twig"]}/v1.34.4.tar.gz"
+    ["local"]="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR["twig"]}/v1.34.4.tar.gz"
 )
 
 # all php tar.gz packages
@@ -1101,12 +1135,6 @@ PHP_TAR_GZ_PACKAGE=(
 #-----------------------------------------------------------
 # directory
 
-# local directory
-declare -A PIP_PACKAGE_LOCAL_DIR;
-PIP_PACKAGE_LOCAL_DIR=(
-    ["ansible"]="${LOCAL_DIR["pip"]}/ansible"
-)
-
 # download directory
 declare -A PIP_PACKAGE_DOWNLOAD_DIR;
 PIP_PACKAGE_DOWNLOAD_DIR=(
@@ -1120,7 +1148,7 @@ PIP_PACKAGE_DOWNLOAD_DIR=(
 declare -A PIP_PACKAGE_ANSIBLE;
 PIP_PACKAGE_ANSIBLE=(
     ["remote"]="ansible pexpect pywinrm"
-    ["local"]=`list_pip_package ${PIP_PACKAGE_LOCAL_DIR["ansible"]}`
+    ["local"]=`list_pip_package ${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]}`
 )
 
 # all pip packages
@@ -1136,17 +1164,8 @@ PIP_PACKAGE=(
 #-----------------------------------------------------------
 # directory
 
-# local directory
-declare -A PHPSPREADSHEET_TAR_GZ_PACKAGE_LOCAL_DIR;
-PHPSPREADSHEET_TAR_GZ_PACKAGE_LOCAL_DIR=(
-    ["phpspreadsheet"]="${LOCAL_DIR["phpspreadsheet-tar-gz"]}/PhpSpreadsheet"
-)
-
 # download directory
-declare -A PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR;
-PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR=(
-    ["phpspreadsheet"]="${DOWNLOAD_DIR["php-tar-gz"]}/PhpSpreadsheet"
-)
+PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR="${DOWNLOAD_DIR["php-tar-gz"]}/PhpSpreadsheet"
 
 #-----------------------------------------------------------
 # package
@@ -1156,17 +1175,6 @@ COMPOSER=https://getcomposer.org/installer
 
 # PhpSpreadsheet
 PHPSPREADSHEET=""phpoffice/phpspreadsheet":"*""
-
-declare -A PHPSPREADSHEET_TAR_GZ_PACKAGE_SPREADSHEET;
-PHPSPREADSHEET_TAR_GZ_PACKAGE_SPREADSHEET=(
-    ["local"]="${PHP_TAR_GZ_PACKAGE_LOCAL_DIR["phpspreadsheet"]}/vendor.tar.gz"
-)
-
-#all php tar.gz packages
-declare -A PHPSPREADSHEET_TAR_GZ_PACKAGE;
-PHPSPREADSHEET_TAR_GZ_PACKAGE=(
-    ["phpspreadsheet"]=${PHPSPREADSHEET_TAR_GZ_PACKAGE_SPREADSHEET[${MODE}]}
-)
 
 ################################################################################
 # main
@@ -1195,5 +1203,4 @@ fi
 log "$END_MESSAGE"
 
 func_exit
-
 
