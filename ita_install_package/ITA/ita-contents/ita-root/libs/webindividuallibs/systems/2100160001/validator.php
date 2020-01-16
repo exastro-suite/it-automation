@@ -665,6 +665,9 @@ class MaxLengthValidator extends IntNumValidator {
         else if(!array_key_exists('CREATE_MENU_ID', $arrayRegData)){
             $boolExeContinue = false;
         }
+        else if(!is_numeric($arrayRegData['MAX_LENGTH'])){
+            $boolExeContinue = false;
+        }
         else{
             // メニュー作成の場合
             if(2100160002 == $g['page_dir']){
@@ -692,7 +695,11 @@ class MaxLengthValidator extends IntNumValidator {
                     if(array_key_exists('CREATE_ITEM_ID',$arrayVariant['edit_target_row']) && $arrayVariant['edit_target_row']['CREATE_ITEM_ID'] === $row01['CREATE_ITEM_ID']){
                         continue;
                     }
-                    $sumMaxLength += $row01['MAX_LENGTH'] * 3 + 2;
+
+                    if(is_numeric($row01['MAX_LENGTH'])){
+                        $sumMaxLength += $row01['MAX_LENGTH'] * 3 + 2;
+                    }
+
                 }
                 unset($objQuery01);
 
