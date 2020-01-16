@@ -35,12 +35,6 @@ function callback() {}
             else{
                 document.getElementById('disp_execution_area').innerHTML = result;
                 
-                adjustTableAuto ( "DbTable_Yobi0",
-                               "sDefault",
-                               "fakeContainer_Yobi0",
-                               600,
-                               900);
-                
                 // ステータスIDを取得
                 result_status_id = document.getElementById('status_id').innerHTML;
                 
