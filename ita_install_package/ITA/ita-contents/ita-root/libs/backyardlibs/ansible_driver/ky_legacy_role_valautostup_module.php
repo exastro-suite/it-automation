@@ -1253,7 +1253,6 @@ function valAssSeqDuplicatePickUp($in_col_type,
 
     switch($in_vars_attr) {
     case GC_VARS_ATTR_STD:             // 一般変数
-        break;
     case GC_VARS_ATTR_LIST:            // 複数具体値
         if( isset($inout_varAssignSeqList[$row[$in_pattern_id]]
                                          [$row[$in_vars_link_id]]
@@ -1263,14 +1262,13 @@ function valAssSeqDuplicatePickUp($in_col_type,
                                                 [$row[$in_assign_seq]];
 
             //重複しているのでエラーリストに代入値紐付の主キーを退避
-            $inout_errorColumnIdList[$column_id]        = 1;
             $inout_errorColumnIdList[$row['COLUMN_ID']] = 1;
 
-            if($log_level === "DEBUG") {
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90029",array($row['COLUMN_ID'],$column_id,$in_col_type));
+            //DEBUGモードは判定しないでログを出力する。
+            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90029",array($column_id,$row['COLUMN_ID'],$row['COLUMN_ID'],$in_col_type));
 
-                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            }
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
             // エラーリターン
             return false;
         }
@@ -1290,14 +1288,12 @@ function valAssSeqDuplicatePickUp($in_col_type,
                                                        [$row[$in_assign_seq]];
 
             //重複しているのでエラーリストに代入値紐付の主キーを退避
-            $inout_errorColumnIdList[$column_id]        = 1;
             $inout_errorColumnIdList[$row['COLUMN_ID']] = 1;
 
-            if($log_level === "DEBUG") {
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90208",array($row['COLUMN_ID'],$column_id,$in_col_type));
+            //DEBUGモードは判定しないでログを出力する。
+            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90029",array($column_id,$row['COLUMN_ID'],$row['COLUMN_ID'],$in_col_type));
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
-                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            }
             // エラーリターン
             return false;
         }
@@ -1801,13 +1797,13 @@ function checkAndCreateVarsAssignData($in_table_name,
                                         [$in_vars_link_id]
                                         [$in_vars_assign_seq])) {
             // 既に登録されている
-            if($log_level === "DEBUG") {
-                $dup_info = $ina_vars_ass_chk_list[$in_operation_id]
+            // DEBUGモードを判定しないでメッセージ出力
+            $dup_info = $ina_vars_ass_chk_list[$in_operation_id]
                                                   [$in_patten_id]
                                                   [$in_host_id]
                                                   [$in_vars_link_id]
                                                   [$in_vars_assign_seq];
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90050",array($in_menu_id,
+            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90050",array($in_menu_id,
                                                                                 $in_row_id,
                                                                                 $in_operation_id,
                                                                                 $in_patten_id,
@@ -1816,8 +1812,7 @@ function checkAndCreateVarsAssignData($in_table_name,
                                                                                 $keyValueType,
                                                                                 $dup_info['MENU_ID'],
                                                                                 $dup_info[DF_ITA_LOCAL_PKEY]));
-                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            }
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
         } else {
             $chk_status = true;
             // オペ+作業+ホスト+変数+メンバ変数の組合せの代入順序退避
@@ -1852,14 +1847,14 @@ function checkAndCreateVarsAssignData($in_table_name,
                                               [$in_col_seq_combination_id]
                                               [$in_vars_assign_seq])) {
             // 既に登録されている
-            if($log_level === "DEBUG") {
-                $dup_info = $ina_array_vars_ass_chk_list[$in_operation_id]
+            // DEBUGモードを判定しないでメッセージ出力
+            $dup_info = $ina_array_vars_ass_chk_list[$in_operation_id]
                                                         [$in_patten_id]
                                                         [$in_host_id]
                                                         [$in_vars_link_id]
                                                         [$in_col_seq_combination_id]
                                                         [$in_vars_assign_seq];
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90209",array($in_menu_id,
+            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90209",array($in_menu_id,
                                                                                 $in_row_id,
                                                                                 $in_operation_id,
                                                                                 $in_patten_id,
@@ -1869,7 +1864,6 @@ function checkAndCreateVarsAssignData($in_table_name,
                                                                                 $dup_info['MENU_ID'],
                                                                                 $dup_info[DF_ITA_LOCAL_PKEY]));
             LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            }
         } else {
             $chk_status = true;
             // オペ+作業+ホスト+変数+メンバ変数の組合せの列順序退避
