@@ -634,8 +634,8 @@ $(function(){
 //////// ----ファイルエクスポートファンクション ////////
 var DataExport = function() {
 
-    var checked_num_sym = $('#Mix1_1_data :checked').length;
-    var checked_num_ope = $('#Mix2_1_data :checked').length;
+    var checked_num_sym = $('#Mix1_1 :checked').length;
+    var checked_num_ope = $('#Mix2_1 :checked').length;
     if(checked_num_sym == 0 && checked_num_ope == 0) {
         window.alert(getSomeMessage('ITABASEC090011'));
         return false;
