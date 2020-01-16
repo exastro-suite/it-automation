@@ -10,6 +10,7 @@ box-sizing: border-box!important;
 min-height: 160px;
 background-color: #EEE;
 }
+
 /* table 外枠 */
 .itaTableBody::before,
 .itaTableBody::after,
@@ -131,6 +132,9 @@ background-color: #FFFF8F;
 /* 固定線 */
 .fixedBorder {
 display: none;
+}
+.edge .fixedBorder {
+display: none!important;
 }
 .itaTable.tableSticky .fixedBorder {
 display: block;
