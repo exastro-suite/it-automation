@@ -1573,15 +1573,15 @@
                                                      [$row[$in_vars_link_id]]
                                                      [$row[$in_assign_seq]];
 
+                //最初のレコードのみを処理。それ以降のレコードはログを出力し、登録処理はスキップする。
                 //重複しているのでエラーリストに代入値紐付の主キーを退避
-                $ina_error_column_id_list[$column_id]        = 1;
+                //$ina_error_column_id_list[$column_id]        = 1;
                 $ina_error_column_id_list[$row['COLUMN_ID']] = 1;
 
-                if ( $log_level === 'DEBUG' ){
-                    $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90029",array($row['COLUMN_ID'],$column_id,$in_col_type));
+                //DEBUGモードは判定しないでログを出力する。
+                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90029",array($column_id,$row['COLUMN_ID'],$row['COLUMN_ID'],$in_col_type));
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
-                    LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                }
                 // エラーリターン
                 return false;
             }
@@ -1592,6 +1592,7 @@
 
         }
         else{
+            //現在はデットルート
             //配列変数の場合は列順序の重複チェック
             if( isset($ina_var_col_seq_list[$row[$in_pattern_id]]
                                            [$row[$in_vars_link_id]]
@@ -1602,15 +1603,15 @@
                                                        [$row[$in_child_vars_link_id]]
                                                        [$row[$in_child_vars_col_seq]];
 
+                //最初のレコードのみを処理。それ以降のレコードはログを出力し、登録処理はスキップする。
                 //重複しているのでエラーリストに代入値紐付の主キーを退避
-                $ina_error_column_id_list[$column_id]        = 1;
+                //$ina_error_column_id_list[$column_id]        = 1;
                 $ina_error_column_id_list[$row['COLUMN_ID']] = 1;
 
-                if ( $log_level === 'DEBUG' ){
-                    $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90030",array($row['COLUMN_ID'],$column_id,$in_col_type));
+                //DEBUGモードは判定しないでログを出力する。
+                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90029",array($column_id,$row['COLUMN_ID'],$row['COLUMN_ID'],$in_col_type));
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
-                    LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                }
                 // エラーリターン
                 return false;
             }
@@ -3752,7 +3753,8 @@
         $sql = $sql .     "   DATE_FORMAT(LAST_UPDATE_TIMESTAMP,'%Y%m%d%H%i%s%f') LAST_UPDATE_TIMESTAMP \n";
         $sql = $sql .     " FROM                                                              \n";
         $sql = $sql .     "   A_PROC_LOADED_LIST                                              \n";
-        $sql = $sql .     " WHERE  ROW_ID = $in_a_proc_loaded_list_pkey \n";
+        $sql = $sql .     " WHERE  ROW_ID = $in_a_proc_loaded_list_pkey  and (LOADED_FLG is NULL or LOADED_FLG <> '1') \n";
+
 
         $sqlUtnBody = $sql;
         $arrayUtnBind = array();
