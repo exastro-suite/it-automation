@@ -650,7 +650,13 @@ function ckRangeOfConfirm(value, min, max){
 }
 
 function addPullDownBox(strTableWrapAreaId, strTablePrintId, intMaxWidth, strAdjustTargetSeqNumeric, strContainerDivClassName){
-    adjustWidthOfColumnInSuperTable(strTableWrapAreaId, strTablePrintId, 'psl_', strAdjustTargetSeqNumeric, intMaxWidth, strContainerDivClassName);
+    // adjustWidthOfColumnInSuperTable(strTableWrapAreaId, strTablePrintId, 'psl_', strAdjustTargetSeqNumeric, intMaxWidth, strContainerDivClassName);
+    
+    // tableの幅を設定しなおす
+    var $table = $('#' + strTableWrapAreaId );
+    var tableWidth = $table.find('table').outerWidth();
+    $table.find('.itaTableBody').css('width', tableWidth );
+    
 }
 
 function adjustWidthOfColumnInSuperTable(strTableWrapAreaId, strTablePrintId, strClassOfColumnIdentifyPrefix, strAdjustTargetSeqNumeric, intMaxWidth,  strContainerDivClassName){
@@ -763,6 +769,117 @@ function adjustTableAuto( table_id,
 
         // ITA Tableを適用する
         itaTable( table_id );
+        
+        /*
+        var table_height = document.getElementById(table_id+'_data').offsetHeight;
+        var table_width  = document.getElementById(table_id+'_data').offsetWidth;
+        var all=document.getElementsByTagName("*");
+        var height_adjust_flag;
+        var width_adjust_flag;
+        var adjust_px_1;
+        var adjust_px_2;
+        var adjust_px_3;
+
+        //テーブル(table_id+'_data')は、
+        //<class=fakeContainer_XXXXXSetting>.<class=sBase>.<class=sData>.<class=sDataInner>.<table class=sDefault sDefault-Main>
+        //の中にある。
+
+        if( table_height <= max_table_height ){
+            //----stによって構築されたテーブルの高さが、設定された最大高より小さかった場合（フィルターテーブルは、ほぼココに入る）
+            height_adjust_flag = 1;
+            adjust_px_3 = 2;//2
+        }
+        else{
+            //----stによって構築されたテーブルの高さが、、設定された最大高より大きかった場合（縦スクロール発生時）
+            height_adjust_flag = 0;
+            adjust_px_3 = 18;
+        }
+        var boolAdjustHeight = true;
+        if( table_width + adjust_px_3 <= max_table_width ){
+            width_adjust_flag = 1;
+        }
+        else if( table_width < max_table_width ){
+            width_adjust_flag = 1;
+            adjust_px_3 = 0;
+        }
+        else{
+        }
+        if( boolAdjustHeight===true )
+        {
+            //----stによって構築されたテーブルの幅が、設定された最大幅より大きかった場合（横スクロール発生時）
+            adjust_px_1 = 18;
+            var header_rows_length  = 0;
+            var totalHeaderHeight = 0;
+            for(var i in all){
+                if(all[i].className == container_name){
+                    for( j=0; j<all[i].childNodes.length; j++){
+                        if(all[i].childNodes[j].className == 'sBase'){
+                            for( k=0; k<all[i].childNodes[j].childNodes.length; k++){
+                                if(all[i].childNodes[j].childNodes[k].className == 'sHeader'){
+                                    var objHeaderTable = all[i].childNodes[j].childNodes[k].childNodes[0].childNodes[0];
+                                    for( l=0; l<objHeaderTable.childNodes.length; l++){
+                                        if(objHeaderTable.childNodes[l].tagName == 'TBODY'){
+                                            var objTBody = objHeaderTable.childNodes[l];
+                                            for( m=0; m<objTBody.childNodes.length; m++){
+                                                if(objTBody.childNodes[m].className == strHeaderTrClassName){
+                                                    header_rows_length = header_rows_length +1;
+                                                    totalHeaderHeight = totalHeaderHeight + objTBody.childNodes[m].offsetHeight;
+                                                }
+                                            }
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                            break;
+                        } 
+                    }
+                    break;
+                }
+            }
+            adjust_px_2 = totalHeaderHeight;
+        }
+        
+        for(var i in all){
+            if(all[i].className == container_name){
+                if( height_adjust_flag == 1 ){
+                    var table_height_1 = table_height + adjust_px_1;
+                    all[i].style.height = table_height_1 + 'px';
+                }
+                
+                //----高さの調整
+                for( j=0; j<all[i].childNodes.length; j++){
+                    if(all[i].childNodes[j].className == 'sBase'){
+                        for( k=0; k<all[i].childNodes[j].childNodes.length; k++){
+                            if(all[i].childNodes[j].childNodes[k].className == 'sData'){
+                                if( height_adjust_flag == 1 ){
+                                    var table_height_2 = table_height - adjust_px_2 + adjust_px_1;
+                                    all[i].childNodes[j].childNodes[k].style.height = table_height_2 + 'px';
+                                }
+                            }
+                        }
+                    }
+                }
+                //高さの調整----
+                
+                //----幅の調整
+                for( j=0; j<all[i].childNodes.length; j++){
+                    if(all[i].childNodes[j].className == 'sBase'){
+                        for( k=0; k<all[i].childNodes[j].childNodes.length; k++){
+                            if(all[i].childNodes[j].childNodes[k].className == 'sData'){
+                                if( width_adjust_flag == 1 ){
+                                    var table_width_2 = table_width + adjust_px_3;
+                                    all[i].childNodes[j].childNodes[k].style.width = table_width_2 + 'px';
+                                }
+                            }
+                        }
+                    }
+                }
+                //幅の調整----
+            }
+        }
+        */
    
     }
 }
