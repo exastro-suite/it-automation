@@ -18,6 +18,7 @@
 ##
 ##  【概要】
 ##      pioneer用 対話ファイル実行スクリプト
+##      python2とpython3に対応
 ##
 ##  【特記事項】
 ##      <<引数>>
@@ -117,6 +118,12 @@ class AnsibleModule_exit(Exception): pass
 
 def main():
 
+  # python2の場合にデフォルト文字コードをUTF-8に変更する。
+  import sys
+  if sys.version_info.major == 2:
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
   global log_file_name
   global password
   global output_password
@@ -151,6 +158,9 @@ def main():
     #########################################################
     private_fail_json(obj=module,msg='exec_file no found fail exit')
   config = yaml.load(open(module.params['exec_file']).read())
+
+  private_log_output(log_file_name,host_name,'python version:' + str(sys.version))
+  private_log_output(log_file_name,host_name,'default encoding:' + str(sys.getdefaultencoding()))
 
   private_log_output(log_file_name,host_name,str(config))
 
@@ -213,7 +223,9 @@ def main():
     private_log_output(log_file_name,host_name,exec_name)
     exec_log_output(exec_name)
 
-    p = pexpect.spawn(exec_cmd,  encoding='utf-8',codec_errors='replace')
+    # python2ではencodingは機能しない
+    #p = pexpect.spawn(exec_cmd,  encoding='utf-8',codec_errors='replace')
+    p = pexpect.spawn(exec_cmd)
 
     # ドライランモードを退避しタイムアウト値を5秒にする。
     if module.check_mode:
@@ -221,6 +233,7 @@ def main():
       timeout  = 5;
     else:
       chk_mode = ''
+
 
     # exec_list read
     for input in config['exec_list']:
@@ -263,23 +276,23 @@ def main():
       timeout_num = 256
 
       # log output
-      private_log_output(log_file_name,host_name,'=== input command =================================================')
+      private_log_output(log_file_name,host_name,'=== execute command =================================================')
       input_cmd = password_replace(output_password,str(input))
-      private_log_output(log_file_name,host_name,'input command:' + input_cmd)
-      private_log_output(log_file_name,host_name,'===================================================================')
-      exec_log_output('=== input command: =================================================')
-      exec_log_output('input command: ' + input_cmd)
-      exec_log_output('====================================================================')
+      private_log_output(log_file_name,host_name,'execute command:' + input_cmd)
+      private_log_output(log_file_name,host_name,'=====================================================================')
+      exec_log_output('=== execute command: =================================================')
+      exec_log_output('execute command: ' + input_cmd)
+      exec_log_output('======================================================================')
 
       # expect command ?
       if 'expect' in input:
         for cmd in input:
           if 'expect' == cmd:
-            expect_cmd = str(input[cmd])
+            expect_cmd = unicode2encode(input[cmd])
             expect_name = 'expect command:(' + expect_cmd + ')'
 
           elif 'exec' == cmd:
-            exec_cmd = str(input[cmd])
+            exec_cmd = unicode2encode(input[cmd])
             exec_name = 'exec command:(' + exec_cmd + ')'
           else:
             # error log
@@ -606,7 +619,7 @@ def main():
             execute_when_log('when',log_file_name,host_name,temp_cmd2)
 
             # ORがある場合
-            if re.search( " OR ", temp_cmd2 ):
+            if com_re_search(" OR ", temp_cmd2 ):
 
               # OR実施数分ループ
               while 1:
@@ -614,7 +627,7 @@ def main():
                 temp_cmd2 = temp_cmd2[int(tmp1):]
                 temp_cmd2 = temp_cmd2.lstrip()
 
-                if re.search( " OR ", temp_cmd2 ):
+                if com_re_search(" OR ", temp_cmd2 ):
                   tmp2 = temp_cmd2.find(' OR ')
                   temp_cmd3 = temp_cmd2[:int(tmp2)]
                   temp_cmd3 = temp_cmd3.lstrip()
@@ -722,17 +735,17 @@ def main():
               temp_cmd = exec_cmd
 
               # コマンドにitem.Xの記述があるかチェック
-              if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd ):
+              if com_re_search("{{ item.[0-9]|[1-9][0-9] }}", temp_cmd ):
 
                 # with_itemsの変数分ループ
                 for j in range(0,max,1):
 
                   # item.Xチェック
-                  if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd ):
+                  if com_re_search("{{ item.[0-9]|[1-9][0-9] }}", temp_cmd ):
 
                     temp = "{{ " + "item." + str(j) + " }}"
 
-                    if re.search( temp, temp_cmd ):
+                    if com_re_search( temp, temp_cmd ):
 
                       # 空でない場合
                       if len(def_cmd[j][i]) != 0:
@@ -765,7 +778,7 @@ def main():
                     continue_flg = 0
 
                     # exec_whenにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", exec_when_cmd[j] ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", exec_when_cmd[j] ):
 
                       # exec_when文を退避
                       temp_cmd2 = exec_when_cmd[j]
@@ -774,11 +787,11 @@ def main():
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd2 ):
+                          if com_re_search( temp2, temp_cmd2 ):
 
                             # 置換
                             temp_cmd2 = temp_cmd2.replace( temp2, def_cmd[k][i] )
@@ -791,7 +804,7 @@ def main():
                       count = 0
 
                       # ORがある場合
-                      if re.search( " OR ", temp_cmd2 ):
+                      if com_re_search( " OR ", temp_cmd2 ):
 
                         execute_when_log('exec_when',log_file_name,host_name,temp_cmd2)
 
@@ -801,7 +814,7 @@ def main():
                           temp_cmd2 = temp_cmd2[int(tmp1):]
                           temp_cmd2 = temp_cmd2.lstrip()
 
-                          if re.search( " OR ", temp_cmd2 ):
+                          if com_re_search( " OR ", temp_cmd2 ):
                             tmp2 = temp_cmd2.find(' OR ')
                             temp_cmd3 = temp_cmd2[:int(tmp2)]
                             temp_cmd3 = temp_cmd3.lstrip()
@@ -874,7 +887,7 @@ def main():
                       count = 0
 
                       # ORがある場合
-                      if re.search( " OR ", temp_cmd2 ):
+                      if com_re_search( " OR ", temp_cmd2 ):
 
                         execute_when_log('exec_when',log_file_name,host_name,temp_cmd2)
 
@@ -884,7 +897,7 @@ def main():
                           temp_cmd2 = temp_cmd2[int(tmp1):]
                           temp_cmd2 = temp_cmd2.lstrip()
 
-                          if re.search( " OR ", temp_cmd2 ):
+                          if com_re_search( " OR ", temp_cmd2 ):
                             tmp2 = temp_cmd2.find(' OR ')
                             temp_cmd3 = temp_cmd2[:int(tmp2)]
                             temp_cmd3 = temp_cmd3.lstrip()
@@ -954,17 +967,17 @@ def main():
                       temp_cmd4 = expect_cmd
 
                       # promptにitem.Xの記述があるかチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                         # with_itemsの変数分ループ
                         for k in range(0,max,1):
 
                           # item.Xチェック
-                          if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                          if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                             temp2 = "{{ " + "item." + str(k) + " }}"
 
-                            if re.search( temp2, temp_cmd4 ):
+                            if com_re_search( temp2, temp_cmd4 ):
 
                               if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
@@ -989,17 +1002,17 @@ def main():
                       temp_cmd5 = str(timeout2)
 
                       # timeoutにitem.Xの記述があるかチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                         # with_itemsの変数分ループ
                         for k in range(0,max,1):
 
                           # item.Xチェック
-                          if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                          if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                             temp2 = "{{ " + "item." + str(k) + " }}"
 
-                            if re.search( temp2, temp_cmd5 ):
+                            if com_re_search( temp2, temp_cmd5 ):
 
                               if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
@@ -1035,17 +1048,17 @@ def main():
                     temp_cmd4 = expect_cmd
 
                     # promptにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                       # with_itemsの変数分ループ
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd4 ):
+                          if com_re_search( temp2, temp_cmd4 ):
 
                             if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
@@ -1070,17 +1083,17 @@ def main():
                     temp_cmd5 = str(timeout2)
 
                     # timeoutにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                       # with_itemsの変数分ループ
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd5 ):
+                          if com_re_search( temp2, temp_cmd5 ):
 
                             if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
@@ -1110,7 +1123,7 @@ def main():
                       for j in range(0,failed_max,1):
 
                         # failed_whenにitem.Xの記述があるかチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", failed_cmd[j] ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", failed_cmd[j] ):
 
                           # failed_when文を退避
                           temp_cmd2 = failed_cmd[j]
@@ -1119,11 +1132,11 @@ def main():
                           for k in range(0,max,1):
 
                             # item.Xチェック
-                            if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
+                            if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
 
                               temp2 = "{{ " + "item." + str(k) + " }}"
 
-                              if re.search( temp2, temp_cmd2 ):
+                              if com_re_search( temp2, temp_cmd2 ):
 
                                 # 置換
                                 temp_cmd2 = temp_cmd2.replace( temp2, def_cmd[k][i] )
@@ -1136,7 +1149,7 @@ def main():
                           count = 0
 
                           # ORがある場合
-                          if re.search( " OR ", temp_cmd2 ):
+                          if com_re_search( " OR ", temp_cmd2 ):
 
                             execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
@@ -1146,7 +1159,7 @@ def main():
                               temp_cmd2 = temp_cmd2[int(tmp1):]
                               temp_cmd2 = temp_cmd2.lstrip()
 
-                              if re.search( " OR ", temp_cmd2 ):
+                              if com_re_search( " OR ", temp_cmd2 ):
                                 tmp2 = temp_cmd2.find(' OR ')
                                 temp_cmd3 = temp_cmd2[:int(tmp2)]
                                 temp_cmd3 = temp_cmd3.lstrip()
@@ -1233,7 +1246,7 @@ def main():
                           count = 0
 
                           # ORがある場合
-                          if re.search( " OR ", temp_cmd2 ):
+                          if com_re_search( " OR ", temp_cmd2 ):
 
                             execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
@@ -1243,7 +1256,7 @@ def main():
                               temp_cmd2 = temp_cmd2[int(tmp1):]
                               temp_cmd2 = temp_cmd2.lstrip()
 
-                              if re.search( " OR ", temp_cmd2 ):
+                              if com_re_search( " OR ", temp_cmd2 ):
                                 tmp2 = temp_cmd2.find(' OR ')
                                 temp_cmd3 = temp_cmd2[:int(tmp2)]
                                 temp_cmd3 = temp_cmd3.lstrip()
@@ -1330,17 +1343,17 @@ def main():
                     temp_cmd4 = expect_cmd
 
                     # promptにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                       # with_itemsの変数分ループ
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd4 ):
+                          if com_re_search( temp2, temp_cmd4 ):
 
                             if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
@@ -1365,17 +1378,17 @@ def main():
                     temp_cmd5 = str(timeout2)
 
                     # timeoutにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                       # with_itemsの変数分ループ
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd5 ):
+                          if com_re_search( temp2, temp_cmd5 ):
 
                             if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
@@ -1412,17 +1425,17 @@ def main():
                   temp_cmd4 = expect_cmd
 
                   # promptにitem.Xの記述があるかチェック
-                  if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                  if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                     # with_itemsの変数分ループ
                     for k in range(0,max,1):
 
                       # item.Xチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                         temp2 = "{{ " + "item." + str(k) + " }}"
 
-                        if re.search( temp2, temp_cmd4 ):
+                        if com_re_search( temp2, temp_cmd4 ):
 
                           if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
@@ -1447,17 +1460,17 @@ def main():
                   temp_cmd5 = str(timeout2)
 
                   # timeoutにitem.Xの記述があるかチェック
-                  if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                  if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                     # with_itemsの変数分ループ
                     for k in range(0,max,1):
 
                       # item.Xチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                         temp2 = "{{ " + "item." + str(k) + " }}"
 
-                        if re.search( temp2, temp_cmd5 ):
+                        if com_re_search( temp2, temp_cmd5 ):
 
                           if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
@@ -1487,7 +1500,7 @@ def main():
                     for j in range(0,failed_max,1):
 
                       # failed_whenにitem.Xの記述があるかチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", failed_cmd[j] ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", failed_cmd[j] ):
 
                         # コマンド文を退避
                         temp_cmd2 = failed_cmd[j]
@@ -1496,11 +1509,11 @@ def main():
                         for k in range(0,max,1):
 
                           # item.Xチェック
-                          if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
+                          if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
 
                             temp2 = "{{ " + "item." + str(k) + " }}"
 
-                            if re.search( temp2, temp_cmd2 ):
+                            if com_re_search( temp2, temp_cmd2 ):
 
                               # 置換
                               temp_cmd2 = temp_cmd2.replace( temp2, def_cmd[k][i] )
@@ -1513,7 +1526,7 @@ def main():
                         count = 0
 
                         # ORがある場合
-                        if re.search( " OR ", temp_cmd2 ):
+                        if com_re_search( " OR ", temp_cmd2 ):
 
                           execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
@@ -1523,7 +1536,7 @@ def main():
                             temp_cmd2 = temp_cmd2[int(tmp1):]
                             temp_cmd2 = temp_cmd2.lstrip()
 
-                            if re.search( " OR ", temp_cmd2 ):
+                            if com_re_search( " OR ", temp_cmd2 ):
                               tmp2 = temp_cmd2.find(' OR ')
                               temp_cmd3 = temp_cmd2[:int(tmp2)]
                               temp_cmd3 = temp_cmd3.lstrip()
@@ -1608,7 +1621,7 @@ def main():
                         count = 0
 
                         # ORがある場合
-                        if re.search( " OR ", temp_cmd2 ):
+                        if com_re_search( " OR ", temp_cmd2 ):
 
                           execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
@@ -1618,7 +1631,7 @@ def main():
                             temp_cmd2 = temp_cmd2[int(tmp1):]
                             temp_cmd2 = temp_cmd2.lstrip()
 
-                            if re.search( " OR ", temp_cmd2 ):
+                            if com_re_search( " OR ", temp_cmd2 ):
                               tmp2 = temp_cmd2.find(' OR ')
                               temp_cmd3 = temp_cmd2[:int(tmp2)]
                               temp_cmd3 = temp_cmd3.lstrip()
@@ -1628,7 +1641,6 @@ def main():
                               # 最後のESCコードから後ろを削除
                               register_temp = last_escstr_cut(p.before)
 
-# enomoto
                               # When結果ログ初期設定
                               when_command = temp_cmd3
                               when_name = 'failed_when'
@@ -1711,7 +1723,7 @@ def main():
                     continue_flg = 0
 
                     # exec_whenにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", exec_when_cmd[j] ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", exec_when_cmd[j] ):
 
                       # exec_when文を退避
                       temp_cmd2 = exec_when_cmd[j]
@@ -1720,11 +1732,11 @@ def main():
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd2 ):
+                          if com_re_search( temp2, temp_cmd2 ):
 
                             # 置換
                             temp_cmd2 = temp_cmd2.replace( temp2, def_cmd[k][i] )
@@ -1737,7 +1749,7 @@ def main():
                       count = 0
 
                       # ORがある場合
-                      if re.search( " OR ", temp_cmd2 ):
+                      if com_re_search( " OR ", temp_cmd2 ):
 
                         execute_when_log('exec_when',log_file_name,host_name,temp_cmd2)
 
@@ -1747,7 +1759,7 @@ def main():
                           temp_cmd2 = temp_cmd2[int(tmp1):]
                           temp_cmd2 = temp_cmd2.lstrip()
 
-                          if re.search( " OR ", temp_cmd2 ):
+                          if com_re_search( " OR ", temp_cmd2 ):
                             tmp2 = temp_cmd2.find(' OR ')
                             temp_cmd3 = temp_cmd2[:int(tmp2)]
                             temp_cmd3 = temp_cmd3.lstrip()
@@ -1770,7 +1782,6 @@ def main():
 
                             temp_cmd2 = temp_cmd2.rstrip()
 
-# enomoto
                             # When結果ログ初期設定
                             when_command = temp_cmd2
                             when_name = 'exec_when'
@@ -1793,7 +1804,6 @@ def main():
                       # ORがない場合
                       else:
 
-# enomoto
                         # When結果ログ初期設定
                         when_command = temp_cmd2
                         when_name = 'exec_when'
@@ -1822,7 +1832,7 @@ def main():
                       count = 0
 
                       # ORがある場合
-                      if re.search( " OR ", temp_cmd2 ):
+                      if com_re_search( " OR ", temp_cmd2 ):
 
                         execute_when_log('exec_when',log_file_name,host_name,temp_cmd2)
 
@@ -1832,7 +1842,7 @@ def main():
                           temp_cmd2 = temp_cmd2[int(tmp1):]
                           temp_cmd2 = temp_cmd2.lstrip()
 
-                          if re.search( " OR ", temp_cmd2 ):
+                          if com_re_search( " OR ", temp_cmd2 ):
                             tmp2 = temp_cmd2.find(' OR ')
                             temp_cmd3 = temp_cmd2[:int(tmp2)]
                             temp_cmd3 = temp_cmd3.lstrip()
@@ -1855,7 +1865,6 @@ def main():
 
                             temp_cmd2 = temp_cmd2.rstrip()
 
-# enomoto
                             # When結果ログ初期設定
                             when_command = temp_cmd2
                             when_name = 'exec_when'
@@ -1905,17 +1914,17 @@ def main():
                       temp_cmd4 = expect_cmd
 
                       # promptにitem.Xの記述があるかチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                         # with_itemsの変数分ループ
                         for k in range(0,max,1):
 
                           # item.Xチェック
-                          if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                          if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                             temp2 = "{{ " + "item." + str(k) + " }}"
 
-                            if re.search( temp2, temp_cmd4 ):
+                            if com_re_search( temp2, temp_cmd4 ):
 
                               if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
@@ -1940,17 +1949,17 @@ def main():
                       temp_cmd5 = str(timeout2)
 
                       # timeoutにitem.Xの記述があるかチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                         # with_itemsの変数分ループ
                         for k in range(0,max,1):
 
                           # item.Xチェック
-                          if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                          if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                             temp2 = "{{ " + "item." + str(k) + " }}"
 
-                            if re.search( temp2, temp_cmd5 ):
+                            if com_re_search( temp2, temp_cmd5 ):
 
                               if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
@@ -1987,17 +1996,17 @@ def main():
                     temp_cmd4 = expect_cmd
 
                     # promptにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                       # with_itemsの変数分ループ
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd4 ):
+                          if com_re_search( temp2, temp_cmd4 ):
 
                             if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
@@ -2022,17 +2031,17 @@ def main():
                     temp_cmd5 = str(timeout2)
 
                     # timeoutにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                       # with_itemsの変数分ループ
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd5 ):
+                          if com_re_search( temp2, temp_cmd5 ):
 
                             if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
@@ -2062,7 +2071,7 @@ def main():
                       for j in range(0,failed_max,1):
 
                         # failed_whenにitem.Xの記述があるかチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", failed_cmd[j] ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", failed_cmd[j] ):
 
                           # failed_when文を退避
                           temp_cmd2 = failed_cmd[j]
@@ -2071,11 +2080,11 @@ def main():
                           for k in range(0,max,1):
 
                             # item.Xチェック
-                            if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
+                            if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
 
                               temp2 = "{{ " + "item." + str(k) + " }}"
 
-                              if re.search( temp2, temp_cmd2 ):
+                              if com_re_search( temp2, temp_cmd2 ):
 
                                 # 置換
                                 temp_cmd2 = temp_cmd2.replace( temp2, def_cmd[k][i] )
@@ -2088,7 +2097,7 @@ def main():
                           count = 0
 
                           # ORがある場合
-                          if re.search( " OR ", temp_cmd2 ):
+                          if com_re_search( " OR ", temp_cmd2 ):
 
                             execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
@@ -2098,7 +2107,7 @@ def main():
                               temp_cmd2 = temp_cmd2[int(tmp1):]
                               temp_cmd2 = temp_cmd2.lstrip()
 
-                              if re.search( " OR ", temp_cmd2 ):
+                              if com_re_search( " OR ", temp_cmd2 ):
                                 tmp2 = temp_cmd2.find(' OR ')
                                 temp_cmd3 = temp_cmd2[:int(tmp2)]
                                 temp_cmd3 = temp_cmd3.lstrip()
@@ -2186,7 +2195,7 @@ def main():
                           count = 0
 
                           # ORがある場合
-                          if re.search( " OR ", temp_cmd2 ):
+                          if com_re_search( " OR ", temp_cmd2 ):
 
                             execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
@@ -2196,7 +2205,7 @@ def main():
                               temp_cmd2 = temp_cmd2[int(tmp1):]
                               temp_cmd2 = temp_cmd2.lstrip()
 
-                              if re.search( " OR ", temp_cmd2 ):
+                              if com_re_search( " OR ", temp_cmd2 ):
                                 tmp2 = temp_cmd2.find(' OR ')
                                 temp_cmd3 = temp_cmd2[:int(tmp2)]
                                 temp_cmd3 = temp_cmd3.lstrip()
@@ -2288,17 +2297,17 @@ def main():
                     temp_cmd4 = expect_cmd
 
                     # promptにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                       # with_itemsの変数分ループ
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd4 ):
+                          if com_re_search( temp2, temp_cmd4 ):
 
                             if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
@@ -2323,17 +2332,17 @@ def main():
                     temp_cmd5 = str(timeout2)
 
                     # timeoutにitem.Xの記述があるかチェック
-                    if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                    if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                       # with_itemsの変数分ループ
                       for k in range(0,max,1):
 
                         # item.Xチェック
-                        if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                        if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                           temp2 = "{{ " + "item." + str(k) + " }}"
 
-                          if re.search( temp2, temp_cmd5 ):
+                          if com_re_search( temp2, temp_cmd5 ):
 
                             if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
@@ -2369,17 +2378,17 @@ def main():
                   temp_cmd4 = expect_cmd
 
                   # promptにitem.Xの記述があるかチェック
-                  if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                  if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                     # with_itemsの変数分ループ
                     for k in range(0,max,1):
 
                       # item.Xチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd4 ):
 
                         temp2 = "{{ " + "item." + str(k) + " }}"
 
-                        if re.search( temp2, temp_cmd4 ):
+                        if com_re_search( temp2, temp_cmd4 ):
 
                           if len(def_cmd[k]) == prompt_count or def_cmd[k][prompt_count] == '':
 
@@ -2404,17 +2413,17 @@ def main():
                   temp_cmd5 = str(timeout2)
 
                   # timeoutにitem.Xの記述があるかチェック
-                  if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                  if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                     # with_itemsの変数分ループ
                     for k in range(0,max,1):
 
                       # item.Xチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd5 ):
 
                         temp2 = "{{ " + "item." + str(k) + " }}"
 
-                        if re.search( temp2, temp_cmd5 ):
+                        if com_re_search( temp2, temp_cmd5 ):
 
                           if len(def_cmd[k]) == timeout_count or def_cmd[k][timeout_count] == '':
 
@@ -2444,7 +2453,7 @@ def main():
                     for j in range(0,failed_max,1):
 
                       # failed_whenにitem.Xの記述があるかチェック
-                      if re.search( "{{ item.[0-9]|[1-9][0-9] }}", failed_cmd[j] ):
+                      if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", failed_cmd[j] ):
 
                         # コマンド文を退避
                         temp_cmd2 = failed_cmd[j]
@@ -2453,11 +2462,11 @@ def main():
                         for k in range(0,max,1):
 
                           # item.Xチェック
-                          if re.search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
+                          if com_re_search( "{{ item.[0-9]|[1-9][0-9] }}", temp_cmd2 ):
 
                             temp2 = "{{ " + "item." + str(k) + " }}"
 
-                            if re.search( temp2, temp_cmd2 ):
+                            if com_re_search( temp2, temp_cmd2 ):
 
                               # 置換
                               temp_cmd2 = temp_cmd2.replace( temp2, def_cmd[k][i] )
@@ -2470,7 +2479,7 @@ def main():
                         count = 0
 
                         # ORがある場合
-                        if re.search( " OR ", temp_cmd2 ):
+                        if com_re_search( " OR ", temp_cmd2 ):
 
                           execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
@@ -2480,7 +2489,7 @@ def main():
                             temp_cmd2 = temp_cmd2[int(tmp1):]
                             temp_cmd2 = temp_cmd2.lstrip()
 
-                            if re.search( " OR ", temp_cmd2 ):
+                            if com_re_search( " OR ", temp_cmd2 ):
                               tmp2 = temp_cmd2.find(' OR ')
                               temp_cmd3 = temp_cmd2[:int(tmp2)]
                               temp_cmd3 = temp_cmd3.lstrip()
@@ -2570,7 +2579,7 @@ def main():
                         count = 0
 
                         # ORがある場合
-                        if re.search( " OR ", temp_cmd2 ):
+                        if com_re_search( " OR ", temp_cmd2 ):
 
                           execute_when_log('failed_when',log_file_name,host_name,temp_cmd2)
 
@@ -2580,7 +2589,7 @@ def main():
                             temp_cmd2 = temp_cmd2[int(tmp1):]
                             temp_cmd2 = temp_cmd2.lstrip()
 
-                            if re.search( " OR ", temp_cmd2 ):
+                            if com_re_search( " OR ", temp_cmd2 ):
                               tmp2 = temp_cmd2.find(' OR ')
                               temp_cmd3 = temp_cmd2[:int(tmp2)]
                               temp_cmd3 = temp_cmd3.lstrip()
@@ -2690,7 +2699,7 @@ def main():
           expect_prompt(p,log_file_name,host_name,expect_cmd,timeout2)
 
         if register_flg == 1:
-          register_cmd = p.before
+          register_cmd = unicode2encode(p.before)
           register_name = register_tmp_name
           private_log_output(log_file_name,host_name,register_cmd)
           private_log_output(log_file_name,host_name,register_name)
@@ -2845,12 +2854,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
   when_cmd = password_replace(password,when_cmd)
 
   # whenが"no match"である場合
-  if re.search( "no match", when_cmd ):
+  if com_re_search( "no match", when_cmd ):
 
     if len(register_name) != 0:
 
       # whenとregister変数が一致する場合
-      if re.search( register_name, when_cmd ):
+      if com_re_search( register_name, when_cmd ):
 
         register_used_flg = 1
 
@@ -2871,7 +2880,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
           return 1
 
         # registerに条件分が一致するか検索
-        if re.search( tmp3, register_cmd ):
+        if com_re_search( tmp3, register_cmd ):
 
           # 一致した場合、1を返却する
           return 1
@@ -2914,7 +2923,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
           return 1
 
         # 一致するか検索
-        if re.search( tmp3, tmp5 ):
+        if com_re_search( tmp3, tmp5 ):
 
           # 一致した場合、1を返却する
           return 1
@@ -2957,7 +2966,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
           return 1
 
       # 一致するか検索
-      if re.search( tmp3, tmp5 ):
+      if com_re_search( tmp3, tmp5 ):
 
         # 一致した場合、1を返却する
         return 1
@@ -2967,12 +2976,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
         return 0
 
   # whenが"match"である場合
-  elif re.search( "match", when_cmd ):
+  elif com_re_search( "match", when_cmd ):
 
     if len(register_name) != 0:
 
       # whenとregister変数が一致する場合
-      if re.search( register_name, when_cmd ):
+      if com_re_search( register_name, when_cmd ):
 
         register_used_flg = 1
 
@@ -2993,7 +3002,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
           return 1
 
         # registerに条件分が一致するか検索
-        if re.search( tmp3, register_cmd ):
+        if com_re_search( tmp3, register_cmd ):
 
           # 一致した場合、0を返却する
           return 0
@@ -3036,7 +3045,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
           return 1
 
         # 一致するか検索
-        if re.search( tmp3, tmp5 ):
+        if com_re_search( tmp3, tmp5 ):
 
           # 一致した場合、0を返却する
           return 0
@@ -3079,7 +3088,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
         return 1
 
       # 一致するか検索
-      if re.search( tmp3, tmp5 ):
+      if com_re_search( tmp3, tmp5 ):
 
         # 一致した場合、0を返却する
         return 0
@@ -3089,12 +3098,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
         return 1
 
   # 比較演算子("==")の場合
-  elif re.search( "==", when_cmd ):
+  elif com_re_search( "==", when_cmd ):
 
     if len(register_name) != 0:
 
       # whenとregister変数が一致する場合
-      if re.search( register_name, when_cmd ):
+      if com_re_search( register_name, when_cmd ):
 
         register_used_flg = 1
 
@@ -3215,12 +3224,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
         return 1
 
   # 比較演算子("!=")の場合
-  elif re.search( "!=", when_cmd ):
+  elif com_re_search( "!=", when_cmd ):
 
     if len(register_name) != 0:
 
       # whenとregister変数が一致する場合
-      if re.search( register_name, when_cmd ):
+      if com_re_search( register_name, when_cmd ):
 
         register_used_flg = 1
 
@@ -3340,12 +3349,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
         return 1
 
   # 比較演算子(">=")の場合
-  elif re.search( ">=", when_cmd ):
+  elif com_re_search( ">=", when_cmd ):
 
     if len(register_name) != 0:
 
       # whenとregister変数が一致する場合
-      if re.search( register_name, when_cmd ):
+      if com_re_search( register_name, when_cmd ):
 
         register_used_flg = 1
 
@@ -3465,12 +3474,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
         return 1
 
   # 比較演算子(">")の場合
-  elif re.search( ">", when_cmd ):
+  elif com_re_search( ">", when_cmd ):
 
     if len(register_name) != 0:
 
       # whenとregister変数が一致する場合
-      if re.search( register_name, when_cmd ):
+      if com_re_search( register_name, when_cmd ):
 
         register_used_flg = 1
 
@@ -3586,12 +3595,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
         return 1
 
   # 比較演算子("<=")の場合
-  elif re.search( "<=", when_cmd ):
+  elif com_re_search( "<=", when_cmd ):
 
     if len(register_name) != 0:
 
       # whenとregister変数が一致する場合
-      if re.search( register_name, when_cmd ):
+      if com_re_search( register_name, when_cmd ):
 
         register_used_flg = 1
 
@@ -3712,12 +3721,12 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
         return 1
 
   # 比較演算子("<")の場合
-  elif re.search( "<", when_cmd ):
+  elif com_re_search( "<", when_cmd ):
 
     if len(register_name) != 0:
 
       # whenとregister変数が一致する場合
-      if re.search( register_name, when_cmd ):
+      if com_re_search( register_name, when_cmd ):
 
         register_used_flg = 1
 
@@ -3831,7 +3840,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
         return 1
 
   # is defineの場合
-  elif re.search( "is define", when_cmd ):
+  elif com_re_search( "is define", when_cmd ):
 
     # 後ろから'is'の位置を取得
     tmp1 = str(when_cmd.rfind('is'))
@@ -3844,7 +3853,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
     with open(host_vars_file, "r") as f:
       tmp3 = f.read()
 
-    if re.search( tmp2, tmp3 ):
+    if com_re_search( tmp2, tmp3 ):
 
       # 一致した場合、0を返却する
       return 0
@@ -3854,7 +3863,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
       return 1
 
   # is undefineの場合
-  elif re.search( "is undefine", when_cmd ):
+  elif com_re_search( "is undefine", when_cmd ):
 
     # 後ろから'is'の位置を取得
     tmp1 = str(when_cmd.rfind('is'))
@@ -3867,7 +3876,7 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
     with open(host_vars_file, "r") as f:
       tmp3 = f.read()
 
-    if re.search( tmp2, tmp3 ):
+    if com_re_search( tmp2, tmp3 ):
 
       # 一致した場合、1を返却する
       return 1
@@ -3885,7 +3894,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
   when_cmd = password_replace(password,when_cmd)
 
   # whenが"no match"である場合
-  if re.search( "no match", when_cmd ):
+  if com_re_search( "no match", when_cmd ):
 
     # '('が何文字目か検索
     tmp1 = str(when_cmd.find('('))
@@ -3904,7 +3913,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 1
 
     # registerに条件分が一致するか検索
-    if re.search( tmp3, register_cmd ):
+    if com_re_search( tmp3, register_cmd ):
 
       # 一致した場合、1を返却する
       return 1
@@ -3914,7 +3923,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 0
 
   # whenが"match"である場合
-  elif re.search( "match", when_cmd ):
+  elif com_re_search( "match", when_cmd ):
 
     # '('が何文字目か検索
     tmp1 = str(when_cmd.find('('))
@@ -3933,7 +3942,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 1
 
     # registerに条件分が一致するか検索
-    if re.search( tmp3, register_cmd ):
+    if com_re_search( tmp3, register_cmd ):
 
       # 一致した場合、0を返却する
       return 0
@@ -3943,7 +3952,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 1
 
   # 比較演算子("==")の場合
-  elif re.search( "==", when_cmd ):
+  elif com_re_search( "==", when_cmd ):
 
     # 後ろの'='の位置を取得
     tmp1 = str(when_cmd.rfind('='))
@@ -3976,7 +3985,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 1
 
   # 比較演算子("!=")の場合
-  elif re.search( "!=", when_cmd ):
+  elif com_re_search( "!=", when_cmd ):
 
     # 後ろの'='の位置を取得
     tmp1 = str(when_cmd.rfind('='))
@@ -4008,7 +4017,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 1
 
   # 比較演算子(">=")の場合
-  elif re.search( ">=", when_cmd ):
+  elif com_re_search( ">=", when_cmd ):
 
     # 後ろの'='の位置を取得
     tmp1 = str(when_cmd.rfind('='))
@@ -4041,7 +4050,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 1
 
   # 比較演算子(">")の場合
-  elif re.search( ">", when_cmd ):
+  elif com_re_search( ">", when_cmd ):
 
     # '>'の位置を取得
     tmp1 = str(when_cmd.find('>'))
@@ -4073,7 +4082,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 1
 
   # 比較演算子("<=")の場合
-  elif re.search( "<=", when_cmd ):
+  elif com_re_search( "<=", when_cmd ):
 
     # 後ろの'='の位置を取得
     tmp1 = str(when_cmd.rfind('='))
@@ -4106,7 +4115,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 1
 
   # 比較演算子("<")の場合
-  elif re.search( "<", when_cmd ):
+  elif com_re_search( "<", when_cmd ):
 
     # '<'の位置を取得
     tmp1 = str(when_cmd.find('<'))
@@ -4138,7 +4147,7 @@ def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
       return 1
 
 def last_escstr_cut(sometext):
-  m_split = re.split('\x1b',sometext)
+  m_split = re.split('\x1b',unicode2encode(sometext))
   stdout_data = ""
   idx = 1
   max = len(m_split)
@@ -4153,11 +4162,17 @@ def last_escstr_cut(sometext):
   return stdout_data
 
 def password_replace(password,data):
-  global exec_log
   rep_str = data.replace('<<__loginpassword__>>', password)
   return rep_str
 
 def exec_log_output(log,replace_flg = True):
+  global exec_log
+  global output_password
+  if replace_flg == True:
+    output_log = password_replace(output_password,str(log))
+  exec_log.append(output_log)
+
+def debug_exec_log_output(log,replace_flg = True):
   global exec_log
   global output_password
   if replace_flg == True:
@@ -4169,6 +4184,31 @@ def private_log_output(log_file_name,host_name,log,replace_flg = True):
   if replace_flg == True:
     output_log = password_replace(output_password,str(log))
   private_log(log_file_name,host_name,output_log)
+
+# python2/3で文字型に差異があり、re.searchに渡す文字型を調整
+def com_re_search(in_find_str,in_str):
+  return re.search( str2unicode(in_find_str), str2unicode(in_str) )
+
+def str2unicode(in_str,code='utf-8'):
+  out_unicode = in_str
+  if sys.version_info.major == 2:
+    if type(in_str) is str:
+      # unicodeを指定文字コードにエンコードする。
+      out_unicode = in_str.decode('utf-8')
+  return out_unicode
+
+def unicode2encode(in_str,code='utf-8',errors='replace'):
+
+  # python version確認
+  if sys.version_info.major == 2:
+    if type(in_str) is unicode:
+      # unicodeを指定文字コードにエンコードする。
+      return in_str.encode(code,errors)
+  else:
+    if type(in_str) is bytes:
+      # バイト文字列を指定文字コードにデコードする。
+      return in_str.decode(code,errors)
+  return in_str
 
 def expect_prompt(p,log_file_name,host_name,cmd,timeout):
   global password
@@ -4190,13 +4230,13 @@ def expect_prompt(p,log_file_name,host_name,cmd,timeout):
 
   # 標準出力ログ
   exec_log_output('prompt match')
-  exec_log_output('before:[' + p.before + ']')
-  exec_log_output('match:[' + p.after + ']')
-  exec_log_output('after:[' + p.buffer + ']')
+  exec_log_output('before:[' + unicode2encode(p.before) + ']')
+  exec_log_output('match:[' + unicode2encode(p.after) + ']')
+  exec_log_output('after:[' + unicode2encode(p.buffer) + ']')
   private_log_output(log_file_name,host_name,"prompt match")
-  private_log_output(log_file_name,host_name,"before:[" + p.before + "]")
-  private_log_output(log_file_name,host_name,"match:[" + p.after + "]")
-  private_log_output(log_file_name,host_name,"after:[" + p.buffer + "]")
+  private_log_output(log_file_name,host_name,"before:[" + unicode2encode(p.before) + "]")
+  private_log_output(log_file_name,host_name,"match:[" + unicode2encode(p.after) + "]")
+  private_log_output(log_file_name,host_name,"after:[" + unicode2encode(p.buffer) + "]")
 
   private_log_output(log_file_name,host_name,"Ok")
 
