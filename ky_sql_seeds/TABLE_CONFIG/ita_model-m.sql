@@ -9,10 +9,12 @@ CREATE TABLE F_CREATE_MENU_INFO
 CREATE_MENU_ID                      %INT%                           , -- 識別シーケンス項番
 MENU_NAME                           %VARCHR%(64)                    ,
 PURPOSE                             %INT%                           ,
+TARGET                              %INT%                           ,
 MENUGROUP_FOR_HG                    %INT%                           ,
 MENUGROUP_FOR_H                     %INT%                           ,
 MENUGROUP_FOR_VIEW                  %INT%                           ,
 MENUGROUP_FOR_CONV                  %INT%                           ,
+MENUGROUP_FOR_CMDB                  %INT%                           ,
 DISP_SEQ                            %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
@@ -31,10 +33,12 @@ JOURNAL_ACTION_CLASS                %VARCHR%(8)                     , -- 履歴�
 CREATE_MENU_ID                      %INT%                           , -- 識別シーケンス項番
 MENU_NAME                           %VARCHR%(64)                    ,
 PURPOSE                             %INT%                           ,
+TARGET                              %INT%                           ,
 MENUGROUP_FOR_HG                    %INT%                           ,
 MENUGROUP_FOR_H                     %INT%                           ,
 MENUGROUP_FOR_VIEW                  %INT%                           ,
 MENUGROUP_FOR_CONV                  %INT%                           ,
+MENUGROUP_FOR_CMDB                  %INT%                           ,
 DISP_SEQ                            %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
@@ -214,6 +218,35 @@ JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴�
 
 PURPOSE_ID                          %INT%                           , -- 識別シーケンス項番
 PURPOSE_NAME                        %VARCHR%(64)                    ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+-- -------------------------
+-- 作成対象マスタ
+-- -------------------------
+CREATE TABLE F_PARAM_TARGET
+(
+TARGET_ID                           %INT%                           , -- 識別シーケンス項番
+TARGET_NAME                         %VARCHR%(64)                    ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY (TARGET_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_PARAM_TARGET_JNL
+(
+JOURNAL_SEQ_NO                      %INT%                           , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                %DATETIME6%                     , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴用変更種別
+
+TARGET_ID                           %INT%                           , -- 識別シーケンス項番
+TARGET_NAME                         %VARCHR%(64)                    ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
