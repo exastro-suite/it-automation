@@ -59,11 +59,11 @@ if( userAgent.indexOf('msie') != -1 || userAgent.indexOf('trident') != -1 ) {
 } else if( userAgent.indexOf('edge') != -1 ) {
   userAgent = 'edge';
 } else {
-  userAgent = '';
+  userAgent = 'def';
 }
 
 // Tableを囲む
-$itaTable.wrap('<div id="' + itaTableWrapID + '" class="itaTable"><div id="' + itaTableBodyID + '" class="itaTableBody"><div class="tableScroll"></div></div></div>');
+$itaTable.wrap('<div id="' + itaTableWrapID + '" class="itaTable ' + userAgent +'"><div id="' + itaTableBodyID + '" class="itaTableBody"><div class="tableScroll"></div></div></div>');
 
 // Tableフッターと固定線の追加
 var tableFooterHTML = ''
@@ -112,7 +112,7 @@ var $tableSetting = $('#' + tableSettingID ),
 //
 //   ログ出力用
 //
-var logFlag = true;
+var logFlag = false;
 var log = function() {
     if ( logFlag === true ) {
       for ( var i = 0; i < arguments.length; i++ ) {
@@ -268,6 +268,7 @@ var fixedBorderUpdate = function(){
     'height' : tableScrollHeight
   });
   $itaTableBody.css('width', $itaTable.outerWidth() + scrollWidth );
+  
 }
 fixedBorderUpdate();
 
@@ -707,10 +708,8 @@ loadCheckStatus( tableKey );
 
 // Edge対策Tableを再描画する
 $itaTable.hide();
-setTimeout(function(){
+setTimeout( function(){
   $itaTable.show();
 }, 10 );
-
-
 
 }
