@@ -695,8 +695,8 @@ class CheckAnsibleRoleFiles {
                                                               $vars_list,
                                                               $array_vars_list,
                                                               $varsval_list,
-                                                              $ina_ITA2User_var_list,
-                                                              $ina_User2ITA_var_list);
+                                                              $ITA2User_var_list,
+                                                              $User2ITA_var_list);
                        if($ret === false) {
                            return false;
                        }
