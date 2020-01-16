@@ -1,3 +1,14 @@
+@charset "UTF-8";
+
+/* **********************************************************************
+ * 01. ITA Table
+ * 02. Execution Nakami Table
+ ********************************************************************* */
+
+
+
+/* 01. ITA Table ****************************************************** */
+
 .itaTable {
 position: relative;
 z-index: 1;
@@ -492,3 +503,48 @@ background-color: #FF821E;
 }
 
 
+
+
+
+
+
+
+/* 02. Execution Nakami Table ****************************************************** */
+
+#ExecutionNakami table {
+margin: 0; padding: 0;
+background-color: #D4D4D4;
+border-collapse: collapse;
+}
+#ExecutionNakami th,
+#ExecutionNakami td {
+padding: 3px 6px;
+border: 1px solid #D4D4D4;
+white-space: pre;
+line-height: 1.5;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #2B2B2B;
+}
+#ExecutionNakami th {
+background-color: #888;
+border-color: #666;
+color: #F2F2F2;
+letter-spacing: 0.05em;
+text-decoration: none;
+}
+#ExecutionNakami td {
+background-color: #FFF;
+}
+#ExecutionNakami td.likeHeader {
+background-color: #EEE;
+}
+#ExecutionNakami th.noBorderRight {
+border-right: none;
+}
+#ExecutionNakami th.noBorderBoth {
+border-left: none;
+border-right: none;
+}
+#ExecutionNakami th.noBorderLeft {
+border-left: none;
+}
