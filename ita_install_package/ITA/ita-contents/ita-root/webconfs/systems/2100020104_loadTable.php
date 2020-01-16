@@ -28,6 +28,9 @@ if ( empty($root_dir_path) ){
 
 // 共通モジュールをロード
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php' );
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php' );
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/CheckAnsibleRoleFiles.php' );
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
@@ -83,11 +86,6 @@ Ansible(Legacy(NS))プレイブック素材集
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
             $root_dir_path = $root_dir_temp[0] . "ita-root";
         }
-        // 共通モジュールをロード
-        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
-        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php' );
-        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php' );
-        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/CheckAnsibleRoleFiles.php' );
 
         // 共通変数を抜き出す。
         $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);
@@ -186,13 +184,21 @@ Ansible(Legacy(NS))プレイブック素材集
             $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_8',$arrayRegData)?
                                $arrayRegData['tmp_file_COL_IDSOP_8']:null;
             $TPFVarListfile = $root_dir_path . "/temp/file_up_column/" . $tmpFile . "_vars_list";
+            $tmpfilepath    = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
         }
-        
+
         // 一時ファイルから使用しているテンプレート変数のリストを取得
         unset($g['COM_VARS_LIST_VALUE']);
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
                 if(strlen($tmpFile) != 0) {
+                    // FileUpload後に登録・更新でエラーが発生した場合、tmp_file_COL_IDSOP_8が別ファイルになる対応
+                    if( ! file_exists($TPFVarListfile)) {
+                        // 共通変数を抜き出す。
+                        $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);
+                        $retArray = $obj->CommonVarssAanalys($tmpfilepath,$TPFVarListfile);
+                        unset($obj);
+                    }
                     $json_VarsAry = file_get_contents($TPFVarListfile);
                     $g['COM_VARS_LIST_VALUE'] = $json_VarsAry;
                     @unlink($TPFVarListfile);
