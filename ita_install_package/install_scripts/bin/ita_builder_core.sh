@@ -567,10 +567,6 @@ configure_php() {
     mkdir -p /usr/share/php/spyc-master >> "$ITA_BUILDER_LOG_FILE" 2>&1
     cat_tar_gz ${PHP_TAR_GZ_PACKAGE["spyc"]} | tar zx --strip-components=1 -C /usr/share/php/spyc-master >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
-    # Install Twig.
-    echo "----------Installation[Twig]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    cat_tar_gz ${PHP_TAR_GZ_PACKAGE["twig"]} | tar zx -C /usr/share/php >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
     # Install Composer.
     if [ "${exec_mode}" == "3" ]; then
         echo "----------Installation[Composer]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1094,14 +1090,12 @@ PEAR_PACKAGE=(
 declare -A PHP_TAR_GZ_PACKAGE_LOCAL_DIR;
 PHP_TAR_GZ_PACKAGE_LOCAL_DIR=(
     ["spyc"]="${LOCAL_DIR["php-tar-gz"]}/Spyc"
-    ["twig"]="${LOCAL_DIR["php-tar-gz"]}/Twig"
 )
 
 # download directory
 declare -A PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR;
 PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR=(
     ["spyc"]="${DOWNLOAD_DIR["php-tar-gz"]}/Spyc"
-    ["twig"]="${DOWNLOAD_DIR["php-tar-gz"]}/Twig"
 )
 
 #-----------------------------------------------------------
@@ -1114,18 +1108,10 @@ PHP_TAR_GZ_PACKAGE_SPYC=(
     ["local"]="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR["spyc"]}/0.6.2.tar.gz"
 )
 
-# Twig
-declare -A PHP_TAR_GZ_PACKAGE_TWIG;
-PHP_TAR_GZ_PACKAGE_TWIG=(
-    ["remote"]="https://github.com/twigphp/Twig/archive/v1.34.4.tar.gz"
-    ["local"]="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR["twig"]}/v1.34.4.tar.gz"
-)
-
 # all php tar.gz packages
 declare -A PHP_TAR_GZ_PACKAGE;
 PHP_TAR_GZ_PACKAGE=(
     ["spyc"]=${PHP_TAR_GZ_PACKAGE_SPYC[${MODE}]}
-    ["twig"]=${PHP_TAR_GZ_PACKAGE_TWIG[${MODE}]}
 )
 
 
