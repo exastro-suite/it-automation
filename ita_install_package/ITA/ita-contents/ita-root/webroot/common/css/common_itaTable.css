@@ -88,6 +88,11 @@ line-height: 1.5;
 font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
 color: #2B2B2B;
 }
+.itaTableBody th.diff,
+.itaTableBody td.diff {
+color: #0D00D8;
+font-weight: bold;
+}
 .itaTableBody th {
 padding: 3px 6px;
 background-color: #888;
@@ -110,7 +115,22 @@ background-color: #EEE;
 .itaTableBody tr:nth-child(odd) td.likeHeader {
 background-color: #E8E8E8;
 }
-
+.itaTableBody tr.disuse td,
+.itaTableBody tr.disuse td.likeHeader,
+.itaTableBody tr.disuse:nth-child(odd) td {
+background-color: #E0E0E0;
+background-image: repeating-linear-gradient( -45deg, #E0E0E0, #E0E0E0 2px, #E8E8E8 2px, #E8E8E8 4px);
+color: #AAA;
+}
+.itaTableBody tr.disuse:hover td,
+.itaTableBody tr.disuse:nth-child(odd):hover td {
+background-color: #FFFFCC;
+background-image: none;
+}
+.itaTableBody tr.disuse:hover td.likeHeader {
+background-color: #FFFF8F;
+background-image: none;
+}
 
 
 /* .tableSticky */
@@ -329,7 +349,9 @@ background-color: #444;
 border-color: #60C60D;
 color: #60C60D;
 }
-
+.tableSettingFooter button:active {
+transform: scale( 0.925 );
+}
 
 #KIZI .tableSettingBody dt {
 position: relative;
