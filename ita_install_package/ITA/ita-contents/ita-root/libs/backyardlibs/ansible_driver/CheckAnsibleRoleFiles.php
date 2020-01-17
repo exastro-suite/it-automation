@@ -3121,7 +3121,8 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
             // 配列階層か判定
             if($array_f == 'I'){
                 // 配列階層の列番号を退避 各配列の位置を3桁の数値文字列で結合していく 
-                $wk_col_index_str = $in_col_index_str . sprintf("%03d",$var);                
+                #$wk_col_index_str = $in_col_index_str . sprintf("%03d",$var);                
+                $wk_col_index_str = $in_col_index_str . sprintf("%08d",$var);                
 
                 // 配列階層の場合の変数名を設定 変数名を0に設定する。
                 if($in_var_name_path == ""){
