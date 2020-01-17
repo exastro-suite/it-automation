@@ -21,8 +21,8 @@ function itaTable( tableID ){
 //
 var $itaTable = $( '#' + tableID );
 
-// パラメータから固有key作成
-function getParam( name ) { 
+// パラメータと親fakeContainerから固有key作成
+var getParam = function( name ) { 
   var url = window.location.href,
       regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
   var results = regex.exec( url );
@@ -31,7 +31,18 @@ function getParam( name ) {
 }
 var pageNumber = getParam('no');
 pageNumber = pageNumber !== null ? pageNumber : '9999999999';
-var tableKey = 'No' + pageNumber + '_' + tableID; // 状態保存用の固有Key
+
+var fakeContainerClass = $itaTable.closest('div[class*="fakeContainer_"]').attr('class').split(' '),
+    fakeContainer = 'table';
+for( var j = 0; j < fakeContainerClass.length; j++ ) {
+  if( fakeContainerClass[j].indexOf('fakeContainer_') != -1 ) {
+    fakeContainer = fakeContainerClass[j].replace('fakeContainer_', '');
+    break;
+  }
+}
+
+// 状態保存用の固有Key
+var tableKey = 'No' + pageNumber + '_' + fakeContainer + '_' + tableID;
 
 var tHeadClass = '.defaultExplainRow'; // テーブル見出しclass
 var rowHeadClass = '.likeHeader'; // 行見出しclass
@@ -94,8 +105,7 @@ var tableSettingHTML = ''
     + '</div></div>';
 
 var $itaTableWrap = $('#' + itaTableWrapID ),
-    $itaTableBody = $('#' + itaTableBodyID ),
-    $itaTableFooter = $('#' + itaTableFooterID );
+    $itaTableBody = $('#' + itaTableBodyID );
     
 $itaTableBody.append( tableFooterHTML );
 $itaTableWrap.append( tableSettingHTML );
@@ -164,6 +174,7 @@ if( $stickyCheck.css('position') === 'sticky' ) positionStickyFlag = true;
 //   チェック結果ログ出力
 //
 log(
+'Table Key / ' + tableKey,
 'sessionStorage / ' + sessionStorageFlag,
 'localStorage / ' + localStrageFlag,
 'position:sticky; / ' + positionStickyFlag
@@ -195,7 +206,7 @@ $itaTable.find( tHeadClass ).each( function(){
       + '#' + tableID + ' ' + tHeadClass + ':nth-child(' + fixedTableHeadCounter + ') th {'
         + 'top:' + fixedSize + 'px;'
       + '}'
-      + '#' + tableID + ' ' + tHeadClass + ' th[date-rowspan="' + fixedTableHeadCounter + '"] {'
+      + '#' + tableID + ' ' + tHeadClass + ' th[data-rowspan="' + fixedTableHeadCounter + '"] {'
         + 'height:' + rowSpanHeight + 'px;'
       + '}';
     fixedSize += trHeight + 1;
@@ -510,9 +521,15 @@ $tableSetting.find('button').on('click', function(){
     scrollCheck( $tableScroll );
   }
   
+  // 適用ボタン
   if( buttonType.indexOf('apply') >= 0 ){
-    tableHideFucn( dataMaxLevel );
-    saveCheckStatus( tableKey );
+    // 表示する列が無い場合はアラートを出す
+    if ( $tableSetting.find('.colCheckList input[type="checkbox"]:checked').length ) {
+      tableHideFucn( dataMaxLevel );
+      saveCheckStatus( tableKey );
+    } else {
+      alert('No columns to display.')
+    }
   }
 
   if( buttonType.indexOf('open') >= 0 ){
@@ -548,8 +565,8 @@ for ( var i = 0; i < tablebodyDisplayFlagArray.length; i++ ) {
 // rowspan調整
 var rowspanInit = function() {
     $itaTable.find( tHeadClass ).find('th').each( function(){
-      // デフォルトのrowspanをdate-rowspanに入れる
-      $( this ).attr('date-rowspan', $( this ).attr('rowspan') );
+      // デフォルトのrowspanをdata-rowspanに入れる
+      $( this ).attr('data-rowspan', $( this ).attr('rowspan') );
     });
 }
 rowspanInit();
@@ -566,7 +583,7 @@ var rowspanAdjustment = function() {
     });
     // 空行の数を元にrowspanを調整
     $itaTable.find( tHeadClass ).find('th').each( function(){
-      var defRowspan = Number( $( this ).attr('date-rowspan') );
+      var defRowspan = Number( $( this ).attr('data-rowspan') );
       var rowspan = ( defRowspan - trHiddenCount ) <= 0 ? 1 : defRowspan - trHiddenCount ;
       $( this ).attr('rowspan', rowspan );
     });
@@ -626,10 +643,12 @@ var tableHideFucn = function( listLevel ) {
       }
     });
   });
+  
   // 再帰
   if( listLevel > 1 ) {
     tableHideFucn( listLevel - 1 );
   } else {
+      
     var styleCode = '<style>';
     for ( var i = 0; i <= tablebodyDisplayFlagArray.length; i++ ) {
       if ( tablebodyDisplayFlagArray[ i ] === false ) {
@@ -639,10 +658,10 @@ var tableHideFucn = function( listLevel ) {
     styleCode += '</style>';
     $colHideStyle.html( styleCode );
     rowspanAdjustment();
-    
+
     fixedBorderUpdate();
     scrollCheck( $tableScroll );
-    
+
     headingFixed();
     
   }
@@ -706,10 +725,24 @@ var loadCheckStatus = function( key ) {
 }
 loadCheckStatus( tableKey );
 
+// Window resize
+var resizeTimer = false;    
+    $( window ).on('resize', function() {
+      if ( resizeTimer !== false ) {
+        clearTimeout( resizeTimer );
+      }
+      resizeTimer = setTimeout( function(){
+        fixedBorderUpdate();
+        scrollCheck( $tableScroll );
+    }, 100 );
+});
+
 // Edge対策Tableを再描画する
-$itaTable.hide();
-setTimeout( function(){
-  $itaTable.show();
-}, 10 );
+if ( userAgent == 'edge' ){
+    $itaTable.hide();
+    setTimeout( function(){
+      $itaTable.show();
+    }, 10 );
+}
 
 }
