@@ -27,34 +27,17 @@ http://pear.php.net/package/HTML_AJAX
 Licensed under the LGPLv3
 see licenses/HTML_AJAX-beta.txt for license details
 
-HTTP_Request2
-http://pear.php.net/package/HTTP_Request2
-Copyright (c) 2008-2016, Alexey Borzov <avb@php.net>
-Licensed under the 3-Clause BSD
-see licenses/HTTP_Request2.txt for license details
-
-MDB2
-http://pear.php.net/package/MDB2
-Copyright (c) 1998-2007 Manuel Lemos, Tomas V.V.Cox, Stig. S. Bakken, Lukas Smith
-see licenses/MDB2.txt for license details
-
-PHPExcel
-https://github.com/PHPOffice/PHPExcel
-Copyright (c) 2006 - 2015 PHPExcel
-Licensed under the LGPLv3
-see licenses/PHPExcel.txt for license details
+PhpSpreadsheet
+https://github.com/PHPOffice/PhpSpreadsheet
+Copyright (c) 2019 PhpSpreadsheet Authors
+Licensed under the MIT License
+see licenses/PhpSpreadsheet.txt for license details
 
 Spyc
 https://github.com/mustangostang/spyc
 Copyright 2005-2006 Chris Wanstrath, 2006-2011 Vlad Andersen
 Licensed under the MIT License
 see licenses/Spyc.txt for license details
-
-Twig
-https://twig.symfony.com/
-Copyright (c) 2009-2017 by the Twig Team.
-Licensed under the 3-Clause BSD
-see licenses/Twig.txt for license details
 
 DateTimePicker
 https://xdsoft.net/jqplugins/datetimepicker/
