@@ -2356,7 +2356,7 @@ CREATE TABLE B_CMDB_MENU_COLUMN  (
 COLUMN_LIST_ID                 %INT%                   , -- 識別シーケンス
 MENU_ID                        %INT%                   , -- メニューID
 COL_NAME                       %VARCHR%(64)            , -- テーブル　カラム名
-COL_TITLE                      %VARCHR%(256)           , -- メニュー　カラム名
+COL_TITLE                      %VARCHR%(512)           , -- メニュー　カラム名
 COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム名 代入値自動登録 表示順
 REF_TABLE_NAME                 %VARCHR%(64)            , -- 参照テーブル名
 REF_PKEY_NAME                  %VARCHR%(64)            , -- 参照テーブル主キー
@@ -2379,7 +2379,7 @@ JOURNAL_ACTION_CLASS           %VARCHR%(8)             , -- 履歴用変更種�
 COLUMN_LIST_ID                 %INT%                   , -- 識別シーケンス
 MENU_ID                        %INT%                   , -- メニューID
 COL_NAME                       %VARCHR%(64)            , -- テーブル　カラム名
-COL_TITLE                      %VARCHR%(256)           , -- メニュー　カラム名
+COL_TITLE                      %VARCHR%(512)           , -- メニュー　カラム名
 COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム名 代入値自動登録 表示順
 REF_TABLE_NAME                 %VARCHR%(64)            , -- 参照テーブル名
 REF_PKEY_NAME                  %VARCHR%(64)            , -- 参照テーブル主キー
