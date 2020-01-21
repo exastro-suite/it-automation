@@ -81,7 +81,7 @@ var tableFooterHTML = ''
     + '<div id="' + itaTableFooterID + '" class="itaTableFooter">'
     + '<div class="itaTableFooterMenu"><div class="itaTableFooterMenuInner">'
       + '<ul>'
-        + '<li><button id="' + tableSettingOpenID + '">Table setting</button></li>'
+        + '<li><button id="' + tableSettingOpenID + '">Table setting<span></span></button></li>'
       + '</li>'
     + '</div></div>'
     + '<style id="' + fixedRowHeadStyleID + '"></style>'
@@ -333,10 +333,13 @@ $( $line1 ).find('th').each(function(){
 // セル情報取得
 var thDataFunc = function( $th ) {
     var titleText = $th.text(),
+        requiredFlg = false,
         colspanNum = $th.attr('colspan') !== undefined ? Number( $th.attr('colspan') ) : 1,
         rowspanNum = $th.attr('rowspan') !== undefined ? Number( $th.attr('rowspan') ) : 1;
+  
+    if( $th.find('.input_required').length ) requiredFlg = true;
     
-    return [ titleText, colspanNum, rowspanNum ];
+    return [ titleText, colspanNum, rowspanNum, requiredFlg ];
 }
 
 // テーブルからリスト作成
@@ -357,17 +360,22 @@ var trDataFunc = function( $tr, start, end, level, parentStat, parentID ) {
 
       var dataColStart = colNumber,
           dataColEnd = colNumber + data[1] - 1,
-          inputID = 'col' + colNumberID;
+          inputID = 'col' + colNumberID,
+          listClass = 'level' + level,
+          inputStatus = 'checked';
       
-      // 固定部分は無効にする
-      var disabledInput = '';
-      if( $th.is('.thSticky') ) disabledInput = 'disabled ';
+      // 固定部分は非表示にする
+      if( $th.is('.thSticky') ) listClass += ' disabled';
+      // 固定部分および必須はDisabled
+      if( $th.is('.thSticky') || data[3] === true ) inputStatus += ' disabled';
       
       $th.attr('data-col-id', tableID + '_col' + colNumberID );
       colNumberID++;
 
-      headerListHTML += '<li class="level' + level + ' ' + disabledInput + '"><span>'
-      + '<input type="checkbox" id="' + tableID + '_' + inputID + '" class="" data-parent-id="' + tableID + '_' + parentID + '" data-colspan="' + data[1] + '" data-level="' + level + '" data-col-start="' + dataColStart + '" data-col-end="' + dataColEnd + '" ' + disabledInput + 'checked>'
+      headerListHTML += ''
+      + '<li class="' + listClass + '">'
+        + '<span>'
+          + '<input type="checkbox" id="' + tableID + '_' + inputID + '" class="" data-parent-id="' + tableID + '_' + parentID + '" data-colspan="' + data[1] + '" data-level="' + level + '" data-col-start="' + dataColStart + '" data-col-end="' + dataColEnd + '" ' + inputStatus + '>'
       + '<label for="' + tableID + '_' + inputID + '">' + data[0] + '</label>';
       
       // 次の行があるか？
@@ -490,7 +498,9 @@ $tableSetting.find('input[type="checkbox"]').on('change', function(){
     }
     
     // Edgeで色の状態が再描画されないための応急処置
-    $tableSetting.find('.tableSettingBody').hide().show();
+    if( userAgent == 'edge' ) {
+      $tableSetting.find('.tableSettingBody').hide().show();
+    }
 
 });
 
@@ -644,24 +654,35 @@ var tableHideFucn = function( listLevel ) {
     });
   });
   
-  // 再帰
+  // 子列があれば再帰、なければ非表示処理
   if( listLevel > 1 ) {
     tableHideFucn( listLevel - 1 );
   } else {
-      
-    var styleCode = '<style>';
+    
+    var hideCount = 0;
+    var styleCode = '';
     for ( var i = 0; i <= tablebodyDisplayFlagArray.length; i++ ) {
       if ( tablebodyDisplayFlagArray[ i ] === false ) {
         styleCode += '#' + tableID + ' td:nth-child(' + ( i + 1 ) + '){ display: none; }';
+        hideCount++;
       }
     }
-    styleCode += '</style>';
     $colHideStyle.html( styleCode );
+    
+    // 非表示列数を表示
+    $tableSettingOpen.find('span').text( hideCount );
+    if ( hideCount > 0 ) {
+			var hiddenTitle = ' columns hidden.';
+			if( hideCount == 1 ) hiddenTitle = ' column hidden.';
+      $tableSettingOpen.find('span').attr('title', hideCount + hiddenTitle ).show();
+    } else {
+      $tableSettingOpen.find('span').attr('title', '').hide();
+    }
+    
+    // 各種調整
     rowspanAdjustment();
-
     fixedBorderUpdate();
     scrollCheck( $tableScroll );
-
     headingFixed();
     
   }
