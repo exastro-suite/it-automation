@@ -14,7 +14,7 @@
 //   limitations under the License.
 //
 ////en_US_UTF-8_ITACREPAR_MNU
-$ary[102001] = "Maintenance (view/register/update/discard) can be performed on the menu name of the menu to be created.<br>
+$ary[102001] = "Maintenance (view/register/update/discard) can be performed on the menu name of the parameter sheet menu or data sheet menu to be created.<br>
 You cannot use \"Main menu\" as the menu name.";
 $ary[102002] = "Id";
 $ary[102003] = "Menu creation information";
@@ -40,8 +40,8 @@ $ary[102022] = "Enter the menu group on which to create the vertical menu.";
 $ary[102023] = "Creation target";
 $ary[102024] = "Menu group For Data Sheet";
 $ary[102025] = "Enter the menu group on which to create the data sheet.";
-$ary[102026] = "If you select \"Parameter Sheet\", it will be registered in the substitution value automatic registration setting.
-If you select \"Data Sheet\", you can use it as a master without registering to the substitution value automatic registration setting.";
+$ary[102026] = "If you select \"Parameter Sheet\", ITA will create a parameter sheet menu that is set in the substitution value automatic registration setting.
+If you select \"Data Sheet\", ITA will create a data sheet menu that is not set in the substitution value automatic registration setting.";
 $ary[102101] = "Maintenance (view/register/update/discard) can be performed on items managed in the menu.";
 $ary[102102] = "Id";
 $ary[102103] = "Menu item creation information";
