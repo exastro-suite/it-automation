@@ -456,7 +456,17 @@ position: absolute;
 left: -9999px;
 }
 
-
+#KIZI .itaTableFooter button span {
+display: none;
+margin-left: 0.5em;
+padding: 2px 4px 1px;
+background-color: #FFF;
+border-radius: 1em;
+font-weight: bold;
+font-size: 11px;
+font-family: Consolas;
+color: #F00;
+}
 
 
 #KIZI .tableSettingBody span {
@@ -497,6 +507,17 @@ background-color: #444;
 #KIZI .tableSettingBody input:checked + label {
 color: #EEE;
 }
+
+#KIZI .tableSettingBody li.level1 > span input:disabled + label {
+background-color: #737373;
+border-top-color: #888;
+cursor: default;
+}
+#KIZI .tableSettingBody input:disabled + label::before,
+#KIZI .tableSettingBody input:disabled + label::after {
+  display: none!important;
+}
+
 
 /* チェックマーク */
 #KIZI .tableSettingBody label::before,
