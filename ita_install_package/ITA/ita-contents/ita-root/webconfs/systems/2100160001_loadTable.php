@@ -71,7 +71,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     // 作成対象 
     $c = new IDColumn('TARGET',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102023"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME', '', array('OrderByThirdColumn'=>'TARGET_ID'));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102025"));//エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102026"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
     $objVldt = new SubstitutionValidator($c);
     $c->setValidator($objVldt);
