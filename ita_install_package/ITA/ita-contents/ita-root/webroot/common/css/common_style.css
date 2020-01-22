@@ -732,9 +732,6 @@ td.likeHeader {
 	background-color: #EBEBEB;
 	min-height: 20px;
 }
-tr:hover td.likeHeader {
-	background-color: #FFFF88;
-}
 
 th.number, td.number {
 	text-align: right;
