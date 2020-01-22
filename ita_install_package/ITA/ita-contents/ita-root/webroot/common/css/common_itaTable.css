@@ -3,6 +3,7 @@
 /* **********************************************************************
  * 01. ITA Table
  * 02. Execution Nakami Table
+ * 99. Other.
  ********************************************************************* */
 
 
@@ -18,7 +19,7 @@ box-sizing: border-box;
 box-sizing: border-box!important;
 }
 .itaTable.tableSettingOpen {
-min-height: 160px;
+min-height: 240px;
 background-color: #EEE;
 }
 
@@ -122,16 +123,26 @@ background-color: #E0E0E0;
 background-image: repeating-linear-gradient( -45deg, #E0E0E0, #E0E0E0 2px, #E8E8E8 2px, #E8E8E8 4px);
 color: #AAA;
 }
-.itaTableBody tr.disuse:hover td,
-.itaTableBody tr.disuse:nth-child(odd):hover td {
+/*
+.itaTableBody tr:hover td {
+background-color: #FFFFCC;
+}
+.itaTableBody tr:hover td.likeHeader {
+background-color: #FFFF8F;
+}
+*/
+
+/* Filter Print のみにhover */
+.fakeContainer_Filter1Print .itaTableBody tr:hover td,
+.fakeContainer_Filter2Print .itaTableBody tr:hover td {
 background-color: #FFFFCC;
 background-image: none;
 }
-.itaTableBody tr.disuse:hover td.likeHeader {
+.fakeContainer_Filter1Print .itaTableBody tr:hover td.likeHeader,
+.fakeContainer_Filter2Print .itaTableBody tr:hover td.likeHeader {
 background-color: #FFFF8F;
 background-image: none;
 }
-
 
 /* .tableSticky */
 
@@ -154,12 +165,12 @@ position: sticky;
 z-index: 1;
 box-shadow: 0 0 0 1px #CCC;
 }
-.itaTableBody tr:hover td {
-background-color: #FFFFCC;
-}
-.itaTableBody tr:hover td.likeHeader {
-background-color: #FFFF8F;
-}
+
+
+
+
+
+
 /* 固定線 */
 .fixedBorder {
 display: none;
@@ -457,7 +468,7 @@ left: -9999px;
 }
 
 #KIZI .itaTableFooter button span {
-display: none;
+display: inline-block;
 margin-left: 0.5em;
 padding: 2px 4px 1px;
 background-color: #FFF;
@@ -544,7 +555,10 @@ background-color: #60C60D;
 #KIZI .tableSettingBody input.noCheck:checked + label::before {
 background-color: #FF821E;
 }
-
+/* 非表示用 */
+.tableSettingHidden {
+display: none!important;
+}
 
 
 
@@ -591,3 +605,40 @@ border-right: none;
 #ExecutionNakami th.noBorderLeft {
 border-left: none;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* 99. Other ****************************************************** */
+
+/* メニュー作成 */
+.menuTypeHidden {
+display: none!important;
+}
+[data-select-type="data"] .itaTable.tableSticky tr.defaultExplainRow th.thSticky {
+background-color: #765FAB;
+}
+[data-select-type="data"] .itaTable tr.defaultExplainRow th {
+background-color: #866CC2;
+}
+[data-select-type="param"] .itaTable.tableSticky tr.defaultExplainRow th.thSticky {
+background-color: #007779;
+}
+[data-select-type="param"] .itaTable tr.defaultExplainRow th {
+background-color: #00878A;
+}
+#KIZI [data-select-type="data"] .tableSettingBody li.level1.param,
+#KIZI [data-select-type="param"] .tableSettingBody li.level1.data {
+pointer-events: none;
+opacity: 0.5;
+}
+
+
