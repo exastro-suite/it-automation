@@ -886,9 +886,26 @@ function selectTargetAction(action){
     // パラメータシート固有の項目の項目番号
     var paramCols =       [5, 7, 8, 9, 10];         
     // データシート固有の項目の項目番号
-    var dataCols = [6];         
+    var dataCols = [6];
 
-    var selecter = getSelecter(action); 
+    var selecter = getSelecter(action);
+		
+		// Parent fake container
+		var $fakeContainer = $( selecter.header ).closest('div[class^="fakeContainer_"]');
+		
+		if( !$fakeContainer.is('.menuEditTable') ) {
+			$fakeContainer.addClass('menuEditTable')
+				.find('.defaultExplainRow th').each( function( index ){
+				var colsClass = '';
+				if ( paramCols.indexOf( index + 1 ) != -1 ) colsClass = 'param';
+				if ( dataCols.indexOf( index + 1 ) != -1 ) colsClass = 'data'; 
+				if ( colsClass != '' ) {
+					$( this ).addClass( colsClass );
+					$fakeContainer.find('.colCheckList li.level1').eq( index ).addClass( colsClass );
+				}
+			});
+		}
+		
     if (selecter.val == '2'){ // 「データシート」を選択
         
         // 項目を非表示 + 値消去
@@ -898,7 +915,9 @@ function selectTargetAction(action){
         // 項目を表示
         dataCols.forEach(function(num){
             showColumns(selecter, num);
-        }); 
+        });
+				
+				$fakeContainer.attr('data-select-type', 'data');
         
     }else if(selecter.val == '1'){    //「パラメータシート」を選択
         // 項目を非表示 + 値消去
@@ -910,6 +929,8 @@ function selectTargetAction(action){
         paramCols.forEach(function(num){
             showColumns(selecter, num);
         });
+				
+				$fakeContainer.attr('data-select-type', 'param');
 
     }
 }
@@ -925,9 +946,7 @@ function hideColumns(action, selecter, num){
     }
 
     $(selecter.header + ' th:nth-child(' + num + ')').attr('size', width); // 項目サイズを保持
-    $(selecter.data + ' td:nth-child(' + num + '),'+ selecter.header + ' th:nth-child(' + num + ')').prop('width', ''); 
-    $(selecter.data + ' td:nth-child(' + num + '),'+ selecter.header + ' th:nth-child(' + num + ')').prop('width', '');
-    $(selecter.data + ' td:nth-child(' + num + ') ,'+ selecter.header + ' th:nth-child(' + num + ')').css('display', 'none'); 
+    $(selecter.data + ' td:nth-child(' + num + '),'+ selecter.header + ' th:nth-child(' + num + ')').prop('width', '').addClass('menuTypeHidden');
 }
 
 // 項目を表示する
@@ -936,9 +955,9 @@ function showColumns(selecter, num){
    if(width == 0 || width == undefined){
        width = 'auto';
    }
-   $(selecter.data + ' td:nth-child(' + num + '),'+ selecter.header + ' th:nth-child(' + num + ')').attr('width', width);
-   $(selecter.data + ' td:nth-child(' + num + ') ,'+ selecter.header + ' th:nth-child(' + num + ')').css('display', ''); 
+   $(selecter.data + ' td:nth-child(' + num + '),'+ selecter.header + ' th:nth-child(' + num + ')').attr('width', width).removeClass('menuTypeHidden');
 }
+
 // 「作成対象」に値を設定する
 function selectValue(action, no){
     var text = $('#' + action + '_table2 > option[value="' + no + '"]').html()
