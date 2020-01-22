@@ -81,7 +81,7 @@ var tableFooterHTML = ''
     + '<div id="' + itaTableFooterID + '" class="itaTableFooter">'
     + '<div class="itaTableFooterMenu"><div class="itaTableFooterMenuInner">'
       + '<ul>'
-        + '<li><button id="' + tableSettingOpenID + '">Table setting<span></span></button></li>'
+        + '<li><button id="' + tableSettingOpenID + '">Table setting<span style="display:none"></span></button></li>'
       + '</li>'
     + '</div></div>'
     + '<style id="' + fixedRowHeadStyleID + '"></style>'
@@ -313,6 +313,8 @@ if( positionStickyFlag === true ) {
     $fixedRowHeadStyle.html( fixedStyleHTML );
 }
 
+
+
 //////////////////////////////////////////////////
 //
 //   列の表示・非表示
@@ -326,7 +328,7 @@ var $line1 = $itaTable.find('tr').eq( 0 );
 
 // 列数を取得
 var colCount = 0;
-$( $line1 ).find('th').each(function(){
+$line1.find('th').each(function(){
   colCount += $( this ).attr('colspan') !== undefined ? Number( $( this ).attr('colspan') ) : 1;
 });
 
@@ -489,12 +491,20 @@ $tableSetting.find('input[type="checkbox"]').on('change', function(){
 
     if( $input.prop('checked') ) {
       // 子要素すべてをチェックする
-      $input.removeClass('noCheck').closest('span').next('ul').find('input').removeClass('noCheck').prop('checked', true );
+      $input.removeClass('noCheck').closest('span').next('ul').find('input').not(':disabled').removeClass('noCheck').prop('checked', true );
       checkSiblingsInput( $input );
     } else {
-      // 子要素すべてのチェックを外す
-      $input.closest('span').next('ul').find('input').prop('checked', false );
-      checkSiblingsInput( $input );
+			// 子要素に未チェックがあればすべてチェックにする
+			if( $input.is('.noCheck') ) {
+				$input.removeClass('noCheck').prop('checked', true )
+					.closest('span').next('ul').find('input').not(':disabled').removeClass('noCheck').prop('checked', true );
+			} else {
+				// 子要素すべてのチェックを外す
+				$input.closest('span').next('ul').find('input').not(':disabled').prop('checked', false );
+				// 子にinput:disabledがあればチェックしなおす。
+				if ( $input.closest('span').next('ul').find('input:disabled').length ) $input.addClass('noCheck').prop('checked', true );
+			}
+			checkSiblingsInput( $input );
     }
     
     // Edgeで色の状態が再描画されないための応急処置
@@ -586,8 +596,8 @@ var rowspanAdjustment = function() {
     var trHiddenCount = 0;
     $itaTable.find( tHeadClass ).each( function(){
       var $headerTr = $( this );
-      if( $headerTr.find('th:visible').length == 0 ) {
-         $headerTr.hide();
+      if( $headerTr.find('th').not('.tableSettingHidden').length == 0 ) {
+         $headerTr.addClass('tableSettingHidden');
          trHiddenCount++;
       }
     });
@@ -601,7 +611,7 @@ var rowspanAdjustment = function() {
 
 // チェックリストを元にセルを表示・非表示
 var tableHideFucn = function( listLevel ) {
-  $itaTable.find( tHeadClass ).show();
+  $itaTable.find( tHeadClass ).removeClass('tableSettingHidden');
   $tableSetting.find('.colCheckList ul[data-level="' + listLevel + '"]').each( function(){
     $( this ).children('li').each( function(){
 
@@ -625,7 +635,7 @@ var tableHideFucn = function( listLevel ) {
           if ( colspanAdjustFlag == '-') {
             $colspanAdjustParent.attr('colspan', parentThColspan - changeNumber );
           } else if ( colspanAdjustFlag == '+') {
-            $colspanAdjustParent.show().attr('colspan', parentThColspan + changeNumber );
+            $colspanAdjustParent.removeClass('tableSettingHidden').attr('colspan', parentThColspan + changeNumber );
           }
 
           // 再帰
@@ -635,20 +645,20 @@ var tableHideFucn = function( listLevel ) {
       var targetThColspan = Number( ( $targetTh.attr('colspan') !== undefined ) ? $targetTh.attr('colspan') : 1 );
 
       if( !$input.prop('checked') ) {
-        if( $targetTh.is(':visible') ) {
+        if( !$targetTh.is('.tableSettingHidden') ) {
           colspanAdjust( $input, $targetTh, $parentTh, targetThColspan, '-');
           for ( var i = startCol; i <= endCol; i++ ) {
             tablebodyDisplayFlagArray[ i ] = false;
           }
-          $targetTh.hide();
+          $targetTh.addClass('tableSettingHidden');
         }
       } else {
-        if( $targetTh.is(':hidden') ) {
+        if( $targetTh.is('.tableSettingHidden') ) {
           colspanAdjust( $input, $targetTh, $parentTh, targetThColspan, '+');
           for ( var j = startCol; j <= endCol; j++ ) {
             tablebodyDisplayFlagArray[ j ] = true;
           }
-          $targetTh.show();
+          $targetTh.removeClass('tableSettingHidden');
         }
       }
     });
@@ -680,13 +690,17 @@ var tableHideFucn = function( listLevel ) {
     }
     
     // 各種調整
-    rowspanAdjustment();
-    fixedBorderUpdate();
-    scrollCheck( $tableScroll );
-    headingFixed();
+		setTimeout( function(){
+			rowspanAdjustment();
+			fixedBorderUpdate();
+			scrollCheck( $tableScroll );
+			headingFixed();
+		}, 1 );
     
   }
 }
+
+
 
 //////////////////////////////////////////////////
 //
@@ -746,7 +760,22 @@ var loadCheckStatus = function( key ) {
 }
 loadCheckStatus( tableKey );
 
-// Window resize
+
+
+//////////////////////////////////////////////////
+//
+//   その他
+//
+
+// テーブル内のselectが変更された時にテーブルのサイズを更新する
+$itaTable.find('select').on('change', function(){
+    setTimeout( function(){
+      fixedBorderUpdate();
+      scrollCheck( $tableScroll );
+    }, 1 );
+});
+
+// Windowサイズが変更された時にテーブルのサイズを更新する
 var resizeTimer = false;    
     $( window ).on('resize', function() {
       if ( resizeTimer !== false ) {
