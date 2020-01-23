@@ -194,6 +194,89 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             return $retArray;
         };
 
+        // パスワードをansible-vaultで暗号化した文字列を隠しカラムに登録する。
+        $objFunction04 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+
+            global $g;
+            if ( empty($root_dir_path) ){
+                $root_dir_temp = array();
+                $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+                $root_dir_path = $root_dir_temp[0] . "ita-root";
+            }
+
+            require_once($root_dir_path . '/libs/commonlibs/common_php_functions.php');
+            require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
+            $boolRet = true;
+            $intErrorType = null;
+            $aryErrMsgBody = array();
+            $strErrMsg = "";
+            $strErrorBuf = "";
+            $strFxName = "";
+            if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
+                $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+                if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+                    $strVaultPasswd = '';
+                    // パスワード認証の場合
+                    if( $exeQueryData['LOGIN_AUTH_TYPE'] == 2 ) {
+                        if( $exeQueryData[$objColumn->getID()] != "" ){
+                            $strPasswdDecodeValue = ky_decrypt($exeQueryData[$objColumn->getID()]);
+                            $vaultobj        = new AnsibleVault();
+                            $indento         = "";
+                            $password_file   = '';
+                            $dir             = '';
+                            $file            = '';
+                            $password        = '';
+                            $strVaultPasswd = '';
+
+                            // ansible-vault パスワードファイルのパス設定 ~/ita-root/temp/(pid)_vaultpasswd
+                            $vaultobj->setValutPasswdFileInfo("temp",getmypid().'_vaultpasswd');
+
+                            // ansible-vault パスワードファイル生成
+                            $ret = $vaultobj->CraeteValutPasswdFile($root_dir_path,$password_file);
+                            if($ret === false) {
+                                $intErrorType = 2;
+                                $boolRet = false;
+                                $strErrMsg = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000079");
+                            } else {
+                                // パスワード暗号化
+                                $ret = $vaultobj->Vault($password_file,
+                                                        $strPasswdDecodeValue,
+                                                        $strVaultPasswd,
+                                                        $indento);
+
+                                // vault パスワードファイル削除
+                                unset($vaultobj);
+                                if($ret === false) {
+                                    $intErrorType = 2;
+                                    $boolRet = false;
+                                    $strErrMsg = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($strVaultPasswd));
+                                } else {
+                                    $strVaultPasswd = " !vault |\n" . $strVaultPasswd;
+                                }
+                            }
+                        }
+                    }
+                    if($boolRet === true) {
+                        // ansible-vaultで暗号化した文字列を隠しカラムに登録
+                        $strQuery = "UPDATE C_STM_LIST SET LOGIN_PW_ANSIBLE_VAULT = :LOGIN_PW_ANSIBLE_VAULT "
+                                   ."WHERE SYSTEM_ID = " . $exeQueryData['SYSTEM_ID'];
+
+                        $aryForBind = array('LOGIN_PW_ANSIBLE_VAULT' => $strVaultPasswd);
+
+                        $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+                        if( $aryRetBody[0] !== true ){
+                            $boolRet = false;
+                            $intErrorType = 2;
+                            $strErrMsg = $aryRetBody[2];
+                        }
+                    }
+                }
+            }
+            $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+            return $retArray;
+        };
+
         $outputType01 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
         $outputType01->setFunctionForGetBodyTag($objFunction03);
         $outputType02 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
@@ -211,6 +294,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setValidator($objVldt);
         $c->setEncodeFunctionName("ky_encrypt");
         $c->setFunctionForEvent('beforeTableIUDAction',$objFunction02);
+        $c->setFunctionForEvent('afterTableIUDAction',$objFunction04);
         $cg->addColumn($c);
     $table->addColumn($cg);
 
