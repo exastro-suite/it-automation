@@ -48,6 +48,7 @@ class CStmList extends TableBaseDefinition {
             "LOGIN_USER"                      => "",
             "LOGIN_PW_HOLD_FLAG"              => "",
             "LOGIN_PW"                        => "",
+            "LOGIN_PW_ANSIBLE_VAULT"          => "",
             "LOGIN_AUTH_TYPE"                 => "",
             "WINRM_PORT"                      => "",
             "WINRM_SSL_CA_FILE"               => "",
