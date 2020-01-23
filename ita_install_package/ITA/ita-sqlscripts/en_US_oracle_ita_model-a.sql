@@ -629,6 +629,7 @@ PROTOCOL_ID                       NUMBER                    ,
 LOGIN_USER                        VARCHAR2(30)              ,
 LOGIN_PW_HOLD_FLAG                NUMBER                    ,
 LOGIN_PW                          VARCHAR2(60)              ,
+LOGIN_PW_ANSIBLE_VAULT            VARCHAR2(512)             , -- パスワード ansible-vault暗号化文字列　隠しカラム
 LOGIN_AUTH_TYPE                   NUMBER                    ,
 WINRM_PORT                        NUMBER                    , -- WinRM接続プロトコル
 WINRM_SSL_CA_FILE                 VARCHAR2(256)             , -- WinRM接続 SSLサーバー証明書
@@ -681,6 +682,7 @@ PROTOCOL_ID                       NUMBER                    ,
 LOGIN_USER                        VARCHAR2(30)              ,
 LOGIN_PW_HOLD_FLAG                NUMBER                    ,
 LOGIN_PW                          VARCHAR2(60)              ,
+LOGIN_PW_ANSIBLE_VAULT            VARCHAR2(512)             , -- パスワード ansible-vault暗号化文字列　隠しカラム
 LOGIN_AUTH_TYPE                   NUMBER                    ,
 WINRM_PORT                        NUMBER                    , -- WinRM接続プロトコル
 WINRM_SSL_CA_FILE                 VARCHAR2(256)             , -- WinRM接続 SSLサーバー証明書
