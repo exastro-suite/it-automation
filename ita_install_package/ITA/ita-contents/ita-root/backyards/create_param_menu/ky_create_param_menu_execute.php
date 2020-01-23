@@ -1117,7 +1117,7 @@ EOD;
         //////////////////////////
         // ロール・メニュー紐付管理更新
         //////////////////////////
-        $result = updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+        $result = updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET']);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -2222,7 +2222,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
 /*
  * ロール・メニュー紐付管理更新
  */
-function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
+function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target){
     global $objDBCA, $db_model_ch, $objMTS;
     $roleMenuLinkListTable = new RoleMenuLinkListTable($objDBCA, $db_model_ch);
 
@@ -2265,31 +2265,38 @@ function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId
                 }
             }
         }
-
-        if(NULL !== $convMenuId && NULL !== $hgMenuId){
-            $menuArray = array(array($convMenuId,       1,  '0'),
-                               array($hgMenuId,         2,  '0'),
-                               array($hostMenuId,       2,  '0'),
-                               array($viewMenuId,       2,  '0'),
-                               array($convHostMenuId,   2,  '1'),
-                              );
+        
+        // データシートの場合
+        if("2" == $target){
+                $menuArray = array(array($hostMenuId,   1,  '0'));
         }
-        else if(NULL !== $convMenuId && NULL === $hgMenuId){
-            $menuArray = array(array($convMenuId,   1,  '0'),
-                               array($hostMenuId,   2,  '0'),
-                               array($viewMenuId,   2,  '0'),
-                              );
-        }
-        else if(NULL === $convMenuId && NULL !== $hgMenuId){
-            $menuArray = array(array($hgMenuId,     1,  '0'),
-                               array($hostMenuId,   2,  '0'),
-                               array($viewMenuId,   2,  '0'),
-                              );
-        }
+        // パラメータシートの場合
         else{
-            $menuArray = array(array($hostMenuId,   1,  '0'),
-                               array($viewMenuId,   2,  '0'),
-                              );
+            if(NULL !== $convMenuId && NULL !== $hgMenuId){
+                $menuArray = array(array($convMenuId,       1,  '0'),
+                                   array($hgMenuId,         2,  '0'),
+                                   array($hostMenuId,       2,  '0'),
+                                   array($viewMenuId,       2,  '0'),
+                                   array($convHostMenuId,   2,  '1'),
+                                  );
+            }
+            else if(NULL !== $convMenuId && NULL === $hgMenuId){
+                $menuArray = array(array($convMenuId,   1,  '0'),
+                                   array($hostMenuId,   2,  '0'),
+                                   array($viewMenuId,   2,  '0'),
+                                  );
+            }
+            else if(NULL === $convMenuId && NULL !== $hgMenuId){
+                $menuArray = array(array($hgMenuId,     1,  '0'),
+                                   array($hostMenuId,   2,  '0'),
+                                   array($viewMenuId,   2,  '0'),
+                                  );
+            }
+            else{
+                $menuArray = array(array($hostMenuId,   1,  '0'),
+                                   array($viewMenuId,   2,  '0'),
+                                  );
+            }
         }
 
         foreach($menuArray as $menu){
