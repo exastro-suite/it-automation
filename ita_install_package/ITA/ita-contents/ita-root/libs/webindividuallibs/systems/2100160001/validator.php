@@ -210,6 +210,7 @@ class PurposeValidator extends IDValidator {
     protected $eventMasterName;
 
     function isValid($value, $strNumberForRI=null, $arrayRegData=null, &$arrayVariant=array()){
+
         global $g;
         $retBool = true;
         $strModeId = "";
@@ -274,22 +275,10 @@ class PurposeValidator extends IDValidator {
                             $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1003");
                         }
                         // ホストグループ用メニューグループ、ホスト用メニューグループ、参照用メニューグループが設定されていない場合、エラー
-                        else if(!$menugroupForHG && !$menugroupForHost && !$menugroupForView){
+                        else if(!$menugroupForHG || !$menugroupForHost || !$menugroupForView){
                             $retBool = false;
                             $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1023");
                         }
-                        else if(!$menugroupForHG){
-                            $retBool = false;
-                            $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1029");
-                        }    
-                        else if(!$menugroupForHost){
-                            $retBool = false;
-                            $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1031");
-                        }    
-                        else if(!$menugroupForView){
-                            $retBool = false;
-                            $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1030");
-                        }    
                     }
                     // 用途がホストの場合
                     else if("1" == $value){
@@ -300,18 +289,10 @@ class PurposeValidator extends IDValidator {
                             $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1002");
                         }
                         // ホスト用メニューグループ、または参照用メニューグループが設定されていない場合、エラー
-                        else if(!$menugroupForHost && !$menugroupForView){
+                        else if(!$menugroupForHost || !$menugroupForView){
                             $retBool = false;
                             $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1024");
                         }
-                        else if(!$menugroupForHost){
-                            $retBool = false;
-                            $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1032");
-                        }    
-                        else if(!$menugroupForView){
-                            $retBool = false;
-                            $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1033");
-                        }    
 
                     }
                 }
@@ -684,6 +665,9 @@ class MaxLengthValidator extends IntNumValidator {
         else if(!array_key_exists('CREATE_MENU_ID', $arrayRegData)){
             $boolExeContinue = false;
         }
+        else if(!is_numeric($arrayRegData['MAX_LENGTH'])){
+            $boolExeContinue = false;
+        }
         else{
             // メニュー作成の場合
             if(2100160002 == $g['page_dir']){
@@ -711,7 +695,11 @@ class MaxLengthValidator extends IntNumValidator {
                     if(array_key_exists('CREATE_ITEM_ID',$arrayVariant['edit_target_row']) && $arrayVariant['edit_target_row']['CREATE_ITEM_ID'] === $row01['CREATE_ITEM_ID']){
                         continue;
                     }
-                    $sumMaxLength += $row01['MAX_LENGTH'] * 3 + 2;
+
+                    if(is_numeric($row01['MAX_LENGTH'])){
+                        $sumMaxLength += $row01['MAX_LENGTH'] * 3 + 2;
+                    }
+
                 }
                 unset($objQuery01);
 
