@@ -21,11 +21,15 @@
 //////////////////////////////////////////////////////////////////////
 class  AnsibleVault {
     private $root_dir_path;
+    private $dir;
+    private $file;
     function __construct() {
         // ルートディレクトリを取得
         $root_dir_temp = array();
         $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
         $this->root_dir_path = $root_dir_temp[0] . "ita-root";
+        $this->dir     = '.tmp';
+        $this->file    = '.tmpkey';
     }
     function Vault($password_file,$value ,&$encode_value,$indento="  ") {
         $result = true;
@@ -33,13 +37,13 @@ class  AnsibleVault {
 
         $path = sprintf('%s/confs/commonconfs/path_ANSIBLE_MODULE.txt',$this->root_dir_path);
         // 改行コードが付いている場合に取り除く
-        $ansible_path = @file_get_contents($path);
+        $ansible_path = file_get_contents($path);
         $ansible_path = str_replace("\n","",$ansible_path);
         if($ansible_path === false) {
             $encode_value = 'ansible path file not found';
             return false;
         }
-        $cmd = "echo -n $value | $ansible_path/ansible-vault encrypt --vault-password-file $password_file 2>&1";
+        $cmd = "sudo -H -i echo -n $value | $ansible_path/ansible-vault encrypt --vault-password-file $password_file 2>&1";
         exec($cmd,$output,$return_var);
         foreach($output as $line) {
             if(strlen(trim($line)) == 0) {
@@ -56,13 +60,29 @@ class  AnsibleVault {
         }
         return $result;
     }
+    function setValutPasswdIndento($val,$indento) {
+        $edit_val = "";
+        $arry = explode("\n",$val);
+        foreach($arry as $line){
+            if($edit_val == "") {
+                $edit_val  = $line;
+            } else {
+                $edit_val .= "\n" . $indento . $line;
+            }
+        }
+        return $edit_val;
+    }
+    function setValutPasswdFileInfo($dir,$file) {
+        $this->dir  = $dir;
+        $this->file = $file;
+    }
     function getValutPasswdFileInfo() {
         $ret      = true;
-        $dir      = '.tmp';
-        $file     = '.tmpkey';
+        $dir      = $this->dir;
+        $file     = $this->file;
         $password = '';
         $file_path = sprintf('%s/confs/commonconfs/ansible_vault_accesskey.txt',$this->root_dir_path);
-        $ret = @file_get_contents($file_path);
+        $ret = file_get_contents($file_path);
         if( $ret !== false){
             $password = base64_decode(str_rot13($ret));
         }
