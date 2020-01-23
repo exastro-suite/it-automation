@@ -312,6 +312,8 @@ class CreateAnsibleExecFiles {
 
     private  $ansible_vault_password_file_dir; // ansible_vault password file dir
 
+    private  $lv_hostinfolist;            // 機器一覧
+
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
     //   コンストラクタ
@@ -1286,6 +1288,8 @@ class CreateAnsibleExecFiles {
                                        $in_exec_option)
     {
 
+        $this->lv_hostinfolist = $ina_hostinfolist;
+
         //////////////////////////////////////
         // グローバル変数管理よりグローバル変数を取得
         //////////////////////////////////////
@@ -1604,34 +1608,17 @@ class CreateAnsibleExecFiles {
                 // パスワード
                 if($ina_hostinfolist[$host_name]['LOGIN_PW'] != self::LC_ANS_UNDEFINE_NAME)
                 {
-                    // 機器一覧のパスワードをansible-vaultで暗号化
-                    $encode_val = "";
+                    // ansible-vaultで暗号化された文字列のインデントを調整
                     $indento_sp12 = str_pad( " ", 12 , " ", STR_PAD_LEFT );
+                    $vaultpass = "";
                     $vaultobj = new AnsibleVault();
-                    $password_file = '';
-                    // ansible-vault パスワードファイル生成
-                    $ret = $vaultobj->CraeteValutPasswdFile($this->ansible_vault_password_file_dir,
-                                                            $password_file);
-                    if($ret === false) {
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000079");
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                        return false;
-                    }
-                    // パスワード暗号化
-                    $ret = $vaultobj->Vault($password_file,
-                                            $ina_hostinfolist[$host_name]['LOGIN_PW'],
-                                            $encodeval,$indento_sp12);
 
-                    // パスワードファイル削除
-                    @unlink($password_file);
+                    $vaultpass = $vaultobj->setValutPasswdIndento($ina_hostinfolist[$host_name]['LOGIN_PW_ANSIBLE_VAULT'],
+                                                                 $indento_sp12);
 
                     unset($vaultobj);
-                    if($ret === false) {
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($encodeval));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                        return false;
-                    }
-                    $pass = "ansible_ssh_pass: " . " !vault |\n" . $encodeval;
+
+                    $pass = "ansible_ssh_pass: " . $vaultpass;
                 }
                 // 対象ホストがwindowsの場合かつPioneer以外
                 if( (($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
@@ -1972,35 +1959,17 @@ class CreateAnsibleExecFiles {
             // 機器一覧のパスワードをansible-vaultで暗号化
             if(($var == self::LC_ANS_PASSWD_VAR_NAME) &&
                ($val != self::LC_ANS_UNDEFINE_NAME)) {
-                $encode_val = "";
-
-                // ansible-vaultで暗号化
+                // ansible-vaultで暗号化された文字列のインデントを調整
+                $indento_sp2 = str_pad( " ", 2 , " ", STR_PAD_LEFT );
+                $vaultpass = "";
                 $vaultobj = new AnsibleVault();
 
-                // ansible-vault パスワードファイル生成
-                $password_file = '';
-                $ret = $vaultobj->CraeteValutPasswdFile($this->ansible_vault_password_file_dir,
-                                                        $password_file);
-                if($ret === false) {
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000079");
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    return false;
-                }
+                $vaultpass = $vaultobj->setValutPasswdIndento($this->lv_hostinfolist[$in_host_ipaddr]['LOGIN_PW_ANSIBLE_VAULT'],
+                                                              $indento_sp2);
 
-                // パスワード暗号化
-                $ret = $vaultobj->Vault($password_file,$val,$encodeval);
-
-                // パスワードファイル削除
-                @unlink($password_file);
                 unset($vaultobj);
 
-                if($ret === false) {
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",
-                                                                array($encodeval));
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    return false;
-                }
-                $val = " !vault |\n" . $encodeval;
+                $val = $vaultpass;
             }
             //ホスト変数ファイルのレコード生成
             //変数名: 具体値
@@ -2161,33 +2130,24 @@ class CreateAnsibleExecFiles {
                             $val = ky_encrypt($val);
                             break;
                         default:
-                            // ansible-vaultで暗号化
+                            // ansible-vaultで暗号化された文字列のインデントを調整
+                            $indento_sp2 = str_pad( " ", 2 , " ", STR_PAD_LEFT );
+                            $vaultpass = "";
                             $vaultobj = new AnsibleVault();
 
-                            // ansible-vault パスワードファイル生成
-                            $password_file = '';
-                            $ret = $vaultobj->CraeteValutPasswdFile($this->ansible_vault_password_file_dir,
-                                                                    $password_file);
-                            if($ret === false) {
-                                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000079");
-                                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                                return false;
+                            // ホスト名からIPを取得         
+                            $ip_addr = '';
+                            foreach($this->lv_hostinfolist as $ip_addr=>$info) {
+                                if($info['HOSTNAME'] == $in_host_name) {
+                                    break;
+                                }
                             }
+                            $vaultpass = $vaultobj->setValutPasswdIndento($this->lv_hostinfolist[$ip_addr]['LOGIN_PW_ANSIBLE_VAULT'],
+                                                                          $indento_sp2);
 
-                            // パスワード暗号化
-                            $ret = $vaultobj->Vault($password_file,$val,$encodeval);
-
-                            // パスワードファイル削除
-                            @unlink($password_file);
                             unset($vaultobj);
 
-                            if($ret === false) {
-                               $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",
-                                                                          array($encodeval));
-                               $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                               return false;
-                            }
-                            $val = " !vault |\n" . $encodeval;
+                            $val = $vaultpass;
                             break;
                         }
                     }
@@ -5503,6 +5463,7 @@ class CreateAnsibleExecFiles {
                "  TBL_2.DISUSE_FLAG, \n" .
                "  TBL_2.WINRM_SSL_CA_FILE , \n".
                "  TBL_2.HOSTS_EXTRA_ARGS, \n".
+               "  TBL_2.LOGIN_PW_ANSIBLE_VAULT, \n".
                "  ( \n" .
                "    SELECT \n" .
                "      TBL_3.PROTOCOL_NAME \n" .
@@ -5749,6 +5710,7 @@ class CreateAnsibleExecFiles {
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_AUTH_TYPE']    = $login_auth_type;  //Ansible認証方式
                 $ina_hostinfolist[$row['IP_ADDRESS']]['WINRM_PORT']         = $winrm_port;       //WINRM接続プロトコル
                 $ina_hostinfolist[$row['IP_ADDRESS']]['OS_TYPE_ID']         = $row['OS_TYPE_ID'];//OS種別
+                $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_PW_ANSIBLE_VAULT'] = $row['LOGIN_PW_ANSIBLE_VAULT']; //ansible-vaultで暗号化したパスワード
 
             }
             // 作業対象ホスト管理に登録されているホストが管理対象システム一覧(C_STM_LIST )に未登録
