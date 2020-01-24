@@ -87,7 +87,6 @@
     //
     //  F0001  readValAssDB
     //  F0002  ColVarInfoAnalysis
-    //  F0003  AssSeqColSeqInfoAnalysis
     //  F0004  makeMenuSelectSQL
     //  F0006  GetMenuData
     //  F0007  DBGetMenuData
@@ -1279,50 +1278,6 @@
                 }
                 break;
             }
-            //カラムタイプにより処理分岐
-            switch($col_type){
-            case DF_COL_TYPE_VAL:
-            case DF_COL_TYPE_KEYVAL:
-                //Value型変数を場合の代入順序と列順序をチェック
-                $ret = AssSeqColSeqInfoAnalysis("Value",
-                                                $val_child_var_type,
-                                                $row,
-                                                $lva_var_assign_seq_list,
-                                                $lva_var_col_seq_list,
-                                                $ina_error_column_id_list,
-                                                "PATTERN_ID",
-                                                "VAL_VARS_LINK_ID",
-                                                "VAL_CHILD_VARS_LINK_ID",
-                                                "VAL_ASSIGN_SEQ",
-                                                "VAL_CHILD_VARS_COL_SEQ");
-                if($ret === false){
-                    // 次のカラムへ
-                    continue 2;
-                }
-                break;
-            }
-            switch($col_type){
-            case DF_COL_TYPE_KEY:
-            case DF_COL_TYPE_KEYVAL:
-                //key型変数を場合の代入順序と列順序をチェック
-                $ret = AssSeqColSeqInfoAnalysis("Key",
-                                                $key_child_var_type,
-                                                $row,
-                                                $lva_var_assign_seq_list,
-                                                $lva_var_col_seq_list,
-                                                $ina_error_column_id_list,
-                                                "PATTERN_ID",
-                                                "KEY_VARS_LINK_ID",
-                                                "KEY_CHILD_VARS_LINK_ID",
-                                                "KEY_ASSIGN_SEQ",
-                                                "KEY_CHILD_VARS_COL_SEQ");
-                if($ret === false){
-                    // 次のカラムへ
-                    continue 2;
-                }
-                break;
-            }
-
             $ina_table_nameTOid_list[$row['TABLE_NAME']]=$row['MENU_ID'];
             $ina_table_colnameTOid_list[$row['TABLE_NAME']][$row['COL_NAME']][]=$row['COLUMN_ID'];
             // #1207 Update start 同じカラムに複数の変数を割り当てた場合の対応
@@ -1514,111 +1469,6 @@
                 // エラーリターン
                 return false;
             }
-        }
-        return true;
-    }
-    ////////////////////////////////////////////////////////////////////////////////
-    // F0003
-    // 処理内容
-    //   代入値紐付からカラム情報を取得する。
-    //   
-    // パラメータ
-    //   $in_col_type:              カラムタイプ Value/Key
-    //   $in_child_var_type:        配列変数区分 
-    //                              true:配列変数   false:一般変数
-    //   $row:                      クエリ配列
-    //   $ina_var_assign_seq_list:  作業パターン+変数名+代入順序の重複チェック配列
-    //   $ina_var_col_seq_list:     作業パターン+変数名+メンバー変数+列順序の重複チェック配列     
-    //   $ina_error_column_id_list: 代入値紐付でエラーが発生している代入値紐付の主キーリスト
-    //   $in_vars_link_id:          クエリ配列内のKey/Value型の変数IDキー 
-    //                              VAL_VARS_LINK_ID/KEY_VARS_LINK_ID
-    //   $in_vars_name:             クエリ配列内のKey/Value型の変数名キー
-    //                              VAL_VARS_NAME/KEY_VARS_NAME
-    //   $in_ptn_vars_link_cnt:     クエリ配列内のKey/Value型の作業パターン+変数の
-    //                              作業パターン変数紐付の登録件数
-    //                              VAL_PTN_VARS_LINK_CNT/KEY_PTN_VARS_LINK_CNT
-    //   $in_child_vars_link_id:    クエリ配列内のKey/Value型のメンバー変数IDキー
-    //                              VAL_CHILD_VARS_LINK_ID/KEY_CHILD_VARS_LINK_ID
-    //   $in_child_vars_name:       クエリ配列内のKey/Value型のメンバー変数名キー
-    //                              VAL_CHILD_VARS_NAME/KEY_CHILD_VARS_NAME
-    //   $in_assign_seq:            クエリ配列内のKey/Value型の代入順序キー
-    //                              VAL_ASSIGN_SEQ/KEY_ASSIGN_SEQ
-    //   $in_child_vars_col_seq:    クエリ配列内のKey/Value型の列順序キー
-    //                              VAL_CHILD_VARS_COL_SEQ/KEY_CHILD_VARS_COL_SEQ
-    // 
-    // 戻り値
-    //   True:正常　　False:異常
-    ////////////////////////////////////////////////////////////////////////////////
-    function AssSeqColSeqInfoAnalysis($in_col_type,
-                                      $in_child_var_type,
-                                      $row,
-                                      &$ina_var_assign_seq_list,
-                                      &$ina_var_col_seq_list,
-                                      &$ina_error_column_id_list,
-                                      $in_pattern_id,                    
-                                      $in_vars_link_id,                  
-                                      $in_child_vars_link_id,            
-                                      $in_assign_seq,                    
-                                      $in_child_vars_col_seq){
-        global    $objMTS;
-        global    $objDBCA;
-        global    $log_level;
-
-        // 一般変数を判定
-        if($in_child_var_type === false){
-            if( isset($ina_var_assign_seq_list[$row[$in_pattern_id]]
-                                              [$row[$in_vars_link_id]]
-                                              [$row[$in_assign_seq]])){
-                $column_id = $ina_var_assign_seq_list[$row[$in_pattern_id]]
-                                                     [$row[$in_vars_link_id]]
-                                                     [$row[$in_assign_seq]];
-
-                //最初のレコードのみを処理。それ以降のレコードはログを出力し、登録処理はスキップする。
-                //重複しているのでエラーリストに代入値紐付の主キーを退避
-                //$ina_error_column_id_list[$column_id]        = 1;
-                $ina_error_column_id_list[$row['COLUMN_ID']] = 1;
-
-                //DEBUGモードは判定しないでログを出力する。
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90029",array($column_id,$row['COLUMN_ID'],$row['COLUMN_ID'],$in_col_type));
-                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-
-                // エラーリターン
-                return false;
-            }
-            //代入順序退避
-            $ina_var_assign_seq_list[$row[$in_pattern_id]]
-                                    [$row[$in_vars_link_id]]
-                                    [$row[$in_assign_seq]] = $row['COLUMN_ID'];
-
-        }
-        else{
-            //現在はデットルート
-            //配列変数の場合は列順序の重複チェック
-            if( isset($ina_var_col_seq_list[$row[$in_pattern_id]]
-                                           [$row[$in_vars_link_id]]
-                                           [$row[$in_child_vars_link_id]]
-                                           [$row[$in_child_vars_col_seq]])){
-                $column_id = $ina_var_col_seq_list[$row[$in_pattern_id]]
-                                                       [$row[$in_vars_link_id]]
-                                                       [$row[$in_child_vars_link_id]]
-                                                       [$row[$in_child_vars_col_seq]];
-
-                //最初のレコードのみを処理。それ以降のレコードはログを出力し、登録処理はスキップする。
-                //重複しているのでエラーリストに代入値紐付の主キーを退避
-                //$ina_error_column_id_list[$column_id]        = 1;
-                $ina_error_column_id_list[$row['COLUMN_ID']] = 1;
-
-                //DEBUGモードは判定しないでログを出力する。
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90029",array($column_id,$row['COLUMN_ID'],$row['COLUMN_ID'],$in_col_type));
-                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-
-                // エラーリターン
-                return false;
-            }
-            $ina_var_col_seq_list[$row[$in_pattern_id]]
-                                 [$row[$in_vars_link_id]]
-                                 [$row[$in_child_vars_link_id]]
-                                 [$row[$in_child_vars_col_seq]] = $row['COLUMN_ID'];
         }
         return true;
     }
@@ -2226,15 +2076,12 @@
                                                         [$in_child_vars_col_seq];
 
                 // 既に登録されている
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90049",array( $in_menu_id,
-                                                                                 $in_row_id,
-                                                                                 $in_operation_id,
-                                                                                 $in_patten_id,
-                                                                                 $in_host_id,
+                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90049",array( $dup_info['COLUMN_ID'],
                                                                                  $in_column_id,
-                                                                                 $in_key_value_vars_id,
-                                                                                 $dup_info['MENU_ID'],
-                                                                                 $dup_info[DF_ITA_LOCAL_PKEY]));
+                                                                                 $in_column_id,
+                                                                                 $in_operation_id,
+                                                                                 $in_host_id,
+                                                                                 $in_key_value_vars_id));
                 LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             }
             else{
@@ -2245,7 +2092,7 @@
                                             [$in_host_id]
                                             [$in_vars_link_id]
                                             [$in_child_vars_link_id]
-                                            [$in_child_vars_col_seq] = array('MENU_ID'=>$in_menu_id,DF_ITA_LOCAL_PKEY=>$in_row_id);
+                                            [$in_child_vars_col_seq] = array('COLUMN_ID'=>$in_column_id);
             }
             // 代入値管理の登録に必要な情報退避
             $ina_child_vars_ass_list[] = array('TABLE_NAME'=>$in_table_name,
@@ -2275,15 +2122,12 @@
                                                   [$in_host_id]
                                                   [$in_vars_link_id]
                                                   [$in_vars_assign_seq];
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90050",array( $in_menu_id,
-                                                                                 $in_row_id,
-                                                                                 $in_operation_id,
-                                                                                 $in_patten_id,
-                                                                                 $in_host_id,
+                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90049",array( $dup_info['COLUMN_ID'],
                                                                                  $in_column_id,
-                                                                                 $in_key_value_vars_id,
-                                                                                 $dup_info['MENU_ID'],
-                                                                                 $dup_info[DF_ITA_LOCAL_PKEY]));
+                                                                                 $in_column_id,
+                                                                                 $in_operation_id,
+                                                                                 $in_host_id,
+                                                                                 $in_key_value_vars_id));
                 LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             }
             else{
@@ -2293,7 +2137,7 @@
                                       [$in_patten_id]
                                       [$in_host_id]
                                       [$in_vars_link_id]
-                                      [$in_vars_assign_seq]       = array('MENU_ID'=>$in_menu_id,DF_ITA_LOCAL_PKEY=>$in_row_id);
+                                      [$in_vars_assign_seq]       = array('COLUMN_ID'=>$in_column_id);
             }
             // 代入値管理の登録に必要な情報退避
             $ina_vars_ass_list[] = array('TABLE_NAME'=>$in_table_name,
