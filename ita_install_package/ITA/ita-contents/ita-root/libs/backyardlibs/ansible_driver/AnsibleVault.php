@@ -43,7 +43,7 @@ class  AnsibleVault {
             $encode_value = 'ansible path file not found';
             return false;
         }
-        $cmd = "sudo -H -i echo -n $value | $ansible_path/ansible-vault encrypt --vault-password-file $password_file 2>&1";
+        $cmd = "sudo -H -i echo -n $value | sudo -i $ansible_path/ansible-vault encrypt --vault-password-file $password_file 2>&1";
         exec($cmd,$output,$return_var);
         foreach($output as $line) {
             if(strlen(trim($line)) == 0) {
