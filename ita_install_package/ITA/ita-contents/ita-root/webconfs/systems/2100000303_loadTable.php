@@ -219,13 +219,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 case "DTUP_singleRecUpdate":
                     $db_update = false;
                     // 変更前
-                    $befor_pw        = $aryVariant['edit_target_row']['LOGIN_PW'];
-                    $befor_auth_type = $aryVariant['edit_target_row']['LOGIN_AUTH_TYPE'];
-                    $befor_pw_hold   = $aryVariant['edit_target_row']['LOGIN_PW_HOLD_FLAG'];
+                    $befor_pw = array_key_exists('LOGIN_PW',$aryVariant['edit_target_row'])?
+                                                            $aryVariant['edit_target_row']['LOGIN_PW']:null;
                     // 変更後
-                    $after_pw        = $aryVariant['arySqlExe_update_table']['LOGIN_PW'];
-                    $after_auth_type = $aryVariant['arySqlExe_update_table']['LOGIN_AUTH_TYPE'];
-                    $after_pw_hold   = $aryVariant['arySqlExe_update_table']['LOGIN_PW_HOLD_FLAG'];
+                    $after_pw = array_key_exists('LOGIN_PW',$aryVariant['arySqlExe_update_table'])?
+                                                            $aryVariant['arySqlExe_update_table']['LOGIN_PW']:null;
+
                     // パスワードの初期化は認証方式は関係ない
                     // ログインパスワードが管理でない場合にパスワードがクリア。管理の場合は残る
                     // 変更前と変更後のパスワードを判定して、違う場合にansible-vaultで暗号化した文字列を初期化
