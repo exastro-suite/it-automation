@@ -214,54 +214,30 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $strFxName = "";
             if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
                 $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
-                if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
-                    $strVaultPasswd = '';
-                    // パスワード認証の場合
-                    if( $exeQueryData['LOGIN_AUTH_TYPE'] == 2 ) {
-                        if( $exeQueryData[$objColumn->getID()] != "" ){
-                            $strPasswdDecodeValue = ky_decrypt($exeQueryData[$objColumn->getID()]);
-                            $vaultobj        = new AnsibleVault();
-                            $indento         = "";
-                            $password_file   = '';
-                            $dir             = '';
-                            $file            = '';
-                            $password        = '';
-                            $strVaultPasswd = '';
-
-                            // ansible-vault パスワードファイルのパス設定 ~/ita-root/temp/(pid)_vaultpasswd
-                            $vaultobj->setValutPasswdFileInfo("temp",getmypid().'_vaultpasswd');
-
-                            // ansible-vault パスワードファイル生成
-                            $ret = $vaultobj->CraeteValutPasswdFile($root_dir_path,$password_file);
-                            if($ret === false) {
-                                $intErrorType = 2;
-                                $boolRet = false;
-                                $strErrMsg = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000079");
-                            } else {
-                                // パスワード暗号化
-                                $ret = $vaultobj->Vault($password_file,
-                                                        $strPasswdDecodeValue,
-                                                        $strVaultPasswd,
-                                                        $indento);
-
-                                // vault パスワードファイル削除
-                                unset($vaultobj);
-                                if($ret === false) {
-                                    $intErrorType = 2;
-                                    $boolRet = false;
-                                    $strErrMsg = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($strVaultPasswd));
-                                } else {
-                                    $strVaultPasswd = " !vault |\n" . $strVaultPasswd;
-                                }
-                            }
-                        }
+                switch($modeValue) {
+                //case "DTUP_singleRecRegister":
+                case "DTUP_singleRecUpdate":
+                    $db_update = false;
+                    // 変更前
+                    $befor_pw        = $aryVariant['edit_target_row']['LOGIN_PW'];
+                    $befor_auth_type = $aryVariant['edit_target_row']['LOGIN_AUTH_TYPE'];
+                    $befor_pw_hold   = $aryVariant['edit_target_row']['LOGIN_PW_HOLD_FLAG'];
+                    // 変更後
+                    $after_pw        = $aryVariant['arySqlExe_update_table']['LOGIN_PW'];
+                    $after_auth_type = $aryVariant['arySqlExe_update_table']['LOGIN_AUTH_TYPE'];
+                    $after_pw_hold   = $aryVariant['arySqlExe_update_table']['LOGIN_PW_HOLD_FLAG'];
+                    // パスワードの初期化は認証方式は関係ない
+                    // ログインパスワードが管理でない場合にパスワードがクリア。管理の場合は残る
+                    // 変更前と変更後のパスワードを判定して、違う場合にansible-vaultで暗号化した文字列を初期化
+                    if($befor_pw != $after_pw) {
+                        $db_update = true;
                     }
-                    if($boolRet === true) {
-                        // ansible-vaultで暗号化した文字列を隠しカラムに登録
-                        $strQuery = "UPDATE C_STM_LIST SET LOGIN_PW_ANSIBLE_VAULT = :LOGIN_PW_ANSIBLE_VAULT "
+                    if($db_update === true) {
+                        // ansible-vaultで暗号化した文字列を初期化
+                        $strQuery = "UPDATE C_STM_LIST SET LOGIN_PW_ANSIBLE_VAULT = '' "
                                    ."WHERE SYSTEM_ID = " . $exeQueryData['SYSTEM_ID'];
 
-                        $aryForBind = array('LOGIN_PW_ANSIBLE_VAULT' => $strVaultPasswd);
+                        $aryForBind = array();
 
                         $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
 
