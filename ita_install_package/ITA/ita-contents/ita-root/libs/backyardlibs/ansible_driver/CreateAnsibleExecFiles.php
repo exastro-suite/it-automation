@@ -314,6 +314,8 @@ class CreateAnsibleExecFiles {
 
     private  $lv_hostinfolist;            // 機器一覧
 
+    private  $ansible_exec_user;          // ansibleコマンド 実行ユーザー
+
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
     //   コンストラクタ
@@ -1606,19 +1608,20 @@ class CreateAnsibleExecFiles {
                 }
                 // パスワードが設定されているか(windowsの場合に有効)
                 // パスワード
-                if($ina_hostinfolist[$host_name]['LOGIN_PW'] != self::LC_ANS_UNDEFINE_NAME)
+                if(($ina_hostinfolist[$host_name]['LOGIN_PW'] != self::LC_ANS_UNDEFINE_NAME) &&
+                   ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_PW))
                 {
-                    // ansible-vaultで暗号化された文字列のインデントを調整
                     $indento_sp12 = str_pad( " ", 12 , " ", STR_PAD_LEFT );
-                    $vaultpass = "";
-                    $vaultobj = new AnsibleVault();
-
-                    $vaultpass = $vaultobj->setValutPasswdIndento($ina_hostinfolist[$host_name]['LOGIN_PW_ANSIBLE_VAULT'],
-                                                                 $indento_sp12);
-
-                    unset($vaultobj);
-
-                    $pass = "ansible_ssh_pass: " . $vaultpass;
+                    $make_vaultpass = $this->makeAnsibleVaultPassword($this->getAnsibleExecuteUser(),
+                                                                      $ina_hostinfolist[$host_name]['LOGIN_PW'],
+                                                                      $ina_hostinfolist[$host_name]['LOGIN_PW_ANSIBLE_VAULT'],
+                                                                      $indento_sp12,
+                                                                      $this->ansible_vault_password_file_dir,
+                                                                      $ina_hostinfolist[$host_name]['SYSTEM_ID']);
+                    if($make_vaultpass === false) {
+                        return false;
+                    }
+                    $pass = "ansible_ssh_pass: " . $make_vaultpass;
                 }
                 // 対象ホストがwindowsの場合かつPioneer以外
                 if( (($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
@@ -1961,15 +1964,17 @@ class CreateAnsibleExecFiles {
                ($val != self::LC_ANS_UNDEFINE_NAME)) {
                 // ansible-vaultで暗号化された文字列のインデントを調整
                 $indento_sp2 = str_pad( " ", 2 , " ", STR_PAD_LEFT );
-                $vaultpass = "";
-                $vaultobj = new AnsibleVault();
+                $make_vaultpass = $this->makeAnsibleVaultPassword($this->getAnsibleExecuteUser(),
+                                                                  $val,
+                                                                  $this->lv_hostinfolist[$in_host_ipaddr]['LOGIN_PW_ANSIBLE_VAULT'],
+                                                                  $indento_sp2,
+                                                                  $this->ansible_vault_password_file_dir,
+                                                                  $this->lv_hostinfolist[$in_host_ipaddr]['SYSTEM_ID']);
+                if($make_vaultpass === false) {
+                    return false;
+                }
 
-                $vaultpass = $vaultobj->setValutPasswdIndento($this->lv_hostinfolist[$in_host_ipaddr]['LOGIN_PW_ANSIBLE_VAULT'],
-                                                              $indento_sp2);
-
-                unset($vaultobj);
-
-                $val = $vaultpass;
+                $val = $make_vaultpass;
             }
             //ホスト変数ファイルのレコード生成
             //変数名: 具体値
@@ -2130,24 +2135,25 @@ class CreateAnsibleExecFiles {
                             $val = ky_encrypt($val);
                             break;
                         default:
-                            // ansible-vaultで暗号化された文字列のインデントを調整
-                            $indento_sp2 = str_pad( " ", 2 , " ", STR_PAD_LEFT );
-                            $vaultpass = "";
-                            $vaultobj = new AnsibleVault();
-
-                            // ホスト名からIPを取得         
                             $ip_addr = '';
+                            // ホスト名からIPを取得         
                             foreach($this->lv_hostinfolist as $ip_addr=>$info) {
                                 if($info['HOSTNAME'] == $in_host_name) {
                                     break;
                                 }
                             }
-                            $vaultpass = $vaultobj->setValutPasswdIndento($this->lv_hostinfolist[$ip_addr]['LOGIN_PW_ANSIBLE_VAULT'],
-                                                                          $indento_sp2);
-
-                            unset($vaultobj);
-
-                            $val = $vaultpass;
+                            // ansible-vaultで暗号化
+                            $indento_sp2 = str_pad( " ", 2 , " ", STR_PAD_LEFT );
+                            $make_vaultpass = $this->makeAnsibleVaultPassword($this->getAnsibleExecuteUser(),
+                                                                              $val,
+                                                                              $this->lv_hostinfolist[$ip_addr]['LOGIN_PW_ANSIBLE_VAULT'],
+                                                                              $indento_sp2,
+                                                                              $this->ansible_vault_password_file_dir,
+                                                                              $this->lv_hostinfolist[$ip_addr]['SYSTEM_ID']);
+                            if($make_vaultpass === false) {
+                                return false;
+                            }
+                            $val = $make_vaultpass;
                             break;
                         }
                     }
@@ -11006,6 +11012,121 @@ class CreateAnsibleExecFiles {
             }
         }
         return true;
+    }
+
+    function makeAnsibleVaultPassword($in_exec_user,$in_pass,$in_vaultpass,$in_indento,$in_password_file_path,$in_system_id) {
+        $vaultobj = new AnsibleVault();
+        $out_vaultpass = "";
+        if(strlen(trim($in_vaultpass)) == 0) {
+            // 機器一覧のパスワードをansible-vaultで暗号化
+            $vaultobj = new AnsibleVault();
+            $password_file = '';
+            // ansible-vault パスワードファイル生成
+            $ret = $vaultobj->CraeteValutPasswdFile($in_password_file_path,
+                                                    $password_file);
+            if($ret === false) {
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000079");
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            // パスワード暗号化
+            $ret = $vaultobj->Vault($in_exec_user,
+                                    $password_file,
+                                    $in_pass,
+                                    $out_vaultpass,
+                                    $in_indento);
+
+            // パスワードファイル削除
+            @unlink($password_file);
+
+            if($ret === false) {
+                unset($vaultobj);
+
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($out_vaultpass));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            $out_vaultpass = " !vault |\n" . $out_vaultpass;
+
+            $strFxName = "";
+            // ansible-vaultで暗号化した文字列を初期化
+            $strQuery =   "UPDATE C_STM_LIST SET LOGIN_PW_ANSIBLE_VAULT = :LOGIN_PW_ANSIBLE_VAULT "
+                        . "WHERE SYSTEM_ID = " . $in_system_id;
+
+            $aryForBind = array('LOGIN_PW_ANSIBLE_VAULT'=>$out_vaultpass);
+
+            $ret = $this->RecordAccess($strQuery,$aryForBind);
+
+            if($ret !== true ){
+                unset($vaultobj);
+
+                return false;
+            }
+        } else {
+            $out_vaultpass = $in_vaultpass;
+        }
+        // ansible-vaultで暗号化された文字列のインデントを調整
+        $out_vaultpass = $vaultobj->setValutPasswdIndento($out_vaultpass,$in_indento);
+
+        unset($vaultobj);
+
+        return $out_vaultpass;
+    }
+    function RecordAccess($sqlUtnBody, $arrayUtnBind) {
+
+        $objQueryUtn = $this->lv_objDBCA->sqlPrepare($sqlUtnBody);
+        if($objQueryUtn->getStatus()===false) {
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $objQueryUtn->getLastError();
+            $this->DebugLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $sqlUtnBody . "\n" . $arrayUtnBind;
+            $this->DebugLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            return false;
+        }
+
+        $errstr = $objQueryUtn->sqlBind($arrayUtnBind);
+        if($errstr != "") {
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $errstr;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $sqlUtnBody . "\n" . $arrayUtnBind;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            return false;
+        }
+
+        $r = $objQueryUtn->sqlExecute();
+        if(!$r) {
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $objQueryUtn->getLastError();
+            $this->DebugLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $sqlUtnBody . "\n" . $arrayUtnBind;
+            $this->DebugLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            return false;
+        }
+        unset($objQueryUtn);
+        return true;
+    }
+    function getAnsibleExecuteUser() {
+        return $this->ansible_exec_user;
+    }
+    function setAnsibleExecuteUser($user_name) {
+        // user名の指定がない場合はrootにする。
+        if(strlen(trim($user_name)) == 0) {
+            $user_name = 'root';
+        }
+        $this->ansible_exec_user = $user_name;
     }
 }
 
