@@ -605,7 +605,6 @@ configure_ansible() {
     
     # Install some pip packages.
     pip3 install ${PIP_PACKAGE["ansible"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-sleep 10
 }
 
 
