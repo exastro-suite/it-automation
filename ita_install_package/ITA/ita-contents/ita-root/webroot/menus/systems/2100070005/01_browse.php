@@ -252,16 +252,6 @@ float:right;width:140px;text-align:right;
     text-align:right;
     font-weight:bolder;
 }
-.dispLog{
-    display:none;
-    background:indianred;
-    font-weight:bolder;
-    color:white;
-    float:right;
-    cursor:pointer;
-    border:0;
-    border-radius:10px;
-}
 </style>
 
 EOD;
@@ -307,7 +297,6 @@ print <<< EOD
 
     <div class="detail">
     </div>
-<button class="dispLog">{$objMTS->getSomeMessage("ITAOPENST-MNU-160060")}</button>
 </div>
 
             </div>

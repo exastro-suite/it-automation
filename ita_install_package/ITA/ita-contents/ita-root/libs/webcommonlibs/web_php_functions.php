@@ -313,7 +313,7 @@
             }else if( $array["DATE3"] != false ){
                 $date = $array["DATE3"];
             }else{
-                continue 2;
+                continue;
             }
             switch( $array["STATUS_ID"] ){
             case ($set_status["COMPLETE_ID"]):
@@ -823,7 +823,6 @@ EOD;
             }
             print makeAjaxProxyResultStream($arrayResult);
             exit();
-            break;
             //HTML/AJAX経由の場合----
         }
     }

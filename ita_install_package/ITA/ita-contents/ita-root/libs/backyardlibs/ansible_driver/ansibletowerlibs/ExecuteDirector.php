@@ -34,6 +34,8 @@ require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlib
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/setenv.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/MessageTemplateStorageHolder.php");
 
+require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
+
 $rest_api_command = $root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/";
 require_once($rest_api_command . "AnsibleTowerRestApiProjects.php");
 require_once($rest_api_command . "AnsibleTowerRestApiCredentials.php");
@@ -47,6 +49,8 @@ require_once($rest_api_command . "AnsibleTowerRestApiWorkflowJobTemplates.php");
 require_once($rest_api_command . "AnsibleTowerRestApiWorkflowJobTemplateNodes.php");
 
 require_once($rest_api_command . "AnsibleTowerRestApiOrganization.php");
+require_once($rest_api_command . "AnsibleTowerRestApiInstanceGroups.php");
+require_once($rest_api_command . "AnsibleTowerRestApiConfig.php");
 
 class ExecuteDirector {
 
@@ -68,12 +72,40 @@ class ExecuteDirector {
 
     function build($exeInsRow, $ifInfoRow) {
 
+        global $vg_tower_driver_name;
+
         $this->logger->trace(__METHOD__);
 
         $execution_no = $exeInsRow['EXECUTION_NO'];
 
+        $virtualenv_name = $exeInsRow['I_VIRTUALENV_NAME'];
+
+        // Towerのvirtualenv確認
+        $virtualenv_name_ok = false;
+        if($virtualenv_name != "") {
+            $response_array = AnsibleTowerRestApiConfig::get($this->restApiCaller);
+            if($response_array['success'] == false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040026",array($virtualenv_name));
+                $this->errorLogOut($errorMessage);
+                return false;
+            }
+            if( isset($response_array['responseContents']['custom_virtualenvs'] )) {
+                foreach($response_array['responseContents']['custom_virtualenvs'] as $no=>$name) {
+                    if($name == $virtualenv_name) {
+                        $virtualenv_name_ok = true;
+                        break;
+                    }
+                }
+            }
+            if($virtualenv_name_ok === false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040027",array($virtualenv_name));
+                $this->errorLogOut($errorMessage);
+                return false;
+            }
+        }
+
+
         $OrganizationName = trim($ifInfoRow['ANSTWR_ORGANIZATION']);
-        $OrganizationId = '1';  // 組織名が未入力の場合 Default を設定
         if(strlen($OrganizationName) != 0) {
             //組織情報取得
             //   [[Inventory]]
@@ -94,15 +126,11 @@ class ExecuteDirector {
                 return false;
             }
             $OrganizationId = $response_array['responseContents'][0]['id'];
-        }
-//------------
-
-        $ret = $this->prepareProject($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_ANS']); 
-        if($ret == false) {
-            // array[40001] = "SCM更新作業に失敗しました。";
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040001");
+        } else {
+            // 組織名未登録
+            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040030");
             $this->errorLogOut($errorMessage);
-            return -1;
+            return false;
         }
 
         // Host情報取得
@@ -114,13 +142,41 @@ class ExecuteDirector {
             $this->errorLogOut($errorMessage);
             return -1;
         }
+//------------
+
+        $ret = $this->prepareProject($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_ANS']); 
+        if($ret == false) {
+            // array[40001] = "SCM更新作業に失敗しました。";
+            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040001");
+            $this->errorLogOut($errorMessage);
+            return -1;
+        }
 
         // project生成
-        $projectId = $this->createProject($execution_no,$OrganizationId);
+        $projectId = $this->createProject($execution_no,$OrganizationId,$virtualenv_name);
         if($projectId == -1) {
             $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040003");
             $this->errorLogOut($errorMessage);
             return -1;
+        }
+
+        // ansible vault認証情報生成
+        $vault_credentialId = -1;
+        if($vg_tower_driver_name != "pioneer") {
+           $vaultobj = new AnsibleVault();
+           list($ret,$dir,$file,$vault_password) = $vaultobj->getValutPasswdFileInfo();
+           if($ret === false) {
+               $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000080");
+               $this->errorLogOut($errorMessage);
+               return -1;
+           }
+           unset($vaultobj);
+           $vault_credentialId = $this->createVaultCredential($execution_no, $vault_password, $OrganizationId);
+           if($vault_credentialId == -1) {
+               $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040031");
+               $this->errorLogOut($errorMessage);
+               return -1;
+           }
         }
 
         $jobTemplateIds = array();
@@ -143,7 +199,7 @@ class ExecuteDirector {
             }
 
             // ジョブテンプレート生成
-            $jobTemplateId = $this->createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $inventoryId, $exeInsRow['RUN_MODE']);
+            $jobTemplateId = $this->createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $vault_credentialId, $inventoryId, $exeInsRow['RUN_MODE']);
             if($jobTemplateId == -1) {
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040006");
                 $this->errorLogOut($errorMessage);
@@ -169,6 +225,32 @@ class ExecuteDirector {
 
         $this->logger->trace(__METHOD__);
 
+        global $vg_tower_driver_name;
+        $allResult = true;
+
+        // ジョブスライス設定有無判定
+        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,$vg_tower_driver_name,addPadding($execution_no));
+        $query = sprintf("?name__startswith=%s",$search_name);
+        $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
+
+        $job_slice_use = false;
+        $dummy = array();
+        $IDData = array();
+        $this->logger->trace(var_export($response_array, true));
+        if($response_array['success'] == true) {
+            if(@count($response_array['responseContents']) != 0) {
+                if($response_array['responseContents'][0]['job_slice_count'] > 1) {
+                    $job_slice_use = true;
+                    // ジョブスライスされたジョブIDを取得
+                    $dummy1 = array();
+                    $job_id_get     = true;
+                    $job_status_get = false;
+                    $job_stdout_get = false;
+                    $this->SliceJobsMonitoring($execution_no,$dummy1,$job_id_get,$job_status_get,$job_stdout_get, $IDData);
+                    // 戻り値は判定しない
+                }
+            }
+        }
         $allResult = true;
         $ret = $this->cleanUpPreparedProjectDirectory($execution_no);
         if($ret == false) {
@@ -190,6 +272,10 @@ class ExecuteDirector {
         if($ret == false) {
             $allResult = false;
         }
+        if($job_slice_use = true) {
+            // ジョブスライスされたワークフロージョブを削除
+            $this->cleanUpSliceJobs($execution_no,$job_slice_use,$IDData);
+        }
         $ret = $this->cleanUpProject($execution_no);
         if($ret == false) {
             $allResult = false;
@@ -198,11 +284,16 @@ class ExecuteDirector {
         if($ret == false) {
             $allResult = false;
         }
+        if($vg_tower_driver_name != "pioneer") {
+            $ret = $this->cleanUpVaultCredential($execution_no);
+            if($ret == false) {
+                $allResult = false;
+            }
+        }
         $ret = $this->cleanUpInventory($execution_no);
         if($ret == false) {
             $allResult = false;
         }
-
         return $allResult;
     }
 
@@ -620,13 +711,27 @@ class ExecuteDirector {
             }
 
             $instanceGroupId = null;
-            if(!empty($hostInfo['ANSTWR_INSTANCE_GRP_ITA_MNG_ID'])) {
-                $instanceGroup = $this->dbAccess->selectRow("B_ANS_TWR_INSTANCE_GROUP", $hostInfo['ANSTWR_INSTANCE_GRP_ITA_MNG_ID']);  
-                if(empty($instanceGroup)) {
-                    $this->logger->error("Not exists or disabled instance group. ANSTWR_INSTANCE_GRP_ITA_MNG_ID: " . $hostInfo['ANSTWR_INSTANCE_GRP_ITA_MNG_ID']);
+            if(!empty($hostInfo['ANSTWR_INSTANCE_GROUP_NAME'])) {
+                // Towerのインスタンスグループ情報取得
+                $response_array = AnsibleTowerRestApiInstanceGroups::getAll($this->restApiCaller);
+                if($response_array['success'] == false) {
+                    // 組織名未登録
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040028",array($hostInfo['ANSTWR_INSTANCE_GROUP_NAME']));
+                    $this->errorLogOut($errorMessage);
                     return false;
                 }
-                $instanceGroupId = $instanceGroup['INSTANCE_GROUP_ID'];
+
+                foreach($response_array['responseContents'] as $info) {
+                    if($info['name'] == $hostInfo['ANSTWR_INSTANCE_GROUP_NAME']) {
+                        $instanceGroupId = $info['id'];
+                    }
+                }
+                if($instanceGroupId == null) {
+                    // インスタンスグループ未登録
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040029",array($hostInfo['ANSTWR_INSTANCE_GROUP_NAME']));
+                    $this->errorLogOut($errorMessage);
+                    return false;
+                }                
             }
 
             // 配列のキーに使いたいだけ
@@ -691,6 +796,11 @@ class ExecuteDirector {
                     return false;
                 }
                 $hostData['password'] = $hostInfo['LOGIN_PW'];
+
+                if(strlen($hostInfo['WINRM_SSL_CA_FILE']) != 0) {
+                    $filePath = "winrm_ca_files/" . addPadding($hostInfo['SYSTEM_ID']) . "-" . $hostInfo['WINRM_SSL_CA_FILE'];
+                    $hostData['ansible_winrm_ca_trust_path'] = $filePath;
+                }
             }
 
             $hostData['hosts_extra_args'] = $hostInfo['HOSTS_EXTRA_ARGS'];
@@ -710,7 +820,7 @@ class ExecuteDirector {
         return true;
     }
 
-    private function createProject($execution_no,$OrganizationId) {
+    private function createProject($execution_no,$OrganizationId,$virtualenv_name) {
         $this->logger->trace(__METHOD__);
 
         $param = array();
@@ -718,6 +828,10 @@ class ExecuteDirector {
         $param['organization'] = $OrganizationId;
 
         $param['execution_no'] = $execution_no;
+
+        if(strlen($virtualenv_name) != 0) {
+            $param['custom_virtualenv'] = $virtualenv_name;
+        }
 
         $this->logger->trace(var_export($param, true));
 
@@ -779,6 +893,37 @@ class ExecuteDirector {
         return $credentialId;
     }
 
+    private function createVaultCredential($execution_no, $vault_password, $OrganizationId) {
+
+        $this->logger->trace(__METHOD__);
+
+        $param = array();
+        $param['organization'] = $OrganizationId;
+
+        $param['execution_no'] = $execution_no;
+
+        $param['vault_password'] = $vault_password;
+
+        $this->logger->trace(var_export($param, true));
+
+        $response_array = AnsibleTowerRestApiCredentials::vault_post($this->restApiCaller, $param);
+
+        $this->logger->trace(var_export($response_array, true));
+
+        if($response_array['success'] == false) {
+            $this->logger->debug($response_array['responseContents']['errorMessage']);
+            return -1;
+        }
+
+        if(array_key_exists("id", $response_array['responseContents']) == false) {
+            $this->logger->debug("No vault credential id.");
+            return -1;
+        }
+
+        $vault_credentialId = $response_array['responseContents']['id'];
+        return $vault_credentialId;
+    }
+
     private function createEachInventory($execution_no, $loopCount, $inventory, $OrganizationId) {
 
         $this->logger->trace(__METHOD__);
@@ -832,44 +977,26 @@ class ExecuteDirector {
             if($hostData['winrm'] == 1) {
                 $variables_array[] = "ansible_connection: winrm";
                 $variables_array[] = "ansible_ssh_port: " . $hostData['winrmPort'];
+                if( isset($hostData['ansible_winrm_ca_trust_path']) ) {
+                    $variables_array[] = "ansible_winrm_ca_trust_path: " . $hostData['ansible_winrm_ca_trust_path'];
+                }
             }
 
             if(strlen(trim($hostData['ansible_ssh_extra_args'])) != 0) {
                 $variables_array[] = "ansible_ssh_extra_args: " . trim($hostData['ansible_ssh_extra_args']);
             }
 
-            // インベントりファイル追加オプションをYAML形式に変換
-            $String = $hostData['hosts_extra_args'];
-            $String = " " . $String . " ";
-            $ValList = preg_split("/(\s)+(\S)+(\s)*=/", $String);
-            if(count($ValList) > 1)
-            {
-                // 先頭に空が入るので取り除く
-                if(strlen(trim($ValList[0])) == 0)
-                {
-                    unset($ValList[0]);
+            // インベントりファイル追加オプションの空白行を取り除く
+            $yaml_array = explode("\n", $hostData['hosts_extra_args']);
+            foreach($yaml_array as $record) {
+                if(strlen(trim($record)) == 0) {
+                    continue;
                 }
+                $variables_array[] = $record;   
             }
-            $VarCount = preg_match_all("/(\s)+(\S)+(\s)*=/", $String,$VarList);
-            // 具体値の設定を確認
-            $Val = array();
-            foreach($ValList as $Val) {
-                if(strlen(trim($Val)) == 0) {
-                    $ValAry[] = '';
-                } else {
-                    $ValAry[] = $Val;
-                }
-            }
-            $idx = 0;
-            foreach($VarList[0] as $VarName)
-            {
-                $VarName = preg_split("/(\s)*=(\s)*/", $VarName);
-                $variables_array[]  = trim($VarName[0]) . ': ' .  $ValAry[$idx];
-                $idx++;
-            }
-            // インベントりファイル追加オプションをYAML形式に変換
 
-            if(!empty($variables_array)) {
+            // インベントりファイル追加オプションを設定
+            if(count($variables_array) != 0) {
                 $param['variables'] = implode("\n", $variables_array);
             }
 
@@ -889,7 +1016,7 @@ class ExecuteDirector {
         return $inventoryId;
     }
 
-    private function createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $inventoryId, $runMode) {
+    private function createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $vault_credentialId, $inventoryId, $runMode) {
         global $vg_parent_playbook_name;
 
         $this->logger->trace(__METHOD__);
@@ -902,6 +1029,10 @@ class ExecuteDirector {
         $param['project'] = $projectId;
         $param['playbook'] = $vg_parent_playbook_name;
         $param['credential'] = $credentialId;
+
+        if($vault_credentialId != -1) {
+            $param['vault_credential'] = $vault_credentialId;
+        }
 
         $addparam = array();
         foreach($this->JobTemplatePropertyParameterAry as $key=>$val)
@@ -1023,6 +1154,24 @@ class ExecuteDirector {
         }
 
         $this->logger->trace("Clean up credentials finished. (execution_no: $execution_no)");
+
+        return true;
+    }
+
+    private function cleanUpVaultCredential($execution_no) {
+
+        $this->logger->trace(__METHOD__);
+
+        $response_array = AnsibleTowerRestApiCredentials::deleteVault($this->restApiCaller, $execution_no);
+
+        $this->logger->trace(var_export($response_array, true));
+
+        if($response_array['success'] == false) {
+            $this->logger->debug($response_array['responseContents']['errorMessage']);
+            return false;
+        }
+
+        $this->logger->trace("Clean up vault credentials finished. (execution_no: $execution_no)");
 
         return true;
     }
@@ -1152,21 +1301,67 @@ class ExecuteDirector {
 
         return true;
     }
+    private function cleanUpSliceJobs($execution_no,$job_slice_use,$IDData) {
+
+        $this->logger->trace(__METHOD__);
+
+        if($job_slice_use === false) {
+            return true;
+        }
+
+        // ジョブスライスされたジョブは後方の処理で削除される。
+
+        // ジョブスライスされたワークフロージョブを削除
+        if(isset($IDData['workflow_job_id']) === true) {
+            foreach($IDData['workflow_job_id'] as $workflow_job_id) {
+                // エラーでも先に進む
+                $response_array = AnsibleTowerRestApiWorkflowJobs::delete($this->restApiCaller, $workflow_job_id);
+                if($response_array['success'] == false) {
+                    $this->logger->error(var_export($response_array, true));
+                }
+            }
+        }
+        return true;
+    }
+
 
     function monitoring($toProcessRow, $ansibleTowerIfInfo) {
+
+        global $vg_tower_driver_name;
 
         $this->logger->trace(__METHOD__);
 
         $execution_no = $toProcessRow['EXECUTION_NO'];
 
+        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,$vg_tower_driver_name,addPadding($execution_no));
+        $query = sprintf("?name__startswith=%s",$search_name);
+        $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
+
+        $this->logger->trace(var_export($response_array, true));
+        if($response_array['success'] == false) {
+            $this->logger->error("Faild to RestAPI access job templates. query:".$query);
+            return EXCEPTION;
+        }
+        if(@count($response_array['responseContents']) === 0) {
+            $this->logger->error("Faild to get job templates contents. query:".$query);
+            $this->logger->error(var_export($response_array, true));
+            return EXCEPTION;
+        }
+
+        // ジョブスライス数を判定
+        $job_slice_use = true;
+        if($response_array['responseContents'][0]['job_slice_count'] == 1) {
+            $job_slice_use = false;
+        }
+
         // AnsibleTower Status チェック
-        list($status, $wfJobId) = $this->checkWorkflowJobStatus($execution_no);
+        list($status, $wfJobId) = $this->checkWorkflowJobStatus($execution_no,$job_slice_use);
         if($status == EXCEPTION || $wfJobId == -1) {
             return $status;
         }
 
         // Ansibleログ書き出し
-        $ret = $this->createAnsibleLogs($execution_no, $ansibleTowerIfInfo['ANSIBLE_STORAGE_PATH_LNX'], $wfJobId);  
+        $ret = $this->createAnsibleLogs($execution_no, $ansibleTowerIfInfo['ANSIBLE_STORAGE_PATH_LNX'], $wfJobId, $job_slice_use);  
         if($ret == false) {
             $status = EXCEPTION;
         }
@@ -1174,7 +1369,178 @@ class ExecuteDirector {
         return $status;
     }
 
-    function checkWorkflowJobStatus($execution_no) {
+    function SliceJobsMonitoring($execution_no,&$SliceJobsData,
+                                 $job_id_get,$job_status_get,$job_stdout_get,
+                                &$IDData=array()) {
+
+        global $vg_tower_driver_name;
+
+        $this->logger->trace(__METHOD__);
+
+        // ジョブテンプレート情報検索　ita_%s_executions_jobtpl_%s"
+        $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,
+                               $vg_tower_driver_name,addPadding($execution_no));
+        $query = sprintf("?name__startswith=%s",$search_name);
+        $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
+
+        $this->logger->trace(var_export($response_array, true));
+        if($response_array['success'] == false) {
+            $this->logger->error("Faild to RestAPI access job template. query:".$query);
+            return EXCEPTION;
+        }
+        if(@count($response_array['responseContents']) === 0) {
+            $this->logger->error("Faild to get job template contents. query:".$query);
+            $this->logger->error(var_export($response_array, true));
+            return EXCEPTION;
+        }
+
+        foreach($response_array['responseContents'] as $job_tmp_row) {
+            // ジョブテンプレート有無判定
+            if(isset($job_tmp_row['id']) === false) {
+                $this->logger->error("Faild to get job template id. query:".$query);
+                $this->logger->error(var_export($response_array, true));
+                return EXCEPTION;
+            }
+
+            //$this->logger->error("job templates id:[".$job_tmp_row['id']."]");
+
+            $query = sprintf("%s/slice_workflow_jobs/",$job_tmp_row['id']);
+
+            // ジョブテンプレートIDから分割されたワークフロージョブ情報取得
+            $response_array_workflow_jobs_templates = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
+            if($response_array_workflow_jobs_templates['success'] == false) {
+                $this->logger->error("Faild to RestAPI access slice workflow job. query:" . $query);
+                return EXCEPTION;
+            }
+            if(@count($response_array_workflow_jobs_templates['responseContents']) === 0 ) {
+                $this->logger->error("Faild to get lice workflow job query:".$query);
+                $this->logger->error(var_export($response_array_workflow_jobs_templates, true));
+                return EXCEPTION;
+            }
+            foreach($response_array_workflow_jobs_templates['responseContents'] as $workflow_jobs_templates_row) {
+                // ワークフロージョブ有無判定
+                if(isset($job_tmp_row['id']) === false) {
+                    $this->logger->error("Faild to get workflow job. query:".$query);
+                    $this->logger->error(var_export($response_array_workflow_jobs_templates, true));
+                    return EXCEPTION;
+                }
+ 
+                // ワークフロージョブID
+                $workflow_job_id = $workflow_jobs_templates_row['id'];
+                $query = sprintf("%s/workflow_nodes/",$workflow_job_id);
+
+                // ワークフロージョブID退避
+                $IDData['workflow_job_id'][] = $workflow_job_id;
+
+               //$this->logger->error("workflow job id:[" . $workflow_job_id . "]");
+
+                // ワークフロージョブIDからワークフロージョブノード情報取得 
+                $response_array_workflow_nodes = AnsibleTowerRestApiWorkflowJobs::getAll($this->restApiCaller, $query);
+                if($response_array_workflow_nodes['success'] == false) {
+                    $this->logger->error("Faild to RestAPI access workflow job node. query:" . $query);
+                    return EXCEPTION;
+                }
+                if(@count($response_array_workflow_nodes['responseContents']) === 0 ) {
+                    $this->logger->error("Faild to get workflow job node contents. query:".$query);
+                    $this->logger->error(var_export($response_array_workflow_nodes, true));
+                    return EXCEPTION;
+                }
+                $stdout_log = "";
+
+                foreach($response_array_workflow_nodes['responseContents'] as $workflow_nodes_row) {
+                    // ワークフロージョブノード有無
+                    if(isset($workflow_nodes_row['id']) === false) {
+                        $this->logger->error("Faild to get workflow job node. query:".$query);
+                        $this->logger->error(var_export($response_array_workflow_nodes, true));
+                        return EXCEPTION;
+                    }
+                    // ワークフロージョブノードID退避
+                    $IDData['workflow_job_node_id'][] = $workflow_nodes_row['id'];
+
+                    // ジョブ有無判定
+                    if(isset($workflow_nodes_row['summary_fields']['job']["id"]) === false) {
+                        // summary_fields が生成されていない場合がある。
+                        if($job_stdout_get === false) {
+                            $this->logger->error("Faild to get jobs id. query:".$query);
+                            $this->logger->error(var_export($response_array_workflow_nodes, true));
+                        }
+                        return EXCEPTION;
+                    }
+
+                    // ジョブ名
+                    $workflow_job_name = $workflow_nodes_row['summary_fields']['workflow_job']["name"];
+                    // ジョブID
+                    $jobId = $workflow_nodes_row['summary_fields']['job']["id"];
+
+                    // ジョブID退避
+                    if($job_id_get === true) {
+                        $IDData['job_id'][] = $jobId;
+                    }
+                    if(($job_status_get === false) &&
+                       ($job_stdout_get === false))
+                    {
+                        continue;
+                    }
+
+                    $query = sprintf("%s",$jobId);
+                    // ジョブ情報取得
+                    $response_array_jobs = AnsibleTowerRestApiJobs::get($this->restApiCaller, $query);
+                    if($response_array_jobs['success'] == false) {
+                        $this->logger->error("Faild to RestAPI access job detail. query:".$query);
+                        return EXCEPTION;
+                    }
+                    if(@count($response_array_jobs['responseContents']) === 0 ) {
+                        $this->logger->error("Faild to get job detail. query:".$query);
+                        $this->logger->error(var_export($response_array_jobs, true));
+                        return EXCEPTION;
+                    }
+
+                    // ジョブ実行状態判定
+                    $jobData = $response_array_jobs['responseContents'];
+                    if(!array_key_exists("id",     $jobData) ||
+                       !array_key_exists("status", $jobData) ||
+                       !array_key_exists("failed", $jobData)) {
+                        $this->logger->error("Not expected data. query:".$query);
+                        $this->logger->error(var_export($response_array_jobs, true));
+                        return EXCEPTION;
+                    }
+                    // ジョブの実行状態か必要な場合
+                    if($job_status_get === true) {
+                       if($jobData['status'] != "successful") {
+                           return FAILURE;
+                       }
+                    }  
+                    // ジョブの標準出力が必要か判定
+                    if($job_stdout_get === false) {
+                       continue;
+                    }
+
+                    // 標準出力情報取得
+                    $response_array_stdout = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
+                    if($response_array_stdout['success'] == false) {
+                        $this->logger->error("Faild to get job stdout.. " . print_r($response_array_stdout,true));
+                        $response_array['responseContents'] = "Faild to get job stdout. " . $response_array['responseContents']['errorMessage'];
+                    }
+                    if(@count($response_array_stdout['responseContents']) === 0 ) {
+                        $response_array_stdout['responseContents'] = "";
+                    }
+
+                    // inventory/project/credentialsの情報退避
+                    // 複数Jobの場合は最後の情報を使用
+                    $SliceJobsData[$workflow_job_name] = $jobData;
+
+                    // ログを退避
+                    $page = sprintf("(%d/%d)\n",$jobData['job_slice_number'],$jobData['job_slice_count']);
+                    $stdout_log .= $page;
+                    $stdout_log .= $response_array_stdout['responseContents'];
+                    $SliceJobsData[$workflow_job_name]['result_stdout'] = $stdout_log;
+                }
+            }
+        }
+        return COMPLETE;
+    }
+
+    function checkWorkflowJobStatus($execution_no,&$job_slice_use) {
 
         $this->logger->trace(__METHOD__);
         $wfJobId = -1;
@@ -1209,7 +1575,17 @@ class ExecuteDirector {
                 break;
             case "successful":
                 // 子Jobが全て成功であればCOMPLETE、ひとつでも失敗していればFAILURE
-                $status = $this->checkAllJobsStatus($wfJobId);
+                // ジョブスライスの有無判定
+                if($job_slice_use === true) {
+                    $dummy1 = array();
+                    $dummy2 = array();
+                    $job_id_get     = false;
+                    $job_status_get = true;
+                    $job_stdout_get = false;
+                    $status = $this->SliceJobsMonitoring($execution_no,$dummy1,$job_id_get,$job_status_get,$job_stdout_get, $dummy2);
+                } else {
+                    $status = $this->checkAllJobsStatus($wfJobId);
+                }
                 break;
             case "failed":
             case "error":
@@ -1240,6 +1616,7 @@ class ExecuteDirector {
         }
 
         $workflowJobNodeArray_restResult = $response_array['responseContents'];
+
         $this->logger->trace(var_export($workflowJobNodeArray_restResult, true));
 
         $workflowJobNodeArray_jobDataAdded = array();
@@ -1274,7 +1651,7 @@ class ExecuteDirector {
         return COMPLETE;
     }
 
-    function createAnsibleLogs($execution_no, $dataRelayStoragePath, $wfJobId) {
+    function createAnsibleLogs($execution_no, $dataRelayStoragePath, $wfJobId, $job_slice_use) {
         global $vg_tower_driver_type;
         global $vg_tower_driver_id;
 
@@ -1288,6 +1665,20 @@ class ExecuteDirector {
         $joblistFullPath        = $outDirectoryPath . "/" . $joblistFilename;
 
         ////////////////////////////////////////////////////////////////
+        // ジョブスライスの場合にジョブの標準出力を取得
+        ////////////////////////////////////////////////////////////////
+        $SliceJobsData          = array();
+        if($job_slice_use === true) {
+            $dummy = array();
+            $job_id_get     = false;
+            $job_status_get = false;
+            $job_stdout_get = true;
+            $status = $this->SliceJobsMonitoring($execution_no,$SliceJobsData,
+                                                 $job_id_get,$job_status_get,$job_stdout_get, 
+                                                 $dummyx2);
+            // 戻り値はチェックしない
+        }
+        ////////////////////////////////////////////////////////////////
         // データ取得
         ////////////////////////////////////////////////////////////////
         $this->logger->trace("AnsibleTowerRestApiWorkflowJobs::get / param = " . $wfJobId);
@@ -1298,6 +1689,7 @@ class ExecuteDirector {
         }
 
         $workflowJobData = $response_array['responseContents'];
+
         $this->logger->trace(var_export($workflowJobData, true));
 
         $query = "?workflow_job=" . $wfJobId;
@@ -1318,27 +1710,43 @@ class ExecuteDirector {
                 continue;
             }
             $jobId = $workflowJobNodeData['job'];
-            $this->logger->trace("AnsibleTowerRestApiJobs::get / param = " . $jobId);
-            $response_array = AnsibleTowerRestApiJobs::get($this->restApiCaller, $jobId);
-            if($response_array['success'] == false) {
-                $this->logger->error("Faild to get job detail. " . $response_array['responseContents']['errorMessage']);
-                return false;
+
+            if($job_slice_use === false) {
+                $this->logger->trace("AnsibleTowerRestApiJobs::get / param = " . $jobId);
+                $response_array = AnsibleTowerRestApiJobs::get($this->restApiCaller, $jobId);
+                if($response_array['success'] == false) {
+                    $this->logger->error("Faild to get job detail. " . $response_array['responseContents']['errorMessage']);
+                    return false;
+                }
+
+                $jobData = $response_array['responseContents'];
+                $this->logger->trace(var_export($jobData, true));
+
+                $response_array = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
+
+                if($response_array['success'] == false) {
+                    $this->logger->error("Faild to get job stdout.. " . print_r($response_array,true));
+                    // 標準出力が取得できなかった場合
+                    $response_array['responseContents'] = "Faild to get job stdout. " . $response_array['responseContents']['errorMessage'];
+                }
+                $jobData['result_stdout'] = $response_array['responseContents'];
+
+                $workflowJobNodeData['jobData'] = $jobData;
+
+                $workflowJobNodeArray_jobDataAdded[] = $workflowJobNodeData;
+            } else {
+                $jobName = $workflowJobNodeData['summary_fields']['job']['name'];
+
+                $jobData = "";
+                if(isset($SliceJobsData[$jobName]) === true) {
+                    $jobData = $SliceJobsData[$jobName];
+                } else {
+                    continue;
+                }
+                $workflowJobNodeData['jobData'] = $jobData;
+
+                $workflowJobNodeArray_jobDataAdded[] = $workflowJobNodeData;
             }
-
-            $jobData = $response_array['responseContents'];
-            $this->logger->trace(var_export($jobData, true));
-
-            $response_array = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
-
-            if($response_array['success'] == false) {
-                throw new Exception("Faild to get job stdout. " . $response_array['responseContents']['errorMessage']);
-            }
-
-            $jobData['result_stdout'] = $response_array['responseContents'];
-
-            $workflowJobNodeData['jobData'] = $jobData;
-
-            $workflowJobNodeArray_jobDataAdded[] = $workflowJobNodeData;
         }
 
         ////////////////////////////////////////////////////////////////
@@ -1348,6 +1756,15 @@ class ExecuteDirector {
             $this->logger->error("Error: '" . $joblistFullPath . "' is directory. Remove this.");
             return false;
         }
+
+        ////////////////////////////////////////////////////////////////
+        // ログファイル生成
+        ////////////////////////////////////////////////////////////////
+        $ret = $this->CreateLogs($workflowJobData,$workflowJobNodeArray_jobDataAdded,$joblistFullPath,$outDirectoryPath,$execlogFullPath,$job_slice_use);
+        return $ret;
+    }
+    function CreateLogs($workflowJobData,$workflowJobNodeArray_jobDataAdded,$joblistFullPath,$outDirectoryPath,$execlogFullPath,$job_slice_use) {
+        global  $vg_tower_driver_name;
 
         $contentArray = array();
 
@@ -1382,6 +1799,21 @@ class ExecuteDirector {
             $contentArray[] = "  credential_name: " . $credentialData['name'];
             $contentArray[] = "  credential_type: " . $credentialData['credential_type'];
             $contentArray[] = "  credential_inputs: " . json_encode($credentialData['inputs']);
+            $contentArray[] = "  virtualenv: " . $projectData['custom_virtualenv'];
+            if($job_slice_use === true) {
+                $contentArray[] = "  job_slice_count: " . $jobData["job_slice_count"];
+            }
+            $query = sprintf("%s/instance_groups/",$jobData['inventory']);
+            $response_array  = AnsibleTowerRestApiInventories::getAll($this->restApiCaller, $query);
+            if($response_array['success'] == false) {
+                $this->logger->error("Faild to get inventory. " . $response_array['responseContents']['errorMessage']);
+                return false;
+            }
+            $instance_group = "";
+            if(isset($response_array['responseContents'][0]['name']) === true) {
+                $instance_group = $response_array['responseContents'][0]['name'];
+            }
+            $contentArray[] = "  instance_group: " . $instance_group;
 
             $response_array = AnsibleTowerRestApiInventories::get($this->restApiCaller, $jobData['inventory']);
             if($response_array['success'] == false) {
@@ -1454,6 +1886,8 @@ class ExecuteDirector {
                 $this->logger->error("Faild to read file. " . $joblistFullPath);
                 return false;
             }
+
+
             $execlogContent = $joblistContent;
             foreach($jobFileList as $jobName => $jobFileFullPath) {
                 $execlogContent .= "\n";
@@ -1477,7 +1911,7 @@ class ExecuteDirector {
                 return false;
             }
             // /exastro/ita-root/libs/restapiindividuallibs/ansible_driver/execute_statuscheck.phpに同等の処理あり
-            if($vg_tower_driver_type == "pioneer") {
+            if($vg_tower_driver_name == "pioneer") {
                 // ユーザログ("xxx", )を改行する
                 $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $execlogFullPath_org  .  " > " . $execlogFullPath_tmp1;
                 exec($cmd);

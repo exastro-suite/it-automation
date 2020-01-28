@@ -197,7 +197,6 @@
                 // 想定外エラー通知画面にリダイレクト
                 webRequestForceQuitFromEveryWhere(500,10310103);
                 exit();
-                break;
             }
             else{
                 $boolLocalAuthUser = $tmpArrayRet[0]['AuthUserType']; // 判別結果

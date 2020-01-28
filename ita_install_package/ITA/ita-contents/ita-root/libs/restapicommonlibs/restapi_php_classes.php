@@ -334,31 +334,34 @@ class RestAPIInfoAdmin{
                 $this->intResultStatusCode       =  500;
                 $this->aryErrorInfo['Exception'] = 'Request header unknown error';
             }
+            else{
+                $aryReqHeaderRaw = array_change_key_case($aryReqHeaderRaw);
+            }
         }
         //リクエストヘッダを全て取得----
 
         //----http(s)リクエストヘッダに所定の項目があるかをチェック
         if( $boolExeContinue === true ){
             if( $boolExeContinue === true ){
-                if( array_key_exists('Content-Type', $aryReqHeaderRaw) !== true ){
+                if( array_key_exists('content-type', $aryReqHeaderRaw) !== true ){
                     $boolExeContinue = false;
                     $this->aryErrorInfo['Exception'] = 'Required request header item[Content-Type] is not exists';
                 }
             }
             if( $boolExeContinue === true ){
-                if( array_key_exists('X-UMF-API-Version', $aryReqHeaderRaw) !== true ){
+                if( array_key_exists('x-umf-api-version', $aryReqHeaderRaw) !== true ){
                     $boolExeContinue = false;
                     $this->aryErrorInfo['Exception'] = 'Required request header item[X-UMF-API-Version] is not exists';
                 }
             }
             if( $boolExeContinue === true ){
-                if( array_key_exists('Date', $aryReqHeaderRaw) !== true ){
+                if( array_key_exists('date', $aryReqHeaderRaw) !== true ){
                     $boolExeContinue = false;
                     $this->aryErrorInfo['Exception'] = 'Required request header item[Date] is not exists';
                 }
             }
             if( $boolExeContinue === true ){
-                if( array_key_exists('Authorization', $aryReqHeaderRaw) !== true ){
+                if( array_key_exists('authorization', $aryReqHeaderRaw) !== true ){
                     $boolExeContinue = false;
                     $this->aryErrorInfo['Exception'] = 'Required request header item[Authorization] is not exists';
                 }
@@ -387,8 +390,8 @@ class RestAPIInfoAdmin{
         //----ここから認証
         if( $boolExeContinue === true ){
             // リクエストで送られてきた情報
-            $strHeaderAuthorization     = $this->aryReqHeaderData['Authorization'];
-            $strHeaderDate              = $this->aryReqHeaderData['Date'];
+            $strHeaderAuthorization     = $this->aryReqHeaderData['authorization'];
+            $strHeaderDate              = $this->aryReqHeaderData['date'];
 
             $strRequestURIOnRest        = $this->strRequestURIOnRest;
 
@@ -428,14 +431,13 @@ class RestAPIInfoAdmin{
 
     function requireWrap(){
         $boolExeContinue = true;
-        $boolRequire = @require($this->strBufferRequirePath);
+        $boolRequire = require($this->strBufferRequirePath);
         if( $boolRequire===false ){
             // 呼び出し失敗
             $boolExeContinue = false;
             $this->intResultStatusCode       = 500;
             //
             $this->aryErrorInfo['Exception'] = 'RestAPI submodule['.$this->strBufferRequirePath.'] call error';
-            break;
         }
         else{
             if(isset($boolExeContinue)===false){

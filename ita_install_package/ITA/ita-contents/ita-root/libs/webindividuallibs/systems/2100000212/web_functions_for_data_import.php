@@ -86,6 +86,12 @@ function uploadZipFile(){
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
     }
 
+    // ファイル名確認
+    if(preg_match("/^[^,\"'\t\/\r\n]*$/s", $_FILES['zipfile']['name']) !== 1){
+        web_log("The file name[" . $_FILES['zipfile']['name'] . "] is invalid.");
+        throw new Exception($g['objMTS']->getSomeMessage('ITAWDCH-ERR-513'));
+    }
+
     // ファイル移動
     if (move_uploaded_file($_FILES['zipfile']['tmp_name'], $uploadFilePath) === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900019',

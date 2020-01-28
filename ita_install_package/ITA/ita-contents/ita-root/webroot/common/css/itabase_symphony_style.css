@@ -186,11 +186,12 @@ article {
 	color:#F5F5F5;
 	font-size:18px;
 	font-weight:bold;
-	width:60px;
-	height:60px;
+	width: 60px;
+	height: 60px;
 	text-align:center;
-	line-height:60px;
-	border-radius:50%;
+  text-shadow: 1px 1px 2px rgba( 0,0,0,0.2 );
+	line-height: 60px;
+	border-radius: 50%;
 }
 .ui-sortable {
 	position: relative;
@@ -490,31 +491,43 @@ border-top: none;border-radius: 0 0 4px 4px;
 /* ----materialAreaFunctionOn */
 
 .movement {
-	padding: 8px;
-	overflow: hidden;
+  padding: 8px 8px 8px 10px;
 }
-
-.movement:nth-child(2n+1){
+.movement:nth-child(2n+1) {
 	background: #E5EAEF;
 }
-
 .movement .operation_box {
-	line-height: 35px;
-	margin-left: 48px;
+  display: table;
+  width: calc( 100% - 46px );
+  margin-left: 46px;
+  height: 34px;
 }
 .movement .operation_box .inLineTitle {
-	display: block;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	overflow: hidden;
+  display: table-cell;
+  vertical-align: middle;
+  line-height: 1.5;
+  color: #444;
+  word-break: break-all;
 }
 .draggable-handle {
-	border-radius: 50%;
-	width: 35px;
-	height: 35px;
-	background: #0070FF;
-	float: left;
-	margin-right: 10px;
+  display: block;
+  float: left;
+	width: 34px; height: 34px;
+	background-color: transparent;
+  border-radius: 50%;
+  box-shadow: -4px -4px 8px rgba( 0,0,0,0.1 ) inset;
+  transition-duration: 0.3s;
+}
+.draggable-handle::after {
+  content: '';
+  display: block;
+  width: 100%; height: 100%;
+  background-image: radial-gradient( circle at 25% 25%, rgba( 255,255,255,0.5 ), transparent );
+  box-shadow: 0 0 0 2px #FFF, 0 0 6px 2px rgba( 0,0,0,0.3 );
+  border-radius: 50%;
+}
+.movement2 .draggable-handle::after {
+  box-shadow: 0 0 0 3px #FFF, 0 0 6px 3px rgba( 0,0,0,0.3 );
 }
 
 /* materialAreaFunctionOn---- */
@@ -526,62 +539,66 @@ border-top: none;border-radius: 0 0 4px 4px;
 	border: 1px solid #999;
 }
 
+
+
 /* ----theme colors */
 
 .red {
-	background: #FF0070;
+	background: #EB0F0F;
 }
 .green {
-	background: #00FF8F;
+	background: #00A050;
 }
 .blue {
-	background: #0000FF;
+	background: #0050B4;
 }
 .orange {
-	background: #FF8F00;
+	background: #F79300;
 }
 .black {
-	background: #010101;
+	background: #333333;
 }
 .brown {
-        background: #8D4513;
+  background: #785028;
 }
 
 /* OpenAudIT ------- */
 .auditgreen {
-        background: #67BA42;
+  background: #80C624;
 }
 /* ------- OpenAudIT */
 
 /* OpenStack ------- */
 .dahliapurple {
-        background: #A50082;
+  background: #962896;
 }
 /* ------- OpenStack */
 
 /* DSC ------- */
 .DSCblue {
-        background: #0C5C9C;
+  background: #5A96FF;
 }
 /* ------- DSC */
 
 /* TestPlayer ------- */
 .TPpink {
-        background: #FF1493;
+  background: #FF758D;
 }
 /*  ------- TestPlayer  */
 
 /* OpenShift ------- */
 .darkcyan {
-        background: #008B8B;
+  background: #0096B4;
 }
 /* ------- OpenShift */
 
 /* AnsibleTower ------- */
 .naplesyellow {
-        background: #FDD35C;
+  background: #FAD228;
 }
 /* ------- AnsibleTower */
+
+
 
 .ttc_red {
     color: #FF0070;
@@ -645,12 +662,13 @@ border-top: none;border-radius: 0 0 4px 4px;
 
 #startMark,
 #endMark {
-	background-image: repeating-linear-gradient( 90deg, #AAA, #AAA 10px, #BBB 10px, #BBB 20px);
+	background-image: linear-gradient( 90deg, #A0A0A0 50%, #ACACAC 50% );
+  background-size: 16px 16px;
 	animation: startRunning 0.5s linear infinite;
 }
 @keyframes startRunning {
 	0% { background-position: 0 0; }
-	100% { background-position: 20px 0; }
+	100% { background-position: 16px 0; }
 }
 .symStatusEnd,
 #startMark.symStatusEnd,
@@ -683,13 +701,14 @@ border-top: none;border-radius: 0 0 4px 4px;
     /* (水系)準備中・実行中 */
 	font-size:10px;
 	background: #29adc0; /* [2.1] */
-	background-image: repeating-linear-gradient( 90deg, #29adc0, #29adc0 5px, #1199ad 5px, #1199ad 10px);
+	background-image: linear-gradient( 90deg, #29adc0 50%, #1199ad 50% );
+  background-size: 8px 8px;
 	animation: statusRunningOnTime 0.5s linear infinite;
 }
 @keyframes statusRunningOnTime {
 	0% { background-position: 0 0; transform: scale( 1 ); }
-	50% { background-position: 5px 0; transform: scale( 1.05 ); }
-	100% { background-position: 10px 0; transform: scale( 1 ); }
+	50% { background-position: 4px 0; transform: scale( 1.05 ); }
+	100% { background-position: 8px 0; transform: scale( 1 ); }
 }
 
 
@@ -935,8 +954,19 @@ article.draggable_area {
 	border-top: 1px dashed #CCC;
 	max-height: 590px;
 }
+#material_area_wrapper .movement::after {
+content: '';
+display: block;
+clear: both;
+}
 #material_area_wrapper .draggable-handle {
-	cursor: s-resize;
+	cursor: pointer;
+}
+#material_area_wrapper .draggable-handle:hover {
+  transform: translateX( -4px );
+}
+#material_area_wrapper .draggable-handle:active {
+  cursor: ns-resize;
 }
 
 #material_area {

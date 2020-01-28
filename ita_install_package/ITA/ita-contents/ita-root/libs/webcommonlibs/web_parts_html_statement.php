@@ -42,6 +42,9 @@
     $timeStamp_plotly_latest_min_js=filemtime("$root_dir_path/webroot/common/javascripts/plotly-latest.min.js");
     $timeStamp_favicon_ico=filemtime("$root_dir_path/webroot/common/imgs/favicon.ico");
 
+    $timeStamp_common_itaTable_css=filemtime("$root_dir_path/webroot/common/css/common_itaTable.css");
+    $timeStamp_common_itaTable_js=filemtime("$root_dir_path/webroot/common/javascripts/common_itaTable.js");
+
 print <<< EOD
     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
     <html lang="ja">
@@ -54,6 +57,7 @@ print <<< EOD
 
         <title>{$title_name}</title>
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/common_superTables.js?{$timeStamp_common_superTables_js}"></script>
+        <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/common_itaTable.js?{$timeStamp_common_itaTable_js}"></script>
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/common_tableSort.js?{$timeStamp_common_tableSort_js}"></script>
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/common_valueControllers.js?{$timeStamp_common_valueControllers_js}"></script>
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/common_ky_javasctipts.js?{$timeStamp_common_ky_javasctipts_js}"></script>
@@ -68,6 +72,7 @@ print <<< EOD
         </script>
         <link rel="stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/common_style.css?{$timeStamp_common_style_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/common_superTables.css?{$timeStamp_common_superTables_css}">
+        <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/common_itaTable.css?{$timeStamp_common_itaTable_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/jquery-ui-1.10.4.custom.min.css?{$timeStamp_jquery_ui_1_10_4_custom_min_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/jquery.datetimepicker.css?{$timeStamp_jquery_datetimepicker_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/select2.css?{$timeStamp_select2_css}">

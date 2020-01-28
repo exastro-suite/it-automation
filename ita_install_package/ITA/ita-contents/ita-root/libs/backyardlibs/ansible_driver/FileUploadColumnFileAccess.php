@@ -95,7 +95,7 @@ class FileUploadColumnFileAccessBase{
         return($dir);
     }
 
-    function getFilePath($pkey,$FileName) {
+    function getFilePath($pkey,$FileName = Null) {
         $root_dir_temp = array();
         $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
         $root_dir_path = $root_dir_temp[0] . "ita-root";
@@ -143,7 +143,7 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
     function GetLastError() {
         return $this->lv_lasterrmsg;
     }
-    function getFilePath($pkey) {
+    function getFilePath($pkey,$FileName = Null) {
         return(parent::getFilePath($pkey,'AnalysFile.json'));
     }
 
@@ -276,7 +276,6 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
                         if($ret != 0) {
                             // 多段定義の場合
                             if( ! isset($Vars_list[$var_name])) {
-                                if(strlen($retStrBody)!=0) $retStrBody .= "\n";
                                 $this->SetLastError(basename(__FILE__),__LINE__,
                                                     $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000020",
                                                                                      array($line,$var_name)));
@@ -286,7 +285,6 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
                                     $GBL_vars_info['1'][$var_name] = '0';
                                 } else {
                                     // 複数具体値定義の場合
-                                    if(strlen($retStrBody)!=0) $retStrBody .= "\n";
                                     $this->SetLastError(basename(__FILE__),__LINE__,
                                                         $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000020",
                                                                                          array($line,$var_name)));
@@ -295,7 +293,6 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
                             }
                         } else {
                             // 変数名がastrollで扱えない場合
-                            if(strlen($retStrBody)!=0) $retStrBody .= "\n";
                             $this->SetLastError(basename(__FILE__),__LINE__,
                                                 $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000017",
                                                                                   array($line,$var_name)));

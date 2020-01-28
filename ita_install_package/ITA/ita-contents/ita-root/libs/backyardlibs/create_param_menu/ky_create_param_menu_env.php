@@ -58,6 +58,11 @@ define('FILE_MST_LOADTABLE',            'master_00_loadTable.php');             
 define('FILE_MST_LOADTABLE_VAL',        'master_00_loadTable_value.php');       // マスタ用の00_loadTable.phpのデータ部テンプレート
 define('FILE_MST_SQL',                  'masterDB.sql');                        // マスタ用のDB作成用のSQLテンプレート
 
+define('FILE_CMDB_LOADTABLE',              'cmdb_00_loadTable.php');               // CMDB用の00_loadTable.phpテンプレート
+define('FILE_CMDB_LOADTABLE_VAL',          'cmdb_00_loadTable_value.php');         // CMDB用の00_loadTable.phpのデータ部テンプレート
+define('FILE_CMDB_LOADTABLE_ID',           'cmdb_00_loadTable_id.php');            // CMDB用の00_loadTable.phpのデータ部テンプレート(ID用)
+define('FILE_CMDB_SQL',                    'cmdbDB.sql');                          // CMDB用のDB作成用のSQLテンプレート
+
 define('TABLE_PREFIX',              'KY_AUTO_TABLE_');                  // テーブル名の接頭語
 define('MASTER_PREFIX',             'KY_AUTO_MASTER_');                 // マスタ名の接頭語
 define('COLUMN_PREFIX',             'KY_AUTO_COL_');                    // カラム名の接頭語

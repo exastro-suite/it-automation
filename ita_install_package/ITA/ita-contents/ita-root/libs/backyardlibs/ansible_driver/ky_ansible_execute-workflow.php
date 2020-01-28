@@ -676,6 +676,10 @@
                                                  $objMTS,
                                                  $objDBCA);
 
+            // Ansibleコマンド実行ユーザー設定
+            $ansdrv->setAnsibleExecuteUser($lv_ans_exec_user);
+
+
             // データベースからansibleで実行する情報取得し実行ファイル作成
             $ret = CreateAnsibleExecFilesfunction($vg_driver_id,
                                                   $ansdrv,
@@ -861,6 +865,7 @@
                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-51067",array($tgt_execution_no,$rest_api_response['StatusCode']));
                         require ($root_dir_path . $log_output_php );
                     }
+
                 
                     ////////////////////////////////////////////////////////////////
                     // 結果判定                                                   //
@@ -871,6 +876,7 @@
                     
                         // 異常メッセージ
                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",$tgt_execution_no);
+                        $ansdrv->LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
                         require ($root_dir_path . $log_output_php );
                         $FREE_LOG = print_r($rest_api_response,true);
                         require ($root_dir_path . $log_output_php );
@@ -1656,13 +1662,6 @@
                     } 
                     if(isset($JobTemplatePropertyParameterAry[$PropertyName])) {
                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000002",array($ChkParamString));
-                        $ErrorMsgAry[] = $FREE_LOG;
-                        $result = false;
-                        break;
-                    }
-                    // Exastro1.1ではジョブスライス数は未対応
-                    if($PropertyName == "job_slice_count") {
-                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000103",array($ChkParamString));
                         $ErrorMsgAry[] = $FREE_LOG;
                         $result = false;
                         break;

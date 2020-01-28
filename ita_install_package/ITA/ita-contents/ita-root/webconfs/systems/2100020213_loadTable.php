@@ -87,6 +87,16 @@ Ansible(Pioneer)作業管理
     $c->setJournalDispIDOfMaster('STATUS_NAME');
     $table->addColumn($c);
     
+    /* 実行区分 */
+    $c = new IDColumn('EXEC_MODE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203065"),'B_ANSIBLE_EXEC_MODE','ID','NAME','', array('OrderByThirdColumn'=>'ID'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203066"));
+    $table->addColumn($c);
+
+    //virtualenv
+    $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000016"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000017"));//エクセル・ヘッダでの説明
+    $table->addColumn($c);
+
     //シンフォニークラス
     $c = new TextColumn('SYMPHONY_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309120"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309130"));//エクセル・ヘッダでの説明

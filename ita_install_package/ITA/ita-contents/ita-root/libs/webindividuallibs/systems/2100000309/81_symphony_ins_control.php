@@ -46,6 +46,8 @@ function symphonyInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSONO
     $intUIErrorMsgSaveIndex = -1;
     $aryOverrideForErrorData = array();
     
+    $intResultInfoCode="000";//結果コード(正常終了)
+
    // 各種ローカル変数を定義
     
     $strFxName = __FUNCTION__;
@@ -63,6 +65,51 @@ function symphonyInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSONO
             $tmpAryOrderData = $objJSONOfReceptedData;
         }
         list($intSymphonyInstanceId       , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('SYMPHONY_INSTANCE_ID') ,null);
+
+        //予約取消、緊急停止の場合
+        if( $strCommand == "CANCEL" || $strCommand == "SCRAM" ){
+            //ステータス確認、予約取消、緊急停止の結果コード追加
+            $aryRowOfSymInstanceTable = getSingleSymphonyInfoFromSymphonyInstances($intSymphonyInstanceId, 1);
+            if ( array_key_exists('STATUS_ID', $aryRowOfSymInstanceTable[4])) {
+                if ( in_array($aryRowOfSymInstanceTable[4]['STATUS_ID'], array(5,6,7,8,9) )   ){
+                    //----予約取消
+                    if( $strCommand == "CANCEL"  ){
+                        $intResultInfoCode = "002";//結果コード(予約取消不可)
+                        $strExpectedErrMsgBodyForUI = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-102040",$aryRowOfSymInstanceTable[4]['STATUS_ID']);
+                    }
+                    //----緊急停止
+                    if( $strCommand == "SCRAM"  &&  $aryRowOfSymInstanceTable[4]['ABORT_EXECUTE_FLAG'] == '2' ){
+                        $intResultInfoCode = "003";//結果コード(緊急停止不可)
+                        $strExpectedErrMsgBodyForUI = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-101030",$aryRowOfSymInstanceTable[4]['STATUS_ID']);
+                    }
+                }
+            }else{
+                 if( $strCommand == "CANCEL" )$intResultInfoCode = "002";//結果コード(予約取消不可)
+                 if( $strCommand == "SCRAM"  )$intResultInfoCode = "003";//結果コード(緊急停止不可)
+            }  
+        }
+
+        //一時停止解除の場合
+        if( $strCommand == "RELEASE" ){
+            //保留解除のフラグチェック、結果コード追加
+            $aryRowOfMovement = getInfoFromOneOfSymphonyInstances($intSymphonyInstanceId,1);
+            list($tmpMovseqNo       , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('MOVEMENT_SEQ_NO') ,null);
+            $arrMovseqNo = --$tmpMovseqNo;
+            //Movementの実行番号の確認
+            if( array_key_exists($arrMovseqNo, $aryRowOfMovement[5] ) ){
+                //保留解除済み
+                if($aryRowOfMovement[5][$arrMovseqNo]['RELEASED_FLAG']==2){
+                    $intResultInfoCode = "004";//結果コード(一時停止解除不可)  
+                    $strExpectedErrMsgBodyForUI =  "Movemntの保留は解除済みです。";
+                }
+            }else{
+                //Movementの実行番号不正の場合
+                $strExpectedErrMsgBodyForUI =  "Movementの実行番号が不正です。";
+                $intResultInfoCode = "004";//結果コード(一時停止解除不可)  
+            }          
+        }
+
+
         switch($strCommand){
             case "INFO":
                 $aryRetBody = symphonyInstancePrint($intSymphonyInstanceId);
@@ -91,13 +138,7 @@ function symphonyInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSONO
         }
         
         if( $aryRetBody[1] !== null ){
-            $intErrorType = $aryRetBody[1];
-            $intErrorPlaceMark = 2000;
-            if( $intErrorType < 500 ){
-                $strExpectedErrMsgBodyForUI = $aryRetBody[$intUIErrorMsgSaveIndex];
-                $intResultStatusCode = 400;
-            }
-            throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                if( $aryRetBody[$intUIErrorMsgSaveIndex] != "" )$strExpectedErrMsgBodyForUI = $aryRetBody[$intUIErrorMsgSaveIndex];
         }
         
         if( headers_sent() === true ){
@@ -110,6 +151,9 @@ function symphonyInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSONO
         // 成功時のデータテンプレを取得
         $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
         $aryForResultData['resultdata'] = $aryRetBody[0];
+        $aryForResultData['resultdata']['RESULTCODE'] = $intResultInfoCode;
+        $aryForResultData['resultdata']['RESULTINFO'] = $strExpectedErrMsgBodyForUI;
+
     }
     catch (Exception $e){
         // 失敗時のデータテンプレを取得
@@ -126,7 +170,11 @@ function symphonyInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSONO
         if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
         if( 500 <= $intErrorType ) $strSysErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
         if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
+        $intResultInfoCode   = "";//結果コード(異常終了)
     }
+
+    if($intResultInfoCode != "")$aryForResultData['resultdata']['RESULTCODE'] = $intResultInfoCode;
+
     $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
                           'ResultData'=>$aryForResultData);
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
@@ -331,6 +379,7 @@ function scramOneOfSymphonyInstances($fxVarsIntSymphonyInstanceId){
                          nl2br($strExpectedErrMsgBodyForUI)
                          );
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
     return $arrayResult;
 }
 
@@ -391,4 +440,5 @@ function holdReleaseOneOfMovementInstances($fxVarsIntSymphonyInstanceId,$fxVarsI
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     return $arrayResult;
 }
+
 ?>

@@ -54,6 +54,7 @@ class CAnstwrExeInsMng extends TableBaseDefinition {
             "OPERATION_NO_UAPK"            => "",
             "I_OPERATION_NAME"             => "",
             "I_OPERATION_NO_IDBH"          => "",
+            "I_VIRTUALENV_NAME"            => "",
             "TIME_BOOK"                     => "DATETIME",
             "TIME_START"                    => "DATETIME",
             "TIME_END"                      => "DATETIME",

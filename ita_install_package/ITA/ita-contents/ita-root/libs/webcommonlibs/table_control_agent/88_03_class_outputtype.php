@@ -585,6 +585,7 @@ class TraceOutputType extends OutputType {
 		$strFxName = __CLASS__."::".__FUNCTION__;
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 		$boolAbort = false;
+		$boolNullSkip = false;
 		$objTable = $this->objColumn->getTable();
 		$strInitedColId = $this->objColumn->getID();
 		$aryVariant['callerClass'] = get_class($this);
@@ -613,6 +614,9 @@ class TraceOutputType extends OutputType {
 			if( array_key_exists($strFirstSearchKeySetColId, $rowData)===true ){
 				$strSearchKeyValue = $rowData[$strFirstSearchKeySetColId];
 				$strStartValue = $strSearchKeyValue;
+                if(is_null($strStartValue)){
+                    $boolNullSkip = true;
+                }
 			}else{
 				//----キーが存在しないので、中断
 				$boolAbort = true;
@@ -620,7 +624,7 @@ class TraceOutputType extends OutputType {
 			}
 		}
 
-		if( $boolAbort === false ){
+		if( $boolAbort === false && $boolNullSkip === false ){
 			foreach($this->aryTraceQuery as $arySingleTraceQuery){
 				$intTraceTryCount += 1;
 				$aryForBind = array(

@@ -23,7 +23,6 @@ if( empty($root_dir_path) ){
     $root_dir_temp = explode('ita-root', dirname(__FILE__));
     $root_dir_path = $root_dir_temp[0] . 'ita-root';
 }
-
 define('ROOT_DIR_PATH',         $root_dir_path);
 require_once ROOT_DIR_PATH      . '/libs/backyardlibs/create_param_menu/ky_create_param_menu_env.php';
 require_once CPM_LIB_PATH       . 'ky_create_param_menu_classes.php';
@@ -31,7 +30,6 @@ require_once CPM_LIB_PATH       . 'ky_create_param_menu_functions.php';
 require_once COMMONLIBS_PATH    . 'common_php_req_gate.php';
 
 try{
-
     $logPrefix = basename( __FILE__, '.php' ) . '_';
     $tmpDir = "";
 
@@ -44,6 +42,7 @@ try{
     // 未実行のレコードがない場合は処理を終了する
     //////////////////////////
     $createMenuStatusArray = getUnexecutedRecord();
+    
     if(count($createMenuStatusArray) === 0){
         if(LOG_LEVEL === 'DEBUG'){
             outputLog($objMTS->getSomeMessage('ITACREPAR-STD-10004'));
@@ -72,6 +71,10 @@ try{
                               TEMPLATE_PATH . FILE_CONVERT_SQL,
                               TEMPLATE_PATH . FILE_CONVERT_H_LOADTABLE,
                               TEMPLATE_PATH . FILE_CONVERT_H_SQL,
+                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE,
+                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_ID,
+                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_VAL,
+                              TEMPLATE_PATH . FILE_CMDB_SQL,
                              );
     $templateArray = array();
     foreach($templatePathArray as $templatePath){
@@ -106,7 +109,10 @@ try{
     $convSqlTmpl                = $templateArray[14];
     $convHostLoadTableTmpl      = $templateArray[15];
     $convHostSqlTmpl            = $templateArray[16];
-
+    $cmdbLoadTableTmpl          = $templateArray[17];
+    $cmdbLoadTableIdTmpl        = $templateArray[18];
+    $cmdbLoadTableValTmpl       = $templateArray[19];
+    $cmdbSqlTmpl                = $templateArray[20];
     //////////////////////////
     // パラメータシート作成情報を取得
     //////////////////////////
@@ -384,6 +390,7 @@ try{
         $hgLoadTableVal = "";
         $hostLoadTableVal = "";
         $viewLoadTableVal = "";
+        $cmdbLoadTableVal = "";
         $errFlg = false;
         $itemColumnGrpArrayArray = array();
 
@@ -423,16 +430,16 @@ try{
             // 「'」がある場合は「\'」に変換する
             $description    = str_replace("'", "\'", $itemInfo['DESCRIPTION']);
             $itemName       = str_replace("'", "\'", $itemInfo['ITEM_NAME']);
-
-            if("2" == $cmiData['PURPOSE']){
-                // ホストグループ用loadTableのカラム埋め込み部分を作成する
+                       
+            if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
+                // データシート用loadTableのカラム埋め込み部分を作成する
                 // 文字列の場合
                 if(1 == $itemInfo['INPUT_METHOD_ID']){
-                    $work = $hgLoadTableValTmpl;
+                    $work = $cmdbLoadTableValTmpl;
                 }
                 // 他メニュー参照の場合
                 else{
-                    $work = $hgLoadTableIdTmpl;
+                    $work = $cmdbLoadTableIdTmpl;
                 }
 
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -468,95 +475,144 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                 }
-                $hgLoadTableVal .= $work . "\n";
-            }
-
-            // ホスト用loadTableのカラム埋め込み部分を作成する
-            // 文字列の場合
-            if(1 == $itemInfo['INPUT_METHOD_ID']){
-                $work = $hostLoadTableValTmpl;
-            }
-            // 他メニュー参照の場合
-            else{
-                $work = $hostLoadTableIdTmpl;
-            }
-
-            $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
-
-            $work = str_replace(REPLACE_INFO,   $description,               $work);
-            if("" != $itemInfo['PREG_MATCH']){
-                $pregWork = str_replace("'", "\\'", $itemInfo['PREG_MATCH']);
-                $work = str_replace(REPLACE_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+                $cmdbLoadTableVal .= $work . "\n";
             }
             else{
-                $work = str_replace(REPLACE_PREG, "", $work);
-            }
-            $work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
-            $work = str_replace(REPLACE_DISP,   $itemName,                  $work);
-            $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
-            if(1 == $itemInfo['REQUIRED']){
-                $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
-            }
-            else{
-                $work = str_replace(REPLACE_REQUIRED, "", $work);
-            }
+				if("2" == $cmiData['PURPOSE']){
+					// ホストグループ用loadTableのカラム埋め込み部分を作成する
+					// 文字列の場合
+					if(1 == $itemInfo['INPUT_METHOD_ID']){
+						$work = $hgLoadTableValTmpl;
+					}
+					// 他メニュー参照の場合
+					else{
+						$work = $hgLoadTableIdTmpl;
+					}
 
-            if(1 == $itemInfo['UNIQUED'] && "1" == $cmiData['PURPOSE']){
-                $work = str_replace(REPLACE_UNIQUED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setUnique(true);", $work);
-            }
-            else{
-                $work = str_replace(REPLACE_UNIQUED, "", $work);
-            }
-            // 他メニュー参照の場合
-            if(2 == $itemInfo['INPUT_METHOD_ID']){
-                $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
-                $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
-                $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
-                $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
-            }
-            $hostLoadTableVal .= $work . "\n";
+					$work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
 
-            // 最新値参照用loadTableのカラム埋め込み部分を作成する
-            // 文字列の場合
-            if(1 == $itemInfo['INPUT_METHOD_ID']){
-                $work = $viewLoadTableValTmpl;
-            }
-            // 他メニュー参照の場合
-            else{
-                $work = $viewLoadTableIdTmpl;
-            }
+					$work = str_replace(REPLACE_INFO,   $description,               $work);
+					if("" != $itemInfo['PREG_MATCH']){
+						$pregWork = str_replace("'", "\\'", $itemInfo['PREG_MATCH']);
+						$work = str_replace(REPLACE_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+					}
+					else{
+						$work = str_replace(REPLACE_PREG, "", $work);
+					}
+					$work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
+					$work = str_replace(REPLACE_DISP,   $itemName,                  $work);
+					$work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
+					if(1 == $itemInfo['REQUIRED']){
+						$work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
+					}
+					else{
+						$work = str_replace(REPLACE_REQUIRED, "", $work);
+					}
+					if(1 == $itemInfo['UNIQUED']){
+						$work = str_replace(REPLACE_UNIQUED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setUnique(true);", $work);
+					}
+					else{
+						$work = str_replace(REPLACE_UNIQUED, "", $work);
+					}
+					// 他メニュー参照の場合
+					if(2 == $itemInfo['INPUT_METHOD_ID']){
+						$matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+						$otherMenuLink = $otherMenuLinkArray[$matchIdx];
+						$work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
+						$work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
+						$work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+					}
+					$hgLoadTableVal .= $work . "\n";
+				}
 
-            $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
+				// ホスト用loadTableのカラム埋め込み部分を作成する
+				// 文字列の場合
+				if(1 == $itemInfo['INPUT_METHOD_ID']){
+					$work = $hostLoadTableValTmpl;
+				}
+				// 他メニュー参照の場合
+				else{
+					$work = $hostLoadTableIdTmpl;
+				}
 
-            $work = str_replace(REPLACE_INFO,   $description,               $work);
-            if("" != $itemInfo['PREG_MATCH']){
-                $pregWork = str_replace("'", "\\'", $itemInfo['PREG_MATCH']);
-                $work = str_replace(REPLACE_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
-            }
-            else{
-                $work = str_replace(REPLACE_PREG, "", $work);
-            }
-            $work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
-            $work = str_replace(REPLACE_DISP,   $itemName,                  $work);
-            $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
-            // 他メニュー参照の場合
-            if(2 == $itemInfo['INPUT_METHOD_ID']){
-                $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
-                $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
-                $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
-                $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
-            }
-            $viewLoadTableVal .= $work . "\n";
-        }
+				$work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
+
+				$work = str_replace(REPLACE_INFO,   $description,               $work);
+				if("" != $itemInfo['PREG_MATCH']){
+					$pregWork = str_replace("'", "\\'", $itemInfo['PREG_MATCH']);
+					$work = str_replace(REPLACE_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+				}
+				else{
+					$work = str_replace(REPLACE_PREG, "", $work);
+				}
+				$work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
+				$work = str_replace(REPLACE_DISP,   $itemName,                  $work);
+				$work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
+				if(1 == $itemInfo['REQUIRED']){
+					$work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
+				}
+				else{
+					$work = str_replace(REPLACE_REQUIRED, "", $work);
+				}
+
+				if(1 == $itemInfo['UNIQUED'] && "1" == $cmiData['PURPOSE']){
+					$work = str_replace(REPLACE_UNIQUED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setUnique(true);", $work);
+				}
+				else{
+					$work = str_replace(REPLACE_UNIQUED, "", $work);
+				}
+				// 他メニュー参照の場合
+				if(2 == $itemInfo['INPUT_METHOD_ID']){
+					$matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+					$otherMenuLink = $otherMenuLinkArray[$matchIdx];
+					$work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
+					$work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
+					$work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+				}
+				$hostLoadTableVal .= $work . "\n";
+
+				// 最新値参照用loadTableのカラム埋め込み部分を作成する
+				// 文字列の場合
+				if(1 == $itemInfo['INPUT_METHOD_ID']){
+					$work = $viewLoadTableValTmpl;
+				}
+				// 他メニュー参照の場合
+				else{
+					$work = $viewLoadTableIdTmpl;
+				}
+
+				$work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
+
+				$work = str_replace(REPLACE_INFO,   $description,               $work);
+				if("" != $itemInfo['PREG_MATCH']){
+					$pregWork = str_replace("'", "\\'", $itemInfo['PREG_MATCH']);
+					$work = str_replace(REPLACE_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+				}
+				else{
+					$work = str_replace(REPLACE_PREG, "", $work);
+				}
+				$work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
+				$work = str_replace(REPLACE_DISP,   $itemName,                  $work);
+				$work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
+				// 他メニュー参照の場合
+				if(2 == $itemInfo['INPUT_METHOD_ID']){
+					$matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+					$otherMenuLink = $otherMenuLinkArray[$matchIdx];
+					$work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
+					$work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
+					$work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+				}
+				$viewLoadTableVal .= $work . "\n";
+			}
+        } 
+        
         unset($itemInfo);
         if(true === $errFlg){
             continue;
         }
 
         // カラムグループ部品組み立て
-        $columnGrpParts = makeColumnGrpParts($itemColumnGrpArrayArray);
+        $columnGrpParts = makeColumnGrpParts($itemColumnGrpArrayArray, $cmiData['TARGET']);
 
         // パラメータシート(縦)を作成する設定の場合
         if(true === $createConvFlg){
@@ -697,16 +753,18 @@ try{
             }
 
             // カラムグループ部品組み立て
-            $convColumnGrpParts = makeColumnGrpParts($convItemColumnGrpArrayArray);
+            $convColumnGrpParts = makeColumnGrpParts($convItemColumnGrpArrayArray, $substitution="1");
 
-            // 用途によってホストキーとホスト定義を設定する
-            if("2" == $cmiData['PURPOSE']){
-                $hostKey = "KY_KEY";
-                $hostDef = "\$c = new IDColumn('KY_KEY',\$g['objMTS']->getSomeMessage('ITACREPAR-MNU-102601') . '/' . \$g['objMTS']->getSomeMessage('ITACREPAR-MNU-102602'),'G_UQ_HOST_LIST','KY_KEY','KY_VALUE','');";
-            }
-            else{
-                $hostKey = "HOST_ID";
-                $hostDef = "\$c = new IDColumn('HOST_ID',\$g['objMTS']->getSomeMessage('ITACREPAR-MNU-102601'),'C_STM_LIST','SYSTEM_ID','HOSTNAME','');";
+            if("1" == $cmiData['TARGET']){  // 作成対象; パラメータシート用
+            	// 用途によってホストキーとホスト定義を設定する
+				if("2" == $cmiData['PURPOSE']){
+					$hostKey = "KY_KEY";
+					$hostDef = "\$c = new IDColumn('KY_KEY',\$g['objMTS']->getSomeMessage('ITACREPAR-MNU-102601') . '/' . \$g['objMTS']->getSomeMessage('ITACREPAR-MNU-102602'),'G_UQ_HOST_LIST','KY_KEY','KY_VALUE','');";
+				}
+				else{
+					$hostKey = "HOST_ID";
+					$hostDef = "\$c = new IDColumn('HOST_ID',\$g['objMTS']->getSomeMessage('ITACREPAR-MNU-102601'),'C_STM_LIST','SYSTEM_ID','HOSTNAME','');";
+				}
             }
         }
 
@@ -715,121 +773,140 @@ try{
         $description    = str_replace("\n", "<BR/>", $description);
         $menuName       = str_replace("'", "\'", $cmiData['MENU_NAME']);
 
-        if("2" == $cmiData['PURPOSE']){
-            // ホストグループ用の00_loadTable.php
-            $work = $hgLoadTableTmpl;
-            $work = str_replace(REPLACE_INFO,   $description,       $work);
-            $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
-            $work = str_replace(REPLACE_MENU,   $menuName,          $work);
-            $hgLoadTableVal .= $columnGrpParts;
-            $work = str_replace(REPLACE_ITEM,   $hgLoadTableVal, $work);
-            $hgLoadTable = $work;
-        }
-
-        // ホスト用の00_loadTable.php
-        $work = $hostLoadTableTmpl;
-        $work = str_replace(REPLACE_INFO,   $description,       $work);
-        $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
-        $work = str_replace(REPLACE_MENU,   $menuName,          $work);
-        $hostLoadTableVal .= $columnGrpParts;
-        $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
-        $hostLoadTable = $work;
-
-        // パラメータシート(縦)を作成する設定の場合
-        if(true === $createConvFlg){
-
-            // 縦メニュー用の00_loadTable.php
-            $convertLoadTableVal .= $convColumnGrpParts;
-            if("2" == $cmiData['PURPOSE']){
-                $work = $convLoadTableTmpl;
-                $work = str_replace(REPLACE_INFO,       $description,           $work);
-                $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                $work = str_replace(REPLACE_MENU,       $menuName,              $work);
-                $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
-                $convertLoadTable = $work;
-                $work = $convHostLoadTableTmpl;
-                $work = str_replace(REPLACE_INFO,       $description,           $work);
-                $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                $work = str_replace(REPLACE_MENU,       $menuName,              $work);
-                $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
-                $convertHostLoadTable = $work;
-            }
-            else{
-                $work = $convHostLoadTableTmpl;
-                $work = str_replace(REPLACE_INFO,       $description,           $work);
-                $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                $work = str_replace(REPLACE_MENU,       $menuName,              $work);
-                $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
-                $convertLoadTable = $work;
-            }
-        }
-
-        // 最新値参照用の00_loadTable.php
-        $work = $viewLoadTableTmpl;
-        $work = str_replace(REPLACE_INFO,   $description,       $work);
-        $work = str_replace(REPLACE_MENU,   $menuName,          $work);
-        if(true === $createConvFlg){
-            $work = str_replace(REPLACE_TABLE,  $menuTableName . '_CONV',     $work);
-            $inputOrder = <<< 'EOD'
-    // 入力順序
-    $c = new NumColumn('INPUT_ORDER',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102613"));
-    $c->setHiddenMainTableColumn(true);
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102614"));
-    $c->setValidator(new IntNumValidator(0, null));
-    $c->getOutputType("filter_table")->setVisible(false);
-    $c->setSubtotalFlag(false);
-    $table->addColumn($c);
-EOD;
-            $work = str_replace(REPLACE_INPUT_ORDER, $inputOrder, $work);
-
-            $convertViewLoadTableVal .= $convColumnGrpParts;
-            $work = str_replace(REPLACE_ITEM,   $convertViewLoadTableVal,  $work);
-        }
+        if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
+		    // データシート用の00_loadTable.php
+			$work = $cmdbLoadTableTmpl;
+			$work = str_replace(REPLACE_INFO,   $description,       $work);
+			$work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+			$work = str_replace(REPLACE_MENU,   $menuName,          $work);
+			$cmdbLoadTableVal .= $columnGrpParts;
+			$work = str_replace(REPLACE_ITEM,   $cmdbLoadTableVal, $work);
+			$cmdbLoadTable = $work;
+			
+			// データシート用のSQL
+			$work = $cmdbSqlTmpl;
+			$work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
+			$work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
+			$work = str_replace(REPLACE_COL,        $columns,       $work);
+			$cmdbSql = $work;
+		}
         else{
-            $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
-            $work = str_replace(REPLACE_INPUT_ORDER, "", $work);
-            $viewLoadTableVal .= $columnGrpParts;
-            $work = str_replace(REPLACE_ITEM,   $viewLoadTableVal,  $work);
-        }
-        $viewLoadTable = $work;
+			if("2" == $cmiData['PURPOSE']){
+				// ホストグループ用の00_loadTable.php
+				$work = $hgLoadTableTmpl;
+				$work = str_replace(REPLACE_INFO,   $description,       $work);
+				$work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+				$work = str_replace(REPLACE_MENU,   $menuName,          $work);
+				$hgLoadTableVal .= $columnGrpParts;
+				$work = str_replace(REPLACE_ITEM,   $hgLoadTableVal, $work);
+				$hgLoadTable = $work;
+			}
 
-        // ホストグループ用のSQL
-        $work = $hgSqlTmpl;
-        $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
-        $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
-        $work = str_replace(REPLACE_COL,        $columns,       $work);
-        $hgSql = $work;
+			// ホスト用の00_loadTable.php
+			$work = $hostLoadTableTmpl;
+			$work = str_replace(REPLACE_INFO,   $description,       $work);
+			$work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+			$work = str_replace(REPLACE_MENU,   $menuName,          $work);
+			$hostLoadTableVal .= $columnGrpParts;
+			$work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
+			$hostLoadTable = $work;
 
-        // ホスト用のSQL
-        $work = $hostSqlTmpl;
-        $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
-        $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
-        $work = str_replace(REPLACE_COL,        $columns,       $work);
-        $hostSql = $work;
+			// パラメータシート(縦)を作成する設定の場合
+			if(true === $createConvFlg){
 
-        // パラメータシート(縦)を作成する設定の場合
-        if(true === $createConvFlg){
+				// 縦メニュー用の00_loadTable.php
+				$convertLoadTableVal .= $convColumnGrpParts;
+				if("2" == $cmiData['PURPOSE']){
+					$work = $convLoadTableTmpl;
+					$work = str_replace(REPLACE_INFO,       $description,           $work);
+					$work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+					$work = str_replace(REPLACE_MENU,       $menuName,              $work);
+					$work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
+					$convertLoadTable = $work;
+					$work = $convHostLoadTableTmpl;
+					$work = str_replace(REPLACE_INFO,       $description,           $work);
+					$work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+					$work = str_replace(REPLACE_MENU,       $menuName,              $work);
+					$work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
+					$convertHostLoadTable = $work;
+				}
+				else{
+					$work = $convHostLoadTableTmpl;
+					$work = str_replace(REPLACE_INFO,       $description,           $work);
+					$work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+					$work = str_replace(REPLACE_MENU,       $menuName,              $work);
+					$work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
+					$convertLoadTable = $work;
+				}
+			}
 
-            // 縦メニュー用のSQL
-            if("2" == $cmiData['PURPOSE']){
-                $work = $convSqlTmpl;
-                $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
-                $work = str_replace(REPLACE_COL,        $convColumns,           $work);
-                $convertSql = $work;
-                $work = $convHostSqlTmpl;
-                $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
-                $work = str_replace(REPLACE_COL,        $convColumns,           $work);
-                $convertSql .= $work;
-            }
-            else{
-                $work = $convHostSqlTmpl;
-                $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
-                $work = str_replace(REPLACE_COL,        $convColumns,           $work);
-                $convertSql = $work;
-            }
+			// 最新値参照用の00_loadTable.php
+			$work = $viewLoadTableTmpl;
+			$work = str_replace(REPLACE_INFO,   $description,       $work);
+			$work = str_replace(REPLACE_MENU,   $menuName,          $work);
+			if(true === $createConvFlg){
+				$work = str_replace(REPLACE_TABLE,  $menuTableName . '_CONV',     $work);
+				$inputOrder = <<< 'EOD'
+// 入力順序
+$c = new NumColumn('INPUT_ORDER',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102614"));
+$c->setHiddenMainTableColumn(true);
+$c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102614"));
+$c->setValidator(new IntNumValidator(0, null));
+$c->getOutputType("filter_table")->setVisible(false);
+$c->setSubtotalFlag(false);
+$table->addColumn($c);
+EOD;
+			$work = str_replace(REPLACE_INPUT_ORDER, $inputOrder, $work);
+
+			$convertViewLoadTableVal .= $convColumnGrpParts;
+			$work = str_replace(REPLACE_ITEM,   $convertViewLoadTableVal,  $work);
+		}
+		else{
+			$work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+			$work = str_replace(REPLACE_INPUT_ORDER, "", $work);
+			$viewLoadTableVal .= $columnGrpParts;
+			$work = str_replace(REPLACE_ITEM,   $viewLoadTableVal,  $work);
+		}
+		$viewLoadTable = $work;
+
+			// ホストグループ用のSQL
+			$work = $hgSqlTmpl;
+			$work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
+			$work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
+			$work = str_replace(REPLACE_COL,        $columns,       $work);
+			$hgSql = $work;
+
+			// ホスト用のSQL
+			$work = $hostSqlTmpl;
+			$work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
+			$work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
+			$work = str_replace(REPLACE_COL,        $columns,       $work);
+			$hostSql = $work;
+
+			// パラメータシート(縦)を作成する設定の場合
+			if(true === $createConvFlg){
+
+				// 縦メニュー用のSQL
+				if("2" == $cmiData['PURPOSE']){
+					$work = $convSqlTmpl;
+					$work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+					$work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
+					$work = str_replace(REPLACE_COL,        $convColumns,           $work);
+					$convertSql = $work;
+					$work = $convHostSqlTmpl;
+					$work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+					$work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
+					$work = str_replace(REPLACE_COL,        $convColumns,           $work);
+					$convertSql .= $work;
+				}
+				else{
+					$work = $convHostSqlTmpl;
+					$work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+					$work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
+					$work = str_replace(REPLACE_COL,        $convColumns,           $work);
+					$convertSql = $work;
+				}
+			}  
         }
 
         //////////////////////////
@@ -854,9 +931,9 @@ EOD;
         //////////////////////////
         $sqlFilePath = $menuTmpDir . $menuTableName . ".sql";
 
-        if("2" == $cmiData['PURPOSE']){
-            // ホストグループ用
-            $result = file_put_contents($sqlFilePath, $hgSql);
+        if("2" == $cmiData['TARGET']){
+            // データシート用
+            $result = file_put_contents($sqlFilePath, $cmdbSql);
             if(false === $result){
                 $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($sqlFilePath));
                 outputLog($msg);
@@ -865,27 +942,39 @@ EOD;
                 continue;
             }
         }
+        else{
+			if("2" == $cmiData['PURPOSE']){
+				// ホストグループ用
+				$result = file_put_contents($sqlFilePath, $hgSql);
+				if(false === $result){
+					$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($sqlFilePath));
+					outputLog($msg);
+					// パラメータシート作成管理更新処理を行う
+					updateMenuStatus($targetData, "4", $msg, false, true);
+					continue;
+				}
+			}
+			// ホスト用
+			$result = file_put_contents($sqlFilePath, $hostSql, FILE_APPEND);
+			if(false === $result){
+				$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($sqlFilePath));
+				outputLog($msg);
+				// パラメータシート作成管理更新処理を行う
+				updateMenuStatus($targetData, "4", $msg, false, true);
+				continue;
+			}
 
-        // ホスト用
-        $result = file_put_contents($sqlFilePath, $hostSql, FILE_APPEND);
-        if(false === $result){
-            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($sqlFilePath));
-            outputLog($msg);
-            // パラメータシート作成管理更新処理を行う
-            updateMenuStatus($targetData, "4", $msg, false, true);
-            continue;
-        }
+			// パラメータシート(縦)を作成する設定の場合
+			if(true === $createConvFlg){
 
-        // パラメータシート(縦)を作成する設定の場合
-        if(true === $createConvFlg){
-
-            $result = file_put_contents($sqlFilePath, $convertSql, FILE_APPEND);
-            if(false === $result){
-                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($sqlFilePath));
-                outputLog($msg);
-                // パラメータシート作成管理更新処理を行う
-                updateMenuStatus($targetData, "4", $msg, false, true);
-                continue;
+				$result = file_put_contents($sqlFilePath, $convertSql, FILE_APPEND);
+				if(false === $result){
+					$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($sqlFilePath));
+					outputLog($msg);
+					// パラメータシート作成管理更新処理を行う
+					updateMenuStatus($targetData, "4", $msg, false, true);
+					continue;
+				}
             }
         }
 
@@ -893,9 +982,9 @@ EOD;
         // 外部CMDB作成用SQL実行
         //////////////////////////
         $baseTable = new BaseTable_CPM($objDBCA, $db_model_ch);
-        if("2" == $cmiData['PURPOSE']){
-            // ホストグループ用
-            $explodeSql = explode(";", $hgSql);
+        if("2" == $cmiData['TARGET']){
+            // データシート用
+            $explodeSql = explode(";", $cmdbSql);
             $errFlg = false;
             foreach($explodeSql as $sql){
 
@@ -919,59 +1008,87 @@ EOD;
                 continue;
             }
         }
+        else{
+			if("2" == $cmiData['PURPOSE']){
+				// ホストグループ用
+				$explodeSql = explode(";", $hgSql);
+				$errFlg = false;
+				foreach($explodeSql as $sql){
 
-        // ホスト用
-        $explodeSql = explode(";", $hostSql);
-        $errFlg = false;
-        foreach($explodeSql as $sql){
+					// SQLが空の場合はスキップ
+					if("" === str_replace(" ", "", (str_replace("\n", "", $sql)))){
+						continue;
+					}
 
-            // SQLが空の場合はスキップ
-            if("" === str_replace(" ", "", (str_replace("\n", "", $sql)))){
-                continue;
-            }
+					// SQL実行
+					$result = $baseTable->execQuery($sql, NULL, $objQuery);
+					if(true !== $result){
+						$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', array($result));
+						outputLog($msg);
+						// パラメータシート作成管理更新処理を行う
+						updateMenuStatus($targetData, "4", $msg, false, true);
+						$errFlg = true;
+						break;
+					}
+				}
+				if(true === $errFlg){
+					continue;
+				}
+			}
 
-            // SQL実行
-            $result = $baseTable->execQuery($sql, NULL, $objQuery);
-            if(true !== $result){
-                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', array($result));
-                outputLog($msg);
-                // パラメータシート作成管理更新処理を行う
-                updateMenuStatus($targetData, "4", $msg, false, true);
-                $errFlg = true;
-                break;
-            }
-        }
-        if(true === $errFlg){
-            continue;
-        }
+			// ホスト用
+			$explodeSql = explode(";", $hostSql);
+			$errFlg = false;
+			foreach($explodeSql as $sql){
 
-        // パラメータシート(縦)を作成する設定の場合
-        if(true === $createConvFlg){
+				// SQLが空の場合はスキップ
+				if("" === str_replace(" ", "", (str_replace("\n", "", $sql)))){
+					continue;
+				}
 
-            $explodeSql = explode(";", $convertSql);
-            $errFlg = false;
-            foreach($explodeSql as $sql){
+				// SQL実行
+				$result = $baseTable->execQuery($sql, NULL, $objQuery);
+				if(true !== $result){
+					$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', array($result));
+					outputLog($msg);
+					// パラメータシート作成管理更新処理を行う
+					updateMenuStatus($targetData, "4", $msg, false, true);
+					$errFlg = true;
+					break;
+				}
+			}
+			if(true === $errFlg){
+				continue;
+			}
 
-                // SQLが空の場合はスキップ
-                if("" === str_replace(" ", "", (str_replace("\n", "", $sql)))){
-                    continue;
-                }
+			// パラメータシート(縦)を作成する設定の場合
+			if(true === $createConvFlg){
 
-                // SQL実行
-                $result = $baseTable->execQuery($sql, NULL, $objQuery);
-                if(true !== $result){
-                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', array($result));
-                    outputLog($msg);
-                    outputLog("SQL=$sql");
-                    // パラメータシート作成管理更新処理を行う
-                    updateMenuStatus($targetData, "4", $msg, false, true);
-                    $errFlg = true;
-                    break;
-                }
-            }
-            if(true === $errFlg){
-                continue;
-            }
+				$explodeSql = explode(";", $convertSql);
+				$errFlg = false;
+				foreach($explodeSql as $sql){
+
+					// SQLが空の場合はスキップ
+					if("" === str_replace(" ", "", (str_replace("\n", "", $sql)))){
+						continue;
+					}
+
+					// SQL実行
+					$result = $baseTable->execQuery($sql, NULL, $objQuery);
+					if(true !== $result){
+						$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', array($result));
+						outputLog($msg);
+						outputLog("SQL=$sql");
+						// パラメータシート作成管理更新処理を行う
+						updateMenuStatus($targetData, "4", $msg, false, true);
+						$errFlg = true;
+						break;
+					}
+				}
+				if(true === $errFlg){
+					continue;
+				}
+			}
         }
 
         //////////////////////////
@@ -1000,7 +1117,7 @@ EOD;
         //////////////////////////
         // ロール・メニュー紐付管理更新
         //////////////////////////
-        $result = updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+        $result = updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET']);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1019,163 +1136,176 @@ EOD;
             continue;
         }
 
-        //////////////////////////
-        // 他メニュー連携テーブル更新
-        //////////////////////////
-        $result = updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+		//////////////////////////
+		// 他メニュー連携テーブル更新
+		//////////////////////////
+		$result = updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+		if(true !== $result){
+			// パラメータシート作成管理更新処理を行う
+			updateMenuStatus($targetData, "4", $result, true, true);
+			continue;
+		}
 
-        if(true !== $result){
-            // パラメータシート作成管理更新処理を行う
-            updateMenuStatus($targetData, "4", $result, true, true);
-            continue;
-        }
+		if("1" == $cmiData['TARGET']){  // 作成対象: パラメータシート
+			//////////////////////////
+			// 紐付対象メニュー更新
+			//////////////////////////
+			$result = updateLinkTargetMenu($hostMenuId);
+			if(true !== $result){
+				// パラメータシート作成管理更新処理を行う
+				updateMenuStatus($targetData, "4", $result, true, true);
+				continue;
+			}
 
-        //////////////////////////
-        // 紐付対象メニュー更新
-        //////////////////////////
-        $result = updateLinkTargetMenu($hostMenuId);
+			//////////////////////////
+			// 紐付対象メニューテーブル管理更新
+			//////////////////////////
+			$result = updateLinkTargetTable($hostMenuId, "F_" . $menuTableName . "_H");
 
-        if(true !== $result){
-            // パラメータシート作成管理更新処理を行う
-            updateMenuStatus($targetData, "4", $result, true, true);
-            continue;
-        }
+			if(true !== $result){
+				// パラメータシート作成管理更新処理を行う
+				updateMenuStatus($targetData, "4", $result, true, true);
+				continue;
+			}
 
-        //////////////////////////
-        // 紐付対象メニューテーブル管理更新
-        //////////////////////////
-        $result = updateLinkTargetTable($hostMenuId, "F_" . $menuTableName . "_H");
+			//////////////////////////
+			// 紐付対象メニューカラム管理更新
+			//////////////////////////
+			$result = updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray);
 
-        if(true !== $result){
-            // パラメータシート作成管理更新処理を行う
-            updateMenuStatus($targetData, "4", $result, true, true);
-            continue;
-        }
+			if(true !== $result){
+				// パラメータシート作成管理更新処理を行う
+				updateMenuStatus($targetData, "4", $result, true, true);
+				continue;
+			}
 
-        //////////////////////////
-        // 紐付対象メニューカラム管理更新
-        //////////////////////////
-        $result = updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray);
+			// 用途がホストグループ用の場合
+			if("2" == $cmiData['PURPOSE']){
 
-        if(true !== $result){
-            // パラメータシート作成管理更新処理を行う
-            updateMenuStatus($targetData, "4", $result, true, true);
-            continue;
-        }
+				//////////////////////////
+				// ホストグループ分割対象更新
+				//////////////////////////
+				$result = updateDivideTarget($hgMenuId, $hostMenuId);
 
-        // 用途がホストグループ用の場合
-        if("2" == $cmiData['PURPOSE']){
+				if(true !== $result){
+					// パラメータシート作成管理更新処理を行う
+					updateMenuStatus($targetData, "4", $result, true, true);
+					continue;
+				}
 
-            //////////////////////////
-            // ホストグループ分割対象更新
-            //////////////////////////
-            $result = updateDivideTarget($hgMenuId, $hostMenuId);
+				if(true === $createConvFlg){
+					//////////////////////////
+					// ホストグループ分割対象更新
+					//////////////////////////
+					$result = updateDivideTarget($convMenuId, $convHostMenuId);
 
-            if(true !== $result){
-                // パラメータシート作成管理更新処理を行う
-                updateMenuStatus($targetData, "4", $result, true, true);
-                continue;
-            }
+					if(true !== $result){
+						// パラメータシート作成管理更新処理を行う
+						updateMenuStatus($targetData, "4", $result, true, true);
+						continue;
+					}
+				}
+			}
 
-            if(true === $createConvFlg){
-                //////////////////////////
-                // ホストグループ分割対象更新
-                //////////////////////////
-                $result = updateDivideTarget($convMenuId, $convHostMenuId);
+			// パラメータシート(縦)を作成する設定の場合
+			if(true === $createConvFlg){
 
-                if(true !== $result){
-                    // パラメータシート作成管理更新処理を行う
-                    updateMenuStatus($targetData, "4", $result, true, true);
-                    continue;
-                }
-            }
-        }
+				// 用途がホストグループ用の場合
+				if("2" == $cmiData['PURPOSE']){
+					$toMenuId = $hgMenuId;
+				}
+				else{
+					$toMenuId = $hostMenuId;
+				}
 
-        // パラメータシート(縦)を作成する設定の場合
-        if(true === $createConvFlg){
+				//////////////////////////
+				// パラメータシート縦横変換管理更新
+				//////////////////////////
+				$result = updateColToRowMng($cpiData, $convMenuId, $toMenuId, $cmiData['PURPOSE'], $startColName);
 
-            // 用途がホストグループ用の場合
-            if("2" == $cmiData['PURPOSE']){
-                $toMenuId = $hgMenuId;
-            }
-            else{
-                $toMenuId = $hostMenuId;
-            }
-
-            //////////////////////////
-            // パラメータシート縦横変換管理更新
-            //////////////////////////
-            $result = updateColToRowMng($cpiData, $convMenuId, $toMenuId, $cmiData['PURPOSE'], $startColName);
-
-            if(true !== $result){
-                // パラメータシート作成管理更新処理を行う
-                updateMenuStatus($targetData, "4", $result, true, true);
-                continue;
-            }
-        }
-
+				if(true !== $result){
+					// パラメータシート作成管理更新処理を行う
+					updateMenuStatus($targetData, "4", $result, true, true);
+					continue;
+				}
+			}
+        } 
         //////////////////////////
         // loadTableを配置する
         //////////////////////////
-        if("2" == $cmiData['PURPOSE']){
-            // ホストグループ用
-            $hgLoadTablePath = $menuTmpDir . sprintf("%010d", $hgMenuId) . "_loadTable.php";
-            $result = deployLoadTable($hgLoadTable,
-                                      $hgLoadTablePath,
-                                      sprintf("%010d", $hgMenuId),
-                                      $targetData
-                                     );
-            if(true !== $result){
-                continue;
-            }
+        if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
+				//データシート用
+				$cmdbLoadTablePath = $menuTmpDir . sprintf("%010d", $hostMenuId) . "_loadTable.php";
+				$result = deployLoadTable($cmdbLoadTable,
+										  $cmdbLoadTablePath,
+										  sprintf("%010d", $hostMenuId),
+										  $targetData
+										 );
+				if(true !== $result){
+					continue;
+				}
         }
+        else{
+			if("2" == $cmiData['PURPOSE']){
+				// ホストグループ用
+				$hgLoadTablePath = $menuTmpDir . sprintf("%010d", $hgMenuId) . "_loadTable.php";
+				$result = deployLoadTable($hgLoadTable,
+										  $hgLoadTablePath,
+										  sprintf("%010d", $hgMenuId),
+										  $targetData
+										 );
+				if(true !== $result){
+					continue;
+				}
+			}
 
-        // ホスト用
-        $hostLoadTablePath = $menuTmpDir . sprintf("%010d", $hostMenuId) . "_loadTable.php";
-        $result = deployLoadTable($hostLoadTable,
-                                  $hostLoadTablePath,
-                                  sprintf("%010d", $hostMenuId),
-                                  $targetData
-                                 );
-        if(true !== $result){
-            continue;
-        }
+			// ホスト用
+			$hostLoadTablePath = $menuTmpDir . sprintf("%010d", $hostMenuId) . "_loadTable.php";
+			$result = deployLoadTable($hostLoadTable,
+									  $hostLoadTablePath,
+									  sprintf("%010d", $hostMenuId),
+									  $targetData
+									 );
+			if(true !== $result){
+				continue;
+			}
 
-        // 最新値参照用
-        $viewLoadTablePath = $menuTmpDir . sprintf("%010d", $viewMenuId) . "_loadTable.php";
-        $result = deployLoadTable($viewLoadTable,
-                                  $viewLoadTablePath,
-                                  sprintf("%010d", $viewMenuId),
-                                  $targetData
-                                 );
-        if(true !== $result){
-            continue;
-        }
+			// 最新値参照用
+			$viewLoadTablePath = $menuTmpDir . sprintf("%010d", $viewMenuId) . "_loadTable.php";
+			$result = deployLoadTable($viewLoadTable,
+									  $viewLoadTablePath,
+									  sprintf("%010d", $viewMenuId),
+									  $targetData
+									 );
+			if(true !== $result){
+				continue;
+			}
 
-        // パラメータシート(縦)を作成する設定の場合
-        if(true === $createConvFlg){
-            // 縦メニュー用
-            $convertLoadTablePath = $menuTmpDir . sprintf("%010d", $convMenuId) . "_loadTable.php";
-            $result = deployLoadTable($convertLoadTable,
-                                      $convertLoadTablePath,
-                                      sprintf("%010d", $convMenuId),
-                                      $targetData
-                                     );
-            if(true !== $result){
-                continue;
-            }
+			// パラメータシート(縦)を作成する設定の場合
+			if(true === $createConvFlg){
+				// 縦メニュー用
+				$convertLoadTablePath = $menuTmpDir . sprintf("%010d", $convMenuId) . "_loadTable.php";
+				$result = deployLoadTable($convertLoadTable,
+										  $convertLoadTablePath,
+										  sprintf("%010d", $convMenuId),
+										  $targetData
+										 );
+				if(true !== $result){
+					continue;
+				}
 
-            if("2" == $cmiData['PURPOSE']){
-                $convertHostLoadTablePath = $menuTmpDir . sprintf("%010d", $convHostMenuId) . "_loadTable.php";
-                $result = deployLoadTable($convertHostLoadTable,
-                                          $convertHostLoadTablePath,
-                                          sprintf("%010d", $convHostMenuId),
-                                          $targetData
-                                         );
-                if(true !== $result){
-                    continue;
-                }
-            }
+				if("2" == $cmiData['PURPOSE']){
+					$convertHostLoadTablePath = $menuTmpDir . sprintf("%010d", $convHostMenuId) . "_loadTable.php";
+					$result = deployLoadTable($convertHostLoadTable,
+											  $convertHostLoadTablePath,
+											  sprintf("%010d", $convHostMenuId),
+											  $targetData
+											 );
+					if(true !== $result){
+						continue;
+					}
+				}
+			}
         }
 
         //////////////////////////
@@ -1202,74 +1332,90 @@ EOD;
             continue;
         }
 
-        if("2" == $cmiData['PURPOSE']){
-            // ホストグループ用の00_loadTable.php
-            $result = $zip->addFile($hgLoadTablePath, basename($hgLoadTablePath));
+        if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
+			// データシート用の00_loadTable.php
+			$result = $zip->addFile($cmdbLoadTablePath, basename($cmdbLoadTablePath));
 
-            if(true != $result){
-                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $hgLoadTablePath));
-                outputLog($msg);
-                // パラメータシート作成管理更新処理を行う
-                updateMenuStatus($targetData, "4", $msg, true, true);
-                $zip->close();
-                $zip = NULL;
-                continue;
-            }
+			if(true != $result){
+				$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $cmdbLoadTablePath));
+				outputLog($msg);
+				// パラメータシート作成管理更新処理を行う
+				updateMenuStatus($targetData, "4", $msg, true, true);
+				$zip->close();
+				$zip = NULL;
+				continue;
+			}
         }
+        else{ // 作成対象: パラメータシート 
+			if("2" == $cmiData['PURPOSE']){
+				// ホストグループ用の00_loadTable.php
+				$result = $zip->addFile($hgLoadTablePath, basename($hgLoadTablePath));
 
-        // ホスト用の00_loadTable.php
-        $result = $zip->addFile($hostLoadTablePath, basename($hostLoadTablePath));
+				if(true != $result){
+					$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $hgLoadTablePath));
+					outputLog($msg);
+					// パラメータシート作成管理更新処理を行う
+					updateMenuStatus($targetData, "4", $msg, true, true);
+					$zip->close();
+					$zip = NULL;
+					continue;
+				}
+			}
 
-        if(true != $result){
-            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $hostLoadTablePath));
-            outputLog($msg);
-            // パラメータシート作成管理更新処理を行う
-            updateMenuStatus($targetData, "4", $msg, true, true);
-            $zip->close();
-            $zip = NULL;
-            continue;
-        }
+			// ホスト用の00_loadTable.php
+			$result = $zip->addFile($hostLoadTablePath, basename($hostLoadTablePath));
 
-        // 参照用の00_loadTable.php
-        $result = $zip->addFile($viewLoadTablePath, basename($viewLoadTablePath));
+			if(true != $result){
+				$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $hostLoadTablePath));
+				outputLog($msg);
+				// パラメータシート作成管理更新処理を行う
+				updateMenuStatus($targetData, "4", $msg, true, true);
+				$zip->close();
+				$zip = NULL;
+				continue;
+			}
 
-        if(true != $result){
-            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $viewLoadTablePath));
-            outputLog($msg);
-            // パラメータシート作成管理更新処理を行う
-            updateMenuStatus($targetData, "4", $msg, true, true);
-            $zip->close();
-            $zip = NULL;
-            continue;
-        }
+			// 参照用の00_loadTable.php
+			$result = $zip->addFile($viewLoadTablePath, basename($viewLoadTablePath));
 
-        // パラメータシート(縦)を作成する設定の場合
-        if(true === $createConvFlg){
-        // 縦メニュー用の00_loadTable.php
-            $result = $zip->addFile($convertLoadTablePath, basename($convertLoadTablePath));
+			if(true != $result){
+				$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $viewLoadTablePath));
+				outputLog($msg);
+				// パラメータシート作成管理更新処理を行う
+				updateMenuStatus($targetData, "4", $msg, true, true);
+				$zip->close();
+				$zip = NULL;
+				continue;
+			}
 
-            if(true != $result){
-                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $convertLoadTablePath));
-                outputLog($msg);
-                // パラメータシート作成管理更新処理を行う
-                updateMenuStatus($targetData, "4", $result, true, true);
-                $zip->close();
-                $zip = NULL;
-                continue;
-            }
-            if("2" == $cmiData['PURPOSE']){
-                $result = $zip->addFile($convertHostLoadTablePath, basename($convertHostLoadTablePath));
+			// パラメータシート(縦)を作成する設定の場合
+			if(true === $createConvFlg){
+			// 縦メニュー用の00_loadTable.php
+				$result = $zip->addFile($convertLoadTablePath, basename($convertLoadTablePath));
 
-                if(true != $result){
-                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $convertHostLoadTablePath));
-                    outputLog($msg);
-                    // パラメータシート作成管理更新処理を行う
-                    updateMenuStatus($targetData, "4", $result, true, true);
-                    $zip->close();
-                    $zip = NULL;
-                    continue;
-                }
-            }
+				if(true != $result){
+					$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $convertLoadTablePath));
+					outputLog($msg);
+					// パラメータシート作成管理更新処理を行う
+					updateMenuStatus($targetData, "4", $result, true, true);
+					$zip->close();
+					$zip = NULL;
+					continue;
+				}
+				if("2" == $cmiData['PURPOSE']){
+					$result = $zip->addFile($convertHostLoadTablePath, basename($convertHostLoadTablePath));
+
+					if(true != $result){
+						$msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $convertHostLoadTablePath));
+						outputLog($msg);
+						// パラメータシート作成管理更新処理を行う
+						updateMenuStatus($targetData, "4", $result, true, true);
+						$zip->close();
+						$zip = NULL;
+						continue;
+					}
+				}
+			}
         }
 
         // SQLファイル
@@ -1524,13 +1670,14 @@ function updateMenuStatus($targetData, $status, $note, $rollbackFlg, $tranFlg, $
  * カラムグループ部品組み立て
  * 
  */
-function makeColumnGrpParts($itemColumnGrpArrayArray){
+function makeColumnGrpParts($itemColumnGrpArrayArray, $substitution){
 
     $columnGrpParts = "";
     $beforeKey = null;
     $beforeColumnGrpArray = array();
     $numsetColumnGrpArrayArray = array();
     $columnGrpNum = 1;
+    $substitutionFlag = ($substitution == "2") ? true : false;
 
     // カラムグループに番号を振る
     foreach($itemColumnGrpArrayArray as $key => $itemColumnGrpArray){
@@ -1568,8 +1715,12 @@ function makeColumnGrpParts($itemColumnGrpArrayArray){
         if($loopCnt !== 1){
 
             if(0 === count($beforeColumnGrpArray)){
-                // カラムグループの設定が無い場合、カラムを根本に紐付ける
-                $columnGrpParts .= "    \$cg->addColumn(\$c{$beforeKey});\n";
+				// カラムグループの設定が無い場合、カラムを根本に紐付ける
+                if($substitutionFlag){
+					$columnGrpParts .= "    \$table->addColumn(\$c{$beforeKey});\n";
+				}else{
+                	$columnGrpParts .= "    \$cg->addColumn(\$c{$beforeKey});\n";
+				}
             }
             else{
                 // カラムグループの設定がある場合、カラムグループの末端に紐付ける
@@ -1585,7 +1736,13 @@ function makeColumnGrpParts($itemColumnGrpArrayArray){
                         $columnGrpParts .= "    \$cg" . $beforeColumnGrpArray[$loopCnt2 - 1]['ID'] . "->addColumn(\$cg" . $beforeColumnGrpArray[$loopCnt2]['ID'] . ");\n";
                     }
                     else{
-                        $columnGrpParts .= "    \$cg->addColumn(\$cg" . $beforeColumnGrpArray[$loopCnt2]['ID'] . ");\n";
+						if($substitutionFlag){
+                    			// データシート用はテーブル直付け
+								$columnGrpParts .= "    \$table->addColumn(\$cg" . $beforeColumnGrpArray[$loopCnt2]['ID'] . ");\n";
+						}else{
+                     		    // パラメータシートは「パラメータ」直下に付ける
+								$columnGrpParts .= "    \$cg->addColumn(\$cg" . $beforeColumnGrpArray[$loopCnt2]['ID'] . ");\n";
+						}
                     }
                 }
             }
@@ -1593,24 +1750,35 @@ function makeColumnGrpParts($itemColumnGrpArrayArray){
 
         // ループの最後の場合
         if($loopCnt === count($numsetColumnGrpArrayArray)){
+			if(0 === count($numsetColumnGrpArray)){
+				// カラムグループの設定が無い場合、カラムを根本に紐付ける
+				if($substitutionFlag){
+                    // データシート用はテーブル直付け
+				    $columnGrpParts .= "    \$table->addColumn(\$c{$key});\n";
+				}else{
+                    // パラメータシートは「パラメータ」直下に付ける
+					$columnGrpParts .= "    \$cg->addColumn(\$c{$key});\n";
+				}
+			}
+			else{
+				// カラムグループの設定がある場合、カラムグループの末端に紐付ける
+				$columnGrpParts .= "    \$cg" . $numsetColumnGrpArray[count($numsetColumnGrpArray) - 1]['ID'] . "->addColumn(\$c{$key});\n";
+			}
 
-            if(0 === count($numsetColumnGrpArray)){
-                // カラムグループの設定が無い場合、カラムを根本に紐付ける
-                $columnGrpParts .= "    \$cg->addColumn(\$c{$key});\n";
-            }
-            else{
-                // カラムグループの設定がある場合、カラムグループの末端に紐付ける
-                $columnGrpParts .= "    \$cg" . $numsetColumnGrpArray[count($numsetColumnGrpArray) - 1]['ID'] . "->addColumn(\$c{$key});\n";
-            }
-
-            for($loopCnt3 = count($numsetColumnGrpArray) -1; 0 <= $loopCnt3; $loopCnt3--){
-                if($loopCnt3 !== 0){
-                    $columnGrpParts .= "    \$cg" . $numsetColumnGrpArray[$loopCnt3 - 1]['ID'] . "->addColumn(\$cg" . $numsetColumnGrpArray[$loopCnt3]['ID'] . ");\n";
-                }
-                else{
-                    $columnGrpParts .= "    \$cg->addColumn(\$cg" . $numsetColumnGrpArray[$loopCnt3]['ID'] . ");\n";
-                }
-            }
+			for($loopCnt3 = count($numsetColumnGrpArray) -1; 0 <= $loopCnt3; $loopCnt3--){
+				if($loopCnt3 !== 0){
+					$columnGrpParts .= "    \$cg" . $numsetColumnGrpArray[$loopCnt3 - 1]['ID'] . "->addColumn(\$cg" . $numsetColumnGrpArray[$loopCnt3]['ID'] . ");\n";
+				}
+				else{
+					if($substitutionFlag){
+                        // データシート用はテーブル直付け
+						$columnGrpParts .= "    \$table->addColumn(\$cg" . $numsetColumnGrpArray[$loopCnt3]['ID'] . ");\n"; 
+					}else{
+                        // パラメータシートは「パラメータ」直下に付ける
+						$columnGrpParts .= "    \$cg->addColumn(\$cg" . $numsetColumnGrpArray[$loopCnt3]['ID'] . ");\n";
+					}
+				}
+			}
         }
 
         $beforeColumnGrpArray = $numsetColumnGrpArray;
@@ -1813,6 +1981,12 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
 
             // 必須かつ一意の場合
             if(1 == $itemInfo['REQUIRED'] && 1 == $itemInfo['UNIQUED']){
+                
+                if($substitutionFlag == true){
+                	$strParameter = "";      // データシート用は「パラメータ」をつけない
+				}else{
+                	$strParameter = $objMTS->getSomeMessage("ITACREPAR-MNU-102612") ."/"; 
+				}
 
                 // 項目名を決定する
                 if(0 < count($itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']])){
@@ -1908,6 +2082,10 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
                 $convMatchFlg = true;
                 $convMenuList = $menu;
             }
+            else if($cmiData['MENUGROUP_FOR_CMDB'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
+                $cmdbMatchFlg = true;
+                $cmdbMenuList = $menu;
+            }
             else if(MENU_GROUP_ID_CONV_HOST == $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
                 $convHostMatchFlg = true;
                 $convHostMenuList = $menu;
@@ -1915,17 +2093,21 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
         }
 
         $targetArray = array();
-        if(true === $createConvFlg){
-            $targetArray[] = array('MATCH_FLG' => $convMatchFlg, 'DATA' => $convMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_CONV']);
+        if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
+            $targetArray[] = array('MATCH_FLG' => $cmdbMatchFlg, 'DATA' => $cmdbMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_CMDB']);
         }
-        if("2" == $cmiData['PURPOSE']){
-            $targetArray[] = array('MATCH_FLG' => $hgMatchFlg, 'DATA' => $hgMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_HG']);
-        }
-        $targetArray[] = array('MATCH_FLG' => $hostMatchFlg, 'DATA' => $hostMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_H']);
-        $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
-
-        if(true === $createConvFlg && "2" == $cmiData['PURPOSE']){
-            $targetArray[] = array('MATCH_FLG' => $convHostMatchFlg, 'DATA' => $convHostMenuList, 'MENU_GROUP' => MENU_GROUP_ID_CONV_HOST);
+        else{
+			if(true === $createConvFlg){
+				$targetArray[] = array('MATCH_FLG' => $convMatchFlg, 'DATA' => $convMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_CONV']);
+			}
+			if("2" == $cmiData['PURPOSE']){
+				$targetArray[] = array('MATCH_FLG' => $hgMatchFlg, 'DATA' => $hgMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_HG']);
+			}
+			$targetArray[] = array('MATCH_FLG' => $hostMatchFlg, 'DATA' => $hostMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_H']);
+			$targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+			if(true === $createConvFlg && "2" == $cmiData['PURPOSE']){
+				$targetArray[] = array('MATCH_FLG' => $convHostMatchFlg, 'DATA' => $convHostMenuList, 'MENU_GROUP' => MENU_GROUP_ID_CONV_HOST);
+			}
         }
 
         foreach($targetArray as &$target){
@@ -1988,38 +2170,47 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
         }
         unset($target);
 
-        if(true === $createConvFlg){
-            if("2" == $cmiData['PURPOSE']){
-                $convMenuId = $targetArray[0]['MENU_ID'];
-                $hgMenuId   = $targetArray[1]['MENU_ID'];
-                $hostMenuId = $targetArray[2]['MENU_ID'];
-                $viewMenuId = $targetArray[3]['MENU_ID'];
-                $convHostMenuId = $targetArray[4]['MENU_ID'];
-            }
-            else{
-                $convMenuId = $targetArray[0]['MENU_ID'];
-                $hgMenuId   = NULL;
-                $hostMenuId = $targetArray[1]['MENU_ID'];
-                $viewMenuId = $targetArray[2]['MENU_ID'];
-                $convHostMenuId = NULL;
-            }
-        }
+		if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
+			$convMenuId = NULL;
+			$hgMenuId   = NULL;
+			$hostMenuId = $targetArray[0]['MENU_ID'];  // MenuID はホスト用を使用
+			$viewMenuId = NULL; 
+			$convHostMenuId = NULL;
+		}
         else{
-            if("2" == $cmiData['PURPOSE']){
-                $convMenuId = NULL;
-                $hgMenuId   = $targetArray[0]['MENU_ID'];
-                $hostMenuId = $targetArray[1]['MENU_ID'];
-                $viewMenuId = $targetArray[2]['MENU_ID'];
-                $convHostMenuId = NULL;
-            }
-            else{
-                $convMenuId = NULL;
-                $hgMenuId   = NULL;
-                $hostMenuId = $targetArray[0]['MENU_ID'];
-                $viewMenuId = $targetArray[1]['MENU_ID'];
-                $convHostMenuId = NULL;
-            }
-        }
+			if(true === $createConvFlg){
+				if("2" == $cmiData['PURPOSE']){
+					$convMenuId = $targetArray[0]['MENU_ID'];
+					$hgMenuId   = $targetArray[1]['MENU_ID'];
+					$hostMenuId = $targetArray[2]['MENU_ID'];
+					$viewMenuId = $targetArray[3]['MENU_ID'];
+					$convHostMenuId = $targetArray[4]['MENU_ID'];
+				}
+				else{
+					$convMenuId = $targetArray[0]['MENU_ID'];
+					$hgMenuId   = NULL;
+					$hostMenuId = $targetArray[1]['MENU_ID'];
+					$viewMenuId = $targetArray[2]['MENU_ID'];
+					$convHostMenuId = NULL;
+				}
+			}
+			else{
+				if("2" == $cmiData['PURPOSE']){
+					$convMenuId = NULL;
+					$hgMenuId   = $targetArray[0]['MENU_ID'];
+					$hostMenuId = $targetArray[1]['MENU_ID'];
+					$viewMenuId = $targetArray[2]['MENU_ID'];
+					$convHostMenuId = NULL;
+				}
+				else{
+					$convMenuId = NULL;
+					$hgMenuId   = NULL;
+					$hostMenuId = $targetArray[0]['MENU_ID'];
+					$viewMenuId = $targetArray[1]['MENU_ID'];
+					$convHostMenuId = NULL;
+				}
+			}
+        }  
 
         return true;
     }
@@ -2031,7 +2222,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
 /*
  * ロール・メニュー紐付管理更新
  */
-function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
+function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target){
     global $objDBCA, $db_model_ch, $objMTS;
     $roleMenuLinkListTable = new RoleMenuLinkListTable($objDBCA, $db_model_ch);
 
@@ -2074,31 +2265,38 @@ function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId
                 }
             }
         }
-
-        if(NULL !== $convMenuId && NULL !== $hgMenuId){
-            $menuArray = array(array($convMenuId,       1,  '0'),
-                               array($hgMenuId,         2,  '0'),
-                               array($hostMenuId,       2,  '0'),
-                               array($viewMenuId,       2,  '0'),
-                               array($convHostMenuId,   2,  '1'),
-                              );
+        
+        // データシートの場合
+        if("2" == $target){
+                $menuArray = array(array($hostMenuId,   1,  '0'));
         }
-        else if(NULL !== $convMenuId && NULL === $hgMenuId){
-            $menuArray = array(array($convMenuId,   1,  '0'),
-                               array($hostMenuId,   2,  '0'),
-                               array($viewMenuId,   2,  '0'),
-                              );
-        }
-        else if(NULL === $convMenuId && NULL !== $hgMenuId){
-            $menuArray = array(array($hgMenuId,     1,  '0'),
-                               array($hostMenuId,   2,  '0'),
-                               array($viewMenuId,   2,  '0'),
-                              );
-        }
+        // パラメータシートの場合
         else{
-            $menuArray = array(array($hostMenuId,   1,  '0'),
-                               array($viewMenuId,   2,  '0'),
-                              );
+            if(NULL !== $convMenuId && NULL !== $hgMenuId){
+                $menuArray = array(array($convMenuId,       1,  '0'),
+                                   array($hgMenuId,         2,  '0'),
+                                   array($hostMenuId,       2,  '0'),
+                                   array($viewMenuId,       2,  '0'),
+                                   array($convHostMenuId,   2,  '1'),
+                                  );
+            }
+            else if(NULL !== $convMenuId && NULL === $hgMenuId){
+                $menuArray = array(array($convMenuId,   1,  '0'),
+                                   array($hostMenuId,   2,  '0'),
+                                   array($viewMenuId,   2,  '0'),
+                                  );
+            }
+            else if(NULL === $convMenuId && NULL !== $hgMenuId){
+                $menuArray = array(array($hgMenuId,     1,  '0'),
+                                   array($hostMenuId,   2,  '0'),
+                                   array($viewMenuId,   2,  '0'),
+                                  );
+            }
+            else{
+                $menuArray = array(array($hostMenuId,   1,  '0'),
+                                   array($viewMenuId,   2,  '0'),
+                                  );
+            }
         }
 
         foreach($menuArray as $menu){
@@ -2624,7 +2822,7 @@ function updateColToRowMng($cpiData, $menuId, $toMenuId, $purpose, $startColName
         $insertData['TO_MENU_ID']       = $toMenuId;                // 変換先メニュー
         $insertData['PURPOSE']          = $purpose;                 // 用途
         $insertData['START_COL_NAME']   = $startColName;            // 開始カラム名
-        $insertData['COL_CNT']   = $cpiData['COL_CNT'];             // 項目数
+        $insertData['COL_CNT']          = $cpiData['COL_CNT'];      // 項目数
         $insertData['REPEAT_CNT']       = $cpiData['REPEAT_CNT'];   // 繰り返し数
         $insertData['CHANGED_FLG']      = "0";                      // 縦横変換済みフラグ
         $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ

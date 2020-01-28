@@ -607,7 +607,7 @@ class OrchestratorLinkAgent {
     //存在しているオーケストレータ情報を取得する
     
     //----存在している作業パターンを取得する
-    function getLivePatternFromMaster($aryOrchestratorId=null,$strSearchKeyValue="",$aryPatternId=null){
+    function getLivePatternFromMaster($aryOrchestratorId=array(),$strSearchKeyValue="",$aryPatternId=array()){
         /////////////////////////////////////////////////////////////
         // 作業パターン情報を取得                                  //
         /////////////////////////////////////////////////////////////
@@ -639,7 +639,7 @@ class OrchestratorLinkAgent {
         $strPatternMasterAnsExecOption        = 'ANS_EXEC_OPTIONS';
         $strPatternMasterOpenst_Template      = 'OPENST_TEMPLATE';
         $strPatternMasterOpenst_Env           = 'OPENST_ENVIRONMENT';
-
+        $strPatternMasterAnsVirtualEnvName    = 'ANS_VIRTUALENV_NAME';
         
         try{
             $objDBCA = $this->getDBConnectAgent();
@@ -725,6 +725,7 @@ class OrchestratorLinkAgent {
                   .",{$strPatternMasterDscRetryTimeout} DSC_RETRY_TIMEOUT " 
                   .",{$strPatternMasterAnsPlaybookHedDef} ANS_PLAYBOOK_HED_DEF "
                   .",{$strPatternMasterAnsExecOption} ANS_EXEC_OPTIONS "
+                  .",{$strPatternMasterAnsVirtualEnvName} ANS_VIRTUALENV_NAME "
                   .",{$strPatternMasterOpenst_Template} OPENST_TEMPLATE "
                   .",{$strPatternMasterOpenst_Env} OPENST_ENVIRONMENT "
                   ."FROM   {$strPatternMasterTableId} "

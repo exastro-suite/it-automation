@@ -52,13 +52,12 @@ Ansible(Legacy)作業管理
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108040"));
     // エクセルのシート名
-    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108050"));
+    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108050")
+);
 
     //---- 検索機能の制御
     $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
     // 検索機能の制御----
-
-
 
     $table->setDBSortKey(array("EXECUTION_NO"=>"DESC"));
 
@@ -66,11 +65,6 @@ Ansible(Legacy)作業管理
     $strTextBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108060");
     $c = new LinkButtonColumn( 'MonitorExecution', $strTextBody, $strTextBody, 'monitor_execution', array( ":EXECUTION_NO" ) );
     $c->setDBColumn(false);
-    $table->addColumn($c);
-
-    /* 実行区分 */
-    $c = new IDColumn('EXEC_MODE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203065"),'B_ANSIBLE_EXEC_MODE','ID','NAME','', array('OrderByThirdColumn'=>'ID'));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203066"));
     $table->addColumn($c);
 
     //実行種別
@@ -83,6 +77,7 @@ Ansible(Legacy)作業管理
     $c->setJournalDispIDOfMaster('RUN_MODE_NAME');
     $table->addColumn($c);
 
+    //状態
     $c = new IDColumn('STATUS_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108070"),'D_ANSIBLE_LNS_INS_STATUS','STATUS_ID','STATUS_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108080"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_ANSIBLE_LNS_INS_STATUS_JNL');
@@ -92,6 +87,16 @@ Ansible(Legacy)作業管理
     $c->setJournalDispIDOfMaster('STATUS_NAME');
     $table->addColumn($c);
     
+    /* 実行区分 */
+    $c = new IDColumn('EXEC_MODE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203065"),'B_ANSIBLE_EXEC_MODE','ID','NAME','', array('OrderByThirdColumn'=>'ID'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203066"));
+    $table->addColumn($c);
+
+    //virtualenv
+    $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000016"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000017"));//エクセル・ヘッダでの説明
+    $table->addColumn($c);
+
     //シンフォニークラス
     $c = new TextColumn('SYMPHONY_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108120"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108130"));//エクセル・ヘッダでの説明

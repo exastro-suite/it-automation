@@ -462,6 +462,7 @@
     }
     
     $server = new HTML_AJAX_Server();
-    $server->registerClass(new Db_Access());
+    $db_access = new Db_Access();
+    $server->registerClass($db_access);
     $server->handleRequest();
 ?>
