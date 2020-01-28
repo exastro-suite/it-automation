@@ -1,9 +1,6 @@
 @charset "UTF-8";
 
 /***********************************************************************
- * common_style.css for NEC IT Automation
- *                                      Last Modified: 2019/03/14
- *                                      Encode :ＵＴＦ－８
  * 00.initialized
  * 01.HEADER
  * 02.FOOTER
@@ -14,18 +11,6 @@
  * 07.system messages(warning/err/alert)
  * 08.etc(sort/selectlist...)
  ********************************************************************** /
-
- 
-
-
-
-
-
-
-
-
-
-
 
  /* 00.initialized *******************************************************/
 body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, select, fieldset, p, blockquote, th, td, input[type="file"], input[type="submit"], input[type="button"] {
@@ -168,6 +153,7 @@ a:hover, a:active {
 #FOOTER {
 	position: fixed;
 	bottom: 0; left: 0;
+  z-index: 9999;
 	width: 100%;
 	min-width: 1240px;
 	padding: 8px;
@@ -746,9 +732,6 @@ td.likeHeader {
 	background-color: #EBEBEB;
 	min-height: 20px;
 }
-tr:hover td.likeHeader {
-	background-color: #FFFF88;
-}
 
 th.number, td.number {
 	text-align: right;
@@ -825,9 +808,6 @@ span.sortMarkWrap > * {
 	border: none;
 	margin-bottom: 10px;
 	width: 100%;
-	min-width: 1020px;
-	height: 700px; /* !important */
-	overflow: hidden;
 }
 
 /* calendar */

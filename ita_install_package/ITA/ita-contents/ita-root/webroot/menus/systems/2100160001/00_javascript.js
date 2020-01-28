@@ -224,6 +224,14 @@ callback.prototype = {
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
+
+        if(ary_result[0] != "002"){ 
+            (function(){
+                var action = 'update';
+                selectValue(action, $('#' + action + '_table2').val());
+                selectTargetAction(action); 
+            }());
+        }
     },
     Mix1_1_deleteTable : function( result ){
         var strMixOuterFrameName = 'Mix1_Nakami';
@@ -289,7 +297,6 @@ callback.prototype = {
         if( ary_result[0] == "000" ){
 
             var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
-
             switch( ary_result[1] ){
                 case "100":
                     window.alert(resultContentTag);
@@ -326,6 +333,13 @@ callback.prototype = {
         }
 
         showForDeveloper(result);
+        if( ary_result[0] != "002" ){  
+            (function(){
+                var action = 'register' 
+                selectValue(action, '1');
+                selectTargetAction(action); 
+            }());
+        }
     },
     Journal1Tbl_printJournal : function( result ){
         var strMixOuterFrameName = 'Journal1_Nakami';
@@ -426,7 +440,6 @@ window.onload = function(){
 
 // ----サイト個別メニュー、ここから
 // サイト個別メニュー、ここまで----
-
 }
 
 //////// コールバックファンクション---- ////////
@@ -853,3 +866,124 @@ function jumpToItem(menu_name){
     window.open(url);
 }
 // ここまでカスタマイズした場合の一般メソッド配置域----
+
+// イベント処理 ここから
+$(document).on('change', '#register_table2', function(){
+   selectTargetAction('register');
+});
+
+$(document).on('change', '#update_table2', function(){
+   selectTargetAction('update');
+});
+
+/*
+* 作成対象プルダウン変更時の処理
+*
+* 項目の追加/変更時には以下の配列を増減させる。
+* paramCols, dataCols
+*/    
+function selectTargetAction(action){
+    // パラメータシート固有の項目の項目番号
+    var paramCols =       [5, 7, 8, 9, 10];         
+    // データシート固有の項目の項目番号
+    var dataCols = [6];
+
+    var selecter = getSelecter(action);
+		
+		// Parent fake container
+		var $fakeContainer = $( selecter.header ).closest('div[class^="fakeContainer_"]');
+		
+		if( !$fakeContainer.is('.menuEditTable') ) {
+			$fakeContainer.addClass('menuEditTable')
+				.find('.defaultExplainRow th').each( function( index ){
+				var colsClass = '';
+				if ( paramCols.indexOf( index + 1 ) != -1 ) colsClass = 'param';
+				if ( dataCols.indexOf( index + 1 ) != -1 ) colsClass = 'data'; 
+				if ( colsClass != '' ) {
+					$( this ).addClass( colsClass );
+					$fakeContainer.find('.colCheckList li.level1').eq( index ).addClass( colsClass );
+				}
+			});
+		}
+		
+    if (selecter.val == '2'){ // 「データシート」を選択
+        
+        // 項目を非表示 + 値消去
+        paramCols.forEach(function(num){
+            hideColumns(action, selecter, num);
+        });
+        // 項目を表示
+        dataCols.forEach(function(num){
+            showColumns(selecter, num);
+        });
+				
+				$fakeContainer.attr('data-select-type', 'data');
+        
+    }else if(selecter.val == '1'){    //「パラメータシート」を選択
+        // 項目を非表示 + 値消去
+        dataCols.forEach(function(num){
+            hideColumns(action, selecter, num);
+        });
+
+        // 項目を表示
+        paramCols.forEach(function(num){
+            showColumns(selecter, num);
+        });
+				
+				$fakeContainer.attr('data-select-type', 'param');
+
+    }
+}
+
+// 選択値を消去 + 項目を非表示 
+function hideColumns(action, selecter, num){
+    $('#' + action + '_table' + (num - 1)).val(''); 
+    $('#select2-' + action + '_table' + (num - 1) + '-container').empty();
+
+    var width = $(selecter.header + ' th:nth-child(' + num + ')').width(); 
+    if(width == 0 || width == undefined){
+        width = 'auto';
+    }
+
+    $(selecter.header + ' th:nth-child(' + num + ')').attr('size', width); // 項目サイズを保持
+    $(selecter.data + ' td:nth-child(' + num + '),'+ selecter.header + ' th:nth-child(' + num + ')').prop('width', '').addClass('menuTypeHidden');
+}
+
+// 項目を表示する
+function showColumns(selecter, num){
+   var width = $(selecter.header + ' th:nth-child(' + num + ')').attr('size'); 
+   if(width == 0 || width == undefined){
+       width = 'auto';
+   }
+   $(selecter.data + ' td:nth-child(' + num + '),'+ selecter.header + ' th:nth-child(' + num + ')').attr('width', width).removeClass('menuTypeHidden');
+}
+
+// 「作成対象」に値を設定する
+function selectValue(action, no){
+    var text = $('#' + action + '_table2 > option[value="' + no + '"]').html()
+    if(text == undefined){
+        text = '---';
+    }
+    $('#' + action + '_table2').val(no);
+    $('#select2-' + action + '_table2-container').html(text);
+}
+
+// クラス名とID名を取得 
+function getSelecter(action){
+    var selecter = {};
+    var number;
+    if(action == 'register'){
+        number = 2 
+    }else if(action == 'update'){
+        number = 1
+    }
+    selecter.val = $('#' + action + '_table2').val(); 
+     
+    // データ部
+    selecter.header = '#Mix' + number + '_1 ';
+    selecter.data = '#Mix' + number + '_1 ';
+
+    return selecter;
+}
+
+// イベント処理 ここまで

@@ -37,28 +37,13 @@ PROCESS_TOTAL_CNT=14
 #----------------------------------------
 log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Stop Apache.(httpd)"
 
-#SentOS6の場合
-if [ ${ITA_OS} = 'RHEL6' ]; then
-    #Apache停止
-    /etc/init.d/httpd stop 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
+#Apache停止
+systemctl stop httpd.service 2>> "$LOG_FILE"
 
-    #Apacheが停止しているか確認
-    APACHE_ACTIVE=`/etc/init.d/httpd status | grep "stopped" -c`
-
-    if [ ${#APACHE_ACTIVE} -eq 0 ]; then
-    log "WARNING : Failed to restart Apache(httpd) service."
-    fi
-
-#SentOS7の場合
-else
-    #Apache停止
-    systemctl stop httpd.service 2>> "$LOG_FILE"
-
-    #Apacheが停止しているか確認
-    APACHE_ACTIVE=`systemctl status httpd | grep "dead"`
-    if [ ${#APACHE_ACTIVE} -eq 0 ]; then
-        log "WARNING : Failed to stop Apache(httpd) service."
-    fi
+#Apacheが停止しているか確認
+APACHE_ACTIVE=`systemctl status httpd | grep "dead"`
+if [ ${#APACHE_ACTIVE} -eq 0 ]; then
+    log "WARNING : Failed to stop Apache(httpd) service."
 fi
 
 #プロセスカウント+1
@@ -379,25 +364,6 @@ if [ -e /etc/httpd/conf.d/vhosts_exastro-it-automation.conf ]; then
     rm -f /etc/httpd/conf.d/vhosts_exastro-it-automation.conf 2>> "$LOG_FILE"
 else
     log 'WARNING : httpd config file does not exist.'
-fi
-
-
-#RHEL6の場合は以下を実行
-if [ "$ITA_OS" = "RHEL6" ]; then
-    #ssl.confが存在するか確認
-    if [ -e /etc/httpd/conf.d/ssl.conf ]; then
-        #ssl.conf_originalが存在するか確認
-        if [ -e /etc/httpd/conf.d/ssl.conf_original ]; then
-            #ssl.confを削除
-            rm -f /etc/httpd/conf.d/ssl.conf 2>> "$LOG_FILE"
-            #ssl.conf_originalを削除
-            mv /etc/httpd/conf.d/ssl.conf_original /etc/httpd/conf.d/ssl.conf 2>> "$LOG_FILE"
-        else
-            log 'WARNING : Failed to place /etc/httpd/conf.d/ssl.conf_original.'
-        fi
-    else
-        log 'WARNING : Failed to place /etc/httpd/conf.d/ssl.conf.'
-    fi
 fi
 
 #vhosts_exastro-it-automation.confが削除されているか確認

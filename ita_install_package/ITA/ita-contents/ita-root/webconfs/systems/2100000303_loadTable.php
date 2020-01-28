@@ -194,6 +194,64 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             return $retArray;
         };
 
+        // パスワードをansible-vaultで暗号化した文字列を隠しカラムに登録する。
+        $objFunction04 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+
+            global $g;
+            if ( empty($root_dir_path) ){
+                $root_dir_temp = array();
+                $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+                $root_dir_path = $root_dir_temp[0] . "ita-root";
+            }
+
+            require_once($root_dir_path . '/libs/commonlibs/common_php_functions.php');
+            require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
+            $boolRet = true;
+            $intErrorType = null;
+            $aryErrMsgBody = array();
+            $strErrMsg = "";
+            $strErrorBuf = "";
+            $strFxName = "";
+            if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
+                $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+                switch($modeValue) {
+                //case "DTUP_singleRecRegister":
+                case "DTUP_singleRecUpdate":
+                    $db_update = false;
+                    // 変更前
+                    $befor_pw = array_key_exists('LOGIN_PW',$aryVariant['edit_target_row'])?
+                                                            $aryVariant['edit_target_row']['LOGIN_PW']:null;
+                    // 変更後
+                    $after_pw = array_key_exists('LOGIN_PW',$aryVariant['arySqlExe_update_table'])?
+                                                            $aryVariant['arySqlExe_update_table']['LOGIN_PW']:null;
+
+                    // パスワードの初期化は認証方式は関係ない
+                    // ログインパスワードが管理でない場合にパスワードがクリア。管理の場合は残る
+                    // 変更前と変更後のパスワードを判定して、違う場合にansible-vaultで暗号化した文字列を初期化
+                    if($befor_pw != $after_pw) {
+                        $db_update = true;
+                    }
+                    if($db_update === true) {
+                        // ansible-vaultで暗号化した文字列を初期化
+                        $strQuery = "UPDATE C_STM_LIST SET LOGIN_PW_ANSIBLE_VAULT = '' "
+                                   ."WHERE SYSTEM_ID = " . $exeQueryData['SYSTEM_ID'];
+
+                        $aryForBind = array();
+
+                        $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+                        if( $aryRetBody[0] !== true ){
+                            $boolRet = false;
+                            $intErrorType = 2;
+                            $strErrMsg = $aryRetBody[2];
+                        }
+                    }
+                }
+            }
+            $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+            return $retArray;
+        };
+
         $outputType01 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
         $outputType01->setFunctionForGetBodyTag($objFunction03);
         $outputType02 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
@@ -211,6 +269,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setValidator($objVldt);
         $c->setEncodeFunctionName("ky_encrypt");
         $c->setFunctionForEvent('beforeTableIUDAction',$objFunction02);
+        $c->setFunctionForEvent('afterTableIUDAction',$objFunction04);
         $cg->addColumn($c);
     $table->addColumn($cg);
 
@@ -380,8 +439,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setValidator($objVldt);
         $cg2->addColumn($c);
 
-        $objVldt = new SingleTextValidator(0,512,false);
-        $c = new TextColumn('HOSTS_EXTRA_ARGS',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104620"));
+        $objVldt = new MultiTextValidator(0,512,false);
+        $c = new MultiTextColumn('HOSTS_EXTRA_ARGS',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104620"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104621"));
         $c->setValidator($objVldt);
         $cg2->addColumn($c);
@@ -390,7 +449,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-102026"));
 
            // インスタンスグループ
-           $c = new IDColumn('ANSTWR_INSTANCE_GRP_ITA_MNG_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104630"),'B_ANS_TWR_INSTANCE_GROUP','INSTANCE_GROUP_ITA_MANAGED_ID','INSTANCE_GROUP_NAME','');
+           $c = new IDColumn('ANSTWR_INSTANCE_GROUP_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104630"),
+                              'B_ANS_TWR_INSTANCE_GROUP', 'INSTANCE_GROUP_NAME', 'INSTANCE_GROUP_NAME','');
            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104631"));
            $cg->addColumn($c);
 

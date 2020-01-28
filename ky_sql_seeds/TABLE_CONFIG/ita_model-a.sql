@@ -629,6 +629,7 @@ PROTOCOL_ID                       %INT%                     ,
 LOGIN_USER                        %VARCHR%(30)              ,
 LOGIN_PW_HOLD_FLAG                %INT%                     ,
 LOGIN_PW                          %VARCHR%(60)              ,
+LOGIN_PW_ANSIBLE_VAULT            %VARCHR%(512)             , -- パスワード ansible-vault暗号化文字列　隠しカラム
 LOGIN_AUTH_TYPE                   %INT%                     ,
 WINRM_PORT                        %INT%                     , -- WinRM接続プロトコル
 WINRM_SSL_CA_FILE                 %VARCHR%(256)             , -- WinRM接続 SSLサーバー証明書
@@ -638,7 +639,7 @@ HOSTS_EXTRA_ARGS                  %VARCHR%(512)             , -- インベント
 --
 SYSTEM_NAME                       %VARCHR%(64)              ,
 COBBLER_PROFILE_ID                %INT%                     , -- FOR COBLLER
-INTERFACE_TYPE                    %VARCHR%(256)              , -- FOR COBLLER
+INTERFACE_TYPE                    %VARCHR%(256)             , -- FOR COBLLER
 MAC_ADDRESS                       %VARCHR%(17)              , -- FOR COBLLER
 NETMASK                           %VARCHR%(15)              , -- FOR COBLLER
 GATEWAY                           %VARCHR%(15)              , -- FOR COBLLER
@@ -649,8 +650,7 @@ CONN_SSH_KEY_FILE                 %VARCHR%(256)             ,
 DSC_CERTIFICATE_FILE              %VARCHR%(256)             , -- DSC利用情報 認証キーファイル
 DSC_CERTIFICATE_THUMBPRINT        %VARCHR%(256)             , -- DSC利用情報 サムプリント
 
-ANSTWR_INSTANCE_GRP_ITA_MNG_ID    %INT%                     , -- AnsibleTower利用情報 インスタンスグループID
-
+ANSTWR_INSTANCE_GROUP_NAME        %VARCHR%(512)             , -- インスタンスグループ名
 
 DISP_SEQ                          %INT%                     , -- 表示順序
 NOTE                              %VARCHR%(4000)            , -- 備考
@@ -676,12 +676,13 @@ HOSTNAME                          %VARCHR%(128)             ,
 IP_ADDRESS                        %VARCHR%(15)              ,
 
 ETH_WOL_MAC_ADDRESS               %VARCHR%(17)              , -- ETH_WAKE_ON_LAN
-ETH_WOL_NET_DEVICE                %VARCHR%(256)              , -- ETH_WAKE_ON_LAN
+ETH_WOL_NET_DEVICE                %VARCHR%(256)             , -- ETH_WAKE_ON_LAN
 
 PROTOCOL_ID                       %INT%                     ,
 LOGIN_USER                        %VARCHR%(30)              ,
 LOGIN_PW_HOLD_FLAG                %INT%                     ,
 LOGIN_PW                          %VARCHR%(60)              ,
+LOGIN_PW_ANSIBLE_VAULT            %VARCHR%(512)             , -- パスワード ansible-vault暗号化文字列　隠しカラム
 LOGIN_AUTH_TYPE                   %INT%                     ,
 WINRM_PORT                        %INT%                     , -- WinRM接続プロトコル
 WINRM_SSL_CA_FILE                 %VARCHR%(256)             , -- WinRM接続 SSLサーバー証明書
@@ -691,7 +692,7 @@ HOSTS_EXTRA_ARGS                  %VARCHR%(512)             , -- インベント
 
 SYSTEM_NAME                       %VARCHR%(64)              ,
 COBBLER_PROFILE_ID                %INT%                     , -- FOR COBLLER
-INTERFACE_TYPE                    %VARCHR%(256)              , -- FOR COBLLER
+INTERFACE_TYPE                    %VARCHR%(256)             , -- FOR COBLLER
 MAC_ADDRESS                       %VARCHR%(17)              , -- FOR COBLLER
 NETMASK                           %VARCHR%(15)              , -- FOR COBLLER
 GATEWAY                           %VARCHR%(15)              , -- FOR COBLLER
@@ -702,8 +703,7 @@ CONN_SSH_KEY_FILE                 %VARCHR%(256)             ,
 DSC_CERTIFICATE_FILE              %VARCHR%(256)             , -- DSC利用情報 認証キーファイル
 DSC_CERTIFICATE_THUMBPRINT        %VARCHR%(256)             , -- DSC利用情報 サムプリント
 
-ANSTWR_INSTANCE_GRP_ITA_MNG_ID    %INT%                     , -- AnsibleTower利用情報 インスタンスグループID
-
+ANSTWR_INSTANCE_GROUP_NAME        %VARCHR%(512)             , -- インスタンスグループ名
 
 DISP_SEQ                          %INT%                     , -- 表示順序
 NOTE                              %VARCHR%(4000)            , -- 備考
@@ -728,6 +728,7 @@ ANS_PARALLEL_EXE                  %INT%                            ,
 ANS_WINRM_ID                      %INT%                            ,
 ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
+ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 
@@ -761,6 +762,7 @@ ANS_PARALLEL_EXE                  %INT%                            ,
 ANS_WINRM_ID                      %INT%                            ,
 ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
+ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 
@@ -1671,6 +1673,91 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 -- メインメニューパネル化対応 -
 
 
+-- -------------------------------------------------------
+-- --Symphony/オペレーション エクスポート/インポート機能用
+-- -------------------------------------------------------
+-- エクスポート/インポート管理 -
+CREATE TABLE B_DP_SYM_OPE_STATUS
+(
+TASK_ID                           %INT%                             , -- タスクID
+--
+TASK_STATUS                       %INT%                             , -- ステータス
+DP_TYPE                           %INT%                             , -- 処理種別
+FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
+DISP_SEQ                          %INT%                             , -- 表示順序
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (TASK_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_DP_SYM_OPE_STATUS_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                             , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴用変更種別
+--
+TASK_ID                           %INT%                             , -- 識別シーケンス
+TASK_STATUS                       %INT%                             , -- ステータス
+DP_TYPE                           %INT%                             , -- 処理種別
+FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
+DISP_SEQ                          %INT%                             , -- 表示順序
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- エクスポート/インポート管理 -
+
+-- Symphonyエクスポート紐付 -
+CREATE TABLE B_SYMPHONY_EXPORT_LINK
+(
+ROW_ID                          %INT%                               , -- ID
+
+HIERARCHY                       %INT%                               , -- 階層
+SRC_ROW_ID                      %INT%                               , -- 検索元項番
+SRC_ITEM                        %VARCHR%(128)                       , -- 検索元項目名
+DEST_MENU_ID                    %INT%                               , -- 検索先メニュー
+DEST_ITEM                       %VARCHR%(128)                       , -- 検索先項目名
+OTHER_CONDITION                 %VARCHR%(1024)                      , -- その他検索条件
+SPECIAL_SELECT_FUNC             %VARCHR%(1024)                      , -- 検索専用特別関数
+
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Symphonyエクスポート紐付 -
+
+-- オペレーションエクスポート紐付 -
+CREATE TABLE B_OPERATION_EXPORT_LINK
+(
+ROW_ID                          %INT%                               , -- ID
+
+HIERARCHY                       %INT%                               , -- 階層
+SRC_ROW_ID                      %INT%                               , -- 検索元項番
+SRC_ITEM                        %VARCHR%(128)                       , -- 検索元項目名
+DEST_MENU_ID                    %INT%                               , -- 検索先メニュー
+DEST_ITEM                       %VARCHR%(128)                       , -- 検索先項目名
+OTHER_CONDITION                 %VARCHR%(1024)                      , -- その他検索条件
+SPECIAL_SELECT_FUNC             %VARCHR%(1024)                      , -- 検索専用特別関数
+
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- オペレーションエクスポート紐付 -
+
+-- Symオペインポート時停止サービス -
+CREATE TABLE B_SVC_TO_STOP_IMP_SYM_OPE
+(
+ROW_ID                          %INT%                               , -- ID
+
+SERVICE_NAME                    %VARCHR%(128)                       , -- サービス名
+
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Symオペインポート時停止サービス -
+
+
+
 -- *****************************************************************************
 -- *** ITA-BASE Tables *****                                                 ***
 -- *****************************************************************************
@@ -2271,7 +2358,7 @@ CREATE TABLE B_CMDB_MENU_COLUMN  (
 COLUMN_LIST_ID                 %INT%                   , -- 識別シーケンス
 MENU_ID                        %INT%                   , -- メニューID
 COL_NAME                       %VARCHR%(64)            , -- テーブル　カラム名
-COL_TITLE                      %VARCHR%(256)           , -- メニュー　カラム名
+COL_TITLE                      %VARCHR%(512)           , -- メニュー　カラム名
 COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム名 代入値自動登録 表示順
 REF_TABLE_NAME                 %VARCHR%(64)            , -- 参照テーブル名
 REF_PKEY_NAME                  %VARCHR%(64)            , -- 参照テーブル主キー
@@ -2294,7 +2381,7 @@ JOURNAL_ACTION_CLASS           %VARCHR%(8)             , -- 履歴用変更種�
 COLUMN_LIST_ID                 %INT%                   , -- 識別シーケンス
 MENU_ID                        %INT%                   , -- メニューID
 COL_NAME                       %VARCHR%(64)            , -- テーブル　カラム名
-COL_TITLE                      %VARCHR%(256)           , -- メニュー　カラム名
+COL_TITLE                      %VARCHR%(512)           , -- メニュー　カラム名
 COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム名 代入値自動登録 表示順
 REF_TABLE_NAME                 %VARCHR%(64)            , -- 参照テーブル名
 REF_PKEY_NAME                  %VARCHR%(64)            , -- 参照テーブル主キー

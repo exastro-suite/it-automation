@@ -122,14 +122,12 @@
         $lv_tableNameToMenuIdList      = array();
         // カラム情報配列
         $lv_tabColNameToValAssRowList  = array();
-        // 代入値紐付の登録に不備がある主キーの配列
-        $lv_errorColumnIdList          = array();
+
         // テーブル名と主キーの配列
         $lv_tableNameToPKeyNameList    = array();
 
         $ret = readValAssign($lv_tableNameToMenuIdList,
                              $lv_tabColNameToValAssRowList,
-                             $lv_errorColumnIdList,
                              $lv_tableNameToPKeyNameList);
         if($ret === false) {
             $error_flag = 1;
@@ -164,7 +162,6 @@
         $ret = getCMDBdata($lv_tableNameToSqlList,
                            $lv_tableNameToMenuIdList,
                            $lv_tabColNameToValAssRowList,
-                           $lv_errorColumnIdList,
                            $lv_varsAssList,
                            $lv_arrayVarsAssList,
                            $warning_flag);
@@ -173,7 +170,6 @@
        unset($lv_tableNameToSqlList);
        unset($lv_tableNameToMenuIdList);
        unset($lv_tabColNameToValAssRowList);
-       unset($lv_errorColumnIdList);
        unset($lv_tableNameToPKeyNameList);
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -537,8 +533,6 @@
 //                                           [テーブル名]=MENU_ID
 //   &$inout_tabColNameToValAssRowList:  カラム情報配列
 //                                           [テーブル名][カラム名][]=>array("代入値自動登録設定のカラム名"=>値)
-//   &$inout_errorColumnIdList:          代入値紐付の登録に不備がある主キーの配列
-//                                           [代入値紐付主キー]=1
 //   &$inout_tableNameToPKeyNameList:    テーブル主キー名配列
 //                                           [テーブル名]=主キー名
 // 戻り値
@@ -546,7 +540,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 function readValAssign(&$inout_tableNameToMenuIdList,
                        &$inout_tabColNameToValAssRowList,
-                       &$inout_errorColumnIdList,
                        &$inout_tableNameToPKeyNameList
                        ) {
 
@@ -826,13 +819,6 @@ function readValAssign(&$inout_tableNameToMenuIdList,
         return false;
     }
 
-    //$lva_var_assign_seq_list{作業パターン][変数][代入順序]=COLUMN_LIST_ID
-    $lva_var_assign_seq_list   = array();
-
-    //$lva_array_assign_seq_list{作業パターン][変数][メンバー変数][代入順序]=COLUMN_LIST_ID
-    $lva_array_assign_seq_list = array();
-
-
     while($row = $objQuery->resultFetch()) {
         // CMDB代入値紐付メニューが廃止されているか判定
         if($row['TBL_DISUSE_FLAG'] != '0') {
@@ -973,52 +959,6 @@ function readValAssign(&$inout_tableNameToMenuIdList,
             break;
         }
 
-        // Key項目・Value項目の検査（他レコードとの関連）
-        //カラムタイプにより処理分岐
-        switch($col_type) {
-        case DF_COL_TYPE_VAL:
-        case DF_COL_TYPE_KEYVAL:
-            //Value型変数の代入順序の重複をチェック
-            $ret = valAssSeqDuplicatePickUp("Value",
-                                            $val_vars_attr,
-                                            $row,
-                                            $lva_var_assign_seq_list,
-                                            $lva_array_assign_seq_list,
-                                            $inout_errorColumnIdList,
-                                            "PATTERN_ID",
-                                            "VAL_VARS_LINK_ID",
-                                            "VAL_COL_SEQ_COMBINATION_ID",
-                                            "VAL_ASSIGN_SEQ"
-                                            );
-            if($ret === false) {
-                // 次のカラムへ
-                continue 2;
-            }
-            break;
-        }
-
-        switch($col_type) {
-        case DF_COL_TYPE_KEY:
-        case DF_COL_TYPE_KEYVAL:
-            //key型変数を場合の代入順序をチェック
-            $ret = valAssSeqDuplicatePickUp("Key",
-                                            $key_vars_attr,
-                                            $row,
-                                            $lva_var_assign_seq_list,
-                                            $lva_array_assign_seq_list,
-                                            $inout_errorColumnIdList,
-                                            "PATTERN_ID",
-                                            "KEY_VARS_LINK_ID",
-                                            "KEY_COL_SEQ_COMBINATION_ID",
-                                            "KEY_ASSIGN_SEQ"
-                                            );
-            if($ret === false) {
-                // 次のカラムへ
-                continue 2;
-            }
-            break;
-        }
-
         $inout_tableNameToMenuIdList[$row['TABLE_NAME']] = $row['MENU_ID'];
 
         $inout_tabColNameToValAssRowList[$row['TABLE_NAME']][$row['COL_NAME']][] = 
@@ -1056,7 +996,6 @@ function readValAssign(&$inout_tableNameToMenuIdList,
     unset($objQuery);
     return true;
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 // F0003
 // 処理内容
@@ -1213,105 +1152,6 @@ function valAssColumnValidate($in_col_type,           //カラムタイプ Value
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// F0004
-// 処理内容
-//   代入値自動登録設定の代入順序の重複チェック
-//   
-// パラメータ
-//   $in_col_type:                カラムタイプ Value/Key
-//   $in_vars_attr:               変数区分 (1:一般変数, 2:複数具体値, 3:多次元変数)
-//   $row:                        クエリ配列
-//   $inout_varAssignSeqList:     作業パターン+変数名+代入順序の重複チェック配列
-//   $inout_arrayAssignSeqList:   作業パターン+変数名+メンバー変数+代入順序の重複チェック配列
-//   $inout_errorColumnIdList:    代入値紐付でエラーが発生している代入値紐付の主キーリスト
-//   $in_pattern_id:              クエリ配列内のKey/Value型の変数名キー
-//                                VAL_VARS_NAME/KEY_VARS_NAME
-//   $in_vars_link_id:            クエリ配列内のKey/Value型の変数IDキー 
-//                                VAL_VARS_LINK_ID/KEY_VARS_LINK_ID
-//   $in_col_seq_combination_id:  クエリ配列内のKey/Value型のメンバー変数IDキー
-//                                VAL_COL_SEQ_COMBINATION_ID/KEY_COL_SEQ_COMBINATION_ID
-//   $in_assign_seq:              クエリ配列内のKey/Value型の代入順序キー
-//                                VAL_ASSIGN_SEQ/KEY_ASSIGN_SEQ
-// 
-// 戻り値
-//   True:正常　　False:異常
-////////////////////////////////////////////////////////////////////////////////
-function valAssSeqDuplicatePickUp($in_col_type,
-                                  $in_vars_attr,
-                                  $row,
-                                  &$inout_varAssignSeqList,
-                                  &$inout_arrayAssignSeqList,
-                                  &$inout_errorColumnIdList,
-                                  $in_pattern_id,
-                                  $in_vars_link_id,
-                                  $in_col_seq_combination_id,
-                                  $in_assign_seq) {
-
-    global    $objMTS;
-    global    $objDBCA;
-    global    $log_level;
-
-    switch($in_vars_attr) {
-    case GC_VARS_ATTR_STD:             // 一般変数
-        break;
-    case GC_VARS_ATTR_LIST:            // 複数具体値
-        if( isset($inout_varAssignSeqList[$row[$in_pattern_id]]
-                                         [$row[$in_vars_link_id]]
-                                         [$row[$in_assign_seq]])) {
-            $column_id = $inout_varAssignSeqList[$row[$in_pattern_id]]
-                                                [$row[$in_vars_link_id]]
-                                                [$row[$in_assign_seq]];
-
-            //重複しているのでエラーリストに代入値紐付の主キーを退避
-            $inout_errorColumnIdList[$column_id]        = 1;
-            $inout_errorColumnIdList[$row['COLUMN_ID']] = 1;
-
-            if($log_level === "DEBUG") {
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90029",array($row['COLUMN_ID'],$column_id,$in_col_type));
-
-                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            }
-            // エラーリターン
-            return false;
-        }
-        //代入順序退避
-        $inout_varAssignSeqList[$row[$in_pattern_id]]
-                               [$row[$in_vars_link_id]]
-                               [$row[$in_assign_seq]] = $row['COLUMN_ID'];
-        break;
-    case GC_VARS_ATTR_M_ARRAY:         // 多次元変数
-        if( isset($inout_arrayAssignSeqList[$row[$in_pattern_id]]
-                                           [$row[$in_vars_link_id]]
-                                           [$row[$in_col_seq_combination_id]]
-                                           [$row[$in_assign_seq]])) {
-            $column_id = $inout_arrayAssignSeqList[$row[$in_pattern_id]]
-                                                       [$row[$in_vars_link_id]]
-                                                       [$row[$in_col_seq_combination_id]]
-                                                       [$row[$in_assign_seq]];
-
-            //重複しているのでエラーリストに代入値紐付の主キーを退避
-            $inout_errorColumnIdList[$column_id]        = 1;
-            $inout_errorColumnIdList[$row['COLUMN_ID']] = 1;
-
-            if($log_level === "DEBUG") {
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90208",array($row['COLUMN_ID'],$column_id,$in_col_type));
-
-                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            }
-            // エラーリターン
-            return false;
-        }
-        //代入順序退避
-        $inout_arrayAssignSeqList[$row[$in_pattern_id]]
-                                      [$row[$in_vars_link_id]]
-                                      [$row[$in_col_seq_combination_id]]
-                                      [$row[$in_assign_seq]] = $row['COLUMN_ID'];
-        break;
-    }
-    return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // F0005
 // 処理内容
 //   代入値紐付メニューへのSELECT文を生成する。
@@ -1406,7 +1246,6 @@ function createQuerySelectCMDB($in_tableNameToMenuIdList,
 //                                  [テーブル名]=MENU_ID
 //   $in_tabColNameToValAssRowList: カラム情報配列
 //                                  [テーブル名][カラム名][]=>array("代入値紐付のカラム名"=>値)
-//   $in_errorColumnIdList:         代入値自動登録設定の登録に不備がある主キーの配列
 //                                  [代入値自動登録設定主キー]=1
 //   $ina_vars_ass_list:            一般変数・複数具体値変数用 代入値登録情報配列
 //   $ina_array_vars_ass_list:      多次元変数配列変数用 代入値登録情報配列
@@ -1419,7 +1258,6 @@ function createQuerySelectCMDB($in_tableNameToMenuIdList,
 function getCMDBdata($in_tableNameToSqlList,
                      $in_tableNameToMenuIdList,
                      $in_tabColNameToValAssRowList,
-                     $in_errorColumnIdList,
                      &$ina_vars_ass_list,
                      &$ina_array_vars_ass_list,
                      &$warning_flag) {
@@ -1542,11 +1380,6 @@ function getCMDBdata($in_tableNameToSqlList,
                 }
 
                 foreach($in_tabColNameToValAssRowList[$table_name][$col_name] as $col_data) {
-                    // テーブル名+カラム名の情報にエラーがないか判定
-                    if(   isset($in_errorColumnIdList[$col_data['COLUMN_ID']])) {
-                        continue;
-                    }
-
                     // IDcolumnの場合は参照元から具体値を取得する
                     if("" != $col_data['REF_TABLE_NAME']){
                         $sql = "";
@@ -1801,23 +1634,19 @@ function checkAndCreateVarsAssignData($in_table_name,
                                         [$in_vars_link_id]
                                         [$in_vars_assign_seq])) {
             // 既に登録されている
-            if($log_level === "DEBUG") {
-                $dup_info = $ina_vars_ass_chk_list[$in_operation_id]
+            // DEBUGモードを判定しないでメッセージ出力
+            $dup_info = $ina_vars_ass_chk_list[$in_operation_id]
                                                   [$in_patten_id]
                                                   [$in_host_id]
                                                   [$in_vars_link_id]
                                                   [$in_vars_assign_seq];
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90050",array($in_menu_id,
-                                                                                $in_row_id,
-                                                                                $in_operation_id,
-                                                                                $in_patten_id,
-                                                                                $in_host_id,
-                                                                                $in_column_id,
-                                                                                $keyValueType,
-                                                                                $dup_info['MENU_ID'],
-                                                                                $dup_info[DF_ITA_LOCAL_PKEY]));
-                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            }
+            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90049",array( $dup_info['COLUMN_ID'],
+                                                                             $in_column_id,
+                                                                             $in_column_id,
+                                                                             $in_operation_id,
+                                                                             $in_host_id,
+                                                                             $keyValueType));
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
         } else {
             $chk_status = true;
             // オペ+作業+ホスト+変数+メンバ変数の組合せの代入順序退避
@@ -1826,9 +1655,7 @@ function checkAndCreateVarsAssignData($in_table_name,
                                   [$in_host_id]
                                   [$in_vars_link_id]
                                   [$in_vars_assign_seq] = array(
-                                                    'MENU_ID'         => $in_menu_id,
-                                                    DF_ITA_LOCAL_PKEY => $in_row_id
-                                                    );
+                                                    'COLUMN_ID' => $in_column_id);
         }
         // 代入値管理の登録に必要な情報退避
         $ina_vars_ass_list[] = array('TABLE_NAME'        => $in_table_name,
@@ -1852,24 +1679,22 @@ function checkAndCreateVarsAssignData($in_table_name,
                                               [$in_col_seq_combination_id]
                                               [$in_vars_assign_seq])) {
             // 既に登録されている
-            if($log_level === "DEBUG") {
-                $dup_info = $ina_array_vars_ass_chk_list[$in_operation_id]
+            // DEBUGモードを判定しないでメッセージ出力
+            $dup_info = $ina_array_vars_ass_chk_list[$in_operation_id]
                                                         [$in_patten_id]
                                                         [$in_host_id]
                                                         [$in_vars_link_id]
                                                         [$in_col_seq_combination_id]
                                                         [$in_vars_assign_seq];
-                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90209",array($in_menu_id,
-                                                                                $in_row_id,
-                                                                                $in_operation_id,
-                                                                                $in_patten_id,
-                                                                                $in_host_id,
-                                                                                $in_column_id,
-                                                                                $keyValueType,
-                                                                                $dup_info['MENU_ID'],
-                                                                                $dup_info[DF_ITA_LOCAL_PKEY]));
+
+
+            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90049",array( $dup_info['COLUMN_ID'],
+                                                                             $in_column_id,
+                                                                             $in_column_id,
+                                                                             $in_operation_id,
+                                                                             $in_host_id,
+                                                                             $keyValueType));
             LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            }
         } else {
             $chk_status = true;
             // オペ+作業+ホスト+変数+メンバ変数の組合せの列順序退避
@@ -1879,9 +1704,7 @@ function checkAndCreateVarsAssignData($in_table_name,
                                         [$in_vars_link_id]
                                         [$in_col_seq_combination_id]
                                         [$in_vars_assign_seq] = array(
-                                                    'MENU_ID'           => $in_menu_id,
-                                                    DF_ITA_LOCAL_PKEY   => $in_row_id
-                                                    );
+                                                    'COLUMN_ID' => $in_column_id);
         }
         // 代入値管理の登録に必要な情報退避
         $ina_array_vars_ass_list[] = array('TABLE_NAME'            => $in_table_name,

@@ -96,6 +96,46 @@ function initProcess(pageMode){
                 loadSymphonyForMonitor(varRequestTarget);            
             }
             break;
+        case "instanceConstruct_SymphonyExport":
+            varInitedFlag1 = false;
+            
+            var filter1AreaWrap = 'Filter1_Nakami';
+            
+            webPrintRowConfirm = parseInt(document.getElementById('sysWebRowConfirm').innerHTML);
+            webPrintRowLimit = parseInt(document.getElementById('sysWebRowLimit').innerHTML);
+            
+            webStdTableWidth = document.getElementById('webStdTableWidth').innerHTML;
+            webStdTableHeight = document.getElementById('webStdTableHeight').innerHTML;
+            
+            // しばらくお待ち下さいを出す
+            var objTableArea = $('#'+filter1AreaWrap+' .table_area').get()[0];
+            objTableArea.innerHTML = "<div class=\"wait_msg\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
+            proxy.Filter1Tbl_reload(0);
+            
+            // フィルタ部分を隠す
+            show('Filter1_Midashi'   ,'Filter1_Nakami'   );
+            
+            break;
+        case "instanceConstruct_OperationExport":
+            varInitedFlag2 = false;
+            
+            var filter2AreaWrap = 'Filter2_Nakami';
+            
+            webPrintRowConfirm = parseInt(document.getElementById('sysWebRowConfirm').innerHTML);
+            webPrintRowLimit = parseInt(document.getElementById('sysWebRowLimit').innerHTML);
+            
+            webStdTableWidth = document.getElementById('webStdTableWidth').innerHTML;
+            webStdTableHeight = document.getElementById('webStdTableHeight').innerHTML;
+            
+            // しばらくお待ち下さいを出す
+            var objTableArea = $('#'+filter2AreaWrap+' .table_area').get()[0];
+            objTableArea.innerHTML = "<div class=\"wait_msg\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
+            proxy.Filter2Tbl_reload(0);
+            
+            // フィルタ部分を隠す
+            show('Filter2_Midashi'   ,'Filter2_Nakami'   );
+            
+            break;
     }
 }
 

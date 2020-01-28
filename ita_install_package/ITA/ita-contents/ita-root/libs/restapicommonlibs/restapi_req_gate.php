@@ -74,7 +74,7 @@
     $strTempJsonString = '';
     //変数の宣言----
 
-    @require_once(dirname(__FILE__)."/restapi_php_classes.php");
+    require_once(dirname(__FILE__)."/restapi_php_classes.php");
 
     //----クラスが定義済かどうか、を確認する
     if( class_exists('RestAPIInfoAdmin') ){

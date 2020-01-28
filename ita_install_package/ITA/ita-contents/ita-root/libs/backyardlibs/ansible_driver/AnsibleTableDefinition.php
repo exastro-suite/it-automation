@@ -42,6 +42,7 @@ function CreateExecInstMngArray(&$ary) {
     $ary["OPERATION_NO_UAPK"]            = "";
     $ary["I_OPERATION_NAME"]             = "";
     $ary["I_OPERATION_NO_IDBH"]          = "";
+    $ary["I_VIRTUALENV_NAME"]            = "";
     $ary["TIME_BOOK"]                    = "";
     $ary["TIME_START"]                   = "";
     $ary["TIME_END"]                     = "";

@@ -308,7 +308,6 @@ class CheckAnsibleRoleFiles {
                                                $ina_def_vars_list,
                                                $ina_def_varsval_list,   
                                                $ina_def_array_vars_list,
-                                               $in_dir,                
                                                $in_get_copyvar,       
                                                $ina_copyvars_list,   
                                                $in_get_tpfvar,
@@ -413,7 +412,6 @@ class CheckAnsibleRoleFiles {
                              &$ina_def_vars_list,
                              &$ina_def_varsval_list,
                              &$ina_def_array_vars_list,
-                              $in_base_dir,
                               $in_get_copyvar,
                              &$ina_copyvars_list,
                               $in_get_tpfvar,
@@ -442,7 +440,6 @@ class CheckAnsibleRoleFiles {
                                           $ina_def_vars_list,
                                           $ina_def_varsval_list,
                                           $ina_def_array_vars_list,
-                                          $in_base_dir,
                                           $in_get_copyvar,
                                           $ina_copyvars_list,
                                           $in_get_tpfvar,
@@ -501,7 +498,6 @@ class CheckAnsibleRoleFiles {
                                 &$ina_def_vars_list,
                                 &$ina_def_varsval_list,
                                 &$ina_def_array_vars_list,
-                                 $in_base_dir,
                                  $in_get_copyvar,
                                 &$ina_copyvars_list,
                                  $in_get_tpfvar,           
@@ -699,8 +695,8 @@ class CheckAnsibleRoleFiles {
                                                               $vars_list,
                                                               $array_vars_list,
                                                               $varsval_list,
-                                                              $ina_ITA2User_var_list,
-                                                              $ina_User2ITA_var_list);
+                                                              $ITA2User_var_list,
+                                                              $User2ITA_var_list);
                        if($ret === false) {
                            return false;
                        }
@@ -1374,7 +1370,7 @@ class CheckAnsibleRoleFiles {
         }
         if($result_code === true) {
             // ディレクトリのパーミッションを変更
-            $cmd = sprintf("find %s -type d -exec chmod 777 {} +",$BaseDir);
+            $cmd = sprintf("find %s -type d -exec chmod 755 {} +",$BaseDir);
             system($cmd);
         }
         return $result_code;
@@ -3125,7 +3121,8 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
             // 配列階層か判定
             if($array_f == 'I'){
                 // 配列階層の列番号を退避 各配列の位置を3桁の数値文字列で結合していく 
-                $wk_col_index_str = $in_col_index_str . sprintf("%03d",$var);                
+                #$wk_col_index_str = $in_col_index_str . sprintf("%03d",$var);                
+                $wk_col_index_str = $in_col_index_str . sprintf("%08d",$var);                
 
                 // 配列階層の場合の変数名を設定 変数名を0に設定する。
                 if($in_var_name_path == ""){

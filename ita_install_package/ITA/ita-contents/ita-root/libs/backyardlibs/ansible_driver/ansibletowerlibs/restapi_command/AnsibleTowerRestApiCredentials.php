@@ -38,8 +38,10 @@ class AnsibleTowerRestApiCredentials extends AnsibleTowerRestApiBase {
     //const PREPARE_BUILD_CREDENTIAL_NAME = "ita_executions_local";
     const IDENTIFIED_NAME_PREFIX = "ita_%s_executions_credential_%s_%s";
     const PREPARE_BUILD_CREDENTIAL_NAME = "ita_executions_local";
+    const VAULT_IDENTIFIED_NAME_PREFIX = "ita_%s_executions_vault_credential_%s";
 
     const MACHINE = 1;
+    const VAULT   = 3;
 
     // static only
     private function __construct() {
@@ -186,6 +188,80 @@ class AnsibleTowerRestApiCredentials extends AnsibleTowerRestApiBase {
         return $pickup_response_array; // データ不足しているが、後続の処理はsuccessしか確認しないためこのまま
     }
 
+    static function vault_post($RestApiCaller, $param) {
+        global $vg_tower_driver_name;
+
+        // content生成
+        $content = array();
+
+        if(!empty($param['execution_no'])) {
+            $content['name'] = sprintf(self::VAULT_IDENTIFIED_NAME_PREFIX, $vg_tower_driver_name, addPadding($param['execution_no']));
+        } else {
+            // 必須のためNG返す
+            $response_array['success'] = false;
+            $response_array['responseContents']['errorMessage'] = "Need 'execution_no'.";
+            return $response_array;
+        }
+
+        if(!empty($param['organization'])) {
+            $content['organization']       = $param['organization'];
+        } else {
+            // 必須のためNG返す
+            $response_array['success'] = false;
+            $response_array['responseContents']['errorMessage'] = "Need 'organization'.";
+            return $response_array;
+        }
+
+        if(!empty($param['vault_password'])) {
+            $content['inputs']['vault_password']       = $param['vault_password'];
+        } else {
+            // 必須のためNG返す
+            $response_array['success'] = false;
+            $response_array['responseContents']['errorMessage'] = "Need 'vault_password'.";
+            return $response_array;
+        }
+
+        $content['credential_type'] = self::VAULT; // vault
+
+        // REST APIアクセス
+        $method = "POST";
+        $response_array = $RestApiCaller->restCall($method, self::API_PATH, $content);
+
+        // REST失敗
+        if($response_array['statusCode'] != 201) {
+            $response_array['success'] = false;
+            if(!array_key_exists("errorMessage", $response_array['responseContents'])) {
+                $response_array['responseContents']['errorMessage'] = "status_code not 201. =>" . $response_array['statusCode'];
+            }
+            return $response_array;
+        }
+
+        // REST成功
+        $response_array['success'] = true;
+
+        return $response_array;
+    }
+    static function deleteVault($RestApiCaller, $execution_no) {
+        global $vg_tower_driver_name;
+
+        // データ絞り込み
+        $filteringName = sprintf(self::VAULT_IDENTIFIED_NAME_PREFIX, $vg_tower_driver_name, addPadding($execution_no));
+        $query = "?name__startswith=" . $filteringName;
+        $pickup_response_array = self::getAll($RestApiCaller, $query);
+        if($pickup_response_array['success'] == false) {
+            return $pickup_response_array;
+        }
+
+        foreach($pickup_response_array['responseContents'] as $credentialData) {
+
+            $response_array = self::delete($RestApiCaller, $credentialData['id']);
+            if($response_array['success'] == false) {
+                return $response_array;
+            }
+        }
+
+        return $pickup_response_array; // データ不足しているが、後続の処理はsuccessしか確認しないためこのまま
+    }
 }
 
 ?>

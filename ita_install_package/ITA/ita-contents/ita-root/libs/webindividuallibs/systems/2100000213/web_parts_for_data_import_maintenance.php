@@ -29,7 +29,7 @@ try {
     $sql  = 'SELECT COUNT(*) AS COUNT';
     $sql .= ' FROM B_DP_STATUS';
     $sql .= ' WHERE TASK_STATUS = ' . $taskStatus;
-    $sql .= " AND LAST_UPDATE_TIMESTAMP < '" . $limitDatetime . "'";
+    $sql .= " AND DISUSE_FLAG='0' AND LAST_UPDATE_TIMESTAMP < '" . $limitDatetime . "'";
 
     $objQuery = $objDBCA->sqlPrepare($sql);
     if ($objQuery->getStatus() === false) {

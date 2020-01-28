@@ -41,6 +41,8 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
     const CLEANUP_PREPARED_BUILD_NAME_PREFIX = "ita_%s_executions_cleanup_%s";
     const SEARCH_NAME_PREFIX = "ita_%s_executions_jobtpl_%s_";
 
+    const SEARCH_IDENTIFIED_NAME_PREFIX = "ita_%s_executions_jobtpl_%s";
+
     // static only
     private function __construct() {
     }
@@ -140,6 +142,10 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
             $response_array['success'] = false;
             $response_array['responseContents']['errorMessage'] = "Need 'credential'.";
             return $response_array;
+        }
+
+        if(!empty($param['vault_credential'])) {
+            $content['vault_credential'] = $param['vault_credential'];
         }
 
         if(!empty($param['job_type'])) {

@@ -585,21 +585,13 @@
             $tgt_row = array();
             
             $errmsg    = "";
-            $undef_cnt = 0;
-            $def_cnt   = 0;
             $arr_type_def_list = array();
             $pkg_id    = "";
             while ( $row = $objQuery->resultFetch() ){
+                if((strlen($row['ROLE_ID'])==0) && (strlen($row['ROLE_PACKAGE_ID'])==0)) {
+                    continue;
+                }
                 $tgt_row[] =  $row;
-                // 各ロールで変数が定義されているか判定
-                // 複数具体値変数で具体値が未定義の場合は該当ロールの変数情報が具体値管理に登録されない。
-                if(strlen($row['ROLE_ID'])==0){
-                    $undef_cnt++;
-                }
-                else{
-                    $def_cnt++;
-                }
-                // 同じロールパッケージが紐付てあるか判定
                 if($pkg_id == ""){
                     $pkg_id = $row['M_ROLE_PACKAGE_ID'];
                 }
@@ -616,16 +608,6 @@
             }
             unset($objQuery);
 
-            // 全てのロールで具体値未定義を判定
-            if($def_cnt == 0){
-                return true;
-            }
-            // 一部のロールで具体値未定義を判定
-            if(($def_cnt != 0) && ($undef_cnt != 0)){
-                // 一部のロールで具体値未定義
-                $varval   = "default value is undefined with some rolls";
-                return false;
-            }
             for($idx=0;$idx<count($tgt_row);$idx++){
                 // 変数の属性を判定
                 if($var_type == ""){
@@ -691,6 +673,7 @@
                 else{
                     foreach($tgt_row as $row){
 
+                        // 各ロールのデフォルト値が同じか確認する。同じ場合は表示する。
                         if(@count($wk_varval[$row['ASSIGN_SEQ']]) != 0){
                             if($wk_varval[$row['ASSIGN_SEQ']] != $row['VARS_VALUE']){
                                 $errmsg = "default value is not match";
@@ -722,7 +705,6 @@
             }
             else{
                 $errmsg = "variable type error";
-                break;
             }
 
             if($errmsg != ""){
@@ -774,6 +756,7 @@
         //-- サイト個別PHP要素、ここまで--
     }
     $server = new HTML_AJAX_Server();
-    $server->registerClass(new Db_Access());
+    $db_access = new Db_Access();
+    $server->registerClass($db_access);
     $server->handleRequest();
 ?>

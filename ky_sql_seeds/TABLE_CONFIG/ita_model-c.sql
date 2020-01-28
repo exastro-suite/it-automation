@@ -378,6 +378,76 @@ CREATE TABLE B_ANS_TWR_INSTANCE_GROUP_JNL (
 )%%TABLE_CREATE_OUT_TAIL%%; 
 -- 履歴系テーブル作成----
 
+-- ------------------------------
+-- -- Tower VIRTUALENVマスタ
+-- ------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_TWR_VIRTUALENV ( 
+  ROW_ID                          %INT%                             , 
+  VIRTUALENV_NAME                 %VARCHR%(512)                     , 
+  VIRTUALENV_NO                   %INT%                             , 
+  DISP_SEQ                        %INT%                             , 
+  NOTE                            %VARCHR%(4000)                    , 
+  DISUSE_FLAG                     %VARCHR%(1)                       , 
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , 
+  LAST_UPDATE_USER                %INT%                             , 
+  PRIMARY KEY (ROW_ID) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_TWR_VIRTUALENV_JNL ( 
+  JOURNAL_SEQ_NO                  %INT%                             , 
+  JOURNAL_REG_DATETIME            %DATETIME6%                       , 
+  JOURNAL_ACTION_CLASS            %VARCHR%(8)                       , 
+  ROW_ID                          %INT%                             , 
+  VIRTUALENV_NAME                 %VARCHR%(512)                     , 
+  VIRTUALENV_NO                   %INT%                             , 
+  DISP_SEQ                        %INT%                             , 
+  NOTE                            %VARCHR%(4000)                    , 
+  DISUSE_FLAG                     %VARCHR%(1)                       , 
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , 
+  LAST_UPDATE_USER                %INT%                             , 
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 履歴系テーブル作成----
+
+-- ------------------------------
+-- -- Tower 組織名マスタ
+-- ------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE 
+B_ANS_TWR_ORGANIZATION ( 
+  ROW_ID                          %INT%                             , 
+  ORGANIZATION_NAME               %VARCHR%(512)                     , 
+  ORGANIZATION_ID                 %INT%                             , 
+  DISP_SEQ                        %INT%                             , 
+  NOTE                            %VARCHR%(4000)                    , 
+  DISUSE_FLAG                     %VARCHR%(1)                       , 
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , 
+  LAST_UPDATE_USER                %INT%                             , 
+  PRIMARY KEY (ROW_ID) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE 
+B_ANS_TWR_ORGANIZATION_JNL ( 
+  JOURNAL_SEQ_NO                  %INT%                             , 
+  JOURNAL_REG_DATETIME            %DATETIME6%                       , 
+  JOURNAL_ACTION_CLASS            %VARCHR%(8)                       , 
+  ROW_ID                          %INT%                             , 
+  ORGANIZATION_NAME               %VARCHR%(512)                     , 
+  ORGANIZATION_ID                 %INT%                             , 
+  DISP_SEQ                        %INT%                             , 
+  NOTE                            %VARCHR%(4000)                    , 
+  DISUSE_FLAG                     %VARCHR%(1)                       , 
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , 
+  LAST_UPDATE_USER                %INT%                             , 
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 履歴系テーブル作成----
+
 
 -- ----------------------------------------------------------------------------------------
 -- -- ansible-playbookのオプションパラメータとAnsible Tower JobTemplate プロパティの紐づけ
@@ -823,6 +893,7 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
+I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -865,6 +936,7 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
+I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -951,8 +1023,9 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_WINRM_ID                  ,
-        ANS_PLAYBOOK_HED_DEF      ,
+        ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -984,6 +1057,7 @@ SELECT
         ANS_WINRM_ID                  ,
         ANS_PLAYBOOK_HED_DEF      ,
         ANS_EXEC_OPTIONS              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -1081,6 +1155,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1128,6 +1203,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1512,6 +1588,7 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
+I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1554,6 +1631,7 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
+I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1646,6 +1724,7 @@ SELECT
         TIME_LIMIT                    ,
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -1675,6 +1754,7 @@ SELECT
         TIME_LIMIT                    ,
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -1774,6 +1854,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,         
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1821,6 +1902,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,         
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1922,6 +2004,7 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションNo
 I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
+I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -1964,6 +2047,7 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションNo
 I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
+I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -2699,6 +2783,7 @@ SELECT
         ANS_WINRM_ID                  ,
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -2730,6 +2815,7 @@ SELECT
         ANS_WINRM_ID                  ,
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
+        ANS_VIRTUALENV_NAME           ,
         (SELECT 
            COUNT(*) 
          FROM 
@@ -2771,6 +2857,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2818,6 +2905,7 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
+         TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,

@@ -650,7 +650,13 @@ function ckRangeOfConfirm(value, min, max){
 }
 
 function addPullDownBox(strTableWrapAreaId, strTablePrintId, intMaxWidth, strAdjustTargetSeqNumeric, strContainerDivClassName){
-    adjustWidthOfColumnInSuperTable(strTableWrapAreaId, strTablePrintId, 'psl_', strAdjustTargetSeqNumeric, intMaxWidth, strContainerDivClassName);
+    // adjustWidthOfColumnInSuperTable(strTableWrapAreaId, strTablePrintId, 'psl_', strAdjustTargetSeqNumeric, intMaxWidth, strContainerDivClassName);
+    
+    // tableの幅を設定しなおす
+    var $table = $('#' + strTableWrapAreaId );
+    var tableWidth = $table.find('table').outerWidth();
+    $table.find('.itaTableBody').css('width', tableWidth );
+    
 }
 
 function adjustWidthOfColumnInSuperTable(strTableWrapAreaId, strTablePrintId, strClassOfColumnIdentifyPrefix, strAdjustTargetSeqNumeric, intMaxWidth,  strContainerDivClassName){
@@ -761,14 +767,10 @@ function adjustTableAuto( table_id,
             }
         }
 
-        //----ここでスーパーテーブルによる呼び出し
-        new superTable(table_id, {
-            cssSkin : skin_name,
-            fixedCols : 0,
-            headerRows : header_row_num
-        });
-        //ここでスーパーテーブルによる呼び出し----
+        // ITA Tableを適用する
+        itaTable( table_id );
         
+        /*
         var table_height = document.getElementById(table_id+'_data').offsetHeight;
         var table_width  = document.getElementById(table_id+'_data').offsetWidth;
         var all=document.getElementsByTagName("*");
@@ -877,6 +879,8 @@ function adjustTableAuto( table_id,
                 //幅の調整----
             }
         }
+        */
+   
     }
 }
 // テーブル整形用のファンクション定義----

@@ -121,9 +121,16 @@
     // true  : 実行中
     // false : 未実行
     function chkAnsibleRunning($strPlaybookPath){
+        global $root_dir_path;
         $rtn = false;
 
-        // #1055 2016/09/28 Update start centos7ではpgrepで自分を検出している模様
+        // usleep time (ms)
+        $sleep_time = @file_get_contents($root_dir_path . '/confs/ansible_driver/ansible_playbook_watch_time.txt');
+        if($sleep_time === false) {
+            $sleep_time = 10;
+        }
+
+        // centos7ではpgrepで自分を検出している模様
         // pgrep => psに変更
         $strBuildCommand     = "ps -efw|grep '{$strPlaybookPath}' |grep -v grep|wc -l";
 
@@ -139,7 +146,7 @@
                 break;
             }
             if($i < 2) {
-                usleep(500000);
+                usleep($sleep_time);
             }
 
         }

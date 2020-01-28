@@ -21,11 +21,32 @@
 //////////////////////////////////////////////////////////////////////
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
+
     global $g;
     $root_dir_path = $g['root_dir_path'];
-
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITABASEH-MNU-107070");
+
+    require_once ($root_dir_path . "/libs/backyardlibs/common/common_db_access.php");
+    $dbobj = new CommonDBAccessCoreClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
+
+    $sqlBody   = "select ANSIBLE_EXEC_MODE from B_ANSIBLE_IF_INFO where DISUSE_FLAG='0'";
+    $arrayBind = array();
+    $objQuery  = "";
+    $ansible_exec_mode = 0;
+    $ret = $dbobj->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
+    if($ret === false) {
+        web_log($dbobj->GetLastErrorMsg());
+    } else {
+        if($objQuery->effectedRowCount() == 0) {
+            $message = sprintf("Recode not found. (Table:B_ANSIBLE_IF_INFO");
+            web_log(basename(__FILE__),__LINE__,$message);
+        } else {
+            $row = $objQuery->resultFetch();
+            // ANSIBLE_EXEC_MODE=2 ansible tower
+            $ansible_exec_mode = $row['ANSIBLE_EXEC_MODE'];
+        }
+    }
 /*
 作業パターン
 */
@@ -123,6 +144,21 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $cg->addColumn($c);
 
         $table->addColumn($cg);
+
+        // ANSIBLEインターフェース情報の実行エンジンがTowerの場合にTower利用情報を表示
+        if($ansible_exec_mode == 2) {
+
+            // Tower利用情報
+            $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITABASEH-MNU-108241") );
+
+                // virtualenv
+                $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-108242"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
+                $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-108243")); //エクセル・ヘッダでの説明
+                $c->setHiddenMainTableColumn(true); //コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+            $cg->addColumn($c);
+
+            $table->addColumn($cg);
+        }
     }
 
     // OpenStack利用情報

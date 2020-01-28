@@ -1,0 +1,644 @@
+@charset "UTF-8";
+
+/* **********************************************************************
+ * 01. ITA Table
+ * 02. Execution Nakami Table
+ * 99. Other.
+ ********************************************************************* */
+
+
+
+/* 01. ITA Table ****************************************************** */
+
+.itaTable {
+position: relative;
+z-index: 1;
+box-sizing: border-box;
+}
+.itaTable * {
+box-sizing: border-box!important;
+}
+.itaTable.tableSettingOpen {
+min-height: 240px;
+background-color: #EEE;
+}
+
+/* table 外枠 */
+.itaTableBody::before,
+.itaTableBody::after,
+.itaTable .tableScroll::before,
+.itaTable .tableScroll::after {
+content: '';
+display: block;
+position: absolute;
+z-index: 20;
+border-color: #666;
+border-style: solid;
+border-width: 0;
+pointer-events: none;
+}
+.itaTableBody::before {
+left: 0; top: 0;
+width: 1px; height: 100%;
+border-left-width: 1px;
+}
+.itaTableBody::after {
+right: 0; top: 0;
+width: 1px; height: 100%;
+border-right-width: 1px;
+}
+.itaTable .tableScroll::before {
+left: 0; top: 0;
+width: 100%; height: 1px;
+border-top-width: 1px;
+}
+.itaTable .tableScroll::after {
+right: 0; bottom: 0;
+width: 100%; height: 1px;
+border-bottom-width: 1px;
+}
+
+/* .itaTableBody */
+
+.itaTableBody {
+position: relative;
+z-index: 1;
+max-width: 100%;
+}
+.tableSettingOpen .itaTableBody {
+transition-duration: 0.3s;
+}
+.tableScroll {
+overflow: auto;
+max-height: calc( 700px - 32px );
+margin-bottom: 0;
+background-color: #F2F2F2;
+}
+.itaTableBody table {
+margin: 0; padding: 0;
+background-color: #D4D4D4;
+border-collapse: separate;
+border-spacing: 1px;
+}
+.itaTableBody th,
+.itaTableBody td {
+box-sizing: border-box;
+padding: 3px;
+white-space: pre;
+line-height: 1.5;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #2B2B2B;
+}
+.itaTableBody th.diff,
+.itaTableBody td.diff {
+color: #0D00D8;
+font-weight: bold;
+}
+.itaTableBody th {
+padding: 3px 6px;
+background-color: #888;
+color: #F2F2F2;
+letter-spacing: 0.05em;
+text-decoration: none;
+}
+th.sortTriggerInTbl:hover {
+background-color: #AAA;
+}
+.itaTableBody td {
+background-color: #FFF;
+}
+.itaTableBody tr:nth-child(odd) td {
+background-color: #F8F8F8;
+}
+.itaTableBody td.likeHeader {
+background-color: #EEE;
+}
+.itaTableBody tr:nth-child(odd) td.likeHeader {
+background-color: #E8E8E8;
+}
+.itaTableBody tr.disuse td,
+.itaTableBody tr.disuse td.likeHeader,
+.itaTableBody tr.disuse:nth-child(odd) td {
+background-color: #E0E0E0;
+background-image: repeating-linear-gradient( -45deg, #E0E0E0, #E0E0E0 2px, #E8E8E8 2px, #E8E8E8 4px);
+color: #AAA;
+}
+/*
+.itaTableBody tr:hover td {
+background-color: #FFFFCC;
+}
+.itaTableBody tr:hover td.likeHeader {
+background-color: #FFFF8F;
+}
+*/
+
+/* Filter Print のみにhover */
+.fakeContainer_Filter1Print .itaTableBody tr:hover td,
+.fakeContainer_Filter2Print .itaTableBody tr:hover td {
+background-color: #FFFFCC;
+background-image: none;
+}
+.fakeContainer_Filter1Print .itaTableBody tr:hover td.likeHeader,
+.fakeContainer_Filter2Print .itaTableBody tr:hover td.likeHeader {
+background-color: #FFFF8F;
+background-image: none;
+}
+
+/* .tableSticky */
+
+.itaTable.tableSticky tr.defaultExplainRow th {
+position: sticky;
+top: 1px;
+z-index: 2;
+box-shadow: 0 0 0 1px #666;
+}
+.itaTable.tableSticky tr.defaultExplainRow th.thSticky {
+z-index: 3;
+background-color: #777;
+box-shadow: 0 0 0 1px #666;
+}
+.itaTable.tableSticky tr.defaultExplainRow th.thSticky.sortTriggerInTbl:hover {
+background-color: #999;
+}
+.itaTable.tableSticky td.likeHeader {
+position: sticky;
+z-index: 1;
+box-shadow: 0 0 0 1px #CCC;
+}
+
+
+
+
+
+
+/* 固定線 */
+.fixedBorder {
+display: none;
+}
+.edge .fixedBorder {
+display: none!important;
+}
+.itaTable.tableSticky .fixedBorder {
+display: block;
+position: absolute;
+z-index: 5;
+border-width: 0;
+border-color: #333;
+border-style: dotted;
+pointer-events: none;
+transition-duration: 0.1s;
+transition-timing-function: linear;
+}
+.itaTable.tableSticky .fixedBorder.top {
+left: 0;
+height: 1px;
+border-top-width: 1px;
+border-color: #111;
+}
+.itaTable.tableSticky .fixedBorder.left,
+.itaTable.tableSticky .fixedBorder.right {
+top: 0;
+width: 1px;
+}
+.itaTable.tableSticky .fixedBorder.left {
+border-left-width: 1px;
+background-image: linear-gradient( 90deg, rgba( 0,0,0,0.2 ), transparent );
+}
+.itaTable.tableSticky .fixedBorder.right {
+border-right-width: 1px;
+background-image: linear-gradient( -90deg, rgba( 0,0,0,0.2 ), transparent );
+}
+.itaTable.tableSticky .scrollLeft .fixedBorder.left,
+.itaTable.tableSticky .scrollRight .fixedBorder.right {
+width: 8px;
+}
+
+/* 無効化 */
+.noFixed_top tr.defaultExplainRow th { top: auto!important; }
+.noFixed_right .thSticky,
+.noFixed_right .likeHeader { right: auto!important; }
+.noFixed_left .thSticky,
+.noFixed_left .likeHeader { left: auto!important; }
+
+.noFixed_top .fixedBorder.top,
+.noFixed_right .fixedBorder.right,
+.noFixed_left .fixedBorder.left {
+display: none!important;
+}
+
+
+
+/* .itaTableFooter */
+
+.itaTableFooter {
+position: relative;
+z-index: 1;
+pointer-events: none;
+}
+.itaTableFooterMenu {
+position: absolute;
+left: 0; bottom: 0;
+width: 100%; height: 0;
+}
+.itaTableFooterMenuInner {
+overflow: hidden;
+position: relative;
+z-index: 1;
+width: 100%; height: 0;
+transition-duration: 0.1s;
+}
+.tableSettingOpen .itaTableFooterMenuInner {
+transition-duration: 0s;
+}
+.itaTableBody:hover .itaTableFooterMenuInner {
+ height: 32px;
+}
+.tableSettingOpen .itaTableBody:hover .itaTableFooterMenuInner {
+height: 0;
+}
+.itaTableFooterMenu ul {
+position: absolute;
+right: 0; bottom: 0;
+display: table;
+height: 32px;
+margin: 0; padding: 0 8px;
+background-color: #444;
+border-radius: 0 0 4px 4px;
+list-style: none;
+pointer-events: all;
+}
+.itaTableFooterMenu li {
+display: table-cell;
+margin: 0; padding: 0;
+vertical-align: middle;
+text-align: center;
+}
+
+
+
+/* .itaTableSetting */
+
+.itaTableSetting {
+display: none;
+overflow: hidden;
+position: absolute;
+right: 0; top: 0;
+z-index: 100;
+height: 100%; min-height: 160px;
+box-shadow: 0 0 8px rgba( 0,0,0,0.6 );
+animation: tableSettingShow 0.3s forwards;
+}
+.tableSettingOpen .itaTableSetting {
+display: block;
+}
+@keyframes tableSettingShow {
+0% { transform: translateX( 100% ); }
+100% { transform: translateX( 0 ); }
+}
+.itaTableSettingInner {
+height: 100%;
+}
+.tableSettingBody {
+overflow: auto;
+height: calc( 100% - 32px );
+background-color: rgba( 0,0,0,0.8 );
+border: 4px solid #444;
+border-bottom: none;
+color: #EEE;
+}
+.tableSettingFooter {
+height: 32px;
+background-color: #444;
+}
+.tableSettingFooter ul {
+display: table;
+table-layout: fixed;
+margin: 0; padding: 0 8px;
+list-style: none;
+}
+.tableSettingFooter ul {
+margin: 0 auto;
+}
+.tableSettingFooter li {
+display: table-cell;
+height: 32px;
+padding: 0 8px;
+vertical-align: middle;
+}
+.itaTableFooter button,
+.tableSettingFooter button {
+display: inline-block;
+min-width: inherit; min-height: inherit;
+padding: 4px 16px 3px;
+background-color: #4D9E0A;
+border: 1px solid #4D9E0A;
+border-radius: 2px;
+color: #FFF;
+text-decoration: none;
+line-height: 1;
+font-size: 12px;
+white-space: nowrap;
+cursor: pointer;
+}
+.itaTableFooter button {
+padding: 4px 8px 3px;
+}
+.tableSettingFooter button.reset,
+.tableSettingFooter button.close {
+background-color: #444;
+border: 1px solid #4D9E0A;
+color: #4D9E0A;
+}
+.itaTableFooter button:hover,
+.tableSettingFooter button:hover {
+background-color: #60C60D;
+border-color: #60C60D;
+}
+.tableSettingFooter button.reset:hover,
+.tableSettingFooter button.close:hover {
+background-color: #444;
+border-color: #60C60D;
+color: #60C60D;
+}
+.tableSettingFooter button:active {
+transform: scale( 0.925 );
+}
+
+#KIZI .tableSettingBody dt {
+position: relative;
+z-index: 1;
+padding: 8px 16px 7px;
+background-color: #555;
+background-image: linear-gradient( #4F4F4F, #555 );
+border: 1px solid #111;
+border-bottom-color: #333;
+border-top: none;
+text-shadow: 1px 1px 0 #111;
+font-size: 13px;
+}
+#KIZI .tableSettingBody dt::after {
+content: '';
+position: absolute;
+left: 0; top: 50%;
+z-index: 1;
+transform: translateY(-50%);
+width: 8px; height: 2px;
+background-color: #FF821E;
+}
+#KIZI .tableSettingBody dl:first-child dt {
+border-top: 1px solid #111;
+}
+#KIZI .tableSettingBody dd {
+border-left: 1px solid #111;
+border-right: 1px solid #111;
+}
+#KIZI .tableSettingBody ul {
+margin: 0; padding: 0;
+list-style: none;
+}
+#KIZI .tableSettingBody li {
+position: relative;
+z-index: 1;
+margin: 0; padding: 0;
+}
+#KIZI .tableSettingBody li.disabled {
+display: none;
+}
+#KIZI .tableSettingBody ul.level1 li:last-child {
+border-bottom: none;
+}
+#KIZI .tableSettingBody li.level1 ul {
+padding-left: 16px;
+background-color: #222;
+}
+#KIZI .tableSettingBody ul.level2 {
+padding: 0 4px 4px;
+}
+#KIZI .tableSettingBody li.level1 li {
+padding: 4px 0 0;
+}
+
+
+
+
+
+/* 罫線 */
+#KIZI .tableSettingBody li.level1 li::before {
+content: '';
+position: absolute;
+left: -8px; top: 15px;
+z-index: 1;
+width: 8px; height: 1px;
+background-color: #444;
+}
+#KIZI .tableSettingBody li.level1 li::after {
+content: '';
+position: absolute;
+left: -8px; top: 0;
+z-index: 1;
+width: 1px; height: 100%;
+background-color: #444;
+}
+#KIZI .tableSettingBody li.level1 li:last-child::after {
+height: 15px;
+}
+
+
+#KIZI .tableSettingBody button.open {
+position: absolute;
+right: 0; top: 1px;
+z-index: 1;
+width: 24px; height: 24px;
+min-width: inherit; min-height: inherit;
+background-color: transparent;
+border: none;
+line-height: 24px;
+text-align: center;
+font-size: 12px;
+color: #EEE;
+cursor: pointer;
+}
+#KIZI .tableSettingBody ul button:hover {
+background-color: #FF821E;
+}
+
+#KIZI .tableSettingBody input {
+position: absolute;
+left: -9999px;
+}
+
+#KIZI .itaTableFooter button span {
+display: inline-block;
+margin-left: 0.5em;
+padding: 2px 4px 1px;
+background-color: #FFF;
+border-radius: 1em;
+font-weight: bold;
+font-size: 11px;
+font-family: Consolas;
+color: #F00;
+}
+
+
+#KIZI .tableSettingBody span {
+display: block;
+position: relative;
+z-index: 1;
+}
+#KIZI .tableSettingBody label {
+display: block;
+position: relative;
+z-index: 1;
+padding: 0 24px 0 20px;
+background-color: #333;
+border: 1px solid #444;
+line-height: 24px;
+white-space: nowrap;
+font-size: 12px;
+cursor: pointer;
+color: #999;
+}
+#KIZI .tableSettingBody li.level1 > span label {
+margin: 0;
+background-color: #666666;
+border: none;
+border-top: 1px solid #777;
+border-bottom: 1px solid #333;
+color: #AAA;
+}
+#KIZI .tableSettingBody li.level1 > span input:checked + label {
+color: #EEE;
+}
+#KIZI .tableSettingBody li.level1 > span label:hover {
+background-color: #777;
+}
+#KIZI .tableSettingBody label:hover {
+background-color: #444;
+}
+#KIZI .tableSettingBody input:checked + label {
+color: #EEE;
+}
+
+#KIZI .tableSettingBody li.level1 > span input:disabled + label {
+background-color: #737373;
+border-top-color: #888;
+cursor: default;
+}
+#KIZI .tableSettingBody input:disabled + label::before,
+#KIZI .tableSettingBody input:disabled + label::after {
+  display: none!important;
+}
+
+
+/* チェックマーク */
+#KIZI .tableSettingBody label::before,
+#KIZI .tableSettingBody label::after {
+content: '';
+display: block;
+position: absolute;
+left: 4px; top: 50%;
+z-index: 1;
+transform: translateY(-50%);
+width: 8px; height: 8px;
+background-color: #111;
+}
+#KIZI .tableSettingBody label::before {
+left: 6px;
+z-index: 2;
+width: 4px; height: 4px;
+background-color: #666;
+transition-duration: 0.1s;
+}
+#KIZI .tableSettingBody input:checked + label::before {
+background-color: #60C60D;
+}
+#KIZI .tableSettingBody input.noCheck:checked + label::before {
+background-color: #FF821E;
+}
+/* 非表示用 */
+.tableSettingHidden {
+display: none!important;
+}
+
+
+
+
+
+
+
+/* 02. Execution Nakami Table ****************************************************** */
+
+#ExecutionNakami table {
+margin: 0; padding: 0;
+background-color: #D4D4D4;
+border-collapse: collapse;
+}
+#ExecutionNakami th,
+#ExecutionNakami td {
+padding: 3px 6px;
+border: 1px solid #D4D4D4;
+white-space: pre;
+line-height: 1.5;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #2B2B2B;
+}
+#ExecutionNakami th {
+background-color: #888;
+border-color: #666;
+color: #F2F2F2;
+letter-spacing: 0.05em;
+text-decoration: none;
+}
+#ExecutionNakami td {
+background-color: #FFF;
+}
+#ExecutionNakami td.likeHeader {
+background-color: #EEE;
+}
+#ExecutionNakami th.noBorderRight {
+border-right: none;
+}
+#ExecutionNakami th.noBorderBoth {
+border-left: none;
+border-right: none;
+}
+#ExecutionNakami th.noBorderLeft {
+border-left: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* 99. Other ****************************************************** */
+
+/* メニュー作成 */
+.menuTypeHidden {
+display: none!important;
+}
+[data-select-type="data"] .itaTable.tableSticky tr.defaultExplainRow th.thSticky {
+background-color: #765FAB;
+}
+[data-select-type="data"] .itaTable tr.defaultExplainRow th {
+background-color: #866CC2;
+}
+[data-select-type="param"] .itaTable.tableSticky tr.defaultExplainRow th.thSticky {
+background-color: #007779;
+}
+[data-select-type="param"] .itaTable tr.defaultExplainRow th {
+background-color: #00878A;
+}
+#KIZI [data-select-type="data"] .tableSettingBody li.level1.param,
+#KIZI [data-select-type="param"] .tableSettingBody li.level1.data {
+pointer-events: none;
+opacity: 0.5;
+}
+
+

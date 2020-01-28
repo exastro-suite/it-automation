@@ -10,8 +10,8 @@ ita_directory:
 # e.g) ita_language:en_US
 ita_language:en_US
 
-# Select Operation System. ("RHEL6" or "RHEL7")
-# e.g) ita_os:RHEL7
+# Select Operation System. ("RHEL7" or "RHEL8")
+# e.g) ita_os:RHEL8
 ita_os:RHEL7
 
 # Enter the MariaDB root user's password

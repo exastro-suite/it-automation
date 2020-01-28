@@ -96,7 +96,6 @@ $ary[160020] = "Schedule cancellation";
 $ary[160030] = "Emergency stop";
 $ary[160040] = "Emergency stop";
 $ary[160050] = "This menu monitors the registered OpenStack setting execution. <br>In addition to checking the progress status of execution in realtime, it is possible to perform emergency stop.";
-$ary[160060] = "Check result";
 $ary[170000] = "You can view the details of the execution results.";
 $ary[170010] = "Status";
 $ary[170020] = "Dropdown menu";

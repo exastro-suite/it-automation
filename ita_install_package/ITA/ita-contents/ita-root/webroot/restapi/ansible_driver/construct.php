@@ -13,6 +13,32 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
+
+    ////////////////////////////////
+    // ルートディレクトリを取得   //
+    ////////////////////////////////
+    if ( empty($root_dir_path) ){
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+    }
+
+    ////////////////////////////////
+    // PHP エラー時のログ出力先   //
+    ////////////////////////////////
+    $log_output_dir  = $root_dir_path . '/logs/restapilogs/ansible_driver';
+    $log_file_prefix = basename( __FILE__, '.php' ) . "_";
+
+    $tmpVarTimeStamp = time();
+    $logfile = $log_output_dir . "/" . $log_file_prefix . date("Ymd",$tmpVarTimeStamp) . ".log";
+
+    ////////////////////////////////
+    // PHP エラー時のログ出力を設定
+    ////////////////////////////////
+    ini_set('display_errors',0);
+    ini_set('log_errors',1);
+    ini_set('error_log',$logfile);
+
     // ログ出力フラグ /etc/sysconfig/httpdより取得
     $vg_log_level = @getenv('ANSIBLE_RESTAPI_LOG_LEVEL');
 

@@ -401,6 +401,12 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
             $strErrStepIdInFx="00000008";
             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
+
+        // ansible tower実行の場合だけvirtualenvを設定
+        $virtualenv_name = "";
+        if($exec_mode == 2) {
+            $virtualenv_name = $arySinglePatternSource["ANS_VIRTUALENV_NAME"];
+        }
         
         $arrayValue = array(
         "JOURNAL_SEQ_NO"=>$p_execution_jnl_no,
@@ -430,7 +436,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "I_ANS_PLAYBOOK_HED_DEF"=>$arySinglePatternSource["ANS_PLAYBOOK_HED_DEF"],
         "I_ANS_EXEC_OPTIONS"=>$exec_opt . ' ' . $arySinglePatternSource["ANS_EXEC_OPTIONS"],
         "EXEC_MODE"=>$exec_mode,
-
+        "I_VIRTUALENV_NAME"=>$virtualenv_name,
         "DISUSE_FLAG"=>"0",
         "NOTE"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
