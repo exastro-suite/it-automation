@@ -232,7 +232,6 @@ Ansibleテンプレート
         case "DTUP_singleRecDelete":
             if($modeValue_sub == 'off') {
 
-web_log("DTUP_singleRecDelete off");
                 // 変数定義の解析結果を取得
                 $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
 
@@ -258,7 +257,6 @@ web_log("DTUP_singleRecDelete off");
             break;
         case "DTUP_singleRecUpdate":
         case "DTUP_singleRecRegister":
-web_log("DTUP_singleRecUpdate DTUP_singleRecRegister");
             // 変数定義を解析しファイルに保存
             $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
             $ret = $fileObj->putVarStructAnalysis($PkeyID,
@@ -282,7 +280,6 @@ web_log("DTUP_singleRecUpdate DTUP_singleRecRegister");
         }
         // 各テンプレート変数の定義変数で変数の構造に差異がないか確認
         if($retBool === true) {
-web_log("各テンプレート変数の定義変数で変数の構造に差異がないか確認");
             if(( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) ||
                ( $strModeId == "DTUP_singleRecDelete" && $modeValue_sub == 'off')) {
                 $dbObj = new CommonDBAccessCoreClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
@@ -298,11 +295,8 @@ web_log("各テンプレート変数の定義変数で変数の構造に差異�
                     $retStrBody = $dbObj->GetLastErrorMsg();
                 } else {
                     while($row = $objQuery->resultFetch()) {
-web_log("B_ANS_TEMPLATE_FILE read");
-web_log($row);
                         // 自レコードはスキップ
                         if($row['ANS_TEMPLATE_ID'] == $PkeyID) {
-web_log("read continue");
                             continue;
                         }
                         $chk_PkeyID           = $row['ANS_TEMPLATE_ID'];
