@@ -45,7 +45,7 @@ class FileUploadColumnFileAccessBase{
         $this->ColumnName                  = $ColumnName;
         $this->HistoryDirUseFlg            = $HistoryDirUseFlg;
         $this->web_mode                    = false;
-        $this->lv_lasterrmsg = "";
+        $this->lv_lasterrmsg               = array();
         if( isset($_SERVER) === true ){
             if( array_key_exists('HTTP_HOST', $_SERVER) === true ){
                 $this->web_mode  = true;
@@ -55,6 +55,7 @@ class FileUploadColumnFileAccessBase{
 
     function SetLastError($p1,$p2,$p3){
         $FREE_LOG = "FILE:$p1 LINE:$p2 $p3";
+        $this->lv_lasterrmsg    = array();
         $this->lv_lasterrmsg[0] = $p3;
         $this->lv_lasterrmsg[1] = "FILE:$p1 LINE:$p2 $p3";
     }
@@ -124,7 +125,7 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
         $this->ColumnName                  = "VAR_STRUCT_ANAL_JSON_STRING_FILE";
         $this->HistoryDirUseFlg            = $HistoryDirUseFlg;
         $this->web_mode                    = false;
-        $this->lv_lasterrmsg               = "";
+        $this->lv_lasterrmsg               = array();
 
         parent::__construct($objMTS,$objDBCA,$this->menuID,$this->ColumnName,$HistoryDirUseFlg);
         if( isset($_SERVER) === true ){
@@ -136,6 +137,7 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
 
     function SetLastError($p1,$p2,$p3){
         $FREE_LOG = "FILE:$p1 LINE:$p2 $p3";
+        $this->lv_lasterrmsg    = array();
         $this->lv_lasterrmsg[0] = $p3;
         $this->lv_lasterrmsg[1] = "FILE:$p1 LINE:$p2 $p3";
     }
