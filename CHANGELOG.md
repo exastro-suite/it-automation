@@ -32,7 +32,7 @@ Ansible-Driver
 ---------------
   * パスワード項目をansible-vaultにより暗号化を行う機能を追加
   * hostsファイルのyaml化
-  * Ansible-LegacyRoleで、ロール内のansible.cnfを使用できるように改善
+  * Ansible-LegacyRoleで、ロール内のansible.cfgを使用できるように改善
   * AnsibleTowerと連携した際に、Movement毎にvirtualenvを指定できる機能を追加
   * 作業実行、作業状態確認のRestAPIを追加
 
