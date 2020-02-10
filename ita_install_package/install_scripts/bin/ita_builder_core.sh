@@ -817,14 +817,24 @@ log "read setting file"
 read_setting_file "$ITA_BUILDER_SETTING_FILE"
 
 #check (ita_builder_setting.txt)
-if [ "${linux_os}" != 'CentOS7' -a "${linux_os}" != 'CentOS8' -a "${linux_os}" != 'RHEL7' -a "${linux_os}" != 'RHEL8' ]; then
-    log "ERROR:should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8"
+if [ "${linux_os}" != 'CentOS7' -a "${linux_os}" != 'CentOS8' -a "${linux_os}" != 'RHEL7' -a "${linux_os}" != 'RHEL8' -a "${linux_os}" != 'RHEL7_AWS' -a "${linux_os}" != 'RHEL8_AWS' ]; then
+    log "ERROR:should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8 or RHEL7_AWS or RHEL8_AWS"
     func_exit
 else
     LINUX_OS="${linux_os}"
 fi
 
-if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ]; then
+if [ "${linux_os}" == 'RHEL7_AWS' ]; then
+    LINUX_OS='RHEL7'
+    AWS_FLG='yes'
+elif [ "${linux_os}" == 'RHEL8_AWS' ]; then
+    LINUX_OS='RHEL8'
+    AWS_FLG='yes'
+else
+    AWS_FLG='no'
+fi
+
+if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ] && [ $AWS_FLG == 'no' ]; then
     if [ ! -n "$redhat_user_name" ]; then
         log "ERROR:should be set[redhat_user_name]"
         func_exit
@@ -894,7 +904,7 @@ fi
 ################################################################################
 # set subscription
 if [ "$exec_mode" != "2" ]; then
-    if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ]; then
+    if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ] && [ $AWS_FLG == 'no' ]; then
 
         log "setting subscriction of RHEL"
 

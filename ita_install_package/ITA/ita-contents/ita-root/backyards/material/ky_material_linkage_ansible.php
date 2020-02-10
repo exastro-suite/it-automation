@@ -978,7 +978,7 @@ function linkAnsibleRole($materialLinkageData, $fileName, $base64File) {
                     throw new Exception();
                 }
 
-                $upFilePath     = ANS_ROLE_PATH . sprintf("%010d", $updateData['PLAYBOOK_MATTER_ID']) . "/";
+                $upFilePath     = ANS_ROLE_PATH . sprintf("%010d", $updateData['ROLE_PACKAGE_ID']) . "/";
                 $upJnlFilePath  = $upFilePath . "old/" . sprintf("%010d", $jnlSeqNo) . "/";;
 
                 // ファイルを格納パスに配置する

@@ -1,4 +1,4 @@
-# Select Operation System. ("CentOS7","CentOS8","RHEL7","RHEL8")
+# Select Operation System. ("CentOS7","CentOS8","RHEL7","RHEL8","RHEL7_AWS","RHEL8_AWS")
 # e.g) linux_os:RHEL8
 linux_os:
 
