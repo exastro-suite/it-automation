@@ -175,10 +175,14 @@
         exec($cmd);
         
         // 改行文字を改行コードに置換える
-        $cmd = "sed -e 's/\\\\r\\\\n/\\n/g' "  . $out_exec_tmp1 . " > " . $out_exec_log;
+        $cmd = "sed -e 's/\\\\r\\\\n/\\n/g' "  . $out_exec_tmp1 . " > " . $out_exec_tmp2;
         exec($cmd);
 
-        exec("/bin/rm -f " . $out_exec_tmp1 );
+        // python改行文字を改行コードに置換える
+        $cmd = "sed -e 's/\\\\n/\\n/g' "  . $out_exec_tmp2 . " > " . $out_exec_log;
+        exec($cmd);
+
+        exec("/bin/rm -f " . $out_exec_tmp1 . " " . $out_exec_tmp2);
     }
     else{
 //       特定のキーワードで改行しlegacyのログを見やすくする
@@ -187,6 +191,7 @@
         $out_exec_tmp1 = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.tmp1";
         $out_exec_tmp2 = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.tmp2";
         $out_exec_tmp3 = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.tmp3";
+        $out_exec_tmp4 = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.tmp4";
         $out_exec_log  = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log";
 
         // ログ(", ")  =>  (",\n")を改行する
@@ -202,10 +207,14 @@
         exec($cmd);
         
         // 改行文字を改行コードに置換える
-        $cmd = "sed -e 's/\\\\r\\\\n/\\n/g' "  . $out_exec_tmp3 . " > " . $out_exec_log;
+        $cmd = "sed -e 's/\\\\r\\\\n/\\n/g' "  . $out_exec_tmp3 . " > " . $out_exec_tmp4;
         exec($cmd);
 
-        exec("/bin/rm -f " . $out_exec_tmp1 . " " . $out_exec_tmp2 . " " . $out_exec_tmp3);
+        // python改行文字を改行コードに置換える
+        $cmd = "sed -e 's/\\\\n/\\n/g' "  . $out_exec_tmp4 . " > " . $out_exec_log;
+        exec($cmd);
+
+        exec("/bin/rm -f " . $out_exec_tmp1 . " " . $out_exec_tmp2 . " " . $out_exec_tmp3  . " " . $out_exec_tmp4);
 
     }
 
