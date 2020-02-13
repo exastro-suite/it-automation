@@ -80,6 +80,8 @@
 //  F0056 CreatePioneertemplatefiles
 //  F0058 CopyPioneerTemplatefiles
 //  F0059 CreateLegacyRoleTemplateFiles
+//  F0060 errorlocalaction 
+//  F0061 initlocalCommandInfo
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php");
@@ -3500,6 +3502,8 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function CheckDialogfileFormat($in_file_name,$in_host_name){
+        $ignore_errors_preg_match = "/(\S+):(\s+)(no|yes|(\{\{( ){1}(\S+)( ){1}\}\}))(\s*)$/";
+
         $result_code = true;
 
         // stateコマンドの情報退避
@@ -3510,6 +3514,10 @@ class CreateAnsibleExecFiles {
         $command_info    = array();
         $command_line_no = 0;
 
+        // localactionの情報退避
+        $localaction_info    = array();
+        $localaction_line_no = 0;
+
         $fd = @fopen($in_file_name, "r");
         if($fd == null){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55222",array($in_host_name,basename($in_file_name)));
@@ -3518,7 +3526,23 @@ class CreateAnsibleExecFiles {
         }
         else{
             $line_no = 0;
+
+            // $mystsの値
+            // 0: idle
+            // 1: conf=>timeout待ち
+            // 2: exec_list待ち
+            // 3: ブロック待ち
+            // 4: 3でpexpect読み取り　           exec待ち
+            // 5: 3でstate読み取り　             各パラメータ待ち
+            // 6: 5でparameter読み取り　         - パラメータ待ち
+            // 7: 3でcommand読み取り  　         各パラメータ待ち
+            // 8: command=>xxxx_with読み取り     - パラメータ待ち
+            // 9: localaction読み取り　         各パラメータ待ち
             $mysts  = 0;
+
+            $now_cmd = "";
+            $now_when_cmd = "";
+
             while(!feof($fd)){
                 $line_no++;
                 $rbuff = @fgets($fd);
@@ -3531,6 +3555,7 @@ class CreateAnsibleExecFiles {
                 // #の前の文字がスペースの場合、以降をコメントとして扱う
                 $wspstr = explode(" #",$read_line);
                 $read_line = $wspstr[0];
+
 
                 //TABキー入力の判定
                 if(strstr($read_line,"\t") !== false){
@@ -3652,24 +3677,16 @@ class CreateAnsibleExecFiles {
                 }
                 // exec_list=>expect:キーか判定
                 elseif(strpos($read_line,"  - expect:") === 0){
-                    if(($mysts == 5) || ($mysts == 6))
-                    {
-                       $ret = $this->checkstateCommand($mysts,$result_code,$state_info,$state_line_no,$in_file_name,$in_host_name);
-                       if($ret === false){
-                           break;
-                       } 
-                       //対話ファイルのチェック状態を戻す
-                       $mysts = 3;
-                    } else if( ($mysts == 7) || ($mysts == 8) ) {
-                        // 1個前のcommandの構文が正しいか判定
-                        // $result_codeはエラーの場合にfalseになる
-                        $ret = $this->checkCommand( $mysts, $result_code, $command_info, $command_line_no, $in_file_name, $in_host_name );
-                        // 対話ファイルのチェック状態を戻す
-                        if($ret === false) {
-                            break;
-                        }
-                        $mysts = 3;
+
+                    // 一個前のコマンドに問題がないか判定
+                    $ret = $this->beforCommandCheck($mysts,$result_code,
+                                                    $state_info,   $state_line_no,
+                                                    $command_info, $command_line_no,
+                                                    $in_file_name,  $in_host_name );
+                    if($ret === false) {
+                        break;
                     }
+
                     if($mysts == 3){
                         $arry_list = explode(":",$read_line);
                         if (count($arry_list) < 2){
@@ -3746,31 +3763,73 @@ class CreateAnsibleExecFiles {
                         break;
                     }
                 }
-// 作業パターンの出力結果から特定の文字列でOK/NGを判断するコマンド(state)の処理
+
+                /////////////////////////////////////////////////////////////
+                // exec_list=>localaction:キーか判定
+                ////////////////////////////////////////////////////////////
+                elseif(strpos($read_line,"  - localaction:") === 0){
+                    $now_cmd = "localaction";
+
+                    // 一個前のコマンドに問題がないか判定
+                    $ret = $this->beforCommandCheck($mysts,$result_code,
+                                                    $state_info,   $state_line_no,
+                                                    $command_info, $command_line_no,
+                                                    $in_file_name,  $in_host_name );
+                    if($ret === false) {
+                        break;
+                    }
+
+                    if($mysts == 3){
+                        $mysts = 9;
+
+                        // localactionコマンドの情報を初期化
+                        $this->initlocalactionInfo($localaction_info,$localaction_line_no,$line_no);
+
+                        $arry_list = explode(":",$read_line);
+                        if (count($arry_list) < 2){
+                            $this->errorlocalaction($mysts,$result_code,$localaction_info,$localaction_line_no,
+                                                    "ITAANSIBLEH-ERR-55284",
+                                                    array($in_host_name,basename($in_file_name),$line_no));
+                            //終了
+                            break;
+                        }
+                        $expect = rtrim(trim($arry_list[1]));
+                        if($expect == ""){
+                            $this->errorlocalaction($mysts,$result_code,$localaction_info,$localaction_line_no,
+                                                    "ITAANSIBLEH-ERR-55284",
+                                                    array($in_host_name,basename($in_file_name),$line_no));
+                            //localaction終了
+                            break;
+                        }
+                        else{
+                            // localaction 記述済みにマーク
+                            $localaction_info[$now_cmd] = "1";
+                        }
+                    }
+                    else{
+                        $this->errorlocalaction($mysts,$result_code,$localaction_info,$localaction_line_no,
+                                                "ITAANSIBLEH-ERR-55281",
+                                                array($in_host_name,basename($in_file_name),$line_no));
+                        //終了
+                        break;
+                    }
+                }
+
                 ////////////////////////////////////////////////////////////////
                 // exec_list=>state:キーか判定
                 ////////////////////////////////////////////////////////////////
                 elseif(strpos($read_line,"  - state:") === 0){
                     $now_cmd = "state";
-                    if(($mysts == 5) || ($mysts == 6))
-                    {  // 1個前のstateコマンドの構文が正しいか判定
-                       // $result_codeはエラーの場合にfalseになる
-                       $ret = $this->checkstateCommand($mysts,$result_code,$state_info,$state_line_no,$in_file_name,$in_host_name);
-                       //対話ファイルのチェック状態を戻す
-                       if($ret === false){
-                           break;
-                       } 
-                       $mysts = 3;
-                    } else if( ($mysts == 7) || ($mysts == 8) ) {
-                        // 1個前のcommandの構文が正しいか判定
-                        // $result_codeはエラーの場合にfalseになる
-                        $ret = $this->checkCommand( $mysts, $result_code, $command_info, $command_line_no, $in_file_name, $in_host_name );
-                        // 対話ファイルのチェック状態を戻す
-                        if($ret === false) {
-                            break;
-                        }
-                        $mysts = 3;
+
+                    // 一個前のコマンドに問題がないか判定
+                    $ret = $this->beforCommandCheck($mysts,$result_code,
+                                                    $state_info,   $state_line_no,
+                                                    $command_info, $command_line_no,
+                                                    $in_file_name,  $in_host_name );
+                    if($ret === false) {
+                        break;
                     }
+
                     if($mysts == 3){
                         $mysts = 5;
 
@@ -3965,6 +4024,8 @@ class CreateAnsibleExecFiles {
                             break;
                         }
                         else{
+                            // parameter 記述済みにマーク
+                            $state_info[$now_cmd] = "1";
                             // parameterのリスト取得中
                             $mysts = 6;
                         }
@@ -3986,7 +4047,7 @@ class CreateAnsibleExecFiles {
                 ////////////////////////////////////////////////////////////////
                 elseif(strpos($read_line,"      - ") === 0){
                     if($mysts == 6){
-                        $now_cmd = "parameter";
+                        $now_cmd = "- (parameter)";
                         $arry_list = explode("-",$read_line);
                         if (count($arry_list) < 2){
                             $this->errorstateCommand($mysts,$result_code,$state_info,$state_line_no,
@@ -4004,33 +4065,35 @@ class CreateAnsibleExecFiles {
                             break;
                         }
                         else{
-                            // state 記述済みにマーク
+                            // parameter - 記述済みにマーク
                             $state_info[$now_cmd] = "1";
                         }
                     } else if($mysts == 8){
+                        $now_cmd = "- (" . $now_when_cmd . ")";    
                         $arry_list = explode("-",$read_line);
                         if (count($arry_list) < 2){
-                            $this->errorstateCommand($mysts,$result_code,$state_info,$state_line_no,
-                                                     "ITAANSIBLEH-ERR-55277",
-                                                     array($in_host_name,basename($in_file_name),$line_no,$now_cmd));
+                            $this->errorCommand($mysts,$result_code,$command_info,$command_line_no,
+                                                "ITAANSIBLEH-ERR-55277",
+                                                array($in_host_name,basename($in_file_name),$line_no,$now_cmd));
                             //終了
                             break;
                         }
                         $expect = rtrim(trim($arry_list[1]));
                         if($expect == ""){
-                            $this->errorstateCommand($mysts,$result_code,$state_info,$state_line_no,
-                                                     "ITAANSIBLEH-ERR-55277",
-                                                     array($in_host_name,basename($in_file_name),$line_no,$now_cmd));
+                            $this->errorCommand($mysts,$result_code,$command_info,$command_line_no,
+                                                "ITAANSIBLEH-ERR-55277",
+                                                array($in_host_name,basename($in_file_name),$line_no,$now_cmd));
                             //終了
                             break;
                         } else{
-                            // state 記述済みにマーク
+                            // 記述済みにマーク
                             $command_info[$now_cmd] = "1";
                         }
                     } else {
                         $this->errorstateCommand($mysts,$result_code,$state_info,$state_line_no,
                                                  "ITAANSIBLEH-ERR-55280",
-                                                 array($in_host_name,basename($in_file_name),$line_no,$now_cmd));
+                                                 array($in_host_name,basename($in_file_name),$line_no,  
+                                                       $read_line));
                         //終了
                         break;
                     }
@@ -4131,7 +4194,27 @@ class CreateAnsibleExecFiles {
                 ////////////////////////////////////////////////////////////////
                 elseif(strpos($read_line,"    ignore_errors:") === 0){
                     $now_cmd = "ignore_errors";
-                    if(($mysts == 5) || ($mysts == 6)){
+                    if($mysts == 9) {
+                        // コマンドが既に設定済か判定
+                        if($localaction_info[$now_cmd] == "1") {
+                            $this->errorlocalaction($mysts,$result_code,$localaction_info,$localaction_line_no,
+                                                    "ITAANSIBLEH-ERR-55283",
+                                                    array($in_host_name,basename($in_file_name),$line_no,$now_cmd));
+                            //終了
+                            break;
+                        }
+                        // パラメータにyes/noか変数が指定されているか判定
+                        $ret = preg_match($ignore_errors_preg_match,$read_line);
+                        if($ret !== 1){
+                            $this->errorstateCommand($mysts,$result_code,$localaction_info,$localaction_line_no,
+                                                     "ITAANSIBLEH-ERR-55282",
+                                                     array($in_host_name,basename($in_file_name),$line_no,$now_cmd));
+                            //終了
+                            break;
+                        }
+                        $mysts = 3;
+                    }
+                    elseif(($mysts == 5) || ($mysts == 6)){
                         // コマンドが既に設定済みか判定
                         if($state_info[$now_cmd]=="1"){
                             $this->errorstateCommand($mysts,$result_code,$state_info,$state_line_no,
@@ -4141,7 +4224,7 @@ class CreateAnsibleExecFiles {
                             break;
                         }
                         // パラメータにyes/noか変数が指定されているか判定
-                        $ret = preg_match("/(\S+):(\s+)(no|yes|(\{\{( ){1}(\S+)( ){1}\}\}))(\s*)$/",$read_line);
+                        $ret = preg_match($ignore_errors_preg_match,$read_line);
                         if($ret !== 1){
                             $this->errorstateCommand($mysts,$result_code,$state_info,$state_line_no,
                                                      "ITAANSIBLEH-ERR-55247",
@@ -4172,25 +4255,18 @@ class CreateAnsibleExecFiles {
                 ////////////////////////////////////////////////////////////////
                 elseif(strpos($read_line,"  - command:") === 0) {
                     $now_cmd = "command";
-                    if(($mysts == 5) || ($mysts == 6)) {
-                        // 1個前のstateコマンドの構文が正しいか判定
-                        // $result_codeはエラーの場合にfalseになる
-                        $ret = $this->checkstateCommand($mysts,$result_code,$state_info,$state_line_no,$in_file_name,$in_host_name);
-                        //対話ファイルのチェック状態を戻す
-                        if($ret === false){
-                            break;
-                        }
-                        $mysts = 3;
-                    } else if( ($mysts == 7) || ($mysts == 8) ) {
-                        // 1個前のcommandの構文が正しいか判定
-                        // $result_codeはエラーの場合にfalseになる
-                        $ret = $this->checkCommand( $mysts, $result_code, $command_info, $command_line_no, $in_file_name, $in_host_name );
-                        // 対話ファイルのチェック状態を戻す
-                        if($ret === false) {
-                            break;
-                        }
-                        $mysts = 3;
+
+                    $now_when_name = "";
+
+                    // 一個前のコマンドに問題がないか判定
+                    $ret = $this->beforCommandCheck($mysts,$result_code,
+                                                    $state_info,   $state_line_no,
+                                                    $command_info, $command_line_no,
+                                                    $in_file_name,  $in_host_name );
+                    if($ret === false) {
+                        break;
                     }
+
                     if($mysts == 3){
                         $mysts = 7;
 
@@ -4251,13 +4327,12 @@ class CreateAnsibleExecFiles {
                                                     "ITAANSIBLEH-ERR-55277",
                                                     array($in_host_name,basename($in_file_name),$line_no,$now_cmd));
                                 break;
-                            } else {
-                                // command 記述済みにマーク
-                                $command_info[$now_cmd] = "1";
-                                // リスト取得中の場合にcommand中に変更
-                                if($mysts == 8){
-                                    $mysts = 7;
-                                }
+                            }
+                            // パラメータ記述済みにマーク
+                            $command_info[$now_cmd] = "1";
+                            // リスト取得中の場合にcommand中に変更
+                            if($mysts == 8){
+                                $mysts = 7;
                             }
                         }
                     } else {
@@ -4289,15 +4364,14 @@ class CreateAnsibleExecFiles {
                                 //終了
                                 break;
                             }
-                            $expect = rtrim(trim($arry_list[1]));
-                            if($expect == ""){
+                            if(rtrim(trim($arry_list[1])) == ""){
                                 $this->errorCommand($mysts,$result_code,$command_info,$command_line_no,
                                                     "ITAANSIBLEH-ERR-55277",
                                                     array($in_host_name,basename($in_file_name),$line_no,$now_cmd));
                                 //終了
                                 break;
                             } else {
-                                // command 記述済みにマーク
+                                // パラメータ記述済みにマーク
                                 $command_info[$now_cmd] = "1";
                                 // リスト取得中の場合にcommand中に変更
                                 if($mysts == 8){
@@ -4345,6 +4419,9 @@ class CreateAnsibleExecFiles {
                                 break;
                             }
                             else{
+                                // パラメータ記述済みにマーク
+                                $command_info[$now_cmd] = "1";   
+                                $now_when_cmd = $now_cmd;       
                                 // with_itemsのリスト取得中
                                 $mysts = 8;
                             }
@@ -4388,6 +4465,9 @@ class CreateAnsibleExecFiles {
                                 //終了
                                 break;
                             } else {
+                                // パラメータ記述済みにマーク
+                                $command_info[$now_cmd] = "1";   
+                                $now_when_cmd = $now_cmd;       
                                 // whenのリスト取得中
                                 $mysts = 8;
                             }
@@ -4431,6 +4511,9 @@ class CreateAnsibleExecFiles {
                                 //終了
                                 break;
                             } else {
+                                // パラメータ記述済みにマーク
+                                $command_info[$now_cmd] = "1";   
+                                $now_when_cmd = $now_cmd;       
                                 // failed_whenのリスト取得中
                                 $mysts = 8;
                             }
@@ -4474,6 +4557,9 @@ class CreateAnsibleExecFiles {
                                 //終了
                                 break;
                             } else {
+                                // パラメータ記述済みにマーク
+                                $command_info[$now_cmd] = "1";   
+                                $now_when_cmd = $now_cmd;       
                                 // exec_whenのリスト取得中
                                 $mysts = 8;
                             }
@@ -4539,6 +4625,8 @@ class CreateAnsibleExecFiles {
                 // $result_codeはエラーの場合にfalseになる
                 $ret = $this->checkCommand($mysts,$result_code,$command_info,$command_line_no,$in_file_name,$in_host_name);
                 break;
+            case 9:
+                break;
             }
         }
         if($fd !== null){
@@ -4547,7 +4635,6 @@ class CreateAnsibleExecFiles {
         return($result_code);
     }
 
-// 作業パターンの出力結果から特定の文字列でOK/NGを判断するコマンド(state)の処理追加
     /////////////////////////////////////////////////////////////////////////////////
     // F0024
     // 処理内容
@@ -4569,6 +4656,7 @@ class CreateAnsibleExecFiles {
         $in_state_info["prompt"]         = "0";
         $in_state_info["shell"]          = "0";
         $in_state_info["parameter"]      = "0";
+        $in_state_info["- (parameter)"]  = "0";
         $in_state_info["stdout_file"]    = "0";
         $in_state_info["success_exit"]   = "0";
         $in_state_info["ignore_errors"]  = "0";
@@ -4608,7 +4696,6 @@ class CreateAnsibleExecFiles {
         $this->initstateCommandInfo($in_state_info,$in_state_line_no,$in_state_line_no);
     }
 
-    
     /////////////////////////////////////////////////////////////////////////////////
     // F0026
     // 処理内容
@@ -4627,25 +4714,26 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function checkstateCommand(&$in_state_sts,&$in_result_code,&$in_state_info,&$in_state_line_no,$in_file_name,$in_host_name){
-        $error_list = array();
         // パラメータリスト
-        $cmd_list  = array("state"       ,"prompt"       ,"shell"        ,"parameter",
+        $cmd_list  = array("state"       ,"prompt"       ,"shell"        ,"parameter", "- (parameter)",
                            "stdout_file" ,"success_exit" ,"ignore_errors");
 
-        // パラメータ判定リスト
+        // パラメータ必須設定判定リスト
         $ok_list[] = array("state"=>"1"     , "prompt"=>"1"      , "shell"=>"?"        ,
-                           "parameter"=>"?" ,"stdout_file"=>"?"  , "success_exit"=>"?" ,
+                           "parameter"=>"?" , "- (parameter)"=>"?","stdout_file"=>"?"  , "success_exit"=>"?" ,
                            "ignore_errors"=>"?");
-        $ok_list[] = array("state"=>"1"     , "prompt"=>"1"      , "shell"=>"1"        ,
-                           "parameter"=>"?" ,"stdout_file"=>"?"  , "success_exit"=>"?" ,
-                           "ignore_errors"=>"?");
-        $ok_list[] = array("state"=>"1"     , "prompt"=>"1"      , "shell"=>"?"        ,
-                           "parameter"=>"1" , "stdout_file"=>"?" , "success_exit"=>"?" ,
-                           "ignore_errors"=>"?");
+   
+        // パラメータ組み合わせ設定判定リスト
+        // check_list:    指定パラメータの設定条件 複数可能(and)
+        // relation_list: 指定パラメータと関連するパラメータ設定条件 複数可能(and)
+        $combination_list[] = array('check_list'=>array('parameter'=>'1'),
+                                    'relation_list'=>array('parameter'=>'1','- (parameter)'=>'1'));
+
 
         $result_code = false;
+        $pattern_ret = true;
+        $error_list = array();
         foreach($ok_list as $pattern){
-            $pattern_ret = true;
             foreach($cmd_list as $cmd){
                 // 任意入力のパラメータでないか判定
                 if($pattern[$cmd] != "?"){
@@ -4661,6 +4749,29 @@ class CreateAnsibleExecFiles {
             if($pattern_ret == true){
                 $result_code = true;
                 break;
+            }
+        }
+        if($result_code == true) {
+            $error_list = array();
+            foreach($combination_list as $pattern) {
+                $hit = true;
+                foreach($pattern['check_list'] as $cmd=>$value) {
+                    if($in_state_info[$cmd] != $value) {
+                        $hit = false;
+                        break;
+                    }
+                }
+                if($hit === true) {
+                    foreach($pattern['relation_list'] as $cmd=>$value) {
+                        if($in_state_info[$cmd] != $value)
+                        {
+                            $error_list[$cmd] = "1";
+                            $result_code = false;
+                        }
+                        else {
+                        }
+                    }
+                }
             }
         }
         if($result_code == false){
@@ -4710,6 +4821,10 @@ class CreateAnsibleExecFiles {
         $in_command_info["when"]          = "0";
         $in_command_info["failed_when"]   = "0";
         $in_command_info["exec_when"]     = "0";
+        $in_command_info["- (with_items)"]  = "0";
+        $in_command_info["- (when)"]        = "0";
+        $in_command_info["- (failed_when)"] = "0";
+        $in_command_info["- (exec_when)"]   = "0";
         // commandコマンドの行番号を退避
         $in_command_line_no               = $in_line_no;
     }
@@ -4765,19 +4880,38 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function checkCommand(&$in_mysts,&$in_result_code,&$in_command_info,&$in_command_line_no,$in_file_name,$in_host_name){
+
         $error_list = array();
         // パラメータリスト
-        $cmd_list  = array("command"       ,"prompt"        ,"timeout"       ,"register",
-                           "with_items"    ,"when"          ,"failed_when"   ,"exec_when");
+        $cmd_list  = array(   "command"           ,   "prompt"     ,   "timeout"            ,   "register",
+                              "with_items"        ,   "when"       ,   "failed_when"        ,   "exec_when",
+                           "- (with_items)"       ,"- (when)"      ,"- (failed_when)"       ,"- (exec_when)");
 
         // パラメータ判定リスト
-        $ok_list[] = array("command"=>"1"     , "prompt"=>"1"     , "timeout"=>"?" ,
-                           "register"=>"?"    , "with_items"=>"?" , "when"=>"?" ,
-                           "failed_when"=>"?" , "exec_when"=>"?");
+        $ok_list[] = array(   "command"=>"1"      ,   "prompt"=>"1",   "timeout"=>"?"       ,   "register"=>"?", 
+                              "with_items"=>"?"   ,   "when"=>"?"  ,   "failed_when"=>"?"   ,   "exec_when"=>"?",
+                           "- (with_items)"=>"?"  ,"- (when)"=>"?" ,"- (failed_when)"=>"?"  ,"- (exec_when)"=>"?");
+
+        // パラメータ組み合わせ設定判定リスト
+        // check_list:    指定パラメータの設定条件 複数可能(and)
+        // relation_list: 指定パラメータと関連するパラメータ設定条件 複数可能(and)
+        $combination_list[] = array('check_list'=>   array('with_items'=>'1'),
+                                    'relation_list'=>array('with_items'=>'1',
+                                                        '- (with_items)'=>'1'));
+        $combination_list[] = array('check_list'=>   array('when'=>'1'),
+                                    'relation_list'=>array('when'=>'1',
+                                                        '- (when)'=>'1'));
+        $combination_list[] = array('check_list'=>   array('exec_when'=>'1'),
+                                    'relation_list'=>array('exec_when'=>'1',
+                                                        '- (exec_when)'=>'1'));
+        $combination_list[] = array('check_list'=>   array('failed_when'=>'1'),
+                                    'relation_list'=>array('failed_when'=>'1',
+                                                        '- (failed_when)'=>'1'));
 
         $result_code = false;
+        $pattern_ret = true;   
+        $error_list  = array();
         foreach($ok_list as $pattern){
-            $pattern_ret = true;
             foreach($cmd_list as $cmd){
                 // 任意入力のパラメータでないか判定
                 if($pattern[$cmd] != "?"){
@@ -4793,6 +4927,27 @@ class CreateAnsibleExecFiles {
             if($pattern_ret == true){
                 $result_code = true;
                 break;
+            }
+        }
+        if($result_code == true) {
+            $error_list = array();
+            foreach($combination_list as $pattern) {
+                $hit = true;
+                foreach($pattern['check_list'] as $cmd=>$value) {
+                    if($in_command_info[$cmd] != $value) {
+                        $hit = false;
+                        break;
+                    }
+                }
+                if($hit === true) {
+                    foreach($pattern['relation_list'] as $cmd=>$value) {
+                        if($in_command_info[$cmd] != $value)
+                        {
+                            $error_list[$cmd] = "1";
+                            $result_code = false;
+                        }
+                    }
+                }
             }
         }
         if($result_code == false){
@@ -10903,6 +11058,110 @@ class CreateAnsibleExecFiles {
         }
         return true;
     }
+    /////////////////////////////////////////////////////////////////////////////////
+    // F0060
+    // 処理内容
+    //   localactionコマンドのパラメータでエラーがあった場合の処理
+    // 
+    // パラメータ
+    //   $in_mysts:                対話ファイルのチェック状態
+    //   $in_result_code:          モジュール戻り値
+    //   $in_localaction_info:     localactionコマンドパラメータ設定有無配列
+    //   $in_localaction_line_no:  localactionコマンド行番号 退避用
+    //   $in_error_code:           エラーメッセージコード
+    //   $ina_error_info:          エラーメッセージパラメータ
+    //   
+    // 戻り値
+    //   true:   正常
+    //   false:  異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function errorlocalaction(&$in_mysts,
+                              &$in_result_code,
+                              &$in_localaction_info,
+                              &$in_localaction_line_no,
+                              $in_error_code,
+                               $ina_error_info){
+        // エラーメッセージを出力
+        $msgstr = $this->lv_objMTS->getSomeMessage($in_error_code,$ina_error_info);
+        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+        $in_result_code = false;
+        $in_mysts       = 3;
+        // localactionコマンドのパラメータ設定有無をクリア
+        $this->initstateCommandInfo($in_localaction_info,$in_localaction_line_no,$in_localaction_line_no);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // F0061
+    // 処理内容
+    //   localactionコマンドのパラメータ情報初期化
+    // 
+    // パラメータ
+    //   $in_localaction_info:    localactionコマンドパラメータ設定有無配列
+    //   $in_localaction:         localactionコマンド行番号 退避用
+    //   $in_line_no:             localactionコマンド行番号
+    //   
+    // 戻り値
+    //   true:   正常
+    //   false:  異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function initlocalactionInfo(&$in_localaction_info,&$in_localaction_line_no,$in_line_no){
+        // localactionコマンドのパラメータ設定有無をクリア
+        $in_localaction_info                   = array();
+        $in_localaction_info["localaction"]    = "0";
+        $in_localaction_info["ignore_errors"]  = "0";
+        // localactionコマンドの行番号を退避
+        $in_localaction_line_no                = $in_line_no;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // F0062
+    // 処理内容
+    //   一個前のコマンドに問題がないか判定
+    //
+    // パラメータ
+    //   $in_mysts:         対話ファイルのチェック状態
+    //   $in_result_code:   モジュール戻り値
+    //   $in_state_info:    stateコマンドパラメータ設定有無配列
+    //   $in_state_line_no: stateコマンド行番号 退避用
+    //   $in_command_info:    commandコマンドパラメータ設定有無配列
+    //   $in_command_line_no: commandコマンド行番号 退避用
+    //   $in_file_name:     対話ファイル名
+    //   $in_host_name:     ホスト名
+    //
+    // 戻り値
+    //   true:   正常
+    //   false:  異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function beforCommandCheck(&$mysts,        &$result_code,
+                               &$state_info,   &$state_line_no,
+                               &$command_info, &$command_line_no,
+                               $in_file_name,  $in_host_name ) {
+
+        // 一個前のがlocalactionの場合
+        if($mysts == 9) {
+            $mysts = 3;
+        // 一個前のがstateの場合
+        } elseif(($mysts == 5) || ($mysts == 6)) {
+            $ret = $this->checkstateCommand($mysts,$result_code,$state_info,$state_line_no,$in_file_name,$in_host_name);
+            if($ret === false){
+                return $ret;
+            }
+            //対話ファイルのチェック状態を戻す
+            $mysts = 3;
+        // 一個前のがCommandの場合
+        } else if( ($mysts == 7) || ($mysts == 8) ) {
+            // 1個前のcommandの構文が正しいか判定
+            $ret = $this->checkCommand( $mysts, $result_code, $command_info, $command_line_no, $in_file_name, $in_host_name );
+            // 対話ファイルのチェック状態を戻す
+            if($ret === false) {
+                return $ret;
+            }
+            $mysts = 3;
+        }
+        return true;
+    }
+
     // テンプレート管理を使用している場合、親PlaybookにTemplateMmoduleを追加してテンプレート内の変数解決する。
     function TemplateMmoduleAddPlaybook($in_tpf_path) {
         $playbookread  = array();
