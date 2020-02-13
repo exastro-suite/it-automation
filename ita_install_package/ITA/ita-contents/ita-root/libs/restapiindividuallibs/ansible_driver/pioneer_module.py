@@ -102,6 +102,7 @@ exit_dict = {}
 when_log_str = "%s: [%s] %s"
 prompt_log_str = "prompt: [%s]"
 command_log_str = "command: [%s]"
+localaction_log_str = "localaction: [%s]"
 execute_when_log_str = "%s: [%s]"
 
 exec_log = [] 
@@ -323,6 +324,26 @@ def main():
         # read line
         ####################################################
         p.readline()
+
+      # localaction command ?
+      elif 'localaction' in input:
+        for cmd in input:
+          if 'localaction' == cmd:
+            exec_cmd = str(input[cmd])
+            exec_name = 'localaction command:(' + exec_cmd + ')'
+          elif 'ignore_errors' == cmd:
+            ignore_errors = str(input[cmd])
+            if ignore_errors != str(False) and ignore_errors != str(True):
+              logstr = 'ignore_errors=(' + str(input[cmd]) + '): Only yes or no set'
+              exec_log_output(logstr)
+              private_log_output(log_file_name,host_name,logstr)
+              #########################################################
+              # fail exit
+              #########################################################
+              private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
+
+        # localaction実行
+        exec_localaction(module,p,log_file_name,host_name,exec_cmd,ignore_errors)
 
       # state command ?
       elif 'state' in input:
@@ -2807,7 +2828,7 @@ def private_fail_json(**args) :
   if ret_exp == False:
     raise AnsibleModule_exit()
   else:
-    ubj.fail_json(msg=ret_msg,exec_log=ret_exec_log)
+    obj.fail_json(msg=ret_msg,exec_log=ret_exec_log)
 
 def private_exit_json(**args) :
   global exit_dict 
@@ -4168,6 +4189,7 @@ def password_replace(password,data):
 def exec_log_output(log,replace_flg = True):
   global exec_log
   global output_password
+  output_log = str(log)
   if replace_flg == True:
     output_log = password_replace(output_password,str(log))
   exec_log.append(output_log)
@@ -4175,12 +4197,14 @@ def exec_log_output(log,replace_flg = True):
 def debug_exec_log_output(log,replace_flg = True):
   global exec_log
   global output_password
+  output_log = str(log)
   if replace_flg == True:
     output_log = password_replace(output_password,str(log))
   exec_log.append(output_log)
 
 def private_log_output(log_file_name,host_name,log,replace_flg = True):
   global output_password
+  output_log = str(log)
   if replace_flg == True:
     output_log = password_replace(output_password,str(log))
   private_log(log_file_name,host_name,output_log)
@@ -4259,6 +4283,64 @@ def exec_command(p,log_file_name,host_name,cmd):
   p.sendline(pass_rep_cmd)
 
   private_log_output(log_file_name,host_name,"Ok")
+
+def exec_localaction(module,p,log_file_name,host_name,cmd,ignore_errors):
+  global password
+  global localaction_log_str
+  global exec_log
+
+  # 隠蔽文字デコード
+  pass_rep_cmd = password_replace(password,cmd)
+
+  # localactionコマンドログ生成
+  # "localaction: [%s]"
+  logstr =  localaction_log_str % (cmd)
+
+  # localactionコマンドログ出力
+  exec_log_output(logstr)
+  private_log_output(log_file_name,host_name,logstr)
+
+  # コマンド実行
+  p = subprocess.Popen(pass_rep_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  stdout_data, stderr_data = p.communicate()
+
+  # 標準出力をログに出力
+  if len(stdout_data) > 0:
+    stdlog = unicode2encode(stdout_data)
+    stdlog = stdlog.replace("\n","\r\n")
+  else:
+    stdlog = ""
+  logstr = "stdout: [" + stdlog + "]"
+  private_log_output(log_file_name,host_name,logstr)
+  exec_log_output(logstr)
+
+  # 標準エラー出力をログに出力
+  if len(stderr_data) > 0:
+    stdlog = unicode2encode(stderr_data)
+    stdlog = stdlog.replace("\n","\r\n")
+  else:
+    stdlog = ""
+  logstr = "stderr: [" + stdlog + "]"
+  private_log_output(log_file_name,host_name,logstr)
+  exec_log_output(logstr)
+
+  # exit code判定
+  if p.returncode == 0:
+    private_log_output(log_file_name,host_name,"Ok")
+  else:
+    # ignore_errors check
+    if ignore_errors == str(False):
+      logstr = 'dialog_file fail exit. (ignore_errors: no)'
+      private_log_output(log_file_name,host_name,logstr)
+      exec_log_output(logstr)
+      #########################################################
+      # fail exit
+      #########################################################
+      private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
+    else:
+      logstr = 'dialog_file execut continue. (ignore_errors: yes)'
+      private_log_output(log_file_name,host_name,logstr)
+      exec_log_output(logstr)
 
 def when_check_result(when_name,ret,log_file_name,host_name,cmd):
   global when_log_str
