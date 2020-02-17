@@ -100,12 +100,15 @@
         
         $strUTNTableId = "";
         $strJNLTableId = "";
+        $strUTNViewId = "";
+        $strJNLViewId = "";
 
         $strUTNRIColumnId = "";
         $strJNLRIColumnId = "";
 
         $aryColumnInfo01 = array();
         $aryColumnInfo02 = array();
+        $aryColumnInfo03 = array();
 
         try{
             $systemDir = "systems/{$strMenuIdNumeric}";
@@ -208,6 +211,8 @@
                         $strUTNTableId = $objTable->getDBMainTableHiddenID();
                         $strJNLTableId = $objTable->getDBJournalTableHiddenID();
                         if( 0 < strlen($strUTNTableId) && 0 < strlen($strJNLTableId) ){
+                            $strUTNViewId = $objTable->getDBMainTableBody();
+                            $strJNLViewId = $objTable->getDBJournalTableBody();
                             $strHiddenTableMode = true;
                         }
                         else{
@@ -230,9 +235,11 @@
                     $aryInfoOfTable = array("PAGE_TYPE"        =>$strPageType
                                            ,"UTN"              =>array("OBJECT_ID"           =>$strUTNTableId
                                                                       ,"ROW_INDENTIFY_COLUMN"=>$strUTNRIColumnId
+                                                                      ,"VIEW_ID"             =>$strUTNViewId
                                                                        )
                                            ,"JNL"              =>array("OBJECT_ID"           =>$strJNLTableId
                                                                       ,"ROW_INDENTIFY_COLUMN"=>$strJNLRIColumnId
+                                                                      ,"VIEW_ID"             =>$strJNLViewId
                                                                        )
                                            ,"UTN_ROW_INDENTIFY"=>$strUTNRIColumnId
                                            ,"JNL_SEQ_NO"       =>$strJNLRIColumnId
@@ -266,6 +273,8 @@
                     $strUTNTableId = $objTable->getDBMainTableHiddenID();
                     $strJNLTableId = $objTable->getDBJournalTableHiddenID();
                     if( 0 < strlen($strUTNTableId) && 0 < strlen($strJNLTableId) ){
+                        $strUTNViewId = $objTable->getDBMainTableBody();
+                        $strJNLViewId = $objTable->getDBJournalTableBody();
                         $strHiddenTableMode = true;
                     }
                     else{
@@ -275,9 +284,11 @@
                     $aryInfoOfTable = array("PAGE_TYPE"        =>$strPageType
                                            ,"UTN"              =>array("OBJECT_ID"           =>$strUTNTableId
                                                                       ,"ROW_INDENTIFY_COLUMN"=>$strUTNRIColumnId
+                                                                      ,"VIEW_ID"             =>$strUTNViewId
                                                                        )
                                            ,"JNL"              =>array("OBJECT_ID"           =>$strJNLTableId
                                                                       ,"ROW_INDENTIFY_COLUMN"=>$strJNLRIColumnId
+                                                                      ,"VIEW_ID"             =>$strJNLViewId
                                                                        )
                                            ,"UTN_ROW_INDENTIFY"=>$strUTNRIColumnId
                                            ,"JNL_SEQ_NO"       =>$strJNLRIColumnId
@@ -311,14 +322,23 @@
                         }
                         if( $boolAddInfo === true ){
                             if("IDColumn" === get_class($objColumn)){
-                                $aryColumnInfo01[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster());
+                                $aryColumnInfo01[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
+                                $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
                             }
                             else{
-                                $aryColumnInfo01[] = array($strColumnId,$objColumn->getColLabel(true),"","","");
+                                $aryColumnInfo01[] = array($strColumnId,$objColumn->getColLabel(true),"","","",get_class($objColumn));
+                                $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),"","","",get_class($objColumn));
                             }
                         }
                         else{
-                            $aryColumnInfo02[] = array($strColumnId,$objColumn->getColLabel(true));
+                            if("IDColumn" === get_class($objColumn)){
+                                $aryColumnInfo02[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
+                                $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
+                            }
+                            else{
+                                $aryColumnInfo02[] = array($strColumnId,$objColumn->getColLabel(true),"","","",get_class($objColumn));
+                                $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),"","","",get_class($objColumn));
+                            }
                         }
                         //必須カラムではない任意カラム----
                     }
@@ -332,7 +352,8 @@
         }
         $aryValues = array("TABLE_INFO"       =>$aryInfoOfTable
                           ,"TABLE_IUD_COLUMNS"=>$aryColumnInfo01
-                          ,"OTHER_COLUMNS"    =>$aryColumnInfo02                         
+                          ,"OTHER_COLUMNS"    =>$aryColumnInfo02
+                          ,"ALL_COLUMNS"      =>$aryColumnInfo03
                            );
         return array($aryValues,$intErrorType,$strErrMsg);
     }
