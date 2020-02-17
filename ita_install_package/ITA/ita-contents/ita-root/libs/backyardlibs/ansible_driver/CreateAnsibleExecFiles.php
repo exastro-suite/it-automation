@@ -1447,7 +1447,6 @@ class CreateAnsibleExecFiles {
             if ( $this->CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist,false) === false){
                 return false;
             }
-
             ////////////////////////////////////////////////
             // ホスト変数ファイルにグローバル変数・コピー変数
             // テンプレート変数の情報を出力する。
@@ -1455,14 +1454,12 @@ class CreateAnsibleExecFiles {
             if( $this->CommitHostVarsfiles($ina_hosts,$ina_hostprotcollist,$ina_host_vars) === false){
                 return false;
             }
-
             /////////////////////////////////////////////////
             // 具体値がTPF/CPF変数の場合の具体値の置換え　 //
             /////////////////////////////////////////////////
             if ( $this->CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist,true) === false){
                 return false;
             }
-
             ///////////////////////////////////////////////
             // テンプレート管理を使用している場合、
             // 親PlaybookにTemplateMmoduleを追加して
@@ -2671,6 +2668,11 @@ class CreateAnsibleExecFiles {
                 return false;
             }
         }
+        // in/original_dialog_filesに加工前の対話ファイルをコピー
+        $cmd = sprintf("/bin/cp -rfp %s/* %s/.",$this->getAnsible_original_dialog_files_Dir(),
+                                                $this->getAnsible_in_original_dialog_files_Dir());
+        system($cmd);
+
         //////////////////////////////////////
         // 親PlayBookファイル作成(Pioneer)  //
         //////////////////////////////////////
@@ -2757,11 +2759,6 @@ class CreateAnsibleExecFiles {
                 }
             }
         }
-
-        // in/original_dialog_filesに加工前の対話ファイルをコピー
-        $cmd = sprintf("/bin/cp -rfp %s/* %s/.",$this->getAnsible_original_dialog_files_Dir(),
-                                                $this->getAnsible_in_original_dialog_files_Dir());
-        system($cmd);
 
         return true;
     }
