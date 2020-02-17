@@ -35,7 +35,6 @@
 //  F0005  delCMDBMenuTblDB
 //  F0006  addCMDBMenuColDB
 //  F0007  delCMDBMenuColDB
-//  F0008  getHideMenuColumnName
 //
 ///////////////////////////////////////////////////////////////////////
 // 起動しているshellの起動判定を正常にするための待ち時間
@@ -214,6 +213,35 @@ $arrayValueTmplOfMenuCol = array(
 //CMDB代入値紐付対象メニュー----
 
 ////////////////////////////////
+// 代入値自動登録設定の表示から除外するカラムリスト
+////////////////////////////////
+$arrayHideMenuColumnList = array(
+    "ROW_ID",
+    "HOST_ID",
+    "OPERATION_ID_DISP",
+    "OPERATION_DATE_DISP",
+    "OPERATION_ID_NAME_DISP",
+    "OPERATION_ID",
+    "BASE_TIMESTAMP",
+    "LAST_EXECUTE_TIMESTAMP",
+    "OPERATION_NAME",
+    "OPERATION_DATE",
+    "NOTE",
+    "DISUSE_FLAG",
+    "LAST_UPDATE_TIMESTAMP",
+    "LAST_UPDATE_USER",
+);
+
+////////////////////////////////
+// 代入値自動登録設定の項目表示対象のクラス
+////////////////////////////////
+$arrayTargetClassList = array(
+    "TextColumn",
+    "IDColumn",
+    "NumColumn",
+);
+
+////////////////////////////////
 // ローカル変数(全体)宣言     //
 ////////////////////////////////
 $warning_flag               = 0;        // 警告フラグ(1：警告発生)
@@ -224,10 +252,6 @@ $cmdbMenuTableDisuseCnt = 0;
 $cmdbMenuColumnInsertCnt = 0;
 $cmdbMenuColumnUpdateCnt = 0;
 $cmdbMenuColumnDisuseCnt = 0;
-//2019/01/15----
-
-// 代入値自動登録設定の項目表示から除外するカラムリストファイル
-$lv_hide_column_list_file = $root_dir_path . '/confs/backyardconfs/ita_base/hide_menu_column_list.txt';
 
 try{
 
@@ -259,7 +283,6 @@ try{
         LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
     }
 
-    //----2019/01/15
     ////////////////////////////////
     // 処理済みフラグを判定
     ////////////////////////////////
@@ -368,19 +391,6 @@ try{
         LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
     }
 
-    $lva_hide_col_list  = array();
-    ////////////////////////////////////////////////////////////////////////////////
-    // 代入値自動登録設定の項目表示から除外するカラムリストファイルからカラム名を取得
-    ////////////////////////////////////////////////////////////////////////////////
-    $ret = getHideMenuColumnName($lv_hide_column_list_file,$lva_hide_col_list);
-    if($ret === false){
-        // トレースメッセージ
-        if ( $log_level === 'DEBUG' ){
-            $FREE_LOG = 'Get column information from the column list file which excludes display from the Substitution value auto-registration setting has failed. (file:{' . $lv_hide_column_list_file . '})';
-            LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-        }
-    }
-
     ///////////////////////////////////////////////////////////////////////////
     // P0001
     // CMDB内の代入値紐付対象メニューを抽出
@@ -477,7 +487,7 @@ try{
             continue;
         }
         // テーブル名取得
-        $table_name    = $aryValue['TABLE_INFO']['UTN']['OBJECT_ID'];
+        $table_name = ( $aryValue['TABLE_INFO']['UTN']['VIEW_ID'] == "" ) ? $aryValue['TABLE_INFO']['UTN']['OBJECT_ID'] : $aryValue['TABLE_INFO']['UTN']['VIEW_ID']; 
 
         // 主キー
         if(@strlen($aryValue['TABLE_INFO']['UTN']['ROW_INDENTIFY_COLUMN']) === 0){
@@ -507,7 +517,7 @@ try{
         $error_hit = false;
         $lva_col_list = array();
 
-        foreach($aryValue['TABLE_IUD_COLUMNS'] as $no=>$list){
+        foreach($aryValue['ALL_COLUMNS'] as $no=>$list){
             // カラム名空白確認
             if(@strlen($list[0]) == 0){
                 if ( $log_level === 'DEBUG' ){
@@ -563,6 +573,14 @@ try{
                 $error_hit = true;
                 continue;
             }
+            // 除外リスト確認
+            if(in_array($list[0], $arrayHideMenuColumnList)){
+                continue;
+            }
+            // 対象クラス確認
+            if(!in_array($list[5], $arrayTargetClassList)){
+                continue;
+            }
             // カラム情報登録
             $lva_col_list[$list[0]] = array('COL_TITLE_DISP_SEQ'=>$no,'COL_TITLE'=>$list[1],'REF_TABLE_NAME'=>$list[2],'REF_PKEY_NAME'=>$list[3],'REF_COL_NAME'=>$list[4]);
         }
@@ -613,15 +631,10 @@ try{
         ///////////////////////////////////////////////////////////////////////////
         foreach($lva_col_list as $col_name=>$col_data){
 
-            // 代入値自動登録設定の項目表示から除外するカラムリストに登録されているカラムは登録しない。
-            if(@strlen($lva_hide_col_list[strtoupper($col_name)]) != 0){
-                continue;
-            }
-
             $ret = addCMDBMenuColDB($strCurTableMenuCol,      $strJnlTableMenuCol,
                                     $strSeqOfCurTableMenuCol, $strSeqOfJnlTableMenuCol,
                                     $arrayConfigOfMenuCol,    $arrayValueTmplOfMenuCol,
-                                    $menu_id, $col_name, $col_data,                                     
+                                    $menu_id, $col_name, $col_data,
                                     $db_access_user_id);
             if($ret === false){
                 $error_flag = 1;
@@ -1949,48 +1962,5 @@ function LocalLogPrint($p1,$p2,$p3){
     global $log_output_php;
     $FREE_LOG = "FILE:$p1 LINE:$p2 $p3";
     require ($root_dir_path . $log_output_php);
-}
-////////////////////////////////////////////////////////////////////////////////
-// F0008
-// 処理内容
-//   代入値自動登録設定の項目表示から除外するカラムリストファイルから
-//   カラム名を取得する。
-//
-// パラメータ
-//   $in_file:                       非表示カラムリストファイル
-//   $ina_hide_col_name:             非表示カラムリスト
-//                                   [カラム名]=主キー名
-// 戻り値
-//   True:正常　　False:異常
-////////////////////////////////////////////////////////////////////////////////
-function getHideMenuColumnName($in_file,&$ina_hide_col_name){
-    $ina_hide_col_name = array();
-    $strSourceString = file_get_contents($in_file);
-    if($strSourceString === false){
-        return false;
-    }
-    // 入力データを行単位に分解
-    $arry_list = explode("\n",$strSourceString);
-    $line = 0;
-    foreach($arry_list as $strSourceString){
-        $col_name = trim($strSourceString);
-        // 空行は読み飛ばす
-        if(strlen($col_name) == 0){
-            continue;
-        }
-        // コメント行は読み飛ばす
-        if(mb_strpos($col_name,"#",0,"UTF-8") === 0){
-            continue;
-        }
-        // HOST_IDとOPERATION_IDの場合は除外
-        switch(strtoupper($col_name)){
-        case 'HOST_ID':
-        case 'OPERATION_ID':
-            continue 2;
-        }
-        // 非表示のカラムを退避する。一応大文字で統一
-        $ina_hide_col_name[strtoupper($col_name)] = 0;
-    }
-    return true;
 }
 ?>
