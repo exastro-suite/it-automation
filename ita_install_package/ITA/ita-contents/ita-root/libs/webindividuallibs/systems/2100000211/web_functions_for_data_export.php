@@ -59,9 +59,10 @@ function getExportMenuList($menuGroupAry){
         foreach($menuGroup['menu'] as $mKey => $menuAry) {
 
             $systemPath = $g['root_dir_path'] . '/webconfs/systems/' . $menuAry['menu_id'] . '_loadTable.php';
+            $sheetPath = $g['root_dir_path'] . '/webconfs/sheets/' . $menuAry['menu_id'] . '_loadTable.php';
             $userPath = $g['root_dir_path'] . '/webconfs/users/' . $menuAry['menu_id'] . '_loadTable.php';
 
-            if(file_exists($systemPath) || file_exists($userPath)){
+            if(file_exists($systemPath) || file_exists($sheetPath) || file_exists($userPath)){
                 $retAry[$mgKey]['menu_group_name'] = $menuGroup['menu_group_name'];
                 $retAry[$mgKey]['menu'][] = $menuAry;
             }
