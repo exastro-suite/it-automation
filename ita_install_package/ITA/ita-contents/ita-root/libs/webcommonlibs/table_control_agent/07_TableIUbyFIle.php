@@ -412,9 +412,13 @@
             }
             else{
                 $systemFile = "{$g['root_dir_path']}/webconfs/systems/{$g['page_dir']}_loadTable.php";
+                $sheetFile = "{$g['root_dir_path']}/webconfs/sheets/{$g['page_dir']}_loadTable.php";
                 $userFile = "{$g['root_dir_path']}/webconfs/users/{$g['page_dir']}_loadTable.php";
                 if(file_exists($systemFile)){
                     require_once($systemFile);
+                }
+                else if(file_exists($sheetFile)){
+                    require_once($sheetFile);
                 }
                 else if(file_exists($userFile)){
                     require_once($userFile);
