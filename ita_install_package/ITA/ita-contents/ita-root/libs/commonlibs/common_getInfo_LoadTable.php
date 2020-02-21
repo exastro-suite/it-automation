@@ -111,10 +111,11 @@
         $aryColumnInfo03 = array();
 
         try{
-            $systemDir = "systems/{$strMenuIdNumeric}";
-            $userDir = "users/{$strMenuIdNumeric}";
             if(file_exists("{$g['root_dir_path']}/webconfs/systems/{$strMenuIdNumeric}_loadTable.php")){
                 $strLrWebRootToThisPageDir = "/systems/{$strMenuIdNumeric}";
+            }
+            else if(file_exists("{$g['root_dir_path']}/webconfs/sheets/{$strMenuIdNumeric}_loadTable.php")){
+                $strLrWebRootToThisPageDir = "/sheets/{$strMenuIdNumeric}";
             }
             else if(file_exists("{$g['root_dir_path']}/webconfs/users/{$strMenuIdNumeric}_loadTable.php")){
                 $strLrWebRootToThisPageDir = "/users/{$strMenuIdNumeric}";
