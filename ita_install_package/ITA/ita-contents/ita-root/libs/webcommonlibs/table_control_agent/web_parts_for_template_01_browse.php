@@ -50,9 +50,13 @@
 
     //----デフォルトのロードテーブル関数をコレクション
     $systemFile = "{$g['root_dir_path']}/webconfs/systems/{$g['page_dir']}_loadTable.php";
+    $sheetFile = "{$g['root_dir_path']}/webconfs/sheets/{$g['page_dir']}_loadTable.php";
     $userFile = "{$g['root_dir_path']}/webconfs/users/{$g['page_dir']}_loadTable.php";
     if(file_exists($systemFile)){
         require_once($systemFile);
+    }
+    else if(file_exists($sheetFile)){
+        require_once($sheetFile);
     }
     else if(file_exists($userFile)){
         require_once($userFile);
@@ -83,24 +87,28 @@
     // 共通HTMLステートメントパーツ
     require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/web_parts_html_statement.php");
 
+    $jsSystemFile = "/menus/systems/{$g['page_dir']}/00_javascript.js";
+    $jsSheetFile = "/menus/sheets/{$g['page_dir']}/00_javascript.js";
+    $jsUserFile = "/menus/users/{$g['page_dir']}/00_javascript.js";
+    if(file_exists("{$g['root_dir_path']}/webroot" . $jsSystemFile)){
+        $jsFile = "{$g['scheme_n_authority']}" . $jsSystemFile;
+        $jsFile_Absolute_path = "{$g['root_dir_path']}/webroot" . $jsSystemFile;
+    }
+    else if(file_exists("{$g['root_dir_path']}/webroot" . $jsSheetFile)){
+        $jsFile = "{$g['scheme_n_authority']}" . $jsSheetFile;
+        $jsFile_Absolute_path = "{$g['root_dir_path']}/webroot" . $jsSheetFile;
+    }
+    else if(file_exists("{$g['root_dir_path']}/webroot" . $jsUserFile)){
+        $jsFile = "{$g['scheme_n_authority']}" . $jsUserFile;
+        $jsFile_Absolute_path = "{$g['root_dir_path']}/webroot" . $jsUserFile;
+    }
+    else{
+        $jsFile = "{$g['scheme_n_authority']}/default/menu/00_javascript.js";
+        $jsFile_Absolute_path = "{$g['root_dir_path']}/webroot/default/menu/00_javascript.js";
+    }
 
-$jsSystemFile = "/menus/systems/{$g['page_dir']}/00_javascript.js";
-$jsUserFile = "/menus/users/{$g['page_dir']}/00_javascript.js";
-if(file_exists("{$g['root_dir_path']}/webroot" . $jsSystemFile)){
-    $jsFile = "{$g['scheme_n_authority']}" . $jsSystemFile;
-    $jsFile_Absolute_path = "{$g['root_dir_path']}/webroot" . $jsSystemFile;
-}
-else if(file_exists("{$g['root_dir_path']}/webroot" . $jsUserFile)){
-    $jsFile = "{$g['scheme_n_authority']}" . $jsUserFile;
-    $jsFile_Absolute_path = "{$g['root_dir_path']}/webroot" . $jsUserFile;
-}
-else{
-    $jsFile = "{$g['scheme_n_authority']}/default/menu/00_javascript.js";
-    $jsFile_Absolute_path = "{$g['root_dir_path']}/webroot/default/menu/00_javascript.js";
-}
-
-// javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
-$timeStamp_00_javascript_js = filemtime("$jsFile_Absolute_path");
+    // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
+    $timeStamp_00_javascript_js = filemtime("$jsFile_Absolute_path");
 
     print 
 <<< EOD
