@@ -8,7 +8,7 @@
      </tr>
      <tr>
        <th class="inputItemExplain"><?php print($strLoginPWCaption); ?></th>
-       <td class="inputItemWrapper"><input class="inputUserPw" type="password" name="password" /></td>
+       <td class="inputItemWrapper"><div class="input_password"><input class="inputUserPw" type="password" name="password" /><div class="password_eye"></div></td>
      </tr>
    </table>
    <input id="loginTryExecute" class="loginGateSubmitElement tryExecute" type="submit" name="login" value="<?php print($strLoginActionCaption); ?>" />
