@@ -44,6 +44,7 @@
 
     $timeStamp_common_itaTable_css=filemtime("$root_dir_path/webroot/common/css/common_itaTable.css");
     $timeStamp_common_itaTable_js=filemtime("$root_dir_path/webroot/common/javascripts/common_itaTable.js");
+    $timeStamp_common_javasctipts_js=filemtime("$root_dir_path/webroot/common/javascripts/common_javasctipts.js");
 
 print <<< EOD
     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
@@ -66,10 +67,8 @@ print <<< EOD
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/jquery.datetimepicker.js?{$timeStamp_jquery_datetimepicker_js}"></script>
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/select2.js?{$timeStamp_select2_js}"></script>
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/plotly-latest.min.js?{$timeStamp_plotly_latest_min_js}"></script>
-        <script type="text/javascript">
-        $(window).load(function (){relayout()});
-        $(window).resize(function (){relayout()});
-        </script>
+        <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/common_javasctipts.js?{$timeStamp_common_javasctipts_js}"></script>
+        
         <link rel="stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/common_style.css?{$timeStamp_common_style_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/common_superTables.css?{$timeStamp_common_superTables_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/common_itaTable.css?{$timeStamp_common_itaTable_css}">
