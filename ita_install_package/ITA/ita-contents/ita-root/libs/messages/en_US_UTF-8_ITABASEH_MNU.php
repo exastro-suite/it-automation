@@ -452,4 +452,9 @@ $ary[105076] = "Date/time when the operation was actually performed.";
 $ary[910001] = "version";
 $ary[910002] = "driver";
 $ary[910003] = "version";
+$ary[900100] = "Orchestrator ID";
+$ary[900101] = "Movement ID";
+$ary[900102] = "pause(OFF:/ON:checkedValue)";
+$ary[900103] = "Description";
+$ary[900104] = "Operation ID (Specified individually)";
 ?>
