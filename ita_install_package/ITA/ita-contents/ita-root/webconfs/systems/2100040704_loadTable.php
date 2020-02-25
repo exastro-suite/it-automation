@@ -88,6 +88,26 @@ Ansibleテンプレート
 
     $table->addColumn($c);
 
+    /* 変数定義解析用隠しカラム */
+    $c = new FileUploadColumn('VAR_STRUCT_ANAL_JSON_STRING_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106071"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106072"));//エクセル・ヘッダでの説明
+    $c->setAllowSendFromFile(true);//エクセル/CSVからのアップロードを禁止する。
+    $c->setFileHideMode(true);
+    $c->getOutputType('filter_table')->setVisible(false);
+    $c->getOutputType('print_table')->setVisible(false);
+    $c->getOutputType('update_table')->setVisible(false);
+    $c->getOutputType('register_table')->setVisible(false);
+    $c->getOutputType('delete_table')->setVisible(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->getOutputType('excel')->setVisible(false);
+    $c->getOutputType('csv')->setVisible(false);
+    $c->getOutputType('json')->setVisible(false);
+    $c->setAllowUploadColmnSendRestApi(false);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+
+    $c->setRequired(false);//登録/更新時には、入力必須
+
+    $table->addColumn($c);
+
     /* 変数定義 */
     $objVldt = new MultiTextValidator(0,4000,false);
     $c = new MultiTextColumn('VARS_LIST',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106075"));
@@ -231,7 +251,6 @@ Ansibleテンプレート
         switch($strModeId) {
         case "DTUP_singleRecDelete":
             if($modeValue_sub == 'off') {
-
                 // 変数定義の解析結果を取得
                 $fileObj = new TemplateVarsStructAnalFileAccess($g['objMTS'],$g['objDBCA']);
 
