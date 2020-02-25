@@ -45,14 +45,21 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
 
     $aryOverrideForErrorData = array();
 
+
+    $strResultType01 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12202");   //登録/Register
+    $strResultType02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12203");   //更新/Update
+    $strResultType03 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12204");   //廃止/Discard
+    $strResultType04 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12205");   //復活/Restore
+    $strResultType99 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12206");   //エラー/Error
+
     $tmpResult  = array();
     $resultdata = array();  
     $resultdata_count = array();
-    $resultdata_count['register'] = array("name" => "登録","ct" => 0);
-    $resultdata_count['update']   = array("name" => "更新","ct" => 0);
-    $resultdata_count['delete']   = array("name" => "廃止","ct" => 0);
-    $resultdata_count['revive']   = array("name" => "復活","ct" => 0);
-    $resultdata_count['error']    = array("name" => "エラー","ct" => 0);
+    $resultdata_count['register'] = array("name" => $strResultType01,"ct" => 0);
+    $resultdata_count['update']   = array("name" => $strResultType02,"ct" => 0);
+    $resultdata_count['delete']   = array("name" => $strResultType03,"ct" => 0);
+    $resultdata_count['revive']   = array("name" => $strResultType04,"ct" => 0);
+    $resultdata_count['error']    = array("name" => $strResultType99,"ct" => 0);
 
     // 各種ローカル変数を定義
     $strFxName = __FUNCTION__;
@@ -74,19 +81,19 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
 
             //配列構造のチェック
             switch ($Process_type) {
-                case '登録':
-                case '更新':
+                //登録、更新
+                case $strResultType01:
+                case $strResultType02:
                     if( count($value) == 6 ){
                         if( is_array($value[9])){
                             $objJSONarrChk=0;
                         }                      
                     }
                     break;
-                case '廃止':
-                case '復活':
-                    if( count($value) == 3 ){
-                        if( count($value[2]) == 1 )$objJSONarrChk=0;
-                    }
+                //廃止、復活
+                case $strResultType03:
+                case $strResultType04:
+                    if( count($value) == 3 )$objJSONarrChk=0;
                     break;
                 default:
                     break;
@@ -100,64 +107,76 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
             }
             
             //登録、更新/廃止、復活時の変換
-            if( $Process_type == '登録' || $Process_type == '更新' ) {
-                //symphony要素の配列チェック
-                if( array_key_exists(3, $value) ){
-                    if ( !array_key_exists(3, $value) )$value[3]="";
-                    if ( !array_key_exists(4, $value) )$value[4]=""; 
-                }
+            switch ($Process_type) {
+                //登録、更新
+                case $strResultType01:
+                case $strResultType02:
 
-                //symphony要素の成形、型変換
-                $objJSONOfReceptedData[$key][3]= array();
-                unset($objJSONOfReceptedData[$key][4]);
-                $objJSONOfReceptedData[$key][3][]= array(
-                                    "name"  => "symphony_name",
-                                    "value" => $value[3] 
-                );
-                $objJSONOfReceptedData[$key][3][]= array(
-                                    "name"  => "symphony_tips",
-                                    "value" => $value[4] 
-                );
-
-                //最終更新時刻を変換、チェック
-                if ( array_key_exists(7, $value) ){
-                    if( $value[7] != "" ) $objJSONOfReceptedData[$key][7] = substr_replace($value[7], "." , 16, 0);
-                }else{
-                    $objJSONOfReceptedData[$key][7] =  "";
-                }
-
-                //movemnt要素の配列チェック
-                if( array_key_exists(9, $value) ){
-                    //movemnt要素の配列順＝実行順序へ
-                    foreach ($value[9] as $key1 => $value1) {
-                        $tmp_ary = array( 0 => $key1+1);
-                        $value[9][$key1] = array_merge($tmp_ary, $value[9][$key1]);
+                    //symphony要素の配列チェック
+                    if( array_key_exists(3, $value) ){
+                        if ( !array_key_exists(3, $value) )$value[3]="";
+                        if ( !array_key_exists(4, $value) )$value[4]=""; 
                     }
-                    //Movemnt要素ss;<XX>型へ変換 
-                    foreach ($value[9] as $key1 => $value1) {
-                        $ret_mov[] = "ss;" . implode( "ss;", $value1 );
-                    }
-                    $objJSONOfReceptedData[$key][9] =  implode( "", $ret_mov ) ;
 
-                }else{
-                    $objJSONOfReceptedData[$key][9] =  array() ;      
-                }
-
-            }else if( $Process_type = '廃止' ||  $Process_type = '復活') {
-                //最終更新日時の配列チェック
-                if( array_key_exists(7, $value) ){
-                    $objJSONOfReceptedData[$key][7]=array();
-                    $objJSONOfReceptedData[$key][7][0]= array(
-                                          "name"  => "UPD_UPDATE_TIMESTAMP",
-                                          "value" => $value[7]
+                    //symphony要素の成形、型変換
+                    $objJSONOfReceptedData[$key][3]= array();
+                    unset($objJSONOfReceptedData[$key][4]);
+                    $objJSONOfReceptedData[$key][3][]= array(
+                                        "name"  => "symphony_name",
+                                        "value" => $value[3] 
                     );
-                }else{
-                    $objJSONOfReceptedData[$key][7]=array();
-                    $objJSONOfReceptedData[$key][7][0]= array(
-                                          "name"  => "UPD_UPDATE_TIMESTAMP",
-                                          "value" => ""
-                    );   
-                }
+                    $objJSONOfReceptedData[$key][3][]= array(
+                                        "name"  => "symphony_tips",
+                                        "value" => $value[4] 
+                    );
+
+                    //最終更新時刻を変換、チェック
+                    if ( array_key_exists(7, $value) ){
+                        if( $value[7] != "" ) $objJSONOfReceptedData[$key][7] = substr_replace($value[7], "." , 16, 0);
+                    }else{
+                        $objJSONOfReceptedData[$key][7] =  "";
+                    }
+
+                    //movemnt要素の配列チェック
+                    if( array_key_exists(9, $value) ){
+                        //movemnt要素の配列順＝実行順序へ
+                        foreach ($value[9] as $key1 => $value1) {
+                            $tmp_ary = array( 0 => $key1+1);
+                            $value[9][$key1] = array_merge($tmp_ary, $value[9][$key1]);
+                        }
+                        //Movemnt要素ss;<XX>型へ変換 
+                        foreach ($value[9] as $key1 => $value1) {
+                            $ret_mov[] = "ss;" . implode( "ss;", $value1 );
+                        }
+                        $objJSONOfReceptedData[$key][9] =  implode( "", $ret_mov ) ;
+
+                    }else{
+                        $objJSONOfReceptedData[$key][9] =  array() ;      
+                    }
+
+                    break;
+                //廃止、復活
+                case $strResultType03:
+                case $strResultType04:
+
+                    //最終更新日時の配列チェック
+                    if( array_key_exists(7, $value) ){
+                        $objJSONOfReceptedData[$key][7]=array();
+                        $objJSONOfReceptedData[$key][7][0]= array(
+                                              "name"  => "UPD_UPDATE_TIMESTAMP",
+                                              "value" => $value[7]
+                        );
+                    }else{
+                        $objJSONOfReceptedData[$key][7]=array();
+                        $objJSONOfReceptedData[$key][7][0]= array(
+                                              "name"  => "UPD_UPDATE_TIMESTAMP",
+                                              "value" => ""
+                        );   
+                    }
+                    break;
+                default:
+                    break;
+
             }
         }
 
@@ -181,19 +200,23 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                     if( array_key_exists(7, $value) ) $strLT4UBody = $value[7];
 
                     switch ($Process_type) {
-                        case '登録':
+                        //登録
+                        case $strResultType01:
                             $tmparrayResult = register_execute($arrayReceptData, $strSortedData);
                             $resultdata_count = result_chk_count($tmparrayResult,$resultdata_count,'register');
                             break;
-                        case '更新':
+                        //更新
+                        case $strResultType02:
                             $tmparrayResult = update_execute($intShmphonyClassId, $arrayReceptData, $strSortedData, $strLT4UBody);
                             $resultdata_count = result_chk_count($tmparrayResult,$resultdata_count,'update');
                             break;
-                        case '廃止':
+                        //廃止
+                        case $strResultType03:
                             $tmparrayResult = delete_revive_execute(3, $intShmphonyClassId, $strLT4UBody);
                             $resultdata_count = result_chk_count($tmparrayResult,$resultdata_count,'delete');
                             break;
-                        case '復活':
+                        //復活
+                        case $strResultType04:
                             $tmparrayResult = delete_revive_execute(5, $intShmphonyClassId, $strLT4UBody);
                             $resultdata_count = result_chk_count($tmparrayResult,$resultdata_count,'revive');
                             break;
@@ -391,11 +414,11 @@ function filter_add($aryForResultData){
         }else{
             //FILTER結果にのMOVEMENT情報説明追加
             $tmparyForResultData[$key][] = array(array(
-                "Orchestrator ID",
-                "Movement ID",             
-                "一時停止(OFF:/ON:checkedValue)",
-                "説明",
-                "オペレーションID(個別指定)",  
+                $g['objMTS']->getSomeMessage("ITABASEH-MNU-900100"), //"Orchestrator ID",
+                $g['objMTS']->getSomeMessage("ITABASEH-MNU-900101"), //"Movement ID",       
+                $g['objMTS']->getSomeMessage("ITABASEH-MNU-900102"), //"一時停止(OFF:/ON:checkedValue)",
+                $g['objMTS']->getSomeMessage("ITABASEH-MNU-900103"), //"説明",
+                $g['objMTS']->getSomeMessage("ITABASEH-MNU-900104")  //"オペレーションID(個別指定)", 
             ));
 
         }
