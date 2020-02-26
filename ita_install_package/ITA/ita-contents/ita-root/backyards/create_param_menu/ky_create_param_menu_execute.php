@@ -1805,7 +1805,7 @@ function deployLoadTable($fileContents, $loadTablePath, $menuId, $targetData){
         }
 
         // 00_loadTable.phpの配置
-        $destFile = ROOT_DIR_PATH . "/webconfs/users/{$menuId}_loadTable.php";
+        $destFile = ROOT_DIR_PATH . "/webconfs/sheets/{$menuId}_loadTable.php";
         $result = copy($loadTablePath, $destFile);
         if(false === $result){
             $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5010', array($loadTablePath, $destFile));
