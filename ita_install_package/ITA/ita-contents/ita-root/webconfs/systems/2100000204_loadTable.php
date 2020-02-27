@@ -59,7 +59,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // パネル用画像
     $c = new FileUploadColumn('MENU_GROUP_ICON',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1030501"));
     $c->setFileHideMode(false);
-    $c->setMaxFileSize(20971520);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $table->addColumn($c);
     
     //メニュー情報
