@@ -8723,7 +8723,7 @@ class FileUploadColumn extends Column{
 
 	//----ここから継承メソッドの上書き処理
 
-	function __construct($strColId, $strColLabel, $OAPathToUploadScriptFile="", $nrPathAnyToBranchPerFUC="", $maxFileSize=10485760, $sprintFormat="%010d", $arrayCorrectDirPerms=array("0777")){
+	function __construct($strColId, $strColLabel, $OAPathToUploadScriptFile="", $nrPathAnyToBranchPerFUC="", $maxFileSize=4*1024*1024*1024, $sprintFormat="%010d", $arrayCorrectDirPerms=array("0777")){
 		global $g;
 
 		parent::__construct($strColId, $strColLabel);
