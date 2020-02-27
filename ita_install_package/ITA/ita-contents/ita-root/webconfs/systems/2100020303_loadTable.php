@@ -78,7 +78,7 @@ Ansible（Legacy Role）ロールパッケージ一覧
 
     $c = new FileUploadColumn('ROLE_PACKAGE_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1605070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1605080"));//エクセル・ヘッダでの説明
-    $c->setMaxFileSize(268435456);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
 
