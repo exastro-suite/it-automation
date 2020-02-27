@@ -79,7 +79,7 @@ Ansibleテンプレート
 
     $c = new FileUploadColumn('ANS_TEMPLATE_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106060"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106070"));//エクセル・ヘッダでの説明
-    $c->setMaxFileSize(20971520);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
     $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
