@@ -70,7 +70,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $filePath = "uploadfiles/{$g['page_dir']}";
     $c->setNRPathAnyToBranchPerFUC($filePath);
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-900017"));//エクセル・ヘッダでの説明
-    $c->setMaxFileSize(20971520);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
     $c->setWkPkSprintFormat(false);//メニューNo直下の実行No桁埋め無効
