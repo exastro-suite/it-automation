@@ -97,7 +97,7 @@ Ansible(Legacy(NS))プレイブック素材集
 
     $c = new FileUploadColumn('PLAYBOOK_MATTER_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-301090"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-302010"));//エクセル・ヘッダでの説明
-    $c->setMaxFileSize(268435456);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
     $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
