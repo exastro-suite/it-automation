@@ -275,7 +275,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = new FileUploadColumn('CONN_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-109006"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-109007"));
-    $c->setMaxFileSize(10240);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
     $table->addColumn($c);
@@ -412,7 +412,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     // サーバー証明書
                     $c = new FileUploadColumn('WINRM_SSL_CA_FILE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104610"));
                     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104611"));
-                    $c->setMaxFileSize(10240);//単位はバイト
+                    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
                     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
                     $c->setFileHideMode(true);
                     $cg3->addColumn($c);
@@ -518,7 +518,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
             $c = new FileUploadColumn('DSC_CERTIFICATE_FILE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104502"));
             $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104503"));
-            $c->setMaxFileSize(10240);//単位はバイト
+            $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
             $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
             $c->setFileHideMode(true);
             $cg->addColumn($c);
