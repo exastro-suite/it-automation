@@ -209,7 +209,7 @@ Ansible(Dsc)作業管理
     $c = new FileUploadColumn( "FILE_INPUT", $g['objMTS']->getSomeMessage("ITADSCH-MNU-401060"), 
                                "{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$strLrWebRootToThisPageDir}");
     $c->setDescription($g['objMTS']->getSomeMessage("ITADSCH-MNU-401070"));
-    $c->setMaxFileSize(1024*1024*20);
+    $c->setMaxFileSize(4*1024*1024*1024);
     $c->setFileHideMode(true);
     $c->setHiddenMainTableColumn(true);
     $cg->addColumn($c);
@@ -223,7 +223,7 @@ Ansible(Dsc)作業管理
     $c = new FileUploadColumn( "FILE_RESULT", $g['objMTS']->getSomeMessage("ITADSCH-MNU-401080"), 
                                "{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$strLrWebRootToThisPageDir}");
     $c->setDescription($g['objMTS']->getSomeMessage("ITADSCH-MNU-401090"));
-    $c->setMaxFileSize(1024*1024*20);
+    $c->setMaxFileSize(4*1024*1024*1024);
     $c->setFileHideMode(true);
     $c->setHiddenMainTableColumn(true);
     $cg->addColumn($c);
