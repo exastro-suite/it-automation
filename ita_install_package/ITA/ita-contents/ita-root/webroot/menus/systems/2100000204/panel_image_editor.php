@@ -64,7 +64,43 @@ EOD;
 
         </div><!-- / .art-board -->
       </div><!-- / .canvas -->
-    </div><!-- / .visible-canvas -->
+      
+      <div class="canvas-status">
+        <ul class="canvas-status-ul">
+          <li class="canvas-status-li">
+            <dl class="canvas-status-dl">
+              <dt class="canvas-status-dt">View Scale : </dt>
+              <dd class="canvas-status-dd" id="canvas-status-scale"></dd>
+            </dl>
+          </li>
+          <li class="canvas-status-li">
+            <dl class="canvas-status-dl">
+              <dt class="canvas-status-dt">View X : </dt>
+              <dd class="canvas-status-dd" id="canvas-status-view-x"></dd>
+            </dl>
+          </li>
+          <li class="canvas-status-li">
+            <dl class="canvas-status-dl">
+              <dt class="canvas-status-dt">View Y : </dt>
+              <dd class="canvas-status-dd" id="canvas-status-view-y"></dd>
+            </dl>
+          </li>
+          <li class="canvas-status-li">
+            <dl class="canvas-status-dl">
+              <dt class="canvas-status-dt">Move X : </dt>
+              <dd class="canvas-status-dd" id="canvas-status-move-x"></dd>
+            </dl>
+          </li>
+          <li class="canvas-status-li">
+            <dl class="canvas-status-dl">
+              <dt class="canvas-status-dt">Move Y : </dt>
+              <dd class="canvas-status-dd" id="canvas-status-move-y"></dd>
+            </dl>
+          </li>
+        </ul>
+      </div><!-- / .canvas-status -->
+  
+    </div><!-- / .canvas-window -->
   </div><!-- / .document-window -->
 
   <div id="panel-container" class="panel-container">
@@ -98,8 +134,8 @@ EOD;
                 <th class="property-th">Name:</th><td class="property-td" colspan="3"><input id="document-name" class="property-text" type="text"></td>
               </tr>
               <tr>
-                <th class="property-th">Width:</th><td class="property-td"><input id="document-width" class="property-number" type="number" value="400" disabled><label for="document-width" class="property-input-label">px</label></td>
-                <th class="property-th">Height:</th><td class="property-td"><input id="document-height" class="property-number" type="number" value="400" disabled><label for="document-height" class="property-input-label">px</label></td>
+                <th class="property-th">Width:</th><td class="property-td"><input id="document-width" class="property-number" type="number" value="400"><label for="document-width" class="property-input-label">px</label></td>
+                <th class="property-th">Height:</th><td class="property-td"><input id="document-height" class="property-number" type="number" value="400"><label for="document-height" class="property-input-label">px</label></td>
               </tr>
             </tbody>
           </table>
