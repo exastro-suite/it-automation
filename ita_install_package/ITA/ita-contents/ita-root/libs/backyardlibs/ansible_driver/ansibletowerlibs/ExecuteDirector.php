@@ -1912,34 +1912,36 @@ class ExecuteDirector {
             }
             // /exastro/ita-root/libs/restapiindividuallibs/ansible_driver/execute_statuscheck.phpに同等の処理あり
             if($vg_tower_driver_name == "pioneer") {
-                // ユーザログ("xxx", )を改行する
-                $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $execlogFullPath_org  .  " > " . $execlogFullPath_tmp1;
-                exec($cmd);
-
-                // 改行文字 \\r\\nを改行コードに置換える
-                $cmd = "sed -e 's/\\\\\\\\r\\\\\\\\n/\\n/g' "  . $execlogFullPath_tmp1 . " > " . $execlogFullPath;
-                exec($cmd);
-
-                exec("/bin/rm -f " . $execlogFullPath_tmp1 );
-            } else {
+                $log_data = file_get_contents($execlogFullPath_org);
                 // ログ(", ")  =>  (",\n")を改行する
-                $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $execlogFullPath_org  .  " > " . $execlogFullPath_tmp1;
-                exec($cmd);
+                $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
+                // 改行文字列\\r\\nを改行コードに置換える
+                $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
+                // 改行文字列\r\nを改行コードに置換える
+                $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+                // python改行文字列\\nを改行コードに置換える
+                $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
+                // python改行文字列\nを改行コードに置換える
+                $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+                file_put_contents($execlogFullPath,$log_data);
 
+            } else {
+                $log_data = file_get_contents($execlogFullPath_org);
+                // ログ(", ")  =>  (",\n")を改行する
+                $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
                 // ログ(=> {)  =>  (=> {\n)を改行する
-                $cmd = "sed -e 's/=> {/=> {\\n/g' "    . $execlogFullPath_tmp1 .  " > " . $execlogFullPath_tmp2;
-                exec($cmd);
-
+                $log_data = preg_replace( "/=> {/", "=> {\n",$log_data,-1,$count);
                 // ログ(, ")  =>  (,\n")を改行する
-                $cmd = "sed -e 's/, \"/,\\n\"/g' "     . $execlogFullPath_tmp2 .  " > " . $execlogFullPath_tmp3;
-                exec($cmd);
-
-                // 改行文字を改行コードに置換える
-                $cmd = "sed -e 's/\\\\\\\\r\\\\\\\\n/\\n/g' "  . $execlogFullPath_tmp3 .  " > " . $execlogFullPath;
-                exec($cmd);
-
-                exec("/bin/rm -f " . $execlogFullPath_tmp1 . " " . $execlogFullPath_tmp2 . " " . $execlogFullPath_tmp3);
-
+                $log_data = preg_replace( "/, \"/", ",\n\"",$log_data,-1,$count);
+                // 改行文字列\\r\\nを改行コードに置換える
+                $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
+                // 改行文字列\r\nを改行コードに置換える
+                $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+                // python改行文字列\\nを改行コードに置換える
+                $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
+                // python改行文字列\nを改行コードに置換える
+                $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+                file_put_contents($execlogFullPath,$log_data);
             }
         } finally {
             // ロック解除
