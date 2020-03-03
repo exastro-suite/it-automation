@@ -37,8 +37,16 @@ $(function(){
 
 // 初期値
 const editorInitial = {
-  'editorVersion' : '1.0.0'
+  'version' : '1.0.1',
+  'debug' : false,
+  'scaling' : 1
 };
+
+// エディター値
+let editorValue = {
+  'scaling' : editorInitial.scaling,
+  'oldScaling' : editorInitial.scaling
+}
 
 // jQueryオブジェクトをキャッシュ
 const $workspace = $('#workspace'),
@@ -65,12 +73,17 @@ const setSize = function ( $obj ) {
 }
 const canvasPositionReset = function() {
 
-    g_canvasWindow = setSize( $canvasWindow ),
-    g_canvas = setSize( $canvas ),
+    g_canvasWindow = setSize( $canvasWindow );
+    g_canvas = setSize( $canvas );
     g_artBoard = setSize( $artBoard );
+    editorValue.scaling = editorInitial.scaling;
+    editorValue.oldScaling = editorInitial.scaling;
+
     g_canvas_p = {
       'x' : - ( g_canvas.w / 2 ) + ( g_canvasWindow.w / 2 ),
-      'y' : - ( g_canvas.h / 2 ) + ( g_canvasWindow.h / 2 )
+      'y' : - ( g_canvas.h / 2 ) + ( g_canvasWindow.h / 2 ),
+      'cx' : - ( g_canvas.w / 2 ) + ( g_canvasWindow.w / 2 ),
+      'cy' : - ( g_canvas.h / 2 ) + ( g_canvasWindow.h / 2 )
     };
     g_artBoard_p = {
       'x' : ( g_canvas.w / 2 ) - ( g_artBoard.w / 2 ),
@@ -79,19 +92,29 @@ const canvasPositionReset = function() {
     $canvas.css({
       'left' : g_canvas_p.x,
       'top' : g_canvas_p.y,
-      'transform' : 'translate(0,0)'
-    });
+      'transform' : 'translate(0,0) scale(' + editorInitial.scaling + ')'
+    }).removeClass('small-scale20 small-scale50');
     $artBoard.css({
       'left' : g_artBoard_p.x,
       'top' : g_artBoard_p.y
     });
     
+    statusUpdate();
+    
 }
 
 // モード変更
+const modeChange = function( mode ) {
+    const modeAttr = 'data-mode';
+    if ( mode !== 'clear' ) {
+      $workspace.attr( modeAttr, mode );
+    } else {
+      $workspace.removeAttr( modeAttr );
+    }
+}
 const mode = {
-'c' : function(){ $workspace.addClass('change'); },
-'m' : function(){ console.log('move'); },
+  'canvasMove' : function() { modeChange('canvas-move'); },
+  'clear' : function() { modeChange('clear'); }
 };
 
 // ブラウザ判定
@@ -126,27 +149,40 @@ $canvasWindow.on({
               
         let moveX = 0,
             moveY = 0;
+            
+        mode.canvasMove();
 
         $( window ).on({
           'mousemove.canvas': function( e ){
 
             moveX = e.pageX - mouseDownPositionX;
             moveY = e.pageY - mouseDownPositionY;
-
+            
+            $statusViewX.text( Math.floor( g_canvas_p.x - g_canvas_p.cx + moveX ) + 'px' );
+            $statusViewY.text( Math.floor( g_canvas_p.y - g_canvas_p.cy + moveY ) + 'px' );
+            $statusMoveX.text( moveX + 'px' );
+            $statusMoveY.text( moveY + 'px' );
+            
             $canvas.css({
-              'transform' : 'translate3d(' + moveX + 'px,' + moveY + 'px,0)'
+              'transform' : 'translate3d(' + moveX + 'px,' + moveY + 'px,0) scale(' + editorValue.scaling + ')'
             });
 
+          },
+          'contextmenu.canvas': function( e ) {
+            e.preventDefault();
+            $( this ).off('contextmenu.canvas');
           },
           'mouseup.canvas': function(){
             $( this ).off('mousemove.canvas mouseup.canvas');
             g_canvas_p.x = g_canvas_p.x + moveX;
             g_canvas_p.y = g_canvas_p.y + moveY;
+            statusUpdate();
             $canvas.css({
               'left' : g_canvas_p.x,
               'top' : g_canvas_p.y,
-              'transform' : 'translate(0,0)'
+              'transform' : 'translate(0,0) scale(' + editorValue.scaling + ')'
             });
+            mode.clear();
           }
         });
         
@@ -192,6 +228,121 @@ $panelGroup.each( function() {
     });
 
 });
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   キャンバスの拡縮
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const canvasScaling = function( zoomType, positionX, positionY ){
+
+    const scalingNum = 0.1,
+          scalingMax = 5,
+          scalingMin = 0.1;
+
+    let scaling = editorValue.scaling;
+
+    if ( positionX === undefined ) positionX = g_canvas_p.x / 2;
+    if ( positionY === undefined ) positionY = g_canvas_p.y / 2;
+
+    if ( zoomType === 'in') {
+      scaling = ( scaling * 10 + scalingNum * 10 ) / 10;
+    } else if ( zoomType === 'out') {
+      scaling = ( scaling * 10 - scalingNum * 10 ) / 10;
+    }
+
+    if ( scaling > scalingMax ) scaling = scalingMax;
+    if ( scaling < scalingMin ) scaling = scalingMin;
+
+    if ( scaling !== editorValue.oldScaling ) {
+      const commonX = ( ( g_canvas.w * scaling ) - ( g_canvas.w * editorValue.oldScaling ) ) / 2,
+            commonY = ( ( g_canvas.h * scaling ) - ( g_canvas.h * editorValue.oldScaling ) ) / 2,
+            adjustX = ( ( g_canvas.w / 2 ) - positionX ) * scalingNum,
+            adjustY = ( ( g_canvas.h / 2 ) - positionY ) * scalingNum;
+            
+      g_canvas_p.cx = g_canvas_p.cx - commonX;
+      g_canvas_p.cy = g_canvas_p.cy - commonY;
+
+      if ( zoomType === 'in') {
+        g_canvas_p.x = g_canvas_p.x - commonX + adjustX;
+        g_canvas_p.y = g_canvas_p.y - commonY + adjustY;
+      } else if ( zoomType === 'out') {
+        g_canvas_p.x = g_canvas_p.x - commonX - adjustX;
+        g_canvas_p.y = g_canvas_p.y - commonY - adjustY;
+      }
+
+      $canvas.css({
+        'left' : g_canvas_p.x,
+        'top' : g_canvas_p.y,
+        'transform' : 'scale(' + scaling + ')'
+      }).removeClass('small-scale20 small-scale50');
+      
+      if ( scaling <= 0.5 ) {
+        if ( scaling <= 0.2 ) {
+          $canvas.addClass('small-scale20');
+        } else {
+          $canvas.addClass('small-scale50');
+        }
+      }      
+      
+      editorValue.scaling = scaling;
+      editorValue.oldScaling = scaling;
+      statusUpdate();
+    }
+  
+}
+
+// マウスホイールで拡縮
+const mousewheelevent = ('onwheel' in document ) ? 'wheel' : ('onmousewheel' in document ) ? 'mousewheel' : 'DOMMouseScroll';
+$canvasWindow.on( mousewheelevent, function( e ){
+
+    e.preventDefault();
+
+    const mousePositionX = ( e.pageX - $( this ).offset().left - g_canvas_p.x ) / editorValue.scaling,
+          mousePositionY = ( e.pageY - $( this ).offset().top - g_canvas_p.y ) / editorValue.scaling,
+          delta = e.originalEvent.deltaY ? - ( e.originalEvent.deltaY ) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : - ( e.originalEvent.detail );
+
+    if ( e.shiftKey ) {
+      // 横スクロール
+      if ( delta < 0 ){
+        //
+      } else {
+        //
+      }
+
+    } else {
+      // 縦スクロール
+      if ( delta < 0 ){
+        canvasScaling( 'out', mousePositionX, mousePositionY );
+      } else {
+        canvasScaling( 'in', mousePositionX, mousePositionY);
+      }
+
+    }
+
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   キャンバスステータス
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const $statusScale = $('#canvas-status-scale'),
+      $statusViewX = $('#canvas-status-view-x'),
+      $statusViewY = $('#canvas-status-view-y'),
+      $statusMoveX = $('#canvas-status-move-x'),
+      $statusMoveY = $('#canvas-status-move-y');
+
+const statusUpdate = function() {
+
+    $statusScale.text( Math.floor( editorValue.scaling * 100 ) + '%' );
+    $statusViewX.text( Math.floor( g_canvas_p.x - g_canvas_p.cx ) + 'px' );
+    $statusViewY.text( Math.floor( g_canvas_p.y - g_canvas_p.cy ) + 'px' );
+    $statusMoveX.text('0px');
+    $statusMoveY.text('0px');
+    
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -251,7 +402,6 @@ document.onfullscreenchange = document.onmozfullscreenchange = document.onwebkit
 //   メニュー
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
 $editorMenu.on('click', 'button', function(){
 
     const $button = $( this ),
@@ -281,7 +431,6 @@ $editorMenu.on('click', 'button', function(){
 //   Window リサイズでキャンバスリセット
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
 const reiszeEndTime = 200;
 let resizeTimerID;
 $( window ).on('resize.editor', function(){
@@ -312,7 +461,7 @@ if ( editorType === 'symphony' ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 初期値
-const panelImageInitial = {
+const panelImageValue = {
   'workspaceHeight' : 800,
   'canvasWidth' : 5400,
   'canvasHeight' : 5400,
@@ -322,15 +471,15 @@ const panelImageInitial = {
 
 // 各種サイズをセット
 $workspace.css({
-  'height' : panelImageInitial.workspaceHeight
+  'height' : panelImageValue.workspaceHeight
 });
 $canvas.css({
-  'width' : panelImageInitial.canvasWidth,
-  'height' : panelImageInitial.canvasHeight
+  'width' : panelImageValue.canvasWidth,
+  'height' : panelImageValue.canvasHeight
 });
 $artBoard.css({
-  'width' : panelImageInitial.artboradWidth,
-  'height' : panelImageInitial.artboradHeight
+  'width' : panelImageValue.artboradWidth,
+  'height' : panelImageValue.artboradHeight
 });
 canvasPositionReset();
 
@@ -351,7 +500,7 @@ canvasPositionReset();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 初期値
-const panelImageInitial = {
+const panelImageValue = {
   'workspaceHeight' : 640,
   'canvasWidth' : 2000,
   'canvasHeight' : 2000,
@@ -373,19 +522,16 @@ const panelImageInitial = {
 
 // 各種サイズをセット
 $workspace.css({
-  'height' : panelImageInitial.workspaceHeight
+  'height' : panelImageValue.workspaceHeight
 });
 $canvas.css({
-  'width' : panelImageInitial.canvasWidth,
-  'height' : panelImageInitial.canvasHeight
+  'width' : panelImageValue.canvasWidth,
+  'height' : panelImageValue.canvasHeight
 });
 $artBoard.css({
-  'width' : panelImageInitial.artboradWidth,
-  'height' : panelImageInitial.artboradHeight
+  'width' : panelImageValue.artboradWidth,
+  'height' : panelImageValue.artboradHeight
 });
-$('#document-width').val( panelImageInitial.artboradWidth );
-$('#document-height').val( panelImageInitial.artboradHeight );
-
 canvasPositionReset();
 
 // jQuery オブジェクトをキャッシュ
@@ -394,7 +540,13 @@ const $layerMenu = $('#layer-menu'),
       $panelContainer = $('#panel-container'),
       $layerProperty = $('#layer-property'),
       $layerPropertyPanel = $layerProperty.find('.panel'),
-      $layerTab = $layerProperty.find('.panel-tab');
+      $layerTab = $layerProperty.find('.panel-tab'),
+      $artBoardWidth = $('#document-width'),
+      $artBoardHeight = $('#document-height');
+
+// inputに初期値を入れる
+$artBoardWidth.val( panelImageValue.artboradWidth );
+$artBoardHeight.val( panelImageValue.artboradHeight );
 
 // SVG ID 連番用
 let g_layerCounter = 1;
@@ -406,8 +558,10 @@ let g_selectedLayer = '';
 let artBoardJSON = new Object();
 
 artBoardJSON['config'] = {
-  'documentName' : panelImageInitial.documentName,
-  'editorVersion' : editorInitial.editorVersion,
+  'documentName' : panelImageValue.documentName,
+  'documentWidth' : panelImageValue.artboradWidth,
+  'documentHeight' : panelImageValue.artboradHeight,
+  'editorVersion' : editorInitial.version,
   'layerCounter' : g_layerCounter
 }
 
@@ -418,6 +572,48 @@ if ( browser === 'ie' ) {
 if ( filterFlg === false || browser === 'edge' ) {
   $layerTab.find('[data-tab-nanme="layer-property-filter"]').hide();
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   アートボードサイズ（ドキュメントサイズ）変更
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const artBoardReset = function() {
+
+  let artBoardWidth = $artBoardWidth.val(),
+      artBoardHeight = $artBoardHeight.val();
+  
+  // キャンバスより大きくしない
+  if ( panelImageValue.canvasWidth < artBoardWidth ) {
+    artBoardWidth = panelImageValue.canvasWidth;
+    $artBoardWidth.val( artBoardWidth );
+  }
+  if ( panelImageValue.canvasHeight < artBoardHeight ) {
+    artBoardHeight = panelImageValue.canvasHeight;
+    $artBoardHeight.val( artBoardHeight )
+  } 
+  
+  panelImageValue.artboradWidth = artBoardWidth;
+  panelImageValue.artboradHeight = artBoardHeight;
+  
+  $artBoard.css({
+    'width' : artBoardWidth,
+    'height' : artBoardHeight
+  });
+  artBoardJSON['config'].documentWidth = artBoardWidth;
+  artBoardJSON['config'].documentHeight = artBoardHeight;
+  canvasPositionReset();
+  
+  $artBoard.find('.art-board-layer, .bounding-box').css({
+    'left' : -g_artBoard_p.x,
+    'top' : -g_artBoard_p.y
+  });
+}
+
+$artBoardWidth.add( $artBoardHeight ).on('change', function(){
+    artBoardReset();
+});
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -469,7 +665,7 @@ const initialLayer = function( type ) {
 
       switch( type ) {
         case 'text':
-          $layerShape.text( panelImageInitial.text ).attr({
+          $layerShape.text( panelImageValue.text ).attr({
             'x' : '50%'
           });
           $layerGroup.css({
@@ -479,12 +675,12 @@ const initialLayer = function( type ) {
 
         case 'symbol':
           $layerSVG.get(0).setAttribute('preserveAspectRatio', 'none');
-          $layerSVG.get(0).setAttribute('viewBox', '0 0 ' + panelImageInitial.basicWidth + ' ' + panelImageInitial.basicHeight );
+          $layerSVG.get(0).setAttribute('viewBox', '0 0 ' + panelImageValue.basicWidth + ' ' + panelImageValue.basicHeight );
           break;
 
         case 'shape':
           $layerSVG.get(0).setAttribute('preserveAspectRatio', 'none');
-          $layerSVG.get(0).setAttribute('viewBox', '0 0 ' + panelImageInitial.basicWidth + ' ' + panelImageInitial.basicHeight );
+          $layerSVG.get(0).setAttribute('viewBox', '0 0 ' + panelImageValue.basicWidth + ' ' + panelImageValue.basicHeight );
           break;
 
         case 'bounding-box':
@@ -583,37 +779,37 @@ const newLayer = function( type ) {
       case 'text':
         Object.assign( artBoardJSON[ layerID ], {
           'name' : 'New Text',
-          'height' : panelImageInitial.fontSize * 1.5,
-          'fill' : panelImageInitial.color,
+          'height' : panelImageValue.fontSize * 1.5,
+          'fill' : panelImageValue.color,
           'font' : '',
-          'fontsize' : panelImageInitial.fontSize,
+          'fontsize' : panelImageValue.fontSize,
           'fontweight' : 'normal',
-          'text' : panelImageInitial.text
+          'text' : panelImageValue.text
         });
         break;
 
       case 'symbol':
         Object.assign( artBoardJSON[ layerID ], {
           'name' : 'New Symbol',
-          'symbolID' : panelImageInitial.newSymbol,
+          'symbolID' : panelImageValue.newSymbol,
           'colorNum' : 2,
-          'fill' : panelImageInitial.color,
-          'fill2' : panelImageInitial.color2,
+          'fill' : panelImageValue.color,
+          'fill2' : panelImageValue.color2,
           'opacity2' : 1,
-          'fill3' : panelImageInitial.shapeColor,
+          'fill3' : panelImageValue.shapeColor,
           'opacity3' : 1
         });
-        $layer.find('g').attr('class', 'layer-group').html( $('#' + panelImageInitial.newSymbol ).find('g').html() );
+        $layer.find('g').attr('class', 'layer-group').html( $('#' + panelImageValue.newSymbol ).find('g').html() );
         break;
         
       case 'shape':
         Object.assign( artBoardJSON[ layerID ], {
           'name' : 'New Shape',
-          'shapeID' : panelImageInitial.newShape,
+          'shapeID' : panelImageValue.newShape,
           'colorNum' : 1,
-          'fill' : panelImageInitial.shapeColor
+          'fill' : panelImageValue.shapeColor
         });
-        $layer.find('g').attr('class', 'layer-group').html( $('#' + panelImageInitial.newShape ).find('g').html() );
+        $layer.find('g').attr('class', 'layer-group').html( $('#' + panelImageValue.newShape ).find('g').html() );
         break;
         
       case 'image':
@@ -1307,9 +1503,7 @@ $panelContainer.on('input', 'input', function(){
     }
     // 1以上チェック
     targetInput = [
-      'property-font-size',
-      'property-scale-x',
-      'property-scale-y'
+      'property-font-size'
     ];
     if ( targetInput.indexOf( inputType ) !== -1 ) {
       if ( Number( inputVal ) < 1 ) inputVal = 1;
@@ -1418,7 +1612,7 @@ $panelContainer.on('input', 'input', function(){
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//   クリックして移動
+//   レイヤーの移動
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 $canvasWindow.on('mousedown.layer', '.layer-svg', function( e ){
@@ -1445,8 +1639,8 @@ $canvasWindow.on('mousedown.layer', '.layer-svg', function( e ){
       $( window ).on({
           'mousemove.canvas': function( e ){
 
-            moveX = e.pageX - mouseDownPositionX;
-            moveY = e.pageY - mouseDownPositionY;
+            moveX = Math.floor( ( e.pageX - mouseDownPositionX ) / editorValue.scaling );
+            moveY = Math.floor( ( e.pageY - mouseDownPositionY ) / editorValue.scaling );
             
             // センターにスナップ
             if ( beforeX + moveX < snapPixel && beforeX + moveX > -snapPixel ) moveX = - beforeX;
@@ -1454,6 +1648,9 @@ $canvasWindow.on('mousedown.layer', '.layer-svg', function( e ){
             
             $('#property-x').val( beforeX + moveX );
             $('#property-y').val( beforeY + moveY );
+            
+            $statusMoveX.text( moveX + 'px' );
+            $statusMoveY.text( moveY + 'px' );
             
             $layerSVG.css('transform', 'translate3d(' + moveX + 'px,' + moveY + 'px,0)');
           },
@@ -1464,6 +1661,7 @@ $canvasWindow.on('mousedown.layer', '.layer-svg', function( e ){
             artBoardJSON[ layerID ].y = moveY + beforeY;
             updateLayer( layerID );
             propertyUpdate();
+            statusUpdate();
           }
         });
 
@@ -1530,7 +1728,7 @@ const saveItaIconFile = function() {
   // 一時リンクを作成しダウンロード
   $downloadAnchor.attr({
     'href' : window.URL.createObjectURL( blobText ),
-    'download' : filename + '.' + panelImageInitial.saveExtension,
+    'download' : filename + '.' + panelImageValue.saveExtension,
     'target' : '_blank'
   });
   $workspace.prepend( $downloadAnchor );
@@ -1566,6 +1764,11 @@ if ( itaIconFile ) {
     // 全てのレイヤーを消す
     $artBoard.find('.art-board-layer').remove();
     $layerList.find('.layer-list-li').remove();
+    
+    // アートボードサイズリセット
+    $artBoardWidth.val( artBoardJSON['config'].documentWidth );
+    $artBoardHeight.val( artBoardJSON['config'].documentHeight );
+    artBoardReset();
     
     // カウンター引き継ぎ
     g_layerCounter = artBoardJSON['config'].layerCounter;
@@ -1607,13 +1810,15 @@ const loadItaIconFile = function() {
 const $output = $('#image-output'),
       $outputCanvas = $('#image-canvas');
 
-// html2canvas Options
-const options = {
-  'width' : g_artBoard.w,
-  'height' : g_artBoard.h
-}
 const outputImage = function() {
   
+  // html2canvas Options
+  const html2canvasOptions = {
+    width : g_artBoard.w,
+    height : g_artBoard.h,
+    backgroundColor : null
+  }
+
   // ファイルネーム
   let filename = artBoardJSON['config'].documentName;
   if ( filename === undefined || filename === '' ) {
@@ -1623,8 +1828,8 @@ const outputImage = function() {
   
   $output.show();
   $outputCanvas.addClass('loading').css({
-    'width' : options.width,
-    'height' : options.height
+    'width' : html2canvasOptions.width,
+    'height' : html2canvasOptions.height
   });
   $workspace.find('.output-ignore').css('visibility', 'hidden');
   
@@ -1633,13 +1838,16 @@ const outputImage = function() {
   window.scrollTo( 0, 0 );
   
   // 描画位置調整
+  $canvas.css('transform', 'scale(1)');
   $canvasWindow.css({
     'position' : 'fixed',
-    'left' : 0,
+    'left' : -99999,
     'top' : 0
-  })
+  });
   
-  html2canvas( document.getElementById('art-board'), options ).then( function( canvas ) {
+  $artBoard.addClass('output');
+  
+  html2canvas( $artBoard.get( 0 ), html2canvasOptions ).then( function( canvas ) {
       $outputCanvas.removeClass('loading').html( canvas );
       $workspace.find('.output-ignore').css('visibility', 'visible');
       $canvasWindow.removeAttr('style');
@@ -1655,13 +1863,16 @@ const outputImage = function() {
           'download' : filename + '.png'
         });
       }
+      $canvas.css('transform', 'scale(' + editorValue.scaling + ')');
   });
   $( window ).scrollTop( scrollTop );
+  
 }
 
 $output.on('click', 'button', function(){
     if ( $( this ).is('.cancel') ) {
       $('#image-canvas').find('canvas').remove();
+      $artBoard.removeClass('output');
       $output.hide();
     } 
 });
@@ -1761,7 +1972,7 @@ $('#editor-ime').on('click', 'li', function(){
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const $loadImageInput = $('#load-image-input'),
-      alertMaxSize = ( panelImageInitial.imageFileMaximumSize / 1024 ).toLocaleString();
+      alertMaxSize = ( panelImageValue.imageFileMaximumSize / 1024 ).toLocaleString();
 
 $loadImageInput.on('change', function( e ){
 
@@ -1769,7 +1980,7 @@ const loadImageFile = e.target.files[0];
 
 if ( loadImageFile ) {
   // サイズチェック
-  if ( loadImageFile.size < panelImageInitial.imageFileMaximumSize ) {
+  if ( loadImageFile.size < panelImageValue.imageFileMaximumSize ) {
   
   const imageFileReader = new FileReader();
   imageFileReader.readAsDataURL( loadImageFile );
