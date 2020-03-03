@@ -3856,7 +3856,7 @@ class YAMLFileAnalysis{
 
     function __construct(&$in_objMTS){
         $this->lv_objMTS = $in_objMTS;
-        $this->lv_lasterrmsg;
+        $this->lv_lasterrmsg = array();;
     }
 
     function SetLastError($p1,$p2,$p3){
@@ -3988,7 +3988,7 @@ class VarStructAnalysisFileAccess{
         $this->web_mode                    = false;
         $this->master_non_reg_chk          = $master_non_reg_chk;
         $this->vars_struct_anal_only       = $vars_struct_anal_only;
-        $this->lv_lasterrmsg = "";
+        $this->lv_lasterrmsg               = array();;
         if( isset($_SERVER) === true ){
             if( array_key_exists('HTTP_HOST', $_SERVER) === true ){
                 $this->web_mode  = true;
