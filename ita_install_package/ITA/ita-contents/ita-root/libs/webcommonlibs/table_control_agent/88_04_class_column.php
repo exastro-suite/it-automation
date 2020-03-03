@@ -5118,6 +5118,8 @@ class AutoNumRegisterColumn extends AutoNumColumn {
 		//自動入力
 		$outputType = new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($g['objMTS']->getSomeMessage("ITAWDCH-STD-11401")));
 		$this->setOutputType("register_table", $outputType);
+
+		$this->setSearchType("range");
 	}
 
 	public function beforeIUDValidateCheck(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
@@ -5172,7 +5174,61 @@ class AutoNumRegisterColumn extends AutoNumColumn {
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 		return $retArray;
 	}
-	//TableIUDイベント系----
+
+    function getFilterQuery($boolBinaryDistinctOnDTiS=true){
+        //----WHERE句[0]
+        //----クラス(Table)のメソッド(getFilterQuery)から呼び出される
+        $retStrQuery = "";
+        $dbQM=$this->objTable->getDBQuoteMark();
+
+        $strWpColId = "{$dbQM}{$this->getID()}{$dbQM}";
+        $strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
+
+        switch($this->getSearchType()){
+            case "in":
+                $tmpArray = array();
+                $intFilterCount = 0;
+
+                $arySource = $this->getFilterValuesForDTiS(true,$boolBinaryDistinctOnDTiS);
+                foreach($arySource as $filter){
+                    if(0 < strlen($filter)){
+                        $tmpArray[] = ":{$this->getID()}__{$intFilterCount}";
+                        $intFilterCount++;
+                    }
+                }
+                if(0 < count($tmpArray)){
+                    $retStrQuery .= "{$strWpTblSelfAlias}.{$strWpColId}";
+                    $retStrQuery .= " IN (".implode(",", $tmpArray) . ")";
+                }
+                break;
+            case "range":
+                $strSelfAliasStrConColId = "{$strWpTblSelfAlias}.{$strWpColId}";
+                $flag = false;
+                $arySource = $this->getFilterValuesForDTiS(true,$boolBinaryDistinctOnDTiS);
+                if( isset($arySource[0])===true ){
+                    if( 0 < strlen($arySource[0]) ){
+                        //----長さが0ではない
+                        $retStrQuery .= "{$strSelfAliasStrConColId} >= :{$this->getID()}__0";
+                        $flag = true;
+                    }
+                }
+                if( isset($arySource[1])===true ){
+                    if( 0 < strlen($arySource[1]) ){
+                        //----長さが0ではない
+                        if($flag){
+                            $retStrQuery .= " AND ";
+                        }
+                        $retStrQuery .= "{$strSelfAliasStrConColId} <= :{$this->getID()}__1";
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        return $retStrQuery;
+        //クラス(Table)のメソッド(getFilterQuery)から呼び出される----
+    }
+
 }
 //----ここまでクラス定義
 
