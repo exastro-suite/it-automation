@@ -51,8 +51,9 @@ justify-content: space-between;
 height: calc( 100% - 34px );
 }
 .document-window {
+overflow: hidden;
 width: calc( 100% - 322px ); height: 100%;
-background-color: #666;
+background-color: #222;
 border: 1px solid #666;
 border-left: none;
 }
@@ -60,7 +61,10 @@ border-left: none;
 overflow: hidden;
 position: relative;
 z-index: 0;
-height: 100%;
+width: 100%; height: 100%;
+}
+.workspace[data-mode="canvas-move"] .canvas-window {
+cursor: grabbing!important;
 }
 .canvas {
 overflow: hidden;
@@ -68,12 +72,38 @@ position: absolute;
 left: 0; top: 0;
 z-index: 1;
 background-color: #5F5F5F;
+transform-origin: 0 0;
+}
+.canvas-status {
+position: absolute;
+left: 0; bottom: 0;
+z-index: 99999;
+height: 24px;
+padding: 0 8px;
+background-color: rgba( 0,0,0,.85 );
+border-radius: 0 4px 0 0;
 }
 .art-board {
 position: absolute;
 left: 0; top: 0;
 z-index: 2;
-background-color: #FFF;
+}
+.art-board::after {
+content: '';
+display: block;
+position: absolute;
+left: 0; top: 0;
+z-index: -1;
+width: 100%; height: 100%;
+background-color: #555;
+background-image: linear-gradient( 45deg, #666 25%, transparent 25%, transparent 75%, #666 75%),
+linear-gradient( 45deg, #666 25%, transparent 25%, transparent 75%, #666 75%);
+background-size: 32px 32px;
+background-position: 0 0, 16px 16px;
+pointer-events: none;
+}
+.art-board.output::after {
+display: none;
 }
 .symphony .art-board {
 background: linear-gradient( transparent, transparent 99px, #D0D0D0 99px, #D0D0D0 100px ),
@@ -82,8 +112,25 @@ linear-gradient( transparent, transparent 49px, #DEDEDE 49px, #DEDEDE 50px ),
 linear-gradient( 90deg, transparent, transparent 49px, #DEDEDE 49px, #DEDEDE 50px ),
 linear-gradient( transparent, transparent 9px, #EBEBEB 9px, #EBEBEB 10px ),
 linear-gradient( 90deg, transparent, transparent 9px, #EBEBEB 9px, #EBEBEB 10px ),
-#F8F8F8;
+#F2F2F2;
 background-size: 100px 100px, 100px 100px, 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+}
+.symphony .small-scale50 .art-board {
+background: linear-gradient( transparent, transparent 98px, #D0D0D0 98px, #D0D0D0 100px ),
+linear-gradient( 90deg, transparent, transparent 98px, #D0D0D0 98px, #D0D0D0 100px ),
+linear-gradient( transparent, transparent 48px, #DEDEDE 48px, #DEDEDE 50px ),
+linear-gradient( 90deg, transparent, transparent 48px, #DEDEDE 48px, #DEDEDE 50px ),
+#F2F2F2;
+background-size: 100px 100px, 100px 100px, 50px 50px, 50px 50px;
+}
+.symphony .small-scale20 .art-board {
+background: linear-gradient( transparent, transparent 94px, #D0D0D0 94px, #D0D0D0 100px ),
+linear-gradient( 90deg, transparent, transparent 94px, #D0D0D0 94px, #D0D0D0 100px ),
+#F2F2F2;
+background-size: 100px 100px, 100px 100px;
+}
+.symphony .art-board::after {
+display: none;
 }
 .art-board-border {
 position: absolute;
@@ -132,8 +179,28 @@ animation: boundingBoxBorder 120s linear infinite;
 
 
 
-
-
+#KIZI .canvas-status-ul {
+margin: 0; padding: 0;
+list-style: none;
+letter-spacing: -0.4em;
+}
+#KIZI .canvas-status-li {
+display: inline-block;
+margin: 0; padding: 0 8px;
+letter-spacing: normal;
+}
+.canvas-status-dl {
+display: table;
+}
+.canvas-status-dt,
+.canvas-status-dd {
+display: table-cell;
+height: 24px;
+line-height: 1;
+vertical-align: middle;
+font-size: 10px;
+color: #CCC;
+}
 
 
 
@@ -676,12 +743,20 @@ background-size: 3px 3px;
 border: 1px solid #666;
 }
 .image-output-main {
+overflow: auto;
+max-width: 100%;
+max-height: 100%;
 background-color: #666;
 border: 1px solid #666;
 }
 .image-canvas {
+overflow: hidden;
 position: relative;
 z-index: 1;
+background-color: #555;
+background-image: linear-gradient( 45deg, #666 25%, transparent 25%, transparent 75%, #666 75%), linear-gradient( 45deg, #666 25%, transparent 25%, transparent 75%, #666 75%);
+background-size: 32px 32px;
+background-position: 0 0, 16px 16px;
 }
 .image-canvas.loading::before,
 .image-canvas.loading::after {
