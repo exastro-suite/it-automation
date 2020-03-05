@@ -173,7 +173,7 @@
         $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
         // python改行文字列\\nを改行コードに置換える
         $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
-        file_put_contents($out_exec_tmp1,$log_data);
+        file_put_contents($out_exec_log,$log_data);
     }
     else{
         $in_exec_log   = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.org";
@@ -190,7 +190,7 @@
         $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
         // python改行文字列\\nを改行コードに置換える
         $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
-        file_put_contents($out_exec_tmp1,$log_data);
+        file_put_contents($out_exec_log,$log_data);
     }
 
     // PIDファイル存在チェック
