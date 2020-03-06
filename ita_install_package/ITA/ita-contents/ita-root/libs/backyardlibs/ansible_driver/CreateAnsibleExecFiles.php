@@ -639,7 +639,12 @@ class CreateAnsibleExecFiles {
         //作業実行番号用ディレクトリ作成
         $c_dir = $aryRetAnsibleWorkingDir[2];
 
-        system('/bin/rm -rf ' . $c_dir . ' >/dev/null 2>&1');
+        $outputAry = array();
+        exec('/bin/rm -rf ' . $c_dir ,$outputAry, $ret);
+        if($ret != 0) {
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$ret);
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,print_r($outputAry,true));
+        }
 
         if( is_dir( $c_dir ) ){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55238",array($in_execno,$c_dir));
