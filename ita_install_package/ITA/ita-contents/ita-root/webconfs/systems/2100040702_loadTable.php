@@ -184,6 +184,14 @@ Ansibleインターフェース情報
     $c->setRequired(true);
     $table->addColumn($c);
 
+    /* 並列実行数 */
+    $c = new NumColumn('ANSIBLE_NUM_PARALLEL_EXEC',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1204035"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1204036"));//エクセル・ヘッダでの説明
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new IntNumValidator(1,1000));
+    $c->setRequired(true);//登録/更新時には、入力必須
+    $table->addColumn($c);
+
     /* 状態監視周期(単位ミリ秒) */
     $c = new NumColumn('ANSIBLE_REFRESH_INTERVAL',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1204020"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1204030"));//エクセル・ヘッダでの説明
