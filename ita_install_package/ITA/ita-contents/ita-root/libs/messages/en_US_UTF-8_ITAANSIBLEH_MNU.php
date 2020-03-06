@@ -77,6 +77,8 @@ $ary[106045] = "(Prefix string TPF_) Alphanumeric characters and available symbo
 $ary[106050] = "Make sure to assign \"TPF_\" as prefix string.";
 $ary[106060] = "Template files";
 $ary[106070] = "Files that can be used as template are limited to the Jinja2 template file. \n (Ansible specifications)";
+$ary[106071] = "Variable definition analysis result";
+$ary[106072] = "Variable definition analysis result.";
 $ary[106075] = "Variable definition";
 $ary[106076] = "Define the structure of the variable (VAR_) used in Template file in YAML format.
 The structure of variables can be defined by the following three types.
@@ -636,6 +638,8 @@ $ary[1204018] = "Set the execution user when ansible-playbook command' is execut
 If not entered, the execution user is root.";
 $ary[1204020] = "Status monitoring cycle (milliseconds)";
 $ary[1204030] = "It is interval to refresh execution log when performing an execution. \n Although tuning is required for each environment, recommended value is 3000 milliseconds.";
+$ary[1204035] = "Number of parallel executions";
+$ary[1204036] = "The maximum number of Movements (Legacy / Pioneer / Legacy-Role) that can be executed simultaneously.";
 $ary[1204040] = "Number of rows to display progress status";
 $ary[1204050] = "Number of rows to output execution log when performing an execution. \n Although tuning is required for each environment, recommended value is 1000 rows.";
 $ary[1204060] = "Display order";
@@ -815,6 +819,8 @@ $ary[1605050] = "Role package name";
 $ary[1605060] = "[Maximum length] 256 byte";
 $ary[1605070] = "Role package file (ZIP format)";
 $ary[1605080] = "[Maximum size] 20MB";
+$ary[1605085] = "Variable definition analysis result";
+$ary[1605086] = "Variable definition analysis result.";
 $ary[1605090] = "Display order";
 $ary[1701010] = "You can perform maintenance (view/register/update/discard) of the member variable of Ansible-Legacy Role. ";
 $ary[1701020] = "Item No.";
