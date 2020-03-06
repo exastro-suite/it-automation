@@ -72,6 +72,9 @@ try {
     $importedTableAry = array();
     foreach ($recordAry as $record) {
 
+        // ファイル名が重複しないためにsleep
+        sleep(1);
+
         $execFlg = true;
 
         $res = setStatus($record['TASK_ID'], STATUS_RUNNING);
