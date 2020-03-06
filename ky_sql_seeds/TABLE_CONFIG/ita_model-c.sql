@@ -61,6 +61,7 @@ ANSTWR_AUTH_TOKEN               %VARCHR%(256)                     , -- 接続ト
 ANSTWR_DEL_RUNTIME_DATA         %INT%                             , 
 -- 共通
 NULL_DATA_HANDLING_FLG          %INT%                             , -- Null値の連携 1:有効　2:無効
+ANSIBLE_NUM_PARALLEL_EXEC       %INT%                             , -- 並列実行数
 ANSIBLE_REFRESH_INTERVAL        %INT%                             , 
 ANSIBLE_TAILLOG_LINES           %INT%                             , 
 --
@@ -100,6 +101,7 @@ ANSTWR_AUTH_TOKEN               %VARCHR%(256)                     , -- 接続ト
 ANSTWR_DEL_RUNTIME_DATA         %INT%                             , 
 -- 共通
 NULL_DATA_HANDLING_FLG          %INT%                             , -- Null値の連携 1:有効　2:無効
+ANSIBLE_NUM_PARALLEL_EXEC       %INT%                             , -- 並列実行数
 ANSIBLE_REFRESH_INTERVAL        %INT%                             , 
 ANSIBLE_TAILLOG_LINES           %INT%                             , 
 --
@@ -238,6 +240,7 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(256)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
+VAR_STRUCT_ANAL_JSON_STRING_FILE  %VARCHR%(100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 VARS_LIST                         %VARCHR%(4000)                   , -- 変数定義
 ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
 
@@ -262,6 +265,7 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(256)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
+VAR_STRUCT_ANAL_JSON_STRING_FILE  %VARCHR%(100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 VARS_LIST                         %VARCHR%(4000)                   , -- 変数定義
 ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
 
@@ -835,7 +839,7 @@ OPERATION_NO_UAPK                 %INT%                            ,
 PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
-VARS_ENTRY                        %VARCHR%(1024)                   ,
+VARS_ENTRY                        %VARCHR%(8192)                   ,
 ASSIGN_SEQ                        %INT%                            ,
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -861,7 +865,7 @@ OPERATION_NO_UAPK                 %INT%                            ,
 PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
-VARS_ENTRY                        %VARCHR%(1024)                   ,
+VARS_ENTRY                        %VARCHR%(8192)                   ,
 ASSIGN_SEQ                        %INT%                            ,
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -1530,7 +1534,7 @@ OPERATION_NO_UAPK                 %INT%                            ,
 PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
-VARS_ENTRY                        %VARCHR%(1024)                   ,
+VARS_ENTRY                        %VARCHR%(8192)                   ,
 ASSIGN_SEQ                        %INT%                            ,
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -1556,7 +1560,7 @@ OPERATION_NO_UAPK                 %INT%                            ,
 PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
-VARS_ENTRY                        %VARCHR%(1024)                   ,
+VARS_ENTRY                        %VARCHR%(8192)                   ,
 ASSIGN_SEQ                        %INT%                            ,
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -2077,6 +2081,7 @@ ROLE_PACKAGE_ID                   %INT%                            , -- 識別�
 
 ROLE_PACKAGE_NAME                 %VARCHR%(256)                    , -- ロールパッケージ名
 ROLE_PACKAGE_FILE                 %VARCHR%(256)                    , -- ロールパッケージファイル(ZIP形式)
+VAR_STRUCT_ANAL_JSON_STRING_FILE  %VARCHR%(100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -2099,6 +2104,7 @@ ROLE_PACKAGE_ID                   %INT%                            , -- 識別�
 
 ROLE_PACKAGE_NAME                 %VARCHR%(256)                    , -- ロールパッケージ名
 ROLE_PACKAGE_FILE                 %VARCHR%(256)                    , -- ロールパッケージファイル(ZIP形式)
+VAR_STRUCT_ANAL_JSON_STRING_FILE  %VARCHR%(100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -2408,7 +2414,7 @@ PATTERN_ID                        %INT%                            , -- 作業�
 SYSTEM_ID                         %INT%                            , -- 機器(ホスト)
 VARS_LINK_ID                      %INT%                            , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 多次元変数配列組合せ管理 Pkey
-VARS_ENTRY                        %VARCHR%(1024)                   , -- 具体値
+VARS_ENTRY                        %VARCHR%(8192)                   , -- 具体値
 ASSIGN_SEQ                        %INT%                            ,
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -2435,7 +2441,7 @@ PATTERN_ID                        %INT%                            , -- 作業�
 SYSTEM_ID                         %INT%                            , -- 機器(ホスト)
 VARS_LINK_ID                      %INT%                            , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 多次元変数配列組合せ管理 Pkey
-VARS_ENTRY                        %VARCHR%(1024)                   , -- 具体値
+VARS_ENTRY                        %VARCHR%(8192)                   , -- 具体値
 ASSIGN_SEQ                        %INT%                            ,
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -4141,3 +4147,28 @@ SELECT
 FROM      B_ANS_LRL_MAX_MEMBER_COL_JNL   TAB_A
 LEFT JOIN B_ANSIBLE_LRL_VARS_MASTER_JNL  TAB_B ON ( TAB_A.VARS_NAME_ID    = TAB_B.VARS_NAME_ID    )
 LEFT JOIN D_ANS_LRL_ARRAY_MEMBER_JNL     TAB_C ON ( TAB_A.ARRAY_MEMBER_ID = TAB_C.ARRAY_MEMBER_ID );
+
+-- -------------------------------------------------------
+-- 共通  各作業インスタンスの結合版
+-- -------------------------------------------------------
+CREATE VIEW D_ANSIBLE_EXE_INS_MNG     AS 
+SELECT
+  'Legacy'      as DRIVER_NAME, 'L' as DRIVER_ID, EXECUTION_NO, STATUS_ID, TIME_BOOK, DISUSE_FLAG, LAST_UPDATE_TIMESTAMP
+FROM
+  C_ANSIBLE_LNS_EXE_INS_MNG
+WHERE
+  DISUSE_FLAG = '0'
+UNION
+SELECT
+  'Pioneer'     as DRIVER_NAME, 'P' as DRIVER_ID, EXECUTION_NO, STATUS_ID, TIME_BOOK, DISUSE_FLAG, LAST_UPDATE_TIMESTAMP
+FROM
+  C_ANSIBLE_PNS_EXE_INS_MNG
+WHERE
+  DISUSE_FLAG = '0'
+UNION
+SELECT
+  'Legacy-Role' as DRIVER_NAME, 'R' as DRIVER_ID, EXECUTION_NO, STATUS_ID, TIME_BOOK, DISUSE_FLAG, LAST_UPDATE_TIMESTAMP
+FROM
+  C_ANSIBLE_LRL_EXE_INS_MNG
+WHERE
+  DISUSE_FLAG = '0';
