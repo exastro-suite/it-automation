@@ -172,6 +172,9 @@
        unset($lv_tabColNameToValAssRowList);
        unset($lv_tableNameToPKeyNameList);
 
+        // メモリ最適化
+        $ret = gc_mem_caches();
+
         ////////////////////////////////////////////////////////////////////////////////
         // トランザクション開始       
         ////////////////////////////////////////////////////////////////////////////////
@@ -289,7 +292,6 @@
             $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90053");
             throw new Exception($errorMsg);
         }
-        unset($lv_VarsAssignRecodes);
 
         $ret = deleteVarsAssign($lv_ArryVarsAssignRecodes);
         if($ret === false) {
@@ -297,7 +299,14 @@
             $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90053");
             throw new Exception($errorMsg);
         }
+
+        unset($lv_VarsAssignRecodes);
         unset($lv_ArryVarsAssignRecodes);
+        unset($lv_varsAssList);
+        unset($lv_arrayVarsAssList);
+
+        // メモリ最適化
+        $ret = gc_mem_caches();
 
         ////////////////////////////////////////////////////////////////
         // コミット(レコードロックを解除)                             //
@@ -404,6 +413,12 @@
             throw new Exception($errorMsg);
         }
 
+        unset($lv_phoLinkList);
+        unset($lv_PhoLinkRecodes);
+        
+        // メモリ最適化
+        $ret = gc_mem_caches();
+
         ////////////////////////////////////////////////////////////////
         // コミット(レコードロックを解除)                             //
         ////////////////////////////////////////////////////////////////
@@ -495,6 +510,10 @@
             LocalLogPrint(basename(__FILE__),__LINE__,$errorMsg);
         }
     }
+
+    //メモリ使用量確認
+    //$FREE_LOG = 'memory_get_peak_usage:[' . memory_get_peak_usage(true) . "/" . memory_get_usage() . ']';
+    //LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
 
     ////////////////////////////////
     //// 結果出力               ////
