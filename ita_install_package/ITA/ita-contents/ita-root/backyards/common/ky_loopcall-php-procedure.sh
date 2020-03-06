@@ -60,6 +60,7 @@ export LOG_NAME_PREFIX
 export LOG_LEVEL
 export PROCESS_NAME
 export PHP_PROCEDURE_NAME
+export INTERVAL
 
 #----------------------------------------------------#
 # ログ出力＆プロセス終了ファンクション
