@@ -840,6 +840,7 @@ PATTERN_ID                        NUMBER                           ,
 SYSTEM_ID                         NUMBER                           ,
 VARS_LINK_ID                      NUMBER                           ,
 VARS_ENTRY                        VARCHAR2(8192)                   ,
+VARS_ENTRY_USE_TPFVARS            VARCHAR2(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        NUMBER                           ,
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
@@ -866,6 +867,7 @@ PATTERN_ID                        NUMBER                           ,
 SYSTEM_ID                         NUMBER                           ,
 VARS_LINK_ID                      NUMBER                           ,
 VARS_ENTRY                        VARCHAR2(8192)                   ,
+VARS_ENTRY_USE_TPFVARS            VARCHAR2(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        NUMBER                           ,
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
@@ -1267,6 +1269,7 @@ SELECT
          TAB_B.VARS_NAME_ID              ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.VARS_ENTRY_USE_TPFVARS    ,
          TAB_A.ASSIGN_SEQ                ,
          
          TAB_A.DISP_SEQ                  ,
@@ -1535,6 +1538,7 @@ PATTERN_ID                        NUMBER                           ,
 SYSTEM_ID                         NUMBER                           ,
 VARS_LINK_ID                      NUMBER                           ,
 VARS_ENTRY                        VARCHAR2(8192)                   ,
+VARS_ENTRY_USE_TPFVARS            VARCHAR2(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        NUMBER                           ,
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
@@ -1561,6 +1565,7 @@ PATTERN_ID                        NUMBER                           ,
 SYSTEM_ID                         NUMBER                           ,
 VARS_LINK_ID                      NUMBER                           ,
 VARS_ENTRY                        VARCHAR2(8192)                   ,
+VARS_ENTRY_USE_TPFVARS            VARCHAR2(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        NUMBER                           ,
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
@@ -1966,6 +1971,7 @@ SELECT
          TAB_B.VARS_NAME_ID              ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.VARS_ENTRY_USE_TPFVARS    ,
          TAB_A.ASSIGN_SEQ                ,
          
          TAB_A.DISP_SEQ                  ,
@@ -2415,6 +2421,7 @@ SYSTEM_ID                         NUMBER                           , -- 機器(�
 VARS_LINK_ID                      NUMBER                           , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            NUMBER                           , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        VARCHAR2(8192)                   , -- 具体値
+VARS_ENTRY_USE_TPFVARS            VARCHAR2(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        NUMBER                           ,
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
@@ -2442,6 +2449,7 @@ SYSTEM_ID                         NUMBER                           , -- 機器(�
 VARS_LINK_ID                      NUMBER                           , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            NUMBER                           , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        VARCHAR2(8192)                   , -- 具体値
+VARS_ENTRY_USE_TPFVARS            VARCHAR2(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        NUMBER                           ,
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
@@ -3666,7 +3674,7 @@ CREATE TABLE B_ANS_GLOBAL_VARS_MASTER
 GBL_VARS_NAME_ID                  NUMBER                           , -- 識別シーケンス
 
 VARS_NAME                         VARCHAR2(128)                    , -- グローバル変数名
-VARS_ENTRY                        VARCHAR2(1024)                   , -- 具体値
+VARS_ENTRY                        VARCHAR2(8192)                   , -- 具体値
 VARS_DESCRIPTION                  VARCHAR2(256)                    , -- 変数説明
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
@@ -3689,7 +3697,7 @@ JOURNAL_ACTION_CLASS              VARCHAR2(8)                      , -- 履歴�
 GBL_VARS_NAME_ID                  NUMBER                           , -- 識別シーケンス
 
 VARS_NAME                         VARCHAR2(128)                    , -- グローバル変数名
-VARS_ENTRY                        VARCHAR2(1024)                   , -- 具体値
+VARS_ENTRY                        VARCHAR2(8192)                   , -- 具体値
 VARS_DESCRIPTION                  VARCHAR2(256)                    , -- 変数説明
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
@@ -3728,7 +3736,6 @@ CREATE        INDEX IND_B_ANS_LNS_PTN_VARS_LINK_02    ON B_ANS_LNS_PTN_VARS_LINK
 CREATE        INDEX IND_B_ANS_LNS_PTN_VARS_LINK_03    ON B_ANS_LNS_PTN_VARS_LINK       (PATTERN_ID ,VARS_LINK_ID ,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_LNS_PTN_VARS_LINK_04    ON B_ANS_LNS_PTN_VARS_LINK       (VARS_LINK_ID ,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_01  ON B_ANSIBLE_LNS_VARS_ASSIGN     (DISUSE_FLAG);
-CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_02  ON B_ANSIBLE_LNS_VARS_ASSIGN     (VARS_ENTRY);
 CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_03  ON B_ANSIBLE_LNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,SYSTEM_ID,VARS_LINK_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_04  ON B_ANSIBLE_LNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,DISUSE_FLAG);
 CREATE        INDEX IND_C_ANSIBLE_LNS_EXE_INS_MNG_01  ON C_ANSIBLE_LNS_EXE_INS_MNG     (DISUSE_FLAG);
