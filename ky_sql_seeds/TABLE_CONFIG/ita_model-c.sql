@@ -42,10 +42,15 @@ CREATE TABLE B_ANSIBLE_IF_INFO
 (
 -- 主キー
 ANSIBLE_IF_INFO_ID              INT                               ,
+-- Ansible 接続情報
+ANSIBLE_HOSTNAME                %VARCHR%(128)                     , -- Ansible 接続ホスト名
+ANSIBLE_PROTOCOL                %VARCHR%(8)                       , -- Ansible 接続プロトコル
+ANSIBLE_PORT                    %INT%                             , -- Ansible 接続ポート
+-- Tower 接続情報
+ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- Tower 接続ホスト名
+ANSTWR_PROTOCOL                 %VARCHR%(8)                       , -- Tower 接続プロトコル
+ANSTWR_PORT                     %INT%                             , -- Tower 接続ポート
 -- 共通
-ANSIBLE_HOSTNAME                %VARCHR%(128)                     , 
-ANSIBLE_PROTOCOL                %VARCHR%(8)                       , 
-ANSIBLE_PORT                    %INT%                             ,
 ANSIBLE_EXEC_MODE               %INT%                             , -- 実行モード 1:ansible/2:ansible tower
 ANSIBLE_STORAGE_PATH_LNX        %VARCHR%(256)                     ,
 ANSIBLE_STORAGE_PATH_ANS        %VARCHR%(256)                     ,
@@ -82,10 +87,15 @@ JOURNAL_REG_DATETIME            %DATETIME6%                       , -- 履歴用
 JOURNAL_ACTION_CLASS            %VARCHR%(8)                       , -- 履歴用変更種別
 -- 主キー
 ANSIBLE_IF_INFO_ID              INT                               ,
+-- Ansible 接続情報
+ANSIBLE_HOSTNAME                %VARCHR%(128)                     , -- Ansible 接続ホスト名
+ANSIBLE_PROTOCOL                %VARCHR%(8)                       , -- Ansible 接続プロトコル
+ANSIBLE_PORT                    %INT%                             , -- Ansible 接続ポート
+-- Tower 接続情報
+ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- Tower 接続ホスト名
+ANSTWR_PROTOCOL                 %VARCHR%(8)                       , -- Tower 接続プロトコル
+ANSTWR_PORT                     %INT%                             , -- Tower 接続ポート
 -- 共通
-ANSIBLE_HOSTNAME                %VARCHR%(128)                     , 
-ANSIBLE_PROTOCOL                %VARCHR%(8)                       , 
-ANSIBLE_PORT                    %INT%                             ,
 ANSIBLE_EXEC_MODE               %INT%                             , -- 実行モード 1:ansible/2:ansible tower
 ANSIBLE_STORAGE_PATH_LNX        %VARCHR%(256)                     ,
 ANSIBLE_STORAGE_PATH_ANS        %VARCHR%(256)                     ,
@@ -3738,6 +3748,7 @@ CREATE        INDEX IND_B_ANS_LNS_PTN_VARS_LINK_04    ON B_ANS_LNS_PTN_VARS_LINK
 CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_01  ON B_ANSIBLE_LNS_VARS_ASSIGN     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_03  ON B_ANSIBLE_LNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,SYSTEM_ID,VARS_LINK_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_04  ON B_ANSIBLE_LNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_05  ON B_ANSIBLE_LNS_VARS_ASSIGN     (VARS_ENTRY_USE_TPFVARS);
 CREATE        INDEX IND_C_ANSIBLE_LNS_EXE_INS_MNG_01  ON C_ANSIBLE_LNS_EXE_INS_MNG     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_LNS_VAL_ASSIGN_01       ON B_ANS_LNS_VAL_ASSIGN          (DISUSE_FLAG);
 
@@ -3756,6 +3767,7 @@ CREATE        INDEX IND_B_ANS_PNS_PTN_VARS_LINK_03    ON B_ANS_PNS_PTN_VARS_LINK
 CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_ASSIGN_01  ON B_ANSIBLE_PNS_VARS_ASSIGN     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_ASSIGN_03  ON B_ANSIBLE_PNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,SYSTEM_ID,VARS_LINK_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_ASSIGN_04  ON B_ANSIBLE_PNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_ASSIGN_05  ON B_ANSIBLE_PNS_VARS_ASSIGN     (VARS_ENTRY_USE_TPFVARS);
 CREATE        INDEX IND_C_ANSIBLE_PNS_EXE_INS_MNG_01  ON C_ANSIBLE_PNS_EXE_INS_MNG     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_PNS_VAL_ASSIGN_01       ON B_ANS_PNS_VAL_ASSIGN          (DISUSE_FLAG);
 
@@ -3777,6 +3789,7 @@ CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_01  ON B_ANSIBLE_LRL_VARS_ASSI
 CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_02  ON B_ANSIBLE_LRL_VARS_ASSIGN     (OPERATION_NO_UAPK  ,PATTERN_ID  ,SYSTEM_ID  ,VARS_LINK_ID  ,COL_SEQ_COMBINATION_ID ,DISUSE_FLAG ,ASSIGN_SEQ);
 CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_03  ON B_ANSIBLE_LRL_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,SYSTEM_ID,VARS_LINK_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_04  ON B_ANSIBLE_LRL_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_05  ON B_ANSIBLE_LRL_VARS_ASSIGN     (VARS_ENTRY_USE_TPFVARS);
 CREATE        INDEX IND_B_ANSIBLE_LRL_PHO_LINK_01     ON B_ANSIBLE_LRL_PHO_LINK        (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_PHO_LINK_02     ON B_ANSIBLE_LRL_PHO_LINK        (OPERATION_NO_UAPK  ,PATTERN_ID  ,SYSTEM_ID  ,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_LRL_ROLE_VARSVAL_01     ON B_ANS_LRL_ROLE_VARSVAL        (DISUSE_FLAG);
