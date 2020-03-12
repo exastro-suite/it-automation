@@ -4295,7 +4295,7 @@ class VarStructAnalysisFileAccess{
                      ."   LEFT JOIN B_ANSIBLE_LRL_ROLE_PACKAGE  TAB_F ON ( TAB_C.ROLE_PACKAGE_ID = TAB_F.ROLE_PACKAGE_ID ) \n"
                      ."   LEFT JOIN B_ANSIBLE_LRL_ROLE          TAB_G ON ( TAB_C.ROLE_ID         = TAB_G.ROLE_ID         ) \n"
                      ." WHERE                                           \n"
-                     ."   TAB_A.VARS_ENTRY LIKE  '%{{ TPF_% }}%' AND    \n"
+                     ."   TAB_A.VARS_ENTRY_USE_TPFVARS = '1' AND        \n"
                      ."   TAB_A.DISUSE_FLAG = '0' AND                   \n"
                      ."   TAB_B.DISUSE_FLAG = '0' AND                   \n"
                      ."   TAB_C.DISUSE_FLAG = '0'                       \n";
