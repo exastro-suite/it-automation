@@ -4307,6 +4307,8 @@ class PasswordColumn extends TextColumn {
 		$this->setSelectTagCallerShow(false);
 		
 		$this->setDeleteOffBeforeCheck(false); //復活は、値のバリデーションチェックを行わない
+
+        $this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
 	}
 
 	//----廃止または復活時等のレコード比較用
@@ -4408,6 +4410,47 @@ class PasswordColumn extends TextColumn {
 
 	//ここまで新規メソッドの定義宣言処理----
 
+}
+
+class MaskColumn extends TextColumn {
+
+    //----ここから継承メソッドの上書き処理
+
+    function __construct($strColId, $strColLabel, $aryEtcetera=array()){
+        parent::__construct($strColId, $strColLabel);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));
+        $this->setOutputType("print_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));
+        $this->setOutputType("print_journal_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+        $this->setOutputType("delete_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+        $outputType->setVisible(false);
+        $this->setOutputType("filter_table", $outputType);
+        $outputType = new OutputType(new ReqTabHFmt(), new PasswordInputTabBFmt());
+        $this->setOutputType("update_table", $outputType);
+        $outputType = new OutputType(new ReqTabHFmt(), new PasswordInputTabBFmt());
+        $this->setOutputType("register_table", $outputType);
+
+        $outputType = new OutputType(new ExcelHFmt(), new StaticBFmt(""));
+        $this->setOutputType("excel", $outputType);
+
+        $outputType = new OutputType(new CSVHFmt(), new StaticCSVBFmt(""));
+        $this->setOutputType("csv", $outputType);
+
+        $outputType = new OutputType(new ExcelHFmt(), new StaticBFmt(""));
+        $this->setOutputType("json", $outputType);
+
+        if( array_key_exists("updateRequireExcept", $aryEtcetera) === true ){
+            $this->updateRequireExcept = $updateRequireExcept['updateRequireExcept'];
+        }
+        $this->setSelectTagCallerShow(false);
+        
+        $this->setDeleteOffBeforeCheck(false); //復活は、値のバリデーションチェックを行わない
+
+        $this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
+    }
+    //ここまで継承メソッドの上書き処理----
 }
 
 class MultiTextColumn extends TextColumn {
