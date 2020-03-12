@@ -239,6 +239,7 @@ $arrayTargetClassList = array(
     "TextColumn",
     "IDColumn",
     "NumColumn",
+    "MaskColumn",
 );
 
 ////////////////////////////////
