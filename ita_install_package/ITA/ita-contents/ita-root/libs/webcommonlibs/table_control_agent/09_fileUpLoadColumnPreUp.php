@@ -98,6 +98,14 @@
             $strPhpSysTempDir = sys_get_temp_dir();
             //PHPシステム用一時ディレクトリ----
 
+            if( count($_POST) == 0 && count($_FILES) == 0 ){
+                //----1:php.iniによるファイルサイズ超過
+                $intErrorType = 602;
+                $varErrorOfFileupload = 1;
+                throw new Exception( '00000400-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                //1:php.iniによるファイルサイズ超過----
+            }
+
             $varErrorOfFileupload = $_FILES['file']['error'];
             if( $_FILES['file']['error'] == 1 || $_FILES['file']['error'] == 2 ){
                 //----1:php.iniによるファイルサイズ超過/2:name属性MAX_FILE_SIZEによるファイルサイズ超過
