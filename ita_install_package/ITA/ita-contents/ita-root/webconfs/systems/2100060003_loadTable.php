@@ -79,6 +79,7 @@ DSCコンフィグ素材集
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
     $c->setRequired(true);//登録/更新時には、入力必須 2018.05.23 Add
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $table->addColumn($c);
 
 
