@@ -219,6 +219,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
         //////////////////////////////////////
@@ -318,6 +319,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
         $c->setRequired(true);//登録/更新時には、入力必須
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
         //////////////////////////////////////
@@ -332,6 +334,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
         //////////////////////////////////////
@@ -346,6 +349,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
         //////////////////////////////////////
@@ -360,6 +364,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
     $table->addColumn($cg);
