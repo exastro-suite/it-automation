@@ -113,6 +113,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
     $c->setRequired(true);//登録/更新時には、入力必須
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $table->addColumn($c);
 
     $c = new FileUploadColumn('OPENST_ENVIRONMENT',$g['objMTS']->getSomeMessage("ITAOPENST-MNU-110090"));
@@ -121,6 +122,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $table->addColumn($c);
 
 
