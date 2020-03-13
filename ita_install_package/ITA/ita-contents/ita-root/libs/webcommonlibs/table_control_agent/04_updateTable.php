@@ -486,16 +486,27 @@
                             break;
                         }
                     }
-                    
-                    foreach($arrayObjColumn as $objColumn){
-                        $arrayTmp = $objColumn->afterTableIUDAction($exeUpdateData, $reqUpdateData, $aryVariant);
-                        if($arrayTmp[0]===false){
-                            $intErrorType = $arrayTmp[1];
-                            $error_str = $arrayTmp[3];
-                            $strErrorBuf = $arrayTmp[4];
-                            throw new Exception( '00002500-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+
+                    //1行更新の場合
+                    if( $varCommitSpan === 1 ){                     
+                        foreach($arrayObjColumn as $objColumn){
+                            $arrayTmp = $objColumn->afterTableIUDAction($exeUpdateData, $reqUpdateData, $aryVariant);
+                            if($arrayTmp[0]===false){
+                                $intErrorType = $arrayTmp[1];
+                                $error_str = $arrayTmp[3];
+                                $strErrorBuf = $arrayTmp[4];
+                                throw new Exception( '00002500-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            }
+                            
                         }
-                        
+                    }else{
+                        //全行更新の場合
+                        $varRet[99] = array(
+                            'exeData'        => $exeUpdateData, 
+                            'reqData'  => $reqUpdateData, 
+                            'aryVariant'     => $aryVariant,
+                            'arrayObjColumn' => $arrayObjColumn
+                        );   
                     }
 
                     //----DB更新後の処理が定義されている場合、ここで実行する
