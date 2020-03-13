@@ -8035,6 +8035,9 @@ class RowEditByFileColumn extends Column{
 
 		$boolExeCountinue = true;
 
+        $arySetting = array();
+        $tmparrayTempRet = array();
+
 		//----簡易バリデーションチェック
 		if( is_array($editType) === true || gettype($editType) == "object" ){
 			$intCmdKey = -1;
@@ -8100,6 +8103,11 @@ class RowEditByFileColumn extends Column{
 					$arrayTempRet = registerTableMain($mode, $inputArray, null, $dlcOrderMode, $aryVariant);
 					$retRetMsgBody = $arrayTempRet[2];
 
+                    if( isset($arrayTempRet[99]) ){
+                        $tmparrayTempRet = $arrayTempRet[99];
+                        unset($arrayTempRet[99]);
+                    }
+
 					//----switch
 					switch($arrayTempRet[0]){
 						case "000":
@@ -8162,6 +8170,11 @@ class RowEditByFileColumn extends Column{
 														);
 				$arrayTempRet = updateTableMain($mode, $strNumberForRI, $inputArray, null, $dlcOrderMode, $aryVariant);
 				$retRetMsgBody = $arrayTempRet[2];
+
+                if( isset($arrayTempRet[99]) ){
+                    $tmparrayTempRet = $arrayTempRet[99];
+                    unset($arrayTempRet[99]);
+                }
 
 				//----switch
 				switch($arrayTempRet[0]){
@@ -8293,7 +8306,7 @@ class RowEditByFileColumn extends Column{
 		$arrayRetResult[2] = $retRetMsgBody;
 		$arrayRetResult[3] = $strNumberForRI;
 		$arrayRetResult[4] = $arrayTempRet;
-
+        if($tmparrayTempRet != array()  )$arrayRetResult[99] = $tmparrayTempRet;
 		$this->setFocusEditType("");
 
 		return $arrayRetResult;
