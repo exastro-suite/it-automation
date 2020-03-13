@@ -277,6 +277,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-109007"));
     $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $c->setFileHideMode(true);
     $table->addColumn($c);
 
@@ -414,6 +415,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104611"));
                     $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
                     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+                    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
                     $c->setFileHideMode(true);
                     $cg3->addColumn($c);
 
@@ -521,6 +523,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
             $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
             $c->setFileHideMode(true);
+            $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
             $cg->addColumn($c);
 
             $objVldt = new SingleTextValidator(0,256,false);
