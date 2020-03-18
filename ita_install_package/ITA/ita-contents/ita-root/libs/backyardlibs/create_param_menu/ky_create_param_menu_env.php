@@ -103,3 +103,8 @@ define('REPLACE_ID_TABLE',          '★★★ID_TABLE_NAME★★★');
 define('REPLACE_ID_PRI',            '★★★PRI_KEY_NAME★★★');
 define('REPLACE_ID_COL',            '★★★ID_COL_NAME★★★');
 define('REPLACE_INPUT_ORDER',       '★★★INPUT_ORDER★★★');
+define('REPLACE_FLOAT_MAX',         '★★★FLOAT_MAX★★★');
+define('REPLACE_FLOAT_MIN',         '★★★FLOAT_MIN★★★');
+define('REPLACE_FLOAT_DIGIT',       '★★★FLOAT_DIGIT★★★');
+define('REPLACE_INT_MAX',           '★★★INT_MAX★★★');
+define('REPLACE_INT_MIN',           '★★★INT_MIN★★★');
