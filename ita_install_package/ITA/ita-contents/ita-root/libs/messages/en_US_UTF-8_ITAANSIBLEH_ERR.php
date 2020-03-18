@@ -69,6 +69,7 @@ $ary[50075] = "Set status to unexpected error. (Execution No.:{}:{})";
 $ary[51012] = "Could not lock the Target record. (Execution No.:{})";
 $ary[51013] = "Rollback Completed. (Execution No.:{})";
 $ary[51014] = "End transaction (Execution No.:{})";
+$ary[51067] = "Connection to ansible tower failed. Check the ansible interface information. (Execution No.:{})";
 $ary[51068] = "Connection to ansible server failed. Check the ansible interface information. (Execution No.:{})";
 $ary[51083] = "Rollback has failed. (Execution No.:{})";
 $ary[51084] = "Rollback has failed.";
