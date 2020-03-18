@@ -602,13 +602,23 @@ $ary[1202090] = "Ansible/Ansible Towerサーバとの共有ディレクトリで
 $ary[1202095] = "Symphonyインスタンスデータリレイストレージパス(Ansible)";
 $ary[1202096] = "Symphonyインスタンスの各Movementが共有するディレクトリをAnsible/Ansible Towerサーバで共有する為のパスです。";
 $ary[1203010] = "プロトコル";
-$ary[1203020] = "http/httpsのいずれかです。\nAnsible Towerはhttpsを入力します。";
+$ary[1203020] = "http/httpsのいずれかです。
+通常はhttps
+です。";
+$ary[1203021] = "http/httpsのいずれかです。
+通常はhttps
+です。";
 $ary[1203030] = "ホスト";
-$ary[1203040] = "AnsibleまたはAnsible Towerサーバのホスト名(またはIPアドレス)です。\n※https通信の場合は基本的にホスト名が推奨。";
+$ary[1203040] = "Ansibleサーバのホスト名(またはIPアドレス)です。\n※https通信の場合は基本的にホスト名が推奨。";
+$ary[1203041] = "Ansible Towerサーバのホスト名(またはIPアドレス)です。\n基本的にホスト名が推奨。";
 $ary[1203050] = "ポート";
-$ary[1203060] = "AnsibleまたはAnsible Towerサーバの接続ポートです。
-通常は\nhttpの場合:80\nhttpsの場合443\nです。
-Ansible Towerは443を入力します。";
+$ary[1203060] = "Ansibleサーバの接続ポートです。
+通常は
+httpの場合:80
+httpsの場合443
+です。";
+$ary[1203061] = "Ansible Towerサーバの接続ポートです。
+通常は443です。";
 $ary[1203065] = "実行エンジン";
 $ary[1203066] = "実行するエンジンを選択します。";
 $ary[1203070] = "Access_key_id";
@@ -1142,8 +1152,8 @@ $ary[9010000000] = "認証トークン";
 $ary[9010000001] = "ITAからRestAPIでAnsible Towerに接続するユーザーの認証トークンです。";
 $ary[9010000002] = "組織名";
 $ary[9010000003] = "Ansible Towerに登録されている組織名を入力します。";
-$ary[9010000004] = "Ansible core インターフェース";
-$ary[9010000005] = "Tower インターフェース";
+$ary[9010000004] = "Ansible Engine インターフェース";
+$ary[9010000005] = "Ansible Tower インターフェース";
 $ary[9010000006] = "Legacy";
 $ary[9010000007] = "Legacy Role";
 $ary[9010000008] = "ヘッダーセクション";
@@ -1202,4 +1212,5 @@ $ary[9010000014] = "virtualenv";
 $ary[9010000015] = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。\n実行したいansible実行環境を選択します。\n未選択の場合はTowerインストール時にインストールされたansible実行環境を使用します。";
 $ary[9010000016] = "virtualenv";
 $ary[9010000017] = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。";
+$ary[9010000018] = "必須項目です。(項目:{}/{})";
 ?>
