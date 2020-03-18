@@ -791,9 +791,129 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1010");
                     }
+
+                    // 整数最大値が設定されている場合、エラー
+                    if(array_key_exists('INT_MAX',$arrayRegData) && "" != $arrayRegData['INT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1034");
+                    } 
+                    // 整数最小値が設定されている場合、エラー
+                    if(array_key_exists('INT_MIN',$arrayRegData) && "" != $arrayRegData['INT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1035");
+                    } 
+                    // 小数最大値が設定されている場合、エラー
+                    if(array_key_exists('FLOAT_MAX',$arrayRegData) && "" != $arrayRegData['FLOAT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1036");
+                    } 
+                    // 小数最小値が設定されている場合、エラー
+                    if(array_key_exists('FLOAT_MIN',$arrayRegData) && "" != $arrayRegData['FLOAT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1037");
+                    } 
+                    // 小数桁数が設定されている場合、エラー
+                    if(array_key_exists('FLOAT_DIGIT',$arrayRegData) && "" != $arrayRegData['FLOAT_DIGIT']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1038");
+                    } 
                 }
-                // 入力方式が他メニュー参照の場合
+                // 入力方式が整数の場合
                 else if("2" == $value){
+                    // 最大バイト数が設定されている場合、エラー
+                    if(array_key_exists('MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1044");
+                    }
+
+                    // 正規表現が設定されている場合、エラー
+                    if(array_key_exists('PREG_MATCH',$arrayRegData) && "" != $arrayRegData['PREG_MATCH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1045");
+                    } 
+
+                    // メニューグループ：メニュー：項目が設定されている場合、エラー
+                    if(array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) && "" != $arrayRegData['OTHER_MENU_LINK_ID']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1046");
+                    }
+
+                    // 整数最大値が設定されていない場合、エラー
+                    if(!array_key_exists('INT_MAX',$arrayRegData) || "" == $arrayRegData['INT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1047");
+                    }
+                    
+                    // 整数最小値が設定されていない場合、エラー
+                    if(!array_key_exists('INT_MIN',$arrayRegData) || "" == $arrayRegData['INT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1048");
+                    }
+                    // 小数最大値が設定されている場合、エラー
+                    if(array_key_exists('FLOAT_MAX',$arrayRegData) && "" != $arrayRegData['FLOAT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1049");
+                    } 
+                    // 小数最小値が設定されている場合、エラー
+                    if(array_key_exists('FLOAT_MIN',$arrayRegData) && "" != $arrayRegData['FLOAT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1050");
+                    } 
+                    // 小数桁数が設定されている場合、エラー
+                    if(array_key_exists('FLOAT_DIGIT',$arrayRegData) && "" != $arrayRegData['FLOAT_DIGIT']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1051");
+                    } 
+                }
+                
+                // 入力方式が小数の場合
+                else if("3" == $value){
+                    // 最大バイト数が設定されている場合、エラー
+                    if(array_key_exists('MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1052");
+                    }
+
+                    // 正規表現が設定されている場合、エラー
+                    if(array_key_exists('PREG_MATCH',$arrayRegData) && "" != $arrayRegData['PREG_MATCH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1053");
+                    } 
+
+                    // メニューグループ：メニュー：項目が設定されている場合、エラー
+                    if(array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) && "" != $arrayRegData['OTHER_MENU_LINK_ID']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1054");
+                    }
+
+                    // 整数最大値が設定されている場合、エラー
+                    if(array_key_exists('INT_MAX',$arrayRegData) && "" != $arrayRegData['INT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1055");
+                    } 
+                    // 整数最小値が設定されている場合、エラー
+                    if(array_key_exists('INT_MIN',$arrayRegData) && "" != $arrayRegData['INT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1056");
+                    } 
+                    // 小数最大値が設定されていない場合、エラー
+                    if(!array_key_exists('FLOAT_MAX',$arrayRegData) || "" == $arrayRegData['FLOAT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1057");
+                    }
+                    // 小数最小値が設定されていない場合、エラー
+                    if(!array_key_exists('FLOAT_MIN',$arrayRegData) || "" == $arrayRegData['FLOAT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1058");
+                    }
+                    // 小数桁数が設定されていない場合、エラー
+                    if(!array_key_exists('FLOAT_DIGIT',$arrayRegData) || "" == $arrayRegData['FLOAT_DIGIT']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1059");
+                    }
+                }
+                // 入力方式がプルダウンの場合
+                else if("6" == $value){
 
                     // 最大バイト数が設定されている場合、エラー
                     if(array_key_exists('MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MAX_LENGTH']){
@@ -812,6 +932,32 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1013");
                     }
+                    
+                    // 整数最大値が設定されている場合、エラー
+                    if(array_key_exists('INT_MAX',$arrayRegData) && "" != $arrayRegData['INT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1039");
+                    } 
+                    // 整数最小値が設定されている場合、エラー
+                    if(array_key_exists('INT_MIN',$arrayRegData) && "" != $arrayRegData['INT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1040");
+                    } 
+                    // 小数最大値が設定されている場合、エラー
+                    if(array_key_exists('FLOAT_MAX',$arrayRegData) && "" != $arrayRegData['FLOAT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1041");
+                    } 
+                    // 小数最小値が設定されている場合、エラー
+                    if(array_key_exists('FLOAT_MIN',$arrayRegData) && "" != $arrayRegData['FLOAT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1042");
+                    } 
+                    // 小数桁数が設定されている場合、エラー
+                    if(array_key_exists('FLOAT_DIGIT',$arrayRegData) && "" != $arrayRegData['FLOAT_DIGIT']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1043");
+                    } 
                 }
                 if( $retBool === false ){
                     $this->setValidRule($strErrAddMsg);
