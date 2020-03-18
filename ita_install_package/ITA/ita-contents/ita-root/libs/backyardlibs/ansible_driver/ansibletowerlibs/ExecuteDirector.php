@@ -34,7 +34,7 @@ require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlib
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/setenv.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/MessageTemplateStorageHolder.php");
 
-require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
+require_once($root_dir_path . '/libs/commonlibs/common_ansible_vault.php');
 
 $rest_api_command = $root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/";
 require_once($rest_api_command . "AnsibleTowerRestApiProjects.php");
