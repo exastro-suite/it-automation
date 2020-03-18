@@ -163,68 +163,68 @@
     }
     // 渡されてきた【作業ID】は、整数型か？----
 
-    //----渡されてきた【作業ID】の、対象のディレクトリが存在しているか、を確認する
-    if( $boolExeContinue === true ){
-        $strPadExeNo = str_pad( $strExeNo, $intNumPadding, "0", STR_PAD_LEFT );
-        //----ansibleへのin情報が格納されたディレクトリへのパス
-        $strDRStorageDirExeNoNS = "{$strRestApiLogPerOcheNS}/{$strPadExeNo}/in";
-        // ディレクトリ存在チェック。エラー時は処理終了。
-        $boolFocusValue = is_dir($strDRStorageDirExeNoNS);
-        if( $boolFocusValue === false ){
-            // 対象ディレクトリが存在しないと判定された場合
-            $boolExeContinue           = false;
-            $this->intResultStatusCode = 400;
-            $this->aryErrorInfo['StackTrace'] = '[FILE]'.__FILE__.',[LINE]'.__LINE__;
-            $this->RestAPI_log("Error:A directory does not exit.'{$strRestApiLogPerOcheNS}/{$strPadExeNo}/in'");
-        }
-    }
-    
-
-    if( $boolExeContinue === true ){
-        //----PID等を格納するディレクトリへのパス
-        $strRestApiLogPerExeNoNS = "{$strRestApiLogPerOcheNS}/{$strPadExeNo}/out";
-        // ディレクトリ存在チェック。エラー時はディレクトリ作成／パーミッション変更を実施する。
-        $boolFocusValue = is_dir($strRestApiLogPerExeNoNS);
-
-        if( $boolFocusValue === false ){
-            // 対象ディレクトリが存在しないと判定された場合
-            $boolMkDir = mkdir($strRestApiLogPerExeNoNS,0755,true);
-            if( $boolMkDir === true ){
-                $boolChmod = chmod($strRestApiLogPerExeNoNS,0777);
-                if( $boolChmod === false ){
-                    // パーミッション変更失敗と判定された場合
-                    $boolExeContinue           = false;
-                    $this->intResultStatusCode = 500;
-                    $this->aryErrorInfo['StackTrace'] = '[FILE]'.__FILE__.',[LINE]'.__LINE__;
-                    $this->RestAPI_log("Error:Failed in a change of directory permission.'{$strRestApiLogPerOcheNS}/{$strPadExeNo}/out'");
-                }
-            }
-            else{
-                // ディレクトリ作成失敗と判定された場合
-                $boolExeContinue           = false;
-                $this->intResultStatusCode = 500;
-                $this->aryErrorInfo['StackTrace'] = '[FILE]'.__FILE__.',[LINE]'.__LINE__;
-                $this->RestAPI_log("Error:Failed in the \"mkdir\".'{$strRestApiLogPerOcheNS}/{$strPadExeNo}/out'");
-            }
-        }
-        else{
-            // ディレクトリが存在している場合。
-            // パーミッションが0777かどうか
-            $permission = substr(sprintf('%o', fileperms($strRestApiLogPerExeNoNS)), -4);
-
-            if ( $permission !== '0777' ){
-                // パーミッションが0777以外、パーミッション変更をおこなう
-                $boolChmod = chmod($strRestApiLogPerExeNoNS,0777);
-                if( $boolChmod === false ){
-                    // パーミッション変更失敗と判定された場合
-                    $boolExeContinue           = false;
-                    $this->intResultStatusCode = 500;
-                    $this->aryErrorInfo['StackTrace'] = '[FILE]'.__FILE__.',[LINE]'.__LINE__;
-                    $this->RestAPI_log("Error:Failed in a change of directory permission.'{$strRestApiLogPerOcheNS}/{$strPadExeNo}/out'");
-                }
-            }
-        }
-    }
+//    //----渡されてきた【作業ID】の、対象のディレクトリが存在しているか、を確認する
+//    if( $boolExeContinue === true ){
+//        $strPadExeNo = str_pad( $strExeNo, $intNumPadding, "0", STR_PAD_LEFT );
+//        //----ansibleへのin情報が格納されたディレクトリへのパス
+//        $strDRStorageDirExeNoNS = "{$strRestApiLogPerOcheNS}/{$strPadExeNo}/in";
+//        // ディレクトリ存在チェック。エラー時は処理終了。
+//        $boolFocusValue = is_dir($strDRStorageDirExeNoNS);
+//        if( $boolFocusValue === false ){
+//            // 対象ディレクトリが存在しないと判定された場合
+//            $boolExeContinue           = false;
+//            $this->intResultStatusCode = 400;
+//            $this->aryErrorInfo['StackTrace'] = '[FILE]'.__FILE__.',[LINE]'.__LINE__;
+//            $this->RestAPI_log("Error:A directory does not exit.'{$strRestApiLogPerOcheNS}/{$strPadExeNo}/in'");
+//        }
+//    }
+//    
+//
+//    if( $boolExeContinue === true ){
+//        //----PID等を格納するディレクトリへのパス
+//        $strRestApiLogPerExeNoNS = "{$strRestApiLogPerOcheNS}/{$strPadExeNo}/out";
+//        // ディレクトリ存在チェック。エラー時はディレクトリ作成／パーミッション変更を実施する。
+//        $boolFocusValue = is_dir($strRestApiLogPerExeNoNS);
+//
+//        if( $boolFocusValue === false ){
+//            // 対象ディレクトリが存在しないと判定された場合
+//            $boolMkDir = mkdir($strRestApiLogPerExeNoNS,0755,true);
+//            if( $boolMkDir === true ){
+//                $boolChmod = chmod($strRestApiLogPerExeNoNS,0777);
+//                if( $boolChmod === false ){
+//                    // パーミッション変更失敗と判定された場合
+//                    $boolExeContinue           = false;
+//                    $this->intResultStatusCode = 500;
+//                    $this->aryErrorInfo['StackTrace'] = '[FILE]'.__FILE__.',[LINE]'.__LINE__;
+//                    $this->RestAPI_log("Error:Failed in a change of directory permission.'{$strRestApiLogPerOcheNS}/{$strPadExeNo}/out'");
+//                }
+//            }
+//            else{
+//                // ディレクトリ作成失敗と判定された場合
+//                $boolExeContinue           = false;
+//                $this->intResultStatusCode = 500;
+//                $this->aryErrorInfo['StackTrace'] = '[FILE]'.__FILE__.',[LINE]'.__LINE__;
+//                $this->RestAPI_log("Error:Failed in the \"mkdir\".'{$strRestApiLogPerOcheNS}/{$strPadExeNo}/out'");
+//            }
+//        }
+//        else{
+//            // ディレクトリが存在している場合。
+//            // パーミッションが0777かどうか
+//            $permission = substr(sprintf('%o', fileperms($strRestApiLogPerExeNoNS)), -4);
+//
+//            if ( $permission !== '0777' ){
+//                // パーミッションが0777以外、パーミッション変更をおこなう
+//                $boolChmod = chmod($strRestApiLogPerExeNoNS,0777);
+//                if( $boolChmod === false ){
+//                    // パーミッション変更失敗と判定された場合
+//                    $boolExeContinue           = false;
+//                    $this->intResultStatusCode = 500;
+//                    $this->aryErrorInfo['StackTrace'] = '[FILE]'.__FILE__.',[LINE]'.__LINE__;
+//                    $this->RestAPI_log("Error:Failed in a change of directory permission.'{$strRestApiLogPerOcheNS}/{$strPadExeNo}/out'");
+//                }
+//            }
+//        }
+//    }
 
     if( $boolExeContinue === true ){
         if($vg_log_level == 'DEBUG'){
