@@ -1,4 +1,4 @@
--- *****************************************************************************
+﻿-- *****************************************************************************
 -- *** ***** CreateParameterMenu Tables                                      ***
 -- *****************************************************************************
 -- -------------------------
@@ -64,6 +64,11 @@ INPUT_METHOD_ID                     %INT%                           ,
 MAX_LENGTH                          %INT%                           ,
 PREG_MATCH                          %VARCHR%(1024)                  ,
 OTHER_MENU_LINK_ID                  %INT%                           ,
+INT_MAX                             %INT%                           ,
+INT_MIN                             %INT%                           ,
+FLOAT_MAX                           %DOUBLE%                        ,
+FLOAT_MIN                           %DOUBLE%                        ,
+FLOAT_DIGIT                         %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
@@ -89,6 +94,11 @@ INPUT_METHOD_ID                     %INT%                           ,
 MAX_LENGTH                          %INT%                           ,
 PREG_MATCH                          %VARCHR%(1024)                  ,
 OTHER_MENU_LINK_ID                  %INT%                           ,
+INT_MAX                             %INT%                           ,
+INT_MIN                             %INT%                           ,
+FLOAT_MAX                           %DOUBLE%                        ,
+FLOAT_MIN                           %DOUBLE%                        ,
+FLOAT_DIGIT                         %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
@@ -683,6 +693,11 @@ SELECT TAB_A.CREATE_ITEM_ID,
        TAB_A.MAX_LENGTH,
        TAB_A.PREG_MATCH,
        TAB_A.OTHER_MENU_LINK_ID,
+       TAB_A.INT_MAX,
+       TAB_A.INT_MIN,
+       TAB_A.FLOAT_MAX,
+       TAB_A.FLOAT_MIN,
+       TAB_A.FLOAT_DIGIT,
        TAB_A.DESCRIPTION,
        TAB_C.FULL_COL_GROUP_NAME,
        CASE
@@ -714,6 +729,11 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
        TAB_A.MAX_LENGTH,
        TAB_A.PREG_MATCH,
        TAB_A.OTHER_MENU_LINK_ID,
+       TAB_A.INT_MAX,
+       TAB_A.INT_MIN,
+       TAB_A.FLOAT_MAX,
+       TAB_A.FLOAT_MIN,
+       TAB_A.FLOAT_DIGIT,
        TAB_A.DESCRIPTION,
        CASE
            WHEN TAB_C.FULL_COL_GROUP_NAME IS NULL THEN [%CONCAT_HEAD/%]TAB_B.MENU_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.ITEM_NAME[%CONCAT_TAIL/%]
