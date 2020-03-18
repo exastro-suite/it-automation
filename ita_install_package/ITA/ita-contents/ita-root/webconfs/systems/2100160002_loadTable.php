@@ -127,7 +127,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new MaxLengthValidator(1,1024));
     $cg->addColumn($c);
 
-
     // 正規表現
     $c = new TextColumn('PREG_MATCH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102115"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102116"));//エクセル・ヘッダでの説明
@@ -135,7 +134,55 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg->addColumn($c);
 
     $table->addColumn($cg);
+    
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102129"));
+    
+    // 整数最小値
+    $objVldt = new IntNumValidator(null,null);
+    $c = new NumColumn('INT_MIN',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102132"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102133"));
+    $c->setValidator($objVldt);
+    $c->setSubtotalFlag(false);
+    $cg->addColumn($c);
 
+    // 整数最大値
+    $objVldt = new IntNumValidator(null,null);
+    $c = new NumColumn('INT_MAX',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102130"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102131"));
+    $c->setValidator($objVldt);
+    $c->setSubtotalFlag(false);
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
+
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102134"));
+    
+    // 小数最小値
+    $objVldt = new FloatNumValidator(-99999999999999,99999999999999,14);
+    $c = new NumColumn('FLOAT_MIN',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102137"),14);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102138"));
+    $c->setValidator($objVldt);
+    $c->setSubtotalFlag(false);
+    $cg->addColumn($c);
+
+    // 小数最大値
+    $objVldt = new FloatNumValidator(-99999999999999,99999999999999,14);
+    $c = new NumColumn('FLOAT_MAX',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102135"),14);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102136"));
+    $c->setValidator($objVldt);
+    $c->setSubtotalFlag(false);
+    $cg->addColumn($c);
+
+    // 小数桁数
+    $objVldt = new IntNumValidator(1,14);
+    $c = new NumColumn('FLOAT_DIGIT',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102139"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102140"));
+    $c->setValidator($objVldt);
+    $c->setSubtotalFlag(false);
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
+    
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102126"));
 
     // メニューグループ：メニュー：項目
@@ -144,7 +191,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg->addColumn($c);
 
     $table->addColumn($cg);
-
 
     // 説明
     $objVldt = new MultiTextValidator(0,1024,false);
