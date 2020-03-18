@@ -253,6 +253,8 @@
                                              $vg_ansible_role_packageDB,
                                              $vg_ansible_roleDB,
                                              $vg_ansible_role_varsDB,
+                                             $lv_ans_if_info,
+                                             $tgt_execution_no,
                                              $objMTS,
                                              $objDBCA);
 
@@ -1036,6 +1038,11 @@
             $lv_ans_exec_user         = $in_ans_if_info['ANSIBLE_EXEC_USER'];
             $lv_ans_exec_mode         = $in_ans_if_info['ANSIBLE_EXEC_MODE'];
 
+            // Towerの接続情報
+            $lv_anstwr_protocol       = $in_ans_if_info['ANSTWR_PROTOCOL'];
+            $lv_anstwr_hostname       = $in_ans_if_info['ANSTWR_HOSTNAME'];
+            $lv_anstwr_port           = $in_ans_if_info['ANSTWR_PORT'];
+
             if(strlen(trim($lv_ans_exec_user)) == 0) {
                 // ansible-playbookの実行ユーザーのデフォルトを設定
                 $lv_ans_exec_user = 'root';
@@ -1381,6 +1388,11 @@
             $lv_anstwr_auth_token     = $in_ans_if_info['ANSTWR_AUTH_TOKEN'];
             $lv_ans_exec_user         = $in_ans_if_info['ANSIBLE_EXEC_USER'];
             $lv_ans_exec_mode         = $in_ans_if_info['ANSIBLE_EXEC_MODE'];
+
+            // Towerの接続情報
+            $lv_anstwr_protocol       = $in_ans_if_info['ANSTWR_PROTOCOL'];
+            $lv_anstwr_hostname       = $in_ans_if_info['ANSTWR_HOSTNAME'];
+            $lv_anstwr_port           = $in_ans_if_info['ANSTWR_PORT'];
 
             if(strlen(trim($lv_ans_exec_user)) == 0) {
                 // ansible-playbookの実行ユーザーのデフォルトを設定
