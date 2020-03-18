@@ -1990,8 +1990,16 @@ class NumTabBFmt extends TextTabBFmt {
 		if( $this->boolNumberSepaMarkShow == false ){
 			$retStrVal = $data;
 		}else{
-			if($data != ""){
-				$retStrVal = number_format($data, $this->intDigitScale, '.', ',');
+            if($data != ""){
+                $intDeciSplit = explode(".",$data);
+                $retStrVal = number_format($intDeciSplit[0], 0 , '.', ',');
+                if(count($intDeciSplit) == 2){
+                    $retStrVal = $retStrVal.".".substr($intDeciSplit[1],0,$this->intDigitScale);
+                    $retStrVal = rtrim($retStrVal,'0');
+                    if($retStrVal[-1] == '.'){
+                        $retStrVal = substr($retStrVal,0,-1);
+                    }
+                }
 			}else{
 				$retStrVal = "";
 			}
