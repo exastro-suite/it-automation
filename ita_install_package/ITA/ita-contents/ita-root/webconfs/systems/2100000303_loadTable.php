@@ -205,7 +205,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             }
 
             require_once($root_dir_path . '/libs/commonlibs/common_php_functions.php');
-            require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
             $boolRet = true;
             $intErrorType = null;
             $aryErrMsgBody = array();
