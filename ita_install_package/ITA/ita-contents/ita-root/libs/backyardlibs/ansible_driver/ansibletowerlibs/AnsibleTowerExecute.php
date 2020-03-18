@@ -75,18 +75,18 @@ global $objDBCA;
         // トレースメッセージ
         $logger->debug("Authorize AnsibleTower.");
     
-        $restApiCaller = new RestApiCaller($ansibleTowerIfInfo['ANSIBLE_PROTOCOL'],
-                                           $ansibleTowerIfInfo['ANSIBLE_HOSTNAME'],
-                                           $ansibleTowerIfInfo['ANSIBLE_PORT'],
+        $restApiCaller = new RestApiCaller($ansibleTowerIfInfo['ANSTWR_PROTOCOL'],
+                                           $ansibleTowerIfInfo['ANSTWR_HOSTNAME'],
+                                           $ansibleTowerIfInfo['ANSTWR_PORT'],
                                            $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN']);
                                        
         $response_array = $restApiCaller->authorize();
         if($response_array['success'] != true) {
             $process_has_error = true;
             $error_flag = 1;
-            $logger->trace("URL: ". $ansibleTowerIfInfo['ANSIBLE_PROTOCOL'] . "://"
-                                  . $ansibleTowerIfInfo['ANSIBLE_HOSTNAME'] . ":"
-                                  . $ansibleTowerIfInfo['ANSIBLE_PORT'] . "\n"
+            $logger->trace("URL: ". $ansibleTowerIfInfo['ANSTWR_PROTOCOL'] . "://"
+                                  . $ansibleTowerIfInfo['ANSTWR_HOSTNAME'] . ":"
+                                  . $ansibleTowerIfInfo['ANSTWR_PORT'] . "\n"
                                   . "TOKEN: " . $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN'] . "\n");
     
             $logger->error("Faild to authorize to ansible_tower. " . $response_array['responseContents']['errorMessage']);
@@ -100,8 +100,21 @@ global $objDBCA;
     
             $director = new ExecuteDirector($restApiCaller, $logger, $dbAccess, $exec_out_dir, $JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry);
         }
+
+
         switch($function) {
         case DF_EXECUTION_FUNCTION:
+            if( ! $process_has_error) {
+                // TowerのRestAPIのv2ページに接続できるか確認
+                $response_array = $restApiCaller->restCall('GET','');
+                if($response_array['statusCode'] != 200) {
+                    // TowerのRestAPIのv2ページに接続出来ない場合はインターフェース情報設定ミスとする。
+                    $process_has_error = true;
+                    $error_flag = 1;
+                    $errorMessage = $msgTplStorage->getSomeMessage("ITAANSIBLEH-ERR-51067",$tgt_execution_no);
+                    $director->errorLogOut($errorMessage);
+                }
+            }
             if($process_has_error) {
                 break;
             }
