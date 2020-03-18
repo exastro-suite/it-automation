@@ -495,17 +495,98 @@ class RowIDNoValidator extends IntNumValidator {
 
 class FloatNumValidator extends NumberValidator {
 
-	function __construct($min=null, $max=null, $intDigitScale=1, $strDisplayFormat="", $aryEtcetera=array()){
-		global $g;
+	function __construct($min=null, $max=null, $intDigitScale=14, $strDisplayFormat="", $aryEtcetera=array()){
+        global $g;
+        if( $min === null ){
+            $min = -99999999999999;
+        }
+        if( $max === null ){
+            $max =  99999999999999;
+        }
 		if( $strDisplayFormat == "" ){
 			//$strDisplayFormat = "数値";
 			$strDisplayFormat = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10401");
-		}
-		parent::__construct($min, $max, '/^((-[1-9])?[0-9]*|-0)(\.[0-9]{0,'.$intDigitScale.'})?$/s', $strDisplayFormat, $aryEtcetera);
-		$this->intDigitScale = $intDigitScale;
-		$this->setMaxLength(9);	//----符号+0+小数点+6桁で、9文字
+        }
+		parent::__construct($min, $max, '/^((-[1-9])?[0-9]{0,14}|-0)(\.[0-9]{0,14})?$/s', $strDisplayFormat, $aryEtcetera);
+        $this->intDigitScale = $intDigitScale;
+		$this->setMaxLength(16);	//----符号+整数+小数点+小数で、16文字
 	}
+	
+	function isValid($value, $strNumberForRI=null, $arrayRegData=null, &$arrayVariant=array()){
+		//----strNumberForRIを使っているのは、MultiValidator/UniqueValidatorのみ[2014-09-08-1255時点]
+		//----パラメータ「NOT_NULL」が、setRequired(NULL禁止)と役割が重複して、混乱の原因になっている。廃止の方向で[2015-03-10]
+		global $g;
+        $retBool = false;
+        $strModeId = "";
+		if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+			if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+				$aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+				$strModeId = $aryTcaAction["ACTION_MODE"];
+				if( $strModeId=="DTiS_recCount" || $strModeId=="DTiS_currentPrint" || $strModeId=="DTiS_journalPrint" ){
+					$strModeId = "DTiS_filterDefault";//filter_table
+				}
+			}
+		}
+		$this->setValidRule("");
+		$this->strModeIdOfLastErr = $strModeId;
+		$this->strErrAddMsg = "";
 
+		$boolExeContinue = true;
+		$varNotNull="";
+
+		if( array_key_exists("NOT_NULL",$this->aryEtcetera) === true ){
+			$varNotNull = $this->aryEtcetera['NOT_NULL'];
+		}
+		if( $this->checkBasicValid($value) == false ){
+			//----NULLバイトやコントロール文字が入っていた場合
+			$boolExeContinue = false;
+			//NULLバイトやコントロール文字が入っていた場合----
+		}else{
+			if( 0==strlen($value) ){
+				if( $varNotNull === true ){
+					//----NULLを許容しない場合
+					$this->strErrAddMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10202");
+					//NULLを許容しない場合----
+				}else{
+					$retBool = true;
+				}
+			}else{
+				$strRegexpFormat = $this->getRegExp($strModeId);
+				$varMinVal = $this->getMin($strModeId);
+				$varMaxVal = $this->getMax($strModeId);
+				if( preg_match($strRegexpFormat, $value) === 1 ){
+					if( ($varMaxVal === null || bccomp($value, $varMaxVal,$this->intDigitScale) != 1) && ($varMinVal === null || bccomp($value, $varMinVal,$this->intDigitScale) != -1) ){
+                        $value= rtrim($value,"0"); //後ろの0を抜く
+                        $vlen = strlen($value);
+						if(strstr($value,'.')) $vlen -= 1;
+						if(strstr($value,'-')) $vlen -= 1;
+						if($this->intDigitScale < $vlen){
+							//----上限桁数を超えた
+							$this->strErrAddMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10208",$this->intDigitScale);
+							//上限桁数を超えた----
+						}
+						else{
+							$retBool = true;
+						}
+					}else{
+						//----範囲を逸脱した
+						$this->strErrAddMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10203",$value);
+						//範囲を逸脱した----
+					}
+				}else{
+					//----書式エラー
+    				$this->setValidRule($g['objMTS']->getSomeMessage("ITAWDCH-ERR-10104", array($strRegexpFormat)));
+                    return false;
+					//書式エラー----
+				}
+			}
+			if( $retBool === false ){
+				$this->setValidRule($this->makeValidRule());
+			}
+		}
+		return $retBool;
+	}
+ 
 }
 
 class TextValidator extends Validator {
