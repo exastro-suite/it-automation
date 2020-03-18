@@ -122,7 +122,7 @@
     $strErrorLog         = 'error.log';
 
 
-    require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
+    require_once ($root_dir_path . '/libs/commonlibs/common_ansible_vault.php');
     $vaultobj = new AnsibleVault();
     list($ret,$dir,$file,$password) = $vaultobj->getValutPasswdFileInfo();
 
