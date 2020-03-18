@@ -392,7 +392,7 @@ try{
                         break;
                     }
                     // 他メニュー参照チェック
-                    if(2 == $inputMethodIdArray[$j] && $otherMenuLinkIdArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['OTHER_MENU_LINK_ID']){
+                    if(6 == $inputMethodIdArray[$j] && $otherMenuLinkIdArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['OTHER_MENU_LINK_ID']){
                         $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5018');
                         outputLog($msg);
                         // パラメータシート作成管理更新処理を行う
@@ -457,25 +457,25 @@ try{
             }
             $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']] = $columnGroupSplit;
 
-            // 文字列の場合
+            // 別々の入力方法のDBカラムタイプを指定
             switch($itemInfo['INPUT_METHOD_ID']){
-                case 1:
+                case 1: //文字列
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
                     break;
-                case 2:
+                case 2: //整数
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                     break;
-                case 3:
+                case 3: //小数
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    DOUBLE,\n";
+                    break;
+                case 4: //日時
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
+                    break;
+                case 5: //日付
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
+                    break;
+                case 6: //プルダウン
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
-                    break;
-                case 4:
-                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    DECIMAL(20,10),\n";
-                    break;
-                case 5:
-                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
-                    break;
-                case 6:
-                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
                     break;
             }
             $columns = $columns . "       TAB_A." . $itemInfo['COLUMN_NAME'] . ",\n";
@@ -491,19 +491,19 @@ try{
                         $work = $cmdbLoadTableValTmpl;  // 文字列
                         break;
                     case 2:
-                        $work = $cmdbLoadTableIdTmpl;   // 他メニュー参照
-                        break;
-                    case 3:
                         $work = $cmdbLoadTableIntTmpl;  // 整数
                         break;
-                    case 4:
+                    case 3:
                         $work = $cmdbLoadTableFltTmpl;  // 小数
+                        break;
+                    case 4:
+                        $work = $cmdbLoadTableDtTmpl;   // 日時
                         break;
                     case 5:
                         $work = $cmdbLoadTableDayTmpl;  // 日付
                         break;
                     case 6:
-                        $work = $cmdbLoadTableDtTmpl;   // 日時
+                        $work = $cmdbLoadTableIdTmpl;   // プルダウン
                         break;
                 }
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -532,12 +532,48 @@ try{
                     $work = str_replace(REPLACE_UNIQUED, "", $work);
                 }
                 // 他メニュー参照の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(6 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                }
+                // 整数の場合
+                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['INT_MAX']){
+                        $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MAX, $itemInfo['INT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['INT_MIN']){
+                        $work = str_replace(REPLACE_INT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                    }
+                }
+                // 小数の場合
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['FLOAT_MAX']){
+                        $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MAX, $itemInfo['FLOAT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_MIN']){
+                        $work = str_replace(REPLACE_FLOAT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MIN, $itemInfo['FLOAT_MIN'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_DIGIT']){
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, '14' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                    }
                 }
                 $cmdbLoadTableVal .= $work . "\n";
             }
@@ -549,19 +585,19 @@ try{
                             $work = $hgLoadTableValTmpl;  // 文字列
                             break;
                         case 2:
-                            $work = $hgLoadTableIdTmpl;   // 他メニュー参照
-                            break;
-                        case 3:
                             $work = $hgLoadTableIntTmpl;  // 整数
                             break;
-                        case 4:
+                        case 3:
                             $work = $hgLoadTableFltTmpl;  // 小数
+                            break;
+                        case 4:
+                            $work = $hgLoadTableDtTmpl;   // 日時
                             break;
                         case 5:
                             $work = $hgLoadTableDayTmpl;  // 日付
                             break;
                         case 6:
-                            $work = $hgLoadTableDtTmpl;   // 日時
+                            $work = $hgLoadTableIdTmpl;   // プルダウン
                             break;
                     }  
 
@@ -591,12 +627,48 @@ try{
                         $work = str_replace(REPLACE_UNIQUED, "", $work);
                     }
                     // 他メニュー参照の場合
-                    if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    if(6 == $itemInfo['INPUT_METHOD_ID']){
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                         $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                         $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                         $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                    }
+                    // 整数の場合
+                    if(2 == $itemInfo['INPUT_METHOD_ID']){
+                        if("" == $itemInfo['INT_MAX']){
+                            $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
+                        }
+                        else{
+                            $work = str_replace(REPLACE_INT_MAX, $itemInfo['INT_MAX'], $work);
+                        }
+                        if("" == $itemInfo['INT_MIN']){
+                            $work = str_replace(REPLACE_INT_MIN, 'null' , $work);
+                        }
+                        else{
+                            $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                        }
+                    }
+                    // 小数の場合
+                    if(3 == $itemInfo['INPUT_METHOD_ID']){
+                        if("" == $itemInfo['FLOAT_MAX']){
+                            $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
+                        }
+                        else{
+                            $work = str_replace(REPLACE_FLOAT_MAX, $itemInfo['FLOAT_MAX'], $work);
+                        }
+                        if("" == $itemInfo['FLOAT_MIN']){
+                            $work = str_replace(REPLACE_FLOAT_MIN, 'null' , $work);
+                        }
+                        else{
+                            $work = str_replace(REPLACE_FLOAT_MIN, $itemInfo['FLOAT_MIN'], $work);
+                        }
+                        if("" == $itemInfo['FLOAT_DIGIT']){
+                            $work = str_replace(REPLACE_FLOAT_DIGIT, '14' , $work);
+                        }
+                        else{
+                            $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                        }
                     }
                     $hgLoadTableVal .= $work . "\n";
                 }
@@ -607,19 +679,19 @@ try{
                         $work = $hostLoadTableValTmpl;  // 文字列
                         break;
                     case 2:
-                        $work = $hostLoadTableIdTmpl;   // 他メニュー参照
-                        break;
-                    case 3:
                         $work = $hostLoadTableIntTmpl;  // 整数
                         break;
-                    case 4:
+                    case 3:
                         $work = $hostLoadTableFltTmpl;  // 小数
+                        break;
+                    case 4:
+                        $work = $hostLoadTableDtTmpl;   // 日時
                         break;
                     case 5:
                         $work = $hostLoadTableDayTmpl;  // 日付
                         break;
                     case 6:
-                        $work = $hostLoadTableDtTmpl;   // 日時
+                        $work = $hostLoadTableIdTmpl;   // プルダウン
                         break;
                 }
 
@@ -650,12 +722,48 @@ try{
                     $work = str_replace(REPLACE_UNIQUED, "", $work);
                 }
                 // 他メニュー参照の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(6 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                }
+                // 整数の場合
+                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['INT_MAX']){
+                        $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MAX, $itemInfo['INT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['INT_MIN']){
+                        $work = str_replace(REPLACE_INT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                    }
+                }
+                // 小数の場合
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['FLOAT_MAX']){
+                        $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MAX, $itemInfo['FLOAT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_MIN']){
+                        $work = str_replace(REPLACE_FLOAT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MIN, $itemInfo['FLOAT_MIN'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_DIGIT']){
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, '14' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                    }
                 }
                 $hostLoadTableVal .= $work . "\n";
 
@@ -666,19 +774,19 @@ try{
                         $work = $viewLoadTableValTmpl;  // 文字列
                         break;
                     case 2:
-                        $work = $viewLoadTableIdTmpl;   // 他メニュー参照
-                        break;
-                    case 3:
                         $work = $viewLoadTableIntTmpl;  // 整数
                         break;
-                    case 4:
+                    case 3:
                         $work = $viewLoadTableFltTmpl;  // 小数
+                        break;
+                    case 4:
+                        $work = $viewLoadTableDtTmpl;   // 日時
                         break;
                     case 5:
                         $work = $viewLoadTableDayTmpl;  // 日付
                         break;
                     case 6:
-                        $work = $viewLoadTableDtTmpl;   // 日時
+                        $work = $viewLoadTableIdTmpl;   // プルダウン
                         break;
                 }
 
@@ -696,12 +804,48 @@ try{
                 $work = str_replace(REPLACE_DISP,   $itemName,                  $work);
                 $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
                 // 他メニュー参照の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(6 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                }
+                // 整数の場合
+                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['INT_MAX']){
+                        $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MAX, $itemInfo['INT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['INT_MIN']){
+                        $work = str_replace(REPLACE_INT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                    }
+                }
+                // 小数の場合
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['FLOAT_MAX']){
+                        $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MAX, $itemInfo['FLOAT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_MIN']){
+                        $work = str_replace(REPLACE_FLOAT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MIN, $itemInfo['FLOAT_MIN'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_DIGIT']){
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, '14' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                    }
                 }
                 $viewLoadTableVal .= $work . "\n";
             }
@@ -763,16 +907,16 @@ try{
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                         break;
                     case 3:
-                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DOUBLE,\n";
                         break;
                     case 4:
-                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DECIMAL(20,10),\n";
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
                         break;
                     case 5:
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
                         break;
                     case 6:
-                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                         break;
                 }
         
@@ -788,19 +932,19 @@ try{
                         $work = $convLoadTableValTmpl;  // 文字列
                         break;
                     case 2:
-                        $work = $convLoadTableIdTmpl;   // 他メニュー参照
-                        break;
-                    case 3:
                         $work = $convLoadTableIntTmpl;  // 整数
                         break;
-                    case 4:
+                    case 3:
                         $work = $convLoadTableFltTmpl;  // 小数
+                        break;
+                    case 4:
+                        $work = $convLoadTableDtTmpl;   // 日時
                         break;
                     case 5:
                         $work = $convLoadTableDayTmpl;  // 日付
                         break;
                     case 6:
-                        $work = $convLoadTableDtTmpl;   // 日時
+                        $work = $convLoadTableIdTmpl;   // プルダウン
                         break;
                 }
 
@@ -830,12 +974,48 @@ try{
                     $work = str_replace(REPLACE_UNIQUED, "", $work);
                 }
                 // 他メニュー参照の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(6 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                }
+                // 整数の場合
+                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['INT_MAX']){
+                        $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MAX, $itemInfo['INT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['INT_MIN']){
+                        $work = str_replace(REPLACE_INT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                    }
+                }
+                // 小数の場合
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['FLOAT_MAX']){
+                        $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MAX, $itemInfo['FLOAT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_MIN']){
+                        $work = str_replace(REPLACE_FLOAT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MIN, $itemInfo['FLOAT_MIN'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_DIGIT']){
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, '14' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                    }
                 }
                 $convertLoadTableVal .= $work . "\n";
 
@@ -845,19 +1025,19 @@ try{
                         $work = $viewLoadTableValTmpl;  // 文字列
                         break;
                     case 2:
-                        $work = $viewLoadTableIdTmpl;   // 他メニュー参照
-                        break;
-                    case 3:
                         $work = $viewLoadTableIntTmpl;  // 整数
                         break;
-                    case 4:
+                    case 3:
                         $work = $viewLoadTableFltTmpl;  // 小数
+                        break;
+                    case 4:
+                        $work = $viewLoadTableDtTmpl;   // 日時
                         break;
                     case 5:
                         $work = $viewLoadTableDayTmpl;  // 日付
                         break;
                     case 6:
-                        $work = $viewLoadTableDtTmpl;   // 日時
+                        $work = $viewLoadTableIdTmpl;   // プルダウン
                         break;
                 }
 
@@ -876,12 +1056,48 @@ try{
                 $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
 
                 // 他メニュー参照の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(6 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                }
+                // 整数の場合
+                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['INT_MAX']){
+                        $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MAX, $itemInfo['INT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['INT_MIN']){
+                        $work = str_replace(REPLACE_INT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                    }
+                }
+                // 小数の場合
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                    if("" == $itemInfo['FLOAT_MAX']){
+                        $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MAX, $itemInfo['FLOAT_MAX'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_MIN']){
+                        $work = str_replace(REPLACE_FLOAT_MIN, 'null' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_MIN, $itemInfo['FLOAT_MIN'], $work);
+                    }
+                    if("" == $itemInfo['FLOAT_DIGIT']){
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, '14' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                    }
                 }
                 $convertViewLoadTableVal .= $work . "\n";
             }
@@ -1298,7 +1514,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューテーブル管理更新
             //////////////////////////
-            $result = updateLinkTargetTable($hostMenuId, "F_" . $menuTableName . "_H");
+            $result = updateLinkTargetTable($hostMenuId, "G_" . $menuTableName . "_H");
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -2659,7 +2875,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
         $columnInfoArray = array();
 
         foreach($itemInfoArray as $key => $itemInfo){
-            if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
+            if(4 == $itemInfo['INPUT_METHOD_ID'] || 5 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             // 項目名を作成
