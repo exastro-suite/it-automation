@@ -141,16 +141,16 @@ try {
     // トレースメッセージ
     $logger->debug("Authorize AnsibleTower.");
 
-    $restApiCaller = new RestApiCaller($ansibleTowerIfInfo['ANSIBLE_PROTOCOL'],    
-                                        $ansibleTowerIfInfo['ANSIBLE_HOSTNAME'],
-                                        $ansibleTowerIfInfo['ANSIBLE_PORT'],
+    $restApiCaller = new RestApiCaller($ansibleTowerIfInfo['ANSTWR_PROTOCOL'],    
+                                        $ansibleTowerIfInfo['ANSTWR_HOSTNAME'],
+                                        $ansibleTowerIfInfo['ANSTWR_PORT'],
                                         $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN']); // 暗号復号は内部処理
 
     $response_array = $restApiCaller->authorize();
     if($response_array['success'] == false) {
-        $logger->trace("URL: " . $ansibleTowerIfInfo['ANSIBLE_PROTOCOL'] . "://"
-                                . $ansibleTowerIfInfo['ANSIBLE_HOSTNAME'] . ":"
-                                . $ansibleTowerIfInfo['ANSIBLE_PORT'] . "\n"
+        $logger->trace("URL: " . $ansibleTowerIfInfo['ANSTWR_PROTOCOL'] . "://"
+                                . $ansibleTowerIfInfo['ANSTWR_HOSTNAME'] . ":"
+                                . $ansibleTowerIfInfo['ANSTWR_PORT'] . "\n"
                                 . "TOKEN: " . $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN'] . "\n");
         throw new Exception("Faild to authorize to ansible_tower. " . $response_array['responseContents']['errorMessage']);
     }
