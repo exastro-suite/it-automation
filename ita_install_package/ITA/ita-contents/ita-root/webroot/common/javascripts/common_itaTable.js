@@ -20,6 +20,9 @@ function itaTable( tableID ){
 //   初期設定
 //
 var $itaTable = $( '#' + tableID );
+var $itaTableHeading = $itaTable.closest('.text').prev('h2');
+if ( !$itaTableHeading.length ) $itaTableHeading = $itaTable.closest('.open').prev('h2');
+
 
 // パラメータと親fakeContainerから固有key作成
 var getParam = function( name ) { 
@@ -49,13 +52,15 @@ var rowHeadClass = '.likeHeader'; // 行見出しclass
 
 // ID名
 var itaTableWrapID = tableID + '_itaTable'; // テーブルラップID
-var itaTableBodyID = tableID + '_itaTableBody'; // テーブルラップID
-var itaTableFooterID = tableID + '_itaTableFooter'; // テーブルラップID
+var itaTableBodyID = tableID + '_itaTableBody'; // テーブルボディID
+var itaTableFooterID = tableID + '_itaTableFooter'; // テーブルフッターID
 
 var tableSettingID = tableID + '_tableSetting'; // テーブル設定id
+var tablePagingID = tableID + '_tablePaging';
 
 var tableSettingOpenID = tableID + '_tableSettingOpen'; // 列リストstyle id
-var fixedRowHeadStyleID = tableID + '_fixedRowHeadStyle'; // 行見出し固定style id
+var fixedRowThHeadStyleID = tableID + '_fixedRowThHeadStyle'; // 行見出し固定style id
+var fixedRowTbHeadStyleID = tableID + '_fixedRowTbHeadStyle'; // 行見出し固定style id
 
 var colHideStyleID = tableID + '_colHideStyle'; // 列非表示style id
 var fixedTopBorderID = tableID + '_fixedTopBorder'; // 固定線Left id
@@ -80,11 +85,12 @@ $itaTable.wrap('<div id="' + itaTableWrapID + '" class="itaTable ' + userAgent +
 var tableFooterHTML = ''
     + '<div id="' + itaTableFooterID + '" class="itaTableFooter">'
     + '<div class="itaTableFooterMenu"><div class="itaTableFooterMenuInner">'
-      + '<ul>'
-        + '<li><button id="' + tableSettingOpenID + '">Table setting<span style="display:none"></span></button></li>'
+      + '<ul class="itaTableFooterMenuUl">'
+        + '<li class="itaTableFooterMenuLi"><button id="' + tableSettingOpenID + '">Table setting<span style="display:none"></span></button></li>'
       + '</li>'
     + '</div></div>'
-    + '<style id="' + fixedRowHeadStyleID + '"></style>'
+    + '<style id="' + fixedRowThHeadStyleID + '"></style>'
+    + '<style id="' + fixedRowTbHeadStyleID + '"></style>'
     + '<style id="' + colHideStyleID + '"></style>'
     + '</div>'
     + '<div id="' + fixedTopBorderID + '" class="fixedBorder top"></div>'
@@ -112,7 +118,8 @@ $itaTableWrap.append( tableSettingHTML );
 
 var $tableSetting = $('#' + tableSettingID ),
     $tableSettingOpen = $('#' + tableSettingOpenID ),
-    $fixedRowHeadStyle = $('#' + fixedRowHeadStyleID ),
+    $fixedRowThHeadStyle = $('#' + fixedRowThHeadStyleID ),
+    $fixedRowTbHeadStyle = $('#' + fixedRowTbHeadStyleID ),
     $colHideStyle = $('#' + colHideStyleID ),
     $fixedTopBorder = $('#' + fixedTopBorderID ),
     $fixedLeftBorder = $('#' + fixedLeftBorderID ),
@@ -194,12 +201,12 @@ var fixedBorderRightPosition = 0; // 右側の固定線の位置
 var fixedSize = 1,
     rowSpanHeight = 0,
     fixedStyleHTML = '';
-
+    
 // テーブルの見出しの数を調べStyleを作成する
 $itaTable.find( tHeadClass ).each( function(){
-    
-    var trHeight = $( this ).outerHeight();
-    
+
+    var trHeight = $( this ).get(0).getBoundingClientRect().height;
+
     fixedTableHeadCounter++;
     rowSpanHeight += trHeight;
     fixedStyleHTML += ''
@@ -213,81 +220,255 @@ $itaTable.find( tHeadClass ).each( function(){
     rowSpanHeight++;
 });
 fixedBorderTopPosition = fixedSize - 1;
+$fixedRowThHeadStyle.html( fixedStyleHTML );
 
-// 行左側の見出しの数を調べStyleを作成する
-fixedSize = 1;
-$itaTable.find('tr').not( tHeadClass ).eq( 0 ).find('td').each( function( i ){
-    if( $( this ).is( rowHeadClass ) ) {
-      fixedLeftRowHeadCounter++;
-      fixedStyleHTML += ''
-        + '#' + tableID + ' td:nth-child(' + fixedLeftRowHeadCounter + '){'
-          + 'left:' + fixedSize + 'px;'
-        + '}'
-        + '#' + tableID + ' tr' + tHeadClass + ':first-child th:nth-child(' + fixedLeftRowHeadCounter + '){'
-          + 'left:' + fixedSize + 'px;'
-        + '}';
-      $itaTable.find( tHeadClass ).eq( 0 ).find('th').eq( i ).addClass('thSticky left');
-      fixedSize += $( this ).outerWidth() + 1;
-    } else {
-      fixedBorderLeftPosition = fixedSize - 1;
-      return false;
-    }
-});
+const headingSizeUpdate = function() {
 
-// 行右側の見出しの数を調べStyleを作成する
-fixedSize = 1;
-$( $itaTable.find('tr').not( tHeadClass ).eq( 0 ).find('td').get().reverse() ).each( function( i ){
-    if( $( this ).is( rowHeadClass ) ) {
-      fixedRightRowHeadCounter++;
-      fixedStyleHTML += ''
-        + '#' + tableID + ' td:nth-last-child(' + fixedRightRowHeadCounter + '){'
-          + 'right:' + fixedSize + 'px;'
-        + '}'
-        + '#' + tableID + ' tr' + tHeadClass + ':first-child th:nth-last-child(' + fixedRightRowHeadCounter + '){'
-          + 'right:' + fixedSize + 'px;'
-        + '}';
-      $( $itaTable.find( tHeadClass ).eq( 0 ).find('th').get().reverse() ).eq( i ).addClass('thSticky right');
-      fixedSize += $( this ).outerWidth() + 1;
-    } else {
-      fixedBorderRightPosition = fixedSize - 1;
-      return false;
-    }
-});
+  fixedLeftRowHeadCounter = 0;
+  fixedRightRowHeadCounter = 0;
+  fixedBorderLeftPosition = 0;
+  fixedBorderRightPosition = 0;
+  fixedSize = 1;
+  rowSpanHeight = 0;
+  
+  fixedStyleHTML = '';
 
+  $tHeadTh = $itaTable.find( tHeadClass ).eq( 0 ).find('th');
+  $tBodyTd = $itaTable.find('tr:visible').not( tHeadClass ).eq( 0 ).find('td');
+  
+  // 行左側の見出しの数を調べStyleを作成する
+  fixedSize = 1;
+  $tBodyTd.each( function( i ){
+      if( $( this ).is( rowHeadClass ) ) {
+        fixedLeftRowHeadCounter++;
+        fixedStyleHTML += ''
+          + '#' + tableID + ' td:nth-child(' + fixedLeftRowHeadCounter + '){'
+            + 'left:' + fixedSize + 'px;'
+          + '}'
+          + '#' + tableID + ' tr' + tHeadClass + ':first-child th:nth-child(' + fixedLeftRowHeadCounter + '){'
+            + 'left:' + fixedSize + 'px;'
+          + '}';
+        $tHeadTh.eq( i ).addClass('thSticky left');
+        // 小数点を含めた幅を取得
+        fixedSize += $( this ).get(0).getBoundingClientRect().width + 1;
+      } else {
+        fixedBorderLeftPosition = fixedSize - 1;
+        return false;
+      }
+  });
+
+  // 行右側の見出しの数を調べStyleを作成する
+  fixedSize = 1;
+  $( $tBodyTd.get().reverse() ).each( function( i ){
+      if( $( this ).is( rowHeadClass ) ) {
+        fixedRightRowHeadCounter++;
+        fixedStyleHTML += ''
+          + '#' + tableID + ' td:nth-last-child(' + fixedRightRowHeadCounter + '){'
+            + 'right:' + fixedSize + 'px;'
+          + '}'
+          + '#' + tableID + ' tr' + tHeadClass + ':first-child th:nth-last-child(' + fixedRightRowHeadCounter + '){'
+            + 'right:' + fixedSize + 'px;'
+          + '}';
+        $( $tHeadTh.get().reverse() ).eq( i ).addClass('thSticky right');
+        // 小数点を含めた幅を取得
+        fixedSize += $( this ).get(0).getBoundingClientRect().width + 1;
+      } else {
+        fixedBorderRightPosition = fixedSize - 1;
+        return false;
+      }
+  });
+
+  $fixedRowTbHeadStyle.html( fixedStyleHTML );
+
+}
+headingSizeUpdate();
 
 var $tableScroll = $itaTableBody.find('.tableScroll');
 
 // 固定線位置更新
 var fixedBorderUpdate = function(){
 
-  $itaTableBody.css('width', 'auto');
-  
-  var tableScrollElement = $tableScroll.get(0);
-  var scrollWidth = tableScrollElement.offsetWidth - tableScrollElement.clientWidth; // スクロールバーのサイズ
-  var tableScrollHeight = tableScrollElement.clientHeight; // Table表示部分の高さ
-  
-  $fixedTopBorder.css({
-    'top' : fixedBorderTopPosition,
-    'width' : 'calc( 100% - ' + scrollWidth + 'px )'
-  });
-  $fixedLeftBorder.css({ 
-    'left' : fixedBorderLeftPosition,
-    'height' : tableScrollHeight
-  });
-  $fixedRightBorder.css({
-    'right' : fixedBorderRightPosition + scrollWidth,
-    'height' : tableScrollHeight
-  });
-  $itaTableBody.css('width', $itaTable.outerWidth() + scrollWidth );
+  // 非表示の時は更新しない
+  if ( $itaTableBody.is(':visible') ) {
+
+    $itaTableBody.css('width', 'auto');
+
+    var tableScrollElement = $tableScroll.get(0);
+    var scrollWidth = tableScrollElement.offsetWidth - tableScrollElement.clientWidth; // スクロールバーのサイズ
+    var tableScrollHeight = tableScrollElement.clientHeight; // Table表示部分の高さ
+    var tableWidth = Math.ceil( $itaTable.get(0).getBoundingClientRect().width + scrollWidth );
+
+    $fixedTopBorder.css({
+      'top' : fixedBorderTopPosition,
+      'width' : 'calc( 100% - ' + scrollWidth + 'px )'
+    });
+    $fixedLeftBorder.css({ 
+      'left' : fixedBorderLeftPosition,
+      'height' : tableScrollHeight
+    });
+    $fixedRightBorder.css({
+      'right' : fixedBorderRightPosition + scrollWidth,
+      'height' : tableScrollHeight
+    });
+    $itaTableBody.css('width', tableWidth );
+
+  }
   
 }
 fixedBorderUpdate();
 
-// スクロールチェック
+// Sticky Class追加
+if( positionStickyFlag === true ) {
+    $itaTableWrap.addClass('tableSticky');
+}
+
+
+
+//////////////////////////////////////////////////
+//
+//   ページング
+//
+
+// ページング対応テーブルフラグ
+var pagingCheckFlag = false,
+    pagingTable = [
+      'Filter1Print',
+      'Filter2Print'
+    ];
+if ( pagingTable.indexOf( fakeContainer ) !== -1 ) {
+    pagingCheckFlag = true;
+    
+    // ページング基本要素追加
+    $itaTable.after('<div class="heightAdjust" />')
+    $itaTableWrap.after('<div id="' + tablePagingID + '" class="pagingInfo"></div>');
+}
+
+var $tablePaging = $('#' + tablePagingID ),
+    $pagingTr = $itaTable.find('tr').not( tHeadClass ),
+    pagingIndex = 0, pagingPage = 2, oldTableHeight = 0,
+    maxTr, maxPage;
+
+// ページ移動
+var paging = function( page ) {
+    
+    if ( page <= 0 ) page = 1;
+    if ( page > maxPage ) page = maxPage;
+
+    // 同じページの場合はスルー
+    if ( pagingIndex !== page ) {
+
+      $itaTableWrap.css('height', $itaTableWrap.height() );
+      pagingIndex = page;
+
+      var pagingStartTr = pagingPage * ( page - 1 ) + 1,
+          pagingEndTr = pagingPage * page;
+      if ( pagingEndTr > maxTr ) pagingEndTr = maxTr;
+
+      $pagingTr.hide().slice( pagingStartTr - 1, pagingEndTr ).show();
+      $tablePaging.find('dt').text('Page : ' + pagingIndex + ' (' + pagingStartTr + ' - ' + pagingEndTr + ')' );
+      $tablePaging.find('.pageNum').removeClass('show').eq( page - 1 ).addClass('show');
+
+      // 前回と高さの差があれば調整する
+      var tableHeight = $itaTable.height();
+      if ( oldTableHeight > tableHeight || oldTableHeight !== 0 ) {
+        $itaTable.next('.heightAdjust').css('height', oldTableHeight - tableHeight );
+      } else {
+        $itaTable.next('.heightAdjust').css('height', 0 );
+      }
+      oldTableHeight = tableHeight;
+
+      headingSizeUpdate();
+      fixedBorderUpdate();
+
+      $itaTableWrap.css('height', 'auto');
+
+    }
+
+}
+
+// ページング初期化
+var pagingSet = function() {
+
+    pagingIndex = 0;
+    oldTableHeight = 0;
+    maxTr = $pagingTr.length;
+    maxPage = Math.ceil( maxTr / pagingPage );
+
+    if ( maxTr > pagingPage ) {
+      
+      // ページリスト作成
+      var pagingListHTML = '<ul class="pagingList">';
+      
+      for ( var i = 0; i < maxPage; i++ ) {
+        pagingListHTML += '<li><span class="pageNum" data-page-num="' + ( i + 1 ) + '">' + ( i + 1 ) + '</span></li>';
+      }
+      pagingListHTML += '</ul>';
+      
+      var pagingHTML = ''
+      + '<dl>'
+        + '<dt></dt>'
+        + '<dd>' + pagingListHTML + '</dd>'
+      + '</dl>';
+      
+      if ( maxPage > 10 ) {
+        $tablePaging.addClass('tenOver');
+      } else {
+        $tablePaging.removeClass('tenOver');
+      }
+      $tablePaging.show().html( pagingHTML );
+      
+      paging( 1 );
+
+      $tablePaging.find('.pageNum').on('click', function(){
+        var pageNum = Number( $( this ).attr('data-page-num') );
+        paging( pageNum );
+      });
+      
+      // マウスホイールでページ移動
+      var mousewheelevent = ('onwheel' in document ) ? 'wheel' : ('onmousewheel' in document ) ? 'mousewheel' : 'DOMMouseScroll';
+      $tablePaging.find('dl').on( mousewheelevent, function( e ){
+          if ( e.buttons === 0 ) {
+            e.preventDefault();
+            // 向き
+            var delta = e.originalEvent.deltaY ? - ( e.originalEvent.deltaY ) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : - ( e.originalEvent.detail );
+            // 縦スクロール
+            if ( delta < 0 ){
+              paging( pagingIndex + 1 );
+            } else {
+              paging( pagingIndex - 1 );
+            }
+          }
+      });
+    
+    }    
+}
+
+// ページング オン・オフ
+var pagingSwitch = function(){
+  var $pagingSetting = $tableSetting.find('.pagingSetting');
+  if ( $pagingSetting.find('input[type="checkbox"]').is(':checked') ) {
+    $itaTable.addClass('pagingOn');
+    $('#' + tablePagingID ).show();
+    pagingPage = Number( $pagingSetting.find('.pageRowsNum').val() );
+    pagingSet();
+  } else {
+    $itaTable.removeClass('pagingOn');
+    $itaTable.find('tr').not( tHeadClass ).show();
+    $('#' + tablePagingID ).html('').hide();  
+  }
+}
+
+
+
+//////////////////////////////////////////////////
+//
+//   横スクロールチェック
+//
+
 var scrollCheck = function( $scroll ){
-    var clientWidth = $scroll.get(0).clientWidth,
-        tableWidth = $scroll.find('table').outerWidth(),
-        scrollLeft = $scroll.scrollLeft();
+    var clientWidth = Math.round( $scroll.get(0).getBoundingClientRect().width ),
+        tableWidth = Math.floor( $scroll.find('table').get(0).getBoundingClientRect().width ),
+        scrollLeft = Math.round( $scroll.scrollLeft() );
     // 左
     if( $scroll.scrollLeft() > 0 ) {
       $itaTableBody.addClass('scrollLeft');
@@ -295,23 +476,18 @@ var scrollCheck = function( $scroll ){
       $itaTableBody.removeClass('scrollLeft');
     }
     // 右
-    if( ( clientWidth + scrollLeft >= tableWidth ) || ( clientWidth == tableWidth ) ) {
+    if( ( clientWidth + scrollLeft >= tableWidth ) || ( clientWidth === tableWidth ) ) {
       $itaTableBody.removeClass('scrollRight');
     } else {
       $itaTableBody.addClass('scrollRight');
     }
+    
 }
 scrollCheck( $tableScroll );
 
 $tableScroll.on('scroll', function(){
     scrollCheck( $( this ) );
 });
-
-// class,style追加
-if( positionStickyFlag === true ) {
-    $itaTableWrap.addClass('tableSticky');
-    $fixedRowHeadStyle.html( fixedStyleHTML );
-}
 
 
 
@@ -415,6 +591,21 @@ trDataFunc( $line1, 0, colCount, 1, 1, 'none');
 // 設定用 HTML
 var itaTableSettingBodyHTML = '';
 
+// ページングオンオフ項目追加
+if( pagingCheckFlag === true ) {
+itaTableSettingBodyHTML += ''
++ '<dl class="pagingSetting">'
+  + '<dt>'
+    + 'Paging'
+  + '</dt>'
+  + '<dd>'
+    + '<ul class="level1">'
+      + '<li class="level1"><span><input type="checkbox" id="' + tableID + '_pagingSwitch" class=""><label for="' + tableID + '_pagingSwitch">Paging<input id="' + tableID + '_pagingNumber" class="pageRowsNum" type="number" value="20"></label></span></li>'
+    + '</ul>'
+  + '</dd>'
++ '</dl>';
+}
+
 // Stickyが使える場合は専用の項目を追加
 if( positionStickyFlag === true ) {
 itaTableSettingBodyHTML += ''
@@ -514,6 +705,20 @@ $tableSetting.find('input[type="checkbox"]').on('change', function(){
 
 });
 
+$tableSetting.find('.pageRowsNum').on({
+    'focus' : function() { $( this ).select(); },
+    'input' : function() {
+      var $input = $( this ),
+          value = $input.val();
+      
+      if ( value <= 0 ) value = 1;
+      if ( value > 100 ) value = 100;
+      
+      $input.val( value );
+      
+    }
+});
+
 $tableSettingOpen.on('click', function(){
 
     $itaTableBody.css('max-width', 'calc( 100% - ' + tableSettingWidth + 'px )');
@@ -531,7 +736,13 @@ $tableSetting.find('button').on('click', function(){
       buttonType = $button.attr('class').split(' ');
 
   if( buttonType.indexOf('reset') >= 0 ){
-    $tableSetting.find('input').removeClass('noCheck').prop('checked', true );
+  
+    $tableSetting.find('.pagingSetting input[type="checkbox"]').prop('checked', false );
+    $tableSetting.find('.pageRowsNum').val(20);
+    
+    $tableSetting.find('.headingFixed input[type="checkbox"]').prop('checked', true );
+    
+    $tableSetting.find('.colCheckList input[type="checkbox"]').removeClass('noCheck').prop('checked', true );
   }
 
   if( buttonType.indexOf('close') >= 0 ){
@@ -546,6 +757,7 @@ $tableSetting.find('button').on('click', function(){
     // 表示する列が無い場合はアラートを出す
     if ( $tableSetting.find('.colCheckList input[type="checkbox"]:checked').length ) {
       tableHideFucn( dataMaxLevel );
+      pagingSwitch();
       saveCheckStatus( tableKey );
     } else {
       alert('No columns to display.')
@@ -608,6 +820,8 @@ var rowspanAdjustment = function() {
       $( this ).attr('rowspan', rowspan );
     });
 }
+
+
 
 // チェックリストを元にセルを表示・非表示
 var tableHideFucn = function( listLevel ) {
@@ -692,9 +906,10 @@ var tableHideFucn = function( listLevel ) {
     // 各種調整
 		setTimeout( function(){
 			rowspanAdjustment();
-			fixedBorderUpdate();
 			scrollCheck( $tableScroll );
 			headingFixed();
+      headingSizeUpdate();
+      fixedBorderUpdate();
 		}, 1 );
     
   }
@@ -732,7 +947,12 @@ var saveCheckStatus = function( key ) {
     checkStatusArray[0] = [ colNumberID, colCount ];
     $tableSetting.find('input').each( function( i ){
       var $this = $( this );
-      checkStatusArray[ i + 1 ] = [ $this.attr('id'), $this.attr('class'), $this.prop('checked') ];
+      if( $this.is('[type="number"]') ) {
+        checkStatusArray[ i + 1 ] = [ $this.attr('id'), $this.attr('class'), $this.val(), 'number' ];
+      } else {
+        checkStatusArray[ i + 1 ] = [ $this.attr('id'), $this.attr('class'), $this.prop('checked'), '' ];
+      }
+      
     });
     log('Local Storage Set. Key[' + key + '].');
     setLocalStorage( key, checkStatusArray );
@@ -749,11 +969,16 @@ var loadCheckStatus = function( key ) {
       }
       // checkboxの更新
       for( var i = 1; i < checkList.length; i++ ) {
-        $('#' + checkList[i][0] ).addClass( checkList[i][1] ).prop('checked', checkList[i][2] );
+        if( checkList[i][3] === 'number' ) {
+          $('#' + checkList[i][0] ).addClass( checkList[i][1] ).val( checkList[i][2] );
+        } else {
+          $('#' + checkList[i][0] ).addClass( checkList[i][1] ).prop('checked', checkList[i][2] );
+        }
       }
       log('Local Storage Get. Key[' + key + '].');
       tableHideFucn( dataMaxLevel );
       headingFixed();
+      pagingSwitch();
     } else {
       log('Local Storage Key[' + key + '] Not found.');
     }
@@ -775,6 +1000,16 @@ $itaTable.find('select').on('change', function(){
     }, 1 );
 });
 
+$itaTableHeading.on('click', function(){
+    setTimeout( function(){
+      if ( $itaTableBody.is(':visible') ) {
+        headingSizeUpdate();
+        fixedBorderUpdate();
+        scrollCheck( $tableScroll );
+      }
+    }, 1 );
+});
+
 // Windowサイズが変更された時にテーブルのサイズを更新する
 var resizeTimer = false;    
     $( window ).on('resize', function() {
@@ -782,6 +1017,7 @@ var resizeTimer = false;
         clearTimeout( resizeTimer );
       }
       resizeTimer = setTimeout( function(){
+        headingSizeUpdate();
         fixedBorderUpdate();
         scrollCheck( $tableScroll );
     }, 100 );
@@ -789,10 +1025,12 @@ var resizeTimer = false;
 
 // Edge対策Tableを再描画する
 if ( userAgent == 'edge' ){
-    $itaTable.hide();
     setTimeout( function(){
-      $itaTable.show();
-    }, 10 );
+      $itaTable.hide();
+      setTimeout( function(){
+        $itaTable.show();
+      }, 10 );
+    }, 10 );    
 }
 
 }
