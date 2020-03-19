@@ -430,7 +430,7 @@
             // ログファイル名(フルパス)を作成
             $tmpVarTimeStamp = time();
             $log_file_postfix = ".log";
-            $logfile = $log_output_dir . $log_file_prefix . date("Ymd",$tmpVarTimeStamp) . $log_file_postfix;
+            $logfile = $log_output_dir .'/' . $log_file_prefix . date("Ymd",$tmpVarTimeStamp) . $log_file_postfix;
 
             $cmd = sprintf("%s %s%s %s %010s %s-%010s >> %s 2>&1 &",
                             $php_command,
