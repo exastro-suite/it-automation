@@ -43,8 +43,8 @@ EOD;
 
 <div class="workspace-header">
   <ul class="editor-menu">
-    <li class="editor-menu-li"><button class="editor-menu-button" data-menu="save-icon-data">Download IPF</button></li>
-    <li class="editor-menu-li"><button class="editor-menu-button" data-menu="load-icon-data">Load IPF</button></li>
+    <li class="editor-menu-li"><button class="editor-menu-button" data-menu="save-icon-data">Save IPF</button></li>
+    <li class="editor-menu-li"><button class="editor-menu-button" data-menu="load-icon-data">Read IPF</button></li>
     <li class="editor-menu-li"><button class="editor-menu-button" data-menu="output-icon-data">Output PNG</button></li>
   </ul>
   <ul class="editor-menu editor-sub-menu">
