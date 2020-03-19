@@ -42,8 +42,8 @@ class Validator {
 
 	function __construct($min=null, $max=null, $strRegexpFormat="", $strDisplayFormat="", $strCheckType="", $boolErrShowPrefix=true){
 		$this->strWhiteCtrls = '\r\n\t';
-		$this->intBasicMaxByteLength = 4000;
-		$this->intBasicMaxChrLength = 4000;
+		$this->intBasicMaxByteLength = 8192;
+		$this->intBasicMaxChrLength = 8192;
 		
 		$this->varMinAsNum = $min;
 		$this->varMaxAsNum = $max;
@@ -62,7 +62,7 @@ class Validator {
 		$this->aryStrDisplayFormatForMode = array();
 		
 		$this->setMinLength(0);
-		$this->setMaxLength(4000);
+		$this->setMaxLength(8192);
 	
 		$this->setLengthCountAsChr(false); //デフォルト（テキストはバイトで長さを測る）
 	}
