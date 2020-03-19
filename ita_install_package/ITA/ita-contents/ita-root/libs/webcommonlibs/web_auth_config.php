@@ -284,7 +284,7 @@
     }
 
     function saLoginAuthentication() {
-        global $pwl_expiry, $pwl_threshold, $pwl_countmax, $strExternalAuthSettingsFilename, $objDBCA, $strErrMsgBody;
+        global $pwl_expiry, $pwl_threshold, $pwl_countmax, $strExternalAuthSettingsFilename, $objDBCA, $strErrMsgBody, $objMTS;
 
         // 接続必須情報の初期化
         $account_list = [];
