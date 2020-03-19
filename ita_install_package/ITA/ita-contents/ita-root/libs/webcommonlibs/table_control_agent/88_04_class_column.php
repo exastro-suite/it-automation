@@ -1276,7 +1276,7 @@ class Column extends ColumnGroup {
 		$strWpColId = "{$dbQM}{$this->getID()}{$dbQM}";
 		$strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
 
-		if($aryQueryElement[$this->getID()] == ""){
+		if($aryQueryElement[$this->getID()] === "" || ( gettype($aryQueryElement[$this->getID()]) == "NULL" ) ){
 			//----DBを問わず、空文字はNULLとしてDBへ入れる。（DBがmySQLで、指定がある場合のみ(空文字)で、DBへ投入するかは別検討）
 			$strSetValue = "{$strWpTblSelfAlias}.{$strWpColId} IS NULL";
 			$aryQueryElement[$this->getID()] = array("bind"=>false);
