@@ -80,6 +80,10 @@ background-color: #D4D4D4;
 border-collapse: separate;
 border-spacing: 1px;
 }
+.fakeContainer_Filter1Print table,
+.fakeContainer_Filter2Print table {
+min-width: 560px;
+}
 .itaTableBody th,
 .itaTableBody td {
 box-sizing: border-box;
@@ -188,6 +192,7 @@ border-style: dotted;
 pointer-events: none;
 transition-duration: 0.1s;
 transition-timing-function: linear;
+transition-property: background-image;
 }
 .itaTable.tableSticky .fixedBorder.top {
 left: 0;
@@ -256,7 +261,7 @@ transition-duration: 0s;
 .tableSettingOpen .itaTableBody:hover .itaTableFooterMenuInner {
 height: 0;
 }
-.itaTableFooterMenu ul {
+#KIZI .itaTableFooterMenu .itaTableFooterMenuUl {
 position: absolute;
 right: 0; bottom: 0;
 display: table;
@@ -267,14 +272,115 @@ border-radius: 0 0 4px 4px;
 list-style: none;
 pointer-events: all;
 }
-.itaTableFooterMenu li {
+#KIZI .itaTableFooterMenu .itaTableFooterMenuLi {
 display: table-cell;
 margin: 0; padding: 0;
 vertical-align: middle;
 text-align: center;
 }
-
-
+.pagingInfo {
+display: none;
+}
+.pagingInfo dl {
+display: inline-block;
+background-color: #444;
+border-radius: 0 0 4px 4px;
+}
+.pagingInfo dt,
+.pagingInfo dd {
+display: inline-block;
+height: 32px;
+vertical-align: top;
+line-height: 32px;
+}
+.pagingInfo dt {
+box-sizing: border-box;
+overflow: hidden;
+width: 160px; height: 32px;
+padding: 0 8px;
+text-overflow: ellipsis;
+white-space: nowrap;
+color: #DDD;
+}
+.pagingInfo dd {
+width: 258px;
+position: relative;
+z-index: 2;
+}
+#KIZI .pagingList {
+overflow: hidden;
+position: absolute;
+left: 0; top: 0;
+z-index: 3;
+box-sizing: border-box;
+width: 258px; height: 32px;
+margin: 0; padding: 6px 4px 5px;
+background-color: #444;
+border-radius: 0 0 4px 4px;
+list-style: none;
+}
+#KIZI .pagingList:hover {
+height: auto;
+}
+#KIZI .pagingList li {
+display: inline-block;
+margin: 0; padding: 0;
+vertical-align: top;
+line-height: 1;
+}
+#KIZI .tenOver .pagingList li:nth-child(10) span {
+  position: relative;
+  z-index: 1;
+  text-indent: -9999px;
+  overflow: hidden;
+}
+#KIZI .tenOver .pagingList li:nth-child(10) span::after {
+  content: '+';
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 2;
+  width: 100%; height: 100%;
+  text-align: center;
+  text-indent: 0;
+  background-color: #444;
+  line-height: 18px;
+  font-weight: bold;
+  color: #4D9E0A;
+}
+#KIZI .tenOver .pagingList:hover li:nth-child(10) span {
+  text-indent: 0;
+}
+#KIZI .tenOver .pagingList:hover li:nth-child(10) span::after {
+  display: none;
+}
+#KIZI .tenOver .pagingList li:nth-child(n+11) {
+margin-top: 8px;
+}
+.pagingList span {
+display: block;
+box-sizing: border-box;
+min-width: 25px;
+margin-bottom: 0; padding: 4px 4px 3px;
+border: 1px solid transparent;
+border-radius: 2px;
+text-align: center;
+color: #AAA;
+cursor: pointer;
+}
+.pagingList span:hover {
+color: #FFF;
+}
+.pagingList span.show {
+border-color: #CCC;
+color: #FFF;
+cursor: default;
+}
+#KIZI .tenOver .pagingList li:nth-child(10) span.show {
+border-color: transparent;
+}
+#KIZI .tenOver .pagingList:hover li:nth-child(10) span.show {
+border-color: #CCC;
+}
 
 /* .itaTableSetting */
 
@@ -462,9 +568,28 @@ cursor: pointer;
 background-color: #FF821E;
 }
 
-#KIZI .tableSettingBody input {
+#KIZI .tableSettingBody input[type="checkbox"] {
 position: absolute;
 left: -9999px;
+}
+#KIZI .pageRowsNum {
+  width: 2em;
+  margin: 0 0 0 0.5em; padding: 2px 0 1px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  text-align: center;
+  font-size: 11px;
+  color: #DDD;
+  cursor: text;
+  -moz-appearance:textfield;
+}
+#KIZI .pageRowsNum:focus {
+  background-color: #444;
+  border-color: #AAA;
+}
+#KIZI .pageRowsNum::-webkit-outer-spin-button,
+#KIZI .pageRowsNum::-webkit-inner-spin-button {
+  -webkit-appearance: none;
 }
 
 #KIZI .itaTableFooter button span {
