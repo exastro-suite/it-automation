@@ -2532,7 +2532,7 @@ VAR_TYPE                          NUMBER                           , -- 変数�
 VARS_NAME_ID                      NUMBER                           , -- 変数名/配列変数名
 COL_SEQ_COMBINATION_ID            NUMBER                           , -- 変数名
 ASSIGN_SEQ                        NUMBER                           , -- 代入順序
-VARS_VALUE                        VARCHAR2(1024)                   , -- 具体値
+VARS_VALUE                        VARCHAR2(8192)                   , -- 具体値
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
 NOTE                              VARCHAR2(4000)                   , -- 備考
@@ -2559,7 +2559,7 @@ VAR_TYPE                          NUMBER                           , -- 変数�
 VARS_NAME_ID                      NUMBER                           , -- 変数名/配列変数名
 COL_SEQ_COMBINATION_ID            NUMBER                           , -- 変数名
 ASSIGN_SEQ                        NUMBER                           , -- 代入順序
-VARS_VALUE                        VARCHAR2(1024)                   , -- 具体値
+VARS_VALUE                        VARCHAR2(8192)                   , -- 具体値
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
 NOTE                              VARCHAR2(4000)                   , -- 備考
