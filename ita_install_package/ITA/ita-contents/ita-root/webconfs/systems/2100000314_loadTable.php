@@ -67,8 +67,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     //symphonyクラスID
-    $c = new IDColumn('SYMPHONY_CLASS_NO',$g['objMTS']->getSomeMessage('ITABASEH-MNU-109070'), 'C_SYMPHONY_CLASS_MNG', 'SYMPHONY_CLASS_NO', 'SYMPHONY_NAME', '', array('SELECT_ADD_FOR_ORDER'=>array('SYMPHONY_CLASS_NO'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
-    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-109060')); //エクセル・ヘッダでの説明
+    $c = new IDColumn('SYMPHONY_CLASS_NO',$g['objMTS']->getSomeMessage('ITABASEH-MNU-920022'), 'C_SYMPHONY_CLASS_MNG', 'SYMPHONY_CLASS_NO', 'SYMPHONY_NAME', '', array('SELECT_ADD_FOR_ORDER'=>array('SYMPHONY_CLASS_NO'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-920023')); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('C_SYMPHONY_CLASS_MNG_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
     $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
@@ -78,8 +78,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     //オペレーションID
-    $c = new IDColumn('OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage('ITABASEH-MNU-105020'), 'C_OPERATION_LIST', 'OPERATION_NO_IDBH', 'OPERATION_NAME', '', array('SELECT_ADD_FOR_ORDER'=>array('OPERATION_NO_UAPK'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
-    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-105020')); //エクセル・ヘッダでの説明
+    $c = new IDColumn('OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage('ITABASEH-MNU-920024'), 'C_OPERATION_LIST', 'OPERATION_NO_IDBH', 'OPERATION_NAME', '', array('SELECT_ADD_FOR_ORDER'=>array('OPERATION_NO_UAPK'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-920025')); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('C_OPERATION_LIST_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
     $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
