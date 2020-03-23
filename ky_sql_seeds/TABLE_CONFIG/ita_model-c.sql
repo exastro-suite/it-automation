@@ -2532,7 +2532,7 @@ VAR_TYPE                          %INT%                            , -- 変数�
 VARS_NAME_ID                      %INT%                            , -- 変数名/配列変数名
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 変数名
 ASSIGN_SEQ                        %INT%                            , -- 代入順序
-VARS_VALUE                        %VARCHR%(1024)                   , -- 具体値
+VARS_VALUE                        %VARCHR%(8192)                   , -- 具体値
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -2559,7 +2559,7 @@ VAR_TYPE                          %INT%                            , -- 変数�
 VARS_NAME_ID                      %INT%                            , -- 変数名/配列変数名
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 変数名
 ASSIGN_SEQ                        %INT%                            , -- 代入順序
-VARS_VALUE                        %VARCHR%(1024)                   , -- 具体値
+VARS_VALUE                        %VARCHR%(8192)                   , -- 具体値
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
