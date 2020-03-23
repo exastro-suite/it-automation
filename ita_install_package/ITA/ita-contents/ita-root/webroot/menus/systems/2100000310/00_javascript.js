@@ -87,6 +87,10 @@ callback.prototype = {
             if( ary_result[3]==1 ){
                 Filter1Tbl_reset_filter(true);
             }
+            // 定期作業実行から遷移してきた場合の対応
+            else if( ary_result[3]==0 ){
+                queryDataToFilter();
+            }
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
@@ -864,5 +868,29 @@ function Mix1_1_jumpToSymphonyInstanceMonitor(symphony_instance_id){
     
     // 作業状態確認メニューに遷移
     open( url, "_blank");
+}
+
+
+function queryDataToFilter(){
+    // クエリから値を取得
+    var symphony_name = getQuerystring("symphony_name");
+    var operation_name = getQuerystring("operation_name");
+    var user_name = getQuerystring("user_name");
+
+    var filter_flag = false;
+
+    // 各NAMEが取得された場合
+    if ( symphony_name.length > 0 || operation_name.length > 0 || user_name.length > 0){
+            document.getElementById('Filter1Tbl_2').value = decodeURIComponent(symphony_name);
+            document.getElementById('Filter1Tbl_3').value = decodeURIComponent(operation_name);
+            document.getElementById('Filter1Tbl_5').value = decodeURIComponent(user_name);
+
+            filter_flag = true;
+    }
+    if(filter_flag === true){
+            filter_on = true;
+            // フィルタボタンを押下したことにする
+            Filter1Tbl_search_async('orderFromFilterCmdBtn');
+    }
 }
 // ここまでカスタマイズした場合の一般メソッド配置域----
