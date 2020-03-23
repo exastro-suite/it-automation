@@ -640,13 +640,12 @@ EOD;
             <div class="scheduleDetail patternDay">
                 <span class="detailHead"><span class="input_required">*</span>{$objMTS->getSomeMessage("ITAWDCH-MNU-1200027")}:</span>
                 <input size="2" maxlength="2" type="text" name="patternDay" value="">
-                <span>日</span>
+                <span>{$objMTS->getSomeMessage("ITAWDCH-MNU-1200007")}</span>
             </div>
 
             <div class="scheduleDetail patternTime">
                 <span class="detailHead"><span class="input_required">*</span>{$objMTS->getSomeMessage("ITAWDCH-MNU-1200028")}:</span>
                 <input size="6" maxlength="5" class="callDateTimePicker2" type="text" name="patternTime" value="">
-                <span>時</span>
             </div>
         </div>
     </div>
