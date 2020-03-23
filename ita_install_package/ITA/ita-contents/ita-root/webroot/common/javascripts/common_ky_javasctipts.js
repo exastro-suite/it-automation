@@ -1050,6 +1050,47 @@ function ckDate(datestr){
     }
 }
 
+// 入力された値が時間hh:ii:ss形式になっているか調べる
+// pattern 1は(hh:ii:ss)
+// pattern 2は(hh:ii)
+function ckTime(timestr, pattern){
+    //hh:ii:ss形式チェック
+    if(pattern == 1){
+        // 正規表現による書式チェック
+        if(!timestr.match(/^\d{2}:\d{2}:\d{2}$/)){
+            return false;
+        }
+        var vHour = timestr.substr(0, 2);
+        var vMinute = timestr.substr(3, 2);
+        var vSecond = timestr.substr(6, 2);
+        // 時,分,秒の妥当性チェック
+        if(vHour >= 0 && vHour <= 23 && vMinute >= 0 && vMinute <= 59 && vSecond >= 0 && vSecond <= 59){
+            return true;
+        }
+        else{
+            return false;
+        } 
+    }
+
+    //hh:ii形式チェック
+    if(pattern == 2){
+        // 正規表現による書式チェック
+        if(!timestr.match(/^\d{2}:\d{2}$/)){
+            return false;
+        }
+        var vHour = timestr.substr(0, 2);
+        var vMinute = timestr.substr(3, 2);
+        // 時,分,秒の妥当性チェック
+        if(vHour >= 0 && vHour <= 23 && vMinute >= 0 && vMinute <= 59){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+}
+
+
 // クエリーストリングを取得する
 function getQuerystring(key, default_){
     if (default_==null){
