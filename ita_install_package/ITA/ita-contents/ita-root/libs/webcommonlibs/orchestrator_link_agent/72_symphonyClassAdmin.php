@@ -120,6 +120,8 @@ function printOneOfSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode){
     $strSysErrMsgBody = "";
     
     try{
+        require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
+        $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA);
         //----シンフォニーが存在するか？
         
         //----バリデーションチェック(入力形式)
@@ -154,7 +156,7 @@ function printOneOfSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode){
         
         //----symphony_ins_noごとに作業パターンの流れを収集する
         //----バリデーションチェック(実質評価)
-        $aryRetBody = getInfoFromOneOfSymphonyClasses($fxVarsIntSymphonyClassId, 0);
+        $aryRetBody = $objOLA->getInfoFromOneOfSymphonyClasses($fxVarsIntSymphonyClassId, 0);
         if( $aryRetBody[1] !== null ){
             // エラーフラグをON
             // 例外処理へ
@@ -174,8 +176,6 @@ function printOneOfSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode){
         
         //----オーケストレータ情報の収集
         
-        require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
-        $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA);
         $aryRetBody = $objOLA->getLiveOrchestratorFromMaster();
         
         if( $aryRetBody[1] !== null ){
@@ -352,352 +352,6 @@ function printOneOfSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode){
     return $arrayResult;
 }
 //ある１のシンフォニーのクラス定義を表示する----
-
-//----ある１のシンフォニークラスの、シンフォニー部分、ムーブメント部分の情報を取得する
-function getInfoFromOneOfSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode=0){
-    global $g;
-    $boolRet = false;
-    $intErrorType = null;
-    $aryErrMsgBody = array();
-    $strErrMsg = "";
-    $aryRowOfSymClassTable = array();
-    $aryRowOfMovClassTable = array();
-    
-    $intControlDebugLevel01=250;
-    
-    $objMTS = $g['objMTS'];
-    $objDBCA = $g['objDBCA'];
-    
-    $strFxName = '([FUNCTION]'.__FUNCTION__.')';
-    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-    
-    $strSysErrMsgBody = "";
-    
-    try{
-        $aryRetBody = getSingleSymphonyInfoFromSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode);
-        if( $aryRetBody[1] !== null ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00000100";
-            if( $aryRetBody[1] === 101 ){
-                //----１行も発見できなかった場合
-                $intErrorType = 101;
-                //１行も発見できなかった場合----
-            }
-            
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        $aryRowOfSymClassTable = $aryRetBody[4];
-        
-        $aryRetBody = getSingleSymphonyInfoFromMovementClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode);
-        if( $aryRetBody[1] !== null ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00000200";
-            //
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-
-        $aryRowOfMovClassTable = $aryRetBody[4];
-        $boolRet = true;
-    }
-    catch(Exception $e){
-        if( $intErrorType === null ) $intErrorType = 500;
-        $tmpErrMsgBody = $e->getMessage();
-        if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
-        if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
-    }
-    $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfSymClassTable,$aryRowOfMovClassTable);
-    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-    return $retArray;
-}
-//ある１のシンフォニークラスの、シンフォニー部分、ムーブメント部分の情報を取得する----
-
-//----シンフォニー定義テーブルから、ある１のシンフォニー情報を取得する
-function getSingleSymphonyInfoFromSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode=0){
-    global $g;
-
-    $boolRet = false;
-    $intErrorType = null;
-    $aryErrMsgBody = array();
-    $strErrMsg = "";
-    $aryRowOfSymClassTable = array();
-    
-    $intControlDebugLevel01=250;
-    
-    $objMTS = $g['objMTS'];
-    $objDBCA = $g['objDBCA'];
-    
-    $strFxName = '([FUNCTION]'.__FUNCTION__.')';
-    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-    
-    $arrayConfigForSymClassSelect = array(
-        "JOURNAL_SEQ_NO"=>"",
-        "JOURNAL_ACTION_CLASS"=>"",
-        "JOURNAL_REG_DATETIME"=>"",
-        "SYMPHONY_CLASS_NO"=>"",
-        "SYMPHONY_NAME"=>"",
-        "DESCRIPTION"=>"",
-        "NOTE"=>"",
-        "DISUSE_FLAG"=>"",
-        "LAST_UPDATE_TIMESTAMP"=>"",
-        "LAST_UPDATE_USER"=>""
-    );
-    
-    $arraySymClassValueTmpl = array(
-        "JOURNAL_SEQ_NO"=>"",
-        "JOURNAL_ACTION_CLASS"=>"",
-        "JOURNAL_REG_DATETIME"=>"",
-        "SYMPHONY_CLASS_NO"=>"",
-        "SYMPHONY_NAME"=>"",
-        "DESCRIPTION"=>"",
-        "NOTE"=>"",
-        "DISUSE_FLAG"=>"",
-        "LAST_UPDATE_TIMESTAMP"=>"",
-        "LAST_UPDATE_USER"=>""
-    );
-    
-    $strSysErrMsgBody = "";
-    
-    try{
-        $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($g['db_model_ch'],"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
-        $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-        
-        // ----全行および全行中、最後に更新された日時を取得する
-        $arrayConfigForSelect = $arrayConfigForSymClassSelect;
-        $arrayConfigForSelect[$strSelectMaxLastUpdateTimestamp] = "";
-        
-        $arrayValue = $arraySymClassValueTmpl;
-        $arrayValue[$strSelectMaxLastUpdateTimestamp] = "";
-        
-        $strSelectMode = "SELECT";
-        $strWhereDisuseFlag = "('0')";
-        $strOrderByArea = "";
-        if( $fxVarsIntMode === 0 ){
-            $strWhereDisuseFlag = "('0')";
-        }
-        else if( $fxVarsIntMode === 1 ){
-            $strWhereDisuseFlag = "('0')";
-            
-            //----更新用のため、ロック
-            $strSelectMode = "SELECT FOR UPDATE";
-            //更新用のため、ロック----
-        }
-        
-        $temp_array = array('WHERE'=>"SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO AND DISUSE_FLAG IN {$strWhereDisuseFlag} ");
-        
-        $retArray = makeSQLForUtnTableUpdate($g['db_model_ch']
-                                            ,$strSelectMode
-                                            ,"SYMPHONY_CLASS_NO"
-                                            ,"C_SYMPHONY_CLASS_MNG"
-                                            ,"C_SYMPHONY_CLASS_MNG_JNL"
-                                            ,$arrayConfigForSelect
-                                            ,$arrayValue
-                                            ,$temp_array );
-        
-        if( $retArray[0] === false ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00000100";
-            //
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        
-        $sqlUtnBody = $retArray[1];
-        $arrayUtnBind = $retArray[2];
-        
-        $arrayUtnBind['SYMPHONY_CLASS_NO'] = $fxVarsIntSymphonyClassId;
-        
-        $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
-        if( $retArray01[0] !== true ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00000200";
-            //
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        $objQueryUtn =& $retArray01[3];
-        
-        //----発見行だけループ
-        $intCount = 0;
-        $aryRowOfSymClassTable = array();
-        while ( $row = $objQueryUtn->resultFetch() ){
-            if( $intCount == 0 ){
-                $aryRowOfSymClassTable = $row;
-            }
-            $intCount += 1;
-        }
-        //発見行だけループ----
-        
-        if( $intCount !== 1 ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00000300";
-            //
-            if( $intCount === 0 ){
-                //----廃止されている場合もあるので、想定内のエラー
-                $intErrorType = 101;
-                //廃止されている場合もあるので、想定内のエラー----
-            }
-            //
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        
-        //シンフォニーが存在するか？----
-        $boolRet = true;
-    }
-    catch(Exception $e){
-        if( $intErrorType === null ) $intErrorType = 500;
-        $tmpErrMsgBody = $e->getMessage();
-        if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
-        if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
-    }
-    $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfSymClassTable);
-    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-    return $retArray;
-}
-//シンフォニー定義テーブルから、ある１のシンフォニー情報を取得する----
-
-//----ムーブメント定義テーブルから、ある１のシンフォニーに紐づくムーブメント情報を取得する
-function getSingleSymphonyInfoFromMovementClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode=0){
-    global $g;
-    $boolRet = false;
-    $intErrorType = null;
-    $aryErrMsgBody = array();
-    $strErrMsg = "";
-    $aryRowOfMovClassTable = array();
-    
-    $intControlDebugLevel01=250;
-    
-    $objMTS = $g['objMTS'];
-    $objDBCA = $g['objDBCA'];
-    
-    $strFxName = '([FUNCTION]'.__FUNCTION__.')';
-    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-    
-    $arrayConfigForMovClassSelect = array(
-        "JOURNAL_SEQ_NO"=>"",
-        "JOURNAL_ACTION_CLASS"=>"",
-        "JOURNAL_REG_DATETIME"=>"",
-        "MOVEMENT_CLASS_NO"=>"",
-        "ORCHESTRATOR_ID"=>"",
-        "PATTERN_ID"=>"",
-        "MOVEMENT_SEQ"=>"",
-        "NEXT_PENDING_FLAG"=>"",
-        "DESCRIPTION"=>"",
-        "SYMPHONY_CLASS_NO"=>"",
-        "OPERATION_NO_IDBH"=>"",
-        "NOTE"=>"",
-        "DISUSE_FLAG"=>"",
-        "LAST_UPDATE_TIMESTAMP"=>"",
-        "LAST_UPDATE_USER"=>""
-    );
-    
-    $arrayMovClassValueTmpl = array(
-        "JOURNAL_SEQ_NO"=>"",
-        "JOURNAL_ACTION_CLASS"=>"",
-        "JOURNAL_REG_DATETIME"=>"",
-        "MOVEMENT_CLASS_NO"=>"",
-        "ORCHESTRATOR_ID"=>"",
-        "PATTERN_ID"=>"",
-        "MOVEMENT_SEQ"=>"",
-        "NEXT_PENDING_FLAG"=>"",
-        "DESCRIPTION"=>"",
-        "SYMPHONY_CLASS_NO"=>"",
-        "OPERATION_NO_IDBH"=>"",
-        "NOTE"=>"",
-        "DISUSE_FLAG"=>"",
-        "LAST_UPDATE_TIMESTAMP"=>"",
-        "LAST_UPDATE_USER"=>""
-    );
-    
-    $strSysErrMsgBody = "";
-    
-    try{
-        $strSelectMode = "SELECT";
-        $strWhereDisuseFlag = "('0')";
-        $strOrderByArea = " ORDER BY MOVEMENT_SEQ ASC";
-        if( $fxVarsIntMode === 0 ){
-            //----活性化しているレコードだけ、ロックせずセレクト
-            $strWhereDisuseFlag = "('0')";
-            //活性化しているレコードだけ、ロックせずセレクト----
-        }
-        else if( $fxVarsIntMode === 1 ){
-            //----更新するため、廃止されているムーブメントレコードも拾う
-            $strWhereDisuseFlag = "('0','1')";
-            //更新するため、廃止されているムーブメントレコードも拾う----
-            
-            //----更新用のため、ロック
-            $strSelectMode = "SELECT FOR UPDATE";
-            //更新用のため、ロック----
-        }
-        
-        $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($g['db_model_ch'],"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
-        $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-        
-        //----各ムーブメントの情報収集
-        $arrayConfigForSelect = $arrayConfigForMovClassSelect;
-        $arrayConfigForSelect[$strSelectMaxLastUpdateTimestamp] = "";
-        
-        $arrayValue = $arrayMovClassValueTmpl;
-        $arrayValue[$strSelectMaxLastUpdateTimestamp] = "";
-        
-        $temp_array = array('WHERE'=>"SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO AND DISUSE_FLAG IN {$strWhereDisuseFlag} {$strOrderByArea}");
-        
-        $retArray = makeSQLForUtnTableUpdate($g['db_model_ch']
-                                            ,$strSelectMode
-                                            ,"MOVEMENT_CLASS_NO"
-                                            ,"C_MOVEMENT_CLASS_MNG"
-                                            ,"C_MOVEMENT_CLASS_MNG_JNL"
-                                            ,$arrayConfigForSelect
-                                            ,$arrayValue
-                                            ,$temp_array);
-        
-        if( $retArray[0] === false ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00000100";
-            //
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        
-        $sqlUtnBody = $retArray[1];
-        $arrayUtnBind = $retArray[2];
-        
-        $arrayUtnBind['SYMPHONY_CLASS_NO'] = $fxVarsIntSymphonyClassId;
-        
-
-        
-        $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
-        if( $retArray01[0] !== true ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00000200";
-            //
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        $objQueryUtn =& $retArray01[3];
-        
-        //----ムーブメントの分だけループする
-        $intCount = 0;
-        while ( $row = $objQueryUtn->resultFetch() ){
-            $aryRowOfMovClassTable[] = $row;
-        }
-        //ムーブメントの分だけループする----
-        $boolRet = true;
-    }
-    catch(Exception $e){
-        $intErrorType = 500;
-        $tmpErrMsgBody = $e->getMessage();
-        if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
-        if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
-    }
-
-    $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfMovClassTable);
-    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-    return $retArray;
-}
-//ムーブメント定義テーブルから、ある１のシンフォニーに紐づくムーブメント情報を取得する----
 
 //----ある１のシンフォニーの定義を更新する
 function symphonyClassUpdateExecute($fxVarsIntSymphonyClassId, $fxVarsAryReceptData, $fxVarsStrSortedData, $fxVarsStrLT4UBody){
@@ -886,7 +540,7 @@ function symphonyClassUpdateExecute($fxVarsIntSymphonyClassId, $fxVarsAryReceptD
         // 更新前の各ムーブメントレコードが、追い越し更新されていないかを調べる----
         
         // バリデーションチェック----
-        $aryRetBody = getInfoFromOneOfSymphonyClasses($fxVarsIntSymphonyClassId,1);
+        $aryRetBody = $objOLA->getInfoFromOneOfSymphonyClasses($fxVarsIntSymphonyClassId,1);
         if( $aryRetBody[1] !== null ){
             // エラーフラグをON
             // 例外処理へ
