@@ -457,4 +457,32 @@ $ary[900101] = "Movement ID";
 $ary[900102] = "pause(OFF:/ON:checkedValue)";
 $ary[900103] = "Description";
 $ary[900104] = "Operation ID (Specified individually)";
+$ary[920001] = "Symphony can be run periodically according to a schedule.
+<br>Select the target symphony, operation, and enter detailed settings from \"Schedule Setting\".";
+$ary[920002] = "RegularlyID";
+$ary[920003] = "RegularlyWorkInformation";
+$ary[920004] = "RegularlyWorkInformation";
+$ary[920005] = "RegularlyWorkList";
+$ary[920006] = "Status";
+$ary[920007] = "The following states exists for Status.\n
+・In operation\n
+・Completed\n
+・Mismatch error\n
+・Symphony discard\n
+・Operation discard\n
+・Unexpected error";
+$ary[920008] = "Schedule setting";
+$ary[920009] = "Schedule";
+$ary[920010] = "Next execution date";
+$ary[920011] = "Start date";
+$ary[920012] = "End date";
+$ary[920013] = "Period";
+$ary[920014] = "Interval";
+$ary[920015] = "Week number";
+$ary[920016] = "Day of weeek";
+$ary[920017] = "Day";
+$ary[920018] = "Time";
+$ary[920019] = "Work suspension period";
+$ary[920020] = "Start";
+$ary[920021] = "End";
 ?>
