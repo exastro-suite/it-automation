@@ -485,4 +485,8 @@ $ary[920018] = "Time";
 $ary[920019] = "Work suspension period";
 $ary[920020] = "Start";
 $ary[920021] = "End";
+$ary[920022] = "Symphony class name";
+$ary[920023] = "[Original data] Symphony class list";
+$ary[920024] = "Operation";
+$ary[920025] = "[Original data] Input operation list";
 ?>
