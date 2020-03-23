@@ -4,3 +4,4 @@
 /ita-root/backyards/ita_base/ky_std_synchronize-symphony
 /ita-root/backyards/ita_base/ky_cmdbmenuanalysis-workflow
 /ita-root/backyards/ita_base/ky_activedirectory_roleuser_replication-workflow
+/ita-root/backyards/ita_base/ky_std_synchronize-regularly
