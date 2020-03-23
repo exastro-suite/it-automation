@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 //   Copyright 2019 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -838,31 +838,34 @@ class InputMethodValidator extends IDValidator {
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1046");
                     }
 
-                    // 整数最大値が設定されていない場合、エラー
+                    // 整数最大値が設定されていない場合、一時最大値にする(最大値>最小値チェックの時エラー出ないため)
                     if(!array_key_exists('INT_MAX',$arrayRegData) || "" == $arrayRegData['INT_MAX']){
-                        $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1047");
+                        $arrayRegData['INT_MAX'] = "2147483648";
                     }
                     
-                    // 整数最小値が設定されていない場合、エラー
+                    // 整数最小値が設定されていない場合、一時最小値にする
                     if(!array_key_exists('INT_MIN',$arrayRegData) || "" == $arrayRegData['INT_MIN']){
-                        $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1048");
+                        $arrayRegData['INT_MIN'] = "-2147483648";
                     }
                     // 小数最大値が設定されている場合、エラー
                     if(array_key_exists('FLOAT_MAX',$arrayRegData) && "" != $arrayRegData['FLOAT_MAX']){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1049");
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1047");
                     } 
                     // 小数最小値が設定されている場合、エラー
                     if(array_key_exists('FLOAT_MIN',$arrayRegData) && "" != $arrayRegData['FLOAT_MIN']){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1050");
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1048");
                     } 
                     // 小数桁数が設定されている場合、エラー
                     if(array_key_exists('FLOAT_DIGIT',$arrayRegData) && "" != $arrayRegData['FLOAT_DIGIT']){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1051");
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1049");
+                    }
+                    // 最大値<最小値になっている場合、エラー
+                    if($retBool == true && $arrayRegData['INT_MIN'] > $arrayRegData['INT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1055");
                     } 
                 }
                 
@@ -871,46 +874,44 @@ class InputMethodValidator extends IDValidator {
                     // 最大バイト数が設定されている場合、エラー
                     if(array_key_exists('MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MAX_LENGTH']){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1052");
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1050");
                     }
 
                     // 正規表現が設定されている場合、エラー
                     if(array_key_exists('PREG_MATCH',$arrayRegData) && "" != $arrayRegData['PREG_MATCH']){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1053");
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1051");
                     } 
 
                     // メニューグループ：メニュー：項目が設定されている場合、エラー
                     if(array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) && "" != $arrayRegData['OTHER_MENU_LINK_ID']){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1054");
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1052");
                     }
 
                     // 整数最大値が設定されている場合、エラー
                     if(array_key_exists('INT_MAX',$arrayRegData) && "" != $arrayRegData['INT_MAX']){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1055");
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1053");
                     } 
                     // 整数最小値が設定されている場合、エラー
                     if(array_key_exists('INT_MIN',$arrayRegData) && "" != $arrayRegData['INT_MIN']){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1056");
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1054");
                     } 
-                    // 小数最大値が設定されていない場合、エラー
+                    // 小数最大値が設定されていない場合、一時最大値にする
                     if(!array_key_exists('FLOAT_MAX',$arrayRegData) || "" == $arrayRegData['FLOAT_MAX']){
-                        $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1057");
+                        $arrayRegData['FLOAT_MAX'] = "99999999999999";
                     }
-                    // 小数最小値が設定されていない場合、エラー
+                    // 小数最小値が設定されていない場合、一時最小値にする
                     if(!array_key_exists('FLOAT_MIN',$arrayRegData) || "" == $arrayRegData['FLOAT_MIN']){
-                        $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1058");
+                        $arrayRegData['FLOAT_MIN'] = "-99999999999999";
                     }
-                    // 小数桁数が設定されていない場合、エラー
-                    if(!array_key_exists('FLOAT_DIGIT',$arrayRegData) || "" == $arrayRegData['FLOAT_DIGIT']){
+                    // 最大値<最小値になっている場合、エラー
+                    if($retBool == true && $arrayRegData['FLOAT_MIN'] > $arrayRegData['FLOAT_MAX']){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1059");
-                    }
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1055");
+                    } 
                 }
                 // 入力方式がプルダウンの場合
                 else if("6" == $value){
