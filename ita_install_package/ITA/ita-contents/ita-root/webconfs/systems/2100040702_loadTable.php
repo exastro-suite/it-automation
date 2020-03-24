@@ -331,7 +331,10 @@ Ansibleインターフェース情報
             // PasswordColumn
             $strToken       = isset($arrayVariant['edit_target_row']['ANSTWR_AUTH_TOKEN'])?
                                     $arrayVariant['edit_target_row']['ANSTWR_AUTH_TOKEN']:null;
-
+            if(strlen($strToken)==0) {
+                $strToken = array_key_exists('ANSTWR_AUTH_TOKEN',$arrayRegData)?
+                               $arrayRegData['ANSTWR_AUTH_TOKEN']:null;
+            }
         }
 
         switch($strModeId) {
