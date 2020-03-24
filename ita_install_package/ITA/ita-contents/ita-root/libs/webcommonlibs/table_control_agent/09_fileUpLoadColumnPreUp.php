@@ -627,10 +627,16 @@
                 $intErrorType = 612;
                 throw new Exception( '00001400-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
-            
-            printHeaderForProvideFileStream($strSavedFileName,"application/octet-stream");
-            $log_string = file_get_contents( $strFilePath );
-            echo $log_string;
+
+            // ファイルダウンロード
+            $content_length = filesize($strFilePath);
+            header("Content-Disposition: attachment; filename=" . basename($strFilePath));
+            header("Content-Length: ".$content_length);
+            header("Content-Type: application/octet-stream");
+            header('Content-Transfer-Encoding: binary');
+            header("Connection: close");
+            ob_end_flush();
+            readfile($strFilePath);
 
             // アクセスログへ記録
             web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4051",array($strFxName,$strFilePath)));
