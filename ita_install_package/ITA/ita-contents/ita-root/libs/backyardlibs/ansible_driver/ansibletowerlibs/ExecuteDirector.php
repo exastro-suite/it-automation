@@ -59,6 +59,8 @@ class ExecuteDirector {
     private $dbAccess;
     private $exec_out_dir;
 
+    private $version;
+
     function __construct($restApiCaller, $logger, $dbAccess, $exec_out_dir, $JobTemplatePropertyParameterAry=array(),$JobTemplatePropertyNameAry=array()) {
         $this->restApiCaller = $restApiCaller;
         $this->logger = $logger;
@@ -68,6 +70,13 @@ class ExecuteDirector {
         $this->JobTemplatePropertyNameAry      = $JobTemplatePropertyNameAry;
 
         $this->objMTS = MessageTemplateStorageHolder::getMTS();
+    }
+
+    function setTowerVersion($version) {
+        $this->version = $version;
+    }
+    function getTowerVersion() {
+        return($this->version);
     }
 
     function build($exeInsRow, $ifInfoRow) {
@@ -142,7 +151,6 @@ class ExecuteDirector {
             $this->errorLogOut($errorMessage);
             return -1;
         }
-//------------
 
         $ret = $this->prepareProject($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_ANS']); 
         if($ret == false) {
@@ -205,6 +213,27 @@ class ExecuteDirector {
                 $this->errorLogOut($errorMessage);
                 return -1;
             }
+
+            ///////////////////////////////////////////////////////////////////////
+            // JobTemplateにcredentialIdを紐づけ(Ansible Tower3.6～)
+            ///////////////////////////////////////////////////////////////////////
+            //---- Ansible Tower Version Check (Not Ver3.5)
+            if($this->getTowerVersion() != TOWER_VER35) {
+
+                $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTemplateId, $credentialId);
+                if($response_array['success'] == false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
+                    $this->errorLogOut($errorMessage);
+                    return -1;
+                }
+                $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTemplateId, $vault_credentialId);
+                if($response_array['success'] == false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
+                    $this->errorLogOut($errorMessage);
+                    return -1;
+                }
+            }
+            //Ansible Tower Version Check (Not Ver3.5) ----
 
             $jobTemplateIds[] = $jobTemplateId;
             $loopCount++;
@@ -443,6 +472,22 @@ class ExecuteDirector {
         $jobTplId = $response_array['responseContents']['id'];
 
         ///////////////////////////////////////////////////////////////////////
+        // prepareJobTemplateにcredentialIdを紐づけ(Ansible Tower3.6～)
+        ///////////////////////////////////////////////////////////////////////
+        //---- Ansible Tower Version Check (Not Ver3.5)
+        if($this->getTowerVersion() != TOWER_VER35) {
+
+            $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTplId, $credentialId);
+            if($response_array['success'] == false) {
+                $this->logger->error($response_array['responseContents']['errorMessage']);
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
+                $this->errorLogOut($errorMessage);
+                return false;
+            }
+        }
+        //Ansible Tower Version Check (Not Ver3.5) ----
+
+        ///////////////////////////////////////////////////////////////////////
         // prepare実行
         ///////////////////////////////////////////////////////////////////////
         $this->logger->trace("build request");
@@ -515,6 +560,40 @@ class ExecuteDirector {
                                                  $responseContents['status'] == "canceled")) ||
                 (array_key_exists("failed", $responseContents) && $responseContents['failed'] == true)) {
                 $this->logger->error("parepare failed. execution_no:$execution_no");
+
+                //---- ジョブの実行結果を取得し実行ログに表示
+                $response_array_stdout = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
+                if(array_key_exists("responseContents",$response_array_stdout) === true) {
+                    if(is_array($response_array_stdout['responseContents']) === true) {
+                        $log_data = print_r($response_array_stdout['responseContents'],true);
+                    } else {
+                        $log_data = $response_array_stdout['responseContents'];
+                    }
+
+                    $execlogFilename        = "exec.log";
+                    $outDirectoryPath       = $dataRelayStoragePath . "/" . $vg_tower_driver_type . '/' . $vg_tower_driver_id . '/' . addPadding($execution_no) . "/out";
+                    $execlogFullPath        = $outDirectoryPath . "/" . $execlogFilename;
+
+                    // ログ(", ")  =>  (",\n")を改行する
+                    $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
+                    // ログ(=> {)  =>  (=> {\n)を改行する
+                    $log_data = preg_replace( "/=> {/", "=> {\n",$log_data,-1,$count);
+                    // ログ(, ")  =>  (,\n")を改行する
+                    $log_data = preg_replace( "/, \"/", ",\n\"",$log_data,-1,$count);
+                    // 改行文字列\\r\\nを改行コードに置換える
+                    $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
+                    // 改行文字列\r\nを改行コードに置換える
+                    $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+                    // python改行文字列\\nを改行コードに置換える
+                    $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
+                    // python改行文字列\nを改行コードに置換える
+                    $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+
+                    @file_put_contents($execlogFullPath,$log_data);
+
+                }
+                //ジョブの実行結果を取得し実行ログに表示 ----
+
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040021" . $responseContents['status']);
                 $this->errorLogOut($errorMessage);
                 return false;
@@ -606,6 +685,20 @@ class ExecuteDirector {
             return false;
         }
         $jobTplId = $response_array['responseContents']['id'];
+
+        ///////////////////////////////////////////////////////////////////////
+        // cleanupJobTemplateにcredentialIdを紐づけ(Ansible Tower3.6～)
+        ///////////////////////////////////////////////////////////////////////
+        //---- Ansible Tower Version Check (Not Ver3.5)
+        if($this->getTowerVersion() != TOWER_VER35) {
+
+            $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTplId, $credentialId);
+            if($response_array['success'] == false) {
+                $this->logger->debug("Linking job-template and credential. (cleanup)");
+                return false;
+            }
+        }
+        //Ansible Tower Version Check (Not Ver3.5) ----
 
         ///////////////////////////////////////////////////////////////////////
         // cleanup実行
@@ -1775,6 +1868,7 @@ class ExecuteDirector {
         // node job data
         foreach($workflowJobNodeArray_jobDataAdded as $workflowJobNodeData) {
             $jobData = $workflowJobNodeData['jobData'];
+
             $contentArray[] = ""; // 空行
             $contentArray[] = "------------------------------------------------------------------------------------------------------------------------"; // セパレータ
             $contentArray[] = "node_job_name: " . $jobData['name'];
@@ -1789,12 +1883,31 @@ class ExecuteDirector {
             $contentArray[] = "  project_name: " . $projectData['name'];
             $contentArray[] = "  project_local_path: " . $projectData['local_path'];
 
-            $response_array = AnsibleTowerRestApiCredentials::get($this->restApiCaller, $jobData['credential']);
-            if($response_array['success'] == false) {
-                $this->logger->error("Faild to get credential. " . $response_array['responseContents']['errorMessage']);
-                return false;
+            //---- Ansible Tower Version Check 
+            if($this->getTowerVersion() == TOWER_VER35) {
+                $response_array = AnsibleTowerRestApiCredentials::get($this->restApiCaller, $jobData['credential']);
+                if($response_array['success'] == false) {
+                    $this->logger->error("Faild to get credential. " . $response_array['responseContents']['errorMessage']);
+                    return false;
+                }
+                $credentialData = $response_array['responseContents'];
+            } else {
+                foreach($jobData['summary_fields']['credentials'] as $CredentialArray) {
+                    if($CredentialArray['kind'] != 'vault') {
+                        $response_array = AnsibleTowerRestApiCredentials::get($this->restApiCaller, $CredentialArray['id']);
+                        if($response_array['success'] == false) {
+                            $this->logger->error("Faild to get credential. " . $response_array['responseContents']['errorMessage']);
+                            return false;
+                        }
+                        $credentialData = $response_array['responseContents'];
+                    }
+                }
+                if( ! isset($credentialData)) {
+                    $this->logger->error("non set to get credential. " . $response_array['responseContents']);
+                    return false;
+                }
             }
-            $credentialData = $response_array['responseContents'];
+            //---- Ansible Tower Version Check 
 
             $contentArray[] = "  credential_name: " . $credentialData['name'];
             $contentArray[] = "  credential_type: " . $credentialData['credential_type'];
