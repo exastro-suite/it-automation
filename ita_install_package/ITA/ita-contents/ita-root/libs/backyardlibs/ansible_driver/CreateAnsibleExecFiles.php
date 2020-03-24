@@ -11374,6 +11374,8 @@ class CreateAnsibleExecFiles {
                     return false;
                 }
             } else {
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array(''));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 return false;
