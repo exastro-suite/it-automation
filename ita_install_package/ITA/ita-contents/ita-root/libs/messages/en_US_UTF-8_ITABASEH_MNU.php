@@ -465,12 +465,14 @@ $ary[920004] = "RegularlyWorkInformation";
 $ary[920005] = "RegularlyWorkList";
 $ary[920006] = "Status";
 $ary[920007] = "The following states exists for Status.\n
+・In preparation\n
 ・In operation\n
 ・Completed\n
 ・Mismatch error\n
+・Linking error\n
+・Unexpected error\n
 ・Symphony discard\n
-・Operation discard\n
-・Unexpected error";
+・Operation discard";
 $ary[920008] = "Schedule setting";
 $ary[920009] = "Schedule";
 $ary[920010] = "Next execution date";
@@ -489,4 +491,5 @@ $ary[920022] = "Symphony class name";
 $ary[920023] = "[Original data] Symphony class list";
 $ary[920024] = "Operation";
 $ary[920025] = "[Original data] Input operation list";
+$ary[920026] = "Auto-input";
 ?>
