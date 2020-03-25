@@ -852,8 +852,6 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 //////// ----更新画面表示時のパラメータセット ////////
 function setUpdateParam(){
     var tableArea = $('#table_area');
-    var statusID = tableArea.find('input[data-sch="statusID"]');
-    var scheduleNextDate = tableArea.find('input[data-sch="scheduleNextDate"]');
     var scheduleRegularlyPeriod = tableArea.find('input[data-sch="scheduleRegularlyPeriod"]');
     var scheduleRegularlyPeriodValue = scheduleRegularlyPeriod.val();
     var schedulePatternWeekNumber = tableArea.find('input[data-sch="schedulePatternWeekNumber"]');
@@ -890,14 +888,6 @@ function setUpdateParam(){
         6 : getSomeMessage("ITAWDCC91017"), //金曜日
         7 : getSomeMessage("ITAWDCC91018"), //土曜日
     };
-
-    //ステータスおよび次回実行日付を強制的に空にする
-    statusIDValue = "";
-    statusID.val(statusIDValue);
-    statusID.parent().html(statusIDValue+statusID.prop('outerHTML'));
-    scheduleNextDateValue = "";
-    scheduleNextDate.val(scheduleNextDateValue);
-    scheduleNextDate.parent().html(scheduleNextDateValue+scheduleNextDate.prop('outerHTML'));
 
     //ID管理しているカラム(周期/週番号/曜日)について、表示される値をIDからNAMEに変換する
     if(scheduleRegularlyPeriodValue){
