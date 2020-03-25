@@ -89,12 +89,30 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     //ステータス
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+
+        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+            $exeQueryData[$objColumn->getID()] = 1; //ステータス：準備中
+        }else if( $modeValue=="DTUP_singleRecDelete" ){
+            $exeQueryData[$objColumn->getID()] = 1; //ステータス：準備中
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
     $c = new IDColumn('STATUS_ID', $g['objMTS']->getSomeMessage('ITABASEH-MNU-920006'), 'B_REGULARLY_STATUS', 'REGULARLY_STATUS_ID', 'REGULARLY_STATUS_NAME', '');
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-920007')); //エクセル・ヘッダでの説明
     $c->setAllowSendFromFile(false); //エクセル/CSVからのアップロードは不可能
-    $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt(''))); //テキストと、隠しテキストインプットを出力する
     $c->getOutputType('update_table')->setAttr('data-sch', 'statusID'); //data属性を追加（モーダルから入力欄への値セット用）
-    $c->getOutputType('register_table')->setVisible(false); //登録時は非表示
+    $strWebUIText = $g['objMTS']->getSomeMessage('ITABASEH-MNU-920026');
+    $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 更新時は「自動入力」を表示 */
+    $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 登録時は「自動入力」を表示 */
+    $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction); //初期値を1(準備中)に
     $table->addColumn($c);
 
     //スケジュール設定ボタン
@@ -113,14 +131,32 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     //スケジュール
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage('ITABASEH-MNU-920009'));
         //次回実行日付
+        $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+            $boolRet = true;
+            $intErrorType = null;
+            $aryErrMsgBody = array();
+            $strErrMsg = "";
+            $strErrorBuf = "";
+
+            $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+            if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+                $exeQueryData[$objColumn->getID()] = null; //nullにする
+            }else if( $modeValue=="DTUP_singleRecDelete" ){
+                $exeQueryData[$objColumn->getID()] = null; //nullにする
+            }
+            $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+            return $retArray;
+        };
         $c = new DateTimeColumn('NEXT_EXECUTION_DATE', $g['objMTS']->getSomeMessage('ITABASEH-MNU-920010'), 'DATETIME', 'DATETIME', false);
         $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-920010'));//エクセル・ヘッダでの説明
         $c->setSecondsInputOnIU(false); //UI表示時に秒を非表示
         $c->setSecondsInputOnFilter(false); //フィルタ表示時に秒を非表示
         $c->setAllowSendFromFile(false); //エクセル/CSVからのアップロードは不可能
-        $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt(''))); //テキストと、隠しテキストインプットを出力する
         $c->getOutputType('update_table')->setAttr('data-sch', 'scheduleNextDate'); //data属性を追加（モーダルから入力欄への値セット用）
-        $c->getOutputType('register_table')->setVisible(false); //登録時は非表示
+        $strWebUIText = $g['objMTS']->getSomeMessage('ITABASEH-MNU-920026');
+        $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 更新時は「自動入力」を表示 */
+        $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 登録時は「自動入力」を表示 */
+        $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction); //初期値をnullに
         $cg->addColumn($c);
 
         //開始日付
