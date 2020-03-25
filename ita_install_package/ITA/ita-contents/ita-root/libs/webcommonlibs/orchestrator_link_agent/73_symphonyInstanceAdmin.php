@@ -1810,8 +1810,7 @@ function symphonyInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $str
                 $aryErrMsgBody = $retArray[2];
                 $strErrMsg = $retArray[3];
                 $strSysErrMsgBody = $retArray[4];
-                $strExpectedErrMsgBodyForUI = implode("\n",$retArray[6]);
-                
+                $strExpectedErrMsgBodyForUI = $retArray[6];
             }
             //webError出力用メッセージを出力
             $aryFreeErrMsgBody = $retArray[7];
