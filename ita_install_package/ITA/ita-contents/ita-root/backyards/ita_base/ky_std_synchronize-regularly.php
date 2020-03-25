@@ -49,6 +49,16 @@
     $strFxName          = "proc({$log_file_prefix})";
     $strIntervalTime    = "3 MINUTE"; //Symphony作業一覧に実行するどれくらい前に登録をするか
 
+    //ステータス定義
+    const STATUS_IN_PREPARATION = 1; //ステータス：準備中
+    const STATUS_IN_OPERATION = 2; //ステータス：稼働中
+    const STATUS_COMPLETED = 3; //ステータス：完了
+    const STATUS_MISMATCH_ERROR = 4; //ステータス：不整合エラー
+    const STATUS_LINKING_ERROR = 5; //ステータス：紐付けエラー
+    const STATUS_UNEXPECTED_ERROR = 6; //ステータス：想定外エラー
+    const STATUS_SYMPHONY_DISCARD = 7; //ステータス：symphony廃止
+    const STATUS_OPERATION_DISCARD = 8; //ステータス：operation廃止
+
     //C_REGULARLY_LIST
     $aryConfigForRegListIUD = array(
         "JOURNAL_SEQ_NO"=>"",
@@ -176,8 +186,9 @@
         // BIND用のベースソース
         $aryBaseSourceForBind = $aryConfigForRegListIUD;
 
-        //NEXT_EXECUTION_DATEおよびSATUS_IDがNULLのレコードを取得
-        $aryTempForSql = array('WHERE'=>"DISUSE_FLAG IN ('0') AND NEXT_EXECUTION_DATE IS NULL AND STATUS_ID IS NULL");
+        //NEXT_EXECUTION_DATEおよびSATUS_IDがSTATUS_IN_PREPARATION(準備中)のレコードを取得
+        $statusInPreparation = STATUS_IN_PREPARATION;
+        $aryTempForSql = array('WHERE'=>"DISUSE_FLAG IN ('0') AND NEXT_EXECUTION_DATE IS NULL AND STATUS_ID = {$statusInPreparation}");
         $aryRetBody = makeSQLForUtnTableUpdate($db_model_ch
                                                ,"SELECT FOR UPDATE"
                                                ,"REGULARLY_ID"
@@ -348,10 +359,11 @@
 
         // BIND用のベースソース
         $aryBaseSourceForBind = $aryConfigForRegListIUD;
-        $aryBaseSourceForBind[$strIntervalTime] = $strIntervalTime;
 
-        //STATUS_IDが1(稼働中)および、NEXT_EXECUTION_DATEがNOWの3分後に訪れるレコードを検索
-        $aryTempForSql = array('WHERE'=>"DISUSE_FLAG IN ('0') AND STATUS_ID = 1 AND (NEXT_EXECUTION_DATE < NOW() + INTERVAL {$strIntervalTime})");
+        //STATUS_IDがSTATUS_IN_OPERATION(稼働中)かSTATUS_LINKING_ERROR(紐付けエラー)および、NEXT_EXECUTION_DATEがNOWの$strIntervalTime(分)後に訪れるレコードを検索
+        $statusInOperation = STATUS_IN_OPERATION;
+        $statusLinkingError = STATUS_LINKING_ERROR;
+        $aryTempForSql = array('WHERE'=>"DISUSE_FLAG IN ('0') AND (STATUS_ID = {$statusInOperation} OR STATUS_ID = {$statusLinkingError}) AND (NEXT_EXECUTION_DATE < NOW() + INTERVAL {$strIntervalTime})");
         $aryRetBody = makeSQLForUtnTableUpdate($db_model_ch
                                                ,"SELECT FOR UPDATE"
                                                ,"REGULARLY_ID"
@@ -400,12 +412,14 @@
             //定期実行ID
             $regularlyId =  $rowOfReguralyList['REGULARLY_ID'];
             //ステータスID
-            $regStatusId = 1;
+            $regCurrentStatusId = $rowOfReguralyList['STATUS_ID'];
+            $regStatusId = STATUS_IN_OPERATION; //ステータス：稼働中
             // トランザクションフラグ(初期値はfalse)
             $boolInTransactionFlag = false;
             //情報取得失敗フラグ(初期値はfalse)
             $getFailedSymphonyInfo = false;
             $getFailedOperationInfo = false;
+            $registerFailedSymphonyInstance = false;
             //次回実行日付が過ぎた場合のフラグ(初期値はfalse)
             $passedNextExecutionDate = false;
 
@@ -434,29 +448,33 @@
                     if($intErrorType === 101){
                         //symphonyが存在しない（廃止扱い）
                         $getFailedSymphonyInfo = true;
-                        $regStatusId = 4; //ステータス：symphony廃止
+                        $regStatusId = STATUS_SYMPHONY_DISCARD; //ステータス：symphony廃止
                     }elseif($intErrorType === 102){
                         //operationが存在しない（廃止扱い）
                         $getFailedOperationInfo = true;
-                        $regStatusId = 5; //ステータス：operation廃止
+                        $regStatusId = STATUS_OPERATION_DISCARD; //ステータス：operation廃止
+                    }else{
+                        $registerFailedSymphonyInstance = true;
                     }
 
                     //ログを出力
-                    foreach($aryErrMsgBody as $msg){
-                        $FREE_LOG = $msg;
-                        require ($root_dir_path . $log_output_php );
-                    }
-                    foreach($aryFreeErrMsgBody as $msg){
-                        $FREE_LOG = $msg;
-                        require ($root_dir_path . $log_output_php );
-                    }
-                    if( 0 < strlen($strSysErrMsgBody)){
-                        $FREE_LOG = $strSysErrMsgBody;
-                        require ($root_dir_path . $log_output_php );  
-                    }
+                    if($regCurrentStatusId != STATUS_LINKING_ERROR){
+                        foreach($aryErrMsgBody as $msg){
+                            $FREE_LOG = $msg;
+                            require ($root_dir_path . $log_output_php );
+                        }
+                        foreach($aryFreeErrMsgBody as $msg){
+                            $FREE_LOG = $msg;
+                            require ($root_dir_path . $log_output_php );
+                        }
+                        if( 0 < strlen($strSysErrMsgBody)){
+                            $FREE_LOG = $strSysErrMsgBody;
+                            require ($root_dir_path . $log_output_php );  
+                        }
 
-                    $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160003", array($regularlyId)); //[処理]symphonyINSTANCEの登録に失敗しました(定期実行ID:{})。
-                    require ($root_dir_path . $log_output_php );
+                        $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160003", array($regularlyId)); //[処理]symphonyINSTANCEの登録に失敗しました(定期実行ID:{})。
+                        require ($root_dir_path . $log_output_php );
+                    }
                 }
 
             }else{
@@ -468,8 +486,8 @@
             ////////////////////////////////
             //次回実行日付がNOWを過ぎていた場合
             if($passedNextExecutionDate == true){
-                //ステータスおよび次回実行日付をnullにする
-                $regStatusId = null;
+                //ステータスを7(準備中)に、次回実行日付をnullにする
+                $regStatusId = STATUS_IN_PREPARATION; //ステータス：準備中
                 $nextExecutionDate = null;
             }
             //symphony情報・operation情報の取得に失敗していたかどうか（廃止されているかどうか）
@@ -481,6 +499,11 @@
                 $aryNextExecutionDateAndStatus = getNextExecutionDate($rowOfReguralyList);
                 $regStatusId = $aryNextExecutionDateAndStatus['statusId'];
                 $nextExecutionDate = $aryNextExecutionDateAndStatus['nextExecutionDate'];
+
+                //Symphony作業一覧への登録が失敗していた場合、ステータスを「紐付けエラー」にする
+                if($registerFailedSymphonyInstance == true){
+                    $regStatusId = STATUS_LINKING_ERROR; //ステータス：紐付けエラー
+                }
             }
 
             // 更新用のテーブル定義
@@ -608,8 +631,10 @@
         // BIND用のベースソース
         $aryBaseSourceForBind = $aryConfigForRegListIUD;
 
-        //STATUS_IDが4(symphony廃止)か5(operation廃止)の対象を取得
-        $aryTempForSql = array('WHERE'=>"DISUSE_FLAG IN ('0') AND (STATUS_ID = 4 OR STATUS_ID = 5)");
+        //STATUS_IDがSTATUS_SYMPHONY_DISCARD(symphony廃止)かSTATUS_OPERATION_DISCARD(operation廃止)の対象を取得
+        $statusSymphonyDiscard = STATUS_SYMPHONY_DISCARD;
+        $statusOperationDiscard = STATUS_OPERATION_DISCARD;
+        $aryTempForSql = array('WHERE'=>"DISUSE_FLAG IN ('0') AND (STATUS_ID = {$statusSymphonyDiscard} OR STATUS_ID = {$statusOperationDiscard})");
         $aryRetBody = makeSQLForUtnTableUpdate($db_model_ch
                                                ,"SELECT"
                                                ,"REGULARLY_ID"
@@ -654,7 +679,7 @@
             $regStatusId = $rowOfReguralyList['STATUS_ID'];
 
             //ステータス：symphony廃止の場合
-            if($regStatusId == 4){
+            if($regStatusId == STATUS_SYMPHONY_DISCARD){
                 $symphonyClassNo = $rowOfReguralyList['SYMPHONY_CLASS_NO'];
                 //symphonyIDをもとに、C_SYMPHONY_CLASS_MNGテーブルより情報を取得
                 $aryRetBodySymphonyInfo = $objOLA->getInfoOfOneSymphony($symphonyClassNo);
@@ -665,7 +690,7 @@
             }
 
             //ステータス：operation廃止の場合
-            if($regStatusId == 5){
+            if($regStatusId == STATUS_OPERATION_DISCARD){
                 $opertionNoIdbh = $rowOfReguralyList['OPERATION_NO_IDBH'];
                 $aryRetBodyOperationInfo = $objOLA->getInfoOfOneOperation($opertionNoIdbh);
                 if( $aryRetBodyOperationInfo[0] !== true ){
@@ -674,16 +699,16 @@
                 }
             }
 
-            ////////////////////////////////////////////////////////////////////////////
-            //symphony・operationが復活している場合、ステータスおよび次回実行日付をnullにして更新する//
-            ///////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////
+            //symphony・operationが復活している場合、ステータスを7(準備中に、)次回実行日付をnullにして更新する//
+            ///////////////////////////////////////////////////////////////////////////////////
 
             // 更新用のテーブル定義
             $aryConfigForIUD = $aryConfigForRegListIUD;
 
             // BIND用のベースソース
             $aryUtnSqlBind = $rowOfReguralyList;
-            $aryUtnSqlBind['STATUS_ID'] = null;
+            $aryUtnSqlBind['STATUS_ID'] = STATUS_IN_PREPARATION; //ステータス：準備中
             $aryUtnSqlBind['NEXT_EXECUTION_DATE'] = null;
             $aryUtnSqlBind['LAST_UPDATE_USER'] = $db_access_user_id;
 
@@ -841,14 +866,14 @@ function getNextExecutionDate($rowOfReguralyList){
     //作業停止期間のチェック(片方だけ存在していないか)
     if(!(($exeStopStartDate && $exeStopEndDate) || (!$exeStopStartDate && !$exeStopEndDate))){
         $failedValiate = true;
-        $regStatusId = 3; //ステータス：不整合エラー
+        $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
     }
     //間隔のチェック
     if($exeInterval){
         $strRegexpFormat = '/^[1-9]$|^[1-9][0-9]$/';
         if(preg_match($strRegexpFormat, $exeInterval) !== 1){
             $failedValiate = true;
-            $regStatusId = 3; //ステータス：不整合エラー
+            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
         }
     }
     //時間のチェック
@@ -856,7 +881,7 @@ function getNextExecutionDate($rowOfReguralyList){
         $strRegexpFormat = "/^$|^(0[0-9]{1}|1{1}[0-9]{1}|2{1}[0-3]{1}):(0[0-9]{1}|[1-5]{1}[0-9]{1})$/";
         if(preg_match($strRegexpFormat, $patternTime) !== 1){
             $failedValiate = true;
-            $regStatusId = 3; //ステータス：不整合エラー
+            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
         }
     }
     //日付のチェック
@@ -864,7 +889,7 @@ function getNextExecutionDate($rowOfReguralyList){
         $strRegexpFormat = '/^[1-9]$|^[1-2][0-9]$|^3[0-1]$/';
         if(preg_match($strRegexpFormat, $patternDay) !== 1){
             $failedValiate = true;
-            $regStatusId = 3; //ステータス：不整合エラー
+            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
         }
     }
     //曜日のチェック
@@ -872,7 +897,7 @@ function getNextExecutionDate($rowOfReguralyList){
         $strRegexpFormat = '/^[1-9]\d*$/';
         if(preg_match($strRegexpFormat, $patternDayOfWeek) !== 1 || $patternDayOfWeek < 1 || 7 < $patternDayOfWeek){
             $failedValiate = true;
-            $regStatusId = 3; //ステータス：不整合エラー
+            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
         }
     }
     //週番号のチェック
@@ -880,7 +905,7 @@ function getNextExecutionDate($rowOfReguralyList){
         $strRegexpFormat = '/^[1-9]\d*$/';
         if(preg_match($strRegexpFormat, $patternWeekNumber) !== 1 || $patternWeekNumber < 1 || 5 < $patternWeekNumber){
             $failedValiate = true;
-            $regStatusId = 3; //ステータス：不整合エラー
+            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
         }
     }
 
@@ -895,7 +920,7 @@ function getNextExecutionDate($rowOfReguralyList){
         $newNextExecutionDate = null;
 
         //ステータスをセット
-        $regStatusId = 1; //ステータス：登録待ち
+        $regStatusId = STATUS_IN_OPERATION; //ステータス：稼働中
 
         //以下周期ごとに次回実行日付を計算する処理
         switch($regularlyPeriodID){
@@ -912,7 +937,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 foreach($required_column as $value){
                     if(!$value){
                         $newNextExecutionDate = null;
-                        $regStatusId = 3; //ステータス：不整合エラー
+                        $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                         break 2; //switch文を抜ける
                     }
                 }
@@ -935,7 +960,7 @@ function getNextExecutionDate($rowOfReguralyList){
                             //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                             if($loopCheckDate >= $addIntervalStartDate){
                                 $newNextExecutionDate = null;
-                                $regStatusId = 3; //ステータス：不整合エラー
+                                $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                 break 2; //switch文を抜ける
                             }
                         }
@@ -957,7 +982,7 @@ function getNextExecutionDate($rowOfReguralyList){
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
                             $newNextExecutionDate = null;
-                            $regStatusId = 3; //ステータス：不整合エラー
+                            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                             break 2; //switch文を抜ける
                         }
                     }
@@ -978,7 +1003,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 foreach($required_column as $value){
                     if(!$value){
                         $newNextExecutionDate = null;
-                        $regStatusId = 3; //ステータス：不整合エラー
+                        $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                         break 2; //switch文を抜ける
                     }
                 }
@@ -1008,7 +1033,7 @@ function getNextExecutionDate($rowOfReguralyList){
                                 //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                                 if($loopCheckDate >= $addIntervalStartYmdPatternTime){
                                     $newNextExecutionDate = null;
-                                    $regStatusId = 3; //ステータス：不整合エラー
+                                    $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                     break 2; //switch文を抜ける
                                 }
                             }
@@ -1023,7 +1048,7 @@ function getNextExecutionDate($rowOfReguralyList){
                             //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                             if($loopCheckDate >= $addIntervalStartYmdPatternTime){
                                 $newNextExecutionDate = null;
-                                $regStatusId = 3; //ステータス：不整合エラー
+                                $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                 break 2; //switch文を抜ける
                             }
                         }
@@ -1046,7 +1071,7 @@ function getNextExecutionDate($rowOfReguralyList){
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
                             $newNextExecutionDate = null;
-                            $regStatusId = 3; //ステータス：不整合エラー
+                            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                             break 2; //switch文を抜ける
                         }
                     }
@@ -1067,7 +1092,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 foreach($required_column as $value){
                     if(!$value){
                         $newNextExecutionDate = null;
-                        $regStatusId = 3; //ステータス：不整合エラー
+                        $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                         break 2; //switch文を抜ける
                     }
                 }
@@ -1107,7 +1132,7 @@ function getNextExecutionDate($rowOfReguralyList){
                                 //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                                 if($loopCheckDate >= $addIntervalstartDateTargetDayOfWeek){
                                     $newNextExecutionDate = null;
-                                    $regStatusId = 3; //ステータス：不整合エラー
+                                    $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                     break 2; //switch文を抜ける
                                 }
                             }
@@ -1121,7 +1146,7 @@ function getNextExecutionDate($rowOfReguralyList){
                                 //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                                 if(strtotime($loopCheckDate) >= strtotime($addIntervalstartDateTargetDayOfWeek)){
                                     $newNextExecutionDate = null;
-                                    $regStatusId = 3; //ステータス：不整合エラー
+                                    $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                     break 2; //switch文を抜ける
                                 }
                             }
@@ -1136,7 +1161,7 @@ function getNextExecutionDate($rowOfReguralyList){
                             //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                             if(strtotime($loopCheckDate) >= strtotime($addIntervalstartDateTargetDayOfWeek)){
                                 $newNextExecutionDate = null;
-                                $regStatusId = 3; //ステータス：不整合エラー
+                                $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                 break 2; //switch文を抜ける
                             }
                         }
@@ -1159,7 +1184,7 @@ function getNextExecutionDate($rowOfReguralyList){
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
                             $newNextExecutionDate = null;
-                            $regStatusId = 3; //ステータス：不整合エラー
+                            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                             break 2; //switch文を抜ける
                         }
                     }
@@ -1180,7 +1205,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 foreach($required_column as $value){
                     if(!$value){
                         $newNextExecutionDate = null;
-                        $regStatusId = 3; //ステータス：不整合エラー
+                        $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                         break 2; //switch文を抜ける
                     }
                 }
@@ -1226,7 +1251,7 @@ function getNextExecutionDate($rowOfReguralyList){
                             //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                             if(strtotime($loopCheckDate) >= strtotime($addIntervalStartYmPatternDayTime)){
                                 $newNextExecutionDate = null;
-                                $regStatusId = 3; //ステータス：不整合エラー
+                                $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                 break 2; //switchを抜ける
                             }
                         }
@@ -1251,7 +1276,7 @@ function getNextExecutionDate($rowOfReguralyList){
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($addIntervalNextYmPatternDayTime)){
                             $newNextExecutionDate = null;
-                            $regStatusId = 3; //ステータス：不整合エラー
+                            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                             break 2; //switchを抜ける
                         }
                     }
@@ -1276,7 +1301,7 @@ function getNextExecutionDate($rowOfReguralyList){
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
                         $newNextExecutionDate = null;
-                        $regStatusId = 3; //ステータス：不整合エラー
+                        $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                         break 2; //switchを抜ける
                         }
                     }
@@ -1297,7 +1322,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 foreach($required_column as $value){
                     if(!$value){
                         $newNextExecutionDate = null;
-                        $regStatusId = 3; //ステータス：不整合エラー
+                        $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                         break 2; //switch文を抜ける
                     }
                 }
@@ -1337,7 +1362,7 @@ function getNextExecutionDate($rowOfReguralyList){
                                 //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                                 if(strtotime($loopCheckDate) >= strtotime($sMWNYmdPatternTime)){
                                     $newNextExecutionDate = null;
-                                    $regStatusId = 3; //ステータス：不整合エラー
+                                    $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                     break 2; //switchを抜ける
                                 }
                             }
@@ -1358,7 +1383,7 @@ function getNextExecutionDate($rowOfReguralyList){
                             //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                             if(strtotime($loopCheckDate) >= strtotime($sMWNYmdPatternTime)){
                                 $newNextExecutionDate = null;
-                                $regStatusId = 3; //ステータス：不整合エラー
+                                $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                 break 2; //switchを抜ける
                             }
                         }
@@ -1395,7 +1420,7 @@ function getNextExecutionDate($rowOfReguralyList){
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
                             $newNextExecutionDate = null;
-                            $regStatusId = 3; //ステータス：不整合エラー
+                            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                             break 2; //switchを抜ける
                         }
                     }
@@ -1416,7 +1441,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 foreach($required_column as $value){
                     if(!$value){
                         $newNextExecutionDate = null;
-                        $regStatusId = 3; //ステータス：不整合エラー
+                        $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                         break 2; //switch文を抜ける
                     }
                 }
@@ -1447,7 +1472,7 @@ function getNextExecutionDate($rowOfReguralyList){
                                 //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                                 if(strtotime($loopCheckDate) >= strtotime($addIntervalLastDayPatternTime)){
                                     $newNextExecutionDate = null;
-                                    $regStatusId = 3; //ステータス：不整合エラー
+                                    $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                     break 2; //switchを抜ける
                                 }
                             }
@@ -1470,7 +1495,7 @@ function getNextExecutionDate($rowOfReguralyList){
                                 //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                                 if(strtotime($loopCheckDate) >= strtotime($addIntervalLastDayPatternTime)){
                                     $newNextExecutionDate = null;
-                                    $regStatusId = 3; //ステータス：不整合エラー
+                                    $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                                     break 2; //switchを抜ける
                                 }
                             }
@@ -1500,7 +1525,7 @@ function getNextExecutionDate($rowOfReguralyList){
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
                             $newNextExecutionDate = null;
-                            $regStatusId = 3; //ステータス：不整合エラー
+                            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
                             break 2; //switchを抜ける
                         }
                     }
@@ -1512,23 +1537,26 @@ function getNextExecutionDate($rowOfReguralyList){
             //////////////////////////
             //どの周期IDにも当てはまらない//
             //////////////////////////
-            $regStatusId = 6; //ステータス：想定外エラー
+            $regStatusId = STATUS_UNEXPECTED_ERROR; //ステータス：想定外エラー
             $newNextExecutionDate = null;
 
-        }
-
-        //次回実行日付のフォーマットチェック
-        $format = 'Y/m/d H:i';
-        $dateFormatCheck = DateTime::createFromFormat($format, $newNextExecutionDate);
-        if($dateFormatCheck == false){
-            $regStatusId = 6; //ステータス：想定外エラー
-            $newNextExecutionDate = null;
         }
 
         //次回実行日付が終了日付を過ぎているかどうかをチェック
         if($newNextExecutionDate !== null){
             if($endDate != "" && strtotime($newNextExecutionDate) >= strtotime($endDate)){
-                $regStatusId = 2; //ステータス：完了
+                $regStatusId = STATUS_COMPLETED; //ステータス：完了
+                $newNextExecutionDate = null;
+            }
+        }
+
+        //次回実行日付のフォーマットチェック
+        if($newNextExecutionDate !== null){
+            $format = 'Y/m/d H:i';
+            $dateFormatCheck = DateTime::createFromFormat($format, $newNextExecutionDate);
+            if($dateFormatCheck == false){
+                $regStatusId = STATUS_UNEXPECTED_ERROR; //ステータス：想定外エラー
+                $newNextExecutionDate = null;
             }
         }
 
