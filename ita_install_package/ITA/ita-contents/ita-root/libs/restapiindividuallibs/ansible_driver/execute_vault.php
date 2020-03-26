@@ -62,17 +62,18 @@
     $in_DataRelayStorageTrunkPathNS = $aryReceptData['DATA_RELAY_STORAGE_TRUNK'];
     $in_ExecUser                    = $aryReceptData['EXEC_USER'];
     $in_TargetValue                 = $aryReceptData['TARGET_VALUE'];
-    $in_Indent                      = $aryReceptData['INDENT'];
-    $in_PasswordFileDir             = $aryReceptData['PASSWORD_FILE_PATH'];
 
     $obj = new AnsibleVault();
 
+    // Tower経由の場合のデータリレイストレージが一致しない場合があるので、/tmpにpasswordファイル作成
+    $obj->setValutPasswdFileInfo('/tmp','.vault_' . getmypid());
+
     // ansible-vault passwordファイル作成
-    $obj->CraeteValutPasswdFile($in_PasswordFileDir,$PasswordFile);
+    $obj->CraeteValutPasswdFile('',$PasswordFile);
 
     // ansible-vault 暗号化
     $EncodeValue = "";
-    $ret = $obj->Vault($in_ExecUser,$PasswordFile,$in_TargetValue,$EncodeValue,$in_Indent);
+    $ret = $obj->Vault($in_ExecUser,$PasswordFile,$in_TargetValue,$EncodeValue,'');
     if($ret === true) {
         $this->arySuccessInfo['status'] = "SUCCEED";
     } else {
@@ -80,6 +81,8 @@
     }
     $this->intResultStatusCode = 200;
     $this->arySuccessInfo['resultdata'] = $EncodeValue;
+
+    unlink($PasswordFile);
 
     unset($obj);
 
