@@ -13,7 +13,7 @@
 //   limitations under the License.
 //
 
-function itaTable( tableID ){
+function itaTable( tableID, $tBodyTr ){
 
 //////////////////////////////////////////////////
 //
@@ -344,12 +344,13 @@ if ( pagingTable.indexOf( fakeContainer ) !== -1 ) {
 }
 
 var $tablePaging = $('#' + tablePagingID ),
-    $pagingTr = $itaTable.find('tr').not( tHeadClass ),
-    pagingIndex = 0, pagingPage = 2, oldTableHeight = 0,
+    pagingIndex = 0, pagingPage = 1, oldTableHeight = 0, oldRowNumber = 0,
     maxTr, maxPage;
 
 // ページ移動
 var paging = function( page ) {
+    
+    var $pagingTr = $itaTable.find('tr').not( tHeadClass );
     
     if ( page <= 0 ) page = 1;
     if ( page > maxPage ) page = maxPage;
@@ -368,17 +369,26 @@ var paging = function( page ) {
       $tablePaging.find('dt').text('Page : ' + pagingIndex + ' (' + pagingStartTr + ' - ' + pagingEndTr + ')' );
       $tablePaging.find('.pageNum').removeClass('show').eq( page - 1 ).addClass('show');
 
-      // 前回と高さの差があれば調整する
-      var tableHeight = $itaTable.height();
-      if ( oldTableHeight > tableHeight || oldTableHeight !== 0 ) {
+      // リストのスクロール調整
+      var showPageNumTop = $tablePaging.find('.pageNum.show').position().top,
+          scrollTop = $tablePaging.find('.pagingList').scrollTop(),
+          pagingListPadding = 5;
+      $tablePaging.find('.pagingList').scrollTop( showPageNumTop - pagingListPadding + scrollTop );
+
+      // 前回と行数の差があれば調整する
+      var tableHeight = $itaTable.height(),
+          rowNumber = pagingEndTr - pagingStartTr + 1;
+      if ( oldRowNumber > rowNumber && oldRowNumber !== 0 ) {
         $itaTable.next('.heightAdjust').css('height', oldTableHeight - tableHeight );
       } else {
         $itaTable.next('.heightAdjust').css('height', 0 );
       }
       oldTableHeight = tableHeight;
-
+      oldRowNumber = rowNumber;
+      
       headingSizeUpdate();
       fixedBorderUpdate();
+      scrollCheck( $tableScroll );
 
       $itaTableWrap.css('height', 'auto');
 
@@ -386,9 +396,11 @@ var paging = function( page ) {
 
 }
 
-// ページング初期化
+// ページング初期設定
 var pagingSet = function() {
 
+    var $pagingTr = $itaTable.find('tr').not( tHeadClass );
+    
     pagingIndex = 0;
     oldTableHeight = 0;
     maxTr = $pagingTr.length;
@@ -397,12 +409,18 @@ var pagingSet = function() {
     if ( maxTr > pagingPage ) {
       
       // ページリスト作成
-      var pagingListHTML = '<ul class="pagingList">';
+      var pagingListHTML = '<div class="pagingList"><table>';
       
-      for ( var i = 0; i < maxPage; i++ ) {
-        pagingListHTML += '<li><span class="pageNum" data-page-num="' + ( i + 1 ) + '">' + ( i + 1 ) + '</span></li>';
+      for ( var i = 0; i < maxPage; ) {
+        pagingListHTML += '<tr>';
+        for ( var j = 0; j < 10; j++ ) {
+          pagingListHTML += '<td><span class="pageNum" data-page-num="' + ( i + 1 ) + '">' + ( i + 1 ) + '</span></td>';
+          i++;
+          if ( i >= maxPage ) break;
+        }
+        pagingListHTML += '</tr>';
       }
-      pagingListHTML += '</ul>';
+      pagingListHTML += '</table></div>';
       
       var pagingHTML = ''
       + '<dl>'
@@ -440,7 +458,26 @@ var pagingSet = function() {
           }
       });
     
-    }    
+    } else {
+      pagingClear();
+    }
+}
+
+// ページングリセット
+var pagingReset = function( page ){
+  if( page === undefined ) page = 1;
+  pagingIndex = 0;
+  oldTableHeight = 0;
+  oldRowNumber = 0;
+  paging( page );
+}
+
+// ページングクリア
+var pagingClear = function() {
+  $itaTableWrap.find('.heightAdjust').css('height', 0 );
+  $itaTable.removeClass('pagingOn').find('tr').not( tHeadClass ).show();
+  $tablePaging.html('').hide();
+  $('.sortTriggerInTbl').off('click.paging');
 }
 
 // ページング オン・オフ
@@ -448,13 +485,17 @@ var pagingSwitch = function(){
   var $pagingSetting = $tableSetting.find('.pagingSetting');
   if ( $pagingSetting.find('input[type="checkbox"]').is(':checked') ) {
     $itaTable.addClass('pagingOn');
-    $('#' + tablePagingID ).show();
+    $tablePaging.show();
     pagingPage = Number( $pagingSetting.find('.pageRowsNum').val() );
     pagingSet();
+    // ソート機能にページングを連動させる
+    $('.sortTriggerInTbl').on('click.paging', function(){
+      setTimeout( function(){
+        pagingReset( pagingIndex );
+      }, 1 );
+    });
   } else {
-    $itaTable.removeClass('pagingOn');
-    $itaTable.find('tr').not( tHeadClass ).show();
-    $('#' + tablePagingID ).html('').hide();  
+    pagingClear();
   }
 }
 
@@ -906,10 +947,10 @@ var tableHideFucn = function( listLevel ) {
     // 各種調整
 		setTimeout( function(){
 			rowspanAdjustment();
-			scrollCheck( $tableScroll );
 			headingFixed();
       headingSizeUpdate();
       fixedBorderUpdate();
+      scrollCheck( $tableScroll );
 		}, 1 );
     
   }
