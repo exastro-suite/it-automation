@@ -226,11 +226,13 @@ class ExecuteDirector {
                     $this->errorLogOut($errorMessage);
                     return -1;
                 }
-                $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTemplateId, $vault_credentialId);
-                if($response_array['success'] == false) {
-                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
-                    $this->errorLogOut($errorMessage);
-                    return -1;
+                if($vg_tower_driver_name != "pioneer") {
+                    $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTemplateId, $vault_credentialId);
+                    if($response_array['success'] == false) {
+                        $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
+                        $this->errorLogOut($errorMessage);
+                        return -1;
+                    }
                 }
             }
             //Ansible Tower Version Check (Not Ver3.5) ----
