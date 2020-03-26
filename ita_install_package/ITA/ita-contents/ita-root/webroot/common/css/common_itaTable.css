@@ -296,46 +296,56 @@ line-height: 32px;
 .pagingInfo dt {
 box-sizing: border-box;
 overflow: hidden;
-width: 160px; height: 32px;
+min-width: 160px; height: 32px;
 padding: 0 8px;
+font-size: 12px;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
 text-overflow: ellipsis;
 white-space: nowrap;
 color: #DDD;
 }
 .pagingInfo dd {
-width: 258px;
+width: 8px;
 position: relative;
 z-index: 2;
 }
-#KIZI .pagingList {
+.pagingList {
 overflow: hidden;
 position: absolute;
 left: 0; top: 0;
 z-index: 3;
 box-sizing: border-box;
-width: 258px; height: 32px;
-margin: 0; padding: 6px 4px 5px;
+height: 32px;
+max-height: 114px; min-height: 32px;
+margin: 0; padding: 5px 4px 4px;
 background-color: #444;
 border-radius: 0 0 4px 4px;
 list-style: none;
 }
-#KIZI .pagingList:hover {
-height: auto;
+.pagingList:hover {
+  overflow: auto;
+  height: auto;
 }
-#KIZI .pagingList li {
-display: inline-block;
-margin: 0; padding: 0;
-vertical-align: top;
-line-height: 1;
+#KIZI .pagingList table {
+  width: auto;
+  min-width: inherit;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
-#KIZI .tenOver .pagingList li:nth-child(10) span {
+#KIZI .pagingList td {
+  vertical-align: middle;
+  line-height: 1;
+}
+#KIZI .tenOver .pagingList tr:first-child td:last-child span {
   position: relative;
   z-index: 1;
   text-indent: -9999px;
   overflow: hidden;
 }
-#KIZI .tenOver .pagingList li:nth-child(10) span::after {
+#KIZI .tenOver .pagingList tr:first-child td:last-child span::after {
   content: '+';
+  box-sizing: border-box;
+  display: block;
   position: absolute;
   left: 0; top: 0;
   z-index: 2;
@@ -343,29 +353,34 @@ line-height: 1;
   text-align: center;
   text-indent: 0;
   background-color: #444;
-  line-height: 18px;
   font-weight: bold;
+  font-size: 16px;
   color: #4D9E0A;
 }
-#KIZI .tenOver .pagingList:hover li:nth-child(10) span {
-  text-indent: 0;
-}
-#KIZI .tenOver .pagingList:hover li:nth-child(10) span::after {
+#KIZI .pagingList tr:nth-child( n + 2 ) td {
   display: none;
 }
-#KIZI .tenOver .pagingList li:nth-child(n+11) {
-margin-top: 8px;
+#KIZI .tenOver .pagingList:hover tr:first-child td:last-child span {
+  text-indent: 0;
+}
+#KIZI .tenOver .pagingList:hover tr:first-child td:last-child span::after {
+  display: none;
+}
+#KIZI .pagingList:hover tr:nth-child( n + 2 ) td {
+  display: table-cell;
 }
 .pagingList span {
 display: block;
+overflow: hidden;
 box-sizing: border-box;
-min-width: 25px;
-margin-bottom: 0; padding: 4px 4px 3px;
+min-width: 25px; height: 21px;
+padding: 4px 4px 3px;
 border: 1px solid transparent;
-border-radius: 2px;
 text-align: center;
 color: #AAA;
 cursor: pointer;
+font-size: 12px;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
 }
 .pagingList span:hover {
 color: #FFF;
