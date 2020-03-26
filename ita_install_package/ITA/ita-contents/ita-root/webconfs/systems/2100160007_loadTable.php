@@ -54,6 +54,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
     $c->getOutputType('filter_table')->setVisible(false);
     $c->getOutputType('print_table')->setVisible(false);
+    $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('print_journal_table')->setVisible(false);
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
@@ -62,12 +63,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // メニュー（表示用）
     $c = new IDColumn('MENU_ID_CLONE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102707"),'A_MENU_LIST','MENU_ID','MENU_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102708"));//エクセル・ヘッダでの説明
+    $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
-    $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
     $c->getOutputType('json')->setVisible(false);
-    $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
 
