@@ -52,7 +52,7 @@
     // $log_file_prefixを作成     //
     ////////////////////////////////
     $log_file_prefix = basename( __FILE__, '.php' ) . "_";
-    $log_file_prefix = str_replace( "ky_ansible", $vg_log_driver_name, $log_file_prefix);
+    $log_file_prefix = str_replace( "ky_ansible", 'ky_' . $vg_log_driver_name, $log_file_prefix);
 
     ////////////////////////////////
     // $log_levelを取得           //
