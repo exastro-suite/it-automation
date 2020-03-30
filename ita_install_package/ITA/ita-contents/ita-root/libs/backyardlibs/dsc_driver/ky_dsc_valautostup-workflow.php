@@ -3997,11 +3997,11 @@ define('DEBUG_STEP3',FALSE);
                  return false;
              }
         }
-        //具体値が1024バイト以上の場合
-        if(strlen($in_col_val)>1024){
+        //具体値が8192バイト以上の場合
+        if(strlen($in_col_val)>8192){
             // トレースメッセージ
             if ( $log_level === 'DEBUG' ){
-                // 紐付メニュー（MENU_ID:｛｝ 項番:｛｝ 項目名:｛｝）の具体値が規定値(最大1024バイト)を超えています。このレコードを処理対象外とします。
+                // 紐付メニュー（MENU_ID:｛｝ 項番:｛｝ 項目名:｛｝）の具体値が規定値(最大8192バイト)を超えています。このレコードを処理対象外とします。
                 $FREE_LOG = $objMTS->getSomeMessage("ITADSCH-ERR-90057",
                                      array($lva_table_nameTOid_list[$in_table_name],$in_row_id,$in_menu_title));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
