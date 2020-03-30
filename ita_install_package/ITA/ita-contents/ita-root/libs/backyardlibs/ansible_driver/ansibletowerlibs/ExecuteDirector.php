@@ -96,7 +96,7 @@ class ExecuteDirector {
             if($response_array['success'] == false) {
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040026",array($virtualenv_name));
                 $this->errorLogOut($errorMessage);
-                return false;
+                return -1;
             }
             if( isset($response_array['responseContents']['custom_virtualenvs'] )) {
                 foreach($response_array['responseContents']['custom_virtualenvs'] as $no=>$name) {
@@ -109,7 +109,7 @@ class ExecuteDirector {
             if($virtualenv_name_ok === false) {
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040027",array($virtualenv_name));
                 $this->errorLogOut($errorMessage);
-                return false;
+                return -1;
             }
         }
 
@@ -125,21 +125,21 @@ class ExecuteDirector {
                 $this->logger->error($response_array['responseContents']['errorMessage']);
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040024",array($OrganizationName));
                 $this->errorLogOut($errorMessage);
-                return false;
+                return -1;
             }
             if(count($response_array['responseContents']) === 0
                 || array_key_exists("id", $response_array['responseContents'][0]) == false) {
                 $this->logger->error("No inventory id. (prepare)");
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040025",array($OrganizationName));
                 $this->errorLogOut($errorMessage);
-                return false;
+                return -1;
             }
             $OrganizationId = $response_array['responseContents'][0]['id'];
         } else {
             // 組織名未登録
             $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040030");
             $this->errorLogOut($errorMessage);
-            return false;
+            return -1;
         }
 
         // Host情報取得
