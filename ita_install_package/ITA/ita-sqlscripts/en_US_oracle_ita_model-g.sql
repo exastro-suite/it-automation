@@ -376,7 +376,7 @@ OPERATION_NO_UAPK                 NUMBER                           , -- オペ�
 PATTERN_ID                        NUMBER                           , -- パターンID
 SYSTEM_ID                         NUMBER                           , -- ホストID
 VARS_LINK_ID                      NUMBER                           , -- 代入値リンクID
-VARS_ENTRY                        VARCHAR2(1024)                   ,
+VARS_ENTRY                        VARCHAR2(8192)                   ,
 ASSIGN_SEQ                        NUMBER                           ,
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
@@ -403,7 +403,7 @@ OPERATION_NO_UAPK                 NUMBER                           , -- オペ�
 PATTERN_ID                        NUMBER                           , -- パターンID
 SYSTEM_ID                         NUMBER                           , -- ホストID
 VARS_LINK_ID                      NUMBER                           , -- 代入値リンクID
-VARS_ENTRY                        VARCHAR2(1024)                   ,
+VARS_ENTRY                        VARCHAR2(8192)                   ,
 ASSIGN_SEQ                        NUMBER                           ,
 
 DISP_SEQ                          NUMBER                           , -- 表示順序
