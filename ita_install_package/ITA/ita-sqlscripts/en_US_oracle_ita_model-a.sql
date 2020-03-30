@@ -1825,7 +1825,7 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 CREATE TABLE B_REGULARLY_STATUS
 (
 REGULARLY_STATUS_ID               NUMBER                       ,
-REGULARLY_STATUS_NAME             VARCHAR2(20)                 ,
+REGULARLY_STATUS_NAME             VARCHAR2(32)                 ,
 DISP_SEQ                          NUMBER                       ,
 NOTE                              VARCHAR2(4000)               ,
 DISUSE_FLAG                       VARCHAR2(1)                  ,
@@ -1844,7 +1844,7 @@ JOURNAL_REG_DATETIME              TIMESTAMP                    ,
 JOURNAL_ACTION_CLASS              VARCHAR2(8)                  ,
 
 REGULARLY_STATUS_ID               NUMBER                       ,
-REGULARLY_STATUS_NAME             VARCHAR2(20)                 ,
+REGULARLY_STATUS_NAME             VARCHAR2(32)                 ,
 DISP_SEQ                          NUMBER                       ,
 NOTE                              VARCHAR2(4000)               ,
 DISUSE_FLAG                       VARCHAR2(1)                  ,
@@ -1858,7 +1858,7 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 CREATE TABLE B_REGULARLY_PERIOD
 (
 REGULARLY_PERIOD_ID               NUMBER                       ,
-REGULARLY_PERIOD_NAME             VARCHAR2(8)                  ,
+REGULARLY_PERIOD_NAME             VARCHAR2(32)                 ,
 DISP_SEQ                          NUMBER                       ,
 NOTE                              VARCHAR2(4000)               ,
 DISUSE_FLAG                       VARCHAR2(1)                  ,
@@ -1877,7 +1877,7 @@ JOURNAL_REG_DATETIME              TIMESTAMP                    ,
 JOURNAL_ACTION_CLASS              VARCHAR2(8)                  ,
 
 REGULARLY_PERIOD_ID               NUMBER                       ,
-REGULARLY_PERIOD_NAME             VARCHAR2(8)                  ,
+REGULARLY_PERIOD_NAME             VARCHAR2(32)                 ,
 DISP_SEQ                          NUMBER                       ,
 NOTE                              VARCHAR2(4000)               ,
 DISUSE_FLAG                       VARCHAR2(1)                  ,
@@ -1892,7 +1892,7 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 CREATE TABLE B_DAY_OF_WEEK
 (
 DAY_OF_WEEK_ID                    NUMBER                       ,
-DAY_OF_WEEK_NAME                  VARCHAR2(8)                  ,
+DAY_OF_WEEK_NAME                  VARCHAR2(16)                 ,
 DISP_SEQ                          NUMBER                       ,
 NOTE                              VARCHAR2(4000)               ,
 DISUSE_FLAG                       VARCHAR2(1)                  ,
@@ -1911,7 +1911,7 @@ JOURNAL_REG_DATETIME              TIMESTAMP                    ,
 JOURNAL_ACTION_CLASS              VARCHAR2(8)                  ,
 
 DAY_OF_WEEK_ID                    NUMBER                       ,
-DAY_OF_WEEK_NAME                  VARCHAR2(8)                  ,
+DAY_OF_WEEK_NAME                  VARCHAR2(16)                 ,
 DISP_SEQ                          NUMBER                       ,
 NOTE                              VARCHAR2(4000)               ,
 DISUSE_FLAG                       VARCHAR2(1)                  ,
@@ -1926,7 +1926,7 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 CREATE TABLE B_WEEK_NUMBER
 (
 WEEK_NUMBER_ID                    NUMBER                       ,
-WEEK_NUMBER_NAME                  VARCHAR2(8)                  ,
+WEEK_NUMBER_NAME                  VARCHAR2(16)                 ,
 DISP_SEQ                          NUMBER                       ,
 NOTE                              VARCHAR2(4000)               ,
 DISUSE_FLAG                       VARCHAR2(1)                  ,
@@ -1945,7 +1945,7 @@ JOURNAL_REG_DATETIME              TIMESTAMP                    ,
 JOURNAL_ACTION_CLASS              VARCHAR2(8)                  ,
 
 WEEK_NUMBER_ID                    NUMBER                       ,
-WEEK_NUMBER_NAME                  VARCHAR2(8)                  ,
+WEEK_NUMBER_NAME                  VARCHAR2(16)                 ,
 DISP_SEQ                          NUMBER                       ,
 NOTE                              VARCHAR2(4000)               ,
 DISUSE_FLAG                       VARCHAR2(1)                  ,
