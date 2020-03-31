@@ -977,7 +977,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 if(strtotime($newNextExecutionDate) >= strtotime($exeStopStartDate) && strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
                     //次回実行日付を基準に作業停止終了日付よりも未来になるまで間隔(時)を加算する
                     $loopCheckDate = $newNextExecutionDate;
-                    while(strtotime($exeStopEndDate) > strtotime($newNextExecutionDate)){
+                    while(strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
                         $newNextExecutionDate = date('Y/m/d H:i', strtotime($newNextExecutionDate.$addHourStr));
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
@@ -1066,7 +1066,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 if(strtotime($newNextExecutionDate) >= strtotime($exeStopStartDate) && strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
                     //次回実行日付を基準に作業停止終了日付よりも未来になるまで間隔(日)を加算する
                     $loopCheckDate = $newNextExecutionDate;
-                    while(strtotime($exeStopEndDate) > strtotime($newNextExecutionDate)){
+                    while(strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
                         $newNextExecutionDate = date('Y/m/d H:i', strtotime($newNextExecutionDate.$addDayStr));
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
@@ -1179,7 +1179,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 if(strtotime($newNextExecutionDate) >= strtotime($exeStopStartDate) && strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
                     //次回実行日付を基準に作業停止終了日付よりも未来になるまで間隔(週)を加算する
                     $loopCheckDate = $newNextExecutionDate;
-                    while(strtotime($exeStopEndDate) > strtotime($newNextExecutionDate)){
+                    while(strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
                         $newNextExecutionDate = date('Y/m/d H:i', strtotime($newNextExecutionDate.$addWeekStr));
                         //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
                         if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
@@ -1289,7 +1289,7 @@ function getNextExecutionDate($rowOfReguralyList){
                     //次回実行日付を基準に作業停止終了日付よりも未来になるまで間隔(月)を加算する（存在しない日付の場合は加算を続行）
                     $loopCheckDate = $newNextExecutionDate;
                     $dateCheck = false;
-                    while(strtotime($exeStopEndDate) > strtotime($newNextExecutionDate) || $dateCheck == false){
+                    while(strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate) || $dateCheck == false){
                         list($Y, $m, $d) = explode('/', $newNextExecutionDate);
                         $nextExecutionYm1 = $Y.'/'.$m.'/'.'1';
                         $addNextExecutionYm = date('Y/m', strtotime($nextExecutionYm1.$addMonthStr));
@@ -1408,7 +1408,7 @@ function getNextExecutionDate($rowOfReguralyList){
                     //次回実行日付を基準に作業停止終了日付よりも未来になるまで間隔(月)を加算する
                     $loopCheck = false;
                     $loopCheckDate = $newNextExecutionDate;
-                    while(strtotime($exeStopEndDate) > strtotime($newNextExecutionDate)){
+                    while(strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
                         //間隔(月)を加算した週番号の日付を取得
                         list($Y, $m, $d) = explode('/', date('Y/n/d', strtotime($newNextExecutionDate)));
                         $newNextExecutionDateYm1 = $Y.'/'.$m.'/1';
@@ -1517,7 +1517,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 if(strtotime($newNextExecutionDate) >= strtotime($exeStopStartDate) && strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
                     //次回実行日付を基準に作業停止終了日付よりも未来になるまで間隔(月)を加算する
                     $loopCheckDate = $newNextExecutionDate;
-                    while(strtotime($exeStopEndDate) > strtotime($newNextExecutionDate)){
+                    while(strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
                         list($Y, $m, $d) = explode('/', $newNextExecutionDate);
                         $Ym1 = $Y.'/'.$m.'/'.'1';
                         $addIntervalYm1 = date('Y/m/d', strtotime($Ym1.$addMonthStr));
@@ -1544,7 +1544,7 @@ function getNextExecutionDate($rowOfReguralyList){
 
         //次回実行日付が終了日付を過ぎているかどうかをチェック
         if($newNextExecutionDate !== null){
-            if($endDate != "" && strtotime($newNextExecutionDate) >= strtotime($endDate)){
+            if($endDate != "" && strtotime($newNextExecutionDate) > strtotime($endDate)){
                 $regStatusId = STATUS_COMPLETED; //ステータス：完了
                 $newNextExecutionDate = null;
             }
