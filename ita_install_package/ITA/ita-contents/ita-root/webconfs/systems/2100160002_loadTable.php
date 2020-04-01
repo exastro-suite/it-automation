@@ -39,13 +39,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
         'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
     );
-
+ 
     $table = new TableControlAgent('F_CREATE_ITEM_INFO','CREATE_ITEM_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102102"), 'F_CREATE_ITEM_INFO_JNL', $tmpAry);
     $tmpAryColumn = $table->getColumns();
     $tmpAryColumn['CREATE_ITEM_ID']->setSequenceID('F_CREATE_ITEM_INFO_RIC');
     $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('F_CREATE_ITEM_INFO_JSQ');
     unset($tmpAryColumn);
-
 
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102103"));
@@ -87,7 +86,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setSubtotalFlag(false);
     $table->addColumn($c);
 
-
     // 必須
     $c = new IDColumn('REQUIRED',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102113"),'G_REQUIRED_MASTER','REQUIRED_ID','REQUIRED_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102114"));//エクセル・ヘッダでの説明
@@ -114,9 +112,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
-
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102125"));
 
+    // 文字列(単一行)
     // 最大バイト数
     $c = new NumColumn('MAX_LENGTH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102109"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102110"));//エクセル・ヘッダでの説明
@@ -124,13 +122,34 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('register_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
     $c->getOutputType('update_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
     $c->setSubtotalFlag(false);
-    $c->setValidator(new MaxLengthValidator(1,1024));
+    $c->setValidator(new IntNumValidator(1,8192));
     $cg->addColumn($c);
 
     // 正規表現
     $c = new TextColumn('PREG_MATCH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102115"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102116"));//エクセル・ヘッダでの説明
-    $c->setValidator(new PregMatchValidator(0,1024));
+    $c->setValidator(new PregMatchValidator(0,8192));
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
+
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102141"));
+
+    // 文字列(複数行)
+    // 最大バイト数
+    $c = new NumColumn('MULTI_MAX_LENGTH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102109"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102110"));//エクセル・ヘッダでの説明
+    $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
+    $c->getOutputType('register_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
+    $c->getOutputType('update_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new IntNumValidator(1,8192));
+    $cg->addColumn($c);
+
+    // 正規表現
+    $c = new TextColumn('MULTI_PREG_MATCH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102115"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102116"));//エクセル・ヘッダでの説明
+    $c->setValidator(new PregMatchValidator(0,8192));
     $cg->addColumn($c);
 
     $table->addColumn($cg);
@@ -202,11 +221,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
-
 //----head of setting [multi-set-unique]
     $table->addUniqueColumnSet(array('CREATE_MENU_ID', 'ITEM_NAME', 'COL_GROUP_ID'));
 //tail of setting [multi-set-unique]----
-
 
     $table->fixColumn();
 
