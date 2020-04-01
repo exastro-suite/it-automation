@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 //   Copyright 2019 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,6 +95,11 @@ try{
                               TEMPLATE_PATH . FILE_VIEW_LOADTABLE_FLT,
                               TEMPLATE_PATH . FILE_VIEW_LOADTABLE_DAY,
                               TEMPLATE_PATH . FILE_VIEW_LOADTABLE_DT,
+                              TEMPLATE_PATH . FILE_H_LOADTABLE_MUL,
+                              TEMPLATE_PATH . FILE_HG_LOADTABLE_MUL,
+                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_MUL,
+                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_MUL,
+                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_MUL
                              );
     $templateArray = array();
     foreach($templatePathArray as $templatePath){
@@ -153,6 +158,12 @@ try{
     $viewLoadTableFltTmpl       = $templateArray[38];
     $viewLoadTableDayTmpl       = $templateArray[39];
     $viewLoadTableDtTmpl        = $templateArray[40];
+    $hostLoadTableMulTmpl       = $templateArray[41];
+    $hgLoadTableMulTmpl         = $templateArray[42];
+    $convLoadTableMulTmpl       = $templateArray[43];
+    $cmdbLoadTableMulTmpl       = $templateArray[44];
+    $viewLoadTableMulTmpl       = $templateArray[45];
+
     //////////////////////////
     // パラメータシート作成情報を取得
     //////////////////////////
@@ -459,22 +470,25 @@ try{
 
             // 別々の入力方法のDBカラムタイプを指定
             switch($itemInfo['INPUT_METHOD_ID']){
-                case 1: //文字列
+                case 1: //文字列(単一行)
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
                     break;
-                case 2: //整数
+                case 2: //文字列(複数行)
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                    break;
+                case 3: //整数
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                     break;
-                case 3: //小数
+                case 4: //小数
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    DOUBLE,\n";
                     break;
-                case 4: //日時
+                case 5: //日時
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
                     break;
-                case 5: //日付
+                case 6: //日付
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
                     break;
-                case 6: //プルダウン
+                case 7: //プルダウン
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                     break;
             }
@@ -488,21 +502,24 @@ try{
                 // データシート用loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $cmdbLoadTableValTmpl;  // 文字列
+                        $work = $cmdbLoadTableValTmpl;  // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $cmdbLoadTableIntTmpl;  // 整数
+                        $work = $cmdbLoadTableMulTmpl;  // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $cmdbLoadTableFltTmpl;  // 小数
+                        $work = $cmdbLoadTableIntTmpl;  // 整数
                         break;
                     case 4:
-                        $work = $cmdbLoadTableDtTmpl;   // 日時
+                        $work = $cmdbLoadTableFltTmpl;  // 小数
                         break;
                     case 5:
-                        $work = $cmdbLoadTableDayTmpl;  // 日付
+                        $work = $cmdbLoadTableDtTmpl;   // 日時
                         break;
                     case 6:
+                        $work = $cmdbLoadTableDayTmpl;  // 日付
+                        break;
+                    case 7:
                         $work = $cmdbLoadTableIdTmpl;   // プルダウン
                         break;
                 }
@@ -516,9 +533,18 @@ try{
                 else{
                     $work = str_replace(REPLACE_PREG, "", $work);
                 }
-                $work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
-                $work = str_replace(REPLACE_DISP,   $itemName,                  $work);
-                $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
+                if("" != $itemInfo['MULTI_PREG_MATCH']){
+                    $pregWork = str_replace("'", "\\'", $itemInfo['MULTI_PREG_MATCH']);
+                    $work = str_replace(REPLACE_MULTI_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+                }
+                else{
+                    $work = str_replace(REPLACE_MULTI_PREG, "", $work);
+                }
+                $work = str_replace(REPLACE_VALUE,            $itemInfo['COLUMN_NAME'],      $work);
+                $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
+                $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
+                $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
                 }
@@ -532,7 +558,7 @@ try{
                     $work = str_replace(REPLACE_UNIQUED, "", $work);
                 }
                 // 他メニュー参照の場合
-                if(6 == $itemInfo['INPUT_METHOD_ID']){
+                if(7 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
@@ -540,7 +566,7 @@ try{
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                 }
                 // 整数の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['INT_MAX']){
                         $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
                     }
@@ -555,7 +581,7 @@ try{
                     }
                 }
                 // 小数の場合
-                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                if(4 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['FLOAT_MAX']){
                         $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
                     }
@@ -582,21 +608,24 @@ try{
                     // ホストグループ用loadTableのカラム埋め込み部分を作成する
                     switch($itemInfo['INPUT_METHOD_ID']){
                         case 1:
-                            $work = $hgLoadTableValTmpl;  // 文字列
+                            $work = $hgLoadTableValTmpl;  // 文字列(単一行)
                             break;
                         case 2:
+                            $work = $hgLoadTableMuTmpl;   // 文字列(複数行)
+                            break;                                
+                        case 3:
                             $work = $hgLoadTableIntTmpl;  // 整数
                             break;
-                        case 3:
+                        case 4:
                             $work = $hgLoadTableFltTmpl;  // 小数
                             break;
-                        case 4:
+                        case 5:
                             $work = $hgLoadTableDtTmpl;   // 日時
                             break;
-                        case 5:
+                        case 6:
                             $work = $hgLoadTableDayTmpl;  // 日付
                             break;
-                        case 6:
+                        case 7:
                             $work = $hgLoadTableIdTmpl;   // プルダウン
                             break;
                     }  
@@ -611,9 +640,18 @@ try{
                     else{
                         $work = str_replace(REPLACE_PREG, "", $work);
                     }
-                    $work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
-                    $work = str_replace(REPLACE_DISP,   $itemName,                  $work);
-                    $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
+                    if("" != $itemInfo['MULTI_PREG_MATCH']){
+                        $pregWork = str_replace("'", "\\'", $itemInfo['MULTI_PREG_MATCH']);
+                        $work = str_replace(REPLACE_MAX_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_MAX_PREG, "", $work);
+                    }
+                    $work = str_replace(REPLACE_VALUE,            $itemInfo['COLUMN_NAME'],      $work);
+                    $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
+                    $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
+                    $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+
                     if(1 == $itemInfo['REQUIRED']){
                         $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
                     }
@@ -627,7 +665,7 @@ try{
                         $work = str_replace(REPLACE_UNIQUED, "", $work);
                     }
                     // 他メニュー参照の場合
-                    if(6 == $itemInfo['INPUT_METHOD_ID']){
+                    if(7 == $itemInfo['INPUT_METHOD_ID']){
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                         $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
@@ -635,7 +673,7 @@ try{
                         $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     }
                     // 整数の場合
-                    if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    if(3 == $itemInfo['INPUT_METHOD_ID']){
                         if("" == $itemInfo['INT_MAX']){
                             $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
                         }
@@ -650,7 +688,7 @@ try{
                         }
                     }
                     // 小数の場合
-                    if(3 == $itemInfo['INPUT_METHOD_ID']){
+                    if(4 == $itemInfo['INPUT_METHOD_ID']){
                         if("" == $itemInfo['FLOAT_MAX']){
                             $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
                         }
@@ -676,21 +714,24 @@ try{
                 // ホスト用loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $hostLoadTableValTmpl;  // 文字列
+                        $work = $hostLoadTableValTmpl;  // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $hostLoadTableIntTmpl;  // 整数
+                        $work = $hostLoadTableMulTmpl;  // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $hostLoadTableFltTmpl;  // 小数
+                        $work = $hostLoadTableIntTmpl;  // 整数
                         break;
                     case 4:
-                        $work = $hostLoadTableDtTmpl;   // 日時
+                        $work = $hostLoadTableFltTmpl;  // 小数
                         break;
                     case 5:
-                        $work = $hostLoadTableDayTmpl;  // 日付
+                        $work = $hostLoadTableDtTmpl;   // 日時
                         break;
                     case 6:
+                        $work = $hostLoadTableDayTmpl;  // 日付
+                        break;
+                    case 7:
                         $work = $hostLoadTableIdTmpl;   // プルダウン
                         break;
                 }
@@ -705,9 +746,18 @@ try{
                 else{
                     $work = str_replace(REPLACE_PREG, "", $work);
                 }
-                $work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
-                $work = str_replace(REPLACE_DISP,   $itemName,                  $work);
-                $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
+                if("" != $itemInfo['MULTI_PREG_MATCH']){
+                    $pregWork = str_replace("'", "\\'", $itemInfo['MULTI_PREG_MATCH']);
+                    $work = str_replace(REPLACE_MULTI_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+                }
+                else{
+                    $work = str_replace(REPLACE_MULTI_PREG, "", $work);
+                }
+                $work = str_replace(REPLACE_VALUE,            $itemInfo['COLUMN_NAME'],      $work);
+                $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
+                $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
+                $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
                 }
@@ -722,7 +772,7 @@ try{
                     $work = str_replace(REPLACE_UNIQUED, "", $work);
                 }
                 // 他メニュー参照の場合
-                if(6 == $itemInfo['INPUT_METHOD_ID']){
+                if(7 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
@@ -730,7 +780,7 @@ try{
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                 }
                 // 整数の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['INT_MAX']){
                         $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
                     }
@@ -745,7 +795,7 @@ try{
                     }
                 }
                 // 小数の場合
-                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                if(4 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['FLOAT_MAX']){
                         $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
                     }
@@ -771,21 +821,24 @@ try{
                 // 文字列の場合
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $viewLoadTableValTmpl;  // 文字列
+                        $work = $viewLoadTableValTmpl;  // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $viewLoadTableIntTmpl;  // 整数
+                        $work = $viewLoadTableMulTmpl;  // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $viewLoadTableFltTmpl;  // 小数
+                        $work = $viewLoadTableIntTmpl;  // 整数
                         break;
                     case 4:
-                        $work = $viewLoadTableDtTmpl;   // 日時
+                        $work = $viewLoadTableFltTmpl;  // 小数
                         break;
                     case 5:
-                        $work = $viewLoadTableDayTmpl;  // 日付
+                        $work = $viewLoadTableDtTmpl;   // 日時
                         break;
                     case 6:
+                        $work = $viewLoadTableDayTmpl;  // 日付
+                        break;
+                    case 7:
                         $work = $viewLoadTableIdTmpl;   // プルダウン
                         break;
                 }
@@ -800,11 +853,20 @@ try{
                 else{
                     $work = str_replace(REPLACE_PREG, "", $work);
                 }
-                $work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
-                $work = str_replace(REPLACE_DISP,   $itemName,                  $work);
-                $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
+                if("" != $itemInfo['MULTI_PREG_MATCH']){
+                    $pregWork = str_replace("'", "\\'", $itemInfo['MULTI_PREG_MATCH']);
+                    $work = str_replace(REPLACE_MULTI_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+                }
+                else{
+                    $work = str_replace(REPLACE_MULTI_PREG, "", $work);
+                }
+                $work = str_replace(REPLACE_VALUE,            $itemInfo['COLUMN_NAME'],      $work);
+                $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
+                $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
+                $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+
                 // 他メニュー参照の場合
-                if(6 == $itemInfo['INPUT_METHOD_ID']){
+                if(7 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
@@ -812,7 +874,7 @@ try{
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                 }
                 // 整数の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['INT_MAX']){
                         $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
                     }
@@ -827,7 +889,7 @@ try{
                     }
                 }
                 // 小数の場合
-                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                if(4 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['FLOAT_MAX']){
                         $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
                     }
@@ -904,18 +966,21 @@ try{
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
                         break;
                     case 2:
-                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
                         break;
                     case 3:
-                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DOUBLE,\n";
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                         break;
                     case 4:
-                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DOUBLE,\n";
                         break;
                     case 5:
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
                         break;
                     case 6:
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    DATETIME(6),\n";
+                        break;
+                    case 7:
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                         break;
                 }
@@ -929,28 +994,31 @@ try{
                 // loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $convLoadTableValTmpl;  // 文字列
+                        $work = $convLoadTableValTmpl;  // 文字列（単一行）
                         break;
                     case 2:
-                        $work = $convLoadTableIntTmpl;  // 整数
+                        $work = $convLoadTableMulTmpl;  // 文字列（複数行）
                         break;
                     case 3:
-                        $work = $convLoadTableFltTmpl;  // 小数
+                        $work = $convLoadTableIntTmpl;  // 整数
                         break;
                     case 4:
-                        $work = $convLoadTableDtTmpl;   // 日時
+                        $work = $convLoadTableFltTmpl;  // 小数
                         break;
                     case 5:
-                        $work = $convLoadTableDayTmpl;  // 日付
+                        $work = $convLoadTableDtTmpl;   // 日時
                         break;
                     case 6:
+                        $work = $convLoadTableDayTmpl;  // 日付
+                        break;
+                    case 7:
                         $work = $convLoadTableIdTmpl;   // プルダウン
                         break;
                 }
 
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
 
-                $work = str_replace(REPLACE_INFO,   $description,               $work);
+                $work = str_replace(REPLACE_INFO, $description,               $work);
                 if("" != $itemInfo['PREG_MATCH']){
                     $pregWork = str_replace("'", "\\'", $itemInfo['PREG_MATCH']);
                     $work = str_replace(REPLACE_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
@@ -958,9 +1026,18 @@ try{
                 else{
                     $work = str_replace(REPLACE_PREG, "", $work);
                 }
-                $work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
-                $work = str_replace(REPLACE_DISP,   $itemName,                  $work);
-                $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
+                if("" != $itemInfo['MULTI_PREG_MATCH']){
+                    $pregWork = str_replace("'", "\\'", $itemInfo['MULTI_PREG_MATCH']);
+                    $work = str_replace(REPLACE_MULTI_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+                }
+                else{
+                    $work = str_replace(REPLACE_MULTI_PREG, "", $work);
+                }
+                $work = str_replace(REPLACE_VALUE,            $itemInfo['COLUMN_NAME'],      $work);
+                $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
+                $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
+                $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
                 }
@@ -974,7 +1051,7 @@ try{
                     $work = str_replace(REPLACE_UNIQUED, "", $work);
                 }
                 // 他メニュー参照の場合
-                if(6 == $itemInfo['INPUT_METHOD_ID']){
+                if(7 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
@@ -982,7 +1059,7 @@ try{
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                 }
                 // 整数の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['INT_MAX']){
                         $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
                     }
@@ -997,7 +1074,7 @@ try{
                     }
                 }
                 // 小数の場合
-                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                if(4 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['FLOAT_MAX']){
                         $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
                     }
@@ -1022,21 +1099,24 @@ try{
                 // 最新値参照用loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $viewLoadTableValTmpl;  // 文字列
+                        $work = $viewLoadTableValTmpl;  // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $viewLoadTableIntTmpl;  // 整数
+                        $work = $viewLoadTableMulTmpl;  // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $viewLoadTableFltTmpl;  // 小数
+                        $work = $viewLoadTableIntTmpl;  // 整数
                         break;
                     case 4:
-                        $work = $viewLoadTableDtTmpl;   // 日時
+                        $work = $viewLoadTableFltTmpl;  // 小数
                         break;
                     case 5:
-                        $work = $viewLoadTableDayTmpl;  // 日付
+                        $work = $viewLoadTableDtTmpl;   // 日時
                         break;
                     case 6:
+                        $work = $viewLoadTableDayTmpl;  // 日付
+                        break;
+                    case 7:
                         $work = $viewLoadTableIdTmpl;   // プルダウン
                         break;
                 }
@@ -1046,14 +1126,24 @@ try{
                 $work = str_replace(REPLACE_INFO,   $description,               $work);
                 if("" != $itemInfo['PREG_MATCH']){
                     $pregWork = str_replace("'", "\\'", $itemInfo['PREG_MATCH']);
+
                     $work = str_replace(REPLACE_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
                 }
                 else{
                     $work = str_replace(REPLACE_PREG, "", $work);
                 }
-                $work = str_replace(REPLACE_VALUE,  $itemInfo['COLUMN_NAME'],   $work);
-                $work = str_replace(REPLACE_DISP,   $itemName,                  $work);
-                $work = str_replace(REPLACE_SIZE,   $itemInfo['MAX_LENGTH'],    $work);
+                if("" != $itemInfo['MULTI_PREG_MATCH']){
+                    $pregWork = str_replace("'", "\\'", $itemInfo['MULTI_PREG_MATCH']);
+
+                    $work = str_replace(REPLACE_MULTI_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+                }
+                else{
+                    $work = str_replace(REPLACE_MULTI_PREG, "", $work);
+                }
+                $work = str_replace(REPLACE_VALUE,            $itemInfo['COLUMN_NAME'],      $work);
+                $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
+                $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
+                $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
 
                 // 他メニュー参照の場合
                 if(6 == $itemInfo['INPUT_METHOD_ID']){
@@ -1064,7 +1154,7 @@ try{
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                 }
                 // 整数の場合
-                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                if(3 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['INT_MAX']){
                         $work = str_replace(REPLACE_INT_MAX, 'null' , $work);
                     }
@@ -1079,7 +1169,7 @@ try{
                     }
                 }
                 // 小数の場合
-                if(3 == $itemInfo['INPUT_METHOD_ID']){
+                if(4 == $itemInfo['INPUT_METHOD_ID']){
                     if("" == $itemInfo['FLOAT_MAX']){
                         $work = str_replace(REPLACE_FLOAT_MAX, 'null' , $work);
                     }
@@ -1501,10 +1591,18 @@ EOD;
         }
 
         if("1" == $cmiData['TARGET']){  // 作成対象: パラメータシート
+            // 紐づけ対象だけを確認 (紐づけ対象がないの場合はtrue)
+            $noLinkTarget = true;
+            foreach($itemInfoArray as $key => $itemInfo){
+                if(2 != $itemInfo['INPUT_METHOD_ID'] && 5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID']){
+                    $noLinkTarget = false;
+                    break;
+                }
+            }
             //////////////////////////
             // 紐付対象メニュー更新
             //////////////////////////
-            $result = updateLinkTargetMenu($hostMenuId);
+            $result = updateLinkTargetMenu($hostMenuId, $noLinkTarget);
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
                 updateMenuStatus($targetData, "4", $result, true, true);
@@ -1514,7 +1612,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューテーブル管理更新
             //////////////////////////
-            $result = updateLinkTargetTable($hostMenuId, "G_" . $menuTableName . "_H");
+            $result = updateLinkTargetTable($hostMenuId, "G_" . $menuTableName . "_H" ,$noLinkTarget);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -2683,7 +2781,7 @@ function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId
 /*
  * 紐付対象メニュー更新
  */
-function updateLinkTargetMenu($hostMenuId){
+function updateLinkTargetMenu($hostMenuId, $noLinkTarget){
     global $objDBCA, $db_model_ch, $objMTS;
     $matchFlg = false;
     $cmdbMenuListTable = new CmdbMenuListTable($objDBCA, $db_model_ch);
@@ -2708,31 +2806,43 @@ function updateLinkTargetMenu($hostMenuId){
             if($cmdbMenuList['MENU_ID'] == $hostMenuId){
                 $matchFlg = true;
 
-                // 廃止の場合
-                if($cmdbMenuList['DISUSE_FLAG'] == "1"){
+                // 廃止、紐づけ対象カラムがある場合
+                if($cmdbMenuList['DISUSE_FLAG'] == "1" && $noLinkTarget == false){
 
                     // 復活する
                     $updateData = $cmdbMenuList;
                     $updateData['NOTE']             = "";                   // 備考
                     $updateData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
                     $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                }
+                // 紐づけ対象カラムがない場合 
+                else if($cmdbMenuList['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
 
-                    //////////////////////////
-                    // 紐付対象メニューテーブルを更新
-                    //////////////////////////
-                    $result = $cmdbMenuListTable->updateTable($updateData, $jnlSeqNo);
-                    if(true !== $result){
-                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                        outputLog($msg);
-                        throw new Exception($msg);
-                    }
+                    // 廃止する
+                    $updateData = $cmdbMenuList;
+                    $updateData['NOTE']             = "";                   // 備考
+                    $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                }
+                // 他の場合は更新しない
+                else{
+                    break;
+                }
+                //////////////////////////
+                // 紐付対象メニューテーブルを更新
+                //////////////////////////
+                $result = $cmdbMenuListTable->updateTable($updateData, $jnlSeqNo);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                    outputLog($msg);
+                    throw new Exception($msg);
                 }
                 break;
             }
         }
 
         // メニューIDが一致するデータが無かった場合
-        if(false === $matchFlg){
+        if(false === $matchFlg && $noLinkTarget == false){
 
             // 登録する
             $insertData = array();
@@ -2760,7 +2870,7 @@ function updateLinkTargetMenu($hostMenuId){
 /*
  * 紐付対象メニューテーブル管理更新
  */
-function updateLinkTargetTable($hostMenuId, $tableName){
+function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget){
     global $objDBCA, $db_model_ch, $objMTS;
     $matchFlg = false;
     $cmdbMenuTableTable = new CmdbMenuTableTable($objDBCA, $db_model_ch);
@@ -2786,11 +2896,15 @@ function updateLinkTargetTable($hostMenuId, $tableName){
                 $matchFlg = true;
 
                 $updateFlg = false;
-                // 廃止の場合、更新する
-                if($cmdbMenuTable['DISUSE_FLAG'] == "1"){
+                // 廃止の場合は更新する
+                if($cmdbMenuTable['DISUSE_FLAG'] == "1" && $noLinkTarget == false){
                     $updateFlg = true;
                 }
-                // テーブル名が異なる場合、更新する
+                // 紐づけ対象がなくなった場合、更新する
+                if($cmdbMenuTable['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
+                    $updateFlg = true;
+                }
+                // テーブル名が異なる場合は更新する
                 if($cmdbMenuTable['TABLE_NAME'] != $tableName){
                     $updateFlg = true;
                 }
@@ -2801,7 +2915,13 @@ function updateLinkTargetTable($hostMenuId, $tableName){
                     $updateData['TABLE_NAME']       = $tableName;           // テーブル名
                     $updateData['PKEY_NAME']        = "ROW_ID";             // 主キー
                     $updateData['NOTE']             = "";                   // 備考
-                    $updateData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
+
+                    if($noLinkTarget == false){
+                        $updateData['DISUSE_FLAG']  = "0";                  // 廃止フラグ(紐づけ対象あり)
+                    }
+                    else if($noLinkTarget == true){
+                        $updateData['DISUSE_FLAG']  = "1";                  // 廃止フラグ(紐づけ対象なし)
+                    }
                     $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
 
                     //////////////////////////
@@ -2819,7 +2939,7 @@ function updateLinkTargetTable($hostMenuId, $tableName){
         }
 
         // メニューIDが一致するデータが無かった場合
-        if(false === $matchFlg){
+        if(false === $matchFlg && $noLinkTarget == false){
 
             // 登録する
             $insertData = array();
@@ -2875,7 +2995,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
         $columnInfoArray = array();
 
         foreach($itemInfoArray as $key => $itemInfo){
-            if(4 == $itemInfo['INPUT_METHOD_ID'] || 5 == $itemInfo['INPUT_METHOD_ID']){
+            if(2 == $itemInfo['INPUT_METHOD_ID'] || 5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             // 項目名を作成
