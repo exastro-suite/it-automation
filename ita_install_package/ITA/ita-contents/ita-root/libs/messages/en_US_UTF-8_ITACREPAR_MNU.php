@@ -52,9 +52,9 @@ $ary[102107] = "Item name";
 $ary[102108] = "Enter the item name you want display on the menu.";
 $ary[102109] = "Maximum number of bytes";
 $ary[102110] = "Enter the maximum number of bytes.
+Total number of bytes (8192).
 For single byte alphanumeric characters, the required bytes will be equal to the number of characters.
-For double byte characters, the number of characters multiplied by 3, plus 2 bytes will be required.
-If total number of bytes (53460) that can be linked to one menu is exceeded, an error will occur.";
+For double byte characters, the number of characters multiplied by 3, plus 2 bytes will be required.";
 $ary[102111] = "Display order";
 $ary[102112] = "Enter the order of the columns to be displayed in the menu. Columns will be displayed in ascending order from left to right.";
 $ary[102113] = "Required";
@@ -66,7 +66,7 @@ $ary[102118] = "Enter a description to be displayed when mousing over the item n
 $ary[102119] = "Unique";
 $ary[102120] = "For unique items, set \"●\".";
 $ary[102121] = "Input method";
-$ary[102122] = "Select between \"String\",\"Interger\",\"Decimal number\",\"Date/time\", \"Date\", or \"Pulldown selection\"";
+$ary[102122] = "Select between \"String\",\"Multi string\",\"Interger\",\"Decimal number\",\"Date/time\", \"Date\", or \"Pulldown selection\"";
 $ary[102123] = "Menu group: Menu: Item";
 $ary[102124] = "Select the item to be referenced.";
 $ary[102125] = "String";
