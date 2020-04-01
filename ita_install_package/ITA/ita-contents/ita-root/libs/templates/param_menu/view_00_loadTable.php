@@ -145,6 +145,39 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->addColumn($cg);
 
+    //----隠し保存テーブルがある場合の、カウント高速化
+   $objFxCountTableRowLengthAgent = function($objTable, $aryVariant, $arySetting, $strFormatterId)
+   {
+       global $g;
+
+       //recCountMain[print_Table.recCount]
+       // レコード行数を第1引数で返却すること
+       // エラーがなければ第2引数はnullで、あれば整数で
+       $intRowLength = null;
+       $intErrorType = null;
+       $aryErrorMsgBody = array();
+       $strFxName = "NONAME(countTableRowLengthAgent)";
+       $query = "SELECT COUNT(*) AS REC_CNT FROM " . $objTable->getDBMainTableHiddenID() . " T1 WHERE T1.".$objTable->getRequiredDisuseColumnID() ." IN ('0','1') ";
+       $aryForBind = array();
+       $aryRetBody = singleSQLExecuteAgent($query, $aryForBind, $strFxName);
+       
+       if( $aryRetBody[0] === true ){
+           $objQuery = $aryRetBody[1];
+           $row = $objQuery->resultFetch();
+           unset($objQuery);
+           $intRowLength = $row['REC_CNT'];
+       }
+       else{
+           $intErrorType = 500;
+           $intRowLength = -1;
+           $aryErrorMsgBody[] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
+       }
+       // エラーメッセージがあれば第3引数に、配列で
+       return array($intRowLength,$intErrorType,$aryErrorMsgBody);
+   };
+   $table->setGeneObject("functionsForOverride",array("getInitPartOfEditByFile"=>array("all_dump_table"=>array("countTableRowLength"=>$objFxCountTableRowLengthAgent))));
+   //隠し保存テーブルがある場合の、カウント高速化----
+
     $table->fixColumn();
 
     $c = $table->getColumns();
