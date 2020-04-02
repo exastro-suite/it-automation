@@ -22,7 +22,7 @@
         }
     }
     else{
-        $strLang="en";
+        $strLang="en";  
     }
 
     // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
@@ -75,6 +75,7 @@ print <<< EOD
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/jquery-ui-1.10.4.custom.min.css?{$timeStamp_jquery_ui_1_10_4_custom_min_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/jquery.datetimepicker.css?{$timeStamp_jquery_datetimepicker_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/select2.css?{$timeStamp_select2_css}">
+        <link id="theme" rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/common_theme.php?theme={$design_type}">
         <link rel="shortcut icon" href="{$scheme_n_authority}/common/imgs/favicon.ico?{$timeStamp_favicon_ico}" type="image/vnd.microsoft.icon">
         <span style="display:none;" id="HTML_AJAX_LOADING"></span>
         <!-- #1241 2107/09/14 datetimepickerなどで使用する言語モードを設定 -->
