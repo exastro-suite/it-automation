@@ -69,6 +69,31 @@
     if(array_key_exists('PW_REUSE_FORBID', $arySYSCON)){
         $pw_reuse_forbid = intval($arySYSCON['PW_REUSE_FORBID']);
     }
+    $design_type = "default";
+    if(array_key_exists('DESIGN_TYPE', $arySYSCON)){
+        switch ($arySYSCON['DESIGN_TYPE']) {
+            case 'red':
+            case 'green':
+            case 'blue':
+            case 'orange':
+            case 'yellow':
+            case 'purple':
+            case 'brown':
+            case 'gray':
+            case 'cool':
+            case 'cute':
+            case 'natural':
+            case 'gorgeous':
+            case 'oase':
+            case 'darkmode':
+                $design_type = $arySYSCON['DESIGN_TYPE'];           
+                break;
+            default:
+                $design_type = "default";
+                break;
+        }
+        
+    }
 
     //----ここから開発ログ系
     if(array_key_exists('DEV_LOG_DIR', $arySYSCON)){
