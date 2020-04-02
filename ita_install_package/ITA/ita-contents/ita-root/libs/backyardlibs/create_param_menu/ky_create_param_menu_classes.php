@@ -926,6 +926,7 @@ class OtherMenuLinkTable extends BaseTable_CPM {
                                     'TABLE_NAME',
                                     'PRI_NAME',
                                     'COLUMN_NAME',
+                                    'COLUMN_TYPE',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
