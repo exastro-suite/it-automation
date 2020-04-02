@@ -560,6 +560,14 @@ try{
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                    if($matchIdx === FALSE){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
@@ -611,7 +619,7 @@ try{
                             $work = $hgLoadTableValTmpl;  // 文字列(単一行)
                             break;
                         case 2:
-                            $work = $hgLoadTableMuTmpl;   // 文字列(複数行)
+                            $work = $hgLoadTableMulTmpl;   // 文字列(複数行)
                             break;                                
                         case 3:
                             $work = $hgLoadTableIntTmpl;  // 整数
@@ -642,10 +650,10 @@ try{
                     }
                     if("" != $itemInfo['MULTI_PREG_MATCH']){
                         $pregWork = str_replace("'", "\\'", $itemInfo['MULTI_PREG_MATCH']);
-                        $work = str_replace(REPLACE_MAX_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
+                        $work = str_replace(REPLACE_MULTI_PREG, "\$objVldt->setRegexp('" . $pregWork . "');", $work);
                     }
                     else{
-                        $work = str_replace(REPLACE_MAX_PREG, "", $work);
+                        $work = str_replace(REPLACE_MULTI_PREG, "", $work);
                     }
                     $work = str_replace(REPLACE_VALUE,            $itemInfo['COLUMN_NAME'],      $work);
                     $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
@@ -667,6 +675,14 @@ try{
                     // 他メニュー参照の場合
                     if(7 == $itemInfo['INPUT_METHOD_ID']){
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                        if($matchIdx === FALSE){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                            outputLog($msg);
+                            // パラメータシート作成管理更新処理を行う
+                            updateMenuStatus($targetData, "4", $msg, false, true);
+                            $errFlg = true;
+                            break;
+                        }
                         $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                         $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                         $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
@@ -774,6 +790,14 @@ try{
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                    if($matchIdx === FALSE){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
@@ -868,6 +892,14 @@ try{
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                    if($matchIdx === FALSE){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
@@ -1053,6 +1085,14 @@ try{
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                    if($matchIdx === FALSE){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
@@ -1146,8 +1186,16 @@ try{
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
 
                 // 他メニュー参照の場合
-                if(6 == $itemInfo['INPUT_METHOD_ID']){
+                if(7 == $itemInfo['INPUT_METHOD_ID']){
                     $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                    if($matchIdx === FALSE){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
@@ -1591,14 +1639,24 @@ EOD;
         }
 
         if("1" == $cmiData['TARGET']){  // 作成対象: パラメータシート
+            
             // 紐づけ対象だけを確認 (紐づけ対象がないの場合はtrue)
             $noLinkTarget = true;
             foreach($itemInfoArray as $key => $itemInfo){
                 if(2 != $itemInfo['INPUT_METHOD_ID'] && 5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID']){
+                    // プルダウン選択の中身タイプをチェック
+                    if(7 == $itemInfo['INPUT_METHOD_ID']){
+                        $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                        $otherMenuLink = $otherMenuLinkArray[$matchIdx];
+                        if(2 == $otherMenuLink['COLUMN_TYPE'] || 5 == $otherMenuLink['COLUMN_TYPE'] && 6 == $otherMenuLink['COLUMN_TYPE']){
+                            continue;
+                        } 
+                    }
                     $noLinkTarget = false;
                     break;
                 }
             }
+            
             //////////////////////////
             // 紐付対象メニュー更新
             //////////////////////////
@@ -2430,7 +2488,10 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
 
         // 登録する
         foreach($itemInfoArray as $itemInfo){
-
+            // プルダウン選択は対象外のため、スキップする
+            if(7 == $itemInfo['INPUT_METHOD_ID']){
+                continue;
+            }
             // 必須かつ一意の場合
             if(1 == $itemInfo['REQUIRED'] && 1 == $itemInfo['UNIQUED']){
                 
@@ -2455,13 +2516,14 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
                 }
 
                 $insertData = array();
-                $insertData['MENU_ID']          = $insertMenuId;            // メニュー
-                $insertData['COLUMN_DISP_NAME'] = $columnDispName;          // 項目名
-                $insertData['TABLE_NAME']       = $insertTableName;         // テーブル名
-                $insertData['PRI_NAME']         = "ROW_ID";                 // 主キー
-                $insertData['COLUMN_NAME']      = $itemInfo['COLUMN_NAME']; // カラム名
-                $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
-                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
+                $insertData['MENU_ID']          = $insertMenuId;                // メニュー
+                $insertData['COLUMN_DISP_NAME'] = $columnDispName;              // 項目名
+                $insertData['TABLE_NAME']       = $insertTableName;             // テーブル名
+                $insertData['PRI_NAME']         = "ROW_ID";                     // 主キー
+                $insertData['COLUMN_NAME']      = $itemInfo['COLUMN_NAME'];     // カラム名
+                $insertData['COLUMN_TYPE']      = $itemInfo['INPUT_METHOD_ID']; // カラム種別
+                $insertData['DISUSE_FLAG']      = "0";                          // 廃止フラグ
+                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;         // 最終更新者
 
                 //////////////////////////
                 // 他メニュー連携テーブルに登録
@@ -2997,6 +3059,14 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
         foreach($itemInfoArray as $key => $itemInfo){
             if(2 == $itemInfo['INPUT_METHOD_ID'] || 5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
+            }
+            if(7 == $itemInfo['INPUT_METHOD_ID']){
+                $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                $otherMenuLink = $otherMenuLinkArray[$matchIdx];
+                if(2 == $otherMenuLink['COLUMN_TYPE'] || 5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
+                    outputLog("aaa");
+                    continue;
+                } 
             }
             // 項目名を作成
             $columnGrp = implode("/", $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']]);
