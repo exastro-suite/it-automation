@@ -34,6 +34,7 @@ $ary["ITAWDCC-50103"] = "*Click [Contents file information] button on the menu l
 $ary["ITAWDCC-50104"] = "*Click [User information] button on the roll list to view the user information associated with Role. (cannot perform maintenance)";
 $ary["ITAWDCC-50105"] = "*Click [Menu information] button on the roll list to view the menu information associated with Role. (cannot perform maintenance)";
 $ary["ITAWDCC-50106"] = "*Click [Roll information] button on the user list to view and for maintenance of role information associated with User. Permission is required for maintenance.";
+$ary["ITAWDCC-50107"] = "Refresh screen?";
 $ary["ITAWDCC-70101"] = "Are you sure you want to perform maintenance?";
 $ary["ITAWDCC-70102"] = "Role information is in progress. \nAre you sure you want to cancel the process?";
 $ary["ITAWDCC-70103"] = "No roles have been selected. Are you sure you want to reflect?";
