@@ -213,6 +213,16 @@ callback.prototype = {
                     objUpdateArea.innerHTML = "";
                     Filter1Tbl_search_async();
                     break;
+                case "101":
+                    window.alert(ary_result[2]);
+                    objUpdateArea.innerHTML = "";
+                    if( window.confirm( getSomeMessage("ITAWDCC50107") ) ){
+                        window.location.reload();
+                        break;
+                    }
+
+                    Filter1Tbl_search_async();
+                    break;
                 default:
                     objUpdateArea.innerHTML="";
                     $(objUpdateArea).html(resultContentTag);
@@ -264,6 +274,16 @@ callback.prototype = {
                     objDeleteArea.innerHTML = "";
                     Filter1Tbl_search_async();
                     break;
+                case "101":
+                    window.alert(resultContentTag);
+                    objDeleteArea.innerHTML = "";
+                    if( window.confirm( getSomeMessage("ITAWDCC50107") ) ){
+                        window.location.reload();
+                        break;
+                        }
+
+                    Filter1Tbl_search_async();
+                    break;
                 default:
                     objDeleteArea.innerHTML="";
                     objDeleteArea.insertAdjacentHTML("beforeend",resultContentTag);
@@ -308,6 +328,14 @@ callback.prototype = {
                 case "100":
                     window.alert(resultContentTag);
                     objRegiterArea.innerHTML = "";
+                    Filter1Tbl_search_async();
+                    break;
+
+                case "101":
+                    if( window.confirm( getSomeMessage("ITAWDCC50107") ) ){
+                        window.location.reload();
+                        break;
+                        }
                     Filter1Tbl_search_async();
                     break;
                 case "201":
