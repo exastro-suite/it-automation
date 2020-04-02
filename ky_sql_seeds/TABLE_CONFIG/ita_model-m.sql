@@ -1,4 +1,4 @@
-﻿-- *****************************************************************************
+-- *****************************************************************************
 -- *** ***** CreateParameterMenu Tables                                      ***
 -- *****************************************************************************
 -- -------------------------
@@ -63,8 +63,8 @@ COL_GROUP_ID                        %INT%                           ,
 INPUT_METHOD_ID                     %INT%                           ,
 MAX_LENGTH                          %INT%                           ,
 MULTI_MAX_LENGTH                    %INT%                           ,
-PREG_MATCH                          %VARCHR%(1024)                  ,
-MULTI_PREG_MATCH                    %VARCHR%(1024)                  ,
+PREG_MATCH                          %VARCHR%(8192)                  ,
+MULTI_PREG_MATCH                    %VARCHR%(8192)                  ,
 OTHER_MENU_LINK_ID                  %INT%                           ,
 INT_MAX                             %INT%                           ,
 INT_MIN                             %INT%                           ,
@@ -95,8 +95,8 @@ COL_GROUP_ID                        %INT%                           ,
 INPUT_METHOD_ID                     %INT%                           ,
 MAX_LENGTH                          %INT%                           ,
 MULTI_MAX_LENGTH                    %INT%                           ,
-PREG_MATCH                          %VARCHR%(1024)                  ,
-MULTI_PREG_MATCH                    %VARCHR%(1024)                  ,
+PREG_MATCH                          %VARCHR%(8192)                  ,
+MULTI_PREG_MATCH                    %VARCHR%(8192)                  ,
 OTHER_MENU_LINK_ID                  %INT%                           ,
 INT_MAX                             %INT%                           ,
 INT_MIN                             %INT%                           ,
@@ -279,6 +279,7 @@ COLUMN_DISP_NAME                    %VARCHR%(512)                   ,
 TABLE_NAME                          %VARCHR%(64)                    ,
 PRI_NAME                            %VARCHR%(64)                    ,
 COLUMN_NAME                         %VARCHR%(64)                    ,
+COLUMN_TYPE                         %INT%                           ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
@@ -298,6 +299,7 @@ COLUMN_DISP_NAME                    %VARCHR%(512)                   ,
 TABLE_NAME                          %VARCHR%(64)                    ,
 PRI_NAME                            %VARCHR%(64)                    ,
 COLUMN_NAME                         %VARCHR%(64)                    ,
+COLUMN_TYPE                         %INT%                           ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
@@ -647,6 +649,7 @@ SELECT TAB_A.LINK_ID,
        TAB_A.TABLE_NAME,
        TAB_A.PRI_NAME,
        TAB_A.COLUMN_NAME,
+       TAB_A.COLUMN_TYPE,
        TAB_A.NOTE,
        TAB_A.DISUSE_FLAG,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -672,6 +675,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
        TAB_A.TABLE_NAME,
        TAB_A.PRI_NAME,
        TAB_A.COLUMN_NAME,
+       TAB_A.COLUMN_TYPE,
        TAB_A.NOTE,
        TAB_A.DISUSE_FLAG,
        TAB_A.LAST_UPDATE_TIMESTAMP,
