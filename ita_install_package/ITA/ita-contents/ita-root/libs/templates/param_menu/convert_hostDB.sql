@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS F_★★★TABLE★★★_CONV_H_JNL;
 DROP VIEW  IF EXISTS G_★★★TABLE★★★_CONV_H;
 DROP VIEW  IF EXISTS G_★★★TABLE★★★_CONV_H_JNL;
 
--- ----更新系テーブル作成(ホストグループ＋ホスト)
+-- ----更新系テーブル作成(ホスト)
 CREATE TABLE F_★★★TABLE★★★_CONV_H (
 ROW_ID                        INT             ,
 HOST_ID                       INT             ,
@@ -22,7 +22,7 @@ PRIMARY KEY (ROW_ID)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8
 ;
 
--- ----表示用VIEW作成(ホストグループ＋ホスト)
+-- ----表示用VIEW作成(ホスト)
 CREATE OR REPLACE VIEW G_★★★TABLE★★★_CONV_H AS
 SELECT TAB_A.ROW_ID                     ,
        TAB_A.HOST_ID                    ,
@@ -49,7 +49,7 @@ LEFT JOIN G_OPERATION_LIST        TAB_B ON ( TAB_A.OPERATION_ID = TAB_B.OPERATIO
 ;
 
 
--- ----履歴系テーブル作成(ホストグループ＋ホスト)
+-- ----履歴系テーブル作成(ホスト)
 CREATE TABLE F_★★★TABLE★★★_CONV_H_JNL (
 JOURNAL_SEQ_NO                INT             ,
 JOURNAL_REG_DATETIME          DATETIME(6)     ,
@@ -72,7 +72,7 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8
 ;
 
--- ----表示用VIEW作成(ホストグループ＋ホスト)
+-- ----履歴系VIEW作成(ホスト)
 CREATE OR REPLACE VIEW G_★★★TABLE★★★_CONV_H_JNL AS
 SELECT TAB_A.JOURNAL_SEQ_NO             ,
        TAB_A.JOURNAL_REG_DATETIME       ,
