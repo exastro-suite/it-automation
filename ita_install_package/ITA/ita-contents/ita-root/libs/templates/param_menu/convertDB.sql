@@ -72,7 +72,7 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8
 ;
 
--- ----表示用VIEW作成(ホストグループ＋ホスト)
+-- ----履歴系VIEW作成(ホストグループ＋ホスト)
 CREATE OR REPLACE VIEW G_★★★TABLE★★★_CONV_JNL AS
 SELECT TAB_A.JOURNAL_SEQ_NO             ,
        TAB_A.JOURNAL_REG_DATETIME       ,
