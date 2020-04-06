@@ -15,12 +15,6 @@ limitations under the License.
 
 The following components are included in this product:
 
-Auth
-http://pear.php.net/package/Auth
-2001-2006 The PHP Group
-Licensed under the PHP License 3.01
-see licenses/Auth.txt for license details
-
 HTML_AJAX
 http://pear.php.net/package/HTML_AJAX
 2005-2008 Joshua Eichorn, Arpad Ray, David Coallier, Elizabeth Smith
