@@ -67,7 +67,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // ファイル
     $c = new FileUploadColumn('FILE_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-900015"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-900017"));
-    $c->setMaxFileSize(20971520);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
     $table->addColumn($c);

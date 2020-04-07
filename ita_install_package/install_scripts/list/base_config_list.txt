@@ -14,5 +14,4 @@
 /ita-root/confs/webconfs/L7Protocol.txt
 /ita-root/confs/webconfs/path_HTML_AJAX.txt
 /ita-root/confs/webconfs/path_PhpSpreadsheet.txt
-/ita-root/confs/webconfs/symphony_ins_monitor_interval.txt
 /ita-root/confs/commonconfs/path_PHPSpyc_Classes.txt

@@ -21,5 +21,7 @@
 /ita-root/temp/sym_ope_export
 /ita-root/temp/sym_ope_import/import
 /ita-root/temp/sym_ope_import/upload
+/ita-root/webconfs/sheets
 /ita-root/webconfs/users
+/ita-root/webroot/menus/sheets
 /ita-root/webroot/menus/users

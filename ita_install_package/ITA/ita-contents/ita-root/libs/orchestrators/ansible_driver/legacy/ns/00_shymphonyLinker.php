@@ -646,6 +646,11 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
     $strColIdOfRestAPIProtocol   = 'ANSIBLE_PROTOCOL';
     $strColIdOfRestAPIHostName   = 'ANSIBLE_HOSTNAME';
     $strColIdOfRestAPIPort       = 'ANSIBLE_PORT';
+
+    $strColIdOfTwrRestAPIProtocol   = 'ANSTWR_PROTOCOL';
+    $strColIdOfTwrRestAPIHostName   = 'ANSTWR_HOSTNAME';
+    $strColIdOfTwrRestAPIPort       = 'ANSTWR_PORT';
+
     $strColIdOfRestAPIAccessKey  = 'ANSIBLE_ACCESS_KEY_ID';
     $strColIdOfRestAPISAKey      = 'ANSIBLE_SECRET_ACCESS_KEY';
 
@@ -780,16 +785,24 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         }
         
         // インタフェース情報をローカル変数に格納
+        $strExecMode        = $row_if_info[$strColIdOfExecMode];
         $strDRSRPathFromWeb = $row_if_info[$strColIdOfDRSRPathFromWebSv];
         $strDRSRPathFromDrv = $row_if_info[$strColIdOfDRSRPathFromDrvSv];
-        $strProtocol        = $row_if_info[$strColIdOfRestAPIProtocol];
-        $strHostname        = $row_if_info[$strColIdOfRestAPIHostName];
-        $strPort            = $row_if_info[$strColIdOfRestAPIPort];
+
+        if($strExecMode == DF_EXEC_MODE_ANSIBLE) {
+            $strProtocol        = $row_if_info[$strColIdOfRestAPIProtocol];
+            $strHostname        = $row_if_info[$strColIdOfRestAPIHostName];
+            $strPort            = $row_if_info[$strColIdOfRestAPIPort];
+        } else {
+            $strProtocol        = $row_if_info[$strColIdOfTwrRestAPIProtocol];
+            $strHostname        = $row_if_info[$strColIdOfTwrRestAPIHostName];
+            $strPort            = $row_if_info[$strColIdOfTwrRestAPIPort];
+        }
+
         $strAccessKeyId     = $row_if_info[$strColIdOfRestAPIAccessKey];
         $strSecretAccessKey = ky_decrypt( $row_if_info[$strColIdOfRestAPISAKey] );
 
         $strAuthToken       = $row_if_info[$strColIdOfRestAPIiAuthToken];
-        $strExecMode        = $row_if_info[$strColIdOfExecMode];
         
         if($strExecMode == DF_EXEC_MODE_ANSIBLE) {
             ////////////////////////////////////////////////////////////////

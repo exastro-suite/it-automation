@@ -113,4 +113,17 @@ $ary[900024] = "[Process] Check file Copy (Execution No.:{} FILE:{} LINE:{})";
 $ary[900025] = "[Process] Update status (Execution No.:{} STATUS:{} FILE:{} LINE:{})";
 $ary[900026] = "[Process] Get Number of records(period-exceeding record) (FILE:{} LINE:{})";
 $ary[900027] = "[Process] Delete directory(PATH:{} FILE:{} LINE:{})";
+$ary[160001] = "[Process] Start procedure";
+$ary[160002] = "[Process] End procedure (Normal)";
+$ary[160003] = "[Process] DB Connect completed";
+$ary[160004] = "[Process] Start transaction";
+$ary[160005] = "[Process] End transaction";
+$ary[160006] = "[Process] Start rollback";
+$ary[160007] = "[Process] Start get FirstNextExecutionDate";
+$ary[160008] = "[Process] End get FirstNextExecutionDate";
+$ary[160009] = "[Process] Start register to symphony work list and update NextExecutionDate";
+$ary[160010] = "[Process] End register to symphony work list and update NextExecutionDate";
+$ary[160011] = "[Process] Start check the abolition target of symphony and operation";
+$ary[160012] = "[Process] End check the abolition target of symphony and operation";
+$ary[160013] = "Regularly management procedure";
 ?>

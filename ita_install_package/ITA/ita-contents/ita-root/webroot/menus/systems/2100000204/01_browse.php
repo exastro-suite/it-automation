@@ -220,6 +220,38 @@ EOD;
     </div>
 <!-- サイト個別html要素、ここまで//-->
 EOD;
+
+    print 
+<<<EOD
+    <!-------------------------------- パネル画像エディタ -------------------------------->
+    <h2>
+        <table width="100%">
+            <tr>
+                <td><div onClick=location.href="javascript:show('Editor_Midashi','Editor_Nakami');" class="midashi_class" >{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1030094")}</div></td>
+                <td>
+                    <div id="Editor_Midashi" align="right">
+                        <input type="button" value="{$strCmdWordAreaClose}" class="showbutton" onClick=location.href="javascript:show('Editor_Midashi','Editor_Nakami');" >
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </h2>
+    <div id="Editor_Nakami" style="display:block" class="text">
+        <div style="margin-left:10px">
+EOD;
+
+// パネル用画像エディタ読み込み
+require_once ( $root_dir_path . "/webroot/menus/systems/2100000204/panel_image_editor.php");
+        
+
+    print
+<<<EOD
+        </div>
+    </div>
+    <!-------------------------------- パネル画像エディタ -------------------------------->
+EOD;
+
+
     print 
 <<<EOD
     <!-------------------------------- 変更履歴 -------------------------------->

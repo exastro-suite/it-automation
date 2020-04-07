@@ -1276,7 +1276,7 @@ class Column extends ColumnGroup {
 		$strWpColId = "{$dbQM}{$this->getID()}{$dbQM}";
 		$strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
 
-		if($aryQueryElement[$this->getID()] == ""){
+		if($aryQueryElement[$this->getID()] === "" || ( gettype($aryQueryElement[$this->getID()]) == "NULL" ) ){
 			//----DBを問わず、空文字はNULLとしてDBへ入れる。（DBがmySQLで、指定がある場合のみ(空文字)で、DBへ投入するかは別検討）
 			$strSetValue = "{$strWpTblSelfAlias}.{$strWpColId} IS NULL";
 			$aryQueryElement[$this->getID()] = array("bind"=>false);
@@ -4307,6 +4307,8 @@ class PasswordColumn extends TextColumn {
 		$this->setSelectTagCallerShow(false);
 		
 		$this->setDeleteOffBeforeCheck(false); //復活は、値のバリデーションチェックを行わない
+
+        $this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
 	}
 
 	//----廃止または復活時等のレコード比較用
@@ -4408,6 +4410,47 @@ class PasswordColumn extends TextColumn {
 
 	//ここまで新規メソッドの定義宣言処理----
 
+}
+
+class MaskColumn extends TextColumn {
+
+    //----ここから継承メソッドの上書き処理
+
+    function __construct($strColId, $strColLabel, $aryEtcetera=array()){
+        parent::__construct($strColId, $strColLabel);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));
+        $this->setOutputType("print_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));
+        $this->setOutputType("print_journal_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+        $this->setOutputType("delete_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+        $outputType->setVisible(false);
+        $this->setOutputType("filter_table", $outputType);
+        $outputType = new OutputType(new ReqTabHFmt(), new PasswordInputTabBFmt());
+        $this->setOutputType("update_table", $outputType);
+        $outputType = new OutputType(new ReqTabHFmt(), new PasswordInputTabBFmt());
+        $this->setOutputType("register_table", $outputType);
+
+        $outputType = new OutputType(new ExcelHFmt(), new StaticBFmt(""));
+        $this->setOutputType("excel", $outputType);
+
+        $outputType = new OutputType(new CSVHFmt(), new StaticCSVBFmt(""));
+        $this->setOutputType("csv", $outputType);
+
+        $outputType = new OutputType(new ExcelHFmt(), new StaticBFmt(""));
+        $this->setOutputType("json", $outputType);
+
+        if( array_key_exists("updateRequireExcept", $aryEtcetera) === true ){
+            $this->updateRequireExcept = $updateRequireExcept['updateRequireExcept'];
+        }
+        $this->setSelectTagCallerShow(false);
+        
+        $this->setDeleteOffBeforeCheck(false); //復活は、値のバリデーションチェックを行わない
+
+        $this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
+    }
+    //ここまで継承メソッドの上書き処理----
 }
 
 class MultiTextColumn extends TextColumn {
@@ -5118,6 +5161,8 @@ class AutoNumRegisterColumn extends AutoNumColumn {
 		//自動入力
 		$outputType = new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($g['objMTS']->getSomeMessage("ITAWDCH-STD-11401")));
 		$this->setOutputType("register_table", $outputType);
+
+		$this->setSearchType("range");
 	}
 
 	public function beforeIUDValidateCheck(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
@@ -5172,7 +5217,61 @@ class AutoNumRegisterColumn extends AutoNumColumn {
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 		return $retArray;
 	}
-	//TableIUDイベント系----
+
+    function getFilterQuery($boolBinaryDistinctOnDTiS=true){
+        //----WHERE句[0]
+        //----クラス(Table)のメソッド(getFilterQuery)から呼び出される
+        $retStrQuery = "";
+        $dbQM=$this->objTable->getDBQuoteMark();
+
+        $strWpColId = "{$dbQM}{$this->getID()}{$dbQM}";
+        $strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
+
+        switch($this->getSearchType()){
+            case "in":
+                $tmpArray = array();
+                $intFilterCount = 0;
+
+                $arySource = $this->getFilterValuesForDTiS(true,$boolBinaryDistinctOnDTiS);
+                foreach($arySource as $filter){
+                    if(0 < strlen($filter)){
+                        $tmpArray[] = ":{$this->getID()}__{$intFilterCount}";
+                        $intFilterCount++;
+                    }
+                }
+                if(0 < count($tmpArray)){
+                    $retStrQuery .= "{$strWpTblSelfAlias}.{$strWpColId}";
+                    $retStrQuery .= " IN (".implode(",", $tmpArray) . ")";
+                }
+                break;
+            case "range":
+                $strSelfAliasStrConColId = "{$strWpTblSelfAlias}.{$strWpColId}";
+                $flag = false;
+                $arySource = $this->getFilterValuesForDTiS(true,$boolBinaryDistinctOnDTiS);
+                if( isset($arySource[0])===true ){
+                    if( 0 < strlen($arySource[0]) ){
+                        //----長さが0ではない
+                        $retStrQuery .= "{$strSelfAliasStrConColId} >= :{$this->getID()}__0";
+                        $flag = true;
+                    }
+                }
+                if( isset($arySource[1])===true ){
+                    if( 0 < strlen($arySource[1]) ){
+                        //----長さが0ではない
+                        if($flag){
+                            $retStrQuery .= " AND ";
+                        }
+                        $retStrQuery .= "{$strSelfAliasStrConColId} <= :{$this->getID()}__1";
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        return $retStrQuery;
+        //クラス(Table)のメソッド(getFilterQuery)から呼び出される----
+    }
+
 }
 //----ここまでクラス定義
 
@@ -7936,6 +8035,9 @@ class RowEditByFileColumn extends Column{
 
 		$boolExeCountinue = true;
 
+        $arySetting = array();
+        $tmparrayTempRet = array();
+
 		//----簡易バリデーションチェック
 		if( is_array($editType) === true || gettype($editType) == "object" ){
 			$intCmdKey = -1;
@@ -8001,6 +8103,11 @@ class RowEditByFileColumn extends Column{
 					$arrayTempRet = registerTableMain($mode, $inputArray, null, $dlcOrderMode, $aryVariant);
 					$retRetMsgBody = $arrayTempRet[2];
 
+                    if( isset($arrayTempRet[99]) ){
+                        $tmparrayTempRet = $arrayTempRet[99];
+                        unset($arrayTempRet[99]);
+                    }
+
 					//----switch
 					switch($arrayTempRet[0]){
 						case "000":
@@ -8063,6 +8170,11 @@ class RowEditByFileColumn extends Column{
 														);
 				$arrayTempRet = updateTableMain($mode, $strNumberForRI, $inputArray, null, $dlcOrderMode, $aryVariant);
 				$retRetMsgBody = $arrayTempRet[2];
+
+                if( isset($arrayTempRet[99]) ){
+                    $tmparrayTempRet = $arrayTempRet[99];
+                    unset($arrayTempRet[99]);
+                }
 
 				//----switch
 				switch($arrayTempRet[0]){
@@ -8194,7 +8306,7 @@ class RowEditByFileColumn extends Column{
 		$arrayRetResult[2] = $retRetMsgBody;
 		$arrayRetResult[3] = $strNumberForRI;
 		$arrayRetResult[4] = $arrayTempRet;
-
+        if($tmparrayTempRet != array()  )$arrayRetResult[99] = $tmparrayTempRet;
 		$this->setFocusEditType("");
 
 		return $arrayRetResult;
@@ -8723,7 +8835,7 @@ class FileUploadColumn extends Column{
 
 	//----ここから継承メソッドの上書き処理
 
-	function __construct($strColId, $strColLabel, $OAPathToUploadScriptFile="", $nrPathAnyToBranchPerFUC="", $maxFileSize=10485760, $sprintFormat="%010d", $arrayCorrectDirPerms=array("0777")){
+	function __construct($strColId, $strColLabel, $OAPathToUploadScriptFile="", $nrPathAnyToBranchPerFUC="", $maxFileSize=4*1024*1024*1024, $sprintFormat="%010d", $arrayCorrectDirPerms=array("0777")){
 		global $g;
 
 		parent::__construct($strColId, $strColLabel);

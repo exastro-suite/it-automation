@@ -337,6 +337,8 @@
         $strErrMsg = "";
         $aryRawResultOfEditExecute = array();
         $aryNormalResultOfEditExecute = array();
+
+        $tmparrRetResults=array();
         //
         $root_dir_path = $g['root_dir_path'];
 
@@ -361,6 +363,7 @@
         //デフォルトのファイルアップロード先----
         $refRetKeyExists = false;
         $uploadFiles = array();
+        $arrTempFiles=array();
         // ローカル変数宣言----
 
         $strFxName = __FUNCTION__;
@@ -412,9 +415,13 @@
             }
             else{
                 $systemFile = "{$g['root_dir_path']}/webconfs/systems/{$g['page_dir']}_loadTable.php";
+                $sheetFile = "{$g['root_dir_path']}/webconfs/sheets/{$g['page_dir']}_loadTable.php";
                 $userFile = "{$g['root_dir_path']}/webconfs/users/{$g['page_dir']}_loadTable.php";
                 if(file_exists($systemFile)){
                     require_once($systemFile);
+                }
+                else if(file_exists($sheetFile)){
+                    require_once($sheetFile);
                 }
                 else if(file_exists($userFile)){
                     require_once($userFile);
@@ -1149,6 +1156,11 @@
                                         file_put_contents($tmpFile, base64_decode($uploadFiles[$row_i][$dlcFnv2]));
                                         file_put_contents($tmpNameFile, $inputArray[$colKey]);
 
+                                        $arrTempFiles[]=array(
+                                            'tmpFile' => $tmpFile,
+                                            'tmpNameFile' => $tmpNameFile,
+                                        );
+
                                         $inputArray["tmp_file_".$objColumn->getIDSOP()] = basename($tmpFile);
                                         $aryRetBodyOfTempFileCheck = $objColumn->checkTempFileBeforeMoveOnPreLoad($tmpFile,  basename($tmpFile), $aryVariant, $arySetting);
                                         if( $aryRetBodyOfTempFileCheck[0] !== true || $aryRetBodyOfTempFileCheck[1] !== null ){
@@ -1167,7 +1179,11 @@
                 }
                 
                 //----テーブルへのアクセスを実行
-                $arrayRetResult = $objREBFColumn->editExecute($inputArray, $dlcOrderMode, $aryVariant);
+                $arrayRetResult = $objREBFColumn->editExecute($inputArray, $dlcOrderMode, $aryVariant);             
+                //DB更新後処理用の情報取得（全行Commit時用）
+                $tmparrRetResults[]=$arrayRetResult;
+                unset($arrayRetResult[99]);
+
                 //テーブルへのアクセスを実行----
                 //
                 $aryRawResultOfEditExecute[$row_i] = $arrayRetResult[4];
@@ -1222,7 +1238,60 @@
                     $intSuccess += $aryData['ct'];
                 }
             }
-            
+            //commispant（全行:0）時
+            if( $objTable->getCommitSpanOnTableIUDByFile() === 0 ){
+                //エラー１件以上
+                if( $aryNormalResultOfEditExecute['error']['ct'] != 0){
+                    //集計結果変換
+                    $typect = 0;
+                    foreach($aryNormalResultOfEditExecute as $strKey=>$aryData){
+                        if($strKey != 'error' ){
+                            $typect = $typect + $aryNormalResultOfEditExecute[$strKey]['ct'];
+                            $aryNormalResultOfEditExecute[$strKey]['ct']=0;
+                        }
+                    }
+                    $aryNormalResultOfEditExecute['error']['ct'] = $aryNormalResultOfEditExecute['error']['ct'] + $typect ;
+                }else{
+                    //JSONモード時
+                    if( $intModeFileCh == 2 ){                        
+                        foreach ($tmparrRetResults as $tmpRetResult) {
+                            $exeRegisterData=$tmpRetResult[99]['exeData'];
+                            $reqRegisterData=$tmpRetResult[99]['reqData'];
+                            $aryVariant=$tmpRetResult[99]['aryVariant'];
+                            $arrayObjColumn = $tmpRetResult[99]['arrayObjColumn'];
+                            unset($tmpRetResult[99]);
+
+                            //DB更新後処理
+                            foreach($arrayObjColumn as $objColumn){
+                                $arrayTmp = $objColumn->afterTableIUDAction($exeRegisterData, $reqRegisterData, $aryVariant);
+                                if($arrayTmp[0]===false){
+                                    $intErrorType = $arrayTmp[1];
+                                    $error_str = $arrayTmp[3];
+                                    $strErrorBuf = $arrayTmp[4];
+                                    throw new Exception( '00001900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                }  
+                            }
+                        }                   
+                    }
+                }    
+            } 
+
+            //エラー発生時不要なtempファイル削除
+            if( $aryNormalResultOfEditExecute['error']['ct'] != 0){
+                if( $intModeFileCh == 2 ){
+                    foreach ($arrTempFiles as $tempFiles) {
+                        foreach ($tempFiles as $tempFile) {
+                            if( $tempFile !== ""){
+                                $findfilenames = $tempFile ."*";
+                                foreach (glob($findfilenames) as $findfilename ) {
+                                    $boolUnlink = unlink($findfilename);
+                                }                            
+                            }
+                        }
+                    } 
+                }
+            }
+
             if( $objTable->getCommitSpanOnTableIUDByFile() === 0 ){
                 if( 0 === $intError ){
                     //----トランザクション終了

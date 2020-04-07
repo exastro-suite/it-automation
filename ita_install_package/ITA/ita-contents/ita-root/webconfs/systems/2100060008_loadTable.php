@@ -594,7 +594,7 @@ DSC代入値管理
     //************************************************************************************
     //----具体値
     //************************************************************************************
-    $objVldt = new SingleTextValidator(0,1024,false);
+    $objVldt = new SingleTextValidator(0,8192,false);
     $c = new TextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITADSCH-MNU-304010"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITADSCH-MNU-304020"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

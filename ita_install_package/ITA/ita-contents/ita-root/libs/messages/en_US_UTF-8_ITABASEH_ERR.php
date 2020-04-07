@@ -225,4 +225,7 @@ $ary[900073] = "Must have uploaded kym file.";
 $ary[900074] = "Import Symphony/Operation has failed.";
 $ary[900075] = "SymphonyClassID and OperationID do not exist";
 $ary[900076] = "Specify SymphonyID and OperationID that can be imported";
+$ary[160001] = "[Process] End procedure (Error)";
+$ary[160002] = "[Process] End procedure (Warning)";
+$ary[160003] = "[Process] Registration of symphony instance failed (regularlyId:{}).";
 ?>

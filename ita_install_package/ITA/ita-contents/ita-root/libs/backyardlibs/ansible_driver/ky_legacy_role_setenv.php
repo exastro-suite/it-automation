@@ -90,4 +90,6 @@
     // 親Playbookのファイル名
     $vg_parent_playbook_name            = "site.yml";
 
+    $vg_log_driver_name                 = "Legacy-Role";
+
 ?>

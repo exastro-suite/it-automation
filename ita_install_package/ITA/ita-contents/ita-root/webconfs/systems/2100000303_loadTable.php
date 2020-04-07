@@ -205,7 +205,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             }
 
             require_once($root_dir_path . '/libs/commonlibs/common_php_functions.php');
-            require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
             $boolRet = true;
             $intErrorType = null;
             $aryErrMsgBody = array();
@@ -275,8 +274,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = new FileUploadColumn('CONN_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-109006"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-109007"));
-    $c->setMaxFileSize(10240);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $c->setFileHideMode(true);
     $table->addColumn($c);
 
@@ -412,8 +412,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     // サーバー証明書
                     $c = new FileUploadColumn('WINRM_SSL_CA_FILE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104610"));
                     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104611"));
-                    $c->setMaxFileSize(10240);//単位はバイト
+                    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
                     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+                    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
                     $c->setFileHideMode(true);
                     $cg3->addColumn($c);
 
@@ -518,9 +519,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
             $c = new FileUploadColumn('DSC_CERTIFICATE_FILE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104502"));
             $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104503"));
-            $c->setMaxFileSize(10240);//単位はバイト
+            $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
             $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
             $c->setFileHideMode(true);
+            $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
             $cg->addColumn($c);
 
             $objVldt = new SingleTextValidator(0,256,false);

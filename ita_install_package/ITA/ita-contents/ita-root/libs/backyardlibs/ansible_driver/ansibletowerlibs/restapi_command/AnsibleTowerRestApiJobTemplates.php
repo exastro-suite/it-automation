@@ -30,6 +30,7 @@ if(empty($root_dir_path)) {
 }
 
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiBase.php");   
+require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/setenv.php");
 
 class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
 
@@ -42,6 +43,8 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
     const SEARCH_NAME_PREFIX = "ita_%s_executions_jobtpl_%s_";
 
     const SEARCH_IDENTIFIED_NAME_PREFIX = "ita_%s_executions_jobtpl_%s";
+
+    const CREDENTIALS_ADD_API_PATH = "job_templates/%s/credentials/";
 
     // static only
     private function __construct() {
@@ -135,18 +138,22 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
             return $response_array;
         }
 
-        if(!empty($param['credential'])) {
-            $content['credential'] = $param['credential'];
-        } else {
-            // 必須のためNG返す
-            $response_array['success'] = false;
-            $response_array['responseContents']['errorMessage'] = "Need 'credential'.";
-            return $response_array;
-        }
+        //---- Ansible Tower Version Check (Ver3.5)
+        if($RestApiCaller->getTowerVersion() == TOWER_VER35) {
+            if(!empty($param['credential'])) {
+                $content['credential'] = $param['credential'];
+            } else {
+                // 必須のためNG返す
+                $response_array['success'] = false;
+                $response_array['responseContents']['errorMessage'] = "Need 'credential'.";
+                return $response_array;
+            }
 
-        if(!empty($param['vault_credential'])) {
-            $content['vault_credential'] = $param['vault_credential'];
+            if(!empty($param['vault_credential'])) {
+                $content['vault_credential'] = $param['vault_credential'];
+            }
         }
+        //Ansible Tower Version Check (Ver3.5) ----
 
         if(!empty($param['job_type'])) {
             $content['job_type'] = $param['job_type'];
@@ -302,6 +309,8 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
         // content生成
         $content = array();
 
+        $content['verbosity'] = 2;
+
         if(!empty($param['execution_no'])) {
             //$content['name'] = self::createName(self::PREPARE_BUILD_NAME_PREFIX, $param['execution_no']);
             $content['name'] = sprintf(self::PREPARE_BUILD_NAME_PREFIX,$vg_tower_driver_name,addPadding($param['execution_no']));
@@ -339,14 +348,18 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
             return $response_array;
         }
 
-        if(!empty($param['credential'])) {
-            $content['credential'] = $param['credential'];
-        } else {
-            // 必須のためNG返す
-            $response_array['success'] = false;
-            $response_array['responseContents']['errorMessage'] = "Need 'credential'.";
-            return $response_array;
+        //---- Ansible Tower Version Check (Ver3.5)
+        if($RestApiCaller->getTowerVersion() == TOWER_VER35) {
+            if(!empty($param['credential'])) {
+                $content['credential'] = $param['credential'];
+            } else {
+                // 必須のためNG返す
+                $response_array['success'] = false;
+                $response_array['responseContents']['errorMessage'] = "Need 'credential'.";
+                return $response_array;
+            }
         }
+        //Ansible Tower Version Check (Ver3.5) ----
 
         if(!empty($param['execution_no']) && !empty($param['dataRelayStorage'])) {
             // 構築用のplaybookと同期させること
@@ -441,14 +454,18 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
             return $response_array;
         }
 
-        if(!empty($param['credential'])) {
-            $content['credential'] = $param['credential'];
-        } else {
-            // 必須のためNG返す
-            $response_array['success'] = false;
-            $response_array['responseContents']['errorMessage'] = "Need 'credential'.";
-            return $response_array;
+        //---- Ansible Tower Version Check (Ver3.5)
+        if($RestApiCaller->getTowerVersion() == TOWER_VER35) {
+            if(!empty($param['credential'])) {
+                $content['credential'] = $param['credential'];
+            } else {
+                // 必須のためNG返す
+                $response_array['success'] = false;
+                $response_array['responseContents']['errorMessage'] = "Need 'credential'.";
+                return $response_array;
+            }
         }
+        //Ansible Tower Version Check (Ver3.5) ----
 
         // REST APIアクセス
         $method = "POST";
@@ -504,6 +521,37 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
         return $response_array;
     }
 
+    //---- Ansible Tower Version (Ver3.6)
+    static function postCredentialsAdd($RestApiCaller, $jobTplId, $credentialiId) {
+
+        global $vg_tower_driver_name;
+
+        // content生成
+        $content = array();
+
+        // REST APIアクセス
+        $method = "POST";
+
+        $content['id'] = $credentialiId;
+        $api_path = sprintf(self::CREDENTIALS_ADD_API_PATH,$jobTplId);
+
+        $response_array = $RestApiCaller->restCall($method, $api_path, $content);
+
+        // REST失敗
+        if($response_array['statusCode'] != 204) {
+            $response_array['success'] = false;
+            if(!array_key_exists("errorMessage", $response_array['responseContents'])) {
+                $response_array['responseContents']['errorMessage'] = "status_code not 201. =>" . $response_array['statusCode'];
+            }
+            return $response_array;
+        }
+
+        // REST成功
+        $response_array['success'] = true;
+
+        return $response_array;
+    }
+    //Ansible Tower Version (Ver3.6) ----
 }
 
 ?>

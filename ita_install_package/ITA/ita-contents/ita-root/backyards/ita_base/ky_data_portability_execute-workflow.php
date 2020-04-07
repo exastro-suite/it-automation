@@ -72,6 +72,9 @@ try {
     $importedTableAry = array();
     foreach ($recordAry as $record) {
 
+        // ファイル名が重複しないためにsleep
+        sleep(1);
+
         $execFlg = true;
 
         $res = setStatus($record['TASK_ID'], STATUS_RUNNING);
@@ -2004,9 +2007,13 @@ function getTableName($menuIdAry){
 
         // loadTableを対象に含める
         $loadTableSystemPath = "/webconfs/systems/{$value}_loadTable.php";
+        $loadTableSheetPath = "/webconfs/sheets/{$value}_loadTable.php";
         $loadTableUserPath = "/webconfs/users/{$value}_loadTable.php";
         if(file_exists(ROOT_DIR_PATH . '/' . $loadTableSystemPath)){
             $uploadAry[$value][] = $loadTableSystemPath;
+        }
+        else if(file_exists(ROOT_DIR_PATH . '/' . $loadTableSheetPath)){
+            $uploadAry[$value][] = $loadTableSheetPath;
         }
         else if(file_exists(ROOT_DIR_PATH . '/' . $loadTableUserPath)){
             $uploadAry[$value][] = $loadTableUserPath;
@@ -2014,9 +2021,13 @@ function getTableName($menuIdAry){
 
         // メニューに必要なソースを対象に含める
         $menuPartsSystemPath = "/webroot/menus/systems/{$value}/";
-        $menuPartsUserPath = "/webroot/menus/systems/{$value}/";
+        $menuPartsSheetPath = "/webroot/menus/sheets/{$value}/";
+        $menuPartsUserPath = "/webroot/menus/users/{$value}/";
         if(is_dir(ROOT_DIR_PATH . '/' . $menuPartsSystemPath)){
             $uploadAry[$value][] = $menuPartsSystemPath;
+        }
+        else if(is_dir(ROOT_DIR_PATH . '/' . $menuPartsSheetPath)){
+            $uploadAry[$value][] = $menuPartsSheetPath;
         }
         else if(is_dir(ROOT_DIR_PATH . '/' . $menuPartsUserPath)){
             $uploadAry[$value][] = $menuPartsUserPath;
@@ -2108,10 +2119,11 @@ function getInfoOfLoadTable($strMenuIdNumeric){
     $aryUploadColumnDir = array();
     $aryOtherSeqIds = array();
     try{
-        $systemDir = "systems/{$strMenuIdNumeric}";
-        $userDir = "users/{$strMenuIdNumeric}";
         if(file_exists(ROOT_DIR_PATH . "/webconfs/systems/{$strMenuIdNumeric}_loadTable.php")){
             $strLoadTableFullname = ROOT_DIR_PATH . "/webconfs/systems/{$strMenuIdNumeric}_loadTable.php";
+        }
+        else if(file_exists(ROOT_DIR_PATH . "/webconfs/sheets/{$strMenuIdNumeric}_loadTable.php")){
+            $strLoadTableFullname = ROOT_DIR_PATH . "/webconfs/sheets/{$strMenuIdNumeric}_loadTable.php";
         }
         else if(file_exists(ROOT_DIR_PATH . "/webconfs/users/{$strMenuIdNumeric}_loadTable.php")){
             $strLoadTableFullname = ROOT_DIR_PATH . "/webconfs/users/{$strMenuIdNumeric}_loadTable.php";

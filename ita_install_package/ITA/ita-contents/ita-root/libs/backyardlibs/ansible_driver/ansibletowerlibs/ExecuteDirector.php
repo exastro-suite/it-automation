@@ -34,7 +34,7 @@ require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlib
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/setenv.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/MessageTemplateStorageHolder.php");
 
-require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleVault.php');
+require_once($root_dir_path . '/libs/commonlibs/common_ansible_vault.php');
 
 $rest_api_command = $root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/";
 require_once($rest_api_command . "AnsibleTowerRestApiProjects.php");
@@ -59,6 +59,8 @@ class ExecuteDirector {
     private $dbAccess;
     private $exec_out_dir;
 
+    private $version;
+
     function __construct($restApiCaller, $logger, $dbAccess, $exec_out_dir, $JobTemplatePropertyParameterAry=array(),$JobTemplatePropertyNameAry=array()) {
         $this->restApiCaller = $restApiCaller;
         $this->logger = $logger;
@@ -68,6 +70,13 @@ class ExecuteDirector {
         $this->JobTemplatePropertyNameAry      = $JobTemplatePropertyNameAry;
 
         $this->objMTS = MessageTemplateStorageHolder::getMTS();
+    }
+
+    function setTowerVersion($version) {
+        $this->version = $version;
+    }
+    function getTowerVersion() {
+        return($this->version);
     }
 
     function build($exeInsRow, $ifInfoRow) {
@@ -87,7 +96,7 @@ class ExecuteDirector {
             if($response_array['success'] == false) {
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040026",array($virtualenv_name));
                 $this->errorLogOut($errorMessage);
-                return false;
+                return -1;
             }
             if( isset($response_array['responseContents']['custom_virtualenvs'] )) {
                 foreach($response_array['responseContents']['custom_virtualenvs'] as $no=>$name) {
@@ -100,7 +109,7 @@ class ExecuteDirector {
             if($virtualenv_name_ok === false) {
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040027",array($virtualenv_name));
                 $this->errorLogOut($errorMessage);
-                return false;
+                return -1;
             }
         }
 
@@ -116,21 +125,21 @@ class ExecuteDirector {
                 $this->logger->error($response_array['responseContents']['errorMessage']);
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040024",array($OrganizationName));
                 $this->errorLogOut($errorMessage);
-                return false;
+                return -1;
             }
             if(count($response_array['responseContents']) === 0
                 || array_key_exists("id", $response_array['responseContents'][0]) == false) {
                 $this->logger->error("No inventory id. (prepare)");
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040025",array($OrganizationName));
                 $this->errorLogOut($errorMessage);
-                return false;
+                return -1;
             }
             $OrganizationId = $response_array['responseContents'][0]['id'];
         } else {
             // 組織名未登録
             $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040030");
             $this->errorLogOut($errorMessage);
-            return false;
+            return -1;
         }
 
         // Host情報取得
@@ -142,7 +151,6 @@ class ExecuteDirector {
             $this->errorLogOut($errorMessage);
             return -1;
         }
-//------------
 
         $ret = $this->prepareProject($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_ANS']); 
         if($ret == false) {
@@ -205,6 +213,29 @@ class ExecuteDirector {
                 $this->errorLogOut($errorMessage);
                 return -1;
             }
+
+            ///////////////////////////////////////////////////////////////////////
+            // JobTemplateにcredentialIdを紐づけ(Ansible Tower3.6～)
+            ///////////////////////////////////////////////////////////////////////
+            //---- Ansible Tower Version Check (Not Ver3.5)
+            if($this->getTowerVersion() != TOWER_VER35) {
+
+                $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTemplateId, $credentialId);
+                if($response_array['success'] == false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
+                    $this->errorLogOut($errorMessage);
+                    return -1;
+                }
+                if($vg_tower_driver_name != "pioneer") {
+                    $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTemplateId, $vault_credentialId);
+                    if($response_array['success'] == false) {
+                        $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
+                        $this->errorLogOut($errorMessage);
+                        return -1;
+                    }
+                }
+            }
+            //Ansible Tower Version Check (Not Ver3.5) ----
 
             $jobTemplateIds[] = $jobTemplateId;
             $loopCount++;
@@ -443,6 +474,22 @@ class ExecuteDirector {
         $jobTplId = $response_array['responseContents']['id'];
 
         ///////////////////////////////////////////////////////////////////////
+        // prepareJobTemplateにcredentialIdを紐づけ(Ansible Tower3.6～)
+        ///////////////////////////////////////////////////////////////////////
+        //---- Ansible Tower Version Check (Not Ver3.5)
+        if($this->getTowerVersion() != TOWER_VER35) {
+
+            $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTplId, $credentialId);
+            if($response_array['success'] == false) {
+                $this->logger->error($response_array['responseContents']['errorMessage']);
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
+                $this->errorLogOut($errorMessage);
+                return false;
+            }
+        }
+        //Ansible Tower Version Check (Not Ver3.5) ----
+
+        ///////////////////////////////////////////////////////////////////////
         // prepare実行
         ///////////////////////////////////////////////////////////////////////
         $this->logger->trace("build request");
@@ -515,6 +562,40 @@ class ExecuteDirector {
                                                  $responseContents['status'] == "canceled")) ||
                 (array_key_exists("failed", $responseContents) && $responseContents['failed'] == true)) {
                 $this->logger->error("parepare failed. execution_no:$execution_no");
+
+                //---- ジョブの実行結果を取得し実行ログに表示
+                $response_array_stdout = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
+                if(array_key_exists("responseContents",$response_array_stdout) === true) {
+                    if(is_array($response_array_stdout['responseContents']) === true) {
+                        $log_data = print_r($response_array_stdout['responseContents'],true);
+                    } else {
+                        $log_data = $response_array_stdout['responseContents'];
+                    }
+
+                    $execlogFilename        = "exec.log";
+                    $outDirectoryPath       = $dataRelayStoragePath . "/" . $vg_tower_driver_type . '/' . $vg_tower_driver_id . '/' . addPadding($execution_no) . "/out";
+                    $execlogFullPath        = $outDirectoryPath . "/" . $execlogFilename;
+
+                    // ログ(", ")  =>  (",\n")を改行する
+                    $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
+                    // ログ(=> {)  =>  (=> {\n)を改行する
+                    $log_data = preg_replace( "/=> {/", "=> {\n",$log_data,-1,$count);
+                    // ログ(, ")  =>  (,\n")を改行する
+                    $log_data = preg_replace( "/, \"/", ",\n\"",$log_data,-1,$count);
+                    // 改行文字列\\r\\nを改行コードに置換える
+                    $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
+                    // 改行文字列\r\nを改行コードに置換える
+                    $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+                    // python改行文字列\\nを改行コードに置換える
+                    $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
+                    // python改行文字列\nを改行コードに置換える
+                    $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+
+                    @file_put_contents($execlogFullPath,$log_data);
+
+                }
+                //ジョブの実行結果を取得し実行ログに表示 ----
+
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040021" . $responseContents['status']);
                 $this->errorLogOut($errorMessage);
                 return false;
@@ -606,6 +687,20 @@ class ExecuteDirector {
             return false;
         }
         $jobTplId = $response_array['responseContents']['id'];
+
+        ///////////////////////////////////////////////////////////////////////
+        // cleanupJobTemplateにcredentialIdを紐づけ(Ansible Tower3.6～)
+        ///////////////////////////////////////////////////////////////////////
+        //---- Ansible Tower Version Check (Not Ver3.5)
+        if($this->getTowerVersion() != TOWER_VER35) {
+
+            $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTplId, $credentialId);
+            if($response_array['success'] == false) {
+                $this->logger->debug("Linking job-template and credential. (cleanup)");
+                return false;
+            }
+        }
+        //Ansible Tower Version Check (Not Ver3.5) ----
 
         ///////////////////////////////////////////////////////////////////////
         // cleanup実行
@@ -1775,6 +1870,7 @@ class ExecuteDirector {
         // node job data
         foreach($workflowJobNodeArray_jobDataAdded as $workflowJobNodeData) {
             $jobData = $workflowJobNodeData['jobData'];
+
             $contentArray[] = ""; // 空行
             $contentArray[] = "------------------------------------------------------------------------------------------------------------------------"; // セパレータ
             $contentArray[] = "node_job_name: " . $jobData['name'];
@@ -1789,12 +1885,31 @@ class ExecuteDirector {
             $contentArray[] = "  project_name: " . $projectData['name'];
             $contentArray[] = "  project_local_path: " . $projectData['local_path'];
 
-            $response_array = AnsibleTowerRestApiCredentials::get($this->restApiCaller, $jobData['credential']);
-            if($response_array['success'] == false) {
-                $this->logger->error("Faild to get credential. " . $response_array['responseContents']['errorMessage']);
-                return false;
+            //---- Ansible Tower Version Check 
+            if($this->getTowerVersion() == TOWER_VER35) {
+                $response_array = AnsibleTowerRestApiCredentials::get($this->restApiCaller, $jobData['credential']);
+                if($response_array['success'] == false) {
+                    $this->logger->error("Faild to get credential. " . $response_array['responseContents']['errorMessage']);
+                    return false;
+                }
+                $credentialData = $response_array['responseContents'];
+            } else {
+                foreach($jobData['summary_fields']['credentials'] as $CredentialArray) {
+                    if($CredentialArray['kind'] != 'vault') {
+                        $response_array = AnsibleTowerRestApiCredentials::get($this->restApiCaller, $CredentialArray['id']);
+                        if($response_array['success'] == false) {
+                            $this->logger->error("Faild to get credential. " . $response_array['responseContents']['errorMessage']);
+                            return false;
+                        }
+                        $credentialData = $response_array['responseContents'];
+                    }
+                }
+                if( ! isset($credentialData)) {
+                    $this->logger->error("non set to get credential. " . $response_array['responseContents']);
+                    return false;
+                }
             }
-            $credentialData = $response_array['responseContents'];
+            //---- Ansible Tower Version Check 
 
             $contentArray[] = "  credential_name: " . $credentialData['name'];
             $contentArray[] = "  credential_type: " . $credentialData['credential_type'];
@@ -1912,34 +2027,36 @@ class ExecuteDirector {
             }
             // /exastro/ita-root/libs/restapiindividuallibs/ansible_driver/execute_statuscheck.phpに同等の処理あり
             if($vg_tower_driver_name == "pioneer") {
-                // ユーザログ("xxx", )を改行する
-                $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $execlogFullPath_org  .  " > " . $execlogFullPath_tmp1;
-                exec($cmd);
-
-                // 改行文字 \\r\\nを改行コードに置換える
-                $cmd = "sed -e 's/\\\\\\\\r\\\\\\\\n/\\n/g' "  . $execlogFullPath_tmp1 . " > " . $execlogFullPath;
-                exec($cmd);
-
-                exec("/bin/rm -f " . $execlogFullPath_tmp1 );
-            } else {
+                $log_data = file_get_contents($execlogFullPath_org);
                 // ログ(", ")  =>  (",\n")を改行する
-                $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $execlogFullPath_org  .  " > " . $execlogFullPath_tmp1;
-                exec($cmd);
+                $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
+                // 改行文字列\\r\\nを改行コードに置換える
+                $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
+                // 改行文字列\r\nを改行コードに置換える
+                $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+                // python改行文字列\\nを改行コードに置換える
+                $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
+                // python改行文字列\nを改行コードに置換える
+                $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+                file_put_contents($execlogFullPath,$log_data);
 
+            } else {
+                $log_data = file_get_contents($execlogFullPath_org);
+                // ログ(", ")  =>  (",\n")を改行する
+                $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
                 // ログ(=> {)  =>  (=> {\n)を改行する
-                $cmd = "sed -e 's/=> {/=> {\\n/g' "    . $execlogFullPath_tmp1 .  " > " . $execlogFullPath_tmp2;
-                exec($cmd);
-
+                $log_data = preg_replace( "/=> {/", "=> {\n",$log_data,-1,$count);
                 // ログ(, ")  =>  (,\n")を改行する
-                $cmd = "sed -e 's/, \"/,\\n\"/g' "     . $execlogFullPath_tmp2 .  " > " . $execlogFullPath_tmp3;
-                exec($cmd);
-
-                // 改行文字を改行コードに置換える
-                $cmd = "sed -e 's/\\\\\\\\r\\\\\\\\n/\\n/g' "  . $execlogFullPath_tmp3 .  " > " . $execlogFullPath;
-                exec($cmd);
-
-                exec("/bin/rm -f " . $execlogFullPath_tmp1 . " " . $execlogFullPath_tmp2 . " " . $execlogFullPath_tmp3);
-
+                $log_data = preg_replace( "/, \"/", ",\n\"",$log_data,-1,$count);
+                // 改行文字列\\r\\nを改行コードに置換える
+                $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
+                // 改行文字列\r\nを改行コードに置換える
+                $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+                // python改行文字列\\nを改行コードに置換える
+                $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
+                // python改行文字列\nを改行コードに置換える
+                $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+                file_put_contents($execlogFullPath,$log_data);
             }
         } finally {
             // ロック解除

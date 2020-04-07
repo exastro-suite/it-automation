@@ -42,10 +42,15 @@ CREATE TABLE B_ANSIBLE_IF_INFO
 (
 -- 主キー
 ANSIBLE_IF_INFO_ID              INT                               ,
+-- Ansible 接続情報
+ANSIBLE_HOSTNAME                VARCHAR (128)                     , -- Ansible 接続ホスト名
+ANSIBLE_PROTOCOL                VARCHAR (8)                       , -- Ansible 接続プロトコル
+ANSIBLE_PORT                    INT                               , -- Ansible 接続ポート
+-- Tower 接続情報
+ANSTWR_HOSTNAME                 VARCHAR (128)                     , -- Tower 接続ホスト名
+ANSTWR_PROTOCOL                 VARCHAR (8)                       , -- Tower 接続プロトコル
+ANSTWR_PORT                     INT                               , -- Tower 接続ポート
 -- 共通
-ANSIBLE_HOSTNAME                VARCHAR (128)                     , 
-ANSIBLE_PROTOCOL                VARCHAR (8)                       , 
-ANSIBLE_PORT                    INT                               ,
 ANSIBLE_EXEC_MODE               INT                               , -- 実行モード 1:ansible/2:ansible tower
 ANSIBLE_STORAGE_PATH_LNX        VARCHAR (256)                     ,
 ANSIBLE_STORAGE_PATH_ANS        VARCHAR (256)                     ,
@@ -61,6 +66,7 @@ ANSTWR_AUTH_TOKEN               VARCHAR (256)                     , -- 接続ト
 ANSTWR_DEL_RUNTIME_DATA         INT                               , 
 -- 共通
 NULL_DATA_HANDLING_FLG          INT                               , -- Null値の連携 1:有効　2:無効
+ANSIBLE_NUM_PARALLEL_EXEC       INT                               , -- 並列実行数
 ANSIBLE_REFRESH_INTERVAL        INT                               , 
 ANSIBLE_TAILLOG_LINES           INT                               , 
 --
@@ -81,10 +87,15 @@ JOURNAL_REG_DATETIME            DATETIME(6)                       , -- 履歴用
 JOURNAL_ACTION_CLASS            VARCHAR (8)                       , -- 履歴用変更種別
 -- 主キー
 ANSIBLE_IF_INFO_ID              INT                               ,
+-- Ansible 接続情報
+ANSIBLE_HOSTNAME                VARCHAR (128)                     , -- Ansible 接続ホスト名
+ANSIBLE_PROTOCOL                VARCHAR (8)                       , -- Ansible 接続プロトコル
+ANSIBLE_PORT                    INT                               , -- Ansible 接続ポート
+-- Tower 接続情報
+ANSTWR_HOSTNAME                 VARCHAR (128)                     , -- Tower 接続ホスト名
+ANSTWR_PROTOCOL                 VARCHAR (8)                       , -- Tower 接続プロトコル
+ANSTWR_PORT                     INT                               , -- Tower 接続ポート
 -- 共通
-ANSIBLE_HOSTNAME                VARCHAR (128)                     , 
-ANSIBLE_PROTOCOL                VARCHAR (8)                       , 
-ANSIBLE_PORT                    INT                               ,
 ANSIBLE_EXEC_MODE               INT                               , -- 実行モード 1:ansible/2:ansible tower
 ANSIBLE_STORAGE_PATH_LNX        VARCHAR (256)                     ,
 ANSIBLE_STORAGE_PATH_ANS        VARCHAR (256)                     ,
@@ -100,6 +111,7 @@ ANSTWR_AUTH_TOKEN               VARCHAR (256)                     , -- 接続ト
 ANSTWR_DEL_RUNTIME_DATA         INT                               , 
 -- 共通
 NULL_DATA_HANDLING_FLG          INT                               , -- Null値の連携 1:有効　2:無効
+ANSIBLE_NUM_PARALLEL_EXEC       INT                               , -- 並列実行数
 ANSIBLE_REFRESH_INTERVAL        INT                               , 
 ANSIBLE_TAILLOG_LINES           INT                               , 
 --
@@ -238,6 +250,7 @@ ANS_TEMPLATE_ID                   INT                              ,
 
 ANS_TEMPLATE_VARS_NAME            VARCHAR (256)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
+VAR_STRUCT_ANAL_JSON_STRING_FILE  VARCHAR (100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 VARS_LIST                         VARCHAR (4000)                   , -- 変数定義
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
 
@@ -262,6 +275,7 @@ ANS_TEMPLATE_ID                   INT                              ,
 
 ANS_TEMPLATE_VARS_NAME            VARCHAR (256)                    ,
 ANS_TEMPLATE_FILE                 VARCHAR (256)                    ,
+VAR_STRUCT_ANAL_JSON_STRING_FILE  VARCHAR (100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 VARS_LIST                         VARCHAR (4000)                   , -- 変数定義
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
 
@@ -835,7 +849,8 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (1024)                   ,
+VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -861,7 +876,8 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (1024)                   ,
+VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -1263,6 +1279,7 @@ SELECT
          TAB_B.VARS_NAME_ID              ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.VARS_ENTRY_USE_TPFVARS    ,
          TAB_A.ASSIGN_SEQ                ,
          
          TAB_A.DISP_SEQ                  ,
@@ -1530,7 +1547,8 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (1024)                   ,
+VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -1556,7 +1574,8 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (1024)                   ,
+VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -1962,6 +1981,7 @@ SELECT
          TAB_B.VARS_NAME_ID              ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.VARS_ENTRY_USE_TPFVARS    ,
          TAB_A.ASSIGN_SEQ                ,
          
          TAB_A.DISP_SEQ                  ,
@@ -2077,6 +2097,7 @@ ROLE_PACKAGE_ID                   INT                              , -- 識別�
 
 ROLE_PACKAGE_NAME                 VARCHAR (256)                    , -- ロールパッケージ名
 ROLE_PACKAGE_FILE                 VARCHAR (256)                    , -- ロールパッケージファイル(ZIP形式)
+VAR_STRUCT_ANAL_JSON_STRING_FILE  VARCHAR (100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2099,6 +2120,7 @@ ROLE_PACKAGE_ID                   INT                              , -- 識別�
 
 ROLE_PACKAGE_NAME                 VARCHAR (256)                    , -- ロールパッケージ名
 ROLE_PACKAGE_FILE                 VARCHAR (256)                    , -- ロールパッケージファイル(ZIP形式)
+VAR_STRUCT_ANAL_JSON_STRING_FILE  VARCHAR (100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2408,7 +2430,8 @@ PATTERN_ID                        INT                              , -- 作業�
 SYSTEM_ID                         INT                              , -- 機器(ホスト)
 VARS_LINK_ID                      INT                              , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            INT                              , -- 多次元変数配列組合せ管理 Pkey
-VARS_ENTRY                        VARCHAR (1024)                   , -- 具体値
+VARS_ENTRY                        VARCHAR (8192)                   , -- 具体値
+VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -2435,7 +2458,8 @@ PATTERN_ID                        INT                              , -- 作業�
 SYSTEM_ID                         INT                              , -- 機器(ホスト)
 VARS_LINK_ID                      INT                              , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            INT                              , -- 多次元変数配列組合せ管理 Pkey
-VARS_ENTRY                        VARCHAR (1024)                   , -- 具体値
+VARS_ENTRY                        VARCHAR (8192)                   , -- 具体値
+VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -2508,7 +2532,7 @@ VAR_TYPE                          INT                              , -- 変数�
 VARS_NAME_ID                      INT                              , -- 変数名/配列変数名
 COL_SEQ_COMBINATION_ID            INT                              , -- 変数名
 ASSIGN_SEQ                        INT                              , -- 代入順序
-VARS_VALUE                        VARCHAR (1024)                   , -- 具体値
+VARS_VALUE                        VARCHAR (8192)                   , -- 具体値
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2535,7 +2559,7 @@ VAR_TYPE                          INT                              , -- 変数�
 VARS_NAME_ID                      INT                              , -- 変数名/配列変数名
 COL_SEQ_COMBINATION_ID            INT                              , -- 変数名
 ASSIGN_SEQ                        INT                              , -- 代入順序
-VARS_VALUE                        VARCHAR (1024)                   , -- 具体値
+VARS_VALUE                        VARCHAR (8192)                   , -- 具体値
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -3660,7 +3684,7 @@ CREATE TABLE B_ANS_GLOBAL_VARS_MASTER
 GBL_VARS_NAME_ID                  INT                              , -- 識別シーケンス
 
 VARS_NAME                         VARCHAR (128)                    , -- グローバル変数名
-VARS_ENTRY                        VARCHAR (1024)                   , -- 具体値
+VARS_ENTRY                        VARCHAR (8192)                   , -- 具体値
 VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -3683,7 +3707,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 GBL_VARS_NAME_ID                  INT                              , -- 識別シーケンス
 
 VARS_NAME                         VARCHAR (128)                    , -- グローバル変数名
-VARS_ENTRY                        VARCHAR (1024)                   , -- 具体値
+VARS_ENTRY                        VARCHAR (8192)                   , -- 具体値
 VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
@@ -3705,13 +3729,16 @@ CREATE        INDEX IND_B_ANSIBLE_IF_INFO_01          ON B_ANSIBLE_IF_INFO      
 CREATE        INDEX IND_B_ANSIBLE_RUN_MODE_01         ON B_ANSIBLE_RUN_MODE            (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_VARS_TYPE_01            ON B_ANS_VARS_TYPE               (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_TEMPLATE_FILE_01        ON B_ANS_TEMPLATE_FILE           (DISUSE_FLAG);
+CREATE        INDEX IND_B_ANS_TEMPLATE_FILE_02        ON B_ANS_TEMPLATE_FILE           (ANS_TEMPLATE_VARS_NAME,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_CONTENTS_FILE_01        ON B_ANS_CONTENTS_FILE           (DISUSE_FLAG);
+CREATE        INDEX IND_B_ANS_CONTENTS_FILE_02        ON B_ANS_CONTENTS_FILE           (CONTENTS_FILE_VARS_NAME,DISUSE_FLAG);
 
 -- -- Legacy 追加Index
 CREATE        INDEX IND_B_ANSIBLE_LNS_PLAYBOOK_01     ON B_ANSIBLE_LNS_PLAYBOOK        (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_PATTERN_LINK_01 ON B_ANSIBLE_LNS_PATTERN_LINK    (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_PATTERN_LINK_02 ON B_ANSIBLE_LNS_PATTERN_LINK    (PATTERN_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_PHO_LINK_01     ON B_ANSIBLE_LNS_PHO_LINK        (DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_LNS_PHO_LINK_02     ON B_ANSIBLE_LNS_PHO_LINK        (OPERATION_NO_UAPK,PATTERN_ID,SYSTEM_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_MASTER_01  ON B_ANSIBLE_LNS_VARS_MASTER     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_MASTER_02  ON B_ANSIBLE_LNS_VARS_MASTER     (VARS_NAME);
 CREATE        INDEX IND_B_ANS_LNS_PTN_VARS_LINK_01    ON B_ANS_LNS_PTN_VARS_LINK       (DISUSE_FLAG);
@@ -3719,7 +3746,9 @@ CREATE        INDEX IND_B_ANS_LNS_PTN_VARS_LINK_02    ON B_ANS_LNS_PTN_VARS_LINK
 CREATE        INDEX IND_B_ANS_LNS_PTN_VARS_LINK_03    ON B_ANS_LNS_PTN_VARS_LINK       (PATTERN_ID ,VARS_LINK_ID ,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_LNS_PTN_VARS_LINK_04    ON B_ANS_LNS_PTN_VARS_LINK       (VARS_LINK_ID ,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_01  ON B_ANSIBLE_LNS_VARS_ASSIGN     (DISUSE_FLAG);
-CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_02  ON B_ANSIBLE_LNS_VARS_ASSIGN     (VARS_ENTRY);
+CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_03  ON B_ANSIBLE_LNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,SYSTEM_ID,VARS_LINK_ID,DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_04  ON B_ANSIBLE_LNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_LNS_VARS_ASSIGN_05  ON B_ANSIBLE_LNS_VARS_ASSIGN     (VARS_ENTRY_USE_TPFVARS,DISUSE_FLAG);
 CREATE        INDEX IND_C_ANSIBLE_LNS_EXE_INS_MNG_01  ON C_ANSIBLE_LNS_EXE_INS_MNG     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_LNS_VAL_ASSIGN_01       ON B_ANS_LNS_VAL_ASSIGN          (DISUSE_FLAG);
 
@@ -3729,14 +3758,19 @@ CREATE        INDEX IND_B_ANSIBLE_PNS_DIALOG_01       ON B_ANSIBLE_PNS_DIALOG   
 CREATE        INDEX IND_B_ANSIBLE_PNS_PATTERN_LINK_01 ON B_ANSIBLE_PNS_PATTERN_LINK    (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_PNS_PATTERN_LINK_02 ON B_ANSIBLE_PNS_PATTERN_LINK    (PATTERN_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_PNS_PHO_LINK_01     ON B_ANSIBLE_PNS_PHO_LINK        (DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_PNS_PHO_LINK_02     ON B_ANSIBLE_PNS_PHO_LINK        (OPERATION_NO_UAPK,PATTERN_ID,SYSTEM_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_MASTER_01  ON B_ANSIBLE_PNS_VARS_MASTER     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_MASTER_02  ON B_ANSIBLE_PNS_VARS_MASTER     (VARS_NAME);
 CREATE        INDEX IND_B_ANS_PNS_PTN_VARS_LINK_01    ON B_ANS_PNS_PTN_VARS_LINK       (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_PNS_PTN_VARS_LINK_02    ON B_ANS_PNS_PTN_VARS_LINK       (PATTERN_ID ,VARS_NAME_ID);
 CREATE        INDEX IND_B_ANS_PNS_PTN_VARS_LINK_03    ON B_ANS_PNS_PTN_VARS_LINK       (PATTERN_ID ,VARS_LINK_ID ,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_ASSIGN_01  ON B_ANSIBLE_PNS_VARS_ASSIGN     (DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_ASSIGN_03  ON B_ANSIBLE_PNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,SYSTEM_ID,VARS_LINK_ID,DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_ASSIGN_04  ON B_ANSIBLE_PNS_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_PNS_VARS_ASSIGN_05  ON B_ANSIBLE_PNS_VARS_ASSIGN     (VARS_ENTRY_USE_TPFVARS,DISUSE_FLAG);
 CREATE        INDEX IND_C_ANSIBLE_PNS_EXE_INS_MNG_01  ON C_ANSIBLE_PNS_EXE_INS_MNG     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_PNS_VAL_ASSIGN_01       ON B_ANS_PNS_VAL_ASSIGN          (DISUSE_FLAG);
+
 
 -- -- Role 追加Index
 CREATE        INDEX IND_C_ANSIBLE_LRL_EXE_INS_MNG_01  ON C_ANSIBLE_LRL_EXE_INS_MNG     (DISUSE_FLAG);
@@ -3745,12 +3779,17 @@ CREATE        INDEX IND_B_ANSIBLE_LRL_ROLE_01         ON B_ANSIBLE_LRL_ROLE     
 CREATE        INDEX IND_B_ANSIBLE_LRL_ROLE_VARS_01    ON B_ANSIBLE_LRL_ROLE_VARS       (DISUSE_FLAG);
 CREATE UNIQUE INDEX IND_B_ANSIBLE_LRL_ROLE_VARS_02    ON B_ANSIBLE_LRL_ROLE_VARS       (ROLE_PACKAGE_ID, ROLE_ID , VARS_NAME);
 CREATE        INDEX IND_B_ANSIBLE_LRL_PATTERN_LINK_01 ON B_ANSIBLE_LRL_PATTERN_LINK    (DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_LRL_PATTERN_LINK_02 ON B_ANSIBLE_LRL_PATTERN_LINK    (PATTERN_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_MASTER_01  ON B_ANSIBLE_LRL_VARS_MASTER     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_CHILD_VARS_01   ON B_ANSIBLE_LRL_CHILD_VARS      (DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_LRL_CHILD_VARS_02   ON B_ANSIBLE_LRL_CHILD_VARS      (ARRAY_MEMBER_ID,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_LRL_PTN_VARS_LINK_01    ON B_ANS_LRL_PTN_VARS_LINK       (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_LRL_PTN_VARS_LINK_02    ON B_ANS_LRL_PTN_VARS_LINK       (PATTERN_ID ,VARS_LINK_ID ,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_01  ON B_ANSIBLE_LRL_VARS_ASSIGN     (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_02  ON B_ANSIBLE_LRL_VARS_ASSIGN     (OPERATION_NO_UAPK  ,PATTERN_ID  ,SYSTEM_ID  ,VARS_LINK_ID  ,COL_SEQ_COMBINATION_ID ,DISUSE_FLAG ,ASSIGN_SEQ);
+CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_03  ON B_ANSIBLE_LRL_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,SYSTEM_ID,VARS_LINK_ID,DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_04  ON B_ANSIBLE_LRL_VARS_ASSIGN     (OPERATION_NO_UAPK,PATTERN_ID,DISUSE_FLAG);
+CREATE        INDEX IND_B_ANSIBLE_LRL_VARS_ASSIGN_05  ON B_ANSIBLE_LRL_VARS_ASSIGN     (VARS_ENTRY_USE_TPFVARS,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_PHO_LINK_01     ON B_ANSIBLE_LRL_PHO_LINK        (DISUSE_FLAG);
 CREATE        INDEX IND_B_ANSIBLE_LRL_PHO_LINK_02     ON B_ANSIBLE_LRL_PHO_LINK        (OPERATION_NO_UAPK  ,PATTERN_ID  ,SYSTEM_ID  ,DISUSE_FLAG);
 CREATE        INDEX IND_B_ANS_LRL_ROLE_VARSVAL_01     ON B_ANS_LRL_ROLE_VARSVAL        (DISUSE_FLAG);
@@ -4128,6 +4167,31 @@ SELECT
 FROM      B_ANS_LRL_MAX_MEMBER_COL_JNL   TAB_A
 LEFT JOIN B_ANSIBLE_LRL_VARS_MASTER_JNL  TAB_B ON ( TAB_A.VARS_NAME_ID    = TAB_B.VARS_NAME_ID    )
 LEFT JOIN D_ANS_LRL_ARRAY_MEMBER_JNL     TAB_C ON ( TAB_A.ARRAY_MEMBER_ID = TAB_C.ARRAY_MEMBER_ID );
+
+-- -------------------------------------------------------
+-- 共通  各作業インスタンスの結合版
+-- -------------------------------------------------------
+CREATE VIEW D_ANSIBLE_EXE_INS_MNG     AS 
+SELECT
+  'Legacy'      as DRIVER_NAME, 'L' as DRIVER_ID, EXECUTION_NO, STATUS_ID, TIME_BOOK, DISUSE_FLAG, LAST_UPDATE_TIMESTAMP
+FROM
+  C_ANSIBLE_LNS_EXE_INS_MNG
+WHERE
+  DISUSE_FLAG = '0'
+UNION
+SELECT
+  'Pioneer'     as DRIVER_NAME, 'P' as DRIVER_ID, EXECUTION_NO, STATUS_ID, TIME_BOOK, DISUSE_FLAG, LAST_UPDATE_TIMESTAMP
+FROM
+  C_ANSIBLE_PNS_EXE_INS_MNG
+WHERE
+  DISUSE_FLAG = '0'
+UNION
+SELECT
+  'Legacy-Role' as DRIVER_NAME, 'R' as DRIVER_ID, EXECUTION_NO, STATUS_ID, TIME_BOOK, DISUSE_FLAG, LAST_UPDATE_TIMESTAMP
+FROM
+  C_ANSIBLE_LRL_EXE_INS_MNG
+WHERE
+  DISUSE_FLAG = '0';
 INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_IF_INFO_RIC',2);
 
 INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_IF_INFO_JSQ',2);
@@ -4467,6 +4531,8 @@ INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,N
 INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100019,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100019,'a7d','5ebbc37e034d6874a2af59eb04beaa52','legacyRole代入値自動登録設定プロシージャ','sample@xxx.bbb.ccc','legacyRole代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-121006,'a10f','5ebbc37e034d6874a2af59eb04beaa52','AnsibleTower/AWXサーバデータ同期プロシージャ','sample@xxx.bbb.ccc',NULL,'H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-121006,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-121006,'a10f','5ebbc37e034d6874a2af59eb04beaa52','AnsibleTower/AWXサーバデータ同期プロシージャ','sample@xxx.bbb.ccc',NULL,'H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100020,'a4e','5ebbc37e034d6874a2af59eb04beaa52','Ansible作業実行プロシージャ','sample@xxx.bbb.ccc','Ansible作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100020,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100020,'a4e','5ebbc37e034d6874a2af59eb04beaa52','Ansible作業実行プロシージャ','sample@xxx.bbb.ccc','Ansible作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100020103,1,2100020103,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20103,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100020103,1,2100020103,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -4595,8 +4661,8 @@ INSERT INTO A_PROC_LOADED_LIST (ROW_ID,PROC_NAME,LOADED_FLG,LAST_UPDATE_TIMESTAM
 INSERT INTO A_PROC_LOADED_LIST (ROW_ID,PROC_NAME,LOADED_FLG,LAST_UPDATE_TIMESTAMP) VALUES(2100020006,'ky_legacy_role_valautostup-workflow','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
 
-INSERT INTO B_ANSIBLE_IF_INFO (ANSIBLE_IF_INFO_ID,ANSIBLE_STORAGE_PATH_LNX,ANSIBLE_STORAGE_PATH_ANS,SYMPHONY_STORAGE_PATH_ANS,ANSIBLE_HOSTNAME,ANSIBLE_PROTOCOL,ANSIBLE_PORT,ANSIBLE_EXEC_MODE,ANSIBLE_EXEC_OPTIONS,ANSIBLE_EXEC_USER,ANSIBLE_ACCESS_KEY_ID,ANSIBLE_SECRET_ACCESS_KEY,ANSTWR_ORGANIZATION,ANSTWR_AUTH_TOKEN,ANSTWR_DEL_RUNTIME_DATA,NULL_DATA_HANDLING_FLG,DISP_SEQ,ANSIBLE_REFRESH_INTERVAL,ANSIBLE_TAILLOG_LINES,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/ansible_driver','%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/ansible_driver','%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/symphony','exastro-it-automation','https','443','1','-vvv',NULL,'AccessKeyId','H2IwpzI0DJAwMKAmF2I5','Default',NULL,1,'2',1,3000,1000,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_ANSIBLE_IF_INFO_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ANSIBLE_IF_INFO_ID,ANSIBLE_STORAGE_PATH_LNX,ANSIBLE_STORAGE_PATH_ANS,SYMPHONY_STORAGE_PATH_ANS,ANSIBLE_HOSTNAME,ANSIBLE_PROTOCOL,ANSIBLE_PORT,ANSIBLE_EXEC_MODE,ANSIBLE_EXEC_OPTIONS,ANSIBLE_EXEC_USER,ANSIBLE_ACCESS_KEY_ID,ANSIBLE_SECRET_ACCESS_KEY,ANSTWR_ORGANIZATION,ANSTWR_AUTH_TOKEN,ANSTWR_DEL_RUNTIME_DATA,NULL_DATA_HANDLING_FLG,DISP_SEQ,ANSIBLE_REFRESH_INTERVAL,ANSIBLE_TAILLOG_LINES,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/ansible_driver','%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/ansible_driver','%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/symphony','exastro-it-automation','https','443','1','-vvv',NULL,'AccessKeyId','H2IwpzI0DJAwMKAmF2I5','Default',NULL,1,'2',1,3000,1000,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANSIBLE_IF_INFO (ANSIBLE_IF_INFO_ID,ANSIBLE_STORAGE_PATH_LNX,ANSIBLE_STORAGE_PATH_ANS,SYMPHONY_STORAGE_PATH_ANS,ANSIBLE_HOSTNAME,ANSIBLE_PROTOCOL,ANSIBLE_PORT,ANSTWR_HOSTNAME,ANSTWR_PROTOCOL,ANSTWR_PORT,ANSIBLE_EXEC_MODE,ANSIBLE_EXEC_OPTIONS,ANSIBLE_EXEC_USER,ANSIBLE_ACCESS_KEY_ID,ANSIBLE_SECRET_ACCESS_KEY,ANSTWR_ORGANIZATION,ANSTWR_AUTH_TOKEN,ANSTWR_DEL_RUNTIME_DATA,NULL_DATA_HANDLING_FLG,ANSIBLE_NUM_PARALLEL_EXEC,ANSIBLE_REFRESH_INTERVAL,ANSIBLE_TAILLOG_LINES,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/ansible_driver','%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/ansible_driver','%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/symphony','exastro-it-automation','https','443','ansible-tower-server','https','443','1','-vvv',NULL,'AccessKeyId','H2IwpzI0DJAwMKAmF2I5','Default',NULL,1,'2',50,3000,1000,1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANSIBLE_IF_INFO_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ANSIBLE_IF_INFO_ID,ANSIBLE_STORAGE_PATH_LNX,ANSIBLE_STORAGE_PATH_ANS,SYMPHONY_STORAGE_PATH_ANS,ANSIBLE_HOSTNAME,ANSIBLE_PROTOCOL,ANSIBLE_PORT,ANSTWR_HOSTNAME,ANSTWR_PROTOCOL,ANSTWR_PORT,ANSIBLE_EXEC_MODE,ANSIBLE_EXEC_OPTIONS,ANSIBLE_EXEC_USER,ANSIBLE_ACCESS_KEY_ID,ANSIBLE_SECRET_ACCESS_KEY,ANSTWR_ORGANIZATION,ANSTWR_AUTH_TOKEN,ANSTWR_DEL_RUNTIME_DATA,NULL_DATA_HANDLING_FLG,ANSIBLE_NUM_PARALLEL_EXEC,ANSIBLE_REFRESH_INTERVAL,ANSIBLE_TAILLOG_LINES,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/ansible_driver','%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/ansible_driver','%%%%%ITA_DIRECTORY%%%%%/data_relay_storage/symphony','exastro-it-automation','https','443','ansible-tower-server','https','443','1','-vvv',NULL,'AccessKeyId','H2IwpzI0DJAwMKAmF2I5','Default',NULL,1,'2',50,3000,1000,1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO B_ANSIBLE_RUN_MODE (RUN_MODE_ID,RUN_MODE_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'通常',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_ANSIBLE_RUN_MODE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,RUN_MODE_ID,RUN_MODE_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'通常',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

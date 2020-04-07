@@ -229,23 +229,25 @@ EOD;
                                 <table id="gateChangePwTable" class="headerLeftTable inputItemTable" border="0">
                                     <tr>
                                         <th class="inputItemExplain">{$objMTS->getSomeMessage("ITAWDCH-MNU-1190004")}</th>
-                                        <td class="inputItemWrapper">{$strUsernameLineBody}</td>
+                                        <td class="inputItemWrapper"><div class="input_login_id">{$strUsernameLineBody}</div></td>
                                     </tr>
                                     <tr>
                                         <th class="inputItemExplain">{$objMTS->getSomeMessage("ITAWDCH-MNU-1190005")}</th>
-                                        <td class="inputItemWrapper"><input id="oldPassword" class="inputUserPw" type="password" name="old_password" /></td>
+                                        <td class="inputItemWrapper"><div class="input_password"><input id="oldPassword" class="inputUserPw" type="password" name="old_password" /><div class="password_eye"></div></td>
                                     </tr>
                                     <tr>
                                         <th class="inputItemExplain">{$objMTS->getSomeMessage("ITAWDCH-MNU-1190006")}</th>
-                                        <td class="inputItemWrapper"><input id="newPassword1" class="inputUserPw" type="password" name="new_password" /></td>
+                                        <td class="inputItemWrapper"><div class="input_password"><input id="newPassword1" class="inputUserPw" type="password" name="new_password" /><div class="password_eye"></div></td>
                                     </tr>
                                     <tr>
                                         <th class="inputItemExplain">{$objMTS->getSomeMessage("ITAWDCH-MNU-1190007")}</th>
-                                        <td class="inputItemWrapper"><input id="newPassword2" class="inputUserPw" type="password" name="new_password_2" /></td>
+                                        <td class="inputItemWrapper"><div class="input_password"><input id="newPassword2" class="inputUserPw" type="password" name="new_password_2" /><div class="password_eye"></div></td>
                                     </tr>
                                 </table>
-                                <input id="changePwTryExecute" class="changePwGateSubmitElement tryExecute" type="submit" name="submit" value="{$objMTS->getSomeMessage("ITAWDCH-MNU-1190008")}" />
-                                <input type="hidden" name="expiry" value="{$strExpiry}">
+                                <div id="gateChangePwTry">
+                                  <input id="changePwTryExecute" class="changePwGateSubmitElement tryExecute" type="submit" name="submit" value="{$objMTS->getSomeMessage("ITAWDCH-MNU-1190008")}" />
+                                  <input type="hidden" name="expiry" value="{$strExpiry}">
+                                </div>
                                 {$strDifferBody1}
                             </form>
                         </div>

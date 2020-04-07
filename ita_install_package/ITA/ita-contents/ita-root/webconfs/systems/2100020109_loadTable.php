@@ -566,7 +566,6 @@ Ansible（Legacy）代入値管理
     $table->addColumn($c);
     //ホスト----
 
-
     //----変数名
     $objFunction01 = function($objOutputType, $aryVariant, $arySetting, $aryOverride, $objColumn){
         global $g;
@@ -763,7 +762,8 @@ Ansible（Legacy）代入値管理
     //変数名----
 
 
-    $objVldt = new SingleTextValidator(0,1024,false);
+    //----具体値
+    $objVldt = new SingleTextValidator(0,8192,false);
     $c = new TextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-304010"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-304020"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
@@ -774,9 +774,10 @@ Ansible（Legacy）代入値管理
     $c->setHiddenMainTableColumn(true);
 
     $table->addColumn($c);
+    //具体値----
 
 
-    // 代入順序
+    //----代入順序
     $c = new NumColumn('ASSIGN_SEQ',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-304051"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-304052"));//エクセル・ヘッダでの説明
     $c->setSubtotalFlag(false);
@@ -787,6 +788,49 @@ Ansible（Legacy）代入値管理
     $c->setHiddenMainTableColumn(true);
 
     $table->addColumn($c);
+    //代入順序----
+
+    //----具体値でTPF変数使用有無
+    // 具体値のテンプレート変数設定有無を設定
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+         global    $g;
+         $boolRet = true;
+         $intErrorType = null;
+         $aryErrMsgBody = array();
+         $strErrMsg = "";
+         $strErrorBuf = "";
+
+         $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+         if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+             if(strlen($g['VARS_ENTRY_USE_TPFVARS_VAULE']) !== 0){
+                 $exeQueryData[$objColumn->getID()] = $g['VARS_ENTRY_USE_TPFVARS_VAULE'];
+             }
+         }
+         $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+         return $retArray;
+    };
+
+    $c = new TextColumn('VARS_ENTRY_USE_TPFVARS',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-303085"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-303086"));//エクセル・ヘッダでの説明
+    $c->setRequired(false);             //登録/更新時には、任意入力
+    $c->setHiddenMainTableColumn(true); //コンテンツのソースがヴューの場合、登録/更新の対象とする
+    $c->setAllowSendFromFile(false);    //エクセル/CSVからのアップロードを禁止する。
+
+    $c->getOutputType('filter_table')->setVisible(false);
+    $c->getOutputType('print_table')->setVisible(false);
+    $c->getOutputType('update_table')->setVisible(false);
+    $c->getOutputType('register_table')->setVisible(false);
+    $c->getOutputType('delete_table')->setVisible(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->getOutputType('excel')->setVisible(false);
+    $c->getOutputType('csv')->setVisible(false);
+    $c->getOutputType('json')->setVisible(false);
+
+    $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
+
+    $table->addColumn($c);
+    //具体値でTPF変数使用有無----
+
 
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
     $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
@@ -913,6 +957,8 @@ Ansible（Legacy）代入値管理
             }
         }
 
+        unset($g['VARS_ENTRY_USE_TPFVARS_VAULE']);
+
         if($strModeId == "DTUP_singleRecDelete"){
             //----更新前のレコードから、各カラムの値を取得
             $intOperationNoUAPK = isset($arrayVariant['edit_target_row']['OPERATION_NO_UAPK'])?
@@ -952,6 +998,16 @@ Ansible（Legacy）代入値管理
                                            $arrayRegData['REST_VARS_LINK_ID']:null;
             $intRestSystemId          = array_key_exists('REST_SYSTEM_ID',$arrayRegData)?
                                            $arrayRegData['REST_SYSTEM_ID']:null;
+            $intVarsEntry             = array_key_exists('VARS_ENTRY',$arrayRegData)?
+                                           $arrayRegData['VARS_ENTRY']:null;
+
+            // 具体値にテンプレート変数が設定されているか判定
+            $g['VARS_ENTRY_USE_TPFVARS_VAULE'] = "0";
+            $match_str = "/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/";
+            $ret = preg_match_all($match_str,$intVarsEntry,$var_match);
+            if(($ret !== false) && ($ret > 0)){
+                $g['VARS_ENTRY_USE_TPFVARS_VAULE'] = "1";
+            }
         }
 
         $g['PATTERN_ID_UPDATE_VALUE']        = "";

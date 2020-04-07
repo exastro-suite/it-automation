@@ -78,9 +78,13 @@
             }
             else{
                 $systemFile = "{$g['root_dir_path']}/webconfs/systems/{$g['page_dir']}_loadTable.php";
+                $sheetFile = "{$g['root_dir_path']}/webconfs/sheets/{$g['page_dir']}_loadTable.php";
                 $userFile = "{$g['root_dir_path']}/webconfs/users/{$g['page_dir']}_loadTable.php";
                 if(file_exists($systemFile)){
                     require_once($systemFile);
+                }
+                else if(file_exists($sheetFile)){
+                    require_once($sheetFile);
                 }
                 else if(file_exists($userFile)){
                     require_once($userFile);
@@ -417,14 +421,25 @@
                         }
                     }
 
-                    foreach($arrayObjColumn as $objColumn){
-                        $arrayTmp = $objColumn->afterTableIUDAction($exeRegisterData, $reqRegisterData, $aryVariant);
-                        if($arrayTmp[0]===false){
-                            $intErrorType = $arrayTmp[1];
-                            $error_str = $arrayTmp[3];
-                            $strErrorBuf = $arrayTmp[4];
-                            throw new Exception( '00001900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                    //1行更新の場合
+                    if( $varCommitSpan === 1 ){
+                        foreach($arrayObjColumn as $objColumn){
+                            $arrayTmp = $objColumn->afterTableIUDAction($exeRegisterData, $reqRegisterData, $aryVariant);
+                            if($arrayTmp[0]===false){
+                                $intErrorType = $arrayTmp[1];
+                                $error_str = $arrayTmp[3];
+                                $strErrorBuf = $arrayTmp[4];
+                                throw new Exception( '00001900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            }
                         }
+                    }else{
+                        //全行更新の場合
+                        $varRet[99] = array(
+                            'exeData'        => $exeRegisterData, 
+                            'reqData'        => $reqRegisterData, 
+                            'aryVariant'     => $aryVariant,
+                            'arrayObjColumn' => $arrayObjColumn
+                        );
                     }
 
                     //----DB更新後の処理が定義されている場合、ここで実行する
