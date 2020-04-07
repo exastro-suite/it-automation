@@ -172,6 +172,9 @@
        unset($lv_tabColNameToValAssRowList);
        unset($lv_tableNameToPKeyNameList);
 
+        // メモリ最適化
+        $ret = gc_mem_caches();
+
         ////////////////////////////////////////////////////////////////////////////////
         // トランザクション開始       
         ////////////////////////////////////////////////////////////////////////////////
@@ -289,7 +292,6 @@
             $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90053");
             throw new Exception($errorMsg);
         }
-        unset($lv_VarsAssignRecodes);
 
         $ret = deleteVarsAssign($lv_ArryVarsAssignRecodes);
         if($ret === false) {
@@ -297,7 +299,14 @@
             $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90053");
             throw new Exception($errorMsg);
         }
+
+        unset($lv_VarsAssignRecodes);
         unset($lv_ArryVarsAssignRecodes);
+        unset($lv_varsAssList);
+        unset($lv_arrayVarsAssList);
+
+        // メモリ最適化
+        $ret = gc_mem_caches();
 
         ////////////////////////////////////////////////////////////////
         // コミット(レコードロックを解除)                             //
@@ -404,6 +413,12 @@
             throw new Exception($errorMsg);
         }
 
+        unset($lv_phoLinkList);
+        unset($lv_PhoLinkRecodes);
+        
+        // メモリ最適化
+        $ret = gc_mem_caches();
+
         ////////////////////////////////////////////////////////////////
         // コミット(レコードロックを解除)                             //
         ////////////////////////////////////////////////////////////////
@@ -495,6 +510,10 @@
             LocalLogPrint(basename(__FILE__),__LINE__,$errorMsg);
         }
     }
+
+    //メモリ使用量確認
+    //$FREE_LOG = 'memory_get_peak_usage:[' . memory_get_peak_usage(true) . "/" . memory_get_usage() . ']';
+    //LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
 
     ////////////////////////////////
     //// 結果出力               ////
@@ -1506,7 +1525,7 @@ function makeVarsAssignData($in_table_name,
     if($in_col_list['COL_TYPE'] == DF_COL_TYPE_VAL ||
         $in_col_list['COL_TYPE'] == DF_COL_TYPE_KEYVAL) {
         // Value型カラムの場合
-        //具体値が空白または1024バイト以上ないか判定
+        //具体値が空白または8192バイト以上ないか判定
         $ret = validateValueTypeColValue($in_col_val,
                                          $in_null_data_handling_flg,
                                          $in_menu_id,$in_row_id,$in_col_list['COL_TITLE']);
@@ -1768,6 +1787,9 @@ function addStg1StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
            $in_varsAssignList["ASSIGN_SEQ"]        . "_" .
            "0";
     $hit_flg = false;
+
+    $val_list = array();
+
     // 代入値管理に登録されているか判定
     if(isset($in_VarsAssignRecodes[$key]))
     {
@@ -1792,12 +1814,12 @@ function addStg1StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
         } else {
             $hit_flg = true;
             $tgt_row = $in_VarsAssignRecodes[$key];
-      
+
             // 具体値を退避
             $val_list = array();
             $val_list[] = $in_varsAssignList['VARS_ENTRY'];
             $val_list[] = $in_VarsAssignRecodes[$key]['VARS_ENTRY'];
-
+      
             // 代入値管理に必要なレコードを削除
             unset($in_VarsAssignRecodes[$key]);
         }
@@ -1841,16 +1863,17 @@ function addStg1StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
             LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
         }
     }
+
+    $VARS_ENTRY_USE_TPFVARS = "0";
     // 具体値にテンプレート変数が記述されているか判定
-    if( $db_update_flg === false) {
-        foreach($val_list as $val) {
-            $var_match = array();
-            $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
-            if(($ret !== false) && ($ret > 0)){
-                // テンプレート変数が記述されていることを記録
-                $db_update_flg = true;
-                break;
-            }
+    foreach($val_list as $val) {
+        $var_match = array();
+        $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
+        if(($ret !== false) && ($ret > 0)){
+          // テンプレート変数が記述されていることを記録
+            $db_update_flg = true;
+            $VARS_ENTRY_USE_TPFVARS = "1";
+            break;
         }
     }
 
@@ -1861,6 +1884,9 @@ function addStg1StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
     }
     $tgt_row['JOURNAL_SEQ_NO']          = $seqValueOfJnlTable;
     $tgt_row['VARS_ENTRY']              = $in_varsAssignList['VARS_ENTRY'];
+
+    $tgt_row['VARS_ENTRY_USE_TPFVARS']  = $VARS_ENTRY_USE_TPFVARS;
+
     $tgt_row['COL_SEQ_COMBINATION_ID']  = "";
     $tgt_row['DISUSE_FLAG']             = "0";
     $tgt_row['LAST_UPDATE_USER']        = $db_valautostup_user_id;
@@ -1934,6 +1960,8 @@ function addStg1ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
            $in_varsAssignList["ASSIGN_SEQ"]        . "_" .
            "0";
 
+    $val_list = array();
+
     $hit_flg = false;
     // 代入値管理に登録されているか判定
     if(isset($in_ArryVarsAssignRecodes[$key]))
@@ -1997,19 +2025,19 @@ function addStg1ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
         }
     }
 
-    // 具体値にテンプレート変数が記述されているか判定
-    if( $db_update_flg === false) {
-        foreach($val_list as $val) {
-            $var_match = array();
-            $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
-            if(($ret !== false) && ($ret > 0)){
-                // テンプレート変数が記述されていることを記録
-                $db_update_flg = true;
-                break;
-            }
+    $VARS_ENTRY_USE_TPFVARS = "0";
+    // 具体値にテンプレート変数が記述されているか判定    
+    foreach($val_list as $val) {
+        $var_match = array();
+        $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
+        if(($ret !== false) && ($ret > 0)){
+            // テンプレート変数が記述されていることを記録
+            $db_update_flg = true;
+            $VARS_ENTRY_USE_TPFVARS = "1";
+            break;
         }
     }
-
+    
     // ロール管理ジャーナルに登録する情報設定
     $seqValueOfJnlTable = getAndLockSeq($strSeqOfJnlTable);
     if($seqValueOfJnlTable == -1) {
@@ -2017,6 +2045,8 @@ function addStg1ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
     }
     $tgt_row['JOURNAL_SEQ_NO']   = $seqValueOfJnlTable;
     $tgt_row['VARS_ENTRY']       = $in_varsAssignList['VARS_ENTRY'];
+
+    $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
 
     $tgt_row['DISUSE_FLAG']      = "0";
     $tgt_row['LAST_UPDATE_USER'] = $db_valautostup_user_id;
@@ -2401,13 +2431,13 @@ function addStg2StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
     }
 
     // 具体値にテンプレート変数が記述されているか判定
-    if( $db_update_flg === false) {
-        $var_match = array();
-        $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$in_varsAssignList['VARS_ENTRY'],$var_match);
-        if(($ret !== false) && ($ret > 0)){
-            // テンプレート変数が記述されていることを記録
-            $db_update_flg = true;
-        }
+    $VARS_ENTRY_USE_TPFVARS = "0";
+    $var_match = array();
+    $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$in_varsAssignList['VARS_ENTRY'],$var_match);
+    if(($ret !== false) && ($ret > 0)){
+        // テンプレート変数が記述されていることを記録
+        $db_update_flg = true;
+        $VARS_ENTRY_USE_TPFVARS = "1";
     }
 
     // ロール管理ジャーナルに登録する情報設定
@@ -2417,6 +2447,9 @@ function addStg2StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
     }
     $tgt_row['JOURNAL_SEQ_NO']          = $seqValueOfJnlTable;
     $tgt_row['VARS_ENTRY']              = $in_varsAssignList['VARS_ENTRY'];
+    
+    $tgt_row['VARS_ENTRY_USE_TPFVARS']  = $VARS_ENTRY_USE_TPFVARS;
+    
     $tgt_row['COL_SEQ_COMBINATION_ID']  = "";
     $tgt_row['DISUSE_FLAG']             = "0";
     $tgt_row['LAST_UPDATE_USER']        = $db_valautostup_user_id;
@@ -2550,13 +2583,13 @@ function addStg2ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
     }
 
     // 具体値にテンプレート変数が記述されているか判定
-    if( $db_update_flg === false) {
-        $var_match = array();
-        $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$in_varsAssignList['VARS_ENTRY'],$var_match);
-        if(($ret !== false) && ($ret > 0)){
-            // テンプレート変数が記述されていることを記録
-            $db_update_flg = true;
-        }
+    $VARS_ENTRY_USE_TPFVARS = "0";
+    $var_match = array();
+    $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$in_varsAssignList['VARS_ENTRY'],$var_match);
+    if(($ret !== false) && ($ret > 0)){
+        // テンプレート変数が記述されていることを記録
+        $VARS_ENTRY_USE_TPFVARS = "1";
+        $db_update_flg = true;
     }
 
 
@@ -2567,6 +2600,8 @@ function addStg2ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
     }
     $tgt_row['JOURNAL_SEQ_NO']   = $seqValueOfJnlTable;
     $tgt_row['VARS_ENTRY']       = $in_varsAssignList['VARS_ENTRY'];
+
+    $tgt_row['VARS_ENTRY_USE_TPFVARS']  = $VARS_ENTRY_USE_TPFVARS;
 
     $tgt_row['DISUSE_FLAG']      = "0";
     $tgt_row['LAST_UPDATE_USER'] = $db_valautostup_user_id;
@@ -2593,6 +2628,7 @@ function addStg2ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
 
     return true;
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 // F0017
 // 処理内容
@@ -2732,8 +2768,8 @@ function validateValueTypeColValue($in_col_val,
             return false;
         }
     }
-    //具体値が1024バイト以上の場合
-    if(strlen($in_col_val) > 1024) {
+    //具体値が8192バイト以上の場合
+    if(strlen($in_col_val) > 8192) {
         // トレースメッセージ
         if($log_level === "DEBUG") {
             $traceMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90057",

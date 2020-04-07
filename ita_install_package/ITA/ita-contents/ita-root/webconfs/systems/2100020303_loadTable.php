@@ -78,7 +78,7 @@ Ansible（Legacy Role）ロールパッケージ一覧
 
     $c = new FileUploadColumn('ROLE_PACKAGE_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1605070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1605080"));//エクセル・ヘッダでの説明
-    $c->setMaxFileSize(268435456);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
 
@@ -87,6 +87,27 @@ Ansible（Legacy Role）ロールパッケージ一覧
     $c->setRequired(true);//登録/更新時には、入力必須
 
     $table->addColumn($c);
+
+    /* 変数定義解析用隠しカラム */
+    $c = new FileUploadColumn('VAR_STRUCT_ANAL_JSON_STRING_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1605085"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1605086"));//エクセル・ヘッダでの説明
+    $c->setAllowSendFromFile(true);//エクセル/CSVからのアップロードを禁止する。
+    $c->setFileHideMode(true);
+    $c->getOutputType('filter_table')->setVisible(false);
+    $c->getOutputType('print_table')->setVisible(false);
+    $c->getOutputType('update_table')->setVisible(false);
+    $c->getOutputType('register_table')->setVisible(false);
+    $c->getOutputType('delete_table')->setVisible(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->getOutputType('excel')->setVisible(false);
+    $c->getOutputType('csv')->setVisible(false);
+    $c->getOutputType('json')->setVisible(false);
+    $c->setAllowUploadColmnSendRestApi(false);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+
+    $c->setRequired(false);//登録/更新時には、入力必須
+
+    $table->addColumn($c);
+
 
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
     $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){

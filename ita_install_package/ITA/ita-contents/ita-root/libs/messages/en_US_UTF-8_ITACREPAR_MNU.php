@@ -52,9 +52,9 @@ $ary[102107] = "Item name";
 $ary[102108] = "Enter the item name you want display on the menu.";
 $ary[102109] = "Maximum number of bytes";
 $ary[102110] = "Enter the maximum number of bytes.
+Total number of bytes (8192).
 For single byte alphanumeric characters, the required bytes will be equal to the number of characters.
-For double byte characters, the number of characters multiplied by 3, plus 2 bytes will be required.
-If total number of bytes (53460) that can be linked to one menu is exceeded, an error will occur.";
+For double byte characters, the number of characters multiplied by 3, plus 2 bytes will be required.";
 $ary[102111] = "Display order";
 $ary[102112] = "Enter the order of the columns to be displayed in the menu. Columns will be displayed in ascending order from left to right.";
 $ary[102113] = "Required";
@@ -66,13 +66,25 @@ $ary[102118] = "Enter a description to be displayed when mousing over the item n
 $ary[102119] = "Unique";
 $ary[102120] = "For unique items, set \"●\".";
 $ary[102121] = "Input method";
-$ary[102122] = "Select \"String\" or \"Reference other menu\".";
+$ary[102122] = "Select between \"String\",\"Multi string\",\"Interger\",\"Decimal number\",\"Date/time\", \"Date\", or \"Pulldown selection\"";
 $ary[102123] = "Menu group: Menu: Item";
 $ary[102124] = "Select the item to be referenced.";
 $ary[102125] = "String";
-$ary[102126] = "Reference other menu";
+$ary[102126] = "Pulldown selection";
 $ary[102127] = "Column group";
 $ary[102128] = "Select the column group to belong to.";
+$ary[102129] = "Integer";
+$ary[102130] = "Maximum value";
+$ary[102131] = "Enter the maximum value of Integer column. 2147483647 will be set if not entered.";
+$ary[102132] = "Minimum value";
+$ary[102133] = "Enter the minimum value of Integer column. -2147483648 will be set if not entered.";
+$ary[102134] = "Decimal number";
+$ary[102135] = "Maximum value";
+$ary[102136] = "Enter the maximum value of Decimal number column. 99999999999999 will be set if not entered.";
+$ary[102137] = "Minimum value";
+$ary[102138] = "Enter the minimum value of Decimal number column. -99999999999999 will be set if not entered.";
+$ary[102139] = "Digits";
+$ary[102140] = "Enter the maximum total digit of whole number part and fraction part for Decimal number column. 14 will be set if not entered.";
 $ary[102201] = "Display the link between the created menu and the DB table.";
 $ary[102202] = "Id";
 $ary[102203] = "Menu /Table link list";

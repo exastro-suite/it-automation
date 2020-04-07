@@ -221,6 +221,7 @@
             "VARS_LINK_ID"=>""            ,
             "VARS_ENTRY"=>""              ,
             "ASSIGN_SEQ"=>""              ,
+            "VARS_ENTRY_USE_TPFVARS"=>""  ,
             "DISP_SEQ"=>""                ,
             "DISUSE_FLAG"=>""             ,
             "NOTE"=>""                    ,
@@ -241,6 +242,7 @@
             "VARS_LINK_ID"=>""            ,
             "VARS_ENTRY"=>""              ,
             "ASSIGN_SEQ"=>""              ,
+            "VARS_ENTRY_USE_TPFVARS"=>""  ,
             "DISP_SEQ"=>""                ,
             "DISUSE_FLAG"=>""             ,
             "NOTE"=>""                    ,
@@ -422,7 +424,7 @@
 
     $g_null_data_handling_def   = "";
 
-    $db_update_flg              = false;    // DB更新フラグ
+    $db_update_flg              = false;    // 変数刈取バックヤード連携有無
 
     try{
         ////////////////////////////////
@@ -565,6 +567,12 @@
         unset($lva_table_col_list);
         unset($lva_error_column_id_list);
         unset($lva_table_nameTOPkeyname_list);
+        unset($lva_table_colnameTOid_list);
+        unset($lva_child_vars_ass_list);
+        unset($lva_child_vars_ass_chk_list);
+
+        // メモリ最適化
+        $ret = gc_mem_caches();
 
         ////////////////////////////////////////////////////////////////////////////////
         // トランザクション開始
@@ -612,6 +620,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70018");
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
+
         ////////////////////////////////////////////////////////////////////////////////
         //  一般変数を紐付けている紐付メニューの具体値を代入値管理に登録
         ////////////////////////////////////////////////////////////////////////////////
@@ -656,6 +665,13 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90053");
             throw new Exception( $FREE_LOG );
         }
+
+        unset($lva_vars_ass_list);
+        unset($lva_vars_ass_chk_list);
+        unset($lv_VarsAssignRecodes);
+
+        // メモリ最適化
+        $ret = gc_mem_caches();
 
         ////////////////////////////////////////////////////////////////
         // コミット(レコードロックを解除)                             //
@@ -763,6 +779,11 @@
             throw new Exception( $FREE_LOG );
         }
 
+        unset($lv_PhoLinkRecodes);
+
+        // メモリ最適化
+        $ret = gc_mem_caches();
+
         ////////////////////////////////////////////////////////////////
         // コミット(レコードロックを解除)                             //
         ////////////////////////////////////////////////////////////////
@@ -853,6 +874,10 @@
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
     }
+
+    //メモリ使用量確認
+    //$FREE_LOG = 'memory_get_peak_usage:[' . memory_get_peak_usage(true) . "/" . memory_get_usage() . ']';
+    //LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
 
     ////////////////////////////////
     //// 結果出力               ////
@@ -1886,7 +1911,7 @@
         //カラムタイプを判定
         switch($ina_col_list['COL_TYPE']){
         case DF_COL_TYPE_VAL:
-            //具体値が空白または1024バイト以上ないか判定
+            //具体値が空白または8192バイト以上ないか判定
             $ret = chkValueTypeColValue($in_col_val,
                                         $in_null_data_handling_flg,
                                         $in_table_name,$in_row_id,$ina_col_list['COL_TITLE']);
@@ -1947,7 +1972,7 @@
                            $in_row_id);
             break;
         case DF_COL_TYPE_KEYVAL:
-            //具体値が空白または1024バイト以上ないか判定
+            //具体値が空白または8192バイト以上ないか判定
             $ret = chkValueTypeColValue($in_col_val,
                                         $in_null_data_handling_flg,
                                         $in_table_name,$in_row_id,$ina_col_list['COL_TITLE']);
@@ -2245,18 +2270,19 @@
                 return true;
             }
 
+            $VARS_ENTRY_USE_TPFVARS = "0";
             // 具体値にテンプレート変数が記述されているか判定
-            if( $db_update_flg === false) {
-                $var_match = array();
-                $val_list[] = $tgt_row["VARS_ENTRY"];
-                $val_list[] = $ina_varsass_list['VARS_ENTRY'];
-                foreach($val_list as $val) {
-                    $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
-                    if(($ret !== false) && ($ret > 0)){
-                        // テンプレート変数が記述されていることを記録
-                        $db_update_flg = true;
-                        break;
-                    }
+            $var_match = array();
+            $val_list   = array();
+            $val_list[] = $tgt_row["VARS_ENTRY"];
+            $val_list[] = $ina_varsass_list['VARS_ENTRY'];
+            foreach($val_list as $val) {
+                $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
+                if(($ret !== false) && ($ret > 0)){
+                    // テンプレート変数が記述されていることを記録
+                    $db_update_flg = true;
+                    $VARS_ENTRY_USE_TPFVARS = "1";
+                    break;
                 }
             }
 
@@ -2296,9 +2322,9 @@
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
             $tgt_row["DISUSE_FLAG"]      = '0';
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
-            
         }
 
         $temp_array = array();
@@ -2397,7 +2423,6 @@
         global    $db_update_flg;
         global    $vg_driver_name;
 
-
         global $db_access_user_id;
         global $strCurTableVarsAss;
         global $strJnlTableVarsAss;
@@ -2436,13 +2461,9 @@
             }
                 
             // 具体値にテンプレート変数が記述されているか判定
-            if( $db_update_flg === false) {
-                $var_match = array();
-                $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$tgt_row["VARS_ENTRY"],$var_match);
-                if(($ret !== false) && ($ret > 0)){
-                    // テンプレート変数が記述されていることを記録
-                    $db_update_flg = true;
-                }
+            if($db_update_flg === false) {
+               // テンプレート変数が記述されていることを記録
+               $db_update_flg = true;
             }
 
             // トレースメッセージ
@@ -2474,7 +2495,7 @@
     
                 return false;
             }
-    
+
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["DISUSE_FLAG"]      = '1';
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
@@ -2793,8 +2814,8 @@
                  return false;
             }
         }
-        //具体値が1024バイト以上の場合
-        if(strlen($in_col_val)>1024){
+        //具体値が8192バイト以上の場合
+        if(strlen($in_col_val)>8192){
             // トレースメッセージ
             if ( $log_level === 'DEBUG' ){
                 $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90057",
@@ -2891,6 +2912,16 @@
 
 
         }
+
+        $VARS_ENTRY_USE_TPFVARS = "0";
+        $val = $ina_varsass_list['VARS_ENTRY'];
+        $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$val,$var_match);
+        if(($ret !== false) && ($ret > 0)){
+            // テンプレート変数が記述されていることを記録
+            $db_update_flg = true;
+            $VARS_ENTRY_USE_TPFVARS = "1";
+        }
+
         if($action == "UPDATE"){
             ////////////////////////////////////////////////////////////////
             // ジャーナルシーケンスをロック                               //
@@ -2914,9 +2945,9 @@
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
             $tgt_row["DISUSE_FLAG"]      = '0';
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
-            
         }
         else{
             ////////////////////////////////////////////////////////////////
@@ -2948,6 +2979,7 @@
             $tgt_row['VARS_LINK_ID']      = $ina_varsass_list['VARS_LINK_ID'];
             $tgt_row['ASSIGN_SEQ']        = $ina_varsass_list['ASSIGN_SEQ'];
             $tgt_row["VARS_ENTRY"]        = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
             $tgt_row["DISUSE_FLAG"]      = '0';
 
@@ -2976,16 +3008,6 @@
             $tgt_row["JOURNAL_SEQ_NO"]       = $retArray[0];
             $tgt_row["LAST_UPDATE_USER"]     = $db_access_user_id;
 
-        }
-
-        // 具体値にテンプレート変数が記述されているか判定
-        if( $db_update_flg === false) {
-            $var_match = array();
-            $ret = preg_match_all("/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/",$tgt_row["VARS_ENTRY"],$var_match);
-            if(($ret !== false) && ($ret > 0)){
-                // テンプレート変数が記述されていることを記録
-                $db_update_flg = true;
-            }
         }
 
         $temp_array = array();

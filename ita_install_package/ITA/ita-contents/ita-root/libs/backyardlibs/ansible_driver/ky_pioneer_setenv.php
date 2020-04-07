@@ -90,4 +90,6 @@
     // 親Playbookのファイル名
     $vg_parent_playbook_name            = "playbook.yml";
 
+    $vg_log_driver_name                 = "Pioneer";
+
 ?>

@@ -67,37 +67,6 @@ function makeMenuCheckbox(){
 
 }
 
-/**
- * ユーザID取得
- *
- * @return           ユーザID
- */
-function getUserId($username){
-
-    global $g;
-    $sql  = "SELECT USER_ID FROM A_ACCOUNT_LIST WHERE USERNAME ='".$username."'";
-
-    $objQuery = $g['objDBCA']->sqlPrepare($sql);
-    if ($objQuery === false) {
-        web_log($sql);
-        web_log($objQuery->getLastError());
-        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
-                                             array('A_SEQUENCE', 'F_CREATE_MENU_STATUS_RIC', basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
-    }
-    $res = $objQuery->sqlExecute();
-    if ($res === false) {
-        web_log($sql);
-        web_log($objQuery->getLastError());
-        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
-                                             array('A_SEQUENCE', 'F_CREATE_MENU_STATUS_RIC', basename(__FILE__), __LINE__)));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
-    }
-    $tmpAry = array();
-    $row = $objQuery->resultFetch();
-    return $row['USER_ID'];
-}
-
 
 /**
  * シーケンス取得
@@ -193,9 +162,8 @@ function endTransaction(){
 function insertCMStatus($create_menu_id){
 
     global $g;
-    // ---- AD連携（外部認証）
-    $userId = getUserId($_SESSION['ITA_SESSION']['username']);
-    // AD連携（外部認証） ----
+
+    $userId = $g['login_id'];
 
     // トランザクション開始
     startTransaction();

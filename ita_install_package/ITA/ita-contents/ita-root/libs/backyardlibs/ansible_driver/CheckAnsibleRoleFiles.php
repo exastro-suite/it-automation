@@ -552,10 +552,13 @@ class CheckAnsibleRoleFiles {
         $user_varsval_list = array();
         $user_array_vars_list = array();
         $user_array_varsval_list = array();
+        $user_vars_file_use = false;
 
         // ユーザー定義変数ファイルの有無判定
         if((file_exists($user_vars_file) === true) &&
             (is_file($user_vars_file) === true)){
+            $user_vars_file_use = true;
+
             // ユーザー定義変数ファイルのデータ読込
             $dataString = file_get_contents($user_vars_file);
    
@@ -634,6 +637,8 @@ class CheckAnsibleRoleFiles {
                              );
         $result_code    = true;
         $tasks_dir      = false;
+        $defaults_his   = false;
+
         foreach ($files as $file){
             $fullpath = rtrim($in_dir,'/') . '/' . $file;
 
@@ -677,6 +682,8 @@ class CheckAnsibleRoleFiles {
                                               $ina_system_vars);
                    break;
                case "defaults":
+                   $defaults_his = true;
+
                    $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false, false, true, true, false,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
@@ -684,7 +691,7 @@ class CheckAnsibleRoleFiles {
                        $parent_vars_list = array();
                        $vars_list        = array();
                        $array_vars_list  = array();
-                       $varsval_list      = array();
+                       $varsval_list     = array();
                        // defaultsディレクトリ内の変数定義を読み取る
                        $ret = $this->AnalysisDefaultVarsFiles(LC_RUN_MODE_STD,
                                                               $in_base_dir,
@@ -705,7 +712,7 @@ class CheckAnsibleRoleFiles {
                            $all_parent_vars_list[$parent_vars_list[$idx]['VAR_NAME']] = 0;
                        }
 
-                       // 読替表の任意変数がデフォルト変数定義ファイルやita Readmeファイルに登録されているか判>定する。
+                       // 読替表の任意変数がデフォルト変数定義ファイルやita Readmeファイルに登録されているか判定する。
                        $ret = $this->chkTranslationVars($all_parent_vars_list,$User2ITA_var_list,
                                                          basename($translation_table_file), $errmsg);
                        if($ret === false){
@@ -741,6 +748,33 @@ class CheckAnsibleRoleFiles {
                }
             }
         }
+        // ユーザー定義変数ファイルが存在しデフォルト変数定義ファイルが存在しない場合
+        if(($defaults_his       === false) && 
+           ($user_vars_file_use === true)) {
+            // 読替表の任意変数がita Readmeファイルに登録されているか判定する。
+            $ret = $this->chkTranslationVars($all_parent_vars_list,$User2ITA_var_list,
+                                             basename($translation_table_file), $errmsg);
+            if($ret === false){
+                $this->SetLasteError(basename(__FILE__),__LINE__,$errmsg);
+                return(false);
+            }
+            $vars_list       = array();
+            $varsval_list    = array();
+            $array_vars_list = array();
+            // default変数定義ファイルは存在しないがユーザー定義変数ファイル
+            // の変数情報をマージする処理を呼ぶ(具体値を調整)
+            $chkObj->margeDefaultVarsList($vars_list     , $varsval_list,
+                                          $user_vars_list, $user_varsval_list,
+                                          $array_vars_list, $user_array_vars_list );
+
+            //デフォルト変数定義一覧 に変数の情報を登録
+            $ina_def_vars_list[$in_rolename] = $vars_list;
+            $ina_def_array_vars_list[$in_rolename] = $array_vars_list;
+
+            //デフォルト変数定義の変数の具体値情報を登録
+            $ina_def_varsval_list[$in_rolename] = $varsval_list;
+        }
+
         if($tasks_dir === false){
             //$ary[70006] = "｛｝にtasksディレクトリがありません。";
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70006",array('./roles/' . $in_rolename));
@@ -3856,7 +3890,7 @@ class YAMLFileAnalysis{
 
     function __construct(&$in_objMTS){
         $this->lv_objMTS = $in_objMTS;
-        $this->lv_lasterrmsg;
+        $this->lv_lasterrmsg = array();;
     }
 
     function SetLastError($p1,$p2,$p3){
@@ -3988,7 +4022,7 @@ class VarStructAnalysisFileAccess{
         $this->web_mode                    = false;
         $this->master_non_reg_chk          = $master_non_reg_chk;
         $this->vars_struct_anal_only       = $vars_struct_anal_only;
-        $this->lv_lasterrmsg = "";
+        $this->lv_lasterrmsg               = array();;
         if( isset($_SERVER) === true ){
             if( array_key_exists('HTTP_HOST', $_SERVER) === true ){
                 $this->web_mode  = true;
@@ -4261,7 +4295,7 @@ class VarStructAnalysisFileAccess{
                      ."   LEFT JOIN B_ANSIBLE_LRL_ROLE_PACKAGE  TAB_F ON ( TAB_C.ROLE_PACKAGE_ID = TAB_F.ROLE_PACKAGE_ID ) \n"
                      ."   LEFT JOIN B_ANSIBLE_LRL_ROLE          TAB_G ON ( TAB_C.ROLE_ID         = TAB_G.ROLE_ID         ) \n"
                      ." WHERE                                           \n"
-                     ."   TAB_A.VARS_ENTRY LIKE  '%{{ TPF_% }}%' AND    \n"
+                     ."   TAB_A.VARS_ENTRY_USE_TPFVARS = '1' AND        \n"
                      ."   TAB_A.DISUSE_FLAG = '0' AND                   \n"
                      ."   TAB_B.DISUSE_FLAG = '0' AND                   \n"
                      ."   TAB_C.DISUSE_FLAG = '0'                       \n";

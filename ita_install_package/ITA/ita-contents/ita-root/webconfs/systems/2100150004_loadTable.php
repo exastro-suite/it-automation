@@ -63,7 +63,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = new FileUploadColumn('RETURN_FILE',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101007"),"{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$g['page_dir']}","/uploadfiles/2100150101/RETURN_FILE");
     $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101008"));//エクセル・ヘッダでの説明
-    $c->setMaxFileSize(20971520);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
     $c->setDBColumn(true);
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。

@@ -62,7 +62,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // メニュー資材
     $c03 = new FileUploadColumn('FILE_NAME',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102409"));
     $c03->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102410"));//エクセル・ヘッダでの説明
-    $c03->setMaxFileSize(20971520);//単位はバイト
+    $c03->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c03->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c03->setFileHideMode(true);
     $c03->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)

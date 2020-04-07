@@ -108,19 +108,21 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = new FileUploadColumn('OPENST_TEMPLATE',$g['objMTS']->getSomeMessage("ITAOPENST-MNU-110070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAOPENST-MNU-110080"));//エクセル・ヘッダでの説明
-    $c->setMaxFileSize(20971520);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
     $c->setRequired(true);//登録/更新時には、入力必須
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $table->addColumn($c);
 
     $c = new FileUploadColumn('OPENST_ENVIRONMENT',$g['objMTS']->getSomeMessage("ITAOPENST-MNU-110090"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAOPENST-MNU-110100"));//エクセル・ヘッダでの説明
-    $c->setMaxFileSize(20971520);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $table->addColumn($c);
 
 

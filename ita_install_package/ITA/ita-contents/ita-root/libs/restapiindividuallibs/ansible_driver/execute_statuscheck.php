@@ -162,51 +162,35 @@
 
 
     // 実行中を確認後にユーザログ編集
-
-    // pioneerの場合にユーザログ("xxx", )を改行し不要な改行文字を改行コードに置きなえる
+    // 特定のキーワードで改行しlegacyのログを見やすくする
     if($strOrchestratorSub_Id == "PIONEER_NS"){
         $in_exec_log   = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.org";
-        $out_exec_tmp1 = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.tmp1";
-        $out_exec_tmp2 = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.tmp2";
         $out_exec_log  = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log";
-
-        // ユーザログ("xxx", )を改行する
-        $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $in_exec_log  .  " > " . $out_exec_tmp1;
-        exec($cmd);
-        
-        // 改行文字を改行コードに置換える
-        $cmd = "sed -e 's/\\\\r\\\\n/\\n/g' "  . $out_exec_tmp1 . " > " . $out_exec_log;
-        exec($cmd);
-
-        exec("/bin/rm -f " . $out_exec_tmp1 );
+        $log_data = file_get_contents($in_exec_log);
+        // ログ(", ")  =>  (",\n")を改行する
+        $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
+        // 改行文字列\r\nを改行コードに置換える
+        $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+        // python改行文字列\\nを改行コードに置換える
+        $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+        file_put_contents($out_exec_log,$log_data);
     }
     else{
-//       特定のキーワードで改行しlegacyのログを見やすくする
-
         $in_exec_log   = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.org";
-        $out_exec_tmp1 = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.tmp1";
-        $out_exec_tmp2 = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.tmp2";
-        $out_exec_tmp3 = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log.tmp3";
         $out_exec_log  = $strDRSDirPerExeNoNS . $strOutFolderName . "/exec.log";
 
+        $log_data = file_get_contents($in_exec_log);
         // ログ(", ")  =>  (",\n")を改行する
-        $cmd = "sed -e 's/\", \"/\",\\n\"/g' " . $in_exec_log  .  " > " . $out_exec_tmp1;
-        exec($cmd);
-
+        $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
         // ログ(=> {)  =>  (=> {\n)を改行する
-        $cmd = "sed -e 's/=> {/=> {\\n/g' " . $out_exec_tmp1.  " > " . $out_exec_tmp2;
-        exec($cmd);
-
+        $log_data = preg_replace( "/=> {/", "=> {\n",$log_data,-1,$count);
         // ログ(, ")  =>  (,\n")を改行する
-        $cmd = "sed -e 's/, \"/,\\n\"/g' " . $out_exec_tmp2 .  " > " . $out_exec_tmp3;
-        exec($cmd);
-        
-        // 改行文字を改行コードに置換える
-        $cmd = "sed -e 's/\\\\r\\\\n/\\n/g' "  . $out_exec_tmp3 . " > " . $out_exec_log;
-        exec($cmd);
-
-        exec("/bin/rm -f " . $out_exec_tmp1 . " " . $out_exec_tmp2 . " " . $out_exec_tmp3);
-
+        $log_data = preg_replace( "/, \"/", ",\n\"",$log_data,-1,$count);
+        // 改行文字列\r\nを改行コードに置換える
+        $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+        // python改行文字列\\nを改行コードに置換える
+        $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+        file_put_contents($out_exec_log,$log_data);
     }
 
     // PIDファイル存在チェック

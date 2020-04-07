@@ -1075,7 +1075,7 @@ Ansible（Legacy Role）代入値管理
 ////////////////////////////////////////////////////////
 //----具体値
 ////////////////////////////////////////////////////////
-    $objVldt = new SingleTextValidator(0,1024,false);
+    $objVldt = new SingleTextValidator(0,8192,false);
 
     $c = new TextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1304010"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1304020"));//エクセル・ヘッダでの説明
@@ -1087,7 +1087,6 @@ Ansible（Legacy Role）代入値管理
     $c->setHiddenMainTableColumn(true);
 
     $table->addColumn($c);
-
 
 
 ////////////////////////////////////////////////////////
@@ -1205,6 +1204,50 @@ Ansible（Legacy Role）代入値管理
     $table->addColumn($c);
     //デフォルト値----
 
+////////////////////////////////////////////////////////
+//----具体値でTPF変数使用有無
+////////////////////////////////////////////////////////
+    // 具体値のテンプレート変数設定有無を設定
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+         global    $g;
+         $boolRet = true;
+         $intErrorType = null;
+         $aryErrMsgBody = array();
+         $strErrMsg = "";
+         $strErrorBuf = "";
+
+         $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+         if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+             if(strlen($g['VARS_ENTRY_USE_TPFVARS_VAULE']) !== 0){
+                 $exeQueryData[$objColumn->getID()] = $g['VARS_ENTRY_USE_TPFVARS_VAULE'];
+             }
+         }
+         $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+         return $retArray;
+    };
+
+    $c = new TextColumn('VARS_ENTRY_USE_TPFVARS',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1304025"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1304026"));//エクセル・ヘッダでの説明
+    $c->setRequired(false);             //登録/更新時には、任意入力
+    $c->setHiddenMainTableColumn(true); //コンテンツのソースがヴューの場合、登録/更新の対象とする
+    $c->setAllowSendFromFile(false);    //エクセル/CSVからのアップロードを禁止する。
+
+    $c->getOutputType('filter_table')->setVisible(false);
+    $c->getOutputType('print_table')->setVisible(false);
+    $c->getOutputType('update_table')->setVisible(false);
+    $c->getOutputType('register_table')->setVisible(false);
+    $c->getOutputType('delete_table')->setVisible(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->getOutputType('excel')->setVisible(false);
+    $c->getOutputType('csv')->setVisible(false);
+    $c->getOutputType('json')->setVisible(false);
+
+    $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
+
+    $table->addColumn($c);
+    //具体値でTPF変数使用有無----
+
+
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
     $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
         $boolRet = true;
@@ -1215,16 +1258,70 @@ Ansible（Legacy Role）代入値管理
         $strFxName = "";
 
         $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
-        if( $modeValue=="DTUP_singleRecDelete" ){
-            // 廃止の場合のみ
-            $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
-            if( $modeValue_sub == "on" ){
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+            if( $modeValue=="DTUP_singleRecDelete" ){
+                // 廃止の場合のみ
+                $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
+                if( $modeValue_sub == "on" ){
+                
+                    $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                               ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                               ."WHERE ROW_ID IN (2100020006) ";
+
+                    $aryForBind = array();
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+                    if( $aryRetBody[0] !== true ){
+                        $boolRet = false;
+                        $strErrMsg = $aryRetBody[2];
+                        $intErrorType = 500;
+                    }
+                }
+            }
+            // 具体値にテンプレート変数が登録されているか判定する。
+            $var_match = array();
+            $match_str = "/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/";
+            $var_exec  = false;
+            if($modeValue == "DTUP_singleRecRegister") {
+                $val          = isset($aryVariant['arySqlExe_register_table']['VARS_ENTRY'])?
+                                      $aryVariant['arySqlExe_register_table']['VARS_ENTRY']:'';
+                $ret = preg_match_all($match_str,$val,$var_match);
+                if(($ret !== false) && ($ret > 0)){
+                    $var_exec  = true;
+                }
+            }
+            if($modeValue == "DTUP_singleRecUpdate") {
+                // 変更前と変更後の具体値確認
+                $val          = isset($aryVariant['edit_target_row']['VARS_ENTRY'])?
+                                      $aryVariant['edit_target_row']['VARS_ENTRY']:'';
+                $ret = preg_match_all($match_str,$val,$var_match);
+                if(($ret !== false) && ($ret > 0)){
+                    $var_exec  = true;
+                }else{
+                    $val          = isset($aryVariant['arySqlExe_update_table']['VARS_ENTRY'])?
+                                          $aryVariant['arySqlExe_update_table']['VARS_ENTRY']:'';
+                    $ret = preg_match_all($match_str,$val,$var_match);
+                    if(($ret !== false) && ($ret > 0)){
+                        $var_exec  = true;
+                    }
+                }
+            }
+            if($modeValue == "DTUP_singleRecDelete") {
+                $val          = isset($aryVariant['edit_target_row']['VARS_ENTRY'])?
+                                      $aryVariant['edit_target_row']['VARS_ENTRY']:'';
+                $ret = preg_match_all($match_str,$val,$var_match);
+                if(($ret !== false) && ($ret > 0)){
+                    $var_exec  = true;
+                }
+            }
+            if( $var_exec === true)
+            {
                 $strQuery = "UPDATE A_PROC_LOADED_LIST "
                            ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                           ."WHERE ROW_ID in (2100020006) ";
+                           ."WHERE ROW_ID IN (2100020005) ";
 
                 $aryForBind = array();
-    
+
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
 
                 if( $aryRetBody[0] !== true ){
@@ -1234,9 +1331,11 @@ Ansible（Legacy Role）代入値管理
                 }
             }
         }
+
         $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
         return $retArray;
     };
+
     $tmpAryColumn = $table->getColumns();
     $tmpAryColumn['ASSIGN_ID']->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
@@ -1256,6 +1355,8 @@ Ansible（Legacy Role）代入値管理
         $modeValue_sub = "";
 
         $query = "";
+
+        unset($g['VARS_ENTRY_USE_TPFVARS_VAULE']);
 
         $boolExecuteContinue = true;
         $boolSystemErrorFlag = false;
@@ -1327,6 +1428,17 @@ Ansible（Legacy Role）代入値管理
                                           $arrayRegData['REST_SYSTEM_ID']:null;
             $intRestColSeqCombId     = array_key_exists('REST_COL_SEQ_COMBINATION_ID',$arrayRegData)?
                                           $arrayRegData['REST_COL_SEQ_COMBINATION_ID']:null;
+            $intVarsEntry            = array_key_exists('VARS_ENTRY',$arrayRegData)?
+                                          $arrayRegData['VARS_ENTRY']:null;
+
+            // 具体値にテンプレート変数が設定されているか判定
+            $g['VARS_ENTRY_USE_TPFVARS_VAULE'] = "0";
+            $match_str = "/{{(\s)" . "TPF_" . "[a-zA-Z0-9_]*(\s)}}/";
+            $ret = preg_match_all($match_str,$intVarsEntry,$var_match);
+            if(($ret !== false) && ($ret > 0)){
+                $g['VARS_ENTRY_USE_TPFVARS_VAULE'] = "1";
+            }
+
             // 主キーの値を取得する。
             if( $strModeId == "DTUP_singleRecUpdate" ){
                 // 更新処理の場合

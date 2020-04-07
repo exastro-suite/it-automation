@@ -74,7 +74,7 @@ DSC Comand Option設定ファイル管理
     //************************************************************************************
     $c = new FileUploadColumn('CMPOPTION_FILE',$g['objMTS']->getSomeMessage("ITADSCH-MNU-800420"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITADSCH-MNU-800421"));//エクセル・ヘッダでの説明
-    $c->setMaxFileSize(20971520);//単位はバイト
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
     $c->setFileHideMode(true);
     $c->setRequired(true);//登録/更新時には、入力必須

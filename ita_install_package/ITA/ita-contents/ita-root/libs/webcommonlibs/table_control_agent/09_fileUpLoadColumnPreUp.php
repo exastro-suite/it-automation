@@ -98,6 +98,14 @@
             $strPhpSysTempDir = sys_get_temp_dir();
             //PHPシステム用一時ディレクトリ----
 
+            if( count($_POST) == 0 && count($_FILES) == 0 ){
+                //----1:php.iniによるファイルサイズ超過
+                $intErrorType = 602;
+                $varErrorOfFileupload = 1;
+                throw new Exception( '00000400-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                //1:php.iniによるファイルサイズ超過----
+            }
+
             $varErrorOfFileupload = $_FILES['file']['error'];
             if( $_FILES['file']['error'] == 1 || $_FILES['file']['error'] == 2 ){
                 //----1:php.iniによるファイルサイズ超過/2:name属性MAX_FILE_SIZEによるファイルサイズ超過
@@ -619,10 +627,16 @@
                 $intErrorType = 612;
                 throw new Exception( '00001400-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
-            
-            printHeaderForProvideFileStream($strSavedFileName,"application/octet-stream");
-            $log_string = file_get_contents( $strFilePath );
-            echo $log_string;
+
+            // ファイルダウンロード
+            $content_length = filesize($strFilePath);
+            header("Content-Disposition: attachment; filename=" . basename($strFilePath));
+            header("Content-Length: ".$content_length);
+            header("Content-Type: application/octet-stream");
+            header('Content-Transfer-Encoding: binary');
+            header("Connection: close");
+            ob_end_flush();
+            readfile($strFilePath);
 
             // アクセスログへ記録
             web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4051",array($strFxName,$strFilePath)));

@@ -49,6 +49,9 @@ class RestApiCaller {
     private $exec_mode;
 
     private $UIErrorMsg;
+
+    private $version;
+
     function __construct($protocol, $hostName, $portNo, $encryptedAuthToken) {
         $this->baseURI = $protocol . "://" . $hostName . ":" . $portNo . self::API_BASE_PATH;
         $this->decryptedAuthToken= ky_decrypt($encryptedAuthToken);
@@ -69,6 +72,13 @@ class RestApiCaller {
     function setUp($log_output_php, $log_output_dir, $log_file_prefix, $log_level, $UIExecLogPath, $UIErrorLogPath) {
         $this->logger->setUp($log_output_php, $log_output_dir, $log_file_prefix, $log_level, $UIExecLogPath, $UIErrorLogPath);
     }
+    function setTowerVersion($version) {
+        $this->version = $version;
+    }
+    function getTowerVersion() {
+        return($this->version);
+    }
+
 
     function authorize() {
 

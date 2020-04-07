@@ -245,13 +245,14 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //////////////////////////////////////
         $c = new FileUploadColumn('ASSIGN_FILE',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101325"),"{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$g['page_dir']}","/uploadfiles/2100150101/ASSIGN_FILE");
         $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101326"));//エクセル・ヘッダでの説明
-        $c->setMaxFileSize(20971520);//単位はバイト
+        $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
         $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
         $c->setDBColumn(true);
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
         //////////////////////////////////////
@@ -308,7 +309,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //////////////////////////////////////
         $c = new FileUploadColumn('RETURN_FILE',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101336"),"{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$g['page_dir']}","/uploadfiles/2100150101/RETURN_FILE");
         $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101337"));//エクセル・ヘッダでの説明
-        $c->setMaxFileSize(20971520);//単位はバイト
+        $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
         $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
         $c->setDBColumn(true);
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
@@ -317,6 +318,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
         //////////////////////////////////////
@@ -324,7 +326,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //////////////////////////////////////
         $c = new FileUploadColumn('RETURN_DIFF',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101338"),"{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$g['page_dir']}","/uploadfiles/2100150101/RETURN_DIFF");
         $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101339"));//エクセル・ヘッダでの説明
-        $c->setMaxFileSize(20971520);//単位はバイト
+        $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
         $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
         $c->setDBColumn(true);
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
@@ -333,6 +335,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
         //////////////////////////////////////
@@ -340,7 +343,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //////////////////////////////////////
         $c = new FileUploadColumn('RETURN_TESTCASES',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101340"),"{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$g['page_dir']}","/uploadfiles/2100150101/RETURN_TESTCASES");
         $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101341"));//エクセル・ヘッダでの説明
-        $c->setMaxFileSize(20971520);//単位はバイト
+        $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
         $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
         $c->setDBColumn(true);
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
@@ -349,6 +352,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
         //////////////////////////////////////
@@ -356,7 +360,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //////////////////////////////////////
         $c = new FileUploadColumn('RETURN_EVIDENCES',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101342"),"{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$g['page_dir']}","/uploadfiles/2100150101/RETURN_EVIDENCES");
         $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101343"));//エクセル・ヘッダでの説明
-        $c->setMaxFileSize(20971520);//単位はバイト
+        $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
         $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
         $c->setDBColumn(true);
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
@@ -365,6 +369,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->setFileHideMode(true);
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $cg->addColumn($c);
 
     $table->addColumn($cg);

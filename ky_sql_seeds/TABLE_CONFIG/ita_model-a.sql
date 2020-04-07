@@ -1756,7 +1756,205 @@ PRIMARY KEY (ROW_ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- Symオペインポート時停止サービス -
 
+-- -------------------------------------------------------
+-- --定期作業実行用
+-- -------------------------------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE C_REGULARLY_LIST
+(
+REGULARLY_ID                      %INT%                        ,
+SYMPHONY_CLASS_NO                 %INT%                        ,
+OPERATION_NO_IDBH                 %INT%                        ,
+SYMPHONY_INSTANCE_NO              %INT%                        ,
+STATUS_ID                         %INT%                        ,
+NEXT_EXECUTION_DATE               %DATETIME6%                  ,
+START_DATE                        %DATETIME6%                  ,
+END_DATE                          %DATETIME6%                  ,
+EXECUTION_STOP_START_DATE         %DATETIME6%                  ,
+EXECUTION_STOP_END_DATE           %DATETIME6%                  ,
+EXECUTION_INTERVAL                %INT%                        ,
+REGULARLY_PERIOD_ID               %INT%                        ,
+PATTERN_TIME                      %VARCHR%(5)                  ,
+PATTERN_DAY                       %INT%                        ,
+PATTERN_DAY_OF_WEEK               %INT%                        ,
+PATTERN_WEEK_NUMBER               %INT%                        ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
 
+PRIMARY KEY (REGULARLY_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE C_REGULARLY_LIST_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                        ,
+JOURNAL_REG_DATETIME              %DATETIME6%                  ,
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                  ,
+
+REGULARLY_ID                      %INT%                        ,
+SYMPHONY_CLASS_NO                 %INT%                        ,
+OPERATION_NO_IDBH                 %INT%                        ,
+SYMPHONY_INSTANCE_NO              %INT%                        ,
+STATUS_ID                         %INT%                        ,
+NEXT_EXECUTION_DATE               %DATETIME6%                  ,
+START_DATE                        %DATETIME6%                  ,
+END_DATE                          %DATETIME6%                  ,
+EXECUTION_STOP_START_DATE         %DATETIME6%                  ,
+EXECUTION_STOP_END_DATE           %DATETIME6%                  ,
+EXECUTION_INTERVAL                %INT%                        ,
+REGULARLY_PERIOD_ID               %INT%                        ,
+PATTERN_TIME                      %VARCHR%(5)                  ,
+PATTERN_DAY                       %INT%                        ,
+PATTERN_DAY_OF_WEEK               %INT%                        ,
+PATTERN_WEEK_NUMBER               %INT%                        ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+-- ----更新系テーブル作成
+CREATE TABLE B_REGULARLY_STATUS
+(
+REGULARLY_STATUS_ID               %INT%                        ,
+REGULARLY_STATUS_NAME             %VARCHR%(32)                 ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (REGULARLY_STATUS_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_REGULARLY_STATUS_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                        ,
+JOURNAL_REG_DATETIME              %DATETIME6%                  ,
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                  ,
+
+REGULARLY_STATUS_ID               %INT%                        ,
+REGULARLY_STATUS_NAME             %VARCHR%(32)                 ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+-- ----更新系テーブル作成
+CREATE TABLE B_REGULARLY_PERIOD
+(
+REGULARLY_PERIOD_ID               %INT%                        ,
+REGULARLY_PERIOD_NAME             %VARCHR%(32)                 ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (REGULARLY_PERIOD_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_REGULARLY_PERIOD_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                        ,
+JOURNAL_REG_DATETIME              %DATETIME6%                  ,
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                  ,
+
+REGULARLY_PERIOD_ID               %INT%                        ,
+REGULARLY_PERIOD_NAME             %VARCHR%(32)                 ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+-- ----更新系テーブル作成
+CREATE TABLE B_DAY_OF_WEEK
+(
+DAY_OF_WEEK_ID                    %INT%                        ,
+DAY_OF_WEEK_NAME                  %VARCHR%(16)                 ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (DAY_OF_WEEK_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_DAY_OF_WEEK_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                        ,
+JOURNAL_REG_DATETIME              %DATETIME6%                  ,
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                  ,
+
+DAY_OF_WEEK_ID                    %INT%                        ,
+DAY_OF_WEEK_NAME                  %VARCHR%(16)                 ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+-- ----更新系テーブル作成
+CREATE TABLE B_WEEK_NUMBER
+(
+WEEK_NUMBER_ID                    %INT%                        ,
+WEEK_NUMBER_NAME                  %VARCHR%(16)                 ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (WEEK_NUMBER_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_WEEK_NUMBER_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                        ,
+JOURNAL_REG_DATETIME              %DATETIME6%                  ,
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                  ,
+
+WEEK_NUMBER_ID                    %INT%                        ,
+WEEK_NUMBER_NAME                  %VARCHR%(16)                 ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
 
 -- *****************************************************************************
 -- *** ITA-BASE Tables *****                                                 ***
@@ -2293,7 +2491,9 @@ SELECT
        TAB_A.LAST_UPDATE_USER 
 FROM B_CMDB_MENU_LIST TAB_A
 LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
-LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID);
+LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID)
+WHERE TAB_B.DISUSE_FLAG = '0'
+;
 
 CREATE VIEW D_CMDB_MENU_LIST_JNL AS 
 SELECT TAB_A.JOURNAL_SEQ_NO                 ,
@@ -2313,7 +2513,9 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.LAST_UPDATE_USER 
 FROM B_CMDB_MENU_LIST_JNL TAB_A
 LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
-LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID);
+LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID)
+WHERE TAB_B.DISUSE_FLAG = '0'
+;
 
 -- -------------------------------------------------------
 -- --「紐付対象メニューテーブル管理」メニュー用
@@ -2671,6 +2873,8 @@ CREATE        INDEX IND_A_ROLE_ACC_LINK_LIST_03     ON A_ROLE_ACCOUNT_LINK_LIST 
 CREATE        INDEX IND_A_ROLE_MENU_LINK_LIST_01    ON A_ROLE_MENU_LINK_LIST    ( ROLE_ID, DISUSE_FLAG                      );
 CREATE        INDEX IND_A_ROLE_MENU_LINK_LIST_02    ON A_ROLE_MENU_LINK_LIST    ( MENU_ID, DISUSE_FLAG                      );
 CREATE        INDEX IND_A_ROLE_MENU_LINK_LIST_03    ON A_ROLE_MENU_LINK_LIST    ( ROLE_ID, MENU_ID, DISUSE_FLAG             );
+CREATE UNIQUE INDEX IND_B_CMDB_MENU_TABLE_01        ON B_CMDB_MENU_TABLE        ( MENU_ID                                   );
+CREATE UNIQUE INDEX IND_C_OPERATION_LIST_01         ON C_OPERATION_LIST         ( OPERATION_NO_IDBH                         );
 
 CREATE TABLE B_VALID_INVALID_MASTER
 (

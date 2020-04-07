@@ -218,6 +218,7 @@ $ary[10204] = "Minimum value:{}";
 $ary[10205] = "Maximum value:{}";
 $ary[10206] = "The following criteria must be satisfied. (Criteria: NULL or {} {}) {}";
 $ary[10207] = "The following criteria must be satisfied. (Criteria:{}{}){}";
+$ary[10208] = "The value is over digit limit. (Digit limit:{})";
 $ary[10401] = "Numeric value";
 $ary[10501] = "Characters other than tab and line break";
 $ary[10502] = "Byte";

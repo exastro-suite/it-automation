@@ -25,27 +25,48 @@
         $root_dir_path = $root_dir_temp[0] . "ita-root";
     }
 
-    // ドライバ識別子
-    define("DF_LEGACY_DRIVER_ID"           ,"L");
-    define("DF_LEGACY_ROLE_DRIVER_ID"      ,"R");
-    define("DF_PIONEER_DRIVER_ID"          ,"P");
+    // 二重 require 対応
+    if(!defined('define_ky_ansible_common_setenv')) {
+        define("define_ky_ansible_common_setenv","ky_ansible_common_setenv");
 
-    // ユーザーホスト変数名の先頭文字
-    define("DF_HOST_VAR_HED"               ,"VAR_");
-    // テンプレートファイル変数名の先頭文字
-    define("DF_HOST_TPF_HED"               ,"TPF_");
-    // copyファイル変数名の先頭文字
-    define("DF_HOST_CPF_HED"               ,"CPF_");
-    // グローバル変数名の先頭文字
-    define("DF_HOST_GBL_HED"               ,"GBL_");
-    // テンプレートファイルからグローバル変数を取り出す場合の区分
-    define("DF_HOST_TEMP_GBL_HED"          ,"TEMP_GBL_");
+        // ドライバ識別子
+        define("DF_LEGACY_DRIVER_ID"           ,"L");
+        define("DF_LEGACY_ROLE_DRIVER_ID"      ,"R");
+        define("DF_PIONEER_DRIVER_ID"          ,"P");
 
-    // テンプレートファイルからグローバル変数を取り出す場合の区分
-    define("DF_LOCAL_VAR_HED"              ,"LOCAL_VAR");
+        // ユーザーホスト変数名の先頭文字
+        define("DF_HOST_VAR_HED"               ,"VAR_");
+        // テンプレートファイル変数名の先頭文字
+        define("DF_HOST_TPF_HED"               ,"TPF_");
+        // copyファイル変数名の先頭文字
+        define("DF_HOST_CPF_HED"               ,"CPF_");
+        // グローバル変数名の先頭文字
+        define("DF_HOST_GBL_HED"               ,"GBL_");
+        // テンプレートファイルからグローバル変数を取り出す場合の区分
+        define("DF_HOST_TEMP_GBL_HED"          ,"TEMP_GBL_");
 
-    // ITA側で管理している ロールパッケージ管理 ロールパッケージファイル(ZIP)格納先ディレクトリ
-    define("DF_ROLE_PACKAGE_FILE_CONTENTS_DIR"  ,"/uploadfiles/2100020303/ROLE_PACKAGE_FILE");
+        // テンプレートファイルからグローバル変数を取り出す場合の区分
+        define("DF_LOCAL_VAR_HED"              ,"LOCAL_VAR");
+
+        // ITA側で管理している ロールパッケージ管理 ロールパッケージファイル(ZIP)格納先ディレクトリ
+        define("DF_ROLE_PACKAGE_FILE_CONTENTS_DIR"  ,"/uploadfiles/2100020303/ROLE_PACKAGE_FILE");
+
+        // 実行エンジン
+        define("DF_EXEC_MODE_ANSIBLE"         ,'1');         // Ansibleで実行
+        define("DF_EXEC_MODE_TOWER"           ,'2');         // AnsibleTowerで実行
+
+        // AnsibleTower処理区分
+        define("DF_EXECUTION_FUNCTION"        ,'1');
+        define("DF_CHECKCONDITION_FUNCTION"   ,'2');
+        define("DF_DELETERESOURCE_FUNCTION"   ,'3');
+
+        // B_ANS_TWR_JOBTP_PROPERTY->PROPERTY_TYPE
+        define("DF_JobTemplateKeyValueProperty","1");
+        define("DF_JobTemplateVerbosityProperty","2");
+        define("DF_JobTemplatebooleanTrueProperty","3");
+        define("DF_JobTemplateExtraVarsProperty","4");
+    }
+
     // ITA側で管理している legacy用 子playbookファイル格納先ディレクトリ
     $vg_legacy_playbook_contents_dir  = $root_dir_path . "/uploadfiles/2100020104/PLAYBOOK_MATTER_FILE";
     // ITA側で管理している pioneer用 対話ファイル格納先ディレクトリ
@@ -56,18 +77,4 @@
     // ITA側で管理している テンプレートファイル格納先ディレクトリ
     $vg_template_contents_dir = $root_dir_path . "/uploadfiles/2100040704/ANS_TEMPLATE_FILE";
 
-    // 実行エンジン
-    define("DF_EXEC_MODE_ANSIBLE"         ,'1');         // Ansibleで実行
-    define("DF_EXEC_MODE_TOWER"           ,'2');         // AnsibleTowerで実行
-
-    // AnsibleTower処理区分
-    define("DF_EXECUTION_FUNCTION"        ,'1');
-    define("DF_CHECKCONDITION_FUNCTION"   ,'2');
-    define("DF_DELETERESOURCE_FUNCTION"   ,'3');
-
-    // B_ANS_TWR_JOBTP_PROPERTY->PROPERTY_TYPE
-    define("DF_JobTemplateKeyValueProperty","1");
-    define("DF_JobTemplateVerbosityProperty","2");
-    define("DF_JobTemplatebooleanTrueProperty","3");
-    define("DF_JobTemplateExtraVarsProperty","4");
 ?>

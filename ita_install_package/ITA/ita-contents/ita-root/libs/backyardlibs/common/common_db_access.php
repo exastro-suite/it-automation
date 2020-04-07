@@ -129,7 +129,36 @@ class CommonDBAccessCoreClass {
         }
         return $retArray[0];
     }
-
+    /////////////////////////////////////////////////////////////////////
+    // Sequence Lock
+    /////////////////////////////////////////////////////////////////////
+    function dbacceSequenceLock($tableName) {
+        // Sequence Lock
+        $retArray = getSequenceLockInTrz($tableName, 'A_SEQUENCE');
+        if($retArray[1] != 0) {
+            $message = "Sequence Lock Error.";
+            $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
+            $message = implode("\n",$retArray[2]);
+            $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
+            return false;
+        }
+        return true;
+    }
+    /////////////////////////////////////////////////////////////////////
+    // Sequence no allocation
+    /////////////////////////////////////////////////////////////////////
+    function dbaccessSequenceAlloc($tableName) {
+        // Sequence allocate
+        $retArray = getSequenceValueFromTable($tableName, 'A_SEQUENCE', FALSE);
+        if($retArray[1] != 0) {
+            $message = "Sequence no allocate error.";
+            $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
+            $message = implode("\n",$retArray[2]);
+            $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
+            return false;
+        }
+        return $retArray[0];
+    }
     /////////////////////////////////////////////////////////////////////
     // DB Update
     /////////////////////////////////////////////////////////////////////
@@ -191,14 +220,16 @@ class CommonDBAccessCoreClass {
             return false;
         }
 
-        if(isset($arrayBind) && $objQuery->sqlBind($arrayBind) != "") {
-            $message = "DB Access Error.";
-            $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
-            $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$sqlBody);
-            $errorDetail = $objQuery->getLastError();
-            $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$errorDetail);
-            unset($objQuery);
-            return false;
+        if(is_array($arrayBind)) {
+            $errorDetail = $objQuery->sqlBind($arrayBind);
+            if($errorDetail != "") {
+                $message = "DB Access Error.";
+                $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
+                $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$sqlBody);
+                $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$errorDetail);
+                unset($objQuery);
+                return false;
+            }
         }
 
         $r = $objQuery->sqlExecute();

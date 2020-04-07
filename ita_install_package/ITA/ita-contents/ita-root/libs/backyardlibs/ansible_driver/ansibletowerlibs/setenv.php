@@ -62,6 +62,9 @@ const INT_NUM_PADDING   = 10;
 // WINRM接続ポート デフォルト値
 const LC_WINRM_PORT     = 5985;
 
+const TOWER_VER35 = 1;        // Towerバージョン3.5(以下)
+const TOWER_VER36 = 2;        // Towerバージョン3.6(以上)
+
 ////////////////////////////////
 // ルートディレクトリを取得   //
 ////////////////////////////////

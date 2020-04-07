@@ -556,11 +556,9 @@ configure_php() {
     # WORKAROUND! Symbolic link must exist.
     ln -s /usr/share/pear-data/HTML_AJAX/js /usr/share/pear/HTML/js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
 
-    # Auth.php file modification 
-    sed -i 's/$obj =& new $storage_class($options);/$obj = new $storage_class($options);/g' /usr/share/pear/Auth.php
-
-    # Array.php file modification
-    sed -i 's/function fetchData($user, $pass)/function fetchData($user=null, $pass=null, $username=null, $password=null, $isChallengeResponse = false)/g' /usr/share/pear/Auth/Container/Array.php
+    # Change timeout of HTML_AJAX.
+    sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX.js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
+    sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX_lite.js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
 
     # Install Spyc.
     echo "----------Installation[Spyc]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1078,7 +1076,7 @@ PEAR_PACKAGE_DOWNLOAD_DIR=(
 # pear package (for php)
 declare -A PEAR_PACKAGE_PHP;
 PEAR_PACKAGE_PHP=(
-    ["remote"]="Auth HTML_AJAX-beta"
+    ["remote"]="HTML_AJAX-beta"
     ["local"]="-O `list_pear_package ${PEAR_PACKAGE_DOWNLOAD_DIR["php"]}`"
 )
 

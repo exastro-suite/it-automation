@@ -32,10 +32,14 @@ if(array_key_exists('no', $_GET)){
 }
 
 $individualSystemFile = $root_dir_path . "/webroot/menus/systems/$_GET_Id/$fileName";
-$individualUserFile = $root_dir_path . "/webroot/menus//users/$_GET_Id/$fileName";
+$individualSheetFile = $root_dir_path . "/webroot/menus/sheets/$_GET_Id/$fileName";
+$individualUserFile = $root_dir_path . "/webroot/menus/users/$_GET_Id/$fileName";
 // メニュー個別ファイルがある場合は、それを呼び出す
 if(file_exists($individualSystemFile)){
     require_once($individualSystemFile);
+}
+else if(file_exists($individualSheetFile)){
+    require_once($individualSheetFile);
 }
 else if(file_exists($individualUserFile)){
     require_once($individualUserFile);

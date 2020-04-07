@@ -187,9 +187,9 @@ $ary[108120] = "gather_facts";
 $ary[108130] = "Select if you want to get the build node information (gather_facts) when executing Playbook.";
 $ary[108200] = "OpenStack Dedicated information";
 $ary[108210] = "HEAT template";
-$ary[108220] = "Upload the HEAT template to execute. [Maximum size] 20MB";
+$ary[108220] = "Upload the HEAT template to execute. [Maximum size] 4GB";
 $ary[108230] = "Environment configuration file";
-$ary[108240] = "Upload the script file to be executed after executing the HEAT template. [Maximum size] 20MB";
+$ary[108240] = "Upload the script file to be executed after executing the HEAT template. [Maximum size] 4GB";
 $ary[108241] = "Tower Dedicated information";
 $ary[108242] = "virtualenv";
 $ary[108243] = "Ansible execution environment directory built with virtualenv is displayed.\nChoose the ansible execution environment you want to run.\nIf it is not choose, the ansible execution environment installed at the time of Tower installation will be used.";
@@ -452,4 +452,44 @@ $ary[105076] = "Date/time when the operation was actually performed.";
 $ary[910001] = "version";
 $ary[910002] = "driver";
 $ary[910003] = "version";
+$ary[900100] = "Orchestrator ID";
+$ary[900101] = "Movement ID";
+$ary[900102] = "pause(OFF:/ON:checkedValue)";
+$ary[900103] = "Description";
+$ary[900104] = "Operation ID (Specified individually)";
+$ary[920001] = "Symphony can be run periodically according to a schedule.
+<br>Select the target symphony, operation, and enter detailed settings from \"Schedule Setting\".";
+$ary[920002] = "RegularlyID";
+$ary[920003] = "RegularlyWorkInformation";
+$ary[920004] = "RegularlyWorkInformation";
+$ary[920005] = "RegularlyWorkList";
+$ary[920006] = "Status";
+$ary[920007] = "The following states exists for Status.\n
+・In preparation\n
+・In operation\n
+・Completed\n
+・Mismatch error\n
+・Linking error\n
+・Unexpected error\n
+・Symphony discard\n
+・Operation discard";
+$ary[920008] = "Schedule setting";
+$ary[920009] = "Schedule";
+$ary[920010] = "Next execution date";
+$ary[920011] = "Start date";
+$ary[920012] = "End date";
+$ary[920013] = "Period";
+$ary[920014] = "Interval";
+$ary[920015] = "Week number";
+$ary[920016] = "Day of weeek";
+$ary[920017] = "Day";
+$ary[920018] = "Time";
+$ary[920019] = "Work suspension period";
+$ary[920020] = "Start";
+$ary[920021] = "End";
+$ary[920022] = "Symphony class name";
+$ary[920023] = "[Original data] Symphony class list";
+$ary[920024] = "Operation";
+$ary[920025] = "[Original data] Input operation list";
+$ary[920026] = "Auto-input";
 ?>

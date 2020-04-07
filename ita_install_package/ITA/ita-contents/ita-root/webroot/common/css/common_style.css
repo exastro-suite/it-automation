@@ -30,7 +30,7 @@ body {
 	overflow-y: scroll;
 	font-size: 12px;
 	background-color: #666;
-	background-image: repeating-linear-gradient( -45deg, #666, #666 3px, #5F5F5F 3px, #5F5F5F 6px);
+	background-image: repeating-linear-gradient( #666, #666 2px, #5F5F5F 2px, #5F5F5F 3px);
 }
 
 h1 {
@@ -545,11 +545,9 @@ input.showbutton:hover {
 /* article */
 #gateLogin, #gateLogout, #gateChangePw {
 	background: #FFFFFF;
-	min-height: 280px;
 	margin: 20px auto;
 	text-align: center;
 	border: 1px solid #C4C4C4;
-	padding: 0 10px 20px 10px;
 }
 
 #gateLogin, #gateLogout {
@@ -559,22 +557,90 @@ input.showbutton:hover {
 #gateChangePw {
 	width: 400px;
 }
+#gateChangePw .text {
+  position: relative;
+  padding-bottom: 56px;
+}
+#gateChangePw .input_login_id {
+  box-sizing: border-box;
+  height: 28px;
+  line-height: 20px;
+  margin: 3px 0; padding: 4px 8px;
+  font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+}
+#gateChangePwTry,
+#gateChangePwContainerFooter {
+  box-sizing: border-box;
+  position: absolute;
+  bottom: 16px;
+  width: 50%;
+  padding: 0 8px;
+}
+#gateChangePwTry {
+  left: 0;
+  text-align: right;
+}
+#gateChangePwContainerFooter {
+  right: 0;
+  text-align: left;
+}
+#gateChangePw input[type="submit"] {
+  min-width: 120px;
+}
+#gateChangePw #returnTryExecute {
+  background-color: #AAA;
+  border-color: #AAA;
+  box-shadow: 0 2px 0 #666;
+}
+#gateChangePw #returnTryExecute:hover {
+  background-color: #999;
+  border-color: #999;
+  box-shadow: 0 1px 0 #555;
+}
+#gateChangePw #returnTryExecute:active {
+  box-shadow: none;
+}
 
 /**********************/
 
 /* title */
 #gateLogin h2, #gateChangePw h2, #gateLogout h2 {
-	width: 100%;
-	background: #00367C;
-	padding: 10px;
-	margin-left: -10px;
-	margin-bottom: 20px;
-	color: #F5F5F5;
+  box-sizing: border-box;
+  width: 100%;
+  background: #00367C;
+  padding: 10px;
+  color: #F5F5F5;
+}
+#gateLoginContainer {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 16px;
+}
+#gateChangePwContainerBody {
+  padding: 16px;
+}
+#gateLogout .text {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 16px;
+}
+/* IE11 Flex min-height bug */
+@media all and (-ms-high-contrast:none){
+  #gateLoginContainer::after,
+  #gateLogout .text::after {
+    content: '';
+    min-height: inherit;
+    font-size: 0;
+  }
 }
 
-#gateLogin h2 {
-	margin-bottom: 30px;
-}
+
 /**********************/
 
 /* input tag label */
@@ -591,13 +657,11 @@ input.showbutton:hover {
 	font-size: 14px;
 }
 
-#gateLogin .inputItemWrapper {
+#gateLogin .inputItemWrapper,
+#gateChangePw .inputItemWrapper {
 	width: 200px;
 }
 
-#gateChangePw .inputItemWrapper {
-	width: 246px;
-}
 /**********************/
 
 /* input form */
@@ -618,19 +682,25 @@ input.showbutton:hover {
 	font-size: 12px;
 }
 
-#gateLogin .inputUserId, #gateLogin .inputUserPw {
-	width: 194px;
-	height: 26px;
-	line-height: 26px;
+#gateLogin .inputUserId, #gateLogin .inputUserPw,
+#gateChangePw .inputUserId, #gateChangePw .inputUserPw {
+  box-sizing: border-box;
+	width: 100%;
+	height: 36px;
+	line-height: 28px;
+  font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+  font-size: 13px;
 	margin: 4px 0; padding: 4px 8px;
 }
 
 #gateChangePw .inputUserId, #gateChangePw .inputUserPw {
-	width: 200px;
-	height: 20px;
+	height: 28px;
 	line-height: 20px;
 	margin: 3px 0;
 }
+
+
+
 /**********************/
 
 /* table */
@@ -656,6 +726,55 @@ input.showbutton:hover {
 /* autofiil for Chrome auto-complete */
 input:-webkit-autofill {
 	box-shadow: 0 0 0px 25px #FFFFFF inset;
+}
+
+/* Password mask release */
+.input_password {
+display: inline-block;
+position: relative;
+z-index: 1;
+width: 100%;
+}
+#KIZI .input_password input[type="password"],
+#KIZI .input_password input[type="text"] {
+padding: 2px 18px 2px 2px;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-size: 13px;
+}
+#gateLoginContainer .input_password input[type="password"],
+#gateLoginContainer .input_password input[type="text"],
+#gateChangePw .input_password input[type="password"],
+#gateChangePw .input_password input[type="text"] {
+padding: 4px 24px 4px 8px;
+}
+/* IE Default mask hidden */
+#KIZI .input_password input::-ms-clear,
+#KIZI .input_password input::-ms-reveal,
+#gateLoginContainer .input_password input::-ms-clear,
+#gateLoginContainer .input_password input::-ms-reveal,
+#gateChangePw .input_password input::-ms-clear,
+#gateChangePw .input_password input::-ms-reveal {
+visibility: hidden;
+}
+.password_eye {
+position: absolute;
+right: 2px; top: 50%;
+z-index: 2;
+transform: translateY(-50%);
+width: 16px; height: 16px;
+background: url("../imgs/ita_icon_sprite.png") 0 0 no-repeat;
+background-size: 160px 128px;
+user-select: none;
+-moz-user-select: none;
+-webkit-user-select: none;
+-ms-user-select: none;
+}
+#gateLoginContainer .password_eye,
+#gateChangePw .password_eye {
+right: 4px;
+}
+.password_eye.password_see {
+background-position: -16px 0;
 }
 
 /* 07.for system messages **************************************************************/
