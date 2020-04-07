@@ -227,7 +227,7 @@ EOD;
     <h2>
         <table width="100%">
             <tr>
-                <td><div onClick=location.href="javascript:show('Editor_Midashi','Editor_Nakami');" class="midashi_class" >パネル画像エディタ</div></td>
+                <td><div onClick=location.href="javascript:show('Editor_Midashi','Editor_Nakami');" class="midashi_class" >{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1030094")}</div></td>
                 <td>
                     <div id="Editor_Midashi" align="right">
                         <input type="button" value="{$strCmdWordAreaClose}" class="showbutton" onClick=location.href="javascript:show('Editor_Midashi','Editor_Nakami');" >
