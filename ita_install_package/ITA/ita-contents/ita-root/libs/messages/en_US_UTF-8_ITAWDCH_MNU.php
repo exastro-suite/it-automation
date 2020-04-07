@@ -54,6 +54,7 @@ $ary[1030083] = "<br> There is no menu associated with the menu group. <br>Menu 
 $ary[1030091] = "Menu information";
 $ary[1030092] = "Menu group information";
 $ary[1030093] = "Menu information";
+$ary[1030094] = "Panel image editor";
 $ary[1040001] = "The following functions are provided.<ul tyle=\"disc\"><li>Maintenance of menu (view/register/update/discard/restore)</li><li>View of role associated with menu(cannot maintain)</li><li>Association with role of menu</li><li>View of contents file associated to the menu(cannot maintain)</li></ul>";
 $ary[1040002] = "Menu";
 $ary[1040003] = "Menu";
