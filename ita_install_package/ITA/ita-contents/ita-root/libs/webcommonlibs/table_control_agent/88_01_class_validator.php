@@ -507,7 +507,7 @@ class FloatNumValidator extends NumberValidator {
 			//$strDisplayFormat = "数値";
 			$strDisplayFormat = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10401");
         }
-		parent::__construct($min, $max, '/^((-[1-9])?[0-9]{0,14}|-0)(\.[0-9]{0,14})?$/s', $strDisplayFormat, $aryEtcetera);
+		parent::__construct($min, $max, '/^((-[1-9])?[0-9]{0,}|-0)(\.[0-9]{0,})?$/s', $strDisplayFormat, $aryEtcetera);
         $this->intDigitScale = $intDigitScale;
 		$this->setMaxLength(16);	//----符号+整数+小数点+小数で、16文字
 	}
@@ -556,7 +556,7 @@ class FloatNumValidator extends NumberValidator {
 				$varMaxVal = $this->getMax($strModeId);
 				if( preg_match($strRegexpFormat, $value) === 1 ){
 					if( ($varMaxVal === null || bccomp($value, $varMaxVal,$this->intDigitScale) != 1) && ($varMinVal === null || bccomp($value, $varMinVal,$this->intDigitScale) != -1) ){
-                        $value= rtrim($value,"0"); //後ろの0を抜く
+                        if(strstr($value,'.')) $value= rtrim($value,"0"); //後ろの0を抜く
                         $vlen = strlen($value);
 						if(strstr($value,'.')) $vlen -= 1;
 						if(strstr($value,'-')) $vlen -= 1;

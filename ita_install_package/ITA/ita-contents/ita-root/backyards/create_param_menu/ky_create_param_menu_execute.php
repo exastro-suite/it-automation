@@ -1340,7 +1340,7 @@ try{
                 $work = str_replace(REPLACE_TABLE,  $menuTableName . '_CONV',     $work);
                 $inputOrder = <<< 'EOD'
 // 入力順序
-$c = new NumColumn('INPUT_ORDER',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102614"));
+$c = new NumColumn('INPUT_ORDER',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102613"));
 $c->setHiddenMainTableColumn(true);
 $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102614"));
 $c->setValidator(new IntNumValidator(0, null));
