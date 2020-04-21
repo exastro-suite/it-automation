@@ -2320,7 +2320,7 @@ function getInfoOfLoadTable($strMenuIdNumeric){
                     if( $boolAddInfo === true ){
                         $aryColumnInfo01[] = array($strColumnId,$objColumn->getColLabel(true));
                         if("FileUploadColumn" ===  get_class($objColumn)){
-                            $aryUploadColumnDir[] = $objColumn->getNRPathAnyToBranchPerFUC();
+                            $aryUploadColumnDir[] = $objColumn->getLRPathPackageRootToBranchPerFUC();
                         }
                         if("AutoNumRegisterColumn" ===  get_class($objColumn)){
                             $aryOtherSeqIds[] = $objColumn->getSequenceID();
