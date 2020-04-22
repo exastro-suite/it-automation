@@ -179,17 +179,28 @@ Ansible（Legacy Role）ロールパッケージ一覧
             $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
             // off:復活　on:廃止
             $PkeyID = $strNumberForRI;
+            //----更新前のレコードから、各カラムの値を取得
+            $role_package_name = isset($arrayVariant['edit_target_row']['ROLE_PACKAGE_NAME'])?
+                                       $arrayVariant['edit_target_row']['ROLE_PACKAGE_NAME']:null;
+
+            $zipfile           = isset($arrayVariant['edit_target_row']['ROLE_PACKAGE_FILE'])?
+                                       $arrayVariant['edit_target_row']['ROLE_PACKAGE_FILE']:null;
+
         }else if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
             if($strModeId == "DTUP_singleRecUpdate") {
                 $PkeyID = $strNumberForRI;
-                $role_package_name = array_key_exists('ROLE_PACKAGE_NAME',$arrayRegData)?$arrayRegData['ROLE_PACKAGE_NAME']:null;
             } else {
                 $PkeyID = array_key_exists('ROLE_PACKAGE_ID',$arrayRegData)?$arrayRegData['ROLE_PACKAGE_ID']:null;
-                $role_package_name = array_key_exists('ROLE_PACKAGE_ID',$arrayRegData)?$arrayRegData['ROLE_PACKAGE_NAME']:null;
             }
             $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_8',$arrayRegData)?
                                $arrayRegData['tmp_file_COL_IDSOP_8']:null;
             $strTempFileFullname = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
+
+            $role_package_name = array_key_exists('ROLE_PACKAGE_NAME',$arrayRegData)?
+                                    $arrayRegData['ROLE_PACKAGE_NAME']:null;
+
+            $zipfile           = array_key_exists('ROLE_PACKAGE_FILE',$arrayRegData)?
+                                    $arrayRegData['ROLE_PACKAGE_FILE']:null;
         }
         ////////////////////////////////
         // 共通モジュールの呼び出し   //
@@ -220,77 +231,81 @@ Ansible（Legacy Role）ロールパッケージ一覧
                                                '',
                                                false,
                                                false);
+        if((strlen($role_package_name) == 0) ||
+           (strlen($zipfile) == 0)) {
+            $retBool = false;
+        }
+        if($retBool === true) {
+            if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+                if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
+                    if(strlen($tmpFile) != 0) {
+                        // ロールパッケージ解析
+                        list($retBool,
+                             $intErrorType,
+                             $aryErrMsgBody,
+                             $retStrBody) = $obj->RolePackageAnalysis($strTempFileFullname,
+                                                                      $role_package_name,
+                                                                      $PkeyID,
+                                                                      $disuse_role_chk,
+                                                                      $def_vars_list,
+                                                                      $def_varsval_list,
+                                                                      $def_array_vars_list,
+                                                                      true,
+                                                                      $cpf_vars_list,
+                                                                      true,
+                                                                      $tpf_vars_list,
+                                                                      $gbl_vars_list,
+                                                                      $ITA2User_var_list,
+                                                                      $User2ITA_var_list,
+                                                                      $save_vars_array);
+                        if($retBool === true) {
+                            // 変数構造解析結果を退避
+                            // 退避ディレクトリ作成・確認
+                            $dir = $obj->CreateVarStructAnalJsonStringFileDir($PkeyID);
 
-        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
-            if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
-                if(strlen($tmpFile) != 0) {
-                    // ロールパッケージ解析
-                    list($retBool,
-                         $intErrorType,
-                         $aryErrMsgBody,
-                         $retStrBody) = $obj->RolePackageAnalysis($strTempFileFullname,
-                                                                  $role_package_name,
-                                                                  $PkeyID,
-                                                                  $disuse_role_chk,
-                                                                  $def_vars_list,
-                                                                  $def_varsval_list,
-                                                                  $def_array_vars_list,
-                                                                  true,
-                                                                  $cpf_vars_list,
-                                                                  true,
-                                                                  $tpf_vars_list,
-                                                                  $gbl_vars_list,
-                                                                  $ITA2User_var_list,
-                                                                  $User2ITA_var_list,
-                                                                  $save_vars_array);
-                    if($retBool === true) {
-                        // 変数構造解析結果を退避
-                        // 退避ディレクトリ作成・確認
-                        $dir = $obj->CreateVarStructAnalJsonStringFileDir($PkeyID);
+                            // 退避ファイル名取得
+                            $path = $obj->getVarStructAnalJsonStringFileName($PkeyID);
 
-                        // 退避ファイル名取得
-                        $path = $obj->getVarStructAnalJsonStringFileName($PkeyID);
-
-                        // ファイルに退避
-                        $ret = $obj->putVarStructAnalJsonStringFileInfo($path,
-                                                                        $def_vars_list,
-                                                                        $def_array_vars_list,
-                                                                        $tpf_vars_list,
-                                                                        $ITA2User_var_list,
-                                                                        $gbl_vars_list);
-                        if($ret === false)
-                        {
-                            $retBool    = false;
-                            $retStrBody = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000018');
-                        } 
+                            // ファイルに退避
+                            $ret = $obj->putVarStructAnalJsonStringFileInfo($path,
+                                                                            $def_vars_list,
+                                                                            $def_array_vars_list,
+                                                                            $tpf_vars_list,
+                                                                            $ITA2User_var_list,
+                                                                            $gbl_vars_list);
+                            if($ret === false)
+                            {
+                                $retBool    = false;
+                                $retStrBody = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000018');
+                            } 
+                        }
+                        if($retBool === true) {
+                            $dbObj = new WebDBAccessClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
+                            $ret = $dbObj->CommnVarsUsedListUpdate($PkeyID,$FileID,$save_vars_array);
+                            if($ret === false) {
+                                web_log($dbObj->GetLastErrorMsg());
+                                $retBool = false;
+                                $retStrBody = $dbObj->GetLastErrorMsg();
+                            }
+                            unset($dbObj);
+                        }
                     }
-                    if($retBool === true) {
+                } elseif($strModeId == "DTUP_singleRecDelete"){
+                    switch($modeValue_sub) {
+                    case 'on':
+                    case 'off':
+                        // 廃止の場合、関連レコードを廃止
+                        // 復活の場合、関連レコードを復活
                         $dbObj = new WebDBAccessClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
-                        $ret = $dbObj->CommnVarsUsedListUpdate($PkeyID,$FileID,$save_vars_array);
+                        $ret = $dbObj->CommnVarsUsedListDisuseSet($PkeyID,$FileID,$modeValue_sub);
                         if($ret === false) {
                             web_log($dbObj->GetLastErrorMsg());
                             $retBool = false;
                             $retStrBody = $dbObj->GetLastErrorMsg();
                         }
                         unset($dbObj);
+                        break;
                     }
-                }
-            }
-            elseif($strModeId == "DTUP_singleRecDelete"){
-                switch($modeValue_sub) {
-                case 'on':
-                case 'off':
-                    // 廃止の場合、関連レコードを廃止
-                    // 復活の場合、関連レコードを復活
-                    $dbObj = new WebDBAccessClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
-                    $ret = $dbObj->CommnVarsUsedListDisuseSet($PkeyID,$FileID,$modeValue_sub);
-                    if($ret === false) {
-                        web_log($dbObj->GetLastErrorMsg());
-                        $retBool = false;
-                        $retStrBody = $dbObj->GetLastErrorMsg();
-                    }
-                    unset($dbObj);
-                    break;
                 }
             }
         }
@@ -302,8 +317,6 @@ Ansible（Legacy Role）ロールパッケージ一覧
                 ($modeValue_sub == 'off'))) {
                 if(strlen($tmpFile) == 0) {
                     // 変数構造解析結果を取得
-                    $zipfile           = $arrayVariant['edit_target_row']['ROLE_PACKAGE_FILE'];
-                    $role_package_name = $arrayVariant['edit_target_row']['ROLE_PACKAGE_NAME'];
                     $ret = $obj->getVarStructAnalInfo($PkeyID,
                                                       $role_package_name,
                                                       $zipfile,
