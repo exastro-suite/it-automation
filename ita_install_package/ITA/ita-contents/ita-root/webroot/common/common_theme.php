@@ -67,7 +67,7 @@ $backgroundPatterns = array(
   'STRIPE2' => 'background-image: linear-gradient( transparent, transparent 2px, rgba( 255,255,255,.5 ) 2px, rgba( 255,255,255,.5 ) 3px); background-size: 3px 3px;',
   'CHECK1' => 'background-image: linear-gradient( 45deg, rgba( 255,255,255,.1 ) 25%, transparent 25%, transparent 75%, rgba( 255,255,255,.1 ) 75%),linear-gradient( 45deg, rgba( 255,255,255,.1 ) 25%, transparent 25%, transparent 75%, rgba( 255,255,255,.1 ) 75%);background-size: 64px 64px;background-position: 0 0, 32px 32px;',
   'OASE' => 'background-image: url(../imgs/oase_background.png);background-size: 100% 100%;background-attachment: fixed;',
-  'NONE' => ''
+  'NONE' => 'background-image: none;'
 );
 
 // Theme background set
@@ -236,10 +236,10 @@ switch( $theme ) {
     $c['BODY'] = '1D2123';
     $c['HEADER'] = '272A2C';
     $c['FOOTER'] = '272A2C';
-    $c['MENU'] = array('3A3D3F','4C4F51','EEEEEE');
+    $c['MENU'] = array('1A1A1A','242424','EEEEEE');
     $c['TEXT'] = array('D0D1D1','111');
-    $c['TABLE'] = array('35383A','14181A','2D2F31','14181A','500000');
-    $c['TABLE_F'] = array('4A4C4E','14181A','3E4042','14181A');
+    $c['TABLE'] = array('2E2E2E','000000','1A1A1A','14181A','400000');
+    $c['TABLE_F'] = array('383838','000000','242424','14181A');
     $c['BUTTON'] = array('335581','47668E');
     $c['KIZI'] = '272A2C';
     $c['HEADING'] = array('3A3D3F','335581','EEEEEE');
@@ -248,7 +248,7 @@ switch( $theme ) {
     $c['DARKMODE'] = 'ON';
     $b['HEADER'] = $backgroundPatterns['NONE'];
     $b['MENU'] = $backgroundPatterns['NONE'];
-    $b['BASE'] = $backgroundPatterns['NONE'];
+    $b['KIZI'] = $backgroundPatterns['NONE'];
     break;
     
   default:
@@ -412,6 +412,9 @@ a:active {
 	background-color: {$color->hex($c['HEADING'][0],90)};
 }
 #KIZI input[type="button"].showbutton {
+  background: none;
+  border: none;
+  box-shadow: none;
   color: {$color->hex($c['HEADING'][2],100)};
 }
 #KIZI .text {
@@ -567,7 +570,7 @@ th.sortTriggerInTbl:hover {
 .itaTableBody::after,
 .itaTable .tableScroll::before,
 .itaTable .tableScroll::after {
-border-color: #111;
+  border-color: #111;
 }
 
 /* ********************************************************************* *
@@ -584,7 +587,7 @@ border-color: #111;
 #symphonyInfoShowContainer .rightSideBar-TypeA,
 #operation_info_area .heightAndWidthFixed01,
 #pattern_filter_area, #symphony_area, #material_area_wrapper {
-border-color: {$color->hex($c['REVERSE'][0],30,$c['REVERSE'][1])}!important;
+  border-color: {$color->hex($c['REVERSE'][0],30,$c['REVERSE'][1])}!important;
 }
 #symphony_header,
 #symphonyInfoShowContainer .rightSideBar-TypeA {
@@ -677,18 +680,18 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
   color: #EEE;
 }
 #symphony_area {
-background: #000000!important;
+  background: #000000!important;
 }
 .movement2,
 .draggable_area .movement.ui-draggable-dragging,
 .highlight {
-background-color: #333333!important;
-border-color: #666666!important;
+  background-color: #333333!important;
+  border-color: #666666!important;
 }
 .start, .end,
 .start::after, .end::after,
 .arrow::after, .highlight::after {
-background-color: #666666!important;
+  background-color: #666666!important;
 }
 
 EOF;
