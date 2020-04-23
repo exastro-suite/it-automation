@@ -271,7 +271,7 @@
                 $line = rtrim($line,"\r\n");
                 
                 if( !empty($filter_string) ){
-                    echo strtr(htmlspecialchars($line,ENT_QUOTES),array("\t" => '    ', $filter_string => "<span class=generalErrMsg><b>" . $filter_string . "</b></span>" ));
+                    echo strtr(htmlspecialchars($line,ENT_QUOTES),array("\t" => '    ', htmlspecialchars($filter_string) => "<span class=generalErrMsg><b>" . htmlspecialchars($filter_string) . "</b></span>" ));
                 }
                 else{
                     echo strtr(htmlspecialchars($line,ENT_QUOTES),array("\t" => '    '));
