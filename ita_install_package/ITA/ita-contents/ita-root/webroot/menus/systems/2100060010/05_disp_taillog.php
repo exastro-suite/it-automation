@@ -13,19 +13,38 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  【特記事項】
+    //      オーケストレータ別の設定記述あり
+    //
+    //////////////////////////////////////////////////////////////////////
+    // DSC変更
+    // ANSIBLE_PNS  --> DSC
+    // ANSIBLE      ==> DSC
+    // ANS          --> DSC
+    ////////////////////////////////////////////////////////////////////////////////////////
     
     // 各種ローカル定数を定義
     $intNumPadding = 10;
     
     //----オーケストレータ別の設定記述
     
-    $strIfTableIdForSelect       = 'B_ANSIBLE_IF_INFO'; 
+    $strIfTableIdForSelect       = 'D_DSC_IF_INFO';
     
-    $strColIdOfDRSRPathFromWebSv = 'ANSIBLE_STORAGE_PATH_LNX';
-    $strColIdOfTailLine          = 'ANSIBLE_TAILLOG_LINES';
-    $strColIdOfOfRefreshInt      = 'ANSIBLE_REFRESH_INTERVAL';
+    $strColIdOfDRSRPathFromWebSv = 'DSC_STORAGE_PATH_LNX';
+    $strColIdOfTailLine          = 'DSC_TAILLOG_LINES';
+    $strColIdOfOfRefreshInt      = 'DSC_REFRESH_INTERVAL';
     
-    $strOrchestratorPath        = "legacy/ns";
+    $prg_recorder_array = array(1=>array('PRG_RCDR_ID'=>'1'
+                                        ,'PRG_RCDR_NAME'=>'実行ログ'
+                                        ,'PRG_FILE_NAME'=>'exec.log')
+                                ,2=>array('PRG_RCDR_ID'=>'2'
+                                        ,'PRG_RCDR_NAME'=>'エラーログ'
+                                        ,'PRG_FILE_NAME'=>'error.log')
+    );
+    
+    $strOrchestratorPath        = "dsc/ns";
     //----オーケストレータ別の設定記述----
     
     // 各種ローカル変数を定義
@@ -51,7 +70,6 @@
         $aryOrderToReqGate = array("DBConnect"=>"LATE");
         require_once("{$root_dir_path}/libs/commonlibs/common_php_req_gate.php");
         
-        // メニューのディレクトリを取得
         if(array_key_exists('no', $_GET)){
             $g['page_dir']  = $_GET['no'];
         }
@@ -64,20 +82,8 @@
         // 共通設定取得パーツ
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_get_sysconfig.php");
         
-        $exec_log_caption  = $objMTS->getSomeMessage("ITAANSIBLEH-MNU-2000000");
-        $error_log_caption = $objMTS->getSomeMessage("ITAANSIBLEH-MNU-2000001");
-
-        $prg_recorder_array = array(1=>array('PRG_RCDR_ID'=>'1'
-                                            ,'PRG_RCDR_NAME'=>$exec_log_caption
-                                            ,'PRG_FILE_NAME'=>'exec.log')
-                                    ,2=>array('PRG_RCDR_ID'=>'2'
-                                            ,'PRG_RCDR_NAME'=>$error_log_caption
-                                            ,'PRG_FILE_NAME'=>'error.log')
-                                   );
-
-    
         ////////////////////////////////////////////////////////////////
-        // ANSIBLEインタフェース情報を取得                                //
+        // DSCインタフェース情報を取得                                //
         ////////////////////////////////////////////////////////////////
         // SQL作成
         $sql = "SELECT {$strColIdOfDRSRPathFromWebSv} DRS_ROOT_PATH_FROM_ITAWEB "
@@ -96,7 +102,7 @@
             $error_flag = 1;
             
             // 例外処理へ
-            throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-501",array($strIfTableIdForSelect)) );
+            throw new Exception( $objMTS->getSomeMessage("ITADSCH-ERR-501",array($strIfTableIdForSelect)) );
         }
         
         // SQL発行
@@ -106,7 +112,7 @@
             $error_flag = 1;
             
             // 例外処理へ
-            throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-502",array($strIfTableIdForSelect)) );
+            throw new Exception( $objMTS->getSomeMessage("ITADSCH-ERR-502",array($strIfTableIdForSelect)) );
         }
         
         // レコードFETCH
@@ -122,7 +128,7 @@
             $error_flag = 1;
             
             // 例外処理へ
-            throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-503",array($strIfTableIdForSelect)) );
+            throw new Exception( $objMTS->getSomeMessage("ITADSCH-ERR-503",array($strIfTableIdForSelect)) );
         }
         
         // DBアクセス実施中フラグをOFF
@@ -136,7 +142,6 @@
         
         // tail対象をtail(読み込み)
         if (isset($_GET['load'])){
-            // ANSIBLEインタフェース情報をローカル変数に格納
             $drs_root_path_from_itaweb  = $row_if_info['DRS_ROOT_PATH_FROM_ITAWEB'];
             
             // メニュー情報取得パーツ
@@ -152,7 +157,7 @@
                 $error_flag = 1;
                 
                 // 例外処理へ
-                throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-504") );
+                throw new Exception( $objMTS->getSomeMessage("ITADSCH-ERR-504") );
             }
             else{
                 // クエリからexecution_noを取得
@@ -164,7 +169,7 @@
                     $error_flag = 1;
                     
                     // 例外処理へ
-                    throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-505") );
+                    throw new Exception( $objMTS->getSomeMessage("ITADSCH-ERR-505") );
                 }
                 unset($objIntNumVali);
             }
@@ -175,7 +180,7 @@
                 $error_flag = 1;
                 
                 // 例外処理へ
-                throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-506") );
+                throw new Exception( $objMTS->getSomeMessage("ITADSCH-ERR-506") );
             }
             else{
                 // クエリからprg_recorderを取得
@@ -187,13 +192,13 @@
                     $error_flag = 1;
                     
                     // 例外処理へ
-                    throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-507") );
+                    throw new Exception( $objMTS->getSomeMessage("ITADSCH-ERR-507") );
                 }
                 unset($objIntNumVali);
                 
                 if( array_key_exists($prg_record_file_id,$prg_recorder_array)===false ){
                     // 例外処理へ
-                    throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-510") );
+                    throw new Exception( $objMTS->getSomeMessage("ITADSCH-ERR-510") );
                 }
                 
                 $prg_record_file_name = $prg_recorder_array[$prg_record_file_id]['PRG_FILE_NAME'];
@@ -220,8 +225,9 @@
             
             if ( !file_exists($prg_record_file_name_fullpath) || is_dir( $prg_record_file_name_fullpath ) ){
                 // 例外処理へ(例外ではないが)
+                //throw new Exception("ログファイル未作成");
                 
-                throw new Exception( '<div id="tail_show" style="display:none;"></div>'.$objMTS->getSomeMessage("ITAANSIBLEH-ERR-511") );
+                throw new Exception( '<div id="tail_show" style="display:none;"></div>'.$objMTS->getSomeMessage("ITADSCH-ERR-511") );
             }
             
             // ログファイルの内容を展開
@@ -258,7 +264,7 @@
                     shell_exec( $command_string );
                     if(!file_exists($temp_file_name_fullpath_2)){
                         // 例外処理へ
-                        throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-501",array($command_string)) );
+                        throw new Exception( $objMTS->getSomeMessage("ITADSCH-ERR-502",array($command_string)) );
                     }
                 }
                 else{
@@ -321,7 +327,7 @@
         // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
         $timeStamp_itabase_orchestrator_drive_style_css=filemtime("$root_dir_path/webroot/common/css/itabase_orchestrator_drive_style.css");
         $timeStamp_05_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/05_javascript.js");
-
+        
         print 
 <<< EOD
         <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/05_javascript.js?{$timeStamp_05_javascript_js}"></script>
@@ -332,13 +338,13 @@
                 <table border="0">
                     <tr>
                         <!--//フィルタ-->
-                        <td style="padding-right:10px">{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-506010")}：</td>
+                        <td style="padding-right:10px">{$objMTS->getSomeMessage("ITADSCH-MNU-508030")}：</td>
                         <td>
                             <input onkeydown="pre_filter(event.keyCode)" type="text" id="filter_string" name="filter_string" size="20" maxlength="256">
                         </td>
                         <td style="padding-right:10px">
                             <!--//該当行のみ表示-->
-                            <input type="checkbox" id="match_line_only" name="match_line_only" value="on" onClick="pre_filter('13')" >{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-506020")}
+                            <input type="checkbox" id="match_line_only" name="match_line_only" value="on" onClick="pre_filter('13')" >{$objMTS->getSomeMessage("ITADSCH-MNU-508040")}
                         </td>
                     </tr>
                 </table>
