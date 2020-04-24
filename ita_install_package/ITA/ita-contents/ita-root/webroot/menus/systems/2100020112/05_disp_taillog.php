@@ -258,7 +258,7 @@
                     shell_exec( $command_string );
                     if(!file_exists($temp_file_name_fullpath_2)){
                         // 例外処理へ
-                        throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-501",array($command_string)) );
+                        throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-502",array($command_string)) );
                     }
                 }
                 else{
