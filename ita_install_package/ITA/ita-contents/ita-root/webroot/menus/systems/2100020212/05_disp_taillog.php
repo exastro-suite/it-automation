@@ -13,19 +13,25 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  【特記事項】
+    //      オーケストレータ別の設定記述あり
+    //
+    //////////////////////////////////////////////////////////////////////
     
     // 各種ローカル定数を定義
     $intNumPadding = 10;
     
     //----オーケストレータ別の設定記述
     
-    $strIfTableIdForSelect       = 'B_ANSIBLE_IF_INFO'; 
+    $strIfTableIdForSelect       = 'B_ANSIBLE_IF_INFO';
     
     $strColIdOfDRSRPathFromWebSv = 'ANSIBLE_STORAGE_PATH_LNX';
     $strColIdOfTailLine          = 'ANSIBLE_TAILLOG_LINES';
     $strColIdOfOfRefreshInt      = 'ANSIBLE_REFRESH_INTERVAL';
     
-    $strOrchestratorPath        = "legacy/ns";
+    $strOrchestratorPath        = "pioneer/ns";
     //----オーケストレータ別の設定記述----
     
     // 各種ローカル変数を定義
@@ -73,8 +79,7 @@
                                     ,2=>array('PRG_RCDR_ID'=>'2'
                                             ,'PRG_RCDR_NAME'=>$error_log_caption
                                             ,'PRG_FILE_NAME'=>'error.log')
-                                   );
-
+        );
     
         ////////////////////////////////////////////////////////////////
         // ANSIBLEインタフェース情報を取得                                //
@@ -258,7 +263,7 @@
                     shell_exec( $command_string );
                     if(!file_exists($temp_file_name_fullpath_2)){
                         // 例外処理へ
-                        throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-501",array($command_string)) );
+                        throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-502",array($command_string)) );
                     }
                 }
                 else{
@@ -321,7 +326,7 @@
         // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
         $timeStamp_itabase_orchestrator_drive_style_css=filemtime("$root_dir_path/webroot/common/css/itabase_orchestrator_drive_style.css");
         $timeStamp_05_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/05_javascript.js");
-
+        
         print 
 <<< EOD
         <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/05_javascript.js?{$timeStamp_05_javascript_js}"></script>
@@ -332,13 +337,13 @@
                 <table border="0">
                     <tr>
                         <!--//フィルタ-->
-                        <td style="padding-right:10px">{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-506010")}：</td>
+                        <td style="padding-right:10px">{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-508030")}：</td>
                         <td>
                             <input onkeydown="pre_filter(event.keyCode)" type="text" id="filter_string" name="filter_string" size="20" maxlength="256">
                         </td>
                         <td style="padding-right:10px">
                             <!--//該当行のみ表示-->
-                            <input type="checkbox" id="match_line_only" name="match_line_only" value="on" onClick="pre_filter('13')" >{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-506020")}
+                            <input type="checkbox" id="match_line_only" name="match_line_only" value="on" onClick="pre_filter('13')" >{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-508040")}
                         </td>
                     </tr>
                 </table>
