@@ -13,6 +13,12 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  【特記事項】
+    //      オーケストレータ別の設定記述あり
+    //
+    //////////////////////////////////////////////////////////////////////
     
     // 各種ローカル定数を定義
     $intNumPadding = 10;
@@ -25,7 +31,7 @@
     $strColIdOfTailLine          = 'ANSIBLE_TAILLOG_LINES';
     $strColIdOfOfRefreshInt      = 'ANSIBLE_REFRESH_INTERVAL';
     
-    $strOrchestratorPath        = "legacy/ns";
+    $strOrchestratorPath        = "legacy/rl";
     //----オーケストレータ別の設定記述----
     
     // 各種ローカル変数を定義
@@ -51,7 +57,6 @@
         $aryOrderToReqGate = array("DBConnect"=>"LATE");
         require_once("{$root_dir_path}/libs/commonlibs/common_php_req_gate.php");
         
-        // メニューのディレクトリを取得
         if(array_key_exists('no', $_GET)){
             $g['page_dir']  = $_GET['no'];
         }
@@ -63,7 +68,7 @@
         
         // 共通設定取得パーツ
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_get_sysconfig.php");
-        
+
         $exec_log_caption  = $objMTS->getSomeMessage("ITAANSIBLEH-MNU-2000000");
         $error_log_caption = $objMTS->getSomeMessage("ITAANSIBLEH-MNU-2000001");
 
@@ -73,9 +78,8 @@
                                     ,2=>array('PRG_RCDR_ID'=>'2'
                                             ,'PRG_RCDR_NAME'=>$error_log_caption
                                             ,'PRG_FILE_NAME'=>'error.log')
-                                   );
-
-    
+        );
+        
         ////////////////////////////////////////////////////////////////
         // ANSIBLEインタフェース情報を取得                                //
         ////////////////////////////////////////////////////////////////
@@ -136,7 +140,6 @@
         
         // tail対象をtail(読み込み)
         if (isset($_GET['load'])){
-            // ANSIBLEインタフェース情報をローカル変数に格納
             $drs_root_path_from_itaweb  = $row_if_info['DRS_ROOT_PATH_FROM_ITAWEB'];
             
             // メニュー情報取得パーツ
@@ -152,6 +155,7 @@
                 $error_flag = 1;
                 
                 // 例外処理へ
+                //throw new Exception("QUERY_NOT_FOUND(execution_no)");
                 throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-504") );
             }
             else{
@@ -164,6 +168,7 @@
                     $error_flag = 1;
                     
                     // 例外処理へ
+                    //throw new Exception("QUERY_IS_NOT_INTEGER(execution_no)");
                     throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-505") );
                 }
                 unset($objIntNumVali);
@@ -175,6 +180,7 @@
                 $error_flag = 1;
                 
                 // 例外処理へ
+                //throw new Exception("QUERY_NOT_FOUND(prg_recorder)");
                 throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-506") );
             }
             else{
@@ -187,12 +193,14 @@
                     $error_flag = 1;
                     
                     // 例外処理へ
+                    //throw new Exception("QUERY_IS_NOT_INTEGER(prg_recorder)");
                     throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-507") );
                 }
                 unset($objIntNumVali);
                 
                 if( array_key_exists($prg_record_file_id,$prg_recorder_array)===false ){
                     // 例外処理へ
+                    //throw new Exception("D_PRG_RECORDER_MASTER Select Error");
                     throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-510") );
                 }
                 
@@ -220,7 +228,6 @@
             
             if ( !file_exists($prg_record_file_name_fullpath) || is_dir( $prg_record_file_name_fullpath ) ){
                 // 例外処理へ(例外ではないが)
-                
                 throw new Exception( '<div id="tail_show" style="display:none;"></div>'.$objMTS->getSomeMessage("ITAANSIBLEH-ERR-511") );
             }
             
@@ -258,7 +265,7 @@
                     shell_exec( $command_string );
                     if(!file_exists($temp_file_name_fullpath_2)){
                         // 例外処理へ
-                        throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-501",array($command_string)) );
+                        throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-502",array($command_string)) );
                     }
                 }
                 else{
@@ -321,7 +328,7 @@
         // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
         $timeStamp_itabase_orchestrator_drive_style_css=filemtime("$root_dir_path/webroot/common/css/itabase_orchestrator_drive_style.css");
         $timeStamp_05_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/05_javascript.js");
-
+        
         print 
 <<< EOD
         <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/05_javascript.js?{$timeStamp_05_javascript_js}"></script>
@@ -332,13 +339,13 @@
                 <table border="0">
                     <tr>
                         <!--//フィルタ-->
-                        <td style="padding-right:10px">{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-506010")}：</td>
+                        <td style="padding-right:10px">{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-1506010")}：</td>
                         <td>
                             <input onkeydown="pre_filter(event.keyCode)" type="text" id="filter_string" name="filter_string" size="20" maxlength="256">
                         </td>
                         <td style="padding-right:10px">
                             <!--//該当行のみ表示-->
-                            <input type="checkbox" id="match_line_only" name="match_line_only" value="on" onClick="pre_filter('13')" >{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-506020")}
+                            <input type="checkbox" id="match_line_only" name="match_line_only" value="on" onClick="pre_filter('13')" >{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-1506020")}
                         </td>
                     </tr>
                 </table>
