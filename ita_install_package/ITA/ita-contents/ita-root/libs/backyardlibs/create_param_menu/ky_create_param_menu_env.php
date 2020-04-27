@@ -115,3 +115,4 @@ define('REPLACE_INT_MAX',           '★★★INT_MAX★★★');
 define('REPLACE_INT_MIN',           '★★★INT_MIN★★★');
 define('REPLACE_MULTI_MAX_LENGTH',  '★★★MULTI_MAX_LENGTH★★★');
 define('REPLACE_MULTI_PREG',        '★★★MULTI_PREG_MATCH★★★');
+define('REPLACE_DATE_FORMAT',       '★★★DATE_FORMAT★★★');
