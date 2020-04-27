@@ -638,6 +638,18 @@ th.sortTriggerInTbl:hover {
 #export_form label:hover {
   background-color: {$color->hex($c['TABLE'][4],100)};
 }
+#import_form .import_all_div {
+	background-color: {$color->hex($c['TABLE'][0],100)};
+	border-color: {$color->hex($c['TABLE'][1],100)};
+  color: #FFF;
+}
+#import_form .import_all_div + div {
+  background-color: {$color->hex($c['TABLE'][2],20,$c['REVERSE'][1])};
+	border-color: {$color->hex($c['TABLE'][1],100)};
+}
+#import_form label:hover {
+  background-color: {$color->hex($c['TABLE'][4],100)};
+}
 EOF;
 
 if ( $c['DARKMODE'] == 'ON' ) {
