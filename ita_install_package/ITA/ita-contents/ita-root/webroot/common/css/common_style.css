@@ -1165,6 +1165,7 @@ hr {
 	border: 1px solid #CCC;
 	border-bottom: 1px dashed #CCC;
 	border-radius: 4px 4px 0 0;
+  white-space: nowrap;
 }
 #export_form .export_all_div + div {
 	padding: 8px;
@@ -1212,13 +1213,15 @@ hr {
 	background-color: #E5EBF2;
 	border: 1px solid #CCC;
 	border-bottom: 1px dashed #CCC;
-	border-radius: 8px 8px 0 0;
+	border-radius: 4px 4px 0 0;
+  white-space: nowrap;
 }
 #import_form .import_all_div + div {
 	padding: 8px;
 	border: 1px solid #CCC;
 	border-top: none;
-	border-radius: 0 0 8px 8px;
+	border-radius: 0 0 4px 4px;
+  letter-spacing: -0.4em;
 }
 #import_form .import_all_div + div::after {
 	content: '';
@@ -1227,8 +1230,10 @@ hr {
 }
 #import_form .import_all_div + div p {
 	width: 25%;
-	display: block;
-	float: left;
+	display: inline-block;
+  vertical-align: top;
+  white-space: nowrap;
+  letter-spacing: normal;
 }
 #import_form label,
 #import_form input {
@@ -1238,7 +1243,37 @@ hr {
 	box-sizing: content-box;
 	display: inline-block;
 	padding: 2px 8px;
+  word-break: break-all;
+  white-space: normal;
+}
+#import_form .import_all_div label:hover {
+  background-color: rgba( 255,255,255,.2 );
 }
 #import_form label:hover {
 	background-color: #FFFFCC;
+}
+#import_form input {
+  vertical-align: middle;
+}
+/* Symphony import style */
+#import_all p[style="margin-bottom: 10px;"] + .import_all_div_ope,
+#import_all p[style="margin-bottom: 10px;"] + .import_all_div_sym {
+  margin-bottom: 0!important;
+  border-top: 1px solid #CCC!important;
+}
+#import_all .import_all_div_ope,
+#import_all .import_all_div_sym {
+  box-sizing: content-box;
+  padding: 4px 8px 4px 0;
+  border: 1px solid #CCC;
+  border-top: none;
+  white-space: nowrap;
+}
+#import_all .import_all_div_ope p > label,
+#import_all .import_all_div_sym p > label {
+  box-sizing: content-box;
+	display: inline-block;
+	padding: 2px 8px;
+  word-break: break-all;
+  white-space: normal;
 }
