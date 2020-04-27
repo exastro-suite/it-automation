@@ -1772,6 +1772,8 @@ class IDColumn extends Column {
 
 	protected $strTempBuf;
 
+    protected $strDateFormat;       // as String IDColumnクラスの参照先が日付・日時の場合に指定してフォーマットで表示を変換する。変換無しの場合はnull
+
 	//----「(set/get)SearchType()で制御されてきた。
 
 	//----ここから継承メソッドの上書き処理
@@ -1855,6 +1857,7 @@ class IDColumn extends Column {
 		$this->setJournalLUTSIDOfMaster(null);
 
 		$this->setSelectTagCallerShow(true);
+        $this->setDateFormat(null);
 	}
 
 	//OVR[ignored]::[01]
@@ -2536,6 +2539,17 @@ class IDColumn extends Column {
 
 				if(is_array($this->arrayMasterSetForInput)===true && 0 < count($this->arrayMasterSetForInput)){
 					//----正常に配列を取得できた
+
+                    //----date型の型変換
+                    $arrayTmp = array();
+                    if($this->getDateFormat() !== null){
+                        foreach($this->arrayMasterSetForInput as $key => $value){
+                            $arrayTmp[$key] = date($this->getDateFormat(), strtotime($value));
+                        }
+                    $this->arrayMasterSetForInput = $arrayTmp;
+                    }
+                    //date型の型変換----
+
 					//正常に配列を取得できた----
 				}else{
 					//$this->arrayMasterSetForInput = null;
@@ -2560,7 +2574,19 @@ class IDColumn extends Column {
 				//----バッファーへ生値をコピー
 				$this->setTempBuffer($strRawDispValue);
 				//バッファーへ生値をコピー----
-				$keyValue = array_search($strRawDispValue, $this->getMasterTableArrayForFilter());
+                $arrayBaseSelect = $this->getMasterTableArrayForFilter();
+
+                //----date型の型変換
+                $arrayTmp = array();
+                if($this->getDateFormat() !== null){
+                    foreach($arrayBaseSelect as $key => $value){
+                        $arrayTmp[$key] = date($this->getDateFormat(), strtotime($value));
+                    }
+                    $arrayBaseSelect = $arrayTmp;
+                }
+                //date型の型変換----
+
+				$keyValue = array_search($strRawDispValue, $arrayBaseSelect);
 				if($keyValue === false){
 					//----マスターDispにない値が入っていた場合
 					$reqOrgData[$this->getID()] = "";
@@ -2616,6 +2642,16 @@ class IDColumn extends Column {
 		$this->setEvent("register_table", "onchange", $jsFunction, $jsFunctionArgs);
 	}
 	//廃止予定(2以降)----
+
+	//NEW[51]
+	function getDateFormat(){
+		return $this->strDateFormat;
+	}
+	//NEW[52]
+	function setDateFormat($strDateFormat){
+		$this->strDateFormat = $strDateFormat;
+	}
+
 
 	//ここまで新規メソッドの定義宣言処理
 
