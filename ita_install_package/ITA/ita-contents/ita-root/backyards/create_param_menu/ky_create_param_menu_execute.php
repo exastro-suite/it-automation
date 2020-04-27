@@ -568,6 +568,15 @@ try{
                         $errFlg = true;
                         break;
                     }
+                    if(5 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
+                    }
+                    else if(6 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d\'',   $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
+                    }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
@@ -684,6 +693,15 @@ try{
                             break;
                         }
                         $otherMenuLink = $otherMenuLinkArray[$matchIdx];
+                        if(5 == $otherMenuLink['COLUMN_TYPE']){
+                            $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
+                        }
+                        else if(6 == $otherMenuLink['COLUMN_TYPE']){
+                            $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d\'',   $work);
+                        }
+                        else{
+                            $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
+                        }
                         $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                         $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                         $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
@@ -799,6 +817,15 @@ try{
                         break;
                     }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
+                    if(5 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
+                    }
+                    else if(6 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d\'',   $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
+                    }          
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
@@ -899,6 +926,15 @@ try{
                         updateMenuStatus($targetData, "4", $msg, false, true);
                         $errFlg = true;
                         break;
+                    }
+                    if(5 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
+                    }
+                    else if(6 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d\'',   $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
                     }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
@@ -1093,6 +1129,15 @@ try{
                         $errFlg = true;
                         break;
                     }
+                    if(5 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
+                    }
+                    else if(6 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d\'',   $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
+                    }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
@@ -1195,6 +1240,15 @@ try{
                         updateMenuStatus($targetData, "4", $msg, false, true);
                         $errFlg = true;
                         break;
+                    }
+                    if(5 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
+                    }
+                    else if(6 == $otherMenuLink['COLUMN_TYPE']){
+                        $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d\'',   $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
                     }
                     $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
@@ -1648,7 +1702,7 @@ EOD;
                     if(7 == $itemInfo['INPUT_METHOD_ID']){
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                        if(2 == $otherMenuLink['COLUMN_TYPE'] || 5 == $otherMenuLink['COLUMN_TYPE'] && 6 == $otherMenuLink['COLUMN_TYPE']){
+                        if(2 == $otherMenuLink['COLUMN_TYPE'] || 5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
                             continue;
                         } 
                     }
@@ -3064,7 +3118,6 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                 $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                 if(2 == $otherMenuLink['COLUMN_TYPE'] || 5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
-                    outputLog("aaa");
                     continue;
                 } 
             }

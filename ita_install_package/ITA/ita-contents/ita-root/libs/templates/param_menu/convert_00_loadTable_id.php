@@ -15,3 +15,4 @@
                           );
     $objOT->setTraceQuery($aryTraceQuery);
     $c★★★NUMBER★★★->setOutputType('print_journal_table',$objOT);
+    $c★★★NUMBER★★★->setDateFormat(★★★DATE_FORMAT★★★);

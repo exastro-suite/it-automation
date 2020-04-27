@@ -409,6 +409,12 @@ class OutputType {
 								
 								$valueDispBody = $row['DISP_COLUMN'];
 								
+                                //----date型の型変換
+                                if($objColumn->getDateFormat() !== null){
+                                    $valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
+                                }
+                                //date型の型変換----
+
 								$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody);
 							}
 							// ここまで結果データ作成----
@@ -650,6 +656,13 @@ class TraceOutputType extends OutputType {
 			//中断した場合は、変換なし----
 		}else{
 			//----正常に探しきった場合
+
+            //----date型の型変換
+            if($this->objColumn->getDateFormat() !== null){
+                $strSearchKeyValue = date($this->objColumn->getDateFormat(), strtotime($strSearchKeyValue));
+            }
+            //date型の型変換----
+
 			$rowData[$strInitedColId] = $strSearchKeyValue;
 			//正常に探しきった場合----
 		}
@@ -769,6 +782,17 @@ class IDOutputType extends OutputType {
 					if($utnMasterTable===null){
 						$rowData[$strInitedColId] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-13001",array($this->getErrMsgHead(),$mainIdColVal,$this->getErrMsgTail()));
 					}else if( array_key_exists( $mainIdColVal, $utnMasterTable)===true ){
+
+                        //----date型の型変換
+                        $arrayTmp = array();
+                        if($this->objColumn->getDateFormat() !== null){
+                            foreach($utnMasterTable as $key => $value){
+                                $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
+                            }
+                            $utnMasterTable = $arrayTmp;
+                        }
+                        //date型の型変換----
+
 						$rowData[$strInitedColId] = $utnMasterTable[$mainIdColVal];
 						$aryConvValue['convIDList'] = $utnMasterTable;
 					}else if( 0 < strlen($mainIdColVal) ){
@@ -820,6 +844,17 @@ class IDOutputType extends OutputType {
 					if( $jnlMasterTable===null ){
 						$rowData[$strInitedColId] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-13002",array($this->getErrMsgHead(),$mainIdColVal,$this->getErrMsgTail()));
 					}else if( array_key_exists($mainIdColVal, $jnlMasterTable)===true ){
+
+                        //----date型の型変換
+                        $arrayTmp = array();
+                        if($this->objColumn->getDateFormat() !== null){
+                            foreach($jnlMasterTable as $key => $value){
+                                $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
+                            }
+                            $jnlMasterTable = $arrayTmp;
+                        }
+                        //date型の型変換----
+
 						$rowData[$strInitedColId] = $jnlMasterTable[$mainIdColVal];
 						$aryConvValue['convIDList'] = $jnlMasterTable;
 					}else{
