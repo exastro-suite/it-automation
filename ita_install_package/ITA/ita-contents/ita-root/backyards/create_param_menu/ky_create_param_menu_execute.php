@@ -568,6 +568,7 @@ try{
                         $errFlg = true;
                         break;
                     }
+                    $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     if(5 == $otherMenuLink['COLUMN_TYPE']){
                         $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
                     }
@@ -577,7 +578,6 @@ try{
                     else{
                         $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
                     }
-                    $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
@@ -927,6 +927,7 @@ try{
                         $errFlg = true;
                         break;
                     }
+                    $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     if(5 == $otherMenuLink['COLUMN_TYPE']){
                         $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
                     }
@@ -935,8 +936,7 @@ try{
                     }
                     else{
                         $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
-                    }
-                    $otherMenuLink = $otherMenuLinkArray[$matchIdx];
+                    }            
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
@@ -1129,6 +1129,7 @@ try{
                         $errFlg = true;
                         break;
                     }
+                    $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     if(5 == $otherMenuLink['COLUMN_TYPE']){
                         $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
                     }
@@ -1138,7 +1139,6 @@ try{
                     else{
                         $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
                     }
-                    $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
@@ -1241,6 +1241,7 @@ try{
                         $errFlg = true;
                         break;
                     }
+                    $otherMenuLink = $otherMenuLinkArray[$matchIdx];
                     if(5 == $otherMenuLink['COLUMN_TYPE']){
                         $work = str_replace(REPLACE_DATE_FORMAT,   '\'Y/m/d H:i:s\'',   $work);
                     }
@@ -1249,8 +1250,7 @@ try{
                     }
                     else{
                         $work = str_replace(REPLACE_DATE_FORMAT,   'null',   $work);
-                    }
-                    $otherMenuLink = $otherMenuLinkArray[$matchIdx];
+                    }      
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
