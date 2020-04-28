@@ -21,7 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-function AnsibleTowerExecution($function,$ansibleTowerIfInfo,&$toProcessRow,$exec_out_dir,$UIExecLogPath,$UIErrorLogPath,&$status='',$JobTemplatePropertyParameterAry=array(),$JobTemplatePropertyNameAry=array()) {
+function AnsibleTowerExecution($function,$ansibleTowerIfInfo,&$TowerHostList,&$toProcessRow,$exec_out_dir,$UIExecLogPath,$UIErrorLogPath,&$status='',$JobTemplatePropertyParameterAry=array(),$JobTemplatePropertyNameAry=array()) {
 
 global $root_dir_path;
 global $log_output_dir;
@@ -165,8 +165,8 @@ global $objDBCA;
             ////////////////////////////////////////////////////////////////
             // AnsibleTowerに必要なデータを生成                           //
             ////////////////////////////////////////////////////////////////
-            $workflowTplId = $director->build($toProcessRow, $ansibleTowerIfInfo,
-                                              $JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry);
+            $TowerHostList = array();
+            $workflowTplId = $director->build($toProcessRow, $ansibleTowerIfInfo,$TowerHostList);
             if($workflowTplId == -1) {
                 // メイン処理での異常フラグをON
                 $process_has_error = true;
@@ -219,7 +219,7 @@ global $objDBCA;
             if(($process_was_scrammed || $process_has_error) &&
                 $ansibleTowerIfInfo['ANSTWR_DEL_RUNTIME_DATA'] == 1 &&
                 $director != null) {
-                 $ret = $director->delete($tgt_execution_no);
+                 $ret = $director->delete($tgt_execution_no,$TowerHostList);
                  if($ret == false) {
                      $warning_flag = 1;
                  $logger->error("Faild to cleanup ansibletower environment. (exec_no: $tgt_execution_no)");
@@ -294,7 +294,7 @@ global $objDBCA;
             }
 
             if($ansibleTowerIfInfo['ANSTWR_DEL_RUNTIME_DATA'] == 1 && $director != null) {
-                $ret = $director->delete($tgt_execution_no);
+                $ret = $director->delete($tgt_execution_no,$TowerHostList);
                 if($ret == false) {
                     $warning_flag = 1;
                     $logger->error("Faild to clean up ansibletower environment. (exec_no: $tgt_execution_no)");
