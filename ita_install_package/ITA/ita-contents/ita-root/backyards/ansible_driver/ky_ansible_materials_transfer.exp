@@ -1,0 +1,111 @@
+#!/usr/bin/expect
+#   Copyright 2019 NEC Corporation
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+######################################################################
+##
+##  【概要】
+##      リモートホストへのファイル転送
+##
+##  【特記事項】
+##      <<引数>>
+##      expect ky_ansible_materials_transfer.exp %0 ... %6
+##       %0:   リモートホスト
+##       %1:   認証方式
+##               パスワード認証: pass  
+##               鍵認証:         key
+##               パスワード省略: none  
+##       %2:   ユーザー名
+##       %3:   パスワード
+##       %4:   鍵認証ファイル
+##       %5:   ファイル転送元パス
+##       %6:   ファイル転送先パス
+##      <<exit code>>
+##       0:   正常
+##       他:　異常
+##
+######################################################################
+set HOST            [lindex $argv 0]
+set TYPE            [lindex $argv 1]
+set USER            [lindex $argv 2]
+set PASSWD          [lindex $argv 3]
+if { ${TYPE} == "none" } {
+   set KEY_FILE_PATH " "
+} elseif { ${TYPE} == "key" } {
+   set KEY_FILE_PATH  [lindex $argv 4]
+}
+set SRC_PATH        [lindex $argv 5]
+set DEST_PATH       [lindex $argv 6]
+
+set timeout 10
+if { ${TYPE} == "pass" } {
+    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SRC_PATH} ${USER}@${HOST}:${DEST_PATH}
+    expect "assword:" {
+        send "${PASSWD}\n"
+        exp_continue
+    } "(yes/no)?" {
+        send "yes\n"
+        exp_continue
+    } " " {
+        exp_continue
+    } timeout {
+        exit 200
+    } eof {
+       catch wait result
+       set OS_ERROR [ lindex $result 2 ]
+       if { ${OS_ERROR} == -1 } {
+           exit 202
+       }
+       set STATUS [ lindex $result 3 ]
+       exit ${STATUS}
+    }
+} elseif { ${TYPE} == "key" } {
+    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${KEY_FILE_PATH} ${SRC_PATH} ${USER}@${HOST}:${DEST_PATH}
+    expect "assword:" {
+        exit 201
+    } "(yes/no)?" {
+        exit 201
+    } " " {
+        exp_continue
+    } timeout {
+        exit 200
+    } eof {
+       catch wait result
+       set OS_ERROR [ lindex $result 2 ]
+       if { ${OS_ERROR} == -1 } {
+           exit 202
+       }
+       set STATUS [ lindex $result 3 ]
+       exit ${STATUS}
+    }
+}
+if { ${TYPE} == "none" } {
+    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SRC_PATH} ${USER}@${HOST}:${DEST_PATH}
+    expect "password:" {
+        exit 201
+    } "(yes/no)?" {
+        exit 201
+    } timeout {
+        exit 200
+    } eof {
+       catch wait result
+       set OS_ERROR [ lindex $result 2 ]
+       if { ${OS_ERROR} == -1 } {
+           exit 202
+       }
+       set STATUS [ lindex $result 3 ]
+       exit ${STATUS}
+    }
+}
+exit 203
