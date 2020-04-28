@@ -79,7 +79,7 @@ class ExecuteDirector {
         return($this->version);
     }
 
-    function build($exeInsRow, $ifInfoRow) {
+    function build($exeInsRow, $ifInfoRow, &$TowerHostList) {
 
         global $vg_tower_driver_name;
 
@@ -152,10 +152,25 @@ class ExecuteDirector {
             return -1;
         }
 
-        $ret = $this->prepareProject($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_ANS']); 
+        // AnsibleTowerHost情報取得
+        $TowerHostList = array();
+        $ret = $this->getTowerHostInfo($execution_no,$ifInfoRow['ANSIBLE_STORAGE_PATH_LNX'],$TowerHostList);
         if($ret == false) {
-            // array[40001] = "SCM更新作業に失敗しました。";
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040001");
+            // AnsibleTowerホスト一覧の取得に失敗しました。
+            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040033");
+            $this->errorLogOut($errorMessage);
+            return -1;
+        }
+        if(count($TowerHostList) == 0) {
+            // AnsibleTowerホスト一覧に有効なホスト情報が登録されていません。
+            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040034");
+            $this->errorLogOut($errorMessage);
+            return -1;
+        }
+
+        $ret = $this->MaterialsTransfer($execution_no, $ifInfoRow, $TowerHostList);
+        if($ret == false) {
+            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040036");
             $this->errorLogOut($errorMessage);
             return -1;
         }
@@ -252,7 +267,7 @@ class ExecuteDirector {
         return $workflowTplId;
     }
 
-    function delete($execution_no) {
+    function delete($execution_no, $TowerHostList) {
 
         $this->logger->trace(__METHOD__);
 
@@ -283,7 +298,7 @@ class ExecuteDirector {
             }
         }
         $allResult = true;
-        $ret = $this->cleanUpPreparedProjectDirectory($execution_no);
+        $ret = $this->MaterialsDelete($execution_no, $TowerHostList);
         if($ret == false) {
             $allResult = false;
         }
@@ -355,429 +370,155 @@ class ExecuteDirector {
         return $wfJobId;
     }
 
-    private function prepareProject($execution_no, $dataRelayStoragePath) {
-        global  $vg_tower_driver_type;
-        global  $vg_tower_driver_id;
-        global  $vg_tower_driver_name;
+    private function MaterialsTransfer($execution_no, $ifInfoRow, $TowerHostList) {
 
         $this->logger->trace(__METHOD__);
 
-        ///////////////////////////////////////////////////////////////////////
-        // prepare必要情報取得
-        ///////////////////////////////////////////////////////////////////////
-        $prepareParam = array();
+        global $root_dir_path;
 
-        $prepareParam['execution_no']     = $execution_no;
-        $prepareParam['dataRelayStorage'] = $dataRelayStoragePath;
-        $prepareParam['driver_type']      = $vg_tower_driver_type;
-        $prepareParam['driver_id']        = $vg_tower_driver_id;
-        $prepareParam['driver_name']      = $vg_tower_driver_name;
+        $src_path  = $this->getMaterialsTransferSourcePath($ifInfoRow['ANSIBLE_STORAGE_PATH_LNX'],$execution_no);
+        $dest_path = $this->getMaterialsTransferDestinationPath($execution_no);
 
-        //   [[Inventory]]
-        $query = "?name=" . AnsibleTowerRestApiInventories::PREPARE_BUILD_INVENTORY_NAME;
-        $response_array = AnsibleTowerRestApiInventories::getAll($this->restApiCaller, $query);
-        $this->logger->trace(var_export($response_array, true));
-        if($response_array['success'] == false) {
-            $this->logger->error($response_array['responseContents']['errorMessage']);
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040009");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        if(count($response_array['responseContents']) === 0
-            || array_key_exists("id", $response_array['responseContents'][0]) == false) {
-            $this->logger->error("No inventory id. (prepare)");
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040010");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        $inventoryId = $response_array['responseContents'][0]['id'];
-        $prepareParam['inventory'] = $inventoryId;
+        $tmp_log_file = '/tmp/.ky_ansible_materials_transfer_' . getmypid() . ".log";
 
-        //   [[Inventory][host]]
-        $response_array = AnsibleTowerRestApiInventoryHosts::getAllEachInventory($this->restApiCaller, $inventoryId);
-        $this->logger->trace(var_export($response_array, true));
-        if($response_array['success'] == false) {
-            $this->logger->error($response_array['responseContents']['errorMessage']);
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040022");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        if(count($response_array['responseContents']) === 0
-            || array_key_exists("id", $response_array['responseContents'][0]) == false) {
-            $this->logger->error("No invenroty-host id. (prepare)");
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040023");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        // ホストがあるかのチェックのみ
-
-        //   [[project]]
-        $query = "?name=" . AnsibleTowerRestApiProjects::PREPARE_BUILD_PROJECT_NAME;
-        $response_array = AnsibleTowerRestApiProjects::getAll($this->restApiCaller, $query);
-        $this->logger->trace(var_export($response_array, true));
-        if($response_array['success'] == false) {
-            $this->logger->error($response_array['responseContents']['errorMessage']);
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040011");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        if(count($response_array['responseContents']) === 0
-            || array_key_exists("id", $response_array['responseContents'][0]) == false) {
-            $this->logger->error("No project id. (prepare)");
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040012");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        $projectId = $response_array['responseContents'][0]['id'];
-        $prepareParam['project'] = $projectId;
-
-        $prepareParam['playbook'] = AnsibleTowerRestApiJobTemplates::LAUNCH_PLAYBOOK_NAME; // 固定
-
-        //   [[Credential]]
-        $query = "?name=" . AnsibleTowerRestApiCredentials::PREPARE_BUILD_CREDENTIAL_NAME;
-        $response_array = AnsibleTowerRestApiCredentials::getAll($this->restApiCaller, $query);
-        $this->logger->trace(var_export($response_array, true));
-        if($response_array['success'] == false) {
-            $this->logger->error($response_array['responseContents']['errorMessage']);
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040013");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        if(count($response_array['responseContents']) === 0
-            || array_key_exists("id", $response_array['responseContents'][0]) == false) {
-            $this->logger->error("No credential id. (prepare)");
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040014");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        $credentialId = $response_array['responseContents'][0]['id'];
-        $prepareParam['credential'] = $credentialId;
-
-        ///////////////////////////////////////////////////////////////////////
-        // prepareJobTemplate作成
-        ///////////////////////////////////////////////////////////////////////
-        $this->logger->trace("prepare build");
-
-        $response_array = AnsibleTowerRestApiJobTemplates::postForPrepare($this->restApiCaller, $prepareParam);
-        if($response_array['success'] == false) {
-            $this->logger->error($response_array['responseContents']['errorMessage']);
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040015");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        if(array_key_exists("id", $response_array['responseContents']) == false) {
-            $this->logger->error("No job-template id. (prepare)");
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040016");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        $jobTplId = $response_array['responseContents']['id'];
-
-        ///////////////////////////////////////////////////////////////////////
-        // prepareJobTemplateにcredentialIdを紐づけ(Ansible Tower3.6～)
-        ///////////////////////////////////////////////////////////////////////
-        //---- Ansible Tower Version Check (Not Ver3.5)
-        if($this->getTowerVersion() != TOWER_VER35) {
-
-            $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTplId, $credentialId);
-            if($response_array['success'] == false) {
-                $this->logger->error($response_array['responseContents']['errorMessage']);
-                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
+        $result_code = true;
+        foreach($TowerHostList as $credential) {
+       
+            $cmd = sprintf("expect %s/%s %s %s %s %s %s %s %s > %s 2>&1",
+                            $root_dir_path,
+                            "backyards/ansible_driver/ky_ansible_materials_transfer.exp",
+                            $credential['host_name'],
+                            $credential['auth_type'],
+                            $credential['username'],
+                            $credential['password'],
+                            $credential['ssh_key_file'],
+                            $src_path,
+                            $dest_path,
+                            $tmp_log_file);
+            exec($cmd,$arry_out,$return_var);
+            if($return_var !== 0) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040035",array($credential['host_name']));
                 $this->errorLogOut($errorMessage);
-                return false;
+
+                $this->logger->error($errorMessage);
+                $log = file_get_contents($tmp_log_file);
+                $this->logger->error($log);
+
+                $result_code = false;
             }
+            unlink($tmp_log_file);
         }
-        //Ansible Tower Version Check (Not Ver3.5) ----
+        return $result_code;
+    } // MaterialsTransfer
 
-        ///////////////////////////////////////////////////////////////////////
-        // prepare実行
-        ///////////////////////////////////////////////////////////////////////
-        $this->logger->trace("build request");
+    private function MaterialsDelete($execution_no, $TowerHostList) {
 
-        $param = array();
+        $this->logger->trace(__METHOD__);
 
-        $param['jobTplId'] = $jobTplId;
+        global $root_dir_path;
 
-        $this->logger->trace(var_export($param, true));
+        $dest_path = $this->getMaterialsTransferDestinationPath($execution_no);
 
-        $response_array = AnsibleTowerRestApiJobTemplates::launch($this->restApiCaller, $param);
+        $tmp_log_file = '/tmp/.ky_ansible_materials_delete_' . getmypid() . ".log";
 
-        $this->logger->trace(var_export($response_array, true));
+        $result_code = true;
+        foreach($TowerHostList as $credential) {
+       
+            $cmd = sprintf("expect %s/%s %s %s %s %s %s %s > %s 2>&1",
+                            $root_dir_path,
+                            "backyards/ansible_driver/ky_ansible_materials_delete.exp",
+                            $credential['host_name'],
+                            $credential['auth_type'],
+                            $credential['username'],
+                            $credential['password'],
+                            $credential['ssh_key_file'],
+                            $dest_path,
+                            $tmp_log_file);
+            exec($cmd,$arry_out,$return_var);
+            if($return_var !== 0) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040037",array($credential['host_name']));
+                $this->logger->error($errorMessage);
+                $log = file_get_contents($tmp_log_file);
+                $this->logger->error($log);
 
-        if($response_array['success'] == false) {
-            $this->logger->error($response_array['responseContents']['errorMessage']);
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040017");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        if(array_key_exists("id", $response_array['responseContents']) == false) {
-            $this->logger->error("No job id. (prepare)");
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040018");
-            $this->errorLogOut($errorMessage);
-            return false;
-        }
-        $jobId = $response_array['responseContents']['id'];
-
-        ///////////////////////////////////////////////////////////////////////
-        // prepare build実行完了待ち
-        ///////////////////////////////////////////////////////////////////////
-        $this->logger->trace("Waiting for finish prepare build. Job Id: $jobId");
-
-        $now = 0;
-        $limit = 120;
-        $sleepTime = 1; // sleep(sec)
-        while(true) {
-
-            if($now > $limit) {
-                $this->logger->error("Time out (limit: " . $limit * $sleepTime . " sec)");
-                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040019");
-                $this->errorLogOut($errorMessage);
-                return false;
+                $result_code = false;
             }
-            $now++;
-            sleep($sleepTime);
+            unlink($tmp_log_file);
+        }
+        return $result_code;
+    } // MaterialsDelete
 
-            $response_array = AnsibleTowerRestApiJobs::get($this->restApiCaller, $jobId);
+    private function getTowerHostInfo($execution_no,$dataRelayStoragePath,&$TowerHostList) {
+        global $vg_tower_driver_type;
+        global $vg_tower_driver_id;
 
-            $responseContents = $response_array['responseContents'];
-            $this->logger->trace(__METHOD__ . " / " . __LINE__);
-            $this->logger->trace("rest_success: " . $response_array['success']);
-            $job_status = array_key_exists("status", $responseContents) ? $responseContents['status'] : "";
-            $this->logger->trace("job_status: " . $job_status);
-            $job_failed = array_key_exists("failed", $responseContents) ? $responseContents['failed'] : "";
-            $this->logger->trace("job_failed: " . $job_failed);
-            $this->logger->trace("wait count: " . $now);
+        $this->logger->trace(__METHOD__);
 
-            if($response_array['success'] == false) {
-                $this->logger->error($response_array['responseContents']['errorMessage']);
-                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040020");
-                $this->errorLogOut($errorMessage);
-                return false;
+        $TowerHostList = array();
+
+        $condition = array(
+            "DISUSE_FLAG" => '0',
+        );
+
+        $rows = $this->dbAccess->selectRowsUseBind('B_ANS_TWR_HOST', false, $condition);
+
+        foreach($rows as $row) {
+            // isolated node は省く
+            if(strlen($row['ANSTWR_ISOLATED_TYPE']) != 0) {
+                continue;
             }
-
-            $responseContents = $response_array['responseContents'];
-            if((array_key_exists("status", $responseContents) &&
-                                                ($responseContents['status'] == "failed" ||
-                                                 $responseContents['status'] == "error" ||
-                                                 $responseContents['status'] == "canceled")) ||
-                (array_key_exists("failed", $responseContents) && $responseContents['failed'] == true)) {
-                $this->logger->error("parepare failed. execution_no:$execution_no");
-
-                //---- ジョブの実行結果を取得し実行ログに表示
-                $response_array_stdout = AnsibleTowerRestApiJobs::getStdOut($this->restApiCaller, $jobId);
-                if(array_key_exists("responseContents",$response_array_stdout) === true) {
-                    if(is_array($response_array_stdout['responseContents']) === true) {
-                        $log_data = print_r($response_array_stdout['responseContents'],true);
-                    } else {
-                        $log_data = $response_array_stdout['responseContents'];
-                    }
-
-                    $execlogFilename        = "exec.log";
-                    $outDirectoryPath       = $dataRelayStoragePath . "/" . $vg_tower_driver_type . '/' . $vg_tower_driver_id . '/' . addPadding($execution_no) . "/out";
-                    $execlogFullPath        = $outDirectoryPath . "/" . $execlogFilename;
-
-                    // ログ(", ")  =>  (",\n")を改行する
-                    $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
-                    // ログ(=> {)  =>  (=> {\n)を改行する
-                    $log_data = preg_replace( "/=> {/", "=> {\n",$log_data,-1,$count);
-                    // ログ(, ")  =>  (,\n")を改行する
-                    $log_data = preg_replace( "/, \"/", ",\n\"",$log_data,-1,$count);
-                    // 改行文字列\\r\\nを改行コードに置換える
-                    $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
-                    // 改行文字列\r\nを改行コードに置換える
-                    $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
-                    // python改行文字列\\nを改行コードに置換える
-                    $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
-                    // python改行文字列\nを改行コードに置換える
-                    $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
-
-                    @file_put_contents($execlogFullPath,$log_data);
-
+            $username          = $row['ANSTWR_LOGIN_USER'];
+            $password          = ky_decrypt($row['ANSTWR_LOGIN_PASSWORD']);
+            if(strlen(trim($password)) == 0) {
+                $password      = "undefine";
+            }
+            $sshKeyFile        = $row['ANSTWR_LOGIN_SSH_KEY_FILE'];
+            if(strlen(trim($sshKeyFile)) == 0) {
+                $sshKeyFile    = "undefine";
+            } else {
+                $src_file   = getAnsibleTowerSshKeyFileContent($row['ANSTWR_HOST_ID'],$row['ANSTWR_LOGIN_SSH_KEY_FILE']);
+                $sshKeyFile = sprintf("%s/%s/%s/%s/in/ssh_key_files/AnsibleTower_%s_%s",
+                                      $dataRelayStoragePath,
+                                      $vg_tower_driver_type,
+                                      $vg_tower_driver_id,
+                                      addPadding($execution_no),
+                                      addPadding($row['ANSTWR_HOST_ID']),
+                                      $row['ANSTWR_LOGIN_SSH_KEY_FILE']);
+                if( copy($src_file,$sshKeyFile) === false ){
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000106",array(basename($src_file)));
+                    $this->errorLogOut($errorMessage);
+                    return false;
                 }
-                //ジョブの実行結果を取得し実行ログに表示 ----
-
-                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040021" . $responseContents['status']);
-                $this->errorLogOut($errorMessage);
-                return false;
+                if( !chmod( $sshKeyFile, 0600 ) ){
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->errorLogOut($errorMessage);
+                    return false;
+                }
+            }
+            switch($row['ANSTWR_LOGIN_AUTH_TYPE']) {
+            case 1:   // 鍵認証
+                $auth_type   = "key";
+                break;
+            case 2:   // パスワード認証
+                $auth_type   = "pass";
+                break;
+            default:  // 認証未指定
+                $auth_type   = "none";
+                break;
             }
 
-            if(array_key_exists("status", $responseContents) && $responseContents['status'] == "successful" &&
-                array_key_exists("failed", $responseContents) && $responseContents['failed'] == false) {
-                $this->logger->trace("prepare successful. execution_no:$execution_no");
+            $credential = array(
+                "id"              => $row['ANSTWR_HOST_ID'],
+                "host_name"       => $row['ANSTWR_HOSTNAME'],
+                "auth_type"       => $auth_type,
+                "username"        => $username,
+                "password"        => $password,
+                "ssh_key_file"    => $sshKeyFile,
+            );
 
-                return true;
-            }
+            $TowerHostList[] = $credential;
         }
-    } // prepareProject
-
-    private function cleanUpPreparedProjectDirectory($execution_no) {
-        global $vg_tower_driver_name;
-
-        $this->logger->trace(__METHOD__);
-
-        ///////////////////////////////////////////////////////////////////////
-        // cleanup必要情報取得
-        ///////////////////////////////////////////////////////////////////////
-        $cleanupParam = array();
-        $cleanupParam['execution_no'] = $execution_no;
-        $cleanupParam['driver_name']  = $vg_tower_driver_name;
-
-        //   [[Inventory]]
-        $query = "?name=" . AnsibleTowerRestApiInventories::PREPARE_BUILD_INVENTORY_NAME;
-        $response_array = AnsibleTowerRestApiInventories::getAll($this->restApiCaller, $query);
-        $this->logger->trace(var_export($response_array, true));
-        if($response_array['success'] == false) {
-            $this->logger->debug($response_array['responseContents']['errorMessage']);
-            return false;
-        }
-        if(count($response_array['responseContents']) === 0
-            || array_key_exists("id", $response_array['responseContents'][0]) == false) {
-            $this->logger->debug("No inventory id. (cleanup)");
-            return false;
-        }
-        $inventoryId = $response_array['responseContents'][0]['id'];
-        $cleanupParam['inventory'] = $inventoryId;
-
-        //   [[project]]
-        $query = "?name=" . AnsibleTowerRestApiProjects::CLEANUP_PREPARED_BUILD_PROJECT_NAME;
-        $response_array = AnsibleTowerRestApiProjects::getAll($this->restApiCaller, $query);
-        $this->logger->trace(var_export($response_array, true));
-        if($response_array['success'] == false) {
-            $this->logger->debug($response_array['responseContents']['errorMessage']);
-            return false;
-        }
-        if(count($response_array['responseContents']) === 0
-            || array_key_exists("id", $response_array['responseContents'][0]) == false) {
-            $this->logger->debug("No project id. (cleanup)");
-            return false;
-        }
-        $projectId = $response_array['responseContents'][0]['id'];
-        $cleanupParam['project'] = $projectId;
-
-        $cleanupParam['playbook'] = AnsibleTowerRestApiJobTemplates::LAUNCH_PLAYBOOK_NAME; // 固定
-
-        //   [[Credential]]
-        $query = "?name=" . AnsibleTowerRestApiCredentials::PREPARE_BUILD_CREDENTIAL_NAME;
-        $response_array = AnsibleTowerRestApiCredentials::getAll($this->restApiCaller, $query);
-        $this->logger->trace(var_export($response_array, true));
-        if($response_array['success'] == false) {
-            $this->logger->debug($response_array['responseContents']['errorMessage']);
-            return false;
-        }
-        if(count($response_array['responseContents']) === 0
-            || array_key_exists("id", $response_array['responseContents'][0]) == false) {
-            $this->logger->debug("No credential id. (cleanup)");
-            return false;
-        }
-        $credentialId = $response_array['responseContents'][0]['id'];
-        $cleanupParam['credential'] = $credentialId;
-
-        ///////////////////////////////////////////////////////////////////////
-        // cleanupJobTemplate作成
-        ///////////////////////////////////////////////////////////////////////
-        $this->logger->trace("cleanup prepared project dir");
-
-        $response_array = AnsibleTowerRestApiJobTemplates::postForCleanupPreparedProjectDirectory($this->restApiCaller, $cleanupParam);
-        if($response_array['success'] == false) {
-            $this->logger->debug($response_array['responseContents']['errorMessage']);
-            return false;
-        }
-        if(array_key_exists("id", $response_array['responseContents']) == false) {
-            $this->logger->debug("No job-template id. (cleanup)");
-            return false;
-        }
-        $jobTplId = $response_array['responseContents']['id'];
-
-        ///////////////////////////////////////////////////////////////////////
-        // cleanupJobTemplateにcredentialIdを紐づけ(Ansible Tower3.6～)
-        ///////////////////////////////////////////////////////////////////////
-        //---- Ansible Tower Version Check (Not Ver3.5)
-        if($this->getTowerVersion() != TOWER_VER35) {
-
-            $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTplId, $credentialId);
-            if($response_array['success'] == false) {
-                $this->logger->debug("Linking job-template and credential. (cleanup)");
-                return false;
-            }
-        }
-        //Ansible Tower Version Check (Not Ver3.5) ----
-
-        ///////////////////////////////////////////////////////////////////////
-        // cleanup実行
-        ///////////////////////////////////////////////////////////////////////
-        $this->logger->trace("cleanup request");
-
-        $param = array();
-
-        $param['jobTplId'] = $jobTplId;
-
-        $this->logger->trace(var_export($param, true));
-
-        $response_array = AnsibleTowerRestApiJobTemplates::launch($this->restApiCaller, $param);
-
-        $this->logger->trace(var_export($response_array, true));
-
-        if($response_array['success'] == false) {
-            $this->logger->debug($response_array['responseContents']['errorMessage']);
-            return false;
-        }
-        if(array_key_exists("id", $response_array['responseContents']) == false) {
-            $this->logger->debug("No job id. (cleanup)");
-            return false;
-        }
-        $jobId = $response_array['responseContents']['id'];
-
-        ///////////////////////////////////////////////////////////////////////
-        // cleanup prepare project実行完了待ち
-        ///////////////////////////////////////////////////////////////////////
-        $this->logger->trace("Waiting for finish cleanup prepared project. Job Id: $jobId");
-
-        $now = 0;
-        $limit = 120;
-        $sleepTime = 1; // sleep(sec)
-        while(true) {
-
-            if($now > $limit) {
-                $this->logger->debug("Time out (limit: " . $limit * $sleepTime . " sec)");
-                return false;
-            }
-            $now++;
-            sleep($sleepTime);
-
-            $response_array = AnsibleTowerRestApiJobs::get($this->restApiCaller, $jobId);
-
-            $responseContents = $response_array['responseContents'];
-            $this->logger->trace(__METHOD__ . " / " . __LINE__);
-            $this->logger->trace("rest_success: " . $response_array['success']);
-            $job_status = array_key_exists("status", $responseContents) ? $responseContents['status'] : "";
-            $this->logger->trace("job_status: " . $job_status);
-            $job_failed = array_key_exists("failed", $responseContents) ? $responseContents['failed'] : "";
-            $this->logger->trace("job_failed: " . $job_failed);
-            $this->logger->trace("wait count: " . $now);
-
-            if($response_array['success'] == false) {
-                $this->logger->debug($response_array['responseContents']['errorMessage']);
-                return false;
-            }
-
-            $responseContents = $response_array['responseContents'];
-            if((array_key_exists("status", $responseContents) &&
-                                                ($responseContents['status'] == "failed" ||
-                                                 $responseContents['status'] == "error" ||
-                                                 $responseContents['status'] == "canceled")) ||
-                (array_key_exists("failed", $responseContents) && $responseContents['failed'] == true)) {
-                $this->logger->debug("Cleanup failed. execution_no:$execution_no");
-                return false;
-            }
-
-
-            if(array_key_exists("status", $responseContents) && $responseContents['status'] == "successful" &&
-                array_key_exists("failed", $responseContents) && $responseContents['failed'] == false) {
-                $this->logger->trace("Cleanup successful. execution_no:$execution_no");
-
-                return true;
-            }
-        }
+        return true;
     }
 
     private function getHostInfo($exeInsRow, &$inventoryForEachCredentials) {
@@ -1311,14 +1052,14 @@ class ExecuteDirector {
             return false;
         }
 
-        $response_array = AnsibleTowerRestApiJobTemplates::deleteRelatedCurrnetExecutionForPrepare($this->restApiCaller, $execution_no);
-
-        $this->logger->trace(var_export($response_array, true));
-
-        if($response_array['success'] == false) {
-            $this->logger->debug($response_array['responseContents']['errorMessage']);
-            return false;
-        }
+//        $response_array = AnsibleTowerRestApiJobTemplates::deleteRelatedCurrnetExecutionForPrepare($this->restApiCaller, $execution_no);
+//
+//        $this->logger->trace(var_export($response_array, true));
+//
+//        if($response_array['success'] == false) {
+//            $this->logger->debug($response_array['responseContents']['errorMessage']);
+//            return false;
+//        }
 
         $this->logger->trace("Clean up job templates finished. (execution_no: $execution_no)");
 
@@ -1365,14 +1106,14 @@ class ExecuteDirector {
             return false;
         }
 
-        $response_array = AnsibleTowerRestApiJobs::deleteRelatedCurrnetExecutionForPrepare($this->restApiCaller, $execution_no);
+//        $response_array = AnsibleTowerRestApiJobs::deleteRelatedCurrnetExecutionForPrepare($this->restApiCaller, $execution_no);
 
-        $this->logger->trace(var_export($response_array, true));
-
-        if($response_array['success'] == false) {
-            $this->logger->debug($response_array['responseContents']['errorMessage']);
-            return false;
-        }
+//        $this->logger->trace(var_export($response_array, true));
+//
+//        if($response_array['success'] == false) {
+//            $this->logger->debug($response_array['responseContents']['errorMessage']);
+//            return false;
+//        }
 
         $this->logger->trace("Clean up job templates finished. (execution_no: $execution_no)");
 
@@ -2068,11 +1809,36 @@ class ExecuteDirector {
     function errorLogOut($message) {
         if($this->exec_out_dir != "" && file_exists($this->exec_out_dir)) {
             $errorLogfile = $this->exec_out_dir . "/" . "error.log";
-            $ret = file_put_contents($errorLogfile, "\n\n" . $message, FILE_APPEND | LOCK_EX);
+
+            if(preg_match('/\\n$/',$message) == 0) $message.= "\n";
+
+            $ret = file_put_contents($errorLogfile, $message, FILE_APPEND | LOCK_EX);
             if($ret === false) {
                 $this->logger->error("Error. Faild to write message. $message");
             }
         }
+    }
+    function geterrorLogPath() {
+        $errorLogfile = "";
+        if($this->exec_out_dir != "" && file_exists($this->exec_out_dir)) {
+            $errorLogfile = $this->exec_out_dir . "/" . "error.log";
+        }
+        return $errorLogfile;
+    }
+
+    function getMaterialsTransferSourcePath($dataRelayStoragePath,$execution_no) {
+        global $vg_tower_driver_type;
+        global $vg_tower_driver_id;
+
+        $path = sprintf("%s/%s/%s/%s/in",$dataRelayStoragePath,$vg_tower_driver_type,$vg_tower_driver_id,addPadding($execution_no));
+        return $path;
+    }
+
+    function getMaterialsTransferDestinationPath($execution_no) {
+        global $vg_tower_driver_name;
+
+        $path = sprintf("/var/lib/awx/projects/ita_%s_executions_%s",$vg_tower_driver_name,addPadding($execution_no)); 
+        return $path;
     }
 
     function __destruct() {
@@ -2091,4 +1857,15 @@ function getSshKeyFileContent($systemId, $sshKeyFileName) {
     $content = file_get_contents($filePath);
 
     return $content;
+}
+
+function getAnsibleTowerSshKeyFileContent($TowerHostID, $sshKeyFileName) {
+   
+    global $root_dir_path;
+   
+    $ssh_key_file_dir = $root_dir_path . "/uploadfiles/2100040708/ANSTWR_LOGIN_SSH_KEY_FILE/";
+   
+    $filePath = $ssh_key_file_dir . addPadding($TowerHostID) . "/" . $sshKeyFileName;
+   
+    return $filePath;
 }
