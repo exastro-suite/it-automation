@@ -47,7 +47,7 @@ ANSIBLE_HOSTNAME                %VARCHR%(128)                     , -- Ansible �
 ANSIBLE_PROTOCOL                %VARCHR%(8)                       , -- Ansible 接続プロトコル
 ANSIBLE_PORT                    %INT%                             , -- Ansible 接続ポート
 -- Tower 接続情報
-ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- Tower 接続ホスト名
+ANSTWR_HOST_ID                  %INT%                             , -- Tower 接続ホスト名
 ANSTWR_PROTOCOL                 %VARCHR%(8)                       , -- Tower 接続プロトコル
 ANSTWR_PORT                     %INT%                             , -- Tower 接続ポート
 -- 共通
@@ -92,7 +92,7 @@ ANSIBLE_HOSTNAME                %VARCHR%(128)                     , -- Ansible �
 ANSIBLE_PROTOCOL                %VARCHR%(8)                       , -- Ansible 接続プロトコル
 ANSIBLE_PORT                    %INT%                             , -- Ansible 接続ポート
 -- Tower 接続情報
-ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- Tower 接続ホスト名
+ANSTWR_HOST_ID                  %INT%                             , -- Tower 接続ホスト名
 ANSTWR_PROTOCOL                 %VARCHR%(8)                       , -- Tower 接続プロトコル
 ANSTWR_PORT                     %INT%                             , -- Tower 接続ポート
 -- 共通
@@ -122,6 +122,49 @@ LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , -- 最終更
 LAST_UPDATE_USER                %INT%                             , -- 最終更新ユーザ
 PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_TWR_HOST ( 
+  ANSTWR_HOST_ID                  %INT%                             ,
+  ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
+  ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
+  ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
+  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
+  ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
+-- 
+  DISP_SEQ                        %INT%                             ,
+  NOTE                            %VARCHR%(4000)                    ,
+  DISUSE_FLAG                     %VARCHR%(1)                       ,
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       ,
+  LAST_UPDATE_USER                %INT%                             ,
+  PRIMARY KEY (ANSTWR_HOST_ID) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_TWR_HOST_JNL ( 
+  JOURNAL_SEQ_NO                  %INT%                             ,
+  JOURNAL_REG_DATETIME            %DATETIME6%                       ,
+  JOURNAL_ACTION_CLASS            %VARCHR%(8)                       ,
+-- 
+  ANSTWR_HOST_ID                  %INT%                             ,
+  ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
+  ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
+  ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
+  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
+  ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
+-- 
+  DISP_SEQ                        %INT%                             ,
+  NOTE                            %VARCHR%(4000)                    ,
+  DISUSE_FLAG                     %VARCHR%(1)                       ,
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       ,
+  LAST_UPDATE_USER                %INT%                             ,
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
 -- 履歴系テーブル作成----
 
 -- ----更新系テーブル作成
@@ -636,6 +679,64 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 
 -- *****************************************************************************
 -- ***  Ansible Common Tables *****                                          ***
+-- *****************************************************************************
+
+-- *****************************************************************************
+-- *** ***** Ansible Common Views                                            ***
+-- *****************************************************************************
+
+CREATE VIEW D_ANS_TWR_HOST     AS 
+SELECT
+  * 
+FROM 
+  B_ANS_TWR_HOST
+WHERE
+  ANSTWR_ISOLATED_TYPE is NULL;
+  
+CREATE VIEW D_ANS_TWR_HOST_JNL AS 
+SELECT
+  * 
+FROM 
+  B_ANS_TWR_HOST_JNL
+WHERE
+  ANSTWR_ISOLATED_TYPE is NULL;
+
+CREATE VIEW D_ANSIBLE_TOWER_IF_INFO AS 
+SELECT 
+  TAB_A.*,
+  TAB_B.ANSTWR_HOSTNAME,
+  TAB_B.ANSTWR_LOGIN_AUTH_TYPE,
+  TAB_B.ANSTWR_LOGIN_USER,
+  TAB_B.ANSTWR_LOGIN_PASSWORD,
+  TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE,
+  TAB_B.ANSTWR_ISOLATED_TYPE
+FROM
+  B_ANSIBLE_IF_INFO           TAB_A
+  LEFT JOIN (
+             SELECT * 
+             FROM B_ANS_TWR_HOST 
+             WHERE DISUSE_FLAG = '0'
+            ) TAB_B ON ( TAB_A.ANSTWR_HOST_ID = TAB_B.ANSTWR_HOST_ID );
+  
+CREATE VIEW D_ANSIBLE_TOWER_IF_INFO_JNL AS 
+SELECT 
+  TAB_A.*,
+  TAB_B.ANSTWR_HOSTNAME,
+  TAB_B.ANSTWR_LOGIN_AUTH_TYPE,
+  TAB_B.ANSTWR_LOGIN_USER,
+  TAB_B.ANSTWR_LOGIN_PASSWORD,
+  TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE,
+  TAB_B.ANSTWR_ISOLATED_TYPE
+FROM
+  B_ANSIBLE_IF_INFO_JNL         TAB_A
+  LEFT JOIN (
+             SELECT * 
+             FROM B_ANS_TWR_HOST_JNL
+             WHERE DISUSE_FLAG = '0'
+            ) TAB_B ON ( TAB_A.ANSTWR_HOST_ID = TAB_B.ANSTWR_HOST_ID );
+
+-- *****************************************************************************
+-- ***  Ansible Common View *****                                            ***
 -- *****************************************************************************
 
 -- *****************************************************************************
