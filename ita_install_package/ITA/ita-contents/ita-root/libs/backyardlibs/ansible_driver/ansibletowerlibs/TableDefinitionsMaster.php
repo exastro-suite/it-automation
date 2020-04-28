@@ -60,14 +60,13 @@ class TableDefinitionsMaster {
             ////////////////////////////////
             // ビュークラス定義ファイル
             ////////////////////////////////
-            // 今のところビュークラス定義ファイルはないのでコメント
-            //$viewFileList  = array_diff(scandir($tableDefinitionDirPath . "view/"), array("..", "."));
-            //foreach($viewFileList as $viewClassPHP) {
-            //    require_once($tableDefinitionDirPath . "view/" . $viewClassPHP);
-            //
-            //    $className = basename($viewClassPHP, ".php");
-            //    self::$tableDefinitions[$className::getTableName()] = $className;
-            //}
+            $viewFileList  = array_diff(scandir($tableDefinitionDirPath . "view/"), array("..", "."));
+            foreach($viewFileList as $viewClassPHP) {
+                require_once($tableDefinitionDirPath . "view/" . $viewClassPHP);
+            
+                $className = basename($viewClassPHP, ".php");
+                self::$tableDefinitions[$className::getTableName()] = $className;
+            }
         }
 
         // 定義取得
