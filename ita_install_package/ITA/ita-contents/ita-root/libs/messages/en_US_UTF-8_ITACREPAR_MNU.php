@@ -85,6 +85,7 @@ $ary[102137] = "Minimum value";
 $ary[102138] = "Enter the minimum value of Decimal number column. -99999999999999 will be set if not entered.";
 $ary[102139] = "Digits";
 $ary[102140] = "Enter the maximum total digit of whole number part and fraction part for Decimal number column. 14 will be set if not entered.";
+$ary[102141] = "Multi string";
 $ary[102201] = "Display the link between the created menu and the DB table.";
 $ary[102202] = "Id";
 $ary[102203] = "Menu /Table link list";
