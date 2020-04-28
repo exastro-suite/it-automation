@@ -51,7 +51,7 @@
 
     if($vg_log_level == 'DEBUG')  $this->RestAPI_log("START[".basename(__FILE__)."]");
 
-    $root_dir_path = '/exastro/ita-root';
+    $root_dir_path = $this->getApplicationRootDirPath();
 
     require_once ($root_dir_path . '/libs/commonlibs/common_ansible_vault.php');
     

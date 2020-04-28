@@ -245,6 +245,7 @@
                 
                 // フィルタ文字列をエスケープ
                 $filter_string_escape = preg_quote($filter_string);
+                $filter_string_escape = str_replace("'", "'\''", $filter_string_escape);
                 
                 $strMatchLineOnly = "";
                 if( isset($_GET['match_line_only']) ){
@@ -255,6 +256,10 @@
                     // フィルタしてコピー
                     $command_string = "grep '" . $filter_string_escape . "' < " . $temp_file_name_fullpath_1 . " > " . $temp_file_name_fullpath_2;
                     shell_exec( $command_string );
+                    if(!file_exists($temp_file_name_fullpath_2)){
+                        // 例外処理へ
+                        throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-502",array($command_string)) );
+                    }
                 }
                 else{
                     copy( $temp_file_name_fullpath_1, $temp_file_name_fullpath_2 );
@@ -271,7 +276,7 @@
                 $line = rtrim($line,"\r\n");
                 
                 if( !empty($filter_string) ){
-                    echo strtr(htmlspecialchars($line,ENT_QUOTES),array("\t" => '    ', $filter_string => "<span class=generalErrMsg><b>" . $filter_string . "</b></span>" ));
+                    echo strtr(htmlspecialchars($line,ENT_QUOTES),array("\t" => '    ', htmlspecialchars($filter_string,ENT_QUOTES) => "<span class=generalErrMsg><b>" . htmlspecialchars($filter_string,ENT_QUOTES) . "</b></span>" ));
                 }
                 else{
                     echo strtr(htmlspecialchars($line,ENT_QUOTES),array("\t" => '    '));
