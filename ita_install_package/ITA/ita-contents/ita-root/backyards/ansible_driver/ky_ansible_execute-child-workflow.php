@@ -261,7 +261,8 @@
         //////////////////////////////////////////////////////////////////
         // 処理対象の作業インスタンス実行                            
         //////////////////////////////////////////////////////////////////
-        $ret = instance_execution($dbobj,$ansdrv,$lv_ans_if_info,$tgt_driver_id,$tgt_execution_no,$intJournalSeqNo,$tgt_execution_row,$cln_execution_row);
+        $TowerHostList = array();
+        $ret = instance_execution($dbobj,$ansdrv,$lv_ans_if_info,$TowerHostList,$tgt_driver_id,$tgt_execution_no,$intJournalSeqNo,$tgt_execution_row,$cln_execution_row);
         
         ////////////////////////////////////////////////////////////////
         // 処理対象の作業インスタンスのステータス更新
@@ -337,7 +338,7 @@
                 $cln_execution_row = $tgt_execution_row;
             }
 
-            $ret = instance_checkcondition($dbobj,$ansdrv,$lv_ans_if_info,$tgt_driver_id,$tgt_execution_no,$intJournalSeqNo,$tgt_execution_row,$cln_execution_row);
+            $ret = instance_checkcondition($dbobj,$ansdrv,$lv_ans_if_info,$TowerHostList,$tgt_driver_id,$tgt_execution_no,$intJournalSeqNo,$tgt_execution_row,$cln_execution_row);
             
             $ststus_update = false;
             // ステータスが更新されたか判定
@@ -971,7 +972,7 @@
         return true;
     }
     // 処理対象の作業インスタンス実行
-    function instance_execution($dbobj,$in_ansdrv,$in_ans_if_info,$in_driver_id,$in_execution_no,$in_JournalSeqNo,$in_execution_row,&$out_execution_row) {
+    function instance_execution($dbobj,$in_ansdrv,$in_ans_if_info,&$TowerHostList,$in_driver_id,$in_execution_no,$in_JournalSeqNo,$in_execution_row,&$out_execution_row) {
         global $objDBCA;
         global $objMTS;
         global $db_model_ch;
@@ -1288,7 +1289,8 @@
                     // AnsibleTowerから実行                                       //
                     ////////////////////////////////////////////////////////////////
                     // $Statusは未使用
-                    $ret = AnsibleTowerExecution(DF_EXECUTION_FUNCTION,$in_ans_if_info,$out_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$Status,$JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry);
+                    $TowerHostList = array();
+                    $ret = AnsibleTowerExecution(DF_EXECUTION_FUNCTION,$in_ans_if_info,$TowerHostList,$out_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$Status,$JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry);
 
                     if ( $log_level === 'DEBUG' ){
                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-51069",$in_execution_no);
@@ -1335,7 +1337,7 @@
             return false;
         }
     }
-    function instance_checkcondition($dbobj,$in_ansdrv,$in_ans_if_info,$in_driver_id,$in_execution_no,$in_JournalSeqNo,$in_execution_row,&$out_execution_row) {
+    function instance_checkcondition($dbobj,$in_ansdrv,$in_ans_if_info,$TowerHostList,$in_driver_id,$in_execution_no,$in_JournalSeqNo,$in_execution_row,&$out_execution_row) {
         global $objDBCA;
         global $objMTS;
         global $db_model_ch;
@@ -1479,7 +1481,7 @@
                 ////////////////////////////////////////////////////////////////
                 // AnsibleTowerから実行                                       //
                 ////////////////////////////////////////////////////////////////
-                $ret = AnsibleTowerExecution(DF_CHECKCONDITION_FUNCTION,$in_ans_if_info,$out_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$Status);
+                $ret = AnsibleTowerExecution(DF_CHECKCONDITION_FUNCTION,$in_ans_if_info,$TowerHostList,$out_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$Status);
 
                 if( $Status == 5 ||
                     $Status == 6 ||
@@ -1641,7 +1643,7 @@
                     }
 
                     // 戻り値は確認しない。
-                    AnsibleTowerExecution(DF_DELETERESOURCE_FUNCTION,$in_ans_if_info,$in_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$Status);
+                    AnsibleTowerExecution(DF_DELETERESOURCE_FUNCTION,$in_ans_if_info,$TowerHostList,$in_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$Status);
 
                     if($log_level === 'DEBUG' ){
                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-50076",$in_execution_no);
