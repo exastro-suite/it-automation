@@ -42,7 +42,7 @@ class BAnsIfInfo extends TableBaseDefinition {
             "ANSIBLE_HOSTNAME"             => "",
             "ANSIBLE_PROTOCOL"             => "",
             "ANSIBLE_PORT"                 => "",
-            "ANSTWR_HOSTNAME"              => "",          
+            "ANSTWR_HOST_ID"               => "",          
             "ANSTWR_PROTOCOL"              => "",         
             "ANSTWR_PORT"                  => "",             
             "ANSIBLE_EXEC_MODE"            => "",
