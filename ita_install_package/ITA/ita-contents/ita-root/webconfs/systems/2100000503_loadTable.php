@@ -56,9 +56,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
     // 検索機能の制御----
 
-
-
-
     //メニュー
     $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-213004"),'D_CMDB_TARGET_MENU_LIST','MENU_ID','MENU_PULLDOWN','',array('OrderByThirdColumn'=>'MENU_ID'));
     $c->setDescription('');//エクセル・ヘッダでの説明
@@ -74,6 +71,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     //項目名
     $c = new TextColumn('COL_TITLE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-213006"));
+    $c->setDescription('');//エクセル・ヘッダでの説明
+    $c->setRequired(true);//登録/更新時には、入力必須
+    $table->addColumn($c);
+
+    //クラス
+    $c = new TextColumn('COL_CLASS',$g['objMTS']->getSomeMessage("ITABASEH-MNU-213011"));
     $c->setDescription('');//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
