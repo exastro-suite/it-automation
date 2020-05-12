@@ -950,6 +950,11 @@
         global    $objDBCA;
         global    $log_level;
 
+        $cmdb_menu_column_tbl = 'B_CMDB_MENU_COLUMN';
+        if($in_driver_name == DF_PIONEER_DRIVER) {
+            $cmdb_menu_column_tbl = 'D_ANS_PNS_CMDB_MENU_COLUMN';
+        }
+
         $sql =            " SELECT                                                           \n";
         $sql = $sql .     "   TBL_A.COLUMN_ID                                             ,  \n";
         $sql = $sql .     "   TBL_A.MENU_ID                                               ,  \n";
@@ -1010,59 +1015,10 @@
         $sql = $sql .     "       DISUSE_FLAG   = '0'                                        \n";
         $sql = $sql .     "   ) AS VAL_PTN_VARS_LINK_CNT                                  ,  \n";
         $sql = $sql .     "   TBL_A.VAL_CHILD_VARS_LINK_ID                                ,  \n";
-        // ROLEの場合のみ該当メンバー変数のメンバー変数一覧の登録確認
-        if($in_driver_name == DF_ROLE_DRIVER){
-            $sql = $sql . "   (                                                              \n";
-            $sql = $sql . "     SELECT                                                       \n";
-            $sql = $sql . "       CHILD_VARS_NAME                                            \n";
-            $sql = $sql . "     FROM                                                         \n";
-            $sql = $sql . "       $in_child_vars_tbl                                         \n";
-            $sql = $sql . "     WHERE                                                        \n";
-            $sql = $sql . "       PARENT_VARS_NAME_ID IN (                                   \n";
-            $sql = $sql . "         SELECT                                                   \n";
-            $sql = $sql . "           VARS_NAME_ID                                           \n";
-            $sql = $sql . "         FROM                                                     \n";
-            $sql = $sql . "           $in_ptn_vars_link_tbl                                  \n";
-            $sql = $sql . "         WHERE                                                    \n";
-            $sql = $sql . "           PATTERN_ID    = TBL_A.PATTERN_ID        AND            \n";
-            $sql = $sql . "           VARS_LINK_ID  = TBL_A.VAL_VARS_LINK_ID  AND            \n";
-            $sql = $sql . "           DISUSE_FLAG   = '0'                                    \n";
-            $sql = $sql . "         )                                                        \n";
-            $sql = $sql . "       AND                                                        \n";
-            $sql = $sql . "       CHILD_VARS_NAME_ID  = TBL_A.VAL_CHILD_VARS_LINK_ID AND     \n";
-            $sql = $sql . "       DISUSE_FLAG = '0'                                          \n";
-            $sql = $sql . "   ) AS VAL_CHILD_VARS_NAME                                     , \n";
-        }
-        else{
-            $sql = $sql . "   NULL AS VAL_CHILD_VARS_NAME                                  , \n";
-        }
-        // 変数一覧管理の変数タイプを取得　legacy/pioneerにはないのでnull設定
-        if($in_driver_name == DF_ROLE_DRIVER){
-            $sql = $sql . "   (                                                              \n";
-            $sql = $sql . "     SELECT                                                       \n";
-            $sql = $sql . "       VARS_ATTRIBUTE_01                                          \n";
-            $sql = $sql . "     FROM                                                         \n";
-            $sql = $sql . "       $in_vars_master_tbl                                        \n";
-            $sql = $sql . "     WHERE                                                        \n";
-            $sql = $sql . "       VARS_NAME_ID IN (                                          \n";
-            $sql = $sql . "         SELECT                                                   \n";
-            $sql = $sql . "           VARS_NAME_ID                                           \n";
-            $sql = $sql . "         FROM                                                     \n";
-            $sql = $sql . "           $in_ptn_vars_link_tbl                                  \n";
-            $sql = $sql . "         WHERE                                                    \n";
-            $sql = $sql . "           PATTERN_ID    = TBL_A.PATTERN_ID        AND            \n";
-            $sql = $sql . "           VARS_LINK_ID  = TBL_A.VAL_VARS_LINK_ID  AND            \n";
-            $sql = $sql . "           DISUSE_FLAG   = '0'                                    \n";
-            $sql = $sql . "                        )                                         \n";
-            $sql = $sql . "       AND                                                        \n";
-            $sql = $sql . "       DISUSE_FLAG   = '0'                                        \n";
-            $sql = $sql . "   ) AS VARS_ATTRIBUTE_01                                       , \n";
-        }
-        else{
-            $sql = $sql . "   NULL AS VARS_ATTRIBUTE_01                                    , \n";
-        }
-        $sql = $sql .     "                                                                  \n";
-        $sql = $sql . "   TBL_A.VAL_ASSIGN_SEQ                                             , \n";
+        // legacy/pioneerにはないのでnull設定
+        $sql = $sql .     "   NULL AS VAL_CHILD_VARS_NAME                                 ,  \n";
+        $sql = $sql .     "   NULL AS VARS_ATTRIBUTE_01                                   ,  \n";
+        $sql = $sql .     "   TBL_A.VAL_ASSIGN_SEQ                                        ,  \n";
         $sql = $sql .     "   TBL_A.VAL_CHILD_VARS_COL_SEQ                                 , \n";
         $sql = $sql .     "   TBL_A.KEY_VARS_LINK_ID                                       , \n";
         $sql = $sql .     "   (                                                              \n";
@@ -1095,37 +1051,13 @@
         $sql = $sql .     "       DISUSE_FLAG   = '0'                                        \n";
         $sql = $sql .     "   ) AS KEY_PTN_VARS_LINK_CNT                                   , \n";
         $sql = $sql .     "   TBL_A.KEY_CHILD_VARS_LINK_ID                                 , \n";
-        // ROLEの場合のみ該当メンバー変数のメンバー変数一覧の登録確認
-        if($in_driver_name == DF_ROLE_DRIVER){
-            $sql = $sql . "   (                                                              \n";
-            $sql = $sql . "     SELECT                                                       \n";
-            $sql = $sql . "       CHILD_VARS_NAME                                            \n";
-            $sql = $sql . "     FROM                                                         \n";
-            $sql = $sql . "       $in_child_vars_tbl                                         \n";
-            $sql = $sql . "     WHERE                                                        \n";
-            $sql = $sql . "       PARENT_VARS_NAME_ID IN (                                   \n";
-            $sql = $sql . "         SELECT                                                   \n";
-            $sql = $sql . "           VARS_NAME_ID                                           \n";
-            $sql = $sql . "         FROM                                                     \n";
-            $sql = $sql . "           $in_ptn_vars_link_tbl                                  \n";
-            $sql = $sql . "         WHERE                                                    \n";
-            $sql = $sql . "           PATTERN_ID    = TBL_A.PATTERN_ID        AND            \n";
-            $sql = $sql . "           VARS_LINK_ID  = TBL_A.KEY_VARS_LINK_ID  AND            \n";
-            $sql = $sql . "           DISUSE_FLAG   = '0'                                    \n";
-            $sql = $sql . "         )                                                        \n";
-            $sql = $sql . "       AND                                                        \n";
-            $sql = $sql . "       CHILD_VARS_NAME_ID  = TBL_A.KEY_CHILD_VARS_LINK_ID AND     \n";
-            $sql = $sql . "       DISUSE_FLAG = '0'                                          \n";
-            $sql = $sql . "   ) AS KEY_CHILD_VARS_NAME                                     , \n";
-        }
-        else{
-            $sql = $sql . "   NULL AS KEY_CHILD_VARS_NAME                                  , \n";
-        }
-        $sql = $sql . "   TBL_A.KEY_ASSIGN_SEQ                                             , \n";
+        // legacy/pioneerにはないのでnull設定
+        $sql = $sql .     "   NULL AS KEY_CHILD_VARS_NAME                                  , \n";
+        $sql = $sql .     "   TBL_A.KEY_ASSIGN_SEQ                                         , \n";
         $sql = $sql .     "   TBL_A.KEY_CHILD_VARS_COL_SEQ                                   \n";
         $sql = $sql .     " FROM                                                             \n";
         $sql = $sql .     "   $in_val_assign_tbl TBL_A                                       \n";
-        $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_COLUMN TBL_B ON                          \n";
+        $sql = $sql .     "   LEFT JOIN $cmdb_menu_column_tbl TBL_B ON                       \n";
         $sql = $sql .     "          (TBL_A.COLUMN_LIST_ID = TBL_B.COLUMN_LIST_ID)           \n";
         $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_TABLE  TBL_C ON                          \n";
         $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_C.MENU_ID)                  \n";
