@@ -294,7 +294,7 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(256)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
 VAR_STRUCT_ANAL_JSON_STRING_FILE  %VARCHR%(100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
-VARS_LIST                         %VARCHR%(4000)                   , -- 変数定義
+VARS_LIST                         %VARCHR%(8192)                   , -- 変数定義
 ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -319,7 +319,7 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(256)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
 VAR_STRUCT_ANAL_JSON_STRING_FILE  %VARCHR%(100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
-VARS_LIST                         %VARCHR%(4000)                   , -- 変数定義
+VARS_LIST                         %VARCHR%(8192)                   , -- 変数定義
 ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -2092,6 +2092,102 @@ SELECT
          TAB_A.LAST_UPDATE_USER
 FROM B_ANSIBLE_PNS_VARS_ASSIGN         TAB_A
 LEFT JOIN D_ANS_PNS_PTN_VARS_LINK  TAB_B ON ( TAB_B.VARS_LINK_ID = TAB_A.VARS_LINK_ID )
+;
+
+CREATE VIEW D_ANS_PNS_CMDB_MENU_COLUMN AS
+SELECT
+  TBL_A.*
+FROM 
+  B_CMDB_MENU_COLUMN TBL_A
+WHERE
+  TBL_A.COL_CLASS   <>  'MultiTextColumn'
+;
+  
+CREATE VIEW D_ANS_PNS_CMDB_MENU_COLUMN_JNL AS
+SELECT
+  TBL_A.*
+FROM 
+  B_CMDB_MENU_COLUMN_JNL TBL_A
+WHERE
+  TBL_A.COL_CLASS   <>  'MultiTextColumn'
+;
+
+CREATE VIEW D_ANS_PNS_CMDB_MENU_LIST AS
+SELECT 
+  TBL_A.*
+FROM 
+  D_CMDB_MENU_LIST TBL_A
+WHERE
+  (SELECT 
+     COUNT(*) 
+   FROM 
+     B_CMDB_MENU_COLUMN TBL_B
+   WHERE
+     TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
+     TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
+     TBL_B.DISUSE_FLAG =   '0'
+  ) <> 0
+;
+
+CREATE VIEW D_ANS_PNS_CMDB_MENU_LIST_JNL AS
+SELECT 
+  TBL_A.*
+FROM 
+  D_CMDB_MENU_LIST_JNL TBL_A
+WHERE
+  (SELECT 
+     COUNT(*) 
+   FROM 
+     B_CMDB_MENU_COLUMN_JNL TBL_B
+   WHERE
+     TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
+     TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
+     TBL_B.DISUSE_FLAG =   '0'
+  ) <> 0
+;
+
+CREATE VIEW D_ANS_PNS_CMDB_MG_MU_COL_LIST AS
+SELECT
+  TAB_A.COLUMN_LIST_ID                 ,
+  CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_TITLE_PULLDOWN,
+  TAB_C.MENU_ID                        ,
+  TAB_A.COL_TITLE_DISP_SEQ             ,
+  TAB_A.DISP_SEQ                       ,
+  TAB_A.NOTE                           ,
+  TAB_A.DISUSE_FLAG                    ,
+  TAB_A.LAST_UPDATE_TIMESTAMP          ,
+  TAB_A.LAST_UPDATE_USER
+FROM        D_ANS_PNS_CMDB_MENU_COLUMN TAB_A
+  LEFT JOIN D_ANS_PNS_CMDB_MENU_LIST   TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+  LEFT JOIN A_MENU_LIST                TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+  LEFT JOIN A_MENU_GROUP_LIST          TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+   TAB_A.DISUSE_FLAG = '0' AND
+   TAB_B.DISUSE_FLAG = '0' AND
+   TAB_C.DISUSE_FLAG = '0' AND
+   TAB_D.DISUSE_FLAG = '0'
+;
+
+CREATE VIEW D_ANS_PNS_CMDB_MG_MU_COL_LIST_JNL AS
+SELECT
+  TAB_A.COLUMN_LIST_ID                 ,
+  CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_PULLDOWN,
+  TAB_C.MENU_ID                        ,
+  TAB_A.COL_TITLE_DISP_SEQ             ,
+  TAB_A.DISP_SEQ                       ,
+  TAB_A.NOTE                           ,
+  TAB_A.DISUSE_FLAG                    ,
+  TAB_A.LAST_UPDATE_TIMESTAMP          ,
+  TAB_A.LAST_UPDATE_USER
+FROM        D_ANS_PNS_CMDB_MENU_COLUMN_JNL TAB_A
+  LEFT JOIN D_ANS_PNS_CMDB_MENU_LIST       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+  LEFT JOIN A_MENU_LIST                    TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+  LEFT JOIN A_MENU_GROUP_LIST              TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+   TAB_A.DISUSE_FLAG = '0' AND
+   TAB_B.DISUSE_FLAG = '0' AND
+   TAB_C.DISUSE_FLAG = '0' AND
+   TAB_D.DISUSE_FLAG = '0'
 ;
 
 -- *****************************************************************************
