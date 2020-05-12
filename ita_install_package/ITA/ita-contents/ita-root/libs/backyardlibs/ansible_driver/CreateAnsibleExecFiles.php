@@ -1996,7 +1996,9 @@ class CreateAnsibleExecFiles {
             }
             //ホスト変数ファイルのレコード生成
             //変数名: 具体値
-            $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+            $NumPadding = 2;
+            $edit_val = $this->HostVarEdit($val,$NumPadding);
+            $var_str = $var_str . sprintf("%s: %s\n",$var,$edit_val);
 
             // 変数の具体値に使用しているテンプレート/コピー変数の情報を確認
             if($in_var_type == "VAR"){
@@ -2044,7 +2046,10 @@ class CreateAnsibleExecFiles {
             
                 //ホスト変数ファイルのレコード生成
                 //変数名: 具体値
-                $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+                $NumPadding = 2;
+                $edit_val = $this->HostVarEdit($val,$NumPadding);
+                $var_str = $var_str . sprintf("%s: %s\n",$var,$edit_val);
+
                 //グローバル変数の具体値にコピー変数があるか確認
                 $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
                 $ret = $this->LegacyRoleCheckConcreteValueIsVar($objLibs,
@@ -2174,6 +2179,10 @@ class CreateAnsibleExecFiles {
                             $val = $make_vaultpass;
                             break;
                         }
+                    } else {
+                        // 複数行具体値のyaml書式対応
+                        $NumPadding = 2;
+                        $val = $this->HostVarEdit($val,$NumPadding);
                     }
                     $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
 
@@ -2211,6 +2220,10 @@ class CreateAnsibleExecFiles {
                         }
                         $this->lv_parent_vars_list[$in_host_name][$var] = 0;
 
+                        // 複数行具体値のyaml書式対応
+                        $NumPadding = 2;
+                        $val = $this->HostVarEdit($val,$NumPadding);
+
                         //ホスト変数ファイルのレコード生成
                         //変数名: 具体値
                         $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
@@ -2244,8 +2257,6 @@ class CreateAnsibleExecFiles {
                         }
                         $this->lv_parent_vars_list[$in_host_name][$var] = 0;
 
-                        //ホスト変数ファイルのレコード生成
-                        //変数名: 具体値
                         $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
                     }
                 }
@@ -2257,8 +2268,6 @@ class CreateAnsibleExecFiles {
                         }
                         $this->lv_parent_vars_list[$in_host_name][$var] = 0;
                         
-                        //ホスト変数ファイルのレコード生成
-                        //変数名: 具体値
                         $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
                     }
                 }
@@ -3027,13 +3036,7 @@ class CreateAnsibleExecFiles {
         $errmsg = "";
         $f_name = "";
         $f_line = "";
-        // Spycモジュールの読み込み
-        $ret = $this->LoadSpycModule($errmsg, $f_name, $f_line);
-        if($ret === false){
-            $errmsg = $errmsg . "(" . $f_line . ")";
-            $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg);
-            return(false);
-        }
+
         // 対話ファイル配列のホスト分繰返し
         foreach( $ina_hosts as $no=>$host_name ){
             // 対話ファイル配列より該当ホストの対話ファイル配列取得            
@@ -3043,26 +3046,35 @@ class CreateAnsibleExecFiles {
                     // 対話ファイルのパス取得(オリジナル版)
                     foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
                     $dialog_file    = $this->getAnsible_org_dialog_file($hostname,$playbook_pkey,$playbook);
-                    try {
-                        $dialog_file_array = Spyc::YAMLLoad($dialog_file);
-                    } catch ( Exception $ex ) {
+
+                    $parseObj = new YAMLParse($this->lv_objMTS);
+                    $dialog_file_array = $parseObj->Parse($dialog_file);
+                    if($dialog_file_array === false) {
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$parseObj->GetLastError());
                         //$ary[6000073] = "対話ファイルがYAML形式が確認して下さい。(対話ファイル:{})";
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,
                                                       $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000073",
                                                                                        array($playbook)));
+                        unset($parseObj);
                         return false;
                     }
+                    unset($parseObj);
                     // ホスト変数ファイルのパス取得
                     $host_vars_file = $this->getAnsible_host_var_file($hostname);
-                    try {
-                        $host_vars_file_array = Spyc::YAMLLoad($host_vars_file);
-                    } catch ( Exception $ex ) {
+
+                    $parseObj = new YAMLParse($this->lv_objMTS);
+                    $host_vars_file_array = $parseObj->Parse($host_vars_file);
+                    if($host_vars_file_array === false) {
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$parseObj->GetLastError());
                         //$ary[6000074] = "ホスト変数ファイルがYAML形式で生成されていません。(ホスト名:{})";
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,
                                                       $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000074",
                                                                                        array($hostname)));
+                        unset($parseObj);
                         return false;
                     }
+                    unset($parseObj);
+
                     // 複数具体値変数の使い方が正しいか確認
                     $dialog_file_vars=array();
                     $ret = $this->value_extraction($dialog_file_array,"",$dialog_file_vars);
@@ -3153,6 +3165,15 @@ class CreateAnsibleExecFiles {
 
                                 // グローバル変数の具体値を退避
                                 $globalvarSetTo[$var_name] = $this->lva_global_vars_list[$var_name];
+
+                                //複数行具体値判定
+                                $ret = $this->chkMultilineValue($this->lva_global_vars_list[$var_name]);
+                                if($ret === false) {
+                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90308",
+                                                                                array($var_name));
+                                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                    return false;
+                                }
                             }
                         }
                     }
@@ -3178,13 +3199,22 @@ class CreateAnsibleExecFiles {
                             continue;
                         }
                     }
-                    $this->LoadSpycModule($errmsg, $f_name, $f_line);
+
                     $copyvarSetTo = array();
                     $copy_list = array();
                     $host_vars_file = $hostname;
                     //$file_name2 = $this->getAnsible_org_host_var_file($host_vars_file);
                     $file_name2 = $this->getAnsible_host_var_file($host_vars_file);
-                    $copy_list = Spyc::YAMLLoad($file_name2);
+
+                    $parseObj = new YAMLParse($this->lv_objMTS);
+                    $copy_list = $parseObj->Parse($file_name2);
+                    if($copy_list === false) {
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$parseObj->GetLastError());
+                        $result_code = false;
+                        unset($parseObj);
+                        continue;
+                    }
+                    unset($parseObj);
 
                     // $copy_list[ 変数名 ]=>具体値
                     foreach( $file_copy_vars_list as $var_name ){
@@ -3215,13 +3245,21 @@ class CreateAnsibleExecFiles {
                             continue;
                         }
                     }
-                    $this->LoadSpycModule($errmsg, $f_name, $f_line);
+
                     $tpfvarSetTo = array();
                     $tpf_list = array();
                     $host_vars_file2 = $hostname;
-                    //$file_name3 = $this->getAnsible_org_host_var_file($host_vars_file2);
                     $file_name3 = $this->getAnsible_host_var_file($host_vars_file2);
-                    $tpf_list = Spyc::YAMLLoad($file_name3);
+
+                    $parseObj = new YAMLParse($this->lv_objMTS);
+                    $tpf_list = $parseObj->Parse($file_name3);
+                    if($tpf_list === false) {
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$parseObj->GetLastError());
+                        $result_code = false;
+                        unset($parseObj);
+                        continue;
+                    }
+                    unset($parseObj);
 
                     foreach( $la_tpf_vars as $no => $tpf_var_list ) {
                         foreach( $tpf_var_list as $line_no  => $tpf_var_name ) {
@@ -6228,14 +6266,10 @@ class CreateAnsibleExecFiles {
                         }
                         else{
                             if(@count($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . $row['VARS_ENTRY'];
+                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "";
                             }
-                            else{
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] . "\n - " . $row['VARS_ENTRY'];
-                            }
+                            // 複数行具体値をjson形式で収める
+                            $this->ArrayTypeValue_encode($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$row['VARS_ENTRY']);
                         }
                     }
                     // 多次元変数の場合は具体値をここでは退避しない。
@@ -6504,6 +6538,18 @@ class CreateAnsibleExecFiles {
                     unset($objQuery);
                     return false;
                 }
+
+                //複数行具体値判定
+                $ret = $this->chkMultilineValue($row['VARS_ENTRY']);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90307",
+                                                                array($row['ASSIGN_ID'],
+                                                                      $row['VARS_NAME']));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    unset($objQuery);
+                    return false;
+                }
+
                 // 下記予約変数が使用されているかチェックする。
                 // 親playbook(pioneer)に埋め込まれるリモート接続コマンド用変数の名前
                 // 親playbook(legacy)に埋め込まれるリモートログインのユーザー用変数の名前
@@ -6561,33 +6607,19 @@ class CreateAnsibleExecFiles {
                     }
                     else{
                         if(@count($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
-                            switch($this->getAnsibleDriverID()){
-                            case DF_PIONEER_DRIVER_ID:
-                                // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
-                                break;
-                            case DF_LEGACY_DRIVER_ID:
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . $row['VARS_ENTRY'];
-                                break;
-                            }
+                            $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "";
                         }
-                        else{
-                            switch($this->getAnsibleDriverID()){
-                            case DF_PIONEER_DRIVER_ID:
-                                // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
-                                break;
-                            case DF_LEGACY_DRIVER_ID:
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . $row['VARS_ENTRY'];
-                                break;
-                            }
+
+                        $var_val = $row['VARS_ENTRY'];
+                        switch($this->getAnsibleDriverID()){
+                        case DF_PIONEER_DRIVER_ID:
+                            // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
+                            $var_val = "\"" . $row['VARS_ENTRY'] . "\"";
+                            break;
                         }
+
+                        // 複数行具体値をjson形式で収める
+                        $this->ArrayTypeValue_encode($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$var_val);
                     }
                 }
             }
@@ -6667,33 +6699,19 @@ class CreateAnsibleExecFiles {
                     }
                     else{
                         if(@count($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
-                            switch($this->getAnsibleDriverID()){
-                            case DF_PIONEER_DRIVER_ID:
-                                // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
-                                break;
-                            case DF_LEGACY_DRIVER_ID:
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\n - " . $row['VARS_ENTRY'];
-                                break;
-                            }
+                            $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "";
                         }
-                        else{
-                            switch($this->getAnsibleDriverID()){
-                            case DF_PIONEER_DRIVER_ID:
-                                // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . "\"" . $row['VARS_ENTRY'] . "\"";
-                                break;
-                            case DF_LEGACY_DRIVER_ID:
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = 
-                                // △-に変更
-                                $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] .  "\n - " . $row['VARS_ENTRY'];
-                                break;
-                            }
+
+                        $var_val = $row['VARS_ENTRY'];
+                        switch($this->getAnsibleDriverID()){
+                        case DF_PIONEER_DRIVER_ID:
+                            // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
+                            $var_val = "\"" . $row['VARS_ENTRY'] . "\"";
+                            break;
                         }
+
+                        // 複数行具体値をjson形式で収める
+                        $this->ArrayTypeValue_encode($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$var_val);
                     }
                 }
             }
@@ -9163,11 +9181,13 @@ class CreateAnsibleExecFiles {
                 // 具体値を埋め込む
                 if($in_var_type == '1'){
                     // Key-Value変数の場合
-                    $in_out_array = trim($in_var_val);
+                    //$in_out_array = trim($in_var_val);
+                    $in_out_array = $in_var_val;
                 }
                 else{
                     // 複数具体値の場合
-                    $in_out_array[$in_ass_no] = trim($in_var_val);
+                    //$in_out_array[$in_ass_no] = trim($in_var_val);
+                    $in_out_array[$in_ass_no] = $in_var_val;
                     // 代入順序で昇順ソートする。
                     ksort($in_out_array);
                 }
@@ -9265,9 +9285,11 @@ class CreateAnsibleExecFiles {
                     
                     // 具体値出力
                     // - xxxxxxx
-                    $vars_str = sprintf("%s- %s\n",$indent,$val);
-                    $in_str_hostvars = $in_str_hostvars . $vars_str;
+                    $NumPadding = strlen($indent) + 4;
+                    $edit_str = $this->MultilineValueEdit($val,$NumPadding);
 
+                    $vars_str = sprintf("%s  - %s\n",$indent,$edit_str);
+                    $in_str_hostvars = $in_str_hostvars . $vars_str;
                     continue;
                 }
                 else{
@@ -9302,7 +9324,9 @@ class CreateAnsibleExecFiles {
 
                             // 変数と具体値出力 配列の先頭変数なので - を付ける
                             // - xxxxx: xxxxxxx
-                            $vars_str = sprintf("%s- %s: %s\n",$indent,$var,$val);
+                            $NumPadding = strlen($indent) + 4;
+                            $edit_str = $this->MultilineValueEdit($val,$NumPadding);
+                            $vars_str = sprintf("%s- %s: %s\n",$indent,$var,$edit_str);
                             $in_str_hostvars = $in_str_hostvars . $vars_str;
 
                             // インデント位置を加算
@@ -9326,7 +9350,9 @@ class CreateAnsibleExecFiles {
                             // 変数と具体値出力 配列の先頭変数ではないので - は付けない
                             //   xxxxx: xxxxxx
                             // インデント位置は加算済み
-                            $vars_str = sprintf("%s%s: %s\n",$indent,$var,$val);
+                            $NumPadding = strlen($indent) + 4;
+                            $edit_str = $this->MultilineValueEdit($val,$NumPadding);
+                            $vars_str = sprintf("%s%s: %s\n",$indent,$var,$edit_str);
                             $in_str_hostvars = $in_str_hostvars . $vars_str;
 
                         }
@@ -9369,7 +9395,9 @@ class CreateAnsibleExecFiles {
 
                         // 変数と具体値出力
                         // xxxxx: xxxxxxx
-                        $vars_str = sprintf("%s%s: %s\n",$indent,$var,$val);
+                        $NumPadding = strlen($indent) + 4;
+                        $edit_str = $this->MultilineValueEdit($val,$NumPadding);
+                        $vars_str = sprintf("%s%s: %s\n",$indent,$var,$edit_str);
                         $in_str_hostvars = $in_str_hostvars . $vars_str;
 
                         continue;
@@ -9421,44 +9449,6 @@ class CreateAnsibleExecFiles {
             return "C";
         }
         return "I";
-    }
-    ////////////////////////////////////////////////////////////////////////////////
-    // F1014
-    // 処理内容
-    //   Spycモジュールの読み込み
-    //
-    // パラメータ
-    //   $in_errmsg:              エラー時のメッセージ格納
-    //   $in_f_name:              ファイル名
-    //   $in_f_line:              エラー発生行番号格納
-    //
-    // 戻り値
-    //   true:   正常
-    //   false:  異常
-    ////////////////////////////////////////////////////////////////////////////////
-    function LoadSpycModule(&$in_errmsg, &$in_f_name, &$in_f_line){
-        global $root_dir_path;
-
-        $in_f_name = __FILE__;
-
-        // Spycモジュールのパスを取得
-        $spyc_path = @file_get_contents($root_dir_path . "/confs/commonconfs/path_PHPSpyc_Classes.txt");
-        if($spyc_path === false){
-            $in_errmsg = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70084");
-            $in_f_line = __LINE__;
-            return false;
-        }
-        // 改行コードが付いている場合に取り除く
-        $spyc_path = str_replace("\n","",$spyc_path);
-        $spyc_path = $spyc_path . "/Spyc.php";
-        if( file_exists($spyc_path) === false ){
-            $in_errmsg = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70085");
-            $in_f_line = __LINE__;
-            return false;
-        }
-        require ($spyc_path);
-
-        return true;
     }
     ////////////////////////////////////////////////////////////////////////////////
     // F0044
@@ -11436,12 +11426,73 @@ class CreateAnsibleExecFiles {
     function getAnsibleExecuteUser() {
         return $this->ansible_exec_user;
     }
+
     function setAnsibleExecuteUser($user_name) {
         // user名の指定がない場合はrootにする。
         if(strlen(trim($user_name)) == 0) {
             $user_name = 'root';
         }
         $this->ansible_exec_user = $user_name;
+    }
+
+    function HostVarEdit($val,$NumPadding) {
+        // josn形式(複数具体値)か判定
+        if( ! $this->isArrayTypeValue($val)) {
+            $val = $this->MultilineValueEdit($val,$NumPadding);
+        } else {
+            $val = $this->ArrayTypeValue_decode($val,$NumPadding);
+        }
+        return $val;
+    }
+
+    function MultilineValueEdit($val,$NumPadding) {
+        if(count(explode("\n",$val)) > 1) {
+            $strpad = str_pad( "", $NumPadding, " ", STR_PAD_LEFT );
+            $val = preg_replace("/\n/","\n$strpad",$val);
+            $val = "|-\n$strpad" . $val;
+        }
+        return $val;
+    }
+
+    function chkMultilineValue($val) {
+        if($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) {
+            if(count(explode("\n",$val)) > 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function ArrayTypeValue_encode(&$jsonstr,$val) {
+        if(strlen($jsonstr) == 0) {
+            $ary = array();
+        } else {
+            $ary = json_decode($jsonstr,true);
+        }
+        $ary[] = $val;
+        $jsonstr = json_encode($ary);
+    }
+
+    function ArrayTypeValue_decode($jsonstr,$NumPadding) {
+        $val = "";
+        $strpad = str_pad( "", $NumPadding, " ", STR_PAD_LEFT );
+        $indstrpad = str_pad( "", $NumPadding + 2, " ", STR_PAD_LEFT );
+        $ary = json_decode($jsonstr,true);
+        foreach($ary as $line) {
+            if(count(explode("\n",$line)) != 1) {;
+                $line = preg_replace("/\n/","\n$indstrpad",$line);
+                $val .= sprintf("\n%s- |-\n%s%s",$strpad,$indstrpad,$line);
+            } else {
+                $val .= sprintf("\n%s- %s",$strpad,$line);
+            }
+        }
+        return $val;
+    }
+
+    function isArrayTypeValue($string) {
+        return ((is_string($string) &&
+                (is_object(json_decode($string)) ||
+                 is_array(json_decode($string))))) ? true : false;
     }
 }
 
