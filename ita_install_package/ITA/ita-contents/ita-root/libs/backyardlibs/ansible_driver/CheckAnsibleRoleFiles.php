@@ -23,6 +23,7 @@ if ( empty($root_dir_path) ){
 }
 require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibleMakeMessage.php");
 require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php");
+require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php");
 //////////////////////////////////////////////////////////////////////
 //
 //  【処理概要】
@@ -60,7 +61,6 @@ require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/FileUploadColu
 //    F1011  ParentVarAnalysis
 //    F1012  MiddleAnalysis
 //    F1013  CreateTempDefaultsVarsFile
-//    F1014  LoadSpycModule
 //    F1015  LastAnalysis
 //    F1016  chkStandardVariable
 //    F1017  chkMultiValueVariable
@@ -564,14 +564,6 @@ class CheckAnsibleRoleFiles {
    
             // ユーザー定義変数ファイルから変数取得
             $chkObj = new DefaultVarsFileAnalysis($this->lv_objMTS);
-
-            // Spycモジュールの読み込み
-            $ret = $chkObj->LoadSpycModule($errmsg, $f_name, $f_line);
-            if($ret === false){
-                $errmsg = $errmsg . "(" . $f_line . ")";
-                $this->SetLasteError(basename(__FILE__),__LINE__,$errmsg);
-                return(false);
-            }
 
             $parent_vars_list = array();
             $ret = $chkObj->FirstAnalysis($dataString,
@@ -1452,7 +1444,6 @@ class CheckAnsibleRoleFiles {
 //    F1011  ParentVarAnalysis
 //    F1012  MiddleAnalysis
 //    F1013  CreateTempDefaultsVarsFile
-//    F1014  LoadSpycModule
 //    F1015  LastAnalysis
 //    F1016  chkStandardVariable
 //    F1017  chkMultiValueVariable
@@ -2211,6 +2202,7 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
         }
         $ret = true;
         $parent_vars = array();
+        // 変数の二重定義判定
         foreach($ina_parent_vars_list as $parent_vars_info) {
             $var_name = $parent_vars_info['VAR_NAME'];
             if(isset($parent_vars[$var_name])) {
@@ -2324,33 +2316,25 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
         $in_zero_array_def = false;
         $in_error_code     = "";
 
-        // Spycが誤解析する文法をはじく
         // - のみの定義か判定
         $ret = preg_match('/^(\s*)-(\s+)$/',$in_string,$matchi,PREG_OFFSET_CAPTURE);
         if($ret == 1){
-            // Spycが - のみの定義は誤解釈するので禁止
+            // - のみの定義は禁止
             $in_error_code = "ITAANSIBLEH-ERR-70076"; 
             return false;
         }
         // - {} の定義か判定
         $ret = preg_match_all('/^(\s*)-(\s+){(\s*)}(\s*)$/',$in_string,$matchi);
         if($ret == 1){
-            // Spycが - {} の定義は誤解釈するので禁止
+            // - {} の定義は禁止
             $in_error_code = "ITAANSIBLEH-ERR-70080"; 
             return false;
         }
-        // - {} の定義か判定
+        // - [] の定義か判定
         $ret = preg_match_all('/^(\s*)-(\s+)\[(\s*)\](\s*)$/',$in_string,$matchi);
         if($ret == 1){
-            // Spycが - {} の定義は誤解釈するので禁止
+            // - [] の定義は禁止
             $in_error_code = "ITAANSIBLEH-ERR-70081"; 
-            return false;
-        }
-
-        $ret = preg_match('/^(\s*)-(\s*)$/',$in_string,$matchi,PREG_OFFSET_CAPTURE);
-        if($ret == 1){
-            // Spycが - のみの定義は誤解釈するので禁止
-            $in_error_code = "ITAANSIBLEH-ERR-70076"; 
             return false;
         }
         // 配列変数 - { ... } の定義か判定
@@ -2368,32 +2352,18 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
             }
             $ret = preg_match('/^(\s*)-(\s+){(\s*)}(\s*)$/',$in_string,$matchi,PREG_OFFSET_CAPTURE);
             if($ret == 1){
-                // Spycが - {} の定義は誤解釈するので禁止
+                // - {} の定義はエラー
                 $in_error_code = "ITAANSIBLEH-ERR-70080"; 
                 return false;
             }
             $in_array_var_def = true;
             // 行先頭から-までの文字数取得
             $in_mark_pos = strpos($haifun_matchi[0][0],"-",0);
-            // Spycが配列の具体値を省略すると(xxx: ,)誤解釈をするので禁止
-            $ret = preg_match_all('/[a-zA-Z0-9_]*(\s*):(\s*),/',$in_string,$matchi);
+
+            // xx:}
+            $ret = preg_match_all('/[a-zA-Z0-9_]*(\s*):}(\s*)/',$in_string,$matchi);
             if($ret > 0){
                 $in_error_code = "ITAANSIBLEH-ERR-70077"; 
-                return false;
-            }
-            $ret = preg_match_all('/[a-zA-Z0-9_]*(\s*):(\s*)}/',$in_string,$matchi);
-            if($ret > 0){
-                $in_error_code = "ITAANSIBLEH-ERR-70077"; 
-                return false;
-            }
-            $ret = preg_match_all('/[a-zA-Z0-9_]*(\s*):(\s*),(\s*)}/',$in_string,$matchi);
-            if($ret > 0){
-                $in_error_code = "ITAANSIBLEH-ERR-70077"; 
-                return false;
-            }
-            $ret = preg_match_all('/,(\s*)}(\s*)/',$in_string,$matchi);
-            if($ret > 0){
-                $in_error_code = "ITAANSIBLEH-ERR-70079"; 
                 return false;
             }
             return true;
@@ -2405,7 +2375,7 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
             // 変数定義か判定
             $ret = preg_match('/^(\s*)-(\s*)[a-zA-Z0-9_]*(\s*):/',$in_string,$var_matchi,PREG_OFFSET_CAPTURE);
             if($ret == 1){
-                // : の後ろはスペースがなにいとダメ
+                // : の後ろはスペースがないとダメ
                 $ret = preg_match('/^(\s*)-(\s*)[a-zA-Z0-9_]*(\s*):(\S)/',$in_string,$matchi,PREG_OFFSET_CAPTURE);
                 if($ret == 1){
                     return false;
@@ -2571,7 +2541,7 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
     // 処理内容
     //   defalte変数ファイルに定義さけている変数の情報で、
     //   ITAの文法に反する定義をエラーにする。
-    //   Spyc.phpで誤解析する可能性がある文法を調整する。
+    //   YAMLパーサーで誤解析する可能性がある文法を調整する。
     //
     // パラメータ
     //   $ina_parent_vars_list:   defalte変数ファイルの親変数毎に分解配列
@@ -2615,76 +2585,49 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
         $in_f_name = __FILE__;
         $array_line = 0;
         foreach($ina_parent_vars_list as $parent_vars_list){
-            ///////////////////////////////////////////////
-            // ITAの文法に反する定義をエラーにする。
-            ///////////////////////////////////////////////
-            // 具体値が複数行にまたがっている場合はエラー
-            if(is_array($parent_vars_list['DATA'])){
-                $row_count = count($parent_vars_list['DATA']);
-                for($idx = 0;$idx < $row_count;$idx++){
-                    // 具体値定義がある行か判定
-                    if($parent_vars_list['DATA'][$idx]['VAL_DEF'] === true){
-                        if($idx != ($row_count - 1)){
-                            // 次の行が具体値のみの定義か判定
-                            if(($parent_vars_list['DATA'][$idx + 1]['VAL_DEF'] === true) &&
-                               ($parent_vars_list['DATA'][$idx + 1]['MARK_POS'] === -1 ) &&
-                               ($parent_vars_list['DATA'][$idx + 1]['VAR_DEF'] === false)){
-                                $in_errmsg = AnsibleMakeMessage($this->lv_objMTS,$this->GetRunModeVarFile(),
-                                                                "ITAANSIBLEH-ERR-70075",
-                                                                array($in_msg_role_pkg_name, $in_role_name, basename($in_file_name), 
-                                                                      $parent_vars_list['DATA'][$idx]['LINE']));
-                                $in_f_line   = __LINE__;
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
-            ///////////////////////////////////////////////
-            // Spycで誤解析する可能性がある文法を調整する。
-            ///////////////////////////////////////////////
-            // 配列変数のカンマの位置を調整 VAR1: VAL.VAR2: ...  => VAR1: VAL. VAR2: ...
-            if(is_array($parent_vars_list['DATA'])){
-                $row_count = count($parent_vars_list['DATA']);
-                for($idx = 0;$idx < $row_count;$idx++){
-                    if($ina_parent_vars_list[$array_line]['DATA'][$idx]['ARRAY_VAR_DEF'] === true){
-                        $string = $ina_parent_vars_list[$array_line]['DATA'][$idx]['DATA'];
-                        $ret = preg_match_all('/,[a-zA-Z0-9_]*(\s*):(\s+)/',$string,$match);
-                        if($ret > 0){
-                            foreach($match[0] as $var_string){
-                                $upd_var_string = preg_replace('/^,/',', ',$var_string);
-                                $string = str_replace($var_string,$upd_var_string,$string);
-                            }
-                        }
-                        $ina_parent_vars_list[$array_line]['DATA'][$idx]['DATA'] = $string;
-                    }
-                }
-            }
             // 変数と具体値が別々の行にまたがっている場合に1行にまとめる
+            $var_idx = -1;
             if(is_array($parent_vars_list['DATA'])){
                 $row_count = count($parent_vars_list['DATA']);
                 for($idx = 0;$idx < $row_count;$idx++){
-                    // 変数のみの定義
-                    if(($parent_vars_list['DATA'][$idx]['VAR_DEF'] === true) &&
-                       ($parent_vars_list['DATA'][$idx]['VAL_DEF'] === false)){
-                        if($idx != ($row_count - 1)){
-                            // 具体値のみの定義か判定
-                            if(($parent_vars_list['DATA'][$idx + 1]['VAL_DEF']  === true ) &&
-                               ($parent_vars_list['DATA'][$idx + 1]['MARK_POS'] === -1   ) &&
-                               ($parent_vars_list['DATA'][$idx + 1]['VAR_DEF']  === false)){
-                                // 変数と具体値を結合する
-                                $ina_parent_vars_list[$array_line]['DATA'][$idx]['DATA'] =
-                                $ina_parent_vars_list[$array_line]['DATA'][$idx]['DATA'] . " " . 
-                                $ina_parent_vars_list[$array_line]['DATA'][$idx + 1]['VAR_VAL'];
-
-                                $ina_parent_vars_list[$array_line]['DATA'][$idx]['VAL_DEF'] = true;
-                                $ina_parent_vars_list[$array_line]['DATA'][$idx]['VAR_VAL'] = 
-                                $ina_parent_vars_list[$array_line]['DATA'][$idx + 1]['VAR_VAL'];
-
-                                // 具体値の行を無効にする
-                                $ina_parent_vars_list[$array_line]['DATA'][$idx + 1]['EDIT_SKIP'] = true;
-                            }
+                    // 変数定義か判定
+                    // 変数定義か複数具体値の定義か判定
+                    if($parent_vars_list['DATA'][$idx]['VAR_DEF']  === true ) {
+                        $var_idx = $idx;
+                        $pos     = $parent_vars_list['DATA'][$idx]['VAR_POS'];
+                        continue;
+                    }
+                    // 複数具体値の定義か判定
+                    if(($parent_vars_list['DATA'][$idx]['VAR_DEF']  === false) &&
+                       ($parent_vars_list['DATA'][$idx]['MARK_POS'] !=  -1   )) {
+                        $var_idx = $idx;
+                        $pos     = $parent_vars_list['DATA'][$idx]['MARK_POS'];
+                        continue;
+                    }
+                    // 具体値のみの定義か判定
+                    if(($parent_vars_list['DATA'][$idx]['VAL_DEF']  === true ) &&
+                       ($parent_vars_list['DATA'][$idx]['MARK_POS'] === -1   ) &&
+                       ($parent_vars_list['DATA'][$idx]['VAR_DEF']  === false)){
+                        // 具体値のインデント確認
+                        if($pos >= $parent_vars_list['DATA'][$idx]['VAL_POS']) {
+                            $in_errmsg = AnsibleMakeMessage($this->lv_objMTS,$this->GetRunModeVarFile(),
+                                                            "ITAANSIBLEH-ERR-70075",
+                                                            array($in_msg_role_pkg_name, $in_role_name, basename($in_file_name), 
+                                                                  $parent_vars_list['DATA'][$idx]['LINE']));
+                            $in_f_line   = __LINE__;
+                            return false;
                         }
+                        // 具体値を結合する
+                        $ina_parent_vars_list[$array_line]['DATA'][$var_idx]['VAL_DEF'] = true;
+
+                        $ina_parent_vars_list[$array_line]['DATA'][$var_idx]['DATA'] .= 
+                           "\n" . $ina_parent_vars_list[$array_line]['DATA'][$idx]['DATA'];
+
+                        $ina_parent_vars_list[$array_line]['DATA'][$var_idx]['VAR_VAL'] .= 
+                           "\n" .  $ina_parent_vars_list[$array_line]['DATA'][$idx]['VAR_VAL'];
+
+                        // 具体値の行を無効にする
+                        $ina_parent_vars_list[$array_line]['DATA'][$idx]['EDIT_SKIP'] = true;
                     }
                 }
             }
@@ -2745,44 +2688,6 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
         fclose($fd);
         return true;
     }
-    ////////////////////////////////////////////////////////////////////////////////
-    // F1014
-    // 処理内容
-    //   Spycモジュールの読み込み
-    //
-    // パラメータ
-    //   $in_errmsg:              エラー時のメッセージ格納
-    //   $in_f_name:              ファイル名
-    //   $in_f_line:              エラー発生行番号格納
-    //
-    // 戻り値
-    //   true:   正常
-    //   false:  異常
-    ////////////////////////////////////////////////////////////////////////////////
-    function LoadSpycModule(&$in_errmsg, &$in_f_name, &$in_f_line){
-        global $root_dir_path;
-
-        $in_f_name = __FILE__;
-
-        // Spycモジュールのパスを取得
-        $spyc_path = @file_get_contents($root_dir_path . "/confs/commonconfs/path_PHPSpyc_Classes.txt");
-        if($spyc_path === false){
-            $in_errmsg = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70084");
-            $in_f_line = __LINE__;
-            return false;
-        }
-        // 改行コードが付いている場合に取り除く
-        $spyc_path = str_replace("\n","",$spyc_path);
-        $spyc_path = $spyc_path . "/Spyc.php";
-        if( file_exists($spyc_path) === false ){
-            $in_errmsg = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70085");
-            $in_f_line = __LINE__;
-            return false;
-        }
-        require ($spyc_path);
-
-        return true;
-    }
     // F1015
     function LastAnalysis($in_tmp_file_name,$ina_parent_vars_list,&$ina_vars_list,&$ina_varsval_list,
                          &$ina_array_vars_list,
@@ -2799,18 +2704,20 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                 return false;
             }
             $var_array = array();
-            try {
-                $var_array = Spyc::YAMLLoad($in_tmp_file_name);
-            } catch ( Exception $ex ) {
-                @unlink($in_tmp_file_name);
-                $in_errmsg = AnsibleMakeMessage($this->lv_objMTS,$this->GetRunModeVarFile(),
-                                                "ITAANSIBLEH-ERR-6000029",
-                                                array($in_msg_role_pkg_name, $in_role_name, basename($in_file_name),
-                                                      $parent_vars_list['LINE']));
+            $parseObj = new YAMLParse($this->lv_objMTS);
+            $var_array = $parseObj->Parse($in_tmp_file_name);
+            @unlink($in_tmp_file_name);
+            if($var_array === false) {
+                $in_errmsg = $parseObj->GetLastError();
+                $in_errmsg = "\n" . AnsibleMakeMessage($this->lv_objMTS,$this->GetRunModeVarFile(),
+                                                       "ITAANSIBLEH-ERR-6000029",
+                                                       array($in_msg_role_pkg_name, $in_role_name, basename($in_file_name),
+                                                             $parent_vars_list['LINE']));
                 $in_f_line = __LINE__;
+                unset($parseObj);
                 return false;
             }
-            @unlink($in_tmp_file_name);
+            unset($parseObj);
 
             if(is_array($var_array)){
                 if(@count($var_array) != 1){
@@ -2860,9 +2767,9 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
     ////////////////////////////////////////////////////////////////////////////////
     // F1016
     // 処理内容
-    //   Spycから取得した配列構造が一般変数か判定
+    //   YAMLパーサーから取得した配列構造が一般変数か判定
     // パラメータ
-    //   $in_var_array:               Spycから取得した配列構造
+    //   $in_var_array:               YAMLパーサーから取得した配列構造
     // 戻り値
     //   true: 正常　false:異常
     ////////////////////////////////////////////////////////////////////////////////    
@@ -2885,9 +2792,9 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
     ////////////////////////////////////////////////////////////////////////////////
     // F1017
     // 処理内容
-    //   Spycから取得した配列構造が複数具体値の変数か判定
+    //   YAMLパーサーから取得した配列構造が複数具体値の変数か判定
     // パラメータ
-    //   $in_var_array:               Spycから取得した配列構造
+    //   $in_var_array:               YAMLパーサーから取得した配列構造
     // 戻り値
     //   true: 正常　false:異常
     ////////////////////////////////////////////////////////////////////////////////    
@@ -2917,7 +2824,7 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
     // 処理内容
     //   配列構造が複数具体値の変数か判定
     // パラメータ
-    //   $in_var_array:               Spycから取得した配列構造
+    //   $in_var_array:               YAMLパーサーから取得した配列構造
     // 戻り値
     //   true: 正常　false:異常
     ////////////////////////////////////////////////////////////////////////////////    
@@ -2941,10 +2848,10 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
     ////////////////////////////////////////////////////////////////////////////////
     // F1019
     // 処理内容
-    //   Spycから取得した配列構造を解析する。
+    //   YAMLパーサーから取得した配列構造を解析する。
     // パラメータ
     //   $in_var:                     親変数名
-    //   $in_var_array:               Spycから取得した配列構造
+    //   $in_var_array:               YAMLパーサーから取得した配列構造
     //   $ina_vars_list:              現在未使用
     //   $ina_varsval_list:           現在未使用
     //   $in_var_type:                変数区分 VAR_かどうか
@@ -2985,7 +2892,7 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
             $diff_vars_list = array();
             $varval_list = array();
             $array_col_count_list = array();
-            // Spycが取得した多次元配列の構造から具体値を排除する。また配列階層の配列数と具体値を取得する。
+            // YAMLパーサーが取得した多次元配列の構造から具体値を排除する。また配列階層の配列数と具体値を取得する。
             $ret = $this->MakeMultiArrayToDiffMultiArray($in_var_array,
                                                          $diff_vars_list,
                                                          $varval_list,
@@ -3082,12 +2989,12 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
     ////////////////////////////////////////////////////////////////////////////////
     // F1020
     // 処理内容
-    //   Spycから取得し配列構造にはメンバー変数の具体値が含まれているので、
+    //   YAMLパーサーから取得し配列構造にはメンバー変数の具体値が含まれているので、
     //   具体値を取り除き配列数が1の配列構造(ina_vars_list)を作成する。
     //   各メンバー変数の具体値をina_varval_listに退避する。
     //   各配列階層の配列数退避をina_array_col_count_listに退避する。
     // パラメータ
-    //   $ina_parent_var_array:       Spycから取得し配列構造
+    //   $ina_parent_var_array:       YAMLパーサーから取得し配列構造
     //   $ina_vars_list:              具体値を取り除き配列数が1の配列構造退避
     //   $ina_varval_list:            各メンバー変数の具体値退避
     //   $in_var_name_path:           1つ前の階層までのメンバー変数のパス
@@ -3934,14 +3841,6 @@ class YAMLFileAnalysis{
         $array_vars_list    = array();
         $array_varsval_list = array();
 
-        // Spycモジュールの読み込み
-        $ret = $chkObj->LoadSpycModule($errmsg, $f_name, $f_line);
-        if($ret === false){
-            $errmsg = $errmsg . "(" . $f_line . ")";
-            $this->SetLastError(basename(__FILE__),__LINE__,$errmsg);
-            return(false);
-        }
-
         $parent_vars_list = array();
         $ret = $chkObj->FirstAnalysis($dataString,
                                       $parent_vars_list,
@@ -4131,10 +4030,6 @@ class VarStructAnalysisFileAccess{
         $root_dir_temp = array();
         $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
         $root_dir_path = $root_dir_temp[0] . "ita-root";
-
-        $ansible_common_php  = '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php';
-
-        require_once ($root_dir_path . $ansible_common_php);
 
         $dbObj = new AnsibleCommonLibs();
 
