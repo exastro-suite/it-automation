@@ -971,4 +971,45 @@ class WebDBAccessClass extends CommonDBAccessCoreClass {
         return true;
     }
 }
+class YAMLParse {
+    private $lv_objMTS;
+    private $lv_lasterrmsg;
+
+    function __construct($objMTS){
+        $this->lv_objMTS     = $objMTS;
+        $this->lv_lasterrmsg = array();
+    }
+
+    function SetLastError($p1){
+        $this->lv_lasterrmsg[] = $p1;
+    }
+
+    function GetLastError() {
+        return $this->lv_lasterrmsg;
+    }
+    function Parse($yamlfile) {
+        $this->lv_lasterrmsg = array();
+        $yaml = file_get_contents($yamlfile);
+        $encode = mb_detect_encoding($yaml);
+        switch($encode) {
+        case "ASCII":
+        case "UTF-8":
+            break;
+        default:
+            // "UTF-8以外の文字文字コードが使用されています。";
+            $msg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000108');
+            $this->SetLastError($msg);
+            return false;
+        }
+        $val = yaml_parse_file($yamlfile);
+        if($val === false) {
+            // "YAML解析で想定外のエラーが発生しました。"
+            $msg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000109');
+            $this->SetLastError($msg);
+            return false;
+        } else {
+            return $val;
+        }
+    }
+}
 ?>
