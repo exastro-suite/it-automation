@@ -353,6 +353,7 @@ $ary[213007] = "Reference table name";
 $ary[213008] = "Reference primary key";
 $ary[213009] = "Reference column name";
 $ary[213010] = "Display order";
+$ary[213011] = "Class";
 $ary[214001] = "Maintenance (view/register/update/discard) can be performed on data deletion information with an operation that has an expired retention period.";
 $ary[214002] = "No";
 $ary[214003] = "Operation deletion management";
