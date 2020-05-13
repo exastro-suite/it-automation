@@ -1963,7 +1963,7 @@ function exportData($record){
     // kymに固める
     $exportFile = 'ita_exportdata_' . date('YmdHis') . '.kym';
     $output = NULL;
-    $cmd = "cd '" . $exportPath . "';find . > target_list.txt 2>&1";
+    $cmd = "cd '" . $exportPath . "';ls -1 > target_list.txt 2>&1";
     exec($cmd, $output, $return_var);
 
     if(0 != $return_var){
@@ -2977,7 +2977,7 @@ function exportSymOpe($record){
 
         // kym2に固める
         $output = NULL;
-        $cmd = "cd '" . $exportPath . "';find . > target_list.txt 2>&1";
+        $cmd = "cd '" . $exportPath . "';ls -1 > target_list.txt 2>&1";
         exec($cmd, $output, $return_var);
 
         if(0 != $return_var){
