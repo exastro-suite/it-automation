@@ -239,6 +239,21 @@ try{
     $convertParamInfoArray = $result;
 
     //////////////////////////
+    // ロール・ユーザ紐づけ情報を取得
+    //////////////////////////
+    $roleAccountLinkListTable = new RoleAccountLinkListTable($objDBCA, $db_model_ch);
+    $sql = $roleAccountLinkListTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+    // SQL実行
+    $result = $roleAccountLinkListTable->selectTable($sql);
+    if(!is_array($result)){
+        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+        outputLog($msg);
+        throw new Exception($msg);
+    }
+    $roleUserLinkArray = $result;
+
+    //////////////////////////
     // 作業用ディレクトリ作成
     //////////////////////////
     // 最新時間を取得
@@ -1663,7 +1678,7 @@ EOD;
         //////////////////////////
         // ロール・メニュー紐付管理更新
         //////////////////////////
-        $result = updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET']);
+        $result = updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $roleUserLinkArray);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -2119,6 +2134,7 @@ function getUnexecutedRecord(){
         throw new Exception($e->getMessage());
     }
 }
+
 
 /**
  * パラメータシート作成管理更新
@@ -2790,7 +2806,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
 /*
  * ロール・メニュー紐付管理更新
  */
-function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target){
+function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target, $roleUserLinkArray){
     global $objDBCA, $db_model_ch, $objMTS;
     $roleMenuLinkListTable = new RoleMenuLinkListTable($objDBCA, $db_model_ch);
 
@@ -2866,25 +2882,39 @@ function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId
                                   );
             }
         }
-
+        
+        $roles = array();
+        
+        foreach($roleUserLinkArray as $rUL){
+            if($rUL['USER_ID'] == $targetData['LAST_UPDATE_USER']){
+                $roles[] = $rUL['ROLE_ID'];
+            }
+            
+        }
+        // 管理者ロールは入れていない場合
+        if(!in_array("1",$roles)){
+            $roles[] = "1";
+        }
+        
         foreach($menuArray as $menu){
+            foreach($roles as $role){
+                // 登録する
+                $insertData = array();
+                $insertData['ROLE_ID']          = $role;                // ロール
+                $insertData['MENU_ID']          = $menu[0];             // メニュー
+                $insertData['PRIVILEGE']        = $menu[1];             // 紐付
+                $insertData['DISUSE_FLAG']      = $menu[2];             // 廃止フラグ
+                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
 
-            // 登録する
-            $insertData = array();
-            $insertData['ROLE_ID']          = 1;                    // ロール
-            $insertData['MENU_ID']          = $menu[0];             // メニュー
-            $insertData['PRIVILEGE']        = $menu[1];             // 紐付
-            $insertData['DISUSE_FLAG']      = $menu[2];             // 廃止フラグ
-            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
-
-            //////////////////////////
-            // ロール・メニュー紐付管理テーブルに登録
-            //////////////////////////
-            $result = $roleMenuLinkListTable->insertTable($insertData, $seqNo, $jnlSeqNo);
-            if(true !== $result){
-                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                outputLog($msg);
-                throw new Exception($msg);
+                //////////////////////////
+                // ロール・メニュー紐付管理テーブルに登録
+                //////////////////////////
+                $result = $roleMenuLinkListTable->insertTable($insertData, $seqNo, $jnlSeqNo);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                    outputLog($msg);
+                    throw new Exception($msg);
+                }
             }
         }
         return true;
