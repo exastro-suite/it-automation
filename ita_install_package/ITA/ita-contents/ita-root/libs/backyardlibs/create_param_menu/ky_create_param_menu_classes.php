@@ -639,6 +639,31 @@ class RoleMenuLinkListTable extends BaseTable_CPM {
 }
 
 /**
+ * ロール・ユーザー紐付管理テーブルクラス
+ */
+class RoleAccountLinkListTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'A_ROLE_ACCOUNT_LINK_LIST';
+        $this->seqName      = 'SEQ_' . $this->tableName;
+        $this->jnlSeqName   = 'JSEQ_' . $this->tableName;
+        $this->columnNames  = array('LINK_ID',
+                                    'ROLE_ID',
+                                    'USER_ID',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
  * 紐付対象メニューテーブルクラス
  */
 class CmdbMenuListTable extends BaseTable_CPM {
