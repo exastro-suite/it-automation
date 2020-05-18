@@ -732,6 +732,7 @@ class CmdbMenuColumnTable extends BaseTable_CPM {
         $this->columnNames  = array('COLUMN_LIST_ID',
                                     'MENU_ID',
                                     'COL_NAME',
+                                    'COL_CLASS',
                                     'COL_TITLE',
                                     'COL_TITLE_DISP_SEQ',
                                     'REF_TABLE_NAME',
