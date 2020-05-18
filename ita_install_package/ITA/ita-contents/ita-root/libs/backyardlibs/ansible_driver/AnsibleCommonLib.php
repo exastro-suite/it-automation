@@ -1012,4 +1012,31 @@ class YAMLParse {
         }
     }
 }
+class ValAutoRegInputParameterCheck {
+    function __construct(){
+    }
+    function VarsInfo($in_col_type,$in_key_vars_link_id,$in_key_col_seq_comb_id,$in_key_assign_seq,
+                                   $in_val_vars_link_id,$in_val_col_seq_comb_id,$in_val_assign_seq) {
+        global $g;
+        $retStrBody = true;
+        switch($in_col_type){
+        case '1':   // Value
+            if((strlen($in_key_vars_link_id) != 0) ||
+               (strlen($in_key_col_seq_comb_id) != 0) ||
+               (strlen($in_key_assign_seq) != 0)) {
+               $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-5000037",array("Value","Key"));
+            }
+            break;
+        case '2':   // Key
+            if((strlen($in_val_vars_link_id) != 0) ||
+               (strlen($in_val_col_seq_comb_id) != 0) ||
+               (strlen($in_val_assign_seq) != 0)) {
+               $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-5000037",array("Key","Value"));
+            }
+            break;
+        }
+        return $retStrBody;
+    }
+}
+
 ?>
