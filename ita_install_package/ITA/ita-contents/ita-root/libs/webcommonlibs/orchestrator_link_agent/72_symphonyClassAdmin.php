@@ -454,7 +454,7 @@ function symphonyClassUpdateExecute($fxVarsIntSymphonyClassId, $fxVarsAryReceptD
         }
         $tmpAryMovement = $aryRetBody[0];
         //----バリデーションチェック
-        $aryRetBody = validationCheckForTableIUD($tmpAryMovement, $aryExecuteData);
+        $aryRetBody = validationCheckForTableIUD($tmpAryMovement, $aryExecuteData, $fxVarsIntSymphonyClassId);
         if( $aryRetBody[1] !== null ){
             // エラーフラグをON
             // 例外処理へ
@@ -1042,7 +1042,7 @@ function symphonyClassRegisterExecute($fxVarsIntSymphonyClassId ,$fxVarsAryRecep
         }
         $tmpAryMovement = $aryRetBody[0];
         //----バリデーションチェック
-        $aryRetBody = validationCheckForTableIUD($tmpAryMovement, $aryExecuteData);
+        $aryRetBody = validationCheckForTableIUD($tmpAryMovement, $aryExecuteData, $fxVarsIntSymphonyClassId);
         if( $aryRetBody[1] !== null ){
             // エラーフラグをON
             // 例外処理へ
@@ -1442,7 +1442,7 @@ function dataConvertForTableIUD($aryMovementOfRawRecept, $aryExecuteData){
     return $retArray;
 }
 
-function validationCheckForTableIUD($aryMovementOfRawRecept, $aryExecuteData){
+function validationCheckForTableIUD($aryMovementOfRawRecept, $aryExecuteData, $fxVarsIntSymphonyClassId){
     global $g;
     $retBool = false;
     $intErrorType = null;
@@ -1471,6 +1471,58 @@ function validationCheckForTableIUD($aryMovementOfRawRecept, $aryExecuteData){
             $intErrorType = 2;
             
             $aryErrMsgBody[] = $objMTS->getSomeMessage("ITABASEH-ERR-5721202",array($objSLTxtVali->getValidRule()));
+        }
+        else{
+            // Symphonyクラス名称の一意制約の確認
+            $query  = "SELECT SYMPHONY_CLASS_NO,SYMPHONY_NAME ";
+            $query .= "FROM C_SYMPHONY_CLASS_MNG ";
+            $query .= "WHERE DISUSE_FLAG='0' ";
+
+            $arrayRows = array();
+            $row_counter = 0;
+            $retArray = singleSQLExecuteAgent($query, array(), $strFxName);
+            if( $retArray[0] === true ){
+                $objQuery = $retArray[1];
+                $count=0;
+                // 行取得
+                while( $row = $objQuery->resultFetch() ){
+                    if( $row !== false ){
+                        $count+=1;
+                        $arrayRows[] = $row;
+                    }
+                }
+                // ----レコード数を取得
+                $row_counter = $count;
+                // レコード数を取得----
+                unset($objQuery);
+            }
+            else{
+                // エラーフラグをON
+                // 例外処理へ
+                $intErrorType = 500;
+                web_log("SQL ERROR. SQL=[$query], ERROR=[" . $retArray[2] . "]");
+                throw new Exception("FILE: " . __FILE__ . ", LINE: " . __LINE__);
+            }
+            if($row_counter == 0){
+                //----1行も存在しなかった
+                //1行も存在しなかった----
+            }else{
+                $symphonyClassNoArray = array();
+                foreach($arrayRows as $data){
+                    if($fxVarsIntSymphonyClassId != $data['SYMPHONY_CLASS_NO'] && $strSymphonyName === $data['SYMPHONY_NAME']){
+                        $symphonyClassNoArray[] = $data['SYMPHONY_CLASS_NO'];
+                    }
+                }
+
+                if(0 < count($symphonyClassNoArray)){
+                    // エラーフラグをON
+                    $intErrorType = 2;
+
+                    $tmpMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-603",array($g['objMTS']->getSomeMessage("ITABASEH-MNU-109040"), implode(",", $symphonyClassNoArray)));
+                    $tmpMsg .= "[(" . $g['objMTS']->getSomeMessage("ITABASEH-MNU-109070") . ")]";
+                    $aryErrMsgBody[] = $tmpMsg;
+                }
+            }
         }
         unset($objSLTxtVali);
         
