@@ -1712,12 +1712,12 @@ EOD;
             // 紐づけ対象だけを確認 (紐づけ対象がないの場合はtrue)
             $noLinkTarget = true;
             foreach($itemInfoArray as $key => $itemInfo){
-                if(2 != $itemInfo['INPUT_METHOD_ID'] && 5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID']){
+                if(5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID']){
                     // プルダウン選択の中身タイプをチェック
                     if(7 == $itemInfo['INPUT_METHOD_ID']){
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                        if(2 == $otherMenuLink['COLUMN_TYPE'] || 5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
+                        if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
                             continue;
                         } 
                     }
@@ -3141,16 +3141,35 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
         $columnInfoArray = array();
 
         foreach($itemInfoArray as $key => $itemInfo){
-            if(2 == $itemInfo['INPUT_METHOD_ID'] || 5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
+            if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             if(7 == $itemInfo['INPUT_METHOD_ID']){
                 $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                 $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                if(2 == $otherMenuLink['COLUMN_TYPE'] || 5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
+                if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
                     continue;
-                } 
+                }
+                if(1 == $otherMenuLink['COLUMN_TYPE']){
+                    $colClass = "TextColumn";
+                }
+                else if(2 == $otherMenuLink['COLUMN_TYPE']){
+                    $colClass = "MultiTextColumn";
+                }
+                else if(3 == $otherMenuLink['COLUMN_TYPE'] || 4 == $otherMenuLink['COLUMN_TYPE']){
+                    $colClass = "NumColumn";
+                }
             }
+            else if(1 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "TextColumn";
+            }
+            else if(2 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "MultiTextColumn";
+            }
+            else if(3 == $itemInfo['INPUT_METHOD_ID'] || 4 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "NumColumn";
+            }
+            
             // 項目名を作成
             $columnGrp = implode("/", $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']]);
             if("" != $columnGrp){
@@ -3166,7 +3185,6 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             $otherColumnName = null;
             if("" != $itemInfo['OTHER_MENU_LINK_ID']){
                 foreach($otherMenuLinkArray as $otherMenuLink){
-
                     if($itemInfo['OTHER_MENU_LINK_ID'] == $otherMenuLink['LINK_ID']){
                         $otherTableName = $otherMenuLink['TABLE_NAME'];
                         $otherPriName = $otherMenuLink['PRI_NAME'];
@@ -3177,6 +3195,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             }
 
             $columnInfoArray[] = array('COL_NAME' => $itemInfo['COLUMN_NAME'],
+                                       'COL_CLASS' => $colClass,
                                        'COL_TITLE' => $columnTitle,
                                        'COL_TITLE_DISP_SEQ' => $key + 2,
                                        'REF_TABLE_NAME' => $otherTableName,
@@ -3216,7 +3235,8 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                         $updateFlg = true;
                     }
                     // 各値のいずれかに変更がある場合、更新する
-                    if($cmdbMenuColumn['COL_TITLE']             != $columnInfo['COL_TITLE'] ||
+                    if($cmdbMenuColumn['COL_CLASS']             != $columnInfo['COL_CLASS'] ||
+                       $cmdbMenuColumn['COL_TITLE']             != $columnInfo['COL_TITLE'] ||
                        $cmdbMenuColumn['COL_TITLE_DISP_SEQ']    != $columnInfo['COL_TITLE_DISP_SEQ'] ||
                        $cmdbMenuColumn['REF_TABLE_NAME']        != $columnInfo['REF_TABLE_NAME'] ||
                        $cmdbMenuColumn['REF_PKEY_NAME']         != $columnInfo['REF_PKEY_NAME'] ||
@@ -3230,6 +3250,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                         $updateData = $cmdbMenuColumn;
                         $updateData['MENU_ID']              = $hostMenuId;                          // メニュー
                         $updateData['COL_NAME']             = $columnInfo['COL_NAME'];              // カラム名
+                        $updateData['COL_CLASS']            = $columnInfo['COL_CLASS'];             // カラムタイプ
                         $updateData['COL_TITLE']            = $columnInfo['COL_TITLE'];             // 項目名
                         $updateData['COL_TITLE_DISP_SEQ']   = $columnInfo['COL_TITLE_DISP_SEQ'];    // 表示順
                         $updateData['REF_TABLE_NAME']       = $columnInfo['REF_TABLE_NAME'];        // 参照テーブル
@@ -3260,6 +3281,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 $insertData = array();
                 $insertData['MENU_ID']              = $hostMenuId;                          // メニュー
                 $insertData['COL_NAME']             = $columnInfo['COL_NAME'];              // カラム名
+                $insertData['COL_CLASS']            = $columnInfo['COL_CLASS'];             // カラムタイプ
                 $insertData['COL_TITLE']            = $columnInfo['COL_TITLE'];             // 項目名
                 $insertData['COL_TITLE_DISP_SEQ']   = $columnInfo['COL_TITLE_DISP_SEQ'];    // 表示順
                 $insertData['REF_TABLE_NAME']       = $columnInfo['REF_TABLE_NAME'];        // 参照テーブル
