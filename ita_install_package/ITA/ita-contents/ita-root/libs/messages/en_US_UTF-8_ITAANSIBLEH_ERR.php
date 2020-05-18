@@ -485,6 +485,7 @@ $ary[5000033] = "Template file is not registered in the template list. (Playbook
 $ary[5000034] = "Server certificate file of device list managed by the system does not exist.(Device list Item No.: {} server certificate file:{})";
 $ary[5000035] = "Failed to copy server certificate file. (Device list Item No.: {} server certificate file:{})";
 $ary[5000036] = "Failed to Set file permission. (line:{})";
+$ary[5000037] = "Registration method: \\"String {} type\\" can not be set when \\"{} variable information\\" is set.";
 $ary[6000001] = "optional parameters is no value. (parameters: {})";
 $ary[6000002] = "option parameter is duplicate. (parameters: {})";
 $ary[6000003] = "optional parameters is invalid. (parameters: {})";
