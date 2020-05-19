@@ -1109,6 +1109,29 @@ DSC代入値自動登録設定
         }
         //作業パターンのチェックの組み合わせチェック----
 
+        //----入力不要項目の未入力チェック
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            switch($rg_col_type){
+            case '1':   // Value
+                if((strlen($rg_key_vars_link_id) != 0) ||
+                   (strlen($rg_key_assign_seq) != 0)) {
+                   $retStrBody = $g['objMTS']->getSomeMessage("ITADSCH-ERR-90301",array("Value","Key"));
+                   $retBool = false;
+                   $boolExecuteContinue = false;
+                }
+                break;
+            case '2':   // Key
+                if((strlen($rg_val_vars_link_id) != 0) ||
+                   (strlen($rg_val_assign_seq) != 0)) {
+                   $retStrBody = $g['objMTS']->getSomeMessage("ITADSCH-ERR-90301",array("Key","Value"));
+                   $retBool = false;
+                   $boolExecuteContinue = false;
+                }
+                break;
+            }
+        }
+        //----入力不要項目の未入力チェック
+
         //----Key変数の種類ごとに、バリデーションチェック
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             switch($rg_col_type){
