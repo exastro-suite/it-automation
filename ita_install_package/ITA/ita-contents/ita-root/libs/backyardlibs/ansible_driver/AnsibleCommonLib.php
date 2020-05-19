@@ -977,11 +977,11 @@ class YAMLParse {
 
     function __construct($objMTS){
         $this->lv_objMTS     = $objMTS;
-        $this->lv_lasterrmsg = array();
+        $this->lv_lasterrmsg = "";
     }
 
     function SetLastError($p1){
-        $this->lv_lasterrmsg[] = $p1;
+        $this->lv_lasterrmsg = $p1;
     }
 
     function GetLastError() {
@@ -989,6 +989,11 @@ class YAMLParse {
     }
     function Parse($yamlfile) {
         $this->lv_lasterrmsg = array();
+        if(!extension_loaded('yaml')) {
+            $msg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000107');
+            $this->SetLastError($msg);
+            return false;
+        }
         $yaml = file_get_contents($yamlfile);
         $encode = mb_detect_encoding($yaml);
         switch($encode) {
