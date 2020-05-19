@@ -259,6 +259,7 @@ $ary[90238] = "Global variable is used in the Config file, but not registered in
 $ary[90239] = "Global variable used in Config file is not registered in the global variable list. (Global variable:{})";
 $ary[90241] = "Failed to read Config file. (Cofig file:{})";
 $ary[90300] = "Failed to register the specific value of generic variable or array-type variable to the substitution value list.";
+$ary[90301] = "Registration method: \\"String {} type\\" can not be set when \\"{} variable information\\" is set.";
 $ary[990000] = "Error occurred ([FILE]{}[LINE]{})";
 $ary[990001] = "Exception occurred.";
 $ary[990002] = "Rollback has failed.";
