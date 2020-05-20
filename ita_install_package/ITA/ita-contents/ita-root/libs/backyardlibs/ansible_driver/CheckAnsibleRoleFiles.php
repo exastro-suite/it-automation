@@ -2709,7 +2709,7 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
             @unlink($in_tmp_file_name);
             if($var_array === false) {
                 $in_errmsg = $parseObj->GetLastError();
-                $in_errmsg = "\n" . AnsibleMakeMessage($this->lv_objMTS,$this->GetRunModeVarFile(),
+                $in_errmsg .= "\n" . AnsibleMakeMessage($this->lv_objMTS,$this->GetRunModeVarFile(),
                                                        "ITAANSIBLEH-ERR-6000029",
                                                        array($in_msg_role_pkg_name, $in_role_name, basename($in_file_name),
                                                              $parent_vars_list['LINE']));
