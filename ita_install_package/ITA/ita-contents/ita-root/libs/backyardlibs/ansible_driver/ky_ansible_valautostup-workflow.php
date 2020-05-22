@@ -416,9 +416,6 @@
     $php_req_gate_php     = '/libs/commonlibs/common_php_req_gate.php';
     $db_connect_php       = '/libs/commonlibs/common_db_connect.php';
 
-    ////////////////////////////////
-    // ローカル変数(全体)宣言     //
-    ////////////////////////////////
     $warning_flag               = 0;        // 警告フラグ(1：警告発生)
     $error_flag                 = 0;        // 異常フラグ(1：異常発生)
 
@@ -1566,6 +1563,10 @@
         global    $objDBCA;
         global    $log_level;
 
+        $VariableColumnAry = array();           // 変数カラムリスト
+        $VariableColumnAry['B_ANS_TEMPLATE_FILE']['ANS_TEMPLATE_VARS_NAME']  = 0;
+        $VariableColumnAry['B_ANS_CONTENTS_FILE']['CONTENTS_FILE_VARS_NAME'] = 0;
+
         foreach($ina_table_nameTOsql_list as $table_name=>$sql){
             if ( $log_level === 'DEBUG' ){
                 $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70017",array($ina_table_nameTOid_list[$table_name]));
@@ -1707,6 +1708,10 @@
                                     // fetch行を取得
                                     $tgt_row = $objQuery->resultFetch();
                                     $col_val = $tgt_row[$ina_col_list['REF_COL_NAME']];
+                                    // TPF/CPF変数カラム判定
+                                    if(isset($VariableColumnAry[$ina_col_list['REF_TABLE_NAME']][$ina_col_list['REF_COL_NAME']])) {
+                                        $col_val = "'{{ $col_val }}'";
+                                    }
                                 }
                                 unset($objQuery);
                             }
