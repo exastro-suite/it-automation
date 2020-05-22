@@ -1285,6 +1285,10 @@ function getCMDBdata($in_tableNameToSqlList,
     global    $objDBCA;
     global    $log_level;
 
+    $VariableColumnAry = array();           // 変数カラムリスト
+    $VariableColumnAry['B_ANS_TEMPLATE_FILE']['ANS_TEMPLATE_VARS_NAME']  = 0;
+    $VariableColumnAry['B_ANS_CONTENTS_FILE']['CONTENTS_FILE_VARS_NAME'] = 0;
+
     // オペ+作業+ホスト+変数の組合せの代入順序 重複確認用
     $lv_varsAssChkList = array();
     // オペ+作業+ホスト+変数+メンバ変数の組合せの代入順序 重複確認用
@@ -1440,6 +1444,11 @@ function getCMDBdata($in_tableNameToSqlList,
                             // fetch行を取得
                             $tgt_row = $objQuery->resultFetch();
                             $col_val = $tgt_row[$col_data['REF_COL_NAME']];
+                            // TPF/CPF変数カラム判定
+                            if(isset($VariableColumnAry[$col_data['REF_TABLE_NAME']][$col_data['REF_COL_NAME']])) {
+                                $col_val = "'{{ $col_val }}'";
+                            }
+
                         }
                         unset($objQuery);
                     }
