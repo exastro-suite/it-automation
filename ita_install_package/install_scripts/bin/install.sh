@@ -104,6 +104,10 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
+    if [ "$CREATEPARAM2_FLG" -eq 1 ]; then
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+1))
+    fi
+
     if [ "$HOSTGROUP_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
@@ -163,6 +167,10 @@ func_install_messasge() {
     
     if [ CREATEPARAM_FLG = ${1} ]; then
         MESSAGE="Createparam"
+    fi
+
+    if [ CREATEPARAM2_FLG = ${1} ]; then
+        MESSAGE="Createparam2"
     fi
 
     if [ HOSTGROUP_FLG = ${1} ]; then
@@ -365,6 +373,7 @@ CREATE_TABLES=(
     MATERIAL3_FLG
     MATERIAL5_FLG
     CREATEPARAM_FLG
+    CREATEPARAM2_FLG
     HOSTGROUP_FLG
     HOSTGROUP2_FLG
     HOSTGROUP3_FLG
@@ -435,6 +444,7 @@ MATERIAL2_FLG=0
 MATERIAL3_FLG=0
 MATERIAL5_FLG=0
 CREATEPARAM_FLG=0
+CREATEPARAM2_FLG=0
 HOSTGROUP_FLG=0
 HOSTGROUP2_FLG=0
 HOSTGROUP3_FLG=0
@@ -628,6 +638,16 @@ elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$DSC_FLG" 
     MATERIAL5_FLG=1
 elif [ "$DSC_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
     MATERIAL5_FLG=1
+fi
+
+if [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] &&  [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] ; then
+    CREATEPARAM2_FLG=0
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] && [ "$CREATEPARAM_FLG" -eq 1 ] ; then
+    CREATEPARAM2_FLG=1
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] && [ "$ANSIBLE_FLG" -eq 1 ] ; then
+    CREATEPARAM2_FLG=1
+elif [ "$ANSIBLE_FLG" -eq 1 ] && [ "$CREATEPARAM_FLG" -eq 1 ] ; then
+    CREATEPARAM2_FLG=1
 fi
 
 if [ "$CREATEPARAM_FLG" -eq 1 ]; then
