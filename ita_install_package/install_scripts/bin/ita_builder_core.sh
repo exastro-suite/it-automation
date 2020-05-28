@@ -60,6 +60,15 @@ list_yum_package() {
 }
 
 
+list_pecl_package() {
+    local dst_dir=$1
+
+    if [ -d $dst_dir ]; then
+        find $dst_dir -type f | grep -E '\.tgz$' | tr "\n" " "
+    fi
+}
+
+
 list_pip_package() {
     local dst_dir=$1
 
@@ -560,10 +569,20 @@ configure_php() {
     sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX.js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
     sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX_lite.js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
 
-    # Install Spyc.
-    echo "----------Installation[Spyc]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    mkdir -p /usr/share/php/spyc-master >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    cat_tar_gz ${PHP_TAR_GZ_PACKAGE["spyc"]} | tar zx --strip-components=1 -C /usr/share/php/spyc-master >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    # Install php-yaml.
+    echo "----------Installation[php-yaml]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ "${exec_mode}" == "3" ]; then
+        pecl channel-update pecl.php.net >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        echo "" | pecl install ${PHP_TAR_GZ_PACKAGE["yaml"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    else
+        echo "" | pecl install ${PHP_TAR_GZ_PACKAGE["yaml"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
+
+    pecl list | grep yaml >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+       log "ERROR:Installation failed[php-yaml]"
+       func_exit
+    fi
 
     # Install Composer.
     if [ "${exec_mode}" == "3" ]; then
@@ -731,8 +750,9 @@ download() {
         mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     
-        log "Download packages[$key]"
-        curl -L ${PHP_TAR_GZ_PACKAGE[$key]} -O >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        log "Download packages[php-yaml]"
+        pecl channel-update pecl.php.net >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pecl download ${PHP_TAR_GZ_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
         download_check
     done
     cd $ITA_INSTALL_SCRIPTS_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1;
@@ -1046,7 +1066,7 @@ YUM__ENV_PACKAGE="${YUM_PACKAGE_YUM_ENV[${MODE}]}"
 declare -A YUM_PACKAGE;
 YUM_PACKAGE=(
     ["httpd"]="httpd mod_ssl"
-    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd python3"
+    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd python3 php-devel libyaml libyaml-devel"
     ["git"]="git"
     ["ansible"]="sshpass expect"
 )
@@ -1096,29 +1116,29 @@ PEAR_PACKAGE=(
 # local directory
 declare -A PHP_TAR_GZ_PACKAGE_LOCAL_DIR;
 PHP_TAR_GZ_PACKAGE_LOCAL_DIR=(
-    ["spyc"]="${LOCAL_DIR["php-tar-gz"]}/Spyc"
+    ["yaml"]="${LOCAL_DIR["php-tar-gz"]}/YAML"
 )
 
 # download directory
 declare -A PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR;
 PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR=(
-    ["spyc"]="${DOWNLOAD_DIR["php-tar-gz"]}/Spyc"
+    ["yaml"]="${DOWNLOAD_DIR["php-tar-gz"]}/YAML"
 )
 
 #-----------------------------------------------------------
 # package
 
-# Spyc
-declare -A PHP_TAR_GZ_PACKAGE_SPYC;
-PHP_TAR_GZ_PACKAGE_SPYC=(
-    ["remote"]="https://github.com/mustangostang/spyc/archive/0.6.2.tar.gz"
-    ["local"]="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR["spyc"]}/0.6.2.tar.gz"
+# YAML
+declare -A PHP_TAR_GZ_PACKAGE_YAML;
+PHP_TAR_GZ_PACKAGE_YAML=(
+    ["remote"]="YAML"
+    ["local"]="-O `list_pecl_package ${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR["yaml"]}`"
 )
 
 # all php tar.gz packages
 declare -A PHP_TAR_GZ_PACKAGE;
 PHP_TAR_GZ_PACKAGE=(
-    ["spyc"]=${PHP_TAR_GZ_PACKAGE_SPYC[${MODE}]}
+    ["yaml"]=${PHP_TAR_GZ_PACKAGE_YAML[${MODE}]}
 )
 
 
