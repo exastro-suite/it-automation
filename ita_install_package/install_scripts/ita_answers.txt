@@ -32,7 +32,7 @@ db_password:
 ita_base:yes
 material:no
 createparam:yes
-hostgroup:no
+hostgroup:yes
 ansible_driver:yes
 cobbler_driver:no
 openstack_driver:no
