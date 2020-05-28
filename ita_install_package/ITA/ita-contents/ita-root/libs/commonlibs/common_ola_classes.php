@@ -1740,7 +1740,7 @@ class OrchestratorLinkAgent {
                         $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733109",array($intFocusIndex + 1),$tmpStrOpeNoIDBH);
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                     }
-                    $tmpAryRetBody = $objOLA->getInfoOfOneOperation($tmpStrOpeNoIDBH,1);
+                    $tmpAryRetBody = $this->getInfoOfOneOperation($tmpStrOpeNoIDBH,1);
                     if( $tmpAryRetBody[1] !== null ){
                         // エラーフラグをON
                         // 例外処理へ
