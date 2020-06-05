@@ -1265,7 +1265,7 @@ Ansible（Legacy Role）代入値管理
                 
                     $strQuery = "UPDATE A_PROC_LOADED_LIST "
                                ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                               ."WHERE ROW_ID IN (2100020006) ";
+                               ."WHERE ROW_ID IN (2100020006, 2100170007) ";
 
                     $aryForBind = array();
                     $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
