@@ -123,7 +123,7 @@ $ary[5013] = "Failed to get the data of \"Master item creation information\".";
 $ary[5014] = "Vertical menu creation information could not be acquired.";
 $ary[5015] = "Vertical menu Illegal number of creation information items and repetitions.";
 $ary[5016] = "Vertical menu Input method does not match on repeat item set by creation information.";
-$ary[5017] = "Vertical menu Maximum number of bytes do not match in repeat item set by creation information.";
+$ary[5017] = "Vertical menu Number of items/repetition count mismatches menu item creation information ";
 $ary[5018] = "Vertical Menu group: Menu: Item names in Pulldown selection do not match in the repetition item set by creation information.";
 $ary[5019] = "Failed to acquire the specified pulldown menu item.ID=[{}]";
 ?>
