@@ -779,7 +779,9 @@ if [ "$BASE_FLG" -eq 1 ]; then
             log 'WARNING : Failed to place /etc/php-fpm.d/www.conf_original.'
         fi
         cp -p ../ext_files_for_CentOS8.x/etc_php-fpm.d/www.conf /etc/php-fpm.d/ 2>> "$LOG_FILE"
-        if ! test -e /etc/php-fpm.d/www.conf ; then
+        if test -e /etc/php-fpm.d/www.conf ; then
+            sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" /etc/php-fpm.d/www.conf 2>> "$LOG_FILE"
+        else
             log 'WARNING : Failed to place /etc/php-fpm.d/www.conf.'
         fi
     fi
