@@ -46,6 +46,59 @@ try{
     $disuseCnt = 0;             // 廃止件数
     $tranStartFlg = false;
 
+    ////////////////////////////////
+    // 処理済みフラグを判定
+    ////////////////////////////////
+    $sql = "SELECT LOADED_FLG,LAST_UPDATE_TIMESTAMP " .
+           "FROM A_PROC_LOADED_LIST " .
+           "WHERE ROW_ID = :ROW_ID";
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if($objQuery->getStatus()===false){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+
+    $bindParam = array('ROW_ID'=>2100170005);
+    $objQuery->sqlBind($bindParam);
+
+    $r = $objQuery->sqlExecute();
+    if (!$r){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+    // FETCH行数を取得
+    $procLoadList = array();
+    while ( $row = $objQuery->resultFetch() ){
+        $procLoadList[] = $row;
+    }
+    // DBアクセス事後処理
+    unset($objQuery);
+
+    if (1 != count($procLoadList)){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+
+    if('1' == $procLoadList[0]['LOADED_FLG']){
+        //処理対象がないため処理終了
+        if(LOG_LEVEL === 'DEBUG'){
+            // 終了ログ出力
+            outputLog($objMTS->getSomeMessage('ITAHOSTGROUP-STD-10002', basename( __FILE__, '.php' )));
+        }
+        return true;
+    }
+    $procLastUpdateTimeStamp = $procLoadList[0]['LAST_UPDATE_TIMESTAMP'];
+
     //////////////////////////
     // ホストグループ一覧テーブルを検索
     //////////////////////////
@@ -85,12 +138,13 @@ try{
             }
         }
 
-
-        foreach($treeData['ALL_CHILD_IDS'] as $childId) {
-            $linkDataArray[] = array('VARS_NAME'    => "VAR_hostgroup_" . $hgName,
-                                     'HOSTGROUP_ID' => $treeData['KY_KEY'] - 10000,
-                                     'CHILD_ID'     => $childId,
-                                    );
+        if(NULL !== $hgName){
+            foreach($treeData['ALL_CHILD_IDS'] as $childId) {
+                $linkDataArray[] = array('VARS_NAME'    => "VAR_hostgroup_" . $hgName,
+                                         'HOSTGROUP_ID' => $treeData['KY_KEY'] - 10000,
+                                         'CHILD_ID'     => $childId,
+                                        );
+            }
         }
     }
 
@@ -168,6 +222,23 @@ try{
             }
             $insertCnt ++;
         }
+        // ホストグループ変数化メニューのデータとホストグループ変数名が一致しない場合
+        else if($linkData['VARS_NAME'] != $hostGrpVar['VARS_NAME']){
+            // 更新する
+            $updateData['VARS_NAME']        = $linkData['VARS_NAME'];       // ホストグループ変数名
+            $updateData['LAST_UPDATE_USER'] = USER_ID_MAKE_HOST_GRP_VAR;    // 最終更新者
+
+            //////////////////////////
+            // 出力用テーブルを更新
+            //////////////////////////
+            $result = $hostgroupVarTable->updateTable($updateData, $jnlSeqNo);
+            if(true !== $result){
+                $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+                outputLog($msg);
+                throw new Exception($msg);
+            }
+            $updateCnt ++;
+        }
     }
     unset($linkData);
 
@@ -207,6 +278,73 @@ try{
             throw new Exception($msg);
         }
         $disuseCnt ++;
+    }
+
+    ////////////////////////////////
+    // 処理済みフラグをONにする
+    ////////////////////////////////
+    $sql = "UPDATE A_PROC_LOADED_LIST " .
+           "SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP " .
+           "WHERE ROW_ID = :ROW_ID AND LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP2 ";
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+
+    if( $objQuery->getStatus() === false ){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+
+    $objDBCA->setQueryTime();
+    $bindParam = array('LOADED_FLG'=>'1', 'ROW_ID'=>2100170005, 'LAST_UPDATE_TIMESTAMP'=>$objDBCA->getQueryTime(), 'LAST_UPDATE_TIMESTAMP2'=>$procLastUpdateTimeStamp);
+    $objQuery->sqlBind($bindParam);
+
+    $r = $objQuery->sqlExecute();
+
+    if (!$r){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+    unset($objQuery);
+
+    if($insertCnt > 0 || $updateCnt > 0 ||  $disuseCnt > 0){
+
+        ////////////////////////////////
+        // 処理済みフラグをOFFにする
+        ////////////////////////////////
+        $sql = "UPDATE A_PROC_LOADED_LIST " .
+               "SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP " .
+               "WHERE ROW_ID IN (2100170006, 2100170007) ";
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+
+        if( $objQuery->getStatus() === false ){
+            $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+            outputLog($msg);
+            outputLog($sql);
+            outputLog($objQuery->getLastError());
+            throw new Exception($msg);
+        }
+
+        $objDBCA->setQueryTime();
+        $bindParam = array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP'=>$objDBCA->getQueryTime());
+        $objQuery->sqlBind($bindParam);
+
+        $r = $objQuery->sqlExecute();
+
+        if (!$r){
+            $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+            outputLog($msg);
+            outputLog($sql);
+            outputLog($objQuery->getLastError());
+            throw new Exception($msg);
+        }
+        unset($objQuery);
     }
 
     // コミット
