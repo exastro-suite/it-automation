@@ -7,7 +7,7 @@
 CREATE TABLE F_CREATE_MENU_INFO
 (
 CREATE_MENU_ID                      INT                             , -- 識別シーケンス項番
-MENU_NAME                           VARCHAR (64)                    ,
+MENU_NAME                           VARCHAR (256)                    ,
 PURPOSE                             INT                             ,
 TARGET                              INT                             ,
 MENUGROUP_FOR_HG                    INT                             ,
@@ -31,7 +31,7 @@ JOURNAL_REG_DATETIME                DATETIME(6)                     , -- 履歴�
 JOURNAL_ACTION_CLASS                VARCHAR (8)                     , -- 履歴用変更種別
 
 CREATE_MENU_ID                      INT                             , -- 識別シーケンス項番
-MENU_NAME                           VARCHAR (64)                    ,
+MENU_NAME                           VARCHAR (256)                    ,
 PURPOSE                             INT                             ,
 TARGET                              INT                             ,
 MENUGROUP_FOR_HG                    INT                             ,
