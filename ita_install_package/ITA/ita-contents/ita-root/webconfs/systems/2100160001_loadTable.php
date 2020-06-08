@@ -63,7 +63,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :active"');
     $c->getOutputType('register_table')->setTextTagLastAttr('style = "ime-mode :active"');
     $c->getOutputType('update_table')->setTextTagLastAttr('style = "ime-mode :active"');
-    $objVldt = new MenuNameValidator(1,64,false);
+    $objVldt = new MenuNameValidator(1,256,false);
 	$c->setValidator($objVldt);
     $c->setRequired(true);//登録/更新時には、入力必須
     $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
