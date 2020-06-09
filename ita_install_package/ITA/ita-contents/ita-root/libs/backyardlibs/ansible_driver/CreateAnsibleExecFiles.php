@@ -3050,11 +3050,10 @@ class CreateAnsibleExecFiles {
                     $parseObj = new YAMLParse($this->lv_objMTS);
                     $dialog_file_array = $parseObj->Parse($dialog_file);
                     if($dialog_file_array === false) {
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$parseObj->GetLastError());
+                        $errmsg = $parseObj->GetLastError();
                         //$ary[6000073] = "対話ファイルがYAML形式が確認して下さい。(対話ファイル:{})";
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,
-                                                      $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000073",
-                                                                                       array($playbook)));
+                        $errmsg .= "\n" . $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000073",array($playbook));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg);
                         unset($parseObj);
                         return false;
                     }
@@ -3065,11 +3064,10 @@ class CreateAnsibleExecFiles {
                     $parseObj = new YAMLParse($this->lv_objMTS);
                     $host_vars_file_array = $parseObj->Parse($host_vars_file);
                     if($host_vars_file_array === false) {
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$parseObj->GetLastError());
-                        //$ary[6000074] = "ホスト変数ファイルがYAML形式で生成されていません。(ホスト名:{})";
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,
-                                                      $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000074",
-                                                                                       array($hostname)));
+                        $errmsg = $parseObj->GetLastError();
+			//rary[6000074] = "ホスト変数ファイルがYAML形式で生成されていません。(ホスト名:{})";
+                        $errmsg .= "\n" . $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000074", array($hostname));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg);
                         unset($parseObj);
                         return false;
                     }
@@ -3169,7 +3167,7 @@ class CreateAnsibleExecFiles {
                                 //複数行具体値判定
                                 $ret = $this->chkMultilineValue($this->lva_global_vars_list[$var_name]);
                                 if($ret === false) {
-                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90308",
+                                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90307",
                                                                                 array($var_name));
                                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                                     return false;
@@ -3209,7 +3207,10 @@ class CreateAnsibleExecFiles {
                     $parseObj = new YAMLParse($this->lv_objMTS);
                     $copy_list = $parseObj->Parse($file_name2);
                     if($copy_list === false) {
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$parseObj->GetLastError());
+                        $errmsg = $parseObj->GetLastError();
+			//rary[6000074] = "ホスト変数ファイルがYAML形式で生成されていません。(ホスト名:{})";
+                        $errmsg .= "\n" . $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000074", array($hostname));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg);
                         $result_code = false;
                         unset($parseObj);
                         continue;
@@ -6542,9 +6543,8 @@ class CreateAnsibleExecFiles {
                 //複数行具体値判定
                 $ret = $this->chkMultilineValue($row['VARS_ENTRY']);
                 if($ret === false) {
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90307",
-                                                                array($row['ASSIGN_ID'],
-                                                                      $row['VARS_NAME']));
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90309",
+                                                               array($row['VARS_NAME']));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     unset($objQuery);
                     return false;
@@ -6807,6 +6807,10 @@ class CreateAnsibleExecFiles {
         $parent_vars_list = array();
         foreach( $in_tgt_row as $row )
         {
+            // 多段メンバー変数の廃止レコードを判定
+            if($row['MEMBER_COL_COMB_DISUSE_FLAG']!='0'){
+                continue;
+            }
             if($row['PTN_VARS_LINK_DISUSE_FLAG']=='0'){
                 // 代入値管理のみあるホスト変数(作業対象ホストにない)をはじく
                 if($row['PHO_LINK_HOST_COUNT'] == 0){
