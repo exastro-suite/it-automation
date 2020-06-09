@@ -1006,10 +1006,59 @@ class YAMLParse {
             $this->SetLastError($msg);
             return false;
         }
-        $val = yaml_parse_file($yamlfile);
+        $msg = "";
+        $val = @yaml_parse_file($yamlfile);
         if($val === false) {
+// AJAXでエラーになるのでコメント
+//            $pares_error = error_get_last();
+//            if(is_array($pares_error)) {
+//                if(isset($pares_error["message"])) {
+//                    $msg = sprintf("yaml parse text:%s %s",$yaml,$pares_error["message"]);
+//                }
+//            }
+//            // "YAML解析で想定外のエラーが発生しました。"
+//           $msg .= $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000109');
+            // YAML解析で想定外のエラーのメッセージは呼び元で出している
+            $this->SetLastError("");
+            return false;
+        } else {
+            return $val;
+        }
+    }
+    function StringParse($yamltext) {
+        $this->lv_lasterrmsg = array();
+        if(!extension_loaded('yaml')) {
+            $msg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000107');
+            $this->SetLastError($msg);
+            return false;
+        }
+        $encode = mb_detect_encoding($yamltext);
+        switch($encode) {
+        case "ASCII":
+        case "UTF-8":
+            break;
+        default:
+            // "UTF-8以外の文字文字コードが使用されています。";
+            $msg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000108');
+            $this->SetLastError($msg);
+            return false;
+        }
+        $msg = "";
+        $val = @yaml_parse($yamltext);
+        if($val === false) {
+// AJAXでエラーになるのでコメント
+//            $pares_error = error_get_last();
+//            if(is_array($pares_error)) {
+//              if(isset($pares_error["message"])) {
+//                  $msg = sprintf("yaml parse text:%s %s",$yamltext,$pares_error["message"]);
+//                  //$msg = sprintf("yaml parse text:%s ",$yamltext);
+//              }
+//          }
+//
+            $msg = sprintf("yaml parse text:%s \n",$yamltext);
+
             // "YAML解析で想定外のエラーが発生しました。"
-            $msg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000109');
+            $msg .= $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000109');
             $this->SetLastError($msg);
             return false;
         } else {
