@@ -1167,7 +1167,7 @@ PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR="${DOWNLOAD_DIR["php-tar-gz"]}/PhpSpr
 COMPOSER=https://getcomposer.org/installer
 
 # PhpSpreadsheet
-PHPSPREADSHEET=""phpoffice/phpspreadsheet":"*""
+PHPSPREADSHEET=""phpoffice/phpspreadsheet":"1.12.0""
 
 ################################################################################
 # main
