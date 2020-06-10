@@ -1402,6 +1402,51 @@ LEFT JOIN D_ANS_LNS_PTN_VARS_LINK  TAB_B ON ( TAB_B.VARS_LINK_ID = TAB_A.VARS_LI
 -- *** ***** Ansible Pioneer Tables                                          ***
 -- *****************************************************************************
 -- ----更新系テーブル作成
+CREATE TABLE B_OS_TYPE
+(
+OS_TYPE_ID                        %INT%                     ,
+
+OS_TYPE_NAME                      %VARCHR%(256)             ,
+HARDAWRE_TYPE_SV                  %INT%                     ,
+HARDAWRE_TYPE_ST                  %INT%                     ,
+HARDAWRE_TYPE_NW                  %INT%                     ,
+
+DISP_SEQ                          %INT%                     , -- 表示順序
+NOTE                              %VARCHR%(4000)            , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)               , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%               , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                     , -- 最終更新ユーザ
+
+PRIMARY KEY (OS_TYPE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_OS_TYPE_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                     , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%               , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)               , -- 履歴用変更種別
+
+OS_TYPE_ID                        %INT%                     ,
+
+OS_TYPE_NAME                      %VARCHR%(256)             ,
+HARDAWRE_TYPE_SV                  %INT%                     ,
+HARDAWRE_TYPE_ST                  %INT%                     ,
+HARDAWRE_TYPE_NW                  %INT%                     ,
+
+DISP_SEQ                          %INT%                     , -- 表示順序
+NOTE                              %VARCHR%(4000)            , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)               , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%               , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                     , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+
+
+-- ----更新系テーブル作成
 CREATE TABLE B_ANSIBLE_PNS_DIALOG_TYPE
 (
 DIALOG_TYPE_ID                    %INT%                            , -- 識別シーケンス
@@ -1778,6 +1823,53 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 -- *****************************************************************************
 -- *** ***** Ansible Pioneer Views                                           ***
 -- *****************************************************************************
+CREATE VIEW D_OS_TYPE 
+AS 
+SELECT * 
+FROM B_OS_TYPE;
+
+CREATE VIEW D_OS_TYPE_JNL 
+AS 
+SELECT * 
+FROM B_OS_TYPE_JNL;
+
+CREATE VIEW D_OS_TYPE_SV 
+AS 
+SELECT * 
+FROM B_OS_TYPE 
+WHERE HARDAWRE_TYPE_SV=1;
+
+CREATE VIEW D_OS_TYPE_SV_JNL 
+AS 
+SELECT * 
+FROM B_OS_TYPE_JNL 
+WHERE HARDAWRE_TYPE_SV=1;
+
+CREATE VIEW D_OS_TYPE_ST 
+AS 
+SELECT * 
+FROM B_OS_TYPE 
+WHERE HARDAWRE_TYPE_ST=1;
+
+CREATE VIEW D_OS_TYPE_ST_JNL 
+AS 
+SELECT * 
+FROM B_OS_TYPE_JNL 
+WHERE HARDAWRE_TYPE_ST=1;
+
+CREATE VIEW D_OS_TYPE_NW 
+AS 
+SELECT * 
+FROM B_OS_TYPE 
+WHERE HARDAWRE_TYPE_NW=1;
+
+CREATE VIEW D_OS_TYPE_NW_JNL 
+AS 
+SELECT * 
+FROM B_OS_TYPE_JNL 
+WHERE HARDAWRE_TYPE_NW=1;
+
+
 CREATE VIEW D_ANSIBLE_PNS_INS_STATUS     AS 
 SELECT * 
 FROM B_ANSIBLE_STATUS;
