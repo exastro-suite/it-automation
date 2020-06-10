@@ -384,17 +384,29 @@ try{
             }
 
             // 型、サイズのチェック
-            $inputMethodIdArray = array();
-            $maxLengthArray = array();
-            $otherMenuLinkIdArray = array();
+            $inputMethodIdArray     = array();
+            $maxLengthArray         = array();
+            $otherMenuLinkIdArray   = array();
+            $multiMaxLengthArray    = array();
+            $intMaxArray            = array();
+            $intMinArray            = array();
+            $floatMaxArray          = array();
+            $floatMinArray          = array();
+            $floatDigitArray        = array();
             $errFlg = false;
 
             for($i = 0; $i < $cpiData['REPEAT_CNT']; $i ++){
                 for($j = 0; $j < $cpiData['COL_CNT']; $j ++){
 
                     if($i === 0){
-                        $inputMethodIdArray[] = $repeatItemArray[$j]['INPUT_METHOD_ID'];
-                        $maxLengthArray[] = $repeatItemArray[$j]['MAX_LENGTH'];
+                        $inputMethodIdArray[]   = $repeatItemArray[$j]['INPUT_METHOD_ID'];
+                        $maxLengthArray[]       = $repeatItemArray[$j]['MAX_LENGTH'];
+                        $multiMaxLengthArray[]  = $repeatItemArray[$j]['MULTI_MAX_LENGTH'];
+                        $intMaxArray[]          = $repeatItemArray[$j]['INT_MAX'];
+                        $intMinArray[]          = $repeatItemArray[$j]['INT_MIN'];
+                        $floatMaxArray[]        = $repeatItemArray[$j]['FLOAT_MAX'];
+                        $floatMinArray[]        = $repeatItemArray[$j]['FLOAT_MIN'];
+                        $floatDigitArray[]      = $repeatItemArray[$j]['FLOAT_DIGIT'];
                         $otherMenuLinkIdArray[] = $repeatItemArray[$j]['OTHER_MENU_LINK_ID'];
                         continue;
                     }
@@ -408,7 +420,7 @@ try{
                         $errFlg = true;
                         break;
                     }
-                    // 最大バイト数チェック
+                    // 最大バイト数(単一)チェック
                     if(1 == $inputMethodIdArray[$j] && $maxLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['MAX_LENGTH']){
                         $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
                         outputLog($msg);
@@ -417,8 +429,35 @@ try{
                         $errFlg = true;
                         break;
                     }
-                    // 他メニュー参照チェック
-                    if(6 == $inputMethodIdArray[$j] && $otherMenuLinkIdArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['OTHER_MENU_LINK_ID']){
+                    // 最大バイト数(複数)チェック
+                    if(2 == $inputMethodIdArray[$j] && $multiMaxLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['MULTI_MAX_LENGTH']){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // 整数チェック
+                    if(3 == $inputMethodIdArray[$j] && ($intMaxArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['INT_MAX'] || $intMinArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['INT_MIN'])){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // 小数チェック
+                    if(4 == $inputMethodIdArray[$j] && ($floatMaxArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['FLOAT_MAX'] || $floatMinArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['FLOAT_MIN'] || $floatDigitArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['FLOAT_DIGIT'])){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // プルダウン選択チェック
+                    if(7 == $inputMethodIdArray[$j] && $otherMenuLinkIdArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['OTHER_MENU_LINK_ID']){
                         $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5018');
                         outputLog($msg);
                         // パラメータシート作成管理更新処理を行う
@@ -2642,11 +2681,13 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
         $viewMatchFlg = false;
         $convMatchFlg = false;
         $convHostMatchFlg = false;
+        $cmdbMatchFlg = false;
         $hgMenuList = NULL;
         $hostMenuList = NULL;
         $viewMenuList = NULL;
         $convMenuList = NULL;
         $convHostMenuList = NULL;
+        $cmdbMenuList = NULL;
 
         foreach($menuListArray as $menu){
             // メニューグループとメニューが一致するデータを検索
