@@ -1021,9 +1021,12 @@ YUM_REPO_PACKAGE_MARIADB=(
 )
 
 # yum repository package (for php)
+ARCH=$(arch)
 declare -A YUM_REPO_PACKAGE_PHP;
 YUM_REPO_PACKAGE_PHP=(
-    ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
+    ["RHEL8"]="--set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms"
+    ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-optional-rpms"
+    ["CentOS8"]="--set-enabled PowerTools"
     ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
     ["yum_all"]=""
 )
@@ -1066,9 +1069,9 @@ YUM__ENV_PACKAGE="${YUM_PACKAGE_YUM_ENV[${MODE}]}"
 declare -A YUM_PACKAGE;
 YUM_PACKAGE=(
     ["httpd"]="httpd mod_ssl"
-    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd python3 php-devel libyaml libyaml-devel"
+    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd python3 php-devel libyaml libyaml-devel make"
     ["git"]="git"
-    ["ansible"]="sshpass expect"
+    ["ansible"]="sshpass expect nc"
 )
 
 
