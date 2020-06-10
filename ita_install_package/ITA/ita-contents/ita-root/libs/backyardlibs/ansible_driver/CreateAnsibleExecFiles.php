@@ -1953,6 +1953,12 @@ class CreateAnsibleExecFiles {
             if(@count($parent_vars_list[$var]) != 0)
                 continue;
 
+            // 機器一覧のプロトコルが未登録の場合を判定
+            if(($var == self::LC_ANS_PROTOCOL_VAR_NAME) &&
+               ($val == self::LC_ANS_UNDEFINE_NAME)){
+                // __loginprotocol__をホスト変数に出力しない
+                continue;
+            }
             // コピー変数の登録の場合に、VAR変数の具体値に
             // 使用されているコピー変数か確認する。
             if($in_var_type == "CPF"){
@@ -2144,6 +2150,14 @@ class CreateAnsibleExecFiles {
                         continue;
                     }
                     $this->lv_parent_vars_list[$in_host_name][$var] = 0;
+
+                    // 機器一覧のプロトコルが未登録の場合を判定
+                    if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) &&
+                       ($var == self::LC_ANS_PROTOCOL_VAR_NAME) &&
+                       ($val == self::LC_ANS_UNDEFINE_NAME)){
+                        // __loginprotocol__をホスト変数に出力しない
+                        continue;
+                    }
                     //ホスト変数ファイルのレコード生成
                     //変数名: 具体値
 
