@@ -2369,79 +2369,62 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
         if($ret == 1){
             // 行先頭から-までの文字数取得
             $in_mark_pos = strpos($haifun_matchi[0][0],"-",0);
-            // 正規表記の先頭と終端文字列
-            $lv_fix_head  = "/^(\s*)-(\s+)";
-            $lv_fix_foot1 = ":(\s+)/";
-            $lv_fix_foot2 = ":$/";
-            //変数名の正規表記判定
-            list($ret,$pattern,$var_matchi,$match_pattern) =  $this->VarNamePattenMatch($in_string,$lv_fix_head,$lv_fix_foot1,$lv_fix_foot2);
-            if($ret === true){
-                $var_pattern = $pattern['pattern'];
-                // 行先頭から変数名までの文字数取得
-                $in_var_pos  = strlen($haifun_matchi[0][0]);
-                // 変数名を取り出す
-                $in_var_name = preg_replace("/(\s*):(\s*)$/","",$var_matchi[0][0]);
-                $in_var_name = preg_replace("/^(\s*)-(\s+)/","",$in_var_name);
-                $in_var_def = true;
-                // 具体値取り出し
-                $in_var_val = preg_replace($match_pattern,"",$in_string);
-                $in_var_val = trim($in_var_val);
-                if(strlen($in_var_val) != 0){
-                    // 具体値定義あり
-                    $in_var_val_def = true;
-                }
-                // 変数名判定
-                $ret = $this->chkVariableName($in_parent_var_pos,$in_var_pos,$pattern);
-                if($ret === false) {
-                    return $ret;
-                }
+
+            $obj = new YAMLParse($this->lv_objMTS);
+            $yml_parse_ary = $obj->StringParse($in_string);
+            $in_free_msg = $obj->GetLastError();
+            unset($obj);
+            if($yml_parse_ary === false) {
+                $in_error_code = 'FREE_MSG';
+                return false;
             }
-            else{
-                $ret = preg_match('/^(\s*)-(\s+)(\S)/',$in_string,$val_matchi,PREG_OFFSET_CAPTURE);
-                if($ret == 1){
-                    $in_var_val = preg_replace("/^(\s*)-(\s+)/","",$in_string);
-                    $in_var_val = trim($in_var_val);
-                    if(strlen($in_var_val) != 0){
-                        // 具体値定義あり
-                        $in_var_val_def = true;
-                    }
-                    // 具体値定義位置取得
-                    $in_val_pos  = strlen($val_matchi[0][0]) - 1;
-                    if(($in_crt_var_pos >= $in_val_pos) || ($in_crt_var_pos == -1)) {
-                        return false;
-                    }
-                }
-                else{
+            list($ret,$varinfo) = $this->chkVarStructure($yml_parse_ary);
+            switch($ret) {
+            case false:
+                return false;
+                break;
+            case 'hashlist': // 変数と具体値のリスト定義
+                $varname = "";
+                if(count($varinfo['name'])!=1) {
                     return false;
+                } else {
+                    $varname = $varinfo['name'][0];
                 }
-            }
-        }
-        else{
-             $ret = preg_match("/^(\s*)(\S+)(\s*):(\s*)/",$in_string,$var_matchi,PREG_OFFSET_CAPTURE);
-             if($ret != 0) {
-                 // 正規表記の先頭と終端文字列
-                 $lv_fix_head  = "/^(\s*)";
-                 $lv_fix_foot1 = ":(\s+)/";
-                 $lv_fix_foot2 = ":$/";
-                 //変数名の正規表記判定
-                 list($ret,$pattern,$var_matchi,$match_pattern) =  $this->VarNamePattenMatch($in_string,$lv_fix_head,$lv_fix_foot1,$lv_fix_foot2);
-                 if($ret === true){
-                     // 行先頭から変数名までの文字数取得
-                    $ret = preg_match('/(\S)/',$in_string,$matchi,PREG_OFFSET_CAPTURE);
+
+                if(count($varinfo['value'])!=1) {
+                    return false;
+                } else {
+                    $varvalue = $varinfo['value'][0];
+                }
+
+                // 正規表記の先頭と終端文字列
+                $lv_fix_head  = "/^";
+                $lv_fix_foot1 = "$/";
+                $lv_fix_foot2 = "$/";
+
+                //変数名の正規表記判定
+                list($ret,$pattern,$var_matchi,$match_pattern) =  $this->VarNamePattenMatch($varname,$lv_fix_head,$lv_fix_foot1,$lv_fix_foot2);
+                if($ret === true){
+                    // 行先頭から変数名までの文字数取得
+                    $ret = preg_match('/^(\s*)-(\s+)/',$in_string,$matchi,PREG_OFFSET_CAPTURE);
                     if($ret == 1){
-                        $in_var_pos  = $matchi[0][1];
+                        $in_var_pos  = strlen($matchi[0][0]);
                     }
                     // 変数名を取り出す
-                    $in_var_name = preg_replace("/(\s*):(\s*)$/","",$var_matchi[0][0]);
-                    $in_var_name = trim($in_var_name);
+                    $in_var_name = $varinfo['name'][0];
                     $in_var_def = true;
                     // 具体値取り出し
-                    $in_var_val = preg_replace($match_pattern,"",$in_string);
+                    $in_var_val = $varvalue;
                     $in_var_val = trim($in_var_val);
+                    $in_var_val_def = false;
+                    $in_val_pos     = 0;
                     if(strlen($in_var_val) != 0){
-                    // 具体値定義あり
+                       // 具体値定義あり
                         $in_var_val_def = true;
+                        // 具体値定義位置取得
+                        $in_val_pos  = $in_var_pos + strlen($in_var_name);
                     }
+
                     // 変数名判定
                     $ret = $this->chkVariableName($in_parent_var_pos,$in_var_pos,$pattern);
                     if($ret === false) {
@@ -2450,7 +2433,93 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                 } else {
                     return false;
                 }
-            } else{
+                break;
+            case 'list':     // 具体値のリスト
+                $ret = preg_match('/^(\s*)-(\s+)/',$in_string,$matchi,PREG_OFFSET_CAPTURE);
+                if($ret == 1){
+                    // 具体値定義位置取得
+                    $in_val_pos = strlen($matchi[0][0]);
+                    $in_var_val = $varvalue;
+                    $in_var_val = trim($in_var_val);
+                    if(strlen($in_var_val) != 0){
+                        // 具体値定義あり
+                        $in_var_val_def = true;
+                    }
+                    if(($in_crt_var_pos >= $in_val_pos) || ($in_crt_var_pos == -1)) {
+                        return false;
+                    }
+                }
+                else{
+                    return false;
+                }
+            default:
+                return false;
+            }
+       } else{
+            $obj = new YAMLParse($this->lv_objMTS);
+            $yml_parse_ary = $obj->StringParse($in_string);
+            $in_free_msg = $obj->GetLastError();
+            unset($obj);
+            if($yml_parse_ary === false) {
+                $in_error_code = 'FREE_MSG';
+                return false;
+            }
+            list($ret,$varinfo) = $this->chkVarStructure($yml_parse_ary);
+            switch($ret) {
+            case false:
+               return false;
+               break;
+            case 'var':  // 変数のみの定義
+            case 'hash': // 変数と具体値の定義
+                 if(count($varinfo['name'])!=1) {
+                     return false;
+                 } else {
+                     $varname = $varinfo['name'][0];
+                 }
+
+                 if(count($varinfo['value'])!=1) {
+                     return false;
+                 } else {
+                     $varvalue = $varinfo['value'][0];
+                 }
+
+                 // 正規表記の先頭と終端文字列
+                 $lv_fix_head  = "/^";
+                 $lv_fix_foot1 = "$/";
+                 $lv_fix_foot2 = "$/";
+                 //変数名の正規表記判定
+                 list($ret,$pattern,$var_matchi,$match_pattern) =  $this->VarNamePattenMatch($varname,$lv_fix_head,$lv_fix_foot1,$lv_fix_foot2);
+                 if($ret === true){
+                     // 行先頭から変数名までの文字数取得
+                    $ret = preg_match('/(\S)/',$in_string,$matchi,PREG_OFFSET_CAPTURE);
+                    if($ret == 1){
+                        $in_var_pos  = $matchi[0][1];
+                    }
+                    // 変数名を取り出す
+                    $in_var_name = $varinfo['name'][0];
+                    $in_var_def = true;
+                    // 具体値取り出し
+                    $in_var_val = $varvalue;
+                    $in_var_val = trim($in_var_val);
+                    $in_var_val_def = false;
+                    $in_val_pos     = 0;
+                    if(strlen($in_var_val) != 0){
+                       // 具体値定義あり
+                        $in_var_val_def = true;
+                        // 具体値定義位置取得
+                        $in_val_pos  = $in_var_pos + strlen($in_var_name);
+                    }
+
+                    // 変数名判定
+                    $ret = $this->chkVariableName($in_parent_var_pos,$in_var_pos,$pattern);
+                    if($ret === false) {
+                        return $ret;
+                    }
+                } else {
+                    return false;
+                }
+               break;
+            case 'value':
                 $ret = preg_match('/^(\s*)(\S)/',$in_string,$val_matchi,PREG_OFFSET_CAPTURE);
                 if($ret == 1){
                     $in_var_val = trim($in_string);
@@ -2469,6 +2538,9 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                 } else {
                     return false;
                 }
+                break;
+            default:
+                return false;
             }
         }
         if($in_var_val_def === true){
@@ -3787,16 +3859,29 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                 $match_pattern = $in_fix_head . $pattern['pattern'] . $in_fix_foot2;
                 $ret = preg_match($match_pattern,$in_string,$var_matchi,PREG_OFFSET_CAPTURE);
                 if($ret != 0) {
-                    $result_code = true;
+                    $result_code = $this->chksFfailChar($var_matchi[0][0]);
                     break;
                 }
             }else{
-                $result_code = true;
+                $result_code = $this->chksFfailChar($var_matchi[0][0]);
                 break;
             }
         }
         return [$result_code,$pattern,$var_matchi,$match_pattern];
     }
+    function chksFfailChar($in_string) {
+        $fail_char_string = "\".[]'\\: ";
+        foreach(str_split($fail_char_string) as $ch) {
+            $ret = strpos($in_string,$ch);
+            if($ret !== false) {
+               return false;
+            } else {
+               continue;
+            }
+        }
+        return true;
+    }
+
     ////////////////////////////////////////////////////////////////
     // F1034
     // 処理内容
@@ -3837,6 +3922,11 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                             $result_code = 'hashlist';
                         }
                     }
+                // varname: null
+                } elseif ($lv1_val == "") {
+                    $result_ary['name'][] = $lv1_key;
+                    $result_ary['value'][] = $lv1_val;
+                    $result_code = 'var';
                 } elseif (is_string($lv1_val)) {
                     $result_ary['name'][] = $lv1_key;
                     $result_ary['value'][] = $lv1_val;
