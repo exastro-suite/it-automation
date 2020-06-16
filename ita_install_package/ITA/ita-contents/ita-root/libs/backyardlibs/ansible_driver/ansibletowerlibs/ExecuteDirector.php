@@ -154,7 +154,7 @@ class ExecuteDirector {
 
         // AnsibleTowerHost情報取得
         $TowerHostList = array();
-        $ret = $this->getTowerHostInfo($execution_no,$ifInfoRow['ANSIBLE_STORAGE_PATH_LNX'],$TowerHostList);
+        $ret = $this->getTowerHostInfo($execution_no,$ifInfoRow['ANSTWR_HOST_ID'],$ifInfoRow['ANSIBLE_STORAGE_PATH_LNX'],$TowerHostList);
         if($ret == false) {
             // AnsibleTowerホスト一覧の取得に失敗しました。
             $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040033");
@@ -448,7 +448,7 @@ class ExecuteDirector {
         return $result_code;
     } // MaterialsDelete
 
-    private function getTowerHostInfo($execution_no,$dataRelayStoragePath,&$TowerHostList) {
+    private function getTowerHostInfo($execution_no,$anstwr_host_id,$dataRelayStoragePath,&$TowerHostList) {
         global $vg_tower_driver_type;
         global $vg_tower_driver_id;
 
@@ -457,6 +457,7 @@ class ExecuteDirector {
         $TowerHostList = array();
 
         $condition = array(
+            "ANSTWR_HOST_ID"=>$anstwr_host_id,
             "DISUSE_FLAG" => '0',
         );
 
