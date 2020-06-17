@@ -2362,7 +2362,6 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                      }
                  }
             }
-
             return true;
         }
         $ret = preg_match('/^(\s*)-(\s+)/',$in_string,$haifun_matchi,PREG_OFFSET_CAPTURE);
@@ -2391,6 +2390,7 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                     $varname = $varinfo['name'][0];
                 }
 
+                $varvalue = "";
                 if(count($varinfo['value'])!=1) {
                     return false;
                 } else {
@@ -2435,6 +2435,13 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                 }
                 break;
             case 'list':     // 具体値のリスト
+                $varname = "";
+                $varvalue = "";
+                if(count($varinfo['value'])!=1) {
+                    return false;
+                } else {
+                    $varvalue = $varinfo['value'][0];
+                }
                 $ret = preg_match('/^(\s*)-(\s+)/',$in_string,$matchi,PREG_OFFSET_CAPTURE);
                 if($ret == 1){
                     // 具体値定義位置取得
@@ -2452,6 +2459,7 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                 else{
                     return false;
                 }
+                break;
             default:
                 return false;
             }
@@ -2471,12 +2479,14 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                break;
             case 'var':  // 変数のみの定義
             case 'hash': // 変数と具体値の定義
+                 $varname = "";
                  if(count($varinfo['name'])!=1) {
                      return false;
                  } else {
                      $varname = $varinfo['name'][0];
                  }
 
+                 $varvalue = "";
                  if(count($varinfo['value'])!=1) {
                      return false;
                  } else {
@@ -2518,8 +2528,15 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                 } else {
                     return false;
                 }
-               break;
+                break;
             case 'value':
+                $varname = "";
+                $varvalue = "";
+                if(count($varinfo['value'])!=1) {
+                    return false;
+                } else {
+                    $varvalue = $varinfo['value'][0];
+                }
                 $ret = preg_match('/^(\s*)(\S)/',$in_string,$val_matchi,PREG_OFFSET_CAPTURE);
                 if($ret == 1){
                     $in_var_val = trim($in_string);
@@ -3917,20 +3934,34 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                         } else {
                             foreach($lv1_val as $lv2_key=>$lv2_val) {
                                 $result_ary['name'][] = $lv2_key;
-                                $result_ary['value'][] = $lv2_val;
+                                if(is_array($lv2_val)) {
+                                    // - varname: []
+                                    $result_ary['value'][] = "";
+                                } else {
+                                    $result_ary['value'][] = $lv2_val;
+                                }
                             }
                             $result_code = 'hashlist';
                         }
                     }
-                // varname: null
-                } elseif ($lv1_val == "") {
-                    $result_ary['name'][] = $lv1_key;
-                    $result_ary['value'][] = $lv1_val;
-                    $result_code = 'var';
-                } elseif (is_string($lv1_val)) {
-                    $result_ary['name'][] = $lv1_key;
-                    $result_ary['value'][] = $lv1_val;
-                    $result_code = 'hash';
+                } else {
+                    // varname: []
+                    if(is_array($lv1_val)) {
+                        $result_ary['name'][] = $lv1_key;
+                        $result_ary['value'][] = "";
+                        $result_code = 'var';
+                    } else {
+                        // varname: null
+                        if ($lv1_val == "") {
+                            $result_ary['name'][] = $lv1_key;
+                            $result_ary['value'][] = $lv1_val;
+                            $result_code = 'var';
+                        } elseif (is_string($lv1_val)) {
+                            $result_ary['name'][] = $lv1_key;
+                            $result_ary['value'][] = $lv1_val;
+                            $result_code = 'hash';
+                        }
+                    }
                 }
             }
         } else {
