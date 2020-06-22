@@ -631,8 +631,6 @@ class OrchestratorLinkAgent {
         $strPatternMasterAnsWinRM = 'ANS_WINRM_ID';
         $strPatternMasterAnsParaEx = 'ANS_PARALLEL_EXE';
 
-        $strPatternMasterDscRetryTimeout = 'DSC_RETRY_TIMEOUT';
-
         $boolBinaryDistinctOnDTiS = false; //false=あいまい
 
         $strPatternMasterAnsPlaybookHedDef    = 'ANS_PLAYBOOK_HED_DEF';
@@ -722,7 +720,6 @@ class OrchestratorLinkAgent {
                   .",{$strPatternMasterAnsHostDesignType} ANS_HOST_DESIGNATE_TYPE_ID "
                   .",{$strPatternMasterAnsParaEx} ANS_PARALLEL_EXE "
                   .",{$strPatternMasterAnsWinRM} ANS_WINRM_ID "
-                  .",{$strPatternMasterDscRetryTimeout} DSC_RETRY_TIMEOUT " 
                   .",{$strPatternMasterAnsPlaybookHedDef} ANS_PLAYBOOK_HED_DEF "
                   .",{$strPatternMasterAnsExecOption} ANS_EXEC_OPTIONS "
                   .",{$strPatternMasterAnsVirtualEnvName} ANS_VIRTUALENV_NAME "
@@ -1966,9 +1963,6 @@ class OrchestratorLinkAgent {
         case 5:   // legacy role
             $ret = $this->AnsibleLegacyRoleMovementValidator($tgtSource_row,$intOperationNoUAPK,$MovementErrorMsg,$intFocusIndex,$aryFreeErrMsgBody);
             break;
-        case 8:   // DSC
-            $ret = $this->DscMovementValidator($tgtSource_row,$intOperationNoUAPK,$MovementErrorMsg,$intFocusIndex,$aryFreeErrMsgBody);
-            break;
         default:  // 対象外は無条件にtrue
             $ret = true;
         }
@@ -2305,126 +2299,6 @@ class OrchestratorLinkAgent {
         return true;
     }
 // Ansible Legacy Role Movementの登録状態を確認----
-// ----DSC Movementの登録状態を確認
-    function DscMovementValidator($tgtSource_row,$intOperationNoUAPK,&$MovementErrorMsg,$intFocusIndex){
-        $objMTS = $this->getMessageTemplateStorage();
-        $objDBCA = $this->getDBConnectAgent();
-
-        // 作業対象ホストの件数と作業対象ホストに紐づくマスタの登録状況までを確認
-        //-------------------------------------------------------------------------------
-        // ①同一オペレーションNo(OPERATION_NO_UAPK)が廃止フラグONの状態
-        //   B_DSC_PHO_LINK と C_OPERATION_LIST
-        // ②同一パターンID(PATTERN_ID)が廃止フラグONの状態
-        //   B_DSC_PHO_LINK と C_PATTERN_PER_ORCH
-        // ③同一パターンID(PATTERN_ID)が廃止フラグONの状態
-        //   B_DSC_PHO_LINK と B_DSC_PATTERN_LINK
-        // ④同一ホスト(SYSTEM_ID)が廃止フラグONの状態
-        //   B_DSC_PHO_LINK と C_STM_LIST
-        //-------------------------------------------------------------------------------
-        $sql = sprintf(" SELECT                                                           " .
-                       "   PHO_LINK_ID AS PKEY,                                           " .
-                       "   COUNT(*) AS ROW_COUNT,                                         " .
-                       "   OPERATION_NO_UAPK,                                             " .
-                       "   (                                                              " .
-                       "     SELECT                                                       " .
-                       "       COUNT(*)                                                   " .
-                       "     FROM                                                         " .
-                       "       C_OPERATION_LIST S_TBL                                     " .
-                       "     WHERE                                                        " .
-                       "       S_TBL.OPERATION_NO_UAPK = M_TBL.OPERATION_NO_UAPK AND      " .
-                       "       S_TBL.DISUSE_FLAG = '0'                                    " .
-                       "   ) OPE_COUNT,                                                   " .
-                       "   PATTERN_ID,                                                    " .
-                       "   (                                                              " .
-                       "     SELECT                                                       " .
-                       "       COUNT(*)                                                   " .
-                       "     FROM                                                         " .
-                       "       C_PATTERN_PER_ORCH S_TBL                                   " .
-                       "     WHERE                                                        " .
-                       "       S_TBL.PATTERN_ID  = M_TBL.PATTERN_ID AND                   " .
-                       "       S_TBL.DISUSE_FLAG = '0'                                    " .
-                       "   ) PTN_COUNT,                                                   " .
-                       "   (                                                              " .
-                       "     SELECT                                                       " .
-                       "       COUNT(*)                                                   " .
-                       "     FROM                                                         " .
-                       "       B_DSC_PATTERN_LINK S_TBL                                   " .
-                       "     WHERE                                                        " .
-                       "       S_TBL.PATTERN_ID  = M_TBL.PATTERN_ID AND                   " .
-                       "       S_TBL.DISUSE_FLAG = '0'                                    " .
-                       "   ) BOOK_COUNT,                                                  " .
-                       "   SYSTEM_ID,                                                     " .
-                       "   (                                                              " .
-                       "     SELECT                                                       " .
-                       "       COUNT(*)                                                   " .
-                       "     FROM                                                         " .
-                       "       C_STM_LIST S_TBL                                           " .
-                       "     WHERE                                                        " .
-                       "       S_TBL.SYSTEM_ID  = M_TBL.SYSTEM_ID AND                     " .
-                       "       S_TBL.DISUSE_FLAG = '0'                                    " .
-                       "   ) HOST_COUNT                                                   " .
-                       " FROM                                                             " .
-                       "   B_DSC_PHO_LINK M_TBL                                           " .
-                       " WHERE                                                            " .
-                       "   M_TBL.OPERATION_NO_UAPK  = %s    AND                           " .
-                       "   M_TBL.PATTERN_ID         = %s    AND                           " .  
-                       "   M_TBL.DISUSE_FLAG        = '0';                                ",
-                       $intOperationNoUAPK,
-                       $tgtSource_row['I_PATTERN_ID']);
-        $objQuery = $objDBCA->sqlPrepare($sql);
-        if($objQuery->getStatus()===false){
-            $aryFreeErrMsgBody[] = __FILE__ . ":" . __LINE__ . ":" . $sql;
-            $aryFreeErrMsgBody[] = __FILE__ . ":" . __LINE__ . ":" . $objQuery->getLastError();
-            unset($objQuery);
-            return false;
-        }
-        $r = $objQuery->sqlExecute();
-        if (!$r){
-            $aryFreeErrMsgBody[] = __FILE__ . ":" . __LINE__ . ":" . $sql;
-            $aryFreeErrMsgBody[] = __FILE__ . ":" . __LINE__ . ":" . $objQuery->getLastError();
-            unset($objQuery);
-            return false;
-        }
-
-        // 作業パターンID登録確認
-        $fetch_counter = $objQuery->effectedRowCount();
-        if ($fetch_counter < 1){
-            unset($objQuery);
-            return false;
-        }
-        while ( $row = $objQuery->resultFetch() ){
-            // 作業対象ホストが未登録
-            if($row['ROW_COUNT'] == 0){
-                $msg = $objMTS->getSomeMessage("ITABASEH-ERR-1990033",array($intFocusIndex));
-                $MovementErrorMsg = sprintf("%s\n%s",$MovementErrorMsg,$msg);
-                continue;
-            }
-            if($row['OPE_COUNT'] == 0){
-                $msg = $objMTS->getSomeMessage("ITABASEH-ERR-1990034",array($intFocusIndex,$row['PKEY']));
-                $MovementErrorMsg = sprintf("%s\n%s",$MovementErrorMsg,$msg);
-                continue;
-            }
-            if($row['HOST_COUNT'] == 0){
-                $msg = $objMTS->getSomeMessage("ITABASEH-ERR-1990036",array($intFocusIndex,$row['PKEY']));
-                $MovementErrorMsg = sprintf("%s\n%s",$MovementErrorMsg,$msg);
-                continue;
-            }
-            if($row['PTN_COUNT'] == 0){
-                $msg = $objMTS->getSomeMessage("ITABASEH-ERR-1990035",array($intFocusIndex,$row['PKEY']));
-                $MovementErrorMsg = sprintf("%s\n%s",$MovementErrorMsg,$msg);
-                continue;
-            }
-            if($row['BOOK_COUNT'] == 0){
-                $msg = $objMTS->getSomeMessage("ITABASEH-ERR-1990038",array($intFocusIndex,$row['PKEY']));
-                $MovementErrorMsg = sprintf("%s\n%s",$MovementErrorMsg,$msg);
-                continue;
-            }
-        }
-        // DBアクセス事後処理
-        unset($objQuery);
-        return true;
-    }
-// DSC Movementの登録状態を確認----
     /////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////
     // ここまで固有定義関数----                                //
