@@ -240,10 +240,9 @@
 
         // ----Authインスタンスの作成
         $objAuth = new Auth();
-        // $objAuth = new AuthForWDBC($strSessionName, $boolAllowLogin);
         // Authインスタンスの作成----
 
-        $objAuth->setSessionName('ITA_SESSION');
+        $objAuth->setSessionName('ITA_SESSION_'.bin2hex($_SERVER['HTTP_HOST']));
         $objAuth->setAllowLogin($boolAllowLogin);
         $objAuth->setLoginFunction('saLoginAuthentication');
         $objAuth->setLoginFormFunction('saLoginFunction');
