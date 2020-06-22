@@ -1069,7 +1069,7 @@ YUM__ENV_PACKAGE="${YUM_PACKAGE_YUM_ENV[${MODE}]}"
 declare -A YUM_PACKAGE;
 YUM_PACKAGE=(
     ["httpd"]="httpd mod_ssl"
-    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd python3 php-devel libyaml libyaml-devel make"
+    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd python3 php-devel libyaml libyaml-devel make sudo crontabs"
     ["git"]="git"
     ["ansible"]="sshpass expect nc"
 )
