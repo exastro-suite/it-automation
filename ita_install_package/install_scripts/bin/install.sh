@@ -80,10 +80,6 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
-    if [ "$DSC_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-
     if [ "$MATERIAL_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
@@ -93,10 +89,6 @@ func_set_total_cnt() {
     fi
     
     if [ "$MATERIAL3_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-
-    if [ "$MATERIAL5_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
@@ -145,10 +137,6 @@ func_install_messasge() {
         MESSAGE="OpenStack driver"
     fi
 
-    if [ DSC_FLG = ${1} ]; then
-        MESSAGE="DSC driver"
-    fi
-
     if [ MATERIAL_FLG = ${1} ]; then
         MESSAGE="Material"
     fi
@@ -159,10 +147,6 @@ func_install_messasge() {
     
     if [ MATERIAL3_FLG = ${1} ]; then
         MESSAGE="Material3"
-    fi
-    
-    if [ MATERIAL5_FLG = ${1} ]; then
-        MESSAGE="Material5"
     fi
     
     if [ CREATEPARAM_FLG = ${1} ]; then
@@ -367,11 +351,9 @@ CREATE_TABLES=(
     ANSIBLE_FLG
     COBBLER_FLG
     OPENSTACK_FLG
-    DSC_FLG
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
-    MATERIAL5_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
@@ -385,11 +367,9 @@ RELEASE_PLASE=(
     ita_ansible-driver
     ita_cobbler-driver
     ita_openstack-driver
-    ita_dsc-driver
     ita_material
     ita_material2
     ita_material3
-    ita_material5
     ita_createparam
     ita_hostgroup
     ita_hostgroup2
@@ -409,11 +389,9 @@ SERVICES_SET=(
     ANSIBLE_FLG
     COBBLER_FLG
     OPENSTACK_FLG
-    DSC_FLG
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
-    MATERIAL5_FLG
     CREATEPARAM_FLG
     HOSTGROUP_FLG
     HOSTGROUP2_FLG
@@ -438,11 +416,9 @@ BASE_FLG=0
 ANSIBLE_FLG=0
 COBBLER_FLG=0
 OPENSTACK_FLG=0
-DSC_FLG=0
 MATERIAL_FLG=0
 MATERIAL2_FLG=0
 MATERIAL3_FLG=0
-MATERIAL5_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 HOSTGROUP_FLG=0
@@ -453,7 +429,7 @@ REPLACE_CHAR="%%%%%ITA_DIRECTORY%%%%%"
 
 DRIVER_CNT=0
 ANSWER_DRIVER_CNT=0
-ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'openstack_driver' 'dsc_driver' 'material'  'createparam'  'hostgroup')
+ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'openstack_driver' 'material'  'createparam'  'hostgroup')
 
 
 #answerファイル読み取り
@@ -502,11 +478,6 @@ while read LINE; do
             func_answer_format_check
             if [ "$val" = 'yes' ]; then
                 OPENSTACK_FLG=1
-            fi
-        elif [ "$key" = 'dsc_driver' ]; then
-            func_answer_format_check
-            if [ "$val" = 'yes' ]; then
-                DSC_FLG=1
             fi
         elif [ "$key" = 'material' ]; then
             func_answer_format_check
@@ -560,9 +531,6 @@ fi
 if [ $OPENSTACK_FLG -eq 1 ]; then
     log "INFO : Installation target : openstack_driver"
 fi
-if [ $DSC_FLG -eq 1 ]; then
-    log "INFO : Installation target : dsc_driver"
-fi
 if [ $MATERIAL_FLG -eq 1 ]; then
     log "INFO : Installation target : material"
 fi
@@ -596,13 +564,6 @@ if [ "$OPENSTACK_FLG" -eq 1 ]; then
     fi
 fi
 
-if [ "$DSC_FLG" -eq 1 ]; then
-    if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_dsc-driver ; then
-        log 'WARNING : DSC driver has already been installed.'
-        DSC_FLG=0
-    fi
-fi
-
 if [ "$MATERIAL_FLG" -eq 1 ]; then
     if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material ; then
         log 'WARNING : Material has already been installed.'
@@ -628,16 +589,6 @@ elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$OPENSTACK
     MATERIAL3_FLG=1
 elif [ "$OPENSTACK_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
     MATERIAL3_FLG=1
-fi
-
-if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material5 ; then
-    MATERIAL5_FLG=0
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_dsc-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL5_FLG=1
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$DSC_FLG" -eq 1 ] ; then
-    MATERIAL5_FLG=1
-elif [ "$DSC_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL5_FLG=1
 fi
 
 if [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] &&  [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] ; then
