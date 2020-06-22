@@ -605,9 +605,6 @@ STATIC                            %VARCHR%(32)              , -- FOR COBLLER
 
 CONN_SSH_KEY_FILE                 %VARCHR%(256)             ,
 
-DSC_CERTIFICATE_FILE              %VARCHR%(256)             , -- DSC利用情報 認証キーファイル
-DSC_CERTIFICATE_THUMBPRINT        %VARCHR%(256)             , -- DSC利用情報 サムプリント
-
 ANSTWR_INSTANCE_GROUP_NAME        %VARCHR%(512)             , -- インスタンスグループ名
 
 DISP_SEQ                          %INT%                     , -- 表示順序
@@ -658,9 +655,6 @@ STATIC                            %VARCHR%(32)              , -- FOR COBLLER
 
 CONN_SSH_KEY_FILE                 %VARCHR%(256)             ,
 
-DSC_CERTIFICATE_FILE              %VARCHR%(256)             , -- DSC利用情報 認証キーファイル
-DSC_CERTIFICATE_THUMBPRINT        %VARCHR%(256)             , -- DSC利用情報 サムプリント
-
 ANSTWR_INSTANCE_GROUP_NAME        %VARCHR%(512)             , -- インスタンスグループ名
 
 DISP_SEQ                          %INT%                     , -- 表示順序
@@ -689,8 +683,6 @@ ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
 ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
-
-DSC_RETRY_TIMEOUT                 %INT%                            , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -723,8 +715,6 @@ ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
 ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
-
-DSC_RETRY_TIMEOUT                 %INT%                            , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -976,8 +966,6 @@ I_TIME_LIMIT                      %INT%                      ,
 I_ANS_HOST_DESIGNATE_TYPE_ID      %INT%                      ,
 I_ANS_WINRM_ID                    %INT%                      ,
 
-I_DSC_RETRY_TIMEOUT               %INT%                      , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
-
 I_MOVEMENT_SEQ                    %INT%                      ,
 I_NEXT_PENDING_FLAG               %INT%                      ,
 I_DESCRIPTION                     %VARCHR%(4000)             ,
@@ -1020,8 +1008,6 @@ I_PATTERN_NAME                    %VARCHR%(256)              ,
 I_TIME_LIMIT                      %INT%                      ,
 I_ANS_HOST_DESIGNATE_TYPE_ID      %INT%                      ,
 I_ANS_WINRM_ID                    %INT%                      ,
-
-I_DSC_RETRY_TIMEOUT               %INT%                      , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
 
 I_MOVEMENT_SEQ                    %INT%                      ,
 I_NEXT_PENDING_FLAG               %INT%                      ,
@@ -2238,9 +2224,6 @@ SELECT TAB_A.SYSTEM_ID                        SYSTEM_ID                     ,
 
        TAB_A.CONN_SSH_KEY_FILE                CONN_SSH_KEY_FILE             ,
 
-       TAB_A.DSC_CERTIFICATE_FILE             DSC_CERTIFICATE_FILE          ,
-       TAB_A.DSC_CERTIFICATE_THUMBPRINT       DSC_CERTIFICATE_THUMBPRINT    ,
-
        TAB_A.DISP_SEQ                         DISP_SEQ                      ,
        TAB_A.NOTE                             NOTE                          ,
        TAB_A.DISUSE_FLAG                      DISUSE_FLAG                   ,
@@ -2279,9 +2262,6 @@ SELECT TAB_A.JOURNAL_SEQ_NO                   JOURNAL_SEQ_NO                ,
        TAB_A.STATIC                           STATIC                        ,
 
        TAB_A.CONN_SSH_KEY_FILE                CONN_SSH_KEY_FILE             ,
-
-       TAB_A.DSC_CERTIFICATE_FILE             DSC_CERTIFICATE_FILE          ,
-       TAB_A.DSC_CERTIFICATE_THUMBPRINT       DSC_CERTIFICATE_THUMBPRINT    ,
 
        TAB_A.DISP_SEQ                         DISP_SEQ                      ,
        TAB_A.NOTE                             NOTE                          ,
