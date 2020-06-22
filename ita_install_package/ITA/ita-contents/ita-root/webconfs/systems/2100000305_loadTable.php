@@ -179,19 +179,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $table->addColumn($cg);
     }
 
-    // DSC利用情報
-    $wanted_filename = "ita_dsc-driver";
-    if( file_exists($root_dir_path."/libs/release/".$wanted_filename) ) {
-        $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITABASEH-MNU-108300") );
-
-            // エラーリトライタイムアウト
-            $c = new FileUploadColumn('DSC_RETRY_TIMEOUT',$g['objMTS']->getSomeMessage("ITABASEH-MNU-108310"));
-            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-108320"));//エクセル・ヘッダでの説明
-            $cg->addColumn($c);
-
-        $table->addColumn($cg);
-    }
-
 
     $table->fixColumn();
 
