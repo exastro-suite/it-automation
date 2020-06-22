@@ -906,8 +906,6 @@ class StmListTable extends BaseTable {
                                     'GATEWAY',                        
                                     'STATIC',                         
                                     'CONN_SSH_KEY_FILE',              
-                                    'DSC_CERTIFICATE_FILE',           
-                                    'DSC_CERTIFICATE_THUMBPRINT',     
                                     'ANSTWR_INSTANCE_GROUP_NAME',
                                     'DISP_SEQ',                       
                                     'NOTE',                           
