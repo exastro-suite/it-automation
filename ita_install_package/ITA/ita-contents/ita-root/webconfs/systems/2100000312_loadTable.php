@@ -92,11 +92,6 @@ Symphony紐付Movementの一覧
     $c->setSubtotalFlag(false);
     $table->addColumn($c);
 
-    $c = new NumColumn('I_DSC_RETRY_TIMEOUT', $g['objMTS']->getSomeMessage("ITABASEH-MNU-209110"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-209110"));//エクセル・ヘッダでの説明
-    $c->setSubtotalFlag(false);
-    $table->addColumn($c);
-
     $c = new NumColumn('I_MOVEMENT_SEQ', $g['objMTS']->getSomeMessage("ITABASEH-MNU-209111"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-209111"));//エクセル・ヘッダでの説明
     $c->setSubtotalFlag(false);
