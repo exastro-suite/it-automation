@@ -1018,7 +1018,8 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
-
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
@@ -1061,6 +1062,8 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -1282,6 +1285,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -1330,6 +1335,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -1761,6 +1768,8 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -1804,6 +1813,8 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -2076,6 +2087,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -2124,6 +2137,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -2321,6 +2336,8 @@ FILE_INPUT                        %VARCHR%(1024)                   , -- 投入�
 FILE_RESULT                       %VARCHR%(1024)                   , -- 結果データ格納ファイル(ZIP形式)
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -2364,6 +2381,8 @@ FILE_INPUT                        %VARCHR%(1024)                   , -- 投入�
 FILE_RESULT                       %VARCHR%(1024)                   , -- 結果データ格納ファイル(ZIP形式)
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -3180,6 +3199,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -3228,6 +3249,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
