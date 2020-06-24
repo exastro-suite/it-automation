@@ -195,8 +195,12 @@
                     // 例外処理へ
                     throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-510") );
                 }
-                
-                $prg_record_file_name = $prg_recorder_array[$prg_record_file_id]['PRG_FILE_NAME'];
+                if($prg_record_file_id == '1') { 
+                    $SelectedFile = $_GET['SelectedFile'];
+                    $prg_record_file_name = $SelectedFile;
+                } else {
+                    $prg_record_file_name = $prg_recorder_array[$prg_record_file_id]['PRG_FILE_NAME'];
+                }
                 
             }
             
