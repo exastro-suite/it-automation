@@ -1018,7 +1018,8 @@ FILE_INPUT                        VARCHAR (1024)                   ,
 FILE_RESULT                       VARCHAR (1024)                   ,
 RUN_MODE                          INT                              , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         INT                              , -- 実行モード 1:ansible/2:ansible tower
-
+MULTIPLELOG_MODE                  INT                              , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
@@ -1061,6 +1062,8 @@ FILE_INPUT                        VARCHAR (1024)                   ,
 FILE_RESULT                       VARCHAR (1024)                   ,
 RUN_MODE                          INT                              , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         INT                              , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  INT                              , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1282,6 +1285,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -1330,6 +1335,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -1761,6 +1768,8 @@ FILE_INPUT                        VARCHAR (1024)                   ,
 FILE_RESULT                       VARCHAR (1024)                   ,
 RUN_MODE                          INT                              , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         INT                              , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  INT                              , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1804,6 +1813,8 @@ FILE_INPUT                        VARCHAR (1024)                   ,
 FILE_RESULT                       VARCHAR (1024)                   ,
 RUN_MODE                          INT                              , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         INT                              , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  INT                              , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2076,6 +2087,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -2124,6 +2137,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -2321,6 +2336,8 @@ FILE_INPUT                        VARCHAR (1024)                   , -- 投入�
 FILE_RESULT                       VARCHAR (1024)                   , -- 結果データ格納ファイル(ZIP形式)
 RUN_MODE                          INT                              , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         INT                              , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  INT                              , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -2364,6 +2381,8 @@ FILE_INPUT                        VARCHAR (1024)                   , -- 投入�
 FILE_RESULT                       VARCHAR (1024)                   , -- 結果データ格納ファイル(ZIP形式)
 RUN_MODE                          INT                              , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         INT                              , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  INT                              , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -3180,6 +3199,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -3228,6 +3249,8 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -4775,8 +4798,8 @@ INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRI
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20315,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100020315,2100020003,'Member variable list',NULL,NULL,NULL,1,0,1,2,150,'role_child_vars_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040702,2100020000,'Interface information',NULL,NULL,NULL,1,0,1,1,20,'if_info_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20502,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040702,2100020000,'Interface information',NULL,NULL,NULL,1,0,1,1,20,'if_info_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040706,2100020000,'Global variable list',NULL,NULL,NULL,1,0,1,2,25,'global_vars_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20506,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040706,2100020000,'Global variable list',NULL,NULL,NULL,1,0,1,2,25,'global_vars_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040706,2100020000,'Global variable list',NULL,NULL,NULL,1,0,1,2,30,'global_vars_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20506,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040706,2100020000,'Global variable list',NULL,NULL,NULL,1,0,1,2,30,'global_vars_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040703,2100020000,'File list',NULL,NULL,NULL,1,0,1,1,40,'contents_file_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20507,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040703,2100020000,'File list',NULL,NULL,NULL,1,0,1,1,40,'contents_file_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040704,2100020000,'template list',NULL,NULL,NULL,1,0,1,1,50,'ans_template_master','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
