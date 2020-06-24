@@ -77,7 +77,8 @@
                         TAB_A.I_ANS_WINRM_ID,
                         TAB_A.ANS_WINRM_FLAG_NAME,
                         TAB_A.I_VIRTUALENV_NAME,
-
+                        TAB_A.MULTIPLELOG_MODE,
+                        TAB_A.LOGFILELIST_JSON,
                         TAB_A.NOTE,
                         {$strSelectLastUpdateTimestamp4} AS LAST_UPDATE_TIMESTAMP,
                         CASE TAB_B.USERNAME_JP WHEN NULL THEN {$strConnectString1}
@@ -185,6 +186,13 @@
         $caption = $COLUMN_32;
         $url = sprintf("/default/menu/01_browse.php?no=2100020203&movement_id=%s",$movement_param);
         $COLUMN_40 =  sprintf("<input class=\"linkBtnInTbl\" type=\"button\" value=\"%s\" onClick=\"window.open('%s')\">",$caption,$url);
+
+        if($showTgtRow['MULTIPLELOG_MODE'] == 1) {
+            $hide_COLUMN01   = "on";
+        } else {
+            $hide_COLUMN01   = "off";
+        }
+        $hide_COLUMN02   = nl2br(htmlspecialchars($showTgtRow['LOGFILELIST_JSON']));
 
         //オーケストレータ別の設定記述----
 
@@ -304,6 +312,9 @@ EOD;
                 </table>
                 </div>
                 <div id="status_id" style="display:none;">{$status_id}</div>
+                <div id="MultipleLog" style="display:none;">{$hide_COLUMN01}</div>
+                <div id="LogFileList" style="display:none;">{$hide_COLUMN02}</div>
+
 EOD;
         //オーケストレータ別の設定記述----
     }
