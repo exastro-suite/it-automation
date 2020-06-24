@@ -24,9 +24,57 @@ var timer = null;
 
 //////// 画面生成時に初回実行する処理 ////////
 window.onload = function(){
-    // 一度だけはrunさせる
+
+let runFlag = false;
+
+const observerFunction = function() {
+        
+  // 監視を終了する
+  // observer.disconnect();
+
+  const g_objjsonLogFileList = window.parent.document.getElementById("LogFileList").innerHTML;
+  const g_objMultipleLog = window.parent.document.getElementById("MultipleLog").innerHTML;
+  const g_objLogfileSelectionArea = window.parent.document.getElementById("LogfileSelectionArea");
+  const g_objLogSelection = window.parent.document.getElementById("LogSelection");
+
+  if(g_objMultipleLog != 'on') {
+       g_objLogfileSelectionArea.style.display ="none";
+  } else {
+       g_objLogfileSelectionArea.style.display ="block";
+       const Last_idx = g_objLogSelection.length;
+
+       if(g_objjsonLogFileList != "") {
+           const g_objLogFileList = JSON.parse(g_objjsonLogFileList);
+           for (let idx = 0; idx < g_objLogFileList.length; idx++) {
+               if(Last_idx > (idx + 1)) {
+                   continue;
+               }
+               if (g_objLogFileList[idx] != null) {
+                   let op = document.createElement("option");
+                   op.value = g_objLogFileList[idx];  //value値
+                   op.text = g_objLogFileList[idx];   //テキスト値
+                   g_objLogSelection.appendChild(op);
+               }
+           }
+       }
+  }
+
+  // 一度だけはrunさせる
+  if ( runFlag === false ) {
+    runFlag = true;
     run();
-}
+  }
+
+};
+
+const target = window.parent.document.getElementById("disp_execution_area"),
+      observer = new MutationObserver( observerFunction ),
+      config = { childList: true };
+
+// 対象を監視し変更があったら実行する
+observer.observe( target, config );
+
+};
 
 // tail開始ファンクション
 function start(){
@@ -100,10 +148,17 @@ function run(){
             qv_match_line_only = "on";
         }
         
+        let g_objLogSelection = window.parent.document.getElementById("LogSelection");
+        const num = g_objLogSelection.selectedIndex;
+
+	// 値(数値)から値(value値)を取得
+	const SelectedFile = g_objLogSelection.options[num].value;
+
         var objTailStop = document.getElementById('stop_update');
         if( objTailStop.innerHTML!='abort' ){
             // tail実行
-            obj.load('?no=2100020212&execution_no='+execution_no+'&prg_recorder='+prg_record_file_name+'&load=1'+'&match_line_only='+qv_match_line_only+'&filter_string='+filter_string
+            obj.load('?no=2100020212&SelectedFile='+SelectedFile+'&execution_no='+execution_no+'&prg_recorder='+prg_record_file_name+'&load=1'+'&match_line_only='+qv_match_line_only+'&filter_string='+filter_string
+
                      ,null
                      ,function(response, status, xhr){
                           if( response.indexOf('tail_show') == -1 ){
