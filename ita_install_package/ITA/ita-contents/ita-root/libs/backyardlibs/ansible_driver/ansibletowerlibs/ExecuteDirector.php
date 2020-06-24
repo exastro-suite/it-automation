@@ -58,9 +58,10 @@ class ExecuteDirector {
     private $logger;
     private $dbAccess;
     private $exec_out_dir;
-
+    private $dataRelayStoragePath;
     private $version;
-
+    private $MultipleLogFileJsonAry;
+    private $MultipleLogMark;
     function __construct($restApiCaller, $logger, $dbAccess, $exec_out_dir, $JobTemplatePropertyParameterAry=array(),$JobTemplatePropertyNameAry=array()) {
         $this->restApiCaller = $restApiCaller;
         $this->logger = $logger;
@@ -70,6 +71,9 @@ class ExecuteDirector {
         $this->JobTemplatePropertyNameAry      = $JobTemplatePropertyNameAry;
 
         $this->objMTS = MessageTemplateStorageHolder::getMTS();
+        $this->dataRelayStoragePath = "";
+        $MultipleLogFileJsonAry     = "";
+        $MultipleLogMark            = "";
     }
 
     function setTowerVersion($version) {
@@ -152,7 +156,19 @@ class ExecuteDirector {
             return -1;
         }
 
+        // 複数の認証情報によりログが分割されるか確認
+        if(count($inventoryForEachCredentials) != 1) {
+            $ret = $this->settMultipleLogMark($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_LNX']);
+            if($ret === false) {
+                // $ary[70082] = "一時ファイルの作成に失敗しました。";
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-70082");
+                $this->errorLogOut($errorMessage);
+                return -1;
+            }
+        }
+
         // AnsibleTowerHost情報取得
+        $this->dataRelayStoragePath = $ifInfoRow['ANSIBLE_STORAGE_PATH_LNX'];
         $TowerHostList = array();
         $ret = $this->getTowerHostInfo($execution_no,$ifInfoRow['ANSTWR_HOST_ID'],$ifInfoRow['ANSIBLE_STORAGE_PATH_LNX'],$TowerHostList);
         if($ret == false) {
@@ -1170,6 +1186,8 @@ class ExecuteDirector {
 
         $execution_no = $toProcessRow['EXECUTION_NO'];
 
+        $this->dataRelayStoragePath = $ansibleTowerIfInfo['ANSIBLE_STORAGE_PATH_LNX'];
+
         $search_name = sprintf(AnsibleTowerRestApiJobTemplates::SEARCH_IDENTIFIED_NAME_PREFIX,$vg_tower_driver_name,addPadding($execution_no));
         $query = sprintf("?name__startswith=%s",$search_name);
         $response_array = AnsibleTowerRestApiJobTemplates::getAll($this->restApiCaller, $query);
@@ -1189,6 +1207,15 @@ class ExecuteDirector {
         $job_slice_use = true;
         if($response_array['responseContents'][0]['job_slice_count'] == 1) {
             $job_slice_use = false;
+        } else {
+            // 複数ログであることを記録
+            $ret = $this->settMultipleLogMark($toProcessRow['EXECUTION_NO'], $ansibleTowerIfInfo['ANSIBLE_STORAGE_PATH_LNX']);
+            if($ret === false) {
+                // $ary[70082] = "一時ファイルの作成に失敗しました。";
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-70082");
+                $this->errorLogOut($errorMessage);
+                return EXCEPTION;
+            }
         }
 
         // AnsibleTower Status チェック
@@ -1282,7 +1309,6 @@ class ExecuteDirector {
                     $this->logger->error(var_export($response_array_workflow_nodes, true));
                     return EXCEPTION;
                 }
-                $stdout_log = "";
 
                 foreach($response_array_workflow_nodes['responseContents'] as $workflow_nodes_row) {
                     // ワークフロージョブノード有無
@@ -1363,19 +1389,30 @@ class ExecuteDirector {
                     }
 
                     // inventory/project/credentialsの情報退避
-                    // 複数Jobの場合は最後の情報を使用
-                    $SliceJobsData[$workflow_job_name] = $jobData;
+                    // 複数Jobの場合は最初の情報を使用
+
+                    if(! isset($SliceJobsData[$workflow_job_name])) {
+                        $SliceJobsData[$workflow_job_name] = $jobData;
+                    }
 
                     // ログを退避
-                    $page = sprintf("(%d/%d)\n",$jobData['job_slice_number'],$jobData['job_slice_count']);
+                    $stdout_log = "";
+                    $page = sprintf("\n(%d/%d)\n",$jobData['job_slice_number'],$jobData['job_slice_count']);
                     $stdout_log .= $page;
                     $stdout_log .= $response_array_stdout['responseContents'];
-                    $SliceJobsData[$workflow_job_name]['result_stdout'] = $stdout_log;
+
+                    // ジョブスライス数を設定
+                    $SliceJobsData[$workflow_job_name]['result_stdout']['ita_local_job_slice_count'] = $jobData['job_slice_count'];
+                    // ログを配列化する
+                    $stdout_info = array();
+                    $stdout_info = array('job_slice_numbe'=>$jobData['job_slice_number'],'log'=>$stdout_log);
+                    $SliceJobsData[$workflow_job_name]['result_stdout']['ita_local_logs'][] = $stdout_info;
                 }
             }
         }
         return COMPLETE;
     }
+
 
     function checkWorkflowJobStatus($execution_no,&$job_slice_use) {
 
@@ -1507,12 +1544,13 @@ class ExecuteDirector {
         $SliceJobsData          = array();
         if($job_slice_use === true) {
             $dummy = array();
-            $job_id_get     = false;
+            //CHG$job_id_get     = false;
+            $job_id_get     = true;
             $job_status_get = false;
             $job_stdout_get = true;
             $status = $this->SliceJobsMonitoring($execution_no,$SliceJobsData,
                                                  $job_id_get,$job_status_get,$job_stdout_get, 
-                                                 $dummyx2);
+                                                 $dummy);  
             // 戻り値はチェックしない
         }
         ////////////////////////////////////////////////////////////////
@@ -1556,6 +1594,8 @@ class ExecuteDirector {
                     return false;
                 }
 
+                $jobData = array();
+
                 $jobData = $response_array['responseContents'];
                 $this->logger->trace(var_export($jobData, true));
 
@@ -1566,7 +1606,13 @@ class ExecuteDirector {
                     // 標準出力が取得できなかった場合
                     $response_array['responseContents'] = "Faild to get job stdout. " . $response_array['responseContents']['errorMessage'];
                 }
-                $jobData['result_stdout'] = $response_array['responseContents'];
+
+                // ジョブスライス数を設定
+                $jobData['result_stdout']['ita_local_job_slice_count'] = $jobData['job_slice_count'];
+                // ログを配列化する
+                $stdout_info = array();
+                $stdout_info = array('job_slice_numbe'=>$jobData['job_slice_number'],'log'=>$response_array['responseContents']);
+                $jobData['result_stdout']['ita_local_logs'][] = $stdout_info;
 
                 $workflowJobNodeData['jobData'] = $jobData;
 
@@ -1597,10 +1643,10 @@ class ExecuteDirector {
         ////////////////////////////////////////////////////////////////
         // ログファイル生成
         ////////////////////////////////////////////////////////////////
-        $ret = $this->CreateLogs($workflowJobData,$workflowJobNodeArray_jobDataAdded,$joblistFullPath,$outDirectoryPath,$execlogFullPath,$job_slice_use);
+        $ret = $this->CreateLogs($execution_no,$workflowJobData,$workflowJobNodeArray_jobDataAdded,$joblistFullPath,$outDirectoryPath,$execlogFullPath,$job_slice_use);
         return $ret;
     }
-    function CreateLogs($workflowJobData,$workflowJobNodeArray_jobDataAdded,$joblistFullPath,$outDirectoryPath,$execlogFullPath,$job_slice_use) {
+    function CreateLogs($execution_no,$workflowJobData,$workflowJobNodeArray_jobDataAdded,$joblistFullPath,$outDirectoryPath,$execlogFullPath,$job_slice_use) {
         global  $vg_tower_driver_name;
 
         $contentArray = array();
@@ -1609,11 +1655,16 @@ class ExecuteDirector {
         $contentArray[] = "workflow_name: " . $workflowJobData['name'];
         $contentArray[] = "started: " . $workflowJobData['started'];
 
+        $jobSummaryAry = array();
         // node job data
         foreach($workflowJobNodeArray_jobDataAdded as $workflowJobNodeData) {
             $jobData = $workflowJobNodeData['jobData'];
 
-            $contentArray[] = ""; // 空行
+            $jobName = $jobData['name'];
+
+            $contentArray = array();
+
+//           $contentArray[] = ""; // 空行
             $contentArray[] = "------------------------------------------------------------------------------------------------------------------------"; // セパレータ
             $contentArray[] = "node_job_name: " . $jobData['name'];
 
@@ -1693,28 +1744,59 @@ class ExecuteDirector {
                 $contentArray[] = "    host_name: " . $hostData['name'];
                 $contentArray[] = "    host_variables: " . $hostData['variables'];
             }
+            $contentArray[] = "------------------------------------------------------------------------------------------------------------------------"; // セパレータ
+            $contentArray[] = "";
+            $jobSummaryAry[$jobName] = join("\n", $contentArray);
         }
         $contentArray[] = ""; // 空行
-
-        if(file_put_contents($joblistFullPath, join("\n", $contentArray)) === false) {
-            $this->logger->error("Faild to write file. " . $joblistFullPath);
-            return false;
-        }
 
         ////////////////////////////////////////////////////////////////
         // 各WorkflowJobNode分のstdoutをファイル化
         ////////////////////////////////////////////////////////////////
         $jobFileList = array();
+        $jobLogFileList = array();
+        $jobOrgLogFileList = array();
         foreach($workflowJobNodeArray_jobDataAdded as $workflowJobNodeData) {
 
             $jobData = $workflowJobNodeData['jobData'];
-            $jobFileFullPath = $outDirectoryPath . "/" . $jobData['name'] . ".txt";
-            if(file_put_contents($jobFileFullPath, $jobData['result_stdout']) === false) {
-                $this->logger->error("Faild to write file. " . $jobFileFullPath);
-                return false;
-            }
+            $jobName = $jobData['name'];
 
-            $jobFileList[$jobData['name']] = $jobFileFullPath;
+            // ジョブスライス数
+            $job_slice_count = $jobData['result_stdout']['ita_local_job_slice_count'];
+
+            // ジョブスライス番号をkeyにログが配列化
+            foreach($jobData['result_stdout']['ita_local_logs'] as $log_info) {
+                $job_slice_number = $log_info['job_slice_numbe']; 
+                $job_slice_number_str = str_pad($job_slice_number, 10, "0", STR_PAD_LEFT );
+
+                // jobサマリ出力
+                $result_stdout    = $jobSummaryAry[$jobName];
+                // jobログ出力
+                $result_stdout    .= $log_info['log'];
+
+                // オリジナルログファイル
+                $jobFileFullPath = $outDirectoryPath . "/" . $jobData['name'] . "_" . $job_slice_number_str . ".txt.org";
+                if(file_put_contents($jobFileFullPath, $result_stdout) === false) {
+                    $this->logger->error("Faild to write file. " . $jobFileFullPath);
+                    return false;
+                }
+                $jobOrgLogFileList[$jobData['name']][] = $jobFileFullPath;
+
+                // jobログを加工
+                $result_stdout    = $this->LogReplacement($result_stdout);
+                $jobFileFullPath = $outDirectoryPath . "/" . $jobData['name'] . "_" . $job_slice_number_str . ".txt";
+                if(file_put_contents($jobFileFullPath, $result_stdout) === false) {
+                    $this->logger->error("Faild to write file. " . $jobFileFullPath);
+                    return false;
+                }
+                // 加工ログファイル
+                $jobFileList[$jobData['name']][] = $jobFileFullPath;
+                $jobLogFileList[] = basename($jobFileFullPath);
+            }
+        }
+        // ジョブスライなどでファイルが複数に分かれた場合にファイルのリスト
+        if(count($jobFileList) != 0) {
+            $this->setMultipleLogFileJsonAry($execution_no, $jobLogFileList);
         }
 
         ////////////////////////////////////////////////////////////////
@@ -1737,68 +1819,52 @@ class ExecuteDirector {
                 }
             }
 
-            // LOCK用ファイルをロック中にやりたい処理 => 実ファイル書き込み
-            $joblistContent = file_get_contents($joblistFullPath);
-            if($joblistContent === false) {
-                $this->logger->error("Faild to read file. " . $joblistFullPath);
-                return false;
-            }
 
-
-            $execlogContent = $joblistContent;
-            foreach($jobFileList as $jobName => $jobFileFullPath) {
-                $execlogContent .= "\n";
-                $execlogContent .= "========================================================================================================================\n"; // セパレータ
-                $execlogContent .= "[job_stdout: " . $jobName . "]\n";
-                $execlogContent .= "\n";
-                $jobFileContent = file_get_contents($jobFileFullPath);
-                if($jobFileContent === false) {
-                    $this->logger->error("Faild to read file. " . $jobFileFullPath);
-                    return false;
+            // 全ジョブのオリジナルログファイル
+            $execlogContent = "";
+            foreach($jobOrgLogFileList as $jobName => $jobFileFullPathAry) {
+                foreach($jobFileFullPathAry as $jobFileFullPath) {
+//                    $execlogContent .= "\n";
+//                    $execlogContent .= "========================================================================================================================\n"; // セパレータ
+//                    $execlogContent .= "[job_stdout: " . $jobName . "]\n";
+//                    $execlogContent .= "\n";
+                    $jobFileContent = file_get_contents($jobFileFullPath);
+                    if($jobFileContent === false) {
+                        $this->logger->error("Faild to read file. " . $jobFileFullPath);
+                        return false;
+                    }
+                    $execlogContent .= $jobFileContent . "\n";
                 }
-                $execlogContent .= $jobFileContent . "\n";
             }
             $execlogFullPath_org  = $execlogFullPath . ".org";
-            $execlogFullPath_tmp1 = $execlogFullPath . ".tmp1";
-            $execlogFullPath_tmp2 = $execlogFullPath . ".tmp2";
-            $execlogFullPath_tmp3 = $execlogFullPath . ".tmp3";
 
             if(file_put_contents($execlogFullPath_org, $execlogContent) === false){
                 $this->logger->error("Faild to write file. " . $execlogFullPath);
                 return false;
             }
-            // /exastro/ita-root/libs/restapiindividuallibs/ansible_driver/execute_statuscheck.phpに同等の処理あり
-            if($vg_tower_driver_name == "pioneer") {
-                $log_data = file_get_contents($execlogFullPath_org);
-                // ログ(", ")  =>  (",\n")を改行する
-                $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
-                // 改行文字列\\r\\nを改行コードに置換える
-                $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
-                // 改行文字列\r\nを改行コードに置換える
-                $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
-                // python改行文字列\\nを改行コードに置換える
-                $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
-                // python改行文字列\nを改行コードに置換える
-                $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
-                file_put_contents($execlogFullPath,$log_data);
 
-            } else {
-                $log_data = file_get_contents($execlogFullPath_org);
-                // ログ(", ")  =>  (",\n")を改行する
-                $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
-                // ログ(=> {)  =>  (=> {\n)を改行する
-                $log_data = preg_replace( "/=> {/", "=> {\n",$log_data,-1,$count);
-                // ログ(, ")  =>  (,\n")を改行する
-                $log_data = preg_replace( "/, \"/", ",\n\"",$log_data,-1,$count);
-                // 改行文字列\\r\\nを改行コードに置換える
-                $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
-                // 改行文字列\r\nを改行コードに置換える
-                $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
-                // python改行文字列\\nを改行コードに置換える
-                $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
-                // python改行文字列\nを改行コードに置換える
-                $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
-                file_put_contents($execlogFullPath,$log_data);
+            // 全ジョブの加工ログファイル
+            $execlogContent = "";
+            foreach($jobFileList as $jobName => $jobFileFullPathAry) {
+                foreach($jobFileFullPathAry as $jobFileFullPath) {
+//                    $execlogContent .= "\n";
+//                    $execlogContent .= "========================================================================================================================\n"; // セパレータ
+//                    $execlogContent .= "[job_stdout: " . $jobName . "]\n";
+//                    $execlogContent .= "\n";
+                    $jobFileContent = file_get_contents($jobFileFullPath);
+                    if($jobFileContent === false) {
+                        $this->logger->error("Faild to read file. " . $jobFileFullPath);
+                        return false;
+                    }
+                    $execlogContent .= $jobFileContent . "\n";
+                }
+            }
+            $execlogFullPath  = $execlogFullPath;
+
+
+            if(file_put_contents($execlogFullPath, $execlogContent) === false){
+                $this->logger->error("Faild to write file. " . $execlogFullPath);
+                return false;
             }
         } finally {
             // ロック解除
@@ -1840,6 +1906,54 @@ class ExecuteDirector {
 
         $path = sprintf("/var/lib/awx/projects/ita_%s_executions_%s",$vg_tower_driver_name,addPadding($execution_no)); 
         return $path;
+    }
+
+    function LogReplacement($log_data) {
+        global $vg_tower_driver_name;
+        // /exastro/ita-root/libs/restapiindividuallibs/ansible_driver/execute_statuscheck.phpに同等の処理あり
+        if($vg_tower_driver_name == "pioneer") {
+            // ログ(", ")  =>  (",\n")を改行する
+            $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
+            // 改行文字列\\r\\nを改行コードに置換える
+            $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
+            // 改行文字列\r\nを改行コードに置換える
+            $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+            // python改行文字列\\nを改行コードに置換える
+            $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
+            // python改行文字列\nを改行コードに置換える
+            $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+        } else {
+            // ログ(", ")  =>  (",\n")を改行する
+            $log_data = preg_replace( "/\", \"/","\",\n\"",$log_data,-1,$count);
+            // ログ(=> {)  =>  (=> {\n)を改行する
+            $log_data = preg_replace( "/=> {/", "=> {\n",$log_data,-1,$count);
+            // ログ(, ")  =>  (,\n")を改行する
+            $log_data = preg_replace( "/, \"/", ",\n\"",$log_data,-1,$count);
+            // 改行文字列\\r\\nを改行コードに置換える
+            $log_data = preg_replace( '/\\\\\\\\r\\\\\\\\n/', "\n",$log_data,-1,$count);
+            // 改行文字列\r\nを改行コードに置換える
+            $log_data = preg_replace( '/\\\\r\\\\n/', "\n",$log_data,-1,$count);
+            // python改行文字列\\nを改行コードに置換える
+            $log_data = preg_replace( "/\\\\\\\\n/", "\n",$log_data,-1,$count);
+            // python改行文字列\nを改行コードに置換える
+            $log_data = preg_replace( "/\\\\n/", "\n",$log_data,-1,$count);
+        }
+        return($log_data);
+    }
+
+    function getMultipleLogMark() {
+        return $this->MultipleLogMark;
+    }
+    function settMultipleLogMark($execution_no, $dataRelayStoragePath) {
+        $this->MultipleLogMark = "1";
+    }
+    function getMultipleLogFileJsonAry() {
+        return $this->MultipleLogFileJsonAry;
+        return true;
+    }
+    function setMultipleLogFileJsonAry($execution_no, $MultipleLogFileNameList) {
+        $this->MultipleLogFileJsonAry  = json_encode($MultipleLogFileNameList);
+        return true;
     }
 
     function __destruct() {
