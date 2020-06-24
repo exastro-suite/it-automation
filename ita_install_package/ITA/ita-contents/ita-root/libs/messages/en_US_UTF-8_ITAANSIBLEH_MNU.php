@@ -502,6 +502,7 @@ $ary[508025] = "It is a menu to monitor registered execution. <br>You can check 
 $ary[508030] = "Filter";
 $ary[508040] = "Display only corresponding lines";
 $ary[509060] = "Populated data set (zip).";
+$ary[509070] = "Display log file";
 $ary[1101035] = "Item";
 $ary[1101060] = "Value";
 $ary[1101070] = "Execution No.";
