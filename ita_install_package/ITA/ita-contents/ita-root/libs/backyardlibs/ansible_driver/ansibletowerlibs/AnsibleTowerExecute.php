@@ -21,7 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-function AnsibleTowerExecution($function,$ansibleTowerIfInfo,&$TowerHostList,&$toProcessRow,$exec_out_dir,$UIExecLogPath,$UIErrorLogPath,&$status='',$JobTemplatePropertyParameterAry=array(),$JobTemplatePropertyNameAry=array()) {
+function AnsibleTowerExecution($function,$ansibleTowerIfInfo,&$TowerHostList,&$toProcessRow,$exec_out_dir,$UIExecLogPath,$UIErrorLogPath,&$MultipleLogMark,&$MultipleLogFileJsonAry,&$status='',$JobTemplatePropertyParameterAry=array(),$JobTemplatePropertyNameAry=array()) {
 
 global $root_dir_path;
 global $log_output_dir;
@@ -173,6 +173,9 @@ global $objDBCA;
                 $error_flag = 1;
                 $logger->error("Faild to create ansibletower environment. (exec_no: $tgt_execution_no)");
             }
+            // マルチログかを取得する。
+            $MultipleLogMark = $director->getMultipleLogMark();
+            
             $wfId = -1;
             $process_was_scrammed = false;
             if(!$process_has_error) {
@@ -253,6 +256,11 @@ global $objDBCA;
             $director = new ExecuteDirector($restApiCaller, $logger, $dbAccess, "");
             $status = $director->monitoring($toProcessRow, $ansibleTowerIfInfo);
 
+            // マルチログかを取得する。
+            $MultipleLogMark = $director->getMultipleLogMark();
+            
+            // マルチログかを取得する。
+            $MultipleLogFileJsonAry = $director->getMultipleLogFileJsonAry();
             ////////////////////////////////////////////////////////////////
             // 遅延チェック                                         //
             ////////////////////////////////////////////////////////////////
