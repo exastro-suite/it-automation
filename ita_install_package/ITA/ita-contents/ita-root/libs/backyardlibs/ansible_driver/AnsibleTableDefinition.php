@@ -50,6 +50,8 @@ function CreateExecInstMngArray(&$ary) {
     $ary["FILE_RESULT"]                  = "";
     $ary["RUN_MODE"]                     = "";
     $ary["EXEC_MODE"]                    = "";
+    $ary["MULTIPLELOG_MODE"]             = "";
+    $ary["LOGFILELIST_JSON"]             = "";
     $ary["DISP_SEQ"]                     = "";
     $ary["NOTE"]                         = "";
     $ary["DISUSE_FLAG"]                  = "";
