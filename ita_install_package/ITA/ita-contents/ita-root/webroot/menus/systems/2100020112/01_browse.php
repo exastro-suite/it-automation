@@ -347,11 +347,24 @@ print <<< EOD
                             <!--進行状況-->
                             <td><div onClick=location.href="javascript:show('Monitor_{$loop_counter}_Midashi','Monitor_{$loop_counter}_Nakami');" class="midashi_class" >{$objMTS->getSomeMessage("ITAANSIBLEH-MNU-505060")}({$prg_recorder['PRG_RCDR_NAME']})</div></td>
                             <td>
+                            
                                 <div id="Monitor_{$loop_counter}_Midashi" align="right">
                                     <input type="button" value="{$strCmdWordAreaClose}" class="showbutton" onClick=location.href="javascript:show('Monitor_{$loop_counter}_Midashi','Monitor_{$loop_counter}_Nakami');" >
                                 </div>
                             </td>
                         </tr>
+EOD;
+if($loop_counter == 1) {
+                        
+        $pulldown_HTML  =   '<tr><td> <div id="LogfileSelectionArea" align="left" style="display: none;">';
+        $pulldown_HTML .=   $objMTS->getSomeMessage("ITAANSIBLEH-MNU-509070");
+        $pulldown_HTML .=   '  <select name="LogSelection" id="LogSelection" onChange="kakunin(this)">';
+        $pulldown_HTML .=   '  <option value="exec.log" selected>exec.log</option>';
+        $pulldown_HTML .=   '  </select>';
+        $pulldown_HTML .=   '</dev></td></tr>';
+        echo $pulldown_HTML;
+}
+print <<< EOD
                     </table>
                 </h2>
                 <div id="Monitor_{$loop_counter}_Nakami" style="display:block" class="text">
