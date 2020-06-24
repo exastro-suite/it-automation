@@ -197,3 +197,8 @@ window.onload = function(){
     }
     show('SetsumeiMidashi','SetsumeiNakami');
 }
+function kakunin(obj) {
+    document.getElementById("TailWindow_1").contentWindow.stop();
+    document.getElementById("TailWindow_1").contentWindow.run();
+}
+
