@@ -627,8 +627,43 @@ configure_ansible() {
 
 # ITA
 configure_ita() {
-    # Replace sudoers config file.
-    copy_and_backup "$ITA_EXT_FILE_DIR/etc/sudoers" "/etc/"
+    # Creating a sudo configuration file
+    cat << EOS > /etc/sudoers.d/it-automation
+daemon       ALL=(ALL)  NOPASSWD:ALL
+apache       ALL=(ALL)  NOPASSWD:ALL
+EOS
+
+    #Check create a sudo configuration file
+    if [ -e /etc/sudoers.d/it-automation ]; then
+        grep -E "^\s*daemon\s+ALL=\(ALL\)\s+NOPASSWD:ALL\s*" /etc/sudoers.d/it-automation >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        local daemon_txt=`echo $?`
+        grep -E "^\s*apache\s+ALL=\(ALL\)\s+NOPASSWD:ALL\s*" /etc/sudoers.d/it-automation >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        local apache_txt=`echo $?`
+
+        if [ $daemon_txt -ne 0 ] || [ $apache_txt -ne 0 ]; then
+            log 'ERROR:Failed to create configuration text in /etc/sudoers.d/it-automation.'
+            func_exit
+        fi
+    else
+        log 'ERROR:Failed to create /etc/sudoers.d/it-automation.'
+        func_exit
+    fi
+
+    chmod 440 /etc/sudoers.d/it-automation >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+    # Comment out "Defaults requiretty" in /etc/sudoers
+    grep -v '^\s*#' /etc/sudoers | grep " requiretty" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ $? -eq 0 ]; then
+        cp -p /etc/sudoers /etc/sudoers`backup_suffix` >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        sed -i -e '/^.*Defaults.*requiretty/ s/^/# /g' /etc/sudoers >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+        #Check comment out "Defaults requiretty"
+        grep '^#' /etc/sudoers | grep -E "^.*Defaults.*requiretty" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            log "ERROR:Defaults requiretty is not commented out"
+            func_exit
+        fi
+    fi
 
     # install ITA
     "$ITA_INSTALL_SCRIPTS_DIR/ita_installer.sh"
