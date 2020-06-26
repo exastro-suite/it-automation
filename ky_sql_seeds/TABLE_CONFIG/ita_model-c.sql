@@ -168,6 +168,38 @@ CREATE TABLE B_ANS_TWR_HOST_JNL (
 -- 履歴系テーブル作成----
 
 -- ----更新系テーブル作成
+CREATE TABLE B_ANS_TWR_CREDENTIAL_TYPE ( 
+  CREDENTIAL_TYPE_ID              %INT%                             ,
+  CREDENTIAL_TYPE_NAME            %VARCHR%(256)                     ,
+   
+  DISP_SEQ                        %INT%                             ,
+  NOTE                            %VARCHR%(4000)                    ,
+  DISUSE_FLAG                     %VARCHR%(1)                       ,
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       ,
+  LAST_UPDATE_USER                %INT%                             ,
+  PRIMARY KEY (CREDENTIAL_TYPE_ID) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_TWR_CREDENTIAL_TYPE_JNL ( 
+  JOURNAL_SEQ_NO                  %INT%                             ,
+  JOURNAL_REG_DATETIME            %DATETIME6%                       ,
+  JOURNAL_ACTION_CLASS            %VARCHR%(8)                       ,
+-- 
+  CREDENTIAL_TYPE_ID              %INT%                             ,
+  CREDENTIAL_TYPE_NAME            %VARCHR%(256)                     ,
+-- 
+  DISP_SEQ                        %INT%                             ,
+  NOTE                            %VARCHR%(4000)                    ,
+  DISUSE_FLAG                     %VARCHR%(1)                       ,
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       ,
+  LAST_UPDATE_USER                %INT%                             ,
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 履歴系テーブル作成----
+
+-- ----更新系テーブル作成
 CREATE TABLE B_ANSIBLE_RUN_MODE
 (
 RUN_MODE_ID                       %INT%                            , -- 識別シーケンス
