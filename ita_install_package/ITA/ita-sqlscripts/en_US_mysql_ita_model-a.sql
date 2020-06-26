@@ -594,6 +594,8 @@ WINRM_SSL_CA_FILE                 VARCHAR (256)             , -- WinRM接続 SSL
 OS_TYPE_ID                        INT                       ,
 SSH_EXTRA_ARGS                    VARCHAR (512)             , -- ssh追加パラメータ
 HOSTS_EXTRA_ARGS                  VARCHAR (512)             , -- インベントリファイル(hosts)追加パラメータ
+CREDENTIAL_TYPE_ID                INT                       , -- Ansible-Tower認証情報　接続タイプ
+
 --
 SYSTEM_NAME                       VARCHAR (64)              ,
 COBBLER_PROFILE_ID                INT                       , -- FOR COBLLER
@@ -644,6 +646,7 @@ WINRM_SSL_CA_FILE                 VARCHAR (256)             , -- WinRM接続 SSL
 OS_TYPE_ID                        INT                       ,
 SSH_EXTRA_ARGS                    VARCHAR (512)             , -- ssh追加パラメータ
 HOSTS_EXTRA_ARGS                  VARCHAR (512)             , -- インベントリファイル(hosts)追加パラメータ
+CREDENTIAL_TYPE_ID                INT                       , -- Ansible-Tower認証情報　接続タイプ
 
 SYSTEM_NAME                       VARCHAR (64)              ,
 COBBLER_PROFILE_ID                INT                       , -- FOR COBLLER
