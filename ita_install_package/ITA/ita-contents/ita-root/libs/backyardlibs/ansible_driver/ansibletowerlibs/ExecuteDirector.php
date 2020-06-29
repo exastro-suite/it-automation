@@ -586,10 +586,10 @@ class ExecuteDirector {
                     return false;
                 }                
             }
+            $credential_type_id = $hostInfo['CREDENTIAL_TYPE_ID'];
 
             // 配列のキーに使いたいだけ
-            $key = $hostInfo['LOGIN_USER'] . $hostInfo['LOGIN_PW'] . $sshPrivateKey . $instanceGroupId;
-
+            $key = $hostInfo['LOGIN_USER'] . $hostInfo['LOGIN_PW'] . $sshPrivateKey . $instanceGroupId . "CREDENTIAL_TYPE_ID_" . $credential_type_id;
             $username        = $hostInfo['LOGIN_USER'];
             $password        = $hostInfo['LOGIN_PW'];
             switch($hostInfo['LOGIN_AUTH_TYPE']) {
@@ -607,7 +607,8 @@ class ExecuteDirector {
             $credential = array(
                 "username"        => $username,
                 "password"        => $password,
-                "ssh_private_key" => $sshPrivateKey
+                "ssh_private_key" => $sshPrivateKey,
+                "credential_type_id" => $credential_type_id
             );
 
             $inventory = array();
@@ -724,6 +725,9 @@ class ExecuteDirector {
         }
         if(array_key_exists("ssh_private_key", $credential)) {
             $param['ssh_private_key'] = $credential['ssh_private_key'];
+        }
+        if(array_key_exists("credential_type_id", $credential)) {
+            $param['credential_type_id'] = $credential['credential_type_id'];
         }
 
         $this->logger->trace(var_export($param, true));
