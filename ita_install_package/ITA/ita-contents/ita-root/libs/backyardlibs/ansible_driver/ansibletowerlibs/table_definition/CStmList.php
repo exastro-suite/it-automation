@@ -55,6 +55,7 @@ class CStmList extends TableBaseDefinition {
             "OS_TYPE_ID"                      => "",
             "SSH_EXTRA_ARGS"                  => "",
             "HOSTS_EXTRA_ARGS"                => "",
+            "CREDENTIAL_TYPE_ID"              => "",
             "SYSTEM_NAME"                     => "",
             "COBBLER_PROFILE_ID"              => "",
             "INTERFACE_TYPE"                  => "",
