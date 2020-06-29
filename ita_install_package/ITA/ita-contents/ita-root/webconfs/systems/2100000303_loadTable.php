@@ -455,6 +455,16 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104631"));
            $cg->addColumn($c);
 
+           // 認証情報　接続タイプ
+           $c = new IDColumn('CREDENTIAL_TYPE_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-103051"),
+                              'B_ANS_TWR_CREDENTIAL_TYPE', 'CREDENTIAL_TYPE_ID', 'CREDENTIAL_TYPE_NAME','');
+           $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-103052"));
+           //$c->getOutputType('update_table')->setOverrideInputValue(1);
+           $c->setDefaultValue("register_table", 1);
+           $c->setRequired(true);//登録/更新時には、入力必須
+
+           $cg->addColumn($c);
+
         $cg2->addColumn($cg);
 
         $table->addColumn($cg2);
