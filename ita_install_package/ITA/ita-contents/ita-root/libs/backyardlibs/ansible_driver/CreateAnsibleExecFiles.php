@@ -5694,6 +5694,7 @@ class CreateAnsibleExecFiles {
                "  TBL_2.WINRM_SSL_CA_FILE , \n".
                "  TBL_2.HOSTS_EXTRA_ARGS, \n".
                "  TBL_2.LOGIN_PW_ANSIBLE_VAULT, \n".
+               "  TBL_2.CREDENTIAL_TYPE_ID, \n".
                "  ( \n" .
                "    SELECT \n" .
                "      TBL_3.PROTOCOL_NAME \n" .
@@ -5911,6 +5912,16 @@ class CreateAnsibleExecFiles {
 
                     break;
                 }
+                // 接続タイプが選択されていることを確認
+                if(strlen($row['CREDENTIAL_TYPE_ID'])==0){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70059",
+                                                               array($row['IP_ADDRESS']));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+    
+                    unset($objQuery);
+                    return false;
+                }
+                
                 // IPアドレスの配列作成
                 $ina_hostlist[$row['SYSTEM_ID']]=$row['IP_ADDRESS'];
                 // IPアドレス,ホスト名,プロトコル,ログインユーザー,パスワードの配列作成
@@ -5941,7 +5952,7 @@ class CreateAnsibleExecFiles {
                 $ina_hostinfolist[$row['IP_ADDRESS']]['WINRM_PORT']         = $winrm_port;       //WINRM接続プロトコル
                 $ina_hostinfolist[$row['IP_ADDRESS']]['OS_TYPE_ID']         = $row['OS_TYPE_ID'];//OS種別
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_PW_ANSIBLE_VAULT'] = $row['LOGIN_PW_ANSIBLE_VAULT']; //ansible-vaultで暗号化したパスワード
-
+                $ina_hostinfolist[$row['IP_ADDRESS']]['CREDENTIAL_TYPE_ID'] = $row['CREDENTIAL_TYPE_ID']; 
             }
             // 作業対象ホスト管理に登録されているホストが管理対象システム一覧(C_STM_LIST )に未登録
             elseif($row['DISUSE_FLAG']===null){
