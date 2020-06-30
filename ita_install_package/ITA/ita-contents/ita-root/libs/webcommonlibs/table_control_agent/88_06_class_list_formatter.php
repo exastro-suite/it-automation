@@ -1401,7 +1401,6 @@ class ExcelFormatter extends ListFormatter {
             }
             if( $objColumn->getID() == $lcRequiredUpdateDate4UColumnId ){
                 $sheet->getStyle($cellAddress)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($strRRGGBBSendForbiddenColumn);
-                $sheet->getCell($cellAddress)->setDataType(\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 $sheet->getColumnDimensionByColumn(self::DATA_START_COL+$i_col)->setVisible(false);
             }
             if( is_a($objColumn, "MultiTextColumn") ===true ){
@@ -1579,29 +1578,8 @@ class ExcelFormatter extends ListFormatter {
                         $rowData = $row->getRowData();
                         $inputType=0;
                         $focusValue = $objColumn->getOutputBody($this->strPrintTargetListFormatterId, $rowData);
-                        if( is_a($objColumn, "FileUploadColumn") === true ){
-                            if( array_key_exists($objColumn->getID(), $rowData) && $rowData[$objColumn->getID()] != "" ){
 
-                                if( $objColumn->getFileHideMode() === false ){
-                                    //----ファイル隠蔽モードではない
-
-                                    //----クライアントからファイルへアクセスするためのURLを取得
-                                    $url = $objColumn->getOAPathToFUCItemPerRow($rowData);
-
-                                    $localPath = $objColumn->getLAPathToFUCItemPerRow($rowData);
-
-                                    if(file_exists($localPath)===true){
-                                        $hyperLink = new \PhpOffice\PhpSpreadsheet\Cell\Hyperlink($url);
-                                        //ハイパーリンクのスタイル(下線、青色)
-                                        $sheet->getStyle(self::cr2s($i_col, $i_row))->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
-                                        $sheet->getStyle(self::cr2s($i_col, $i_row))->getFont()->setUnderline(\PhpOffice\PhpSpreadsheet\Style\Font::UNDERLINE_SINGLE);
-                                        $sheet->setHyperLink(self::cr2s($i_col, $i_row), $hyperLink);
-                                    }
-                                    //ファイル隠蔽モードではない----
-                                }
-                                $focusValue = $rowData[$objColumn->getID()];
-                            }
-                        }elseif( get_class($objColumn) == "NumColumn" ){
+                        if( get_class($objColumn) == "NumColumn" ){
                             $inputType = 1;
                         }
 
