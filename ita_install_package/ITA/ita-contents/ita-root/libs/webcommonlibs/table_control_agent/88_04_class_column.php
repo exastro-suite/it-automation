@@ -9458,7 +9458,6 @@ class FileUploadColumn extends Column{
 
 		if( $this->getFileHideMode() === false ){
 			//----隠蔽されていない場合
-			$origin=$this->getOrigin();
 			$upDir=$this->getNRPathAnyToBranchPerFUC();
 
 			$strDirnameOfNumberForRI = sprintf($this->getWkPkSprintFormat(), $strNumberForRI);
@@ -9469,7 +9468,8 @@ class FileUploadColumn extends Column{
 			}else{
 				$strMidPath = "{$strDirnameOfNumberForRI}";
 			}
-			$url = "{$origin}/{$upDir}/{$strMidPath}/{$strFilename}";
+
+			$url = "{$upDir}/{$strMidPath}/{$strFilename}";
 			//隠蔽されていない場合----
 		}else{
 			//----ファイルが隠蔽されている場合
