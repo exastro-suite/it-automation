@@ -81,12 +81,39 @@ Ansible(Legacy(NS))プレイブック素材集
     // FileUpload時にファイルの内容をチェック
     $objFunction = function($objColumn, $functionCaller, $strTempFileFullname, $strOrgFileName, $aryVariant, $arySetting){
 
+        global $g;
+
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = null;
+
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
             $root_dir_path = $root_dir_temp[0] . "ita-root";
         }
 
+        // 対話ファイルの文字コードが"UTF-8以外か判定
+        $outFilename = $strTempFileFullname;
+        $yaml = file_get_contents($outFilename);
+        $encode = mb_detect_encoding($yaml);
+        switch($encode) {
+        case "ASCII":
+        case "UTF-8":
+            if (preg_match('/^[\x0x\xef][\x0x\xbb][\x0x\xbf]/', $yaml)) {
+                $strErrMsg = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000110');
+                $boolRet = false;
+            }
+            break;
+        default:
+            $strErrMsg = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000108');
+            $boolRet = false;
+        }
+        if($boolRet === false) {
+            $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg);
+            return $retArray;
+        }
         // 共通変数を抜き出す。
         $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);
         $outFilename = $root_dir_path . "/temp/file_up_column/" . basename($strTempFileFullname) . "_vars_list";
