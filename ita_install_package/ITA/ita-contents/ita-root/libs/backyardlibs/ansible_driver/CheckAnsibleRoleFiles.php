@@ -524,6 +524,14 @@ class CheckAnsibleRoleFiles {
         // 該当ロールの読替表のファイルの有無判定
         if((file_exists($translation_table_file) === true) &&
             (is_file($translation_table_file) === true)){
+
+            //文字コードとBOM付をチェック
+            $ret = $this->FileCharacterCodeCheck($translation_table_file,$errmsg);
+            if($ret === false) {
+                $this->SetLasteError(basename(__FILE__),__LINE__,$errmsg);
+                return(false);
+            }
+
              // 該当ロールの読替表を読込
              $ret = $this->readTranslationFile($translation_table_file,
                                                $ITA2User_var_list,
@@ -557,6 +565,13 @@ class CheckAnsibleRoleFiles {
         if((file_exists($user_vars_file) === true) &&
             (is_file($user_vars_file) === true)){
             $user_vars_file_use = true;
+
+            //文字コードとBOM付をチェック
+            $ret = $this->FileCharacterCodeCheck($user_vars_file,$errmsg);
+            if($ret === false) {
+                $this->SetLasteError(basename(__FILE__),__LINE__,$errmsg);
+                return(false);
+            }
 
             // ユーザー定義変数ファイルのデータ読込
             $dataString = file_get_contents($user_vars_file);
@@ -638,7 +653,6 @@ class CheckAnsibleRoleFiles {
 
         foreach ($files as $file){
             $fullpath = rtrim($in_dir,'/') . '/' . $file;
-
             if(is_dir($fullpath)){
                switch($file){
                case "tasks":
@@ -648,40 +662,41 @@ class CheckAnsibleRoleFiles {
                    // p3:サブディレクトリ(許可(true)/許可しない(false))
                    // p4:main.ymlファイル以外のファイル(許可(true)/許可しない(false))
                    // p5:TPF/CPF変数取得有(true)/無(false)
-                   //                                                       p1     p2     p3     p4    p5
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  true,  true,  true, true,
+                   // p6:ファイル文字コードチェック有(true)/無(false)
+                   //                                                       p1     p2     p3     p4    p5    p6
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  true,  true,  true, true, true,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
                case "handlers":
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  false, true,  true, true,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  false, true,  true, true, true,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
                case "templates":
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  false, true, true, true,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  false, true, true, true,  false,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
                case "meta":
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false,  false, true, true, false,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false,  false, true, true, false, true,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
                case "files":
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false, false, true, true, false,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false, false, true, true, false,  false,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
                case "vars":
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false, false, true, true, false,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false, false, true, true, false,  true,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
                case "defaults":
                    $defaults_his = true;
 
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false, false, true, true, false,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false, false, true, true, false,  true,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    if($ret === true) {
@@ -903,17 +918,12 @@ class CheckAnsibleRoleFiles {
     //   $in_dir:         roleディレクトリ
     //   $in_rolename     ロール名
     //   $in_dirname      ディレクトリ名
-    ////   $in_get_rolevar  ロール変数取得有(true)/無(false)
-    ////   $in_main_yml     main.yml必須有(true)/無(false)
-    ////   $in_etc_yml      main.ymlと他ファイルの依存有(true)/無(false)
-    ////   $in_main_yml_only
-    ////                    main.ymlファイル以外のファイルは存在不可
     //   $in_get_rolevar  ロール変数取得有(true)/無(false)
     //   $in_main_yml     main.yml必須有(true)/無(false)
     //   $in_etc_yml      main.ymlファイル以外のファイル(許可(true)/許可しない(false))
     //   $in_sub_dir      サブディレクトリ(許可(true)/許可しない(false))
-
     //   $in_get_var_tgt_dir: CPF/TPF変数を取得対象ディレクトリ判定 true:取得　false:取得しない
+    //   $in_CharacterCodeCheck: ファイル文字コードチェック有(true)/無(false)
     //   $in_get_copyvar:    PlaybookからCPF変数を取得の有無  true:取得　false:取得しない
     //   $ina_copyvars_list: Playbookで使用しているCPF変数のリスト
     //                       $ina_copyvars_list[ロール名][変数名]=1
@@ -932,6 +942,7 @@ class CheckAnsibleRoleFiles {
                           $in_etc_yml,
                           $in_sub_dir,
                           $in_get_var_tgt_dir,
+                          $in_CharacterCodeCheck,
                           $in_get_copyvar,
                          &$ina_copyvars_list,
                           $in_get_tpfvar, 
@@ -964,6 +975,14 @@ class CheckAnsibleRoleFiles {
                 }
             }
             if(is_file($fullpath)){
+                if($in_CharacterCodeCheck===true) {
+                    //文字コードとBOM付をチェック
+                    $ret = $this->FileCharacterCodeCheck($fullpath,$errmsg);
+                    if($ret === false) {
+                        $this->SetLasteError(basename(__FILE__),__LINE__,$errmsg);
+                        return(false);
+                    }
+                }
                 if($file == "main.yml"){
                      $main_yml = true;
                 }
@@ -1201,6 +1220,44 @@ class CheckAnsibleRoleFiles {
         $this->lv_lasterrmsg[1] = "FILE:$p1 LINE:$p2 $p3";
     }
     function debuglog($line,$msg){
+//        if(is_array($msg)){
+//            $log=print_r($msg,true);
+//        } else {
+//            $log = $msg;
+//        }
+//        error_log($line.$log."\n",3,'/temp/debug.log');
+    }
+    function FileCharacterCodeCheck($Filename,&$strErrMsg) {
+        $strErrMsg = "";
+        //エラーメッセージのファイル名を生成
+        $ary = explode('/roles/',$Filename);
+        if(count($ary) <= 1) {
+            // ITAreadmeや読替表の場合
+            $dispFilename = basename($Filename);
+        } else {
+            // role内のファイルの場合
+            unset($ary[0]);
+            unset($ary[0]);
+            $dispFilename = implode('/roles/',$ary);
+        }
+
+        $boolRet = true;
+        $yaml = file_get_contents($Filename);
+        $encode = mb_detect_encoding($yaml);
+        switch($encode) {
+        case "ASCII":
+        case "UTF-8":
+            if (preg_match('/^[\x0x\xef][\x0x\xbb][\x0x\xbf]/', $yaml)) {
+                $strErrMsg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000112',array($dispFilename));
+                $boolRet = false;
+            }
+            break;
+        default:
+            $strErrMsg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000111',array($dispFilename));
+            $boolRet = false;
+            break;
+        }
+        return $boolRet;
     }
 }
     ////////////////////////////////////////////////////////////////////////////////
