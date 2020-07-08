@@ -432,6 +432,9 @@ CREATE TABLE B_ITA_EXT_STM_MASTER
 ITA_EXT_STM_ID                  INT                          ,
 ITA_EXT_STM_NAME                VARCHAR (64)                 ,
 ITA_EXT_LINK_LIB_PATH           VARCHAR (64)                 ,
+MENU_ID                         INT                          , -- 作業管理メニューID
+EXEC_INS_MNG_TABLE_NAME         VARCHAR (64)                 , -- 作業インスタンステーブル名
+LOG_TARGET                      INT                          , -- ログ収集対象有無 1:対象 他:対象外
 DISP_SEQ                        INT                          ,
 NOTE                            VARCHAR (4000)               ,
 DISUSE_FLAG                     VARCHAR (1)                  ,
@@ -450,6 +453,9 @@ JOURNAL_ACTION_CLASS            VARCHAR (8)                  ,
 ITA_EXT_STM_ID                  INT                          ,
 ITA_EXT_STM_NAME                VARCHAR (64)                 ,
 ITA_EXT_LINK_LIB_PATH           VARCHAR (64)                 ,
+MENU_ID                         INT                          , -- 作業管理メニューID
+EXEC_INS_MNG_TABLE_NAME         VARCHAR (64)                 , -- 作業インスタンステーブル名
+LOG_TARGET                      INT                          , -- ログ収集対象有無 1:対象 他:対象外
 DISP_SEQ                        INT                          ,
 NOTE                            VARCHAR (4000)               ,
 DISUSE_FLAG                     VARCHAR (1)                  ,
