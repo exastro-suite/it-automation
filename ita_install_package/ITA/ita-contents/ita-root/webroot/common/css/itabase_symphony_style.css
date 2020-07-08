@@ -598,6 +598,11 @@ border-top: none;border-radius: 0 0 4px 4px;
 }
 /* ------- AnsibleTower */
 
+/* Terraform ------- */
+.terraformblue {
+  background: #5c4ee5;
+}
+/* ------- Terraform */
 
 
 .ttc_red {
