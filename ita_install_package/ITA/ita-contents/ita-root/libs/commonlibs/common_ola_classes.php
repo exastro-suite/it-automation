@@ -638,6 +638,8 @@ class OrchestratorLinkAgent {
         $strPatternMasterOpenst_Template      = 'OPENST_TEMPLATE';
         $strPatternMasterOpenst_Env           = 'OPENST_ENVIRONMENT';
         $strPatternMasterAnsVirtualEnvName    = 'ANS_VIRTUALENV_NAME';
+
+        $strPatternMasterTerraformWorkspaceID = 'TERRAFORM_WORKSPACE_ID';
         
         try{
             $objDBCA = $this->getDBConnectAgent();
@@ -725,6 +727,7 @@ class OrchestratorLinkAgent {
                   .",{$strPatternMasterAnsVirtualEnvName} ANS_VIRTUALENV_NAME "
                   .",{$strPatternMasterOpenst_Template} OPENST_TEMPLATE "
                   .",{$strPatternMasterOpenst_Env} OPENST_ENVIRONMENT "
+                  .",{$strPatternMasterTerraformWorkspaceID} TERRAFORM_WORKSPACE_ID "
                   ."FROM   {$strPatternMasterTableId} "
                   ."WHERE  {$strWhereZone} "
                   ."ORDER  BY DISP_SEQ ASC";
