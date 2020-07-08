@@ -495,4 +495,7 @@ $ary[920023] = "[Original data] Symphony class list";
 $ary[920024] = "Operation";
 $ary[920025] = "[Original data] Input operation list";
 $ary[920026] = "Auto-input";
+$ary[111010] = "Terraform Dedicated information";
+$ary[111020] = "Organization:Workspace";
+$ary[111030] = "Target Organization:Workspace.";
 ?>
