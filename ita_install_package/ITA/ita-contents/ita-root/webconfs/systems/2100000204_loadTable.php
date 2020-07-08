@@ -45,7 +45,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);
     $c->setUnique(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1030202"));
-    $objVdt = new TextValidator(1, 64, false, "/^[^:\t\r\n]*$/s", $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1030203"));
+    $objVdt = new TextValidator(1, 256, false, "/^[^:\t\r\n]*$/s", $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1030203"));
     $objVdt->setRegExp("/^[^\t\r\n]*$/s","DTiS_filterDefault");
     $c->setValidator($objVdt);
     $table->addColumn($c);
