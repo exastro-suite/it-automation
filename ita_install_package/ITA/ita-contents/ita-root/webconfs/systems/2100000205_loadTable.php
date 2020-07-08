@@ -125,7 +125,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040602"));
     $c->getOutputType('update_table')->setAttr('size','60');
     $c->getOutputType('register_table')->setAttr('size','60');
-    $c->setValidator(new MenuNameValidator_2100000205(1, 64, false));
+    $c->setValidator(new MenuNameValidator_2100000205(1, 256, false));
     $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
     
