@@ -497,4 +497,7 @@ $ary[920023] = "[元データ]Symphonyクラス一覧";
 $ary[920024] = "オペレーション名";
 $ary[920025] = "[元データ]投入オペレーション一覧";
 $ary[920026] = "自動入力";
+$ary[111010] = "Terraform利用情報";
+$ary[111020] = "Organization:Workspace";
+$ary[111030] = "対象のOrganization:Workspaceです。";
 ?>
