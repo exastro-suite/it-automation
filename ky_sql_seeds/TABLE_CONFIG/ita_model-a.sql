@@ -692,6 +692,7 @@ ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
 ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
+TERRAFORM_WORKSPACE_ID            %INT%                            , --Terraform利用情報
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -724,6 +725,7 @@ ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
 ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
+TERRAFORM_WORKSPACE_ID            %INT%                            , --Terraform利用情報
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
