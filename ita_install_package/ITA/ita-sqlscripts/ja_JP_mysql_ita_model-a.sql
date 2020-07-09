@@ -692,7 +692,7 @@ ANS_EXEC_OPTIONS                  VARCHAR (512)                    ,
 ANS_VIRTUALENV_NAME               VARCHAR (512)                    , 
 OPENST_TEMPLATE                   VARCHAR (256)                    ,
 OPENST_ENVIRONMENT                VARCHAR (256)                    ,
-TERRAFORM_WORKSPACE_ID            INT                              , --Terraform利用情報
+TERRAFORM_WORKSPACE_ID            INT                              , -- Terraform利用情報
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -725,7 +725,7 @@ ANS_EXEC_OPTIONS                  VARCHAR (512)                    ,
 ANS_VIRTUALENV_NAME               VARCHAR (512)                    , 
 OPENST_TEMPLATE                   VARCHAR (256)                    ,
 OPENST_ENVIRONMENT                VARCHAR (256)                    ,
-TERRAFORM_WORKSPACE_ID            INT                              , --Terraform利用情報
+TERRAFORM_WORKSPACE_ID            INT                              , -- Terraform利用情報
 
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
