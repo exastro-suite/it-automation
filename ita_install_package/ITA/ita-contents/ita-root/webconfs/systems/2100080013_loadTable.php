@@ -26,7 +26,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103310");
 /*--------↑
-PolicySet-Policy紐付け管理ページ
+PolicySet-Policy紐付管理ページ
 */
     $tmpAry = array(
         'TT_SYS_01_JNL_SEQ_ID'=>'JOURNAL_SEQ_NO',
