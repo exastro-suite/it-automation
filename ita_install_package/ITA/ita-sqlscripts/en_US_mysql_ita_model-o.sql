@@ -297,7 +297,7 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 -- ----更新系テーブル作成
---PolicySet-Policy紐付け
+--PolicySet-Policy紐付管理
 CREATE TABLE B_TERRAFORM_POLICYSET_POLICY_LINK
 (
 POLICYSET_POLICY_LINK_ID          INT                              ,
@@ -313,7 +313,7 @@ PRIMARY KEY (POLICYSET_POLICY_LINK_ID)
 -- 更新系テーブル作成----
 
 -- ----履歴系テーブル作成
---PolicySet-Policy紐付け(履歴)
+--PolicySet-Policy紐付管理(履歴)
 CREATE TABLE B_TERRAFORM_POLICYSET_POLICY_LINK_JNL
 (
 JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
@@ -331,7 +331,7 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 -- ----更新系テーブル作成
---PolicySet-Workspace紐付け
+--PolicySet-Workspace紐付管理
 CREATE TABLE B_TERRAFORM_POLICYSET_WORKSPACE_LINK
 (
 POLICYSET_WORKSPACE_LINK_ID       INT                              ,
@@ -347,7 +347,7 @@ PRIMARY KEY (POLICYSET_WORKSPACE_LINK_ID)
 -- 更新系テーブル作成----
 
 -- ----履歴系テーブル作成
---PolicySet-Workspace紐付け(履歴)
+--PolicySet-Workspace紐付管理(履歴)
 CREATE TABLE B_TERRAFORM_POLICYSET_WORKSPACE_LINK_JNL
 (
 JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
@@ -541,7 +541,7 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 -- 履歴系テーブル作成----
 
 -- ----更新系テーブル作成
---Module変数紐付け管理
+--Module変数紐付管理
 CREATE TABLE B_TERRAFORM_MODULE_VARS_LINK
 (
 MODULE_VARS_LINK_ID               INT                              ,
@@ -558,7 +558,7 @@ PRIMARY KEY (MODULE_VARS_LINK_ID)
 -- 更新系テーブル作成----
 
 -- ----履歴系テーブル作成
---Module変数紐付け管理(履歴)
+--Module変数紐付管理(履歴)
 CREATE TABLE B_TERRAFORM_MODULE_VARS_LINK_JNL
 (
 JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
@@ -683,7 +683,7 @@ CREATE VIEW D_TERRAFORM_INS_RUN_MODE_JNL AS
 SELECT * 
 FROM B_TERRAFORM_RUN_MODE_JNL;
 
---Organizations-Workspaces紐付け VIEW
+--Organizations-Workspaces紐付 VIEW
 CREATE VIEW D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK AS
 SELECT
         TAB_B.ORGANIZATION_ID         ,
@@ -844,7 +844,7 @@ FROM
   B_TERRAFORM_VARS_ASSIGN_JNL TAB_A
 ;
 
---Module変数紐付け VIEW
+--Module変数紐付管理 VIEW
 CREATE VIEW D_TERRAFORM_PTN_VARS_LINK AS 
 SELECT 
         TAB_A.MODULE_VARS_LINK_ID      ,
@@ -882,7 +882,7 @@ LEFT JOIN B_TERRAFORM_PATTERN_LINK  TAB_B ON ( TAB_A.MODULE_MATTER_ID = TAB_B.MO
 LEFT JOIN E_TERRAFORM_PATTERN       TAB_C ON ( TAB_B.PATTERN_ID = TAB_C.PATTERN_ID )
 ;
 
---Module変数紐付けプルダウン用 VIEW
+--Module変数紐付プルダウン用 VIEW
 CREATE VIEW D_TERRAFORM_PTN_VARS_LINK_VFP AS 
 SELECT 
         TAB_A.MODULE_VARS_LINK_ID      ,
@@ -903,7 +903,7 @@ AND TAB_B.DISUSE_FLAG = '0'
 AND TAB_C.DISUSE_FLAG = '0'
 ;
 
---変数データ紐付け(backyard処理用) VIEW
+--変数データ紐付(backyard処理用) VIEW
 CREATE VIEW D_TERRAFORM_VARS_DATA AS
 SELECT 
          TAB_A.ASSIGN_ID                 ,
