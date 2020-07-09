@@ -353,9 +353,9 @@ CREATE TABLE B_TERRAFORM_POLICYSET_WORKSPACE_LINK_JNL
 JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
 JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴用変更日時
 JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
-POLICYSET_WORKSPACE_LINK_ID       $INT$                            ,
-POLICY_SET_ID                     $INT$                            ,
-WORKSPACE_ID                      $INT$                            ,
+POLICYSET_WORKSPACE_LINK_ID       INT                              ,
+POLICY_SET_ID                     INT                              ,
+WORKSPACE_ID                      INT                              ,
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
@@ -949,7 +949,7 @@ WHERE
 CREATE VIEW E_TERRAFORM_PTN_VAR_LIST AS
 SELECT DISTINCT
   TAB_A.*,
-  CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.MODULE_VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN,
+  CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.MODULE_VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   D_TERRAFORM_PTN_VARS_LINK          TAB_A
   LEFT JOIN B_TERRAFORM_MODULE_VARS_LINK TAB_B ON ( TAB_A.MODULE_VARS_LINK_ID = TAB_B.MODULE_VARS_LINK_ID )
@@ -962,7 +962,7 @@ WHERE
 CREATE VIEW E_TERRAFORM_PTN_VAR_LIST_JNL AS
 SELECT DISTINCT
   TAB_A.*,
-  CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.MODULE_VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN,
+  CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.MODULE_VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   D_TERRAFORM_PTN_VARS_LINK_JNL     TAB_A
   LEFT JOIN B_TERRAFORM_MODULE_VARS_LINK_JNL TAB_B ON ( TAB_A.MODULE_VARS_LINK_ID = TAB_B.MODULE_VARS_LINK_ID )
