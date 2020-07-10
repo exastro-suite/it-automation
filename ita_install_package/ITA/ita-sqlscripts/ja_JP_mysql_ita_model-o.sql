@@ -233,7 +233,6 @@ CREATE TABLE B_TERRAFORM_POLICY
 (
 POLICY_ID                         INT                              ,   
 POLICY_NAME                       VARCHAR (256)                    , 
-POLICY_MATTER_NAME                VARCHAR (256)                    ,
 POLICY_MATTER_FILE                VARCHAR (256)                    ,
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -253,7 +252,6 @@ JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴�
 JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
 POLICY_ID                         INT                              ,
 POLICY_NAME                       VARCHAR (256)                    , 
-POLICY_MATTER_NAME                VARCHAR (256)                    ,
 POLICY_MATTER_FILE                VARCHAR (256)                    ,
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -1006,7 +1004,6 @@ CREATE VIEW D_TERRAFORM_POLICY AS
 SELECT  POLICY_ID      ,
         POLICY_NAME    ,
         CONCAT(POLICY_ID,':',POLICY_NAME) POLICY,
-        POLICY_MATTER_NAME    ,
         POLICY_MATTER_FILE    ,
         DISP_SEQ              ,
         NOTE                  ,
@@ -1022,7 +1019,6 @@ SELECT  JOURNAL_SEQ_NO          ,
         POLICY_ID             ,
         POLICY_NAME           ,
         CONCAT(POLICY_ID,':',POLICY_NAME) POLICY,
-        POLICY_MATTER_NAME    ,
         POLICY_MATTER_FILE    ,
         DISP_SEQ              ,
         NOTE                  ,
