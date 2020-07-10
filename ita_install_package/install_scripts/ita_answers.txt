@@ -36,3 +36,4 @@ hostgroup:yes
 ansible_driver:yes
 cobbler_driver:no
 openstack_driver:no
+terraform_driver:no
