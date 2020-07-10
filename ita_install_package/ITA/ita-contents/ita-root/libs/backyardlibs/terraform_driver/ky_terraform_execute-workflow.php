@@ -1341,7 +1341,6 @@
                         $ary_policy_data[$row['POLICY_ID']] = array(
                                                                     "policy_id" => $row['POLICY_ID'],
                                                                     "policy_name" => $row['POLICY_NAME'],
-                                                                    "policy_matter_name" => $row['POLICY_MATTER_NAME'],
                                                                     "policy_matter_file" => $row['POLICY_MATTER_FILE'],
                                                                     "policy_note" => $row['NOTE']
                                                                  );
@@ -1403,7 +1402,7 @@
                                 $statusCode = 0;
                                 $count = 0;
                                 while ($statusCode != 200 && $count < $apiRetryCount){
-                                    $apiResponse = update_policy($lv_terraform_hostname, $lv_terraform_token ,$tfe_policy_id, $ita_data['policy_name'], $ita_data['policy_matter_name'], $ita_data['policy_note']);
+                                    $apiResponse = update_policy($lv_terraform_hostname, $lv_terraform_token ,$tfe_policy_id, $ita_data['policy_name'], $ita_data['policy_matter_file'], $ita_data['policy_note']);
                                     $statusCode = $apiResponse['StatusCode'];
                                     if($statusCode == 200){
                                         //返却StatusCodeが正常なので終了
@@ -1462,7 +1461,7 @@
                                 $statusCode = 0;
                                 $count = 0;
                                 while ($statusCode != 201 && $count < $apiRetryCount){
-                                    $apiResponse = create_policy($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $ita_data['policy_name'], $ita_data['policy_matter_name'], $ita_data['policy_note']);
+                                    $apiResponse = create_policy($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $ita_data['policy_name'], $ita_data['policy_matter_file'], $ita_data['policy_note']);
                                     $statusCode = $apiResponse['StatusCode'];
                                     if($statusCode == 201){
                                         //返却StatusCodeが正常なので終了
