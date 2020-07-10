@@ -69,15 +69,6 @@ Policy素材集
     $table->addColumn($c);
 
     //************************************************************************************
-    //----Policy素材名
-    //************************************************************************************
-    $c = new TextColumn('POLICY_MATTER_NAME',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103070"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103080"));//エクセル・ヘッダでの説明
-    $c->setRequired(true);//登録/更新時には、入力必須
-    $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
-    $table->addColumn($c);
-
-    //************************************************************************************
     //----Policy素材
     //************************************************************************************
     $c = new FileUploadColumn('POLICY_MATTER_FILE',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103090"));
