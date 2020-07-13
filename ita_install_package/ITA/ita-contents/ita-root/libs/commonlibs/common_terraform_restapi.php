@@ -99,8 +99,9 @@
             ////////////////////////////////
             // REST APIアクセス           //
             ////////////////////////////////
-            $http_response_header = null;
-            $ResponsContents = file_get_contents( "https://" . $hostname . "/" . $requestURI,
+            $http_response_header = array();
+            //失敗時はfalseが入る。エラー無視。
+            @$ResponsContents = file_get_contents( "https://" . $hostname . "/" . $requestURI,
                 false,
                 stream_context_create($HttpContext) );
 
