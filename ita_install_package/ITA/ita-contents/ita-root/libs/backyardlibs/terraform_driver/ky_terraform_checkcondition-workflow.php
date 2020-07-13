@@ -357,10 +357,15 @@
             //log格納ディレクトリを作成
             if(!file_exists($log_path)){
                 if(!mkdir($log_path, 0777, true)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
                     if(!chmod($log_path, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                     }
                 }
@@ -448,16 +453,29 @@
                     $count++;
                 }
             }
+
             //API結果を判定
-            if($statusCode != 200){
+            if($statusCode == -2 || $statusCode == 401){
+                //初回API実行時のみ、インターフェース情報のhostnameとUserTokenが適切かどうかをチェック。hostnameが不正な場合返り値は-2、UserTokenが不正な場合返り値は401となる。
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141210",array(__FILE__,__LINE__)); //[API Error]RUNデータの取得に失敗しました。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142010"); //[API Error]Terraform Enterpriseとの接続に失敗しました。インターフェース情報を確認して下さい。
                 LocalLogPrint($error_log, $message);
 
-                // 常フラグON
+                // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception( $message );
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142011",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
+            }elseif($statusCode != 200){
+                //error_logにメッセージを追記
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141210"); //[API Error]RUNデータの取得に失敗しました。
+                LocalLogPrint($error_log, $message);
+
+                // 異常フラグON
+                $error_flag = 1;
+                // 例外処理へ
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141211",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
             }
             $responsContents = $apiResponse['ResponsContents'];
 
@@ -491,13 +509,14 @@
             //API結果を判定
             if($statusCode != 200){
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141220",array(__FILE__,__LINE__)); //[API Error]plan詳細情報の取得に失敗しました。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141220"); //[API Error]plan詳細情報の取得に失敗しました。
                 LocalLogPrint($error_log, $message);
 
-                // 常フラグON
+                // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception( $message );
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141221",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
             }
             $responsContents = $apiResponse['ResponsContents'];
 
@@ -550,13 +569,14 @@
                 //API結果を判定
                 if($statusCode != 200){
                     //error_logにメッセージを追記
-                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141230",array(__FILE__,__LINE__)); //[API Error]policy-check詳細情報の取得に失敗しました。
+                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141230"); //[API Error]policy-check詳細情報の取得に失敗しました。
                     LocalLogPrint($error_log, $message);
 
-                    // 常フラグON
+                    // 異常フラグON
                     $error_flag = 1;
                     // 例外処理へ
-                    throw new Exception( $message );
+                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141231",array(__FILE__,__LINE__,$statusCode));
+                    throw new Exception( $backyard_log );
                 }
                 $responsContents = $apiResponse['ResponsContents'];
 
@@ -650,13 +670,14 @@
                     //API結果を判定
                     if($statusCode != 200){
                         //error_logにメッセージを追記
-                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141240",array(__FILE__,__LINE__)); //[API Error]apply詳細情報の取得に失敗しました。
+                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141240"); //[API Error]apply詳細情報の取得に失敗しました。
                         LocalLogPrint($error_log, $message);
 
-                        // 常フラグON
+                        // 異常フラグON
                         $error_flag = 1;
                         // 例外処理へ
-                        throw new Exception( $message );
+                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141241",array(__FILE__,__LINE__,$statusCode));
+                        throw new Exception( $backyard_log );
                     }
                     $responsContents = $apiResponse['ResponsContents'];
 
@@ -715,13 +736,14 @@
                         //API結果を判定
                         if($statusCode != 200){
                             //error_logにメッセージを追記
-                            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141250",array(__FILE__,__LINE__)); //[API Error]stateバージョン情報の取得に失敗しました。
+                            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141250"); //[API Error]stateバージョン情報の取得に失敗しました。
                             LocalLogPrint($error_log, $message);
 
-                            // 常フラグON
+                            // 異常フラグON
                             $error_flag = 1;
                             // 例外処理へ
-                            throw new Exception( $message );
+                            $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141251",array(__FILE__,__LINE__,$statusCode));
+                            throw new Exception( $backyard_log );
                         }
                         $responsContents = $apiResponse['ResponsContents'];
 
@@ -868,10 +890,14 @@
                 if(!is_dir($in_utn_file_dir)){
                     // ここ(UTNのdir)だけは再帰的に作成する
                     if(!mkdir($in_utn_file_dir, 0777, true)){
+                        // 警告フラグON
+                        $warning_flag = 1;
                         // 例外処理へ
                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                     }
                     if(!chmod($in_utn_file_dir, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
                         // 例外処理へ
                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                     }
