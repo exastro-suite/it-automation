@@ -526,10 +526,15 @@
             //log格納ディレクトリを作成
             if(!file_exists($log_path)){
                 if(!mkdir($log_path, 0777, true)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
                     if(!chmod($log_path, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                     }
                 }
@@ -872,15 +877,27 @@
             }
 
             //API結果を判定
-            if($statusCode != 200){
+            if($statusCode == -2 || $statusCode == 401){
+                //初回API実行時のみ、インターフェース情報のhostnameとUserTokenが適切かどうかをチェック。hostnameが不正な場合返り値は-2、UserTokenが不正な場合返り値は401となる。
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141010",array(__FILE__,__LINE__)); //[API Error]Organization情報取得に失敗しました
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142010"); //[API Error]Terraform Enterpriseとの接続に失敗しました。インターフェース情報を確認して下さい。
                 LocalLogPrint($error_log, $message);
 
-                // 常フラグON
+                // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception( $message );
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142011",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
+            }elseif($statusCode != 200){
+                //error_logにメッセージを追記
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141010"); //[API Error]Organization情報取得に失敗しました
+                LocalLogPrint($error_log, $message);
+
+                // 異常フラグON
+                $error_flag = 1;
+                // 例外処理へ
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141011",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
             }else{
                 $responsContents = $apiResponse['ResponsContents'];
                 $exist_flag = false;
@@ -922,13 +939,14 @@
             //API結果を判定
             if($statusCode != 200){
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141020",array(__FILE__,__LINE__)); //[API Error]Workspace情報取得に失敗しました
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141020"); //[API Error]Workspace情報取得に失敗しました
                 LocalLogPrint($error_log, $message);
 
-                // 常フラグON
+                // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception( $message );
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141021",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
             }else{
                 $responsContents = $apiResponse['ResponsContents'];
                 $exist_flag = false;
@@ -1040,13 +1058,14 @@
             //API結果を判定
             if($statusCode != 200){
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141030",array(__FILE__,__LINE__)); //[API Error]Variables一覧取得に失敗しました。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141030"); //[API Error]Variables一覧取得に失敗しました。
                 LocalLogPrint($error_log, $message);
 
                 // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception( $message );
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141031",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
             }else{
                 $workspaceVarListResponsContents = $apiResponse['ResponsContents'];
                 foreach($workspaceVarListResponsContents['data'] as $data){
@@ -1069,13 +1088,14 @@
                     //API結果を判定
                     if($statusCode != 204){
                         //error_logにメッセージを追記
-                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141040",array(__FILE__,__LINE__)); //[API Error]Variablesの削除に失敗しました。
+                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141040"); //[API Error]Variablesの削除に失敗しました。
                         LocalLogPrint($error_log, $message);
 
                         // 異常フラグON
                         $error_flag = 1;
                         // 例外処理へ
-                        throw new Exception( $message );
+                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141041",array(__FILE__,__LINE__,$statusCode));
+                        throw new Exception( $backyard_log );
                     }
                 }
             }
@@ -1106,13 +1126,14 @@
             //API結果を判定
             if($statusCode != 201){
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141050",array(__FILE__,__LINE__)); //[API Error]Variablesの登録に失敗しました。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141050"); //[API Error]Variablesの登録に失敗しました。
                 LocalLogPrint($error_log, $message);
 
                 // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception( $message );
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141051",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
             }
 
             //--------------------------------------------------------------
@@ -1146,13 +1167,14 @@
                     //API結果を判定
                     if($statusCode != 201){
                         //error_logにメッセージを追記
-                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141060",array(__FILE__,__LINE__)); //[API Error]Variablesの登録に失敗しました。
+                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141060"); //[API Error]Variablesの登録に失敗しました。
                         LocalLogPrint($error_log, $message);
 
                         // 異常フラグON
                         $error_flag = 1;
                         // 例外処理へ
-                        throw new Exception( $message );
+                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141061",array(__FILE__,__LINE__,$statusCode));
+                        throw new Exception( $backyard_log );
                     }
                 }
             }
@@ -1370,13 +1392,14 @@
                     //API結果を判定
                     if($statusCode != 200){
                         //error_logにメッセージを追記
-                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141070",array(__FILE__,__LINE__)); //[API Error]Policy情報取得に失敗しました。
+                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141070"); //[API Error]Policy情報取得に失敗しました。
                         LocalLogPrint($error_log, $message);
 
-                        // 常フラグON
+                        // 異常フラグON
                         $error_flag = 1;
                         // 例外処理へ
-                        throw new Exception( $message );
+                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141071",array(__FILE__,__LINE__,$statusCode));
+                        throw new Exception( $backyard_log );
                     }else{
                         //----------------------------------------------
                         // TFEのPolicySet一覧と適用するPolicyを照らし合わせて登録・更新を実行
@@ -1416,13 +1439,14 @@
                                 //API結果を判定
                                 if($statusCode != 200){
                                     //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141080",array(__FILE__,__LINE__)); //[API Error]Policyの更新に失敗しました。
+                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141080"); //[API Error]Policyの更新に失敗しました。
                                     LocalLogPrint($error_log, $message);
 
-                                    // 常フラグON
+                                    // 異常フラグON
                                     $error_flag = 1;
                                     // 例外処理へ
-                                    throw new Exception( $message );
+                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141081",array(__FILE__,__LINE__,$statusCode));
+                                    throw new Exception( $backyard_log );
                                 }
                                 $updatePolicyResponsContents = $apiResponse['ResponsContents'];
                                 //API返却結果からTFE用のPolicyIDを取得
@@ -1447,13 +1471,14 @@
                                 //API結果を判定
                                 if($statusCode != 200){
                                     //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141100",array(__FILE__,__LINE__)); //[API Error]Policyコードの適用に失敗しました。
+                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141100"); //[API Error]Policyコードの適用に失敗しました。
                                     LocalLogPrint($error_log, $message);
 
-                                    // 常フラグON
+                                    // 異常フラグON
                                     $error_flag = 1;
                                     // 例外処理へ
-                                    throw new Exception( $message );
+                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141101",array(__FILE__,__LINE__,$statusCode));
+                                    throw new Exception( $backyard_log );
                                 }
 
                             }else{
@@ -1475,13 +1500,14 @@
                                 //API結果を判定
                                 if($statusCode != 201){
                                     //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141090",array(__FILE__,__LINE__)); //[API Error]Policyの登録に失敗しました。
+                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141090"); //[API Error]Policyの登録に失敗しました。
                                     LocalLogPrint($error_log, $message);
 
-                                    // 常フラグON
+                                    // 異常フラグON
                                     $error_flag = 1;
                                     // 例外処理へ
-                                    throw new Exception( $message );
+                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141091",array(__FILE__,__LINE__,$statusCode));
+                                    throw new Exception( $backyard_log );
                                 }
                                 $createPolicyResponsContents = $apiResponse['ResponsContents'];
 
@@ -1507,13 +1533,14 @@
                                 //API結果を判定
                                 if($statusCode != 200){
                                     //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141100",array(__FILE__,__LINE__)); //[API Error]Policyコードの適用に失敗しました。
+                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141100"); //[API Error]Policyコードの適用に失敗しました。
                                     LocalLogPrint($error_log, $message);
 
-                                    // 常フラグON
+                                    // 異常フラグON
                                     $error_flag = 1;
                                     // 例外処理へ
-                                    throw new Exception( $message );
+                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141101",array(__FILE__,__LINE__,$statusCode));
+                                    throw new Exception( $backyard_log );
                                 }
                             }
                         }
@@ -1541,13 +1568,14 @@
                     //API結果を判定
                     if($statusCode != 200){
                         //error_logにメッセージを追記
-                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141110",array(__FILE__,__LINE__)); //[API Error]PolicySet情報取得に失敗しました。
+                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141110"); //[API Error]PolicySet情報取得に失敗しました。
                         LocalLogPrint($error_log, $message);
 
-                        // 常フラグON
+                        // 異常フラグON
                         $error_flag = 1;
                         // 例外処理へ
-                        throw new Exception( $message );
+                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141111",array(__FILE__,__LINE__,$statusCode));
+                        throw new Exception( $backyard_log );
                     }else{
                         $policySetsListResponsContents = $apiResponse['ResponsContents'];
                         //----------------------------------------------
@@ -1592,13 +1620,14 @@
                                     //API結果を判定
                                     if($statusCode != 204){
                                         //error_logにメッセージを追記
-                                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141120",array(__FILE__,__LINE__)); //[API Error]PolicySetからのWorkspace切り離し処理に失敗しました。
+                                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141120"); //[API Error]PolicySetからのWorkspace切り離し処理に失敗しました。
                                         LocalLogPrint($error_log, $message);
 
-                                        // 常フラグON
+                                        // 異常フラグON
                                         $error_flag = 1;
                                         // 例外処理へ
-                                        throw new Exception( $message );
+                                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141121",array(__FILE__,__LINE__,$statusCode));
+                                        throw new Exception( $backyard_log );
                                     }
                                 }
                             }
@@ -1642,13 +1671,14 @@
                                 //API結果を判定
                                 if($statusCode != 200){
                                     //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141130",array(__FILE__,__LINE__)); //[API Error]PolicySetの更新に失敗しました。
+                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141130"); //[API Error]PolicySetの更新に失敗しました。
                                     LocalLogPrint($error_log, $message);
 
-                                    // 常フラグON
+                                    // 異常フラグON
                                     $error_flag = 1;
                                     // 例外処理へ
-                                    throw new Exception( $message );
+                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141131",array(__FILE__,__LINE__,$statusCode));
+                                    throw new Exception( $backyard_log );
                                 }
                                 $updatePolicySetResponsContents = $apiResponse['ResponsContents'];
 
@@ -1671,13 +1701,14 @@
                                 //API結果を判定
                                 if($statusCode != 204){
                                     //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141140",array(__FILE__,__LINE__)); //[API Error]PolicySetからのPolicy切り離し処理に失敗しました。
+                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141140"); //[API Error]PolicySetからのPolicy切り離し処理に失敗しました。
                                     LocalLogPrint($error_log, $message);
 
-                                    // 常フラグON
+                                    // 異常フラグON
                                     $error_flag = 1;
                                     // 例外処理へ
-                                    throw new Exception( $message );
+                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141141",array(__FILE__,__LINE__,$statusCode));
+                                    throw new Exception( $backyard_log );
                                 }
 
                             }else{
@@ -1699,13 +1730,14 @@
                                 //API結果を判定
                                 if($statusCode != 201){
                                     //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141150",array(__FILE__,__LINE__)); //[API Error]PolicySetの登録に失敗しました。
+                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141150"); //[API Error]PolicySetの登録に失敗しました。
                                     LocalLogPrint($error_log, $message);
 
-                                    // 常フラグON
+                                    // 異常フラグON
                                     $error_flag = 1;
                                     // 例外処理へ
-                                    throw new Exception( $message );
+                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141151",array(__FILE__,__LINE__,$statusCode));
+                                    throw new Exception( $backyard_log );
                                 }
                                 $createPolicySetResponsContents = $apiResponse['ResponsContents'];
 
@@ -1743,13 +1775,14 @@
                             //API結果を判定
                             if($statusCode != 204){
                                 //error_logにメッセージを追記
-                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141160",array(__FILE__,__LINE__)); //[API Error]PolicySetとWorkspaceの紐付けに失敗しました。
+                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141160"); //[API Error]PolicySetとWorkspaceの紐付けに失敗しました。
                                 LocalLogPrint($error_log, $message);
 
-                                // 常フラグON
+                                // 異常フラグON
                                 $error_flag = 1;
                                 // 例外処理へ
-                                throw new Exception( $message );
+                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141161",array(__FILE__,__LINE__,$statusCode));
+                                throw new Exception( $backyard_log );
                             }
 
                             //----------------------------------------------
@@ -1783,13 +1816,14 @@
                             //API結果を判定
                             if($statusCode != 204){
                                 //error_logにメッセージを追記
-                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141170",array(__FILE__,__LINE__)); //[API Error]PolicySetとPolicyの紐付けに失敗しました。
+                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141170"); //[API Error]PolicySetとPolicyの紐付けに失敗しました。
                                 LocalLogPrint($error_log, $message);
 
                                 // 異常フラグON
                                 $error_flag = 1;
                                 // 例外処理へ
-                                throw new Exception( $message );
+                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141171",array(__FILE__,__LINE__,$statusCode));
+                                throw new Exception( $backyard_log );
                             }
                         }
                     }
@@ -1856,10 +1890,15 @@
             //一時利用ディレクトリの存在をチェックし、なければ作成
             if(!file_exists($tar_temp_save_dir)){
                 if(!mkdir($tar_temp_save_dir, 0777, true)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
                     if(!chmod($tar_temp_save_dir, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                     }
                 }
@@ -1885,10 +1924,15 @@
 
             //作業実行Noのディレクトリを作成
             if(!mkdir($tgt_execution_dir, 0777, true) ){
+                // 警告フラグON
+                $warning_flag = 1;
                 // 例外処理へ
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
             }else{
                 if(!chmod($tgt_execution_dir, 0777)){
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }
             }
@@ -1933,13 +1977,14 @@
             //API結果を判定
             if($statusCode != 201){
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141180",array(__FILE__,__LINE__)); //[API Error]ModuleファイルアップロードURLの取得に失敗しました。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141180"); //[API Error]ModuleファイルアップロードURLの取得に失敗しました。
                 LocalLogPrint($error_log, $message);
 
                 // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception( $message );
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141181",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
             }
             //アップロードURLとcv_idを取得
             $upload_url = $apiResponse['ResponsContents']['data']['attributes']['upload-url'];
@@ -1961,13 +2006,14 @@
             //API結果を判定（正常終了時、$apiResponseに空が返ってくる）
             if($apiResponse != ""){
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141190",array(__FILE__,__LINE__)); //[API Error]Moduleファイルのアップロードに失敗しました。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141190"); //[API Error]Moduleファイルのアップロードに失敗しました。
                 LocalLogPrint($error_log, $message);
 
                 // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception( $message );
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141191",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
             }
 
             //RUNの作成（planの実行）
@@ -1988,13 +2034,14 @@
             //API結果を判定
             if($statusCode != 201){
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141200",array(__FILE__,__LINE__)); //RUNの作成に失敗しました。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141200"); //RUNの作成に失敗しました。
                 LocalLogPrint($error_log, $message);
 
                 // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception( $message );
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141201",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
             }
 
             //RUN_IDを取得
@@ -2017,10 +2064,14 @@
             if(!is_dir($in_utn_file_dir)){
                 // ここ(UTNのdir)だけは再帰的に作成する
                 if(!mkdir($in_utn_file_dir, 0777, true)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }
                 if(!chmod($in_utn_file_dir, 0777)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }
