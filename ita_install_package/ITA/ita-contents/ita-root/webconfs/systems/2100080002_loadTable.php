@@ -100,6 +100,7 @@ Organizations管理
         $c->setOutputType("update_table", $outputType);
         $c->setOutputType("register_table", $outputType);
         $c->setOutputType("print_journal_table", $outputType);
+        $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
         $cg->addColumn($c);
 
         //デフォルトでボタンを非活性にする
