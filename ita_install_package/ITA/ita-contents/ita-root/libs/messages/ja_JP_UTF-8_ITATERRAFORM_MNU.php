@@ -47,8 +47,8 @@ $ary[101320] = "エラーログ";
 $ary[102010] = "Terraform Enterpriseへの接続インターフェース情報をメンテナンス(閲覧/更新)できます。 <br>本メニューは必ず1レコードである必要があります。
 ";
 $ary[102020] = "No.";
-$ary[102030] = "Terraformインタフェース情報";
-$ary[102040] = "Terraformインタフェース情報";
+$ary[102030] = "Terraformインターフェース情報";
+$ary[102040] = "Terraformインターフェース情報";
 $ary[102050] = "Hostname";
 $ary[102060] = "Terraform EnterpriseのHostnameです";
 $ary[102070] = "User Token";
