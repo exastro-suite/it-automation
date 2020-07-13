@@ -151,9 +151,9 @@
             $retOrganizationData = getOrganizationData($checkData['organizationID']);
             if($retOrganizationData[0] == false){
                 //エラーログ出力
-                web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211060", $retOrganizationData[2]));
+                web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211060", $retOrganizationData[2])); //Organization情報の取得に失敗しました。
                 $retArray[0] = false;
-                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211050"); //通信エラー
+                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211060", $retOrganizationData[2]); //Organization情報の取得に失敗しました。
                 return($retArray);
             }
             
@@ -167,9 +167,9 @@
             $retInterfaceInfo = getInterfaceInfo();
             if($retInterfaceInfo[0] == false){
                 //エラーログ出力
-                web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211070", $retInterfaceInfo[2]));
+                web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211070", $retInterfaceInfo[2])); //インタフェース情報の取得に失敗しました。
                 $retArray[0] = false;
-                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211050"); //通信エラー
+                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211070", $retInterfaceInfo[2]); //インタフェース情報の取得に失敗しました。
                 return($retArray);
             }
 
@@ -214,7 +214,7 @@
                 //エラーログ出力
                 web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211030",'00000400-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')'));
                 $retArray[0] = false;
-                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211050"); //通信エラー
+                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211050"); //Terraform Enterpriseとの接続に失敗しました。インターフェース情報を確認して下さい。
                 return($retArray);
             }
 
