@@ -523,7 +523,6 @@
             //必要なデータを格納
             $tfe_plan_status = $responsContents['data']['attributes']['status'];
             $tfe_plan_log_read_url = $responsContents['data']['attributes']['log-read-url'];
-            $tfe_plan_log = file_get_contents($tfe_plan_log_read_url);
 
             //----------------------------------------------
             // planの結果判定
@@ -538,6 +537,7 @@
                 //----------------------------------------------
                 // planのlogファイル(error)を追記
                 //----------------------------------------------
+                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url);
                 $error_msg = $error_msg . $plan_log_bar . $tfe_plan_log . "\n";
                 file_put_contents($error_log, $error_msg);
 
@@ -546,6 +546,7 @@
                 //----------------------------------------------
                 // planのlogファイル(exec)を追記
                 //----------------------------------------------
+                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url);
                 $exec_msg = $exec_msg . $plan_log_bar . $tfe_plan_log . "\n";
                 file_put_contents($exec_log, $exec_msg);
 
@@ -597,9 +598,6 @@
                     $HttpContext['ssl']['verify_peer']=false;
                     $HttpContext['ssl']['verify_peer_name']=false;
 
-                    //policyCheckログを取得
-                    $tfe_policy_log = file_get_contents($output_url, false, stream_context_create($HttpContext));
-
                     //----------------------------------------------
                     // policyCheckの緊急停止判定
                     //----------------------------------------------
@@ -612,8 +610,9 @@
                         //----------------------------------------------
                         // policyCheckのlogファイル(exex)を追記
                         //----------------------------------------------
-                            $exec_msg = $exec_msg . $policy_check_log_bar . $tfe_policy_log . "\n";
-                            file_put_contents($exec_log, $exec_msg);
+                        $tfe_policy_log = file_get_contents($output_url, false, stream_context_create($HttpContext));
+                        $exec_msg = $exec_msg . $policy_check_log_bar . $tfe_policy_log . "\n";
+                        file_put_contents($exec_log, $exec_msg);
 
                     }else{
                         //----------------------------------------------
@@ -630,6 +629,7 @@
                             //----------------------------------------------
                             // policyCheckのlogファイル(error)を追記
                             //----------------------------------------------
+                            $tfe_policy_log = file_get_contents($output_url, false, stream_context_create($HttpContext));
                             $error_msg = $error_msg . $policy_check_log_bar . $tfe_policy_log . "\n";
                             file_put_contents($error_log, $error_msg);
 
@@ -639,6 +639,7 @@
                             //----------------------------------------------
                             // policyCheckのlogファイル(exec)を追記
                             //----------------------------------------------
+                            $tfe_policy_log = file_get_contents($output_url, false, stream_context_create($HttpContext));
                             $exec_msg = $exec_msg . $policy_check_log_bar . $tfe_policy_log . "\n";
                             file_put_contents($exec_log, $exec_msg);
                         }
@@ -684,7 +685,6 @@
                     //必要なデータを格納
                     $tfe_apply_status = $responsContents['data']['attributes']['status'];
                     $tfe_apply_log_read_url = $responsContents['data']['attributes']['log-read-url'];
-                    $tfe_apply_log = file_get_contents($tfe_apply_log_read_url);
 
                     //----------------------------------------------
                     // applyの結果判定
@@ -699,6 +699,7 @@
                         //----------------------------------------------
                         // applyのlogファイル(error)を追記
                         //----------------------------------------------
+                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url);
                         $error_msg = $error_msg . $apply_log_bar . $tfe_apply_log . "\n";
                         file_put_contents($error_log, $error_msg);
 
@@ -711,6 +712,7 @@
                         //----------------------------------------------
                         // applyのlogファイル(exec)を追記
                         //----------------------------------------------
+                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url);
                         $exec_msg = $exec_msg . $apply_log_bar . $tfe_apply_log . "\n";
                         file_put_contents($exec_log, $exec_msg);
 
@@ -797,14 +799,22 @@
                         //----------------------------------------------
                         // applyのlogファイル(exec)を追記
                         //----------------------------------------------
+                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url);
                         $exec_msg = $exec_msg . $apply_log_bar . $tfe_apply_log . "\n";
                         file_put_contents($exec_log, $exec_msg);
+
+                    //到達不可(plan結果、applyを実行しないと判断された場合)
+                    }elseif($tfe_apply_status == "unreachable"){
+                        $status_id = 5; //完了ステータス(5)設定
+                        $make_zip_flag = true;
+                        $status_update_flag = true;
 
                     //進行中
                     }else{
                         //----------------------------------------------
                         // applyのlogファイル(exec)を追記
                         //----------------------------------------------
+                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url);
                         $exec_msg = $exec_msg . $apply_log_bar . $tfe_apply_log . "\n";
                         file_put_contents($exec_log, $exec_msg);
 
@@ -822,6 +832,7 @@
                 //----------------------------------------------
                 // planのlogファイル(exex)を追記
                 //----------------------------------------------
+                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url);
                 $exec_msg = $exec_msg . $plan_log_bar . $tfe_plan_log . "\n";
                 file_put_contents($exec_log, $exec_msg);
 
@@ -830,6 +841,7 @@
                 //----------------------------------------------
                 // planのlogファイル(exec)を追記
                 //----------------------------------------------
+                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url);
                 $exec_msg = $exec_msg . $plan_log_bar . $tfe_plan_log . "\n";
                 file_put_contents($exec_log, $exec_msg);
 
