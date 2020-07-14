@@ -119,6 +119,36 @@ yum_install() {
     fi
 }
 
+
+yum_package_check() {
+    if [ $# -gt 0 ];then
+        for key in $@; do
+            echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            yum list installed | grep "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Package not installed [$key]"
+                func_exit
+            fi
+        done
+    fi
+}
+
+
+create_repo_check(){
+    if [ $# -gt 0 ];then
+        for key in $@; do
+            echo "----------Check Creation repository[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            yum repolist | grep "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -eq 0 ]; then
+                echo "Successful repository acquisition" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            else
+                return 1
+            fi
+        done
+    fi
+}
+
+
 download_check() {
     DOWNLOAD_CHK=`echo $?`
     if [ $DOWNLOAD_CHK -ne 0 ]; then
@@ -146,18 +176,21 @@ yum_repository() {
         if [[ "$repo" =~ ^[^-] ]]; then
             if [ "$LINUX_OS" == "RHEL7" ]; then
                 rpm -ivh "$repo" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                CREATEREPO_CHK=`echo $?`
             else
                 yum install -y "$repo" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                CREATEREPO_CHK=`echo $?`
             fi
-            
-            if [ $CREATEREPO_CHK == 0 ] || [ $CREATEREPO_CHK == 1 ]; then
-                echo "Successful repository acquisition" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            else
+
+            # Check Creating repository
+            if [[ "$repo" =~ .*epel-release.* ]]; then
+                create_repo_check epel >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            elif [[ "$repo" =~ .*remi-release-7.* ]]; then
+                create_repo_check remi-safe >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            fi
+            if [ $? -ne 0 ]; then
                 log "ERROR:Failed to get repository"
                 func_exit
             fi
+
             shift
         fi
 
@@ -168,6 +201,19 @@ yum_repository() {
                 dnf config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             fi
 
+            # Check Creating repository
+            if [ "${REPOSITORY}" != "yum_all" ]; then
+               case "${LINUX_OS}" in
+                    "CentOS7") create_repo_check remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "RHEL7") create_repo_check remi-php72 rhel-7-server-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "CentOS8") create_repo_check PowerTools >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "RHEL8") create_repo_check codeready-builder-for-rhel-8 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                esac 
+                if [ $? -ne 0 ]; then
+                   log "ERROR:Failed to get repository"
+                    func_exit
+                fi
+            fi
             yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
         fi
     fi
@@ -182,14 +228,14 @@ mariadb_repository() {
             local repo=$1
 
             curl -sS "$repo" | bash >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            CREATEREPO_CHK=`echo $?`
 
-            if [ $CREATEREPO_CHK == 0 ] || [ $CREATEREPO_CHK == 1 ]; then
-                echo "Successful repository acquisition" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            else
+            # Check Creating repository
+            create_repo_check mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
                 log "ERROR:Failed to get repository"
                 func_exit
             fi
+
             yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
         fi
     fi
@@ -278,6 +324,7 @@ enabled=0
             yum_repository ${YUM_REPO_PACKAGE["yum-env-enable-repo"]}
             yum_repository ${YUM_REPO_PACKAGE["yum-env-disable-repo"]}
         fi
+        yum_package_check yum-utils createrepo
     fi
 
     if [ "${MODE}" == "remote" ]; then
@@ -290,7 +337,7 @@ enabled=0
 
 # RPM install
 install_rpm() {
-    RPM_INSTALL_CMD="rpm -ivh --replacepkgs"
+    RPM_INSTALL_CMD="rpm -Uvh --replacepkgs --nodeps"
     LOOP_CNT=0
 
     #get name of RPM
@@ -392,6 +439,8 @@ configure_mariadb() {
                 func_exit
             fi
             
+            yum_package_check MariaDB MariaDB-server expect
+
             # enable and start (initialize) MariaDB Server
             #--------CentOS7,RHEL7--------
             systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -491,6 +540,8 @@ configure_mariadb() {
                 func_exit
             fi
             
+            yum_package_check mariadb mariadb-server expect
+
             # enable and start (initialize) MariaDB Server
             #--------CentOS8,RHEL8--------
             systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -535,6 +586,8 @@ configure_mariadb() {
 configure_httpd() {
     # install some packages
     yum_install ${YUM_PACKAGE["httpd"]}
+    # Check installation httpd packages
+    yum_package_check ${YUM_PACKAGE["httpd"]}
 
     # enable and start Apache HTTP Server
     #--------CentOS7/8,RHEL7/8--------
@@ -549,17 +602,25 @@ configure_php() {
 
     # Install some packages.
     yum_install ${YUM_PACKAGE["php"]}
+    # Check installation php packages
+    yum_package_check ${YUM_PACKAGE["php"]}
 
     # Install some pear packages.
-    pear install ${PEAR_PACKAGE["php"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    PEAR_INSTALL_CHECK=`echo $?`
-    echo "----------Installation[${PEAR_PACKAGE["php"]}]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    echo "----------Installation[HTML_AJAX]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ "${exec_mode}" == "3" ]; then
+        pear channel-update pear.php.net >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pear install ${PEAR_PACKAGE["php"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    else
+        pear install ${PEAR_PACKAGE["php"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
 
-    if [ $PEAR_INSTALL_CHECK == 1 ] || [ $PEAR_INSTALL_CHECK == 0 ]; then
+    # Check installation HTML_AJAX
+    pear list | grep HTML_AJAX >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ $? -eq 0 ]; then
         echo "Success pear Install" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     else
-        log "ERROR:Installation failed[${PEAR_PACKAGE["php"]}]"
-        func_exit
+       log "ERROR:Installation failed[${PEAR_PACKAGE["php"]}]"
+       func_exit
     fi
 
     # WORKAROUND! Symbolic link must exist.
@@ -578,6 +639,7 @@ configure_php() {
         echo "" | pecl install ${PHP_TAR_GZ_PACKAGE["yaml"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
+    #Check installation php-yaml
     pecl list | grep yaml >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? -ne 0 ]; then
        log "ERROR:Installation failed[php-yaml]"
@@ -587,17 +649,32 @@ configure_php() {
     # Install Composer.
     if [ "${exec_mode}" == "3" ]; then
         echo "----------Installation[Composer]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        curl -sS $COMPOSER | php -- --install-dir=/usr/bin  >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        curl -sS $COMPOSER | php -- --install-dir=/usr/bin  >> "$ITA_BUILDER_LOG_FILE" 2>&1       
+        # install check Composer.
+        if [ ! -e /usr/bin/composer.phar ]; then
+            log "ERROR:Installation failed[Composer]"
+            func_exit
+        fi
     fi
 
     # Install PhpSpreadsheet.
     echo "----------Installation[PhpSpreadsheet]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ "${exec_mode}" == "3" ]; then
         /usr/bin/composer.phar require $PHPSPREADSHEET >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        # install check PhpSpreadsheet.
+        if [ $? -ne 0 ]; then
+            log "ERROR:Installation failed[PhpSpreadsheet]"
+            func_exit
+        fi       
         mv vendor /usr/share/php/  >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     else
         mkdir -p /usr/share/php/vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
         cat_tar_gz ${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR}/vendor.tar.gz | tar zx --strip-components=1 -C /usr/share/php/vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        # install check  PhpSpreadsheet.
+        if [ $? -ne 0 ]; then
+            log "ERROR:Installation failed[PhpSpreadsheet]"
+            func_exit
+        fi       
     fi
 
     #clean
@@ -610,18 +687,57 @@ configure_php() {
 configure_git() {
     # Install some packages.
     yum_install ${YUM_PACKAGE["git"]}
+    # Check installation git packages.
+    echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    yum list installed "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ $? != 0 ]; then
+        log "ERROR:Package not installed [$key]"
+        func_exit
+    fi
+
 }
 
 
 # Ansible
 configure_ansible() {
     yum_install ${YUM_PACKAGE["ansible"]}
-    
+    # Check installation yum ansible packages.
+    yum_package_check ${YUM_PACKAGE["ansible"]}
+
     # Replace Ansible config file.
     copy_and_backup "$ITA_EXT_FILE_DIR/etc_ansible/ansible.cfg" "/etc/ansible/"
     
     # Install some pip packages.
-    pip3 install ${PIP_PACKAGE["ansible"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ "${exec_mode}" == "3" ]; then
+        for key in ${PIP_PACKAGE["ansible"]}; do
+            echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            pip3 install $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Installation failed[$key]"
+                func_exit
+            fi
+        done
+    else
+        for key in ${PIP_PACKAGE["ansible"]}; do
+            echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            pip3 install $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Installation failed pip packages."
+                func_exit
+            fi
+        done
+    fi
+
+    # Check installation some pip packages.
+    for key in ${PIP_PACKAGE_ANSIBLE["remote"]}; do
+        echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pip3 list --format=legacy | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Package not installed [$key]"
+                func_exit
+            fi
+    done
+
 }
 
 
@@ -814,6 +930,11 @@ download() {
     
     mkdir -p vendor/composer
     curl -sS $COMPOSER | php -- --install-dir=vendor/composer >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    # install check Composer.
+    if [ ! -e ./vendor/composer/composer.phar ]; then
+        log "ERROR:Installation failed[Composer]"
+        func_exit
+    fi
 
     local download_dir="${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1104,7 +1225,7 @@ YUM__ENV_PACKAGE="${YUM_PACKAGE_YUM_ENV[${MODE}]}"
 declare -A YUM_PACKAGE;
 YUM_PACKAGE=(
     ["httpd"]="httpd mod_ssl"
-    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-zip php-gd python3 php-devel libyaml libyaml-devel make sudo crontabs"
+    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-gd python3 php-devel libyaml libyaml-devel make sudo crontabs"
     ["git"]="git"
     ["ansible"]="sshpass expect nc"
 )
