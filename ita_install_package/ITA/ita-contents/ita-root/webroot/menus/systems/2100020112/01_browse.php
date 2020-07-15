@@ -353,19 +353,19 @@ print <<< EOD
                                 </div>
                             </td>
                         </tr>
+                    </table>
 EOD;
 if($loop_counter == 1) {
                         
-        $pulldown_HTML  =   '<tr><td> <div id="LogfileSelectionArea" align="left" style="display: none;">';
+        $pulldown_HTML  =   '<h3><div id="LogfileSelectionArea" align="left" style="display: none;">';
         $pulldown_HTML .=   $objMTS->getSomeMessage("ITAANSIBLEH-MNU-509070");
         $pulldown_HTML .=   '  <select name="LogSelection" id="LogSelection" onChange="kakunin(this)">';
         $pulldown_HTML .=   '  <option value="exec.log" selected>exec.log</option>';
         $pulldown_HTML .=   '  </select>';
-        $pulldown_HTML .=   '</dev></td></tr>';
+        $pulldown_HTML .=   '</dev></h3>';
         echo $pulldown_HTML;
 }
 print <<< EOD
-                    </table>
                 </h2>
                 <div id="Monitor_{$loop_counter}_Nakami" style="display:block" class="text">
                     <div style="margin-left:10px">
