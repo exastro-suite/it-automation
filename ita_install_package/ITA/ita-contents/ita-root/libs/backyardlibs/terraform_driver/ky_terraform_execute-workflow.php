@@ -439,8 +439,8 @@
         if (!$r){
             // 異常フラグON
             $error_flag = 1;
-                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00001300")) );
+            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+            throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00001300")) );
         }
 
         // トレースメッセージ
@@ -543,10 +543,15 @@
             //error_logファイルを作成
             if(!file_exists($error_log)){
                 if(!touch($error_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
                     if(!chmod($error_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                     }
                 }
@@ -555,10 +560,15 @@
             //exec_logファイルを作成
             if(!file_exists($exec_log)){
                 if(!touch($exec_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
                     if(!chmod($exec_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                     }
                 }
@@ -714,6 +724,7 @@
             // fetch行数を取得
             $fetch_counter = $objQuery->effectedRowCount();
             if ($fetch_counter < 1){
+                // 異常フラグON
                 $error_flag = 1;
                 // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
                 throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00002100")) );
@@ -844,6 +855,7 @@
             // fetch行数を取得
             $fetch_counter = $objQuery->effectedRowCount();
             if ($fetch_counter < 1){
+                // 異常フラグON
                 $error_flag = 1;
                 // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
                 throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00002900")) );
@@ -1238,8 +1250,8 @@
                 if( $objQuery->getStatus()===false ){
                     // 異常フラグON
                     $error_flag = 1;
-                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00003400")) );
+                    // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                    throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00003400")) );
                 }
 
                 // SQL発行
@@ -1247,8 +1259,8 @@
                 if (!$r){
                     // 異常フラグON
                     $error_flag = 1;
-                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00003500")) );
+                    // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                    throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00003500")) );
                 }
                 // fetch行数を取得
                 $fetch_counter = $objQuery->effectedRowCount();
@@ -1952,6 +1964,8 @@
 
             //tarファイルの存在を確認
             if( !file_exists($tar_temp_save_dir . "/" . $tar_module_file)){
+                // 警告フラグON
+                $warning_flag = 1;
                 // 例外処理へ
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121030",array($tgt_execution_no, __FILE__ , __LINE__)));
             }
@@ -2080,6 +2094,8 @@
 
             //zipファイルの存在を確認
             if(!file_exists($in_utn_file_dir . "/" . $in_zip_file_name)){
+                // 警告フラグON
+                $warning_flag = 1;
                 // 例外処理へ
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121040",array($tgt_execution_no, __FILE__ , __LINE__)));
             }
