@@ -296,6 +296,15 @@
         $lv_terraform_pattern_link   = array();  // 単一行SELECTの結果を格納
         $RequestContents             = array();  // REST API向けのリクエストコンテンツ(JSON)を格納
 
+        //ログおよびstateファイル取得用のHTTPコンテキスト作成
+        $Header = array( "Authorization: Bearer ". $lv_terraform_token,
+                         "Content-Type: application/vnd.api+json");
+        $HttpContext = array( "http" => array( "method"        => 'GET',
+                                               "header"        => implode("\r\n", $Header),
+                                               "ignore_errors" => true));
+        $HttpContext['ssl']['verify_peer']=false;
+        $HttpContext['ssl']['verify_peer_name']=false;
+
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
             // 処理対象レコードの処理ループ開始
@@ -374,10 +383,14 @@
             //error_logファイルを作成
             if(!file_exists($error_log)){
                 if(!touch($error_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
                     if(!chmod($error_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                     }
                 }
@@ -386,10 +399,15 @@
             //exec_logファイルを作成
             if(!file_exists($exec_log)){
                 if(!touch($exec_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
                     if(!chmod($exec_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                     }
                 }
@@ -537,7 +555,7 @@
                 //----------------------------------------------
                 // planのlogファイル(error)を追記
                 //----------------------------------------------
-                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url);
+                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url, false, stream_context_create($HttpContext));
                 $error_msg = $error_msg . $plan_log_bar . $tfe_plan_log . "\n";
                 file_put_contents($error_log, $error_msg);
 
@@ -546,7 +564,7 @@
                 //----------------------------------------------
                 // planのlogファイル(exec)を追記
                 //----------------------------------------------
-                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url);
+                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url, false, stream_context_create($HttpContext));
                 $exec_msg = $exec_msg . $plan_log_bar . $tfe_plan_log . "\n";
                 file_put_contents($exec_log, $exec_msg);
 
@@ -588,15 +606,6 @@
                     $policyResult = $responsContents['data'][0]['attributes']['result'];
                     $output = $responsContents['data'][0]['links']['output'];
                     $output_url = "https://".$lv_terraform_hostname.$output."/";
-
-                    //policyCheckログ取得用HTTPコンテキスト作成
-                    $Header = array( "Authorization: Bearer ". $lv_terraform_token,
-                                     "Content-Type: application/vnd.api+json");
-                    $HttpContext = array( "http" => array( "method"        => 'GET',
-                                                           "header"        => implode("\r\n", $Header),
-                                                           "ignore_errors" => true));
-                    $HttpContext['ssl']['verify_peer']=false;
-                    $HttpContext['ssl']['verify_peer_name']=false;
 
                     //----------------------------------------------
                     // policyCheckの緊急停止判定
@@ -699,7 +708,7 @@
                         //----------------------------------------------
                         // applyのlogファイル(error)を追記
                         //----------------------------------------------
-                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url);
+                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url, false, stream_context_create($HttpContext));
                         $error_msg = $error_msg . $apply_log_bar . $tfe_apply_log . "\n";
                         file_put_contents($error_log, $error_msg);
 
@@ -712,7 +721,7 @@
                         //----------------------------------------------
                         // applyのlogファイル(exec)を追記
                         //----------------------------------------------
-                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url);
+                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url, false, stream_context_create($HttpContext));
                         $exec_msg = $exec_msg . $apply_log_bar . $tfe_apply_log . "\n";
                         file_put_contents($exec_log, $exec_msg);
 
@@ -763,7 +772,7 @@
                         }
 
                         //stateファイルの中身を取得
-                        $state_file_content = file_get_contents($state_download_url);
+                        $state_file_content = file_get_contents($state_download_url, false, stream_context_create($HttpContext));
 
                         if($state_file_content != false){
                             //stateファイルを生成
@@ -771,10 +780,15 @@
                             $state_file = $log_path . "/" . $state_file_name;
                             if(!file_exists($state_file)){
                                 if(!touch($state_file)){
+                                    // 警告フラグON
+                                    $warning_flag = 1;
                                     // 例外処理へ
                                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                                 }else{
                                     if(!chmod($state_file, 0777)){
+                                        // 警告フラグON
+                                        $warning_flag = 1;
+                                        // 例外処理へ
                                         throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
                                     }
                                 }
@@ -799,7 +813,7 @@
                         //----------------------------------------------
                         // applyのlogファイル(exec)を追記
                         //----------------------------------------------
-                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url);
+                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url, false, stream_context_create($HttpContext));
                         $exec_msg = $exec_msg . $apply_log_bar . $tfe_apply_log . "\n";
                         file_put_contents($exec_log, $exec_msg);
 
@@ -814,7 +828,7 @@
                         //----------------------------------------------
                         // applyのlogファイル(exec)を追記
                         //----------------------------------------------
-                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url);
+                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url, false, stream_context_create($HttpContext));
                         $exec_msg = $exec_msg . $apply_log_bar . $tfe_apply_log . "\n";
                         file_put_contents($exec_log, $exec_msg);
 
@@ -832,7 +846,7 @@
                 //----------------------------------------------
                 // planのlogファイル(exex)を追記
                 //----------------------------------------------
-                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url);
+                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url, false, stream_context_create($HttpContext));
                 $exec_msg = $exec_msg . $plan_log_bar . $tfe_plan_log . "\n";
                 file_put_contents($exec_log, $exec_msg);
 
@@ -841,7 +855,7 @@
                 //----------------------------------------------
                 // planのlogファイル(exec)を追記
                 //----------------------------------------------
-                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url);
+                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url, false, stream_context_create($HttpContext));
                 $exec_msg = $exec_msg . $plan_log_bar . $tfe_plan_log . "\n";
                 file_put_contents($exec_log, $exec_msg);
 
@@ -918,6 +932,8 @@
 
                 //zipファイルの存在を確認
                 if(!file_exists($in_utn_file_dir . "/" . $in_zip_file_name)){
+                    // 警告フラグON
+                    $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121040",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }
