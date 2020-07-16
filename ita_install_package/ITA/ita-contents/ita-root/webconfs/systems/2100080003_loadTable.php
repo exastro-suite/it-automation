@@ -74,7 +74,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new TextColumn('WORKSPACE_NAME', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102470'));
     $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102480'));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
-    $c->setValidator(new TextValidator(1, 128, false, '/^[a-zA-Z0-9_-]+$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-106045")));
+    $c->setValidator(new TextValidator(1, 90, false, '/^[a-zA-Z0-9_-]+$/', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102485")));
     $table->addColumn($c);
 
     //Apply Method
