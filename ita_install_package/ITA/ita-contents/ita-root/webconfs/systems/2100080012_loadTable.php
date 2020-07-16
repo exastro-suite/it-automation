@@ -64,7 +64,7 @@ Policy Sets管理ページ
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103260"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
     $c->setUnique(true);
-    $c->setValidator(new TextValidator(1, 128, false, '/^[a-zA-Z0-9_-]+$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-106045")));
+    $c->setValidator(new TextValidator(1, 256, false, '/^[a-zA-Z0-9_-]+$/', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103265")));
     $table->addColumn($c);
 
     $table->fixColumn();
