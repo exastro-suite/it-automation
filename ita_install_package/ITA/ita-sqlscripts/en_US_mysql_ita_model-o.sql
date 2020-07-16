@@ -119,8 +119,8 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 CREATE TABLE B_TERRAFORM_ORGANIZATIONS
 (
 ORGANIZATION_ID                   INT                              ,
-ORGANIZATION_NAME                 VARCHAR (128)                    ,
-EMAIL_ADDRESS                     VARCHAR (256)                    ,
+ORGANIZATION_NAME                 VARCHAR (40)                     ,
+EMAIL_ADDRESS                     VARCHAR (128)                    ,
 CHECK_RESULT                      VARCHAR (8)                      ,
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -139,8 +139,8 @@ JOURNAL_SEQ_NO                    INT                              , -- 履歴�
 JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴用変更日時
 JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
 ORGANIZATION_ID                   INT                              ,
-ORGANIZATION_NAME                 VARCHAR (128)                    ,
-EMAIL_ADDRESS                     VARCHAR (256)                    ,
+ORGANIZATION_NAME                 VARCHAR (40)                     ,
+EMAIL_ADDRESS                     VARCHAR (128)                    ,
 CHECK_RESULT                      VARCHAR (8)                      ,
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -157,7 +157,7 @@ CREATE TABLE B_TERRAFORM_WORKSPACES
 (
 WORKSPACE_ID                      INT                              ,
 ORGANIZATION_ID                   INT                              ,
-WORKSPACE_NAME                    VARCHAR (128)                    ,
+WORKSPACE_NAME                    VARCHAR (90)                     ,
 APPLY_METHOD                      VARCHAR (32)                     ,
 TERRAFORM_VERSION                 VARCHAR (32)                     ,
 CHECK_RESULT                      VARCHAR (8)                      ,
@@ -179,7 +179,7 @@ JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴�
 JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
 WORKSPACE_ID                      INT                              ,
 ORGANIZATION_ID                   INT                              ,
-WORKSPACE_NAME                    VARCHAR (128)                    ,
+WORKSPACE_NAME                    VARCHAR (90)                     ,
 APPLY_METHOD                      VARCHAR (32)                     ,
 TERRAFORM_VERSION                 VARCHAR (32)                     ,
 CHECK_RESULT                      VARCHAR (8)                      ,
