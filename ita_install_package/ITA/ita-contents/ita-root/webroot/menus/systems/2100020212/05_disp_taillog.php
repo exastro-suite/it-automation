@@ -232,8 +232,17 @@
                 throw new Exception( '<div id="tail_show" style="display:none;"></div>'.$objMTS->getSomeMessage("ITAANSIBLEH-ERR-511") );
             }
             
+            if($prg_record_file_id == 1){
+                $fp = fopen($prg_record_file_name_fullpath,'r');
+                flock($fp, LOCK_EX);
+            }
+
             // ログファイルの内容を展開
             $file_data = file_get_contents( $prg_record_file_name_fullpath );
+
+            if($prg_record_file_id == 1){
+                fclose($fp);
+            }
             
             // 文字コード判定
             if( $file_data != mb_convert_encoding( $file_data , 'UTF-8', 'UTF-8' ) ){
