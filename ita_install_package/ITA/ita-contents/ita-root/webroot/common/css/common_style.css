@@ -80,32 +80,130 @@ a:hover, a:active {
 }
 #PAGETOP {
 	position: relative;
-}#PAGETOP::after {
+}
+#PAGETOP::after {
 	content: '';
 	display: block;
 	clear: both;
 }
 
 /* 01.HEADER *******************************************************/
+#HEADER *,
+#HEADER *::before,
+#HEADER *::after {
+  box-sizing: border-box;
+}
 #HEADER {
-	width: 100%;
+  overflow: hidden;
+	width: 100%; height: 80px;
 	min-width: 1240px;
 	background: #002B62;
 	background-image: linear-gradient(#335581, #002B62);
 	color: #F5F5F5;
 }
-#HEADER::after {
-	content: '';
-	display: block;
-	clear: both;
+#HEADER .headerInner {
+  display: table;
+  width: 100%; height: 80px;
 }
-#HEADER > div {
-	width: 100%!important; height: auto!important;
-	float: none!important; display: inline-block!important;
-	vertical-align: middle;
-	text-align: center;
-	padding: 8px 0;
+#HEADER .headerInner > div {
+  display: table-cell;
+  vertical-align: middle;
 }
+#HEADER .itaLogo {
+  width: 16px;
+  padding: 0 16px;
+}
+#HEADER .itaLogo img {
+  width: 200px; height: auto;
+}
+#HEADER .headerMenuGroupName {
+  padding: 0 8px;
+}
+#HEADER h1 {
+  overflow: auto;
+  max-height: 80px;
+  padding: 8px 0;
+  line-height: 1.25;
+  font-size: 24px;
+  font-weight: bold;
+  color: #F5F5F5;
+}
+#HEADER .headerInformation {
+  padding: 0 16px;
+}
+#HEADER .itaLoginUserInformation {
+  display: table;
+  margin-left: auto;
+}
+#HEADER .itaLoginUserInformation > div {
+  display: table-cell;
+  vertical-align: middle;
+}
+#HEADER .itaLoginUserIcon {
+}
+#HEADER .itaLoginUserIconList {
+  overflow: hidden;
+  height: 32px;
+  margin: 0; padding: 0;
+  list-style: none;
+  line-height: 1;
+  letter-spacing: -0.4em;
+  white-space: nowrap;
+}
+#HEADER .itaLoginUserIconItem {
+  display: inline-block;
+  margin-right: 4px;
+  letter-spacing: normal;
+  vertical-align: top;
+}
+#HEADER .itaLoginUserIconItem:first-child {
+  margin-left: 8px;
+}
+#HEADER .itaLoginUserIconItem:last-child {
+  margin-right: 0;
+}
+#HEADER .itaLoginUserIconImage {
+  display: block;
+  width: 32px; height: 32px;
+  background-size: cover;
+  background-position: center center;
+}
+#HEADER .itaLoginUserName,
+#HEADER .itaLoginUserID {
+  line-height: 1;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 11px;
+}
+#HEADER .itaLoginUserName {
+  margin-bottom: 6px;
+}
+#HEADER .headerMenu {
+  padding-top: 8px;
+  text-align: right;
+  white-space: nowrap;
+}
+#HEADER .headerMenu > form {
+  display: inline-block;
+}
+/* HEADER button(changePW/Logout) */
+#HEADER input {
+  width: auto; height: 20px;
+	min-width: 100px;
+  margin: 0; padding: 2px;
+	border: 1px solid transparent;
+	border-radius: 2px;
+	transform: translateY(0);
+	box-shadow: none;
+  line-height: 1;
+}
+/* HEADER button(changePW/Logout):hover */
+#HEADER input:hover {
+	border: 1px solid transparent;
+}
+
+
+
 #HEADER > div img {
 	width: auto!important; height: 56px!important;
 	margin: 0!important;
@@ -126,14 +224,6 @@ a:hover, a:active {
 #HEADER div.ita_name,
 #HEADER table td:first-child div.ita_name {
     display: none!important;
-}
-#HEADER h1 {
-	display: inline-block;
-	margin-left: 24px;
-	color: #F5F5F5;
-	font-size: 24px;
-	font-weight: bold;
-	vertical-align: middle;
 }
 #HEADER h4 {
 	color: #F5F5F5;
@@ -236,7 +326,7 @@ a:hover, a:active {
 	/* overflow: hidden !important;*/
 	margin-left: 180px;
 	min-height: 80vh!important;
-	min-width: 1020px;
+	min-width: 1012px;
 	
 	background-color:	#F0F0F0;
 	background-image:	repeating-linear-gradient( 90deg, transparent, transparent 100px, #E6E6E6 100px, #E6E6E6 101px, transparent 101px, transparent 200px, #EBEBEB 200px, #EBEBEB 201px),
@@ -524,23 +614,6 @@ input.showbutton:hover {
 	box-shadow: none;
 }
 
-/* HEADER button(changePW/Logout) */
-#HEADER input {
-	padding: 2px;
-	min-width: 100px;
-	width: auto;
-	margin-top: 5px;
-	border: none;
-	border-radius: 2px;
-	transform: translateY(0);
-	box-shadow: none;
-}
-
-/* HEADER button(changePW/Logout):hover */
-#HEADER input:hover {
-	border: none;
-}
-
 /* 06.screen for login/logout & changePW  ************************************************/
 /* article */
 #gateLogin, #gateLogout, #gateChangePw {
@@ -549,11 +622,9 @@ input.showbutton:hover {
 	text-align: center;
 	border: 1px solid #C4C4C4;
 }
-
 #gateLogin, #gateLogout {
 	width: 360px;
 }
-
 #gateChangePw {
 	width: 400px;
 }
@@ -775,6 +846,84 @@ right: 4px;
 }
 .password_eye.password_see {
 background-position: -16px 0;
+}
+
+/* SSO Login */
+#ssoLoginContainer *,
+#ssoLoginContainer *::before,
+#ssoLoginContainer *::after {
+  box-sizing: border-box;
+}
+#ssoLoginContainer {
+  padding: 16px 0;
+  background-color: rgba( 0,0,0,.05 );
+}
+#ssoLoginContainer .ssoLoginTitle {
+  margin-bottom: 16px;
+}
+#ssoLoginContainer .ssoLoginList {
+  width: 280px;
+  margin: 0 auto; padding: 0;
+  list-style: none;
+}
+#ssoLoginContainer .ssoLoginItem {
+  margin: 0 0 6px; padding: 0;
+}
+#ssoLoginContainer .ssoLoginLink {
+  display: block;
+  padding: 0 0 2px;
+  text-decoration: none;
+  font-size: 12px;
+  color: #FFF;
+}
+#ssoLoginContainer .ssoLoginLink:focus {
+  outline: none;
+}
+#ssoLoginContainer .ssoLoginLink:hover {
+  padding: 1px 0;
+}
+#ssoLoginContainer .ssoLoginLink:active {
+  padding: 2px 0 0;
+}
+#ssoLoginContainer .ssoLoginLinkInner {
+  display: table;
+  width: 100%;
+  background-color: #EEE;
+  background: #FF9B4B;
+  box-shadow: 0 2px 0 #CC6818;
+  border-radius: 4px;
+  text-align: left;
+}
+#ssoLoginContainer .ssoLoginLink:focus .ssoLoginLinkInner {
+  box-shadow: 0 0 0 1px #0070FF, 0 2px 0 #CC6818;
+}
+#ssoLoginContainer .ssoLoginLink:hover .ssoLoginLinkInner {
+  background-color: #FF701E;
+  box-shadow: 0 1px 0 #CC6818;
+}
+#ssoLoginContainer .ssoLoginLink:active .ssoLoginLinkInner {
+  background-color: #FF701E;
+  box-shadow: none;
+}      
+#ssoLoginContainer .ssoLoginIcon,
+#ssoLoginContainer .ssoLoginAccountType {
+  display: table-cell;
+  vertical-align: middle;
+}
+#ssoLoginContainer .ssoLoginIcon {
+  width: 36px; height: 36px;
+  padding: 6px;
+  background-color: rgba( 255,255,255,.5 );
+  border-radius: 3px 0 0 3px;
+}
+#ssoLoginContainer .ssoLoginIconImage {
+  display: inline-block;
+  width: 24px; height: 24px;
+  background-size: cover;
+  background-position: center center;
+}
+#ssoLoginContainer .ssoLoginAccountType {
+  padding: 8px 16px;
 }
 
 /* 07.for system messages **************************************************************/
@@ -1277,3 +1426,29 @@ hr {
   word-break: break-all;
   white-space: normal;
 }
+
+.header-sample-title {
+  background-color: #EEE;
+  text-align: right;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.p1 .itaLoginUserIconText {
+  display: block;
+  width: 32px; height: 32px;
+  background-color: #AAA;
+  border-radius: 4px;
+  letter-spacing: -9999px;
+  line-height: 34px;
+  text-align: center;
+  font-size: 20px;
+  color: transparent;
+  pointer-events: none;
+}
+
+.p1 .itaLoginUserIconText::first-letter {
+  letter-spacing: normal;
+  color: #FFF;
+}
+
