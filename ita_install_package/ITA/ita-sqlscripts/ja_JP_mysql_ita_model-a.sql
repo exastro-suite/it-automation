@@ -220,7 +220,7 @@ NOTE                           VARCHAR (4000)               , -- 備考
 DISUSE_FLAG                    VARCHAR (1)                  , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          DATETIME(6)                  , -- 最終更新日時
 LAST_UPDATE_USER               INT                          , -- 最終更新ユーザ
-PRIMARY KEY (ID),
+PRIMARY KEY (ID)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 CREATE TABLE A_VISIBLE_FLAG_LIST (
@@ -230,7 +230,7 @@ NOTE                           VARCHAR (4000)               , -- 備考
 DISUSE_FLAG                    VARCHAR (1)                  , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          DATETIME(6)                  , -- 最終更新日時
 LAST_UPDATE_USER               INT                          , -- 最終更新ユーザ
-PRIMARY KEY (ID),
+PRIMARY KEY (ID)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 CREATE TABLE A_PROVIDER_ATTRIBUTE_NAME_LIST (
@@ -240,7 +240,7 @@ NOTE                           VARCHAR (4000)               , -- 備考
 DISUSE_FLAG                    VARCHAR (1)                  , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          DATETIME(6)                  , -- 最終更新日時
 LAST_UPDATE_USER               INT                          , -- 最終更新ユーザ
-PRIMARY KEY (ID),
+PRIMARY KEY (ID)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 -- 履歴系テーブル作成
