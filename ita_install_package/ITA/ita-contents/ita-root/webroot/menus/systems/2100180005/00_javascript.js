@@ -113,7 +113,7 @@ $( function(){
       editor.rowResize();
     } else {
       // conductor_instance_idが無い場合はConductor作業一覧へ飛ばす
-      alert( getSomeMessage("ITABASEC010108") );
+      alert( getSomeMessage("ITABASEC020001") );
       var url = '/default/menu/01_browse.php?no=2100180006';
       location.href = url;
     }
