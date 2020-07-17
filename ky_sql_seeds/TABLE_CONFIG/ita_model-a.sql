@@ -220,7 +220,7 @@ NOTE                           %VARCHR%(4000)               , -- 備考
 DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
 LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
-PRIMARY KEY (ID),
+PRIMARY KEY (ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
 CREATE TABLE A_VISIBLE_FLAG_LIST (
@@ -230,7 +230,7 @@ NOTE                           %VARCHR%(4000)               , -- 備考
 DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
 LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
-PRIMARY KEY (ID),
+PRIMARY KEY (ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
 CREATE TABLE A_PROVIDER_ATTRIBUTE_NAME_LIST (
@@ -240,7 +240,7 @@ NOTE                           %VARCHR%(4000)               , -- 備考
 DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
 LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
-PRIMARY KEY (ID),
+PRIMARY KEY (ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
 -- 履歴系テーブル作成
