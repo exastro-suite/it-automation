@@ -51,7 +51,7 @@ $timeStamp_favicon_ico = filemtime($root_dir_path."/webroot/common/imgs/favicon.
     <meta http-equiv="Content-Script-Type" content="text/javascript">
     <meta http-equiv="content-style-type" content="text/css">
     <link rel="shortcut icon" href="<?= $scheme_n_authority ?>/common/imgs/favicon.ico?<?= $timeStamp_favicon_ico ?>" type="image/vnd.microsoft.icon">
-    <title>{$objMTS->getSomeMessage("ITAWDCH-MNU-4030001")}</title>
+    <title><?= $objMTS->getSomeMessage("ITAWDCH-MNU-4030001") ?></title>
 </head>
 <body>
     <br>
