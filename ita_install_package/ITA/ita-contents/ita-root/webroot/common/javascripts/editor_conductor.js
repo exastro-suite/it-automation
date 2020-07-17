@@ -129,48 +129,48 @@ const listIdName = function( type, id ) {
 // メッセージ
 const messageText = {
   "0001": {
-    "ja": "接続先がありません。",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020112"),
+    "en": getSomeMessage("ITABASEC020112"),
     "type": "notice"},
   "0002": {
-    "ja": "条件分岐は最大６つです。",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020113"),
+    "en": getSomeMessage("ITABASEC020113"),
     "type": "notice"},
   "0003": {
-    "ja": "分岐は最低２つです。",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020114"),
+    "en": getSomeMessage("ITABASEC020114"),
     "type": "notice"},
   "0004": {
-    "ja": "接続済みの分岐は削除できません。",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020115"),
+    "en": getSomeMessage("ITABASEC020115"),
     "type": "notice"},
   "0005": {
-    "ja": "ループする接続はできません。",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020116"),
+    "en": getSomeMessage("ITABASEC020116"),
     "type": "warning"},
   "0006": {
-    "ja": "Startノードは削除できません。",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020117"),
+    "en": getSomeMessage("ITABASEC020117"),
     "type": "notice"},
   "0007": {
-    "ja": "条件分岐はマージできません。",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020118"),
+    "en": getSomeMessage("ITABASEC020118"),
     "type": "warning"},
   "1001": {
-    "ja": "読み込みに失敗しました。",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020119"),
+    "en": getSomeMessage("ITABASEC020119"),
     "type": "error"},
   "1002": {
-    "ja": "読み込みに成功しました。",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020120"),
+    "en": getSomeMessage("ITABASEC020120"),
     "type": "done"},
   "2001": {
-    "ja": "一時停止を解除しますか？",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020121"),
+    "en": getSomeMessage("ITABASEC020121"),
     "type": "confirm"},
   "2002": {
-    "ja": "リセットしますか？",
-    "en": "",
+    "ja": getSomeMessage("ITABASEC020122"),
+    "en": getSomeMessage("ITABASEC020122"),,
     "type": "confirm"}
 };
 const message = function( messageID ) {
@@ -206,7 +206,7 @@ const nodeStatus = {
   '5': ['done', getSomeMessage("ITABASEC010507") ], // 実行完了
   '6': ['fail', getSomeMessage("ITABASEC010306") ], // 異常終了
   '7': ['stop', getSomeMessage("ITABASEC010304") ], // 緊急停止
-  '8': ['pause', '停止中'], // 保留中 getSomeMessage("ITABASEC010508")
+  '8': ['pause',getSomeMessage("ITABASEC020111") ], //停止中
   '9': ['done', getSomeMessage("ITABASEC010305") ], // 正常終了
   '10': ['error', getSomeMessage("ITABASEC010502") ], // 準備エラー
   '11': ['error', getSomeMessage("ITABASEC010307") ], // 想定外エラー
