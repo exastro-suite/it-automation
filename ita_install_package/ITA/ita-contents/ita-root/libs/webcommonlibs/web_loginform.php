@@ -1,17 +1,47 @@
-<?php print($strLoginFormHeadBody); ?>
+<?= $strLoginFormHeadBody ?>
 <div id="gateLoginContainer" class="gateContainer">
- <form id="gateLoginForm" class="inputUserInfoForm" method="POST" name="loginform" action="<?php print($strGateUrl); ?>?login&grp=<?php print($ASJTM_grp_id); ?>&no=<?php print($ASJTM_id); ?>">
+ <form id="gateLoginForm" class="inputUserInfoForm" method="POST" name="loginform" action="<?= $strGateUrl ?>?login&grp=<?= $ASJTM_grp_id ?>&no=<?= $ASJTM_id ?>">
    <table id="gateLoginItemTable" class="headerLeftTable inputItemTable" border="0">
      <tr>
-       <th class="inputItemExplain"><?php print($strLoginIDCaption); ?></th>
+       <th class="inputItemExplain"><?= $strLoginIDCaption ?></th>
        <td class="inputItemWrapper"><input class="inputUserId" type="text" name="username" /></td>
      </tr>
      <tr>
-       <th class="inputItemExplain"><?php print($strLoginPWCaption); ?></th>
+       <th class="inputItemExplain"><?= $strLoginPWCaption ?></th>
        <td class="inputItemWrapper"><div class="input_password"><input class="inputUserPw" type="password" name="password" /><div class="password_eye"></div></td>
      </tr>
    </table>
-   <input id="loginTryExecute" class="loginGateSubmitElement tryExecute" type="submit" name="login" value="<?php print($strLoginActionCaption); ?>" />
+   <input id="loginTryExecute" class="loginGateSubmitElement tryExecute" type="submit" name="login" value="<?= $strLoginActionCaption ?>" />
  </form>
 </div>
-<?php print($strLoginFormTailBody); ?>
+
+<?php if (!empty($arySsoProviderList) && array_sum(array_column($arySsoProviderList, 'visibleFlag')) > 0) { ?>
+<div id="ssoLoginContainer">
+  <div class="ssoLoginTitle"><span class="ssoLoginTitleText"><?= $objMTS->getSomeMessage("ITAWDCH-STD-1011") ?></span></div>
+    <ul class="ssoLoginList">
+    <?php foreach ($arySsoProviderList as $item) { ?>
+      <?php if ($item['visibleFlag'] === '1') { ?>
+
+      <li class="ssoLoginItem">
+        <a href="/common/common_sso_auth.php?<?= $item['authType'] ?>&providerId=<?= $item['providerId'] ?>&grp=<?= $ASJTM_grp_id ?>&no=<?= $ASJTM_id ?>">
+          <span class="ssoLoginLinkInner">
+          <?php if (!empty($item['providerLogo'])) { ?>
+
+            <span class="ssoLoginIcon">
+              <span class="ssoLoginIconImage" style="background-image: url(<?= $item['providerLogo'] ?>);"></span>
+            </span>
+
+          <?php } ?>
+
+            <span class="ssoLoginAccountType"><?= $objMTS->getSomeMessage("ITAWDCH-STD-1012",$item['providerName']) ?></span>
+          </span>
+        </a>
+      </li>
+      <?php } ?>
+    <?php } ?>
+
+    </ul>
+  </div>
+</div>
+<?php } ?>
+<?= $strLoginFormTailBody ?>
