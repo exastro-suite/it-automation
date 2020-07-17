@@ -108,4 +108,16 @@ $ary["ITABASEC-020107"] = "Abnormal termination";
 $ary["ITABASEC-020108"] = "Unexpected error";
 $ary["ITABASEC-020109"] = "Cancel reservation";
 $ary["ITABASEC-020110"] = "Unexpected error (loop)";
+$ary["ITABASEC-020111"] = "Stopping";
+$ary["ITABASEC-020112"] = "There is no connection destination.";
+$ary["ITABASEC-020113"] = "There is a maximum of 6 conditional branches.";
+$ary["ITABASEC-020114"] = "There are at least two branches.";
+$ary["ITABASEC-020115"] = "You cannot delete a connected branch.";
+$ary["ITABASEC-020116"] = "Looped connections are not possible.";
+$ary["ITABASEC-020117"] = "You cannot delete the Start node.";
+$ary["ITABASEC-020118"] = "Conditional branches cannot be merged.";
+$ary["ITABASEC-020119"] = "Failed to read.";
+$ary["ITABASEC-020120"] = "The reading was successful.";
+$ary["ITABASEC-020121"] = "Are you sure you want to cancel the suspension?";
+$ary["ITABASEC-020122"] = "Do you want to reset it?";
 ?>
