@@ -711,6 +711,7 @@
                 case 501: // 実装されていないメソッド
                 case 502: // 不正なゲートウェイ
                 case 503: // サービス利用不可（過負荷、メンテナンス中による）
+                    http_response_code($intDefaultResutStatusCode);
                     break;
             }
 
@@ -718,6 +719,16 @@
 
             //MDC(NNN)+
             switch($intForceQuitDatailCode){
+                // 400
+                case 10000400: // 不正なリクエスト
+                    insideRedirectCodePrint("/common/common_bad_request.php",$intInsideRedirectMode);
+                    break;
+                // 401
+                case 10000401: // 未認証アクセス
+                    insideRedirectCodePrint("/common/common_unauthorized.php",$intInsideRedirectMode);
+                    break;
+                // 403
+                case 10000403: // 不正操作によるアクセス警告画面にリダイレクト
                 case 10310201: // 不正操作によるアクセス警告画面にリダイレクト
                 case 10610201: // 不正操作によるアクセス警告画面にリダイレクト
                 case 10810201: // 不正操作によるアクセス警告画面にリダイレクト
@@ -1055,8 +1066,34 @@ EOD;
     }
 
     function getSchemeNAuthority(){
-        // URI部分を省略するために空を返却
-        return '';
+        // グローバル変数の利用宣言
+        global $root_dir_path,$g;
+        $retStrValue = "";
+        if ( empty($root_dir_path) ){
+            $root_dir_path = getApplicationRootDirPath();
+        }
+        $strContent = "";
+        if( file_exists($root_dir_path."/confs/webconfs/L7Protocol.txt")===true ){
+            $strContent = @file_get_contents ( $root_dir_path."/confs/webconfs/L7Protocol.txt" );
+        }
+        if( $strContent == "http" || $strContent == "https" ){
+            $retStrValue = $strContent.":/"."/".$_SERVER['HTTP_HOST'];
+        }
+        else if( $strContent != "" ){
+            web_log("Setting of L7Protocol is not collect.");
+            exit();
+        }
+        if( $retStrValue == "" ){
+            $protocol = getRequestProtocol();
+
+            // 起動元がバックヤードかWebを判定
+            $arrayReqInfo = requestTypeAnalyze();
+            if( $arrayReqInfo[0] == "web" )
+                $retStrValue = $protocol . $_SERVER['HTTP_HOST'];
+            else
+                $retStrValue = '';
+        }
+        return $retStrValue;
     }
 
     function ky_printHeaderForProvideBinaryStream($strProvideFilename,$strContentType="",$varContentLength=null,$boolFileNameUTF8=true){
