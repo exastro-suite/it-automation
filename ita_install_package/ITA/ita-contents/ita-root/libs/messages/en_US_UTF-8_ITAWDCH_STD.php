@@ -40,8 +40,8 @@ $ary[1006] = "Logout";
 $ary[1102] = "Logged out";
 $ary[1103] = "Login again";
 $ary[1104] = "You are not logged in.";
-$ary[501] = "User name [{}]<br>";
-$ary[502] = "Login ID [{}]<br>";
+$ary[501] = "User name [{}]";
+$ary[502] = "Login ID [{}]";
 $ary[503] = "Logout";
 $ary[504] = "Change password";
 $ary[301] = "Download for developer (Excel)";
@@ -282,4 +282,6 @@ $ary[1007] = "Panel display: Large";
 $ary[1008] = "Panel display: Middle";
 $ary[1009] = "Panel display: Small";
 $ary[1010] = "Classic mode";
+$ary[1011] = "Login on another account";
+$ary[1012] = "{} Account";
 ?>
