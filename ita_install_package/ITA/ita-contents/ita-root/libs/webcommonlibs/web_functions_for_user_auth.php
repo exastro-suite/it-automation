@@ -1749,7 +1749,8 @@
                   ."FROM "
                   ."    A_ACCOUNT_LIST "
                   ."WHERE "
-                  ."    DISUSE_FLAG = '0' ";
+                  ."    DISUSE_FLAG = '0' AND "
+                  ."    AUTH_TYPE not in('sso')";
 
             $objQuery = $objDBCA->sqlPrepare($sql);
             if( $objQuery->getStatus()===false ){
