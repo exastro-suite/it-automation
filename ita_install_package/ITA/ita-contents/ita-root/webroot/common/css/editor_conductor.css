@@ -1,0 +1,1546 @@
+@charset "utf-8";
+/* CSS Document */
+
+#editor.load-conductor > div {
+opacity: .5!important;
+pointer-events: none!important;
+}
+
+#editor-edit {
+  height: 80%;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+#editor-info {
+  height: 20%;
+}
+#editor-body .editor-row-resize-bar {
+  top: 80%;
+}
+#canvas-visible-area {
+overflow: hidden;
+position: relative;
+z-index: 0;
+width: 100%; height: 100%;
+}
+#canvas {
+overflow: hidden;
+position: absolute;
+left: 0; top: 0;
+z-index: 1;
+background-color: #5F5F5F;
+transform-origin: 0 0;
+}
+#art-board {
+position: absolute;
+left: 0; top: 0;
+z-index: 2;
+background: linear-gradient( transparent, transparent 99px, #CCC 99px, #CCC 100px ),
+            linear-gradient( 90deg, transparent, transparent 99px, #CCC 99px, #CCC 100px ),
+            linear-gradient( transparent, transparent 49px, #D0D0D0 49px, #D0D0D0 50px ),
+            linear-gradient( 90deg, transparent, transparent 49px, #D0D0D0 49px, #D0D0D0 50px ),
+            linear-gradient( transparent, transparent 9px, #DDD 9px, #DDD 10px ),
+            linear-gradient( 90deg, transparent, transparent 9px, #DDD 9px, #DDD 10px ),
+            #EEE;
+background-size: 100px 100px, 100px 100px, 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+}
+#canvas[data-scale="50"] #art-board {
+background: linear-gradient( transparent, transparent 98px, #CCC 98px, #CCC 100px ),
+            linear-gradient( 90deg, transparent, transparent 98px, #CCC 98px, #CCC 100px ),
+            linear-gradient( transparent, transparent 48px, #D0D0D0 48px, #DEDEDE 50px ),
+            linear-gradient( 90deg, transparent, transparent 48px, #D0D0D0 48px, #D0D0D0 50px ),
+            #EEE;
+background-size: 100px 100px, 100px 100px, 50px 50px, 50px 50px;
+}
+#canvas[data-scale="25"] #art-board {
+background: linear-gradient( transparent, transparent 96px, #DDD 96px, #DDD 100px ),
+            linear-gradient( 90deg, transparent, transparent 96px, #DDD 96px, #DDD 100px ),
+            #EEE;
+background-size: 100px 100px, 100px 100px;
+}
+#canvas[data-scale="10"] #art-board {
+background: #EEE;
+}
+
+/* モード別 */
+body[data-action-mode="editor-pause"] { cursor: no-drop!important; }
+body[data-action-mode="editor-pause"] * { pointer-events: none!important; }
+body[data-action-mode="canvas-move"] * { cursor: grabbing!important; }
+body[data-action-mode="case-drag"] *,
+body[data-action-mode="node-drag"] *,
+body[data-action-mode="node-noedge-drag"],
+body[data-action-mode="node-move"] *,
+body[data-action-mode="node-noedge-move"] * { cursor: grabbing!important; }
+body[data-action-mode="node-select"] #art-board * { pointer-events: none!important; }
+
+.node {
+position: absolute;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+cursor: pointer;
+}
+body[data-action-mode="node-move"] .node {
+pointer-events: none!important;
+}
+body[data-action-mode="node-move"] .node.current {
+z-index: 9999;
+}
+#editor[data-editor-mode="view"] .node:hover::after,
+body[data-action-mode="edge-connect"] .node:hover::after,
+body[data-action-mode="edge-connect"] .node.selected::after {
+display: none!important;
+}
+#editor[data-editor-mode="view"] .node {
+cursor: default!important;
+}
+.node:hover::after,
+.node.selected::after {
+content: '';
+position: absolute;
+left: -8px; top: -8px;
+z-index: -1;
+width: calc( 100% + 16px ); height: calc( 100% + 16px );
+background-color: rgba( 255,100,10,.2 );
+border: 4px solid #FF640A;
+border-radius: 12px;
+opacity: 0.8;
+pointer-events: none;
+}
+.node.selected::after {
+background-color: rgba( 96,198,13,.2 );
+border-color: #60C60D;
+}
+#canvas[data-scale="75"] .node:hover::after,
+#canvas[data-scale="75"] .node.selected::after {
+left: -12px; top: -12px;
+width: calc( 100% + 24px ); height: calc( 100% + 24px );
+border-width: 6px;
+}
+#canvas[data-scale="50"] .node:hover::after,
+#canvas[data-scale="50"] .node.selected::after {
+left: -16px; top: -16px;
+width: calc( 100% + 32px ); height: calc( 100% + 32px );
+border-width: 8px;
+}
+#canvas[data-scale="25"] .node:hover::after,
+#canvas[data-scale="25"] .node.selected::after {
+left: -32px; top: -32px;
+width: calc( 100% + 64px ); height: calc( 100% + 64px );
+border-width: 16px;
+}
+#canvas[data-scale="10"] .node:hover::after,
+#canvas[data-scale="10"] .node.selected::after {
+left: -64px; top: -64px;
+width: calc( 100% + 128px ); height: calc( 100% + 128px );
+border-width: 32px;
+}
+
+.node.drag {
+position: fixed;
+pointer-events: none;
+}
+.node-main,
+.node-sub {
+display: flex;
+padding: 1px;
+background: linear-gradient( #666, #111 );
+border-radius: 9px;
+box-shadow: 4px 4px 8px rgba( 0,0,0,.4 );
+}
+.node-body {
+position: relative;
+z-index: 1;
+}
+#editor[data-editor-mode="edit"] .node-body {
+cursor: grab;
+}
+.node-circle {
+position: absolute;
+left: 4px; top: -8px;
+z-index: 1;
+width: 72px; height: 72px;
+background-image: linear-gradient( -45deg, #CCC, #EEE );
+box-shadow: 1px 1px 3px 1px rgba( 0,0,0,.4 );
+border-radius: 50%;
+}
+.node-circle::before {
+content: '';
+position: absolute;
+left: 1px; top: 1px;
+z-index: 2;
+width: 70px; height: 70px;
+background-image: linear-gradient( -45deg, #EEE, #CCC );
+border-radius: 50%;
+}
+.node-circle::after {
+content: '';
+position: absolute;
+left: 4px; top: 4px;
+z-index: 3;
+width: 64px; height: 64px;
+background-image: linear-gradient( -45deg, #333, #666 );
+box-shadow: 0 0 2px 1px rgba( 0,0,0,.3 ) inset;
+border-radius: 50%;
+}
+.node-circle .node-gem {
+display: block;
+position: absolute;
+left: 7px; top: 7px;
+z-index: 5;
+width: 58px; height: 58px;
+box-shadow: 0 0 2px 1px rgba( 0,0,0,.3 );
+border-radius: 50%;
+text-align: center;
+line-height: 58px;
+text-shadow: 1px 1px 1px rgba( 0,0,0,.6 );
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-weight: bold;
+font-size: 28px;
+color: #EEE;
+transition-duration: 1s;
+}
+.node-circle .node-gem::before,
+.node-circle .node-gem::after {
+content: '';
+display: block;
+position: absolute;
+right: 0; top: 0;
+width: 58px; height: 58px;
+border-radius: 50%;
+}
+.node-circle .node-gem::before {
+background-image: radial-gradient( circle at 50% 80%, rgba( 255,255,255,.6 ), transparent );
+box-shadow: 0 -1px 4px 2px rgba( 0,0,0,.3 ) inset;
+}
+.node-circle .node-gem::after {
+background-image: linear-gradient( rgba( 255,255,255,.95 ), rgba( 255,255,255,.7 ) 10%, transparent 85% );
+transform-origin: center top;
+transform: scale(.8,.6) translateY(4px);
+}
+.node-type,
+.node-name {
+overflow: hidden;
+max-width: 400px;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+}
+.drag .node-name {
+white-space: nowrap;
+text-overflow: ellipsis;
+}
+.node-type {
+overflow: hidden;
+text-overflow: ellipsis;
+height: 24px;
+padding: 0 8px 0 84px;
+background: linear-gradient( rgba( 255,255,255,.2 ), transparent, rgba( 0,0,0,.3 ) ) #666;
+border-top: 1px solid rgba( 255,255,255,.2 );
+border-left: 1px solid rgba( 255,255,255,.2 );
+border-bottom: 1px solid rgba( 0,0,0,.5 );
+border-right: 1px solid rgba( 0,0,0,.3 );
+text-shadow: 1px 1px 2px rgba( 255,255,255,.6 ),
+            -1px -1px 2px rgba( 0,0,0,.6 );
+white-space: nowrap;
+line-height: 24px;
+font-size: 11px;
+color: #DDD;
+}
+.node-name {
+min-height: 32px;
+padding: 4px 8px 4px 84px;
+background-color: #DDD;
+background-image: linear-gradient( rgba( 0,0,0,0 ), rgba( 0,0,0,.3 ) );
+background-position: -1px -1px;
+background-size: 105% 105%;
+border-top: 1px solid rgba( 255,255,255,.2 );
+border-left: 1px solid rgba( 255,255,255,.4 );
+border-bottom: 1px solid rgba( 0,0,0,.6 );
+border-right: 1px solid rgba( 0,0,0,.1 );
+line-height: 1.5;
+font-size: 14px;
+font-weight: bold;
+color: #222;
+}
+.node-terminal {
+position: relative;
+z-index: 1;
+width: 32px; min-height: 32px;
+background-color: #666;
+background-image: linear-gradient( rgba( 0,0,0,0 ), rgba( 0,0,0,.7 ) );
+background-position: -1px -1px;
+background-size: 105% 105%;
+border-top: 1px solid rgba( 255,255,255,.2 );
+border-left: 1px solid rgba( 255,255,255,.2 );
+border-bottom: 1px solid rgba( 0,0,0,.3 );
+border-right: 1px solid rgba( 0,0,0,.3 );
+}
+#editor[data-editor-mode="edit"] .node-terminal {
+cursor: pointer;
+}
+.node-cap {
+width: 16px;
+}
+.node-in {
+border-radius: 8px 0 0 8px;
+}
+.node-out {
+border-radius: 0 8px 8px 0;
+}
+#editor[data-editor-mode="edit"] .node-terminal.hover {
+cursor: copy;
+}
+#editor[data-editor-mode="edit"] .node-terminal.connected.hover {
+cursor: no-drop!important;
+}
+.node-terminal::after,
+.node-cap::before,
+.node-cap::after {
+content: '';
+display: block;
+position: absolute;
+left: 20%;
+z-index: 1;
+width: 60%; height: 8px;
+background-size: 6px 6px;
+}
+.node-cap::before {
+top: 4px;
+background-image: linear-gradient( #666 1px, #333 1px, #333 2px, transparent 2px );
+}
+.node-terminal::after,
+.node-cap::after {
+bottom: 4px;
+background-image: linear-gradient( #444 1px, #111 1px, #111 2px, transparent 2px );
+}
+.node-in.node-terminal::before,
+.node-out.node-terminal::before {
+content: 'IN';
+display: block;
+position: absolute;
+left: 0; top: 4px;
+z-index: 1;
+transform: scale(0.9);
+width: 100%;
+text-shadow: 1px 1px 1px rgba( 0,0,0,.8 ), -1px -1px 1px rgba( 255,255,255,.2 );
+text-align: center;
+line-height: 1;
+letter-spacing: 0.2em;
+font-size: 10px;
+font-weight: bold;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #DDD;
+}
+.node-out.node-terminal::before {
+content: 'OUT';
+}
+
+.node-terminal .hole,
+.node-terminal .hole::before,
+.node-terminal .hole::after {
+display: block;
+content: '';
+position: absolute;
+left: 50%;
+transform: translateX(-50%);
+border-radius: 50%;
+}
+.node-terminal .hole {
+top: 50%;
+z-index: 2;
+transform: translate(-50%,-50%);
+width: 24px; height: 24px;
+background-image: linear-gradient( #111, #444 );
+box-shadow: 0 1px 1px rgba( 255,255,255,.3 ),
+0 -1px 1px rgba( 0,0,0,.4 );
+}
+.node-terminal .hole::before {
+top: 3px;
+z-index: 3;
+width: 18px; height: 18px;
+background-image: linear-gradient( #CCC, #AAA );
+}
+.node-terminal .hole::after {
+top: 4px;
+z-index: 4;
+width: 16px; height: 16px;
+border: 1px solid #888;
+background-color: #333;
+box-shadow: 0 0 8px #000 inset;
+}
+
+
+
+.node-terminal.connect .hole::after,
+.node-terminal.connected .hole::after {
+background-image: linear-gradient( 130deg, #AAA, #FFFFF2, #AAA );
+border-color: #333;
+box-shadow: 1px 1px 6px 2px rgba( 0,0,0,.8 );
+}
+.node-terminal .hole-inner {
+display: block;
+position: absolute;
+left: 0; top: 0;
+z-index: 5;
+width: 100%; height: 100%;
+border: 2px solid transparent;
+border-radius: 50%;
+transform: scale(1);
+transition-duration: .2s;
+}
+body[data-action-mode="edge-connect"] .node-terminal {
+cursor: no-drop;
+}
+body[data-action-mode="edge-connect"] .node-terminal.connect,
+body[data-action-mode="edge-connect"] .node-terminal.wait-connect {
+cursor: pointer;
+}
+body[data-action-mode="edge-connect"] .node-terminal .hole {
+opacity: .3;
+}
+body[data-action-mode="edge-connect"] .node-terminal.connect .hole,
+body[data-action-mode="edge-connect"] .node-terminal.connected .hole,
+body[data-action-mode="edge-connect"] .node-terminal.wait-connect .hole {
+opacity: 1;
+}
+body[data-action-mode="edge-connect"] .node-terminal.wait-connect .hole-inner {
+border-color: #60C60D;
+transform: scale(1.2);
+cursor: pointer;
+}
+body[data-action-mode="edge-connect"] .node-terminal.wait-connect .connect-mark {
+display: block;
+position: absolute;
+left: 0; top: 0;
+width: 100%; height: 100%;
+}
+body[data-action-mode="edge-connect"] .node-terminal.wait-connect .connect-mark::before {
+content: '';
+display: block;
+position: absolute;
+left: 8px;
+width: 16px; height: 16px;
+border: 8px solid transparent;
+top: -20px;
+border-top-color: #FF640A;
+transition-duration: .2s;
+animation: connectMarkTop 1s infinite;
+}
+@keyframes connectMarkTop {
+  0% { transform: translateY(0); }
+ 50% { transform: translateY(4px); }
+100% { transform: translateY(0); }
+}
+body[data-action-mode="edge-connect"] .node-terminal.wait-connect.hover .hole-inner {
+border-color: #FF640A;
+}
+body[data-action-mode="edge-connect"] .node-terminal.wait-connect.hover .connect-mark::before {
+animation: none;
+transform: translateY(6px);
+}
+
+.node-terminal.connect .hole-inner::after,
+.node-terminal.connected .hole-inner::after,
+.node-terminal.connect .hole-inner::before,
+.node-terminal.connected .hole-inner::before {
+content: '';
+position: absolute;
+left: 50%; top: 50%;
+z-index: 6;
+transform: translate(-50%,-50%);
+width: 8px; height: 2px;
+background-color: #333;
+border-radius: 1px;
+}
+.node-terminal.connect .hole-inner::before,
+.node-terminal.connected .hole-inner::before {
+z-index: 7;
+transform: translate(-50%,-50%) rotate(90deg);
+}
+.node-terminal.connect-a .hole-inner {
+animation: connectedAnimation 1s;
+}
+@keyframes connectedAnimation {
+from { transform: scale(1.5) rotate( 0 ); }
+to { transform: scale(1) rotate( 360deg ); }
+}
+
+
+/* function */
+.function .node-terminal::before,
+.function .node-terminal::after,
+.function .node-cap::before,
+.function .node-cap::after {
+display: none;
+}
+.function .node-terminal .hole {
+top: 50%;
+transform: translate(-50%,-50%);
+}
+.function-conditional .node-main .node-body {
+display: none;
+}
+.function .node-type {
+padding-left: 8px;
+text-align: left;
+}
+.function .node-name {
+padding-left: 8px;
+}
+.function-blank .node-name {
+padding: 0 8px;
+}
+
+/* call */
+.conductor-call .node-type {
+padding-left: 84px;
+}
+.conductor-call .node-name {
+padding: 4px 4px 4px 80px;
+}
+.conductor-call .select-conductor-name {
+display: block;
+padding: 2px;
+background-color: #222;
+border: 1px solid #666;
+box-shadow: 0 1px 0 rgba( 255,255,255,.3 );
+border-radius: 2px;
+}
+.conductor-call .select-conductor-name-inner {
+overflow: hidden;
+display: block;
+padding: 4px 8px;
+background-color: #111;
+background-image: linear-gradient( rgba( 0,0,0,0 ), rgba( 0,0,0,.2 ) );
+border-radius: 1px;
+text-align: left;
+line-height: 1;
+font-weight: normal;
+font-size: 12px;
+color: #666;
+white-space: nowrap;
+text-overflow: ellipsis;
+}
+.conductor-call.call-select .select-conductor-name-inner {
+background-color: #FF640A;
+color: #FFF;
+}
+
+/* blanl */
+.function-blank .node-name {
+position: relative;
+z-index: 1;
+background-image: linear-gradient( #666, #222 );
+border-top-color: rgba( 255,255,255,.3 );
+border-left-color: rgba( 255,255,255,.3 );
+}
+.function-blank .node-name::before,
+.function-blank .node-name::after {
+content: '';
+display: block;
+position: absolute;
+top: 50%;
+z-index: 2;
+transform: translateY(-50%);
+width: 2px; height: 80%;
+border-left: 1px solid rgba( 0,0,0,.4 );
+border-right: 1px solid rgba( 255,255,255,.15 );
+}
+.function-blank .node-name::before {
+left: 4px;
+}
+.function-blank .node-name::after {
+right: 4px;
+}
+
+/* branch, merge */
+.function-conditional,
+.function-parallel,
+.function-merge {
+display: flex;
+align-items: center;
+}
+.function-conditional .node-sub,
+.function-parallel .node-sub,
+.function-merge .node-sub {
+margin: 48px 0;
+}
+.function-conditional .node-sub:first-child,
+.function-parallel .node-sub:first-child,
+.function-merge .node-sub:first-child {
+margin-top: 0!important;
+}
+.function-conditional .node-sub:last-child,
+.function-parallel .node-sub:last-child,
+.function-merge .node-sub:last-child {
+margin-bottom: 0!important;
+}
+.node-branch .node-body {
+width: calc( 100% - 40px );
+}
+.branch-type,
+.merge-status,
+.pause-status,
+.pause-resume {
+min-width: 8px; min-height: 32px;
+padding: 4px;
+}
+.branch-type,
+.merge-status {
+background-image: linear-gradient( #DDD, #AAA );
+border-top: 1px solid rgba( 255,255,255,.8 );
+border-left: 1px solid rgba( 255,255,255,.4 );
+border-bottom: 1px solid rgba( 0,0,0,.5 );
+border-right: 1px solid rgba( 0,0,0,.3 );
+}
+.pause-status,
+.pause-resume {
+display: inline-block;
+background-image: linear-gradient( #C00, #900 );
+border-top: 1px solid rgba( 255,255,255,.4 );
+border-left: 1px solid rgba( 255,255,255,.3 );
+border-bottom: 1px solid rgba( 0,0,0,.3 );
+border-right: 1px solid rgba( 0,0,0,.3 );
+vertical-align: top;
+}
+#KIZI .branch-type ul {
+width: 100%; min-height: 24px;
+margin: 0; padding: 1px;
+background-color: #222;
+border: 1px solid #666;
+box-shadow: 0 1px 0 rgba( 255,255,255,.3 );
+border-radius: 2px;
+list-style: none;
+}
+#KIZI .branch-type li {
+margin: 1px 1px 4px; padding: 4px 8px 3px;
+white-space: nowrap;
+}
+#KIZI .branch-type li:last-child {
+margin-bottom: 1px;
+}
+.branch-type li {
+background-image: linear-gradient( rgba( 0,0,0,0 ), rgba( 0,0,0,.2 ) );
+border-radius: 2px;
+line-height: 1;
+text-align: center;
+font-size: 11px;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #EEE;
+}
+.branch-type li.done { background-color: #4D9E0A; }
+.branch-type li.fail { background-color: #6E22B5; }
+.branch-type li.error { background-color: #D60000; }
+.branch-type li.stop { background-color: #EBEB00; color: #111; }
+.branch-type li.skip { background-color: #00878A; }
+.branch-type li.other { background-color: #999999; }
+
+.pause-resume-button {
+overflow: hidden;
+display: block;
+position: relative;
+z-index: 1;
+width: 24px; height: 22px;
+margin: 0; padding: 0 8px;
+background-color: #666;
+border: 1px solid;
+border-top-color: rgba( 255,255,255,.1 );
+border-left-color: rgba( 255,255,255,.1 );
+border-right-color: rgba( 0,0,0,.2 );
+border-bottom-color: rgba( 0,0,0,.2 );
+border-radius: 2px;
+box-shadow: 0 0 0 1px #111;
+text-shadow: 1px 1px 1px rgba( 0,0,0,.6 );
+cursor: pointer;
+}
+.pause-resume-button::before {
+content: '';
+display: block;
+position: absolute;
+left: 50%; top: 50%;
+transform: translate(-4px,-50%);
+border-width: 6px 10px;
+border-style: solid;
+border-color: transparent;
+border-left-color: #EEE;
+}
+.pause-resume-button:hover {
+background-color: #777;
+}
+.pause-resume-button:disabled {
+pointer-events: none;
+background-color: #555;
+box-shadow: 0 0 0 1px #111;
+border-color: #666;
+}
+.pause-resume-button:disabled::before {
+border-left-color: #888;
+}
+.pause-resume-button:active {
+background-color: #606060;
+box-shadow: 0 0 0 1px #111;
+border-color: rgba( 0,0,0,.3 );
+color: #EEE;
+outline: none;
+}
+.pause-resume-button:active::before {
+border-left-color: #DDD;
+}
+#KIZI .merge-status .merge-status-list,
+#KIZI .pause-status .pause-status-list {
+overflow: hidden;
+display: block;
+position: relative;
+z-index: 1;
+width: 100%; height: 22px;
+margin: 0; padding: 1px;
+background-color: #222;
+border: 1px solid #666;
+box-shadow: 0 1px 0 rgba( 255,255,255,.3 );
+border-radius: 2px;
+list-style: none;
+}
+#KIZI .pause-status .pause-status-list {
+box-shadow: 0 0 0 1px rgba( 0,0,0,.8 );
+}
+#KIZI .merge-status .merge-status-item,
+#KIZI .pause-status .pause-status-item {
+height: 18px;
+margin: 0 0 2px; padding: 0 4px;
+background-image: linear-gradient( rgba( 0,0,0,0 ), rgba( 0,0,0,.2 ) );
+border: 1px solid #000;
+border-radius: 2px;
+line-height: 16px;
+text-align: center;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #EEE;
+transition-duration: .5s;
+}
+.merge-status[data-status="standby"] .merge-status-item,
+.pause-status[data-status="standby"] .pause-status-item {
+transform: translateY(0);
+}
+.merge-status[data-status="waiting"] .merge-status-item,
+.pause-status[data-status="pause"] .pause-status-item {
+transform: translateY(-20px);
+animation: waiting 2s infinite;
+}
+@keyframes waiting {
+  0% { opacity: .7; }
+ 50% { opacity: 1; }
+100% { opacity: .7; }
+}
+.merge-status[data-status="complete"] .merge-status-item,
+.pause-status[data-status="resume"] .pause-status-item {
+transform: translateY(-40px);
+}
+.merge-status[data-status="unused"] .merge-status-item {
+transform: translateY(-60px);
+}
+#KIZI .merge-status .merge-status-standby,
+#KIZI .pause-status .pause-status-standby {
+background-color: #111;
+color: #999;
+}
+#KIZI .merge-status .merge-status-waiting,
+#KIZI .pause-status .pause-status-pause {
+background-color: #C00;
+color: #EEE;
+}
+#KIZI .merge-status .merge-status-complete,
+#KIZI .pause-status .pause-status-resume {
+background-color: #4D9E0A;
+color: #FFF;
+}
+#KIZI .merge-status .merge-status-unused {
+margin: 0;
+background-color: #999;
+color: #DDD;
+}
+
+.branch-in,
+.branch-out,
+.merge-in,
+.merge-out {
+position: relative;
+z-index: 1;
+width: 10px; min-height: 32px;
+background-color: #666;
+background-image: linear-gradient( rgba( 0,0,0,0 ), rgba( 0,0,0,.7 ) );
+background-position: -1px -1px;
+background-size: 105% 105%;
+border-top: 1px solid rgba( 255,255,255,.4 );
+border-left: 1px solid rgba( 255,255,255,.2 );
+border-bottom: 1px solid rgba( 0,0,0,.8 );
+border-right: 1px solid rgba( 0,0,0,.8 );
+cursor: pointer;
+}
+.function-conditional .node-terminal.node-in,
+.function-parallel .node-terminal.node-in,
+.function-merge .node-terminal.node-out {
+min-height: 56px;
+}
+.function-conditional .node-terminal.node-in::before,
+.function-parallel .node-terminal.node-in::before,
+.function-merge .node-terminal.node-out::before {
+content: 'IN';
+display: block;
+position: absolute;
+left: 0; top: 4px;
+z-index: 1;
+transform: scale(0.9);
+width: 100%;
+text-shadow: 1px 1px 1px rgba( 0,0,0,.8 ), -1px -1px 1px rgba( 255,255,255,.2 );
+text-align: center;
+line-height: 1;
+letter-spacing: 0.2em;
+font-size: 10px;
+font-weight: bold;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #DDD;
+}
+.function-merge .node-terminal.node-out::before {
+content: 'OUT';
+}
+.function-conditional .node-terminal.node-in::after,
+.function-parallel .node-terminal.node-in::after,
+.function-merge .node-terminal.node-out::after {
+content: '';
+display: block;
+position: absolute;
+left: 20%; bottom: 4px;
+z-index: 1;
+width: 60%; height: 8px;
+background-image: linear-gradient( #444 1px, #111 1px, #111 2px, transparent 2px );
+background-size: 6px 6px;
+}
+
+
+.branch-in,
+.merge-in {
+border-radius: 8px 0 0 8px;
+}
+.branch-out,
+.merge-out {
+border-radius: 0 8px 8px 0;
+}
+
+.branch-line {
+overflow: hidden;
+z-index: -1;
+width: 40px;
+height: 100%;
+}
+.branch-line svg {
+height: 8px;
+}
+.branch-line .branch-line {
+fill: none;
+stroke: #999;
+stroke-width: 1px;
+}
+.branch-line .branch-in-line {
+fill: none;
+stroke: #444;
+stroke-width: 3px;
+}
+.branch-line .branch-out-line {
+fill: none;
+stroke: #222;
+stroke-width: 5px;
+}
+.branch-line .branch-back-line {
+fill: none;
+stroke: #EEE;
+stroke-width: 11px;
+}
+
+#branch-condition-move {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+#KIZI .branch-case {
+margin: 0; padding: 2px;
+}
+#KIZI .branch-case li {
+margin: 2px 4px; padding: 4px 8px;
+}
+.branch-case {
+width: 100%; min-height: 29px;
+background-color: #222;
+border: 1px solid #555;
+border-radius: 3px;
+line-height: 1;
+list-style: none;
+letter-spacing: -0.4em;
+}
+.branch-case.hover {
+border-color: #FF640A;
+}
+.branch-case li {
+display: inline-block;
+padding: 4px 8px;
+box-shadow: 0 0 0 1px #000;
+border-radius: 2px;
+line-height: 1;
+letter-spacing: normal;
+font-size: 11px;
+white-space: nowrap;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #EEE;
+cursor: grab;
+}
+.branch-case li.done { background-color: #4D9E0A; }
+.branch-case li.fail { background-color: #6E22B5; }
+.branch-case li.error { background-color: #D60000; }
+.branch-case li.stop { background-color: #EBEB00; color: #111; }
+.branch-case li.skip { background-color: #00878A; }
+
+.branch-case li:hover {
+opacity: 0.75;
+}
+
+
+/* */
+.conductor-call .node-circle .node-gem,
+.conductor-start .node-circle .node-gem,
+.conductor-end .node-circle .node-gem {
+font-size: 40px!important;
+}
+
+/* Conductor color */
+
+.conductor-start .node-type,
+.conductor-start .node-circle .node-gem,
+.conductor-end .node-type,
+.conductor-end .node-circle .node-gem,
+.conductor-call .node-type,
+.conductor-call .node-circle .node-gem{ background-color: #002B62; }
+
+.node-ansible-legacy .node-type { background-color: #DD0000; }
+.add-node.ansible-legacy,
+.node-ansible-legacy .node-circle .node-gem { background-color: #EE0000; }
+
+.node-ansible-pioneer .node-type { background-color: #00763B; }
+.add-node.ansible-pioneer,
+.node-ansible-pioneer .node-circle .node-gem { background-color: #008040; }
+
+.node-ansible-legacy-role  .node-type { background-color: #654422; }
+.add-node.ansible-legacy-role,
+.node-ansible-legacy-role .node-circle .node-gem { background-color: #6E4A25; }
+
+.node-cobbler .node-type { background-color: #8A2BE2; }
+.add-node.cobbler,
+.node-cobbler .node-circle .node-gem { background-color: #6E22B5; }
+
+.node-dsc .node-type  { background-color: #FF701E; }
+.add-node.dsc,
+.node-dsc .node-circle .node-gem { background-color: #F5600A; }
+
+/* Running */
+.node.running .node-circle::after {
+background-image: linear-gradient( #264F05 2px, #132803 2px );
+background-size: 3px 3px;
+animation: runningNodeCircleBack 0.5s linear infinite;
+}
+@keyframes runningNodeCircleBack {
+0% {
+  background-position: 0 0;
+  opacity: 1;
+  box-shadow: 0 0 2px #60C60D;
+  }
+50% {
+  background-position: 0 1px;
+  opacity: .9;
+  box-shadow: 0 0 4px #60C60D;
+  }
+100% {
+  background-position: 0 3px;
+  opacity: 1;
+  box-shadow: 0 0 2px #60C60D;
+  }
+}
+.run-complete .node.running .node-circle::after {
+animation: none;
+background-image: linear-gradient( -45deg, #333, #666 );
+}
+
+.node.running .node-running {
+display: block;
+position: absolute;
+left: 11%; top: 11%;
+z-index: 4;
+width: 78%; height: 78%;
+border: 4px solid transparent;
+border-top-color: #FFF;
+border-radius: 50%;
+animation: runningNodeCircle 3s linear infinite;
+opacity: 0.75;
+}
+@keyframes runningNodeCircle {
+to { transform: rotate(360deg); }
+}
+.run-complete .node.running .node-running {
+animation: none;
+}
+.node.running .node-running::before,
+.node.running .node-running::after {
+content: '';
+position: absolute;
+left: -4px; top: -4px;
+z-index: 4;
+width: calc( 100% + 8px ); height: calc( 100% + 8px );
+border: 4px solid transparent;
+border-radius: 50%;
+}
+.node.running .node-running::before {
+transform: rotate(120deg);
+border-top-color: #FFF;
+}
+.node.running .node-running::after {
+transform: rotate(240deg);
+border-top-color: #FFF;
+}
+
+.node.running .node-circle .node-gem {
+transform: scale(.75);
+box-shadow: 0 0 16px 2px rgba( 0,0,0,.3 ) inset,
+0 0 8px 2px #264F05;
+}
+.run-complete .node.running .node-circle .node-gem {
+transform: scale(1);
+box-shadow: 0 0 16px 2px rgba( 0,0,0,.3 ) inset;
+}
+.node.running.complete .node-circle::after,
+.node.running.complete .node-running {
+animation: none;
+}
+.node.run-unused,
+.node-sub.run-unused {
+opacity: .3!important;
+}
+.node-result {
+overflow: hidden;
+display: block;
+align-items: center;
+justify-content: center;
+position: absolute;
+left: 5px; top: 5px;
+z-index: 20;
+width: 62px; height: 62px;
+border-radius: 50%;
+}
+
+
+/* 結果表示 */
+.node-result::before {
+display: none;
+content: attr(data-result-text);
+align-items: center;
+justify-content: center;
+width: 100%; height: 100%;
+background-color: #666;
+background-image: linear-gradient( rgba( 255,255,255,0 ) 50%, rgba( 255,255,255,.1 ) 50% );
+background-size: 4px 4px;
+border: 2px solid rgba( 0,0,0,.3);
+box-shadow: 0 0 0 1px #111 inset, 0 0 8px rgba( 0,0,0,.6 ) inset;
+border-radius: 50%;
+text-shadow: 0 0 4px #111;
+text-align: center;
+line-height: 1;
+white-space: nowrap;
+font-size: 16px;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-weight: bold;
+color: #FFF;
+transition-duration: .5s;
+}
+.complete .node-result::before {
+display: flex;
+transform: scale(1);
+animation: completeResult 1s forwards;
+}
+@keyframes completeResult {
+  0% { transform: scale(1.5); opacity: 0; }
+100% { transform: scale(1); opacity: 1; }
+}
+.complete[data-result="6"] .node-result::before,
+.complete[data-result="10"] .node-result::before,
+.complete[data-result="11"] .node-result::before {
+background-color: #D00;
+}
+.complete[data-result="5"] .node-result::before,
+.complete[data-result="9"] .node-result::before {
+background-color: #58B60C;
+}
+.complete[data-result="12"] .node-result::before,
+.complete[data-result="13"] .node-result::before,
+.complete[data-result="14"] .node-result::before {
+background-color: #00878A;
+}
+.complete[data-result="7"] .node-result::before {
+background-color: #FD0;
+text-shadow: none;
+color: #000;
+}
+
+
+.node > .node-note {
+display: none;
+pointer-events: none;
+position: absolute;
+left: 50%; bottom: calc(100% + 16px);
+z-index: 99999;
+transform: translateX(-50%);
+min-width: 100%;
+padding: 8px 16px;
+background-color: rgba( 0,0,0,.6 );
+background-image: linear-gradient( transparent, rgba( 0,0,0,.4 ) );
+border-bottom: 2px solid #333;
+border-radius: 8px;
+box-shadow: 3px 3px 6px rgba( 0,0,0,.3 );
+}
+.node > .node-note.note-open {
+display: block;
+}
+.node.operation > .node-note.note-open {
+bottom: calc(100% + 48px);
+}
+.node > .node-note::after {
+content: '';
+display: block;
+position: absolute;
+left: 50%; bottom: -8px;
+transform: translateX(-50%);
+width: 0; height: 0;
+border-left: 8px solid transparent;
+border-right: 8px solid transparent;
+border-top: 8px solid #333;
+}
+.node > .node-note p {
+line-height: 1.5;
+letter-spacing: 0.1em;
+font-size: 13px;
+color: #DDD;
+white-space: nowrap;
+}
+.node > .node-skip {
+overflow: hidden;
+position: absolute;
+right: 16px; top: 100%;
+z-index: 0;
+transform: translateY(-100%);
+background-color: #222;
+border: 1px solid #222;
+border-radius: 0 0 5px 5px;
+transition-duration: .2s;
+}
+.node.skip > .node-skip {
+box-shadow: 0 1px 4px rgba( 0,0,0,.6 ), 0 0 4px rgba( 0,0,0,.3 ) inset;
+transform: translateY(-1px);
+}
+.node.skip > .node-skip::before,
+.node.skip > .node-skip::after {
+content: '';
+display: block;
+position: absolute;
+}
+.node.skip > .node-skip::before {
+top: 4px; left: 10%;
+width: 80%; height: 2px;
+border-bottom: 1px solid rgba( 255,255,255,.08 );
+border-top: 1px solid rgba( 0,0,0,.3 );
+}
+.node.skip > .node-skip::after {
+bottom: 3px; left: 10%;
+width: 80%; height: 2px;
+border-bottom: 1px solid rgba( 255,255,255,.12 );
+border-top: 1px solid rgba( 0,0,0,.3);
+}
+.node-skip-checkbox {
+position: absolute;
+left: -99999px; top: 0;
+z-index: 0;
+}
+.node-skip-label {
+display: block;
+padding: 9px 8px 7px 24px;
+background-color: #555;
+background-image: linear-gradient( rgba( 0,0,0,.5 ), rgba( 0,0,0,0 ) 35%, rgba( 0,0,0,0 ));
+background-size: 100% 105%;
+border-left: 1px solid rgba( 255,255,255,.2 );
+border-bottom: 1px solid rgba( 0,0,0,.3 );
+border-right: 1px solid rgba( 0,0,0,.3 );
+border-radius: 0 0 4px 4px;
+line-height: 1;
+text-shadow: -1px -1px 1px rgba( 0,0,0,.5 );
+font-size: 10px;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #DDD;
+white-space: nowrap;
+cursor: pointer;
+}
+.node-skip-label::before,
+.node-skip-label::after {
+content: '';
+display: block;
+position: absolute;
+z-index: 1;
+width: 12px; height: 12px;
+}
+.node-skip-label::before {
+left: 8px; top: 8px;
+background-color: #000;
+border: 1px solid #222;
+}
+.node-skip-checkbox:checked + .node-skip-label::before {
+background-color: #FF640A;
+}
+.node-skip-checkbox:checked + .node-skip-label::after {
+left: 12px; top: 9px;
+width: 4px; height: 8px;
+border: 2px solid #FFF;
+border-left: none;
+border-top: none;
+transform: rotate( 45deg );
+}
+/* Operation個別指定 */
+.node > .node-operation {
+position: absolute;
+left: 12px; top: -36px;
+z-index: 0;
+transform: translateY(160%);
+width: calc( 100% - 24px ); height: 24px;
+display: flex;
+padding: 1px;
+background-color: #666;
+background-image: linear-gradient( #666, #111 );
+background-position: -1px -1px;
+background-size: 105% 105%;
+border-radius: 12px;
+box-shadow: 4px 4px 8px rgba( 0,0,0,.3 );
+}
+.node.operation > .node-operation {
+transform: translateY(0);
+}
+.node > .node-operation::before,
+.node > .node-operation::after {
+content: '';
+display: block;
+z-index: 2;
+width: 16px;
+height: 22px;
+background-color: #555;
+background-image: linear-gradient( #555, #222 );
+background-position: -1px -1px;
+background-size: 105% 105%;
+border-top: 1px solid rgba( 255,255,255,.2 );
+border-left: 1px solid rgba( 255,255,255,.2 );
+border-bottom: 1px solid rgba( 0,0,0,.6 );
+border-right: 1px solid rgba( 0,0,0,.6 );
+}
+.node > .node-operation::before {
+border-radius: 10px 0 0 10px;
+}
+.node > .node-operation::after {
+border-radius: 0 10px 10px 0;
+}
+.node-operation-border {
+position: absolute;
+left: 14px; bottom: -16px;
+width: calc( 100% - 28px ); height: 16px;
+}
+.node-operation-border::before,
+.node-operation-border::after {
+content: '';
+position: absolute;
+top: -2px;
+z-index: 0;
+width: 4px; height: 24px;
+background-color: #555;
+border: 1px solid #222;
+border-top-width: 2px;
+box-shadow: 2px 0 2px rgba( 0,0,0,.4 ), 0 0 1px rgba( 0,0,0,.6 ) inset;
+}
+.node-operation-border::before {
+left: 0;
+transform: rotate(8deg);
+}
+.node-operation-border::after {
+right: 0;
+transform: rotate(-8deg);
+}
+.node-operation-body {
+z-index: 2;
+width: calc( 100% - 32px ); height: 100%;
+padding: 2px 4px;
+background-image: linear-gradient( #666, #555 );
+border-top: 1px solid rgba( 255,255,255,.2 );
+border-left: 1px solid rgba( 255,255,255,.2 );
+border-bottom: 1px solid rgba( 0,0,0,.3 );
+border-right: 1px solid rgba( 0,0,0,.3 );
+}
+.node-operation-data,
+.node-operation-name {
+display: inline-block;
+height: 16px;
+box-shadow: 0 0 0 1px #222;
+vertical-align: top;
+line-height: 14px;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+color: #EEE;
+}
+.node-operation-data {
+overflow: hidden;
+width: calc( 100% - 25px );
+padding: 0 8px;
+background-color: #222;
+border: 1px solid #000;
+white-space: nowrap;
+font-size: 12px;
+text-overflow: ellipsis;
+}
+.node-operation-name {
+width: 24px;
+margin-right: 1px;
+background-color: #FF640A;
+border: 1px solid rgba( 0,0,0,.2 );
+text-align: center;
+font-weight: bold;
+font-size: 11px;
+}
+
+
+/* SVG */
+#svg-area,
+#select-area {
+position: absolute;
+left: 0; top: 0;
+z-index: 0;
+pointer-events: none;
+}
+#select-area {
+z-index: 99999;
+}
+#svg-area g {
+cursor: pointer;
+}
+#svg-area path {
+fill: none;
+stroke-linecap: round;
+}
+#editor[data-editor-mode="edit"] #svg-area g,
+#editor[data-editor-mode="edit"] #svg-area path {
+pointer-events: auto;
+}
+.svg-line,
+.svg-line-outside,
+.svg-select-line,
+.svg-line-back {
+stroke-linecap: round;
+fill: transparent;
+}
+/* 選択用ライン */
+.svg-select-line {
+stroke: rgba( 255,255,255,0 );
+stroke-width: 24;
+}
+.svg-line {
+stroke: rgba( 255,255,255,.25 );
+stroke-width: 1;
+}
+.svg-line-inside {
+stroke: rgba( 255,255,255,.25 );
+stroke-width: 3;
+}
+.svg-line-outside {
+stroke: #001A3B;
+stroke-width: 5;
+}
+.svg-line-back {
+stroke: #EEE;
+stroke-width: 11;
+}
+/* Edge 削除 */
+.svg-group[data-connected="connected"].hover .svg-line-outside { stroke: #C80000; }
+/* Edge 割り込み可能 */
+body[data-action-mode="node-move"] .svg-group[data-interrupt="true"] .svg-line-outside { stroke: #60C60D; }
+/* Edge 割り込み */
+body[data-action-mode="node-move"] .svg-group[data-connected="connected"].hover .svg-line-outside { stroke: #F5600A; }
+
+.svg-group[data-status="running"] .svg-line {
+display: none;
+}
+.svg-group[data-status="running"] .svg-line-inside {
+stroke: #FFF;
+stroke-dasharray: 10;
+stroke-dashoffset: 80;
+animation: featuresLine 2s linear 0s infinite;
+}
+/* IE11 not support */
+@keyframes featuresLine {
+0% { stroke-dashoffset: 80; }
+100% { stroke-dashoffset: 0; }
+}
+.run-complete .svg-group[data-status="running"] .svg-line-inside {
+animation: none;
+}
+.svg-group[data-status="run-unused"] {
+opacity: .3;
+}
+
+#select-area rect {
+fill: rgba( 96,198,13,.1 );
+stroke: #60C60D;
+storke-width: 1px;
+}
+
+.node-table-wrap {
+overflow-y: auto;
+overflow-x: hidden;
+height: 100%;
+background-color: #222;
+border-top: 1px solid #222;
+box-shadow: 0 0 0 1px #555;
+}
+/* Chrome */
+.node-table-wrap::-webkit-scrollbar {
+  width: 8px;
+}
+.node-table-wrap::-webkit-scrollbar-track {
+  background: #222;
+}
+.node-table-wrap::-webkit-scrollbar-thumb {
+  background: #666;
+  border-right: 1px solid #111;
+}
+/* Firefox */
+.node-table-wrap {
+  scrollbar-width: thin;
+  scrollbar-color: #666 #222;
+}
+
+
+#movement-list,
+#function-list {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+#movement-list .node-table-wrap {
+height: calc( 100% - 32px );
+}
+.node-table {
+width: 100%;
+margin-top: -1px;
+background-color: #111;
+border-collapse: separate;
+border-spacing: 1px;
+}
+.node-table th,
+.node-table td {
+color: #DDD;
+}
+.node-table thead th {
+position: sticky;
+
+top: 0;
+z-index: 2;
+background-color: #333;
+box-shadow: 0 0 0 1px #111;
+}
+.node-table tbody th {
+width: 8px;
+background-color: #444;
+}
+.node-table tbody td {
+background-color: #555;
+}
+.node-table th div {
+padding: 4px;
+font-size: 11px;
+}
+.node-table td div {
+padding: 6px 12px;
+}
+
+#editor[data-editor-mode="edit"] .node-table tbody th,
+#editor[data-editor-mode="edit"] .node-table tbody td {
+cursor: grab;
+}
+#editor[data-editor-mode="edit"] .node-table tbody tr:hover th {
+background-color: #2F3337;
+}
+#editor[data-editor-mode="edit"] .node-table tbody tr:hover td {
+background-color: #3B4045;
+}
+
+
+
+.movement-filter {
+overflow: hidden;
+height: 32px;
+}
+.movement-filter .panel-table {
+margin-bottom: 0;
+}
+.filter-hide {
+display: none;
+}
+
+.add-node {
+position: relative;
+z-index: 1;
+display: block;
+width: 20px; height: 20px;
+margin: 0 auto; padding: 0;
+background-color: #666;
+box-shadow: 0 0 0 1px #000;
+border-radius: 50%;
+}
+.add-node::before,
+.add-node::after {
+content: '';
+display: block;
+position: absolute;
+right: 0; top: 0;
+z-index: 2;
+width: 100%; height: 100%;
+border-radius: 50%;
+}
+.add-node::before {
+background-image: radial-gradient( circle at 50% 80%, rgba( 255,255,255,.6 ), transparent );
+box-shadow: 0 -1px 2px 1px rgba( 0,0,0,.3 ) inset;
+}
+.add-node::after {
+background-image: linear-gradient( rgba( 255,255,255,.95 ), rgba( 255,255,255,.7 ) 10%, transparent 85% );
+transform-origin: center top;
+transform: scale(.8,.6) translateY(1px);
+}
+
+
+
+
+/* パネル モード別 */
+#editor[data-editor-mode="edit"] #conductor .view,
+#editor[data-editor-mode="view"] #conductor .edit { display: none; }
+
+/* メニュー モード別 */
+#editor #editor-footer .editor-menu-list,
+#editor .editor-header-main-menu,
+#editor[data-editor-mode="edit"][data-editor-config="update"] .editor-menu-list.edit,
+#editor[data-editor-mode="edit"][data-editor-config="update"] #editor-footer .editor-menu-list.edit { display: none; }
+
+#editor[data-editor-mode="edit"] .editor-header-main-menu { display: table-cell; }
+
+#editor[data-editor-mode="edit"] #editor-footer .editor-menu-list.edit,
+#editor[data-editor-mode="view"] #editor-footer .editor-menu-list.view,
+#editor[data-editor-mode="edit"][data-editor-config="update"] #editor-footer .editor-menu-list.update,
+#editor[data-editor-mode="execute"] #editor-footer .editor-menu-list,
+#editor[data-editor-mode="checking"] #editor-footer .editor-menu-list {
+display: inline-block;
+}
