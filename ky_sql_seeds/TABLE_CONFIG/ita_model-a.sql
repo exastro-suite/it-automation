@@ -20,11 +20,14 @@ PRIMARY KEY(NAME)
 CREATE TABLE A_ACCOUNT_LIST
 (
 USER_ID                 %INT%                   ,
-USERNAME                %VARCHR%(30)            ,
+USERNAME                %VARCHR%(270)           ,
 PASSWORD                %VARCHR%(32)            ,
-USERNAME_JP             %VARCHR%(80)            ,
+USERNAME_JP             %VARCHR%(270)           ,
 MAIL_ADDRESS            %VARCHR%(256)           ,
 PW_LAST_UPDATE_TIME     %DATETIME6%             ,
+AUTH_TYPE               %VARCHR%(10)            ,
+PROVIDER_ID             %INT%                   ,
+PROVIDER_USER_ID        %VARCHR%(256)           ,
 NOTE                    %VARCHR%(4000)          ,
 DISUSE_FLAG             %VARCHR%(1)             ,
 LAST_UPDATE_TIMESTAMP   %DATETIME6%             ,
@@ -183,6 +186,63 @@ LAST_UPDATE_USER        %INT%                   ,
 PRIMARY KEY(FLAG)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
+CREATE TABLE A_PROVIDER_LIST
+(
+PROVIDER_ID                    %INT%                        , -- プロバイダーID
+PROVIDER_NAME                  %VARCHR%(100)                , -- プロバイダー名
+LOGO                           %VARCHR%(256)                , -- ロゴ
+AUTH_TYPE                      %VARCHR%(10)                 , -- 認証方式
+VISIBLE_FLAG                   %INT%                        , -- 表示フラグ
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(PROVIDER_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_ATTRIBUTE_LIST (
+PROVIDER_ATTRIBUTE_ID          %INT%                        , -- 属性ID
+PROVIDER_ID                    %INT%                        , -- プロバイダーID
+NAME                           %VARCHR%(100)                , -- 属性名
+VALUE                          %VARCHR%(256)                , -- 属性値
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY (PROVIDER_ATTRIBUTE_ID),
+UNIQUE KEY UNQ_IDX_A_PROVIDER_ATTRIBUTE_LIST_01 (PROVIDER_ID,NAME)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_AUTH_TYPE_LIST (
+ID                             %INT%                        , -- ID
+NAME                           %VARCHR%(10)                 , -- 認証方式名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY (ID),
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_VISIBLE_FLAG_LIST (
+ID                             %INT%                        , -- ID
+FLAG                           %VARCHR%(10)                 , -- 表示フラグ名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY (ID),
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_ATTRIBUTE_NAME_LIST (
+ID                             %INT%                        , -- SSO認証属性名称ID
+NAME                           %VARCHR%(50)                 , -- SSO認証属性名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY (ID),
+)%%TABLE_CREATE_OUT_TAIL%%;
+
 -- 履歴系テーブル作成
 CREATE TABLE A_ACCOUNT_LIST_JNL
 (
@@ -190,11 +250,14 @@ JOURNAL_SEQ_NO          %INT%                   ,
 JOURNAL_REG_DATETIME    %DATETIME6%             ,
 JOURNAL_ACTION_CLASS    %VARCHR%(8)             ,
 USER_ID                 %INT%                   ,
-USERNAME                %VARCHR%(30)            ,
+USERNAME                %VARCHR%(270)           ,
 PASSWORD                %VARCHR%(32)            ,
-USERNAME_JP             %VARCHR%(80)            ,
+USERNAME_JP             %VARCHR%(270)           ,
 MAIL_ADDRESS            %VARCHR%(256)           ,
 PW_LAST_UPDATE_TIME     %DATETIME6%             ,
+AUTH_TYPE               %VARCHR%(10)            ,
+PROVIDER_ID             %INT%                   ,
+PROVIDER_USER_ID        %VARCHR%(256)           ,
 NOTE                    %VARCHR%(4000)          ,
 DISUSE_FLAG             %VARCHR%(1)             ,
 LAST_UPDATE_TIMESTAMP   %DATETIME6%             ,
@@ -415,6 +478,83 @@ DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止�
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
 LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
 PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+
+CREATE TABLE A_PROVIDER_LIST_JNL
+(
+JOURNAL_SEQ_NO               %INT%                          , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME         %DATETIME6%                    , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS         %VARCHR%(8)                    , -- 履歴用変更種別
+
+PROVIDER_ID                  %INT%                          , -- プロバイダーID
+PROVIDER_NAME                %VARCHR%(100)                  , -- プロバイダー名
+LOGO                         %VARCHR%(256)                  , -- ロゴ
+AUTH_TYPE                    %VARCHR%(10)                   , -- 認証方式
+VISIBLE_FLAG                 %INT%                          , -- 表示フラグ
+NOTE                         %VARCHR%(4000)                 , -- 備考
+DISUSE_FLAG                  %VARCHR%(1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP        %DATETIME6%                    , -- 最終更新日時
+LAST_UPDATE_USER             %INT%                          , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_ATTRIBUTE_LIST_JNL (
+JOURNAL_SEQ_NO                 %INT%                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME           %DATETIME6%                  , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS           %VARCHR%(8)                  , -- 履歴用変更種別
+
+PROVIDER_ATTRIBUTE_ID          %INT%                        , -- 属性ID
+PROVIDER_ID                    %INT%                        , -- プロバイダーID
+NAME                           %VARCHR%(100)                , -- 属性名
+VALUE                          %VARCHR%(256)                , -- 属性値
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_AUTH_TYPE_LIST_JNL (
+JOURNAL_SEQ_NO                 %INT%                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME           %DATETIME6%                  , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS           %VARCHR%(8)                  , -- 履歴用変更種別
+
+ID                             %INT%                        , -- ID
+NAME                           %VARCHR%(10)                 , -- 認証方式名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_VISIBLE_FLAG_LIST_JNL (
+JOURNAL_SEQ_NO                 %INT%                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME           %DATETIME6%                  , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS           %VARCHR%(8)                  , -- 履歴用変更種別
+
+ID                             %INT%                        , -- ID
+FLAG                           %VARCHR%(10)                 , -- 表示フラグ名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_ATTRIBUTE_NAME_LIST_JNL (
+JOURNAL_SEQ_NO                 %INT%                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME           %DATETIME6%                  , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS           %VARCHR%(8)                  , -- 履歴用変更種別
+
+ID                             %INT%                        , -- SSO認証属性名称ID
+NAME                           %VARCHR%(50)                 , -- SSO認証属性名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
 -- *****************************************************************************
@@ -1980,6 +2120,9 @@ SELECT TAB_A.USER_ID              ,
        [%CONCAT_HEAD/%]TAB_A.USER_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.USERNAME[%CONCAT_TAIL/%] USER_PULLDOWN,
        TAB_C.USER_JUDGE_ID        ,
        TAB_C.AD_USER_SID          ,
+       TAB_A.AUTH_TYPE            ,
+       TAB_A.PROVIDER_ID          ,
+       TAB_A.PROVIDER_USER_ID     ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -2005,6 +2148,9 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        [%CONCAT_HEAD/%]TAB_A.USER_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.USERNAME[%CONCAT_TAIL/%] USER_PULLDOWN,
        TAB_C.USER_JUDGE_ID        ,
        TAB_C.AD_USER_SID          ,
+       TAB_A.AUTH_TYPE            ,
+       TAB_A.PROVIDER_ID          ,
+       TAB_A.PROVIDER_USER_ID     ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -2199,6 +2345,59 @@ FROM A_ROLE_ACCOUNT_LINK_LIST_JNL TAB_A
 LEFT JOIN A_ACCOUNT_LIST TAB_B ON (TAB_A.USER_ID = TAB_B.USER_ID)
 LEFT JOIN A_ROLE_LIST TAB_C ON (TAB_A.ROLE_ID = TAB_C.ROLE_ID)
 WHERE TAB_A.USER_ID > 0;
+
+CREATE VIEW D_PROVIDER_LIST AS
+SELECT TAB_A.PROVIDER_ID,
+       TAB_A.PROVIDER_NAME,
+       TAB_A.LOGO,
+       TAB_A.AUTH_TYPE,
+       TAB_A.VISIBLE_FLAG,
+       TAB_A.NOTE,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER
+FROM A_PROVIDER_LIST TAB_A;
+
+CREATE VIEW D_PROVIDER_LIST_JNL AS
+SELECT TAB_A.JOURNAL_SEQ_NO,
+       TAB_A.JOURNAL_REG_DATETIME,
+       TAB_A.JOURNAL_ACTION_CLASS,
+       TAB_A.PROVIDER_ID,
+       TAB_A.PROVIDER_NAME,
+       TAB_A.LOGO,
+       TAB_A.AUTH_TYPE,
+       TAB_A.VISIBLE_FLAG,
+       TAB_A.NOTE,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER
+FROM A_PROVIDER_LIST_JNL TAB_A;
+
+CREATE VIEW D_PROVIDER_ATTRIBUTE_LIST AS
+SELECT TAB_A.PROVIDER_ATTRIBUTE_ID,
+       TAB_A.PROVIDER_ID,
+       TAB_A.NAME,
+       TAB_A.VALUE,
+       TAB_A.NOTE,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER
+FROM A_PROVIDER_ATTRIBUTE_LIST TAB_A;
+
+CREATE VIEW D_PROVIDER_ATTRIBUTE_LIST_JNL AS
+SELECT TAB_A.JOURNAL_SEQ_NO,
+       TAB_A.JOURNAL_REG_DATETIME,
+       TAB_A.JOURNAL_ACTION_CLASS,
+       TAB_A.PROVIDER_ATTRIBUTE_ID,
+       TAB_A.PROVIDER_ID,
+       TAB_A.NAME,
+       TAB_A.VALUE,
+       TAB_A.NOTE,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER
+FROM A_PROVIDER_ATTRIBUTE_LIST_JNL TAB_A;
+
 -- *****************************************************************************
 -- *** WEB-DBCORE Views *****                                                ***
 -- *****************************************************************************
