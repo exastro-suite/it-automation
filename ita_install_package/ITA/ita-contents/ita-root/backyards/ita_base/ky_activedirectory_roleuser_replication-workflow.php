@@ -132,6 +132,8 @@ try {
 
     $strSpecialRoles = $aryExternalAuthSettings['LocalRoleId']['IdList'];
     $arySpecialRoles = explode(",", $strSpecialRoles);
+    // SSO default role_idを特別ロールIDとして扱う
+    $arySpecialRoles[] = 2100000001;
 
     ////////////////////////////////////////////////////////////////
     // AD認証(ユーザ/ロールのリストとってこれるユーザ)
@@ -204,6 +206,16 @@ try {
         }
     }
     //デッドロック防止のために、昇順でロック----
+
+    // ----除外ユーザーリストにSSOユーザーを追加
+    $sso_user = new AAccountListModel($objDBCA, $db_access_user_id);
+    $conditions = array("AUTH_TYPE = 'sso'");
+    $sso_users = $sso_user->find($conditions, true);
+    foreach ($sso_users as $u) {
+        $arySpecialUsers[] = $u['USER_ID'];
+    }
+    unset($sso_user, $conditions, $sso_users);
+    // 除外ユーザーリストにSSOユーザーを追加 ----
 
     ////////////////////////////////////////////////////////////////
     // 同期処理
@@ -356,7 +368,7 @@ function getUserSyncData($ldapconn, $baseDn, $groupDnToInfo) {
         if(array_key_exists("mail", $result[$u]) === true) {
             $data['mail']    = $result[$u]['mail'][0];
         } else {
-            $data['mail']    = "dummy_from_activedirectory@xxx.bbb.ccc";
+            $data['mail']    = "";
         }
 
         $groups = array();
@@ -514,6 +526,7 @@ function accoutListSync($userListFromAD, $arySpecialUsers) {
                     if(!isSpecialUser($data['USER_ID'], $arySpecialUsers) &&
                         (
                             $data['DISUSE_FLAG']    === "1" ||
+                            $data['AUTH_TYPE']      != "ad" ||
                             $data['USERNAME']       != $adUser['uniqueUserName'] ||
                             $data['USERNAME_JP']    != $adUser['displayname'] ||
                             $data['MAIL_ADDRESS']   != $adUser['mail']
@@ -523,6 +536,7 @@ function accoutListSync($userListFromAD, $arySpecialUsers) {
                         $data['USERNAME_JP']        = $adUser['displayname'];
                         $data['MAIL_ADDRESS']       = $adUser['mail'];
                         $data['DISUSE_FLAG']        = "0";
+                        $data['AUTH_TYPE']          = "ad";
 
                         $update_account->updateRow($data);
                     }
@@ -548,6 +562,7 @@ function accoutListSync($userListFromAD, $arySpecialUsers) {
                     $data['MAIL_ADDRESS']           = $adUser['mail'];
                     $data['PW_LAST_UPDATE_TIME']    = "9999/12/31 23:59:59";
                     $data['DISUSE_FLAG']            = "0";
+                    $data['AUTH_TYPE']              = "ad";
 
                     // 使用ユーザIDを退避
                     $user_id = $update_account->insertRow($data);
