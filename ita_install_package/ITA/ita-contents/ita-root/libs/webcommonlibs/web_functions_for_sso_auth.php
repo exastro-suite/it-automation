@@ -63,27 +63,29 @@ function autoRegistUser($auth_session) {
     // 登録されているか確認
     if (!empty($aryUser) && is_array($aryUser)) {
         // 登録済み
+        $strAction = 'UPDATE';
 
         // 廃止済み確認
-        if ($aryUser['DISUSE_FLAG'] === '1') {
+        $strDisuseFlag = $aryUser['DISUSE_FLAG'];
+        if ($strDisuseFlag === '1') {
             // 廃止済み
-            // アクセスログ出力
-            web_log($objMTS->getSomeMessage("ITAWDCH-ERR-51"));
-            // 想定外エラー通知画面にリダイレクト
-            webRequestForceQuitFromEveryWhere(403,10000403);
-            exit();
+            // 廃止済みユーザーは自動復活する
+            $strDisuseFlag = '0';
+            $strAction = 'L_REVIVE';
         }
-        // username_jp,mail_addressが変更されているかチェック
-        if ((empty($auth_session['provider_user_name']) || ($aryUser['USERNAME_JP'] === $auth_session['provider_user_name'])) && $aryUser['MAIL_ADDRESS'] === $auth_session['provider_user_email']) {
+        // username_jp,mail_addressが変更されていないか、自動復活でないかチェック
+        if ((empty($auth_session['provider_user_name']) || ($aryUser['USERNAME_JP'] === $auth_session['provider_user_name'])) && 
+            $aryUser['MAIL_ADDRESS'] === $auth_session['provider_user_email'] &&
+            $strAction !== 'L_REVIVE') {
             // 変更なし(provider_user_nameが取得できない(=empty)場合は変更なしとみなす)
             return true;
         }
         // 変更あり(更新)
-        $strAction = 'UPDATE';
         query('UPDATE A_ACCOUNT_LIST '
              .'SET '
              .'USERNAME_JP = :USERNAME_JP, '
              .'MAIL_ADDRESS = :MAIL_ADDRESS, '
+             .'DISUSE_FLAG = :DISUSE_FLAG, '
              .'LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP, '
              .'LAST_UPDATE_USER = :LAST_UPDATE_USER '
              .'WHERE '
@@ -91,6 +93,7 @@ function autoRegistUser($auth_session) {
              ['USER_ID'          => $aryUser['USER_ID'],
               'USERNAME_JP'      => empty($auth_session['provider_user_name']) ? $aryUser['USERNAME_JP'] : $auth_session['provider_user_name'],
               'MAIL_ADDRESS'     => $auth_session['provider_user_email'],
+              'DISUSE_FLAG'      => $strDisuseFlag,
               'LAST_UPDATE_USER' => $intRegUID,
              ], $strTablename, $strAction);
         return true;
