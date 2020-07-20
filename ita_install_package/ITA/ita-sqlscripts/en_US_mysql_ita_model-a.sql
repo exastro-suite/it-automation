@@ -2470,9 +2470,9 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 CREATE TABLE C_REGULARLY2_LIST
 (
 REGULARLY_ID                      INT                          ,
-SYMPHONY_CLASS_NO                 INT                          ,
+CONDUCTOR_CLASS_NO                INT                          ,
 OPERATION_NO_IDBH                 INT                          ,
-SYMPHONY_INSTANCE_NO              INT                          ,
+CONDUCTOR_INSTANCE_NO             INT                          ,
 STATUS_ID                         INT                          ,
 NEXT_EXECUTION_DATE               DATETIME(6)                  ,
 START_DATE                        DATETIME(6)                  ,
@@ -2501,9 +2501,9 @@ JOURNAL_REG_DATETIME              DATETIME(6)                  ,
 JOURNAL_ACTION_CLASS              VARCHAR (8)                  ,
 
 REGULARLY_ID                      INT                          ,
-SYMPHONY_CLASS_NO                 INT                          ,
+CONDUCTOR_CLASS_NO                INT                          ,
 OPERATION_NO_IDBH                 INT                          ,
-SYMPHONY_INSTANCE_NO              INT                          ,
+CONDUCTOR_INSTANCE_NO             INT                          ,
 STATUS_ID                         INT                          ,
 NEXT_EXECUTION_DATE               DATETIME(6)                  ,
 START_DATE                        DATETIME(6)                  ,
