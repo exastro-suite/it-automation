@@ -127,6 +127,7 @@ a:hover, a:active {
   font-size: 24px;
   font-weight: bold;
   color: #F5F5F5;
+  word-break: break-all;
 }
 #HEADER .headerInformation {
   padding: 0 16px;
@@ -1221,7 +1222,6 @@ hr {
 	user-select: none;
 }
 .ui-sortable-helper {
-
 }
 .ui-sortable-placeholder {
 	height: 1px!important;
@@ -1229,12 +1229,10 @@ hr {
 }
 .mm_text {
 	position: absolute;
-	bottom: 0; left: 50%;
-	transform: translateX(-50%);
+	bottom: 0; left: 0;
 	width: 100%!important;
 	height: 24px!important;
 	margin: 0 auto !important;
-	transition-duration: 0;
 	z-index: 25;
 }
 .mm_text p {
@@ -1245,30 +1243,33 @@ hr {
 	text-align: center;
 	line-height: 24px;
 }
-.mm_list:hover {
-	z-index: 20;
+/* Hover処理 js */
+.mm_list.itemHover {
+	z-index: 99999;
 }
-.mm_list:hover .mm_text {
-	bottom: -12px;
-	width: auto!important;
+.mm_list.itemHover .mm_text {
+  box-sizing: border-box;
+	position: fixed;
+	width: auto!important; max-width: 320px;
+  height: auto!important;
 	background-color: #FFF;
-	border-radius: 8px;
-	padding: 0 8px;
+	border-radius: 4px;
+	padding: 8px;
 	box-shadow: 0 0 4px 0 rgba( 0, 0, 0, 0.5 );
-	height: 32px!important;
-	transition-duration: 0.2s;
+  pointer-events: none;
 }
-.mm_list:hover .mm_text p {
+.mm_list.itemHover .mm_text p {
 	text-overflow: clip;
-	line-height: 32px;
+	line-height: 16px;
+  white-space: normal;
+  word-break: break-all;
 }
 .mm_list a,
 .menu_border {
 	display: block;
 	overflow: hidden;
 	position: relative;
-	border-radius: 8px;
-	background-color: #FFF;
+	border-radius: 4px;
 	padding-bottom: 100%;
 }
 .menu_border {
@@ -1451,4 +1452,42 @@ hr {
   letter-spacing: normal;
   color: #FFF;
 }
-
+/* メニュー作成実行 */
+#create_menu_form > h3 {
+margin: 0 !important; padding: 8px;
+background-color: #E5EBF2;
+border: 1px solid #CCC;
+border-bottom: 1px dashed #CCC;
+border-radius: 4px 4px 0 0;
+white-space: nowrap;
+}
+#creat_div {
+margin: 0 0 16px 0 !important; padding: 8px;
+background-color: #FFF;
+border: 1px solid #CCC;
+border-top: none;
+border-radius: 0 0 4px 4px;
+letter-spacing: -0.4em;
+}
+#creat_div > p {
+width: 25%;
+display: inline-block;
+vertical-align: top;
+white-space: nowrap;
+letter-spacing: normal;
+}
+#create_menu_form label {
+box-sizing: content-box;
+display: block;
+padding: 2px 8px;
+word-break: break-all;
+white-space: normal;
+cursor: pointer;
+}
+#create_menu_form label > input  {
+vertical-align: middle;
+margin-right: 0.5em;
+}
+#create_menu_form label:hover {
+	background-color: #FFFFCC;
+}
