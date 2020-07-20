@@ -148,6 +148,15 @@ if (isset($_GET['grp']) && !empty($_GET['grp'])) {
                         <!----  /表示モードを変更するセレクトボックス  ---->
 
                         <?php } ?>
+                        <?php if ($boolVisibleChangePasswordButton) { ?>
+
+                        <!----  パスワード変更ボタン  ---->
+                        <form method="POST" style="display:inline" action="<?= $scheme_n_authority ?>/common/common_change_password_form.php?grp=<?= $ACRCM_group_id ?>&no=<?= $ACRCM_id ?>" >
+                          <input type="submit" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-504") ?>" />
+                        </form>
+                        <!----  /パスワード変更ボタン  ---->
+
+                        <?php } ?>
                         <?php if ($boolIsLogin) { ?>
 
                         <!----  ログアウトボタン  ---->
@@ -155,15 +164,6 @@ if (isset($_GET['grp']) && !empty($_GET['grp'])) {
                           <input type="submit" name="logout" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-503") ?>" />
                         </form>
                         <!----  /ログアウトボタン  ---->
-
-                        <?php } ?>
-                        <?php if ($boolVisibleChangePasswordButton) { ?>
-
-                        <!----  パスワード変更ボタン  ---->
-                        <form method="POST" style="display:inline" action="<?= $scheme_n_authority ?>/common/common_change_password_form.php?grp=<?= $ACRCM_group_id ?>&no=<?= $ACRCM_id ?>" >
-                          <input type="submit" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-504") ?>" />
-                        </form>　
-                        <!----  /パスワード変更ボタン  ---->
 
                         <?php } ?>
 
