@@ -39,6 +39,53 @@ $( function() {
         });
       }
     }, '.password_eye');
+    
+    // メインメニュー メニュー名表示
+    $('#sortable .mm_list').on({
+      'mouseenter': function() {
+        var $item = $( this ),
+            itemWidth = $item.width(),
+            itemHeight = $item.height(),
+            positionX = $item.offset().left - window.pageXOffset,
+            positionY = $item.offset().top - window.pageYOffset;
+        $item.addClass('itemHover').find('.mm_text').css({
+          'min-width': itemWidth
+        });
+        
+        // 位置を調整する
+        var documentPadding = 4,
+            itemTextWidth = $item.find('.mm_text').outerWidth(),
+            itemTextHeight = $item.find('.mm_text').outerHeight(),
+            diffWidt = ( itemTextWidth - itemWidth ) / 2,
+            positionLeft = positionX - diffWidt,
+            positionTop = itemHeight + positionY + documentPadding,
+            documentWidth = document.body.clientWidth,
+            documentHeight = document.documentElement.clientHeight;
+        // Left check
+        if ( positionLeft <= documentPadding ) positionLeft = documentPadding;
+        // Right check
+        if ( positionLeft + itemTextWidth > documentWidth ) {
+          positionLeft = documentWidth - itemTextWidth - documentPadding;
+        }
+        // Bottom check
+        if ( positionTop + itemTextHeight > documentHeight ) {
+          positionTop = positionY - itemTextHeight - documentPadding;
+        }        
+        $item.find('.mm_text').css({
+          'top': positionTop,
+          'left': positionLeft,
+          'bottom': 'auto',
+          'min-width': itemWidth
+        });
+      },
+      'mouseleave': function() {
+        $( this ).removeClass('itemHover').find('.mm_text').css({
+          'top': 'auto',
+          'left': 0,
+          'bottom': 0
+        });
+      }
+    });
 
 });
 
