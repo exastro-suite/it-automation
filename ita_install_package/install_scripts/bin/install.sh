@@ -65,7 +65,7 @@ func_set_total_cnt() {
     PROCCESS_TOTAL_CNT=0
 
     if [ "$BASE_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+18))
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+19))
     fi
 
     if [ "$ANSIBLE_FLG" -eq 1 ]; then
@@ -813,6 +813,16 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log "INFO : $ITA_DIRECTORY/data_relay_storage/symphony already exists."
     else
         mkdir -m 777 -p "$ITA_DIRECTORY"/data_relay_storage/symphony 2>> "$LOG_FILE"
+    fi
+    PROCCESS_CNT=$((PROCCESS_CNT+1))
+
+    ################################################################################################
+    log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Create data relay storage for conductor."
+    ################################################################################################
+    if test -d "$ITA_DIRECTORY"/data_relay_storage/conductor ; then
+        log "INFO : $ITA_DIRECTORY/data_relay_storage/conductor already exists."
+    else
+        mkdir -m 777 -p "$ITA_DIRECTORY"/data_relay_storage/conductor 2>> "$LOG_FILE"
     fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
 
