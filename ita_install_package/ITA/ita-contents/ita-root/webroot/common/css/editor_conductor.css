@@ -262,7 +262,7 @@ font-size: 14px;
 font-weight: bold;
 color: #222;
 }
-.node-terminal {
+.node-in, .node-out {
 position: relative;
 z-index: 1;
 width: 32px; min-height: 32px;
@@ -278,14 +278,14 @@ border-right: 1px solid rgba( 0,0,0,.3 );
 #editor[data-editor-mode="edit"] .node-terminal {
 cursor: pointer;
 }
-.node-cap {
-width: 16px;
-}
 .node-in {
 border-radius: 8px 0 0 8px;
 }
 .node-out {
 border-radius: 0 8px 8px 0;
+}
+.node-cap {
+width: 16px;
 }
 #editor[data-editor-mode="edit"] .node-terminal.hover {
 cursor: copy;
@@ -938,6 +938,10 @@ font-size: 40px!important;
 .node-dsc .node-type  { background-color: #FF701E; }
 .add-node.dsc,
 .node-dsc .node-circle .node-gem { background-color: #F5600A; }
+
+.node-terraform .node-type  { background-color: #5c4ee5; }
+.add-node.terraform,
+.node-terraform .node-circle .node-gem { background-color: #5c4ee5; }
 
 /* Running */
 .node.running .node-circle::after {
