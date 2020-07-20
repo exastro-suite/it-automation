@@ -170,7 +170,7 @@ const messageText = {
     "type": "confirm"},
   "2002": {
     "ja": getSomeMessage("ITABASEC020122"),
-    "en": getSomeMessage("ITABASEC020122"),,
+    "en": getSomeMessage("ITABASEC020122"),
     "type": "confirm"}
 };
 const message = function( messageID ) {
@@ -185,16 +185,16 @@ const message = function( messageID ) {
 
 // Conductorステータス
 const conductorStatus = {
-  '1': ['wait', getSomeMessage("ITABASEC020101")],    //未実行:1
-  '2': ['wait', getSomeMessage("ITABASEC020102")],    //未実行(予約):2
-  '3': ['running', getSomeMessage("ITABASEC020103")],    //実行中:3
-  '4': ['running', getSomeMessage("ITABASEC020104")],    //実行中(遅延):4
-  '5': ['done', getSomeMessage("ITABASEC020105")],    //正常終了:5
-  '6': ['stop', getSomeMessage("ITABASEC020106")],    //緊急停止:6
-  '7': ['fail', getSomeMessage("ITABASEC020107")],    //異常終了:7
-  '8': ['error', getSomeMessage("ITABASEC020108")],    //想定外エラー:8
-  '9': ['cancel', getSomeMessage("ITABASEC020109")],    //予約取消:9
-  '10': ['error', getSomeMessage("ITABASEC020110")]    //想定外エラー(ループ):10
+  '1': ['wait', getSomeMessage("ITABASEC020301")],    //未実行:1
+  '2': ['wait', getSomeMessage("ITABASEC020302")],    //未実行(予約):2
+  '3': ['running', getSomeMessage("ITABASEC20303")],    //実行中:3
+  '4': ['running', getSomeMessage("ITABASEC020304")],    //実行中(遅延):4
+  '5': ['done', getSomeMessage("ITABASEC020305")],    //正常終了:5
+  '6': ['stop', getSomeMessage("ITABASEC020306")],    //緊急停止:6
+  '7': ['fail', getSomeMessage("ITABASEC020307")],    //異常終了:7
+  '8': ['error', getSomeMessage("ITABASEC020308")],    //想定外エラー:8
+  '9': ['cancel', getSomeMessage("ITABASEC020309")],    //予約取消:9
+  '10': ['error', getSomeMessage("ITABASEC020310")]    //想定外エラー(ループ):10
 };
 
 // Nodeステータス
