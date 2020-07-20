@@ -27,13 +27,14 @@ let conductorEditorMode = '';
 function initEditor( mode ) {
     
     conductorUseList.orchestratorName = {
-      '0': 'UnKnown',
+      '0': 'Unknown',
       '3': 'Ansible Legacy',
       '4': 'Ansible Pioneer',
       '5': 'Ansible Legacy Role',
       '6': 'Cobbler',
       '8': 'DSC',
-      '9': 'OpenStack'
+      '9': 'OpenStack',
+      '10': 'Terraform'
     };
 
     conductorMode( mode );
@@ -44,7 +45,9 @@ function initEditor( mode ) {
     let movementListHTML = '';
     
     for ( let i = 0; i < movementLength; i++ ) {
-      const orchestrator = conductorUseList.orchestratorName[ movementList[i].ORCHESTRATOR_ID ].toLocaleLowerCase().replace(/\s/g, '-');
+      let orcheName = conductorUseList.orchestratorName[ movementList[i].ORCHESTRATOR_ID ];
+      if ( orcheName === undefined ) orcheName = 'Unknown';
+      const orchestrator = orcheName.toLocaleLowerCase().replace(/\s/g, '-');
       movementListHTML += ''
         + '<tr>'
           + '<th><span class="add-node '+ orchestrator +'" '
@@ -1242,6 +1245,7 @@ const createNodeHTML = function( nodeID ) {
         conductorData[ nodeID ]['Name'] = 'Unknown';
       }
       nodeType = conductorUseList.orchestratorName[ conductorData[ nodeID ]['ORCHESTRATOR_ID'] ];
+      if ( nodeType === undefined ) nodeType = 'Unknown';
       nodeName = conductorData[ nodeID ]['Name'];   
       nodeClass.push('node-' + nodeType.toLocaleLowerCase().replace(/\s/g, '-') );
     } else {
