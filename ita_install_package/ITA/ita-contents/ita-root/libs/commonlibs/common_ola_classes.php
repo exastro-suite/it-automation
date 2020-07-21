@@ -3430,17 +3430,6 @@ class OrchestratorLinkAgent {
 
                 //Movementの場合  [NODE_TYPE_ID(=3)の場合]       
                 if( $aryDataForMovement['NODE_TYPE_ID'] == 3){
-                    //Movementクラス詳細取得
-                    $aryRetBody = $this->getInfoOfOneMovement($aryDataForMovement['PATTERN_ID'], 0, 1);
-                    $aryOptionOrder = $aryRetBody[4];
-
-                    if( $aryRetBody[1] !== null ){
-                        // エラーフラグをON
-                        // 例外処理へ
-                        $strErrMsg = $aryRetBody[4];
-                        $strErrStepIdInFx="00000200";
-                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                    }
 
                     // ----PATTERN_IDからパターン情報を取得
                     $strPatternIdNumeric = $aryDataForMovement['PATTERN_ID'];
