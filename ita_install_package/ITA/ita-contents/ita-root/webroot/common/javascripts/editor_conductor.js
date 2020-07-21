@@ -190,7 +190,7 @@ const message = function( messageID ) {
 const conductorStatus = {
   '1': ['wait', getSomeMessage("ITABASEC020301")],    //未実行:1
   '2': ['wait', getSomeMessage("ITABASEC020302")],    //未実行(予約):2
-  '3': ['running', getSomeMessage("ITABASEC20303")],    //実行中:3
+  '3': ['running', getSomeMessage("ITABASEC020303")],    //実行中:3
   '4': ['running', getSomeMessage("ITABASEC020304")],    //実行中(遅延):4
   '5': ['done', getSomeMessage("ITABASEC020305")],    //正常終了:5
   '6': ['stop', getSomeMessage("ITABASEC020306")],    //緊急停止:6
