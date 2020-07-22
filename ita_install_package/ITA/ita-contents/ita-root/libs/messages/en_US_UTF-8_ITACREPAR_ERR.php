@@ -111,7 +111,7 @@ $ary[5001] = "File does not exist. File=[{}].";
 $ary[5002] = "Failed to read the file. File=[{}].";
 $ary[5003] = "Failed to execute SQL. SQL error = [{}].";
 $ary[5004] = "Failed to create directory. Directory = [{}].";
-$ary[5005] = "Failed to get the data of \"Menu creation information\".";
+$ary[5005] = "Failed to get the data of \"Menu definition information\".";
 $ary[5006] = "Failed to get the data of \"Menu item creation information\".";
 $ary[5007] = "Failed to create the file. File=[{}].";
 $ary[5008] = "Failed to add the file to the ZIP file. ZIP file = [{}], additional file = [{}].";
