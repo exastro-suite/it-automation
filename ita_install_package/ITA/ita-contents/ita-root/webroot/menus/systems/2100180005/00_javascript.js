@@ -46,7 +46,7 @@ callback.prototype = {
     },
     //----Conductor登録----//
     printConductorStatus : function( result ){
-        console.log( result );
+        //console.log( result );
         conductorUseList.conductorStatus = JSON.parse( result );
         if ( conductorGetMode === 'starting') {
             var conductorID = Number( conductorUseList.conductorStatus.CONDUCTOR_INSTANCE_INFO.CONDUCTOR_CLASS_NO );
@@ -57,7 +57,7 @@ callback.prototype = {
     },
     //----Conductor予約取消----//
     bookCancelConducrtorInstance : function( result ){
-        console.log(result);
+        //console.log(result);
         if ( result[0] === '000' ) {
           editor.log.set('notice', getSomeMessage("ITABASEC020003",{0:result[2]}));
           proxy.printConductorStatus( conductorInstanceID );
@@ -67,16 +67,21 @@ callback.prototype = {
     },
     //----Conductor強制停止----//
     scramConducrtorInstance : function( result ){
-        console.log(result);
+        //console.log(result);
+        var errorType = '',
+            errorMessage = '';
         if ( result[0] === '000' ) {
-          // バックヤードの周回タイミングに合わせ結果の表示を遅らせる
-          setTimeout( function() {
-            editor.log.set('notice', getSomeMessage("ITABASEC020005",{0:result[2]}));
-            proxy.printConductorStatus( conductorInstanceID );
-          }, 3000 );
+          errorType = 'notice';
+          errorMessage = getSomeMessage("ITABASEC020005",{0:result[2]});
         } else {
-          editor.log.set('error', 'Scram error');
+          errorType = 'error';
+          errorMessage = 'Scram error';
         }
+        // バックヤードの周回タイミングに合わせ結果の表示を遅らせる
+        setTimeout( function() {
+          editor.log.set( errorType, errorMessage );
+          proxy.printConductorStatus( conductorInstanceID );
+        }, 3000 );
     },
     //----Conductor保留解除----//
     holdReleaseNodeInstance : function( result ){
