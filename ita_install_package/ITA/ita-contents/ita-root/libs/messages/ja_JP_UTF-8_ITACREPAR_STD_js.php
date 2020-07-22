@@ -16,4 +16,42 @@
 ////ja_JP_UTF-8_ITACREPAR_STD
 $ary["ITACREPAR_1001"] = "メニューが作成されていません";
 $ary["ITACREPAR_1101"] = "メニューが作成されていません";
+$ary["ITACREPAR_1201"] = "メニュー作成を実行しますか？\n※既に同じメニュー名のメニューや「メニュー作成情報」の項番が同じメニューが存在する場合、上書きでメニューが作成され、入力済みのデータは削除されます。\n入力済みのデータが必要な場合は、「キャンセル」を選択して、データをバックアップしてください。
+";
+$ary["ITACREPAR_1202"] = "項目";
+$ary["ITACREPAR_1203"] = "グループ";
+$ary["ITACREPAR_1204"] = "文字列(単一行)";
+$ary["ITACREPAR_1205"] = "文字列(複数行)";
+$ary["ITACREPAR_1206"] = "整数";
+$ary["ITACREPAR_1207"] = "小数";
+$ary["ITACREPAR_1208"] = "日時";
+$ary["ITACREPAR_1209"] = "日付";
+$ary["ITACREPAR_1210"] = "プルダウン選択";
+$ary["ITACREPAR_1211"] = "項番";
+$ary["ITACREPAR_1212"] = "自動入力";
+$ary["ITACREPAR_1213"] = "最大バイト数";
+$ary["ITACREPAR_1214"] = "正規表現";
+$ary["ITACREPAR_1215"] = "最小値";
+$ary["ITACREPAR_1216"] = "最大値";
+$ary["ITACREPAR_1217"] = "桁数";
+$ary["ITACREPAR_1218"] = "選択項目";
+$ary["ITACREPAR_1219"] = "必須";
+$ary["ITACREPAR_1220"] = "一意制約";
+$ary["ITACREPAR_1221"] = "説明";
+$ary["ITACREPAR_1222"] = "備考";
+$ary["ITACREPAR_1223"] = "ホスト名";
+$ary["ITACREPAR_1224"] = "オペレーション";
+$ary["ITACREPAR_1225"] = "パラメータ";
+$ary["ITACREPAR_1226"] = "オペレーション名";
+$ary["ITACREPAR_1227"] = "基準日時";
+$ary["ITACREPAR_1228"] = "実施予定日";
+$ary["ITACREPAR_1229"] = "最終実行日時";
+$ary["ITACREPAR_1230"] = "備考";
+$ary["ITACREPAR_1231"] = "最終更新日時";
+$ary["ITACREPAR_1232"] = "最終更新者";
+$ary["ITACREPAR_1233"] = "オペレーション";
+$ary["ITACREPAR_1234"] = "システム管理者";
+$ary["ITACREPAR_1235"] = "メニューグループ選択";
+$ary["ITACREPAR_1236"] = "登録完了。項番：";
+$ary["ITACREPAR_1237"] = "バリデーションエラー";
 ?>
