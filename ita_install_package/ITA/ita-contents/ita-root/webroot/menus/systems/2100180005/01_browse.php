@@ -246,7 +246,7 @@ EOD;
                           <td class="panel-td"><span id="conductor-instance-end" class="panel-span"></span></td>
                         </tr>
                         <tr>
-                          <th class="panel-th">Exution user :</th>
+                          <th class="panel-th">Execution user :</th>
                           <td class="panel-td"><span id="conductor-instance-user" class="panel-span"></span></td>
                         </tr>
                         <tr>
