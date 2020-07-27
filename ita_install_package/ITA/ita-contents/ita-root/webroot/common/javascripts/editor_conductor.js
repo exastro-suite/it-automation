@@ -4075,6 +4075,8 @@ const conductorStatusUpdate = function( exeNumber ) {
     $window.on('conductorStatusUpdate', function(){
       conductorStatusUpdate(1);
     });
+    // ボタンを一旦非表示に
+    $('#cansel-instance, #scram-instance').hide();
   }
 
   // パネル情報更新
@@ -4322,16 +4324,21 @@ const conductorStatusUpdate = function( exeNumber ) {
   switch( conductorInfo.STATUS_ID ) {
     case '1':
       // 未実行
+      $('#scram-instance').show().prop('disabled', true );
+      $('#cansel-instance').prop('disabled', true ).hide();
       pollingTimer();
       break;
     case '2':
       // 未実行（予約）
-      $('#cansel-instance').prop('disabled', false );
+      $('#cansel-instance').show().prop('disabled', false );
+      $('#scram-instance').prop('disabled', true ).hide();
+      pollingTimer();
       break;
     case '3':
     case '4':
       // 実行中
-      $('#scram-instance').prop('disabled', false );
+      $('#scram-instance').show().prop('disabled', false );
+      $('#cansel-instance').prop('disabled', true ).hide();
       nodeStatusUpdate();
       pollingTimer();
       break;
