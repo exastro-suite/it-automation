@@ -1189,6 +1189,8 @@
                                             //---CALLノードを異常終了へ
                                             $aryMovInsUpdateTgtSource['STATUS_ID'] = 6;     //異常終了
                                             $aryMovInsUpdateTgtSource['TIME_START'] = "DATETIMEAUTO(6)";
+                                            
+                                            if( isset( $retArray[5] ) )$intSubSymcallInsNo = $retArray[5];   
                                             if ( $intSubSymcallInsNo != "")$aryMovInsUpdateTgtSource['CONDUCTOR_INSTANCE_CALL_NO'] =  $intSubSymcallInsNo;
 
                                             // 更新用のテーブル定義
