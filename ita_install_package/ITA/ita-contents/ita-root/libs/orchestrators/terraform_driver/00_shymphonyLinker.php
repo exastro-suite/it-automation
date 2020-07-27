@@ -55,6 +55,8 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "I_OPERATION_NO_IDBH"=>"",
+        "CONDUCTOR_NAME"=>"",
+        "CONDUCTOR_INSTANCE_NO"=>"",
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
@@ -82,6 +84,8 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "I_OPERATION_NO_IDBH"=>"",
+        "CONDUCTOR_NAME"=>"",
+        "CONDUCTOR_INSTANCE_NO"=>"",
         "TIME_BOOK"=>"",
         "TIME_START"=>"",
         "TIME_END"=>"",
@@ -253,6 +257,8 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
     try{
         $user_name = '';
         $symphony_name = '';
+        $conductor_name = "";
+        $conductor_instance_no = "";
         list($strTmpRunMode,$boolKeyExists) = isSetInArrayNestThenAssign($aryProperParameter,array('RUN_MODE'),"");
         if( $boolKeyExists === false ){
             //----シンフォニーから呼ばれる場合を想定
@@ -307,6 +313,37 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
                 unset($objQuery);
             }
             //シンフォニーから呼ばれる場合を想定----
+
+            //----conductorから呼ばれる場合を想定
+            // CONDUCTOR_NAMEと実行ユーザ名情報を取得する
+            if(isset($g['__CONDUCTOR_INSTANCE_NO__'])) {
+                $conductor_instance_no = $g['__CONDUCTOR_INSTANCE_NO__'];
+                // SQL作成
+                $sql = "SELECT I_CONDUCTOR_NAME,EXECUTION_USER FROM C_CONDUCTOR_INSTANCE_MNG WHERE CONDUCTOR_INSTANCE_NO = $conductor_instance_no";
+                // SQL準備
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                if( $objQuery->getStatus()===false ){
+                    $strErrStepIdInFx="00000001";
+                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+                // SQL発行
+                $r = $objQuery->sqlExecute();
+
+                if (!$r){
+                    unset($objQuery);
+                    $strErrStepIdInFx="00000001";
+                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+                // レコードFETCH
+                while ( $row = $objQuery->resultFetch() ){
+                    $user_name = $row['EXECUTION_USER'];
+                    $conductor_name = $row['I_CONDUCTOR_NAME'];
+                }
+                // DBアクセス事後処理
+                unset($objQuery);
+            }
+            //conductorから呼ばれる場合を想定-----
+
         }
         else{
             //----各オーケストレータ個別で呼ばれる場合を想定
@@ -414,6 +451,8 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "I_OPERATION_NO_IDBH"=>"",
+        "CONDUCTOR_NAME"=>"",
+        "CONDUCTOR_INSTANCE_NO"=>"",
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
@@ -462,6 +501,8 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "OPERATION_NO_UAPK"=>$intOperationNoUAPK,
         "I_OPERATION_NAME"=>$aryRowOfOperationTable["OPERATION_NAME"],
         "I_OPERATION_NO_IDBH"=>$aryRowOfOperationTable["OPERATION_NO_IDBH"],
+        "CONDUCTOR_NAME"=>$conductor_name,
+        "CONDUCTOR_INSTANCE_NO"=>$conductor_instance_no,
         "TIME_BOOK"=>$strPreserveDatetime,
         "TIME_START"=>"",
         "TIME_END"=>"",
