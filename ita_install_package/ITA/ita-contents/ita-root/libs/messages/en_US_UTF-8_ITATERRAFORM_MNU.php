@@ -44,6 +44,7 @@ $ary[101270] = "End date/time";
 $ary[101280] = "Confirm";
 $ary[101310] = "Execution log";
 $ary[101320] = "Error log";
+$ary[101330] = "Caller Conductor";
 $ary[102010] = "You can perform maintenance (View/Update) of connection interface information for Terraform Enterprise. <br>This menu should be one record.
 ";
 $ary[102020] = "No.";
@@ -234,6 +235,8 @@ $ary[104220] = "Start date/time";
 $ary[104230] = "[Format] YYYY/MM/DD HH:MM";
 $ary[104240] = "End date/time";
 $ary[104250] = "[Format] YYYY/MM/DD HH:MM";
+$ary[104260] = "Caller Conductor";
+$ary[104270] = "[Original data]Conductor class List";
 $ary[104310] = "Terraform substitution variable name management";
 $ary[104320] = "Item No.";
 $ary[104330] = "Terraform_Module_variable_link";
