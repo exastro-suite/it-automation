@@ -57,6 +57,8 @@
                         TAB_A.OPERATION_NO_UAPK,
                         TAB_A.I_OPERATION_NAME,
                         TAB_A.I_OPERATION_NO_IDBH,
+                        TAB_A.CONDUCTOR_NAME,
+                        TAB_A.CONDUCTOR_INSTANCE_NO,
                         TAB_A.STATUS_NAME,
                         {$strSelectLastUpdateTimestamp1} AS TIME_BOOK,
                         {$strSelectLastUpdateTimestamp2} AS TIME_START,
@@ -112,7 +114,9 @@
         
         $COLUMN_04 = nl2br(htmlspecialchars($showTgtRow['OPERATION_NO_UAPK']));
         $COLUMN_05 = nl2br(htmlspecialchars($showTgtRow['I_OPERATION_NAME']));
-        
+
+        $COLUMN_44 = nl2br(htmlspecialchars($showTgtRow['CONDUCTOR_NAME']));
+
         //----オーケストレータ別の設定記述
         $strFocusColumnId = 'FILE_INPUT';
         $objColumn = $arrayColumn[$strFocusColumnId];
@@ -191,6 +195,10 @@
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-101060")}</span><!--呼出元Symphony//--></td>
                         <td                                     >{$COLUMN_43}</td>
+                    </tr>
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-101330")}</span><!--呼出元Conductor//--></td>
+                        <td                                     >{$COLUMN_44}</td>
                     </tr>
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-101070")}</span><!--実行ユーザ//--></td>
