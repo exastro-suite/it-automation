@@ -196,7 +196,7 @@ function conductorNoRegister($intShmphonyClassId, $intOperationNo, $strPreserveD
     $arrayResult = array($strResultCode,
                          $strDetailCode,
                          $strSymphonyInstanceId,
-                         nl2br($strExpectedErrMsgBodyForUI)
+                         $strExpectedErrMsgBodyForUI
                          );
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     return $arrayResult;
