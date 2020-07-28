@@ -102,6 +102,11 @@ Ansible(Pioneer)作業管理
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309130"));//エクセル・ヘッダでの説明
     $table->addColumn($c);
     
+    //コンダクタクラス
+    $c = new TextColumn('CONDUCTOR_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309121"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309131"));//エクセル・ヘッダでの説明
+    $table->addColumn($c);
+    
     //実行ユーザ
     $c = new TextColumn('EXECUTION_USER',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309100"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309110"));//エクセル・ヘッダでの説明
