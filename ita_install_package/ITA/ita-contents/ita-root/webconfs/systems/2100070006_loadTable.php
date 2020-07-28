@@ -87,6 +87,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITAOPENST-MNU-130310"));//エクセル・ヘッダでの説明
     $table->addColumn($c);
     
+    //コンダクタクラス
+    $c = new TextColumn('CONDUCTOR_NAME',$g['objMTS']->getSomeMessage("ITAOPENST-MNU-130301"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAOPENST-MNU-130302"));//エクセル・ヘッダでの説明
+    $table->addColumn($c);
+
     //実行ユーザ
     $c = new TextColumn('EXECUTION_USER',$g['objMTS']->getSomeMessage("ITAOPENST-MNU-130280"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAOPENST-MNU-130290"));//エクセル・ヘッダでの説明
