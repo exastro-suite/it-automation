@@ -782,7 +782,8 @@ EOS
     fi
 
     # install ITA
-    "$ITA_INSTALL_SCRIPTS_DIR/ita_installer.sh"
+    source "$ITA_INSTALL_SCRIPTS_DIR/ita_installer.sh"
+
 }
 
 
@@ -984,6 +985,14 @@ if [ "${exec_mode}" == "1" ]; then
     ITA_BUILDER_LOG_FILE=$ITA_INSTALL_SCRIPTS_DIR/log/ita_gather.log
 else
     ITA_BUILDER_LOG_FILE=$ITA_INSTALL_SCRIPTS_DIR/log/ita_builder.log
+fi
+
+# Authorization check.
+log "INFO : Authorization check."
+if [ ${EUID:-${UID}} -ne 0 ]; then
+    log 'ERROR : Execute with root authority.'
+    log 'INFO : Abort installation.'
+    exit
 fi
 
 #read setting file and answer file
