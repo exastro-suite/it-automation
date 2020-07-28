@@ -70,8 +70,6 @@
     $aryImportFilePath = array();
     $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath("ITAWDCC","STD","_js");
     $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath("ITACREPAR","STD","_js");
-    $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath("ITACREPAR","MNU","");
-    $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath("ITACREPAR","ERR","");
 
     $strTemplateBody = getJscriptMessageTemplate($aryImportFilePath,$g['objMTS']);
     
@@ -231,7 +229,7 @@ EOD;
               <tbody>
                 <tr>
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104211")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-id" class="property-span">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104235")}</span></td>
+                  <td class="property-td" colspan="3"><span id="create-menu-id" class="property-span">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
                 <tr>
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104212")}</th>
@@ -251,11 +249,11 @@ EOD;
                 </tr>
                 <tr>
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104216")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-last-modified" class="property-span">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104235")}</span></td>
+                  <td class="property-td" colspan="3"><span id="create-menu-last-modified" class="property-span">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
                 <tr>
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104217")}</th>
-                  <td class="property-td" colspan="3"><span id="create-last-update-user" class="property-span">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104235")}</span></td>
+                  <td class="property-td" colspan="3"><span id="create-last-update-user" class="property-span">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
               </tbody>
             </table>
@@ -324,7 +322,7 @@ EOD;
               <tbody>
                 <tr>
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104211")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-id" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104235")}</span></td>
+                  <td class="property-td" colspan="3"><span id="create-menu-id" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
                 <tr>
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104212")}<span class="input_required">*</span> :</th>
@@ -350,11 +348,11 @@ EOD;
                 </tr>
                 <tr>
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104216")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-last-modified" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104235")}</span></td>
+                  <td class="property-td" colspan="3"><span id="create-menu-last-modified" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
                 <tr>
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104217")}</th>
-                  <td class="property-td" colspan="3"><span id="create-last-update-user" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104235")}</span></td>
+                  <td class="property-td" colspan="3"><span id="create-last-update-user" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
               </tbody>
             </table>
@@ -401,7 +399,7 @@ EOD;
             <textarea id="create-menu-note" class="property-textarea" spellcheck="false"></textarea>
           </div>
 
-          <p class="note">※<span class="input_required">*</span>{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104237")}</p>
+          <p class="note">※<span class="input_required">*</span>{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104235")}</p>
 
       </div>
     </div>
