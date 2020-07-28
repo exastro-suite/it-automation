@@ -214,7 +214,7 @@ func_create_tables() {
         if ! test -e "$LIST_DIR/${DRIVER,,}_table_list.txt" ; then
             log "WARNING : ${DRIVER,,}_table_list.txt does not be found."
         else
-            "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
+            source "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             while read LINE; do
                 FILE_PATH="$LOG_DIR/$LINE.log"
                 if ! test -e "$FILE_PATH" ; then
@@ -292,7 +292,7 @@ func_services_set() {
             log "WARNING : ${DRIVER,,}_service_list.txt does not be found."
         else
             sed -i -e '/^$/d' "$LIST_DIR/${DRIVER,,}_service_list.txt" 2>> "$LOG_FILE"
-            "$BIN_DIR/register-services_RHEL.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
+            source "$BIN_DIR/register-services_RHEL.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             while read LINE; do
                 service=`basename ${LINE}`
                 RES=`systemctl | grep "$service" | grep 'running'`
@@ -323,7 +323,7 @@ func_crontab_set() {
             cp "$LIST_DIR/${DRIVER,,}_crontab_list.txt" "/tmp/" 2>> "$LOG_FILE"
             sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" "/tmp/${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
             sed -i -e '/^$/d' "/tmp/${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
-            "$BIN_DIR/register-crontab.sh" "${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
+            source "$BIN_DIR/register-crontab.sh" "${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
             while read LINE; do
                 LINE=${LINE//\'/}
                 LINE=${LINE//* /}
@@ -928,6 +928,18 @@ if [ "$BASE_FLG" -eq 1 ]; then
     #################################################################################################
     func_crontab_set BASE_FLG
 
+fi
+
+#################################################################################################
+#Check ITA version of installer and already installed ITA.
+#################################################################################################
+if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_base ; then
+    diff ../ITA/ita-releasefiles/ita_base "$ITA_DIRECTORY"/ita-root/libs/release/ita_base >> "$LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+        log "ERROR : The version of the installer and the already installed ITA are different."
+        log "INFO : Abort installation."
+        func_exit_and_delete_file
+    fi
 fi
 
 if [ "$DRIVER_CNT" -ne 0 ]; then
