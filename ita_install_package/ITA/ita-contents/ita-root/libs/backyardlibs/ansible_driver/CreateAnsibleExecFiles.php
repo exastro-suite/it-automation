@@ -142,6 +142,9 @@ class CreateAnsibleExecFiles {
     // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
     const LC_SYMPHONY_DIR_VAR_NAME           = "__symphony_workflowdir__";
 
+    // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
+    const LC_CONDUCTO_DIR_VAR_NAME           = "__conductor_workflowdir__";
+
     // 管理対象システム一覧のログイン・パスワード未登録時の内部変数値
     const LC_ANS_UNDEFINE_NAME               = "__undefinesymbol__";
 
@@ -271,6 +274,9 @@ class CreateAnsibleExecFiles {
     private $lv_user_out_Dir;
     // ユーザー公開用symphonyインスタンスストレージパス
     private $lv_symphony_instance_Dir;
+
+    // ユーザー公開用conductorインスタンスストレージパス
+    private $lv_conductor_instance_Dir;
 
     // 読替表のデータリスト
     private $translationtable_list;
@@ -407,6 +413,7 @@ class CreateAnsibleExecFiles {
         $this->setAnsibleBaseDir('ANSIBLE_SH_PATH_ITA',$in_ansible_ita_base_dir);
         $this->setAnsibleBaseDir('ANSIBLE_SH_PATH_ANS',$in_ansible_ans_base_dir);
         $this->setAnsibleBaseDir('SYMPHONY_SH_PATH_ANS',$in_symphony_ans_base_dir);
+        $this->setAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ANS',$in_ans_if_info['CONDUCTOR_STORAGE_PATH_ANS']);
 
         //ITA子PlayBook格納ディレクトリ
         $this->setITA_child_playbook_Dir($in_ita_child_playbook_dir);
@@ -580,6 +587,8 @@ class CreateAnsibleExecFiles {
     //   $ina_def_array_vars_list:  各ロールのデフォルト変数ファイル内に定義されている多次元変数の情報
     //   $in_symphony_instance_no:  symphonyから起動された場合のsymphonyインスタンスID
     //                              作業実行の場合は空白
+    //   $in_conductor_instance_no: conductorから起動された場合のconductorインスタンスID
+    //                              作業実行の場合は空白
     //
     // 戻り値
     //   true:   正常
@@ -597,7 +606,8 @@ class CreateAnsibleExecFiles {
                                      &$in_role_rolepackage_id  = "",
                                      &$ina_def_vars_list,
                                      &$ina_def_array_vars_list,
-                                     $in_symphony_instance_no
+                                     $in_symphony_instance_no,
+                                     $in_conductor_instance_no
                                      ){
         global $root_dir_path;
 
@@ -715,7 +725,7 @@ class CreateAnsibleExecFiles {
                                              $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                              $user_out_Dir);
 
-        // symphonyからの起動か判定
+        // symphonyからの起動か判定 ディレクトリはsymphonyバックヤードで作成済み
         if(strlen($in_symphony_instance_no) != 0) {
             // ユーザー公開用symphonyインスタンス作業用 データリレイストレージパス
             $this->lv_symphony_instance_Dir = $this->getAnsibleBaseDir('SYMPHONY_SH_PATH_ANS') . "/" . sprintf("%010s",$in_symphony_instance_no);
@@ -723,6 +733,16 @@ class CreateAnsibleExecFiles {
         else
         {
             $this->lv_symphony_instance_Dir = $this->lv_user_out_Dir;
+        }
+
+        // conductorからの起動か判定 ディレクトリはconductorバックヤードで作成済み
+        if(strlen($in_conductor_instance_no)  != 0) {
+            // ユーザー公開用conductorインスタンス作業用 データリレイストレージパス
+            $this->lv_conductor_instance_Dir = $this->getAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ANS') . "/" . sprintf("%010s",$in_conductor_instance_no);
+        }
+        else
+        {
+            $this->lv_conductor_instance_Dir = $this->lv_user_out_Dir;
         }
 
         //inディレクトリ作成
@@ -943,6 +963,9 @@ class CreateAnsibleExecFiles {
 
                 // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
                 $system_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
+
+                // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
+                $system_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
 
                 $ina_def_vars_list = array();
                 $err_vars_list = array();
@@ -2695,6 +2718,9 @@ class CreateAnsibleExecFiles {
             // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
             $host_vars_list[self::LC_SYMPHONY_DIR_VAR_NAME] = $this->lv_symphony_instance_Dir;
 
+            // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
+            $host_vars_list[self::LC_CONDUCTO_DIR_VAR_NAME] = $this->lv_conductor_instance_Dir;
+
             // ホストアドレス方式がホスト名方式の場合はhost_varsをホスト名する。
             foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
             $host_vars_file = $hostname;
@@ -2891,6 +2917,9 @@ class CreateAnsibleExecFiles {
 
                 // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
                 $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
+
+                // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
+                $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
 
                 // ホスト変数の抜出を示すパラメータを追加
                 $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$local_vars);
@@ -3303,7 +3332,10 @@ class CreateAnsibleExecFiles {
 
                         // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
                         $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
- 
+
+                        // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
+                        $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
+
                         $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$local_vars);
 
                         $aryResultParse = $objWSRA->getParsedResult();
@@ -5074,6 +5106,7 @@ class CreateAnsibleExecFiles {
     //                     ANSIBLE_SH_PATH_ITA:  Ansible作業用 ITA側
     //                     ANSIBLE_SH_PATH_ANS:  Ansible作業用 Ansible側
     //                     SYMPHONY_SH_PATH_ANS: symphony作業用 Ansible側
+    //                     CONDUCTOR_STORAGE_PATH_ANS: conductor作業用 Ansible側
     //   $in_dir:        ベースディレクトリ
     // 
     // 戻り値
@@ -5091,6 +5124,7 @@ class CreateAnsibleExecFiles {
     //                     ANSIBLE_SH_PATH_ITA:  Ansible作業用 ITA側
     //                     ANSIBLE_SH_PATH_ANS:  Ansible作業用 Ansible側
     //                     SYMPHONY_SH_PATH_ANS: symphony作業用 Ansible側
+    //                     CONDUCTOR_STORAGE_PATH_ANS: conductor作業用 Ansible側
     // 
     // 戻り値
     //   Ansible用 ベースディレクトリ名
@@ -6202,6 +6236,7 @@ class CreateAnsibleExecFiles {
                    ($row['VARS_NAME']==self::LC_ANS_USERNAME_VAR_NAME) ||
                    ($row['VARS_NAME']==self::LC_ANS_OUTDIR_VAR_NAME)   ||
                    ($row['VARS_NAME']==self::LC_SYMPHONY_DIR_VAR_NAME)  ||
+                   ($row['VARS_NAME']==self::LC_CONDUCTO_DIR_VAR_NAME)  ||
                    ($row['VARS_NAME']==self::LC_ANS_LOGINHOST_VAR_NAME) ||
                    ($row['VARS_NAME']==self::LC_ANS_PASSWD_VAR_NAME)){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56201",
@@ -6584,6 +6619,7 @@ class CreateAnsibleExecFiles {
                    ($row['VARS_NAME']==self::LC_ANS_USERNAME_VAR_NAME) ||
                    ($row['VARS_NAME']==self::LC_ANS_OUTDIR_VAR_NAME)   ||
                    ($row['VARS_NAME']==self::LC_SYMPHONY_DIR_VAR_NAME)  ||
+                   ($row['VARS_NAME']==self::LC_CONDUCTO_DIR_VAR_NAME)  ||
                    ($row['VARS_NAME']==self::LC_ANS_LOGINHOST_VAR_NAME) ||
                    ($row['VARS_NAME']==self::LC_ANS_PASSWD_VAR_NAME)){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56201",
@@ -6700,6 +6736,7 @@ class CreateAnsibleExecFiles {
                    ($row['VARS_NAME']==self::LC_ANS_USERNAME_VAR_NAME) ||
                    ($row['VARS_NAME']==self::LC_ANS_OUTDIR_VAR_NAME)   ||
                    ($row['VARS_NAME']==self::LC_SYMPHONY_DIR_VAR_NAME)  ||
+                   ($row['VARS_NAME']==self::LC_CONDUCTO_DIR_VAR_NAME)  ||
                    ($row['VARS_NAME']==self::LC_ANS_LOGINHOST_VAR_NAME) ||
                    ($row['VARS_NAME']==self::LC_ANS_PASSWD_VAR_NAME)){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56201",
@@ -6864,6 +6901,7 @@ class CreateAnsibleExecFiles {
                    ($row['VARS_NAME']==self::LC_ANS_USERNAME_VAR_NAME) ||
                    ($row['VARS_NAME']==self::LC_ANS_OUTDIR_VAR_NAME)   ||
                    ($row['VARS_NAME']==self::LC_SYMPHONY_DIR_VAR_NAME)  ||
+                   ($row['VARS_NAME']==self::LC_CONDUCTO_DIR_VAR_NAME)  ||
                    ($row['VARS_NAME']==self::LC_ANS_LOGINHOST_VAR_NAME) ||
                    ($row['VARS_NAME']==self::LC_ANS_PASSWD_VAR_NAME)){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56201",
@@ -7298,6 +7336,9 @@ class CreateAnsibleExecFiles {
 
            // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
            $ina_host_vars[$host_ip][self::LC_SYMPHONY_DIR_VAR_NAME] = $this->lv_symphony_instance_Dir;
+
+           // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
+           $ina_host_vars[$host_ip][self::LC_CONDUCTO_DIR_VAR_NAME] = $this->lv_conductor_instance_Dir;
             
        }
     }
@@ -7864,6 +7905,9 @@ class CreateAnsibleExecFiles {
 
         // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
         $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
+
+        // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
+        $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
 
         $file_vars_list = array();
         // テンプレートからローカル変数を抜出す
@@ -10215,6 +10259,7 @@ class CreateAnsibleExecFiles {
         $local_vars[] = self::LC_ANS_LOGINHOST_VAR_NAME;
         $local_vars[] = self::LC_ANS_OUTDIR_VAR_NAME;
         $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
+        $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
 
         $file_vars_list = array();
         // テンプレートからローカル変数を抜出す
