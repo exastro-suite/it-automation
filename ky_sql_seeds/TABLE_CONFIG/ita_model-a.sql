@@ -209,8 +209,7 @@ NOTE                           %VARCHR%(4000)               , -- 備考
 DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
 LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
-PRIMARY KEY (PROVIDER_ATTRIBUTE_ID),
-UNIQUE KEY UNQ_IDX_A_PROVIDER_ATTRIBUTE_LIST_01 (PROVIDER_ID,NAME)
+PRIMARY KEY (PROVIDER_ATTRIBUTE_ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
 CREATE TABLE A_PROVIDER_AUTH_TYPE_LIST (
