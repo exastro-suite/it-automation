@@ -97,53 +97,53 @@ if ( lang === 'en' ) languageCode = 1;
       
 // テキスト
 const languageText = {
-'0000':[getSomeMessage('ITACREPAR_1202'),'Item'],
-'0001':[getSomeMessage('ITACREPAR_1203'),'Group'],
-'0002':[getSomeMessage('ITACREPAR_1204'),''],
-'0003':[getSomeMessage('ITACREPAR_1205'),''],
-'0004':[getSomeMessage('ITACREPAR_1206'),''],
-'0005':[getSomeMessage('ITACREPAR_1207'),''],
-'0006':[getSomeMessage('ITACREPAR_1208'),''],
-'0007':[getSomeMessage('ITACREPAR_1209'),''],
-'0008':[getSomeMessage('ITACREPAR_1210'),''],
-'0009':[getSomeMessage('ITACREPAR_1211'),''],
-'0010':[getSomeMessage('ITACREPAR_1212'),''],
-'0011':[getSomeMessage('ITACREPAR_1213'),''],
-'0012':[getSomeMessage('ITACREPAR_1214'),''],
-'0013':[getSomeMessage('ITACREPAR_1215'),''],
-'0014':[getSomeMessage('ITACREPAR_1216'),''],
-'0015':[getSomeMessage('ITACREPAR_1217'),''],
-'0016':[getSomeMessage('ITACREPAR_1218'),''],
-'0017':[getSomeMessage('ITACREPAR_1219'),''],
-'0018':[getSomeMessage('ITACREPAR_1220'),''],
-'0019':[getSomeMessage('ITACREPAR_1221'),''],
-'0020':[getSomeMessage('ITACREPAR_1222'),''],
-'0021':[getSomeMessage('ITACREPAR_1223'),''],
-'0022':[getSomeMessage('ITACREPAR_1224'),''],
-'0023':[getSomeMessage('ITACREPAR_1225'),''],
-'0024':[getSomeMessage('ITACREPAR_1226'),''],
-'0025':[getSomeMessage('ITACREPAR_1227'),''],
-'0026':[getSomeMessage('ITACREPAR_1228'),''],
-'0027':[getSomeMessage('ITACREPAR_1229'),''],
-'0028':[getSomeMessage('ITACREPAR_1230'),''],
-'0029':[getSomeMessage('ITACREPAR_1231'),''],
-'0030':[getSomeMessage('ITACREPAR_1232'),''],
-'0031':[getSomeMessage('ITACREPAR_1233'),''],
-'0032':[getSomeMessage('ITACREPAR_1234'),''],
-'0033':[getSomeMessage('ITACREPAR_1235'),'']
+'0000':[getSomeMessage("ITACREPAR_1202"),''],
+'0001':[getSomeMessage("ITACREPAR_1203"),''],
+'0002':[getSomeMessage("ITACREPAR_1204"),''],
+'0003':[getSomeMessage("ITACREPAR_1205"),''],
+'0004':[getSomeMessage("ITACREPAR_1206"),''],
+'0005':[getSomeMessage("ITACREPAR_1207"),''],
+'0006':[getSomeMessage("ITACREPAR_1208"),''],
+'0007':[getSomeMessage("ITACREPAR_1209"),''],
+'0008':[getSomeMessage("ITACREPAR_1210"),''],
+'0009':[getSomeMessage("ITACREPAR_1211"),''],
+'0010':[getSomeMessage("ITACREPAR_1212"),''],
+'0011':[getSomeMessage("ITACREPAR_1213"),''],
+'0012':[getSomeMessage("ITACREPAR_1214"),''],
+'0013':[getSomeMessage("ITACREPAR_1215"),''],
+'0014':[getSomeMessage("ITACREPAR_1216"),''],
+'0015':[getSomeMessage("ITACREPAR_1217"),''],
+'0016':[getSomeMessage("ITACREPAR_1218"),''],
+'0017':[getSomeMessage("ITACREPAR_1219"),''],
+'0018':[getSomeMessage("ITACREPAR_1220"),''],
+'0019':[getSomeMessage("ITACREPAR_1221"),''],
+'0020':[getSomeMessage("ITACREPAR_1222"),''],
+'0021':[getSomeMessage("ITACREPAR_1223"),''],
+'0022':[getSomeMessage("ITACREPAR_1224"),''],
+'0023':[getSomeMessage("ITACREPAR_1225"),''],
+'0024':[getSomeMessage("ITACREPAR_1226"),''],
+'0025':[getSomeMessage("ITACREPAR_1227"),''],
+'0026':[getSomeMessage("ITACREPAR_1228"),''],
+'0027':[getSomeMessage("ITACREPAR_1229"),''],
+'0028':[getSomeMessage("ITACREPAR_1230"),''],
+'0029':[getSomeMessage("ITACREPAR_1231"),''],
+'0030':[getSomeMessage("ITACREPAR_1232"),''],
+'0031':[getSomeMessage("ITACREPAR_1233"),''],
+'0032':[getSomeMessage("ITACREPAR_1234"),''],
+'0033':[getSomeMessage("ITACREPAR_1235"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
-  return languageText[code][languageCode];
+  return languageText[code][0];
 };
 
 // 項目別ダミーテキスト（value:[ja,en,type]）
 const selectDummyText = {
   '0' : ['','',''],
-  '1' : [getSomeMessage('ITACREPAR_1204'),'','string'],
+  '1' : [getSomeMessage("ITACREPAR_1204"),'','string'],
   '2' : [getSomeMessage("ITACREPAR_1205") +'<br>' + getSomeMessage("ITACREPAR_1205"),'','string'],
   '3' : ['0','0','number'],
-  '4' : ['.','.','number'],
+  '4' : ['0.0','0.0','number'],
   '5' : ['2020/01/01 00:00','2020/01/01 00:00','string'],
   '6' : ['2020/01/01','2020/01/01','string'],
   '7' : ['','','select'],
@@ -1054,19 +1054,6 @@ const sortMark = '<span class="sortMarkWrap"><span class="sortNotSelected"></spa
         + '<td class="likeHeader">2020/01/01 00:00:00</td>'
         + '<td class="likeHeader">' + textCode('0032') + '</td>';
 
-// 入力内容からダミー数字を作成
-const dummyNumber = function( max, digit ) {
-  if ( max === '' ) max = 1;
-  if ( digit === '' ) digit = 1;
-  if ( digit !== 0 ) {
-    max = Number( String( max ).slice( 0, digit ) );
-    if ( digit > 1 ) {
-      max = max / 10;
-    }
-  }
-  return max;
-}
-
 // リピートを含めた子の列数を返す
 const childColumnCount = function( $column ) {
   let counter = $column.find('.menu-column, .column-empty').length;
@@ -1117,20 +1104,7 @@ const previewTable = function(){
 
           let dummyText = selectDummyText[ selectTypeValue ][ languageCode ],
               dummyType = selectDummyText[ selectTypeValue ][ 2 ];
-          if ( dummyType === 'number' ) {
-            let max;
-            if ( selectTypeValue === 'integer') {
-              max = $targetColumn.find('.int-max-number').val();
-            } else {
-              max = $targetColumn.find('.float-max-number').val();
-            }
-            const digit = $targetColumn.find('.digit-number').val();
-            if ( dummyText === '0') {
-              dummyText = dummyNumber( max, 0 );
-            } else {
-              dummyText = dummyNumber( max, digit );
-            }
-          } else if ( dummyType === 'select' ) {
+              if ( dummyType === 'select' ) {
             dummyText = $targetColumn.find('.config-select').find('option:selected').text();
           }
           tbodyArray.push('<td class="' + dummyType + '">' + dummyText + '</td>');
@@ -1685,7 +1659,12 @@ const createRegistrationData = function( type ){
 const loadMenu = function() {
     
     const loadJSON = menuEditorArray.selectMenuInfo;
-  
+
+    // 流用新規はメニュー名を空白にする
+    if ( menuEditorMode === 'diversion' ){
+      loadJSON['menu']['MENU_NAME'] = '';
+    }
+    
     // パネル情報表示
     menuParameter('set', loadJSON );
     
@@ -1805,9 +1784,9 @@ const menuParameter = function( type, setData ) {
     };
     // 流用する場合はID、更新日時、更新者をnullに
     if ( menuEditorMode === 'diversion' ){
-      menuParameterList['CREATE_MENU_ID'][0] = null;
-      menuParameterList['LAST_UPDATE_TIMESTAMP'][0] = null;
-      menuParameterList['LAST_UPDATE_USER'][0] = null;
+      delete menuParameterList['CREATE_MENU_ID'];
+      delete menuParameterList['LAST_UPDATE_TIMESTAMP'];
+      delete menuParameterList['LAST_UPDATE_USER'];
     }
 
     if ( type === 'get' ) {
