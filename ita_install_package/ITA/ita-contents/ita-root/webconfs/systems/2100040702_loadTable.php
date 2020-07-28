@@ -233,6 +233,17 @@ Ansibleインターフェース情報
     //Symphonyデータリレイストレージパス(Ansible/Tower)----
     
     //--------------------------------------------------------------
+    //----conductorデータリレイストレージパス(Ansible/Tower)
+    //--------------------------------------------------------------
+    $objVldt = new SingleTextValidator(1,256,false);
+    $c = new TextColumn('CONDUCTOR_STORAGE_PATH_ANS',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202097"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202098"));//エクセル・ヘッダでの説明
+    $c->setValidator($objVldt);
+    $c->setRequired(true);//登録/更新時には、入力必須
+    $table->addColumn($c);
+    //conductorデータリレイストレージパス(Ansible/Tower)----
+    
+    //--------------------------------------------------------------
     //----Ansible-Playbook実行時のオプションパラメータ
     //--------------------------------------------------------------
     $objVldt = new SingleTextValidator(0,512,false);
