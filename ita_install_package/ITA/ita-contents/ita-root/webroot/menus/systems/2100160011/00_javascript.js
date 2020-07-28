@@ -37,7 +37,7 @@ callback.prototype = {
             // 二回目以降のバリデエラーの場合に前回表示したエラーログを消す
             menuEditorLog.clear();
             menuEditorLog.set('error', ary_result[2] );
-            window.alert(getSomeMessage("ITACREPAR_1237"));
+            window.alert(getSomeMessage("ITAWDCC90102"));
         }
         // システムエラーの場合
         else{
@@ -69,7 +69,7 @@ callback.prototype = {
             // 二回目以降のバリデエラーの場合に前回表示したエラーログを消す
             menuEditorLog.clear();
             menuEditorLog.set('error', ary_result[2] );
-            window.alert(getSomeMessage("ITACREPAR_1237"));
+            window.alert(getSomeMessage("ITAWDCC90102"));
         }
         // システムエラーの場合
         else{
