@@ -51,6 +51,5 @@ $ary["ITACREPAR_1232"] = "Last updated by";
 $ary["ITACREPAR_1233"] = "Operation";
 $ary["ITACREPAR_1234"] = "System Administrator";
 $ary["ITACREPAR_1235"] = "Target menu group";
-$ary["ITACREPAR_1236"] = "Completion of registration　Id：";
-$ary["ITACREPAR_1237"] = "Validation error";
+$ary["ITACREPAR_1236"] = "Menu creation was accepted.\nPlease click the Menu creation history button and check the creation status.\nId:";
 ?>
