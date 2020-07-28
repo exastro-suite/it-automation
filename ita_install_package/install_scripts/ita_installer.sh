@@ -98,7 +98,7 @@ log 'INFO : Duplicate start-up check.'
 for((i=0; i<3; i++)); do
     PS_RES=`ps -ef`
     RES=`echo "$PS_RES" | grep "$0" -c`
-    if [ "$RES" -gt 1 ]; then
+    if [ "$RES" -gt 2 ]; then
         log 'INFO : Duplicate start-up is detected.'
         log 'INFO : Abort installation.'
         exit
