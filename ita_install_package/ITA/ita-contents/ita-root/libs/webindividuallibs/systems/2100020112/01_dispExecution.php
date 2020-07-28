@@ -49,6 +49,7 @@
         
         $strConnectString1 = makeStringConnectForSQLPart($g['db_model_ch'],array("'('","TAB_A.LAST_UPDATE_USER","')'"));
 
+// ENO
         //----オーケストレータ別の設定記述
         $sql = "SELECT  TAB_A.EXECUTION_NO,
                         TAB_A.SYMPHONY_NAME,
@@ -77,6 +78,8 @@
                         TAB_A.I_VIRTUALENV_NAME,
                         TAB_A.MULTIPLELOG_MODE,
                         TAB_A.LOGFILELIST_JSON,
+                        TAB_A.CONDUCTOR_NAME,            
+                        TAB_A.CONDUCTOR_INSTANCE_NO,     
                         TAB_A.NOTE, 
                         {$strSelectLastUpdateTimestamp4} AS LAST_UPDATE_TIMESTAMP,
                         CASE TAB_B.USERNAME_JP WHEN NULL THEN {$strConnectString1}
@@ -120,6 +123,9 @@
         $COLUMN_01 = nl2br(htmlspecialchars($showTgtRow['EXECUTION_NO']));
         $COLUMN_42 = nl2br(htmlspecialchars($showTgtRow['EXECUTION_USER']));
         $COLUMN_43 = nl2br(htmlspecialchars($showTgtRow['SYMPHONY_NAME']));
+
+        $COLUMN_44 = nl2br(htmlspecialchars($showTgtRow['CONDUCTOR_NAME']));
+
         $COLUMN_03 = nl2br(htmlspecialchars($showTgtRow['I_TIME_LIMIT']));
         
         $COLUMN_04 = nl2br(htmlspecialchars($showTgtRow['OPERATION_NO_UAPK']));
@@ -235,6 +241,10 @@ EOD;
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-103110")}</span><!--シンフォニークラス//--></td>
                         <td                                     >{$COLUMN_43}</td>
+                    </tr>
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-103111")}</span><!--ENO コンダクタクラス//--></td>
+                        <td                                     >{$COLUMN_44}</td>
                     </tr>
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-103100")}</span><!--実行ユーザ//--></td>
