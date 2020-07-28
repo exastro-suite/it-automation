@@ -52,6 +52,8 @@ function CreateExecInstMngArray(&$ary) {
     $ary["EXEC_MODE"]                    = "";
     $ary["MULTIPLELOG_MODE"]             = "";
     $ary["LOGFILELIST_JSON"]             = "";
+    $ary["CONDUCTOR_NAME"]               = "";
+    $ary["CONDUCTOR_INSTANCE_NO"]        = "";
     $ary["DISP_SEQ"]                     = "";
     $ary["NOTE"]                         = "";
     $ary["DISUSE_FLAG"]                  = "";
