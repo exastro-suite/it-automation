@@ -434,6 +434,7 @@
                                             $in_ansdrv,
                                             $in_execution_no,
                                             $symphony_instance_no,
+                                            $conductor_instance_no,
                                             $in_pattern_id,
                                             $in_operation_id,
                                             //ホストアドレス方式追加
@@ -499,7 +500,8 @@
                                                    $role_rolepackage_id,
                                                    $def_vars_list,
                                                    $def_array_vars_list,
-                                                   $symphony_instance_no
+                                                   $symphony_instance_no,
+                                                   $conductor_instance_no
                                                    );
         if($ret <> true){
             // 例外処理へ
@@ -1021,6 +1023,9 @@
 
         // symphonyインスタンス番号を退避
         $tgt_symphony_instance_no = $in_execution_row['SYMPHONY_INSTANCE_NO'];
+
+        // conductorインスタンス番号を退避
+        $tgt_conductor_instance_no = $in_execution_row['CONDUCTOR_INSTANCE_NO'];
         
         require ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_global_variables.php");
 
@@ -1079,6 +1084,7 @@
                                                   $in_ansdrv,
                                                   $in_execution_no,
                                                   $tgt_symphony_instance_no,
+                                                  $tgt_conductor_instance_no,
                                                   $in_execution_row["PATTERN_ID"],
                                                   $in_execution_row["OPERATION_NO_UAPK"],
                                                   // ホストアドレス指定方式（I_ANS_HOST_DESIGNATE_TYPE_ID）
