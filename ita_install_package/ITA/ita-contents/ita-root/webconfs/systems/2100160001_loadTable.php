@@ -144,7 +144,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     // GUIメニューへのリンク
-    $c = new LinkButtonColumn('GUI_detail_show', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233"), $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233"), 'jumpToGui', array(':CREATE_MENU_ID')); 
+    $c = new LinkButtonColumn('GUI_detail_show', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104232"), $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104232"), 'jumpToGui', array(':CREATE_MENU_ID')); 
     $table->addColumn($c);
 
 
