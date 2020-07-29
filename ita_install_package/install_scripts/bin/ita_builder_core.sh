@@ -203,11 +203,13 @@ yum_repository() {
 
             # Check Creating repository
             if [ "${REPOSITORY}" != "yum_all" ]; then
-               case "${LINUX_OS}" in
+               case "${linux_os}" in
                     "CentOS7") create_repo_check remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "RHEL7") create_repo_check remi-php72 rhel-7-server-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "RHEL7_AWS") create_repo_check remi-php72 rhui-rhel-7-server-rhui-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "CentOS8") create_repo_check PowerTools >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "RHEL8") create_repo_check codeready-builder-for-rhel-8 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "RHEL8_AWS") create_repo_check codeready-builder-for-rhel-8-rhui-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                 esac 
                 if [ $? -ne 0 ]; then
                    log "ERROR:Failed to get repository"
@@ -598,8 +600,9 @@ configure_httpd() {
 # PHP
 configure_php() {
     # enable yum repository
-    yum_repository ${YUM_REPO_PACKAGE["php"]}
-
+    if [ "${REPOSITORY}" != "yum_all" ]; then
+        yum_repository ${YUM_REPO_PACKAGE["php"]}
+    fi
     # Install some packages.
     yum_install ${YUM_PACKAGE["php"]}
     # Check installation php packages
@@ -854,7 +857,7 @@ download() {
     # Enable all yum repositories(Other than mariadb).
     log "Enable the required yum repositories."
     for key in ${!YUM_REPO_PACKAGE[@]}; do
-        yum_repository ${YUM_REPO_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        yum_repository ${YUM_REPO_PACKAGE[$key]} 
     done
     # Enable mariadb repositories.
     mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
@@ -1191,6 +1194,8 @@ declare -A YUM_REPO_PACKAGE_PHP;
 YUM_REPO_PACKAGE_PHP=(
     ["RHEL8"]="--set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms"
     ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-optional-rpms"
+    ["RHEL8_AWS"]="--set-enabled codeready-builder-for-rhel-8-rhui-rpms"
+    ["RHEL7_AWS"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-rhel-7-server-rhui-optional-rpms"
     ["CentOS8"]="--set-enabled PowerTools"
     ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
     ["yum_all"]=""
@@ -1201,7 +1206,7 @@ declare -A YUM_REPO_PACKAGE;
 YUM_REPO_PACKAGE=(
     ["yum-env-enable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO[${REPOSITORY}]}
     ["yum-env-disable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO[${REPOSITORY}]}
-    ["php"]=${YUM_REPO_PACKAGE_PHP[${REPOSITORY}]}
+    ["php"]=${YUM_REPO_PACKAGE_PHP[${linux_os}]}
 )
 
 
