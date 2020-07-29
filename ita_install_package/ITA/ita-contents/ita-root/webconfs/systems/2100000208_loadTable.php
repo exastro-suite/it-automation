@@ -68,7 +68,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);
     $c->setRequired(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070402"));
-    $c->setValidator(new SingleTextValidator(1, 64, false));
+    $c->setValidator(new SingleTextValidator(1, 270, false));
     $table->addColumn($c);
 
     // メールアドレス
