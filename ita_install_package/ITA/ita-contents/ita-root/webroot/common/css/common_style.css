@@ -204,10 +204,14 @@ a:hover, a:active {
 }
 
 
-
-#HEADER > div img {
+#HEADER > div {
+width: 100%!important;
+height: 80px!important;
+}
+#HEADER > div > img {
+  display: block;
 	width: auto!important; height: 56px!important;
-	margin: 0!important;
+	margin: 12px auto!important;
 }
 #HEADER table td {
 	padding: 8px 16px;
@@ -487,7 +491,8 @@ a:hover, a:active {
 
 /* 05.input button & submit *******************************************/
 /* default button */
-input[type="button"], input[type="submit"] {
+input[type="button"],
+input[type="submit"] {
 	font-size: 12px;
 	color: #FFF;
 	padding: 5px 10px;
@@ -499,6 +504,8 @@ input[type="button"], input[type="submit"] {
 	border: 1px solid #FF821E;
 	box-shadow: 0 2px 0 #CC6818;
 	transform: translateY(-2px);
+  cursor: pointer;
+  outline: none;
 }
 input.deleteBtnInTbl[type="button"] {
 	background: #DD0000;
@@ -514,12 +521,10 @@ input.deleteBtnInTbl[type="button"][value="Restore"] {
 
 /* default button:hover */
 input[type="button"]:hover, input[type="submit"]:hover {
-	cursor: pointer;
 	background: #FF640A;
 	border: 1px solid #FF640A;
 	transform: translateY(-1px);
 	box-shadow: 0 1px 0 #AA6818;
-	outline: none;
 }
 input.deleteBtnInTbl[type="button"]:hover {
 	background: #CC0000;
@@ -870,20 +875,20 @@ background-position: -16px 0;
 #ssoLoginContainer .ssoLoginItem {
   margin: 0 0 6px; padding: 0;
 }
-#ssoLoginContainer .ssoLoginLink {
+#ssoLoginContainer .ssoLoginItem a {
   display: block;
   padding: 0 0 2px;
   text-decoration: none;
   font-size: 12px;
   color: #FFF;
 }
-#ssoLoginContainer .ssoLoginLink:focus {
+#ssoLoginContainer .ssoLoginItem a:focus {
   outline: none;
 }
-#ssoLoginContainer .ssoLoginLink:hover {
+#ssoLoginContainer .ssoLoginItem a:hover {
   padding: 1px 0;
 }
-#ssoLoginContainer .ssoLoginLink:active {
+#ssoLoginContainer .ssoLoginItem a:active {
   padding: 2px 0 0;
 }
 #ssoLoginContainer .ssoLoginLinkInner {
@@ -895,14 +900,14 @@ background-position: -16px 0;
   border-radius: 4px;
   text-align: left;
 }
-#ssoLoginContainer .ssoLoginLink:focus .ssoLoginLinkInner {
+#ssoLoginContainer .ssoLoginItem a:focus .ssoLoginLinkInner {
   box-shadow: 0 0 0 1px #0070FF, 0 2px 0 #CC6818;
 }
-#ssoLoginContainer .ssoLoginLink:hover .ssoLoginLinkInner {
+#ssoLoginContainer .ssoLoginItem a:hover .ssoLoginLinkInner {
   background-color: #FF701E;
   box-shadow: 0 1px 0 #CC6818;
 }
-#ssoLoginContainer .ssoLoginLink:active .ssoLoginLinkInner {
+#ssoLoginContainer .ssoLoginItem a:active .ssoLoginLinkInner {
   background-color: #FF701E;
   box-shadow: none;
 }      
@@ -973,6 +978,7 @@ background-position: -16px 0;
 }
 
 .alert_area {
+  word-break: break-all;
 	font-size: 14px;
 	color: #D80D00;
 }
