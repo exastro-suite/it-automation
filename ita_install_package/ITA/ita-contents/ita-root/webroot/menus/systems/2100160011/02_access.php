@@ -387,7 +387,7 @@
                                            "MENUGROUP_FOR_VIEW" => $menuData['menu']['MENUGROUP_FOR_VIEW'],
                                            "MENUGROUP_FOR_CONV" => $menuData['menu']['MENUGROUP_FOR_CONV'],
                                            "DESCRIPTION" => $menuData['menu']['DESCRIPTION'],
-                                           "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $createMenuInfoData['LAST_UPDATE_TIMESTAMP'])
+                                           "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['menu']['LAST_UPDATE_TIMESTAMP'])
                                           );
                          break;
                     }
@@ -462,7 +462,6 @@
                 }
                 $columnGroupArray = $result;
                 
-                $updateItemArray = array();
                 // 既存、使えなくなった項目を廃止
                 foreach($createItemInfoArray as $createItemInfoData){
                     if($createItemInfoData['CREATE_MENU_ID'] == $menuData['menu']['CREATE_MENU_ID']){
@@ -470,7 +469,7 @@
                         if($key === false){
                             $strNumberForRI = $createItemInfoData['CREATE_ITEM_ID'];       // 主キー
                             $reqDeleteData = array("DISUSE_FLAG"          => "0",
-                                                   "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $createItemInfoData['LAST_UPDATE_TIMESTAMP'])
+                                                   "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $createItemInfoData['item']['LAST_UPDATE_TIMESTAMP'])
                                                   );
 
                             $g["page_dir"] = "2100160002";
@@ -481,10 +480,6 @@
                             if($arrayResult[0] !== "000"){
                                 throw new Exception();
                             }
-                        }
-                        else{
-                            // 更新する項目のタイムスタンプを記録
-                            $updateItemArray[$createItemInfoData['CREATE_ITEM_ID']] = "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $createItemInfoData['LAST_UPDATE_TIMESTAMP']);
                         }
                     }
                 }
@@ -545,7 +540,7 @@
                                                  "OTHER_MENU_LINK_ID"  => $itemData['OTHER_MENU_LINK_ID'],
                                                  "DESCRIPTION"      => $itemData['DESCRIPTION'],
                                                  "NOTE"             => $itemData['NOTE'],
-                                                 "UPD_UPDATE_TIMESTAMP" => $updateItemArray[$itemData['CREATE_ITEM_ID']]
+                                                 "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $itemData['LAST_UPDATE_TIMESTAMP'])
                                                  );
 
                         $g["page_dir"] = "2100160002";
@@ -663,7 +658,7 @@
                         $arrayRegisterData = array("CREATE_ITEM_ID" => $createItemID,
                                                    "COL_CNT" => count($repeatData['COLUMNS']),
                                                    "REPEAT_CNT" => $repeatData['REPEAT_CNT'],
-                                                   "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $updateData['LAST_UPDATE_TIMESTAMP'])
+                                                   "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['repeat']['r1']['LAST_UPDATE_TIMESTAMP'])
                                                   );
 
                         $g["page_dir"] = "2100160009";
@@ -1052,6 +1047,21 @@
                 }
                 $columnGroupArray = $result;
                 
+                /////////////////////
+                // アカウントリスト取得
+                /////////////////////
+                $accountListTable = new AccountListTable($g["objDBCA"], $g["db_model_ch"]);
+                $sql = $accountListTable->createSselect("WHERE DISUSE_FLAG = '0'");
+                
+                // SQL実行
+                $result = $accountListTable->selectTable($sql);
+                if(!is_array($result)){
+                    $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                    $arrayResult = array("999","", $msg);
+                    throw new Exception();
+                }
+                $accountListArray = $result;
+                
                 //////////////////////////
                 // メニュー(縦)作成情報を取得
                 //////////////////////////
@@ -1072,6 +1082,13 @@
                 foreach($createMenuInfoArray as $createMenuInfoData){
                     if($createMenuInfoData['CREATE_MENU_ID'] == $createMenuId){
                         $findFlag = true;
+                        $username = "";
+                        foreach($accountListArray as $accountListData){
+                            if($createMenuInfoData['LAST_UPDATE_USER'] == $accountListData['USER_ID']){
+                                $username = $accountListData['USERNAME_JP'];
+                            }
+                        }
+                        
                         $returnDataArray['menu'] = array(
                             "CREATE_MENU_ID"           => $createMenuInfoData['CREATE_MENU_ID'],
                             "MENU_NAME"                => $createMenuInfoData['MENU_NAME'],
@@ -1085,7 +1102,7 @@
                             "DISP_SEQ"                 => $createMenuInfoData['DISP_SEQ'],
                             "DESCRIPTION"              => $createMenuInfoData['DESCRIPTION'],
                             "NOTE"                     => $createMenuInfoData['NOTE'],
-                            "LAST_UPDATE_USER"         => $createMenuInfoData['LAST_UPDATE_USER'],
+                            "LAST_UPDATE_USER"         => $username,
                             "LAST_UPDATE_TIMESTAMP"    => $createMenuInfoData['LAST_UPDATE_TIMESTAMP']
                         );
                         break;
@@ -1140,7 +1157,8 @@
                     }
                     $returnDataArray['repeat']['r1'] = array(
                         "columns"    => $columnsArray,
-                        "REPEAT_CNT" => $cpiData['REPEAT_CNT']
+                        "REPEAT_CNT" => $cpiData['REPEAT_CNT'],
+                        "LAST_UPDATE_TIMESTAMP" => $cpiData['LAST_UPDATE_TIMESTAMP']
                     );
                 }
                 
@@ -1179,29 +1197,30 @@
                         $repeatItem = false;
                     }
                     $returnDataArray['item']['i' . $itemNum] = array(
-                        "CREATE_MENU_ID" => $itemInfoData['CREATE_MENU_ID'],
-                        "CREATE_ITEM_ID" => $itemInfoData['CREATE_ITEM_ID'],
-                        "ITEM_NAME" => $itemInfoData['ITEM_NAME'],
-                        "DISP_SEQ" => $itemInfoData['DISP_SEQ'],
-                        "REQUIRED" => $required,
-                        "UNIQUED" => $uniqued,
-                        "COL_GROUP_ID" => $itemInfoData['COL_GROUP_ID'],
-                        "PARENT" => $parent,
-                        "INPUT_METHOD_ID" => $itemInfoData['INPUT_METHOD_ID'],
-                        "MAX_LENGTH" => $itemInfoData['MAX_LENGTH'],
-                        "PREG_MATCH" => $itemInfoData['PREG_MATCH'],
-                        "MULTI_MAX_LENGTH" => $itemInfoData['MULTI_MAX_LENGTH'],
-                        "MULTI_PREG_MATCH" => $itemInfoData['MULTI_PREG_MATCH'],
-                        "INT_MIN" => $itemInfoData['INT_MIN'],
-                        "INT_MAX" => $itemInfoData['INT_MAX'],
-                        "FLOAT_MIN" => $itemInfoData['FLOAT_MIN'],
-                        "FLOAT_MAX" => $itemInfoData['FLOAT_MAX'],
-                        "FLOAT_DIGIT" => $itemInfoData['FLOAT_DIGIT'],
-                        "OTHER_MENU_LINK_ID" => $itemInfoData['OTHER_MENU_LINK_ID'],
-                        "DESCRIPTION" => $itemInfoData['DESCRIPTION'],
-                        "REPEAT_ITEM" => $repeatItem,
-                        "MIN_WIDTH" => "",
-                        "NOTE" => $itemInfoData['NOTE']
+                        "CREATE_MENU_ID"        => $itemInfoData['CREATE_MENU_ID'],
+                        "CREATE_ITEM_ID"        => $itemInfoData['CREATE_ITEM_ID'],
+                        "ITEM_NAME"             => $itemInfoData['ITEM_NAME'],
+                        "DISP_SEQ"              => $itemInfoData['DISP_SEQ'],
+                        "REQUIRED"              => $required,
+                        "UNIQUED"               => $uniqued,
+                        "COL_GROUP_ID"          => $itemInfoData['COL_GROUP_ID'],
+                        "PARENT"                => $parent,
+                        "INPUT_METHOD_ID"       => $itemInfoData['INPUT_METHOD_ID'],
+                        "MAX_LENGTH"            => $itemInfoData['MAX_LENGTH'],
+                        "PREG_MATCH"            => $itemInfoData['PREG_MATCH'],
+                        "MULTI_MAX_LENGTH"      => $itemInfoData['MULTI_MAX_LENGTH'],
+                        "MULTI_PREG_MATCH"      => $itemInfoData['MULTI_PREG_MATCH'],
+                        "INT_MIN"               => $itemInfoData['INT_MIN'],
+                        "INT_MAX"               => $itemInfoData['INT_MAX'],
+                        "FLOAT_MIN"             => $itemInfoData['FLOAT_MIN'],
+                        "FLOAT_MAX"             => $itemInfoData['FLOAT_MAX'],
+                        "FLOAT_DIGIT"           => $itemInfoData['FLOAT_DIGIT'],
+                        "OTHER_MENU_LINK_ID"    => $itemInfoData['OTHER_MENU_LINK_ID'],
+                        "DESCRIPTION"           => $itemInfoData['DESCRIPTION'],
+                        "REPEAT_ITEM"           => $repeatItem,
+                        "MIN_WIDTH"             => "",
+                        "NOTE"                  => $itemInfoData['NOTE'],
+                        "LAST_UPDATE_TIMESTAMP" => $itemInfoData['LAST_UPDATE_TIMESTAMP']
                     );
                     $itemNum++; 
                 }
