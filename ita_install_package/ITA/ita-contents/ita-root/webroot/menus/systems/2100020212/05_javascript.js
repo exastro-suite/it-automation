@@ -121,14 +121,26 @@ function run(){
     }
 
     if( exec_flag == true ){
-        // 親ウィンドウの「result_status_id」が完了(5)、完了(異常)(6)、想定外エラー(7)、緊急停止(8)、予約取消(10)の場合
-        if( window.parent.result_status_id == 5 ||
-            window.parent.result_status_id == 6 ||
-            window.parent.result_status_id == 7 ||
-            window.parent.result_status_id == 8 ||
-            window.parent.result_status_id == 10 ){
-            // 以降は実行しない
-            stop();
+        var send_exec_status_id = document.getElementById('send_exec_status_id').innerHTML;
+        if(prg_record_file_name == 1) {
+            elem_name ='exec_log_get_status';
+        } else {
+            elem_name ='error_log_get_status';
+        }
+        // ログ取得ステータスを取得
+        var log_status_id = document.getElementById(elem_name).innerHTML;
+
+        // ステータスが完了(5)、完了(異常)(6)、想定外エラー(7)、緊急停止(8)、予約取消(10)の場合
+        if( send_exec_status_id == 5 ||
+            send_exec_status_id == 6 ||
+            send_exec_status_id == 7 ||
+            send_exec_status_id == 8 ||
+            send_exec_status_id == 10 ){
+               // ステータスが実行中以降でログ取得が出来ている場合にタイマ停止
+               if(log_status_id == 'on') {
+                   // 以降は実行しない
+                   stop();
+               }
         }
     }
 
@@ -151,8 +163,8 @@ function run(){
         let g_objLogSelection = window.parent.document.getElementById("LogSelection");
         const num = g_objLogSelection.selectedIndex;
 
-	// 値(数値)から値(value値)を取得
-	const SelectedFile = g_objLogSelection.options[num].value;
+        // 値(数値)から値(value値)を取得
+        const SelectedFile = g_objLogSelection.options[num].value;
 
         var objTailStop = document.getElementById('stop_update');
         if( objTailStop.innerHTML!='abort' ){
@@ -161,6 +173,49 @@ function run(){
 
                      ,null
                      ,function(response, status, xhr){
+
+                           // 未実行やerrorなどのケースでステータスが未表示の場合がある。
+                           // ステータスが取得できない場合があるので実際のステータスを設定
+                           for (  var i = 0;  i < 10;  i++  ) {
+                              obj = window.parent.document.getElementById('status_id');
+                              if(obj != null) {
+                                  var status_id = obj.innerHTML;
+                                  break;
+                              }
+                           }
+
+                           // ステータスを取得
+                           var stridx = response.search(/[0-9]+<\/div>$/);
+                           if(stridx != -1) {
+                              var status_html = response.substr(stridx);
+                              var status_id = status_html.replace(/<\/div>/g, '');
+                              var numstr = status_id.search(/^[0-9]+$/);
+                              if(numstr == -1) {
+                                 // ステータスが取得できなかった場合
+                                 console.log("Faild to get execute status.(execution no %s)",execution_no);
+                                 console.log(response);
+                              }
+                           }
+
+                           // ステータスを更新
+                           var send_exec_status_id = document.getElementById('send_exec_status_id');
+                           send_exec_status_id.innerHTML = status_id;
+
+                           // 状態が完了(5)、完了(異常)(6)、想定外エラー(7)、緊急停止(8)、予約取消(10)の場合
+                           if( status_id == 5 ||
+                               status_id == 6 ||
+                               status_id == 7 ||
+                               status_id == 8 ||
+                               status_id == 10 ){
+                               if(prg_record_file_name == 1) {
+                                   elem_name ='exec_log_get_status';
+                               } else {
+                                   elem_name ='error_log_get_status';
+                               }
+                               // ログ取得ステータスを更新
+                               var log_status_id = document.getElementById(elem_name);
+                               log_status_id.innerHTML = 'on';
+                          }
                           if( response.indexOf('tail_show') == -1 ){
                               //----以降、アクセスをしないフラグを立てる
                               var objTailStop = document.getElementById('stop_update');
@@ -212,12 +267,13 @@ function pre_filter(kcode){
     if( kcode == 13 ){
         // フィルタ文字列を取得(URLエンコードも実施)
         if( document.getElementById('filter_string') != null ){
-            // 親ウィンドウの「result_status_id」が完了(5)、完了(異常)(6)、想定外エラー(7)、緊急停止(8)、予約取消(10)の場合
-            if( window.parent.result_status_id == 5 ||
-                window.parent.result_status_id == 6 ||
-                window.parent.result_status_id == 7 ||
-                window.parent.result_status_id == 8 ||
-                window.parent.result_status_id == 10 ){
+            var send_exec_status_id = document.getElementById('send_exec_status_id').innerHTML;
+            // ifreamの「send_exec_status_id」が完了(5)、完了(異常)(6)、想定外エラー(7)、緊急停止(8)、予約取消(10)の場合
+            if( send_exec_status_id == 5 ||
+                send_exec_status_id == 6 ||
+                send_exec_status_id == 7 ||
+                send_exec_status_id == 8 ||
+                send_exec_status_id == 10 ){
                 // tailを単発実行
                 run();
             }
