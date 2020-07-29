@@ -70,6 +70,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->fixColumn();
 
+    $table->setGeneObject('webSetting', $arrayWebSetting);
+
     return $table;
 };
 loadTableFunctionAdd($tmpFx,__FILE__);
