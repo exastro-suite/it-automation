@@ -265,6 +265,7 @@ if ( menuEditorMode !== 'view') {
     $('#create-menu-use').html( selectParamPurposeHTML );
 }
 
+
 const columnHTML = ''
   + '<div class="menu-column" data-rowpan="1" data-item-id="">'
     + '<div class="menu-column-header">'
@@ -1496,7 +1497,7 @@ const createRegistrationData = function( type ){
     alert('Empty error.');
     return false;
   }
-  
+
   let createMenuJSON = {
     'menu' : {},
     'group' : {},
@@ -1518,7 +1519,7 @@ const createRegistrationData = function( type ){
         // 項目・リピート
         const columnHTML = function( $targetColumn, repeatNumber ) {
         
-          if ( repeatNumber === undefined  ) repeatNumber = 0;
+          if ( repeatNumber === undefined  ) repeatNumber = 0;menuParameter
 
           const order = itemCount++,
                 selectTypeValue = $targetColumn.find('.menu-column-type-select').val();
@@ -1554,7 +1555,14 @@ const createRegistrationData = function( type ){
             'REPEAT_ITEM' : repeatFlag,
             'MIN_WIDTH' : $targetColumn.css('min-width')
           }
+
+          if ( menuEditorMode === 'edit' ) {
+            if (menuEditorArray.selectMenuInfo['item'][key]) {
+              createMenuJSON['item'][key]['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['item'][key]['LAST_UPDATE_TIMESTAMP'];
+            }
+          }
           
+        
           switch ( selectTypeValue ) {
             case '1':
               createMenuJSON['item'][key]['MAX_LENGTH'] = $targetColumn.find('.max-byte').val();
@@ -1595,6 +1603,10 @@ const createRegistrationData = function( type ){
             createMenuJSON['repeat'][repeatKey] = {
               'COLUMNS' : columns,
               'REPEAT_CNT' : repeatNumber
+            }
+
+            if ( menuEditorMode === 'edit' ) {
+              createMenuJSON['repeat']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['repeat']['LAST_UPDATE_TIMESTAMP'];
             }
           }
         } else {
@@ -1664,7 +1676,7 @@ const loadMenu = function() {
     if ( menuEditorMode === 'diversion' ){
       loadJSON['menu']['MENU_NAME'] = '';
     }
-    
+
     // パネル情報表示
     menuParameter('set', loadJSON );
     
