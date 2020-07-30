@@ -232,9 +232,8 @@ $ary[104228] = "Diversion new";
 $ary[104229] = "Menu creation history";
 $ary[104230] = "Reload";
 $ary[104231] = "Cancel";
-$ary[104232] = "Do you want to create the  Menu ?\n*If a menu with the same menu name or a menu the same 'Menu definition information' ID already exists, the existing data will be deleted and overwritten by the new data.\nIf you need to retain the existing data, select 'Cancel' and perform a backup.";
-$ary[104233] = "Menu definition/creation";
-$ary[104234] = "Auto fill";
-$ary[104235] = "Select menu group";
-$ary[104236] = "Required item";
+$ary[104232] = "Menu definition/creation";
+$ary[104233] = "Auto fill";
+$ary[104234] = "Select menu group";
+$ary[104235] = "Required item";
 ?>
