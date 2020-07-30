@@ -72,7 +72,8 @@
                                            "MENUGROUP_FOR_H" => $menuData['menu']['MENUGROUP_FOR_H'],
                                            "MENUGROUP_FOR_VIEW" => $menuData['menu']['MENUGROUP_FOR_VIEW'],
                                            "MENUGROUP_FOR_CONV" => $menuData['menu']['MENUGROUP_FOR_CONV'],
-                                           "DESCRIPTION" => $menuData['menu']['DESCRIPTION']
+                                           "DESCRIPTION" => $menuData['menu']['DESCRIPTION'],
+                                           "NOTE" => $menuData['menu']['NOTE'],
                                           );
                 
                 $g["page_dir"] = "2100160001";
@@ -387,6 +388,7 @@
                                            "MENUGROUP_FOR_VIEW" => $menuData['menu']['MENUGROUP_FOR_VIEW'],
                                            "MENUGROUP_FOR_CONV" => $menuData['menu']['MENUGROUP_FOR_CONV'],
                                            "DESCRIPTION" => $menuData['menu']['DESCRIPTION'],
+                                           "NOTE" => $menuData['menu']['NOTE'],
                                            "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['menu']['LAST_UPDATE_TIMESTAMP'])
                                           );
                          break;
