@@ -233,7 +233,7 @@ $ary[104229] = "Menu creation history";
 $ary[104230] = "Reload";
 $ary[104231] = "Cancel";
 $ary[104232] = "Menu definition/creation";
-$ary[104233] = "Auto fill";
+$ary[104233] = "Auto-input";
 $ary[104234] = "Select menu group";
 $ary[104235] = "Required item";
 ?>
