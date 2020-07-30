@@ -3141,7 +3141,7 @@ COLUMN_LIST_ID                 %INT%                   , -- 識別シーケン�
 MENU_ID                        %INT%                   , -- メニューID
 COL_NAME                       %VARCHR%(64)            , -- メニュー　カラム名
 COL_CLASS                      %VARCHR%(64)            , -- メニュー　カラムクラス
-COL_TITLE                      %VARCHR%(512)           , -- メニュー　カラムタイトル
+COL_TITLE                      %VARCHR%(4096)          , -- メニュー　カラムタイトル
 COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム　代入値自動登録 表示順
 REF_TABLE_NAME                 %VARCHR%(64)            , -- 参照テーブル名
 REF_PKEY_NAME                  %VARCHR%(64)            , -- 参照テーブル主キー
@@ -3165,7 +3165,7 @@ COLUMN_LIST_ID                 %INT%                   , -- 識別シーケン�
 MENU_ID                        %INT%                   , -- メニューID
 COL_NAME                       %VARCHR%(64)            , -- メニュー　カラム名
 COL_CLASS                      %VARCHR%(64)            , -- メニュー　カラムクラス
-COL_TITLE                      %VARCHR%(512)           , -- メニュー　カラムタイトル
+COL_TITLE                      %VARCHR%(4096)          , -- メニュー　カラムタイトル
 COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム　代入値自動登録 表示順
 REF_TABLE_NAME                 %VARCHR%(64)            , -- 参照テーブル名
 REF_PKEY_NAME                  %VARCHR%(64)            , -- 参照テーブル主キー
