@@ -366,12 +366,6 @@ function conductorInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSON
     $strFxName = __FUNCTION__;
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
-
-    $objJSONOfReceptedData=array();
-    $objJSONOfReceptedData['CONDUCTOR_INSTANCE_ID'] = 1175;
-    $objJSONOfReceptedData['NODE_INSTANCE_ID'] = 4331;
-
-
     try{
         require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/71_basic_common_lib.php");
         require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/74_conductorClassAdmin.php");
