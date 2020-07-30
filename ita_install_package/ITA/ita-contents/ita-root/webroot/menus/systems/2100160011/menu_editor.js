@@ -1797,9 +1797,10 @@ const menuParameter = function( type, setData ) {
       'DESCRIPTION' : ['create-menu-explanation', 'textarea'],
       'NOTE' : ['create-menu-note', 'textarea']
     };
-    // 流用する場合はID、更新日時、更新者、説明、備考をnullに
+    // 流用する場合はID、表示順序、更新日時、更新者、説明、備考をnullに
     if ( menuEditorMode === 'diversion' ){
       delete menuParameterList['CREATE_MENU_ID'];
+      delete menuParameterList['DISP_SEQ'];
       delete menuParameterList['LAST_UPDATE_TIMESTAMP'];
       delete menuParameterList['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'];
       delete menuParameterList['LAST_UPDATE_USER'];
