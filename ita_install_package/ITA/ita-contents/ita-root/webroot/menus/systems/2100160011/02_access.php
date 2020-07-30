@@ -232,7 +232,7 @@
                 $insertData['FILE_NAME'] = "";
                 $insertData['NOTE'] = "";
                 $insertData['DISUSE_FLAG'] = "0";
-                $insertData['LAST_UPDATE_USER'] = "";
+                $insertData['LAST_UPDATE_USER'] = $g['login_id'];
                 
                 //////////////////////////
                 // メニュー作成管理テーブルに登録
@@ -701,7 +701,7 @@
                 $insertData['FILE_NAME'] = "";
                 $insertData['NOTE'] = "";
                 $insertData['DISUSE_FLAG'] = "0";
-                $insertData['LAST_UPDATE_USER'] = "";
+                $insertData['LAST_UPDATE_USER'] = $g['login_id'];
                 
                 $result = $createMenuStatusTable->insertTable($insertData, $seqNo, $jnlSeqNo);
                 if(true !== $result){
@@ -947,47 +947,6 @@
         }
         
         /////////////////////
-        // アカウントリスト取得
-        /////////////////////
-        function selectAccountList(){
-            // グローバル変数宣言
-            global $g;
-
-            // ローカル変数宣言
-            $arrayResult = array();
-            require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
-
-            $accountListTable = new AccountListTable($g["objDBCA"], $g["db_model_ch"]);
-            $sql = $accountListTable->createSselect("WHERE DISUSE_FLAG = '0'");
-            $result = $accountListTable->selectTable($sql);
-            if(!is_array($result)){
-                $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                $arrayResult = array("999","", $msg);
-                return makeAjaxProxyResultStream($arrayResult);
-            }
-            $filteredData = array();
-            foreach($result as $alData){
-                if($alData['USER_ID'] > 0){
-                    $addArray = array();
-                    $addArray['USER_ID'] = $alData['USER_ID'];
-                    $addArray['USERNAME'] = $alData['USERNAME_JP'];
-                    $filteredData[] = $addArray;
-                }
-            }
-            
-            $arrayResult = array("000","", json_encode($filteredData));
-            if($arrayResult[0]=="000"){
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
-            }else if(intval($arrayResult[0])<500){
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
-            }else{
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
-            }
-
-            return makeAjaxProxyResultStream($arrayResult);
-        }
-        
-        /////////////////////
         // メニュー作成情報関連データ取得
         /////////////////////
         function selectMenuInfo($createMenuId){
@@ -1089,6 +1048,8 @@
                             }
                         }
                         
+                        $date = DateTime::createFromFormat('Y-m-d H:i:s.u', $createMenuInfoData['LAST_UPDATE_TIMESTAMP']);
+                        
                         $returnDataArray['menu'] = array(
                             "CREATE_MENU_ID"           => $createMenuInfoData['CREATE_MENU_ID'],
                             "MENU_NAME"                => $createMenuInfoData['MENU_NAME'],
@@ -1103,7 +1064,8 @@
                             "DESCRIPTION"              => $createMenuInfoData['DESCRIPTION'],
                             "NOTE"                     => $createMenuInfoData['NOTE'],
                             "LAST_UPDATE_USER"         => $username,
-                            "LAST_UPDATE_TIMESTAMP"    => $createMenuInfoData['LAST_UPDATE_TIMESTAMP']
+                            "LAST_UPDATE_TIMESTAMP"    => $createMenuInfoData['LAST_UPDATE_TIMESTAMP'],
+                            "LAST_UPDATE_TIMESTAMP_FOR_DISPLAY" => $date->format('Y-m-d H:i:s')
                         );
                         break;
                     }
