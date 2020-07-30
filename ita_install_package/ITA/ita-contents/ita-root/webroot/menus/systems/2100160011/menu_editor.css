@@ -936,6 +936,7 @@ min-height: 24px;
 background-color: rgba( 0,0,0,.2 );
 line-height: 16px;
 color: #EEE;
+word-break: break-all;
 }
 #KIZI input[type="text"].property-text:focus,
 #KIZI input[type="number"].property-number:focus,
