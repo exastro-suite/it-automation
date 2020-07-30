@@ -1510,6 +1510,9 @@ const createRegistrationData = function( type ){
   
   // メニュー作成情報
   createMenuJSON['menu'] = menuParameter('get');
+  if ( menuEditorMode === 'edit' ) {
+    createMenuJSON['menu']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['menu']['LAST_UPDATE_TIMESTAMP'];
+  }
     
   const tableAnalysis = function( $cols ) {
       
@@ -1648,7 +1651,7 @@ const createRegistrationData = function( type ){
     topColumns.push( $( this ).attr('id') );
   });
   createMenuJSON['menu']['columns'] = topColumns;
-  
+
   // 解析スタート
   tableAnalysis ( $menuTable );
 
@@ -1784,7 +1787,7 @@ const menuParameter = function( type, setData ) {
       'TARGET' : ['create-menu-type', 'select'],
       'DISP_SEQ' : ['create-menu-order', 'number'],
       'PURPOSE' : ['create-menu-use', 'select'],
-      'LAST_UPDATE_TIMESTAMP' : ['create-menu-last-modified', 'span'],
+      'LAST_UPDATE_TIMESTAMP_FOR_DISPLAY' : ['create-menu-last-modified', 'span'],
       'LAST_UPDATE_USER' : ['create-last-update-user', 'span'],
       'MENUGROUP_FOR_H' : ['create-menu-host', 'span'],
       'MENUGROUP_FOR_HG' : ['create-menu-host-group', 'span'],
@@ -1846,7 +1849,7 @@ const menuParameter = function( type, setData ) {
           ['#create-menu-data-sheet', listIdName( 'group', setData['menu']['MENUGROUP_FOR_CMDB'] )],
           ['#create-menu-explanation', setData['menu']['DESCRIPTION'] ],
           ['#create-menu-note', setData['menu']['NOTE'] ],
-          ['#create-menu-last-modified', setData['menu']['LAST_UPDATE_TIMESTAMP'] ],
+          ['#create-menu-last-modified', setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] ],
           ['#create-last-update-user', setData['menu']['LAST_UPDATE_USER']]
         ],
           viewModePanelInfoLength = viewModePanelInfo.length;
