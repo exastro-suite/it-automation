@@ -1801,6 +1801,7 @@ const menuParameter = function( type, setData ) {
     if ( menuEditorMode === 'diversion' ){
       delete menuParameterList['CREATE_MENU_ID'];
       delete menuParameterList['LAST_UPDATE_TIMESTAMP'];
+      delete menuParameterList['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'];
       delete menuParameterList['LAST_UPDATE_USER'];
     }
 
