@@ -526,9 +526,62 @@ var scrollCheck = function( $scroll ){
 }
 scrollCheck( $tableScroll );
 
+var scrollCheckTimer = false;
 $tableScroll.on('scroll', function(){
-    scrollCheck( $( this ) );
+    var $scrollTable = $( this );
+    if ( scrollCheckTimer === false ) {
+      // スクロール開始時
+    }
+    clearTimeout( scrollCheckTimer );
+    scrollCheckTimer = setTimeout( function(){
+      scrollCheckTimer = false;
+      if ( userAgent === 'edge' ) {
+        $itaTableWrap.addClass('edgeScroll');
+        setTimeout( function(){ $itaTableWrap.removeClass('edgeScroll'); }, 100 );
+      } else {
+        scrollCheck( $scrollTable );
+      }
+    },100 );
+    
 });
+
+// Edgeはマウスホイールでのスクロールをjsでやる
+if ( userAgent === 'edge' ) {
+    const mousewheelevent = ('onwheel' in document ) ? 'wheel' : ('onmousewheel' in document ) ? 'mousewheel' : 'DOMMouseScroll';
+    $tableScroll.on( mousewheelevent, function( e ){
+
+        e.preventDefault();
+        var $edgeScroll = $( this ),
+            scrollWidth = 80;
+
+        if ( e.buttons === 0 ) {
+
+          const delta = e.originalEvent.deltaY ? - ( e.originalEvent.deltaY ) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : - ( e.originalEvent.detail );
+
+          if ( e.shiftKey ) {
+            // 横スクロール
+            var scrollX = $edgeScroll.scrollLeft();
+            if ( delta < 0 ){
+              $edgeScroll.scrollLeft( scrollX + scrollWidth );
+            } else {
+              $edgeScroll.scrollLeft( scrollX - scrollWidth );
+            }
+
+          } else {
+            // 縦スクロール
+            var scrollY = $edgeScroll.scrollTop();
+            if ( delta < 0 ){
+              $edgeScroll.scrollTop( scrollY + scrollWidth );
+            } else {
+              $edgeScroll.scrollTop( scrollY - scrollWidth );
+            }
+
+          }
+
+        }
+
+    });
+}
 
 
 

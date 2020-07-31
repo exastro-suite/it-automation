@@ -269,6 +269,8 @@ TIME_END                          %DATETIME6%                      ,
 HEAT_INPUT                        %VARCHR%(1024)                   ,
 HEAT_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            ,
+CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
+CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -300,6 +302,8 @@ TIME_END                          %DATETIME6%                      ,
 HEAT_INPUT                        %VARCHR%(1024)                   ,
 HEAT_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            ,
+CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
+CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -466,6 +470,8 @@ SELECT
         TAB_A.HEAT_RESULT            ,
         TAB_A.RUN_MODE               ,
         TAB_D.RUN_MODE_NAME          ,
+        TAB_A.CONDUCTOR_NAME         ,
+        TAB_A.CONDUCTOR_INSTANCE_NO  ,
         TAB_A.DISP_SEQ               ,
         TAB_A.NOTE                   ,
         TAB_A.DISUSE_FLAG            ,
@@ -500,6 +506,8 @@ SELECT
         TAB_A.HEAT_RESULT            ,
         TAB_A.RUN_MODE               ,
         TAB_D.RUN_MODE_NAME          ,
+        TAB_A.CONDUCTOR_NAME         ,
+        TAB_A.CONDUCTOR_INSTANCE_NO  ,
         TAB_A.DISP_SEQ               ,
         TAB_A.NOTE                   ,
         TAB_A.DISUSE_FLAG            ,

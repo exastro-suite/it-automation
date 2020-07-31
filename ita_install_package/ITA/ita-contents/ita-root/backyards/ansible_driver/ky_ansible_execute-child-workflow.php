@@ -182,7 +182,6 @@
         if($ret === false) {
             $error_flag = 1; throw new Exception( $FREE_LOG );
         }
-
         ////////////////////////////////////////////////////////////////
         // 投入オペレーションの最終実施日を更新する。                  
         ////////////////////////////////////////////////////////////////
@@ -261,7 +260,8 @@
         //////////////////////////////////////////////////////////////////
         // 処理対象の作業インスタンス実行                            
         //////////////////////////////////////////////////////////////////
-        $ret = instance_execution($dbobj,$ansdrv,$lv_ans_if_info,$tgt_driver_id,$tgt_execution_no,$intJournalSeqNo,$tgt_execution_row,$cln_execution_row);
+        $TowerHostList = array();
+        $ret = instance_execution($dbobj,$ansdrv,$lv_ans_if_info,$TowerHostList,$tgt_driver_id,$tgt_execution_no,$intJournalSeqNo,$tgt_execution_row,$cln_execution_row);
         
         ////////////////////////////////////////////////////////////////
         // 処理対象の作業インスタンスのステータス更新
@@ -337,11 +337,14 @@
                 $cln_execution_row = $tgt_execution_row;
             }
 
-            $ret = instance_checkcondition($dbobj,$ansdrv,$lv_ans_if_info,$tgt_driver_id,$tgt_execution_no,$intJournalSeqNo,$tgt_execution_row,$cln_execution_row);
+            $db_update_need = false;
+            $ret = instance_checkcondition($dbobj,$ansdrv,$lv_ans_if_info,$TowerHostList,$tgt_driver_id,$tgt_execution_no,$intJournalSeqNo,$tgt_execution_row,$cln_execution_row,$db_update_need);
             
             $ststus_update = false;
             // ステータスが更新されたか判定
-            if($cln_execution_row['STATUS_ID'] != $tgt_execution_row['STATUS_ID']) {
+            //if($cln_execution_row['STATUS_ID'] != $tgt_execution_row['STATUS_ID']) {
+            if(($cln_execution_row['STATUS_ID'] != $tgt_execution_row['STATUS_ID']) ||
+               ($db_update_need == true)) {
                 $ststus_update = true;
                 ////////////////////////////////////////////////////////////////
                 // 処理対象の作業インスタンスのステータス更新
@@ -431,6 +434,7 @@
                                             $in_ansdrv,
                                             $in_execution_no,
                                             $symphony_instance_no,
+                                            $conductor_instance_no,
                                             $in_pattern_id,
                                             $in_operation_id,
                                             //ホストアドレス方式追加
@@ -496,7 +500,8 @@
                                                    $role_rolepackage_id,
                                                    $def_vars_list,
                                                    $def_array_vars_list,
-                                                   $symphony_instance_no
+                                                   $symphony_instance_no,
+                                                   $conductor_instance_no
                                                    );
         if($ret <> true){
             // 例外処理へ
@@ -971,7 +976,7 @@
         return true;
     }
     // 処理対象の作業インスタンス実行
-    function instance_execution($dbobj,$in_ansdrv,$in_ans_if_info,$in_driver_id,$in_execution_no,$in_JournalSeqNo,$in_execution_row,&$out_execution_row) {
+    function instance_execution($dbobj,$in_ansdrv,$in_ans_if_info,&$TowerHostList,$in_driver_id,$in_execution_no,$in_JournalSeqNo,$in_execution_row,&$out_execution_row) {
         global $objDBCA;
         global $objMTS;
         global $db_model_ch;
@@ -1018,6 +1023,9 @@
 
         // symphonyインスタンス番号を退避
         $tgt_symphony_instance_no = $in_execution_row['SYMPHONY_INSTANCE_NO'];
+
+        // conductorインスタンス番号を退避
+        $tgt_conductor_instance_no = $in_execution_row['CONDUCTOR_INSTANCE_NO'];
         
         require ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_global_variables.php");
 
@@ -1076,6 +1084,7 @@
                                                   $in_ansdrv,
                                                   $in_execution_no,
                                                   $tgt_symphony_instance_no,
+                                                  $tgt_conductor_instance_no,
                                                   $in_execution_row["PATTERN_ID"],
                                                   $in_execution_row["OPERATION_NO_UAPK"],
                                                   // ホストアドレス指定方式（I_ANS_HOST_DESIGNATE_TYPE_ID）
@@ -1287,12 +1296,21 @@
                     ////////////////////////////////////////////////////////////////
                     // AnsibleTowerから実行                                       //
                     ////////////////////////////////////////////////////////////////
+                    $MultipleLogMark = "";
+                    $MultipleLogFileJsonAry = ""; // 定義のみ値は返却されない
                     // $Statusは未使用
-                    $ret = AnsibleTowerExecution(DF_EXECUTION_FUNCTION,$in_ans_if_info,$out_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$Status,$JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry);
+                    $TowerHostList = array();
+                    $ret = AnsibleTowerExecution(DF_EXECUTION_FUNCTION,$in_ans_if_info,$TowerHostList,$out_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$MultipleLogMark,$MultipleLogFileJsonAry,$Status,$JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry);
 
                     if ( $log_level === 'DEBUG' ){
                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-51069",$in_execution_no);
                         require ($root_dir_path . $log_output_php );
+                    }
+                    // マルチログか判定
+                    if($MultipleLogMark != "") {
+                        if($out_execution_row['MULTIPLELOG_MODE'] != $MultipleLogMark) {
+                            $out_execution_row['MULTIPLELOG_MODE'] = $MultipleLogMark;
+                        }
                     }
                 }
                 ////////////////////////////////////////////////////////////////
@@ -1335,7 +1353,7 @@
             return false;
         }
     }
-    function instance_checkcondition($dbobj,$in_ansdrv,$in_ans_if_info,$in_driver_id,$in_execution_no,$in_JournalSeqNo,$in_execution_row,&$out_execution_row) {
+    function instance_checkcondition($dbobj,$in_ansdrv,$in_ans_if_info,$TowerHostList,$in_driver_id,$in_execution_no,$in_JournalSeqNo,$in_execution_row,&$out_execution_row,&$db_update_need) {
         global $objDBCA;
         global $objMTS;
         global $db_model_ch;
@@ -1479,7 +1497,29 @@
                 ////////////////////////////////////////////////////////////////
                 // AnsibleTowerから実行                                       //
                 ////////////////////////////////////////////////////////////////
-                $ret = AnsibleTowerExecution(DF_CHECKCONDITION_FUNCTION,$in_ans_if_info,$out_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$Status);
+                $MultipleLogMark = "";
+                $MultipleLogFileJsonAry = "";
+                $ret = AnsibleTowerExecution(DF_CHECKCONDITION_FUNCTION,$in_ans_if_info,$TowerHostList,$out_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$MultipleLogMark,$MultipleLogFileJsonAry,$Status);
+
+                // マルチログか判定
+                if($MultipleLogMark != "") {
+                    if($out_execution_row['MULTIPLELOG_MODE'] != $MultipleLogMark) {
+                        $out_execution_row['MULTIPLELOG_MODE'] = $MultipleLogMark;
+                        $db_update_need = true;
+                    }
+                }
+                // マルチログファイルリスト
+                if($MultipleLogFileJsonAry!= "") {
+                    if($out_execution_row['LOGFILELIST_JSON'] != $MultipleLogFileJsonAry) {
+                        $out_execution_row['LOGFILELIST_JSON'] = $MultipleLogFileJsonAry;
+                        $db_update_need = true;
+                    }
+                }
+                // マルチログファイルの情報をDBに反映
+                if($db_update_need === true) {
+                    $out_execution_row['JOURNAL_SEQ_NO']    = $in_JournalSeqNo;
+                    $out_execution_row['LAST_UPDATE_USER']  = $db_access_user_id;
+                }
 
                 if( $Status == 5 ||
                     $Status == 6 ||
@@ -1641,7 +1681,9 @@
                     }
 
                     // 戻り値は確認しない。
-                    AnsibleTowerExecution(DF_DELETERESOURCE_FUNCTION,$in_ans_if_info,$in_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$Status);
+                    $MultipleLogMark = "";        // 定義のみ値は返却されない
+                    $MultipleLogFileJsonAry = ""; // 定義のみ値は返却されない
+                    AnsibleTowerExecution(DF_DELETERESOURCE_FUNCTION,$in_ans_if_info,$TowerHostList,$in_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$MultipleLogMark,$MultipleLogFileJsonAry,$Status);
 
                     if($log_level === 'DEBUG' ){
                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-50076",$in_execution_no);

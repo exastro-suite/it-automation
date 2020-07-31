@@ -455,6 +455,16 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104631"));
            $cg->addColumn($c);
 
+           // 認証情報　接続タイプ
+           $c = new IDColumn('CREDENTIAL_TYPE_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-103051"),
+                              'B_ANS_TWR_CREDENTIAL_TYPE', 'CREDENTIAL_TYPE_ID', 'CREDENTIAL_TYPE_NAME','');
+           $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-103052"));
+           //$c->getOutputType('update_table')->setOverrideInputValue(1);
+           $c->setDefaultValue("register_table", 1);
+           $c->setRequired(true);//登録/更新時には、入力必須
+
+           $cg->addColumn($c);
+
         $cg2->addColumn($cg);
 
         $table->addColumn($cg2);
@@ -512,28 +522,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $table->addColumn($cg);
     }
 
-    $wanted_filename = "ita_dsc-driver";
-    if( file_exists($root_dir_path."/libs/release/".$wanted_filename) ){
-        //DSC
-        $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITABASEH-MNU-104501") );
-
-            $c = new FileUploadColumn('DSC_CERTIFICATE_FILE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104502"));
-            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104503"));
-            $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
-            $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
-            $c->setFileHideMode(true);
-            $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
-            $cg->addColumn($c);
-
-            $objVldt = new SingleTextValidator(0,256,false);
-            $c = new TextColumn('DSC_CERTIFICATE_THUMBPRINT',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104504"));
-            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104505"));//エクセル・ヘッダでの説明
-            $c->setValidator($objVldt);
-            $cg->addColumn($c);
-
-        $table->addColumn($cg);
-    }
-
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
     $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
         $boolRet = true;
@@ -548,7 +536,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
             $strQuery = "UPDATE A_PROC_LOADED_LIST "
                        ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                       ."WHERE ROW_ID IN (2100020002,2100020004,2100020006) ";
+                       ."WHERE ROW_ID IN (2100020002,2100020004,2100020006,2100170005) ";
 
             $aryForBind = array();
 

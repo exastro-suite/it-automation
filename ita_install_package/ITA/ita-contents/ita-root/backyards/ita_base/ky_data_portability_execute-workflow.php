@@ -1963,7 +1963,7 @@ function exportData($record){
     // kymに固める
     $exportFile = 'ita_exportdata_' . date('YmdHis') . '.kym';
     $output = NULL;
-    $cmd = "cd '" . $exportPath . "';find . > target_list.txt 2>&1";
+    $cmd = "cd '" . $exportPath . "';ls -1 > target_list.txt 2>&1";
     exec($cmd, $output, $return_var);
 
     if(0 != $return_var){
@@ -2977,7 +2977,7 @@ function exportSymOpe($record){
 
         // kym2に固める
         $output = NULL;
-        $cmd = "cd '" . $exportPath . "';find . > target_list.txt 2>&1";
+        $cmd = "cd '" . $exportPath . "';ls -1 > target_list.txt 2>&1";
         exec($cmd, $output, $return_var);
 
         if(0 != $return_var){
@@ -3281,68 +3281,6 @@ function selectFileTemplData($destTableName, $destItem, $parentData, $parentKey,
         return false;
     }
     if( $objQuery->sqlBind(array($destItem => $destValueExtract)) != "" ){
-        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
-        outputLog(LOG_PREFIX, $objQuery->getLastError());
-        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
-        return false;
-    }
-    $res = $objQuery->sqlExecute();
-    if ($res === false) {
-        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
-        outputLog(LOG_PREFIX, $objQuery->getLastError());
-        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
-        return false;
-    }
-
-    while ($row = $objQuery->resultFetch()){
-        $resultArray[] = $row;
-    }
-
-    return $resultArray;
-}
-
-/**
- * DSC資格情報管理検索（特別版）
- */
-function selectDscCredential($destTableName, $destItem, $parentData, $parentKey, $otherCondition){
-
-    global $objDBCA, $objMTS;
-    $resultArray = array();
-
-    // コンフィグファイルを取得する
-    $matterFilePath = ROOT_DIR_PATH . "/uploadfiles/2100060003/RESOURCE_MATTER_FILE/" . sprintf("%010d", $parentData['RESOURCE_MATTER_ID']) . "/" . $parentData['RESOURCE_MATTER_FILE'];
-
-    if(!file_exists($matterFilePath)){
-        return array();
-    }
-    $matterFile = file_get_contents($matterFilePath);
-
-    $return = preg_match_all('/{{\sCDT\_[a-zA-Z0-9_]+\s}}/', $matterFile, $match);
-
-    if(false === $return || 1 > $return){
-        return array();
-    }
-
-    $destValue = array();
-    foreach($match[0] as $matchData){
-        $destValue[] = str_replace(array('{{ ', ' }}'), '', $matchData);
-    }
-
-    // テーブルを検索する
-    $sql  = "SELECT * FROM {$destTableName} ";
-    $sql .= "WHERE {$destItem} IN (:{$destItem}) ";
-    if($otherCondition != null){
-        $sql .= " AND {$otherCondition}";
-    }
-
-    $objQuery = $objDBCA->sqlPrepare($sql);
-    if ($objQuery->getStatus() === false) {
-        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
-        outputLog(LOG_PREFIX, $objQuery->getLastError());
-        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
-        return false;
-    }
-    if( $objQuery->sqlBind(array($destItem => implode(',', $destValue))) != "" ){
         outputLog(LOG_PREFIX, "SQL=[{$sql}].");
         outputLog(LOG_PREFIX, $objQuery->getLastError());
         outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));

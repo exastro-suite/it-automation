@@ -199,12 +199,28 @@ class Auth
       *  @access public
       **/
     public $errMsg = '';
+    public $errCode = '';
+
+    /**
+      *  エラーが発生判定フラグ
+      *
+      *  @type bool
+      *  @access public
+      **/
+    public $isError = false;
+
+    /**
+      *  エラー発生時の詳細を保持
+      *
+      *  @type string
+      *  @access public
+      **/
+    public $errDetail = '';
   // properties----
 
     /**
       *  Constructor
       *  コンストラクタ
-      *  特に何もしない
       *
       *  @return void
       **/
@@ -214,11 +230,41 @@ class Auth
     }
 
     /**
+      * initiarize
+      * 事前処理
+      **/
+    public function initialize ()
+    {
+        // ----try session start
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            try {
+                if (!empty($this->sessionName)) {
+                    session_name($this->sessionName);
+                }
+                @session_start();
+                if (!session_id()) {
+                    throw new Exception('Session could not be started by Auth, ');
+                }
+            } catch (ErrorException $e) {
+                $this->errMsg = $e->getMessage();
+                return;
+            }
+            if (empty($_SESSION[$this->sessionAuthName])) {
+                session_regenerate_id(true);
+                $_SESSION[$this->sessionAuthName] = [];
+            }
+            $this->session =& $_SESSION[$this->sessionAuthName];
+            $this->server =& $_SERVER;
+            $this->post =& $_POST;
+        }
+        // try session start----
+    }
+
+    /**
       *  認証を行う
       *  認証は全てこのメソッドで行う
       *  必要なプロパティを全てsetメソッドで指定してからstart()を呼ぶこと
       *  処理の流れ
-      *  sessionName指定->session_start
       *  $_SESSIONから認証用のデータ復元(restoreAuthData())
       *  正当な認証か確認(checkAuth())
       *  正当な認証が確認できない場合以下の認証を試みる(allowLoginがtrueの場合)
@@ -231,37 +277,18 @@ class Auth
     public function start()
     {
         // Auth::start() called
-        if (!empty($this->sessionName)) {
-            session_name($this->sessionName);
-        }
-
-        // ----try session start
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            try {
-                @session_start();
-                if (!session_id()) {
-                    throw new Exception('Session could not be started by Auth, ');
-                }
-            } catch (ErrorException $e) {
-                $this->errMsg = $e->getMessage();
-                return;
-            }
-        }
-        // try session start----
-
+        $this->initialize();
         // ----$_SESSION内に認証データがあるか確認ない場合は初期化
-        if (empty($_SESSION[$this->sessionAuthName])) {
-            // sessionId change(for security)
-            session_regenerate_id(true);
-            $_SESSION[$this->sessionAuthName] = [];
-        }
+        //if (empty($_SESSION[$this->sessionAuthName])) {
+        //    // sessionId change(for security)
+        //    session_regenerate_id(true);
+        //    $_SESSION[$this->sessionAuthName] = [];
+        //}
         // $_SESSION内に認証データがあるか確認ない場合は初期化----
-
-        // ----set properties
-        $this->session =& $_SESSION[$this->sessionAuthName];
-        $this->server =& $_SERVER;
-        $this->post =& $_POST;
-        // set properties----
+        //
+        //$this->session =& $_SESSION[$this->sessionAuthName];
+        //$this->server =& $_SERVER;
+        //$this->post =& $_POST;
         // ----restore session data
         $this->restoreAuthData();
         // estore session data----
@@ -357,7 +384,7 @@ class Auth
     protected function setAuth($username)
     {
         // Auth::setAuth() called
-        session_regenerate_id(true);
+        //session_regenerate_id(true);
 
         if (empty($this->session) || !is_array($this->session)) {
             $this->session = [];
@@ -563,7 +590,7 @@ class Auth
         if (empty($this->session)) {
             return;
         }
-        if (emptyt($name)) {
+        if (empty($name)) {
             return $this->session;
         }
         if (isset($this->session[$name])) {
@@ -598,5 +625,656 @@ class Auth
     public function getStatus()
     {
         return $this->status;
+    }
+}
+
+class OAuth2 extends Auth
+{
+  // ----propeties
+    /**
+      * config
+      * @type array
+      **/
+    protected $config = [
+        'providerId'       => '',
+        'providerName'     => '',
+        'providerLogo'     => '',
+        'clientId'         => '',
+        'clientSecret'     => '',
+        'authorizationUri' => '',
+        'accessTokenUri'   => '',
+        'resourceOwnerUri' => '',
+        'scope'            => '',
+        'id'               => '',
+        'name'             => '',
+        'email'            => '',
+        'imageUrl'         => '',
+        'proxy'            => '',
+        'visibleFlag'      => '',
+        'debug'            => '',
+    ];
+
+    // provider設定用のconfig取得callback関数名保持変数
+    protected $setConfigFunction = '';
+
+    // authorizationUriにアクセスする際のproviderId判定用のGETパラメーター名
+    public $httpAuthorizationProviderParam = 'providerId';
+
+    // providerからのcallbackリクエスト(code返却されるURI)判別用GETパラメーター名
+    public $httpCallbackParam = 'callback';
+
+    /**
+      * provider id
+      * @type string
+      **/
+    protected $providerId = '';
+
+    /**
+      * regist form function name
+      * callback function name
+      * function args ($this->session)   // 
+      * $this->session is [
+      *                      'provider_id'         => provider_id,
+      *                      'provider_name'       => provider_name,
+      *                      'provider_user_id'    => provider_user_id,
+      *                      'provider_user_name'  => provider_user_name,
+      *                      'provider_user_email' => provider_user_email,
+      *                    ]
+      * 
+      * @type string
+      **/
+    protected $registFormFunction = '';
+
+    /**
+      * regist function name
+      * callback function name
+      * function args ($this->session)   // 
+      * $this->session is [
+      *                      'provider_id'         => provider_id,
+      *                      'provider_name'       => provider_name,
+      *                      'provider_user_id'    => provider_user_id,
+      *                      'provider_user_name'  => provider_user_name,
+      *                      'provider_user_email' => provider_user_email,
+      *                    ]
+      * 
+      * @type string
+      **/
+    protected $registFunction = '';
+
+    /**
+      * find user function
+      * callback function name
+      * function args ($this->session)   // 
+      *   $this->session is [
+      *                      'provider_id'         => provider_id,
+      *                      'provider_user_id'    => provider_user_id,
+      *                    ]
+      *    @function return $username
+      * @type string
+      **/
+    protected $findUserFunction = '';
+
+    /**
+      * redirect URI
+      * @type string
+      **/
+    protected $redirectUri = '';
+    public $isDebug = false;
+  // propeties----
+
+    /**
+      *  Constructor
+      *  コンストラクタ
+      *  特に何もしない
+      *
+      *  @return void
+      **/
+    /**
+      *  setConfig
+      *  
+      *  @return void
+      **/
+    public function __construct()
+    {
+        //
+    }
+
+    public function setConfigFunction ($functionName)
+    {
+        if (!empty($functionName)) {
+            $this->setConfigFunction = $functionName;
+        }
+    }
+
+    /**
+      * setConfig
+      * providerに関する設定を一括または個別に設定する
+      * fefautの設定は必要なkeyとブランク値を設定している
+      + 不要なkeyを追加設定はできない。
+      * defaultで存在しているkeyのみ上書き可能
+      **/
+    protected function setConfig()
+    {
+        if (empty($this->getProvider())) {
+            $this->isError = true;
+            $this->errMsg = 'can not get provider';
+            $this->errCode = 'ERR-SETCONFIG-01';
+            return false;
+        }
+        // コールバック関数が利用可能か確認
+        if (empty($this->setConfigFunction) || !is_callable($this->setConfigFunction)) {
+            // コールバックログイン関数を実行できない
+            $this->isError = true;
+            $this->errMsg = 'can not use set config function';
+            $this->errCode = 'ERR-01-02';
+            return false;
+        }
+        $config = call_user_func($this->setConfigFunction, $this->providerId);
+        if (empty($config)) {
+            $this->isError = true;
+            $this->errMsg = 'config is empty';
+            $this->errCode = 'ERR-SETCONFIG-03';
+            return false;
+        }
+        if (!is_array($config)) {
+            $this->isError = true;
+            $this->errMsg = 'config formart invalid';
+            $this->errCode = 'ERR-SETCONFIG-04';
+            return false;
+        }
+        foreach ($config as $k=>$v) {
+            if (isset($this->config[$k])) {
+                $this->config[$k] = $v;
+            }
+        }
+        if ($this->config['debug'] == true || $this->config['visibleFlag'] === 0) {
+            $this->isDebug = true;
+        }
+        return true;
+    }
+
+    /**
+      * getConfig
+      * @pram key: return $config[key]
+      *       null: rewturn $config
+      */
+    public function getConfig($key = null) {
+        if (empty($key)) {
+            return $this->config;
+        }
+        if (is_string($key) && isset($this->config[$key])) {
+           return $this->config[$key];
+        }
+    }
+
+    /**
+      * set NextURI
+      * 
+      * @return void
+      */
+    public function setNextUri ($nextUri)
+    {
+        if (!empty($nextUri)) {
+            $this->nextUri = $nextUri;
+        }
+    }
+
+    /**
+      * set redirect URI
+      * 
+      * @return void
+      */
+    public function setRedirectUri ($redirectUri)
+    {
+        if (!empty($redirectUri)) {
+            $this->redirectUri = $redirectUri;
+        }
+    }
+
+    public function getProvider ()
+    {
+        $this->initialize();
+        if (isset($_GET[$this->httpAuthorizationProviderParam]) && !empty($_GET[$this->httpAuthorizationProviderParam])) {
+            $this->providerId = $_GET[$this->httpAuthorizationProviderParam];
+            return $this->providerId;
+        }
+        if (isset($this->session['provider_id']) && !empty($this->session['provider_id'])) {
+            $this->providerId = $this->session['provider_id'];
+            return $this->providerId;
+        }
+    }
+
+    public function setRegistFormFunction($functionName) {
+        if (!empty($functionName)) {
+            $this->registFormFunction = $functionName;
+        }
+    }
+
+    public function setRegistFunction($functionName) {
+        if (!empty($functionName)) {
+            $this->registFunction = $functionName;
+        }
+    }
+
+    public function setFindUserFunction($functionName) {
+        if (!empty($functionName)) {
+            $this->findUserFunction = $functionName;
+        }
+    }
+
+    /**
+      *  start
+      *  OAuth2認証はここで行う
+      * @return void
+      */
+    public function start()
+    {
+        $this->initialize();
+        if (isset($this->session['debug'])) {
+            $this->isDebug = 1;
+            unset($this->session['debug']);
+        }
+        //$this->debug('start()');
+        if (!$this->setConfig()) {
+            return false;
+        }
+        if (isset($_GET[$this->httpAuthorizationProviderParam])) {
+            // ----外部provider認証(ブラウザ経由の認証)
+            return $this->authorization();
+            // 外部provider認証----
+        }
+        if (isset($_GET[$this->httpCallbackParam])) {
+            // ----外部providerからcode返却 , codeをtokenに交換, tokenを使ってuser情報取得
+            if (!$this->callback()) {
+                return false;
+            }
+        }
+
+        // ----ローカルDBへの登録関数の呼び出し
+        //$this->debug('call regist user func');
+        // コールバック関数が利用可能か確認
+        if (empty($this->registFunction) || !is_callable($this->registFunction)) {
+            // コールバックログイン関数を実行できない
+            $this->isError = true;
+            $this->errMsg = 'can not use regist function';
+            $this->errCode = 'ERR-START-01';
+            return false;
+        }
+        // ----ローカルDBへの登録関数実行
+        // ローカルDBへの登録関数実行時のエラーはisError,errMsg,errCodeにセットして返却する
+        $strRegMsg = call_user_func($this->registFunction, $this->session); 
+        if ($this->isError) {
+            return false;
+        }
+        // ローカルDBへの登録関数実行----
+        // ローカルDBへの登録関数の呼び出し----
+
+        // ----ローカルDBに登録されているusernameの取得用関数の呼び出し
+        //$this->debug('call find user func');
+        // コールバック関数が利用可能か確認
+        if (empty($this->findUserFunction) || !is_callable($this->findUserFunction)) {
+            // コールバックログイン関数を実行できない
+            $this->isError = true;
+            $this->errMsg = 'can not use find user function';
+            $this->errCode = 'ERR-START-02';
+            return false;
+        }
+        $username = call_user_func($this->findUserFunction, $this->session);
+        // ローカルDBに登録されているusernameの取得用関数の呼び出し----
+
+        //$this->debug('[class]'.__CLASS__.',username:'.$username);
+        if (!empty($username)) {
+            // $username取得できた
+            // ログイン処理
+            $this->setAuth($username);
+            $this->checkAuth();
+            $this->nextUri = $this->session['next_uri'];
+            unset($this->session['next_uri']);
+            if (!empty($this->nextUri)) {
+                header("Location: $this->nextUri");
+                return true;
+            }
+            // next uriがなかったらどうしよう。。。(認証には成功しているがリダイレクト先が不明)
+        }
+        
+        // $usernameを取得できなかった
+        // 未登録ユーザーは登録フォーム表示関数の呼び出し
+        // コールバック関数が利用可能か確認
+        if (empty($this->registFormFunction) || !is_callable($this->registFormFunction)) {
+            // コールバックログイン関数を実行できない
+            $this->isError = true;
+            $this->errMsg = 'can not use regist form function';
+            $this->errCode = 'ERR-START-03';
+            return false;
+        }
+        // ---formを表示
+        // form表示関数のエラーはfalseをreturnしてisError,errMsg,errCodeをセットして返却する
+        //call_user_func($this->registFormFunction, $this->session, $strRegMsg, $this->isError, $this->errMsg, $this->errCode);
+        call_user_func($this->registFormFunction, $this->session, $strRegMsg);
+        if ($this->isError) {
+            return false;
+        }
+        // formを表示----
+
+        // 元の処理に戻す
+        return true;
+    }
+
+    protected function authorization()
+    {
+        if (empty($this->config['authorizationUri'])) {
+            $this->isError = true;
+            $this->errMsg = 'authorizationUri is empty';
+            $this->errCode = 'ERR-AUTHORIZATION-01';
+            return false;
+        }
+        if (empty($this->config['clientId'])) {
+            $this->isError = true;
+            $this->errMsg = 'clientId is empty';
+            $this->errCode = 'ERR-AUTHORIZATION-02';
+            return false;
+        }
+        if (empty($this->redirectUri)) {
+            $this->isError = true;
+            $this->errMsg = 'redirectUri is empty';
+            $this->errCode = 'ERR-AUTHORIZATION-03';
+            return false;
+        }
+        // ----clear session
+        $this->session = [];
+        // clear session----
+        $state = bin2hex(file_get_contents('/dev/urandom', false, null, 0, 32));
+        $this->session['state'] = $state;
+        if ($this->isDebug) {
+            $this->session['debug'] = 1;
+        }
+        $this->session['provider_id'] = $this->providerId;
+        $this->session['next_uri'] = $this->nextUri;
+        //echo '<pre>(1)$_SESSION:'.print_r($_SESSION,true).'</pre>';
+        $uri = $this->config['authorizationUri'];
+        $query = [
+            'response_type'   => 'code',
+            'redirect_uri'    => $this->redirectUri,
+            'client_id'       => $this->config['clientId'],
+            'state'           => $state,
+        ];
+        if (!empty($this->config['scope'])) {
+            $query += ['scope' => $this->config['scope']];
+        }
+        if (preg_match('/\?/',$uri)) {
+            $uri .= '&'.http_build_query($query);
+        } else {
+            $uri .= '?'.http_build_query($query);
+        }
+        return header('Location: '.$uri);
+    }
+
+    protected function callback()
+    {
+        if (isset($this->session['provider_id']) && isset($this->session['provider_user_id'])) {
+            // 外部ログインン済み
+            return true;
+        }
+        // ----check config
+        $check_keys = ['providerId', 'providerName', 'clientId', 'clientSecret', 'accessTokenUri', 'resourceOwnerUri', 'id', 'name'];
+        foreach ($check_keys as $key) {
+            if (empty($this->config[$key])) {
+                $this->isError = true;
+                $this->errMsg = $key.' is empty';
+                $this->errCode = 'ERR-CALLBACK-01';
+                return false;
+            }
+        }
+        if (empty($this->redirectUri)) {
+            $this->isError = true;
+            $this->errMsg = 'redirectUri is empty';
+            $this->errCode = 'ERR-CALLBACK-02';
+            return false;
+        }
+        // check config----
+        // ----check GET parameter 
+        if (isset($_GET['error']) || isset($_GET['error_message'])) {
+            unset($this->session['state']);
+            $this->isError = true;
+            $this->errMsg = "get error from provider";
+            $this->errCode = 'ERR-CALLBACK-03';
+            $this->errDetail = '$_GET:'.print_r($_GET, true);
+            //$this->debug($this->errDetail);
+            return false;
+        }
+        // check GET parameter----
+        // ----check state
+        if (empty($_GET['state']) || ($_GET['state'] !== $this->session['state'])) {
+            $this->isError = true;
+            $this->errMsg = "invalid state(unmatch)";
+            $this->errCode = 'ERR-CALLBACK-04';
+            $this->errDetail = '$_GET:'.print_r($_GET,true).',$_SESSION:'.print_r($this->session,true);
+            //$this->debug($this->errDetail);
+            unset($this->session['state']);
+            return false;
+        }
+        // check state----
+        // callback process start
+        unset($this->session['state']);
+
+        $errTrace = '';
+        // get access token(code => accessToken)
+        $uri = $this->config['accessTokenUri'];
+        $response = $this->http_request('POST', $uri, [
+            'client_id'     => $this->config['clientId'],
+            'client_secret' => $this->config['clientSecret'],
+            'redirect_uri'  => $this->redirectUri,
+            'code'          => $_GET['code'],
+            'grant_type'    => 'authorization_code',
+        ]);
+        if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404 ) {
+            $errTrace .= print_r($response, true);
+            $response = $this->http_request('POST', $uri,[ 
+                'redirect_uri'  => $this->redirectUri,
+                'code'          => $_GET['code'],
+                'grant_type'    => 'authorization_code',
+                ], 'Authorization: Basic '.base64_encode($this->config['clientId'].':'.$this->config['clientSecret']));
+        }
+        if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404 ) {
+            $errTrace .= print_r($response, true);
+            $response = $this->http_request('GET', $uri,[ 
+                'redirect_uri'  => $this->redirectUri,
+                'code'          => $_GET['code'],
+                'grant_type'    => 'authorization_code',
+                ], 'Authorization: Basic '.base64_encode($this->config['clientId'].':'.$this->config['clientSecret']));
+        }
+        if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404 ) {
+            $errTrace .= print_r($response, true);
+            $response = $this->http_request('GET', $uri,[ 
+                'client_id'     => $this->config['clientId'],
+                'client_secret' => $this->config['clientSecret'],
+                'redirect_uri'  => $this->redirectUri,
+                'code'          => $_GET['code'],
+                'grant_type'    => 'authorization_code',
+            ]);
+        }
+        if ($response->code !== 200 || !isset($response->body->access_token)) { 
+            $errTrace .= print_r($response, true);
+            $this->isError = true;
+            $this->errMsg = "can not get access_token";
+            $this->errCode = 'ERR-CALLBACK-05';
+            $this->errDetail = $errTrace;
+            //$this->debug($this->errDetail);
+            return false;
+        }
+        if (!is_string($response->body->access_token) || empty($response->body->access_token)) {
+            $this->isError = true;
+            $this->errMsg = "access token is invalid.";
+            $this->errCode = 'ERR-CALLBACK-06';
+            $this->errDetail = print_r($response->body->access_token, true);
+            return false;
+        }
+        $accessToken = $response->body->access_token;
+
+        // user情報取得
+        $errTrace = '';
+        $uri = $this->config['resourceOwnerUri'];
+        $query = ['access_token' => $accessToken];
+        if (preg_match('|^https://graph\.facebook\.com|', $uri)) {
+            $query += ['appsecret_proof' =>  hash_hmac('sha256', $accessToken, $this->config['clientSecret'])];
+        }
+        $response = $this->http_request('POST', $uri, $query);
+        if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404) {
+            $errTrace .= print_r($response, true);
+            $response = $this->http_request('GET', $uri, null, 'Authorization: bearer '.$accessToken);
+        }
+        if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404) {
+            $errTrace .= print_r($response, true);
+            $response = $this->http_request('GET', $uri, null, 'Authorization: token '.$accessToken);
+        }
+        if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404) {
+            $errTrace .= print_r($response, true);
+            $response = $this->http_request('GET', $uri, $query);
+        }
+
+        if ($response->code !== 200) {
+            $errTrace .= print_r($response, true);
+            $this->isError = true;
+            $this->errMsg = "can not get user informations.(code={$response->code})";
+            $this->errCode = 'ERR-CALLBACK-07';
+            $this->errDetail = $errTrace;
+            //$this->debug($this->errDetail);
+            return false;
+        }
+        if (gettype($response->body) !== 'object') {
+            $this->isError = true;
+            $this->errMsg = "can not get user informations.(content-type:(".gettype($response->body).")";
+            $this->errCode = 'ERR-CALLBACK-08';
+            $this->errDetail = print_r($response->body, true);
+            return false;
+        }
+
+        $providerUserId = '';
+        if (isset($response->body->{$this->config['id']}) && !empty($response->body->{$this->config['id']})) {
+            $providerUserId = $response->body->{$this->config['id']};
+        }
+
+        $providerUserName = '';
+        if (isset($response->body->{$this->config['name']}) && !empty($response->body->{$this->config['name']})) {
+            $providerUserName = $response->body->{$this->config['name']};
+        }
+
+        $providerUserEmail = '';
+        if (isset($response->body->{$this->config['email']}) && !empty($response->body->{$this->config['email']})) {
+            $providerUserEmail = $response->body->{$this->config['email']};
+        }
+
+        $providerUserImageUrl = '';
+        if (!empty($this->config['imageUrl'])) {
+            $items = preg_split('/\s*>\s*/', $this->config['imageUrl']);
+            $data = $response->body;
+            while ($item = array_shift($items)) {
+                if (isset($data->{$item}) && !empty($data->{$item})) {
+                    $data = $data->{$item};
+                }
+            }
+            if (!empty($data) && is_string($data)) {
+                $providerUserImageUrl = $data;
+            }
+        }
+
+        // ----まとめてsessionに登録
+        $this->session['provider_id'] = $this->providerId;
+        $this->session['provider_name'] = $this->config['providerName'];
+        $this->session['provider_logo'] = $this->config['providerLogo'];
+        $this->session['provider_user_id'] = $providerUserId;
+        $this->session['provider_user_name'] = $providerUserName;
+        $this->session['provider_user_email'] = $providerUserEmail;
+        $this->session['provider_user_image_url'] = $providerUserImageUrl;
+        $this->session['provider_user_data'] = $response->body;
+        // まとめてsessionに登録----
+        return true;
+    }
+
+    protected function http_request ($method, $uri = '', $data = null, $add_header = null)
+    {
+        if (empty($uri)) {
+            return;
+        }
+        if ($method !== 'GET' && $method !== 'POST') {
+            return;
+        }
+        $options = [
+            'http' => [
+                'ignore_errors' => true, 
+                'method'        => $method,
+                'user_agent'    => php_uname().'; PHP/'. PHP_VERSION,
+            ]
+        ];
+        if (!empty($this->config['proxy']) && preg_match('!^(tcp|http)://[0-9a-zA-Z\.\-]+:[1-9][0-9]+$!',$this->config['proxy'])) {
+            $proxy = $this->config['proxy'];
+            if (preg_match('|^http://|', $proxy)) {
+                $proxy = preg_replace('|^http://|', 'tcp://', $proxy);
+            }
+            $options['http']['proxy'] = $proxy;
+            $options['http']['request_fulluri'] = true;
+        }
+        $header[] = 'Accept: application/json';
+        if ($add_header) {
+            $header[] = $add_header;
+        }
+
+        if ($method === 'POST') {
+            $post_query = '';
+            if (!empty($data) && is_array($data)) {
+                $post_query = http_build_query($data);
+            }
+            $header[] = 'Content-Type: application/x-www-form-urlencoded';
+            $header[] = 'Content-Length: '.strlen($post_query);
+            $options['http']['content'] = $post_query;
+        } elseif ($method === 'GET' && !empty($data)) {
+            $add_query = '';
+            if (is_string($data)) {
+                $add_query = $data;
+            } elseif (is_array($data)) {
+                $add_query = http_build_query($data);
+            }
+            if (strstr($uri, '?')) {
+                $uri .= '&'.$add_query;
+            } else {
+                $uri .= '?'.$add_query;
+            }
+        }
+        $options['http']['header'] = implode("\r\n",$header);
+        
+        $body = file_get_contents($uri, false, stream_context_create($options));
+        preg_match('|^HTTP/1\.[01] ([12345][0-9][0-9]) (.+)$|', $http_response_header[0],$match);
+        $code = intval($match[1]);
+        $status = $match[2];
+        $type1 = '';
+        $type2 = '';
+        foreach ($http_response_header as $line) {
+            if (preg_match('|^[Cc]ontent-[Tt]ype:\s*([a-zA-z0-9]+)/([a-zA-Z0-9]+);*\s*|', $line, $match)) {
+                $type1 = $match[1];
+                $type2 = $match[2];
+                break;
+            }
+        }
+        if (preg_match('/(json|javascript)/i', $type2)) {
+            $body = json_decode($body);
+        }
+        if (preg_match('/html/i', $type2)) {
+            //$body = preg_replace('/</', '&lt;', $body); 
+            //$body = preg_replace('/>/', '&gt;', $body); 
+        }
+        $response = json_decode(json_encode([
+            'uri'  => "{$method} {$uri}",
+            'request' => $options,
+            'code' => $code,
+            'status' => $status,
+            'type' => "{$type1}/{$type2}",
+            'body' => $body,
+        ]));
+        //$this->debug(print_r($response,true));
+        return $response;
+    }
+
+    protected function debug($str='') {
+        if ($this->isDebug) error_log($str);
     }
 }

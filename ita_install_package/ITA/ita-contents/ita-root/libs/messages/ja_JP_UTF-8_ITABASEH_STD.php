@@ -126,4 +126,7 @@ $ary[160010] = "[処理]symphony作業一覧への登録および次回実行日
 $ary[160011] = "[処理]symphony,operationの廃止対象チェック(開始)";
 $ary[160012] = "[処理]symphony,operationの廃止対象チェック(終了)";
 $ary[160013] = "定期実行管理プロシージャ";
+$ary[170001] = "コンダクター管理プロシージャ";
+$ary[170002] = "Conductoryの現在のNodeのシーケンスを調査します。(ConductorインスタンスID:{})";
+$ary[170003] = "Conductorの現在のNodeのシーケンスです。(Conductor:{}, Node シーケンス:{})";
 ?>

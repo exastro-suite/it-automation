@@ -44,6 +44,59 @@ try{
         outputLog($objMTS->getSomeMessage('ITAHOSTGROUP-STD-10001', basename( __FILE__, '.php' )));
     }
 
+    ////////////////////////////////
+    // 処理済みフラグを判定
+    ////////////////////////////////
+    $sql = "SELECT LOADED_FLG,LAST_UPDATE_TIMESTAMP " .
+           "FROM A_PROC_LOADED_LIST " .
+           "WHERE ROW_ID = :ROW_ID";
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if($objQuery->getStatus()===false){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+
+    $bindParam = array('ROW_ID'=>2100170007);
+    $objQuery->sqlBind($bindParam);
+
+    $r = $objQuery->sqlExecute();
+    if (!$r){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+    // FETCH行数を取得
+    $procLoadList = array();
+    while ( $row = $objQuery->resultFetch() ){
+        $procLoadList[] = $row;
+    }
+    // DBアクセス事後処理
+    unset($objQuery);
+
+    if (1 != count($procLoadList)){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+
+    if('1' == $procLoadList[0]['LOADED_FLG']){
+        //処理対象がないため処理終了
+        if(LOG_LEVEL === 'DEBUG'){
+            // 終了ログ出力
+            outputLog($objMTS->getSomeMessage('ITAHOSTGROUP-STD-10002', basename( __FILE__, '.php' )));
+        }
+        return true;
+    }
+    $procLastUpdateTimeStamp = $procLoadList[0]['LAST_UPDATE_TIMESTAMP'];
+
     //////////////////////////
     // ホストグループ変数紐付(Ansible-LegacyRole)テーブルを検索
     //////////////////////////
@@ -59,15 +112,32 @@ try{
     }
     $hostGrpVarLinkArray = $result;
 
-    if(0 === count($hostGrpVarLinkArray)){
-        // 終了ログ出力
-        if(LOG_LEVEL === 'DEBUG'){
-            // 終了ログ出力
-            outputLog($objMTS->getSomeMessage('ITAHOSTGROUP-STD-10002', basename( __FILE__, '.php' )));
-        }
-        return true;
+    //////////////////////////
+    // ホストグループ変数化テーブルを検索
+    //////////////////////////
+    $hostgroupVarTable = new HostgroupVarTable($objDBCA, $db_model_ch);
+    $sql = $hostgroupVarTable->createSselect("WHERE DISUSE_FLAG = '0'");
 
+    // SQL実行
+    $result = $hostgroupVarTable->selectTable($sql);
+    if(!is_array($result)){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        throw new Exception($msg);
     }
+    $hostGrpVarArray = $result;
+
+    // 有効なホストグループ変数名を取得
+    $varNameArray = array_column($hostGrpVarArray, "VARS_NAME");
+
+    // 無効なホストグループ変数名のデータは削除
+    $tmpArray = array();
+    foreach($hostGrpVarLinkArray as $hostGrpVarLink) {
+        if(in_array($hostGrpVarLink['VARS_NAME'], $varNameArray)){
+            $tmpArray[] = $hostGrpVarLink;
+        }
+    }
+    $hostGrpVarLinkArray = $tmpArray;
 
     // トランザクション開始
     $result = $objDBCA->transactionStart();
@@ -105,6 +175,38 @@ try{
     if(false === $result) {
         throw new Exception();
     }
+
+    ////////////////////////////////
+    // 処理済みフラグをONにする
+    ////////////////////////////////
+    $sql = "UPDATE A_PROC_LOADED_LIST " .
+           "SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP " .
+           "WHERE ROW_ID = :ROW_ID AND LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP2 ";
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+
+    if( $objQuery->getStatus() === false ){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+
+    $objDBCA->setQueryTime();
+    $bindParam = array('LOADED_FLG'=>'1', 'ROW_ID'=>2100170007, 'LAST_UPDATE_TIMESTAMP'=>$objDBCA->getQueryTime(), 'LAST_UPDATE_TIMESTAMP2'=>$procLastUpdateTimeStamp);
+    $objQuery->sqlBind($bindParam);
+
+    $r = $objQuery->sqlExecute();
+
+    if (!$r){
+        $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+        outputLog($msg);
+        outputLog($sql);
+        outputLog($objQuery->getLastError());
+        throw new Exception($msg);
+    }
+    unset($objQuery);
 
     // コミット
     $result = $objDBCA->transactionCommit();

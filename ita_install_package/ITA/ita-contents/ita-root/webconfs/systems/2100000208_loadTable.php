@@ -49,7 +49,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);
     $c->setUnique(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070202"));
-    $objVldt = new TextValidator(4, 30, false, '/^[a-zA-Z0-9-!#$%&\'()*+.\/;<=>?@[\]^\\_`{|}~]+$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070203"));
+    $objVldt = new TextValidator(4, 270, false, '/^[a-zA-Z0-9-!#$%&\'()*+.\/;<=>?@[\]^\\_`{|}~]+$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070203"));
     $objVldt->setMinLength(1,"DTiS_filterDefault");
     $c->setValidator($objVldt);
     $table->addColumn($c);
@@ -68,15 +68,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);
     $c->setRequired(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070402"));
-    $c->setValidator(new SingleTextValidator(1, 64, false));
+    $c->setValidator(new SingleTextValidator(1, 270, false));
     $table->addColumn($c);
 
     // メールアドレス
     $c = new TextColumn('MAIL_ADDRESS',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070501"));
     $c->setHiddenMainTableColumn(true);
-    $c->setRequired(true);
+    $c->setRequired(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070502"));
-    $objVldt = new TextValidator(1, 256, false, '/^[-_+=\.a-zA-Z0-9]+@[-a-zA-Z0-9\.]+$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070503"));
+    $objVldt = new TextValidator(0, 256, false, '/^(|[-_+=\.a-zA-Z0-9]+@[-a-zA-Z0-9\.]+)$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070503"));
     $objVldt->setRegexp("/^[^\r\n]*$/s","DTiS_filterDefault");
     $c->setValidator($objVldt);
 
@@ -147,6 +147,50 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('print_journal_table')->setVisible(false);
         $table->addColumn($c);
     }
+
+    // 認証方式
+    $c = new TextColumn('AUTH_TYPE',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071101"));
+    $c->setHiddenMainTableColumn(true);
+    $c->setRequired(false);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071102"));
+    $c->getOutputType('register_table')->setVisible(false);
+    $c->getOutputType('update_table')->setVisible(false);
+    // ---- default値設定function (登録時のみ'local'を設定する)(ただしユーザーには見えない)
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()) {
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+
+        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+        if ($modeValue=="DTUP_singleRecRegister") {
+            $exeQueryData[$objColumn->getID()] = 'local';
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
+    // default値設定function----
+    $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
+    $table->addColumn($c);
+
+    // 認証プロバイダー
+    $c = new IDColumn('PROVIDER_ID', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071201"), 'A_PROVIDER_LIST', 'PROVIDER_ID', 'PROVIDER_NAME', null);
+    $c->setHiddenMainTableColumn(true);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071202"));
+    $strWebUIText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071203");
+    $c->getOutputType('register_table')->setVisible(false);
+    $c->getOutputType('update_table')->setVisible(false);
+    $table->addColumn($c);
+
+    // PROVIDER_USER_ID
+    $c = new TextColumn('PROVIDER_USER_ID',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071301"));
+    $c->setHiddenMainTableColumn(true);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071302"));
+    $strWebUIText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071303");
+    $c->getOutputType('register_table')->setVisible(false);
+    $c->getOutputType('update_table')->setVisible(false);
+    $table->addColumn($c);
 
     $table->fixColumn();
     

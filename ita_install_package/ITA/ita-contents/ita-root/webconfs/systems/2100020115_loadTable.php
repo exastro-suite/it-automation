@@ -19,6 +19,13 @@
 //    ・Ansible（Legacy）代入値自動登録設定
 //
 //////////////////////////////////////////////////////////////////////
+// 共通モジュールをロード
+if ( empty($root_dir_path) ){
+    $root_dir_temp = array();
+    $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+    $root_dir_path = $root_dir_temp[0] . "ita-root";
+}
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
@@ -1415,6 +1422,17 @@ Ansible（Legacy）代入値自動登録設定
                 $boolExecuteContinue = false;
                 $retBool = false;
             }    
+        }
+
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            $ret = ValAutoRegInputParameterCheck::VarsInfo($rg_col_type,
+                       $rg_key_vars_link_id, "",$rg_key_assign_seq,
+                       $rg_val_vars_link_id, "",$rg_val_assign_seq);
+            if($ret !== true) {
+                $retStrBody = $ret;
+                $boolExecuteContinue = false;
+                $retBool = false;
+            }
         }
 
         //----メニューと項目の組み合わせチェック

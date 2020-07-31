@@ -22,12 +22,44 @@
 // ----------------------------------------------------------------------------------------------------
 
 $(function(){
-
+'use strict';
 /* ---------------------------------------------------------------------------------------------------- *
 
    01.エディタ共通
 
  * ---------------------------------------------------------------------------------------------------- */
+ 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   関数
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// パラメータ取得用
+const getParam = function ( name ) {
+  const url = window.location.href,
+        regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec( url );
+  if( !results ) return null;
+  return decodeURIComponent( results[2] );
+};
+
+// テキストの無害化
+const textEntities = function( text ) {
+  const entities = [
+    ['&', 'amp'],
+    ['\"', 'quot'],
+    ['\'', 'apos'],
+    ['<', 'lt'],
+    ['>', 'gt'],
+  ];
+  for ( var i = 0; i < entities.length; i++ ) {
+    text = text.replace( new RegExp( entities[i][0], 'g'), '&' + entities[i][1] + ';' );
+  }
+  text = text.replace(/^\s+|\s+$/g, '');
+  text = text.replace(/\r?\n/g, '<br>');
+  return text;
+}
  
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -42,6 +74,9 @@ const editorInitial = {
   'scaling' : 1
 };
 
+const debugMode = getParam('debug');
+if ( debugMode === "true" ) editorInitial.debug = true;
+
 // エディター値
 let editorValue = {
   'scaling' : editorInitial.scaling,
@@ -49,11 +84,13 @@ let editorValue = {
 }
 
 // jQueryオブジェクトをキャッシュ
-const $workspace = $('#workspace'),
+const $window = $( window ),
+      $workspace = $('#workspace'),
       $editorMenu = $workspace.find('.editor-menu'),
       $canvasWindow = $workspace.find('.canvas-window'),
       $canvas = $workspace.find('.canvas'),
       $artBoard = $workspace.find('.art-board'),
+      $panelContainer = $('#panel-container'),
       $panelGroup = $workspace.find('.panel-group');
 
 // エディタータイプ（シンフォニー or パネル画像）
@@ -68,11 +105,16 @@ let g_canvasWindow, g_canvas, g_artBoard,
 const setSize = function ( $obj ) {
   return {
   'w' : $obj.width(),
-  'h' : $obj.height()
+  'h' : $obj.height(),
+  'l' : $obj.offset().left,
+  't' : $obj.offset().top
   }
 }
-const canvasPositionReset = function() {
-
+// ポジションリセット
+const canvasPositionReset = function( duration ) {
+    
+    if ( duration === undefined ) duration = 0.3;
+    
     g_canvasWindow = setSize( $canvasWindow );
     g_canvas = setSize( $canvas );
     g_artBoard = setSize( $artBoard );
@@ -80,15 +122,24 @@ const canvasPositionReset = function() {
     editorValue.oldScaling = editorInitial.scaling;
 
     g_canvas_p = {
-      'x' : - ( g_canvas.w / 2 ) + ( g_canvasWindow.w / 2 ),
-      'y' : - ( g_canvas.h / 2 ) + ( g_canvasWindow.h / 2 ),
-      'cx' : - ( g_canvas.w / 2 ) + ( g_canvasWindow.w / 2 ),
-      'cy' : - ( g_canvas.h / 2 ) + ( g_canvasWindow.h / 2 )
+      'x' : Math.round( - ( g_canvas.w / 2 ) + ( g_canvasWindow.w / 2 ) ),
+      'y' : Math.round( - ( g_canvas.h / 2 ) + ( g_canvasWindow.h / 2 ) ),
+      'cx' : Math.round( - ( g_canvas.w / 2 ) + ( g_canvasWindow.w / 2 ) ),
+      'cy' : Math.round( - ( g_canvas.h / 2 ) + ( g_canvasWindow.h / 2 ) )
     };
     g_artBoard_p = {
-      'x' : ( g_canvas.w / 2 ) - ( g_artBoard.w / 2 ),
-      'y' : ( g_canvas.h / 2 ) - ( g_artBoard.h / 2 )
+      'x' : Math.round( ( g_canvas.w / 2 ) - ( g_artBoard.w / 2 ) ),
+      'y' : Math.round( ( g_canvas.h / 2 ) - ( g_artBoard.h / 2 ) )
     };
+    
+    // Start nodeがある場合は基準にする
+    if ( $('#node-1.symphony-start').length ) {
+      const $start = $('#node-1.symphony-start'),
+            adjustPosition = 32; // 調整する端からの距離;
+      g_canvas_p.x = -( Number( $start.css('left').replace('px','') ) + g_artBoard_p.x - adjustPosition );
+      g_canvas_p.y = -( Number( $start.css('top').replace('px','') ) + g_artBoard_p.y - ( ( g_canvasWindow.h / 2 ) - ( $start.outerHeight() / 2 ) ) );
+    }
+    
     $canvas.css({
       'left' : g_canvas_p.x,
       'top' : g_canvas_p.y,
@@ -101,19 +152,60 @@ const canvasPositionReset = function() {
     
     statusUpdate();
     
+    // アニメーションさせる場合は一時的に操作できないようにする
+    if ( duration !== 0 ) {
+      mode.pause();
+      $canvas.css('transition-duration', duration + 's');
+      setTimeout( function(){
+        $canvas.css('transition-duration', '0s');
+        mode.clear();
+      }, duration * 1000 );
+    }
+    
 }
 
 // モード変更
-const modeChange = function( mode ) {
+let modeType = '';
+const modeChange = function( mode, type ) {
     const modeAttr = 'data-mode';
     if ( mode !== 'clear' ) {
+      modeType = mode;
       $workspace.attr( modeAttr, mode );
     } else {
+      modeType = '';
       $workspace.removeAttr( modeAttr );
     }
-}
+    if ( type !== undefined ) {
+      $workspace.attr('data-type', type );
+    } else {
+      $workspace.removeAttr('data-type');
+    }
+};
+// モードチェック
+const modeCheck = function( mode ) {
+  if ( mode === undefined ) mode = '';
+  if ( modeType === mode ) {
+    return true;
+  } else {
+    return false;
+  }
+};
 const mode = {
+  'pause' : function() { modeChange('editor-pause'); },
   'canvasMove' : function() { modeChange('canvas-move'); },
+  'nodeDrag' : function() { modeChange('node-drag'); },
+  'caseDrag' : function() { modeChange('case-drag'); },
+  'nodeMove' : function( edgeFlag ) {
+    if ( edgeFlag === undefined ) edgeFlag = true;
+    if ( edgeFlag === true ) {
+      modeChange('node-move');
+    } else {
+      modeChange('node-noedge-move');
+    }
+  },
+  'nodeSelect' : function() { modeChange('node-select'); },
+  'edgeInConnect' : function( type ) { modeChange('edge-in-connect', type ); },
+  'edgeOutConnect' : function( type ) { modeChange('edge-out-connect', type ); },
   'clear' : function() { modeChange('clear'); }
 };
 
@@ -140,7 +232,7 @@ if ( $filterCheck.css('filter','blur(1px)') !== undefined ) filterFlg = true;
 $canvasWindow.on({
     'mousedown.canvas': function( e ) {
 
-      if ( e.button === 2 ) {
+      if ( e.buttons === 2 ) {
       
         e.preventDefault();
 
@@ -152,14 +244,14 @@ $canvasWindow.on({
             
         mode.canvasMove();
 
-        $( window ).on({
+        $window.on({
           'mousemove.canvas': function( e ){
 
             moveX = e.pageX - mouseDownPositionX;
             moveY = e.pageY - mouseDownPositionY;
             
-            $statusViewX.text( Math.floor( g_canvas_p.x - g_canvas_p.cx + moveX ) + 'px' );
-            $statusViewY.text( Math.floor( g_canvas_p.y - g_canvas_p.cy + moveY ) + 'px' );
+            $statusViewX.text( Math.round( g_canvas_p.x - g_canvas_p.cx + moveX ) + 'px' );
+            $statusViewY.text( Math.round( g_canvas_p.y - g_canvas_p.cy + moveY ) + 'px' );
             $statusMoveX.text( moveX + 'px' );
             $statusMoveY.text( moveY + 'px' );
             
@@ -169,7 +261,7 @@ $canvasWindow.on({
 
           },
           'contextmenu.canvas': function( e ) {
-            e.preventDefault();
+            if ( editorInitial.debug === false ) e.preventDefault();
             $( this ).off('contextmenu.canvas');
           },
           'mouseup.canvas': function(){
@@ -190,13 +282,7 @@ $canvasWindow.on({
     },
     'contextmenu': function( e ) {
       // コンテキストメニューは表示しない
-      e.preventDefault();
-    },
-    'mouseenter': function() {
-      
-    },
-    'mouseleave': function() {
-
+      if ( editorInitial.debug === false ) e.preventDefault();
     }
 });
 
@@ -261,15 +347,15 @@ const canvasScaling = function( zoomType, positionX, positionY ){
             adjustX = ( ( g_canvas.w / 2 ) - positionX ) * scalingNum,
             adjustY = ( ( g_canvas.h / 2 ) - positionY ) * scalingNum;
             
-      g_canvas_p.cx = g_canvas_p.cx - commonX;
-      g_canvas_p.cy = g_canvas_p.cy - commonY;
+      g_canvas_p.cx = Math.round( g_canvas_p.cx - commonX );
+      g_canvas_p.cy = Math.round( g_canvas_p.cy - commonY );
 
       if ( zoomType === 'in') {
-        g_canvas_p.x = g_canvas_p.x - commonX + adjustX;
-        g_canvas_p.y = g_canvas_p.y - commonY + adjustY;
+        g_canvas_p.x = Math.round( g_canvas_p.x - commonX + adjustX );
+        g_canvas_p.y = Math.round( g_canvas_p.y - commonY + adjustY );
       } else if ( zoomType === 'out') {
-        g_canvas_p.x = g_canvas_p.x - commonX - adjustX;
-        g_canvas_p.y = g_canvas_p.y - commonY - adjustY;
+        g_canvas_p.x = Math.round( g_canvas_p.x - commonX - adjustX );
+        g_canvas_p.y = Math.round( g_canvas_p.y - commonY - adjustY );
       }
 
       $canvas.css({
@@ -298,27 +384,31 @@ const mousewheelevent = ('onwheel' in document ) ? 'wheel' : ('onmousewheel' in 
 $canvasWindow.on( mousewheelevent, function( e ){
 
     e.preventDefault();
+    
+    if ( e.buttons === 0 ) {
 
-    const mousePositionX = ( e.pageX - $( this ).offset().left - g_canvas_p.x ) / editorValue.scaling,
-          mousePositionY = ( e.pageY - $( this ).offset().top - g_canvas_p.y ) / editorValue.scaling,
-          delta = e.originalEvent.deltaY ? - ( e.originalEvent.deltaY ) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : - ( e.originalEvent.detail );
+      const mousePositionX = ( e.pageX - $( this ).offset().left - g_canvas_p.x ) / editorValue.scaling,
+            mousePositionY = ( e.pageY - $( this ).offset().top - g_canvas_p.y ) / editorValue.scaling,
+            delta = e.originalEvent.deltaY ? - ( e.originalEvent.deltaY ) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : - ( e.originalEvent.detail );
 
-    if ( e.shiftKey ) {
-      // 横スクロール
-      if ( delta < 0 ){
-        //
+      if ( e.shiftKey ) {
+        // 横スクロール
+        if ( delta < 0 ){
+          //
+        } else {
+          //
+        }
+
       } else {
-        //
-      }
+        // 縦スクロール
+        if ( delta < 0 ){
+          canvasScaling( 'out', mousePositionX, mousePositionY );
+        } else {
+          canvasScaling( 'in', mousePositionX, mousePositionY);
+        }
 
-    } else {
-      // 縦スクロール
-      if ( delta < 0 ){
-        canvasScaling( 'out', mousePositionX, mousePositionY );
-      } else {
-        canvasScaling( 'in', mousePositionX, mousePositionY);
       }
-
+    
     }
 
 });
@@ -336,9 +426,9 @@ const $statusScale = $('#canvas-status-scale'),
 
 const statusUpdate = function() {
 
-    $statusScale.text( Math.floor( editorValue.scaling * 100 ) + '%' );
-    $statusViewX.text( Math.floor( g_canvas_p.x - g_canvas_p.cx ) + 'px' );
-    $statusViewY.text( Math.floor( g_canvas_p.y - g_canvas_p.cy ) + 'px' );
+    $statusScale.text( Math.round( editorValue.scaling * 100 ) + '%' );
+    $statusViewX.text( Math.round( g_canvas_p.x - g_canvas_p.cx ) + 'px' );
+    $statusViewY.text( Math.round( g_canvas_p.y - g_canvas_p.cy ) + 'px' );
     $statusMoveX.text('0px');
     $statusMoveY.text('0px');
     
@@ -406,7 +496,7 @@ $editorMenu.on('click', 'button', function(){
 
     const $button = $( this ),
           buttonType = $button.attr('data-menu'),
-          buttonDisabledTime = 1000;
+          buttonDisabledTime = 300;
 
     // 一定時間ボタンを押せなくする
     $button.prop('disabled', true );
@@ -419,11 +509,13 @@ $editorMenu.on('click', 'button', function(){
         toggleFullScreen( $workspace.get(0) )
         break;
     }
-
-    setTimeout( function(){
-      $button.prop('disabled', false );
-    }, buttonDisabledTime );
-
+    
+    // buttonDisabledTime ms 後に復活
+    if ( buttonType !== 'node-delete' ) {
+      setTimeout( function(){
+        $button.prop('disabled', false );
+      }, buttonDisabledTime );
+    }
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -433,7 +525,7 @@ $editorMenu.on('click', 'button', function(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const reiszeEndTime = 200;
 let resizeTimerID;
-$( window ).on('resize.editor', function(){
+$window.on('resize.editor', function(){
 
     clearTimeout( resizeTimerID );
 
@@ -442,6 +534,45 @@ $( window ).on('resize.editor', function(){
     }, reiszeEndTime );
 
 });
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   エディターのどこにいるか
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+$canvasWindow.add( $panelContainer ).on({
+  'mouseenter' : function(){ $( this ).addClass('hover'); },
+  'mouseleave' : function(){ $( this ).removeClass('hover'); }
+});
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   詳細ステータスを表示する（デバッグモード）
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+if ( editorInitial.debug === true ) {
+
+    $('#canvas-debug').show();
+
+    $window.on({
+      'mousemove': function( e ){
+        const mousePositionX = Math.round( ( e.pageX - ( g_artBoard_p.x * editorValue.scaling ) - $canvasWindow.offset().left - g_canvas_p.x ) / editorValue.scaling ),
+              mousePositionY = Math.round( ( e.pageY - ( g_artBoard_p.y * editorValue.scaling ) - $canvasWindow.offset().top - g_canvas_p.y ) / editorValue.scaling ),
+              viewMouseX = e.pageX - g_canvasWindow.l,
+              viewMouseY = e.pageY - g_canvasWindow.t;
+        let position = ''
+          + 'Canvas Mouse X : ' + mousePositionX + 'px / Canvas Mouse Y : ' + mousePositionY + 'px<br>'
+          + 'View Mouse X : ' + viewMouseX + 'px / View Mouse Y : ' + viewMouseY + 'px<br>'
+          + 'Page Mouse X : ' + e.pageX + 'px / Page Mouse Y : ' + e.pageY + 'px<br>'
+          + 'Canvas offset X : ' + g_canvasWindow.l + 'px / Canvas offset Y : ' + g_canvasWindow.t + 'px<br>'
+          + 'Canvas Position X : ' + g_canvas_p.x + 'px / Canvas Position Y : ' + g_canvas_p.y + 'px<br>'
+          + 'Art Board Position X : ' + g_artBoard_p.x + 'px / Art Board Position Y : ' + g_artBoard_p.y + 'px<br>';
+        $('#canvas-debug-position').html( position );
+        $('#canvas-debug-scale').html( 'Canvas Scale : ' + editorValue.scaling );
+      }
+    });
+}
 
 
 
@@ -456,18 +587,32 @@ if ( editorType === 'symphony' ) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//   初期設定
+//   シンフォニーエディタ初期設定初期設定
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 初期値
 const panelImageValue = {
-  'workspaceHeight' : 800,
-  'canvasWidth' : 5400,
-  'canvasHeight' : 5400,
-  'artboradWidth' : 5000,
-  'artboradHeight' : 5000
+  'workspaceHeight' : 670,
+  'canvasWidth' : 16400,
+  'canvasHeight' : 16400,
+  'artboradWidth' : 16000,
+  'artboradHeight' : 16000
 };
+
+// 終了ステータス
+const endStatus = {
+  '9' : ['done','正常終了'],
+  '6' : ['fail','異常終了'],
+  '7' : ['stop','緊急停止'],
+  '10' : ['error','準備エラー'],
+  '11' : ['error','想定外エラー'],
+  '14' : ['skip','Skip終了'],
+  '-1' : ['other','その他'],
+};
+
+// jQueryオブジェクトをキャッシュ
+const $nodeList = $panelGroup.find('.node-table');
 
 // 各種サイズをセット
 $workspace.css({
@@ -481,7 +626,2296 @@ $artBoard.css({
   'width' : panelImageValue.artboradWidth,
   'height' : panelImageValue.artboradHeight
 });
-canvasPositionReset();
+canvasPositionReset( 0 );
+
+// ID 連番用
+let g_NodeCounter = 1,
+    g_TerminalCounter = 1,
+    g_LineCounter = 1;
+
+// 選択中のNode ID
+let g_selectedNodeID = [];
+
+// JSONオブジェクト
+let symphonyJSON = new Object();
+
+// Undo Redo用ヒストリー
+let symphonyHistory  = [],
+    historyCounter = 0;
+
+symphonyJSON['config'] = {
+  'editorVersion' : editorInitial.version
+}
+symphonyJSON['symphony'] = {
+  'note' : ''
+};
+
+// 未対応処理
+if ( browser === 'ie' ) {
+  $('.editor-not-available').show();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   Undo / Redo
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const history = {
+
+'add' : function( type, node ) {
+  const historyObj = new Object;
+  Object.assign(historyObj, symphonyJSON[node]);
+  symphonyHistory[ historyCounter++ ] = historyObj;
+  console.log( symphonyHistory );
+},
+'back' : function() {},
+'clear' : function() {
+  symphonyHistory  = [];
+  historyCounter = 0;
+}
+
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   シンフォニーエディタ用メニュー
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+$editorMenu.on('click', 'button', function(){
+
+    const buttonType = $( this ).attr('data-menu');
+          
+    switch ( buttonType ) {
+      case 'symphony-register':
+        break;
+      case 'node-delete':
+        nodeRemove( g_selectedNodeID );
+        break;
+    }
+
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   SVGエリアの作成
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const xmlns = 'http://www.w3.org/2000/svg',
+      $svgArea = $( document.createElementNS( xmlns, 'svg') ),
+      $selectArea = $( document.createElementNS( xmlns, 'svg') ),
+      $selectBox = $( document.createElementNS( xmlns, 'rect') );
+
+$svgArea.get(0).setAttribute('viewBox', '0 0 ' + g_artBoard.w + ' ' + g_artBoard.h );
+$selectArea.get(0).setAttribute('viewBox', '0 0 ' + g_artBoard.w + ' ' + g_artBoard.h );
+
+// 座標マーカー（デバッグ用）
+if ( editorInitial.debug === true ) {
+  const $testSVG = $( document.createElementNS( xmlns, 'svg') ),
+        $testCircle = $( document.createElementNS( xmlns, 'circle') ),
+        $testPath = $( document.createElementNS( xmlns, 'path') );
+  
+  $testSVG.get(0).setAttribute('viewBox', '0 0 ' + g_artBoard.w + ' ' + g_artBoard.h );
+  $testSVG.attr({
+    'id' : 'svg-test',
+    'width' : g_artBoard.w,
+    'height' : g_artBoard.h
+  });
+  $testCircle.attr('class', 'test-circle');
+  $testPath.attr('class', 'test-path');
+  $artBoard.prepend( $testSVG.append( $testPath, $testPath.clone(), $testPath.clone(),
+  $testCircle, $testCircle.clone(), $testCircle.clone(), $testCircle.clone(), $testCircle.clone() ) );
+}
+
+$artBoard.prepend( $svgArea, $selectArea.append( $selectBox ) );
+$svgArea.attr({
+  'id' : 'svg-area',
+  'width' : g_artBoard.w,
+  'height' : g_artBoard.h
+});
+$selectArea.attr({
+  'id' : 'select-area',
+  'width' : g_artBoard.w,
+  'height' : g_artBoard.h
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   線（Edge,Line）削除
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const removeEdge = function( edgeID, removeSpeed ) {
+  
+  if ( removeSpeed === undefined ) removeSpeed = 200;
+  
+  const $edge = $('#' + edgeID ),
+        edge = symphonyJSON[ edgeID ];
+  
+  // 結線情報を削除
+  if ( 'inTerminal' in edge ) {
+    $('#' + edge.inTerminal ).removeClass('connected');
+    delete symphonyJSON[ edge.inNode ].terminal[ edge.inTerminal ].edge;
+    delete symphonyJSON[ edge.inNode ].terminal[ edge.inTerminal ].targetNode;
+  }
+  if ( 'outTerminal' in edge ) {
+    $('#' + edge.outTerminal ).removeClass('connected');
+    delete symphonyJSON[ edge.outNode ].terminal[ edge.outTerminal ].edge;
+    delete symphonyJSON[ edge.outNode ].terminal[ edge.outTerminal ].targetNode;
+  }
+  delete symphonyJSON[ edgeID ];
+  
+  if ( editorInitial.debug === true ) {
+    window.console.log( 'REMOVE EDGE ID : ' + edgeID );
+  }
+  
+  $edge.animate({'opacity' : 0 }, removeSpeed, function(){
+    $( this ).remove();            
+  });
+};
+$svgArea.on({
+  'click' : function(){
+    removeEdge( $( this ).closest('.svg-group').attr('id') );
+  } 
+}, '.svg-select-line');
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   線（Edge,Line）作成
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const newSVG = function() {
+    // SVG ID
+    const svgID = 'line-' + g_LineCounter;
+    g_LineCounter++;
+
+    // グループを作成
+    const $svgGroup = $( document.createElementNS( xmlns, 'g') );
+    $svgGroup.attr({
+      'id' : svgID,
+      'class' : 'svg-group'
+    });
+
+    // パスを作成
+    const $svgLine = $( document.createElementNS( xmlns, 'path') ),
+          $svgLineInside = $( document.createElementNS( xmlns, 'path') ),
+          $svgLineOutside = $( document.createElementNS( xmlns, 'path') ),
+          $svgLineBack = $( document.createElementNS( xmlns, 'path') ),
+          $svgSelectLine = $( document.createElementNS( xmlns, 'path') );
+    $svgLine.attr('class', 'svg-line');
+    $svgLineInside.attr('class', 'svg-line-inside');
+    $svgLineOutside.attr('class', 'svg-line-outside');
+    $svgLineBack.attr('class', 'svg-line-back');
+    $svgSelectLine.attr('class', 'svg-select-line');
+
+    // SVGエリアに追加
+    $svgArea.append( $svgGroup.append( $svgLineBack, $svgLineOutside, $svgLineInside, $svgLine, $svgSelectLine ) );
+      
+    return $svgGroup;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   線（Edge,Line）位置更新
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const edgeUpdate = function( edgeID ) {
+
+    const inNodeID = symphonyJSON[ edgeID ].inNode,
+          outNodeID = symphonyJSON[ edgeID ].outNode;
+                
+    const inTerminal = symphonyJSON[ inNodeID ].terminal[ symphonyJSON[ edgeID ].inTerminal ],
+          outTerminal = symphonyJSON[ outNodeID ].terminal[ symphonyJSON[ edgeID ].outTerminal ];
+                
+    const inX = inTerminal.x,
+          inY = inTerminal.y,
+          outX = outTerminal.x,
+          outY = outTerminal.y;
+                      
+    $('#' + edgeID ).find('path').attr('d', svgDrawPosition( outX, outY, inX, inY ) );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   線（Edge,Line）ホバー
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+$canvasWindow.on({
+  'mouseenter' : function(){
+    $( this ).attr('class','svg-group hover');
+    if ( modeCheck('node-noedge-move') || modeCheck('node-drag') ) {
+      $workspace.find('.node.current').css('opacity', .5 );
+    }
+  },
+  'mouseleave' : function(){
+    $( this ).attr('class','svg-group');
+    if ( modeCheck('node-noedge-move') || modeCheck('node-drag') ) {
+      $workspace.find('.node.current').css('opacity', 1 );
+    }
+  }
+},'.svg-group');
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   線（Edge,Line）ホバー
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const connectEdgeUpdate = function( nodeID ) {
+    $('#' + nodeID ).find('.connected').each( function() {
+      const terminalID = $( this ).attr('id');
+      if ( 'edge' in symphonyJSON[ nodeID ].terminal[ terminalID ] ) {
+        const edgeID = symphonyJSON[ nodeID ].terminal[ terminalID ].edge;
+        edgeUpdate( edgeID );
+      }
+    });
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   SVG 座標
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// SVG命令文
+const svgOrder = function( order, position ) {
+    let pathData = [];
+    for( let i = 0; i < position.length; i++ ){
+      pathData.push( position[ i ].join(',') );
+    }
+    return order + pathData.join(' ');
+};
+
+// SVG座標調整
+const svgDrawPosition = function( startX, startY, endX, endY ) {
+
+    let drawPositionArray = [];
+    
+    // 中間点
+    const centerX = Math.round( ( startX + endX ) / 2 ),
+          centerY = Math.round( ( startY + endY ) / 2 );
+            
+    // 対象との距離
+    const xRange = startX - endX,
+          yRange = startY - endY;
+    
+    // 対象との絶対距離
+    const xAbsoluteRange = Math.abs( xRange ),
+          yAbsoluteRange = Math.abs( yRange );
+    
+    // Terminalからの直線距離
+    let terminalStraightLineRange = 8;
+    
+    // 直線距離X座標
+    const startStraightLineX = startX + terminalStraightLineRange,
+          endStraightLineX = endX - terminalStraightLineRange;
+    
+    // SVG命令（共通）
+    const moveStart = svgOrder('M', [[ startX, startY]] ),
+          startLine = svgOrder('L', [[ startStraightLineX, startY]] ),
+          moveEnd = svgOrder('L', [[ endX, endY]] );          
+    
+    if ( yAbsoluteRange > 32 && xRange > -96 ) {
+      // Back Line
+      let curvetoRangeX = Math.round( xAbsoluteRange / 3 ),
+          curvetoStartY1 = Math.round( startY - yRange / 20 ),
+          curvetoEndY1 = Math.round( endY + yRange / 20 ),
+          curvetoStartY2 = Math.round( startY - yRange / 3 );
+          
+      if ( curvetoRangeX < 32 ) curvetoRangeX = 32;
+      if ( curvetoRangeX > 128 ) curvetoRangeX = 128;
+      if ( yAbsoluteRange < 128 && xRange > 0 ) {
+        let adjustY = ( yRange > 0 ) ? yRange - 128: yRange + 128;
+        curvetoStartY2 = curvetoStartY2 + Math.round( adjustY / 3 );
+      }
+      
+      if ( xAbsoluteRange > 256 && yAbsoluteRange < 256 ) {
+      // Straight S Line
+      const curvetoStart = svgOrder('C', [[ startStraightLineX + 96, startY],[ startStraightLineX + 96, centerY ],[ startStraightLineX, centerY ]] ),
+            centerLine = svgOrder('L',[[ endStraightLineX, centerY ]]),
+            curvetoEnd = svgOrder('C', [[ endStraightLineX - 96, centerY ],[ endStraightLineX - 96, endY ],[ endStraightLineX, endY ]]);
+      
+      drawPositionArray = [ moveStart, startLine, curvetoStart, centerLine, curvetoEnd, moveEnd ];
+      
+      } else {
+      // S Line
+      const curvetoStartX = startStraightLineX + curvetoRangeX,
+            curvetoStart = svgOrder('C', [[ curvetoStartX, curvetoStartY1],[ curvetoStartX, curvetoStartY2 ],[ centerX, centerY ]] ),
+            curvetoEnd = svgOrder('S', [[ endStraightLineX - curvetoRangeX, curvetoEndY1 ],[ endStraightLineX, endY ]]);
+      
+      // path確認用
+      /*
+      if ( editorInitial.debug === true ) {
+        $testSVG = $('#svg-test');
+        
+        // curveto 座標反転
+        const centerRangeX = Math.abs( centerX - curvetoStartX ),
+              centerRangeY = Math.abs( centerY - curvetoStartY2 ),
+              rX = ( centerX < curvetoStartX ) ? centerX - centerRangeX: centerX + centerRangeX,
+              rY = ( centerY < curvetoStartY2 ) ? centerY - centerRangeY: centerY + centerRangeY;
+        
+        $testSVG.find('.test-circle').eq(0).attr({'r':4,'cx':curvetoStartX,'cy':curvetoStartY1});
+        $testSVG.find('.test-circle').eq(1).attr({'r':4,'cx':curvetoStartX,'cy':curvetoStartY2});
+        $testSVG.find('.test-circle').eq(2).attr({'r':4,'cx':centerX,'cy':centerY});
+        $testSVG.find('.test-circle').eq(4).attr({'r':4,'cx':rX,'cy':rY});
+        
+        $testSVG.find('.test-circle').eq(3).attr({'r':4,'cx':endStraightLineX - curvetoRangeX,'cy':curvetoEndY1});
+        
+        $testSVG.find('.test-path').eq(0).attr({'d': svgOrder('M',[[startStraightLineX,startY],[curvetoStartX,curvetoStartY1]])});
+        $testSVG.find('.test-path').eq(1).attr({'d': svgOrder('M',[[curvetoStartX,curvetoStartY2],[rX,rY]])});
+        $testSVG.find('.test-path').eq(2).attr({'d': svgOrder('M',[[endStraightLineX - curvetoRangeX,curvetoEndY1],[endStraightLineX,endY]])});
+      }
+      */
+      
+      drawPositionArray = [ moveStart, startLine, curvetoStart, curvetoEnd, moveEnd ];
+      }
+      
+    } else {
+    
+      if ( xRange > 0 ) {
+        
+        let curvetoRangeX = Math.round( xAbsoluteRange / 3 );
+        if ( curvetoRangeX < 32 ) curvetoRangeX = 32;
+        if ( curvetoRangeX > 128 ) curvetoRangeX = 128;
+        // C Line
+        const centerAdjust = Math.round( curvetoRangeX / 3 * 2 ),
+              curvetoStartX = startStraightLineX + curvetoRangeX,
+              curvetoStart = svgOrder('C', [[ curvetoStartX, startY],[ curvetoStartX, startY + centerAdjust ],[ centerX, centerY + centerAdjust ]] ),
+              curvetoEnd = svgOrder('S', [[ endStraightLineX - curvetoRangeX, endY ],[ endStraightLineX, endY ]]);
+                    
+        drawPositionArray = [ moveStart, startLine, curvetoStart, curvetoEnd, moveEnd ];
+      
+      } else {
+
+        let curvetoQX = startStraightLineX + Math.round( yAbsoluteRange / 3 );
+        if ( curvetoQX > centerX ) curvetoQX = centerX;
+
+        const curvetoQ = svgOrder('Q', [[ curvetoQX, startY]] ),
+              endLine = svgOrder('T', [[ endStraightLineX, endY]] );
+
+        // path確認用
+        /*
+        if ( editorInitial.debug === true ) {
+          $testSVG = $('#svg-test');
+
+          // curveto 座標反転
+          const centerRangeX = Math.abs( centerX - curvetoQX ),
+                centerRangeY = Math.abs( centerY - startY ),
+                rX = ( centerX < curvetoQX ) ? centerX - centerRangeX: centerX + centerRangeX,
+                rY = ( centerY < startY ) ? centerY - centerRangeY: centerY + centerRangeY;
+
+          $testSVG.find('.test-circle').eq(0).attr({'r':4,'cx':0,'cy':0});
+          $testSVG.find('.test-circle').eq(1).attr({'r':4,'cx':curvetoQX,'cy':startY});
+          $testSVG.find('.test-circle').eq(2).attr({'r':4,'cx':centerX,'cy':centerY});
+          $testSVG.find('.test-circle').eq(4).attr({'r':4,'cx':rX,'cy':rY});
+
+          $testSVG.find('.test-circle').eq(3).attr({'r':4,'cx':0,'cy':0});
+
+          $testSVG.find('.test-path').eq(0).attr({'d': svgOrder('M',[[startStraightLineX,startY],[curvetoQX,startY]])});
+          $testSVG.find('.test-path').eq(1).attr({'d': svgOrder('M',[[endStraightLineX,endY],[rX,rY]])});
+          $testSVG.find('.test-path').eq(2).attr({'d': svgOrder('M',[[0,0],[0,0]])});
+        }
+        */
+
+        drawPositionArray = [ moveStart, startLine, curvetoQ, centerX + ',' + centerY, endLine, moveEnd ];
+      }
+    }
+    
+    if ( editorInitial.debug === true ) {
+      $('#canvas-debug-svg').html( 'X Range :' + xRange + ' / Y Range:' + yRange + '<br>' + drawPositionArray.join(' ') );
+    }
+
+    return drawPositionArray.join(' ');
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   ノード位置とターミナルの座標確定
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 位置情報登録
+const nodeSet = function( $node, x, y ){
+
+    const nodeID = $node.attr('id'),
+          w = $node.width(),
+          h = $node.height();
+    
+    // x と y が未定義なら位置情報を更新しない
+    if ( x !== undefined && y !== undefined ) {
+          
+      // アートボードの中か？
+      if ( x < 1 ) x = 0;
+      if ( x + w > g_artBoard.w ) x = g_artBoard.w - w;
+      if ( y < 1 ) y = 0;
+      if ( y + h > g_artBoard.h ) y = g_artBoard.h - h;
+
+      // 位置確定
+      $node.css({
+        'left' : x,
+        'top' : y,
+        'transform' : 'none'
+      });
+
+      symphonyJSON[ nodeID ].x = x;
+      symphonyJSON[ nodeID ].y = y;
+      symphonyJSON[ nodeID ].w = w;
+      symphonyJSON[ nodeID ].h = h;
+    
+    }
+    
+    // ターミナルの位置情報更新
+    let branchCount = 1;
+    $node.find('.node-terminal').each( function() {
+      const $terminal = $( this ),
+            terminalID = $terminal.attr('id'),
+            terminalWidth = $terminal.outerWidth() / 2,
+            terminalHeight = $terminal.outerHeight() / 2;
+      
+      // 未定義なら初期化
+      if ( symphonyJSON[ nodeID ].terminal[ terminalID ] === undefined ) {
+        symphonyJSON[ nodeID ].terminal[ terminalID ] = {};
+        if ( $terminal.is('.node-in') ) {
+          symphonyJSON[ nodeID ].terminal[ terminalID ].type = 'in';
+        } else {
+          symphonyJSON[ nodeID ].terminal[ terminalID ].type = 'out';
+        }
+      }
+      
+      // 分岐ノードの情報をセット
+      if( ( symphonyJSON[ nodeID ].type === 'conditional-branch' &&
+          symphonyJSON[ nodeID ].terminal[ terminalID ].type === 'out' ) ||
+          ( symphonyJSON[ nodeID ].type === 'merge' &&
+          symphonyJSON[ nodeID ].terminal[ terminalID ].type === 'in' ) ) {
+        let branchArray = [];
+        $terminal.prev('.node-body').find('li').each( function(){
+          branchArray.push( $( this ).attr('data-end-status') );
+        });
+        symphonyJSON[ nodeID ].terminal[ terminalID ].condition = branchArray;
+        symphonyJSON[ nodeID ].terminal[ terminalID ].case = branchCount;
+        branchCount++;
+      }
+      
+      symphonyJSON[ nodeID ].terminal[ terminalID ].id = terminalID;
+      symphonyJSON[ nodeID ].terminal[ terminalID ].x =
+        Math.round( symphonyJSON[ nodeID ].x + $terminal.position().left / editorValue.scaling + terminalWidth );
+      symphonyJSON[ nodeID ].terminal[ terminalID ].y =
+        Math.round( symphonyJSON[ nodeID ].y + $terminal.position().top / editorValue.scaling + terminalHeight );
+
+    });
+    
+    if ( editorInitial.debug === true ) {
+      window.console.log( symphonyJSON );
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   ノード初期設定
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const initialNode = function( id, type, name ){
+
+    const nodeID = 'node-' + g_NodeCounter,
+          terminalID = 'terminal-';
+    g_NodeCounter++;
+
+    let nodeClass = '',
+        orchestratorName = '',
+        inEdgeClass = 'node-terminal',
+        outEdgeClass = 'node-terminal',
+        nodeCircle = 'n',
+        nodeType = '',
+        tempType = 'common';
+
+    // 基本パターン分岐
+    switch ( type ) {
+      case 'Ansible Legacy':
+        nodeClass = 'node-ansible-legacy';
+        orchestratorName = 'Ansible Legacy';
+        nodeType = 'movement';
+        break;
+      case 'Ansible Pioneer':
+        nodeClass = 'node-ansible-pioneer';
+        orchestratorName = 'Ansible Pioneer';
+        nodeType = 'movement';
+        break;
+      case 'Ansible Legacy Role':
+        nodeClass = 'node-ansible-legacy-role';
+        orchestratorName = 'Ansible Legacy Role';
+        nodeType = 'movement';
+        break;
+      case 'Cobbler':
+        nodeClass = 'node-cobbler';
+        orchestratorName = 'Cobbler';
+        nodeType = 'movement';
+        break;
+      case 'DSC':
+        nodeClass = 'node-dsc';
+        orchestratorName = 'DSC';
+        nodeType = 'movement';
+        break;
+      case 'symphony-start':
+        name = 'Start';
+        nodeCircle = 'S';
+        nodeClass = 'symphony-start';
+        orchestratorName = 'Symphony';
+        inEdgeClass = 'node-cap';
+        nodeType = 'start';
+        break;
+      case 'symphony-end':
+        name = 'End';
+        nodeCircle = 'E';
+        nodeClass = 'symphony-end';
+        orchestratorName = 'Symphony';
+        outEdgeClass = 'node-cap';
+        nodeType = 'end';
+        break;
+      case 'conditional-branch':
+        name = 'Conditional';
+        nodeClass = 'function function-conditional';
+        orchestratorName = 'Branch';
+        tempType = 'conditional-branch';
+        nodeType = 'conditional-branch';
+        break;
+      case 'parallel-branch':
+        name = 'Parallel';
+        nodeClass = 'function function-parallel';
+        orchestratorName = 'Branch';
+        tempType = 'parallel-branch';
+        nodeType = 'parallel-branch';
+        break;
+      case 'merge':
+        name = 'Merge';
+        nodeClass = 'function function-merge';
+        tempType = 'merge';
+        nodeType = 'merge';
+        break;
+      case 'symphony-pause':
+        name = 'Pause';
+        nodeClass = 'function function-pause';
+        tempType = 'pause';
+        nodeType = 'pause';
+        break;
+      case 'symphony-call':
+        name = '{Not selected}';
+        nodeCircle = 'C';
+        orchestratorName = 'Symphony call';
+        nodeClass = 'symphony-call';
+        tempType = 'call';
+        nodeType = 'call';
+        break;
+      case 'blank-node':
+        name = '';
+        nodeClass = 'function function-blank';
+        tempType = 'blank';
+        nodeType = 'blank';
+        break;
+      default:
+    }
+    
+    let nodeHTML = '';
+    
+    const noteHTML = '<div class="node-note"><div class="node-note-inner"><p></p></div></div>',
+          statusHTML = '<div class="node-status"><div class="node-status"><p></p></div></div>',
+          skipHTML = '<div class="node-skip"><input type="checkbox"><label>Skip</label></div>';
+    
+    switch ( tempType ) {
+      case 'common':
+        nodeHTML = ''
+        + '<div id="' + nodeID + '" class="node ' + nodeClass + '">'
+          + '<div class="node-main">'
+            + '<div id="' + ( terminalID  + g_TerminalCounter ) + '" class="' + inEdgeClass + ' node-in"><span class="hole"><span></span></span></div>'
+            + '<div class="node-body">'
+              + '<div class="node-circle"><span class="node-gem">' + nodeCircle + '</span><span class="node-running"></span></div>'
+              + '<div class="node-type"><span>' + orchestratorName + '</span></div>'
+              + '<div class="node-name"><span>' + name + '</span></div>'
+            + '</div>'
+            + '<div id="' + ( terminalID  + ( g_TerminalCounter + 1 ) ) + '" class="' + outEdgeClass + ' node-out"><span class="hole"><span></span></span></div>'
+          + '</div>'
+          + noteHTML + statusHTML + skipHTML
+        + '</div>';
+        g_TerminalCounter += 2;
+        break;
+      case 'call':
+        nodeHTML = ''
+        + '<div id="' + nodeID + '" class="node ' + nodeClass + '">'
+          + '<div class="node-main">'
+            + '<div id="' + ( terminalID  + g_TerminalCounter ) + '" class="' + inEdgeClass + ' node-in"><span class="hole"><span></span></span></div>'
+            + '<div class="node-body">'
+              + '<div class="node-circle"><span class="node-gem">' + nodeCircle + '</span><span class="node-running"></span></div>'
+              + '<div class="node-type"><span>' + orchestratorName + '</span></div>'
+              + '<div class="node-name"><span class="symphony-name-wrap"><span class="symphony-name">' + name + '</span></span></div>'
+            + '</div>'
+            + '<div id="' + ( terminalID  + ( g_TerminalCounter + 1 ) ) + '" class="' + outEdgeClass + ' node-out"><span class="hole"><span></span></span></div>'
+          + '</div>'
+          + noteHTML + statusHTML + skipHTML
+        + '</div>';
+        g_TerminalCounter += 2;
+        break;
+      case 'conditional-branch':
+        nodeHTML = ''
+          + '<div id="' + nodeID + '" class="node ' + nodeClass + '">'
+            + '<div class="node-main">'
+              + '<div id="' + ( terminalID  + g_TerminalCounter ) + '" class="node-terminal node-in">'
+                + '<span class="hole"><span></span></span>'
+              + '</div>'
+              + '<div class="node-body">'
+                + '<div class="node-type"><span>' + orchestratorName + '</span></div>'
+                + '<div class="node-name"><span>' + name + '</span></div>'
+              + '</div>'
+              + '<div class="branch-cap branch-out"></div>'
+            + '</div>'
+            + '<div class="branch-line"><svg></svg></div>'
+            + '<div class="node-branch">'
+              + '<div class="node-sub">'
+                + '<div class="branch-cap branch-in"></div>'
+                + '<div class="node-body">'
+                  + '<div class="branch-type"><ul><li class="done" data-end-status="9">' + endStatus['9'][1] + '</li></ul></div>'
+                + '</div>'
+                + '<div id="' + ( terminalID  + ( g_TerminalCounter + 1 ) ) + '" class="node-terminal node-out">'
+                  + '<span class="hole"><span></span></span>'
+                + '</div>'
+              + '</div>'
+              + '<div class="node-sub default">'
+                + '<div class="branch-cap branch-in"></div>'
+                + '<div class="node-body">'
+                  + '<div class="branch-type"><ul><li class="default" data-end-status="-1">Other</li></ul></div>'
+                + '</div>'
+                + '<div id="' + ( terminalID  + ( g_TerminalCounter + 2 ) ) + '" class="node-terminal node-out">'
+                  + '<span class="hole"><span></span></span>'
+                + '</div>'
+              + '</div>'
+            + '</div>'
+            + noteHTML
+          + '</div>';
+          g_TerminalCounter += 3;
+          break;
+      case 'parallel-branch':
+        nodeHTML = ''
+          + '<div id="' + nodeID + '" class="node ' + nodeClass + '">'
+            + '<div class="node-main">'
+              + '<div id="' + ( terminalID  + g_TerminalCounter ) + '" class="node-terminal node-in">'
+                + '<span class="hole"><span></span></span>'
+              + '</div>'
+              + '<div class="branch-cap branch-out"></div>'
+            + '</div>'
+            + '<div class="branch-line"><svg></svg></div>'
+            + '<div class="node-branch">'
+              + '<div class="node-sub">'
+                + '<div class="branch-cap branch-in"></div>'
+                + '<div id="' + ( terminalID  + ( g_TerminalCounter + 1 ) ) + '" class="node-terminal node-out">'
+                  + '<span class="hole"><span></span></span>'
+                + '</div>'
+              + '</div>'
+              + '<div class="node-sub">'
+                + '<div class="branch-cap branch-in"></div>'
+                + '<div id="' + ( terminalID  + ( g_TerminalCounter + 2 ) ) + '" class="node-terminal node-out">'
+                  + '<span class="hole"><span></span></span>'
+                + '</div>'
+              + '</div>'
+            + '</div>'
+            + noteHTML
+          + '</div>';
+          g_TerminalCounter += 3;
+          break;
+      case 'merge':
+        nodeHTML = ''
+          + '<div id="' + nodeID + '" class="node ' + nodeClass + '">'
+            + '<div class="node-merge">'
+              + '<div class="node-sub">'
+                + '<div id="' + ( terminalID  + g_TerminalCounter ) + '" class="node-terminal node-in">'
+                  + '<span class="hole"><span></span></span>'
+                + '</div>'
+                + '<div class="node-body">'
+                  + '<div class="merge-status"><span class="standby">Standby</span></div>'
+                + '</div>'
+                + '<div class="merge-cap merge-out"></div>'
+              + '</div>'
+              + '<div class="node-sub">'
+                + '<div id="' + ( terminalID  + ( g_TerminalCounter + 1 ) ) + '" class="node-terminal node-in">'
+                  + '<span class="hole"><span></span></span>'
+                + '</div>'
+                + '<div class="node-body">'
+                  + '<div class="merge-status"><span class="standby">Standby</span></div>'
+                + '</div>'
+                + '<div class="merge-cap merge-out"></div>'
+              + '</div>'
+            + '</div>'
+            + '<div class="branch-line"><svg></svg></div>'
+            + '<div class="node-main">'
+              + '<div class="merge-cap merge-in"></div>'
+              + '<div id="' + ( terminalID  + ( g_TerminalCounter + 2 ) ) + '" class="node-terminal node-out">'
+                + '<span class="hole"><span></span></span>'
+              + '</div>'
+            + '</div>'
+            + noteHTML
+          + '</div>';
+          g_TerminalCounter += 3;
+          break;
+        case 'pause':
+        nodeHTML = ''
+        + '<div id="' + nodeID + '" class="node ' + nodeClass + '">'
+          + '<div class="node-main">'
+            + '<div id="' + ( terminalID  + g_TerminalCounter ) + '" class="' + inEdgeClass + ' node-in"><span class="hole"><span></span></span></div>'
+            + '<div class="node-body">'
+              + '<div class="node-name"><span>' + name + '</span></div>'
+            + '</div>'
+            + '<div id="' + ( terminalID  + ( g_TerminalCounter + 1 ) ) + '" class="' + outEdgeClass + ' node-out"><span class="hole"><span></span></span></div>'
+          + '</div>'
+          + noteHTML + statusHTML + skipHTML
+        + '</div>';
+        g_TerminalCounter += 2;
+        break;
+        case 'blank':
+        nodeHTML = ''
+        + '<div id="' + nodeID + '" class="node ' + nodeClass + '">'
+          + '<div class="node-main">'
+            + '<div id="' + ( terminalID  + g_TerminalCounter ) + '" class="' + inEdgeClass + ' node-in"><span class="hole"><span></span></span></div>'
+            + '<div class="node-body">'
+              + '<div class="node-name"><span>' + name + '</span></div>'
+            + '</div>'
+            + '<div id="' + ( terminalID  + ( g_TerminalCounter + 1 ) ) + '" class="' + outEdgeClass + ' node-out"><span class="hole"><span></span></span></div>'
+          + '</div>'
+          + noteHTML
+        + '</div>';
+        g_TerminalCounter += 2;
+        break;
+        default:
+      }
+    
+    symphonyJSON[ nodeID ] = {
+      'type' : nodeType,
+      'id' : nodeID,
+      'terminal' : {}
+    }
+
+    return $( nodeHTML );
+    
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   分岐線追加・更新
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const branchLine = function( nodeID, setMode ) {
+
+  const branchType = symphonyJSON[ nodeID ].type;
+
+  const $branchNode = $('#' + nodeID ),
+        $branchSVG = $branchNode.find('svg');
+  
+  // 一旦リセット
+  $branchSVG.css('height', 8 ).attr('height', 8 ).empty();
+  
+  // サイズ決定
+  const width = 40,
+        height = $branchNode.height() + 2;
+        
+  $branchSVG.attr({
+    'width' : width,
+    'height' : height
+  }).css({
+    'width' : width,
+    'height' : height
+  }).get(0)
+  .setAttribute('viewBox', '0 0 ' + width + ' ' + height );
+  
+  const terminalHeight = $branchNode.find('.node-main').height() - 16,
+        terminalPosition = ( height - terminalHeight ) / 2,
+        lineInterval = $branchNode.find('.node-sub').length + 1;
+
+  $branchNode.find('.node-sub').each( function( index ){
+  
+    const $subNode = $( this ).find('.node-terminal'),
+          $branchLine = $( document.createElementNS( xmlns, 'path') ),
+          $branchInLine = $( document.createElementNS( xmlns, 'path') ),
+          $branchOutLine = $( document.createElementNS( xmlns, 'path') ),
+          $branchBackLine = $( document.createElementNS( xmlns, 'path') ),
+          endY = terminalPosition + ( terminalHeight / lineInterval * ( index + 1 ) );
+    
+    let startY;
+    if ( setMode === 'drop' ) {
+      startY = $subNode.position().top + ( $subNode.height() / 2 ) + 1;
+    } else {
+      startY = Math.round( $subNode.position().top / editorValue.scaling ) + ( $subNode.height() / 2 ) + 1;
+    }
+    
+    let order;
+    
+    // 追加
+    $branchSVG.prepend( $branchBackLine );
+    $branchSVG.append( $branchOutLine, $branchInLine, $branchLine );
+    // class
+    $branchLine.attr('class','branch-line');
+    $branchInLine.attr('class','branch-in-line');
+    $branchOutLine.attr('class','branch-out-line');
+    $branchBackLine.attr('class','branch-back-line');
+    // 座標設定
+    if ( branchType === 'merge' ) {
+      order = svgOrder('M',[[0,startY]]) + svgOrder('C',[[30,startY],[width-30,endY],[width,endY]]);
+    } else {
+      order = svgOrder('M',[[width,startY]]) + svgOrder('C',[[width-30,startY],[30,endY],[0,endY]]);
+    }
+    
+    $branchLine.attr('d', order );
+    $branchInLine.attr('d', order );
+    $branchOutLine.attr('d', order );
+    $branchBackLine.attr('d', order );
+  });
+    
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   ノード分岐追加・削除
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const addBranch = function( nodeID ) {
+    const $branchNode = $('#' + nodeID );
+    let branchType = '',
+        nodeHTML = '',
+        panelHTML = '';
+    
+    if ( $branchNode.is('.function-conditional') ) {
+      branchType = 'conditional';
+      nodeHTML = ''
+        + '<div class="node-sub">'
+          + '<div class="branch-cap branch-in"></div>'
+          + '<div class="node-body">'
+            + '<div class="branch-type"><ul></ul></div>'
+          + '</div>'
+          + '<div id="terminal-' + g_TerminalCounter + '" class="node-terminal node-out">'
+            + '<span class="hole"><span></span></span>'
+          + '</div>'
+        + '</div>';
+      panelHTML = ''
+        + '<tr>'
+          + '<th class="property-th">Case {{n}} :</th>'
+          + '<td class="property-td"><ul class="branch-case"></ul></td>'
+        + '</tr>';
+    } else if ( $branchNode.is('.function-parallel') ) {
+      branchType = 'parallel';
+      nodeHTML = ''
+        + '<div class="node-sub">'
+          + '<div class="branch-cap branch-in"></div>'
+          + '<div id="terminal-' + g_TerminalCounter + '" class="node-terminal node-out">'
+            + '<span class="hole"><span></span></span>'
+          + '</div>'
+        + '</div>';
+      panelHTML = ''
+        + '<tr>'
+          + '<th class="property-th">Case :</th>'
+          + '<td class="property-td"><ul class="branch-case"></ul></td>'
+        + '</tr>';
+    } else if ( $branchNode.is('.function-merge') ) {
+      branchType = 'merge';
+      nodeHTML = ''
+        + '<div class="node-sub">'
+          + '<div id="terminal-' + g_TerminalCounter + '" class="node-terminal node-in">'
+            + '<span class="hole"><span></span></span>'
+          + '</div>'
+          + '<div class="node-body">'
+            + '<div class="merge-status"><span class="standby">Standby</span></div>'
+          + '</div>'
+          + '<div class="merge-cap merge-out"></div>'
+        + '</div>'
+    }
+    
+    if ( branchType !== '' ) {
+      // 条件分岐は最大6分岐までにする
+      const branchLength = $branchNode.find('.node-sub').length;
+      if ( !( branchType === 'conditional' && branchLength > 6 ) ) {
+        g_TerminalCounter++;
+
+        if ( branchType === 'conditional' ) {
+          $branchNode.find('.node-sub.default').before( nodeHTML );
+          panelHTML = panelHTML.replace('{{n}}', branchLength );
+          $('#branch-case-list').find('tbody').append( panelHTML );
+        } else if ( branchType === 'parallel' ) {
+          $branchNode.find('.node-branch').append( nodeHTML );
+        } else {
+          $branchNode.find('.node-' + branchType ).append( nodeHTML );
+        }
+        nodeSet( $branchNode );
+        branchLine( nodeID );
+        connectEdgeUpdate( nodeID );
+      } else {
+        editorMessage('INFO','MAX 6 Branch.')
+      }
+    }
+};
+const removeBranch = function( nodeID, terminalID ) {
+
+    const $branchNode = $('#' + nodeID );
+    let branchType = '';
+    if ( $branchNode.is('.function-conditional') ) {
+      branchType = 'conditional';
+    } else if ( $branchNode.is('.function-parallel') ) {
+      branchType = 'parallel';
+    } else if ( $branchNode.is('.function-merge') ) {
+      branchType = 'merge';
+    }
+    
+    if ( branchType !== '' ) {
+      // 分岐は最低２つまで
+      if ( $branchNode.find('.node-sub').length > 2 ) {
+      
+        let $targetTerminal;
+        // terminalIDが未定義なら最後の未接続の要素
+        if ( terminalID === undefined ) {
+          $targetTerminal = $branchNode.find('.node-terminal').not('.connected').closest('.node-sub').not('.default').eq(-1);
+          if ( !$targetTerminal.length ) return false;
+          terminalID = $targetTerminal.find('.node-terminal').attr('id');
+        } else {
+          $targetTerminal.find('#' + terminalID ).closest('.node-sub');
+        }
+      
+        // 接続済みの場合は確認する
+        if ( $targetTerminal.find('.node-terminal').is('.connected') ) {
+          if ( confirm('This branch is already connected. Do you want to delete it?') ) {
+            removeEdge( symphonyJSON[ nodeID ].terminal[ terminalID ].edge );
+          } else {
+            return false;
+          }
+        }
+
+        const caseNum = symphonyJSON[ nodeID ].terminal[ terminalID ].case,
+              $deleteCase = $('#branch-case-list').find('tbody').find('tr').eq( caseNum - 1 );
+        
+        // 削除するケースに条件があるか？
+        if ( $deleteCase.find('li').length ) {
+          // 削除される条件をOtherに移動する
+          $deleteCase.find('li').prependTo( $('#noset-conditions') );
+        }        
+        $deleteCase.remove();
+        
+        delete symphonyJSON[ nodeID ].terminal[ terminalID ];
+        $targetTerminal.remove();
+        
+        branchLine( nodeID );
+        nodeSet( $branchNode );
+        panelChange( nodeID );
+      }  else {
+        editorMessage('INFO','The branch cannot be deleted. You need at least two branches.');        
+      }
+      
+      connectEdgeUpdate( nodeID );
+      
+    }
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   リストからノード追加（ドラッグアンドドロップ）
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+$nodeList.on('mousedown', 'tbody tr', function( e ){
+
+  if ( e.button === 0 ) {
+  
+  // 選択したNodeからデータを取得
+  const $nodeData = $( this ).find('.add-node');
+  
+  let addNodeID, addNodeType, addNodeName;
+  
+  if ( $nodeData.is('.function') ) {
+    addNodeID = 'none';
+    addNodeType = $nodeData.attr('data-function-type');
+    addNodeName = 'function';
+  } else {
+    addNodeID = $nodeData.attr('data-id');
+    addNodeType = $nodeData.attr('data-orchestrator');
+    addNodeName = $nodeData.attr('data-name');
+  }
+  
+  // モード変更
+  const noNodeInterrupt = [
+    'conditional-branch',
+    'parallel-branch',
+    'merge'
+  ]; // 割り込まないノード一覧
+  if ( noNodeInterrupt.indexOf( addNodeType ) !== -1 ) {
+    mode.nodeMove( true );
+  } else {
+    mode.nodeMove( false );
+  }
+  
+  const $node = initialNode( addNodeID, addNodeType, addNodeName ),
+        nodeID = $node.attr('id'),
+        mouseDownPositionX = e.pageX,
+        mouseDownPositionY = e.pageY;
+  
+  $workspace.append( $node );
+  
+  // 要素の追加を待つ
+  $node.ready( function(){
+    
+    // 分岐ノードの線を描画
+    if ( noNodeInterrupt.indexOf( addNodeType ) !== -1 ) {
+      branchLine( nodeID, 'drop');
+    }
+          
+    let nodeDragTop = $node.height() / 2,
+        nodeDragLeft = 72;
+    
+    $node.addClass('drag current').css({
+      'left' : Math.round( e.pageX - $window.scrollLeft() - nodeDragLeft ),
+      'top' : Math.round( e.pageY - $window.scrollTop() - nodeDragTop ),
+      'transform-origin' : nodeDragLeft + 'px 50%'
+    });
+    $window.on({
+      'mousemove.dragNode': function( e ){
+
+        const moveX = Math.round( ( e.pageX - mouseDownPositionX ) ),
+              moveY = Math.round( ( e.pageY - mouseDownPositionY ) );
+        if ( $canvasWindow.is('.hover') ) {
+          $node.css('transform', 'translate3d(' + moveX + 'px,' + moveY + 'px,0) scale(' + editorValue.scaling + ')');
+        } else {
+          $node.css('transform', 'translate3d(' + moveX + 'px,' + moveY + 'px,0) scale(1)');
+        }
+      },
+      'mouseup.dragNode': function( e ){
+        $( this ).off('mousemove.dragNode mouseup.dragNode');
+        
+        mode.clear();
+        
+        // Canvasの上にいるか
+        if ( $canvasWindow.is('.hover') ) {
+          
+          // Node を アートボードにセットする
+          nodeDragTop = nodeDragTop * editorValue.scaling;
+          nodeDragLeft = nodeDragLeft * editorValue.scaling;
+          
+          const artBordPsitionX = ( g_artBoard_p.x * editorValue.scaling ) + g_canvasWindow.l + g_canvas_p.x,
+                artBordPsitionY = ( g_artBoard_p.y * editorValue.scaling ) + g_canvasWindow.t + g_canvas_p.y;
+          let nodeX = Math.round( ( e.pageX - artBordPsitionX - nodeDragLeft ) / editorValue.scaling ),
+              nodeY = Math.round( ( e.pageY - artBordPsitionY - nodeDragTop ) / editorValue.scaling );
+          
+          $node.appendTo( $artBoard ).removeClass('drag current').css('opacity', 1 );
+          
+          nodeSet( $node, nodeX, nodeY );
+          
+          nodeDeselect();
+          nodeSelect( nodeID );
+          panelChange( nodeID );
+          
+          // 線の上にいるかチェック
+          nodeInterrupt( nodeID );
+          
+        } else {
+          // キャンバス外の場合は消去
+          g_NodeCounter -= 1;
+          delete symphonyJSON[ nodeID ];
+          $node.animate({'opacity' : 0 }, 200, function(){
+            $( this ).remove();
+          });
+        }
+        
+      }
+    });
+  });
+  
+  }
+  
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   新規ノード追加
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// キャンバスの表示されている部分から位置を設定する
+const visiblePosition = function( axis, position, width, height ) {
+
+  const adjustPosition = 32; // 調整する端からの距離
+  
+  let positionNumber = 0;
+  
+  switch( position ) {
+    case 'center':
+      if ( axis === 'x' ) positionNumber = - g_canvas_p.x - g_artBoard_p.x + ( g_canvasWindow.w / 2 ) - ( width / 2 );
+      if ( axis === 'y' ) positionNumber = - g_canvas_p.y - g_artBoard_p.y + ( g_canvasWindow.h / 2 ) - ( height / 2 );
+      break;
+    case 'top':
+      if ( axis === 'y' ) positionNumber = - g_canvas_p.y - g_artBoard_p.y + adjustPosition;
+      break;
+    case 'bottom':
+      if ( axis === 'y' ) positionNumber = - g_canvas_p.y - g_artBoard_p.y + g_canvasWindow.h - height - adjustPosition;
+      break;
+    case 'left':
+      if ( axis === 'x' ) positionNumber = - g_canvas_p.x - g_artBoard_p.x + adjustPosition;
+      break;
+    case 'right':
+      if ( axis === 'x' ) positionNumber = - g_canvas_p.x - g_artBoard_p.x + g_canvasWindow.w - width - adjustPosition;
+      break;
+  }
+
+  return positionNumber;
+
+}
+// newNode function variables.
+// x = Number or 'left,center,right'.
+// y = Number or 'top,center,bottom'.
+const newNode = function( id, type, name, x, y ){
+
+  const $node = initialNode( id, type, name );
+  
+  // アートボードにNode追加
+  $artBoard.append( $node );
+  
+  // 要素の追加を待つ
+  $node.ready( function(){
+    
+    const width = $node.width(),
+          height = $node.height();
+    
+    // x, yが数値以外の場合
+    if ( x.typeof !== Number ) x = visiblePosition( 'x', x, width, height );
+    if ( y.typeof !== Number ) y = visiblePosition( 'y', y, width, height );
+    
+    // 位置情報をセット
+    nodeSet( $node, x, y );
+  });
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   ターミナルホバー
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+$canvasWindow.on({
+  'mouseenter' : function(){ $( this ).addClass('hover'); },
+  'mouseleave' : function(){ $( this ).removeClass('hover'); }
+},'.node-terminal');
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   結線処理
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// connectEdgeID = 'new'で新規
+const nodeConnect = function( connectEdgeID, outNodeID, outTerminalID, inNodeID, inTermianlID ) {
+
+  let $edge, edgeID;
+
+  if ( connectEdgeID === 'new'){
+    $edge = newSVG();
+    edgeID = $edge.attr('id');
+  } else {
+    $edge = $('#' + connectEdgeID );
+    edgeID = connectEdgeID
+  }
+  $edge.attr('data-connected','connected');
+  
+  // 登録の無いEdgeの場合登録する
+  if ( !( 'edge' in symphonyJSON ) ) {
+    symphonyJSON[ edgeID ] = {
+      'type' : 'edge',
+      'id' : edgeID
+    };
+  }
+  
+  const $outTerminal =  $('#' + outTerminalID ),
+        $inTerminal = $('#' + inTermianlID );
+  $outTerminal.add( $inTerminal ).addClass('connected');
+  
+  
+  // 接続状態を紐づけする
+  
+  // Node out terminal
+  Object.assign( symphonyJSON[ outNodeID ]['terminal'][ outTerminalID ], {
+    'targetNode' : inNodeID,
+    'edge' : edgeID
+  });
+  
+  // Node in terminal
+  Object.assign( symphonyJSON[ inNodeID ]['terminal'][ inTermianlID ], {
+    'targetNode' : outNodeID,
+    'edge' : edgeID
+  });
+  
+  // Edge
+  Object.assign( symphonyJSON[ edgeID ], {
+    'outNode' : outNodeID,
+    'outTerminal' : outTerminalID,
+    'inNode' : inNodeID,
+    'inTerminal' : inTermianlID
+  });
+  
+  // newの場合結線する
+  if ( connectEdgeID === 'new'){
+    const outX = symphonyJSON[ outNodeID ].terminal[ outTerminalID ].x,
+          outY = symphonyJSON[ outNodeID ].terminal[ outTerminalID ].y,
+          inX = symphonyJSON[ inNodeID ].terminal[ inTermianlID ].x,
+          inY = symphonyJSON[ inNodeID ].terminal[ inTermianlID ].y;
+    $edge.find('path').attr('d', svgDrawPosition( outX, outY, inX, inY ) );
+  }
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   結線しているところに割り込む
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const nodeInterrupt = function( nodeID ) {
+
+    if ( $('.svg-group').is('.hover') ) {
+            
+      const hoverEdgeID = $('.svg-group.hover').attr('id'),
+            edgeData = Object.assign({}, symphonyJSON[ hoverEdgeID ]);
+
+      // Terminal数チェック 2で基本Nodeと判定
+      if ( Object.keys( symphonyJSON[ nodeID ]['terminal'] ).length === 2 ) { 
+
+        let inTerminalID,outTerminalID;
+
+        // 接続チェック
+        for ( let terminals in symphonyJSON[ nodeID ].terminal ) {
+          const terminal = symphonyJSON[ nodeID ].terminal[ terminals ];
+          if ( terminal.targetNode === undefined || terminal.targetNode === '' ) {
+            if ( terminal.type === 'out' ) {
+              outTerminalID = terminals;
+            } else if ( terminal.type === 'in' ) {
+              inTerminalID = terminals;
+            }
+          } else {
+            // 接続済の場合は終了
+            return false;
+          }
+        }
+
+        // Delete Edge
+        removeEdge( hoverEdgeID );
+
+        // target Out > current Node In
+        nodeConnect('new', edgeData.outNode, edgeData.outTerminal, nodeID, inTerminalID );
+
+        // current Node Out > target In
+        nodeConnect('new', nodeID, outTerminalID, edgeData.inNode, edgeData.inTerminal );
+
+      }
+
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   ノード選択・選択解除
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const $nodeDelete = $('#node-delete');
+
+const nodeSelect = function( nodeID ) {
+    
+    // nodeIDが未指定の場合すべての要素を選択
+    if ( nodeID === undefined ) {
+    
+      for ( const node in symphonyJSON ) {
+        if ( 'type' in symphonyJSON[node] && symphonyJSON[node].type !== 'edge' ) {
+          nodeSelect( node );
+        }
+      }
+      panelChange();
+    
+    } else {
+    
+      const $node = $('#' + nodeID );
+      $node.addClass('selected');
+
+      // 選択中のノード一覧
+      if ( g_selectedNodeID.indexOf( nodeID ) === -1 ) {
+        g_selectedNodeID.push( nodeID );
+      }
+
+      if ( !( g_selectedNodeID[0] === 'node-1' && g_selectedNodeID.length === 1 ) ) {
+        $nodeDelete.prop('disabled', false );
+      }
+
+      if ( editorInitial.debug === true ) {
+        window.console.log( '選択中のノード一覧' );
+        window.console.log( g_selectedNodeID );
+      }
+    
+    }
+    
+}
+const nodeDeselect = function( nodeID ) {
+    
+    if ( nodeID === undefined ) {
+      // nodeID が未指定の場合すべての選択を解除
+      g_selectedNodeID = [];
+      $('.node.selected').removeClass('selected');
+    } else {
+      // 指定IDの選択を解除
+      const deselectNo = g_selectedNodeID.indexOf( nodeID );
+      if ( deselectNo !== -1 ) {
+        g_selectedNodeID.splice( deselectNo, 1 );
+        $('#' + nodeID ).removeClass('selected');
+      }
+    }
+    
+    if ( !g_selectedNodeID.length || ( g_selectedNodeID[0] === 'node-1' && g_selectedNodeID.length === 1 ) ) {
+      $nodeDelete.prop('disabled', true );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   ノード削除
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const nodeRemove = function( nodeID ) {
+    
+    const nodeRemoveFunc = function( removeNodeID ) {
+      // 接続している線があれば削除する
+      if ( 'terminal' in  symphonyJSON[ removeNodeID ] ) {
+        const terminals = symphonyJSON[ removeNodeID ].terminal;
+        for ( let terminal in terminals ) {
+          const terminalData = terminals[ terminal ];
+          if ( 'edge' in terminalData ) {
+            const edge = symphonyJSON[ terminalData.edge ];
+            removeEdge( edge.id, 1 );
+          }
+        }
+      }
+      // Start（id="node-1"）は削除しない
+      if ( removeNodeID !== 'node-1' ) {
+        // ノード削除
+        $('#' + removeNodeID ).remove();
+        history.add( 'remove', removeNodeID );
+        delete symphonyJSON[ removeNodeID ];
+        panelChange();
+      } else {
+        editorMessage('INFO','Start node cannot be deleted.');
+      }
+    }
+    
+    // 配列かどうか判定
+    if ( $.isArray( nodeID ) ) {
+      const nodeLength = nodeID.length;
+      if ( nodeLength ) {
+        for ( let i = 0; i < nodeLength; i++ ) {
+          nodeRemoveFunc( nodeID[ i ] );
+        }
+      }
+    
+    } else {
+      nodeRemoveFunc( nodeID );
+    }
+    
+    // 選択を解除する
+    nodeDeselect();
+    panelChange();
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   キーボード操作
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+$window.on('keydown', function( e ) {
+    
+    // キャンバスの上にいるかどうか
+    if ( $canvasWindow.is('.hover') && modeCheck() ) {
+    
+      switch( e.keyCode ) {
+
+        // Ctrl + A
+        case 65:
+          if ( e.ctrlKey ) {
+            e.preventDefault();
+            nodeSelect();
+          }
+          break;
+        // Delete
+        case 46:
+          if ( g_selectedNodeID.length ) {
+            nodeRemove( g_selectedNodeID );
+          }
+          break;
+        // +  
+        case 107:
+          if ( g_selectedNodeID.length === 1 ) {
+            addBranch( g_selectedNodeID[ 0 ] );
+          }
+          break;
+        // -  
+        case 109:
+          if ( g_selectedNodeID.length === 1 ) {
+            removeBranch( g_selectedNodeID[ 0 ] );
+          }
+          break;
+
+        default:    
+      }
+    
+    }
+    
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   キャンバスマウスダウン処理（ノードの移動、結線、複数選択）
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 接続禁止パターン（ out Type : [in Types] ）
+const connectablePattern = {
+  'start' : ['conditional-branch','end','merge','pause'],
+  'conditional-branch' : ['conditional-branch', 'end'],
+  'parallel-branch' : ['conditional-branch','parallel-branch','merge','end','pause'],
+  'merge' : ['conditional-branch','merge'],
+  'pause' : ['end','pause']
+};
+// 接続可能チェック（接続できる＝True）
+const checkConnectType = function( outType, inType ) {
+  if ( outType in connectablePattern &&
+       connectablePattern[ outType ].indexOf( inType ) !== -1 ) {    
+    return false;
+  } else {
+    return true;
+  }
+};
+
+$canvasWindow.on('mousedown', function( e ){
+
+    if ( e.buttons === 1 ) {
+    
+      // 選択を解除しておく
+      getSelection().empty();
+    
+      const mouseDownPositionX = e.pageX,
+            mouseDownPositionY = e.pageY,
+            scrollFrame = Math.floor( 1000 / 60 );
+
+      let moveX = 0, moveY = 0,
+          scrollX = 0, scrollY = 0,
+          scaleMoveX = 0, scaleMoveY = 0,
+          scrollDirectionX = '', scrollDirectionY = '',
+          moveScrollSpeedX = 0, moveScrollSpeedY = 0,
+          minScrollSpeed = 4, maxScrollSpeed = 60,
+          adjustMoveSpeed = 20,
+          nodeMoveScrollTimer = false,
+          timerMoveFlag = false;
+
+      // 位置移動
+      const move = function( callback ) {
+        $( window ).on({
+          'mousemove.nodeMove': function( e ){
+
+            moveX = e.pageX - mouseDownPositionX;
+            moveY = e.pageY - mouseDownPositionY;
+
+            let positionX = e.pageX - g_canvasWindow.l,
+                positionY = e.pageY - g_canvasWindow.t;
+
+            // キャンバス外の向き
+            // X over
+            if ( positionX < 1 ) {
+              moveScrollSpeedX = Math.round( -positionX / adjustMoveSpeed );
+              scrollDirectionX = 'left';
+            } else if ( positionX > g_canvasWindow.w ) {
+              moveScrollSpeedX = Math.round( ( positionX - g_canvasWindow.w ) / adjustMoveSpeed ); 
+              scrollDirectionX = 'right';
+            } else {
+              scrollDirectionX = '';
+            }
+            // Y over
+            if ( positionY < 1 ) {
+              moveScrollSpeedY = Math.round( -positionY / adjustMoveSpeed );
+              scrollDirectionY = 'top';
+            } else if ( positionY > g_canvasWindow.h ) {
+              moveScrollSpeedY = Math.round( ( positionY - g_canvasWindow.h ) / adjustMoveSpeed ); 
+              scrollDirectionY = 'bottom';
+            } else {
+              scrollDirectionY = '';
+            }
+
+            if ( timerMoveFlag === false ) {
+              callback('mousemove');
+            }
+          },
+          'mouseup.nodeMove': function(){
+            $( this ).off('mousemove.nodeMove mouseup.nodeMove');
+            $canvasWindow.off('mouseenter.canvasScroll mouseleave.canvasScroll');
+
+            callback('mouseup');
+
+            clearInterval( nodeMoveScrollTimer );
+            statusUpdate();
+            mode.clear();
+          }
+        });
+      };
+
+      // キャンバススクロール
+      const canvasScroll = function( callback ) {
+        $canvasWindow.on({
+          'mouseenter.canvasScroll' : function(){
+            timerMoveFlag = false;
+            clearInterval( nodeMoveScrollTimer );
+            nodeMoveScrollTimer = false;
+          },
+          'mouseleave.canvasScroll' : function(){
+            if ( nodeMoveScrollTimer === false ) {
+              nodeMoveScrollTimer = setInterval( function(){
+                timerMoveFlag = true;
+
+                if ( moveScrollSpeedX < minScrollSpeed ) moveScrollSpeedX = minScrollSpeed;
+                if ( moveScrollSpeedY < minScrollSpeed ) moveScrollSpeedY = minScrollSpeed;
+                if ( moveScrollSpeedX > maxScrollSpeed ) moveScrollSpeedX = maxScrollSpeed;
+                if ( moveScrollSpeedY > maxScrollSpeed ) moveScrollSpeedY = maxScrollSpeed;
+
+                // X scroll
+                if ( scrollDirectionX === 'left' ) {
+                  scrollX = scrollX - moveScrollSpeedX;
+                  g_canvas_p.x = g_canvas_p.x + moveScrollSpeedX;
+                } else if ( scrollDirectionX === 'right' ) {
+                  scrollX = scrollX + moveScrollSpeedX;
+                  g_canvas_p.x = g_canvas_p.x - moveScrollSpeedX;
+                }
+                // Y scroll
+                if ( scrollDirectionY === 'top' ) {
+                  scrollY = scrollY - moveScrollSpeedY;
+                  g_canvas_p.y = g_canvas_p.y + moveScrollSpeedY;
+                } else if ( scrollDirectionY === 'bottom' ) {
+                  scrollY = scrollY + moveScrollSpeedY;
+                  g_canvas_p.y = g_canvas_p.y - moveScrollSpeedY;
+                }
+
+                $canvas.css({
+                  'left' : g_canvas_p.x,
+                  'top' : g_canvas_p.y
+                });
+
+                callback('mousemove');
+
+              }, scrollFrame );
+            }
+          }
+        });
+      };
+
+      const scaleMoveSet = function() {
+        scaleMoveX = Math.round( ( moveX + scrollX ) / editorValue.scaling );
+        scaleMoveY = Math.round( ( moveY + scrollY ) / editorValue.scaling );
+        $statusMoveX.text( scaleMoveX + 'px' );
+        $statusMoveY.text( scaleMoveY + 'px' );
+      };
+      
+      
+      
+      // ノードの上でマウスダウン
+      if ( $( e.target ).closest('.node').length ) {
+      
+        // Node移動、新規Edge 共通処理
+        e.stopPropagation();
+
+        const $node = $( e.target ).closest('.node'),
+              nodeID = $node.attr('id');
+
+        // マウスダウンした場所がTerminalなら新規Edge作成
+        if ( $node.find('.node-terminal').is('.hover') ) {
+
+          const $terminal = $node.find('.node-terminal.hover'),
+                terminalID = $terminal.attr('id'),
+                $edge = newSVG(),
+                edgeID = $edge.attr('id'),
+                $path = $edge.find('path');
+
+          // 接続済みなら何もしない
+          if ( $terminal.is('.connected') ) return false;
+
+          $node.addClass('current');
+          $terminal.addClass('connect');
+
+          let connectMode,
+              start_p = {
+                'x': symphonyJSON[ nodeID ].terminal[ terminalID ].x,
+                'y' : symphonyJSON[ nodeID ].terminal[ terminalID ].y
+              };
+          
+          // in or out
+          if ( $terminal.is('.node-in') ) {
+            connectMode = 'in-out';
+            mode.edgeInConnect( symphonyJSON[nodeID].type );
+          } else {
+            connectMode = 'out-in';
+            mode.edgeOutConnect( symphonyJSON[nodeID].type );
+          }
+          
+          const drawLine = function( event ) {
+            scaleMoveSet();
+
+            const $targetTerminal = $('.node-terminal.hover');
+
+            // 線を削除
+            const clearEdge = function () {
+              $node.removeClass('current');
+              $terminal.removeClass('connect connected');
+              g_LineCounter--;
+              $edge.animate({'opacity' : 0 }, 200, function(){
+                $( this ).remove();
+              });
+              $artBoard.find('.forbidden').removeClass('forbidden');
+            };          
+
+            let end_p = {
+              'x' : start_p.x + scaleMoveX,
+              'y' : start_p.y + scaleMoveY
+            }
+
+            // ターミナルの上か？ 未接続か？
+            if ( $targetTerminal.length && !$targetTerminal.is('.connected') ) {
+              
+              nodeDeselect();
+              panelChange();
+              
+              const targetTerminalID = $targetTerminal.attr('id'),
+                    $targetNode = $targetTerminal.closest('.node'),
+                    targetNodeID = $targetNode.attr('id'),
+                    targetNodeConnect = ( $targetTerminal.is('.node-out') ) ? 'in-out' : 'out-in';
+              
+              const startNodeType = symphonyJSON[nodeID].type,
+                    endNodeType = symphonyJSON[targetNodeID].type;
+              
+              // 接続可能チェック
+              let connectFlag = true;
+              if ( nodeID === targetNodeID ) connectFlag = false; // 違うノード？
+              if ( connectMode !== targetNodeConnect ) connectFlag = false; // Out <-> In?
+              if ( connectMode === 'out-in') { // 接続可能パターン 
+                if ( !checkConnectType( startNodeType, endNodeType ) ) connectFlag = false;
+              } else {
+                if ( !checkConnectType( endNodeType, startNodeType ) ) connectFlag = false;
+              }
+              
+              if ( connectFlag ) {
+
+                // 中心にスナップ
+                end_p.x = symphonyJSON[ targetNodeID ].terminal[ targetTerminalID ].x;
+                end_p.y = symphonyJSON[ targetNodeID ].terminal[ targetTerminalID ].y;
+
+                // コネクト処理
+                if ( event === 'mouseup' ) {
+                  $node.removeClass('current');
+                  $terminal.removeClass('connect');
+                  $artBoard.find('.forbidden').removeClass('forbidden');
+
+                  // 接続状態を紐づけする
+                  if ( connectMode === 'out-in') {
+                    nodeConnect( edgeID, nodeID, terminalID, targetNodeID, targetTerminalID );
+                    if ( !nodeLoopCheck( nodeID ) ) removeEdge( edgeID );
+                  }  else if ( connectMode === 'in-out') {
+                    nodeConnect( edgeID, targetNodeID, targetTerminalID, nodeID, terminalID );
+                    if ( !nodeLoopCheck( targetNodeID ) ) removeEdge( edgeID );
+                  }
+
+                }
+
+              } else {
+                $targetTerminal.addClass('forbidden');
+                if ( event === 'mouseup' ) {
+                  clearEdge();
+                  editorMessage('INFO','This combination cannot connect.');
+                }
+              }
+
+            } else if ( event === 'mouseup' ) {
+              clearEdge();
+            }
+
+            if ( connectMode === 'out-in') {
+              $path.attr('d', svgDrawPosition( start_p.x, start_p.y, end_p.x, end_p.y ) );
+            } else if ( connectMode === 'in-out') {
+              $path.attr('d', svgDrawPosition( end_p.x, end_p.y, start_p.x, start_p.y ) );
+            }
+
+          };
+          move( drawLine );
+          canvasScroll( drawLine );
+
+          $path.attr('d', svgDrawPosition( start_p.x, start_p.y, start_p.x, start_p.y ) );
+
+        } else {
+
+          // Nodeの移動
+          $node.addClass('current');
+          
+          // 選択状態かどうか
+          if ( !$node.is('.selected') ) { 
+            // Shiftキーが押されていれば選択を解除しない
+            if ( !e.shiftKey ) {
+              nodeDeselect();
+              panelChange();
+            }
+            // ノード Selected
+            nodeSelect( nodeID );
+          } else {
+             // 選択状態かつShiftキーが押されていれば選択を解除し終了
+            if ( e.shiftKey ) {
+              nodeDeselect( nodeID );
+              panelChange();
+              return false;
+            }
+          }
+          
+          // 選択しているノードの数
+          const selectNodeLength = g_selectedNodeID.length;
+          
+          // 選択しているノードのターミナルの数
+          const selectNodeTerminalLength = Object.keys( symphonyJSON[ nodeID ].terminal ).length;
+          
+          // 選択しているノードから移動する線をリスト化する
+          const selectNodeMoveLineArray = [];
+          for ( let i = 0; i < selectNodeLength; i++ ) {
+            const selectNodeID = g_selectedNodeID[ i ];
+            // ターミナル数ループ
+            for ( let terminalID in symphonyJSON[ selectNodeID ].terminal ) {
+              const terminal = symphonyJSON[ selectNodeID ].terminal[ terminalID ];
+              if ( 'edge' in terminal ) {
+                const edgeID = symphonyJSON[ terminal.edge ].id;
+                if ( selectNodeMoveLineArray.indexOf( edgeID ) === -1 ) {
+                  selectNodeMoveLineArray.push( edgeID );
+                }
+              }
+            }            
+          }
+          const selectNodeLineLength = selectNodeMoveLineArray.length;
+          
+          // 未接続、選択が一つ、ターミナルが２つの場合は割り込み可能にする
+          if ( selectNodeLineLength === 0 &&
+              selectNodeLength === 1 &&
+              selectNodeTerminalLength === 2 ) {
+            mode.nodeMove( false );
+          } else {
+            mode.nodeMove( true );
+          }
+          
+          // パネル変更
+          panelChange( nodeID );
+          
+          // ノード移動処理
+          const moveNode = function( event ){
+
+            if ( event === 'mousemove') {
+
+              scaleMoveSet();
+              
+              // 選択ノードをすべて仮移動
+              $canvasWindow.find('.node.selected')
+                .css('transform', 'translate3d(' + scaleMoveX + 'px,' + scaleMoveY + 'px,0)');
+              
+              // 選択ノードに接続している線をすべて移動
+              for ( let i = 0; i < selectNodeLineLength; i++ ) {
+                const moveLineID = selectNodeMoveLineArray[ i ],
+                      inNodeID = symphonyJSON[ moveLineID ].inNode,
+                      outNodeID = symphonyJSON[ moveLineID ].outNode;
+                
+                const inTerminal = symphonyJSON[ inNodeID ].terminal[ symphonyJSON[ moveLineID ].inTerminal ],
+                      outTerminal = symphonyJSON[ outNodeID ].terminal[ symphonyJSON[ moveLineID ].outTerminal ];
+                
+                let inX = inTerminal.x,
+                    inY = inTerminal.y,
+                    outX = outTerminal.x,
+                    outY = outTerminal.y;
+                
+                // 選択中のノードなら移動させる
+                if ( g_selectedNodeID.indexOf( inNodeID ) !== -1 ) {
+                  inX += scaleMoveX;
+                  inY += scaleMoveY;
+                }
+                if ( g_selectedNodeID.indexOf( outNodeID ) !== -1 ) {
+                  outX += scaleMoveX;
+                  outY += scaleMoveY;
+                }
+                      
+                $('#' + selectNodeMoveLineArray[ i ] ).find('path')
+                  .attr('d', svgDrawPosition( outX, outY, inX, inY ) );
+              }
+
+            } else if ( event === 'mouseup') {
+              $node.removeClass('current').css('opacity', 1 );
+              // 選択ノード全ての位置確定
+              const nodeSetFunc = function( setNodeID ) {
+                const beforeX = symphonyJSON[ setNodeID ].x,
+                      beforeY = symphonyJSON[ setNodeID ].y;
+                nodeSet( $('#' + setNodeID ), scaleMoveX + beforeX, scaleMoveY + beforeY );
+              }
+              for ( let i = 0; i < selectNodeLength; i++ ) {
+                nodeSetFunc( g_selectedNodeID[ i ] );
+              }
+              // 未接続の基本Nodeを線の上にドラッグで線を消し、ドラッグしたNodeと結線
+              if ( modeCheck('node-noedge-move') ) {
+                nodeInterrupt( nodeID );
+              }
+            }
+
+          };
+
+          move( moveNode );
+          canvasScroll( moveNode );
+
+        }      
+
+
+      // 線の上
+      } else if ( $( e.target ).is('.svg-select-line') ) {
+      
+        nodeDeselect();
+        panelChange();
+      
+      // その他
+      } else {
+        
+        // 全ての選択を解除
+        if ( !e.shiftKey ) nodeDeselect();
+        panelChange();
+        
+        mode.nodeSelect();
+        
+        const positionNow = {
+          'x' : function ( x ) {
+            x = Math.round( ( x - ( g_artBoard_p.x * editorValue.scaling ) - g_canvasWindow.l - g_canvas_p.x ) / editorValue.scaling );
+            return x;
+          },
+          'y' : function ( y ) {
+            y = Math.round( ( y - ( g_artBoard_p.y * editorValue.scaling ) - g_canvasWindow.t - g_canvas_p.y ) / editorValue.scaling )
+            return y;
+          }
+        };
+        const rectX = positionNow.x( mouseDownPositionX ) - 0.5,
+              rectY = positionNow.y( mouseDownPositionY ) - 0.5;
+        
+        let x,y,w,h;
+        
+        const rectDraw = function( event ) {
+          
+          if ( event === 'mousemove') {
+            scaleMoveSet();
+            if ( scaleMoveX < 0 ) {
+              x = rectX + scaleMoveX;
+              w = -scaleMoveX;
+            } else {
+              x = rectX;
+              w = scaleMoveX;
+            }
+            if ( scaleMoveY < 0 ) {
+              y = rectY + scaleMoveY;
+              h = -scaleMoveY;
+            } else {
+              y = rectY;
+              h = scaleMoveY;
+            }
+            $selectArea.find('rect').attr({
+              'x' : x, 'y' : y, 'width' : w, 'height' : h
+            });
+          } else if ( event === 'mouseup') {
+            $selectArea.find('rect').attr({
+              'x' : 0, 'y' : 0, 'width' : 0, 'height' : 0
+            });
+            mode.clear();
+            // 選択範囲内のノードを選択
+            const rect = {
+              'left' : x,
+              'top' : y,
+              'right' : x + w,
+              'bottom' : y + h
+            };
+            for ( let nodeID in symphonyJSON ) {
+              if ( 'type' in symphonyJSON[ nodeID ] ) {
+                if ( symphonyJSON[ nodeID ].type !== 'edge' ) {
+                  const node = {
+                    'left' : symphonyJSON[ nodeID ].x,
+                    'top' : symphonyJSON[ nodeID ].y,
+                    'right' : symphonyJSON[ nodeID ].x + symphonyJSON[ nodeID ].w,
+                    'bottom' : symphonyJSON[ nodeID ].y + symphonyJSON[ nodeID ].h
+                  };
+                  // 判定
+                  if ( ( node.top < rect.bottom && rect.top < node.bottom ) &&
+                       ( node.left < rect.right && rect.left < node.right ) ) {
+                    // 選択状態を反転
+                    if ( g_selectedNodeID.indexOf( nodeID ) === -1 ) {
+                      nodeSelect( nodeID );
+                    } else {
+                      nodeDeselect( nodeID );
+                    }
+                    if ( g_selectedNodeID.length === 1 ) {
+                      panelChange( nodeID );
+                    } else {
+                      panelChange();
+                    }
+                  }
+                }
+              }
+            }
+            
+          }
+        
+        };
+        
+        move( rectDraw );
+        canvasScroll( rectDraw );
+      
+        
+      }
+    
+    }
+
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   初期ノードセット（Start and End）
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// newNode( id, type, name, x, y )
+newNode('none', 'symphony-start', 'fucntion', 'left', 'center');
+newNode('none', 'symphony-end', 'fucntion', 'right', 'center');
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   Startノードから順番に番号を振る
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   結線時ノードループ調査
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const nodeLoopCheck = function( nodeID ) {
+  
+  let flag = true,
+      nodeArray = [],
+      mergeArray = [];
+  
+  // 重複にカウントしないノード
+  const noCountNode = [
+    'conditional-branch',
+    'parallel-branch',
+    'merge'
+  ];
+  
+  const nodeLoopCheckRecursion = function( next ) {
+    if ( flag === true ) {
+      const node = symphonyJSON[ next ];
+
+      // 経路ログ
+      if ( editorInitial.debug === true ) {
+        window.console.log( 'ID:' + next + ' / ' + node.type );
+      }
+
+      if ( noCountNode.indexOf( node.type ) === -1 ) {
+        nodeArray.push( next );
+      }
+      
+      // ターミナルの数だけループ
+      for ( let terminals in node.terminal ) {
+        if ( node.terminal[ terminals ].type === 'out' && 'targetNode' in node.terminal[ terminals ] ) {
+          next = node.terminal[ terminals ].targetNode;
+          // すでに通過したマージの先はチェックしない
+          if ( mergeArray.indexOf( next ) === -1 ) {
+            // 同じIDが見つかれば終了
+            if ( nodeArray.indexOf( next ) !== -1 ) {
+              flag = false;
+              editorMessage('ERROR','Loop error.');
+              return false;
+            } else if ( next !== undefined ) {
+              // 次があれば再帰
+              nodeLoopCheckRecursion( next );
+            }
+          }
+        }
+      }
+      
+      if ( 'merge' === node.type ) {
+        mergeArray.push( next );
+      }
+    }
+  };
+  nodeLoopCheckRecursion( nodeID );
+  return flag;  
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   パネル関連
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const $property = $('#property'),
+      $branchCaseList = $('#branch-case-list').find('tbody');
+
+$property.find('.panel-tab').find('li').not('[data-tab-nanme="symphony"]').hide();
+$property.find('.symphony-panel').not('#symphony').hide();
+
+const panelChange = function( nodeID ) {
+
+  // 複数選択されている場合はパネルを表示しない
+  if ( g_selectedNodeID.length <= 1 ) {
+    
+    let panelType = '';
+    
+    // nodeIDが未定義の場合はシンフォニーパネルを表示
+    if ( nodeID === undefined ) {
+      
+      nodeID = 'symphony';
+      panelType = 'symphony';
+      
+    } else {
+      
+      const nodeType = symphonyJSON[ nodeID ].type;
+      
+      // 対応したパネルを表示
+      switch( nodeType ) {
+        case 'movement':
+        case 'conditional-branch':
+        case 'parallel-branch':
+        case 'merge':
+        case 'call':
+          panelType = nodeType;
+          break;
+        case 'start':
+        case 'end':
+        case 'blank':
+        case 'pause':
+          panelType = 'function';
+          break;
+        default:
+          panelType = 'symphony';
+      }
+    }
+    const $panel = $('#' + panelType );
+    $property.find('.panel-tab').find('li[data-tab-nanme="' + panelType + '"]').show().click()
+      .siblings().hide();
+    
+    // Noteのチェック
+    if ( 'note' in symphonyJSON[ nodeID ] ) {
+      $panel.find('textarea').val( symphonyJSON[ nodeID ].note );
+    } else {
+      $panel.find('textarea').val('');
+    }
+    
+    // パネルごとの処理
+    switch( panelType ) {
+      case '':
+        break;
+      case 'conditional-branch': {
+        
+        // 分岐の数だけボックスを用意する
+        const keys = Object.keys( symphonyJSON[ nodeID ].terminal ).length - 2;
+        let listHTML = '';
+        for (let i = 0; i < keys; i++ ) {
+          listHTML += '<tr><th class="property-th">Case ' + ( i + 1 ) + ' :</th><td class="property-td"><ul class="branch-case"></ul></td></tr>';
+        }
+        $branchCaseList.html( listHTML );
+        
+        // 分岐をパネルに反映する
+        let terminalConditionArray = []; // 使用中の分岐
+        for( let terminalID in symphonyJSON[ nodeID ].terminal ) {
+          const terminalData = symphonyJSON[ nodeID ].terminal[ terminalID ];
+          if ( terminalData.type === 'out') {
+            const conditionLength = terminalData.condition.length;
+            let conditionHTML = '';
+            for ( let i = 0; i < conditionLength; i++ ) {
+              const key = terminalData.condition[ i ];
+              terminalConditionArray.push( key );
+              conditionHTML += conditionBlockHTML( key );
+            }
+            $branchCaseList.find('.branch-case').eq( terminalData.case - 1 ).html( conditionHTML );
+          }
+        }
+        // 未使用分岐をセット
+        let nosetConditionHTML = '';
+        for ( let key in endStatus ){
+          if ( terminalConditionArray.indexOf( key ) === -1 ) {
+            nosetConditionHTML += conditionBlockHTML( key );
+          }
+        }
+        $('#noset-conditions').html( nosetConditionHTML );
+        break;
+      }
+      default:
+    }
+
+  } else {
+    $property.find('.panel-tab li, .symphony-panel').hide();
+  }
+  
+}
+
+/* 分岐パネル */
+$property.find('.branch-add').on('click', function(){ addBranch( g_selectedNodeID[ 0 ] ); });
+$property.find('.branch-delete').on('click', function(){ removeBranch( g_selectedNodeID[ 0 ] ); });
+
+/* 条件ブロック */
+const conditionBlockHTML = function( key ) {
+  return '<li class="' + endStatus[ key ][0] + '" data-end-status="' + key + '">' + endStatus[ key ][1] + '</li>';
+}
+
+/* 条件状態更新 */
+const conditionUpdate = function( nodeID ) {
+  $branchCaseList.find('.branch-case').each( function( i ) {
+    let conditions = [],
+        tergetTerminalID = '';
+    $( this ).find('li').each( function(){
+      conditions.push( $( this ).attr('data-end-status') );
+    });
+    // どこの条件か？
+    for ( let terminalID in symphonyJSON[ nodeID ].terminal ) {
+      const terminal = symphonyJSON[ nodeID ].terminal[ terminalID ];
+      if ( terminal.case === i + 1 ) {
+        tergetTerminalID = terminal.id;
+      }
+    }
+    // 条件を追加
+    const conditionLength = conditions.length;
+    let terminalConditionHTML = '';
+    for ( let i = 0; i < conditionLength; i++ ) {
+      terminalConditionHTML += conditionBlockHTML( conditions[ i ] );
+    }
+    $('#' + tergetTerminalID ).prev('.node-body').find('ul').html( terminalConditionHTML );
+  });
+  nodeSet( $('#' + nodeID ) );
+  branchLine( nodeID );
+  connectEdgeUpdate( nodeID );
+}
+
+/* 条件移動 */
+$property.find('#conditional-branch').on('mousedown', 'li', function( e ) {
+
+  const $condition = $( this ),
+        scrollTop = $window.scrollTop(),
+        scrollLeft = $window.scrollLeft(),
+        conditionWidth = $condition.outerWidth(),
+        conditionHeight = $condition.outerHeight(),
+        mousedownPositionX = e.pageX,
+        mousedownPositionY = e.pageY;
+
+  let moveX, moveY;
+  
+  mode.caseDrag();
+  
+  $property.find('.branch-case').on({
+    'mouseenter' : function() { $( this ).addClass('hover'); },
+    'mouseleave' : function() { $( this ).removeClass('hover'); }
+  })
+  
+  $condition.css({
+    'pointer-events' : 'none',
+    'display' : 'block',
+    'position' : 'fixed',
+    'left' : ( mousedownPositionX - scrollLeft - conditionWidth / 2 ) + 'px',
+    'top' : ( mousedownPositionY - scrollTop - conditionHeight / 2 ) + 'px',
+    'z-index' : 99999
+  });
+  
+  $window.on({
+    'mousemove.conditionMove' : function( e ) {
+      moveX = e.pageX - mousedownPositionX;
+      moveY = e.pageY - mousedownPositionY;
+      $condition.css('transform', 'translate(' + moveX + 'px,' + moveY + 'px)');
+    },
+    'mouseup.conditionMove' : function() {
+      $condition.removeAttr('style');
+      $window.off('mousemove.conditionMove mouseup.conditionMove');
+      mode.clear();
+      if ( $property.find('.branch-case.hover').length ) {
+        $property.find('.branch-case.hover').append( $condition );
+        $property.find('.branch-case').off().removeClass('hover');
+        // 条件反映
+        conditionUpdate( g_selectedNodeID[0] );
+      }
+    }
+  });
+});
+
+// Note更新
+$property.find('textarea').on('input', function() {
+
+  if ( g_selectedNodeID.length === 1 ) {
+    const $targetNodeNote = $('#' + g_selectedNodeID[0] ).find('.node-note');
+    let noteText = $( this ).val();
+
+    // 入力されたテキスト
+    symphonyJSON[ g_selectedNodeID[0] ].note = noteText;
+    
+    // タグの無害化
+    noteText = textEntities( noteText );    
+    
+    if ( noteText === '' ) {
+      $targetNodeNote.hide();
+    } else {
+      $targetNodeNote.show().find('p').html( noteText );
+    }
+
+  } else if ( g_selectedNodeID.length === 0 ) {
+    symphonyJSON['symphony'].note = $( this ).val();
+  }
+
+});
+
+// Movement Filter
+const $movementList = $('#movement-list').find('.node-table');
+$('#movement-filter').on('input', function(){
+  const $movementFilter = $( this ),
+        inputValue = $movementFilter.val(),
+        regExp = new RegExp( inputValue, "i");
+  
+  if ( inputValue !== '' ) {
+  $movementList.find('tbody').find('tr').each( function(){
+    const $tr = $( this ),
+          movementName = $tr.find('td').text();
+    if ( regExp.test( movementName ) ) {
+      $tr.removeClass('filter-hide');
+    } else {
+      $tr.addClass('filter-hide');
+    }
+  });
+  } else {
+    $movementList.find('.filter-hide').removeClass('filter-hide');
+  }
+  
+});
+
+// Message list
+const $messageList = $('#editor-message'),
+      messageHeight = 32;
+const editorMessage = function( type, message ){
+  const $message = $(''
+    + '<li class="editor-message-li ' + type.toLocaleLowerCase() + '">'
+      + '<dl class="editor-message-dl">'
+        + '<dt class="editor-message-dt">' + type + '</dt><dd class="editor-message-dd">' + message + '</dd>'
+      + '</dl>'
+    + '</li>');
+  
+  // アニメーションストップ
+  $messageList.stop(0,0);
+  
+  const bottom = $messageList.css('bottom').replace('px','');
+  
+  $messageList.css('bottom', bottom - messageHeight ).find('ul').append( $message );
+  
+  $messageList.animate({'bottom':0}, 100, 'linear');
+  
+  setTimeout( function() {
+    // アニメーション後に削除
+    $message.addClass('remove').on('animationend webkitAnimationEnd', function(){
+      $message.remove();
+    });
+  }, 3000 );
+};
 
 
 
@@ -532,12 +2966,11 @@ $artBoard.css({
   'width' : panelImageValue.artboradWidth,
   'height' : panelImageValue.artboradHeight
 });
-canvasPositionReset();
+canvasPositionReset( 0 );
 
 // jQuery オブジェクトをキャッシュ
 const $layerMenu = $('#layer-menu'),
       $layerList = $('#layer-list'),
-      $panelContainer = $('#panel-container'),
       $layerProperty = $('#layer-property'),
       $layerPropertyPanel = $layerProperty.find('.panel'),
       $layerTab = $layerProperty.find('.panel-tab'),
@@ -1020,7 +3453,7 @@ $layerList.on('click', 'span', function(){
       }
     });
 
-    $( window ).on({
+    $window.on({
       'mousemove.layer-drag' : function( e ){
         // 移動
         $layerItem.css('transform', 'translateY(' + ( e.pageY - mouseDownPositionY ) + 'px)');
@@ -1639,8 +4072,8 @@ $canvasWindow.on('mousedown.layer', '.layer-svg', function( e ){
       $( window ).on({
           'mousemove.canvas': function( e ){
 
-            moveX = Math.floor( ( e.pageX - mouseDownPositionX ) / editorValue.scaling );
-            moveY = Math.floor( ( e.pageY - mouseDownPositionY ) / editorValue.scaling );
+            moveX = Math.round( ( e.pageX - mouseDownPositionX ) / editorValue.scaling );
+            moveY = Math.round( ( e.pageY - mouseDownPositionY ) / editorValue.scaling );
             
             // センターにスナップ
             if ( beforeX + moveX < snapPixel && beforeX + moveX > -snapPixel ) moveX = - beforeX;
@@ -2018,7 +4451,6 @@ $('#Mix1_Nakami').on({
     'mouseenter' : function( e ){
 
       const imageSrc = $( this ).attr('href'),
-            $window = $( window ),
             scrollTop = $window.scrollTop(),
             scrollLeft = $window.scrollLeft();
             

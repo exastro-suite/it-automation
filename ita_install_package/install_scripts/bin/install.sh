@@ -65,7 +65,7 @@ func_set_total_cnt() {
     PROCCESS_TOTAL_CNT=0
 
     if [ "$BASE_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+18))
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+19))
     fi
 
     if [ "$ANSIBLE_FLG" -eq 1 ]; then
@@ -80,7 +80,7 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
-    if [ "$DSC_FLG" -eq 1 ]; then
+    if [ "$TERRAFORM_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
@@ -96,12 +96,12 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
-    if [ "$MATERIAL5_FLG" -eq 1 ]; then
+    if [ "$CREATEPARAM_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
-    if [ "$CREATEPARAM_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
+    if [ "$CREATEPARAM2_FLG" -eq 1 ]; then
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+1))
     fi
 
     if [ "$HOSTGROUP_FLG" -eq 1 ]; then
@@ -141,8 +141,8 @@ func_install_messasge() {
         MESSAGE="OpenStack driver"
     fi
 
-    if [ DSC_FLG = ${1} ]; then
-        MESSAGE="DSC driver"
+    if [ TERRAFORM_FLG = ${1} ]; then
+        MESSAGE="Terraform driver"
     fi
 
     if [ MATERIAL_FLG = ${1} ]; then
@@ -157,12 +157,12 @@ func_install_messasge() {
         MESSAGE="Material3"
     fi
     
-    if [ MATERIAL5_FLG = ${1} ]; then
-        MESSAGE="Material5"
-    fi
-    
     if [ CREATEPARAM_FLG = ${1} ]; then
         MESSAGE="Createparam"
+    fi
+
+    if [ CREATEPARAM2_FLG = ${1} ]; then
+        MESSAGE="Createparam2"
     fi
 
     if [ HOSTGROUP_FLG = ${1} ]; then
@@ -214,7 +214,7 @@ func_create_tables() {
         if ! test -e "$LIST_DIR/${DRIVER,,}_table_list.txt" ; then
             log "WARNING : ${DRIVER,,}_table_list.txt does not be found."
         else
-            "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
+            source "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             while read LINE; do
                 FILE_PATH="$LOG_DIR/$LINE.log"
                 if ! test -e "$FILE_PATH" ; then
@@ -292,7 +292,7 @@ func_services_set() {
             log "WARNING : ${DRIVER,,}_service_list.txt does not be found."
         else
             sed -i -e '/^$/d' "$LIST_DIR/${DRIVER,,}_service_list.txt" 2>> "$LOG_FILE"
-            "$BIN_DIR/register-services_RHEL.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
+            source "$BIN_DIR/register-services_RHEL.sh" "$LIST_DIR/${DRIVER,,}_service_list.txt" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             while read LINE; do
                 service=`basename ${LINE}`
                 RES=`systemctl | grep "$service" | grep 'running'`
@@ -323,7 +323,7 @@ func_crontab_set() {
             cp "$LIST_DIR/${DRIVER,,}_crontab_list.txt" "/tmp/" 2>> "$LOG_FILE"
             sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" "/tmp/${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
             sed -i -e '/^$/d' "/tmp/${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
-            "$BIN_DIR/register-crontab.sh" "${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
+            source "$BIN_DIR/register-crontab.sh" "${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
             while read LINE; do
                 LINE=${LINE//\'/}
                 LINE=${LINE//* /}
@@ -359,12 +359,12 @@ CREATE_TABLES=(
     ANSIBLE_FLG
     COBBLER_FLG
     OPENSTACK_FLG
-    DSC_FLG
+    TERRAFORM_FLG
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
-    MATERIAL5_FLG
     CREATEPARAM_FLG
+    CREATEPARAM2_FLG
     HOSTGROUP_FLG
     HOSTGROUP2_FLG
     HOSTGROUP3_FLG
@@ -376,11 +376,10 @@ RELEASE_PLASE=(
     ita_ansible-driver
     ita_cobbler-driver
     ita_openstack-driver
-    ita_dsc-driver
+    ita_terraform-driver
     ita_material
     ita_material2
     ita_material3
-    ita_material5
     ita_createparam
     ita_hostgroup
     ita_hostgroup2
@@ -400,11 +399,10 @@ SERVICES_SET=(
     ANSIBLE_FLG
     COBBLER_FLG
     OPENSTACK_FLG
-    DSC_FLG
+    TERRAFORM_FLG
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
-    MATERIAL5_FLG
     CREATEPARAM_FLG
     HOSTGROUP_FLG
     HOSTGROUP2_FLG
@@ -429,12 +427,12 @@ BASE_FLG=0
 ANSIBLE_FLG=0
 COBBLER_FLG=0
 OPENSTACK_FLG=0
-DSC_FLG=0
+TERRAFORM_FLG=0
 MATERIAL_FLG=0
 MATERIAL2_FLG=0
 MATERIAL3_FLG=0
-MATERIAL5_FLG=0
 CREATEPARAM_FLG=0
+CREATEPARAM2_FLG=0
 HOSTGROUP_FLG=0
 HOSTGROUP2_FLG=0
 HOSTGROUP3_FLG=0
@@ -443,7 +441,7 @@ REPLACE_CHAR="%%%%%ITA_DIRECTORY%%%%%"
 
 DRIVER_CNT=0
 ANSWER_DRIVER_CNT=0
-ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'openstack_driver' 'dsc_driver' 'material'  'createparam'  'hostgroup')
+ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'openstack_driver' 'terraform_driver' 'material'  'createparam'  'hostgroup')
 
 
 #answerファイル読み取り
@@ -493,10 +491,10 @@ while read LINE; do
             if [ "$val" = 'yes' ]; then
                 OPENSTACK_FLG=1
             fi
-        elif [ "$key" = 'dsc_driver' ]; then
+        elif [ "$key" = 'terraform_driver' ]; then
             func_answer_format_check
             if [ "$val" = 'yes' ]; then
-                DSC_FLG=1
+                TERRAFORM_FLG=1
             fi
         elif [ "$key" = 'material' ]; then
             func_answer_format_check
@@ -550,8 +548,8 @@ fi
 if [ $OPENSTACK_FLG -eq 1 ]; then
     log "INFO : Installation target : openstack_driver"
 fi
-if [ $DSC_FLG -eq 1 ]; then
-    log "INFO : Installation target : dsc_driver"
+if [ $TERRAFORM_FLG -eq 1 ]; then
+    log "INFO : Installation target : terraform_driver"
 fi
 if [ $MATERIAL_FLG -eq 1 ]; then
     log "INFO : Installation target : material"
@@ -586,10 +584,10 @@ if [ "$OPENSTACK_FLG" -eq 1 ]; then
     fi
 fi
 
-if [ "$DSC_FLG" -eq 1 ]; then
-    if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_dsc-driver ; then
-        log 'WARNING : DSC driver has already been installed.'
-        DSC_FLG=0
+if [ "$TERRAFORM_FLG" -eq 1 ]; then
+    if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_terraform-driver ; then
+        log 'WARNING : Terraform driver has already been installed.'
+        TERRAFORM_FLG=0
     fi
 fi
 
@@ -620,14 +618,14 @@ elif [ "$OPENSTACK_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
     MATERIAL3_FLG=1
 fi
 
-if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material5 ; then
-    MATERIAL5_FLG=0
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_dsc-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL5_FLG=1
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$DSC_FLG" -eq 1 ] ; then
-    MATERIAL5_FLG=1
-elif [ "$DSC_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL5_FLG=1
+if [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] &&  [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] ; then
+    CREATEPARAM2_FLG=0
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] && [ "$CREATEPARAM_FLG" -eq 1 ] ; then
+    CREATEPARAM2_FLG=1
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] && [ "$ANSIBLE_FLG" -eq 1 ] ; then
+    CREATEPARAM2_FLG=1
+elif [ "$ANSIBLE_FLG" -eq 1 ] && [ "$CREATEPARAM_FLG" -eq 1 ] ; then
+    CREATEPARAM2_FLG=1
 fi
 
 if [ "$CREATEPARAM_FLG" -eq 1 ]; then
@@ -759,7 +757,9 @@ if [ "$BASE_FLG" -eq 1 ]; then
             log 'WARNING : Failed to place /etc/php-fpm.d/www.conf_original.'
         fi
         cp -p ../ext_files_for_CentOS8.x/etc_php-fpm.d/www.conf /etc/php-fpm.d/ 2>> "$LOG_FILE"
-        if ! test -e /etc/php-fpm.d/www.conf ; then
+        if test -e /etc/php-fpm.d/www.conf ; then
+            sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" /etc/php-fpm.d/www.conf 2>> "$LOG_FILE"
+        else
             log 'WARNING : Failed to place /etc/php-fpm.d/www.conf.'
         fi
     fi
@@ -813,6 +813,16 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log "INFO : $ITA_DIRECTORY/data_relay_storage/symphony already exists."
     else
         mkdir -m 777 -p "$ITA_DIRECTORY"/data_relay_storage/symphony 2>> "$LOG_FILE"
+    fi
+    PROCCESS_CNT=$((PROCCESS_CNT+1))
+
+    ################################################################################################
+    log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Create data relay storage for conductor."
+    ################################################################################################
+    if test -d "$ITA_DIRECTORY"/data_relay_storage/conductor ; then
+        log "INFO : $ITA_DIRECTORY/data_relay_storage/conductor already exists."
+    else
+        mkdir -m 777 -p "$ITA_DIRECTORY"/data_relay_storage/conductor 2>> "$LOG_FILE"
     fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
 
@@ -918,6 +928,18 @@ if [ "$BASE_FLG" -eq 1 ]; then
     #################################################################################################
     func_crontab_set BASE_FLG
 
+fi
+
+#################################################################################################
+#Check ITA version of installer and already installed ITA.
+#################################################################################################
+if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_base ; then
+    diff ../ITA/ita-releasefiles/ita_base "$ITA_DIRECTORY"/ita-root/libs/release/ita_base >> "$LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+        log "ERROR : The version of the installer and the already installed ITA are different."
+        log "INFO : Abort installation."
+        func_exit_and_delete_file
+    fi
 fi
 
 if [ "$DRIVER_CNT" -ne 0 ]; then

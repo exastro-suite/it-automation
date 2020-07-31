@@ -46,6 +46,7 @@ class AAccountListModel extends BaseModel {
             "USERNAME_JP"            => "",
             "MAIL_ADDRESS"           => "",
             "PW_LAST_UPDATE_TIME"    => "DATETIME",
+            "AUTH_TYPE"              => "",
         );
 
         //  makeSQLForUtnTableUpdate用カラムリスト

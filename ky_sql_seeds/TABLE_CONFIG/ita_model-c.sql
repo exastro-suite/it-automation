@@ -47,7 +47,7 @@ ANSIBLE_HOSTNAME                %VARCHR%(128)                     , -- Ansible �
 ANSIBLE_PROTOCOL                %VARCHR%(8)                       , -- Ansible 接続プロトコル
 ANSIBLE_PORT                    %INT%                             , -- Ansible 接続ポート
 -- Tower 接続情報
-ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- Tower 接続ホスト名
+ANSTWR_HOST_ID                  %INT%                             , -- Tower 接続ホスト名
 ANSTWR_PROTOCOL                 %VARCHR%(8)                       , -- Tower 接続プロトコル
 ANSTWR_PORT                     %INT%                             , -- Tower 接続ポート
 -- 共通
@@ -55,6 +55,7 @@ ANSIBLE_EXEC_MODE               %INT%                             , -- 実行モ
 ANSIBLE_STORAGE_PATH_LNX        %VARCHR%(256)                     ,
 ANSIBLE_STORAGE_PATH_ANS        %VARCHR%(256)                     ,
 SYMPHONY_STORAGE_PATH_ANS       %VARCHR%(256)                     ,
+CONDUCTOR_STORAGE_PATH_ANS      %VARCHR%(256)                     ,
 ANSIBLE_EXEC_OPTIONS            %VARCHR%(512)                     , -- ansible-playbook実行時のオプションパラメータ
 -- ansible独自情報
 ANSIBLE_EXEC_USER               %VARCHR%(64)                      , -- ansible-playbook実行ユーザー
@@ -92,7 +93,7 @@ ANSIBLE_HOSTNAME                %VARCHR%(128)                     , -- Ansible �
 ANSIBLE_PROTOCOL                %VARCHR%(8)                       , -- Ansible 接続プロトコル
 ANSIBLE_PORT                    %INT%                             , -- Ansible 接続ポート
 -- Tower 接続情報
-ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- Tower 接続ホスト名
+ANSTWR_HOST_ID                  %INT%                             , -- Tower 接続ホスト名
 ANSTWR_PROTOCOL                 %VARCHR%(8)                       , -- Tower 接続プロトコル
 ANSTWR_PORT                     %INT%                             , -- Tower 接続ポート
 -- 共通
@@ -100,6 +101,7 @@ ANSIBLE_EXEC_MODE               %INT%                             , -- 実行モ
 ANSIBLE_STORAGE_PATH_LNX        %VARCHR%(256)                     ,
 ANSIBLE_STORAGE_PATH_ANS        %VARCHR%(256)                     ,
 SYMPHONY_STORAGE_PATH_ANS       %VARCHR%(256)                     ,
+CONDUCTOR_STORAGE_PATH_ANS      %VARCHR%(256)                     ,
 ANSIBLE_EXEC_OPTIONS            %VARCHR%(512)                     , -- ansible-playbook実行時のオプションパラメータ
 -- ansible独自情報
 ANSIBLE_EXEC_USER               %VARCHR%(64)                      , -- ansible-playbook実行ユーザー
@@ -122,6 +124,81 @@ LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , -- 最終更
 LAST_UPDATE_USER                %INT%                             , -- 最終更新ユーザ
 PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_TWR_HOST ( 
+  ANSTWR_HOST_ID                  %INT%                             ,
+  ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
+  ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
+  ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
+  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
+  ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
+-- 
+  DISP_SEQ                        %INT%                             ,
+  NOTE                            %VARCHR%(4000)                    ,
+  DISUSE_FLAG                     %VARCHR%(1)                       ,
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       ,
+  LAST_UPDATE_USER                %INT%                             ,
+  PRIMARY KEY (ANSTWR_HOST_ID) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_TWR_HOST_JNL ( 
+  JOURNAL_SEQ_NO                  %INT%                             ,
+  JOURNAL_REG_DATETIME            %DATETIME6%                       ,
+  JOURNAL_ACTION_CLASS            %VARCHR%(8)                       ,
+-- 
+  ANSTWR_HOST_ID                  %INT%                             ,
+  ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
+  ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
+  ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
+  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
+  ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
+-- 
+  DISP_SEQ                        %INT%                             ,
+  NOTE                            %VARCHR%(4000)                    ,
+  DISUSE_FLAG                     %VARCHR%(1)                       ,
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       ,
+  LAST_UPDATE_USER                %INT%                             ,
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 履歴系テーブル作成----
+
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_TWR_CREDENTIAL_TYPE ( 
+  CREDENTIAL_TYPE_ID              %INT%                             ,
+  CREDENTIAL_TYPE_NAME            %VARCHR%(256)                     ,
+   
+  DISP_SEQ                        %INT%                             ,
+  NOTE                            %VARCHR%(4000)                    ,
+  DISUSE_FLAG                     %VARCHR%(1)                       ,
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       ,
+  LAST_UPDATE_USER                %INT%                             ,
+  PRIMARY KEY (CREDENTIAL_TYPE_ID) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_TWR_CREDENTIAL_TYPE_JNL ( 
+  JOURNAL_SEQ_NO                  %INT%                             ,
+  JOURNAL_REG_DATETIME            %DATETIME6%                       ,
+  JOURNAL_ACTION_CLASS            %VARCHR%(8)                       ,
+-- 
+  CREDENTIAL_TYPE_ID              %INT%                             ,
+  CREDENTIAL_TYPE_NAME            %VARCHR%(256)                     ,
+-- 
+  DISP_SEQ                        %INT%                             ,
+  NOTE                            %VARCHR%(4000)                    ,
+  DISUSE_FLAG                     %VARCHR%(1)                       ,
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       ,
+  LAST_UPDATE_USER                %INT%                             ,
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
 -- 履歴系テーブル作成----
 
 -- ----更新系テーブル作成
@@ -251,7 +328,7 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(256)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
 VAR_STRUCT_ANAL_JSON_STRING_FILE  %VARCHR%(100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
-VARS_LIST                         %VARCHR%(4000)                   , -- 変数定義
+VARS_LIST                         %VARCHR%(8192)                   , -- 変数定義
 ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -276,7 +353,7 @@ ANS_TEMPLATE_ID                   %INT%                            ,
 ANS_TEMPLATE_VARS_NAME            %VARCHR%(256)                    ,
 ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
 VAR_STRUCT_ANAL_JSON_STRING_FILE  %VARCHR%(100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
-VARS_LIST                         %VARCHR%(4000)                   , -- 変数定義
+VARS_LIST                         %VARCHR%(8192)                   , -- 変数定義
 ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
 
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -639,6 +716,64 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 -- *****************************************************************************
 
 -- *****************************************************************************
+-- *** ***** Ansible Common Views                                            ***
+-- *****************************************************************************
+
+CREATE VIEW D_ANS_TWR_HOST     AS 
+SELECT
+  * 
+FROM 
+  B_ANS_TWR_HOST
+WHERE
+  ANSTWR_ISOLATED_TYPE is NULL;
+  
+CREATE VIEW D_ANS_TWR_HOST_JNL AS 
+SELECT
+  * 
+FROM 
+  B_ANS_TWR_HOST_JNL
+WHERE
+  ANSTWR_ISOLATED_TYPE is NULL;
+
+CREATE VIEW D_ANSIBLE_TOWER_IF_INFO AS 
+SELECT 
+  TAB_A.*,
+  TAB_B.ANSTWR_HOSTNAME,
+  TAB_B.ANSTWR_LOGIN_AUTH_TYPE,
+  TAB_B.ANSTWR_LOGIN_USER,
+  TAB_B.ANSTWR_LOGIN_PASSWORD,
+  TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE,
+  TAB_B.ANSTWR_ISOLATED_TYPE
+FROM
+  B_ANSIBLE_IF_INFO           TAB_A
+  LEFT JOIN (
+             SELECT * 
+             FROM B_ANS_TWR_HOST 
+             WHERE DISUSE_FLAG = '0'
+            ) TAB_B ON ( TAB_A.ANSTWR_HOST_ID = TAB_B.ANSTWR_HOST_ID );
+  
+CREATE VIEW D_ANSIBLE_TOWER_IF_INFO_JNL AS 
+SELECT 
+  TAB_A.*,
+  TAB_B.ANSTWR_HOSTNAME,
+  TAB_B.ANSTWR_LOGIN_AUTH_TYPE,
+  TAB_B.ANSTWR_LOGIN_USER,
+  TAB_B.ANSTWR_LOGIN_PASSWORD,
+  TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE,
+  TAB_B.ANSTWR_ISOLATED_TYPE
+FROM
+  B_ANSIBLE_IF_INFO_JNL         TAB_A
+  LEFT JOIN (
+             SELECT * 
+             FROM B_ANS_TWR_HOST_JNL
+             WHERE DISUSE_FLAG = '0'
+            ) TAB_B ON ( TAB_A.ANSTWR_HOST_ID = TAB_B.ANSTWR_HOST_ID );
+
+-- *****************************************************************************
+-- ***  Ansible Common View *****                                            ***
+-- *****************************************************************************
+
+-- *****************************************************************************
 -- *** ***** Ansible Legacy Tables                                           ***
 -- *****************************************************************************
 -- ----更新系テーブル作成
@@ -917,6 +1052,11 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
+
+CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
+CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -960,6 +1100,11 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
+
+CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
+CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -1181,6 +1326,10 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
+         TAB_A.CONDUCTOR_NAME            ,
+         TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -1229,6 +1378,10 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
+         TAB_A.CONDUCTOR_NAME            ,
+         TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -1300,6 +1453,51 @@ LEFT JOIN D_ANS_LNS_PTN_VARS_LINK  TAB_B ON ( TAB_B.VARS_LINK_ID = TAB_A.VARS_LI
 -- *****************************************************************************
 -- *** ***** Ansible Pioneer Tables                                          ***
 -- *****************************************************************************
+-- ----更新系テーブル作成
+CREATE TABLE B_OS_TYPE
+(
+OS_TYPE_ID                        %INT%                     ,
+
+OS_TYPE_NAME                      %VARCHR%(256)             ,
+HARDAWRE_TYPE_SV                  %INT%                     ,
+HARDAWRE_TYPE_ST                  %INT%                     ,
+HARDAWRE_TYPE_NW                  %INT%                     ,
+
+DISP_SEQ                          %INT%                     , -- 表示順序
+NOTE                              %VARCHR%(4000)            , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)               , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%               , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                     , -- 最終更新ユーザ
+
+PRIMARY KEY (OS_TYPE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_OS_TYPE_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                     , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%               , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)               , -- 履歴用変更種別
+
+OS_TYPE_ID                        %INT%                     ,
+
+OS_TYPE_NAME                      %VARCHR%(256)             ,
+HARDAWRE_TYPE_SV                  %INT%                     ,
+HARDAWRE_TYPE_ST                  %INT%                     ,
+HARDAWRE_TYPE_NW                  %INT%                     ,
+
+DISP_SEQ                          %INT%                     , -- 表示順序
+NOTE                              %VARCHR%(4000)            , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)               , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%               , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                     , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+
+
 -- ----更新系テーブル作成
 CREATE TABLE B_ANSIBLE_PNS_DIALOG_TYPE
 (
@@ -1615,6 +1813,10 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
+CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
+CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -1658,6 +1860,10 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
+CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
+CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -1677,6 +1883,53 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 -- *****************************************************************************
 -- *** ***** Ansible Pioneer Views                                           ***
 -- *****************************************************************************
+CREATE VIEW D_OS_TYPE 
+AS 
+SELECT * 
+FROM B_OS_TYPE;
+
+CREATE VIEW D_OS_TYPE_JNL 
+AS 
+SELECT * 
+FROM B_OS_TYPE_JNL;
+
+CREATE VIEW D_OS_TYPE_SV 
+AS 
+SELECT * 
+FROM B_OS_TYPE 
+WHERE HARDAWRE_TYPE_SV=1;
+
+CREATE VIEW D_OS_TYPE_SV_JNL 
+AS 
+SELECT * 
+FROM B_OS_TYPE_JNL 
+WHERE HARDAWRE_TYPE_SV=1;
+
+CREATE VIEW D_OS_TYPE_ST 
+AS 
+SELECT * 
+FROM B_OS_TYPE 
+WHERE HARDAWRE_TYPE_ST=1;
+
+CREATE VIEW D_OS_TYPE_ST_JNL 
+AS 
+SELECT * 
+FROM B_OS_TYPE_JNL 
+WHERE HARDAWRE_TYPE_ST=1;
+
+CREATE VIEW D_OS_TYPE_NW 
+AS 
+SELECT * 
+FROM B_OS_TYPE 
+WHERE HARDAWRE_TYPE_NW=1;
+
+CREATE VIEW D_OS_TYPE_NW_JNL 
+AS 
+SELECT * 
+FROM B_OS_TYPE_JNL 
+WHERE HARDAWRE_TYPE_NW=1;
+
+
 CREATE VIEW D_ANSIBLE_PNS_INS_STATUS     AS 
 SELECT * 
 FROM B_ANSIBLE_STATUS;
@@ -1883,6 +2136,10 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
+         TAB_A.CONDUCTOR_NAME            ,
+         TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -1931,6 +2188,10 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
+         TAB_A.CONDUCTOR_NAME            ,
+         TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -1993,6 +2254,102 @@ FROM B_ANSIBLE_PNS_VARS_ASSIGN         TAB_A
 LEFT JOIN D_ANS_PNS_PTN_VARS_LINK  TAB_B ON ( TAB_B.VARS_LINK_ID = TAB_A.VARS_LINK_ID )
 ;
 
+CREATE VIEW D_ANS_PNS_CMDB_MENU_COLUMN AS
+SELECT
+  TBL_A.*
+FROM 
+  B_CMDB_MENU_COLUMN TBL_A
+WHERE
+  TBL_A.COL_CLASS   <>  'MultiTextColumn'
+;
+  
+CREATE VIEW D_ANS_PNS_CMDB_MENU_COLUMN_JNL AS
+SELECT
+  TBL_A.*
+FROM 
+  B_CMDB_MENU_COLUMN_JNL TBL_A
+WHERE
+  TBL_A.COL_CLASS   <>  'MultiTextColumn'
+;
+
+CREATE VIEW D_ANS_PNS_CMDB_MENU_LIST AS
+SELECT 
+  TBL_A.*
+FROM 
+  D_CMDB_MENU_LIST TBL_A
+WHERE
+  (SELECT 
+     COUNT(*) 
+   FROM 
+     B_CMDB_MENU_COLUMN TBL_B
+   WHERE
+     TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
+     TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
+     TBL_B.DISUSE_FLAG =   '0'
+  ) <> 0
+;
+
+CREATE VIEW D_ANS_PNS_CMDB_MENU_LIST_JNL AS
+SELECT 
+  TBL_A.*
+FROM 
+  D_CMDB_MENU_LIST_JNL TBL_A
+WHERE
+  (SELECT 
+     COUNT(*) 
+   FROM 
+     B_CMDB_MENU_COLUMN_JNL TBL_B
+   WHERE
+     TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
+     TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
+     TBL_B.DISUSE_FLAG =   '0'
+  ) <> 0
+;
+
+CREATE VIEW D_ANS_PNS_CMDB_MG_MU_COL_LIST AS
+SELECT
+  TAB_A.COLUMN_LIST_ID                 ,
+  CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_TITLE_PULLDOWN,
+  TAB_C.MENU_ID                        ,
+  TAB_A.COL_TITLE_DISP_SEQ             ,
+  TAB_A.DISP_SEQ                       ,
+  TAB_A.NOTE                           ,
+  TAB_A.DISUSE_FLAG                    ,
+  TAB_A.LAST_UPDATE_TIMESTAMP          ,
+  TAB_A.LAST_UPDATE_USER
+FROM        D_ANS_PNS_CMDB_MENU_COLUMN TAB_A
+  LEFT JOIN D_ANS_PNS_CMDB_MENU_LIST   TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+  LEFT JOIN A_MENU_LIST                TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+  LEFT JOIN A_MENU_GROUP_LIST          TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+   TAB_A.DISUSE_FLAG = '0' AND
+   TAB_B.DISUSE_FLAG = '0' AND
+   TAB_C.DISUSE_FLAG = '0' AND
+   TAB_D.DISUSE_FLAG = '0'
+;
+
+CREATE VIEW D_ANS_PNS_CMDB_MG_MU_COL_LIST_JNL AS
+SELECT
+  TAB_A.COLUMN_LIST_ID                 ,
+  CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_PULLDOWN,
+  TAB_C.MENU_ID                        ,
+  TAB_A.COL_TITLE_DISP_SEQ             ,
+  TAB_A.DISP_SEQ                       ,
+  TAB_A.NOTE                           ,
+  TAB_A.DISUSE_FLAG                    ,
+  TAB_A.LAST_UPDATE_TIMESTAMP          ,
+  TAB_A.LAST_UPDATE_USER
+FROM        D_ANS_PNS_CMDB_MENU_COLUMN_JNL TAB_A
+  LEFT JOIN D_ANS_PNS_CMDB_MENU_LIST       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+  LEFT JOIN A_MENU_LIST                    TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+  LEFT JOIN A_MENU_GROUP_LIST              TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+   TAB_A.DISUSE_FLAG = '0' AND
+   TAB_B.DISUSE_FLAG = '0' AND
+   TAB_C.DISUSE_FLAG = '0' AND
+   TAB_D.DISUSE_FLAG = '0'
+;
+
 -- *****************************************************************************
 -- *** Ansible Pioneer Views *****                                           ***
 -- *****************************************************************************
@@ -2032,6 +2389,10 @@ FILE_INPUT                        %VARCHR%(1024)                   , -- 投入�
 FILE_RESULT                       %VARCHR%(1024)                   , -- 結果データ格納ファイル(ZIP形式)
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
+CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
+CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -2075,6 +2436,10 @@ FILE_INPUT                        %VARCHR%(1024)                   , -- 投入�
 FILE_RESULT                       %VARCHR%(1024)                   , -- 結果データ格納ファイル(ZIP形式)
 RUN_MODE                          %INT%                            , -- ドライランモード 1:通常 2:ドライラン
 EXEC_MODE                         %INT%                            , -- 実行モード 1:ansible/2:ansible tower
+MULTIPLELOG_MODE                  %INT%                            , -- マルチログモード 1:マルチログモード　他:シングルログモード
+LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
+CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
+CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -2891,6 +3256,10 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
+         TAB_A.CONDUCTOR_NAME            ,
+         TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
@@ -2939,6 +3308,10 @@ SELECT
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.EXEC_MODE                 ,
          TAB_G.NAME AS EXEC_MODE_NAME    ,
+         TAB_A.MULTIPLELOG_MODE          ,
+         TAB_A.LOGFILELIST_JSON          ,
+         TAB_A.CONDUCTOR_NAME            ,
+         TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,

@@ -56,6 +56,7 @@ $log_output_dir     = getenv("LOG_DIR");
 if(empty($log_output_dir)) {
     $log_output_dir = $root_dir_path . "/logs/backyardlogs";
 }
+
 $log_file_prefix    = basename(__FILE__, ".php") . "_";
 $tmpVarTimeStamp    = time();
 $logfile            = $log_output_dir . "/" . $log_file_prefix . date("Ymd", $tmpVarTimeStamp) . ".log";
@@ -113,7 +114,7 @@ try {
     ////////////////////////////////
     // トレースメッセージ
     $logger->debug("Get interface info.");
-    $ifInfoRows = $dbAccess->selectRows("B_ANSIBLE_IF_INFO");   
+    $ifInfoRows = $dbAccess->selectRows("D_ANSIBLE_TOWER_IF_INFO");
 
     $num_of_rows = count($ifInfoRows);
     // 設定無しの場合
@@ -129,7 +130,8 @@ try {
         exit(0);
     }
 
-    if(strlen(trim($ifInfoRows[0]['ANSTWR_AUTH_TOKEN'])) == 0) {
+    if((strlen(trim($ifInfoRows[0]['ANSTWR_AUTH_TOKEN'])) == 0) ||
+       (strlen(trim($ifInfoRows[0]['ANSTWR_HOSTNAME'])) == 0)) {
         exit(0);
     }
 
@@ -166,7 +168,7 @@ try {
         if($response_array['success'] == false) {
             throw new Exception("Faild to get instance groups data from ansible_tower. " . $response_array['responseContents']['errorMessage']);
         }
-    
+
         ////////////////////////////////////////////////////////////
         // トランザクション開始
         ////////////////////////////////////////////////////////////

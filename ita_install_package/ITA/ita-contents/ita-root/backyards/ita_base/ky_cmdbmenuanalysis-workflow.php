@@ -13,7 +13,6 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-
 //////////////////////////////////////////////////////////////////////
 //
 //  【概要】
@@ -24,9 +23,6 @@
 //                                  [メニューグループID_メニューID]
 //  $lva_use_menu_col_id_list:      代入値紐付カラムリスト
 //                                  [メニューグループID_メニューID_テーブル名_テーブルカラム名]
-//  $lva_hide_col_list              代入値自動登録設定の項目表示から除外するカラムリスト
-//                                  [カラム名]=1
-//
 //
 //  F0001  makeArrayMenuID
 //  F0002  makeArrayMenuColID
@@ -180,6 +176,7 @@ $arrayConfigOfMenuCol = array(
     "COLUMN_LIST_ID"=>""          ,
     "MENU_ID"=>""                 ,
     "COL_NAME"=>""                ,
+    "COL_CLASS"=>""               ,
     "COL_TITLE"=>""               ,
     "COL_TITLE_DISP_SEQ"=>""      ,
     "REF_TABLE_NAME"=>""          ,
@@ -199,6 +196,7 @@ $arrayValueTmplOfMenuCol = array(
     "COLUMN_LIST_ID"=>""          ,
     "MENU_ID"=>""                 ,
     "COL_NAME"=>""                ,
+    "COL_CLASS"=>""               ,
     "COL_TITLE"=>""               ,
     "COL_TITLE_DISP_SEQ"=>""      ,
     "REF_TABLE_NAME"=>""          ,
@@ -240,6 +238,7 @@ $arrayTargetClassList = array(
     "IDColumn",
     "NumColumn",
     "MaskColumn",
+    "MultiTextColumn",
 );
 
 ////////////////////////////////
@@ -283,6 +282,7 @@ try{
         $FREE_LOG = 'DB connect complete';
         LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
     }
+
 
     ////////////////////////////////
     // 処理済みフラグを判定
@@ -582,8 +582,22 @@ try{
             if(!in_array($list[5], $arrayTargetClassList)){
                 continue;
             }
+            // IDColumnの場合、紐づけ先のColumn Class取得 
+            if($list[5] == 'IDColumn') {
+                $clomn_class = getColumnClass($list[2],$list[4]);
+                if($clomn_class === false) {
+                    continue;
+                }
+                // 対象クラス確認
+                if(!in_array($clomn_class, $arrayTargetClassList)){
+                    continue;
+                }
+            } else {
+                $clomn_class = $list[5];
+            }
+
             // カラム情報登録
-            $lva_col_list[$list[0]] = array('COL_TITLE_DISP_SEQ'=>$no,'COL_TITLE'=>$list[1],'REF_TABLE_NAME'=>$list[2],'REF_PKEY_NAME'=>$list[3],'REF_COL_NAME'=>$list[4]);
+            $lva_col_list[$list[0]] = array('COL_TITLE_DISP_SEQ'=>$no,'COL_TITLE'=>$list[1],'REF_TABLE_NAME'=>$list[2],'REF_PKEY_NAME'=>$list[3],'REF_COL_NAME'=>$list[4],"COL_CLASS"=>$clomn_class);
         }
         if($host_hit === false){
             if ( $log_level === 'DEBUG' ){
@@ -604,6 +618,7 @@ try{
             //次のメニューへ
             continue;
         }
+
         ///////////////////////////////////////////////////////////////////////////
         // P0003
         // CMDB処理対象メニューテーブル管理の更新
@@ -651,6 +666,11 @@ try{
             $lva_use_menu_col_id_list[$make_menu_col_id] = 1;
 
         }
+        unset($aryValues);
+        unset($lva_col_list);
+
+        // メモリ最適化
+        $ret = gc_mem_caches();
     }
 
     // トレースメッセージ
@@ -674,6 +694,11 @@ try{
         throw new Exception( $FREE_LOG );
     }
 
+    unset($lva_use_menu_id_list);
+
+    // メモリ最適化
+    $ret = gc_mem_caches();
+
     // トレースメッセージ
     if ( $log_level === 'DEBUG' ){
         $FREE_LOG = '[Process] Delete the unnecessary menu from the Associated menu column list';
@@ -694,6 +719,11 @@ try{
         $FREE_LOG = 'Discard the unnecessary menu column from associated menu column list has failed.';
         throw new Exception( $FREE_LOG );
     }
+
+    unset($lva_use_menu_col_id_list);
+
+    // メモリ最適化
+    $ret = gc_mem_caches();
 
     ////////////////////////////////
     // 処理済みフラグをONにする
@@ -1560,6 +1590,7 @@ function addCMDBMenuColDB($in_strCurTable,           $in_strJnlTable,
         else{
              // カラムデータが変更になっているか判定する。
              if($row['COL_TITLE']          == $in_col_data['COL_TITLE'] &&
+                $row['COL_CLASS']          == $in_col_data['COL_CLASS'] &&
                 $row['COL_TITLE_DISP_SEQ'] == $in_col_data['COL_TITLE_DISP_SEQ'] &&
                 $row['REF_TABLE_NAME']     == $in_col_data['REF_TABLE_NAME'] &&
                 $row['REF_PKEY_NAME']      == $in_col_data['REF_PKEY_NAME'] &&
@@ -1579,6 +1610,7 @@ function addCMDBMenuColDB($in_strCurTable,           $in_strJnlTable,
         }
     }
     if($action == "UPDATE"){
+
         ////////////////////////////////////////////////////////////////
         // ジャーナルシーケンスをロック                               //
         ////////////////////////////////////////////////////////////////
@@ -1603,6 +1635,7 @@ function addCMDBMenuColDB($in_strCurTable,           $in_strJnlTable,
         $tgt_row["JOURNAL_SEQ_NO"]     = $retArray[0];
         $tgt_row["MENU_ID"]            = $in_menu_id;
         $tgt_row["COL_NAME"]           = $in_col_name;
+        $tgt_row['COL_CLASS']          = $in_col_data['COL_CLASS'];
         $tgt_row["COL_TITLE"]          = $in_col_data['COL_TITLE'];
         $tgt_row['COL_TITLE_DISP_SEQ'] = $in_col_data['COL_TITLE_DISP_SEQ'];
         $tgt_row["REF_TABLE_NAME"]     = $in_col_data['REF_TABLE_NAME'];
@@ -1639,6 +1672,7 @@ function addCMDBMenuColDB($in_strCurTable,           $in_strJnlTable,
         $tgt_row["COLUMN_LIST_ID"]     = $retArray[0];
         $tgt_row["MENU_ID"]            = $in_menu_id;
         $tgt_row["COL_NAME"]           = $in_col_name;
+        $tgt_row['COL_CLASS']          = $in_col_data['COL_CLASS'];
         $tgt_row["COL_TITLE"]          = $in_col_data['COL_TITLE'];
         $tgt_row['COL_TITLE_DISP_SEQ'] = $in_col_data['COL_TITLE_DISP_SEQ'];
         $tgt_row["REF_TABLE_NAME"]     = $in_col_data['REF_TABLE_NAME'];
@@ -1963,5 +1997,94 @@ function LocalLogPrint($p1,$p2,$p3){
     global $log_output_php;
     $FREE_LOG = "FILE:$p1 LINE:$p2 $p3";
     require ($root_dir_path . $log_output_php);
+}
+
+function getColumnClass($ref_table,$ref_column) {
+    global $root_dir_path;
+    global $log_file;
+    global $log_level;
+    global $objDBCA;
+
+    $cmd = sprintf("grep -lR %s %s/webconfs",$ref_table,$root_dir_path);
+    $table_array = array();
+    $ret_code  = "";
+    exec($cmd,$table_array,$ret_code);
+    if($ret_code!= 0) {
+        return false;
+    }
+
+    foreach($table_array as $table) {
+        $cmd = sprintf("grep -lR %s %s",$ref_column,$table);
+        $column_array = array();
+        $ret_code  = "";
+        exec($cmd,$column_array,$ret_code);
+        if($ret_code != 0) {
+            return false;
+        }
+
+        foreach($column_array as $column) {
+
+            $menu_id = substr(basename($column), 0, 10);
+            $php_command = @file_get_contents($root_dir_path . "/confs/backyardconfs/path_PHP_MODULE.txt");
+            $php_command = str_replace("\n","",$php_command);
+
+            // メニューIDに対応する00_loadTable.phpにPHPの構文エラーなどが無いことを確認する。
+            if ( $log_level === 'DEBUG' ){
+                // 標準出力系をログファイルにリダイレクトする。
+                $cmd = sprintf("%s %s%s %s >> %s 2>&1",
+                               $php_command,
+                               $root_dir_path,
+                               "/backyards/ita_base/ky_loadtable_analysis.php",
+                               $menu_id,
+                               $log_file);
+            }
+            else{
+                // 標準出力系を捨てる。
+                $cmd = sprintf("%s %s%s %s > /dev/null 2>&1",
+                               $php_command,
+                               $root_dir_path,
+                               "/backyards/ita_base/ky_loadtable_analysis.php",
+                               $menu_id);
+            }
+
+            // プロセス起動
+            $err = exec($cmd,$arry_out,$return_var);
+
+            // トレースメッセージ
+            if($return_var != 0){
+                if ( $log_level === 'DEBUG' ){
+                    // 異常メッセージ
+                    $FREE_LOG = $column . " of associated menu does not operate properly. Check the " . basename($column) . ' (MENU_ID:{' . $menu_id . '})';
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                    LocalLogPrint(basename(__FILE__),__LINE__,"Exit code=[" . $return_var . "]");
+                }
+                //次のメニューへ
+                continue;
+            }
+
+            list($aryValue,
+                 $intErrorType,
+                 $strErrMsg) = getInfoOfLTUsingIdOfMenuForDBtoDBLink($menu_id,$objDBCA);
+
+            if($intErrorType !== null){
+                if ( $log_level === 'DEBUG' ){
+                    $FREE_LOG = 'Get the associated menu column information has failed. (MENU_ID:{' . $menu_id . '} Error details:{' . $strErrMsg . '})';
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                }
+                //次のメニューへ
+                continue;
+            }
+
+            foreach($aryValue['ALL_COLUMNS'] as $no=>$list){
+                if(($list[0] == $ref_column) &&
+                   ($list[5] != 'IDColumn')) {
+                    $ret_class = $list[5];
+                    return $ret_class;
+                }
+            }
+        }
+    }
+    return false;
 }
 ?>

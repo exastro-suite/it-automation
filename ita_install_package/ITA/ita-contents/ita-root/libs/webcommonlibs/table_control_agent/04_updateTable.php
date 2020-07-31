@@ -28,6 +28,7 @@
         //----$ordMode=1[EXCEL]からのUPDATE
         //----$ordMode=2[CSV]からのUPDATE
         //----$ordMode=3[JSON]からのUPDATE
+        //----$ordMode=4[ブラウザからの新規登録(SQLトランザクション無し)
 
         //----返し値:$varRet
         //----処理結果次第で書き換えるグローバル変数：$g['error_flag']
@@ -193,6 +194,9 @@
                     }else if( $ordMode == 1 || $ordMode == 2 || $ordMode == 3 ){
                         //[EXCEL/CSV/JSON]
                         $varCommitSpan = $objTable->getCommitSpanOnTableIUDByFile();
+                    }else if( $ordMode == 4 ){
+                        //[ブラウザ(SQLトランザクション無し)]
+                        $varCommitSpan = 0;
                     }else{
                         $intErrorType = 500;
                         throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
@@ -488,7 +492,7 @@
                     }
 
                     //1行更新の場合
-                    if( $varCommitSpan === 1 ){                     
+                    if( $varCommitSpan === 1 || $ordMode == 4 ){                     
                         foreach($arrayObjColumn as $objColumn){
                             $arrayTmp = $objColumn->afterTableIUDAction($exeUpdateData, $reqUpdateData, $aryVariant);
                             if($arrayTmp[0]===false){
@@ -564,6 +568,9 @@
                     else if( $ordMode == 1 || $ordMode == 2 || $ordMode == 3 ){
                         //----[EXCEL/CSV/JSON]からの更新
                         //[EXCEL/CSV/JSON]からの更新----
+                    }else if( $ordMode == 4 ){
+                        //[ブラウザ(SQLトランザクション無し)]
+                        $strOutputStr = json_encode($exeUpdateData);
                     }
                     break;
                     // 更新処理実行(mode=3)----
@@ -616,6 +623,9 @@
                             //----[EXCEL/CSV/JSON]からのUPDATE
                             //[EXCEL/CSV/JSON]からのUPDATE----
                         }
+                        else if( $ordMode == 4 ){
+                            //[ブラウザ(SQLトランザクション無し)]
+                        }
                     }
                     break;
                     // 更新処理実行(mode=3)----
@@ -632,7 +642,7 @@
             if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
             //システムエラー級エラーの場合はWebログにも残す----
             $strOutputStr = $error_str;
-            if( $ordMode == 0 ){
+            if( $ordMode == 0 || $ordMode == 4 ){
                 $strOutputStr = nl2br($strOutputStr);
             }
         }

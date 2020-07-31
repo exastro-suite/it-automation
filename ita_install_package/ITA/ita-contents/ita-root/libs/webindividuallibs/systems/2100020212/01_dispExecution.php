@@ -77,7 +77,10 @@
                         TAB_A.I_ANS_WINRM_ID,
                         TAB_A.ANS_WINRM_FLAG_NAME,
                         TAB_A.I_VIRTUALENV_NAME,
-
+                        TAB_A.MULTIPLELOG_MODE,
+                        TAB_A.LOGFILELIST_JSON,
+                        TAB_A.CONDUCTOR_NAME,
+                        TAB_A.CONDUCTOR_INSTANCE_NO,
                         TAB_A.NOTE,
                         {$strSelectLastUpdateTimestamp4} AS LAST_UPDATE_TIMESTAMP,
                         CASE TAB_B.USERNAME_JP WHEN NULL THEN {$strConnectString1}
@@ -121,6 +124,9 @@
         $COLUMN_01 = nl2br(htmlspecialchars($showTgtRow['EXECUTION_NO']));
         $COLUMN_42 = nl2br(htmlspecialchars($showTgtRow['EXECUTION_USER']));
         $COLUMN_43 = nl2br(htmlspecialchars($showTgtRow['SYMPHONY_NAME']));
+
+        $COLUMN_44 = nl2br(htmlspecialchars($showTgtRow['CONDUCTOR_NAME']));
+
         $COLUMN_03 = nl2br(htmlspecialchars($showTgtRow['I_TIME_LIMIT']));
         
         $COLUMN_04 = nl2br(htmlspecialchars($showTgtRow['OPERATION_NO_UAPK']));
@@ -186,6 +192,13 @@
         $url = sprintf("/default/menu/01_browse.php?no=2100020203&movement_id=%s",$movement_param);
         $COLUMN_40 =  sprintf("<input class=\"linkBtnInTbl\" type=\"button\" value=\"%s\" onClick=\"window.open('%s')\">",$caption,$url);
 
+        if($showTgtRow['MULTIPLELOG_MODE'] == 1) {
+            $hide_COLUMN01   = "on";
+        } else {
+            $hide_COLUMN01   = "off";
+        }
+        $hide_COLUMN02   = nl2br(htmlspecialchars($showTgtRow['LOGFILELIST_JSON']));
+
         //オーケストレータ別の設定記述----
 
         //----オーケストレータ別の設定記述
@@ -230,6 +243,10 @@ EOD;
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-103110")}</span><!--シンフォニークラス//--></td>
                         <td                                     >{$COLUMN_43}</td>
+                    </tr>
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-103111")}</span><!--ENO コンダクタクラス//--></td>
+                        <td                                     >{$COLUMN_44}</td>
                     </tr>
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-104100")}</span><!--実行ユーザ//--></td>
@@ -304,6 +321,9 @@ EOD;
                 </table>
                 </div>
                 <div id="status_id" style="display:none;">{$status_id}</div>
+                <div id="MultipleLog" style="display:none;">{$hide_COLUMN01}</div>
+                <div id="LogFileList" style="display:none;">{$hide_COLUMN02}</div>
+
 EOD;
         //オーケストレータ別の設定記述----
     }

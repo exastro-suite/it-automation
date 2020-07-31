@@ -2164,6 +2164,11 @@ class LinkButtonTabBFmt extends TabBFmt {
 				}
 			}
 		}
+
+		if($rowData["DISUSE_FLAG"] == "1" ){
+			$linkable = "disabled";
+		}
+
 		if( $linkable == "disabled" ){
 			$strTagInnerBody = "<div style=\"display:none\">0</div>";
 		}else{

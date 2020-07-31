@@ -137,6 +137,16 @@
         
         $lines    = $row_if_info['TAILLOG_LINES']; // 表示する末尾の行数
         $interval = $row_if_info['REFRESH_INTERVAL']; // 最新化のインターバルタイム(msec)
+        // 作業インスタンスの状態を取得
+        $execution_no = $_GET["execution_no"];
+        $prg_record_file_id = $_GET["prg_recorder"];
+        list($result_code,$send_exec_status_id,$error_msg) = getExecuteStatus($execution_no);
+        if($result_code === false) {
+            $error_flag = 1;
+                
+            // 例外処理へ
+            throw new Exception( $error_msg );
+        }
         
         // tail対象をtail(読み込み)
         if (isset($_GET['load'])){
@@ -203,8 +213,14 @@
                     //throw new Exception("D_PRG_RECORDER_MASTER Select Error");
                     throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-510") );
                 }
+                if($prg_record_file_id == '1') { 
+                    $SelectedFile = $_GET['SelectedFile'];
+                    $prg_record_file_name = $SelectedFile;
+                } else {
+                    $prg_record_file_name = $prg_recorder_array[$prg_record_file_id]['PRG_FILE_NAME'];
+                }
+
                 
-                $prg_record_file_name = $prg_recorder_array[$prg_record_file_id]['PRG_FILE_NAME'];
                 
             }
             
@@ -230,9 +246,18 @@
                 // 例外処理へ(例外ではないが)
                 throw new Exception( '<div id="tail_show" style="display:none;"></div>'.$objMTS->getSomeMessage("ITAANSIBLEH-ERR-511") );
             }
+
+            if($prg_record_file_id == 1){
+                $fp = fopen($prg_record_file_name_fullpath,'r');
+                flock($fp, LOCK_EX);
+            }
             
             // ログファイルの内容を展開
             $file_data = file_get_contents( $prg_record_file_name_fullpath );
+
+            if($prg_record_file_id == 1){
+                fclose($fp);
+            }
             
             // 文字コード判定
             if( $file_data != mb_convert_encoding( $file_data , 'UTF-8', 'UTF-8' ) ){
@@ -292,6 +317,8 @@
                     echo '<br>';
                 }
             }
+            $str = '<div id="status" style="display:none;">' . $send_exec_status_id  . '</div>';
+            echo $str;
             
             
             // テンポラリファイルをお掃除
@@ -355,6 +382,10 @@
         <div id="interval" style="display:none;">$interval</div>
         <div id="before_height" style="display:none;"></div>
         <div id="stop_update" style="display:none;"></div>
+        <!--// send_exec_status_id/exec_log_get_status/error_log_get_statusはiframeのload処理で更新-->
+        <div id="send_exec_status_id" style="display:none;">$send_exec_status_id</div>
+        <div id="exec_log_get_status" style="display:none;">off</div>
+        <div id="error_log_get_status" style="display:none;">off</div>
         </body>
         </html>
 EOD;
@@ -394,4 +425,76 @@ EOD;
             web_log( $objMTS->getSomeMessage("ITAWDCH-STD-603") );
         }
     }
+    function getExecuteStatus($execution_no) {
+        global $objMTS;
+        global $objDBCA;
+
+        $strExeTableIdForSelect    = 'C_ANSIBLE_LRL_EXE_INS_MNG';
+
+        $result_code = false;
+        $result_status = '7';   //初期値を想定外エラーにする。
+        ////////////////////////////////////////////////////////////////
+        // ANSIBLEインタフェース情報を取得                            //
+        ////////////////////////////////////////////////////////////////
+        try {
+            // SQL作成
+            $sql = "SELECT STATUS_ID FROM {$strExeTableIdForSelect} WHERE EXECUTION_NO = :EXECUTION_NO_BV ";
+    
+            // SQL準備
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            if( $objQuery->getStatus()===false ){
+                unset($objQuery);
+
+                $error_msg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-501",array($strExeTableIdForSelect));
+                // ログ出力
+                web_log($error_msg);
+                return [$result_code,$result_status,$error_msg];
+            }
+            $objQuery->sqlBind( array( 'EXECUTION_NO_BV'=>$execution_no ) );
+
+            // SQL発行
+            $r = $objQuery->sqlExecute();
+            if (!$r){
+                unset($objQuery);
+
+                $error_msg =$objMTS->getSomeMessage("ITAANSIBLEH-ERR-502",array($strExeTableIdForSelect));
+                // ログ出力
+                web_log( $error_msg );
+                return [$result_code,$result_status,$error_msg];
+            }
+        
+            // レコードFETCH
+            while ( $row = $objQuery->resultFetch() ){
+                $result_status = $row['STATUS_ID'];
+            }
+            // FETCH行数を取得
+            $num_of_rows = $objQuery->effectedRowCount();
+        
+            // 単一行セレクトでない場合はNG
+            if( $num_of_rows != 1 ){
+                unset($objQuery);
+
+                $error_msg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-503",array($strExeTableIdForSelect));
+                // ログ出力
+                web_log( $error_msg );
+                return [$result_code,$result_status,$error_msg];
+            }
+            unset($objQuery);
+            $result_code = true;
+            $error_msg = "";
+            return [$result_code,$result_status,$error_msg];
+        } catch (Exception $e){
+            if(isset($objQuery)) {
+                unset($objQuery);
+            }
+            $error_msg = $e->getMessage();
+            // ログ出力
+            web_log( $objMTS->getSomeMessage("ITAWDCH-ERR-2001",$e->getMessage()) );
+            web_log( $error_msg);
+
+            return [$result_code,$result_status,$error_msg];
+       }
+            
+    }
+
 ?>

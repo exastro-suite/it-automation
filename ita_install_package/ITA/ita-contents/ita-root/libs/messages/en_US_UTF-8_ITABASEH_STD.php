@@ -126,4 +126,7 @@ $ary[160010] = "[Process] End register to symphony work list and update NextExec
 $ary[160011] = "[Process] Start check the abolition target of symphony and operation";
 $ary[160012] = "[Process] End check the abolition target of symphony and operation";
 $ary[160013] = "Regularly management procedure";
+$ary[170001] = "Conductor management procedure";
+$ary[170002] = "Investigate the current Node sequence of the Conductory. (Conductor instance ID: {})";
+$ary[170003] = "The current Node's sequence of Conductors. (Conductor:{}, Node sequence: {})";
 ?>

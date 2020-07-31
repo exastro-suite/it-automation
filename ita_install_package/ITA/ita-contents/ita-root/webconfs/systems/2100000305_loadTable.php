@@ -179,19 +179,24 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $table->addColumn($cg);
     }
 
-    // DSC利用情報
-    $wanted_filename = "ita_dsc-driver";
+    // Terraform利用情報
+    $wanted_filename = "ita_terraform-driver";
     if( file_exists($root_dir_path."/libs/release/".$wanted_filename) ) {
-        $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITABASEH-MNU-108300") );
+        $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-111010"));
 
-            // エラーリトライタイムアウト
-            $c = new FileUploadColumn('DSC_RETRY_TIMEOUT',$g['objMTS']->getSomeMessage("ITABASEH-MNU-108310"));
-            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-108320"));//エクセル・ヘッダでの説明
+            $c = new IDColumn('TERRAFORM_WORKSPACE_ID', $g['objMTS']->getSomeMessage("ITABASEH-MNU-111020"),'D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK','WORKSPACE_ID','ORGANIZATION_WORKSPACE','');
+            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-111030"));//エクセル・ヘッダでの説明
+            $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+            $c->setJournalTableOfMaster('D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK_JNL');
+            $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
+            $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
+            $c->setJournalKeyIDOfMaster('WORKSPACE_ID');
+            $c->setJournalDispIDOfMaster('ORGANIZATION_WORKSPACE');
+            $c->setRequired(true);//登録/更新時には、入力必須
             $cg->addColumn($c);
 
         $table->addColumn($cg);
     }
-
 
     $table->fixColumn();
 

@@ -111,12 +111,9 @@ class ListFormatter {
             $strFileName = null;
         }
         else{
-            if( mb_strlen($strTempName,"UTF-8") <= 64 ){
-                $strFileHead = $strTempName;
-            }
-            else{
-                $strFileHead = "";
-            }
+            // 128文字に短縮する
+            $strFileHead = mb_substr($strTempName, 0, 128, "UTF-8");
+
             if($intUnixTime === null){
                 $strFileName = $strFileHead."_".$strFilePostFix;
             }
@@ -1404,7 +1401,6 @@ class ExcelFormatter extends ListFormatter {
             }
             if( $objColumn->getID() == $lcRequiredUpdateDate4UColumnId ){
                 $sheet->getStyle($cellAddress)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($strRRGGBBSendForbiddenColumn);
-                $sheet->getCell($cellAddress)->setDataType(\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 $sheet->getColumnDimensionByColumn(self::DATA_START_COL+$i_col)->setVisible(false);
             }
             if( is_a($objColumn, "MultiTextColumn") ===true ){
@@ -1582,29 +1578,8 @@ class ExcelFormatter extends ListFormatter {
                         $rowData = $row->getRowData();
                         $inputType=0;
                         $focusValue = $objColumn->getOutputBody($this->strPrintTargetListFormatterId, $rowData);
-                        if( is_a($objColumn, "FileUploadColumn") === true ){
-                            if( array_key_exists($objColumn->getID(), $rowData) && $rowData[$objColumn->getID()] != "" ){
 
-                                if( $objColumn->getFileHideMode() === false ){
-                                    //----ファイル隠蔽モードではない
-
-                                    //----クライアントからファイルへアクセスするためのURLを取得
-                                    $url = $objColumn->getOAPathToFUCItemPerRow($rowData);
-
-                                    $localPath = $objColumn->getLAPathToFUCItemPerRow($rowData);
-
-                                    if(file_exists($localPath)===true){
-                                        $hyperLink = new \PhpOffice\PhpSpreadsheet\Cell\Hyperlink($url);
-                                        //ハイパーリンクのスタイル(下線、青色)
-                                        $sheet->getStyle(self::cr2s($i_col, $i_row))->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
-                                        $sheet->getStyle(self::cr2s($i_col, $i_row))->getFont()->setUnderline(\PhpOffice\PhpSpreadsheet\Style\Font::UNDERLINE_SINGLE);
-                                        $sheet->setHyperLink(self::cr2s($i_col, $i_row), $hyperLink);
-                                    }
-                                    //ファイル隠蔽モードではない----
-                                }
-                                $focusValue = $rowData[$objColumn->getID()];
-                            }
-                        }elseif( get_class($objColumn) == "NumColumn" ){
+                        if( get_class($objColumn) == "NumColumn" ){
                             $inputType = 1;
                         }
 
@@ -2001,7 +1976,6 @@ class ExcelFormatter extends ListFormatter {
 
     function getSheetNameForEditSheet(&$refBoolSetting=true){
         global $g;
-        $strText01 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-16210");  //"匿名テーブル";
         $strText02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-16211");  //"履歴";
         //----シート名の設定
         $strSheetName = $this->getGeneValue("sheetNameForEditByFile");
@@ -2015,20 +1989,15 @@ class ExcelFormatter extends ListFormatter {
             $refBoolSetting = false;
             //使用禁止文字が設定されていた----
         }
-        if( 31 <= mb_strlen($strSheetName, "UTF-8") ){
-            //----32文字以上だった
-            $strSheetName = $strText01;
-            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-21002"));
-            $refBoolSetting = false;
-            //32文字以上だった----
+
+        // 31文字に短縮する
+        $strSheetName = mb_substr($strSheetName, 0, 31, "UTF-8");
+
+        // Excelシートの予約語「履歴」の場合はそのまま使用できないため後ろに_を付与する
+        if($strSheetName == $g['objMTS']->getSomeMessage("ITAWDCH-STD-16211")){
+            $strSheetName .= "_";
         }
-        if( $strSheetName==$strText02 ){
-            //----エクセルの予約語の場合
-            $strSheetName = $strText01;
-            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-21003"));
-            $refBoolSetting = false;
-            //エクセルの予約語の場合----
-        }
+
         return $strSheetName;
     }
 

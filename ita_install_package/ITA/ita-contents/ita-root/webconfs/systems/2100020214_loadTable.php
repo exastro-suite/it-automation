@@ -20,6 +20,14 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+// 共通モジュールをロード
+if ( empty($root_dir_path) ){
+    $root_dir_temp = array();
+    $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+    $root_dir_path = $root_dir_temp[0] . "ita-root";
+}
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
+
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
@@ -241,7 +249,7 @@ Ansible（Pioneer）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902100"),'D_CMDB_MENU_LIST','MENU_ID','MENU_PULLDOWN','',array('OrderByThirdColumn'=>'MENU_ID'));
+        $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902100"),'D_ANS_PNS_CMDB_MENU_LIST','MENU_ID','MENU_PULLDOWN','',array('OrderByThirdColumn'=>'MENU_ID'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902101"));
 
         $c->setHiddenMainTableColumn(true); //更新対象カラム
@@ -260,7 +268,7 @@ Ansible（Pioneer）代入値自動登録設定
         $c->setEvent('update_table', 'onchange', 'menu_upd');
         $c->setEvent('register_table', 'onchange', 'menu_reg');
 
-        $c->setJournalTableOfMaster('D_CMDB_MENU_LIST_JNL');
+        $c->setJournalTableOfMaster('D_ANS_PNS_CMDB_MENU_LIST_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('MENU_ID');
@@ -297,7 +305,7 @@ Ansible（Pioneer）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902120"),'B_CMDB_MENU_COLUMN','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
+        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902120"),'D_ANS_PNS_CMDB_MENU_COLUMN','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902121"));
 
@@ -325,7 +333,7 @@ Ansible（Pioneer）代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        ."FROM "
-                       ." B_CMDB_MENU_COLUMN TAB_1 "
+                       ." D_ANS_PNS_CMDB_MENU_COLUMN TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -369,7 +377,7 @@ Ansible（Pioneer）代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        ."FROM "
-                       ." B_CMDB_MENU_COLUMN TAB_1 "
+                       ." D_ANS_PNS_CMDB_MENU_COLUMN TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -414,7 +422,7 @@ Ansible（Pioneer）代入値自動登録設定
         $c->setOutputType('update_table',$objOTForUpd);
         $c->setOutputType('register_table',$objOTForReg);
 
-        $c->setJournalTableOfMaster('B_CMDB_MENU_COLUMN_JNL');
+        $c->setJournalTableOfMaster('D_ANS_PNS_CMDB_MENU_COLUMN_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
@@ -435,10 +443,10 @@ Ansible（Pioneer）代入値自動登録設定
         ////////////////////////////////////////////////////////////
         // Excel/CSV/RestAPI 用カラムタイトル名
 
-        $c = new IDColumn('REST_COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902125"),'D_CMDB_MG_MU_COL_LIST','COLUMN_LIST_ID','MENU_COL_TITLE_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MENU_ID','COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1,ADD_SELECT_2') );
+        $c = new IDColumn('REST_COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902125"),'D_ANS_PNS_CMDB_MG_MU_COL_LIST','COLUMN_LIST_ID','MENU_COL_TITLE_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MENU_ID','COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1,ADD_SELECT_2') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902126"));
-        $c->setJournalTableOfMaster('D_CMDB_MG_MU_COL_LIST_JNL');
+        $c->setJournalTableOfMaster('D_ANS_PNS_CMDB_MG_MU_COL_LIST_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
@@ -1211,13 +1219,13 @@ Ansible（Pioneer）代入値自動登録設定
                          ."    SELECT                                         "
                          ."      COUNT(*)                                     "
                          ."    FROM                                           "
-                         ."      B_CMDB_MENU_LIST TBL_B                       "
+                         ."      D_ANS_PNS_CMDB_MENU_LIST TBL_B               "
                          ."    WHERE                                          "
                          ."      TBL_B.MENU_ID      = TBL_A.MENU_ID AND       "
                          ."      TBL_B.DISUSE_FLAG  = '0'                     "
                          ."  ) AS MENU_CNT                                    "
                          ."FROM                                               "
-                         ."  B_CMDB_MENU_COLUMN TBL_A                         "
+                         ."  D_ANS_PNS_CMDB_MENU_COLUMN TBL_A                 "
                          ."WHERE                                              "
                          ."  TBL_A.COLUMN_LIST_ID  = :COLUMN_LIST_ID   AND    "
                          ."  TBL_A.DISUSE_FLAG     = '0'                      ";
@@ -1411,6 +1419,17 @@ Ansible（Pioneer）代入値自動登録設定
             }    
         }
 
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            $ret = ValAutoRegInputParameterCheck::VarsInfo($rg_col_type,
+                       $rg_key_vars_link_id, "",$rg_key_assign_seq,
+                       $rg_val_vars_link_id, "",$rg_val_assign_seq);
+            if($ret !== true) {
+                $retStrBody = $ret;
+                $boolExecuteContinue = false;
+                $retBool = false;
+            }
+        }
+
         //----メニューと項目の組み合わせチェック
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             $retBool = false;
@@ -1421,14 +1440,14 @@ Ansible（Pioneer）代入値自動登録設定
                      ."     SELECT  "
                      ."       COUNT(*) "
                      ."     FROM "
-                     ."       B_CMDB_MENU_COLUMN TBL_B "
+                     ."       D_ANS_PNS_CMDB_MENU_COLUMN TBL_B "
                      ."     WHERE "
                      ."       TBL_B.MENU_ID        = :MENU_ID          AND "
                      ."       TBL_B.COLUMN_LIST_ID = :COLUMN_LIST_ID   AND "
                      ."       TBL_B.DISUSE_FLAG  = '0' "
                      ."   ) AS COLUMN_CNT "
                      ." FROM "
-                     ."   B_CMDB_MENU_LIST TBL_A  "
+                     ."   D_ANS_PNS_CMDB_MENU_LIST TBL_A "
                      ." WHERE "
                      ."   TBL_A.MENU_ID      = :MENU_ID   AND "
                      ."   TBL_A.DISUSE_FLAG  = '0' ";

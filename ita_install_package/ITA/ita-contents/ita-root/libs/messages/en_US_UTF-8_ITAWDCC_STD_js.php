@@ -68,4 +68,6 @@ $ary["ITAWDCC-91022"] = "Day";
 $ary["ITAWDCC-91023"] = "Week";
 $ary["ITAWDCC-91024"] = "Month";
 $ary["ITAWDCC-91025"] = "Regularly management procedure";
+$ary["ITAWDCC-92001"] = "Decision";
+$ary["ITAWDCC-92002"] = "Cansel";
 ?>

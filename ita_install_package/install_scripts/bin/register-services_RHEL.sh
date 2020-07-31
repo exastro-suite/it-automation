@@ -31,5 +31,3 @@ do
         systemctl start `basename ${line}`.service
     fi
 done < ${INPUT_TEXT}
-
-exit

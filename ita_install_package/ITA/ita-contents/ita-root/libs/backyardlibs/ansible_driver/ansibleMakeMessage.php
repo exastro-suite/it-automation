@@ -138,3 +138,52 @@ function AnsibleMakeMessage($objMTS,$chkmode,$msgcode,$paramAry=array()) {
     }
     return $result_msg;
 }
+////////////////////////////////////////////////////////////////////////////////
+//
+// 処理内容
+//   処理モードが標準と変数定義ファイルの構造チェックの両方で表示されるメッセージ
+//   を生成する。
+//
+// パラメータ
+//   $objMTS:   メッセージオブジェクト
+//   $chkmode:  処理モード 標準: 0:LC_RUN_MODE_STD  
+//                         変数定義ファイルの構造チェック: 1:LC_RUN_MODE_VARFILE
+//   $msgcode:  メッセージコード
+//   $freemsg:  ログメッセージ
+//   $paramAry: メッセージパラメータ
+//
+// 戻り値
+//   なし
+//
+////////////////////////////////////////////////////////////////////////////////
+function AnsibleMakeFreeMessage($objMTS,$chkmode,$msgcode,$freemsg,$paramAry=array()) {
+    $msgtblary  = array(LC_RUN_MODE_STD=>'ITAANSIBLEH-ERR-6000025' ,
+                        LC_RUN_MODE_VARFILE=>'ITAANSIBLEH-ERR-6000026');
+    $msgtblary['ITAANSIBLEH-ERR-70044']['paramlist']    = array(LC_RUN_MODE_STD=>'all' ,LC_RUN_MODE_VARFILE=>'3');
+
+    $result_msg = $freemsg;
+    if($chkmode == LC_RUN_MODE_STD) {
+        $pram_code = 'ITAANSIBLEH-ERR-6000025';
+        $param_list = 'all';
+    } else {
+        $pram_code = 'ITAANSIBLEH-ERR-6000026';
+        $param_list = '3';
+    }
+    switch($param_list) {
+    case 'all':
+        $parm_msg = $objMTS->getSomeMessage($pram_code,$paramAry);
+        //$result_msg .= $objMTS->getSomeMessage($msgcode,array($parm_msg));
+        $result_msg .= $parm_msg;
+        break;
+    default:
+        $param_msg = array();
+        foreach(explode(',',$param_list) as $param_no) {
+            $param_msg[] = $paramAry[(int)($param_no)];
+        }
+        $parm_msg   = $objMTS->getSomeMessage($pram_code,$param_msg);
+        //$result_msg .= $objMTS->getSomeMessage($msgcode,array($parm_msg));
+        $result_msg .= $parm_msg;
+        break;
+    }
+    return $result_msg;
+}

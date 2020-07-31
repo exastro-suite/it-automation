@@ -20,11 +20,14 @@ PRIMARY KEY(NAME)
 CREATE TABLE A_ACCOUNT_LIST
 (
 USER_ID                 %INT%                   ,
-USERNAME                %VARCHR%(30)            ,
+USERNAME                %VARCHR%(270)           ,
 PASSWORD                %VARCHR%(32)            ,
-USERNAME_JP             %VARCHR%(80)            ,
+USERNAME_JP             %VARCHR%(270)           ,
 MAIL_ADDRESS            %VARCHR%(256)           ,
 PW_LAST_UPDATE_TIME     %DATETIME6%             ,
+AUTH_TYPE               %VARCHR%(10)            ,
+PROVIDER_ID             %INT%                   ,
+PROVIDER_USER_ID        %VARCHR%(256)           ,
 NOTE                    %VARCHR%(4000)          ,
 DISUSE_FLAG             %VARCHR%(1)             ,
 LAST_UPDATE_TIMESTAMP   %DATETIME6%             ,
@@ -84,7 +87,7 @@ PRIMARY KEY(ROLE_ID)
 CREATE TABLE A_MENU_GROUP_LIST
 (
 MENU_GROUP_ID           %INT%                   ,
-MENU_GROUP_NAME         %VARCHR%(64)            ,
+MENU_GROUP_NAME         %VARCHR%(256)            ,
 MENU_GROUP_ICON         %VARCHR%(256)           ,
 DISP_SEQ                %INT%                   ,
 NOTE                    %VARCHR%(4000)          ,
@@ -98,7 +101,7 @@ CREATE TABLE A_MENU_LIST
 (
 MENU_ID                 %INT%                   ,
 MENU_GROUP_ID           %INT%                   ,
-MENU_NAME               %VARCHR%(64)            ,
+MENU_NAME               %VARCHR%(256)            ,
 LOGIN_NECESSITY         %INT%                   ,
 SERVICE_STATUS          %INT%                   ,
 AUTOFILTER_FLG          %INT%                   ,
@@ -183,6 +186,62 @@ LAST_UPDATE_USER        %INT%                   ,
 PRIMARY KEY(FLAG)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
+CREATE TABLE A_PROVIDER_LIST
+(
+PROVIDER_ID                    %INT%                        , -- プロバイダーID
+PROVIDER_NAME                  %VARCHR%(100)                , -- プロバイダー名
+LOGO                           %VARCHR%(256)                , -- ロゴ
+AUTH_TYPE                      %VARCHR%(10)                 , -- 認証方式
+VISIBLE_FLAG                   %INT%                        , -- 表示フラグ
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(PROVIDER_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_ATTRIBUTE_LIST (
+PROVIDER_ATTRIBUTE_ID          %INT%                        , -- 属性ID
+PROVIDER_ID                    %INT%                        , -- プロバイダーID
+NAME                           %VARCHR%(100)                , -- 属性名
+VALUE                          %VARCHR%(256)                , -- 属性値
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY (PROVIDER_ATTRIBUTE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_AUTH_TYPE_LIST (
+ID                             %INT%                        , -- ID
+NAME                           %VARCHR%(10)                 , -- 認証方式名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY (ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_VISIBLE_FLAG_LIST (
+ID                             %INT%                        , -- ID
+FLAG                           %VARCHR%(10)                 , -- 表示フラグ名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY (ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_ATTRIBUTE_NAME_LIST (
+ID                             %INT%                        , -- SSO認証属性名称ID
+NAME                           %VARCHR%(50)                 , -- SSO認証属性名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY (ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
 -- 履歴系テーブル作成
 CREATE TABLE A_ACCOUNT_LIST_JNL
 (
@@ -190,11 +249,14 @@ JOURNAL_SEQ_NO          %INT%                   ,
 JOURNAL_REG_DATETIME    %DATETIME6%             ,
 JOURNAL_ACTION_CLASS    %VARCHR%(8)             ,
 USER_ID                 %INT%                   ,
-USERNAME                %VARCHR%(30)            ,
+USERNAME                %VARCHR%(270)           ,
 PASSWORD                %VARCHR%(32)            ,
-USERNAME_JP             %VARCHR%(80)            ,
+USERNAME_JP             %VARCHR%(270)           ,
 MAIL_ADDRESS            %VARCHR%(256)           ,
 PW_LAST_UPDATE_TIME     %DATETIME6%             ,
+AUTH_TYPE               %VARCHR%(10)            ,
+PROVIDER_ID             %INT%                   ,
+PROVIDER_USER_ID        %VARCHR%(256)           ,
 NOTE                    %VARCHR%(4000)          ,
 DISUSE_FLAG             %VARCHR%(1)             ,
 LAST_UPDATE_TIMESTAMP   %DATETIME6%             ,
@@ -269,7 +331,7 @@ JOURNAL_SEQ_NO          %INT%                   ,
 JOURNAL_REG_DATETIME    %DATETIME6%             ,
 JOURNAL_ACTION_CLASS    %VARCHR%(8)             ,
 MENU_GROUP_ID           %INT%                   ,
-MENU_GROUP_NAME         %VARCHR%(64)            ,
+MENU_GROUP_NAME         %VARCHR%(256)            ,
 MENU_GROUP_ICON         %VARCHR%(256)           ,
 DISP_SEQ                %INT%                   ,
 NOTE                    %VARCHR%(4000)          ,
@@ -286,7 +348,7 @@ JOURNAL_REG_DATETIME    %DATETIME6%             ,
 JOURNAL_ACTION_CLASS    %VARCHR%(8)             ,
 MENU_ID                 %INT%                   ,
 MENU_GROUP_ID           %INT%                   ,
-MENU_NAME               %VARCHR%(64)            ,
+MENU_NAME               %VARCHR%(256)            ,
 LOGIN_NECESSITY         %INT%                   ,
 SERVICE_STATUS          %INT%                   ,
 AUTOFILTER_FLG          %INT%                   ,
@@ -417,6 +479,83 @@ LAST_UPDATE_USER                  %INT%                             , -- 最終�
 PRIMARY KEY (JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
+
+CREATE TABLE A_PROVIDER_LIST_JNL
+(
+JOURNAL_SEQ_NO               %INT%                          , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME         %DATETIME6%                    , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS         %VARCHR%(8)                    , -- 履歴用変更種別
+
+PROVIDER_ID                  %INT%                          , -- プロバイダーID
+PROVIDER_NAME                %VARCHR%(100)                  , -- プロバイダー名
+LOGO                         %VARCHR%(256)                  , -- ロゴ
+AUTH_TYPE                    %VARCHR%(10)                   , -- 認証方式
+VISIBLE_FLAG                 %INT%                          , -- 表示フラグ
+NOTE                         %VARCHR%(4000)                 , -- 備考
+DISUSE_FLAG                  %VARCHR%(1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP        %DATETIME6%                    , -- 最終更新日時
+LAST_UPDATE_USER             %INT%                          , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_ATTRIBUTE_LIST_JNL (
+JOURNAL_SEQ_NO                 %INT%                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME           %DATETIME6%                  , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS           %VARCHR%(8)                  , -- 履歴用変更種別
+
+PROVIDER_ATTRIBUTE_ID          %INT%                        , -- 属性ID
+PROVIDER_ID                    %INT%                        , -- プロバイダーID
+NAME                           %VARCHR%(100)                , -- 属性名
+VALUE                          %VARCHR%(256)                , -- 属性値
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_AUTH_TYPE_LIST_JNL (
+JOURNAL_SEQ_NO                 %INT%                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME           %DATETIME6%                  , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS           %VARCHR%(8)                  , -- 履歴用変更種別
+
+ID                             %INT%                        , -- ID
+NAME                           %VARCHR%(10)                 , -- 認証方式名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_VISIBLE_FLAG_LIST_JNL (
+JOURNAL_SEQ_NO                 %INT%                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME           %DATETIME6%                  , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS           %VARCHR%(8)                  , -- 履歴用変更種別
+
+ID                             %INT%                        , -- ID
+FLAG                           %VARCHR%(10)                 , -- 表示フラグ名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_PROVIDER_ATTRIBUTE_NAME_LIST_JNL (
+JOURNAL_SEQ_NO                 %INT%                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME           %DATETIME6%                  , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS           %VARCHR%(8)                  , -- 履歴用変更種別
+
+ID                             %INT%                        , -- SSO認証属性名称ID
+NAME                           %VARCHR%(50)                 , -- SSO認証属性名称
+NOTE                           %VARCHR%(4000)               , -- 備考
+DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
 -- *****************************************************************************
 -- *** WEB-DBCORE Tables *****                                               ***
 -- *****************************************************************************
@@ -432,6 +571,9 @@ CREATE TABLE B_ITA_EXT_STM_MASTER
 ITA_EXT_STM_ID                  %INT%                        ,
 ITA_EXT_STM_NAME                %VARCHR%(64)                 ,
 ITA_EXT_LINK_LIB_PATH           %VARCHR%(64)                 ,
+MENU_ID                         %INT%                        , -- 作業管理メニューID
+EXEC_INS_MNG_TABLE_NAME         %VARCHR%(64)                 , -- 作業インスタンステーブル名
+LOG_TARGET                      %INT%                        , -- ログ収集対象有無 1:対象 他:対象外
 DISP_SEQ                        %INT%                        ,
 NOTE                            %VARCHR%(4000)               ,
 DISUSE_FLAG                     %VARCHR%(1)                  ,
@@ -450,6 +592,9 @@ JOURNAL_ACTION_CLASS            %VARCHR%(8)                  ,
 ITA_EXT_STM_ID                  %INT%                        ,
 ITA_EXT_STM_NAME                %VARCHR%(64)                 ,
 ITA_EXT_LINK_LIB_PATH           %VARCHR%(64)                 ,
+MENU_ID                         %INT%                        , -- 作業管理メニューID
+EXEC_INS_MNG_TABLE_NAME         %VARCHR%(64)                 , -- 作業インスタンステーブル名
+LOG_TARGET                      %INT%                        , -- ログ収集対象有無 1:対象 他:対象外
 DISP_SEQ                        %INT%                        ,
 NOTE                            %VARCHR%(4000)               ,
 DISUSE_FLAG                     %VARCHR%(1)                  ,
@@ -570,48 +715,6 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- 履歴系テーブル作成----
 
--- ----更新系テーブル作成
-CREATE TABLE B_OS_TYPE
-(
-OS_TYPE_ID                        %INT%                     ,
-
-OS_TYPE_NAME                      %VARCHR%(256)             ,
-HARDAWRE_TYPE_SV                  %INT%                     ,
-HARDAWRE_TYPE_ST                  %INT%                     ,
-HARDAWRE_TYPE_NW                  %INT%                     ,
-
-DISP_SEQ                          %INT%                     , -- 表示順序
-NOTE                              %VARCHR%(4000)            , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)               , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%               , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                     , -- 最終更新ユーザ
-
-PRIMARY KEY (OS_TYPE_ID)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- 更新系テーブル作成----
-
--- ----履歴系テーブル作成
-CREATE TABLE B_OS_TYPE_JNL
-(
-JOURNAL_SEQ_NO                    %INT%                     , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME              %DATETIME6%               , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS              %VARCHR%(8)               , -- 履歴用変更種別
-
-OS_TYPE_ID                        %INT%                     ,
-
-OS_TYPE_NAME                      %VARCHR%(256)             ,
-HARDAWRE_TYPE_SV                  %INT%                     ,
-HARDAWRE_TYPE_ST                  %INT%                     ,
-HARDAWRE_TYPE_NW                  %INT%                     ,
-
-DISP_SEQ                          %INT%                     , -- 表示順序
-NOTE                              %VARCHR%(4000)            , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)               , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%               , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                     , -- 最終更新ユーザ
-PRIMARY KEY(JOURNAL_SEQ_NO)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- 履歴系テーブル作成----
 
 -- ----更新系テーブル作成
 CREATE TABLE C_STM_LIST
@@ -636,6 +739,8 @@ WINRM_SSL_CA_FILE                 %VARCHR%(256)             , -- WinRM接続 SSL
 OS_TYPE_ID                        %INT%                     ,
 SSH_EXTRA_ARGS                    %VARCHR%(512)             , -- ssh追加パラメータ
 HOSTS_EXTRA_ARGS                  %VARCHR%(512)             , -- インベントリファイル(hosts)追加パラメータ
+CREDENTIAL_TYPE_ID                %INT%                     , -- Ansible-Tower認証情報　接続タイプ
+
 --
 SYSTEM_NAME                       %VARCHR%(64)              ,
 COBBLER_PROFILE_ID                %INT%                     , -- FOR COBLLER
@@ -646,9 +751,6 @@ GATEWAY                           %VARCHR%(15)              , -- FOR COBLLER
 STATIC                            %VARCHR%(32)              , -- FOR COBLLER
 
 CONN_SSH_KEY_FILE                 %VARCHR%(256)             ,
-
-DSC_CERTIFICATE_FILE              %VARCHR%(256)             , -- DSC利用情報 認証キーファイル
-DSC_CERTIFICATE_THUMBPRINT        %VARCHR%(256)             , -- DSC利用情報 サムプリント
 
 ANSTWR_INSTANCE_GROUP_NAME        %VARCHR%(512)             , -- インスタンスグループ名
 
@@ -689,6 +791,7 @@ WINRM_SSL_CA_FILE                 %VARCHR%(256)             , -- WinRM接続 SSL
 OS_TYPE_ID                        %INT%                     ,
 SSH_EXTRA_ARGS                    %VARCHR%(512)             , -- ssh追加パラメータ
 HOSTS_EXTRA_ARGS                  %VARCHR%(512)             , -- インベントリファイル(hosts)追加パラメータ
+CREDENTIAL_TYPE_ID                %INT%                     , -- Ansible-Tower認証情報　接続タイプ
 
 SYSTEM_NAME                       %VARCHR%(64)              ,
 COBBLER_PROFILE_ID                %INT%                     , -- FOR COBLLER
@@ -699,9 +802,6 @@ GATEWAY                           %VARCHR%(15)              , -- FOR COBLLER
 STATIC                            %VARCHR%(32)              , -- FOR COBLLER
 
 CONN_SSH_KEY_FILE                 %VARCHR%(256)             ,
-
-DSC_CERTIFICATE_FILE              %VARCHR%(256)             , -- DSC利用情報 認証キーファイル
-DSC_CERTIFICATE_THUMBPRINT        %VARCHR%(256)             , -- DSC利用情報 サムプリント
 
 ANSTWR_INSTANCE_GROUP_NAME        %VARCHR%(512)             , -- インスタンスグループ名
 
@@ -731,8 +831,7 @@ ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
 ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
-
-DSC_RETRY_TIMEOUT                 %INT%                            , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
+TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -765,8 +864,7 @@ ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
 ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
-
-DSC_RETRY_TIMEOUT                 %INT%                            , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
+TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -1018,8 +1116,6 @@ I_TIME_LIMIT                      %INT%                      ,
 I_ANS_HOST_DESIGNATE_TYPE_ID      %INT%                      ,
 I_ANS_WINRM_ID                    %INT%                      ,
 
-I_DSC_RETRY_TIMEOUT               %INT%                      , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
-
 I_MOVEMENT_SEQ                    %INT%                      ,
 I_NEXT_PENDING_FLAG               %INT%                      ,
 I_DESCRIPTION                     %VARCHR%(4000)             ,
@@ -1062,8 +1158,6 @@ I_PATTERN_NAME                    %VARCHR%(256)              ,
 I_TIME_LIMIT                      %INT%                      ,
 I_ANS_HOST_DESIGNATE_TYPE_ID      %INT%                      ,
 I_ANS_WINRM_ID                    %INT%                      ,
-
-I_DSC_RETRY_TIMEOUT               %INT%                      , -- DSC利用情報 リトライタイムアウト 2018.05.11. Add
 
 I_MOVEMENT_SEQ                    %INT%                      ,
 I_NEXT_PENDING_FLAG               %INT%                      ,
@@ -1956,6 +2050,485 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- 履歴系テーブル作成----
 
+
+
+-- -------------------------------------------------------
+-- --Conductro用
+-- -------------------------------------------------------
+
+-- ----Conductorインターフェース
+CREATE TABLE C_CONDUCTOR_IF_INFO
+(
+CONDUCTOR_IF_INFO_ID               %INT%                      , -- 識別シーケンス
+
+CONDUCTOR_STORAGE_PATH_ITA         %VARCHR%(256)              , -- ITA側のCONDUCTORインスタンス毎の共有ディレクトリ
+CONDUCTOR_REFRESH_INTERVAL         %INT%                      , -- 状態監視周期(単位ミリ秒)
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (CONDUCTOR_IF_INFO_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_CONDUCTOR_IF_INFO_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+
+CONDUCTOR_IF_INFO_ID               %INT%                      , -- 識別シーケンス
+
+CONDUCTOR_STORAGE_PATH_ITA         %VARCHR%(256)              , -- ITA側のCONDUCTORインスタンス毎の共有ディレクトリ
+CONDUCTOR_REFRESH_INTERVAL         %INT%                      , -- 状態監視周期(単位ミリ秒)
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Conductorインターフェース----
+
+-- ----Conductorクラス
+CREATE TABLE C_CONDUCTOR_CLASS_MNG
+(
+CONDUCTOR_CLASS_NO                %INT%                      ,
+
+CONDUCTOR_NAME                    %VARCHR%(256)              ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (CONDUCTOR_CLASS_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_CONDUCTOR_CLASS_MNG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+
+CONDUCTOR_CLASS_NO                %INT%                      ,
+
+CONDUCTOR_NAME                    %VARCHR%(256)              ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Conductorクラス----
+
+-- ----Nodeクラス
+CREATE TABLE C_NODE_CLASS_MNG
+(
+NODE_CLASS_NO                     %INT%                      ,
+
+NODE_NAME                         %VARCHR%(256)              ,
+NODE_TYPE_ID                      %INT%                      ,
+ORCHESTRATOR_ID                   %INT%                      ,
+PATTERN_ID                        %INT%                      ,
+CONDUCTOR_CALL_CLASS_NO           %INT%                      ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+CONDUCTOR_CLASS_NO                %INT%                      ,
+OPERATION_NO_IDBH                 %INT%                      ,
+SKIP_FLAG                         %INT%                      ,
+NEXT_PENDING_FLAG                 %INT%                      ,
+POINT_X                           %INT%                      ,
+POINT_Y                           %INT%                      ,
+POINT_W                           %INT%                      ,
+POINT_H                           %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (NODE_CLASS_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_NODE_CLASS_MNG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+
+NODE_CLASS_NO                     %INT%                      ,
+
+NODE_NAME                         %VARCHR%(256)              ,
+NODE_TYPE_ID                      %INT%                      ,
+ORCHESTRATOR_ID                   %INT%                      ,
+PATTERN_ID                        %INT%                      ,
+CONDUCTOR_CALL_CLASS_NO           %INT%                      ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+CONDUCTOR_CLASS_NO                %INT%                      ,
+OPERATION_NO_IDBH                 %INT%                      ,
+SKIP_FLAG                         %INT%                      ,
+NEXT_PENDING_FLAG                 %INT%                      ,
+POINT_X                           %INT%                      ,
+POINT_Y                           %INT%                      ,
+POINT_W                           %INT%                      ,
+POINT_H                           %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Nodeクラス----
+
+-- ----Terminalクラス
+CREATE TABLE C_NODE_TERMINALS_CLASS_MNG
+(
+TERMINAL_CLASS_NO                 %INT%                      ,
+
+TERMINAL_CLASS_NAME               %VARCHR%(256)              ,
+TERMINAL_TYPE_ID                  %INT%                      ,
+NODE_CLASS_NO                     %INT%                      ,
+CONDUCTOR_CLASS_NO                %INT%                      ,
+CONNECTED_NODE_NAME               %VARCHR%(256)              ,
+LINE_NAME                         %VARCHR%(256)              ,
+TERMINAL_NAME                     %VARCHR%(256)              ,
+CONDITIONAL_ID                    %VARCHR%(256)              ,
+CASE_NO                           %INT%                      ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+POINT_X                           %INT%                      ,
+POINT_Y                           %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (TERMINAL_CLASS_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_NODE_TERMINALS_CLASS_MNG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+
+TERMINAL_CLASS_NO                 %INT%                      ,
+
+TERMINAL_CLASS_NAME               %VARCHR%(256)              ,
+TERMINAL_TYPE_ID                  %INT%                      ,
+NODE_CLASS_NO                     %INT%                      ,
+CONDUCTOR_CLASS_NO                %INT%                      ,
+CONNECTED_NODE_NAME               %VARCHR%(256)              ,
+LINE_NAME                         %VARCHR%(256)              ,
+TERMINAL_NAME                     %VARCHR%(256)              ,
+CONDITIONAL_ID                    %VARCHR%(256)              ,
+CASE_NO                           %INT%                      ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+POINT_X                           %INT%                      ,
+POINT_Y                           %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Terminalクラス----
+
+
+-- ----Conductorインスタンス
+CREATE TABLE C_CONDUCTOR_INSTANCE_MNG
+(
+CONDUCTOR_INSTANCE_NO             %INT%                      ,
+
+I_CONDUCTOR_CLASS_NO              %INT%                      ,
+I_CONDUCTOR_NAME                  %VARCHR%(256)              ,
+I_DESCRIPTION                     %VARCHR%(4000)             ,
+OPERATION_NO_UAPK                 %INT%                      ,
+I_OPERATION_NAME                  %VARCHR%(256)              , 
+STATUS_ID                         %INT%                      ,
+EXECUTION_USER                    %VARCHR%(80)               ,
+ABORT_EXECUTE_FLAG                %INT%                      ,
+CONDUCTOR_CALL_FLAG               %INT%                      ,
+CONDUCTOR_CALLER_NO               %INT%                      ,
+TIME_BOOK                         %DATETIME6%                ,
+TIME_START                        %DATETIME6%                ,
+TIME_END                          %DATETIME6%                ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (CONDUCTOR_INSTANCE_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_CONDUCTOR_INSTANCE_MNG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+--
+CONDUCTOR_INSTANCE_NO             %INT%                      ,
+--
+I_CONDUCTOR_CLASS_NO              %INT%                      ,
+I_CONDUCTOR_NAME                   %VARCHR%(256)              ,
+I_DESCRIPTION                     %VARCHR%(4000)             ,
+OPERATION_NO_UAPK                 %INT%                      ,
+I_OPERATION_NAME                  %VARCHR%(256)              ,
+STATUS_ID                         %INT%                      ,
+EXECUTION_USER                    %VARCHR%(80)               ,
+ABORT_EXECUTE_FLAG                %INT%                      ,
+CONDUCTOR_CALL_FLAG               %INT%                      ,
+CONDUCTOR_CALLER_NO               %INT%                      ,
+TIME_BOOK                         %DATETIME6%                ,
+TIME_START                        %DATETIME6%                ,
+TIME_END                          %DATETIME6%                ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Conductorインスタンス----
+
+-- ----Nodeインスタンス
+CREATE TABLE C_NODE_INSTANCE_MNG
+(
+NODE_INSTANCE_NO                  %INT%                      ,
+
+I_NODE_CLASS_NO                   %INT%                      ,
+I_NODE_TYPE_ID                    %INT%                      ,
+I_ORCHESTRATOR_ID                 %INT%                      ,
+I_PATTERN_ID                      %INT%                      ,
+I_PATTERN_NAME                    %VARCHR%(256)              ,
+I_TIME_LIMIT                      %INT%                      ,
+I_ANS_HOST_DESIGNATE_TYPE_ID      %INT%                      ,
+I_ANS_WINRM_ID                    %INT%                      ,
+I_DSC_RETRY_TIMEOUT               %INT%                      ,
+I_MOVEMENT_SEQ                    %INT%                      ,
+I_NEXT_PENDING_FLAG               %INT%                      ,
+I_DESCRIPTION                     %VARCHR%(4000)             ,
+CONDUCTOR_INSTANCE_NO             %INT%                      ,
+CONDUCTOR_INSTANCE_CALL_NO        %INT%                      ,
+EXECUTION_NO                      %INT%                      ,
+STATUS_ID                         %INT%                      ,
+ABORT_RECEPTED_FLAG               %INT%                      ,
+TIME_START                        %DATETIME6%                ,
+TIME_END                          %DATETIME6%                ,
+RELEASED_FLAG                     %INT%                      ,
+
+EXE_SKIP_FLAG                     %INT%                      ,
+OVRD_OPERATION_NO_UAPK            %INT%                      ,
+OVRD_I_OPERATION_NAME             %VARCHR%(256)              ,
+OVRD_I_OPERATION_NO_IDBH          %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (NODE_INSTANCE_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_NODE_INSTANCE_MNG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+NODE_INSTANCE_NO                  %INT%                      ,
+
+I_NODE_CLASS_NO                   %INT%                      ,
+I_NODE_TYPE_ID                    %INT%                      ,
+I_ORCHESTRATOR_ID                 %INT%                      ,
+I_PATTERN_ID                      %INT%                      ,
+I_PATTERN_NAME                    %VARCHR%(256)              ,
+I_TIME_LIMIT                      %INT%                      ,
+I_ANS_HOST_DESIGNATE_TYPE_ID      %INT%                      ,
+I_ANS_WINRM_ID                    %INT%                      ,
+I_DSC_RETRY_TIMEOUT               %INT%                      ,
+I_MOVEMENT_SEQ                    %INT%                      ,
+I_NEXT_PENDING_FLAG               %INT%                      ,
+I_DESCRIPTION                     %VARCHR%(4000)             ,
+CONDUCTOR_INSTANCE_NO             %INT%                      ,
+CONDUCTOR_INSTANCE_CALL_NO        %INT%                      ,
+EXECUTION_NO                      %INT%                      ,
+STATUS_ID                         %INT%                      ,
+ABORT_RECEPTED_FLAG               %INT%                      ,
+TIME_START                        %DATETIME6%                ,
+TIME_END                          %DATETIME6%                ,
+RELEASED_FLAG                     %INT%                      ,
+
+EXE_SKIP_FLAG                     %INT%                      ,
+OVRD_OPERATION_NO_UAPK            %INT%                      ,
+OVRD_I_OPERATION_NAME             %VARCHR%(256)              ,
+OVRD_I_OPERATION_NO_IDBH          %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Nodeインスタンス----
+
+
+-- ----NODEタイプマスタ
+CREATE TABLE B_NODE_TYPE_MASTER
+(
+NODE_TYPE_ID                      %INT%                             ,
+
+NODE_TYPE_NAME                    %VARCHR%(64)                      ,
+
+DISP_SEQ                          %INT%                             , -- 表示順序, 
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+
+PRIMARY KEY (NODE_TYPE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_NODE_TYPE_MASTER_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                             , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴用変更種別
+
+NODE_TYPE_ID                      %INT%                             ,
+
+NODE_TYPE_NAME                    %VARCHR%(64)                      ,
+
+DISP_SEQ                          %INT%                             , -- 表示順序, 
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- NODEタイプマスタ----
+
+-- ----TERMINALタイプマスタ
+CREATE TABLE B_TERMINAL_TYPE_MASTER
+(
+TERMINAL_TYPE_ID                  %INT%                             , 
+
+TERMINAL_TYPE_NAME                %VARCHR%(64)                      ,
+
+DISP_SEQ                          %INT%                             , -- 表示順序, 
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+
+PRIMARY KEY (TERMINAL_TYPE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_TERMINAL_TYPE_MASTER_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                             , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴用変更種別
+
+TERMINAL_TYPE_ID                  %INT%                             ,
+
+TERMINAL_TYPE_NAME                %VARCHR%(64)                      ,
+
+DISP_SEQ                          %INT%                             , -- 表示順序, 
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+--TERMINALタイプマスタ ----
+
+
+-- -------------------------------------------------------
+-- --定期作業実行用(Conductor)
+-- -------------------------------------------------------
+-- ----定期作業実行用(Conductor)
+CREATE TABLE C_REGULARLY2_LIST
+(
+REGULARLY_ID                      %INT%                        ,
+CONDUCTOR_CLASS_NO                %INT%                        ,
+OPERATION_NO_IDBH                 %INT%                        ,
+CONDUCTOR_INSTANCE_NO             %INT%                        ,
+STATUS_ID                         %INT%                        ,
+NEXT_EXECUTION_DATE               %DATETIME6%                  ,
+START_DATE                        %DATETIME6%                  ,
+END_DATE                          %DATETIME6%                  ,
+EXECUTION_STOP_START_DATE         %DATETIME6%                  ,
+EXECUTION_STOP_END_DATE           %DATETIME6%                  ,
+EXECUTION_INTERVAL                %INT%                        ,
+REGULARLY_PERIOD_ID               %INT%                        ,
+PATTERN_TIME                      %VARCHR%(5)                  ,
+PATTERN_DAY                       %INT%                        ,
+PATTERN_DAY_OF_WEEK               %INT%                        ,
+PATTERN_WEEK_NUMBER               %INT%                        ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (REGULARLY_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_REGULARLY2_LIST_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                        ,
+JOURNAL_REG_DATETIME              %DATETIME6%                  ,
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                  ,
+
+REGULARLY_ID                      %INT%                        ,
+CONDUCTOR_CLASS_NO                %INT%                        ,
+OPERATION_NO_IDBH                 %INT%                        ,
+CONDUCTOR_INSTANCE_NO             %INT%                        ,
+STATUS_ID                         %INT%                        ,
+NEXT_EXECUTION_DATE               %DATETIME6%                  ,
+START_DATE                        %DATETIME6%                  ,
+END_DATE                          %DATETIME6%                  ,
+EXECUTION_STOP_START_DATE         %DATETIME6%                  ,
+EXECUTION_STOP_END_DATE           %DATETIME6%                  ,
+EXECUTION_INTERVAL                %INT%                        ,
+REGULARLY_PERIOD_ID               %INT%                        ,
+PATTERN_TIME                      %VARCHR%(5)                  ,
+PATTERN_DAY                       %INT%                        ,
+PATTERN_DAY_OF_WEEK               %INT%                        ,
+PATTERN_WEEK_NUMBER               %INT%                        ,
+DISP_SEQ                          %INT%                        ,
+NOTE                              %VARCHR%(4000)               ,
+DISUSE_FLAG                       %VARCHR%(1)                  ,
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                  ,
+LAST_UPDATE_USER                  %INT%                        ,
+
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 定期作業実行用(Conductor)----
+
+
+
+
+
 -- *****************************************************************************
 -- *** ITA-BASE Tables *****                                                 ***
 -- *****************************************************************************
@@ -2025,6 +2598,9 @@ SELECT TAB_A.USER_ID              ,
        [%CONCAT_HEAD/%]TAB_A.USER_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.USERNAME[%CONCAT_TAIL/%] USER_PULLDOWN,
        TAB_C.USER_JUDGE_ID        ,
        TAB_C.AD_USER_SID          ,
+       TAB_A.AUTH_TYPE            ,
+       TAB_A.PROVIDER_ID          ,
+       TAB_A.PROVIDER_USER_ID     ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -2050,6 +2626,9 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        [%CONCAT_HEAD/%]TAB_A.USER_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.USERNAME[%CONCAT_TAIL/%] USER_PULLDOWN,
        TAB_C.USER_JUDGE_ID        ,
        TAB_C.AD_USER_SID          ,
+       TAB_A.AUTH_TYPE            ,
+       TAB_A.PROVIDER_ID          ,
+       TAB_A.PROVIDER_USER_ID     ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -2244,6 +2823,59 @@ FROM A_ROLE_ACCOUNT_LINK_LIST_JNL TAB_A
 LEFT JOIN A_ACCOUNT_LIST TAB_B ON (TAB_A.USER_ID = TAB_B.USER_ID)
 LEFT JOIN A_ROLE_LIST TAB_C ON (TAB_A.ROLE_ID = TAB_C.ROLE_ID)
 WHERE TAB_A.USER_ID > 0;
+
+CREATE VIEW D_PROVIDER_LIST AS
+SELECT TAB_A.PROVIDER_ID,
+       TAB_A.PROVIDER_NAME,
+       TAB_A.LOGO,
+       TAB_A.AUTH_TYPE,
+       TAB_A.VISIBLE_FLAG,
+       TAB_A.NOTE,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER
+FROM A_PROVIDER_LIST TAB_A;
+
+CREATE VIEW D_PROVIDER_LIST_JNL AS
+SELECT TAB_A.JOURNAL_SEQ_NO,
+       TAB_A.JOURNAL_REG_DATETIME,
+       TAB_A.JOURNAL_ACTION_CLASS,
+       TAB_A.PROVIDER_ID,
+       TAB_A.PROVIDER_NAME,
+       TAB_A.LOGO,
+       TAB_A.AUTH_TYPE,
+       TAB_A.VISIBLE_FLAG,
+       TAB_A.NOTE,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER
+FROM A_PROVIDER_LIST_JNL TAB_A;
+
+CREATE VIEW D_PROVIDER_ATTRIBUTE_LIST AS
+SELECT TAB_A.PROVIDER_ATTRIBUTE_ID,
+       TAB_A.PROVIDER_ID,
+       TAB_A.NAME,
+       TAB_A.VALUE,
+       TAB_A.NOTE,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER
+FROM A_PROVIDER_ATTRIBUTE_LIST TAB_A;
+
+CREATE VIEW D_PROVIDER_ATTRIBUTE_LIST_JNL AS
+SELECT TAB_A.JOURNAL_SEQ_NO,
+       TAB_A.JOURNAL_REG_DATETIME,
+       TAB_A.JOURNAL_ACTION_CLASS,
+       TAB_A.PROVIDER_ATTRIBUTE_ID,
+       TAB_A.PROVIDER_ID,
+       TAB_A.NAME,
+       TAB_A.VALUE,
+       TAB_A.NOTE,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER
+FROM A_PROVIDER_ATTRIBUTE_LIST_JNL TAB_A;
+
 -- *****************************************************************************
 -- *** WEB-DBCORE Views *****                                                ***
 -- *****************************************************************************
@@ -2253,52 +2885,6 @@ WHERE TAB_A.USER_ID > 0;
 -- *****************************************************************************
 -- *** ***** ITA-BASE Views                                                  ***
 -- *****************************************************************************
-CREATE VIEW D_OS_TYPE 
-AS 
-SELECT * 
-FROM B_OS_TYPE;
-
-CREATE VIEW D_OS_TYPE_JNL 
-AS 
-SELECT * 
-FROM B_OS_TYPE_JNL;
-
-CREATE VIEW D_OS_TYPE_SV 
-AS 
-SELECT * 
-FROM B_OS_TYPE 
-WHERE HARDAWRE_TYPE_SV=1;
-
-CREATE VIEW D_OS_TYPE_SV_JNL 
-AS 
-SELECT * 
-FROM B_OS_TYPE_JNL 
-WHERE HARDAWRE_TYPE_SV=1;
-
-CREATE VIEW D_OS_TYPE_ST 
-AS 
-SELECT * 
-FROM B_OS_TYPE 
-WHERE HARDAWRE_TYPE_ST=1;
-
-CREATE VIEW D_OS_TYPE_ST_JNL 
-AS 
-SELECT * 
-FROM B_OS_TYPE_JNL 
-WHERE HARDAWRE_TYPE_ST=1;
-
-CREATE VIEW D_OS_TYPE_NW 
-AS 
-SELECT * 
-FROM B_OS_TYPE 
-WHERE HARDAWRE_TYPE_NW=1;
-
-CREATE VIEW D_OS_TYPE_NW_JNL 
-AS 
-SELECT * 
-FROM B_OS_TYPE_JNL 
-WHERE HARDAWRE_TYPE_NW=1;
-
 CREATE VIEW E_STM_LIST 
 AS 
 
@@ -2325,9 +2911,6 @@ SELECT TAB_A.SYSTEM_ID                        SYSTEM_ID                     ,
        TAB_A.STATIC                           STATIC                        ,
 
        TAB_A.CONN_SSH_KEY_FILE                CONN_SSH_KEY_FILE             ,
-
-       TAB_A.DSC_CERTIFICATE_FILE             DSC_CERTIFICATE_FILE          ,
-       TAB_A.DSC_CERTIFICATE_THUMBPRINT       DSC_CERTIFICATE_THUMBPRINT    ,
 
        TAB_A.DISP_SEQ                         DISP_SEQ                      ,
        TAB_A.NOTE                             NOTE                          ,
@@ -2367,9 +2950,6 @@ SELECT TAB_A.JOURNAL_SEQ_NO                   JOURNAL_SEQ_NO                ,
        TAB_A.STATIC                           STATIC                        ,
 
        TAB_A.CONN_SSH_KEY_FILE                CONN_SSH_KEY_FILE             ,
-
-       TAB_A.DSC_CERTIFICATE_FILE             DSC_CERTIFICATE_FILE          ,
-       TAB_A.DSC_CERTIFICATE_THUMBPRINT       DSC_CERTIFICATE_THUMBPRINT    ,
 
        TAB_A.DISP_SEQ                         DISP_SEQ                      ,
        TAB_A.NOTE                             NOTE                          ,
@@ -2559,9 +3139,10 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 CREATE TABLE B_CMDB_MENU_COLUMN  (
 COLUMN_LIST_ID                 %INT%                   , -- 識別シーケンス
 MENU_ID                        %INT%                   , -- メニューID
-COL_NAME                       %VARCHR%(64)            , -- テーブル　カラム名
-COL_TITLE                      %VARCHR%(512)           , -- メニュー　カラム名
-COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム名 代入値自動登録 表示順
+COL_NAME                       %VARCHR%(64)            , -- メニュー　カラム名
+COL_CLASS                      %VARCHR%(64)            , -- メニュー　カラムクラス
+COL_TITLE                      %VARCHR%(4096)          , -- メニュー　カラムタイトル
+COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム　代入値自動登録 表示順
 REF_TABLE_NAME                 %VARCHR%(64)            , -- 参照テーブル名
 REF_PKEY_NAME                  %VARCHR%(64)            , -- 参照テーブル主キー
 REF_COL_NAME                   %VARCHR%(64)            , -- 参照テーブルカラム名
@@ -2582,9 +3163,10 @@ JOURNAL_ACTION_CLASS           %VARCHR%(8)             , -- 履歴用変更種�
 
 COLUMN_LIST_ID                 %INT%                   , -- 識別シーケンス
 MENU_ID                        %INT%                   , -- メニューID
-COL_NAME                       %VARCHR%(64)            , -- テーブル　カラム名
-COL_TITLE                      %VARCHR%(512)           , -- メニュー　カラム名
-COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム名 代入値自動登録 表示順
+COL_NAME                       %VARCHR%(64)            , -- メニュー　カラム名
+COL_CLASS                      %VARCHR%(64)            , -- メニュー　カラムクラス
+COL_TITLE                      %VARCHR%(4096)          , -- メニュー　カラムタイトル
+COL_TITLE_DISP_SEQ             %INT%                   , -- メニュー　カラム　代入値自動登録 表示順
 REF_TABLE_NAME                 %VARCHR%(64)            , -- 参照テーブル名
 REF_PKEY_NAME                  %VARCHR%(64)            , -- 参照テーブル主キー
 REF_COL_NAME                   %VARCHR%(64)            , -- 参照テーブルカラム名

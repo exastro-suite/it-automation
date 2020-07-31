@@ -36,6 +36,7 @@ class AnsibleTowerRestApiWorkflowJobs extends AnsibleTowerRestApiBase {
 
     const API_PATH  = "workflow_jobs/";
     const IDENTIFIED_NAME_PREFIX = "ita_executions_workflow_";
+    const NAME_SEARCH  = "name__startswith=ita_%s_executions&name__contains=%s";
     const API_SUB_PATH_CANCEL  = "cancel/";
 
     // static only
@@ -134,6 +135,24 @@ class AnsibleTowerRestApiWorkflowJobs extends AnsibleTowerRestApiBase {
         return $response_array;
     }
 
+    static function NameSearch($RestApiCaller, $execution_no) {
+        global $g;
+        global $vg_tower_driver_name;
+        if(isset($g['TOWER_DRIVER_NAME']))
+             $vg_tower_driver_name = $g['TOWER_DRIVER_NAME'];
+
+        // ジョブスライスが設定されるとワークフロージョブ名はワークフロージョブ名の場合とテンプレート名の場合がある。
+        // テンプレート名:ita_(driver_name)_executions_jobtpl_(execution_no)
+        // ワークフロージョブ名名:ita_(driver_name)_executions_workflowtpl_(execution_no)
+        //
+        $filteringName = sprintf(self::NAME_SEARCH,$vg_tower_driver_name,addPadding($execution_no));
+        $query = "?" . $filteringName;
+        $pickup_response_array = self::getAll($RestApiCaller, $query);
+        if($pickup_response_array['success'] == false) {
+            return $pickup_response_array;
+        }
+        return $pickup_response_array;
+    }
     static function getByExecutionNo($RestApiCaller, $execution_no) {
         global $g;
         global $vg_tower_driver_name;

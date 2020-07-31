@@ -763,8 +763,8 @@ Ansible（Legacy）代入値管理
 
 
     //----具体値
-    $objVldt = new SingleTextValidator(0,8192,false);
-    $c = new TextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-304010"));
+    $objVldt = new MultiTextValidator(0,8192,false);
+    $c = new MultiTextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-304010"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-304020"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
 
@@ -850,7 +850,7 @@ Ansible（Legacy）代入値管理
 
                     $strQuery = "UPDATE A_PROC_LOADED_LIST "
                                ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                               ."WHERE ROW_ID IN (2100020002) ";
+                               ."WHERE ROW_ID IN (2100020002,2100170006) ";
 
                     $aryForBind = array();
 

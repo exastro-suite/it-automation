@@ -55,7 +55,7 @@ $ary[1038] = "\"Decimal number maximum value\" can not be set when \"String\" is
 $ary[1039] = "\"Decimal number minimum value\" can not be set when \"String\" is set.";
 $ary[1040] = "\"Decimal number digit\" can not be set when \"String\" is set.";
 $ary[1041] = "\"Multi string maximum number of bytes\" can not be set when \"Pulldown selection\" is set.";
-$ary[1042] = "\"Multi string Regular expression\\" can not be set when \\"Pulldown selection\\" is set.";
+$ary[1042] = "\"Multi string Regular expression\" can not be set when \"Pulldown selection\" is set.";
 $ary[1043] = "\"Integer maximum value\" can not be set when \"Pulldown selection\" is set.";
 $ary[1044] = "\"Integer minimum value\" can not be set when \"Pulldown selection\" is set.";
 $ary[1045] = "\"Decimal number maximum value\" can not be set when \"Pulldown selection\" is set.";
@@ -111,7 +111,7 @@ $ary[5001] = "File does not exist. File=[{}].";
 $ary[5002] = "Failed to read the file. File=[{}].";
 $ary[5003] = "Failed to execute SQL. SQL error = [{}].";
 $ary[5004] = "Failed to create directory. Directory = [{}].";
-$ary[5005] = "Failed to get the data of \"Menu creation information\".";
+$ary[5005] = "Failed to get the data of \"Menu definition information\".";
 $ary[5006] = "Failed to get the data of \"Menu item creation information\".";
 $ary[5007] = "Failed to create the file. File=[{}].";
 $ary[5008] = "Failed to add the file to the ZIP file. ZIP file = [{}], additional file = [{}].";
@@ -123,7 +123,7 @@ $ary[5013] = "Failed to get the data of \"Master item creation information\".";
 $ary[5014] = "Vertical menu creation information could not be acquired.";
 $ary[5015] = "Vertical menu Illegal number of creation information items and repetitions.";
 $ary[5016] = "Vertical menu Input method does not match on repeat item set by creation information.";
-$ary[5017] = "Vertical menu Maximum number of bytes do not match in repeat item set by creation information.";
+$ary[5017] = "Vertical menu Number of items/repetition count mismatches menu item creation information ";
 $ary[5018] = "Vertical Menu group: Menu: Item names in Pulldown selection do not match in the repetition item set by creation information.";
 $ary[5019] = "Failed to acquire the specified pulldown menu item.ID=[{}]";
 ?>

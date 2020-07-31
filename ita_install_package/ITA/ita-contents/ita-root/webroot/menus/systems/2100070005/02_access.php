@@ -85,7 +85,7 @@
                 web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-2002",array(__FUNCTION__,$error_info)) );
                 
                 // システムエラーのURLを作成
-                $sys_err_url = $g['root_dir_path'] . "/common/common_unexpected_error.php";
+                $sys_err_url = "/common/common_unexpected_error.php";
                 
                 // 異常を返却
                 return "unexpected_error" . $sys_err_url;
