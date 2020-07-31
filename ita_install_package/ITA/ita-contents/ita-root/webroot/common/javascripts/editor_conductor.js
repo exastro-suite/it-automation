@@ -4425,11 +4425,14 @@ $('#editor-footer').on('click', '.editor-menu-button ', function(){
       case 'diversion':
         // 流用しますか？
         if ( window.confirm(getSomeMessage("ITABASEC020000") ) ) {
-          // 新規登録モードに変更する
-          $('#conductor-class-id').text('Auto numbering');
+          // 流用する場合は下記の項目はnullに
           conductorData['conductor'].id = null;
           conductorData['conductor'].LUT4U = null;
+          conductorData['conductor'].conductor_name = null;
+          conductorData['conductor'].note = null;
           conductorMode('edit');
+          panelConductorReset();
+          $('#conductor-class-id').text('Auto numbering');
           // パラメータの無い履歴を追加する
           history.pushState( null, null, '/default/menu/01_browse.php?no=2100180003');
         }
