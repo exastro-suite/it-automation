@@ -342,6 +342,15 @@ if [ "$FORMAT_CHECK_CNT" != 1 ]; then
     exit
 fi
 
+#現在のITAバージョンを取得
+NOW_VERSION_FILE="${ITA_DIRECTORY}/ita-root/libs/release/ita_base"
+if ! test -e ${NOW_VERSION_FILE} ; then
+    log "ERROR : ITA is not installed in [${ITA_DIRECTORY}]."
+    log "INFO : Abort version up."
+    exit
+fi
+NOW_VERSION=`cat ${NOW_VERSION_FILE} | cut -d " " -f 7 | sed -e "s/[\r\n]\+//g"`
+
 #言語の取得
 LANGUAGE_FILE="${ITA_DIRECTORY}/ita-root/confs/commonconfs/app_msg_language.txt"
 if ! test -e ${LANGUAGE_FILE} ; then
@@ -350,6 +359,12 @@ if ! test -e ${LANGUAGE_FILE} ; then
     exit
 fi
 ITA_LANGUAGE=`cat ${LANGUAGE_FILE} | sed -e "s/[\r\n]\+//g"`
+
+if [ "${ITA_LANGUAGE}" != 'ja_JP' -a "${ITA_LANGUAGE}" != 'en_US' ]; then
+    log "ERROR : [${LANGUAGE_FILE}] is incorrect."
+    log "INFO : Abort version up."
+    exit
+fi
 
 #DB接続情報の取得
 DB_CONNECT_FILE="${ITA_DIRECTORY}/ita-root/confs/commonconfs/db_connection_string.txt"
@@ -386,15 +401,6 @@ DB_PASSWORD=`cat ${DB_PASSWORD_FILE} | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' | base64 -
 ############################################################
 log 'INFO : Version check.'
 ############################################################
-#現在のITAバージョンを取得
-NOW_VERSION_FILE="${ITA_DIRECTORY}/ita-root/libs/release/ita_base"
-if ! test -e ${NOW_VERSION_FILE} ; then
-    log "ERROR : ITA is not installed in [${ITA_DIRECTORY}]."
-    log "INFO : Abort version up."
-    exit
-fi
-NOW_VERSION=`cat ${NOW_VERSION_FILE} | cut -d " " -f 7 | sed -e "s/[\r\n]\+//g"`
-
 #現在のITAバージョンの形式チェック
 if ! [[ ${NOW_VERSION} =~ [0-9]+\.[0-9]+\.[0-9]+ ]] ; then
     log "ERROR : [${NOW_VERSION_FILE}] is incorrect."
