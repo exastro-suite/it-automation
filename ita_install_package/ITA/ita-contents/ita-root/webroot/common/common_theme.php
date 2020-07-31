@@ -24,7 +24,7 @@ $theme = $_GET['theme'];
 
 
 // Theme color set
-// MENU [0]:HEADER [1]:LIST [2]:SELECT TEXT
+// MENU [0]:HEADER [1]:LIST [2]:SELECT TEXT [3]:MAIN MENU TEXT [4]:MAIN MENU HOVER BACK
 // TABLE [0]:TH [1]:TH BORDER [2]:TD [3]:TD BORDER [4]:HOVER
 // TABLE_F [0]:TH [1]:TH BORDER [2]:TD [3]:TD BORDER
 // BUTTON [0]:LINK [1]:HOVER
@@ -33,7 +33,7 @@ $c = array(
   'BODY' => '333333',
   'HEADER' => '002B62',
   'FOOTER' => '444444',
-  'MENU' => array('333333','666666','002B62'),
+  'MENU' => array('333333','666666','002B62','000000','FFFFFF'),
   'TEXT' => array('1A1A1A','F2F2F2'),
   'TABLE' => array('888888','666666','F2F2F2','CCCCCC','FFFF8F'),
   'TABLE_F' => array('777777','555555','E2E2E2','AAAAAA'),
@@ -66,7 +66,7 @@ $backgroundPatterns = array(
   'STRIPE1' => 'background-image: linear-gradient( 90deg, transparent, transparent 50%, rgba( 255,255,255,.2 ) 50%, rgba( 255,255,255,.2 )); background-size: 64px 64px;',
   'STRIPE2' => 'background-image: linear-gradient( transparent, transparent 2px, rgba( 255,255,255,.5 ) 2px, rgba( 255,255,255,.5 ) 3px); background-size: 3px 3px;',
   'CHECK1' => 'background-image: linear-gradient( 45deg, rgba( 255,255,255,.1 ) 25%, transparent 25%, transparent 75%, rgba( 255,255,255,.1 ) 75%),linear-gradient( 45deg, rgba( 255,255,255,.1 ) 25%, transparent 25%, transparent 75%, rgba( 255,255,255,.1 ) 75%);background-size: 64px 64px;background-position: 0 0, 32px 32px;',
-  'OASE' => 'background-image: url(../imgs/oase_background.png);background-size: 100% 100%;background-attachment: fixed;',
+  'OASE' => 'background-image: url(./imgs/oase_background.png);background-size: 100% 100%;background-attachment: fixed; background-position: 180px 0;',
   'NONE' => 'background-image: none;'
 );
 
@@ -88,7 +88,7 @@ switch( $theme ) {
   case 'green':
     $c['HEADER'] = '42952B';
     $c['BODY'] = '1E4313';
-    $c['MENU'] = array('326F20','28591A','28591A');
+    $c['MENU'] = array('326F20','28591A','28591A','000000','FFFFFF');
     $c['BASE'] = 'BBE7AF';
     $c['HEADING'] = array('42952B','28591A','FFFFFF');
     break;
@@ -96,7 +96,7 @@ switch( $theme ) {
   case 'purple':
     $c['HEADER'] = '995DEE';
     $c['BODY'] = '291940';
-    $c['MENU'] = array('452A6B','372256','372256');
+    $c['MENU'] = array('452A6B','372256','372256','000000','FFFFFF');
     $c['BASE'] = 'C0A2EB';
     $c['HEADING'] = array('995DEE','5C388F','FFFFFF');
     break;
@@ -104,7 +104,7 @@ switch( $theme ) {
   case 'red':
     $c['HEADER'] = '962027';
     $c['BODY'] = '3C0D10';
-    $c['MENU'] = array('71181D','781A1F','781A1F');
+    $c['MENU'] = array('71181D','781A1F','781A1F','000000','FFFFFF');
     $c['BASE'] = 'FEAEB3';
     $c['HEADING'] = array('962027','3C0D10','FFFFFF');
     break;
@@ -112,7 +112,7 @@ switch( $theme ) {
   case 'blue':
     $c['HEADER'] = '205A8C';
     $c['BODY'] = '0D2438';
-    $c['MENU'] = array('043959','032E47','205A8C');
+    $c['MENU'] = array('043959','032E47','205A8C','000000','FFFFFF');
     $c['BASE'] = 'DCEAF2';
     $c['HEADING'] = array('205A8C','043959','DCEAF2');
     break;
@@ -120,7 +120,7 @@ switch( $theme ) {
   case 'orange':
     $c['HEADER'] = 'F27F1B';
     $c['BODY'] = '913B09';
-    $c['MENU'] = array('F2620F','C24E0C','C24E0C');
+    $c['MENU'] = array('F2620F','C24E0C','C24E0C','000000','FFFFFF');
     $c['BASE'] = 'FACCA4';
     $c['HEADING'] = array('F27F1B','F2620F','FFFFFF');
     break;
@@ -128,7 +128,7 @@ switch( $theme ) {
   case 'yellow':
     $c['HEADER'] = 'F2B705';
     $c['BODY'] = '825502';
-    $c['MENU'] = array('D98E04','AE7203','825502');
+    $c['MENU'] = array('D98E04','AE7203','825502','000000','FFFFFF');
     $c['BASE'] = 'FAE29B';
     $c['HEADING'] = array('F2B705','F2E205','FFFFFF');
     break;
@@ -136,14 +136,14 @@ switch( $theme ) {
   case 'brown':
     $c['HEADER'] = '593527';
     $c['BODY'] = '261612';
-    $c['MENU'] = array('40241E','331D18','331D18');
+    $c['MENU'] = array('40241E','331D18','331D18','000000','FFFFFF');
     $c['BASE'] = 'A68D85';
     $c['HEADING'] = array('593527','352017','FFFFFF');
     break;
     
   case 'gray':
     $c['HEADER'] = '3A3D3F';
-    $c['MENU'] = array('333333','666666','362311');
+    $c['MENU'] = array('333333','666666','362311','000000','FFFFFF');
     $c['BASE'] = 'D8D8D9';
     $c['HEADING'] = array('464A4D','81888C','FFFFFF');
     break;
@@ -152,14 +152,14 @@ switch( $theme ) {
     $c['BODY'] = '233153';
     $c['HEADER'] = '28385E';
     $c['FOOTER'] = '333333';
-    $c['MENU'] = array('233153','28385E','233153');
+    $c['MENU'] = array('233153','28385E','233153','000000','FFFFFF');
     $c['BASE'] = 'A9AFBF';
     $c['BUTTON'] = array('516C8D','4B6382');
     $c['KIZI'] = 'D4D7DF';
     $c['HEADING'] = array('28385E','FF9800','FFFFFF');
     $c['TABLE'] = array('516C8D','425772','EAEDF1','B9C4D1','FFFF8F');
     $c['TABLE_F'] = array('4B6382','667E9B','CBCFD8','ABB8C8');
-    $b['KIZI'] = $backgroundPatterns['none'];
+    $b['KIZI'] = $backgroundPatterns['NONE'];
     $b['HEADING'] = $backgroundPatterns['ROUND3'];
     break;
     
@@ -167,7 +167,7 @@ switch( $theme ) {
     $c['BODY'] = '352628';
     $c['HEADER'] = 'F2295F';
     $c['FOOTER'] = '261E0F';
-    $c['MENU'] = array('593F42','473235','FAEFE7');
+    $c['MENU'] = array('593F42','473235','FAEFE7','000000','FFFFFF');
     $c['BASE'] = 'F598A9';
     $c['BUTTON'] = array('F2295F','DF2657');
     $c['KIZI'] = 'F2D8C2';
@@ -183,7 +183,7 @@ switch( $theme ) {
     $c['BODY'] = '302A20';
     $c['HEADER'] = '302A20';
     $c['FOOTER'] = '483E2F';
-    $c['MENU'] = array('60533F','483E2F','EEEEEE');
+    $c['MENU'] = array('60533F','483E2F','EEEEEE','FFFFFF','483E2F');
     $c['BASE'] = '98A24F';
     $c['BUTTON'] = array('98A24F','8C9549');
     $c['TABLE'] = array('78684F','938672','EFEDEA','C9C3B9','FFFF8F');
@@ -201,7 +201,7 @@ switch( $theme ) {
     $c['BODY'] = '400101';
     $c['HEADER'] = 'BF0413';
     $c['FOOTER'] = '400101';
-    $c['MENU'] = array('8C030E','70020B','D99A25');
+    $c['MENU'] = array('8C030E','70020B','D99A25','FFDD00','000000');
     $c['BASE'] = '111111';
     $c['BUTTON'] = array('E1AE51','DCA236');
     $c['TABLE'] = array('D99A25','AE7B1E','F7EBD3','E8C27C','F2CF66');
@@ -219,7 +219,7 @@ switch( $theme ) {
     $c['BODY'] = '444444';
     $c['HEADER'] = '00989B';
     $c['FOOTER'] = '444444';
-    $c['MENU'] = array('222222','444444','444444');
+    $c['MENU'] = array('222222','444444','444444','000000','FFFFFF');
     $c['TEXT'] = array('444444','FFFFFF');
     $c['TABLE'] = array('00B5B8','007A7C','F2F2F2','CCCCCC','FFFF8F');
     $c['TABLE_F'] = array('00989B','007A7C','E2E2E2','CCCCCC');
@@ -236,7 +236,7 @@ switch( $theme ) {
     $c['BODY'] = '1D2123';
     $c['HEADER'] = '272A2C';
     $c['FOOTER'] = '272A2C';
-    $c['MENU'] = array('1A1A1A','242424','EEEEEE');
+    $c['MENU'] = array('1A1A1A','242424','EEEEEE','EEEEEE','D0D1D1');
     $c['TEXT'] = array('D0D1D1','111');
     $c['TABLE'] = array('2E2E2E','000000','1A1A1A','14181A','400000');
     $c['TABLE_F'] = array('383838','000000','242424','14181A');
@@ -612,10 +612,10 @@ th.sortTriggerInTbl:hover {
   box-shadow: 0 0 0 4px {$color->hex($c['TEXT'][1],100)};
 }
 .mm_text {
-  color: {$color->hex($c['TEXT'][0],100)};
+  color: {$color->hex($c['MENU'][3],100)};
 }
 .mm_list:hover .mm_text {
-  background-color: {$color->hex($c['KIZI'],80)};
+  background-color: {$color->hex($c['MENU'][4],100)};
 }
 #gateLogin, #gateLogout, #gateChangePw {
   background-color: {$color->hex($c['KIZI'],100)};

@@ -410,7 +410,7 @@ class OutputType {
 								$valueDispBody = $row['DISP_COLUMN'];
 								
                                 //----date型の型変換
-                                if($objColumn->getDateFormat() !== null){
+                                if("IDColumn" === get_class($objColumn) && $objColumn->getDateFormat() !== null){
                                     $valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
                                 }
                                 //date型の型変換----
@@ -658,7 +658,7 @@ class TraceOutputType extends OutputType {
 			//----正常に探しきった場合
 
             //----date型の型変換
-            if($this->objColumn->getDateFormat() !== null){
+            if("IDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
                 $strSearchKeyValue = date($this->objColumn->getDateFormat(), strtotime($strSearchKeyValue));
             }
             //date型の型変換----
@@ -785,7 +785,7 @@ class IDOutputType extends OutputType {
 
                         //----date型の型変換
                         $arrayTmp = array();
-                        if($this->objColumn->getDateFormat() !== null){
+                        if("IDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
                             foreach($utnMasterTable as $key => $value){
                                 $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
                             }
@@ -847,7 +847,7 @@ class IDOutputType extends OutputType {
 
                         //----date型の型変換
                         $arrayTmp = array();
-                        if($this->objColumn->getDateFormat() !== null){
+                        if("IDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
                             foreach($jnlMasterTable as $key => $value){
                                 $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
                             }

@@ -239,6 +239,21 @@ try{
     $convertParamInfoArray = $result;
 
     //////////////////////////
+    // ロール・ユーザ紐づけ情報を取得
+    //////////////////////////
+    $roleAccountLinkListTable = new RoleAccountLinkListTable($objDBCA, $db_model_ch);
+    $sql = $roleAccountLinkListTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+    // SQL実行
+    $result = $roleAccountLinkListTable->selectTable($sql);
+    if(!is_array($result)){
+        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+        outputLog($msg);
+        throw new Exception($msg);
+    }
+    $roleUserLinkArray = $result;
+
+    //////////////////////////
     // 作業用ディレクトリ作成
     //////////////////////////
     // 最新時間を取得
@@ -369,17 +384,29 @@ try{
             }
 
             // 型、サイズのチェック
-            $inputMethodIdArray = array();
-            $maxLengthArray = array();
-            $otherMenuLinkIdArray = array();
+            $inputMethodIdArray     = array();
+            $maxLengthArray         = array();
+            $otherMenuLinkIdArray   = array();
+            $multiMaxLengthArray    = array();
+            $intMaxArray            = array();
+            $intMinArray            = array();
+            $floatMaxArray          = array();
+            $floatMinArray          = array();
+            $floatDigitArray        = array();
             $errFlg = false;
 
             for($i = 0; $i < $cpiData['REPEAT_CNT']; $i ++){
                 for($j = 0; $j < $cpiData['COL_CNT']; $j ++){
 
                     if($i === 0){
-                        $inputMethodIdArray[] = $repeatItemArray[$j]['INPUT_METHOD_ID'];
-                        $maxLengthArray[] = $repeatItemArray[$j]['MAX_LENGTH'];
+                        $inputMethodIdArray[]   = $repeatItemArray[$j]['INPUT_METHOD_ID'];
+                        $maxLengthArray[]       = $repeatItemArray[$j]['MAX_LENGTH'];
+                        $multiMaxLengthArray[]  = $repeatItemArray[$j]['MULTI_MAX_LENGTH'];
+                        $intMaxArray[]          = $repeatItemArray[$j]['INT_MAX'];
+                        $intMinArray[]          = $repeatItemArray[$j]['INT_MIN'];
+                        $floatMaxArray[]        = $repeatItemArray[$j]['FLOAT_MAX'];
+                        $floatMinArray[]        = $repeatItemArray[$j]['FLOAT_MIN'];
+                        $floatDigitArray[]      = $repeatItemArray[$j]['FLOAT_DIGIT'];
                         $otherMenuLinkIdArray[] = $repeatItemArray[$j]['OTHER_MENU_LINK_ID'];
                         continue;
                     }
@@ -393,7 +420,7 @@ try{
                         $errFlg = true;
                         break;
                     }
-                    // 最大バイト数チェック
+                    // 最大バイト数(単一)チェック
                     if(1 == $inputMethodIdArray[$j] && $maxLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['MAX_LENGTH']){
                         $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
                         outputLog($msg);
@@ -402,8 +429,35 @@ try{
                         $errFlg = true;
                         break;
                     }
-                    // 他メニュー参照チェック
-                    if(6 == $inputMethodIdArray[$j] && $otherMenuLinkIdArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['OTHER_MENU_LINK_ID']){
+                    // 最大バイト数(複数)チェック
+                    if(2 == $inputMethodIdArray[$j] && $multiMaxLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['MULTI_MAX_LENGTH']){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // 整数チェック
+                    if(3 == $inputMethodIdArray[$j] && ($intMaxArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['INT_MAX'] || $intMinArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['INT_MIN'])){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // 小数チェック
+                    if(4 == $inputMethodIdArray[$j] && ($floatMaxArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['FLOAT_MAX'] || $floatMinArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['FLOAT_MIN'] || $floatDigitArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['FLOAT_DIGIT'])){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // プルダウン選択チェック
+                    if(7 == $inputMethodIdArray[$j] && $otherMenuLinkIdArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['OTHER_MENU_LINK_ID']){
                         $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5018');
                         outputLog($msg);
                         // パラメータシート作成管理更新処理を行う
@@ -1663,7 +1717,7 @@ EOD;
         //////////////////////////
         // ロール・メニュー紐付管理更新
         //////////////////////////
-        $result = updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET']);
+        $result = updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $roleUserLinkArray);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1697,12 +1751,12 @@ EOD;
             // 紐づけ対象だけを確認 (紐づけ対象がないの場合はtrue)
             $noLinkTarget = true;
             foreach($itemInfoArray as $key => $itemInfo){
-                if(2 != $itemInfo['INPUT_METHOD_ID'] && 5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID']){
+                if(5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID']){
                     // プルダウン選択の中身タイプをチェック
                     if(7 == $itemInfo['INPUT_METHOD_ID']){
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                        if(2 == $otherMenuLink['COLUMN_TYPE'] || 5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
+                        if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
                             continue;
                         } 
                     }
@@ -2119,6 +2173,7 @@ function getUnexecutedRecord(){
         throw new Exception($e->getMessage());
     }
 }
+
 
 /**
  * パラメータシート作成管理更新
@@ -2626,11 +2681,13 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
         $viewMatchFlg = false;
         $convMatchFlg = false;
         $convHostMatchFlg = false;
+        $cmdbMatchFlg = false;
         $hgMenuList = NULL;
         $hostMenuList = NULL;
         $viewMenuList = NULL;
         $convMenuList = NULL;
         $convHostMenuList = NULL;
+        $cmdbMenuList = NULL;
 
         foreach($menuListArray as $menu){
             // メニューグループとメニューが一致するデータを検索
@@ -2790,7 +2847,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
 /*
  * ロール・メニュー紐付管理更新
  */
-function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target){
+function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target, $roleUserLinkArray){
     global $objDBCA, $db_model_ch, $objMTS;
     $roleMenuLinkListTable = new RoleMenuLinkListTable($objDBCA, $db_model_ch);
 
@@ -2866,25 +2923,39 @@ function updateRoleMenuLinkList($hgMenuId, $hostMenuId, $viewMenuId, $convMenuId
                                   );
             }
         }
-
+        
+        $roles = array();
+        
+        foreach($roleUserLinkArray as $rUL){
+            if($rUL['USER_ID'] == $targetData['LAST_UPDATE_USER']){
+                $roles[] = $rUL['ROLE_ID'];
+            }
+            
+        }
+        // 管理者ロールは入れていない場合
+        if(!in_array("1",$roles)){
+            $roles[] = "1";
+        }
+        
         foreach($menuArray as $menu){
+            foreach($roles as $role){
+                // 登録する
+                $insertData = array();
+                $insertData['ROLE_ID']          = $role;                // ロール
+                $insertData['MENU_ID']          = $menu[0];             // メニュー
+                $insertData['PRIVILEGE']        = $menu[1];             // 紐付
+                $insertData['DISUSE_FLAG']      = $menu[2];             // 廃止フラグ
+                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
 
-            // 登録する
-            $insertData = array();
-            $insertData['ROLE_ID']          = 1;                    // ロール
-            $insertData['MENU_ID']          = $menu[0];             // メニュー
-            $insertData['PRIVILEGE']        = $menu[1];             // 紐付
-            $insertData['DISUSE_FLAG']      = $menu[2];             // 廃止フラグ
-            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
-
-            //////////////////////////
-            // ロール・メニュー紐付管理テーブルに登録
-            //////////////////////////
-            $result = $roleMenuLinkListTable->insertTable($insertData, $seqNo, $jnlSeqNo);
-            if(true !== $result){
-                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                outputLog($msg);
-                throw new Exception($msg);
+                //////////////////////////
+                // ロール・メニュー紐付管理テーブルに登録
+                //////////////////////////
+                $result = $roleMenuLinkListTable->insertTable($insertData, $seqNo, $jnlSeqNo);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                    outputLog($msg);
+                    throw new Exception($msg);
+                }
             }
         }
         return true;
@@ -3111,16 +3182,35 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
         $columnInfoArray = array();
 
         foreach($itemInfoArray as $key => $itemInfo){
-            if(2 == $itemInfo['INPUT_METHOD_ID'] || 5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
+            if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             if(7 == $itemInfo['INPUT_METHOD_ID']){
                 $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                 $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                if(2 == $otherMenuLink['COLUMN_TYPE'] || 5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
+                if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
                     continue;
-                } 
+                }
+                if(1 == $otherMenuLink['COLUMN_TYPE']){
+                    $colClass = "TextColumn";
+                }
+                else if(2 == $otherMenuLink['COLUMN_TYPE']){
+                    $colClass = "MultiTextColumn";
+                }
+                else if(3 == $otherMenuLink['COLUMN_TYPE'] || 4 == $otherMenuLink['COLUMN_TYPE']){
+                    $colClass = "NumColumn";
+                }
             }
+            else if(1 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "TextColumn";
+            }
+            else if(2 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "MultiTextColumn";
+            }
+            else if(3 == $itemInfo['INPUT_METHOD_ID'] || 4 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "NumColumn";
+            }
+            
             // 項目名を作成
             $columnGrp = implode("/", $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']]);
             if("" != $columnGrp){
@@ -3136,7 +3226,6 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             $otherColumnName = null;
             if("" != $itemInfo['OTHER_MENU_LINK_ID']){
                 foreach($otherMenuLinkArray as $otherMenuLink){
-
                     if($itemInfo['OTHER_MENU_LINK_ID'] == $otherMenuLink['LINK_ID']){
                         $otherTableName = $otherMenuLink['TABLE_NAME'];
                         $otherPriName = $otherMenuLink['PRI_NAME'];
@@ -3147,6 +3236,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             }
 
             $columnInfoArray[] = array('COL_NAME' => $itemInfo['COLUMN_NAME'],
+                                       'COL_CLASS' => $colClass,
                                        'COL_TITLE' => $columnTitle,
                                        'COL_TITLE_DISP_SEQ' => $key + 2,
                                        'REF_TABLE_NAME' => $otherTableName,
@@ -3186,7 +3276,8 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                         $updateFlg = true;
                     }
                     // 各値のいずれかに変更がある場合、更新する
-                    if($cmdbMenuColumn['COL_TITLE']             != $columnInfo['COL_TITLE'] ||
+                    if($cmdbMenuColumn['COL_CLASS']             != $columnInfo['COL_CLASS'] ||
+                       $cmdbMenuColumn['COL_TITLE']             != $columnInfo['COL_TITLE'] ||
                        $cmdbMenuColumn['COL_TITLE_DISP_SEQ']    != $columnInfo['COL_TITLE_DISP_SEQ'] ||
                        $cmdbMenuColumn['REF_TABLE_NAME']        != $columnInfo['REF_TABLE_NAME'] ||
                        $cmdbMenuColumn['REF_PKEY_NAME']         != $columnInfo['REF_PKEY_NAME'] ||
@@ -3200,6 +3291,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                         $updateData = $cmdbMenuColumn;
                         $updateData['MENU_ID']              = $hostMenuId;                          // メニュー
                         $updateData['COL_NAME']             = $columnInfo['COL_NAME'];              // カラム名
+                        $updateData['COL_CLASS']            = $columnInfo['COL_CLASS'];             // カラムタイプ
                         $updateData['COL_TITLE']            = $columnInfo['COL_TITLE'];             // 項目名
                         $updateData['COL_TITLE_DISP_SEQ']   = $columnInfo['COL_TITLE_DISP_SEQ'];    // 表示順
                         $updateData['REF_TABLE_NAME']       = $columnInfo['REF_TABLE_NAME'];        // 参照テーブル
@@ -3230,6 +3322,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 $insertData = array();
                 $insertData['MENU_ID']              = $hostMenuId;                          // メニュー
                 $insertData['COL_NAME']             = $columnInfo['COL_NAME'];              // カラム名
+                $insertData['COL_CLASS']            = $columnInfo['COL_CLASS'];             // カラムタイプ
                 $insertData['COL_TITLE']            = $columnInfo['COL_TITLE'];             // 項目名
                 $insertData['COL_TITLE_DISP_SEQ']   = $columnInfo['COL_TITLE_DISP_SEQ'];    // 表示順
                 $insertData['REF_TABLE_NAME']       = $columnInfo['REF_TABLE_NAME'];        // 参照テーブル
