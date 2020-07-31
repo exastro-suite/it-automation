@@ -865,6 +865,13 @@ function jumpToItem(menu_name){
     // 作業状態確認メニューに遷移
     window.open(url);
 }
+function jumpToGui(create_manu_id){
+    // 遷移先URLを作成
+    var url = '/default/menu/01_browse.php?no=2100160011&create_menu_id=' + encodeURI(create_manu_id);
+
+    // GUIメニューに遷移
+    window.open(url);
+}
 // ここまでカスタマイズした場合の一般メソッド配置域----
 
 // イベント処理 ここから

@@ -37,6 +37,24 @@ function callback() {}
                 
                 // ステータスIDを取得
                 result_status_id = document.getElementById('status_id').innerHTML;
+
+
+                var iframe = document.getElementById('TailWindow_1');
+                var status_id   = iframe.contentWindow.document.getElementById('send_exec_status_id');
+
+                var result_status_id   = status_id.innerHTML;
+
+                status_id = iframe.contentWindow.document.getElementById('exec_log_get_status');
+                var exec_log_status    = status_id.innerHTML;
+                status_id   = iframe.contentWindow.document.getElementById('error_log_get_status');
+                var error_log_status   = status_id.innerHTML;
+
+                var log_status = 0;
+                // ステータスが実行中以降で各ログが取得できているか判定
+                if(exec_log_status  == 'on' &&
+                   error_log_status == 'on') {
+                    log_status = 1;
+                }
                 
                 // ステータスIDが完了(5)、完了(異常)(6)、想定外エラー(7)、緊急停止(8)、予約取消(10)の場合
                 if( result_status_id == 5  ||
@@ -52,12 +70,15 @@ function callback() {}
                     
                     // ステータスIDが想定外エラー(7)でない場合
                     if( result_status_id != 7 ){
-                        // 進行状況のtailをストップ
-                        cntr=1;
-                        while( document.getElementById("TailWindow_"+cntr) != null ){
-                            document.getElementById("TailWindow_"+cntr).contentWindow.stop();
+                        // 実行ログ側で終了を検出した場合に進行状況のtailをストップ
+                        if(log_status == 1) {
+                            // 進行状況のtailをストップ
+                            cntr=1;
+                            while( document.getElementById("TailWindow_"+cntr) != null ){
+                                document.getElementById("TailWindow_"+cntr).contentWindow.stop();
                             
-                            cntr++;
+                                cntr++;
+                            }
                         }
                     }
                 }
@@ -195,4 +216,8 @@ window.onload = function(){
         timerID = setInterval( "disp_execution()", interval );
     }
     show('SetsumeiMidashi','SetsumeiNakami');
+}
+function kakunin(obj) {
+    document.getElementById("TailWindow_1").contentWindow.stop();
+    document.getElementById("TailWindow_1").contentWindow.run();
 }

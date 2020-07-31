@@ -68,4 +68,6 @@ $ary["ITAWDCC-91022"] = "日ごと";
 $ary["ITAWDCC-91023"] = "週ごと";
 $ary["ITAWDCC-91024"] = "か月ごと";
 $ary["ITAWDCC-91025"] = "定期実行管理プロシージャ";
+$ary["ITAWDCC-92001"] = "決定";
+$ary["ITAWDCC-92002"] = "取消";
 ?>

@@ -63,7 +63,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :active"');
     $c->getOutputType('register_table')->setTextTagLastAttr('style = "ime-mode :active"');
     $c->getOutputType('update_table')->setTextTagLastAttr('style = "ime-mode :active"');
-    $objVldt = new MenuNameValidator(1,64,false);
+    $objVldt = new MenuNameValidator(1,256,false);
 	$c->setValidator($objVldt);
     $c->setRequired(true);//登録/更新時には、入力必須
     $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
@@ -143,9 +143,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
-    // 項目作成情報へのリンク
-    $c = new LinkButtonColumn('detail_show', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102019"), $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102020"), 'jumpToItem', array(':MENU_NAME')); 
+    // GUIメニューへのリンク
+    $c = new LinkButtonColumn('GUI_detail_show', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104232"), $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104232"), 'jumpToGui', array(':CREATE_MENU_ID')); 
     $table->addColumn($c);
+
 
 //----head of setting [multi-set-unique]
 

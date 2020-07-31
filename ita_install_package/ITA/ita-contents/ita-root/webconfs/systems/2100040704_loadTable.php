@@ -109,7 +109,7 @@ Ansibleテンプレート
     $table->addColumn($c);
 
     /* 変数定義 */
-    $objVldt = new MultiTextValidator(0,4000,false);
+    $objVldt = new MultiTextValidator(0,8192,false);
     $c = new MultiTextColumn('VARS_LIST',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106075"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-106076"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

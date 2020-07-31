@@ -873,8 +873,12 @@
                     $strSheetName = $objTable->getDBMainTableLabel();
                 }
 
-                if( 31 <= mb_strlen($strSheetName, "UTF-8") ){
-                    $strSheetName = $g['objMTS']->getSomeMessage("ITAWDCH-STD-450");
+                // 31文字に短縮する
+                $strSheetName = mb_substr($strSheetName, 0, 31, "UTF-8");
+
+                // Excelシートの予約語「履歴」の場合はそのまま使用できないため後ろに_を付与する
+                if($strSheetName == $g['objMTS']->getSomeMessage("ITAWDCH-STD-16211")){
+                    $strSheetName .= "_";
                 }
 
                 if( $strSheetName != $objWorkSheet->getTitle() ){

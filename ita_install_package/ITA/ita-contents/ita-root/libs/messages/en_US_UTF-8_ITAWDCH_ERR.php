@@ -64,6 +64,7 @@ $ary[47] = "WARNING:ILLEGAL_ACCESS(Insufficient Privilege).";
 $ary[48] = "WARNING:ILLEGAL_ACCESS.";
 $ary[49] = "ERROR:UNEXPECTED, DETAIL:STEP[{}] OF CHECK REFERER PROCESS.";
 $ary[50] = "ERROR:UNEXPECTED, DETAIL:EXTERNAL AUTH SETTINGS PARSE ERROR";
+$ary[51] = "ERROR:FORBIDDEN, DISUSED USER";
 $ary[101] = "{}Item:{}\n";
 $ary[102] = "It is an invalid criteria. (Item:{})\n";
 $ary[103] = "An invalid criteria (list search criteria) has been set. (Item:{})\n";
@@ -381,4 +382,5 @@ $ary[115008] = "WARNING:ILLEGAL_ACCESS, DETAIL:UNEXPECTED X-Command SENT FOR RES
 $ary[115009] = "WARNING:ILLEGAL_ACCESS, DETAIL:UNEXPECTED REST-API VERSION.";
 $ary[906001] = "FUNCTION: {}, RESULT: WARINIG [RESPONSE: {}]";
 $ary[906002] = "FUNCTION: {}, RESULT: ERROR [RESPONSE: {}]";
+$ary[26000] = "There is a defect in the connection between Nodes. [{}]";
 ?>

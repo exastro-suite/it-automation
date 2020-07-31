@@ -37,7 +37,7 @@
         ////////////////////////////////////////////////////////////////
         // SQL作成
         $sqlBody = "SELECT *
-                    FROM   B_ANSIBLE_IF_INFO
+                    FROM   D_ANSIBLE_TOWER_IF_INFO
                     WHERE  DISUSE_FLAG = '0' ";
 
         $in_dbobj->ClearLastErrorMsg();

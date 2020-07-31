@@ -11,7 +11,5 @@
 /ita-root/confs/commonconfs/db_username.txt
 /ita-root/confs/commonconfs/path_ANSIBLE_MODULE.txt
 /ita-root/confs/webconfs/admin_mail_addr.txt
-/ita-root/confs/webconfs/L7Protocol.txt
 /ita-root/confs/webconfs/path_HTML_AJAX.txt
 /ita-root/confs/webconfs/path_PhpSpreadsheet.txt
-/ita-root/confs/commonconfs/path_PHPSpyc_Classes.txt

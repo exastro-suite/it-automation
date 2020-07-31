@@ -7,7 +7,7 @@
 CREATE TABLE F_CREATE_MENU_INFO
 (
 CREATE_MENU_ID                      %INT%                           , -- 識別シーケンス項番
-MENU_NAME                           %VARCHR%(64)                    ,
+MENU_NAME                           %VARCHR%(256)                    ,
 PURPOSE                             %INT%                           ,
 TARGET                              %INT%                           ,
 MENUGROUP_FOR_HG                    %INT%                           ,
@@ -31,7 +31,7 @@ JOURNAL_REG_DATETIME                %DATETIME6%                     , -- 履歴�
 JOURNAL_ACTION_CLASS                %VARCHR%(8)                     , -- 履歴用変更種別
 
 CREATE_MENU_ID                      %INT%                           , -- 識別シーケンス項番
-MENU_NAME                           %VARCHR%(64)                    ,
+MENU_NAME                           %VARCHR%(256)                    ,
 PURPOSE                             %INT%                           ,
 TARGET                              %INT%                           ,
 MENUGROUP_FOR_HG                    %INT%                           ,
@@ -275,7 +275,7 @@ CREATE TABLE F_OTHER_MENU_LINK
 (
 LINK_ID                             %INT%                           , -- 識別シーケンス項番
 MENU_ID                             %INT%                           ,
-COLUMN_DISP_NAME                    %VARCHR%(512)                   ,
+COLUMN_DISP_NAME                    %VARCHR%(4096)                   ,
 TABLE_NAME                          %VARCHR%(64)                    ,
 PRI_NAME                            %VARCHR%(64)                    ,
 COLUMN_NAME                         %VARCHR%(64)                    ,
@@ -295,7 +295,7 @@ JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴�
 
 LINK_ID                             %INT%                           , -- 識別シーケンス項番
 MENU_ID                             %INT%                           ,
-COLUMN_DISP_NAME                    %VARCHR%(512)                   ,
+COLUMN_DISP_NAME                    %VARCHR%(4096)                   ,
 TABLE_NAME                          %VARCHR%(64)                    ,
 PRI_NAME                            %VARCHR%(64)                    ,
 COLUMN_NAME                         %VARCHR%(64)                    ,

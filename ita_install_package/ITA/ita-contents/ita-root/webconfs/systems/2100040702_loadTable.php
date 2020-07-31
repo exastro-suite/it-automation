@@ -134,14 +134,22 @@ Ansibleインターフェース情報
     //--------------------------------------------------------------
     $tcg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000005"));
 
-        //----ホスト名
+        //----Ansible Tower ホスト一覧
+        $strTextBody= $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000019");
+        $c = new LinkButtonColumn( 'TowerHostList', $strTextBody, $strTextBody, 'TowerHostList', array() );
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000020"));//エクセル・ヘッダでの説明
+        $c->setDBColumn(false);
+	$tcg -> addColumn($c);
+        //Ansible Tower ホスト一覧----
+
+        //----代表ホスト名
         $objVldt = new SingleTextValidator(0,128,false);
-        $c = new TextColumn('ANSTWR_HOSTNAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203030"));
-        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203041"));//エクセル・ヘッダでの説明
+	$c = new IDColumn('ANSTWR_HOST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203041"),'B_ANS_TWR_HOST','ANSTWR_HOST_ID','ANSTWR_HOSTNAME','');
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203042"));//エクセル・ヘッダでの説明
         $c->setValidator($objVldt);
         $c->setRequired(false);//必須チャックはDB登録前処理で実施
 	$tcg -> addColumn($c);
-        //ホスト名----
+        //代表ホスト名----
 
         //----プロトコル
         $objVldt = new SingleTextValidator(0,8,false);
@@ -186,6 +194,8 @@ Ansibleインターフェース情報
 	$tcg -> addColumn($c);
 	//実行時データ削除----
 
+
+
     $table -> addColumn($tcg);
     //Ansible Tower情報----
 
@@ -221,6 +231,17 @@ Ansibleインターフェース情報
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
     //Symphonyデータリレイストレージパス(Ansible/Tower)----
+    
+    //--------------------------------------------------------------
+    //----conductorデータリレイストレージパス(Ansible/Tower)
+    //--------------------------------------------------------------
+    $objVldt = new SingleTextValidator(1,256,false);
+    $c = new TextColumn('CONDUCTOR_STORAGE_PATH_ANS',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202097"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202098"));//エクセル・ヘッダでの説明
+    $c->setValidator($objVldt);
+    $c->setRequired(true);//登録/更新時には、入力必須
+    $table->addColumn($c);
+    //conductorデータリレイストレージパス(Ansible/Tower)----
     
     //--------------------------------------------------------------
     //----Ansible-Playbook実行時のオプションパラメータ
@@ -304,8 +325,8 @@ Ansibleインターフェース情報
             //----更新前のレコードから、各カラムの値を取得
             $strMode        = isset($arrayVariant['edit_target_row']['ANSIBLE_EXEC_MODE'])?
                                     $arrayVariant['edit_target_row']['ANSIBLE_EXEC_MODE']:null;
-            $strTwrHostname = isset($arrayVariant['edit_target_row']['ANSTWR_HOSTNAME'])?
-                                    $arrayVariant['edit_target_row']['ANSTWR_HOSTNAME']:null;
+            $strTwrHostID   = isset($arrayVariant['edit_target_row']['ANSTWR_HOST_ID'])?
+                                    $arrayVariant['edit_target_row']['ANSTWR_HOST_ID']:null;
             $strTwrProtocol = isset($arrayVariant['edit_target_row']['ANSTWR_PROTOCOL'])?
                                     $arrayVariant['edit_target_row']['ANSTWR_PROTOCOL']:null;
             $strTwrPort     = isset($arrayVariant['edit_target_row']['ANSTWR_PORT'])?
@@ -320,8 +341,8 @@ Ansibleインターフェース情報
         }else if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
             $strMode        = array_key_exists('ANSIBLE_EXEC_MODE',$arrayRegData)?
                                  $arrayRegData['ANSIBLE_EXEC_MODE']:null;
-            $strTwrHostname = array_key_exists('ANSTWR_HOSTNAME',$arrayRegData)?
-                                 $arrayRegData['ANSTWR_HOSTNAME']:null;
+            $strTwrHostID   = array_key_exists('ANSTWR_HOST_ID',$arrayRegData)?
+                                 $arrayRegData['ANSTWR_HOST_ID']:null;
             $strTwrProtocol = array_key_exists('ANSTWR_PROTOCOL',$arrayRegData)?
                                  $arrayRegData['ANSTWR_PROTOCOL']:null;
             $strTwrPort     = array_key_exists('ANSTWR_PORT',$arrayRegData)?
@@ -344,7 +365,7 @@ Ansibleインターフェース情報
         case "DTUP_singleRecRegister":
             $retStrBody = "";
             $ary   = array();
-            $ary[] = array("VALUE"=>$strTwrHostname,"MSG_CODE"=>"ITAANSIBLEH-MNU-1203030");
+            $ary[] = array("VALUE"=>$strTwrHostID  ,"MSG_CODE"=>"ITAANSIBLEH-MNU-1203030");
             $ary[] = array("VALUE"=>$strTwrProtocol,"MSG_CODE"=>"ITAANSIBLEH-MNU-1203010");
             $ary[] = array("VALUE"=>$strTwrPort,    "MSG_CODE"=>"ITAANSIBLEH-MNU-1203050");
             $ary[] = array("VALUE"=>$strOrgName,    "MSG_CODE"=>"ITAANSIBLEH-MNU-9010000002");
@@ -353,10 +374,9 @@ Ansibleインターフェース情報
             if($strMode == DF_EXEC_MODE_TOWER) {
                 foreach($ary as $values) {
                     if(trim(strlen($values['VALUE'])) == 0) {
-                        $msg1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000005");
-                        $msg2 = $g['objMTS']->getSomeMessage($values['MSG_CODE']);
+                        $msg1 = $g['objMTS']->getSomeMessage($values['MSG_CODE']);
                         if(strlen($retStrBody) != 0) $retStrBody .= "\n";
-                        $retStrBody .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000018",array($msg1,$msg2));
+                        $retStrBody .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000018",array($msg1));
                     }
                 }
             }

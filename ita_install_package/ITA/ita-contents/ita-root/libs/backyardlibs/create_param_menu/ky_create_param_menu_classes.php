@@ -639,6 +639,31 @@ class RoleMenuLinkListTable extends BaseTable_CPM {
 }
 
 /**
+ * ロール・ユーザー紐付管理テーブルクラス
+ */
+class RoleAccountLinkListTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'A_ROLE_ACCOUNT_LINK_LIST';
+        $this->seqName      = 'SEQ_' . $this->tableName;
+        $this->jnlSeqName   = 'JSEQ_' . $this->tableName;
+        $this->columnNames  = array('LINK_ID',
+                                    'ROLE_ID',
+                                    'USER_ID',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
  * 紐付対象メニューテーブルクラス
  */
 class CmdbMenuListTable extends BaseTable_CPM {
@@ -707,6 +732,7 @@ class CmdbMenuColumnTable extends BaseTable_CPM {
         $this->columnNames  = array('COLUMN_LIST_ID',
                                     'MENU_ID',
                                     'COL_NAME',
+                                    'COL_CLASS',
                                     'COL_TITLE',
                                     'COL_TITLE_DISP_SEQ',
                                     'REF_TABLE_NAME',
@@ -1007,6 +1033,167 @@ class ColToRowMngTable extends BaseTable_CPM {
                                     'COL_CNT',
                                     'REPEAT_CNT',
                                     'CHANGED_FLG',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * 入力方式テーブルクラス
+ */
+class InputMethodTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'F_INPUT_METHOD';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('INPUT_METHOD_ID',
+                                    'INPUT_METHOD_NAME',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * 作成対象テーブルクラス
+ */
+class ParamTargetTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'F_PARAM_TARGET';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('TARGET_ID',
+                                    'TARGET_NAME',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * 用途テーブルクラス
+ */
+class ParamPurposeTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'F_PARAM_PURPOSE';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('PURPOSE_ID',
+                                    'PURPOSE_NAME',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * カラムグループクラス
+ */
+class MenuGroupTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'A_MENU_GROUP_LIST';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('MENU_GROUP_ID',
+                                    'MENU_GROUP_NAME',
+                                    'MENU_GROUP_ICON',
+                                    'DISP_SEQ',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * プルダウン選択中身クラス
+ */
+class PullDownTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'G_OTHER_MENU_LINK';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('LINK_ID',
+                                    'MENU_GROUP_ID',
+                                    'MENU_GROUP_NAME',
+                                    'MENU_ID',
+                                    'MENU_ID_CLONE',
+                                    'MENU_NAME',
+                                    'COLUMN_DISP_NAME',
+                                    'LINK_PULLDOWN',
+                                    'TABLE_NAME',
+                                    'PRI_NAME',
+                                    'COLUMN_NAME',
+                                    'COLUMN_TYPE',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * アカウントリストクラス
+ */
+class AccountListTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'A_ACCOUNT_LIST';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('USER_ID',
+                                    'USERNAME',
+                                    'USERNAME_JP',
+                                    'PW_LAST_UPDATE_TIME',
+                                    'AUTH_TYPE',
+                                    'PROVIDER_ID',
+                                    'PROVIDER_USER_ID',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',

@@ -170,7 +170,11 @@ z-index: 1;
 box-shadow: 0 0 0 1px #CCC;
 }
 
-
+/* Edge調整用 */
+.itaTable.edgeScroll.tableSticky tr.defaultExplainRow th,
+.itaTable.edgeScroll.tableSticky td.likeHeader {
+transform: translateX(.1px);
+}
 
 
 
@@ -780,5 +784,4 @@ background-color: #00878A;
 pointer-events: none;
 opacity: 0.5;
 }
-
 

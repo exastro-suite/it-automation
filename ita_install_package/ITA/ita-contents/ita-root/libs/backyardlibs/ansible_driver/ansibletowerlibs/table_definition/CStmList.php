@@ -55,6 +55,7 @@ class CStmList extends TableBaseDefinition {
             "OS_TYPE_ID"                      => "",
             "SSH_EXTRA_ARGS"                  => "",
             "HOSTS_EXTRA_ARGS"                => "",
+            "CREDENTIAL_TYPE_ID"              => "",
             "SYSTEM_NAME"                     => "",
             "COBBLER_PROFILE_ID"              => "",
             "INTERFACE_TYPE"                  => "",
@@ -63,8 +64,6 @@ class CStmList extends TableBaseDefinition {
             "GATEWAY"                         => "",
             "STATIC"                          => "",
             "CONN_SSH_KEY_FILE"               => "",
-            "DSC_CERTIFICATE_FILE"            => "",
-            "DSC_CERTIFICATE_THUMBPRINT"      => "",
             "ANSTWR_INSTANCE_GROUP_NAME"      => "",
         );
 

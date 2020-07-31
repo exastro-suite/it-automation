@@ -64,6 +64,7 @@ $ary[47] = "WARNING:ILLEGAL_ACCESS(Insufficient Privilege).";
 $ary[48] = "WARNING:ILLEGAL_ACCESS.";
 $ary[49] = "ERROR:UNEXPECTED, DETAIL:STEP[{}] OF CHECK REFERER PROCESS.";
 $ary[50] = "ERROR:UNEXPECTED, DETAIL:EXTERNAL AUTH SETTINGS PARSE ERROR";
+$ary[51] = "ERROR:FORBIDDEN, DISUSED USER";
 $ary[101] = "{}項目:{}\n";
 $ary[102] = "不正な条件設定です。(項目:{})\n";
 $ary[103] = "無効な条件（リスト検索条件）が設定されました。(項目:{})\n";
@@ -381,4 +382,5 @@ $ary[115008] = "WARNING:ILLEGAL_ACCESS, DETAIL:UNEXPECTED X-Command SENT FOR RES
 $ary[115009] = "WARNING:ILLEGAL_ACCESS, DETAIL:UNEXPECTED REST-API VERSION.";
 $ary[906001] = "FUNCTION:{},RESULT:WARINIG [RESPONSE:{}]";
 $ary[906002] = "FUNCTION:{},RESULT:ERROR [RESPONSE:{}]";
+$ary[26000] = "Node間の接続に不備があります。[{}]";
 ?>

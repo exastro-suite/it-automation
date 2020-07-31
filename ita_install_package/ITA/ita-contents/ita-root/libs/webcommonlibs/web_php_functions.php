@@ -711,6 +711,7 @@
                 case 501: // 実装されていないメソッド
                 case 502: // 不正なゲートウェイ
                 case 503: // サービス利用不可（過負荷、メンテナンス中による）
+                    http_response_code($intDefaultResutStatusCode);
                     break;
             }
 
@@ -718,6 +719,16 @@
 
             //MDC(NNN)+
             switch($intForceQuitDatailCode){
+                // 400
+                case 10000400: // 不正なリクエスト
+                    insideRedirectCodePrint("/common/common_bad_request.php",$intInsideRedirectMode);
+                    break;
+                // 401
+                case 10000401: // 未認証アクセス
+                    insideRedirectCodePrint("/common/common_unauthorized.php",$intInsideRedirectMode);
+                    break;
+                // 403
+                case 10000403: // 不正操作によるアクセス警告画面にリダイレクト
                 case 10310201: // 不正操作によるアクセス警告画面にリダイレクト
                 case 10610201: // 不正操作によるアクセス警告画面にリダイレクト
                 case 10810201: // 不正操作によるアクセス警告画面にリダイレクト

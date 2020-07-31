@@ -23,6 +23,3 @@ cat /tmp/"$1" >> ${temp_file}
 crontab ${temp_file}
 
 rm -f ${temp_file}
-
-exit
-

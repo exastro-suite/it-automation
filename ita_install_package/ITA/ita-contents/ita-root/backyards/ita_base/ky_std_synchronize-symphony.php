@@ -374,7 +374,7 @@
         //----シンフォニー、を、一個ずつループする
         foreach($arySymphonyOnRun as $rowOfSymphony ){
 
-            // ansible/DSC/AnsibleTower の00_shymphonyLinker.php で参照
+            // ansible/AnsibleTower の00_shymphonyLinker.php で参照
             $g['__SYMPHONY_INSTANCE_NO__'] = $rowOfSymphony['SYMPHONY_INSTANCE_NO'];
 
             ////////////////////////////

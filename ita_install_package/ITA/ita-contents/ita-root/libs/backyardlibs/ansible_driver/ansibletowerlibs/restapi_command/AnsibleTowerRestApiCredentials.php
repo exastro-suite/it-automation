@@ -109,9 +109,9 @@ class AnsibleTowerRestApiCredentials extends AnsibleTowerRestApiBase {
             return $response_array;
         }
 
-
-        $content['credential_type'] = self::MACHINE; // 現在[Machine]固定
-
+        if(!empty($param['credential_type_id'])) {
+            $content['credential_type'] = $param['credential_type_id'];
+        }
 
         if(!empty($param['username'])) {
             $content['inputs']['username'] = $param['username'];

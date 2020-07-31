@@ -93,6 +93,9 @@
                 $strLoginFormTailBody .= "<br><a href=\"{$scheme_n_authority}/common/common_change_password_form.php?no={$ASJTM_id}\">".$strAnchorInnerToLoginPWUpdate."</a></p>\n";
             }
         }
+        // SSO認証用設定の読み込み
+        require $root_dir_path."/libs/webcommonlibs/web_functions_for_sso_auth.php";
+        $arySsoProviderList = getConfigSsoAuth();
 
         ob_start();
         // フォームを読み込み
@@ -240,10 +243,9 @@
 
         // ----Authインスタンスの作成
         $objAuth = new Auth();
-        // $objAuth = new AuthForWDBC($strSessionName, $boolAllowLogin);
         // Authインスタンスの作成----
 
-        $objAuth->setSessionName('ITA_SESSION');
+        $objAuth->setSessionName('ITA_SESSION_'.md5($_SERVER['HTTP_HOST']));
         $objAuth->setAllowLogin($boolAllowLogin);
         $objAuth->setLoginFunction('saLoginAuthentication');
         $objAuth->setLoginFormFunction('saLoginFunction');

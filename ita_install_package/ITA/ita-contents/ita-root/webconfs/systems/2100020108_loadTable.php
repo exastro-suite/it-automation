@@ -106,7 +106,7 @@ Ansible(Legacy)作業対象ホスト管理
             if( $modeValue_sub == "on" ){
                 $strQuery = "UPDATE A_PROC_LOADED_LIST "
                            ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                           ."WHERE ROW_ID in (2100020002) ";
+                           ."WHERE ROW_ID in (2100020002, 2100170006) ";
 
                 $aryForBind = array();
 

@@ -41,6 +41,7 @@ class DAccountListModel extends BaseModel {
             "MAIL_ADDRESS"          => "",
             "PW_LAST_UPDATE_TIME"   => "DATETIME",
             "AD_USER_SID"           => "",
+            "AUTH_TYPE"             => "",
         );
 
         //  makeSQLForUtnTableUpdate用カラムリスト
