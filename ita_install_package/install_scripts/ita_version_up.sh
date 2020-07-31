@@ -509,6 +509,14 @@ if ! test -e ${VERSION_UP_LIST_FILE} ; then
 fi
 
 if [ ${LIB_INSTALL_FLG} = "yes" ] ; then
+    #リポジトリを有効にする
+    yum install -y yum-utils dnf-utils >> "$LOG_FILE" 2>&1
+    yum-config-manager --enable rhel-7-server-optional-rpms >> "$LOG_FILE" 2>&1
+    yum-config-manager --enable rhui-rhel-7-server-rhui-optional-rpms >> "$LOG_FILE" 2>&1
+    dnf config-manager --set-enabled PowerTools >> "$LOG_FILE" 2>&1
+    dnf config-manager --set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms >> "$LOG_FILE" 2>&1
+    dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms >> "$LOG_FILE" 2>&1
+
     #バージョンアップリストに記載されているバージョンごとにライブラリのインストールを行う
     EXEC_VERSION=${NOW_VERSION}
     while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
