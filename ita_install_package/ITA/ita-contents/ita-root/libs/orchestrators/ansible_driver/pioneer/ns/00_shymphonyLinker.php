@@ -672,7 +672,7 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
     // テーブル情報
     $strExeCurTableIdForSelect   = 'E_ANSIBLE_PNS_EXE_INS_MNG';
     
-    $strIfTableIdForSelect       = 'B_ANSIBLE_IF_INFO';   
+    $strIfTableIdForSelect       = 'D_ANSIBLE_TOWER_IF_INFO';
     $strColIdOfDRSRPathFromWebSv = 'ANSIBLE_STORAGE_PATH_LNX';
     $strColIdOfDRSRPathFromDrvSv = 'ANSIBLE_STORAGE_PATH_ANS';
     

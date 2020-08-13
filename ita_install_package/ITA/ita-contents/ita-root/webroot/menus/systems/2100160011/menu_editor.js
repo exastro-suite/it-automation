@@ -1076,8 +1076,8 @@ const previewTable = function(){
       tbodyNumber = 3,
       maxLevel = rowNumberCheck();
   
-  const previewType = $('#create-menu-type').val();
-  
+  const previewType = Number( $('#create-menu-type').val() );
+
   // エディタ要素をTableに変換
   const tableAnalysis = function( $cols ) {
   
@@ -1156,7 +1156,7 @@ const previewTable = function(){
   // thead HTMLを生成
   const itemLength = childColumnCount( $menuTable );
   
-  if ( previewType === 'parameter-sheet') {
+  if ( previewType === 1 ) {
     maxLevel++;
     tableArray.unshift('');
   }   
@@ -1165,13 +1165,13 @@ const previewTable = function(){
     tableHTML += '<tr class="defaultExplainRow">';
     if ( i === 0 ) {
       tableHTML += tHeadHeaderLeftHTML.replace(/{{rowspan}}/g, maxLevel );
-      if ( previewType === 'parameter-sheet') {
+      if ( previewType === 1 ) {
         tableHTML += tHeadParameterHeaderLeftHTML
           .replace(/{{rowspan}}/g, maxLevel )
           .replace(/{{colspan}}/g, itemLength );
       }
     }
-    if ( i === 1 && previewType === 'parameter-sheet') {
+    if ( i === 1 && previewType === 1 ) {
       tableHTML += tHeadParameterOpeHeaderLeftHTML.replace(/{{rowspan}}/g, maxLevel - 1 );
     }
     tableHTML += tableArray[i];
@@ -1182,7 +1182,7 @@ const previewTable = function(){
   
   for ( let i = 1; i <= tbodyNumber; i++ ) {
     tableHTML += '<tr>' + tBodyHeaderLeftHTML.replace('{{id}}', i );
-    if ( previewType === 'parameter-sheet') {
+    if ( previewType === 1 ) {
       tableHTML += tBodyParameterHeaderLeftHTML;
     }
     tableHTML += tbodyArray.join() + tBodyHeaderRightHTML + '</tr>';
@@ -1654,7 +1654,7 @@ const createRegistrationData = function( type ){
 
   // 解析スタート
   tableAnalysis ( $menuTable );
-
+  
   // JSON変換
   const menuData = JSON.stringify( createMenuJSON );
   
@@ -1675,9 +1675,12 @@ const loadMenu = function() {
     
     const loadJSON = menuEditorArray.selectMenuInfo;
 
-    // 流用新規はメニュー名を空白にする
+    // メニュー名、表示順序、説明、備考は、流用新規時に空白にする
     if ( menuEditorMode === 'diversion' ){
       loadJSON['menu']['MENU_NAME'] = '';
+      loadJSON['menu']['DISP_SEQ'] = '';
+      loadJSON['menu']['NOTE'] = '';
+      loadJSON['menu']['DESCRIPTION'] = '';
     }
 
     // パネル情報表示
@@ -1797,15 +1800,12 @@ const menuParameter = function( type, setData ) {
       'DESCRIPTION' : ['create-menu-explanation', 'textarea'],
       'NOTE' : ['create-menu-note', 'textarea']
     };
-    // 流用する場合はID、表示順序、更新日時、更新者、説明、備考をnullに
+    // 流用時は不要
     if ( menuEditorMode === 'diversion' ){
       delete menuParameterList['CREATE_MENU_ID'];
-      delete menuParameterList['DISP_SEQ'];
       delete menuParameterList['LAST_UPDATE_TIMESTAMP'];
       delete menuParameterList['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'];
       delete menuParameterList['LAST_UPDATE_USER'];
-      delete menuParameterList['DESCRIPTION'];
-      delete menuParameterList['NOTE'];
     }
 
     if ( type === 'get' ) {
