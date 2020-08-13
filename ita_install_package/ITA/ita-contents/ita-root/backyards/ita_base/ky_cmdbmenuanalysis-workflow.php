@@ -2018,7 +2018,10 @@ function getColumnClass($ref_table,$ref_column) {
         $column_array = array();
         $ret_code  = "";
         exec($cmd,$column_array,$ret_code);
-        if($ret_code != 0) {
+        if($ret_code == 1) {
+            continue;
+        }
+        else if($ret_code != 0) {
             return false;
         }
 

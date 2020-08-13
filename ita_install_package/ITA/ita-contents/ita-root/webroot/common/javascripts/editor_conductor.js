@@ -4143,6 +4143,7 @@ const conductorStatusUpdate = function( exeNumber ) {
             outTerminalLength = outTerminals.length;
       let otherFlag = true,
           otherTerminal;
+      $('#' + nodeID ).addClass('running');
       $('#' + conductorData[ nodeID ].terminal[ inTerminal[0] ].edge ).attr('data-status', 'running');
       for ( let i = 0; i < outTerminalLength; i++ ) {
         const terminal = conductorData[ nodeID ]['terminal'][ outTerminals[ i ] ];
@@ -4168,19 +4169,20 @@ const conductorStatusUpdate = function( exeNumber ) {
   // 並列マージの状態を更新する
   const parallelMergeCheck = function( nodeID ) {
     const inTerminals = terminalInOutID( conductorData[ nodeID ].terminal, 'in'),
-          inTerminalLength = inTerminals.length;
+          inTerminalLength = inTerminals.length,
+          $node = $('#' + nodeID );
     let   waitingCount = 0;
     for ( let i = 0; i < inTerminalLength; i++ ) {
       const tergetNodeID = conductorData[ nodeID ].terminal[ inTerminals[i] ].targetNode;
       // 終了しているかチェックする
       if ( ['5','9','12','13','14'].indexOf( nodeInfo[ tergetNodeID ].STATUS ) !== -1 ) {
         waitingCount++;
+        $node.addClass('running');
         $('#' + inTerminals[i] ).next().find('.merge-status').attr('data-status', 'waiting');
         $('#' + conductorData[ nodeID ].terminal[ inTerminals[i] ].edge ).attr('data-status', 'running');
       }      
     }
     // 全て待機状態ならコンプリートにする
-    const $node = $('#' + nodeID );
     if ( inTerminalLength === waitingCount ) {
       $node.find('.merge-status').attr('data-status', 'complete');
     }
@@ -4241,6 +4243,7 @@ const conductorStatusUpdate = function( exeNumber ) {
           tergetNodeID = conductorData[ nodeID ].terminal[ inTerminal[0] ].targetNode;
     // 終了しているかチェックする
     if ( ['5','9','12','13','14'].indexOf( nodeInfo[ tergetNodeID ].STATUS ) !== -1 ) {
+      $('#' + nodeID ).addClass('running');
       $('#' + conductorData[ nodeID ].terminal[ inTerminal[0] ].edge ).attr('data-status', 'running');
     }
   };
@@ -4258,6 +4261,7 @@ const conductorStatusUpdate = function( exeNumber ) {
     
     switch( nodeInfo.STATUS ) {
       case '8':
+        $node.addClass('running');
         $inEdge.attr('data-status', 'running');
         conductorData[ nodeID ].endStatus = true;
         $node.find('.pause-status').attr('data-status', 'pause');
@@ -4272,6 +4276,7 @@ const conductorStatusUpdate = function( exeNumber ) {
         });
         break;
       case '9':
+        $node.addClass('running');
         $inEdge.attr('data-status', 'running');
         conductorData[ nodeID ].endStatus = true;
         $node.find('.pause-status').attr('data-status', 'resume');

@@ -944,6 +944,19 @@ font-size: 40px!important;
 .node-terraform .node-circle .node-gem { background-color: #5c4ee5; }
 
 /* Running */
+#editor[data-editor-mode="checking"] .node {
+filter: grayscale(1) opacity(0.3);
+}
+#editor[data-editor-mode="checking"] .svg-group {
+opacity: .3;
+}
+#editor[data-editor-mode="checking"] .node.running,
+#editor[data-editor-mode="checking"] .node.complete {
+filter: none;
+}
+#editor[data-editor-mode="checking"] .svg-group[data-status="running"] {
+opacity: 1;
+}
 .node.running .node-circle::after {
 background-image: linear-gradient( #264F05 2px, #132803 2px );
 background-size: 3px 3px;
@@ -1023,7 +1036,7 @@ animation: none;
 }
 .node.run-unused,
 .node-sub.run-unused {
-opacity: .3!important;
+filter: grayscale(1) opacity(0.3) !important;
 }
 .node-result {
 overflow: hidden;
