@@ -68,6 +68,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);//登録/更新時には、入力必須
     $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
     $table->addColumn($c);
+    
+    // GUIメニューへのリンク
+    $c = new LinkButtonColumn('GUI_detail_show', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104232"), $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104232"), 'jumpToGui', array(':CREATE_MENU_ID')); 
+    $table->addColumn($c);
 
     // 作成対象 
     $c = new IDColumn('TARGET',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102023"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME', '', array('OrderByThirdColumn'=>'TARGET_ID'));
@@ -143,9 +147,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
-    // GUIメニューへのリンク
-    $c = new LinkButtonColumn('GUI_detail_show', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104232"), $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104232"), 'jumpToGui', array(':CREATE_MENU_ID')); 
-    $table->addColumn($c);
 
 
 //----head of setting [multi-set-unique]
