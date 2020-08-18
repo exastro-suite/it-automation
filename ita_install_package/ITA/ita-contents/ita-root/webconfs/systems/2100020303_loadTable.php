@@ -201,6 +201,11 @@ Ansible（Legacy Role）ロールパッケージ一覧
 
             $zipfile           = array_key_exists('ROLE_PACKAGE_FILE',$arrayRegData)?
                                     $arrayRegData['ROLE_PACKAGE_FILE']:null;
+            // 空更新の場合
+            if($zipfile === null) {
+                $zipfile           = isset($arrayVariant['edit_target_row']['ROLE_PACKAGE_FILE'])?
+                                           $arrayVariant['edit_target_row']['ROLE_PACKAGE_FILE']:null;
+            }
         }
         ////////////////////////////////
         // 共通モジュールの呼び出し   //
@@ -233,7 +238,8 @@ Ansible（Legacy Role）ロールパッケージ一覧
                                                false);
         if((strlen($role_package_name) == 0) ||
            (strlen($zipfile) == 0)) {
-            $retBool = false;
+            // 必須入力のチェックは花園に任せる。
+            return true;
         }
         if($retBool === true) {
             if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
