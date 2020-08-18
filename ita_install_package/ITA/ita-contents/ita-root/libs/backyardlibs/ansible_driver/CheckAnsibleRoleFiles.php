@@ -1,4 +1,4 @@
-<?php
+php
 //   Copyright 2019 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -2375,6 +2375,15 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
             $in_error_code = "ITAANSIBLEH-ERR-70080"; 
             return false;
         }
+
+        // - {} の定義か判定
+        $ret = preg_match_all('/{(\s*)}(\s*)$/',$in_string,$matchi);
+        if($ret == 1){
+            // - {} の定義は禁止
+            $in_error_code = "ITAANSIBLEH-ERR-70080"; 
+            return false;
+        }
+
         // - [] の定義か判定
         $ret = preg_match_all('/^(\s*)-(\s+)\[(\s*)\](\s*)$/',$in_string,$matchi);
         if($ret == 1){
@@ -3980,19 +3989,23 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                 if(is_array($lv1_key)) {
                     // 想定外の構造 多段
                     break;
+                // var:        var:[]
+                //  - vaule
                 } elseif(is_int($lv1_key)) {
-                    if(is_string($lv1_val)) {
+                    if((is_string($lv1_val)) ||  // - vaule
+                       (is_int($lv1_val)) ||     // - 0-9
+                       (is_bool($lv1_val))) {    // - true/false
                         $result_ary['value'][] = $lv1_val;
                         $result_code = 'list';
                     } else {
                         if(count($lv1_val) == 0) {
-                            // 想定外の構造  -{}
+                            // 想定外の構造  -{} -[] が同じ結果でパースされる
                             break;
                         } else {
                             foreach($lv1_val as $lv2_key=>$lv2_val) {
                                 $result_ary['name'][] = $lv2_key;
                                 if(is_array($lv2_val)) {
-                                    // - varname: []
+                                    // - varname: [] - var: {}が同じパース結果になる
                                     $result_ary['value'][] = "";
                                 } else {
                                     $result_ary['value'][] = $lv2_val;
@@ -4002,14 +4015,15 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
                         }
                     }
                 } else {
-                    // varname: []
+                    // var: [] var: {}が同じパース結果になる
                     if(is_array($lv1_val)) {
                         $result_ary['name'][] = $lv1_key;
                         $result_ary['value'][] = "";
                         $result_code = 'var';
                     } else {
-                        // varname: null
-                        if ($lv1_val == "") {
+                        if(($lv1_val == "")    ||  // varname: null
+                           (is_bool($lv1_val)) ||  // varname: true/false
+                           (is_int($lv1_val)))   { // varname: 0-9
                             $result_ary['name'][] = $lv1_key;
                             $result_ary['value'][] = $lv1_val;
                             $result_code = 'var';
@@ -4027,7 +4041,6 @@ $this->debuglog(__LINE__,"[" . $var_name . "] ユーザー多次元変数定義�
         }
         return [$result_code,$result_ary];
     }
-
     function chkVariableName($in_parent_var_pos,$in_var_pos,$pattern) {
         $parent_var = $pattern['parent'];
         $member_var = $pattern['member'];
