@@ -1393,8 +1393,8 @@ class CheckAnsibleRoleFiles {
             }
         }
         foreach ($role_dir_list as $role_dir) {
-            //前方一致したものは除外関数使う
-            if (childRole($role_dir,$role_dir_list)) {
+            //ディレクトリ名前方一致したものは除外
+            if (childRole($role_dir,$role_dir_list) === false) {
                 continue;
             }
             // rolesディレクトリ以降の階層をrole名にする。
@@ -1443,26 +1443,42 @@ class CheckAnsibleRoleFiles {
     ////////////////////////////////////////////////////////////////////////////////
     // F0015
     // 処理内容
-    //   roleディレクトリ配下にtasksディレクトリがある場合の除外処理
+    //   roleディレクトリとして扱うかを判定
+    //   taskディレクトリがあるディレクトリをroleディレクトリとして扱う
+    //   roles	
+    //     nest_dir1
+    //       sample_role1
+    //         tasks
+    //         default
+    //     nest_dir2
+    //       sample_role2
+    //         tasks
+    //         default
+    //         sample_role3
+    //           tasks
+    //  但し、tasksディレクトリがネストしているような階層のroleディレクトリは除外する。
+    //  sample_role3は除外
     //
     // パラメータ
     //   $data:        roleディレクトリ
-    //   $RoleDirList: rolesディレクトリ配下のasksが定義されているディレクトリ一覧
+    //   $RoleDirList: rolesディレクトリ配下のtasksが定義されているディレクトリ一覧
     // 戻り値
-    //   true:   roleディレクトリ配下にtasksディレクトリがある
-    //   false:  roleディレクトリ配下のtasksディレクトリではない
+    //   true:   roleディレクトリとして扱わない。
+    //   false:  roleディレクトリとして扱う。
     ////////////////////////////////////////////////////////////////////////////////
     function childRole($data,$DirList) {
+        $data = $data . "/";
         foreach ($DirList as $dirs) {
-            //完全一致は除外
+            $dirs = $dirs . "/";
+            //完全一致はスキップ(自分自身)
             if ($data === $dirs) {
                 continue;
-            //前方一致は格納
+            //前方一致は除外
             }if (0 === strpos($data,$dirs)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
 /////////////////////////////////////////////////////////////////////////////////
