@@ -330,10 +330,10 @@ EOD;
         </div>
         <div class="editor-header-sub-menu">
           <ul class="editor-menu-list">
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-all">全体表示</button></li>
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-reset">表示リセット</button></li>
-            <li class="editor-menu-item full-screen-hide"><button class="editor-menu-button" data-menu="full-screen-on">フルスクリーン</button></li>
-            <li class="editor-menu-item full-screen-show"><button class="editor-menu-button" data-menu="full-screen-off">フルスクリーン解除</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-all">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309013")}</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-reset">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309014")}</button></li>
+            <li class="editor-menu-item full-screen-hide"><button class="editor-menu-button" data-menu="full-screen-on">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309015")}</button></li>
+            <li class="editor-menu-item full-screen-show"><button class="editor-menu-button" data-menu="full-screen-off">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309016")}</button></li>          
           </ul>
         </div>
       </div>
@@ -367,7 +367,7 @@ EOD;
             
               <div class="editor-tab-menu">
                 <ul class="editor-tab-menu-list">
-                  <li class="editor-tab-menu-item" data-tab="log">ログ</li>
+                  <li class="editor-tab-menu-item" data-tab="log">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309017")}</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
 
@@ -629,7 +629,7 @@ EOD;
       <div class="editor-footer-menu">
         <div class="editor-footer-main-menu">
           <ul class="editor-menu-list edit">
-            <li class="editor-menu-item"><button class="editor-menu-button positive" data-menu="execute" disabled>実行</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button positive" data-menu="execute" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309024")}</button></li>
           </ul>
         </div>
         <div class="editor-footer-sub-menu"></div>
