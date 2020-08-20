@@ -123,24 +123,24 @@ EOD;
       <div class="editor-header-menu">
         <div class="editor-header-main-menu">
           <ul class="editor-menu-list edit">
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-new">新規</button></li>
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-save">保存</button></li>
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-read">読込</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-new">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309007")}</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-save">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309008")}</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-read">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309009")}</button></li>
           </ul>
           <ul class="editor-menu-list">
-            <li class="editor-menu-item"><button id="button-undo" class="editor-menu-button" data-menu="undo" disabled>取り消し</button></li>
-            <li class="editor-menu-item"><button id="button-redo" class="editor-menu-button" data-menu="redo" disabled>やり直し</button></li>
+            <li class="editor-menu-item"><button id="button-undo" class="editor-menu-button" data-menu="undo" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309010")}</button></li>
+            <li class="editor-menu-item"><button id="button-redo" class="editor-menu-button" data-menu="redo" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309011")}</button></li>
           </ul>
           <ul class="editor-menu-list">
-            <li class="editor-menu-item"><button id="node-delete-button" class="editor-menu-button" data-menu="node-delete" disabled>ノード削除</button></li>
+            <li class="editor-menu-item"><button id="node-delete-button" class="editor-menu-button" data-menu="node-delete" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309012")}</button></li>
           </ul>
         </div>
         <div class="editor-header-sub-menu">
           <ul class="editor-menu-list">
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-all">全体表示</button></li>
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-reset">表示リセット</button></li>
-            <li class="editor-menu-item full-screen-hide"><button class="editor-menu-button" data-menu="full-screen-on">フルスクリーン</button></li>
-            <li class="editor-menu-item full-screen-show"><button class="editor-menu-button" data-menu="full-screen-off">フルスクリーン解除</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-all">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309013")}</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-reset">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309014")}</button></li>
+            <li class="editor-menu-item full-screen-hide"><button class="editor-menu-button" data-menu="full-screen-on">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309015")}</button></li>
+            <li class="editor-menu-item full-screen-show"><button class="editor-menu-button" data-menu="full-screen-off">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309016")}</button></li>
           </ul>
         </div>
       </div>
@@ -174,7 +174,7 @@ EOD;
             
               <div class="editor-tab-menu">
                 <ul class="editor-tab-menu-list">
-                  <li class="editor-tab-menu-item" data-tab="log">ログ</li>
+                  <li class="editor-tab-menu-item" data-tab="log">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309017")}</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
 
@@ -379,8 +379,8 @@ EOD;
       <div class="editor-footer-menu">
         <div class="editor-footer-main-menu">
           <ul class="editor-menu-list">
-            <li class="editor-menu-item"><button id="cansel-instance" class="editor-menu-button positive" data-menu="cansel-instance" disabled>予約取消</button></li>
-            <li class="editor-menu-item"><button id="scram-instance" class="editor-menu-button positive" data-menu="scram-instance" disabled>強制停止</button></li>
+            <li class="editor-menu-item"><button id="cansel-instance" class="editor-menu-button positive" data-menu="cansel-instance" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309025")}</button></li>
+            <li class="editor-menu-item"><button id="scram-instance" class="editor-menu-button positive" data-menu="scram-instance" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309026")}</button></li>
           </ul>
         </div>
         <div class="editor-footer-sub-menu"></div>
