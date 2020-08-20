@@ -1027,14 +1027,36 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
             if( !isset( $aryDataForMovement['h'] ) )$aryDataForMovement['h']="";
 
             //廃止済みMovement対応
-            if( $aryDataForMovement['type'] == "movement" && 
-                (  ( $aryDataForMovement['ORCHESTRATOR_ID'] == "" || !is_numeric( $aryDataForMovement['ORCHESTRATOR_ID'] ) ) 
-                   && ( $aryDataForMovement['PATTERN_ID'] == "" || !is_numeric( $aryDataForMovement['PATTERN_ID'] ) ) )
-            ){
-                    $intErrorType = 2;
-                    $strErrStepIdInFx="00002800";
-                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170013");
-                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            if( $aryDataForMovement['type'] == "movement" ){
+                if (  ( $aryDataForMovement['ORCHESTRATOR_ID'] == "" || !is_numeric( $aryDataForMovement['ORCHESTRATOR_ID'] ) ) &&
+                      ( $aryDataForMovement['PATTERN_ID'] == "" || !is_numeric( $aryDataForMovement['PATTERN_ID'] ) ) 
+                ){
+                        $intErrorType = 2;
+                        $strErrStepIdInFx="00002800";
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170013");
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }else{
+                    $aryRetBody = getPatternListWithOrchestratorInfo("",-1);
+                    if( $aryRetBody[1] !== null ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00000200";
+                        $intErrorType = $aryRetBody[1];
+                        //
+                        $aryErrMsgBody = $aryRetBody[2];
+                        //
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                    $arrMVList = $aryRetBody[4];
+
+                    if( !isset($arrMVList[ $aryDataForMovement['PATTERN_ID'] ]) ){
+                        $intErrorType = 2;
+                        $strErrStepIdInFx="00002800";
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170013");
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                }
+
             }
 
             //CALL呼び出し値有無
@@ -1268,18 +1290,6 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         }
         // ムーブメントを登録----
 
-        $aryRetBody = getPatternListWithOrchestratorInfo("",-1);
-        if( $aryRetBody[1] !== null ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00000200";
-            $intErrorType = $aryRetBody[1];
-            //
-            $aryErrMsgBody = $aryRetBody[2];
-            //
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        $arrMVList = json_encode($aryRetBody[4]);
 
         // ----トランザクション終了
         $boolResult = $objDBCA->transactionCommit();
