@@ -3743,7 +3743,7 @@ class OrchestratorLinkAgent {
             $arrayValue = $arrayValueTmpl;
             
             $strSelectMode = "SELECT";
-            $strWhereDisuseFlag = "('0')";
+            $strWhereDisuseFlag = "('0', '1')";
             $strOrderByArea = "";
             if( $fxVarsIntMode === 1 ){
                 //----更新用のため、ロック
@@ -4245,12 +4245,18 @@ class OrchestratorLinkAgent {
 
             //Movement個別
             if( $value['NODE_TYPE_ID'] == 3) {
-                $arr_json[$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];
-                $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
-
-                $arr_json[$value['NODE_NAME']]['Name']=$aryPatternList[$value['PATTERN_ID']]['PATTERN_NAME'];
-
+                if( isset( $aryPatternList[$value['PATTERN_ID']] ) ){
+                    $arr_json[$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];
+                    $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
+                    $arr_json[$value['NODE_NAME']]['Name']=$aryPatternList[$value['PATTERN_ID']]['PATTERN_NAME'];                    
+                }else{
+                    //廃止済みMovemnt対応
+                    $arr_json[$value['NODE_NAME']]['PATTERN_ID']="-";
+                    $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']="-";
+                    $arr_json[$value['NODE_NAME']]['Name']="-";
+                }
             }
+
             //call個別
             if( $value['NODE_TYPE_ID'] == 4) {
                 $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
