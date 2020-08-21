@@ -1844,7 +1844,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0){
                     //作業パターンが存在している----
                 }
                 if( $strPatternName=="" ){
-                    $strPatternName = $objMTS->getSomeMessage("ITABASEH-ERR-5730404",array($row['I_MOVEMENT_CLASS_NO']));
+                    $strPatternName = "-";
                 }
                 $aryClassItems['PATTERN_NAME']              = $strPatternName; //htmlspecialchars
                 

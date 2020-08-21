@@ -243,4 +243,5 @@ $ary[170011] = "The setting value of Node instance ID is invalid. ({})";
 $ary[170012] = "Node Instance ID: Must exist";
 $ary[170101] = "Node instance: Not in a status that can be released (pending).";
 $ary[170102] = "Node instance: Not a Node that can be released.";
+$ary[170013] = "Cannot find TargetMovement. Record may have been discarded.";
 ?>

@@ -125,7 +125,7 @@
     $vg_pattenAry[DF_README_VARS][] = array('parent'=>true, 'member'=>false,'pattern'=>$vg_VarName_var_parent);
     $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>false,'pattern'=>$vg_VarName_lca_parent);
     $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>false,'pattern'=>$vg_VarName_gbl_parent);
-    $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_user_parent);
+    $vg_pattenAry[DF_README_VARS][] = array('parent'=>true,'member'=>true, 'pattern'=>$vg_VarName_user_parent);
     $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member1);
     $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member2);
     $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member3);
