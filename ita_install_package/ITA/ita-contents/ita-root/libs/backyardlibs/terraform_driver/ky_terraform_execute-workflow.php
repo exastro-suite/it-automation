@@ -1041,6 +1041,7 @@
                         $sensitive_boolean = false; //1(OFF)ならfalse
                     }elseif($sensitive_flag == 2){
                         $sensitive_boolean = true; //2(ON)ならtrue
+                        $vars_entry = ky_decrypt($vars_entry); //具体値をデコード
                     }
                     $ary_vars_data[$vars_link_id] = array('VARS_NAME' => $vars_name, 'VARS_ENTRY' => $vars_entry, 'SENSITIVE_FLAG' => $sensitive_boolean);
                 }
