@@ -7909,6 +7909,47 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 
 }
 
+class SensitiveColumn extends passwordColumn {
+	//----ここから継承メソッドの上書き処理
+	function __construct($strColId, $strColLabel, $sensitiveFlagColumn, $aryEtcetera=array()){
+		parent::__construct($strColId, $strColLabel);
+
+			$outputType = new OutputType(new SortedTabHFmt(), new SensitiveTextTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("print_table", $outputType);
+
+			$outputType = new OutputType(new TabHFmt(), new SensitiveTextTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("print_journal_table", $outputType);
+
+			$outputType = new OutputType(new TabHFmt(), new SensitiveTextTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("delete_table", $outputType);
+
+			$outputType = new OutputType(new FilterTabHFmt(), new TextFilterTabBFmt());
+			$this->setOutputType("filter_table", $outputType);
+			$this->setEvent("filter_table", "onkeydown", "pre_search_async", array('event.keyCode'));
+
+			$outputType = new OutputType(new ReqTabHFmt(), new SensitiveTextInputTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("update_table", $outputType);
+
+			$outputType = new OutputType(new ReqTabHFmt(), new TextInputTabBFmt());
+			$this->setOutputType("register_table", $outputType);
+
+			$outputType = new OutputType(new ExcelHFmt(), new SensitiveExcelBFmt($sensitiveFlagColumn));
+			$this->setOutputType("excel", $outputType);
+
+			$outputType = new OutputType(new CSVHFmt(), new SensitiveCSVBFmt($sensitiveFlagColumn));
+			$this->setOutputType("csv", $outputType);
+
+			$outputType = new OutputType(new ExcelHFmt(), new SensitiveExcelBFmt($sensitiveFlagColumn));
+			$this->setOutputType("json", $outputType);
+
+			$this->setEncodeFunctionName("ky_encrypt");
+			$this->setUpdateRequireExcept(false);
+
+	}
+
+	//ここまで継承メソッドの上書き処理----
+}
+
 //----ここからColumn直継承クラス（孫継承なし）
 class RowEditByFileColumn extends Column{
 	protected $strFocusEditType;
