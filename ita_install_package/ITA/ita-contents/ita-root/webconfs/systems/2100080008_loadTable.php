@@ -378,8 +378,8 @@ Terraform代入値管理
     //************************************************************************************
     //----Sensitive設定
     //************************************************************************************
-    $c = new IDColumn('SENSITIVE_FLAG','Sensitive設定', 'B_TERRAFORM_VARS_SENSITIVE', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
-    $c->setDescription('Sensitive設定'); //エクセル・ヘッダでの説明
+    $c = new IDColumn('SENSITIVE_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103760"), 'B_TERRAFORM_VARS_SENSITIVE', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103770")); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('B_TERRAFORM_VARS_SENSITIVE_JNL');
     $c->setRequired(true); //登録/更新時には、入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
@@ -390,13 +390,47 @@ Terraform代入値管理
     //************************************************************************************
     //----具体値
     //************************************************************************************
+    //Sensitive設定ががONの場合に具体値をエンコードする処理
+    $objFunction = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+        if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
+            $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+            //登録か更新の場合
+            if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+                if( $exeQueryData[$objColumn->getID()] != "" ){
+                    $strEncodeFunctionName = $objColumn->getEncodeFunctionName();
+                    if( $strEncodeFunctionName != "" ){
+                        $strEncodedValue = $strEncodeFunctionName($exeQueryData[$objColumn->getID()]);
+                    }else{
+                        $strEncodedValue = $exeQueryData[$objColumn->getID()];
+                    }
+
+                    //SENSITIVE_FLAGがON(2)の場合のみエンコードした値を入れる
+                    if($exeQueryData['SENSITIVE_FLAG'] == 2){
+                        $exeQueryData[$objColumn->getID()] = $strEncodedValue;
+                    }
+
+                }
+            }
+        }
+
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
+
     $objVldt = new SingleTextValidator(0,8192,false);
-    $c = new TextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103740"));
+    $c = new SensitiveColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103740"), 'SENSITIVE_FLAG');
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103750"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
-    $c->setRequired(true);     //登録/更新時には、任意入力
+    $c->setRequired(true);     //登録/更新時には入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
+    // データベース更新前のファンクション登録
+    $c->setFunctionForEvent('beforeTableIUDAction',$objFunction);
     $table->addColumn($c);
 
 
