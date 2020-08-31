@@ -260,7 +260,6 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
         } else {
             foreach($parent_vars_list as $vars_info) {
                 $var_name = $vars_info['VAR_NAME'];
-                $line     = $vars_info['LINE'];
                 $ret = preg_match("/^VAR_[a-zA-Z0-9_]*/",$var_name);
                 if($ret != 0) {
                     // 多段変数の場合
@@ -280,7 +279,7 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
                             if( ! isset($Vars_list[$var_name])) {
                                 $this->SetLastError(basename(__FILE__),__LINE__,
                                                     $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000020",
-                                                                                     array($line,$var_name)));
+                                                                                     array($var_name)));
                                 $retBool = false;
                             } else {
                                 if($Vars_list[$var_name] == 0) {
@@ -289,7 +288,7 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
                                     // 複数具体値定義の場合
                                     $this->SetLastError(basename(__FILE__),__LINE__,
                                                         $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000020",
-                                                                                         array($line,$var_name)));
+                                                                                         array($var_name)));
                                     $retBool = false;
                                 }
                             }
@@ -297,7 +296,7 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
                             // 変数名がastrollで扱えない場合
                             $this->SetLastError(basename(__FILE__),__LINE__,
                                                 $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000017",
-                                                                                  array($line,$var_name)));
+                                                                                  array($var_name)));
                             $retBool = false;
                         }
                     }
