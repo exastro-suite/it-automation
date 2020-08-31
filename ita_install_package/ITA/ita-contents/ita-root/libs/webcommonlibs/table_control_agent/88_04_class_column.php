@@ -7958,13 +7958,18 @@ class SensitiveColumn extends passwordColumn {
 				$strErrorBuf = "";
 				$sensitiveFlagColumn = $this->getSensitiveColumn();
 				$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+
 				//更新の場合
-				$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
-				$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
 				if( $modeValue=="DTUP_singleRecUpdate" ){
-					//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
-					if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
-						$this->setUpdateRequireExcept(false);
+					if(!empty($aryVariant['edit_target_row'])){
+						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+						//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
+						if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
+							$this->setUpdateRequireExcept(false);
+						}else{
+							$this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
+						}
 					}
 				}
 
