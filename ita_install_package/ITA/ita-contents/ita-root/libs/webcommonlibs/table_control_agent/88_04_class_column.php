@@ -7910,9 +7910,14 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 }
 
 class SensitiveColumn extends passwordColumn {
+
+	protected $strSensitiveFlagColumn;
+
 	//----ここから継承メソッドの上書き処理
 	function __construct($strColId, $strColLabel, $sensitiveFlagColumn, $aryEtcetera=array()){
 		parent::__construct($strColId, $strColLabel);
+
+			$this->setSensitiveColumn($sensitiveFlagColumn);
 
 			$outputType = new OutputType(new SortedTabHFmt(), new SensitiveTextTabBFmt($sensitiveFlagColumn));
 			$this->setOutputType("print_table", $outputType);
@@ -7943,10 +7948,75 @@ class SensitiveColumn extends passwordColumn {
 			$this->setOutputType("json", $outputType);
 
 			$this->setEncodeFunctionName("ky_encrypt");
-			$this->setUpdateRequireExcept(false);
+
+			//バリデーションチェック用function
+			$objFunction = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+				$boolRet = true;
+				$intErrorType = null;
+				$aryErrMsgBody = array();
+				$strErrMsg = "";
+				$strErrorBuf = "";
+				$sensitiveFlagColumn = $this->getSensitiveColumn();
+				$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+				//更新の場合
+				$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+				$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+				if( $modeValue=="DTUP_singleRecUpdate" ){
+					//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
+					if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
+						$this->setUpdateRequireExcept(false);
+					}
+				}
+
+				$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+				return $retArray;
+			};
+			$this->setFunctionForEvent('beforeIUDValidateCheck',$objFunction);
+
+			//登録・更新用function
+			$objFunction2 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+				$boolRet = true;
+				$intErrorType = null;
+				$aryErrMsgBody = array();
+				$strErrMsg = "";
+				$strErrorBuf = "";
+				$sensitiveFlagColumn = $this->getSensitiveColumn();
+
+				if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
+					$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+					//登録か更新の場合
+					if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+						if( $exeQueryData[$objColumn->getID()] != "" ){
+							$strEncodeFunctionName = $objColumn->getEncodeFunctionName();
+							if( $strEncodeFunctionName != "" ){
+								$strEncodedValue = $strEncodeFunctionName($exeQueryData[$objColumn->getID()]);
+							}else{
+								$strEncodedValue = $exeQueryData[$objColumn->getID()];
+							}
+
+							//SENSITIVE_FLAGがON(2)の場合のみエンコードした値を入れる
+							if($exeQueryData[$sensitiveFlagColumn] == 2){
+								$exeQueryData[$objColumn->getID()] = $strEncodedValue;
+							}
+
+						}
+					}
+				}
+
+				$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+				return $retArray;
+			};
+			$this->setFunctionForEvent('beforeTableIUDAction',$objFunction2);
 
 	}
 
+	function getSensitiveColumn(){
+		return $this->strSensitiveFlagColumn;
+	}
+
+	function setSensitiveColumn($sensitiveFlagColumn){
+		$this->strSensitiveFlagColumn = $sensitiveFlagColumn;
+	}
 	//ここまで継承メソッドの上書き処理----
 }
 
