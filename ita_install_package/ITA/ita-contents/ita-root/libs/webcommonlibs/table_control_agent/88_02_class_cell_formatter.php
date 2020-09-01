@@ -5759,7 +5759,7 @@ class SensitiveTextTabBFmt extends TabBFmt {
 			$escapedData = $this->makeSafeValueForBrowse($strTempValue);
 			if( $escapedData != "" ){
 				$strTagInnerBody = $escapedData;
-				$strTagInnerBody = nl2br($strTagInnerBody);
+				//$strTagInnerBody = nl2br($strTagInnerBody);
 			}
 		}
 
@@ -5799,6 +5799,49 @@ class SensitiveTextInputTabBFmt extends InputTabBFmt {
 			$aryOverWrite["value"] = $data;
 		}
 		$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>";
+
+		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
+			$objFunction = $this->objFunctionForReturnOverrideGetData;
+			$strTagInnerBody = $objFunction($strTagInnerBody,$this,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite);
+		}
+
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
+}
+
+class SensitiveTextAreaTabBFmt extends InputTabBFmt {
+	private $sensitiveFlagColumn; // SensitiveのON/OFFを判定するフラグのカラム（1ならOFF、2ならON）
+
+	public function __construct($sensitiveFlagColumn){
+		parent::__construct();
+		$this->sensitiveFlagColumn = $sensitiveFlagColumn;
+	}
+
+	public function getData($rowData,$aryVariant){
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+		$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
+		$strColId = $this->getPrintTargetKey();
+
+		//----<textarea></textarea>がdataに入っている場合に異常動作させないための処理
+		$data = $this->makeSafeValueForBrowse($data);
+		//<textarea></textarea>がdataに入っている場合に異常動作させないための処理----
+
+		$aryAddOnDefault["maxLength"] = $this->getMaxInputLength();
+		$aryAddOnDefault["rows"]      = 5;
+		$aryAddOnDefault["cols"]      = 60;
+		$aryOverWrite["id"] = $this->getFSTIDForIdentify();
+		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
+
+		//sensitive_flagの値により処理を分岐（1ならOFF、2ならON）
+		$sensitive_flag = $rowData[$this->sensitiveFlagColumn];
+		if($sensitive_flag == 2){
+			$data = "";
+		}
+		
+		$strTagInnerBody = "<textarea {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>{$data}</textarea>";
+
 
 		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
 			$objFunction = $this->objFunctionForReturnOverrideGetData;
