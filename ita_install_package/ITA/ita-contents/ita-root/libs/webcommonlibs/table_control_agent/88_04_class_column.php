@@ -7909,7 +7909,7 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 
 }
 
-class SensitiveColumn extends passwordColumn {
+class SensitiveSingleTextColumn extends passwordColumn {
 
 	protected $strSensitiveFlagColumn;
 
@@ -8024,6 +8024,133 @@ class SensitiveColumn extends passwordColumn {
 	}
 	//ここまで継承メソッドの上書き処理----
 }
+
+class SensitiveMultiTextColumn extends SensitiveSingleTextColumn {
+
+	protected $intParaGpaphMode; //----1はLf統一
+
+	//----ここから継承メソッドの上書き処理
+
+	function __construct($strColId, $strColLabel, $sensitiveFlagColumn, $aryEtcetera=array()){
+		parent::__construct($strColId, $strColLabel, $sensitiveFlagColumn);
+
+			$outputType = new OutputType(new ReqTabHFmt(), new SensitiveTextAreaTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("update_table", $outputType);
+
+			$outputType = new OutputType(new ReqTabHFmt(), new TextAreaTabBFmt());
+			$this->setOutputType("register_table", $outputType);
+
+			$this->setParaGpaphMode(1);
+
+			//バリデーションチェック用function
+			$objFunction = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+				$boolRet = true;
+				$intErrorType = null;
+				$aryErrMsgBody = array();
+				$strErrMsg = "";
+				$strErrorBuf = "";
+				$sensitiveFlagColumn = $this->getSensitiveColumn();
+				$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+				//更新の場合
+				if( $modeValue=="DTUP_singleRecUpdate" ){
+					if(!empty($aryVariant['edit_target_row'])){
+						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+						//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
+						if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
+							$this->setUpdateRequireExcept(false);
+						}else{
+							$this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
+						}
+					}
+				}
+
+				$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+				return $retArray;
+			};
+			$this->setFunctionForEvent('beforeIUDValidateCheck',$objFunction);
+
+			//登録・更新用function
+			$objFunction2 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+				$boolRet = true;
+				$intErrorType = null;
+				$aryErrMsgBody = array();
+				$strErrMsg = "";
+				$strErrorBuf = "";
+				$sensitiveFlagColumn = $this->getSensitiveColumn();
+				if( $this->getParaGpaphMode()===1 ){
+					//----CrLfがあったらLfへ統一するモードweb_log("CrLfがあったらLfへ統一するモードが走った");
+					$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+					//登録の場合
+					if( $modeValue=="DTUP_singleRecRegister" ){
+						list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($reqOrgData,array($this->getID()),null);
+						if( $tmpBoolKeyExist===true ){
+							$strConvedValue = str_replace(array("\r\n","\r"),"\n",$varValue);
+							$reqOrgData[$this->getID()] = $strConvedValue;
+							$exeQueryData[$this->getID()] = $strConvedValue;
+						}
+					}
+
+					//更新の場合
+					if( $modeValue=="DTUP_singleRecUpdate" ){
+						if(!empty($aryVariant['edit_target_row'])){
+							$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+							$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+							//sensitiveFlagが2(ON)から2(ON)の以外の場合のみ実行
+							if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
+								list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($reqOrgData,array($this->getID()),null);
+								if( $tmpBoolKeyExist===true ){
+									$strConvedValue = str_replace(array("\r\n","\r"),"\n",$varValue);
+									$reqOrgData[$this->getID()] = $strConvedValue;
+									$exeQueryData[$this->getID()] = $strConvedValue;
+								}
+							}
+						}
+					}
+					//CrLfがあったらLfへ統一するモード----
+				}
+
+				if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
+					$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+					//登録か更新の場合
+					if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+						if( $exeQueryData[$objColumn->getID()] != "" ){
+							$strEncodeFunctionName = $objColumn->getEncodeFunctionName();
+							if( $strEncodeFunctionName != "" ){
+								$strEncodedValue = $strEncodeFunctionName($exeQueryData[$objColumn->getID()]);
+							}else{
+								$strEncodedValue = $exeQueryData[$objColumn->getID()];
+							}
+
+							//SENSITIVE_FLAGがON(2)の場合のみエンコードした値を入れる
+							if($exeQueryData[$sensitiveFlagColumn] == 2){
+								$exeQueryData[$objColumn->getID()] = $strEncodedValue;
+							}
+
+						}
+					}
+				}
+
+				$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+				return $retArray;
+			};
+			$this->setFunctionForEvent('beforeTableIUDAction',$objFunction2);
+
+	}
+	//ここまで継承メソッドの上書き処理----
+
+	//----ここから新規メソッドの定義宣言処理
+	function setParaGpaphMode($intParaGpaphMode){
+		$intParaGpaphMode = ($intParaGpaphMode===1)?1:0;
+		$this->intParaGpaphMode = $intParaGpaphMode;
+	}
+	function getParaGpaphMode(){
+		return $this->intParaGpaphMode;
+	}
+	//ここまで新規メソッドの定義宣言処理----
+
+}
+
 
 //----ここからColumn直継承クラス（孫継承なし）
 class RowEditByFileColumn extends Column{
