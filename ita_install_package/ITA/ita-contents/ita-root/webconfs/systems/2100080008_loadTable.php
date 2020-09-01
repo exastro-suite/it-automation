@@ -378,9 +378,9 @@ Terraform代入値管理
     //************************************************************************************
     //----Sensitive設定
     //************************************************************************************
-    $c = new IDColumn('SENSITIVE_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103760"), 'B_TERRAFORM_VARS_SENSITIVE', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c = new IDColumn('SENSITIVE_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103760"), 'B_SENSITIVE_FLAG', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103770")); //エクセル・ヘッダでの説明
-    $c->setJournalTableOfMaster('B_TERRAFORM_VARS_SENSITIVE_JNL');
+    $c->setJournalTableOfMaster('B_SENSITIVE_FLAG_JNL');
     $c->setRequired(true); //登録/更新時には、入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
@@ -391,12 +391,13 @@ Terraform代入値管理
     //----具体値
     //************************************************************************************
     $objVldt = new SingleTextValidator(0,8192,false);
-    $c = new SensitiveColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103740"), 'SENSITIVE_FLAG');
+    $c = new SensitiveSingleTextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103740"), 'SENSITIVE_FLAG');
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103750"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
     $c->setRequired(true);     //登録/更新時には入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
+
     $table->addColumn($c);
 
 

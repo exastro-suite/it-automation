@@ -476,7 +476,7 @@ ASSIGN_ID                         INT                              ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションID
 PATTERN_ID                        INT                              , -- パターンID
 MODULE_VARS_LINK_ID               INT                              , -- 代入値リンクID
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
 SENSITIVE_FLAG                    VARCHAR (1)                      ,
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
@@ -498,41 +498,8 @@ ASSIGN_ID                         INT                              ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションID
 PATTERN_ID                        INT                              , -- パターンID
 MODULE_VARS_LINK_ID               INT                              , -- 代入値リンクID
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
 SENSITIVE_FLAG                    VARCHAR (1)                      ,
-DISP_SEQ                          INT                              , -- 表示順序
-NOTE                              VARCHAR (4000)                   , -- 備考
-DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
-LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
-PRIMARY KEY(JOURNAL_SEQ_NO)
-)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
--- 履歴系テーブル作成----
-
--- ----更新系テーブル作成----
---代入値管理オプション(Sensitive)管理
-CREATE TABLE B_TERRAFORM_VARS_SENSITIVE
-(
-VARS_SENSITIVE                    INT                              ,
-VARS_SENSITIVE_SELECT             VARCHAR (16)                     ,
-DISP_SEQ                          INT                              , -- 表示順序
-NOTE                              VARCHAR (4000)                   , -- 備考
-DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
-LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
-PRIMARY KEY (VARS_SENSITIVE)
-)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
--- 更新系テーブル作成----
-
--- ----履歴系テーブル作成----
---代入値管理オプション(Sensitive)管理(履歴)
-CREATE TABLE B_TERRAFORM_VARS_SENSITIVE_JNL
-(
-JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
-VARS_SENSITIVE                    INT                              ,
-VARS_SENSITIVE_SELECT             VARCHAR (16)                     ,
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
@@ -1259,11 +1226,6 @@ INSERT INTO B_TERRAFORM_WORKSPACE_APPLY_METHOD (WORKSPACE_OPTION_ID,WORKSPACE_OP
 INSERT INTO B_TERRAFORM_WORKSPACE_APPLY_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,WORKSPACE_OPTION_ID,WORKSPACE_OPTION_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Auto apply',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_TERRAFORM_WORKSPACE_APPLY_METHOD (WORKSPACE_OPTION_ID,WORKSPACE_OPTION_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Manual apply',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_TERRAFORM_WORKSPACE_APPLY_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,WORKSPACE_OPTION_ID,WORKSPACE_OPTION_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'Manual apply',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-
-INSERT INTO B_TERRAFORM_VARS_SENSITIVE (VARS_SENSITIVE,VARS_SENSITIVE_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'OFF',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_TERRAFORM_VARS_SENSITIVE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,VARS_SENSITIVE,VARS_SENSITIVE_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'OFF',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_TERRAFORM_VARS_SENSITIVE (VARS_SENSITIVE,VARS_SENSITIVE_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'ON',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_TERRAFORM_VARS_SENSITIVE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,VARS_SENSITIVE,VARS_SENSITIVE_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'ON',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 
 COMMIT;
