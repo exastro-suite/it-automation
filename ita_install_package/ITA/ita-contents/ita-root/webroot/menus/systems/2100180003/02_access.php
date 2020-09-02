@@ -237,7 +237,7 @@
             unset($strSortedData['config']);
 
             require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/74_conductorClassAdmin.php");
-            $arrayResult = conductorClassRegisterExecute(null, $arrayReceptData, $strSortedData, null);
+            $arrayResult = conductorClassRegisterExecute(null, $arrayReceptData, $strSortedData, null,1);
 
             // 結果判定
             if($arrayResult[0]=="000"){
@@ -274,7 +274,7 @@
 
             require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/74_conductorClassAdmin.php");
 
-            $arrayResult = conductorClassRegisterExecute($intShmphonyClassId, $arrayReceptData, $strSortedData, $strLT4UBody);
+            $arrayResult = conductorClassRegisterExecute($intShmphonyClassId, $arrayReceptData, $strSortedData, $strLT4UBody,1);
 
             // 結果判定
             if($arrayResult[0]=="000"){
