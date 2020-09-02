@@ -7973,6 +7973,18 @@ class SensitiveSingleTextColumn extends passwordColumn {
 					}
 				}
 
+				//廃止/復活時に、入力データを補完する
+				if( $modeValue=="DTUP_singleRecDelete" ){
+					if( array_key_exists($this->getID(),$reqOrgData)===false ){
+						//----送信されてこなかった
+						list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($aryVariant,array("edit_target_row",$this->getID()),null);
+						if( $tmpBoolKeyExist===true ){
+							$reqOrgData[$this->getID()] = $varValue;
+						}
+						//送信されてこなかった----
+					}
+				}
+
 				$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
 				return $retArray;
 			};
@@ -8062,6 +8074,18 @@ class SensitiveMultiTextColumn extends SensitiveSingleTextColumn {
 						}else{
 							$this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
 						}
+					}
+				}
+
+				//廃止/復活時に、入力データを補完する
+				if( $modeValue=="DTUP_singleRecDelete" ){
+					if( array_key_exists($this->getID(),$reqOrgData)===false ){
+						//----送信されてこなかった
+						list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($aryVariant,array("edit_target_row",$this->getID()),null);
+						if( $tmpBoolKeyExist===true ){
+							$reqOrgData[$this->getID()] = $varValue;
+						}
+						//送信されてこなかった----
 					}
 				}
 
