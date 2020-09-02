@@ -2093,6 +2093,161 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- Conductorインターフェース----
 
+-- ----Conductorクラス(編集用)
+CREATE TABLE C_CONDUCTOR_EDIT_CLASS_MNG
+(
+CONDUCTOR_CLASS_NO                %INT%                      ,
+
+CONDUCTOR_NAME                    %VARCHR%(256)              ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (CONDUCTOR_CLASS_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_CONDUCTOR_EDIT_CLASS_MNG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+
+CONDUCTOR_CLASS_NO                %INT%                      ,
+
+CONDUCTOR_NAME                    %VARCHR%(256)              ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Conductorクラス(編集用)----
+
+-- ----Nodeクラス(編集用)
+CREATE TABLE C_NODE_EDIT_CLASS_MNG
+(
+NODE_CLASS_NO                     %INT%                      ,
+
+NODE_NAME                         %VARCHR%(256)              ,
+NODE_TYPE_ID                      %INT%                      ,
+ORCHESTRATOR_ID                   %INT%                      ,
+PATTERN_ID                        %INT%                      ,
+CONDUCTOR_CALL_CLASS_NO           %INT%                      ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+CONDUCTOR_CLASS_NO                %INT%                      ,
+OPERATION_NO_IDBH                 %INT%                      ,
+SKIP_FLAG                         %INT%                      ,
+NEXT_PENDING_FLAG                 %INT%                      ,
+POINT_X                           %INT%                      ,
+POINT_Y                           %INT%                      ,
+POINT_W                           %INT%                      ,
+POINT_H                           %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (NODE_CLASS_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_NODE_EDIT_CLASS_MNG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+
+NODE_CLASS_NO                     %INT%                      ,
+
+NODE_NAME                         %VARCHR%(256)              ,
+NODE_TYPE_ID                      %INT%                      ,
+ORCHESTRATOR_ID                   %INT%                      ,
+PATTERN_ID                        %INT%                      ,
+CONDUCTOR_CALL_CLASS_NO           %INT%                      ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+CONDUCTOR_CLASS_NO                %INT%                      ,
+OPERATION_NO_IDBH                 %INT%                      ,
+SKIP_FLAG                         %INT%                      ,
+NEXT_PENDING_FLAG                 %INT%                      ,
+POINT_X                           %INT%                      ,
+POINT_Y                           %INT%                      ,
+POINT_W                           %INT%                      ,
+POINT_H                           %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Nodeクラス(編集用)----
+
+-- ----Terminalクラス(編集用)
+CREATE TABLE C_NODE_TERMINALS_EDIT_CLASS_MNG
+(
+TERMINAL_CLASS_NO                 %INT%                      ,
+
+TERMINAL_CLASS_NAME               %VARCHR%(256)              ,
+TERMINAL_TYPE_ID                  %INT%                      ,
+NODE_CLASS_NO                     %INT%                      ,
+CONDUCTOR_CLASS_NO                %INT%                      ,
+CONNECTED_NODE_NAME               %VARCHR%(256)              ,
+LINE_NAME                         %VARCHR%(256)              ,
+TERMINAL_NAME                     %VARCHR%(256)              ,
+CONDITIONAL_ID                    %VARCHR%(256)              ,
+CASE_NO                           %INT%                      ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+POINT_X                           %INT%                      ,
+POINT_Y                           %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (TERMINAL_CLASS_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_NODE_TERMINALS_EDIT_CLASS_MNG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+
+TERMINAL_CLASS_NO                 %INT%                      ,
+
+TERMINAL_CLASS_NAME               %VARCHR%(256)              ,
+TERMINAL_TYPE_ID                  %INT%                      ,
+NODE_CLASS_NO                     %INT%                      ,
+CONDUCTOR_CLASS_NO                %INT%                      ,
+CONNECTED_NODE_NAME               %VARCHR%(256)              ,
+LINE_NAME                         %VARCHR%(256)              ,
+TERMINAL_NAME                     %VARCHR%(256)              ,
+CONDITIONAL_ID                    %VARCHR%(256)              ,
+CASE_NO                           %INT%                      ,
+DESCRIPTION                       %VARCHR%(4000)             ,
+POINT_X                           %INT%                      ,
+POINT_Y                           %INT%                      ,
+
+DISP_SEQ                          %INT%                      , -- 表示順序
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Terminalクラス(編集用)----
+
 -- ----Conductorクラス
 CREATE TABLE C_CONDUCTOR_CLASS_MNG
 (
