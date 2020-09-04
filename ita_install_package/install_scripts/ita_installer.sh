@@ -130,6 +130,7 @@ ITA_DIRECTORY=''
 ITA_LANGUAGE=''
 ITA_OS=''
 DB_ROOT_PASSWORD=''
+DB_ROOT_PASSWORD_ON_CMD=''
 DB_NAME=''
 DB_USERNAME=''
 DB_PASSWORD=''
@@ -145,7 +146,13 @@ sed -i -e '1s/^\xef\xbb\xbf//' "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
 echo "$(cat "$COPY_ANSWER_FILE")" 1> "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
 
 #answersファイル読み込み
-while read LINE; do
+ANSWERS_TEXT=$(cat "$COPY_ANSWER_FILE")
+#IFSバックアップ
+SRC_IFS="$IFS"
+# IFSに"\n"をセット
+IFS="
+"
+for LINE in $ANSWERS_TEXT;do
     if [ "$LINE" ]; then
         #空白の削除
         PARAM=`echo $LINE | tr -d " "`
@@ -186,7 +193,9 @@ while read LINE; do
             #DBパスワード取得
             elif [ "$key" = 'db_password' ]; then
                 func_answer_format_check
-                DB_PASSWORD="$val"
+                DB_PASSWORD_ON_CMD="$val"
+                val="$(echo "$val"|sed -e 's/\\/\\\\\\\\/g')"
+                DB_PASSWORD="$(echo "$val"|sed -e "s/'/\\\\\\\'/g")"
             fi
         fi
         #--
@@ -212,7 +221,9 @@ while read LINE; do
         #DBルートパスワード取得
         elif [ "$key" = 'db_root_password' ]; then
             func_answer_format_check
-            DB_ROOT_PASSWORD="$val"
+            DB_ROOT_PASSWORD_ON_CMD="$val"
+            val="$(echo "$val"|sed -e 's/\\/\\\\\\\\/g')"
+            DB_ROOT_PASSWORD="$(echo "$val"|sed -e "s/'/\\\\\\\'/g")"
         #DB名取得
         elif [ "$key" = 'db_name' ]; then
             func_answer_format_check
@@ -223,9 +234,11 @@ while read LINE; do
             DB_USERNAME="$val"
         fi
     fi
-done < "$COPY_ANSWER_FILE"
+done
 
+IFS="$SRC_IFS"
 #アンサーファイルの内容が読み取れているか
+
 if [ "$INSTALL_MODE" = "Install" ]; then
     if [ "$FORMAT_CHECK_CNT" != 8 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
