@@ -214,7 +214,7 @@ func_create_tables() {
         if ! test -e "$LIST_DIR/${DRIVER,,}_table_list.txt" ; then
             log "WARNING : ${DRIVER,,}_table_list.txt does not be found."
         else
-            source "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
+            source "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD_ON_CMD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             while read LINE; do
                 FILE_PATH="$LOG_DIR/$LINE.log"
                 if ! test -e "$FILE_PATH" ; then
@@ -686,7 +686,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         sed -i -e "s/ITA_DB/$DB_NAME/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
         sed -i -e "s/ITA_USER/$DB_USERNAME/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
         sed -i -e "s/ITA_PASSWD/$DB_PASSWORD/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
-        RES=`mysql -u root -p"$DB_ROOT_PASSWORD" < /tmp/create-db-and-user_for_MySQL.sql 2>&1 | tee -a "$LOG_FILE"`
+        RES=$(env MYSQL_USER="root" MYSQL_PWD="$DB_ROOT_PASSWORD_ON_CMD" mysql < /tmp/create-db-and-user_for_MySQL.sql 2>&1 | tee -a "$LOG_FILE")
         if echo "$RES" | grep ERROR ; then
             log 'ERROR : Failed to connect to the database.'
             log 'INFO : Abort installation.'
