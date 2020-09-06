@@ -2093,6 +2093,161 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 -- Conductorインターフェース----
 
+-- ----Conductorクラス(編集用)
+CREATE TABLE C_CONDUCTOR_EDIT_CLASS_MNG
+(
+CONDUCTOR_CLASS_NO                INT                        ,
+
+CONDUCTOR_NAME                    VARCHAR (256)              ,
+DESCRIPTION                       VARCHAR (4000)             ,
+
+DISP_SEQ                          INT                        , -- 表示順序
+NOTE                              VARCHAR (4000)             , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                , -- 最終更新日時
+LAST_UPDATE_USER                  INT                        , -- 最終更新ユーザ
+
+PRIMARY KEY (CONDUCTOR_CLASS_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE C_CONDUCTOR_EDIT_CLASS_MNG_JNL
+(
+JOURNAL_SEQ_NO                    INT                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              DATETIME(6)                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              VARCHAR (8)                , -- 履歴用変更種別
+
+CONDUCTOR_CLASS_NO                INT                        ,
+
+CONDUCTOR_NAME                    VARCHAR (256)              ,
+DESCRIPTION                       VARCHAR (4000)             ,
+
+DISP_SEQ                          INT                        , -- 表示順序
+NOTE                              VARCHAR (4000)             , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                , -- 最終更新日時
+LAST_UPDATE_USER                  INT                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+-- Conductorクラス(編集用)----
+
+-- ----Nodeクラス(編集用)
+CREATE TABLE C_NODE_EDIT_CLASS_MNG
+(
+NODE_CLASS_NO                     INT                        ,
+
+NODE_NAME                         VARCHAR (256)              ,
+NODE_TYPE_ID                      INT                        ,
+ORCHESTRATOR_ID                   INT                        ,
+PATTERN_ID                        INT                        ,
+CONDUCTOR_CALL_CLASS_NO           INT                        ,
+DESCRIPTION                       VARCHAR (4000)             ,
+CONDUCTOR_CLASS_NO                INT                        ,
+OPERATION_NO_IDBH                 INT                        ,
+SKIP_FLAG                         INT                        ,
+NEXT_PENDING_FLAG                 INT                        ,
+POINT_X                           INT                        ,
+POINT_Y                           INT                        ,
+POINT_W                           INT                        ,
+POINT_H                           INT                        ,
+
+DISP_SEQ                          INT                        , -- 表示順序
+NOTE                              VARCHAR (4000)             , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                , -- 最終更新日時
+LAST_UPDATE_USER                  INT                        , -- 最終更新ユーザ
+
+PRIMARY KEY (NODE_CLASS_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE C_NODE_EDIT_CLASS_MNG_JNL
+(
+JOURNAL_SEQ_NO                    INT                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              DATETIME(6)                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              VARCHAR (8)                , -- 履歴用変更種別
+
+NODE_CLASS_NO                     INT                        ,
+
+NODE_NAME                         VARCHAR (256)              ,
+NODE_TYPE_ID                      INT                        ,
+ORCHESTRATOR_ID                   INT                        ,
+PATTERN_ID                        INT                        ,
+CONDUCTOR_CALL_CLASS_NO           INT                        ,
+DESCRIPTION                       VARCHAR (4000)             ,
+CONDUCTOR_CLASS_NO                INT                        ,
+OPERATION_NO_IDBH                 INT                        ,
+SKIP_FLAG                         INT                        ,
+NEXT_PENDING_FLAG                 INT                        ,
+POINT_X                           INT                        ,
+POINT_Y                           INT                        ,
+POINT_W                           INT                        ,
+POINT_H                           INT                        ,
+
+DISP_SEQ                          INT                        , -- 表示順序
+NOTE                              VARCHAR (4000)             , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                , -- 最終更新日時
+LAST_UPDATE_USER                  INT                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+-- Nodeクラス(編集用)----
+
+-- ----Terminalクラス(編集用)
+CREATE TABLE C_NODE_TERMINALS_EDIT_CLASS_MNG
+(
+TERMINAL_CLASS_NO                 INT                        ,
+
+TERMINAL_CLASS_NAME               VARCHAR (256)              ,
+TERMINAL_TYPE_ID                  INT                        ,
+NODE_CLASS_NO                     INT                        ,
+CONDUCTOR_CLASS_NO                INT                        ,
+CONNECTED_NODE_NAME               VARCHAR (256)              ,
+LINE_NAME                         VARCHAR (256)              ,
+TERMINAL_NAME                     VARCHAR (256)              ,
+CONDITIONAL_ID                    VARCHAR (256)              ,
+CASE_NO                           INT                        ,
+DESCRIPTION                       VARCHAR (4000)             ,
+POINT_X                           INT                        ,
+POINT_Y                           INT                        ,
+
+DISP_SEQ                          INT                        , -- 表示順序
+NOTE                              VARCHAR (4000)             , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                , -- 最終更新日時
+LAST_UPDATE_USER                  INT                        , -- 最終更新ユーザ
+
+PRIMARY KEY (TERMINAL_CLASS_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE C_NODE_TERMINALS_EDIT_CLASS_MNG_JNL
+(
+JOURNAL_SEQ_NO                    INT                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              DATETIME(6)                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              VARCHAR (8)                , -- 履歴用変更種別
+
+TERMINAL_CLASS_NO                 INT                        ,
+
+TERMINAL_CLASS_NAME               VARCHAR (256)              ,
+TERMINAL_TYPE_ID                  INT                        ,
+NODE_CLASS_NO                     INT                        ,
+CONDUCTOR_CLASS_NO                INT                        ,
+CONNECTED_NODE_NAME               VARCHAR (256)              ,
+LINE_NAME                         VARCHAR (256)              ,
+TERMINAL_NAME                     VARCHAR (256)              ,
+CONDITIONAL_ID                    VARCHAR (256)              ,
+CASE_NO                           INT                        ,
+DESCRIPTION                       VARCHAR (4000)             ,
+POINT_X                           INT                        ,
+POINT_Y                           INT                        ,
+
+DISP_SEQ                          INT                        , -- 表示順序
+NOTE                              VARCHAR (4000)             , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                , -- 最終更新日時
+LAST_UPDATE_USER                  INT                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+-- Terminalクラス(編集用)----
+
 -- ----Conductorクラス
 CREATE TABLE C_CONDUCTOR_CLASS_MNG
 (
@@ -2461,6 +2616,34 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 --TERMINALタイプマスタ ----
 
+-- ----SensitiveFマスタ
+CREATE TABLE B_SENSITIVE_FLAG
+(
+VARS_SENSITIVE                    INT                              ,
+VARS_SENSITIVE_SELECT             VARCHAR (16)                     ,
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY (VARS_SENSITIVE)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE B_SENSITIVE_FLAG_JNL
+(
+JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
+VARS_SENSITIVE                    INT                              ,
+VARS_SENSITIVE_SELECT             VARCHAR (16)                     ,
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+-- SensitiveFマスタ----
 
 -- -------------------------------------------------------
 -- --定期作業実行用(Conductor)
@@ -3719,6 +3902,18 @@ INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_CONDUCTOR_IF_INFO_JSQ',2);
 
 INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_CONDUCTOR_IF_INFO_RIC',2);
 
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_CONDUCTOR_EDIT_CLASS_MNG_JSQ',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_CONDUCTOR_EDIT_CLASS_MNG_RIC',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_NODE_EDIT_CLASS_MNG_JSQ',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_NODE_EDIT_CLASS_MNG_RIC',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_NODE_TERMINALS_EDIT_CLASS_MNG_JSQ',1);
+
+INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_NODE_TERMINALS_EDIT_CLASS_MNG_RIC',1);
+
 
 INSERT INTO A_SYSTEM_CONFIG_LIST (ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000001,'IP_FILTER','IPアドレス規制',NULL,CONCAT('IPアドレスを利用したアクセス規制の有効/無効を選択できる。','\n','規制する場合のホワイトリストはIPアドレスフィルタ管理メニューにて編集できる。','\n','ブランク：無効','\n','1:有効'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_SYSTEM_CONFIG_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000001,'IP_FILTER','IPアドレス規制',NULL,CONCAT('IPアドレスを利用したアクセス規制の有効/無効を選択できる。','\n','規制する場合のホワイトリストはIPアドレスフィルタ管理メニューにて編集できる。','\n','ブランク：無効','\n','1:有効'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -4415,6 +4610,11 @@ INSERT INTO B_MOV_ABT_RECEPT_FLAG (MOV_ABT_RECEPT_FLAG_ID,MOV_ABT_RECEPT_FLAG_NA
 INSERT INTO B_MOV_ABT_RECEPT_FLAG_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MOV_ABT_RECEPT_FLAG_ID,MOV_ABT_RECEPT_FLAG_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'未確認',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_MOV_ABT_RECEPT_FLAG (MOV_ABT_RECEPT_FLAG_ID,MOV_ABT_RECEPT_FLAG_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'確認済',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_MOV_ABT_RECEPT_FLAG_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MOV_ABT_RECEPT_FLAG_ID,MOV_ABT_RECEPT_FLAG_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'確認済',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO B_SENSITIVE_FLAG (VARS_SENSITIVE,VARS_SENSITIVE_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'OFF',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_SENSITIVE_FLAG_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,VARS_SENSITIVE,VARS_SENSITIVE_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'OFF',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_SENSITIVE_FLAG (VARS_SENSITIVE,VARS_SENSITIVE_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'ON',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_SENSITIVE_FLAG_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,VARS_SENSITIVE,VARS_SENSITIVE_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'ON',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO B_REGULARLY_STATUS (REGULARLY_STATUS_ID,REGULARLY_STATUS_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'準備中',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_REGULARLY_STATUS_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,REGULARLY_STATUS_ID,REGULARLY_STATUS_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'準備中',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
