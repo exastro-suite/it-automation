@@ -134,6 +134,7 @@ DB_ROOT_PASSWORD_ON_CMD=''
 DB_NAME=''
 DB_USERNAME=''
 DB_PASSWORD=''
+DB_PASSWORD_ON_CMD=''
 
 # ita_answers.txtを/tmpにコピー
 rm -f "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
@@ -149,7 +150,7 @@ echo "$(cat "$COPY_ANSWER_FILE")" 1> "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
 ANSWERS_TEXT=$(cat "$COPY_ANSWER_FILE")
 #IFSバックアップ
 SRC_IFS="$IFS"
-# IFSに"\n"をセット
+#IFSに"\n"をセット
 IFS="
 "
 for LINE in $ANSWERS_TEXT;do
@@ -236,7 +237,9 @@ for LINE in $ANSWERS_TEXT;do
     fi
 done
 
+#IFSリストア
 IFS="$SRC_IFS"
+
 #アンサーファイルの内容が読み取れているか
 
 if [ "$INSTALL_MODE" = "Install" ]; then
