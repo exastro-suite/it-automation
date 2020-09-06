@@ -44,10 +44,10 @@ Symphony紐付Movementの一覧
         'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
     );
 
-    $table = new TableControlAgent('C_NODE_CLASS_MNG','NODE_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-308001"), 'C_NODE_CLASS_MNG_JNL', $tmpAry); #
+    $table = new TableControlAgent('C_NODE_EDIT_CLASS_MNG','NODE_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-308001"), 'C_NODE_EDIT_CLASS_MNG_JNL', $tmpAry); #
     $tmpAryColumn = $table->getColumns();
-    $tmpAryColumn['NODE_CLASS_NO']->setSequenceID('C_NODE_CLASS_MNG_RIC');
-    $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('C_NODE_CLASS_MNG_JSQ');
+    $tmpAryColumn['NODE_CLASS_NO']->setSequenceID('C_NODE_EDIT_CLASS_MNG_RIC');
+    $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('C_NODE_EDIT_CLASS_MNG_JSQ');
     unset($tmpAryColumn);
 
     // QMファイル名プレフィックス
