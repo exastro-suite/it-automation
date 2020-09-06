@@ -901,7 +901,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log "WARNING : Failed to place db_username.txt."
     fi
 
-    DB_PASSWORD_ENC=`func_str_encode "$DB_PASSWORD"`
+    DB_PASSWORD_ENC=`func_str_encode "$DB_PASSWORD_ON_CMD"`
     echo "$DB_PASSWORD_ENC" > "$ITA_DIRECTORY"/ita-root/confs/commonconfs/db_password.txt
     if ! test -e "$ITA_DIRECTORY"/ita-root/confs/commonconfs/db_password.txt ; then
         log "WARNING : Failed to place db_password.txt."
