@@ -126,4 +126,22 @@ $ary[5016] = "Vertical menu Input method does not match on repeat item set by cr
 $ary[5017] = "Vertical menu Number of items/repetition count mismatches menu item creation information ";
 $ary[5018] = "Vertical Menu group: Menu: Item names in Pulldown selection do not match in the repetition item set by creation information.";
 $ary[5019] = "Failed to acquire the specified pulldown menu item.ID=[{}]";
+$ary[1094] = "\"Password maximum number of bytes\" can not be set when \"String\" is set.";
+$ary[1095] = "\"Password maximum number of bytes\" can not be set when \"Multi String\" is set.";
+$ary[1096] = "\"Password maximum number of bytes\" can not be set when \"Integer\" is set.";
+$ary[1097] = "\"Password maximum number of bytes\" can not be set when \"Decimal number\" is set.";
+$ary[1098] = "\"Password maximum number of bytes\" can not be set when \"Date/time\" is set.";
+$ary[1099] = "\"Password maximum number of bytes\" can not be set when \"Date\" is set.";
+$ary[1100] = "\"Password maximum number of bytes\" can not be set when \"Pulldown selection\" is set.";
+$ary[1101] = "\"Maximum number of bytes\" is required when \"Password\" is set.";
+$ary[1102] = "\"String maximum number of bytes\" can not be set when \"Date/time\" is set.";
+$ary[1103] = "\"String regular expression\" can not be set when \"Password\" is set.";
+$ary[1104] = "\"Multi string maximum number of bytes\" can not be set when \"Password\" is set.";
+$ary[1105] = "\"Multi string regular expression\" can not be set when \"Password\" is set.";
+$ary[1106] = "\"Integer minimum value\" can not be set when \"Password\" is set.";
+$ary[1107] = "\"Integer maximum value\" can not be set when \"Password\" is set.";
+$ary[1108] = "\"Decimal number maximum value\" can not be set when \"Password\" is set.";
+$ary[1109] = "\"Decimal number minimum value\" can not be set when \"Password\" is set.";
+$ary[1110] = "\"Decimal number digit\" can not be set when \"Password\" is set.";
+$ary[1111] = "\"Menu group:Menu:Item\" can not be set when \"Password\" is set.";
 ?>
