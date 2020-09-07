@@ -193,7 +193,8 @@ function printConductorInfoRegConductor($fxVarsIntConductorClassId){
         require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
         $objOLA = new OrchestratorLinkAgent($g['objMTS'],$g['objDBCA']);
 
-        $aryRetBody = $objOLA->convertConductorClassJson($fxVarsIntConductorClassId,1);
+
+        $aryRetBody = $objOLA->convertConductorClassJson($fxVarsIntConductorClassId);
         
         if( $aryRetBody[1]!==null ){
             // 例外処理へ
