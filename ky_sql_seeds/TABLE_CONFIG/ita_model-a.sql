@@ -3214,6 +3214,8 @@ CREATE TABLE B_CMDB_MENU_LIST (
 MENU_LIST_ID                   %INT%                   , -- 識別シーケンス
 MENU_ID                        %INT%                   , -- メニューID
 
+SHEET_TYPE                     %INT%                   , -- シートタイプ　null/1:ホスト/オペレーションを含む　2:ホストのみ
+
 DISP_SEQ                       %INT%                   , -- 表示順序
 NOTE                           %VARCHR%(4000)          , -- 備考
 DISUSE_FLAG                    %VARCHR%(1)             , -- 廃止フラグ
@@ -3229,6 +3231,8 @@ JOURNAL_ACTION_CLASS           %VARCHR%(8)             , -- 履歴用変更種�
 
 MENU_LIST_ID                   %INT%                   , -- 識別シーケンス
 MENU_ID                        %INT%                   , -- メニューID
+
+SHEET_TYPE                     %INT%                   , -- シートタイプ　null/1:ホスト/オペレーションを含む　2:ホストのみ
 
 DISP_SEQ                       %INT%                   , -- 表示順序
 NOTE                           %VARCHR%(4000)          , -- 備考
@@ -3247,6 +3251,7 @@ SELECT
        TAB_A.MENU_ID           MENU_ID_CLONE,
        TAB_B.MENU_NAME                      ,
        [%CONCAT_HEAD/%]TAB_B.MENU_GROUP_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.MENU_GROUP_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.MENU_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.MENU_NAME[%CONCAT_TAIL/%] MENU_PULLDOWN,
+       TAB_A.SHEET_TYPE                     ,
        TAB_A.DISP_SEQ                       ,
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
@@ -3269,6 +3274,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.MENU_ID           MENU_ID_CLONE,
        TAB_B.MENU_NAME                      ,
        [%CONCAT_HEAD/%]TAB_B.MENU_GROUP_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.MENU_GROUP_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.MENU_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.MENU_NAME[%CONCAT_TAIL/%] MENU_PULLDOWN,
+       TAB_A.SHEET_TYPE                     ,
        TAB_A.DISP_SEQ                       ,
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
@@ -3494,6 +3500,7 @@ SELECT
   TAB_A.COLUMN_LIST_ID                 , 
   CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_TITLE_PULLDOWN,
   TAB_C.MENU_ID                        ,
+  TAB_B.SHEET_TYPE                     ,
   TAB_A.COL_TITLE_DISP_SEQ             ,
   TAB_A.DISP_SEQ                       ,
   TAB_A.NOTE                           ,
@@ -3501,7 +3508,7 @@ SELECT
   TAB_A.LAST_UPDATE_TIMESTAMP          ,
   TAB_A.LAST_UPDATE_USER 
 FROM        B_CMDB_MENU_COLUMN TAB_A
-  LEFT JOIN B_CMDB_MENU_LIST   TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+  LEFT JOIN B_CMDB_MENU_LIST       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
   LEFT JOIN A_MENU_LIST            TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
   LEFT JOIN A_MENU_GROUP_LIST      TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
 WHERE
@@ -3515,6 +3522,7 @@ SELECT
   TAB_A.COLUMN_LIST_ID                 , 
   CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_PULLDOWN,
   TAB_C.MENU_ID                        ,
+  TAB_B.SHEET_TYPE                     ,
   TAB_A.COL_TITLE_DISP_SEQ             ,
   TAB_A.DISP_SEQ                       ,
   TAB_A.NOTE                           ,
@@ -3522,7 +3530,7 @@ SELECT
   TAB_A.LAST_UPDATE_TIMESTAMP          ,
   TAB_A.LAST_UPDATE_USER 
 FROM        B_CMDB_MENU_COLUMN_JNL TAB_A
-  LEFT JOIN B_CMDB_MENU_LIST       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+  LEFT JOIN B_CMDB_MENU_LIST           TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
   LEFT JOIN A_MENU_LIST                TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
   LEFT JOIN A_MENU_GROUP_LIST          TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
 WHERE

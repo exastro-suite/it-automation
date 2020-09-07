@@ -252,7 +252,12 @@ Ansible（Legacy Role）代入値自動登録設定
         };
 
         // メニュー
-        $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900100"),'D_CMDB_MENU_LIST','MENU_ID','MENU_PULLDOWN','',array('OrderByThirdColumn'=>'MENU_ID'));
+        $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900100"),
+        'D_ANS_CMDB_MENU_LIST',
+        'MENU_ID',
+        'MENU_PULLDOWN',
+        '',
+        array('OrderByThirdColumn'=>'MENU_ID'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900101"));
 
         $c->setHiddenMainTableColumn(true); //更新対象カラム
@@ -271,7 +276,7 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setEvent('update_table', 'onchange', 'menu_upd');
         $c->setEvent('register_table', 'onchange', 'menu_reg');
 
-        $c->setJournalTableOfMaster('D_CMDB_MENU_LIST_JNL');
+        $c->setJournalTableOfMaster('D_ANS_CMDB_MENU_LIST_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('MENU_ID');
@@ -308,7 +313,12 @@ Ansible（Legacy Role）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900120"),'B_CMDB_MENU_COLUMN','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
+        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900120"),
+        'D_ANS_CMDB_MENU_COLUMN',
+        'COLUMN_LIST_ID',
+        'COL_TITLE',
+         '',
+        array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900121"));
 
@@ -336,7 +346,7 @@ Ansible（Legacy Role）代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        ."FROM "
-                       ." B_CMDB_MENU_COLUMN TAB_1 "
+                       ." D_ANS_CMDB_MENU_COLUMN TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -380,7 +390,7 @@ Ansible（Legacy Role）代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        ."FROM "
-                       ." B_CMDB_MENU_COLUMN TAB_1 "
+                       ." D_ANS_CMDB_MENU_COLUMN TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -426,7 +436,7 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setOutputType('register_table',$objOTForReg);
 
 
-        $c->setJournalTableOfMaster('B_CMDB_MENU_COLUMN_JNL');
+        $c->setJournalTableOfMaster('D_ANS_CMDB_MENU_COLUMN_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
@@ -448,7 +458,12 @@ Ansible（Legacy Role）代入値自動登録設定
         ////////////////////////////////////////////////////////////
         // Excel/CSV/RestAPI 用カラムタイトル名
 
-        $c = new IDColumn('REST_COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900125"),'D_CMDB_MG_MU_COL_LIST','COLUMN_LIST_ID','MENU_COL_TITLE_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MENU_ID','COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1,ADD_SELECT_2') );
+        $c = new IDColumn('REST_COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900125"),
+        'D_ANS_CMDB_MG_MU_COL_LIST',
+        'COLUMN_LIST_ID',
+        'MENU_COL_TITLE_PULLDOWN',
+        '',
+        array('SELECT_ADD_FOR_ORDER'=>array('MENU_ID','COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1,ADD_SELECT_2') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900126"));
 
@@ -466,7 +481,7 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->getOutputType('csv')->setVisible(true);
         $c->getOutputType('json')->setVisible(true);
 
-        $c->setJournalTableOfMaster('D_CMDB_MG_MU_COL_LIST_JNL');
+        $c->setJournalTableOfMaster('D_ANS_CMDB_MG_MU_COL_LIST_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
@@ -2233,13 +2248,13 @@ Ansible（Legacy Role）代入値自動登録設定
                          ."    SELECT                                         "
                          ."      COUNT(*)                                     "
                          ."    FROM                                           "
-                         ."      B_CMDB_MENU_LIST TBL_B                       "
+                         ."      D_ANS_CMDB_MENU_LIST TBL_B                   "
                          ."    WHERE                                          "
                          ."      TBL_B.MENU_ID      = TBL_A.MENU_ID AND       "
                          ."      TBL_B.DISUSE_FLAG  = '0'                     "
                          ."  ) AS MENU_CNT                                    "
                          ."FROM                                               "
-                         ."  B_CMDB_MENU_COLUMN TBL_A                         "
+                         ."  D_ANS_CMDB_MENU_COLUMN TBL_A                     "
                          ."WHERE                                              "
                          ."  TBL_A.COLUMN_LIST_ID  = :COLUMN_LIST_ID   AND    "
                          ."  TBL_A.DISUSE_FLAG     = '0'                      ";
@@ -2403,14 +2418,14 @@ Ansible（Legacy Role）代入値自動登録設定
                      ."     SELECT  "
                      ."       COUNT(*) "
                      ."     FROM "
-                     ."       B_CMDB_MENU_COLUMN TBL_B "
+                     ."       D_ANS_CMDB_MENU_COLUMN TBL_B "
                      ."     WHERE "
                      ."       TBL_B.MENU_ID        = :MENU_ID          AND "
                      ."       TBL_B.COLUMN_LIST_ID = :COLUMN_LIST_ID   AND "
                      ."       TBL_B.DISUSE_FLAG  = '0' "
                      ."   ) AS COLUMN_CNT "
                      ." FROM "
-                     ."   B_CMDB_MENU_LIST TBL_A  "
+                     ."   D_ANS_CMDB_MENU_LIST TBL_A  "
                      ." WHERE "
                      ."   TBL_A.MENU_ID      = :MENU_ID   AND "
                      ."   TBL_A.DISUSE_FLAG  = '0' ";

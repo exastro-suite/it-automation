@@ -249,7 +249,12 @@ Ansible（Pioneer）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902100"),'D_ANS_PNS_CMDB_MENU_LIST','MENU_ID','MENU_PULLDOWN','',array('OrderByThirdColumn'=>'MENU_ID'));
+        $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902100"),
+        'D_ANS_PNS_CMDB_MENU_LIST',
+        'MENU_ID',
+        'MENU_PULLDOWN',
+        '',
+        array('OrderByThirdColumn'=>'MENU_ID'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902101"));
 
         $c->setHiddenMainTableColumn(true); //更新対象カラム
@@ -305,7 +310,12 @@ Ansible（Pioneer）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902120"),'D_ANS_PNS_CMDB_MENU_COLUMN','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
+        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902120"),
+        'D_ANS_PNS_CMDB_MENU_COLUMN',
+        'COLUMN_LIST_ID',
+        'COL_TITLE',
+        '',
+        array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902121"));
 
@@ -443,7 +453,12 @@ Ansible（Pioneer）代入値自動登録設定
         ////////////////////////////////////////////////////////////
         // Excel/CSV/RestAPI 用カラムタイトル名
 
-        $c = new IDColumn('REST_COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902125"),'D_ANS_PNS_CMDB_MG_MU_COL_LIST','COLUMN_LIST_ID','MENU_COL_TITLE_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MENU_ID','COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1,ADD_SELECT_2') );
+        $c = new IDColumn('REST_COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902125"),
+        'D_ANS_PNS_CMDB_MG_MU_COL_LIST',
+        'COLUMN_LIST_ID',
+        'MENU_COL_TITLE_PULLDOWN',
+        '',
+        array('SELECT_ADD_FOR_ORDER'=>array('MENU_ID','COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1,ADD_SELECT_2') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902126"));
         $c->setJournalTableOfMaster('D_ANS_PNS_CMDB_MG_MU_COL_LIST_JNL');
