@@ -517,6 +517,7 @@ class CreateItemInfoTable extends BaseTable_CPM {
                                     'FLOAT_MAX',
                                     'FLOAT_MIN',
                                     'FLOAT_DIGIT',
+                                    'PW_MAX_LENGTH',
                                     'DESCRIPTION',
                                     'NOTE',
                                     'DISUSE_FLAG',

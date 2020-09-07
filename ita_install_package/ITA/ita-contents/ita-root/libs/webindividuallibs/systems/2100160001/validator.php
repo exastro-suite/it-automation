@@ -721,6 +721,11 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1010");
                     }
+                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1094");
+                    }
                 }
                 // 入力方式が文字列(複数行)の場合
                 else if("2" == $value){
@@ -768,7 +773,12 @@ class InputMethodValidator extends IDValidator {
                     if($retBool == true && array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) && "" != $arrayRegData['OTHER_MENU_LINK_ID']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1068");
-                    } 
+                    }
+                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1095");
+                    }
                 }
                 // 入力方式が整数の場合
                 else if("3" == $value){
@@ -824,7 +834,12 @@ class InputMethodValidator extends IDValidator {
                     if($retBool == true && array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) && "" != $arrayRegData['OTHER_MENU_LINK_ID']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1056");
-                    } 
+                    }
+                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1096");
+                    }
                 }
                 // 入力方式が小数の場合
                 else if("4" == $value){
@@ -875,6 +890,11 @@ class InputMethodValidator extends IDValidator {
                     if($retBool == true && array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) && "" != $arrayRegData['OTHER_MENU_LINK_ID']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1064");
+                    }
+                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1097");
                     }
                 }
                 // 入力方式が日時の場合
@@ -929,6 +949,11 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1083");
                     }
+                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1098");
+                    }
                 }
                 // 入力方式が日付の場合
                 else if("6" == $value){
@@ -982,6 +1007,11 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1093");
                     } 
+                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1099");
+                    }
                 }
                 // 入力方式がプルダウンの場合
                 else if("7" == $value){
@@ -1034,6 +1064,69 @@ class InputMethodValidator extends IDValidator {
                     if($retBool == true && (!array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) || "" == $arrayRegData['OTHER_MENU_LINK_ID'])){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1013");
+                    }
+                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1100");
+                    }
+                }
+                // 入力方式が文字列(PW)の場合
+                else if("8" == $value){
+                    // 文字列(単一行)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1102");
+                    }
+                    // 文字列(単一行)正規表現が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PREG_MATCH',$arrayRegData) && "" != $arrayRegData['PREG_MATCH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1103");
+                    }
+                    // 文字列(複数行)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('MULTI_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MULTI_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1104");
+                    }
+                    // 文字列(複数行)正規表現が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('MULTI_PREG_MATCH',$arrayRegData) && "" != $arrayRegData['MULTI_PREG_MATCH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1105");
+                    }
+                    // 整数最小値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('INT_MIN',$arrayRegData) && "" != $arrayRegData['INT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1106");
+                    } 
+                    // 整数最大値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('INT_MAX',$arrayRegData) && "" != $arrayRegData['INT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1107");
+                    } 
+                    // 小数最小値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('FLOAT_MIN',$arrayRegData) && "" != $arrayRegData['FLOAT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1108");
+                    } 
+                    // 小数最大値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('FLOAT_MAX',$arrayRegData) && "" != $arrayRegData['FLOAT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1109");
+                    } 
+                    // 小数桁数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('FLOAT_DIGIT',$arrayRegData) && "" != $arrayRegData['FLOAT_DIGIT']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1110");
+                    }
+                    // メニューグループ：メニュー：項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) && "" != $arrayRegData['OTHER_MENU_LINK_ID']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1111");
+                    }
+                    // 文字列(PW)最大バイト数が設定されていない場合、エラー
+                    if($retBool == true && (!array_key_exists('PW_MAX_LENGTH',$arrayRegData) || "" == $arrayRegData['PW_MAX_LENGTH'])){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1101");
                     }
                 }
                 if( $retBool === false ){

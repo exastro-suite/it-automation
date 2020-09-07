@@ -99,7 +99,12 @@ try{
                               TEMPLATE_PATH . FILE_HG_LOADTABLE_MUL,
                               TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_MUL,
                               TEMPLATE_PATH . FILE_CMDB_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_MUL
+                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_MUL,
+                              TEMPLATE_PATH . FILE_H_LOADTABLE_PW,
+                              TEMPLATE_PATH . FILE_HG_LOADTABLE_PW,
+                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_PW,
+                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_PW,
+                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_PW
                              );
     $templateArray = array();
     foreach($templatePathArray as $templatePath){
@@ -163,6 +168,11 @@ try{
     $convLoadTableMulTmpl       = $templateArray[43];
     $cmdbLoadTableMulTmpl       = $templateArray[44];
     $viewLoadTableMulTmpl       = $templateArray[45];
+    $hostLoadTablePwTmpl        = $templateArray[46];
+    $hgLoadTablePwTmpl          = $templateArray[47];
+    $convLoadTablePwTmpl        = $templateArray[48];
+    $cmdbLoadTablePwTmpl        = $templateArray[49];
+    $viewLoadTablePwTmpl        = $templateArray[50];
 
     //////////////////////////
     // パラメータシート作成情報を取得
@@ -465,6 +475,15 @@ try{
                         $errFlg = true;
                         break;
                     }
+                    // 最大バイト数(PW)チェック
+                    if(8 == $inputMethodIdArray[$j] && $multiMaxLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['MULTI_MAX_LENGTH']){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
                 }
                 if(true === $errFlg){
                     break;
@@ -545,6 +564,9 @@ try{
                 case 7: //プルダウン
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                     break;
+                case 8: //文字列(PW)
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                    break;
             }
             $columns = $columns . "       TAB_A." . $itemInfo['COLUMN_NAME'] . ",\n";
 
@@ -576,6 +598,9 @@ try{
                     case 7:
                         $work = $cmdbLoadTableIdTmpl;   // プルダウン
                         break;
+                    case 8:
+                        $work = $cmdbLoadTablePwTmpl;   // 文字列(PW)
+                        break;
                 }
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
 
@@ -598,6 +623,7 @@ try{
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
 
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -682,7 +708,7 @@ try{
                             $work = $hgLoadTableValTmpl;  // 文字列(単一行)
                             break;
                         case 2:
-                            $work = $hgLoadTableMulTmpl;   // 文字列(複数行)
+                            $work = $hgLoadTableMulTmpl;  // 文字列(複数行)
                             break;                                
                         case 3:
                             $work = $hgLoadTableIntTmpl;  // 整数
@@ -699,6 +725,9 @@ try{
                         case 7:
                             $work = $hgLoadTableIdTmpl;   // プルダウン
                             break;
+                        case 8:
+                            $work = $hgLoadTablePwTmpl;  // 文字列(PW)
+                            break;  
                     }  
 
                     $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -722,6 +751,7 @@ try{
                     $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                     $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                     $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                    $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
 
                     if(1 == $itemInfo['REQUIRED']){
                         $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -822,6 +852,9 @@ try{
                     case 7:
                         $work = $hostLoadTableIdTmpl;   // プルダウン
                         break;
+                    case 8:
+                        $work = $hostLoadTablePwTmpl;   // 文字列(PW)
+                        break;
                 }
 
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -845,6 +878,7 @@ try{
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
 
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -946,6 +980,9 @@ try{
                     case 7:
                         $work = $viewLoadTableIdTmpl;   // プルダウン
                         break;
+                    case 8:
+                        $work = $viewLoadTablePwTmpl;   // 文字列(PW)
+                        break;
                 }
 
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -969,6 +1006,7 @@ try{
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
 
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
@@ -1105,6 +1143,9 @@ try{
                     case 7:
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                         break;
+                    case 8:
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                        break;
                 }
         
                 $convColumns = $convColumns . "       TAB_A." . $itemInfo['COLUMN_NAME'] . ",\n";
@@ -1136,6 +1177,9 @@ try{
                     case 7:
                         $work = $convLoadTableIdTmpl;   // プルダウン
                         break;
+                    case 8:
+                        $work = $convLoadTablePwTmpl;   // 文字列（PW）
+                        break;
                 }
 
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -1159,6 +1203,7 @@ try{
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
 
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -1258,6 +1303,9 @@ try{
                     case 7:
                         $work = $viewLoadTableIdTmpl;   // プルダウン
                         break;
+                    case 8:
+                        $work = $viewLoadTablePwTmpl;   // 文字列(PW)
+                        break;
                 }
 
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -1278,11 +1326,13 @@ try{
                 }
                 else{
                     $work = str_replace(REPLACE_MULTI_PREG, "", $work);
+                    
                 }
                 $work = str_replace(REPLACE_VALUE,            $itemInfo['COLUMN_NAME'],      $work);
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
 
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
@@ -2598,17 +2648,11 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
         // 登録する
         foreach($itemInfoArray as $itemInfo){
             // プルダウン選択は対象外のため、スキップする
-            if(7 == $itemInfo['INPUT_METHOD_ID']){
+            if(7 == $itemInfo['INPUT_METHOD_ID'] || 8 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             // 必須かつ一意の場合
             if(1 == $itemInfo['REQUIRED'] && 1 == $itemInfo['UNIQUED']){
-                
-                if($substitutionFlag == true){
-                    $strParameter = "";      // データシート用は「パラメータ」をつけない
-                }else{
-                    $strParameter = $objMTS->getSomeMessage("ITACREPAR-MNU-102612") ."/"; 
-                }
 
                 // 項目名を決定する
                 if(0 < count($itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']])){
@@ -3188,7 +3232,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             if(7 == $itemInfo['INPUT_METHOD_ID']){
                 $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                 $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
+                if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE'] || 8 == $otherMenuLink['COLUMN_TYPE']){
                     continue;
                 }
                 if(1 == $otherMenuLink['COLUMN_TYPE']){
@@ -3209,6 +3253,9 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             }
             else if(3 == $itemInfo['INPUT_METHOD_ID'] || 4 == $itemInfo['INPUT_METHOD_ID']){
                 $colClass = "NumColumn";
+            }
+            else if(8 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "PasswordColumn";
             }
             
             // 項目名を作成
