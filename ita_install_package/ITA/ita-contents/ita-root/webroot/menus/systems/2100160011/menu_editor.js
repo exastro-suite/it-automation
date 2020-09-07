@@ -147,7 +147,7 @@ const selectDummyText = {
   '5' : ['2020/01/01 00:00','2020/01/01 00:00','string'],
   '6' : ['2020/01/01','2020/01/01','string'],
   '7' : ['','','select'],
-  '8' : [getSomeMessage("ITACREPAR_1238"),'','string']
+  '8' : [getSomeMessage("ITACREPAR_1237"),'','string']
 };
 
 const titleHeight = 32;
