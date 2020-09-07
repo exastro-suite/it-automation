@@ -57,7 +57,7 @@ $log_file_prefix = basename( __FILE__, '.php' ) . "_";
 ////////////////////////////////
 // $log_levelを取得           //
 ////////////////////////////////
-$log_level = getenv('LOG_LEVEL'); // 'DEBUG';
+$log_level =  //getenv('LOG_LEVEL'); // 'DEBUG';
 
 ////////////////////////////////
 // PHPエラー時のログ出力先設定//
@@ -101,6 +101,7 @@ $arrayConfigOfMenu = array(
     "JOURNAL_REG_DATETIME"=>""    ,
     "MENU_LIST_ID"=>""            ,
     "MENU_ID"=>""                 ,
+    "SHEET_TYPE"=>""              ,
     "DISP_SEQ"=>""                ,
     "DISUSE_FLAG"=>""             ,
     "NOTE"=>""                    ,
@@ -114,6 +115,7 @@ $arrayValueTmplOfMenu = array(
     "JOURNAL_REG_DATETIME"=>""    ,
     "MENU_LIST_ID"=>""            ,
     "MENU_ID"=>""                 ,
+    "SHEET_TYPE"=>""              ,
     "DISP_SEQ"=>""                ,
     "DISUSE_FLAG"=>""             ,
     "NOTE"=>""                    ,
@@ -239,6 +241,7 @@ $arrayTargetClassList = array(
     "NumColumn",
     "MaskColumn",
     "MultiTextColumn",
+    "PasswordColumn",
 );
 
 ////////////////////////////////
@@ -777,7 +780,7 @@ try{
 
             $sql = "UPDATE A_PROC_LOADED_LIST "
                    ."SET LOADED_FLG=:LOADED_FLG, LAST_UPDATE_TIMESTAMP=:LAST_UPDATE_TIMESTAMP "
-                   ."WHERE ROW_ID IN (2100020002, 2100020004, 2100020006)";
+                   ."WHERE ROW_ID IN (2100020002, 2100020004, 2100020006, 2100080002)";
 
             $objQuery = $objDBCA->sqlPrepare($sql);
 
