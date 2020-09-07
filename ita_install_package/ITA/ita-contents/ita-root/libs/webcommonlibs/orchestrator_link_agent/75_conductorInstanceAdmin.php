@@ -90,7 +90,39 @@ function conductorInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $st
             unset($tmpAryRetBody);
         }
         //$strPreserveDatetimeの形式チェック----
-       
+
+        //--- Conductorクラス状態保存 
+        $arrayResult = $objOLA->convertConductorClassJson($intShmphonyClassId,1);
+
+        // JSON形式の変換、不要項目の削除
+        $tmpReceptData = $arrayResult[4];
+        $arrayReceptData=$tmpReceptData['conductor'];
+        $strSortedData=$tmpReceptData;
+        unset($strSortedData['conductor']);
+        foreach ($strSortedData as $key => $value) {
+            if( preg_match('/line-/',$key) ){
+                unset($strSortedData[$key]);
+            }
+        }
+        unset($strSortedData['conductor']);
+        unset($strSortedData['config']);
+        
+        $arrayResult = conductorClassRegisterExecute(null, $arrayReceptData, $strSortedData, null);
+
+        if( $arrayResult[0] == "000" ){
+            $intShmphonyClassId = $arrayResult[2];
+        }else{
+            $intErrorType = $arrayResult[0];
+            $aryErrMsgBody=$arrayResult[2];
+            $strErrMsg="";
+            $intSymphonyInstanceId="";
+            $strExpectedErrMsgBodyForUI = $arrayResult[3];
+
+            $strErrStepIdInFx="00000500";
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        // Conductorクラス状態保存 ---
+
         $retArray = $objOLA->registerConductorInstance($intShmphonyClassId, $intOperationNoUAPK, $strPreserveDatetime, "", $aryOptionOrderOverride, $g['login_id'], $g['login_name_jp']);
 
         if($retArray[0] == false){
@@ -1642,7 +1674,7 @@ function getSingleConductorInfoFromNodeInstances($intConductorInstanceId, $intMo
 //Noder(インスタンス)管理テーブルから、ある１のConductorに紐づくNode情報を取得する----
 
 //----ある１のシConductorのインスタンス状態を表示する
-function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0){
+function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""){
     // グローバル変数宣言
     global $g;
     //----RETSET[-PER-FX]
@@ -1799,7 +1831,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0){
         //Conductor(インスタンス)情報を固める----
 
 
-        $aryRetBody = $objOLA->convertConductorClassJson($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO']);
+        $aryRetBody = $objOLA->convertConductorClassJson($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO'],$getmode);
         if( $aryRetBody[1] !== null ){
             // 例外処理へ
             $strErrStepIdInFx="00001000";
@@ -1807,7 +1839,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0){
         }
         $aryConductorData=$aryRetBody;
 
-        $aryRetBody = $objOLA->getInfoOfOneNodeTerminal($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO'], 2, 0,0);
+        $aryRetBody = $objOLA->getInfoOfOneNodeTerminal($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO'], 2, 0,0,0,$getmode);
         if( $aryRetBody[1] !== null ){
             // 例外処理へ
             $strErrStepIdInFx="00001000";

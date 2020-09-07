@@ -130,7 +130,7 @@
             $ola_common_lib_dir = "libs/webcommonlibs/orchestrator_link_agent";
             require_once($g['root_dir_path']."/".$ola_common_lib_dir."/71_basic_common_lib.php");
 
-            require_once($g['root_dir_path']."/libs/webindividuallibs/systems/"."2100180003"."/81_print_conductor_info.php");
+            require_once($g['root_dir_path']."/libs/webindividuallibs/systems/".$g['page_dir']."/81_print_conductor_info.php");
         
             $arrayResult =  printConductorInfoRegConductor($intConductorClassId);
 
@@ -158,7 +158,7 @@
             $ola_common_lib_dir = "libs/webcommonlibs/orchestrator_link_agent";
             require_once($g['root_dir_path']."/".$ola_common_lib_dir."/71_basic_common_lib.php");
 
-            require_once($g['root_dir_path']."/libs/webindividuallibs/systems/"."2100180003"."/81_print_conductor_info.php");
+            require_once($g['root_dir_path']."/libs/webindividuallibs/systems/".$g['page_dir']."/81_print_conductor_info.php");
         
             $arrayResult =  printOperationListInfoRegConductor();
 
@@ -185,7 +185,7 @@
             $ola_common_lib_dir = "libs/webcommonlibs/orchestrator_link_agent";
             require_once($g['root_dir_path']."/".$ola_common_lib_dir."/71_basic_common_lib.php");
             
-            require_once($g['root_dir_path']."/libs/webindividuallibs/systems/"."2100180003"."/81_print_conductor_info.php");
+            require_once($g['root_dir_path']."/libs/webindividuallibs/systems/".$g['page_dir']."/81_print_conductor_info.php");
         
             $arrayResult =  printConductorListInfoRegConductor();
 
