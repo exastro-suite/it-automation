@@ -260,12 +260,22 @@ cat_tar_gz() {
 # read setting file
 read_setting_file() {
     local setting_file=$1
-
-    while read line; do
-        # convert "foo: bar" to "foo=bar", and keep comment 
-        command=`echo $line | sed -E 's/^([^#][^:]*+): *(.*)/\1=\2/'`
-        eval $command
-    done < $setting_file
+    local setting_text=$(cat $setting_file)
+    #IFSバックアップ
+    SRC_IFS="$IFS"
+    IFS="
+"
+    for line in $setting_text;do
+        if [ "$(echo "$line"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
+            local key="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\1/")"
+            local val="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\2/")"
+            val=$(echo "$val"|sed -E 's/"/\\"/g')
+            local command="$key=\"$val\""
+            eval "$command"
+        fi
+    done
+    #IFSリストア
+    IFS="$SRC_IFS"
 }
 
 
