@@ -267,11 +267,15 @@ read_setting_file() {
 "
     for line in $setting_text;do
         if [ "$(echo "$line"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
-            local key="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\1/")"
-            local val="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\2/")"
+            key="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\1/")"
+            val="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\2/")"
             val=$(echo "$val"|sed -E 's/"/\\"/g')
-            local command="$key=\"$val\""
+            command="$key=\"$val\""
             eval "$command"
+        else
+            # convert "foo: bar" to "foo=bar", and keep comment 
+            command=`echo $line | sed -E 's/^([^#][^:]*+): *(.*)/\1=\2/'`
+            eval $command
         fi
     done
     #IFSリストア
