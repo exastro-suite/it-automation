@@ -242,35 +242,6 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 -- -------------------------
--- 作成対象マスタ
--- -------------------------
-CREATE TABLE F_PARAM_TARGET
-(
-TARGET_ID                           INT                             , -- 識別シーケンス項番
-TARGET_NAME                         VARCHAR (64)                    ,
-NOTE                                VARCHAR  (4000)                 , -- 備考
-DISUSE_FLAG                         VARCHAR  (1)                    , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP               DATETIME(6)                     , -- 最終更新日時
-LAST_UPDATE_USER                    INT                             , -- 最終更新ユーザ
-PRIMARY KEY (TARGET_ID)
-)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
-
-CREATE TABLE F_PARAM_TARGET_JNL
-(
-JOURNAL_SEQ_NO                      INT                             , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME                DATETIME(6)                     , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS                VARCHAR  (8)                    , -- 履歴用変更種別
-
-TARGET_ID                           INT                             , -- 識別シーケンス項番
-TARGET_NAME                         VARCHAR (64)                    ,
-NOTE                                VARCHAR  (4000)                 , -- 備考
-DISUSE_FLAG                         VARCHAR  (1)                    , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP               DATETIME(6)                     , -- 最終更新日時
-LAST_UPDATE_USER                    INT                             , -- 最終更新ユーザ
-PRIMARY KEY(JOURNAL_SEQ_NO)
-)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
-
--- -------------------------
 -- 他メニュー連携
 -- -------------------------
 CREATE TABLE F_OTHER_MENU_LINK
