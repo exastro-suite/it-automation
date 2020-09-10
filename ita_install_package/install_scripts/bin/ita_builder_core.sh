@@ -266,15 +266,12 @@ read_setting_file() {
     IFS="
 "
     for line in $setting_text;do
+        # convert "foo: bar" to "foo=bar", and keep comment 
         if [ "$(echo "$line"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
             key="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\1/")"
             val="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\2/")"
-            val=$(echo "$val"|sed -E 's/"/\\"/g')
-            command="$key=\"$val\""
-            eval "$command"
-        else
-            # convert "foo: bar" to "foo=bar", and keep comment 
-            command=`echo $line | sed -E 's/^([^#][^:]*+): *(.*)/\1=\2/'`
+            val=$(echo "$val"|sed -E "s/'/'\\\"'\\\"'/g")
+            command="$key="'"$(echo '"'$val'"')"'
             eval $command
         fi
     done
@@ -392,6 +389,13 @@ configure_mariadb() {
         mkdir -p -m 777 /var/log/mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
+    # mysql_secure_installationへ送信するdb_root_passwordのエスケープをしておく
+    local send_db_root_password="$db_root_password"
+    sedn_db_root_password="$db_root_password"
+    send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\\/\\\\\\\\/g')
+    send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\$/\\\\\\$/g')
+    send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/"/\\\\\\"/g')
+
     if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "CentOS7" ]; then
         #Confirm whether it is installed
         yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -404,7 +408,7 @@ configure_mariadb() {
             error_check
 
             #Confirm whether root password has been changed
-            mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? == 0 ]; then
                 log "Root password of MariaDB is already setting."
             else
@@ -418,9 +422,9 @@ configure_mariadb() {
                     expect -re \"Change the root password\\?.* $\"
                     send \"\\r\"
                     expect \"New password:\"
-                    send \""${db_root_password}\\r"\"
+                    send \""${sedd_db_root_password}\\r"\"
                     expect \"Re-enter new password:\"
-                    send \""${db_root_password}\\r"\"
+                    send \""${send_db_root_password}\\r"\"
                     expect -re \"Remove anonymous users\\?.* $\"
                     send \"Y\\r\"
                     expect -re \"Disallow root login remotely\\?.* $\"
@@ -474,9 +478,9 @@ configure_mariadb() {
                 expect -re \"Change the root password\\?.* $\"
                 send \"Y\\r\"
                 expect \"New password:\"
-                send \""${db_root_password}\\r"\"
+                send \""${send_db_root_password}\\r"\"
                 expect \"Re-enter new password:\"
-                send \""${db_root_password}\\r"\"
+                send \""${send_db_root_password}\\r"\"
                 expect -re \"Remove anonymous users\\?.* $\"
                 send \"Y\\r\"
                 expect -re \"Disallow root login remotely\\?.* $\"
@@ -510,7 +514,7 @@ configure_mariadb() {
             error_check
 
             #Confirm whether root password has been changed
-            mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? == 0 ]; then
                 log "Root password of MariaDB is already setting."
             else
@@ -522,9 +526,9 @@ configure_mariadb() {
                     expect -re \"Set root password\\?.* $\"
                     send \"Y\\r\"
                     expect \"New password:\"
-                    send \""${db_root_password}\\r"\"
+                    send \""${send_db_root_password}\\r"\"
                     expect \"Re-enter new password:\"
-                    send \""${db_root_password}\\r"\"
+                    send \""${send_db_root_password}\\r"\"
                     expect -re \"Remove anonymous users\\?.* $\"
                     send \"Y\\r\"
                     expect -re \"Disallow root login remotely\\?.* $\"
@@ -573,9 +577,9 @@ configure_mariadb() {
                 expect -re \"Set root password\\?.* $\"
                 send \"Y\\r\"
                 expect \"New password:\"
-                send \""${db_root_password}\\r"\"
+                send \""${send_db_root_password}\\r"\"
                 expect \"Re-enter new password:\"
-                send \""${db_root_password}\\r"\"
+                send \""${send_db_root_password}\\r"\"
                 expect -re \"Remove anonymous users\\?.* $\"
                 send \"Y\\r\"
                 expect -re \"Disallow root login remotely\\?.* $\"
