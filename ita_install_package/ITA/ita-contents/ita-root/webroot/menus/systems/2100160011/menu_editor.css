@@ -600,6 +600,7 @@ border-collapse: collapse;
 .menu-column-config-table[date-select-value="4"] tr.number-float,
 .menu-column-config-table[date-select-value="5"] tr.date-time,
 .menu-column-config-table[date-select-value="6"] tr.date,
+.menu-column-config-table[date-select-value="8"] tr.password,
 .menu-column-config-table[date-select-value="7"] tr.select {
   display: table-row;
 }

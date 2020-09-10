@@ -147,6 +147,7 @@ const selectDummyText = {
   '5' : ['2020/01/01 00:00','2020/01/01 00:00','string'],
   '6' : ['2020/01/01','2020/01/01','string'],
   '7' : ['','','select'],
+  '8' : [getSomeMessage("ITACREPAR_1237"),'','string']
 };
 
 const titleHeight = 32;
@@ -310,6 +311,10 @@ const columnHTML = ''
             + '<td>'
               + '<select class="config-select pulldown-select"'+modeDisabled+'>' + selectPulldownListHTML + '</select>'
             + '</td>'
+          + '</tr>'
+          + '<tr class="password">'
+            + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
+            + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="all">'
             + '<td colspan="2">'
@@ -479,7 +484,23 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
   }
   
   if ( loadData === false ) {
-    $addColumnInput.val( title + ' ' + number );
+    // 自動付加する名前が被ってないかチェックする
+    const checkName = function( name ) {
+      let nameList = [];
+      $menuEditor.find('.menu-column-title-input').each( function( i ){
+        nameList[ i ] = $( this ).val();
+      });
+      const condition = true;
+      while( condition ) {
+        if ( nameList.indexOf( name ) !== -1 ) {
+          number++;
+          name = title + ' ' + number;
+        } else {
+          return name;
+        }
+      }
+    }
+    $addColumnInput.val( checkName( title + ' ' + number ) );
   } else {
     $addColumnInput.val( name );
   }
@@ -1513,9 +1534,34 @@ const createRegistrationData = function( type ){
   if ( menuEditorMode === 'edit' ) {
     createMenuJSON['menu']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['menu']['LAST_UPDATE_TIMESTAMP'];
   }
-    
+  
+  // CREATE_ITEM_IDからKEYを返す
+  const CREATE_ITEM_ID_to_KEY = function( itemID ) {
+    for ( let key in menuEditorArray.selectMenuInfo['item'] ) {
+      if ( menuEditorArray.selectMenuInfo['item'][ key ]['CREATE_ITEM_ID'] === itemID ) {
+        return menuEditorArray.selectMenuInfo['item'][ key ]['ITEM_NAME'];
+      }
+    }
+  }
+  // リピート項目チェック（名前からCREATE_ITEM_IDとLAST_UPDATE_TIMESTAMPを返す）
+  const repeatItemCheckID = function( itemName ) {
+    for ( let key in menuEditorArray.selectMenuInfo['item'] ) {
+      if ( menuEditorArray.selectMenuInfo['item'][ key ]['ITEM_NAME'] === itemName ) {
+        // リピートで作成された項目かチェック
+        if ( menuEditorArray.selectMenuInfo['item'][ key ]['REPEAT_ITEM'] === true ) {
+          return [
+            menuEditorArray.selectMenuInfo['item'][ key ]['CREATE_ITEM_ID'],
+            menuEditorArray.selectMenuInfo['item'][ key ]['LAST_UPDATE_TIMESTAMP']
+          ];
+        }
+      }
+    }
+    // 見つからない場合はnullを返す
+    return [ null, null ];
+  }
+  
   const tableAnalysis = function( $cols ) {
-      
+
     $cols.children().each( function(){
       const $column = $( this );
       if ( $column.is('.menu-column, .menu-column-repeat') ) {
@@ -1527,14 +1573,32 @@ const createRegistrationData = function( type ){
           const order = itemCount++,
                 selectTypeValue = $targetColumn.find('.menu-column-type-select').val();
           let key = $targetColumn.attr('id'),
-              repeatFlag = false;
+              repeatFlag = false,
+              CREATE_ITEM_ID = $targetColumn.attr('data-item-id'),
+              LAST_UPDATE_TIMESTAMP = null;
+          
+          if ( CREATE_ITEM_ID === '') CREATE_ITEM_ID = null;
+          if ( menuEditorMode === 'edit' ) {
+            if ( menuEditorArray.selectMenuInfo['item'][key] ) {
+              LAST_UPDATE_TIMESTAMP = menuEditorArray.selectMenuInfo['item'][key]['LAST_UPDATE_TIMESTAMP'];
+            }
+          }
 
           // 項目名
           let itemName = $targetColumn.find('.menu-column-title-input').val();
           if ( repeatNumber > 1 ) {
             itemName += '[' + repeatNumber + ']';
             repeatFlag = true;
-            key = key + '[' + repeatNumber + ']'
+            key = key + '[' + repeatNumber + ']';
+            
+            // 更新時のリピート項目チェック
+            if ( menuEditorMode === 'edit' ) {
+              const originalBeforeName = CREATE_ITEM_ID_to_KEY( CREATE_ITEM_ID ),
+                    repeatItemData = repeatItemCheckID( originalBeforeName + '[' + repeatNumber + ']');
+              CREATE_ITEM_ID = repeatItemData[0];
+              LAST_UPDATE_TIMESTAMP = repeatItemData[1];
+            }
+            
           }
           // カラムグループ
           let parents = '',
@@ -1545,7 +1609,7 @@ const createRegistrationData = function( type ){
           parents = parentArray.join('/');
                            
           createMenuJSON['item'][key] = {
-            'CREATE_ITEM_ID' : $column.attr('data-item-id'),
+            'CREATE_ITEM_ID' : CREATE_ITEM_ID,
             'MENU_NAME' : createMenuJSON['menu']['MENU_NAME'],
             'ITEM_NAME' : itemName,
             'DISP_SEQ' : order,
@@ -1556,15 +1620,10 @@ const createRegistrationData = function( type ){
             'DESCRIPTION' : $targetColumn.find('.explanation').val(),
             'NOTE' : $targetColumn.find('.note').val(),
             'REPEAT_ITEM' : repeatFlag,
-            'MIN_WIDTH' : $targetColumn.css('min-width')
+            'MIN_WIDTH' : $targetColumn.css('min-width'),
+            'LAST_UPDATE_TIMESTAMP' : LAST_UPDATE_TIMESTAMP
           }
-
-          if ( menuEditorMode === 'edit' ) {
-            if (menuEditorArray.selectMenuInfo['item'][key]) {
-              createMenuJSON['item'][key]['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['item'][key]['LAST_UPDATE_TIMESTAMP'];
-            }
-          }
-          
+        
         
           switch ( selectTypeValue ) {
             case '1':
@@ -1587,6 +1646,9 @@ const createRegistrationData = function( type ){
             case '7':
               createMenuJSON['item'][key]['OTHER_MENU_LINK_ID'] = $targetColumn.find('.pulldown-select').val();
               break;
+            case '8':
+              createMenuJSON['item'][key]['PW_MAX_LENGTH'] = $targetColumn.find('.password-max-byte').val();
+              break;
           }
           
         }
@@ -1598,9 +1660,9 @@ const createRegistrationData = function( type ){
             let columns = [];
             for ( let i = 1; i <= repeatNumber; i++ ) {
               $column.find('.menu-column').each( function() {
-                const repeatColumn = $( this );
-                if ( i === 1 ) columns.push( repeatColumn.attr('id') );
-                columnHTML( repeatColumn, i );
+                const $repeatColumn = $( this );
+                if ( i === 1 ) columns.push( $repeatColumn.attr('id') );
+                columnHTML( $repeatColumn, i );
               });
             }
             createMenuJSON['repeat'][repeatKey] = {
@@ -1609,7 +1671,9 @@ const createRegistrationData = function( type ){
             }
 
             if ( menuEditorMode === 'edit' ) {
-              createMenuJSON['repeat']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['repeat']['LAST_UPDATE_TIMESTAMP'];
+              if ( menuEditorArray.selectMenuInfo['repeat']['r1'] && menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'] ) {
+                createMenuJSON['repeat']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'];
+              }
             }
           }
         } else {
@@ -1620,7 +1684,7 @@ const createRegistrationData = function( type ){
         // グループ
         const name = $column.children('.menu-column-group-header').find('.menu-column-title-input').val(),
               key = $column.attr('id'),
-              id = $column.attr('data-group-id');
+              groupID = $column.attr('data-group-id');
         let parents = '',
             parentArray = [],
             columns = [];
@@ -1633,7 +1697,7 @@ const createRegistrationData = function( type ){
           columns.push( $( this ).attr('id') );
         });
         createMenuJSON['group'][key] = {
-          'COL_GROUP_ID' : $column.attr('data-group-id'),
+          'COL_GROUP_ID' : groupID,
           'COL_GROUP_NAME' : name,
           'PARENT' : parents,
           'COLUMNS' : columns
@@ -1663,6 +1727,7 @@ const createRegistrationData = function( type ){
   } else if ( type === 'update' ) {
     updateTable(menuData);
   }
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1763,6 +1828,9 @@ const loadMenu = function() {
               break;
             case '7':
               $item.find('.pulldown-select').val( itemData['OTHER_MENU_LINK_ID'] ).change();
+              break;
+            case '8':
+              $item.find('.password-max-byte').val( itemData['PW_MAX_LENGTH'] ).change();
               break;
           }
         }

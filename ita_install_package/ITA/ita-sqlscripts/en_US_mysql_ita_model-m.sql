@@ -63,14 +63,15 @@ COL_GROUP_ID                        INT                             ,
 INPUT_METHOD_ID                     INT                             ,
 MAX_LENGTH                          INT                             ,
 MULTI_MAX_LENGTH                    INT                             ,
-PREG_MATCH                          VARCHAR (8192)                  ,
-MULTI_PREG_MATCH                    VARCHAR (8192)                  ,
+PREG_MATCH                          TEXT  (8192)                    ,
+MULTI_PREG_MATCH                    TEXT  (8192)                    ,
 OTHER_MENU_LINK_ID                  INT                             ,
 INT_MAX                             INT                             ,
 INT_MIN                             INT                             ,
 FLOAT_MAX                           DOUBLE                          ,
 FLOAT_MIN                           DOUBLE                          ,
 FLOAT_DIGIT                         INT                             ,
+PW_MAX_LENGTH                       INT                             ,
 DESCRIPTION                         VARCHAR (1024)                  ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
 DISUSE_FLAG                         VARCHAR  (1)                    , -- 廃止フラグ
@@ -95,14 +96,15 @@ COL_GROUP_ID                        INT                             ,
 INPUT_METHOD_ID                     INT                             ,
 MAX_LENGTH                          INT                             ,
 MULTI_MAX_LENGTH                    INT                             ,
-PREG_MATCH                          VARCHAR (8192)                  ,
-MULTI_PREG_MATCH                    VARCHAR (8192)                  ,
+PREG_MATCH                          TEXT  (8192)                    ,
+MULTI_PREG_MATCH                    TEXT  (8192)                    ,
 OTHER_MENU_LINK_ID                  INT                             ,
 INT_MAX                             INT                             ,
 INT_MIN                             INT                             ,
 FLOAT_MAX                           DOUBLE                          ,
 FLOAT_MIN                           DOUBLE                          ,
 FLOAT_DIGIT                         INT                             ,
+PW_MAX_LENGTH                       INT                             ,
 DESCRIPTION                         VARCHAR (1024)                  ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
 DISUSE_FLAG                         VARCHAR  (1)                    , -- 廃止フラグ
@@ -708,6 +710,7 @@ SELECT TAB_A.CREATE_ITEM_ID,
        TAB_A.FLOAT_MAX,
        TAB_A.FLOAT_MIN,
        TAB_A.FLOAT_DIGIT,
+       TAB_A.PW_MAX_LENGTH,
        TAB_A.DESCRIPTION,
        TAB_C.FULL_COL_GROUP_NAME,
        CASE
@@ -746,6 +749,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
        TAB_A.FLOAT_MAX,
        TAB_A.FLOAT_MIN,
        TAB_A.FLOAT_DIGIT,
+       TAB_A.PW_MAX_LENGTH,
        TAB_A.DESCRIPTION,
        CASE
            WHEN TAB_C.FULL_COL_GROUP_NAME IS NULL THEN CONCAT(TAB_B.MENU_NAME,':',TAB_A.ITEM_NAME)
@@ -911,6 +915,8 @@ INSERT INTO F_INPUT_METHOD (INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,L
 INSERT INTO F_INPUT_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(6,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',6,'Date/time',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_INPUT_METHOD (INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(7,'Pulldown selection',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_INPUT_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(7,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',7,'Pulldown selection',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_INPUT_METHOD (INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(8,'Password',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_INPUT_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(8,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',8,'Password',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000001,2100000303,'Host name','C_STM_LIST','SYSTEM_ID','HOSTNAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000001,2100000303,'Host name','C_STM_LIST','SYSTEM_ID','HOSTNAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

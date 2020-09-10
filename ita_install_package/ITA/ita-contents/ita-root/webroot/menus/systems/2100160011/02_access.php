@@ -62,6 +62,8 @@
                 if(!array_key_exists("MENUGROUP_FOR_CMDB",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CMDB'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_HG",$menuData['menu']))     $menuData['menu']['MENUGROUP_FOR_HG'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_CONV",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CONV'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_H",$menuData['menu']))      $menuData['menu']['MENUGROUP_FOR_H'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_VIEW",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_VIEW'] = "";
                 
                 $arrayRegisterData = array("MENU_NAME" => $menuData['menu']['MENU_NAME'],
                                            "TARGET" => $menuData['menu']['TARGET'],
@@ -169,6 +171,7 @@
                     if(!array_key_exists("FLOAT_MAX",$itemData))          $itemData["FLOAT_MAX"] = "";
                     if(!array_key_exists("FLOAT_DIGIT",$itemData))        $itemData["FLOAT_DIGIT"] = "";
                     if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))    $itemData["OTHER_MENU_LINK_ID"] = "";
+                    if(!array_key_exists("PW_MAX_LENGTH",$itemData))      $itemData["PW_MAX_LENGTH"] = "";
                     
                     $arrayRegisterData = array("CREATE_MENU_ID" => $menuData['menu']['CREATE_MENU_ID'],
                                                "ITEM_NAME" => $itemData['ITEM_NAME'],
@@ -187,6 +190,7 @@
                                                "FLOAT_MAX" => $itemData['FLOAT_MAX'],
                                                "FLOAT_DIGIT" => $itemData['FLOAT_DIGIT'],
                                                "OTHER_MENU_LINK_ID" => $itemData['OTHER_MENU_LINK_ID'],
+                                               "PW_MAX_LENGTH" => $itemData['PW_MAX_LENGTH'],
                                                "DESCRIPTION" => $itemData['DESCRIPTION'],
                                                "NOTE" => $itemData['NOTE']
                                               );
@@ -372,6 +376,8 @@
                 //////////////////////////
                 if(!array_key_exists("MENUGROUP_FOR_CMDB",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CMDB'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_HG",$menuData['menu']))     $menuData['menu']['MENUGROUP_FOR_HG'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_H",$menuData['menu']))      $menuData['menu']['MENUGROUP_FOR_H'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_VIEW",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_VIEW'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_CONV",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CONV'] = "";
                 
                 $arrayUpdateData = NULL;
@@ -471,7 +477,7 @@
                         if($key === false){
                             $strNumberForRI = $createItemInfoData['CREATE_ITEM_ID'];       // 主キー
                             $reqDeleteData = array("DISUSE_FLAG"          => "0",
-                                                   "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $createItemInfoData['item']['LAST_UPDATE_TIMESTAMP'])
+                                                   "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $createItemInfoData['LAST_UPDATE_TIMESTAMP'])
                                                   );
 
                             $g["page_dir"] = "2100160002";
@@ -521,6 +527,7 @@
                         if(!array_key_exists("FLOAT_MAX",$itemData))          $itemData["FLOAT_MAX"] = "";
                         if(!array_key_exists("FLOAT_DIGIT",$itemData))        $itemData["FLOAT_DIGIT"] = "";
                         if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))    $itemData["OTHER_MENU_LINK_ID"] = "";
+                        if(!array_key_exists("PW_MAX_LENGTH",$itemData))      $itemData["PW_MAX_LENGTH"] = "";
                         
                         $strNumberForRI = $itemData['CREATE_ITEM_ID'];
                         $arrayUpdateData = array("CREATE_MENU_ID"   => $menuData['menu']['CREATE_MENU_ID'],
@@ -540,6 +547,7 @@
                                                  "FLOAT_MAX"        => $itemData['FLOAT_MAX'],
                                                  "FLOAT_DIGIT"      => $itemData['FLOAT_DIGIT'],
                                                  "OTHER_MENU_LINK_ID"  => $itemData['OTHER_MENU_LINK_ID'],
+                                                 "PW_MAX_LENGTH" => $itemData['PW_MAX_LENGTH'],
                                                  "DESCRIPTION"      => $itemData['DESCRIPTION'],
                                                  "NOTE"             => $itemData['NOTE'],
                                                  "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $itemData['LAST_UPDATE_TIMESTAMP'])
@@ -589,6 +597,7 @@
                         if(!array_key_exists("FLOAT_MAX",$itemData))          $itemData["FLOAT_MAX"] = "";
                         if(!array_key_exists("FLOAT_DIGIT",$itemData))        $itemData["FLOAT_DIGIT"] = "";
                         if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))    $itemData["OTHER_MENU_LINK_ID"] = "";
+                        if(!array_key_exists("PW_MAX_LENGTH",$itemData))      $itemData["PW_MAX_LENGTH"] = "";
                         
                         $arrayRegisterData = array("CREATE_MENU_ID"   => $menuData['menu']['CREATE_MENU_ID'],
                                                    "ITEM_NAME"        => $itemData['ITEM_NAME'],
@@ -607,6 +616,7 @@
                                                    "FLOAT_MAX"        => $itemData['FLOAT_MAX'],
                                                    "FLOAT_DIGIT"      => $itemData['FLOAT_DIGIT'],
                                                    "OTHER_MENU_LINK_ID"  => $itemData['OTHER_MENU_LINK_ID'],
+                                                   "PW_MAX_LENGTH"    => $itemData['PW_MAX_LENGTH'],
                                                    "DESCRIPTION"      => $itemData['DESCRIPTION'],
                                                    "NOTE"             => $itemData['NOTE']
                                                   );
@@ -632,7 +642,7 @@
                 // 既存の縦メニュー項目を探す
                 foreach($convertParamInfoArray as $convertParamInfoData){
                     $key = array_search($convertParamInfoData['CREATE_ITEM_ID'], array_column($createItemInfoArray, 'CREATE_ITEM_ID'));
-                    if($key !== false && $createItemInfoArray[$key] == $menuData['menu']['CREATE_MENU_ID']){
+                    if($key !== false && $createItemInfoArray[$key]['CREATE_MENU_ID'] == $menuData['menu']['CREATE_MENU_ID']){
                         $updateData = $convertParamInfoData;
                     }
                 }
@@ -1180,6 +1190,7 @@
                         "FLOAT_MAX"             => $itemInfoData['FLOAT_MAX'],
                         "FLOAT_DIGIT"           => $itemInfoData['FLOAT_DIGIT'],
                         "OTHER_MENU_LINK_ID"    => $itemInfoData['OTHER_MENU_LINK_ID'],
+                        "PW_MAX_LENGTH"         => $itemInfoData['PW_MAX_LENGTH'],
                         "DESCRIPTION"           => $itemInfoData['DESCRIPTION'],
                         "REPEAT_ITEM"           => $repeatItem,
                         "MIN_WIDTH"             => "",

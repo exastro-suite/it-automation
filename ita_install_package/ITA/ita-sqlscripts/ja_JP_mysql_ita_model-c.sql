@@ -984,7 +984,8 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
@@ -1011,7 +1012,8 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
@@ -1432,6 +1434,7 @@ SELECT
          TAB_B.VARS_NAME_ID              ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.SENSITIVE_FLAG            ,
          TAB_A.VARS_ENTRY_USE_TPFVARS    ,
          TAB_A.ASSIGN_SEQ                ,
          
@@ -1745,7 +1748,8 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
@@ -1772,7 +1776,8 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
@@ -2242,6 +2247,7 @@ SELECT
          TAB_B.VARS_NAME_ID              ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.SENSITIVE_FLAG            ,
          TAB_A.VARS_ENTRY_USE_TPFVARS    ,
          TAB_A.ASSIGN_SEQ                ,
          
@@ -2254,29 +2260,81 @@ FROM B_ANSIBLE_PNS_VARS_ASSIGN         TAB_A
 LEFT JOIN D_ANS_PNS_PTN_VARS_LINK  TAB_B ON ( TAB_B.VARS_LINK_ID = TAB_A.VARS_LINK_ID )
 ;
 
+CREATE VIEW D_ANS_CMDB_MENU_LIST AS
+SELECT
+ *
+FROM D_CMDB_MENU_LIST TAB_A
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+;
+
+CREATE VIEW D_ANS_CMDB_MENU_LIST_JNL AS
+SELECT
+ *
+FROM D_CMDB_MENU_LIST_JNL TAB_A
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+;
+
+CREATE VIEW D_ANS_CMDB_MG_MU_COL_LIST AS
+SELECT
+ *
+FROM D_CMDB_MG_MU_COL_LIST TAB_A
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+;
+
+CREATE VIEW D_ANS_CMDB_MG_MU_COL_LIST_JNL AS
+SELECT
+ *
+FROM D_CMDB_MG_MU_COL_LIST_JNL TAB_A
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+;
+
+CREATE VIEW D_ANS_CMDB_MENU_COLUMN AS
+SELECT
+  TAB_B.*
+FROM
+  D_ANS_CMDB_MENU_LIST         TAB_A
+  LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+WHERE
+  TAB_B.DISUSE_FLAG = '0'
+;
+
+CREATE VIEW D_ANS_CMDB_MENU_COLUMN_JNL AS
+SELECT
+  TAB_B.*
+FROM
+  D_ANS_CMDB_MENU_LIST_JNL         TAB_A
+  LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+WHERE
+  TAB_B.DISUSE_FLAG = '0'
+;
+
 CREATE VIEW D_ANS_PNS_CMDB_MENU_COLUMN AS
 SELECT
-  TBL_A.*
-FROM 
-  B_CMDB_MENU_COLUMN TBL_A
+  TAB_B.*
+FROM
+  D_ANS_CMDB_MENU_LIST         TAB_A
+  LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
-  TBL_A.COL_CLASS   <>  'MultiTextColumn'
+  TAB_B.COL_CLASS   <>  'MultiTextColumn' AND
+  TAB_B.DISUSE_FLAG = '0'
 ;
-  
+
 CREATE VIEW D_ANS_PNS_CMDB_MENU_COLUMN_JNL AS
 SELECT
-  TBL_A.*
-FROM 
-  B_CMDB_MENU_COLUMN_JNL TBL_A
+  TAB_B.*
+FROM
+  D_ANS_CMDB_MENU_LIST_JNL         TAB_A
+  LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
-  TBL_A.COL_CLASS   <>  'MultiTextColumn'
+  TAB_B.COL_CLASS   <>  'MultiTextColumn' AND
+  TAB_B.DISUSE_FLAG = '0'
 ;
 
 CREATE VIEW D_ANS_PNS_CMDB_MENU_LIST AS
 SELECT 
   TBL_A.*
 FROM 
-  D_CMDB_MENU_LIST TBL_A
+  D_ANS_CMDB_MENU_LIST TBL_A
 WHERE
   (SELECT 
      COUNT(*) 
@@ -2286,14 +2344,14 @@ WHERE
      TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
      TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
      TBL_B.DISUSE_FLAG =   '0'
-  ) <> 0
+  ) <> 0 
 ;
 
 CREATE VIEW D_ANS_PNS_CMDB_MENU_LIST_JNL AS
 SELECT 
   TBL_A.*
 FROM 
-  D_CMDB_MENU_LIST_JNL TBL_A
+  D_ANS_CMDB_MENU_LIST_JNL TBL_A
 WHERE
   (SELECT 
      COUNT(*) 
@@ -2795,7 +2853,8 @@ PATTERN_ID                        INT                              , -- 作業�
 SYSTEM_ID                         INT                              , -- 機器(ホスト)
 VARS_LINK_ID                      INT                              , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            INT                              , -- 多次元変数配列組合せ管理 Pkey
-VARS_ENTRY                        VARCHAR (8192)                   , -- 具体値
+VARS_ENTRY                        text                             , -- 具体値
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
@@ -2823,7 +2882,8 @@ PATTERN_ID                        INT                              , -- 作業�
 SYSTEM_ID                         INT                              , -- 機器(ホスト)
 VARS_LINK_ID                      INT                              , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            INT                              , -- 多次元変数配列組合せ管理 Pkey
-VARS_ENTRY                        VARCHAR (8192)                   , -- 具体値
+VARS_ENTRY                        text                             , -- 具体値
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
