@@ -271,8 +271,8 @@ read_setting_file() {
             key="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\1/")"
             val="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\2/")"
             val=$(echo "$val"|sed -E "s/'/'\\\"'\\\"'/g")
-            command="$key="'"$(echo '"'$val'"')"'
-            eval $command
+            command="$key='$val'"
+            eval "$command"
         fi
     done
     #IFSリストア
