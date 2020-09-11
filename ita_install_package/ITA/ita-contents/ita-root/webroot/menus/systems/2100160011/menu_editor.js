@@ -1080,7 +1080,7 @@ const sortMark = '<span class="sortMarkWrap"><span class="sortNotSelected"></spa
 const childColumnCount = function( $column ) {
   let counter = $column.find('.menu-column, .column-empty').length;
   $column.find('.menu-column-repeat').each( function() {
-    const columnLength = $( this ).find('.menu-column').length;
+    const columnLength = $( this ).find('.menu-column, .column-empty').length;
     if ( columnLength !== 0 ) {
       counter = counter + ( columnLength * ( Number( $( this ).find('.menu-column-repeat-number-input').val() ) - 1 ) );
     }
@@ -1097,82 +1097,85 @@ const previewTable = function(){
       tbodyNumber = 3,
       maxLevel = rowNumberCheck();
   
+  // パラメータシート or データシート
   const previewType = Number( $('#create-menu-type').val() );
-
+    
   // エディタ要素をTableに変換
-  const tableAnalysis = function( $cols ) {
-  
-    // 兄弟要素配列
-    let trArray = [];
+  const tableAnalysis = function( $cols, repeatCount ) {
+
     // 自分の階層を調べる
     const currentFloor = $cols.children().parents('.menu-column-group').length;
-    
-    $cols.children().each( function(){
-      const $column = $( this );
-      if ( $column.is('.menu-column, .menu-column-repeat') ) {
-        // 項目・リピート
-        const columnHTML = function( $targetColumn, repeatNumber ) {
-          if ( repeatNumber === undefined  ) repeatNumber = 0;
-          const rowspan = $targetColumn.attr('data-rowpan');
-          let columnHTML = '<th rowspan="' + rowspan + '" class="sortTriggerInTbl">';
-          columnHTML += textEntities( $targetColumn.find('.menu-column-title-input').val() );
-          if ( repeatNumber > 1 ) {
-            columnHTML += '[' + repeatNumber + ']';
-          }
-          columnHTML += sortMark + '</th>';
-          trArray.push( columnHTML );
-          // ダミーテキスト
-          const selectTypeValue = $targetColumn.find('.menu-column-type-select').val();
-
-          let dummyText = selectDummyText[ selectTypeValue ][ languageCode ],
-              dummyType = selectDummyText[ selectTypeValue ][ 2 ];
-              if ( dummyType === 'select' ) {
-            dummyText = $targetColumn.find('.config-select').find('option:selected').text();
-          }
-          tbodyArray.push('<td class="' + dummyType + '">' + dummyText + '</td>');
-
-        }
-        
-        if ( $column.is('.menu-column-repeat') ) {
-          if ( $column.find('.menu-column').length ) {
-            const repeatNumber = $column.find('.menu-column-repeat-number-input').val();
-            for ( let i = 1; i <= repeatNumber; i++ ) {
-              $column.find('.menu-column').each( function() {
-                columnHTML( $( this ), i );
-              });
-            }
-          } else {
-            const rowspan = maxLevel - currentFloor;
-            trArray.push('<th class="empty" rowspan="' + rowspan + '">Empty</th>');
-            tbodyArray.push('<td>Empty</td>');
-          }
-        } else {
-          columnHTML( $column );
-        }
-        
-      } else if ( $column.is('.menu-column-group') ) {
-        // グループ
-        const colspan = childColumnCount( $column );        
-        trArray.push('<th colspan="' + colspan + '">' + textEntities( $column.find('.menu-column-title-input').eq(0).val() ) + '</th>');
-        tableAnalysis( $column.children('.menu-column-group-body') );
-      
-      } else if ( $column.is('.column-empty') ) {
-        
-        const rowspan = maxLevel - currentFloor;
-        trArray.push('<th class="empty" rowspan="' + rowspan + '">Empty</th>');
-        tbodyArray.push('<td>Empty</td>');
-        
-      }
-    });
-
     // 配列がUndefinedなら初期化
     if ( tableArray[ currentFloor ] === undefined ) tableArray[ currentFloor ] = [];
-  
-    tableArray[ currentFloor ].push( trArray.join() );
+    // 子セルを調べる
+    $cols.children().each( function(){
+        const $column = $( this );
+
+        if ( $column.is('.menu-column') ) {
+          // 項目ここから
+            // Head
+            const rowspan = $column.attr('data-rowpan');
+            let itemHTML = '<th rowspan="' + rowspan + '" class="sortTriggerInTbl">'
+                           + textEntities( $column.find('.menu-column-title-input').val() );
+            if ( repeatCount > 1 ) {
+              itemHTML += '[' + repeatCount + ']';
+            }
+            itemHTML += sortMark + '</th>';
+            tableArray[ currentFloor ].push( itemHTML );
+            // Body
+            const selectTypeValue = $column.find('.menu-column-type-select').val();
+            let dummyText = selectDummyText[ selectTypeValue ][ languageCode ],
+                dummyType = selectDummyText[ selectTypeValue ][ 2 ];
+            if ( dummyType === 'select' ) {
+              dummyText = $column.find('.config-select').find('option:selected').text();
+            }
+            tbodyArray.push('<td class="' + dummyType + '">' + dummyText + '</td>');
+          // Item end
+        } else if ( $column.is('.menu-column-repeat') ) {
+          // リピート
+            const repeatNumber = $column.find('.menu-column-repeat-number-input').val();
+            if ( $column.find('.menu-column, .menu-column-group').length ) {
+                for ( let i = 1; i <= repeatNumber; i++ ) {
+                  repeatCount = i;
+                  tableAnalysis( $column.children('.menu-column-repeat-body'), repeatCount );
+                }
+                repeatCount = 0;
+            } else {
+                const rowspan = maxLevel - currentFloor;
+                for ( let i = 1; i <= repeatNumber; i++ ) {
+                  tableArray[ currentFloor ].push('<th class="empty" rowspan="' + rowspan + '">Empty</th>');
+                  tbodyArray.push('<td class="empty">Empty</td>');
+                }
+            }
+          // Repeat end
+        } else if ( $column.is('.menu-column-group') ) {
+          // グループ
+            const colspan = childColumnCount( $column ),
+                  groupTitle = textEntities( $column.find('.menu-column-title-input').eq(0).val() ),
+                  regexTitle = new RegExp( '<th colspan=".+">' + groupTitle + '<\/th>'),
+                  tableArrayLength = tableArray[ currentFloor ].length - 1;
+            let groupHTML = '<th colspan="' + colspan + '">' + groupTitle + '</th>';
+            if ( repeatCount > 1 && tableArray[ currentFloor ][ tableArrayLength ].match( regexTitle ) ) {
+              tableArray[ currentFloor ][ tableArrayLength ] = '<th colspan="' + ( colspan * repeatCount ) + '">' + groupTitle + '</th>';
+            } else {
+              tableArray[ currentFloor ].push( groupHTML );
+            }
+            tableAnalysis( $column.children('.menu-column-group-body'), repeatCount );
+          // Group end
+        } else if ( $column.is('.column-empty') ) {
+          // 空
+            const rowspan = maxLevel - currentFloor;
+            tableArray[ currentFloor ].push('<th class="empty" rowspan="' + rowspan + '">Empty</th>');
+            tbodyArray.push('<td>Empty</td>');
+          // Empty end
+        }
+
+    });
+    
   };
-  
+
   // 解析スタート
-  tableAnalysis ( $menuTable );
+  tableAnalysis ( $menuTable, 0 );
   
   // thead HTMLを生成
   const itemLength = childColumnCount( $menuTable );
@@ -1362,7 +1365,6 @@ $('#menu-editor-row-resize').on('mousedown', function( e ){
 const menuGroupBody = function() {
 
   const menuGroupData = menuEditorArray.selectMenuGroupList,
-        menuItem = ['id','name'],
         menuListRowLength = menuGroupData.length,
         menuGroupType = ['host','host-group','reference','vertical','data-sheet'],
         menuGroupAbbreviation = ['Host','Host group','Reference','Vertical','Data sheet'],
@@ -1559,152 +1561,186 @@ const createRegistrationData = function( type ){
     // 見つからない場合はnullを返す
     return [ null, null ];
   }
+  // COL_GROUP_IDからKEYを返す
+  const COL_GROUP_ID_to_KEY = function( groupID ) {
+    for ( let key in menuEditorArray.selectMenuInfo['group'] ) {
+      if ( menuEditorArray.selectMenuInfo['group'][ key ]['COL_GROUP_ID'] === groupID ) {
+        return menuEditorArray.selectMenuInfo['group'][ key ]['COL_GROUP_NAME'];
+      }
+    }
+  }
+  // リピート項目チェック（名前からCREATE_ITEM_IDとLAST_UPDATE_TIMESTAMPを返す）
+  const repeatGroupCheckID = function( groupName ) {
+    for ( let key in menuEditorArray.selectMenuInfo['group'] ) {
+      if ( menuEditorArray.selectMenuInfo['group'][ key ]['COL_GROUP_NAME'] === groupName ) {
+        // リピートで作成された項目かチェック
+        if ( menuEditorArray.selectMenuInfo['group'][ key ]['REPEAT_GROUP'] === true ) {
+          return menuEditorArray.selectMenuInfo['group'][ key ]['COL_GROUP_ID'];
+        }
+      }
+    }
+    // 見つからない場合はnullを返す
+    return [ null, null ];
+  }
   
-  const tableAnalysis = function( $cols ) {
-
+  const tableAnalysis = function( $cols, repeatCount ) {
+    
+    // 子セルを調べる
     $cols.children().each( function(){
       const $column = $( this );
-      if ( $column.is('.menu-column, .menu-column-repeat') ) {
-        // 項目・リピート
-        const columnHTML = function( $targetColumn, repeatNumber ) {
-        
-          if ( repeatNumber === undefined  ) repeatNumber = 0;menuParameter
+      
+      if ( $column.is('.menu-column') ) {
+          // 項目ここから
+            const order = itemCount++,
+                  selectTypeValue = $column.find('.menu-column-type-select').val();
+            let key = $column.attr('id'),
+                repeatFlag = false,
+                CREATE_ITEM_ID = $column.attr('data-item-id'),
+                LAST_UPDATE_TIMESTAMP = null;
 
-          const order = itemCount++,
-                selectTypeValue = $targetColumn.find('.menu-column-type-select').val();
-          let key = $targetColumn.attr('id'),
-              repeatFlag = false,
-              CREATE_ITEM_ID = $targetColumn.attr('data-item-id'),
-              LAST_UPDATE_TIMESTAMP = null;
-          
-          if ( CREATE_ITEM_ID === '') CREATE_ITEM_ID = null;
-          if ( menuEditorMode === 'edit' ) {
-            if ( menuEditorArray.selectMenuInfo['item'][key] ) {
-              LAST_UPDATE_TIMESTAMP = menuEditorArray.selectMenuInfo['item'][key]['LAST_UPDATE_TIMESTAMP'];
-            }
-          }
-
-          // 項目名
-          let itemName = $targetColumn.find('.menu-column-title-input').val();
-          if ( repeatNumber > 1 ) {
-            itemName += '[' + repeatNumber + ']';
-            repeatFlag = true;
-            key = key + '[' + repeatNumber + ']';
-            
-            // 更新時のリピート項目チェック
+            if ( CREATE_ITEM_ID === '') CREATE_ITEM_ID = null;
             if ( menuEditorMode === 'edit' ) {
-              const originalBeforeName = CREATE_ITEM_ID_to_KEY( CREATE_ITEM_ID ),
-                    repeatItemData = repeatItemCheckID( originalBeforeName + '[' + repeatNumber + ']');
-              CREATE_ITEM_ID = repeatItemData[0];
-              LAST_UPDATE_TIMESTAMP = repeatItemData[1];
-            }
-            
-          }
-          // カラムグループ
-          let parents = '',
-              parentArray = [];
-          $targetColumn.parents('.menu-column-group').each( function() {
-            parentArray.unshift( $( this ).find('.menu-column-title-input').val() );
-          });
-          parents = parentArray.join('/');
-                           
-          createMenuJSON['item'][key] = {
-            'CREATE_ITEM_ID' : CREATE_ITEM_ID,
-            'MENU_NAME' : createMenuJSON['menu']['MENU_NAME'],
-            'ITEM_NAME' : itemName,
-            'DISP_SEQ' : order,
-            'REQUIRED' : $targetColumn.find('.required').prop('checked'),
-            'UNIQUED' : $targetColumn.find('.unique').prop('checked'),
-            'COL_GROUP_ID' : parents,
-            'INPUT_METHOD_ID' : selectTypeValue,
-            'DESCRIPTION' : $targetColumn.find('.explanation').val(),
-            'NOTE' : $targetColumn.find('.note').val(),
-            'REPEAT_ITEM' : repeatFlag,
-            'MIN_WIDTH' : $targetColumn.css('min-width'),
-            'LAST_UPDATE_TIMESTAMP' : LAST_UPDATE_TIMESTAMP
-          }
-        
-        
-          switch ( selectTypeValue ) {
-            case '1':
-              createMenuJSON['item'][key]['MAX_LENGTH'] = $targetColumn.find('.max-byte').val();
-              createMenuJSON['item'][key]['PREG_MATCH'] = $targetColumn.find('.regex').val();
-              break;
-            case '2':
-              createMenuJSON['item'][key]['MULTI_MAX_LENGTH'] = $targetColumn.find('.max-byte').val();
-              createMenuJSON['item'][key]['MULTI_PREG_MATCH'] = $targetColumn.find('.regex').val();
-              break;
-            case '3':
-              createMenuJSON['item'][key]['INT_MIN'] = $targetColumn.find('.int-min-number').val();
-              createMenuJSON['item'][key]['INT_MAX'] = $targetColumn.find('.int-max-number').val();
-              break;
-            case '4':
-              createMenuJSON['item'][key]['FLOAT_MIN'] = $targetColumn.find('.float-min-number').val();
-              createMenuJSON['item'][key]['FLOAT_MAX'] = $targetColumn.find('.float-max-number').val();
-              createMenuJSON['item'][key]['FLOAT_DIGIT'] = $targetColumn.find('.digit').val();
-              break;
-            case '7':
-              createMenuJSON['item'][key]['OTHER_MENU_LINK_ID'] = $targetColumn.find('.pulldown-select').val();
-              break;
-            case '8':
-              createMenuJSON['item'][key]['PW_MAX_LENGTH'] = $targetColumn.find('.password-max-byte').val();
-              break;
-          }
-          
-        }
-        
-        if ( $column.is('.menu-column-repeat') ) {
-          if ( $column.find('.menu-column').length ) {
-            const repeatNumber = $column.find('.menu-column-repeat-number-input').val(),
-                  repeatKey = $column.attr('id');
-            let columns = [];
-            for ( let i = 1; i <= repeatNumber; i++ ) {
-              $column.find('.menu-column').each( function() {
-                const $repeatColumn = $( this );
-                if ( i === 1 ) columns.push( $repeatColumn.attr('id') );
-                columnHTML( $repeatColumn, i );
-              });
-            }
-            createMenuJSON['repeat'][repeatKey] = {
-              'COLUMNS' : columns,
-              'REPEAT_CNT' : repeatNumber
-            }
-
-            if ( menuEditorMode === 'edit' ) {
-              if ( menuEditorArray.selectMenuInfo['repeat']['r1'] && menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'] ) {
-                createMenuJSON['repeat']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'];
+              if ( menuEditorArray.selectMenuInfo['item'][key] ) {
+                LAST_UPDATE_TIMESTAMP = menuEditorArray.selectMenuInfo['item'][key]['LAST_UPDATE_TIMESTAMP'];
               }
             }
-          }
-        } else {
-          columnHTML( $column );
-        }
-        
-      } else if ( $column.is('.menu-column-group') ) {
-        // グループ
-        const name = $column.children('.menu-column-group-header').find('.menu-column-title-input').val(),
-              key = $column.attr('id'),
-              groupID = $column.attr('data-group-id');
-        let parents = '',
-            parentArray = [],
-            columns = [];
-        $column.parents('.menu-column-group').each( function() {
-          parentArray.unshift( $( this ).find('.menu-column-title-input').val() );
-        });
-        parents = parentArray.join('/');
-        
-        $column.children('.menu-column-group-body').children().each( function() {
-          columns.push( $( this ).attr('id') );
-        });
-        createMenuJSON['group'][key] = {
-          'COL_GROUP_ID' : groupID,
-          'COL_GROUP_NAME' : name,
-          'PARENT' : parents,
-          'COLUMNS' : columns
-        }
-        tableAnalysis( $column.children('.menu-column-group-body') );
-      
-      }
+            // 項目名
+            let itemName = $column.find('.menu-column-title-input').val();
+            if ( repeatCount > 1 ) {
+              itemName += '[' + repeatCount + ']';
+              repeatFlag = true;
+              key = key + '[' + repeatCount + ']';
+
+              // 更新時のリピート項目チェック
+              if ( menuEditorMode === 'edit' ) {
+                const originalBeforeName = CREATE_ITEM_ID_to_KEY( CREATE_ITEM_ID ),
+                      repeatItemData = repeatItemCheckID( originalBeforeName + '[' + repeatCount + ']');
+                CREATE_ITEM_ID = repeatItemData[0];
+                LAST_UPDATE_TIMESTAMP = repeatItemData[1];
+              }
+
+            }
+            // 親カラムグループ
+            let parents = '',
+                parentArray = [];
+            $column.parents('.menu-column-group').each( function() {
+              parentArray.unshift( $( this ).find('.menu-column-title-input').val() );
+            });
+            parents = parentArray.join('/');
+            // JSONデータ
+            createMenuJSON['item'][key] = {
+              'CREATE_ITEM_ID' : CREATE_ITEM_ID,
+              'MENU_NAME' : createMenuJSON['menu']['MENU_NAME'],
+              'ITEM_NAME' : itemName,
+              'DISP_SEQ' : order,
+              'REQUIRED' : $column.find('.required').prop('checked'),
+              'UNIQUED' : $column.find('.unique').prop('checked'),
+              'COL_GROUP_ID' : parents,
+              'INPUT_METHOD_ID' : selectTypeValue,
+              'DESCRIPTION' : $column.find('.explanation').val(),
+              'NOTE' : $column.find('.note').val(),
+              'REPEAT_ITEM' : repeatFlag,
+              'MIN_WIDTH' : $column.css('min-width'),
+              'LAST_UPDATE_TIMESTAMP' : LAST_UPDATE_TIMESTAMP
+            }
+            // 項目タイプ
+            switch ( selectTypeValue ) {
+              case '1':
+                createMenuJSON['item'][key]['MAX_LENGTH'] = $column.find('.max-byte').val();
+                createMenuJSON['item'][key]['PREG_MATCH'] = $column.find('.regex').val();
+                break;
+              case '2':
+                createMenuJSON['item'][key]['MULTI_MAX_LENGTH'] = $column.find('.max-byte').val();
+                createMenuJSON['item'][key]['MULTI_PREG_MATCH'] = $column.find('.regex').val();
+                break;
+              case '3':
+                createMenuJSON['item'][key]['INT_MIN'] = $column.find('.int-min-number').val();
+                createMenuJSON['item'][key]['INT_MAX'] = $column.find('.int-max-number').val();
+                break;
+              case '4':
+                createMenuJSON['item'][key]['FLOAT_MIN'] = $column.find('.float-min-number').val();
+                createMenuJSON['item'][key]['FLOAT_MAX'] = $column.find('.float-max-number').val();
+                createMenuJSON['item'][key]['FLOAT_DIGIT'] = $column.find('.digit').val();
+                break;
+              case '7':
+                createMenuJSON['item'][key]['OTHER_MENU_LINK_ID'] = $column.find('.pulldown-select').val();
+                break;
+              case '8':
+                createMenuJSON['item'][key]['PW_MAX_LENGTH'] = $column.find('.password-max-byte').val();
+                break;
+            }
+          // Item end
+        } else if ( $column.is('.menu-column-repeat') ) {
+          // リピート
+            const repeatNumber = $column.find('.menu-column-repeat-number-input').val();
+            if ( $column.find('.menu-column, .menu-column-group').length ) {
+                // リピートの回数繰り返す
+                for ( let i = 1; i <= repeatNumber; i++ ) {
+                  repeatCount = i;
+                  tableAnalysis( $column.children('.menu-column-repeat-body'), repeatCount );
+                }
+                repeatCount = 0;
+                // リピート内項目リスト
+                let columns = [];
+                $column.children('.menu-column-repeat-body').children().each( function() {
+                  columns.push( $( this ).attr('id') );
+                });
+                // リピートJSON
+                createMenuJSON['repeat']['r1'] = {
+                  'COLUMNS' : columns,
+                  'REPEAT_CNT' : repeatNumber
+                }
+                if ( menuEditorMode === 'edit' ) {
+                  if ( menuEditorArray.selectMenuInfo['repeat']['r1'] && menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'] ) {
+                    createMenuJSON['repeat']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'];
+                  }
+                }
+            }
+          // Repeat end
+        } else if ( $column.is('.menu-column-group') ) {
+          // グループ
+            let groupID = $column.attr('data-group-id'),
+                groupName = $column.find('.menu-column-title-input').val(),
+                key = $column.attr('id'),
+                parents = '',
+                parentArray = [],
+                columns = [],
+                repeatFlag = false;
+             // グループ名
+            if ( repeatCount > 1 ) {
+              groupName += '[' + repeatCount + ']';
+              repeatFlag = true;
+              key = key + '[' + repeatCount + ']';
+
+              // 更新時のリピート項目チェック
+              if ( menuEditorMode === 'edit' ) {
+                const originalBeforeName = COL_GROUP_ID_to_KEY( groupID ),
+                      repeatGroupID = repeatGroupCheckID( originalBeforeName + '[' + repeatCount + ']');
+                groupID = repeatGroupID;
+              }
+
+            }
+            // 親グループ
+            $column.parents('.menu-column-group').each( function() {
+              parentArray.unshift( $( this ).find('.menu-column-title-input').val() );
+            });
+            parents = parentArray.join('/');
+            // グループ内項目リスト
+            $column.children('.menu-column-group-body').children().each( function() {
+              columns.push( $( this ).attr('id') );
+            });
+            // グループJSON
+            createMenuJSON['group'][key] = {
+              'COL_GROUP_ID' : groupID,
+              'COL_GROUP_NAME' : groupName,
+              'PARENT' : parents,
+              'COLUMNS' : columns,
+              'REPEAT_GROUP' : repeatFlag,
+            }
+            tableAnalysis( $column.children('.menu-column-group-body'), repeatCount );
+          // Group end
+        }     
+
     });
 
   };
@@ -1717,11 +1753,11 @@ const createRegistrationData = function( type ){
   createMenuJSON['menu']['columns'] = topColumns;
 
   // 解析スタート
-  tableAnalysis ( $menuTable );
+  tableAnalysis ( $menuTable, 0 );
   
   // JSON変換
   const menuData = JSON.stringify( createMenuJSON );
-  
+
   if ( type === 'registration' ) {
     registerTable(menuData);
   } else if ( type === 'update' ) {
@@ -1739,7 +1775,7 @@ const createRegistrationData = function( type ){
 const loadMenu = function() {
     
     const loadJSON = menuEditorArray.selectMenuInfo;
-
+    
     // メニュー名、表示順序、説明、備考は、流用新規時に空白にする
     if ( menuEditorMode === 'diversion' ){
       loadJSON['menu']['MENU_NAME'] = '';
