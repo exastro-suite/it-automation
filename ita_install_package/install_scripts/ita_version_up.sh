@@ -720,6 +720,13 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
             fi
         fi
     done
+
+    #その他必要なスクリプトを実行する
+    SHELL_FILE="${VERSION_UP_DIR}/${LIST_VERSION}/other_exec.sh"
+    if test -e ${SHELL_FILE} ; then
+        sh ${SHELL_FILE} >> "$LOG_FILE" 2>&1
+    fi
+
 done < ${VERSION_UP_LIST_FILE}
 
 #リリースファイルを変更する
