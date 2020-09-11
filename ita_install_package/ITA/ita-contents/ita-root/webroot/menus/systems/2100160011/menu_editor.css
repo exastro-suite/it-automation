@@ -1168,11 +1168,9 @@ box-shadow: 0 0 8px rgba( 0,0,0,.5 ) inset, 0 0 4px 1px #4F80FF;
 }
 
 /* 入れ子禁止 */
-.menu-table[data-move-type="menu-column-group"] .menu-column-repeat-body,
 .menu-table[data-move-type="menu-column-repeat"] .menu-column-repeat-body {
 cursor: no-drop!important;
 }
-.menu-table[data-move-type="menu-column-group"] .menu-column-repeat-body *,
 .menu-table[data-move-type="menu-column-repeat"] .menu-column-repeat-body * {
 pointer-events: none;
 }
