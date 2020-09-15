@@ -144,7 +144,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
     //node分繰り返し
     $aryNode = array();
     $arrpatternDel = array('/__proto__/');
-    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/' );
+    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/'  );
 
     foreach( $fxVarsStrSortedData as $nodename => $nodeinfo ){
         //　nodeの処理開始
@@ -392,7 +392,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         #Symfony-nodeパラメータ整形
         $aryExecuteData = $fxVarsAryReceptData;
         $aryNodeData = $objOLA->nodeDateDecodeForedit($fxVarsStrSortedData);
-        #'start','end','movement','call','parallel-branch','conditional-branch','merge','pause','blank'
+        #'start','end','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank'
     
 
         $strErrMsg="";
@@ -630,6 +630,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
             if( !isset( $aryDataForMovement['OPERATION_NO_IDBH'] ) )$aryDataForMovement['OPERATION_NO_IDBH']="";
             if( !isset( $aryDataForMovement['SKIP_FLAG'] ) )$aryDataForMovement['SKIP_FLAG']="";
             if( !isset( $aryDataForMovement['NEXT_PENDING_FLAG'] ) )$aryDataForMovement['NEXT_PENDING_FLAG']="";
+            if( !isset( $aryDataForMovement['CALL_SYMPHONY_ID'] ) )$aryDataForMovement['CALL_SYMPHONY_ID']="";
 
             //廃止済みMovement対応
             if( $aryDataForMovement['type'] == "movement" ){
@@ -694,7 +695,38 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                     }        
             }
+ 
+            //CALL呼び出し値有無(symphony)
+            if( $aryDataForMovement['type'] == "call_s" && ( $aryDataForMovement['CALL_SYMPHONY_ID'] == "" || !is_numeric( $aryDataForMovement['CALL_SYMPHONY_ID'] ) ) ){
+                    $intErrorType = 2;
+                    $strErrStepIdInFx="00002800";
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170015");
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
 
+            //廃止済みSymphony対応
+            if( $aryDataForMovement['type'] == "call_s" ){
+                    $aryRetBody = $objOLA->getInfoOfOneSymphony($aryDataForMovement['CALL_SYMPHONY_ID'],-1);
+                    
+                    if( $aryRetBody[1] !== null ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00000200";
+                        $intErrorType = $aryRetBody[1];
+                        //
+                        $aryErrMsgBody = $aryRetBody[2];
+                        //
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                    $arrMVList = $aryRetBody[4];
+
+                    if( !isset($arrMVList['SYMPHONY_CLASS_NO']) ){
+                        $intErrorType = 2;
+                        $strErrStepIdInFx="00002800";
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170015");
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+            }
         }
          //-バリデーションチェック(NODE毎詳細)---
 
@@ -819,39 +851,43 @@ function checkNodeUseCaseValidate($aryNodeData){
     $arrNodeVariList=array();
     $arrNodeVariList['start']=array(
         "in"=>array(),
-        "out"=>array('movement','call','parallel-branch','blank')
+        "out"=>array('movement','call','call_s','parallel-branch','blank')
     );
     $arrNodeVariList['end']=array(
-        "in"=>array('movement','call','conditional-branch','merge','pause','blank'),
+        "in"=>array('movement','call','call_s','conditional-branch','merge','pause','blank'),
         "out"=>array()
     );
     $arrNodeVariList['movement']=array(
-        "in"=>array('start','movement','call','parallel-branch','conditional-branch','merge','pause','blank'),
-        "out"=>array('end','movement','call','parallel-branch','conditional-branch','merge','pause','blank')
+        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank'),
+        "out"=>array('end','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank')
     );
     $arrNodeVariList['call']=array(
-        "in"=>array('start','movement','call','parallel-branch','conditional-branch','merge','pause','blank'),
-        "out"=>array('end','movement','call','parallel-branch','conditional-branch','merge','pause','blank')
+        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank'),
+        "out"=>array('end','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank')
+    );
+    $arrNodeVariList['call_s']=array(
+        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank'),
+        "out"=>array('end','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank')
     );
     $arrNodeVariList['parallel-branch']=array(
-        "in"=>array('start','movement','call','conditional-branch','merge','pause','blank'),
-        "out"=>array('movement','call','blank')
+        "in"=>array('start','movement','call','call_s','conditional-branch','merge','pause','blank'),
+        "out"=>array('movement','call','call_s','blank')
     );
     $arrNodeVariList['conditional-branch']=array(
         "in"=>array('movement','call'),
-        "out"=>array('end','movement','call','parallel-branch','pause','blank')
+        "out"=>array('end','movement','call','call_s','parallel-branch','pause','blank')
     );
     $arrNodeVariList['merge']=array(
-        "in"=>array('movement','call','pause','blank'),
-        "out"=>array('end','movement','call','parallel-branch','pause','blank')
+        "in"=>array('movement','call','call_s','pause','blank'),
+        "out"=>array('end','movement','call','call_s','parallel-branch','pause','blank')
     );
     $arrNodeVariList['pause']=array(
-        "in"=>array('movement','call','parallel-branch','merge','blank'),
-        "out"=>array('end','movement','call','parallel-branch','merge','blank')
+        "in"=>array('movement','call','call_s','parallel-branch','merge','blank'),
+        "out"=>array('end','movement','call','call_s','parallel-branch','merge','blank')
     );
     $arrNodeVariList['blank']=array(
-        "in"=>array('start','movement','call','parallel-branch','conditional-branch','merge','pause','blank'),
-        "out"=>array('start','movement','call','parallel-branch','conditional-branch','merge','pause','blank')
+        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank'),
+        "out"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank')
     );
 
     try{

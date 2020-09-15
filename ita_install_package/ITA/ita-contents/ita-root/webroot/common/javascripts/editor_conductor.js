@@ -110,6 +110,10 @@ const listIdName = function( type, id ) {
       list = conductorUseList.movementList;
       idKey = 'PATTERN_ID';
       nameKey = 'PATTERN_NAME';
+    } else if ( type === 'symphony') {
+      list = conductorUseList.symphonyCallList;
+      idKey = 'SYMPHONY_CLASS_NO';
+      nameKey = 'SYMPHONY_NAME';
     }
 
     const listLength = list.length;
@@ -1185,7 +1189,8 @@ const createNodeHTML = function( nodeID ) {
       'start' : ['S', 'Conductor', 'Start', 'conductor-start'],
       'end' : ['E', 'Conductor', 'End', 'conductor-end'],
       'pause' : ['', '', 'Pause', 'function function-pause'],
-      'call' : ['C', 'Conductor call', 'Not selected', 'conductor-call'],
+      'call' : ['Cc', 'Conductor call', 'Not selected', 'conductor-call'],
+      'call_s' : ['Sc', 'Symphony call', 'Not selected', 'symphony-call'],
       'conditional-branch' : ['', '', '', 'function function-conditional'],
       'parallel-branch' : ['', '', '', 'function function-parallel'],
       'merge' : ['', '', '', 'function function-merge']
@@ -1255,7 +1260,7 @@ const createNodeHTML = function( nodeID ) {
     }
 
     // Node circle & Node type
-    typeCheck = ['start', 'end', 'movement', 'call'];
+    typeCheck = ['start', 'end', 'movement', 'call', 'call_s'];
     if ( typeCheck.indexOf( nodeData.type ) !== -1 ) {
       nodeHTML += ''
       + '<div class="node-circle">'
@@ -1276,6 +1281,13 @@ const createNodeHTML = function( nodeID ) {
         nodeName = '[' + nodeData['CALL_CONDUCTOR_ID'] + ']:' + listIdName('conductor', nodeData['CALL_CONDUCTOR_ID'] );
       }
       nodeHTML += '<div class="node-name"><span class="select-conductor-name"><span class="select-conductor-name-inner">' + nodeName + '</span></span></span></div>';
+    }
+    if ( nodeData.type === 'call_s' ) {
+      if ( editor.checkValue( nodeData['CALL_SYMPHONY_ID'] ) ) {
+        nodeClass.push('call-select');
+        nodeName = '[' + nodeData['CALL_SYMPHONY_ID'] + ']:' + listIdName('symphony', nodeData['CALL_SYMPHONY_ID'] );
+      }
+      nodeHTML += '<div class="node-name"><span class="select-symphony-name"><span class="select-symphony-name-inner">' + nodeName + '</span></span></span></div>';
     }
     // Pause
     if ( nodeData.type === 'pause' ) {
@@ -1344,7 +1356,7 @@ const createNodeHTML = function( nodeID ) {
     }
 
     // Skip, Status, Operation
-    typeCheck = ['movement', 'call'];
+    typeCheck = ['movement', 'call', 'call_s'];
     if ( typeCheck.indexOf( nodeData.type ) !== -1 ) {
       // Default skip
       let nodeCheckedType = '',
@@ -1464,6 +1476,12 @@ const initialNode = function( nodeType, movementID ){
     if ( nodeType === 'call' ) {
       conductorData[ nodeID ]['SKIP_FLAG'] = 0;
       conductorData[ nodeID ]['CALL_CONDUCTOR_ID'] = null;
+      conductorData[ nodeID ]['OPERATION_NO_IDBH'] = null;
+    }
+    
+    if ( nodeType === 'call_s' ) {
+      conductorData[ nodeID ]['SKIP_FLAG'] = 0;
+      conductorData[ nodeID ]['CALL_SYMPHONY_ID'] = null;
       conductorData[ nodeID ]['OPERATION_NO_IDBH'] = null;
     }
 
@@ -3018,6 +3036,7 @@ const panelChange = function( nodeID ) {
         case 'parallel-branch':
         case 'merge':
         case 'call':
+        case 'call_s':
           panelType = nodeType;
           break;
         case 'start':
@@ -3085,6 +3104,21 @@ const panelChange = function( nodeID ) {
           // Skip
           const nodeChecked = ( Number( conductorData[ nodeID ].SKIP_FLAG ) === 1 ) ? true : false;
           $('#conductor-call-default-skip').prop('checked', nodeChecked );
+        }
+        break;
+      case 'call_s': {
+          let callSymphony = conductorData[ nodeID ].CALL_SYMPHONY_ID;
+          if ( editor.checkValue( callSymphony ) ) {
+            const symphonyName = listIdName('symphony',callSymphony );
+            callSymphony = '[' + callSymphony + ']:' + symphonyName;
+          } else {
+            callSymphony = '';
+          }
+          $('#symphony-call-name').text( callSymphony );
+          panelOperation('#symphony-call-operation');
+          // Skip
+          const nodeChecked = ( Number( conductorData[ nodeID ].SKIP_FLAG ) === 1 ) ? true : false;
+          $('#symphony-call-default-skip').prop('checked', nodeChecked );
         }
         break;
       case 'function':
@@ -3277,6 +3311,21 @@ const callConductorUpdate = function( nodeID, id, name ) {
   panelChange( nodeID );
 };
 
+// Callコンダクターセレクト
+const callSymphonyUpdate = function( nodeID, id, name ) {
+  const $node = $('#' + nodeID );
+  if ( id !== 0 ) { 
+    conductorData[ nodeID ].CALL_SYMPHONY_ID = id;
+    $node.addClass('call-select').find('.select-symphony-name-inner').text('[' + id + ']:' + name );
+  } else {
+    conductorData[ nodeID ].CALL_SYMPHONY_ID = null;
+    $node.removeClass('call-select').find('.select-symphony-name-inner').text('Not selected');
+  }
+  nodeSet( $('#' + nodeID ) );
+  connectEdgeUpdate( nodeID );
+  panelChange( nodeID );
+};
+
 const modalSelectList = function( type ) {
   const $modalBody = $('.editor-modal-body');
   let operationListHTML = ''
@@ -3291,6 +3340,8 @@ const modalSelectList = function( type ) {
     operationListHTML += modalTr( conductorUseList.operationList, 'OPERATION_NO_IDBH','OPERATION_NAME')
   } else if ( type === 'conductor') {
     operationListHTML += modalTr( conductorUseList.conductorCallList, 'CONDUCTOR_CLASS_NO','CONDUCTOR_NAME')
+  } else if ( type === 'symphony') {
+    operationListHTML += modalTr( conductorUseList.symphonyCallList, 'SYMPHONY_CLASS_NO','SYMPHONY_NAME')
   }
   operationListHTML += ''
       + '</tbody>'
@@ -3323,6 +3374,8 @@ const modalSelectList = function( type ) {
           operationUpdate( nodeID, dataID, dataName );
         } else if ( type === 'conductor') {
           callConductorUpdate( nodeID, dataID, dataName );
+        } else if ( type === 'symphony') {
+          callSymphonyUpdate( nodeID, dataID, dataName );
         }
         editor.modalClose();
         break;
@@ -3333,21 +3386,37 @@ const modalSelectList = function( type ) {
   });
   
 };
-$('#conductor-call-operation-select, #movement-operation-select').on('click', function(){
+// Movement operation select
+$('#movement-operation-select').on('click', function(){
+  editor.modalOpen('Select movement operation', modalSelectList, 'operation' );
+});
+// Call conductor operation select
+$('#conductor-call-operation-select').on('click', function(){
   editor.modalOpen('Select call conductor operation', modalSelectList, 'operation' );
 });
-// Callコンダクターセレクト
+// Call symphony operation select
+$('#symphony-call-operation-select').on('click', function(){
+  editor.modalOpen('Select call symphony operation', modalSelectList, 'operation' );
+});
+// Call conductor select
 $('#conductor-call-select').on('click', function(){
   editor.modalOpen('Select call conductor', modalSelectList, 'conductor' );
 });
-
-// オペレーションクリア
-$('#conductor-call-operation-clear, #movement-operation-clear').on('click', function(){
+// Call symphony select
+$('#symphony-call-select').on('click', function(){
+  editor.modalOpen('Select call symphony', modalSelectList, 'symphony' );
+});
+// Call conductor operation clear
+$('#conductor-call-operation-clear, #movement-operation-clear, #symphony-call-operation-clear').on('click', function(){
   operationUpdate( g_selectedNodeID[0], 0 );
 });
-// Callコンダクタークリア
+// Call conductor clear
 $('#conductor-call-clear').on('click', function(){
  callConductorUpdate( g_selectedNodeID[0], 0 );
+});
+// Call symphony clear
+$('#symphony-call-clear').on('click', function(){
+ callSymphonyUpdate( g_selectedNodeID[0], 0 );
 });
 
 
@@ -4303,6 +4372,7 @@ const conductorStatusUpdate = function( exeNumber ) {
             break;
           case 'movement':
           case 'call':
+          case 'call_s':
           case 'end':
             movementCheck( nodeID );
             break;
