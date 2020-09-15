@@ -214,6 +214,7 @@ EOD;
                   <li class="editor-tab-menu-item" data-tab="parallel-branch">Parallel branch</li>
                   <li class="editor-tab-menu-item" data-tab="merge">Merge</li>
                   <li class="editor-tab-menu-item" data-tab="call">Conductor call</li>
+                  <li class="editor-tab-menu-item" data-tab="call_s">Symphony call</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
 
@@ -437,6 +438,54 @@ EOD;
                     </div>
                   </div>
                 </div>
+                
+                <!-- Symphony call -->
+                <div id="call_s" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <table class="panel-table">
+                      <tbody>
+                        <tr>
+                          <th class="panel-th">Default skip :</th>
+                          <td class="panel-td"><input id="symphony-call-default-skip" class="panel-checkbox" type="checkbox"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Symphony select</div>
+                      <table class="panel-table">
+                        <tbody>
+                          <tr>
+                            <th class="panel-th">Symphony :</th>
+                            <td class="panel-td"><span id="symphony-call-name" class="panel-span" data-id="" data-value=""></span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <ul class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="symphony-call-select" class="panel-button">Symphony select</button></li>
+                        <li class="panel-button-group-item"><button id="symphony-call-clear" class="panel-button">Clear</button></li>
+                      </ul>
+                    </div>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Operation select</div>
+                      <table class="panel-table">
+                        <tbody>
+                          <tr>
+                            <th class="panel-th">Operation :</th>
+                            <td class="panel-td"><span id="symphony-call-operation" class="panel-span" data-id="" data-value=""></span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <ul class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="symphony-call-operation-select" class="panel-button">Operation select</button></li>
+                        <li class="panel-button-group-item"><button id="symphony-call-operation-clear" class="panel-button">Clear</button></li>
+                      </ul>
+                    </div>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Note</div>
+                      <textarea id="symphony-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                    </div>
+                  </div>
+                </div>
 
               </div><!-- /.editor-tab-contents -->
               
@@ -496,6 +545,7 @@ EOD;
                           <tr><th><span class="add-node function" data-function-type="end"></span></th><td><div>Conductor end</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="pause"></span></th><td><div>Conductor pause</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="call"></span></th><td><div>Conductor call</div></td></tr>
+                          <tr><th><span class="add-node function" data-function-type="call_s"></span></th><td><div>Symphony call</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="conditional-branch"></span></th><td><div>Conditional branch</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="parallel-branch"></span></th><td><div>Parallel branch</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="merge"></span></th><td><div>Parallel merge</div></td></tr>
