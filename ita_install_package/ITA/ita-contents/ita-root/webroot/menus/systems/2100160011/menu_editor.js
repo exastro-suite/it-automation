@@ -1660,7 +1660,7 @@ const createRegistrationData = function( type ){
               case '4':
                 createMenuJSON['item'][key]['FLOAT_MIN'] = $column.find('.float-min-number').val();
                 createMenuJSON['item'][key]['FLOAT_MAX'] = $column.find('.float-max-number').val();
-                createMenuJSON['item'][key]['FLOAT_DIGIT'] = $column.find('.digit').val();
+                createMenuJSON['item'][key]['FLOAT_DIGIT'] = $column.find('.digit-number').val();
                 break;
               case '7':
                 createMenuJSON['item'][key]['OTHER_MENU_LINK_ID'] = $column.find('.pulldown-select').val();
@@ -1759,8 +1759,10 @@ const createRegistrationData = function( type ){
   const menuData = JSON.stringify( createMenuJSON );
 
   if ( type === 'registration' ) {
+    console.log(menuData);
     registerTable(menuData);
   } else if ( type === 'update' ) {
+    console.log(menuData);
     updateTable(menuData);
   }
 
@@ -1860,7 +1862,7 @@ const loadMenu = function() {
             case '4':
               $item.find('.float-min-number').val( itemData['FLOAT_MIN'] ).change();
               $item.find('.float-max-number').val( itemData['FLOAT_MAX'] ).change();
-              $item.find('.digit').val( itemData['FLOAT_DIGIT'] ).change();
+              $item.find('.digit-number').val( itemData['FLOAT_DIGIT'] ).change();
               break;
             case '7':
               $item.find('.pulldown-select').val( itemData['OTHER_MENU_LINK_ID'] ).change();
