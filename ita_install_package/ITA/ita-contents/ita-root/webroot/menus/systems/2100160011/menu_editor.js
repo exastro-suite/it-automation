@@ -1759,10 +1759,8 @@ const createRegistrationData = function( type ){
   const menuData = JSON.stringify( createMenuJSON );
 
   if ( type === 'registration' ) {
-    console.log(menuData);
     registerTable(menuData);
   } else if ( type === 'update' ) {
-    console.log(menuData);
     updateTable(menuData);
   }
 
