@@ -401,6 +401,45 @@ Terraform代入値管理
     $table->addColumn($c);
 
 
+    // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+        $strFxName = "";
+
+        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+            if( $modeValue=="DTUP_singleRecDelete" ){
+                // 廃止の場合のみ
+                $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
+                if( $modeValue_sub == "on" ){
+
+                    $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                               ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                               ."WHERE ROW_ID IN (2100080002) ";
+
+                    $aryForBind = array();
+
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+                    if( $aryRetBody[0] !== true ){
+                        $boolRet = false;
+                        $strErrMsg = $aryRetBody[2];
+                        $intErrorType = 500;
+                    }
+                }
+            }
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['ASSIGN_ID']->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
+
+
 //----head of setting [multi-set-unique]
     $table->addUniqueColumnSet(array('OPERATION_NO_UAPK','PATTERN_ID','MODULE_VARS_LINK_ID'));
 //tail of setting [multi-set-unique]----

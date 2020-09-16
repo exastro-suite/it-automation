@@ -107,15 +107,22 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $strErrMsg = "";
         $strErrorBuf = "";
         $strFxName = "";
+        $rowIdList = "";
 
         $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
         if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
-
             if(file_exists($g['root_dir_path'] . "/libs/release/ita_ansible-driver")){
+                $rowIdList = "2100020002, 2100020004, 2100020006";
+            }
 
+            if(file_exists($g['root_dir_path'] . "/libs/release/ita_terraform-driver")){
+                $rowIdList = ($rowIdList == "") ? "2100080002" : $rowIdList . ", 2100080002";
+            }
+
+            if($rowIdList != ""){
                 $strQuery = "UPDATE A_PROC_LOADED_LIST "
                            ."SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
-                           ."WHERE ROW_ID IN (2100020002, 2100020004, 2100020006)";
+                           ."WHERE ROW_ID IN ($rowIdList)";
 
                 $g['objDBCA']->setQueryTime();
                 $aryForBind = array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP' => $g['objDBCA']->getQueryTime());
