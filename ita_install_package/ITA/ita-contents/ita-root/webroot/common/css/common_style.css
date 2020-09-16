@@ -812,6 +812,9 @@ position: relative;
 z-index: 1;
 width: 100%;
 }
+.itaTable .input_password {
+width: auto;
+}
 #KIZI .input_password input[type="password"],
 #KIZI .input_password input[type="text"] {
 padding: 2px 18px 2px 2px;
