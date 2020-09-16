@@ -390,11 +390,10 @@ Terraform代入値管理
     //************************************************************************************
     //----具体値
     //************************************************************************************
-    $objVldt = new SingleTextValidator(0,8192,false);
-    $c = new SensitiveSingleTextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103740"), 'SENSITIVE_FLAG');
+    $objVldt = new MultiTextValidator(0,8192,false);
+    $c = new SensitiveMultiTextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103740"), 'SENSITIVE_FLAG');
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103750"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
-    $c->setRequired(true);     //登録/更新時には入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
 
