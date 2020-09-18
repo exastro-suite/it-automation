@@ -165,8 +165,8 @@ for LINE in $ANSWERS_TEXT;do
             continue
         fi
 
-        key=`echo $PARAM | cut -d ":" -f 1 | sed 's/^ \(.*\) $/\1/'`
-        val=`echo $PARAM | cut -d ":" -f 2 | sed 's/^ \(.*\) $/\1/'`
+        key="$(echo "$PARAM" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\1/")"
+        val="$(echo "$PARAM" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\2/")"
 
         #インストールモード取得
         if [ "$key" = 'install_mode' ]; then
@@ -196,6 +196,8 @@ for LINE in $ANSWERS_TEXT;do
                 func_answer_format_check
                 DB_PASSWORD_ON_CMD="$val"
                 val="$(echo "$val"|sed -e 's/\\/\\\\\\\\/g')"
+                val="$(echo "$val"|sed -e 's|/|\\\\\\/|g')"
+                val="$(echo "$val"|sed -e 's/&/\\\\\\&/g')"
                 DB_PASSWORD="$(echo "$val"|sed -e "s/'/\\\\\\\'/g")"
             fi
         fi
@@ -222,9 +224,7 @@ for LINE in $ANSWERS_TEXT;do
         #DBルートパスワード取得
         elif [ "$key" = 'db_root_password' ]; then
             func_answer_format_check
-            DB_ROOT_PASSWORD_ON_CMD="$val"
-            val="$(echo "$val"|sed -e 's/\\/\\\\\\\\/g')"
-            DB_ROOT_PASSWORD="$(echo "$val"|sed -e "s/'/\\\\\\\'/g")"
+            DB_ROOT_PASSWORD="$val"
         #DB名取得
         elif [ "$key" = 'db_name' ]; then
             func_answer_format_check

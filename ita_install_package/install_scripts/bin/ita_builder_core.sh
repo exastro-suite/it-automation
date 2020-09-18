@@ -395,6 +395,7 @@ configure_mariadb() {
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\\/\\\\\\\\/g')
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\$/\\\\\\$/g')
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/"/\\\\\\"/g')
+    send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\[/\\\\\\[/g')
 
     if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "CentOS7" ]; then
         #Confirm whether it is installed
