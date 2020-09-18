@@ -32,8 +32,8 @@
 # @return   STR    string    エンコードした文字列
 ############################################################
 func_str_encode() {
-    STR=`echo -ne "$1" | base64 2>> "$LOG_FILE"`
-    STR=`echo "$STR" | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' 2>> "$LOG_FILE"`
+    STR=$(echo -n "$1" | base64 2>> "$LOG_FILE")
+    STR=$(echo "$STR" | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' 2>> "$LOG_FILE")
     echo "$STR"
 }
 
