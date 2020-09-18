@@ -1587,6 +1587,56 @@
                                                 break;    
                                         }
                                         
+                                    }elseif( $arySymInsCallUpdateTgtSource['STATUS_ID'] == 8 ){
+
+                                        //Nodeインスタンスのステータスを想定外エラーへ
+                                        $aryMovInsUpdateTgtSource['STATUS_ID']    = '11'; //想定外エラー
+                                        $aryMovInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
+                                        $aryMovInsUpdateTgtSource['TIME_START'] = str_replace("-","/",$aryMovInsUpdateTgtSource['TIME_START']) ;
+                                        // 更新用のテーブル定義
+                                        $aryConfigForIUD = $aryConfigForMovInsIUD;
+                                        
+                                        // BIND用のベースソース
+                                        $aryBaseSourceForBind = $aryMovInsUpdateTgtSource;
+                                        $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                                        
+                                        if( $aryRetBody !== true  ){
+                                            // 例外処理へ
+                                            $strErrStepIdInFx="00001404";
+                                            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                        }
+
+                                        //次のNode取得
+                                        $arySqlBind=array(
+                                            "CONDUCTOR_INSTANCE_NO" => $rowOfConductor['CONDUCTOR_INSTANCE_NO'],
+                                            "NODE_CLASS_NO" => $arrTargetNodeInstance["I_NODE_CLASS_NO"],
+                                            "TERMINAL_TYPE_ID" => 2, //out
+                                            );
+                                        $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
+
+                                        //クラスの取得
+                                        $arrParallelTargetNodeClass=array();
+                                        foreach ($aryRetBody as $key => $value) {
+                                            foreach ( $arrNodeClassInfo as $key2 => $value2) {
+                                                if( $value2['NODE_NAME'] == $value['CONNECTED_NODE_NAME'] ){
+                                                    $arrParallelTargetNodeClass[$value2['NODE_CLASS_NO']]=$value2;        
+                                                }
+                                            }
+                                        }
+
+                                        $conditionalflg="";
+                                        foreach ($arrParallelTargetNodeClass as $key => $nclass) {
+                                            if($nclass['NODE_TYPE_ID'] == 6 ){
+                                                $conditionalflg="1";
+                                            }
+                                        }
+                                        //次のNodeがcondition以外
+                                        if($conditionalflg != 1 ){
+                                                //Conductorインスタンスのステータスを想定外エラーへ
+                                                $arySymInsUpdateTgtSource['STATUS_ID'] = 8;     //想定外エラー
+                                                break;    
+                                        }
+                                        
                                     }
 
                                     //後続処理conditional用
@@ -2396,6 +2446,56 @@
                                         if($conditionalflg != 1 ){
                                                 //Conductorインスタンスのステータスを異常終了へ
                                                 $arySymInsUpdateTgtSource['STATUS_ID'] = 6;     //緊急停止
+                                                break;    
+                                        }
+                                        
+                                    }elseif( $arySymInsCallUpdateTgtSource['STATUS_ID'] == 8 ){
+
+                                        //Nodeインスタンスのステータスを想定外エラーへ
+                                        $aryMovInsUpdateTgtSource['STATUS_ID']    = '11'; //想定外エラー
+                                        $aryMovInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
+                                        $aryMovInsUpdateTgtSource['TIME_START'] = str_replace("-","/",$aryMovInsUpdateTgtSource['TIME_START']) ;
+                                        // 更新用のテーブル定義
+                                        $aryConfigForIUD = $aryConfigForMovInsIUD;
+                                        
+                                        // BIND用のベースソース
+                                        $aryBaseSourceForBind = $aryMovInsUpdateTgtSource;
+                                        $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                                        
+                                        if( $aryRetBody !== true  ){
+                                            // 例外処理へ
+                                            $strErrStepIdInFx="00001404";
+                                            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                        }
+
+                                        //次のNode取得
+                                        $arySqlBind=array(
+                                            "CONDUCTOR_INSTANCE_NO" => $rowOfConductor['CONDUCTOR_INSTANCE_NO'],
+                                            "NODE_CLASS_NO" => $arrTargetNodeInstance["I_NODE_CLASS_NO"],
+                                            "TERMINAL_TYPE_ID" => 2, //out
+                                            );
+                                        $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
+
+                                        //クラスの取得
+                                        $arrParallelTargetNodeClass=array();
+                                        foreach ($aryRetBody as $key => $value) {
+                                            foreach ( $arrNodeClassInfo as $key2 => $value2) {
+                                                if( $value2['NODE_NAME'] == $value['CONNECTED_NODE_NAME'] ){
+                                                    $arrParallelTargetNodeClass[$value2['NODE_CLASS_NO']]=$value2;        
+                                                }
+                                            }
+                                        }
+
+                                        $conditionalflg="";
+                                        foreach ($arrParallelTargetNodeClass as $key => $nclass) {
+                                            if($nclass['NODE_TYPE_ID'] == 6 ){
+                                                $conditionalflg="1";
+                                            }
+                                        }
+                                        //次のNodeがcondition以外
+                                        if($conditionalflg != 1 ){
+                                                //Conductorインスタンスのステータスを想定外エラーへ
+                                                $arySymInsUpdateTgtSource['STATUS_ID'] = 8;     //想定外エラー
                                                 break;    
                                         }
                                         
@@ -3259,3 +3359,7 @@ function updateSymphonyInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$ar
 }
 
 ?>
+
+
+
+
