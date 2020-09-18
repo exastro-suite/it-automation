@@ -104,9 +104,16 @@
                 $cgArray = $result;
                 
                 foreach($menuData['group'] as &$groupData){
+                    if(array_key_exists('REPEAT_GROUP',$groupData) && true === $groupData['REPEAT_GROUP']){
+                        continue;
+                    }
                     $groupData['PA_COL_GROUP_ID'] = "";
                     $skipFlag = false;
-                    $fullPath = $groupData['PARENT'] . $groupData['COL_GROUP_NAME'];
+                    if($groupData['PARENT'] == "")
+                        $fullPath = $groupData['COL_GROUP_NAME'];
+                    else{
+                        $fullPath = $groupData['PARENT'] . '/' .  $groupData['COL_GROUP_NAME'];
+                    }
                     foreach($cgArray as $cgData){
                         if($fullPath == $cgData['FULL_COL_GROUP_NAME']){
                             $skipFlag = true;
@@ -140,7 +147,11 @@
                 //////////////////////////
                 // メニュー作成項目情報を登録
                 //////////////////////////
+                $repeatCount = 0;
                 foreach($menuData['item'] as &$itemData){
+                    if($itemData['REPEAT_ITEM'] == true){
+                        $repeatCount += 1;
+                    }
                     if($itemData['REQUIRED'] === true){
                         $required = "1";
                     }
@@ -212,11 +223,20 @@
                 // 縦メニュー情報を登録
                 //////////////////////////
                 
-                foreach($menuData['repeat'] as $repeatData){
-                    $createItemID = $menuData['item'][$repeatData['COLUMNS'][0]]['CREATE_ITEM_ID'];
+                if(array_key_exists('r1',$menuData['repeat'])){
+                    if($menuData['repeat']['r1']['COLUMNS'][0][0] == 'i'){
+                        $createItemID = $menuData['item'][$menuData['repeat']['r1']['COLUMNS'][0]]['CREATE_ITEM_ID'];
+                    }
+                    else{
+                        $curGroup = $menuData['repeat']['r1']['COLUMNS'][0];
+                        while($curGroup[0] == 'g'){
+                            $curGroup = $menuData['group'][$curGroup]['COLUMNS'][0];
+                        }
+                        $createItemID = $menuData['item'][$curGroup]['CREATE_ITEM_ID'];
+                    }
                     $arrayRegisterData = array("CREATE_ITEM_ID" => $createItemID,
-                                               "COL_CNT" => count($repeatData['COLUMNS']),
-                                               "REPEAT_CNT" => $repeatData['REPEAT_CNT']
+                                               "COL_CNT" => $repeatCount / ($menuData['repeat']['r1']['REPEAT_CNT'] - 1),
+                                               "REPEAT_CNT" => $menuData['repeat']['r1']['REPEAT_CNT']
                                               );
 
                     $g["page_dir"] = "2100160009";
@@ -288,7 +308,7 @@
         function updateTable($menuData){
             // グローバル変数宣言
             global $g;
-
+            
             // ローカル変数宣言
             $arrayResult = array();
             try{
@@ -492,7 +512,11 @@
                     }
                 }
                 // IDがいる項目を更新
+                $repeatCount = 0;
                 foreach($menuData['item'] as &$itemData){
+                    if($itemData['REPEAT_ITEM'] === true){
+                        $repeatCount += 1;
+                    }
                     if(!array_key_exists('CREATE_ITEM_ID',$itemData)){
                         $itemData['CREATE_ITEM_ID'] = "";
                     }
@@ -646,8 +670,9 @@
                         $updateData = $convertParamInfoData;
                     }
                 }
+                
                 // 既存の縦メニュー項目を廃止
-                if(count($menuData['repeat']) == 0 && $updateData != NULL){
+                if(!array_key_exists('r1',$menuData['repeat']) && $updateData != NULL){
                     $strNumberForRI = $updateData['CONVERT_PARAM_ID'];       // 主キー
                     $reqDeleteData = array("DISUSE_FLAG"          => "0",
                                            "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $updateData['LAST_UPDATE_TIMESTAMP'])
@@ -663,42 +688,56 @@
                     }
                 }
                 // 既存の縦メニュー項目を更新
-                else if(count($menuData['repeat']) == 1 && $updateData != NULL){
-                    foreach($menuData['repeat'] as $repeatData){
-                        $strNumberForRI = $updateData['CONVERT_PARAM_ID'];
-                        $createItemID = $menuData['item'][$repeatData['COLUMNS'][0]]['CREATE_ITEM_ID'];
-                        $arrayRegisterData = array("CREATE_ITEM_ID" => $createItemID,
-                                                   "COL_CNT" => count($repeatData['COLUMNS']),
-                                                   "REPEAT_CNT" => $repeatData['REPEAT_CNT'],
-                                                   "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['repeat']['r1']['LAST_UPDATE_TIMESTAMP'])
-                                                  );
-
-                        $g["page_dir"] = "2100160009";
-
-                        // 更新処理
-                        $arrayResult = updateTableMain(3, $strNumberForRI, $arrayUpdateData, "2100160009", 4);
-                        if($arrayResult[0] !== "000"){
-                            throw new Exception();
+                else if(array_key_exists('r1',$menuData['repeat']) && $updateData != NULL){
+                    if($menuData['repeat']['r1']['COLUMNS'][0][0] == 'i'){
+                        $createItemID = $menuData['item'][$menuData['repeat']['r1']['COLUMNS'][0]]['CREATE_ITEM_ID'];
+                    }
+                    else{
+                        $curGroup = $menuData['repeat']['r1']['COLUMNS'][0];
+                        while($curGroup[0] == 'g'){
+                            $curGroup = $menuData['group'][$curGroup]['COLUMNS'][0];
                         }
+                        $createItemID = $menuData['item'][$curGroup]['CREATE_ITEM_ID'];
+                    }
+                    $strNumberForRI = $updateData['CONVERT_PARAM_ID'];       // 主キー
+                    $arrayUpdateData = array("CREATE_ITEM_ID" => $createItemID,
+                                               "COL_CNT" => $repeatCount / ($menuData['repeat']['r1']['REPEAT_CNT'] - 1),
+                                               "REPEAT_CNT" => $menuData['repeat']['r1']['REPEAT_CNT'],
+                                               "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['repeat']['LAST_UPDATE_TIMESTAMP'])
+                                              );
+
+                    $g["page_dir"] = "2100160009";
+
+                    // 更新処理
+                    $arrayResult = updateTableMain(3, $strNumberForRI, $arrayUpdateData, "2100160009", 4);
+                    if($arrayResult[0] !== "000"){
+                        throw new Exception();
                     }
                 }
                 // 新規縦メニュー項目を登録
-                else if(count($menuData['repeat']) == 1 && $updateData == NULL){
-                    foreach($menuData['repeat'] as $repeatData){
-                        $createItemID = $menuData['item'][$repeatData['COLUMNS'][0]]['CREATE_ITEM_ID'];
-                        $arrayRegisterData = array("CREATE_ITEM_ID" => $createItemID,
-                                                   "COL_CNT" => count($repeatData['COLUMNS']),
-                                                   "REPEAT_CNT" => $repeatData['REPEAT_CNT']
-                                                  );
-
-                        $g["page_dir"] = "2100160009";
-
-                        // 登録処理
-                        $arrayResult = registerTableMain(2, $arrayRegisterData, "2100160009", 4);
-
-                        if($arrayResult[0] !== "000"){
-                            throw new Exception();
+                else if(array_key_exists('r1',$menuData['repeat']) && $updateData == NULL){
+                    if($menuData['repeat']['r1']['COLUMNS'][0][0] == 'i'){
+                        $createItemID = $menuData['item'][$menuData['repeat']['r1']['COLUMNS'][0]]['CREATE_ITEM_ID'];
+                    }
+                    else{
+                        $curGroup = $menuData['repeat']['r1']['COLUMNS'][0];
+                        while($curGroup[0] == 'g'){
+                            $curGroup = $menuData['group'][$curGroup]['COLUMNS'][0];
                         }
+                        $createItemID = $menuData['item'][$curGroup]['CREATE_ITEM_ID'];
+                    }
+                    $arrayRegisterData = array("CREATE_ITEM_ID" => $createItemID,
+                                               "COL_CNT" => $repeatCount / ($menuData['repeat']['r1']['REPEAT_CNT'] - 1),
+                                               "REPEAT_CNT" => $menuData['repeat']['r1']['REPEAT_CNT']
+                                              );
+
+                    $g["page_dir"] = "2100160009";
+
+                    // 登録処理
+                    $arrayResult = registerTableMain(2, $arrayRegisterData, "2100160009", 4);
+
+                    if($arrayResult[0] !== "000"){
+                        throw new Exception();
                     }
                 }
                 
@@ -1083,7 +1122,7 @@
                     }
                 }
                 
-                // 対応のメニュー情報がない場合、エラー
+                // 対応するメニュー情報がない場合、エラー
                 if(false === $findFlag){
                     $msg = $g['objMTS']->getSomeMessage('ITACREPAR-ERR-5005', $result);
                     $arrayResult = array("999","",$msg);
@@ -1121,11 +1160,14 @@
                     }
                 }
                 
+                // リピート項目がない
                 if(NULL === $cpiData){
                     $returnDataArray['repeat'][] = array();
                 }
+                // リピート項目がある
                 else{
                     $columnsArray = array();
+                    // リピート中の項目の配列を作る
                     for($i = 1 ; $i <= $cpiData['COL_CNT'] ; $i++){
                         $columnsArray[] = "i" . ($i + $searchIdx);
                     }
@@ -1138,17 +1180,46 @@
                 
                 // 項目作成情報
                 $tmpGroupArray = array();
+                $checked = array();
                 $itemNum = 1;
                 foreach($itemInfoArray as $itemInfoData){
+                    // 繰り返し項目判定([2],[3]...)
+                    if($convertFlag == true && $itemNum >= $searchIdx + $cpiData['COL_CNT'] + 1 && $itemNum < $searchIdx + $cpiData['COL_CNT'] * $cpiData['REPEAT_CNT'] + 1){
+                        $repeatItem = true;
+                    }
+                    else{
+                        $repeatItem = false;
+                    }
                     // 親カラムグループを探す
-                    $parent = "";
-                    if($itemInfoData['COL_GROUP_ID'] != ""){
-                        // 使われてカラムグループを記録
-                        $tmpGroupArray[$itemInfoData['COL_GROUP_ID']][] = 'i' . $itemNum;
-                        foreach($columnGroupArray as $columnGroupData){
-                            if($columnGroupData['COL_GROUP_ID'] == $itemInfoData['COL_GROUP_ID']){
-                                $parent = $columnGroupData['FULL_COL_GROUP_NAME'];
-                                break;
+                    if($repeatItem == false){
+                        $parent = "";
+                        if($itemInfoData['COL_GROUP_ID'] != ""){
+                            // カラムグループを記録
+                            $tmpGroupArray[$itemInfoData['COL_GROUP_ID']][] = 'i' . $itemNum;
+                            foreach($columnGroupArray as $columnGroupData){
+                                if($columnGroupData['COL_GROUP_ID'] == $itemInfoData['COL_GROUP_ID']){
+                                    $parent = $columnGroupData['FULL_COL_GROUP_NAME'];
+                                    break;
+                                }
+                            }
+                            $curGroup = $itemInfoData['COL_GROUP_ID'];
+                            // 項目所属するカラムグループの親カラムグループの['columns']配列にカラム情報を入れます
+                            $endFlag = false;
+                            while(false == $endFlag){
+                                foreach($columnGroupArray as $columnGroupData){
+                                    if($columnGroupData['COL_GROUP_ID'] == $curGroup){
+                                        if($columnGroupData['PA_COL_GROUP_ID'] == "" || true === in_array($curGroup,$checked)){
+                                            $endFlag = true;
+                                            break;
+                                        }
+                                        else{
+                                            $tmpGroupArray[$columnGroupData['PA_COL_GROUP_ID']][] = $curGroup;
+                                            $checked[] = $curGroup;
+                                            $curGroup = $columnGroupData['PA_COL_GROUP_ID'];
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -1163,12 +1234,6 @@
                     }
                     else{
                         $uniqued = false;
-                    }
-                    if($convertFlag == true && $itemNum >= $searchIdx + $cpiData['COL_CNT'] + 1 && $itemNum < $searchIdx + $cpiData['COL_CNT'] * $cpiData['REPEAT_CNT'] + 1){
-                        $repeatItem = true;
-                    }
-                    else{
-                        $repeatItem = false;
                     }
                     $returnDataArray['item']['i' . $itemNum] = array(
                         "CREATE_MENU_ID"        => $itemInfoData['CREATE_MENU_ID'],
@@ -1201,29 +1266,6 @@
                 }
                 
                 // カラムグループ
-                // 
-                $checked = array(); 
-                // ルート親カラムグループまで探す
-                foreach($tmpGroupArray as $key => $groupData){
-                    $curGroup = $key;
-                    $endFlag = false;
-                    while(false == $endFlag){
-                        foreach($columnGroupArray as $columnGroupData){
-                            if($columnGroupData['COL_GROUP_ID'] == $curGroup){
-                                if($columnGroupData['PA_COL_GROUP_ID'] == "" || true === in_array($curGroup,$checked)){
-                                    $endFlag = true;
-                                    break;
-                                }
-                                else{
-                                    $tmpGroupArray[$columnGroupData['PA_COL_GROUP_ID']][] = $curGroup;
-                                    $checked[] = $curGroup;
-                                    $curGroup = $columnGroupData['PA_COL_GROUP_ID'];
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
                 
                 $keyToId = array(); // {COL_GROUP_ID -> g1,g2,g3...}
                 $returnGroupArray = array(); // WEBに返信するカラムグループ
@@ -1233,6 +1275,7 @@
                     $keyToId[$key] = 'g' . $groupNum;
                     $groupNum++;
                 }
+                
                 // カラムグループIDをg1,g2,g3...に変換
                 foreach($tmpGroupArray as $key => $groupData){
                     foreach($columnGroupArray as $columnGroupData){
@@ -1261,14 +1304,39 @@
                         }
                     }
                 }
-                
                 $returnDataArray['group'] = $returnGroupArray;
                 
-                // 冒頭の項目配列を作成(i1,i2,g1,g2,r1とか)
+                // リピートの位置 0:リピートなし 1:リピートがカラムグループの中にいる 2:その他
+                $repeatCase = 0;
+                // リピート項目の位置を決める(リピートカラムの共通カラムグループを判定)
+                if($convertFlag == true){
+                    $commonPrefixArray = array();
+                    foreach($returnDataArray['repeat']['r1']['columns'] as $item){
+                        $commonPrefixArray[] = $returnDataArray['item'][$item]['PARENT'] . "/";
+                    }
+                    sort($commonPrefixArray);
+                    $s1 = $commonPrefixArray[0];
+                    $s2 = $commonPrefixArray[count($commonPrefixArray) - 1];
+                    $len = min(strlen($s1),strlen($s2));
+                    
+                    for($i = 0 ; $i < $len && $s1[$i] == $s2[$i] ; $i++);
+                    
+                    $prefix = substr($s1,0,$i);
+                    $prefix = substr($prefix,0,strrpos($prefix,"/"));
+                    
+                    if($prefix == ""){
+                        $repeatCase = 2;
+                    }
+                    else{
+                        $repeatCase = 1;
+                    }
+                }
+
+                // 冒頭(一番上)の項目配列(['menu']['columns'])を作成(i1,i2,g1,g2,r1とか)
                 $columns = array();
                 foreach($returnDataArray['item'] as $key => $item){
                     // 縦メニュー項目(repeat-item)の場合、r1を入る
-                    if($convertFlag == true && in_array($key,$returnDataArray['repeat']['r1']['columns'])){
+                    if($repeatCase == 2 && in_array($key,$returnDataArray['repeat']['r1']['columns'])){
                         $columns[] = 'r1';
                     }
                     // 重複縦メニューの場合、スキップ
@@ -1286,7 +1354,7 @@
                             $columns[] = $group;
                         }
                         else{
-                            $parent = substr($returnDataArray['group'][$group]['PARENT'],0,strpos($returnDataArray['group'][$group]['PARENT'],'/'));
+                            $parent = substr($returnDataArray['group'][$group]['PARENT'],0,strpos($returnDataArray['group'][$group]['PARENT'].'/','/'));
                             foreach($returnDataArray['group'] as $key => $group){
                                 if($group['COL_GROUP_NAME'] == $parent){
                                     $columns[] = $key;
@@ -1298,10 +1366,42 @@
                 }
                 $returnDataArray['menu']['columns'] = array_values(array_unique($columns));
                 
+                if($convertFlag == true){
+                    // ['r1']['columns']のitem -> group
+                    foreach($returnDataArray['repeat']['r1']['columns'] as &$item){
+                        if($returnDataArray['item'][$item]['PARENT'] == $prefix){
+                            continue;
+                        }
+                        $rootColInRepeat = str_replace($prefix . "/","",$returnDataArray['item'][$item]['PARENT']);
+                        $rootColInRepeat = substr($rootColInRepeat,0,strpos($rootColInRepeat."/","/"));
+                        
+                        if($rootColInRepeat != ""){
+                            foreach($returnDataArray['group'] as $key => $group){
+                                if($group['COL_GROUP_NAME'] == $rootColInRepeat){
+                                    $item = $key;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    unset($item);
+                    
+                    $returnDataArray['repeat']['r1']['columns'] = array_values(array_unique($returnDataArray['repeat']['r1']['columns']));
+                    if($repeatCase == 1){
+                        // リピートが所属するカラムグループのitemとgroupをr1に変換
+                        foreach($returnDataArray['group'] as &$group){
+                            if($group['COL_GROUP_NAME'] == substr(strrchr("/".$prefix, "/"), 1)){
+                                $idx = array_search($returnDataArray['repeat']['r1']['columns'][0],$group['COLUMNS']);
+                                array_splice($group['COLUMNS'],$idx,count($returnDataArray['repeat']['r1']['columns']),'r1');
+                                break;
+                            }
+                        }
+                        unset($group);
+                    }
+                }
                 
                 $returnDataArray['menu']['number-item']  = count($returnDataArray['item']);
                 $returnDataArray['menu']['number-group'] = count($returnDataArray['group']);
-                
                 
                 $arrayResult = array("000", "",json_encode($returnDataArray));
 

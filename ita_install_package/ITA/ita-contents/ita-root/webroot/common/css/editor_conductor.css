@@ -492,13 +492,16 @@ padding: 0 8px;
 }
 
 /* call */
-.conductor-call .node-type {
+.conductor-call .node-type,
+.symphony-call .node-type {
 padding-left: 84px;
 }
-.conductor-call .node-name {
+.conductor-call .node-name,
+.symphony-call .node-name {
 padding: 4px 4px 4px 80px;
 }
-.conductor-call .select-conductor-name {
+.conductor-call .select-conductor-name,
+.symphony-call .select-symphony-name {
 display: block;
 padding: 2px;
 background-color: #222;
@@ -506,7 +509,8 @@ border: 1px solid #666;
 box-shadow: 0 1px 0 rgba( 255,255,255,.3 );
 border-radius: 2px;
 }
-.conductor-call .select-conductor-name-inner {
+.conductor-call .select-conductor-name-inner,
+.symphony-call .select-symphony-name-inner {
 overflow: hidden;
 display: block;
 padding: 4px 8px;
@@ -521,12 +525,13 @@ color: #666;
 white-space: nowrap;
 text-overflow: ellipsis;
 }
-.conductor-call.call-select .select-conductor-name-inner {
+.conductor-call.call-select .select-conductor-name-inner,
+.symphony-call.call-select .select-symphony-name-inner {
 background-color: #FF640A;
 color: #FFF;
 }
 
-/* blanl */
+/* blank */
 .function-blank .node-name {
 position: relative;
 z-index: 1;
@@ -904,6 +909,7 @@ opacity: 0.75;
 
 
 /* */
+.symphony-call .node-circle .node-gem,
 .conductor-call .node-circle .node-gem,
 .conductor-start .node-circle .node-gem,
 .conductor-end .node-circle .node-gem {
@@ -917,7 +923,9 @@ font-size: 40px!important;
 .conductor-end .node-type,
 .conductor-end .node-circle .node-gem,
 .conductor-call .node-type,
-.conductor-call .node-circle .node-gem{ background-color: #002B62; }
+.conductor-call .node-circle .node-gem,
+.symphony-call .node-type,
+.symphony-call .node-circle .node-gem { background-color: #002B62; }
 
 .node-ansible-legacy .node-type { background-color: #DD0000; }
 .add-node.ansible-legacy,
