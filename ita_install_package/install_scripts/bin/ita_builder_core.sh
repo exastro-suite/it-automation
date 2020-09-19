@@ -391,7 +391,6 @@ configure_mariadb() {
 
     # mysql_secure_installationへ送信するdb_root_passwordのエスケープをしておく
     local send_db_root_password="$db_root_password"
-    sedn_db_root_password="$db_root_password"
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\\/\\\\\\\\/g')
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\$/\\\\\\$/g')
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/"/\\\\\\"/g')
@@ -424,7 +423,7 @@ configure_mariadb() {
                     expect -re \"Change the root password\\?.* $\"
                     send \"\\r\"
                     expect \"New password:\"
-                    send \""${sedd_db_root_password}\\r"\"
+                    send \""${send_db_root_password}\\r"\"
                     expect \"Re-enter new password:\"
                     send \""${send_db_root_password}\\r"\"
                     expect -re \"Remove anonymous users\\?.* $\"
