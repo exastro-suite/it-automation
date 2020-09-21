@@ -268,8 +268,8 @@ read_setting_file() {
     for line in $setting_text;do
         # convert "foo: bar" to "foo=bar", and keep comment 
         if [ "$(echo "$line"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
-            key="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\1/")"
-            val="$(echo "$line" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\2/")"
+            key="$(echo "$line" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
+            val="$(echo "$line" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\2/")"
             val=$(echo "$val"|sed -E "s/'/'\\\"'\\\"'/g")
             command="$key='$val'"
             eval "$command"
