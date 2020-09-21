@@ -153,19 +153,10 @@ SRC_IFS="$IFS"
 IFS="
 "
 for LINE in $ANSWERS_TEXT;do
-    if [ "$LINE" ]; then
-        #空白の削除
-        PARAM=`echo $LINE | tr -d " "`
+    if [ "$(echo "$LINE"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
 
-        #コメント行、空行は無視する
-        if [ `echo "$PARAM" | cut -c 1` = "#" ]; then
-            continue
-        elif [ `echo "$PARAM" | wc -l` -eq 0 ]; then
-            continue
-        fi
-
-        key="$(echo "$PARAM" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\1/")"
-        val="$(echo "$PARAM" | sed -E "s/^([^:]+):[[:space:]]*(.*)[[:space:]]*$/\2/")"
+        key="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
+        val="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\2/")"
 
         #インストールモード取得
         if [ "$key" = 'install_mode' ]; then
