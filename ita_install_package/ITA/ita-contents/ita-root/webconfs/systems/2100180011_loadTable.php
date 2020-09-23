@@ -67,9 +67,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     //symphonyクラスID
-    $c = new IDColumn('CONDUCTOR_CLASS_NO',$g['objMTS']->getSomeMessage('ITABASEH-MNU-307022'), 'C_CONDUCTOR_CLASS_MNG', 'CONDUCTOR_CLASS_NO', 'CONDUCTOR_NAME', '', array('SELECT_ADD_FOR_ORDER'=>array('CONDUCTOR_CLASS_NO'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c = new IDColumn('CONDUCTOR_CLASS_NO',$g['objMTS']->getSomeMessage('ITABASEH-MNU-307022'), 'C_CONDUCTOR_EDIT_CLASS_MNG', 'CONDUCTOR_CLASS_NO', 'CONDUCTOR_NAME', '', array('SELECT_ADD_FOR_ORDER'=>array('CONDUCTOR_CLASS_NO'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-307023')); //エクセル・ヘッダでの説明
-    $c->setJournalTableOfMaster('C_CONDUCTOR_CLASS_MNG_JNL');
+    $c->setJournalTableOfMaster('C_CONDUCTOR_EDIT_CLASS_MNG_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
     $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
     $c->setJournalKeyIDOfMaster('CONDUCTOR_CLASS_NO');
