@@ -910,3 +910,82 @@ class PatternPerOrchTable extends BaseTable {
     }
 }
 
+/**
+ * 資材管理紐付(Terraform)テーブルクラス
+ */
+class MaterialLinkageTerraformTable extends BaseTable {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'F_MATERIAL_LINKAGE_TERRAFORM';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('ROW_ID',
+                                    'MATERIAL_LINK_NAME',
+                                    'FILE_ID',
+                                    'CLOSE_REVISION_ID',
+                                    'TERRAFORM_MODULE_CHK',
+                                    'TERRAFORM_POLICY_CHK',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * Module素材管理テーブルクラス
+ */
+class TerraformCommonModuleFileTable extends BaseTable {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'B_TERRAFORM_MODULE';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('MODULE_MATTER_ID',
+                                    'MODULE_MATTER_NAME',
+                                    'MODULE_MATTER_FILE',
+                                    'DISP_SEQ',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * Policy素材管理テーブルクラス
+ */
+class TerraformCommonPolicyFileTable extends BaseTable {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'B_TERRAFORM_POLICY';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('POLICY_ID',
+                                    'POLICY_NAME',
+                                    'POLICY_MATTER_FILE',
+                                    'DISP_SEQ',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
