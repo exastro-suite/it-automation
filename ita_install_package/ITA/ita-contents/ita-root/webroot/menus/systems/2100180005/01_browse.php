@@ -226,10 +226,6 @@ EOD;
                           <td class="panel-td"><span id="conductor-instance-id" class="panel-span"></span></td>
                         </tr>
                         <tr>
-                          <th class="panel-th">Conductor ID :</th>
-                          <td class="panel-td"><span id="conductor-class-id" class="panel-span"></span></td>
-                        </tr>
-                        <tr>
                           <th class="panel-th">Conductor name :</th>
                           <td class="panel-td"><span id="conductor-class-name-view" class="view panel-span"></span></td>
                         </tr>
