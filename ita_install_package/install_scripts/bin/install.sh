@@ -96,6 +96,10 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
+    if [ "$MATERIAL4_FLG" -eq 1 ]; then
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
+    fi
+
     if [ "$CREATEPARAM_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
@@ -155,6 +159,10 @@ func_install_messasge() {
     
     if [ MATERIAL3_FLG = ${1} ]; then
         MESSAGE="Material3"
+    fi
+    
+    if [ MATERIAL4_FLG = ${1} ]; then
+        MESSAGE="Material4"
     fi
     
     if [ CREATEPARAM_FLG = ${1} ]; then
@@ -363,6 +371,7 @@ CREATE_TABLES=(
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
+    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
@@ -380,6 +389,7 @@ RELEASE_PLASE=(
     ita_material
     ita_material2
     ita_material3
+    ita_material4
     ita_createparam
     ita_hostgroup
     ita_hostgroup2
@@ -403,6 +413,7 @@ SERVICES_SET=(
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
+    MATERIAL4_FLG
     CREATEPARAM_FLG
     HOSTGROUP_FLG
     HOSTGROUP2_FLG
@@ -431,6 +442,7 @@ TERRAFORM_FLG=0
 MATERIAL_FLG=0
 MATERIAL2_FLG=0
 MATERIAL3_FLG=0
+MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 HOSTGROUP_FLG=0
@@ -616,6 +628,16 @@ elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$OPENSTACK
     MATERIAL3_FLG=1
 elif [ "$OPENSTACK_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
     MATERIAL3_FLG=1
+fi
+
+if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material4 ; then
+    MATERIAL4_FLG=0
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_terraform-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
+    MATERIAL4_FLG=1
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$TERRAFORM_FLG" -eq 1 ] ; then
+    MATERIAL4_FLG=1
+elif [ "$TERRAFORM_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
+    MATERIAL4_FLG=1
 fi
 
 if [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] &&  [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] ; then

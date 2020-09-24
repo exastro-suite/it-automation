@@ -149,6 +149,10 @@ func_install_messasge() {
         MESSAGE="Material3"
     fi
     
+    if [ MATERIAL4_FLG = ${1} ]; then
+        MESSAGE="Material4"
+    fi
+
     if [ CREATEPARAM_FLG = ${1} ]; then
         MESSAGE="Createparam"
     fi
@@ -183,6 +187,7 @@ TERRAFORM_FLG=0
 MATERIAL_FLG=0
 MATERIAL2_FLG=0
 MATERIAL3_FLG=0
+MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 HOSTGROUP_FLG=0
@@ -199,6 +204,7 @@ INSTALLED_FLG_LIST=(
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
+    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
@@ -217,6 +223,7 @@ RELEASE_PLASE=(
     ita_material
     ita_material2
     ita_material3
+    ita_material4
     ita_createparam
     ita_hostgroup
     ita_hostgroup2
@@ -471,6 +478,9 @@ if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material2" ; then
 fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material3" ; then
     MATERIAL3_FLG=1
+fi
+if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material4" ; then
+    MATERIAL4_FLG=1
 fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_createparam" ; then
     CREATEPARAM_FLG=1
