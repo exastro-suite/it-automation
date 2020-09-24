@@ -133,6 +133,7 @@ DB_ROOT_PASSWORD=''
 DB_NAME=''
 DB_USERNAME=''
 DB_PASSWORD=''
+DB_PASSWORD_ON_CMD=''
 
 # ita_answers.txtを/tmpにコピー
 rm -f "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
@@ -145,20 +146,17 @@ sed -i -e '1s/^\xef\xbb\xbf//' "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
 echo "$(cat "$COPY_ANSWER_FILE")" 1> "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
 
 #answersファイル読み込み
-while read LINE; do
-    if [ "$LINE" ]; then
-        #空白の削除
-        PARAM=`echo $LINE | tr -d " "`
+ANSWERS_TEXT=$(cat "$COPY_ANSWER_FILE")
+#IFSバックアップ
+SRC_IFS="$IFS"
+#IFSに"\n"をセット
+IFS="
+"
+for LINE in $ANSWERS_TEXT;do
+    if [ "$(echo "$LINE"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
 
-        #コメント行、空行は無視する
-        if [ `echo "$PARAM" | cut -c 1` = "#" ]; then
-            continue
-        elif [ `echo "$PARAM" | wc -l` -eq 0 ]; then
-            continue
-        fi
-
-        key=`echo $PARAM | cut -d ":" -f 1 | sed 's/^ \(.*\) $/\1/'`
-        val=`echo $PARAM | cut -d ":" -f 2 | sed 's/^ \(.*\) $/\1/'`
+        key="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
+        val="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\2/")"
 
         #インストールモード取得
         if [ "$key" = 'install_mode' ]; then
@@ -186,7 +184,11 @@ while read LINE; do
             #DBパスワード取得
             elif [ "$key" = 'db_password' ]; then
                 func_answer_format_check
-                DB_PASSWORD="$val"
+                DB_PASSWORD_ON_CMD="$val"
+                val="$(echo "$val"|sed -e 's/\\/\\\\\\\\/g')"
+                val="$(echo "$val"|sed -e 's|/|\\\\\\/|g')"
+                val="$(echo "$val"|sed -e 's/&/\\\\\\&/g')"
+                DB_PASSWORD="$(echo "$val"|sed -e "s/'/\\\\\\\'/g")"
             fi
         fi
         #--
@@ -223,9 +225,13 @@ while read LINE; do
             DB_USERNAME="$val"
         fi
     fi
-done < "$COPY_ANSWER_FILE"
+done
+
+#IFSリストア
+IFS="$SRC_IFS"
 
 #アンサーファイルの内容が読み取れているか
+
 if [ "$INSTALL_MODE" = "Install" ]; then
     if [ "$FORMAT_CHECK_CNT" != 8 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'

@@ -32,8 +32,8 @@
 # @return   STR    string    エンコードした文字列
 ############################################################
 func_str_encode() {
-    STR=`echo -ne "$1" | base64 2>> "$LOG_FILE"`
-    STR=`echo "$STR" | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' 2>> "$LOG_FILE"`
+    STR=$(echo -n "$1" | base64 2>> "$LOG_FILE")
+    STR=$(echo "$STR" | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' 2>> "$LOG_FILE")
     echo "$STR"
 }
 
@@ -93,6 +93,10 @@ func_set_total_cnt() {
     fi
     
     if [ "$MATERIAL3_FLG" -eq 1 ]; then
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
+    fi
+
+    if [ "$MATERIAL4_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
@@ -157,6 +161,10 @@ func_install_messasge() {
         MESSAGE="Material3"
     fi
     
+    if [ MATERIAL4_FLG = ${1} ]; then
+        MESSAGE="Material4"
+    fi
+    
     if [ CREATEPARAM_FLG = ${1} ]; then
         MESSAGE="Createparam"
     fi
@@ -214,7 +222,7 @@ func_create_tables() {
         if ! test -e "$LIST_DIR/${DRIVER,,}_table_list.txt" ; then
             log "WARNING : ${DRIVER,,}_table_list.txt does not be found."
         else
-            source "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
+            source "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD_ON_CMD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             while read LINE; do
                 FILE_PATH="$LOG_DIR/$LINE.log"
                 if ! test -e "$FILE_PATH" ; then
@@ -363,6 +371,7 @@ CREATE_TABLES=(
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
+    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
@@ -380,6 +389,7 @@ RELEASE_PLASE=(
     ita_material
     ita_material2
     ita_material3
+    ita_material4
     ita_createparam
     ita_hostgroup
     ita_hostgroup2
@@ -403,6 +413,7 @@ SERVICES_SET=(
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
+    MATERIAL4_FLG
     CREATEPARAM_FLG
     HOSTGROUP_FLG
     HOSTGROUP2_FLG
@@ -431,6 +442,7 @@ TERRAFORM_FLG=0
 MATERIAL_FLG=0
 MATERIAL2_FLG=0
 MATERIAL3_FLG=0
+MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 HOSTGROUP_FLG=0
@@ -618,6 +630,16 @@ elif [ "$OPENSTACK_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
     MATERIAL3_FLG=1
 fi
 
+if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material4 ; then
+    MATERIAL4_FLG=0
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_terraform-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
+    MATERIAL4_FLG=1
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$TERRAFORM_FLG" -eq 1 ] ; then
+    MATERIAL4_FLG=1
+elif [ "$TERRAFORM_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
+    MATERIAL4_FLG=1
+fi
+
 if [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] &&  [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] ; then
     CREATEPARAM2_FLG=0
 elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] && [ "$CREATEPARAM_FLG" -eq 1 ] ; then
@@ -686,7 +708,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         sed -i -e "s/ITA_DB/$DB_NAME/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
         sed -i -e "s/ITA_USER/$DB_USERNAME/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
         sed -i -e "s/ITA_PASSWD/$DB_PASSWORD/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
-        RES=`mysql -u root -p"$DB_ROOT_PASSWORD" < /tmp/create-db-and-user_for_MySQL.sql 2>&1 | tee -a "$LOG_FILE"`
+        RES=$(env MYSQL_PWD="$DB_ROOT_PASSWORD" mysql -uroot < /tmp/create-db-and-user_for_MySQL.sql 2>&1 | tee -a "$LOG_FILE")
         if echo "$RES" | grep ERROR ; then
             log 'ERROR : Failed to connect to the database.'
             log 'INFO : Abort installation.'
@@ -901,7 +923,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log "WARNING : Failed to place db_username.txt."
     fi
 
-    DB_PASSWORD_ENC=`func_str_encode "$DB_PASSWORD"`
+    DB_PASSWORD_ENC=`func_str_encode "$DB_PASSWORD_ON_CMD"`
     echo "$DB_PASSWORD_ENC" > "$ITA_DIRECTORY"/ita-root/confs/commonconfs/db_password.txt
     if ! test -e "$ITA_DIRECTORY"/ita-root/confs/commonconfs/db_password.txt ; then
         log "WARNING : Failed to place db_password.txt."
