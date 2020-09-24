@@ -274,13 +274,13 @@ else
     sed -i -e "s/DB_USERNAME/$DB_USERNAME/g" /tmp/drop_db_and_user_for_MySQL.sql 2>> "$LOG_FILE"
 
     #rootパスワード、DB名、DBユーザ名が間違えていなければ削除処理実行
-    DB_NAME_CHK=`mysql -u root -p"$DB_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" 2>> "$LOG_FILE"`
-    DB_USERNAME_CHK=`mysql -u root -p"$DB_ROOT_PASSWORD" -e "SELECT user, host FROM mysql.user where user = '$DB_USERNAME';" 2>> "$LOG_FILE"`
+    DB_NAME_CHK=$(env MYSQL_PWD="$DB_ROOT_PASSWORD" mysql -uroot -e "SHOW DATABASES LIKE '$DB_NAME';" 2>> "$LOG_FILE")
+    DB_USERNAME_CHK=$(env MYSQL_PWD="$DB_ROOT_PASSWORD" mysql -uroot -e "SELECT user, host FROM mysql.user where user = '$DB_USERNAME';" 2>> "$LOG_FILE")
 
     if [ -z "$DB_NAME_CHK" -o -z "$DB_USERNAME_CHK" ] ; then
         log 'ERROR : Should be set correct [db_root_password][db_name][db_username].'
     else
-        mysql -u root -p"$DB_ROOT_PASSWORD" < /tmp/drop_db_and_user_for_MySQL.sql 2>> "$LOG_FILE"
+        env MYSQL_PWD="$DB_ROOT_PASSWORD" mysql -uroot < /tmp/drop_db_and_user_for_MySQL.sql 2>> "$LOG_FILE"
     fi
 
     rm -f /tmp/drop_db_and_user_for_MySQL.sql

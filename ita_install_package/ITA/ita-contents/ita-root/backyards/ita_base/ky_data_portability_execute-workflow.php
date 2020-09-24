@@ -55,7 +55,7 @@ try {
     // DB接続情報取得
     $paramAry = getDbConnectParams();
     define('DB_USER',   $paramAry['user']);
-    define('DB_PW',     $paramAry['password']);
+    define('DB_PW',     "'".preg_replace("/'/", "'\"'\"'", $paramAry['password'])."'");
     define('DB_HOST',   $paramAry['host']);
     define('DB_NAME',   $paramAry['dbname']);
 
