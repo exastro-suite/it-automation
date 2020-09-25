@@ -64,7 +64,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('register_table')->setTextTagLastAttr('style = "ime-mode :active"');
     $c->getOutputType('update_table')->setTextTagLastAttr('style = "ime-mode :active"');
     $objVldt = new MenuNameValidator(1,256,false);
-	$c->setValidator($objVldt);
+    $c->setValidator($objVldt);
     $c->setRequired(true);//登録/更新時には、入力必須
     $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
     $table->addColumn($c);
@@ -74,7 +74,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     // 作成対象 
-    $c = new IDColumn('TARGET',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102023"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME', '', array('OrderByThirdColumn'=>'TARGET_ID'));
+    $c = new IDColumn('TARGET',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102023"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME', '', array('ORDER'=>'ORDER BY DISP_SEQ'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102026"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
     $objVldt = new SubstitutionValidator($c);

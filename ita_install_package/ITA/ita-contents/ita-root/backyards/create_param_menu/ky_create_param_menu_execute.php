@@ -104,7 +104,12 @@ try{
                               TEMPLATE_PATH . FILE_HG_LOADTABLE_PW,
                               TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_PW,
                               TEMPLATE_PATH . FILE_CMDB_LOADTABLE_PW,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_PW
+                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_PW,
+                              TEMPLATE_PATH . FILE_H_LOADTABLE_OP,
+                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_OP,
+                              TEMPLATE_PATH . FILE_CONVERT_H_LOADTABLE_OP,
+                              TEMPLATE_PATH . FILE_H_OP_SQL,
+                              TEMPLATE_PATH . FILE_CONVERT_H_OP_SQL
                              );
     $templateArray = array();
     foreach($templatePathArray as $templatePath){
@@ -173,6 +178,11 @@ try{
     $convLoadTablePwTmpl        = $templateArray[48];
     $cmdbLoadTablePwTmpl        = $templateArray[49];
     $viewLoadTablePwTmpl        = $templateArray[50];
+    $hostLoadTableOpTmpl        = $templateArray[51];
+    $viewLoadTableOpTmpl        = $templateArray[52];
+    $convHostLoadTableOpTmpl    = $templateArray[53];
+    $hostSqlOpTmpl              = $templateArray[54];
+    $convHostSqlOpTmpl          = $templateArray[55];
 
     //////////////////////////
     // パラメータシート作成情報を取得
@@ -887,7 +897,7 @@ try{
                     $work = str_replace(REPLACE_REQUIRED, "", $work);
                 }
 
-                if(1 == $itemInfo['UNIQUED'] && "1" == $cmiData['PURPOSE']){
+                if(1 == $itemInfo['UNIQUED'] && "2" != $cmiData['PURPOSE']){
                     $work = str_replace(REPLACE_UNIQUED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setUnique(true);", $work);
                 }
                 else{
@@ -1451,15 +1461,26 @@ try{
                 $work = str_replace(REPLACE_ITEM,   $hgLoadTableVal, $work);
                 $hgLoadTable = $work;
             }
-
-            // ホスト用の00_loadTable.php
-            $work = $hostLoadTableTmpl;
-            $work = str_replace(REPLACE_INFO,   $description,       $work);
-            $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
-            $work = str_replace(REPLACE_MENU,   $menuName,          $work);
-            $hostLoadTableVal .= $columnGrpParts;
-            $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
-            $hostLoadTable = $work;
+            if("1" == $cmiData['TARGET']){
+                // ホスト用の00_loadTable.php
+                $work = $hostLoadTableTmpl;
+                $work = str_replace(REPLACE_INFO,   $description,       $work);
+                $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_MENU,   $menuName,          $work);
+                $hostLoadTableVal .= $columnGrpParts;
+                $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
+                $hostLoadTable = $work;
+            }
+            else if("3" == $cmiData['TARGET']){
+                // ホスト用(オペレーションのみ)の00_loadTable.php
+                $work = $hostLoadTableOpTmpl;
+                $work = str_replace(REPLACE_INFO,   $description,       $work);
+                $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_MENU,   $menuName,          $work);
+                $hostLoadTableVal .= $columnGrpParts;
+                $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
+                $hostLoadTable = $work;
+            }
 
             // パラメータシート(縦)を作成する設定の場合
             if(true === $createConvFlg){
@@ -1480,8 +1501,16 @@ try{
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertHostLoadTable = $work;
                 }
-                else{
+                else if("1" == $cmiData['TARGET']){
                     $work = $convHostLoadTableTmpl;
+                    $work = str_replace(REPLACE_INFO,       $description,           $work);
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_MENU,       $menuName,              $work);
+                    $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
+                    $convertLoadTable = $work;
+                }
+                else if("3" == $cmiData['TARGET']){
+                    $work = $convHostLoadTableOpTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
@@ -1491,7 +1520,12 @@ try{
             }
 
             // 最新値参照用の00_loadTable.php
-            $work = $viewLoadTableTmpl;
+            if("3" == $cmiData['TARGET']){
+                $work = $viewLoadTableOpTmpl;
+            }
+            else{
+                $work = $viewLoadTableTmpl;
+            }
             $work = str_replace(REPLACE_INFO,   $description,       $work);
             $work = str_replace(REPLACE_MENU,   $menuName,          $work);
             if(true === $createConvFlg){
@@ -1525,9 +1559,15 @@ EOD;
             $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
             $work = str_replace(REPLACE_COL,        $columns,       $work);
             $hgSql = $work;
-
+            
             // ホスト用のSQL
-            $work = $hostSqlTmpl;
+            if("1" == $cmiData['TARGET']){
+                $work = $hostSqlTmpl;
+            }
+            // ホスト(オペレーションのみ)用のSQL
+            else if("3" == $cmiData['TARGET']){
+                $work = $hostSqlOpTmpl;
+            }
             $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
             $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
             $work = str_replace(REPLACE_COL,        $columns,       $work);
@@ -1549,8 +1589,15 @@ EOD;
                     $work = str_replace(REPLACE_COL,        $convColumns,           $work);
                     $convertSql .= $work;
                 }
-                else{
+                else if("1" == $cmiData['TARGET']){
                     $work = $convHostSqlTmpl;
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
+                    $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                    $convertSql = $work;
+                }
+                else if("3" == $cmiData['TARGET']){
+                    $work = $convHostSqlOpTmpl;
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
                     $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
                     $work = str_replace(REPLACE_COL,        $convColumns,           $work);
@@ -1796,7 +1843,7 @@ EOD;
             continue;
         }
 
-        if("1" == $cmiData['TARGET']){  // 作成対象: パラメータシート
+        if("1" == $cmiData['TARGET']||"3" == $cmiData['TARGET']){  // 作成対象: パラメータシート
             
             // 紐づけ対象だけを確認 (紐づけ対象がないの場合はtrue)
             $noLinkTarget = true;
@@ -3554,7 +3601,6 @@ function updateColToRowMng($cpiData, $menuId, $toMenuId, $purpose, $startColName
                 }
             }
         }
-
         // 登録する
         $insertData = array();
         $insertData['FROM_MENU_ID']     = $menuId;                  // 変換元メニュー

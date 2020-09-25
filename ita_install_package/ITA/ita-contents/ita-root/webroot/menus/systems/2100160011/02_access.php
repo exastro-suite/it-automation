@@ -846,7 +846,7 @@
             require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
 
             $paramTargetTable = new ParamTargetTable($g["objDBCA"], $g["db_model_ch"]);
-            $sql = $paramTargetTable->createSselect("WHERE DISUSE_FLAG = '0'");
+            $sql = $paramTargetTable->createSselect("WHERE DISUSE_FLAG = '0' ORDER BY DISP_SEQ");
             $result = $paramTargetTable->selectTable($sql);
             if(!is_array($result)){
                 $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
@@ -1182,6 +1182,7 @@
                 $tmpGroupArray = array();
                 $checked = array();
                 $itemNum = 1;
+                $returnDataArray['item'] = array();
                 foreach($itemInfoArray as $itemInfoData){
                     // 繰り返し項目判定([2],[3]...)
                     if($convertFlag == true && $itemNum >= $searchIdx + $cpiData['COL_CNT'] + 1 && $itemNum < $searchIdx + $cpiData['COL_CNT'] * $cpiData['REPEAT_CNT'] + 1){
