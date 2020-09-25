@@ -263,7 +263,7 @@ EOD;
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</div>
             <table class="property-table">
               <tbody>
-                <tr class="parameter-sheet">
+                <tr class="parameter-sheet parameter-operation">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104219")}</th>
                   <td class="property-td" colspan="3"><span id="create-menu-host" type="text" class="property-span"></span></td>
                 </tr>
@@ -271,11 +271,11 @@ EOD;
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104220")}</th>
                   <td class="property-td" colspan="3"><span id="create-menu-host-group" type="text" class="property-span"></span></td>
                 </tr>
-                <tr class="parameter-sheet">
+                <tr class="parameter-sheet parameter-operation">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104221")}</th>
                   <td class="property-td" colspan="3"><span id="create-menu-reference" type="text" class="property-span"></span></td>
                 </tr>
-                <tr class="parameter-sheet">
+                <tr class="parameter-sheet parameter-operation">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104222")}</th>
                   <td class="property-td" colspan="3"><span id="create-menu-vertical" type="text" class="property-span"></span></td>
                 </tr>
@@ -362,7 +362,7 @@ EOD;
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</div>
             <table class="property-table">
               <tbody>
-                <tr class="parameter-sheet">
+                <tr class="parameter-sheet parameter-operation">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104219")}<span class="input_required">*</span> :</th>
                   <td class="property-td" colspan="3"><span id="create-menu-host" type="text" class="property-span" data-id="" data-value=""></span></td>
                 </tr>
@@ -370,11 +370,11 @@ EOD;
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104220")}<span class="input_required">*</span> :</th>
                   <td class="property-td" colspan="3"><span id="create-menu-host-group" type="text" class="property-span" data-id="" data-value=""></span></td>
                 </tr>
-                <tr class="parameter-sheet">
+                <tr class="parameter-sheet parameter-operation">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104221")}<span class="input_required">*</span> :</th>
                   <td class="property-td" colspan="3"><span id="create-menu-reference" type="text" class="property-span" data-id="" data-value=""></span></td>
                 </tr>
-                <tr class="parameter-sheet">
+                <tr class="parameter-sheet parameter-operation">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104222")}</th>
                   <td class="property-td" colspan="3"><span id="create-menu-vertical" type="text" class="property-span" data-id="" data-value=""></span></td>
                 </tr>
