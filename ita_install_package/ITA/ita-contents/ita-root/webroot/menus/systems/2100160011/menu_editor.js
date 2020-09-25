@@ -1518,10 +1518,10 @@ $menuGroupSlectButton.on('click', function() {
   // パラメータシートorデータシート
   if ( $('#create-menu-type').val() === '1' || $('#create-menu-type').val() === '3' ) {
     // ホストorホストグループ
-    if ( $('#create-menu-use').val() === '1' ) {
-      type = 'host';
-    } else {
+    if ( $('#create-menu-use').val() === '2' ) {
       type = 'host-group';
+    } else {
+      type = 'host';
     }
   } else {
     type = 'data-sheet';
