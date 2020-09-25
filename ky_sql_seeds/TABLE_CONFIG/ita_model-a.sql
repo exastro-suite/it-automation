@@ -248,6 +248,7 @@ PRIMARY KEY (ID)
 CREATE TABLE F_PARAM_TARGET
 (
 TARGET_ID                           %INT%                           , -- 識別シーケンス項番
+DISP_SEQ                            %INT%                           , 
 TARGET_NAME                         %VARCHR%(64)                    ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
@@ -263,6 +264,7 @@ JOURNAL_REG_DATETIME                %DATETIME6%                     , -- 履歴�
 JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴用変更種別
 
 TARGET_ID                           %INT%                           , -- 識別シーケンス項番
+DISP_SEQ                            %INT%                           , 
 TARGET_NAME                         %VARCHR%(64)                    ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ

@@ -191,6 +191,19 @@ class SubstitutionValidator extends IDValidator {
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1027");
                     } 
                 } 
+                // 作成対象で「パラメータシート(オペレーションのみ)」を選択
+                else if("3" == $value){
+                    //用途が選択されている場合、エラー
+                    if($purpose){ 
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1112");
+                    } 
+                    // データシート用メニューグループ、ホストグループ用メニューグループが選択されている場合、エラー
+                    else if($menugroupForData || $menugroupForHG){ 
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1113");
+                    } 
+                }
 
                 if( $retBool === false ){
                     $this->setValidRule($strErrAddMsg);
