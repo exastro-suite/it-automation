@@ -891,10 +891,14 @@ $(document).on('change', '#update_table2', function(){
 */    
 function selectTargetAction(action){
     // パラメータシート固有の項目の項目番号
-    var paramCols =       [5, 7, 8, 9, 10];         
+    var paramCols = [5, 7, 8, 9, 10];         
+    // パラメータシート（オペレーション）
+    var paraOpeCols = [ 8, 9, 10];   
     // データシート固有の項目の項目番号
     var dataCols = [6];
-
+    // 切替項目番号
+    var changeCols = [5, 6, 7, 8, 9, 10];  
+  
     var selecter = getSelecter(action);
 		
 		// Parent fake container
@@ -904,8 +908,9 @@ function selectTargetAction(action){
 			$fakeContainer.addClass('menuEditTable')
 				.find('.defaultExplainRow th').each( function( index ){
 				var colsClass = '';
-				if ( paramCols.indexOf( index + 1 ) != -1 ) colsClass = 'param';
-				if ( dataCols.indexOf( index + 1 ) != -1 ) colsClass = 'data'; 
+				if ( paramCols.indexOf( index + 1 ) != -1 ) colsClass += ' param';
+        if ( paraOpeCols.indexOf( index + 1 ) != -1 ) colsClass += ' paraope';
+				if ( dataCols.indexOf( index + 1 ) != -1 ) colsClass += ' data'; 
 				if ( colsClass != '' ) {
 					$( this ).addClass( colsClass );
 					$fakeContainer.find('.colCheckList li.level1').eq( index ).addClass( colsClass );
@@ -914,11 +919,11 @@ function selectTargetAction(action){
 		}
 		
     if (selecter.val == '2'){ // 「データシート」を選択
-        
         // 項目を非表示 + 値消去
-        paramCols.forEach(function(num){
+        changeCols.forEach(function(num){
             hideColumns(action, selecter, num);
         });
+        
         // 項目を表示
         dataCols.forEach(function(num){
             showColumns(selecter, num);
@@ -928,7 +933,7 @@ function selectTargetAction(action){
         
     }else if(selecter.val == '1'){    //「パラメータシート」を選択
         // 項目を非表示 + 値消去
-        dataCols.forEach(function(num){
+        changeCols.forEach(function(num){
             hideColumns(action, selecter, num);
         });
 
@@ -938,6 +943,19 @@ function selectTargetAction(action){
         });
 				
 				$fakeContainer.attr('data-select-type', 'param');
+
+    }else if(selecter.val == '3'){    //「パラメータシート」を選択
+        // 項目を非表示 + 値消去
+        changeCols.forEach(function(num){
+            hideColumns(action, selecter, num);
+        });
+
+        // 項目を表示
+        paraOpeCols.forEach(function(num){
+            showColumns(selecter, num);
+        });
+				
+				$fakeContainer.attr('data-select-type', 'paraope');
 
     }
 }
