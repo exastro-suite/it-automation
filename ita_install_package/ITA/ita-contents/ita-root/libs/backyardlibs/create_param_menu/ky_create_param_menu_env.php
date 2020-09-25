@@ -45,6 +45,7 @@ define('FILE_HG_LOADTABLE_DT',          'hostgroup_00_loadTable_datetime.php'); 
 define('FILE_HG_LOADTABLE_ID',          'hostgroup_00_loadTable_id.php');         // ホストグループ用の00_loadTable.phpのデータ部テンプレート(ID用)
 define('FILE_HG_LOADTABLE_PW',          'hostgroup_00_loadTable_password.php');   // ホストグループ用の00_loadTable.phpのデータ部テンプレート(PW用)
 define('FILE_H_LOADTABLE',              'host_00_loadTable.php');                 // ホスト用の00_loadTable.phpテンプレート
+define('FILE_H_LOADTABLE_OP',           'host_00_loadTable_oponly.php');          // ホスト(オペレーションのみ)用の00_loadTable.phpテンプレート
 define('FILE_H_LOADTABLE_VAL',          'host_00_loadTable_value.php');           // ホスト用の00_loadTable.phpのデータ部テンプレート(単一行文字列用)
 define('FILE_H_LOADTABLE_MUL',          'host_00_loadTable_multiValue.php');      // ホスト用の00_loadTable.phpのデータ部テンプレート(複数行文字列用)
 define('FILE_H_LOADTABLE_INT',          'host_00_loadTable_integer.php');         // ホスト用の00_loadTable.phpのデータ部テンプレート(整数用)
@@ -54,6 +55,7 @@ define('FILE_H_LOADTABLE_DT',           'host_00_loadTable_datetime.php');      
 define('FILE_H_LOADTABLE_ID',           'host_00_loadTable_id.php');              // ホスト用の00_loadTable.phpのデータ部テンプレート(ID用)
 define('FILE_H_LOADTABLE_PW',           'host_00_loadTable_password.php');        // ホスト用の00_loadTable.phpのデータ部テンプレート(PW用)
 define('FILE_VIEW_LOADTABLE',           'view_00_loadTable.php');                 // 最新値参照用の00_loadTable.phpテンプレート
+define('FILE_VIEW_LOADTABLE_OP',           'view_00_loadTable_oponly.php');       // 最新値参照(オペレーションのみ)用の00_loadTable.phpテンプレート
 define('FILE_VIEW_LOADTABLE_VAL',       'view_00_loadTable_value.php');           // 最新値参照用の00_loadTable.phpのデータ部テンプレート(単一行文字列用)
 define('FILE_VIEW_LOADTABLE_MUL',       'view_00_loadTable_multiValue.php');      // 最新値参照用の00_loadTable.phpのデータ部テンプレート(複数行文字列用)
 define('FILE_VIEW_LOADTABLE_INT',       'view_00_loadTable_integer.php');         // 最新値参照用の00_loadTable.phpのデータ部テンプレート(整数用)
@@ -72,12 +74,15 @@ define('FILE_CONVERT_LOADTABLE_DT',     'convert_00_loadTable_datetime.php');   
 define('FILE_CONVERT_LOADTABLE_ID',     'convert_00_loadTable_id.php');           // 縦管理メニュー(ホストグループ)用の00_loadTable.phpのデータ部テンプレート(ID用)
 define('FILE_CONVERT_LOADTABLE_PW',     'convert_00_loadTable_password.php');     // 縦管理メニュー(ホストグループ)用の00_loadTable.phpのデータ部テンプレート(PW用)
 define('FILE_CONVERT_H_LOADTABLE',      'convert_host_00_loadTable.php');         // 縦管理メニュー(ホスト)用の00_loadTable.phpテンプレート
+define('FILE_CONVERT_H_LOADTABLE_OP',   'convert_host_00_loadTable_oponly.php');  // 縦管理メニュー(ホスト(オペレーションのみ))用の00_loadTable.phpテンプレート
 define('FILE_CONVERT_H_LOADTABLE_VAL',  'convert_host_00_loadTable_value.php');   // 縦管理メニュー(ホスト)用の00_loadTable.phpのデータ部テンプレート
 define('FILE_CONVERT_H_LOADTABLE_ID',   'convert_host_00_loadTable_id.php');      // 縦管理メニュー(ホスト)用の00_loadTable.phpのデータ部テンプレート(ID用)
 define('FILE_HG_SQL',                   'hostgroupDB.sql');                       // ホストグループ用のDB作成用のSQLテンプレート
 define('FILE_H_SQL',                    'hostDB.sql');                            // ホスト用のDB作成用のSQLテンプレート
 define('FILE_CONVERT_SQL',              'convertDB.sql');                         // 縦管理メニュー(ホストグループ)用のDB作成用のSQLテンプレート
 define('FILE_CONVERT_H_SQL',            'convert_hostDB.sql');                    // 縦管理メニュー(ホスト)用のDB作成用のSQLテンプレート
+define('FILE_H_OP_SQL',                 'hostDB_oponly.sql');                     // ホスト(オペレーションのみ)用のDB作成用のSQLテンプレート
+define('FILE_CONVERT_H_OP_SQL',         'convert_hostDB_oponly.sql');             // 縦管理メニュー(ホスト(オペレーションのみ))用のDB作成用のSQLテンプレート
 define('FILE_MST_LOADTABLE',            'master_00_loadTable.php');               // マスタ用の00_loadTable.phpテンプレート
 define('FILE_MST_LOADTABLE_VAL',        'master_00_loadTable_value.php');         // マスタ用の00_loadTable.phpのデータ部テンプレート
 define('FILE_MST_SQL',                  'masterDB.sql');                          // マスタ用のDB作成用のSQLテンプレート

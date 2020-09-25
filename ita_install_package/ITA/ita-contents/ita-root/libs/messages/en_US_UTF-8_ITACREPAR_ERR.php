@@ -144,4 +144,6 @@ $ary[1108] = "\"Decimal number maximum value\" can not be set when \"Password\" 
 $ary[1109] = "\"Decimal number minimum value\" can not be set when \"Password\" is set.";
 $ary[1110] = "\"Decimal number digit\" can not be set when \"Password\" is set.";
 $ary[1111] = "\"Menu group:Menu:Item\" can not be set when \"Password\" is set.";
+$ary[1112] = "\"Use\" can not be set when \"Parameter sheet(Operation)\" is set.";
+$ary[1113] = "\"Menu Group of Host Group\" and \"Menu Group of Datasheet\" can not be set when \"Parameter sheet(Operation)\" is set.";
 ?>
