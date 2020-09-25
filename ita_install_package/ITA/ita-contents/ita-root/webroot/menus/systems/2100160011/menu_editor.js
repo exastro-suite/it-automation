@@ -1054,6 +1054,9 @@ const sortMark = '<span class="sortMarkWrap"><span class="sortNotSelected"></spa
         + '<th rowspan="{{rowspan}}"><span class="generalBold">' + textCode('0021') + '</span>' + sortMark + '</th>'
         + '<th colspan="4"><span class="generalBold">' + textCode('0022') + '</span></th>'
         + '<th colspan="{{colspan}}"><span class="generalBold">' + textCode('0023') + '</span></th>',
+      tHeadOperationrHeaderLeftHTML = ''
+        + '<th colspan="4"><span class="generalBold">' + textCode('0022') + '</span></th>'
+        + '<th colspan="{{colspan}}"><span class="generalBold">' + textCode('0023') + '</span></th>',  
       tHeadParameterOpeHeaderLeftHTML = ''
         + '<th rowspan="{{rowspan}}"><span class="generalBold">' + textCode('0024') + '</span>' + sortMark + '</th>'
         + '<th rowspan="{{rowspan}}"><span class="generalBold">' + textCode('0025') + '</span>' + sortMark + '</th>'
@@ -1067,6 +1070,11 @@ const sortMark = '<span class="sortMarkWrap"><span class="sortNotSelected"></spa
         + '<td class="likeHeader number">{{id}}</td>',
       tBodyParameterHeaderLeftHTML = ''
         + '<td>192.168.0.1</td>'
+        + '<td>' + textCode('0031') + '</td>'
+        + '<td>2020/01/01 00:00</td>'
+        + '<td>2020/01/01 00:00</td>'
+        + '<td></td>',
+      tBodyOperationHeaderLeftHTML = ''
         + '<td>' + textCode('0031') + '</td>'
         + '<td>2020/01/01 00:00</td>'
         + '<td>2020/01/01 00:00</td>'
@@ -1098,7 +1106,7 @@ const previewTable = function(){
       maxLevel = rowNumberCheck();
   
   // パラメータシート or データシート
-  const previewType = Number( $('#create-menu-type').val() );
+  const previewType = Number( $property.attr('data-menu-type') );
     
   // エディタ要素をTableに変換
   const tableAnalysis = function( $cols, repeatCount ) {
@@ -1180,7 +1188,7 @@ const previewTable = function(){
   // thead HTMLを生成
   const itemLength = childColumnCount( $menuTable );
   
-  if ( previewType === 1 ) {
+  if ( previewType === 1 || previewType === 3 ) {
     maxLevel++;
     tableArray.unshift('');
   }   
@@ -1194,8 +1202,13 @@ const previewTable = function(){
           .replace(/{{rowspan}}/g, maxLevel )
           .replace(/{{colspan}}/g, itemLength );
       }
+      if ( previewType === 3 ) {
+        tableHTML += tHeadOperationrHeaderLeftHTML
+          .replace(/{{rowspan}}/g, maxLevel )
+          .replace(/{{colspan}}/g, itemLength );
+      }
     }
-    if ( i === 1 && previewType === 1 ) {
+    if ( i === 1 && previewType === 1 || i === 1 && previewType === 3 ) {
       tableHTML += tHeadParameterOpeHeaderLeftHTML.replace(/{{rowspan}}/g, maxLevel - 1 );
     }
     tableHTML += tableArray[i];
@@ -1208,6 +1221,9 @@ const previewTable = function(){
     tableHTML += '<tr>' + tBodyHeaderLeftHTML.replace('{{id}}', i );
     if ( previewType === 1 ) {
       tableHTML += tBodyParameterHeaderLeftHTML;
+    }
+    if ( previewType === 3 ) {
+      tableHTML += tBodyOperationHeaderLeftHTML;
     }
     tableHTML += tbodyArray.join() + tBodyHeaderRightHTML + '</tr>';
   }
@@ -1224,7 +1240,12 @@ const previewTable = function(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 $('#create-menu-type').on('change', function(){
-  $property.attr('data-menu-type', $( this ).val() );
+  const menuType = $( this ).val();
+  // パラメータシート（オペレーション）の場合は用途ホストを選択
+  if ( menuType === '3' ) {
+    $('#create-menu-use').val(1).change();
+  }
+  $property.attr('data-menu-type', menuType );
   previewTable();
 });
 $('#create-menu-use').on('change', function(){
@@ -1418,7 +1439,7 @@ const menuGroupBody = function() {
     }
     // Menu group Data
     html += '<td class="id">' + menuGroupData[i]['MENU_GROUP_ID'] + '</td>'
-          + '<td class="name">' + menuGroupData[i]['MENU_GROUP_NAME'] + '</td>';
+          + '<td class="name">' + textEntities( menuGroupData[i]['MENU_GROUP_NAME'] ) + '</td>';
 
     html += '</tr>';      
   }
@@ -1495,7 +1516,7 @@ const $menuGroupSlectButton = $('#create-menu-group-select');
 $menuGroupSlectButton.on('click', function() {
   let type;
   // パラメータシートorデータシート
-  if ( $('#create-menu-type').val() === '1') {
+  if ( $('#create-menu-type').val() === '1' || $('#create-menu-type').val() === '3' ) {
     // ホストorホストグループ
     if ( $('#create-menu-use').val() === '1' ) {
       type = 'host';
