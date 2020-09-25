@@ -1081,6 +1081,7 @@ class ParamTargetTable extends BaseTable_CPM {
         $this->seqName      = $this->tableName . '_RIC';
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('TARGET_ID',
+                                    'DISP_SEQ',
                                     'TARGET_NAME',
                                     'NOTE',
                                     'DISUSE_FLAG',
