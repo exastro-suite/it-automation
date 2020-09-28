@@ -160,7 +160,6 @@ CREATE TABLE B_TERRAFORM_WORKSPACES
 WORKSPACE_ID                      %INT%                            ,
 ORGANIZATION_ID                   %INT%                            ,
 WORKSPACE_NAME                    %VARCHR%(90)                     ,
-APPLY_METHOD                      %VARCHR%(32)                     ,
 TERRAFORM_VERSION                 %VARCHR%(32)                     ,
 CHECK_RESULT                      %VARCHR%(8)                      ,
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -182,7 +181,6 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴�
 WORKSPACE_ID                      %INT%                            ,
 ORGANIZATION_ID                   %INT%                            ,
 WORKSPACE_NAME                    %VARCHR%(90)                     ,
-APPLY_METHOD                      %VARCHR%(32)                     ,
 TERRAFORM_VERSION                 %VARCHR%(32)                     ,
 CHECK_RESULT                      %VARCHR%(8)                      ,
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -592,40 +590,6 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- 履歴系テーブル作成----
 
-
--- ----更新系テーブル作成----
---Workspaceオプション(Apply Method)管理
-CREATE TABLE B_TERRAFORM_WORKSPACE_APPLY_METHOD
-(
-WORKSPACE_OPTION_ID               %INT%                            ,
-WORKSPACE_OPTION_NAME             %VARCHR%(16)                     ,
-DISP_SEQ                          %INT%                            , -- 表示順序
-NOTE                              %VARCHR%(4000)                   , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
-
-PRIMARY KEY (WORKSPACE_OPTION_ID)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- 更新系テーブル作成----
-
--- ----履歴系テーブル作成----
---Workspaceオプション(Apply Method)管理(履歴)
-CREATE TABLE B_TERRAFORM_WORKSPACE_APPLY_METHOD_JNL
-(
-JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
-WORKSPACE_OPTION_ID               %INT%                            ,
-WORKSPACE_OPTION_NAME             %VARCHR%(16)                     ,
-DISP_SEQ                          %INT%                            , -- 表示順序
-NOTE                              %VARCHR%(4000)                   , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
-PRIMARY KEY(JOURNAL_SEQ_NO)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- 履歴系テーブル作成----
 
 -- *****************************************************************************
 -- *** Terraform Tables *****                                                ***

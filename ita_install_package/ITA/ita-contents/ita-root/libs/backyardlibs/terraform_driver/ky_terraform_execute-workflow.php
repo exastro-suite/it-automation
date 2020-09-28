@@ -497,11 +497,13 @@
             $RequestContents = array();
             $operation_no = "";
             $pattern_id = "";
+            $run_mode = "";
             $organization_id = ""; //組織ID
             $organization_name = ""; //組織名
             $workspace_id = ""; //ワークスペースID
             $workspace_name = ""; //ワークスペース名
             $tfe_workspace_id = ""; //TFE側で管理するワークスペースのID
+            $tfe_auto_apply = false; //TFE側で管理するワークスペースでのApply方法（falseならApply前で作業を停止、trueならApplyを自動実行）
             $ary_vars_data = array(); //対象の変数を格納する配列
             $ary_module_matter_id = array(); //モジュール素材IDを格納する配列
             $ary_module_matter = array(); //モジュール素材情報を格納する配列
@@ -525,7 +527,9 @@
             $data_type = "out";
             $log_path = $log_save_dir . "/" . $tgt_execution_no_str_pad . "/" . $data_type;
             $error_log = $log_path . "/error.log";
-            $exec_log = $log_path . "/exec.log";
+            $plan_log = $log_path . "/plan.log";
+            $policyCheck_log = $log_path . "/policyCheck.log";
+            $apply_log = $log_path . "/apply.log";
 
             //log格納ディレクトリを作成
             if(!file_exists($log_path)){
@@ -561,15 +565,15 @@
                 }
             }
 
-            //exec_logファイルを作成
-            if(!file_exists($exec_log)){
-                if(!touch($exec_log)){
+            //plan_logファイルを作成
+            if(!file_exists($plan_log)){
+                if(!touch($plan_log)){
                     // 警告フラグON
                     $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
-                    if(!chmod($exec_log, 0777)){
+                    if(!chmod($plan_log, 0777)){
                         // 警告フラグON
                         $warning_flag = 1;
                         // 例外処理へ
@@ -578,6 +582,39 @@
                 }
             }
 
+            //policyCheck_logファイルを作成
+            if(!file_exists($policyCheck_log)){
+                if(!touch($policyCheck_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
+                }else{
+                    if(!chmod($policyCheck_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
+                        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
+                    }
+                }
+            }
+
+            //apply_logファイルを作成
+            if(!file_exists($apply_log)){
+                if(!touch($apply_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
+                }else{
+                    if(!chmod($apply_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
+                        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
+                    }
+                }
+            }
 
             //----------------------------------------------
             // トランザクション開始
@@ -692,6 +729,8 @@
             $operation_no = $tgt_execution_row['OPERATION_NO_UAPK'];
             //pattern_idを定義
             $pattern_id = $tgt_execution_row['PATTERN_ID'];
+            //RUN_MODEを定義
+            $run_mode = $tgt_execution_row['RUN_MODE'];
 
             // トレースメッセージ
             if ( $log_level === 'DEBUG' ){
@@ -971,6 +1010,7 @@
                         $exist_flag = true;
                         //tfe側で管理しているworkspaceのIDを格納
                         $tfe_workspace_id = $data['id'];
+                        $tfe_auto_apply = $data['attributes']['auto-apply'];
                     }
                 }
 
@@ -984,6 +1024,19 @@
                     // 例外処理へ
                     throw new Exception( $message );
                 }
+
+                //Plan確認の場合、WorkspaceのApplyMethod設定がAuto Applyになっている場合はエラーにする（Plan確認の場合にApplyが実行されてしまうため）
+                if($run_mode == 2 && $tfe_auto_apply == true){
+                    //error_logにメッセージを追記
+                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141205", $workspace_name); //Terraform Enterpriseに対象のWorkspaceが登録されていません。(WorkspaceName:{})
+                    LocalLogPrint($error_log, $message);
+
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception( $message );
+                }
+
             }
 
 

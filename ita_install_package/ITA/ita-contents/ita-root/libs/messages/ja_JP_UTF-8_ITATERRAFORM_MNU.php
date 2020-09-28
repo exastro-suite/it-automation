@@ -45,6 +45,9 @@ $ary[101280] = "確認";
 $ary[101310] = "実行ログ";
 $ary[101320] = "エラーログ";
 $ary[101330] = "呼出元Conductor";
+$ary[101340] = "Planログ";
+$ary[101350] = "PolicyCheckログ";
+$ary[101360] = "Applyログ";
 $ary[102010] = "Terraform Enterpriseへの接続インターフェース情報をメンテナンス(閲覧/更新)できます。 <br>本メニューは必ず1レコードである必要があります。
 ";
 $ary[102020] = "No.";
@@ -92,6 +95,7 @@ $ary[102490] = "Apply Method";
 $ary[102500] = "[Auto apply]はplan完了後自動的にapplyを実行。<br>[Manual apply]はplan完了後にapply実行トリガーが必要。";
 $ary[102510] = "Terraform Version";
 $ary[102520] = "Terraform Versionを入力。空白の場合は最新のバージョンが自動的に選択されます。";
+$ary[102525] = "半角数字と利用可能な記号(.)";
 $ary[102530] = "Terraform Enterprise連携";
 $ary[102540] = "状態チェック";
 $ary[102550] = "連携状態チェック";

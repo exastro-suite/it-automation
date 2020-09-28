@@ -16,6 +16,7 @@ function initProcess(pageMode){
     switch(pageMode){
         case "instanceConstruct":
         case "instanceConstructWithDR":
+        case "instanceConstructWithPlanExecute":
             varInitedFlag1 = false;
             varInitedFlag2 = false;
             
@@ -138,7 +139,13 @@ function constructExecutionNo(boolCallProxy, execution_no, ary_vars, menu_id){
                str_confirm_message = getSomeMessage("ITABASEC010701");
                break;
             case 2: //"ドライラン"
-               str_confirm_message = getSomeMessage("ITABASEC010705");
+               if(menu_id == "2100080010"){
+                    //TerraformはPlan確認
+                    str_confirm_message = getSomeMessage("ITABASEC010710");
+               }else{
+                    str_confirm_message = getSomeMessage("ITABASEC010705");
+               }
+               
                break;
             default:
                confirm_flag = false;
@@ -204,6 +211,40 @@ function drawCommandButtons(pageMode,minorPhase){
                 objButtonL50.className = 'cmdButton disableAfterPush';
                 // ドライラン
                 objButtonL50.value = getSomeMessage("ITABASEC020102");
+                strCallFunctionName = 'orchestratorDryrun';
+                if( minorPhase==1 ){
+                    objButtonL50.disabled = false;
+                }else{
+                    objButtonL50.disabled = true;
+                }
+                objButtonL50.onclick = new Function( strCallFunctionName+"(true);" );
+                if( objButtonL50 != null ){
+                    objCommandAreaWrap.insertBefore(objButtonL50, null);
+                }
+                var objButtonR50 = document.createElement('input');
+                objButtonR50.type = 'button';
+                objButtonR50.className = 'cmdButton disableAfterPush';
+                // 実行
+                objButtonR50.value = getSomeMessage("ITABASEC020101");
+                strCallFunctionName = 'orchestratorExecute';
+                //}
+                if( minorPhase==1 ){
+                    objButtonR50.disabled = false;
+                }else{
+                    objButtonR50.disabled = true;
+                }
+                objButtonR50.onclick = new Function( strCallFunctionName+"(true);" );
+                if( objButtonR50 != null ){
+                    objCommandAreaWrap.insertBefore(objButtonR50, null);
+                }
+                break;
+            case "instanceConstructWithPlanExecute":
+                objCommandAreaWrap.innerHTML = '';
+                var objButtonL50 = document.createElement('input');
+                objButtonL50.type = 'button';
+                objButtonL50.className = 'cmdButton disableAfterPush';
+                // Plan確認
+                objButtonL50.value = getSomeMessage("ITABASEC020103");
                 strCallFunctionName = 'orchestratorDryrun';
                 if( minorPhase==1 ){
                     objButtonL50.disabled = false;

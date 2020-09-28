@@ -160,7 +160,6 @@ CREATE TABLE B_TERRAFORM_WORKSPACES
 WORKSPACE_ID                      INT                              ,
 ORGANIZATION_ID                   INT                              ,
 WORKSPACE_NAME                    VARCHAR (90)                     ,
-APPLY_METHOD                      VARCHAR (32)                     ,
 TERRAFORM_VERSION                 VARCHAR (32)                     ,
 CHECK_RESULT                      VARCHAR (8)                      ,
 DISP_SEQ                          INT                              , -- 表示順序
@@ -182,7 +181,6 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴�
 WORKSPACE_ID                      INT                              ,
 ORGANIZATION_ID                   INT                              ,
 WORKSPACE_NAME                    VARCHAR (90)                     ,
-APPLY_METHOD                      VARCHAR (32)                     ,
 TERRAFORM_VERSION                 VARCHAR (32)                     ,
 CHECK_RESULT                      VARCHAR (8)                      ,
 DISP_SEQ                          INT                              , -- 表示順序
@@ -592,40 +590,6 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 -- 履歴系テーブル作成----
 
-
--- ----更新系テーブル作成----
---Workspaceオプション(Apply Method)管理
-CREATE TABLE B_TERRAFORM_WORKSPACE_APPLY_METHOD
-(
-WORKSPACE_OPTION_ID               INT                              ,
-WORKSPACE_OPTION_NAME             VARCHAR (16)                     ,
-DISP_SEQ                          INT                              , -- 表示順序
-NOTE                              VARCHAR (4000)                   , -- 備考
-DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
-LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
-
-PRIMARY KEY (WORKSPACE_OPTION_ID)
-)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
--- 更新系テーブル作成----
-
--- ----履歴系テーブル作成----
---Workspaceオプション(Apply Method)管理(履歴)
-CREATE TABLE B_TERRAFORM_WORKSPACE_APPLY_METHOD_JNL
-(
-JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
-WORKSPACE_OPTION_ID               INT                              ,
-WORKSPACE_OPTION_NAME             VARCHAR (16)                     ,
-DISP_SEQ                          INT                              , -- 表示順序
-NOTE                              VARCHAR (4000)                   , -- 備考
-DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
-LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
-PRIMARY KEY(JOURNAL_SEQ_NO)
-)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
--- 履歴系テーブル作成----
 
 -- *****************************************************************************
 -- *** Terraform Tables *****                                                ***
@@ -1297,16 +1261,11 @@ INSERT INTO B_TERRAFORM_STATUS_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_
 
 INSERT INTO B_TERRAFORM_RUN_MODE (RUN_MODE_ID,RUN_MODE_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Normal',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_TERRAFORM_RUN_MODE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,RUN_MODE_ID,RUN_MODE_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Normal',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_TERRAFORM_RUN_MODE (RUN_MODE_ID,RUN_MODE_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Dry run',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_TERRAFORM_RUN_MODE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,RUN_MODE_ID,RUN_MODE_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'Dry run',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_TERRAFORM_RUN_MODE (RUN_MODE_ID,RUN_MODE_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Plan check',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_TERRAFORM_RUN_MODE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,RUN_MODE_ID,RUN_MODE_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'Plan check',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO B_TERRAFORM_IF_INFO (TERRAFORM_IF_INFO_ID,TERRAFORM_HOSTNAME,TERRAFORM_TOKEN,TERRAFORM_REFRESH_INTERVAL,TERRAFORM_TAILLOG_LINES,NULL_DATA_HANDLING_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Enter the host name of Terraform Enterprise','Enter the token issued from [User Settings] of Terraform Enterprise','3000','1000','2',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_TERRAFORM_IF_INFO_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,TERRAFORM_IF_INFO_ID,TERRAFORM_HOSTNAME,TERRAFORM_TOKEN,TERRAFORM_REFRESH_INTERVAL,TERRAFORM_TAILLOG_LINES,NULL_DATA_HANDLING_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Enter the host name of Terraform Enterprise','Enter the token issued from [User Settings] of Terraform Enterprise','3000','1000','2',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-
-INSERT INTO B_TERRAFORM_WORKSPACE_APPLY_METHOD (WORKSPACE_OPTION_ID,WORKSPACE_OPTION_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Auto apply',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_TERRAFORM_WORKSPACE_APPLY_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,WORKSPACE_OPTION_ID,WORKSPACE_OPTION_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Auto apply',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_TERRAFORM_WORKSPACE_APPLY_METHOD (WORKSPACE_OPTION_ID,WORKSPACE_OPTION_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Manual apply',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_TERRAFORM_WORKSPACE_APPLY_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,WORKSPACE_OPTION_ID,WORKSPACE_OPTION_NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'Manual apply',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 
 COMMIT;
