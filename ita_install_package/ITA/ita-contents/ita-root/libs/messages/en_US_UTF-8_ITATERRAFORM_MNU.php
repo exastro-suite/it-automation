@@ -45,6 +45,9 @@ $ary[101280] = "Confirm";
 $ary[101310] = "Execution log";
 $ary[101320] = "Error log";
 $ary[101330] = "Caller Conductor";
+$ary[101340] = "Plan log";
+$ary[101350] = "PolicyCheck log";
+$ary[101360] = "Apply log";
 $ary[102010] = "You can perform maintenance (View/Update) of connection interface information for Terraform Enterprise. <br>This menu should be one record.
 ";
 $ary[102020] = "No.";
@@ -92,6 +95,7 @@ $ary[102490] = "Apply Method";
 $ary[102500] = "[Auto apply] automatically executes apply after the plan is completed. <br>[Manual apply] needs apply execution trigger after the plan is completed.";
 $ary[102510] = "Terraform Version";
 $ary[102520] = "Enter Terraform Version. If left blank, the latest version will be automatically selected.";
+$ary[102525] = "Numbers and valid symbols(.)";
 $ary[102530] = "Terraform Enterprise association";
 $ary[102540] = "Status check";
 $ary[102550] = "Association status check";
