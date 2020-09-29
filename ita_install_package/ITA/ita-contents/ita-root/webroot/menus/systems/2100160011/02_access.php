@@ -63,17 +63,19 @@
                 if(!array_key_exists("MENUGROUP_FOR_HG",$menuData['menu']))     $menuData['menu']['MENUGROUP_FOR_HG'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_CONV",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CONV'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_H",$menuData['menu']))      $menuData['menu']['MENUGROUP_FOR_H'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_H_SUB",$menuData['menu']))  $menuData['menu']['MENUGROUP_FOR_H_SUB'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_VIEW",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_VIEW'] = "";
                 
-                $arrayRegisterData = array("MENU_NAME" => $menuData['menu']['MENU_NAME'],
-                                           "TARGET" => $menuData['menu']['TARGET'],
-                                           "DISP_SEQ" => $menuData['menu']['DISP_SEQ'],
-                                           "PURPOSE" => $menuData['menu']['PURPOSE'],
-                                           "MENUGROUP_FOR_CMDB" => $menuData['menu']['MENUGROUP_FOR_CMDB'],
-                                           "MENUGROUP_FOR_HG" => $menuData['menu']['MENUGROUP_FOR_HG'],
-                                           "MENUGROUP_FOR_H" => $menuData['menu']['MENUGROUP_FOR_H'],
-                                           "MENUGROUP_FOR_VIEW" => $menuData['menu']['MENUGROUP_FOR_VIEW'],
-                                           "MENUGROUP_FOR_CONV" => $menuData['menu']['MENUGROUP_FOR_CONV'],
+                $arrayRegisterData = array("MENU_NAME"              => $menuData['menu']['MENU_NAME'],
+                                           "TARGET"                 => $menuData['menu']['TARGET'],
+                                           "DISP_SEQ"               => $menuData['menu']['DISP_SEQ'],
+                                           "PURPOSE"                => $menuData['menu']['PURPOSE'],
+                                           "MENUGROUP_FOR_CMDB"     => $menuData['menu']['MENUGROUP_FOR_CMDB'],
+                                           "MENUGROUP_FOR_HG"       => $menuData['menu']['MENUGROUP_FOR_HG'],
+                                           "MENUGROUP_FOR_H"        => $menuData['menu']['MENUGROUP_FOR_H'],
+                                           "MENUGROUP_FOR_H_SUB"    => $menuData['menu']['MENUGROUP_FOR_H_SUB'],
+                                           "MENUGROUP_FOR_VIEW"     => $menuData['menu']['MENUGROUP_FOR_VIEW'],
+                                           "MENUGROUP_FOR_CONV"     => $menuData['menu']['MENUGROUP_FOR_CONV'],
                                            "DESCRIPTION" => $menuData['menu']['DESCRIPTION'],
                                            "NOTE" => $menuData['menu']['NOTE'],
                                           );
@@ -397,6 +399,7 @@
                 if(!array_key_exists("MENUGROUP_FOR_CMDB",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CMDB'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_HG",$menuData['menu']))     $menuData['menu']['MENUGROUP_FOR_HG'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_H",$menuData['menu']))      $menuData['menu']['MENUGROUP_FOR_H'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_H_SUB",$menuData['menu']))  $menuData['menu']['MENUGROUP_FOR_H_SUB'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_VIEW",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_VIEW'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_CONV",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CONV'] = "";
                 
@@ -411,6 +414,7 @@
                                            "MENUGROUP_FOR_CMDB" => $menuData['menu']['MENUGROUP_FOR_CMDB'],
                                            "MENUGROUP_FOR_HG" => $menuData['menu']['MENUGROUP_FOR_HG'],
                                            "MENUGROUP_FOR_H" => $menuData['menu']['MENUGROUP_FOR_H'],
+                                           "MENUGROUP_FOR_H_SUB" => $menuData['menu']['MENUGROUP_FOR_H_SUB'],
                                            "MENUGROUP_FOR_VIEW" => $menuData['menu']['MENUGROUP_FOR_VIEW'],
                                            "MENUGROUP_FOR_CONV" => $menuData['menu']['MENUGROUP_FOR_CONV'],
                                            "DESCRIPTION" => $menuData['menu']['DESCRIPTION'],
@@ -936,12 +940,10 @@
             }
             $filteredData = array();
             foreach($result as $mgData){
-                if($mgData['MENU_GROUP_ID'] < "2100000001"){
-                    $addArray = array();
-                    $addArray['MENU_GROUP_ID']   = $mgData['MENU_GROUP_ID'];
-                    $addArray['MENU_GROUP_NAME'] = $mgData['MENU_GROUP_NAME'];
-                    $filteredData[] = $addArray;
-                }
+                $addArray = array();
+                $addArray['MENU_GROUP_ID']   = $mgData['MENU_GROUP_ID'];
+                $addArray['MENU_GROUP_NAME'] = $mgData['MENU_GROUP_NAME'];
+                $filteredData[] = $addArray;
             }
             
             $arrayResult = array("000","", json_encode($filteredData));
@@ -1108,6 +1110,7 @@
                             "TARGET"                   => $createMenuInfoData['TARGET'],
                             "MENUGROUP_FOR_HG"         => $createMenuInfoData['MENUGROUP_FOR_HG'],
                             "MENUGROUP_FOR_H"          => $createMenuInfoData['MENUGROUP_FOR_H'],
+                            "MENUGROUP_FOR_H_SUB"      => $createMenuInfoData['MENUGROUP_FOR_H_SUB'],
                             "MENUGROUP_FOR_VIEW"       => $createMenuInfoData['MENUGROUP_FOR_VIEW'],
                             "MENUGROUP_FOR_CONV"       => $createMenuInfoData['MENUGROUP_FOR_CONV'],
                             "MENUGROUP_FOR_CMDB"       => $createMenuInfoData['MENUGROUP_FOR_CMDB'],
