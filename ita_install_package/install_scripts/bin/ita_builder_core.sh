@@ -254,6 +254,14 @@ cat_tar_gz() {
     fi
 }
 
+setting_file_format_check(){
+    if [ `echo "$line" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
+        log "ERROR : Double-byte characters cannot be used in the setting files"
+        log "Applicable line : $line"
+        func_exit
+    fi
+}
+
 ################################################################################
 # configuration functions
 
@@ -268,6 +276,7 @@ read_setting_file() {
     for line in $setting_text;do
         # convert "foo: bar" to "foo=bar", and keep comment 
         if [ "$(echo "$line"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
+            setting_file_format_check
             key="$(echo "$line" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
             val="$(echo "$line" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\2/")"
             val=$(echo "$val"|sed -E "s/'/'\\\"'\\\"'/g")
@@ -275,8 +284,11 @@ read_setting_file() {
             eval "$command"
         fi
     done
+
     #IFSリストア
     IFS="$SRC_IFS"
+
+    
 }
 
 
