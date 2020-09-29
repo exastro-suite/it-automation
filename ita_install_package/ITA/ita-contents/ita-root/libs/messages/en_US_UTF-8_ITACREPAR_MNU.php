@@ -237,4 +237,10 @@ $ary[104233] = "Auto-input";
 $ary[104234] = "Select menu group";
 $ary[104235] = "Required item";
 $ary[104236] = "Password";
+$ary[104237] = "Create as hostgroup menu";
+$ary[104238] = "Create as vertical menu";
+$ary[104239] = "Input";
+$ary[104240] = "Substitution value";
+$ary[104241] = "Reference";
+$ary[104242] = "Yes";
 ?>
