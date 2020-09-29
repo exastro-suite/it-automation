@@ -69,6 +69,152 @@ const menuEditorLog = {
     menuEditorLogNumber = 1;
     $('.editor-log').find('tbody').empty();
   }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   モーダル
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// モーダルを開く
+function itaModalOpen( headerTitle, bodyFunc, modalType ) {
+    
+    if ( typeof bodyFunc !== 'function' ) return false;
+
+    // 初期値
+    if ( headerTitle === undefined ) headerTitle = 'Undefined title';
+    if ( modalType === undefined ) modalType = 'default';
+
+    const $window = $( window ),
+          $body = $('body'),
+          $container = $('.wholecontainer');
+    
+    let footerHTML1;
+    
+    if ( modalType === 'help' ) {
+      footerHTML = ''
+      + '<div class="editor-modal-footer">'
+        + '<ul class="editor-modal-footer-menu">'
+          + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">閉じる</li>'
+        + '</ul>'
+      + '</div>'
+    } else {
+      footerHTML = ''
+      + '<div class="editor-modal-footer">'
+        + '<ul class="editor-modal-footer-menu">'
+          + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button positive" data-button-type="ok">' + getSomeMessage("ITAWDCC92001") + '</li>'
+          + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="cancel">' + getSomeMessage("ITAWDCC92002") + '</li>'
+        + '</ul>'
+      + '</div>'
+    }
+    
+    
+    let modalHTML = ''
+      + '<div id="editor-modal" class="' + modalType + '">'
+        + '<div class="editor-modal-container">'
+          + '<div class="editor-modal-header">'
+            + '<span class="editor-modal-title">' + headerTitle + '</span>'
+            + '<button class="editor-modal-header-close"></button>'
+          + '</div>'
+          + '<div class="editor-modal-body">'
+            + '<div class="editor-modal-loading"></div>'
+          + '</div>'
+          + footerHTML
+        + '</div>'
+      + '</div>';
+
+    const $editorModal = $( modalHTML ),
+          $firstFocus = $editorModal.find('.editor-modal-header-close'),
+          $lastFocus = $editorModal.find('.editor-modal-footer-menu-button[data-button-type="cancel"]');
+
+    $body.append( $editorModal );
+    $container.css('filter','blur(2px)');
+    $firstFocus.focus();
+    
+    $window.on('keydown.modal', function( e ) {
+      
+      switch ( e.keyCode ) {
+        case 9: // Tabでの移動をモーダル内に制限する
+          {
+            const $focusElement = $( document.activeElement );
+            if ( $focusElement.is( $firstFocus ) && e.shiftKey ) {
+              e.preventDefault();
+              $lastFocus.focus();
+            } else if ( $focusElement.is( $lastFocus ) && !e.shiftKey ) {
+              e.preventDefault();
+              $firstFocus.focus();
+            }
+          }
+          break;
+        case 27: // Escでモーダルを閉じる
+          itaModalClose();
+          break;
+      }
+    });
+
+    $firstFocus.on('click', function() {
+      itaModalClose();
+    });
+    if ( modalType === 'help' ) {
+      $editorModal.find('.editor-modal-footer-menu-button[data-button-type="close"]').on('click', itaModalClose );
+    }
+    
+    bodyFunc();
+
+}
+
+// モーダルを閉じる
+function itaModalClose() {
+
+  const $window = $( window ),
+        $container = $('.wholecontainer'),
+        $editorModal = $('#editor-modal');
+  
+  if ( $editorModal.length ) {
+    $window.off('keyup.modal');
+    $editorModal.remove();
+    $container.css('filter','blur(0)');
+  }
+
+}
+
+// モーダルエラー表示
+function itaModalError( message ) {
+
+  const $modalBody = $('.editor-modal-body');
+  
+  $modalBody.html('<div class="editor-modal-error"><p>' + message + '</p></div>');
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   タブ切替初期設定
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function itaTabMenu() {
+
+  $('.editor-tab').each( function() {
+  
+    const $tab = $( this ),
+          $tabItem = $tab.find('.editor-tab-menu-list-item'),
+          $tabBody = $tab.find('.editor-tab-body');
+
+    $tabItem.eq(0).addClass('selected');
+    $tabBody.eq(0).addClass('selected');
+    
+    $tabItem.on('click', function() {
+      const $clickTab = $( this ),
+            $openTab = $('#' + $clickTab.attr('data-tab') );
+            
+      $tab.find('.selected').removeClass('selected');
+      $clickTab.add( $openTab ).addClass('selected');
+    });
+    
+  });
+
 }
 
 const menuEditor = function() {
@@ -84,17 +230,12 @@ const $window = $( window ),
       $menuTable = $menuEditor.find('.menu-table'),
       $property = $('#property');
 
-// common_editor_func.js
+// タブ
 itaTabMenu();
 
 // 読み込み完了
 $menuEditor.removeClass('load-editor');
 
-// 言語 0:ja 1:en
-let languageCode = 0;
-const lang = $html.attr('lang');
-if ( lang === 'en' ) languageCode = 1;
-      
 // テキスト
 const languageText = {
 '0000':[getSomeMessage("ITACREPAR_1202"),''],
@@ -130,7 +271,15 @@ const languageText = {
 '0030':[getSomeMessage("ITACREPAR_1232"),''],
 '0031':[getSomeMessage("ITACREPAR_1233"),''],
 '0032':[getSomeMessage("ITACREPAR_1234"),''],
-'0033':[getSomeMessage("ITACREPAR_1235"),'']
+'0033':[getSomeMessage("ITACREPAR_1235"),''],
+'0034':[getSomeMessage("ITACREPAR_1238"),''],
+'0035':[getSomeMessage("ITACREPAR_1239"),''],
+'0036':[getSomeMessage("ITACREPAR_1240"),''],
+'0037':[getSomeMessage("ITACREPAR_1241"),''],
+'0038':[getSomeMessage("ITACREPAR_1242"),''],
+'0039':[getSomeMessage("ITACREPAR_1243"),''],
+'0040':[getSomeMessage("ITACREPAR_1244"),''],
+'0041':[getSomeMessage("ITACREPAR_1245"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
@@ -245,9 +394,8 @@ for ( let i = 0; i < selectPulldownListDataLength ; i++ ) {
   selectPulldownListHTML += '<option value="' + selectPulldownListData[i].LINK_ID + '">' + selectPulldownListData[i].LINK_PULLDOWN + '</option>';
 }
 
-
+// 作成対象 select
 if ( menuEditorMode !== 'view') {
-    // 作成対象 select
     const selectParamTargetData = menuEditorArray.selectParamTarget,
           selectParamTargetDataLength = selectParamTargetData.length;
     let selectParamTargetHTML = '';
@@ -255,20 +403,10 @@ if ( menuEditorMode !== 'view') {
       selectParamTargetHTML += '<option value="' + selectParamTargetData[i].TARGET_ID + '">' + selectParamTargetData[i].TARGET_NAME + '</option>';
     }
     $('#create-menu-type').html( selectParamTargetHTML );
-
-    // 用途 select
-    const selectParamPurposeData = menuEditorArray.selectParamPurpose,
-          selectParamPurposeDataLength = selectParamPurposeData.length;
-    let selectParamPurposeHTML = '';
-    for ( let i = 0; i < selectParamPurposeDataLength ; i++ ) {
-      selectParamPurposeHTML += '<option value="' + selectParamPurposeData[i].PURPOSE_ID + '">' + selectParamPurposeData[i].PURPOSE_NAME + '</option>';
-    }
-    $('#create-menu-use').html( selectParamPurposeHTML );
 }
 
-
 const columnHTML = ''
-  + '<div class="menu-column" data-rowpan="1" data-item-id="">'
+  + '<div class="menu-column" data-rowpan="1" data-item-id="" style="min-width: 180px">'
     + '<div class="menu-column-header">'
       + columnHeaderHTML
     + '</div>'
@@ -379,17 +517,17 @@ const $undoButton = $('#button-undo'),
       $redoButton = $('#button-redo'),
       maxHistroy = 10; // 最大履歴数
 
-let workHistroy = [''],
+let workHistory = [''],
     workCounter = 0;
 
 // 取り消し、やり直しボタンチェック
 const historyButtonCheck = function() {
-    if ( workHistroy[ workCounter - 1 ] !== undefined ) {
+    if ( workHistory[ workCounter - 1 ] !== undefined ) {
       $undoButton.prop('disabled', false );
     } else {
       $undoButton.prop('disabled', true );
     }
-    if ( workHistroy[ workCounter + 1 ] !== undefined ) {
+    if ( workHistory[ workCounter + 1 ] !== undefined ) {
       $redoButton.prop('disabled', false );
     } else {
       $redoButton.prop('disabled', true );
@@ -402,15 +540,15 @@ const history = {
     workCounter++;
     const $clone = $menuTable.clone();
     $clone.find('.hover').removeClass('hover');
-    workHistroy[ workCounter ] = $clone.html();
+    workHistory[ workCounter ] = $clone.html();
 
     // 履歴追加後の履歴を削除する
-    if ( workHistroy[ workCounter + 1 ] !== undefined ) {
-      workHistroy.length = workCounter + 1;
+    if ( workHistory[ workCounter + 1 ] !== undefined ) {
+      workHistory.length = workCounter + 1;
     } 
     // 最大履歴数を超えた場合最初の履歴を削除する
-    if ( workHistroy.length > maxHistroy ) {
-      workHistroy.shift();
+    if ( workHistory.length > maxHistroy ) {
+      workHistory.shift();
       workCounter--;
     }
     
@@ -418,20 +556,20 @@ const history = {
   },
   'undo' : function() {
     workCounter--;
-    $menuTable.html( workHistroy[ workCounter ] );
+    $menuTable.html( workHistory[ workCounter ] );
     historyButtonCheck();
     previewTable();
   },
   'redo' : function() {
     workCounter++;
-    $menuTable.html( workHistroy[ workCounter ] );
+    $menuTable.html( workHistory[ workCounter ] );
     historyButtonCheck();
     previewTable();
   },
   'clear' : function() {
     workCounter = 0;
-    workHistroy = [];
-    workHistroy[ workCounter ] = $menuTable.html();
+    workHistory = [];
+    workHistory[ workCounter ] = $menuTable.html();
     historyButtonCheck();
   }
 };
@@ -476,6 +614,7 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
         $addColumnInput = $addColumn.find('.menu-column-title-input');
   
   $target.append( $addColumn );
+
   
   $addColumn.attr('id', id );
 
@@ -511,6 +650,13 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
   if ( previewFlag === true ) {
     history.add();
     previewTable();
+  }
+  
+  // 追加した項目に合わせスクロールさせる
+  const editorWindowWidth = $menuEditWindow.outerWidth(),
+        tableWidth = $menuEditWindow.find('.menu-table-wrapper').width()
+  if ( editorWindowWidth < tableWidth ) {
+    $menuEditWindow.children().stop(0,0).animate({'scrollLeft': tableWidth - editorWindowWidth }, 200 );
   }
   
   emptyCheck();
@@ -913,8 +1059,17 @@ const emptyCheck = function() {
 };
 // リピートがあるかチェックする
 const repeatCheck = function() {
-  if ( $menuTable.find('.menu-column-repeat').length === 0 ) {
-    $('.menu-editor-menu-button[data-menu-button="newColumnRepeat"]').prop('disabled', false );
+  const $repeatButton = $('.menu-editor-menu-button[data-menu-button="newColumnRepeat"]'),
+        type = $('#create-menu-type').val();
+  // パラメータシートかつ、縦メニュー利用有無チェック
+  if ( ( type === '1' || type === '3' ) && $('#create-menu-use-vertical').prop('checked') ) {
+    if ( $menuTable.find('.menu-column-repeat').length === 0 ) {
+      $repeatButton.prop('disabled', false );
+    } else {
+      $repeatButton.prop('disabled', true );
+    }
+  } else {
+    $repeatButton.prop('disabled', true );
   }
 };
 
@@ -948,7 +1103,7 @@ $menuEditor.on('click', '.menu-column-copy', function(){
   
   // リピートを含む要素はコピーできないようにする
   if ( $column.find('.menu-column-repeat').length ) {
-    alert('"Repeat" cannot be duplicate.');
+    alert(textCode('0035'));
     return false;
   }
   
@@ -1132,7 +1287,7 @@ const previewTable = function(){
             tableArray[ currentFloor ].push( itemHTML );
             // Body
             const selectTypeValue = $column.find('.menu-column-type-select').val();
-            let dummyText = selectDummyText[ selectTypeValue ][ languageCode ],
+            let dummyText = selectDummyText[ selectTypeValue ][ 0 ],
                 dummyType = selectDummyText[ selectTypeValue ][ 2 ];
             if ( dummyType === 'select' ) {
               dummyText = $column.find('.config-select').find('option:selected').text();
@@ -1239,22 +1394,67 @@ const previewTable = function(){
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// 作成対象セレクト
+let beforeSelectType = '1';
 $('#create-menu-type').on('change', function(){
-  const menuType = $( this ).val();
-  // パラメータシート（オペレーション）の場合は用途ホストを選択
-  if ( menuType === '3' ) {
-    $('#create-menu-use').val(1).change();
+  const $select = $( this ),
+        menuType = $select.val();
+  // データタイプに変更した場合、リピートをチェックする
+  if ( menuType === '2') {
+    const repeatFlag = repeatRemoveConfirm();
+    if ( repeatFlag === true ) {
+      history.clear();
+    } else if ( repeatFlag === false) {
+      // 選択を戻す
+      $select.val( beforeSelectType );
+      return false; 
+    }    
   }
+  beforeSelectType = menuType;
   $property.attr('data-menu-type', menuType );
+  repeatCheck();
   previewTable();
 });
-$('#create-menu-use').on('change', function(){
-  $property.attr('data-host-type', $( this ).val() );
+
+// 縦メニュー利用有無チェックボックス
+$('#create-menu-use-vertical').on('change', function(){
+  const $checkBox = $( this );
+  if ( !$checkBox.prop('checked') ) {
+    const repeatFlag = repeatRemoveConfirm();
+    if ( repeatFlag === true ) {
+      history.clear();
+    } else if ( repeatFlag === false ) {
+      // チェックしなおす
+      $checkBox.prop('checked', true );
+      return false;
+    }
+  }
+  repeatCheck();
 });
-$('#create-menu-vertical-menu').on('change', function(){
-  const verticalFlag = ( $( this ).val() !== '0' ) ? true : false;
-  $property.attr('data-vertical-menu', verticalFlag );
-});
+
+// リピートを解除するか確認する
+const repeatRemoveConfirm = function() {
+    // リピートを使用しているか？
+    const $repeat = $menuEditor.find('.menu-column-repeat').eq(0);
+    if ( $repeat.length ) {
+      if ( confirm( textCode('0034')) ) {
+        // リピートが空か？
+        if ( $repeat.children('.menu-column-repeat-body').children('.column-empty').length ) {
+          $repeat.remove();
+        } else {
+          // 中身をリピートと入れ替える
+          $repeat.replaceWith( $repeat.children('.menu-column-repeat-body').html() );
+        }
+        emptyCheck();
+        previewTable();
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return undefined;
+    }
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1263,7 +1463,7 @@ $('#create-menu-vertical-menu').on('change', function(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const $columnResizeLine = $('#column-resize'),
-      defMinWidth = 160;
+      defMinWidth = 180;
 $menuEditor.on('mousedown', '.column-resize', function( e ) {
   
   // 左クリックチェック
@@ -1387,8 +1587,8 @@ const menuGroupBody = function() {
 
   const menuGroupData = menuEditorArray.selectMenuGroupList,
         menuListRowLength = menuGroupData.length,
-        menuGroupType = ['host','host-group','reference','vertical','data-sheet'],
-        menuGroupAbbreviation = ['Host','Host group','Reference','Vertical','Data sheet'],
+        menuGroupType = ['for-input','for-substitution','for-reference'],
+        menuGroupAbbreviation = [textCode('0036'),textCode('0037'),textCode('0038')],
         menuGroupTypeLength = menuGroupType.length;
 
   let html = ''
@@ -1403,7 +1603,7 @@ const menuGroupBody = function() {
   }
   // header Title
   html += '<th class="id">ID</th>'
-        + '<th class="name">Menu group name</th>';
+        + '<th class="name">' + textCode('0039') + '</th>';
 
   html += '</tr></thead><tbody><tr>';
 
@@ -1517,17 +1717,18 @@ $menuGroupSlectButton.on('click', function() {
   let type;
   // パラメータシートorデータシート
   if ( $('#create-menu-type').val() === '1' || $('#create-menu-type').val() === '3' ) {
-    // ホストorホストグループ
-    if ( $('#create-menu-use').val() === '2' ) {
-      type = 'host-group';
-    } else {
-      type = 'host';
-    }
+    type = 'parameter-sheet';
   } else {
     type = 'data-sheet';
   }
   itaModalOpen( textCode('0033'), menuGroupBody, type );
 });
+
+$('#vertical-menu-help').on('click', function() {
+  itaModalOpen( textCode('0040'), function(){console.log('HELP')}, 'help');
+});
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1553,7 +1754,7 @@ const createRegistrationData = function( type ){
   let itemCount = 0;
   
   // メニュー作成情報
-  createMenuJSON['menu'] = menuParameter('get');
+  createMenuJSON['menu'] = getPanelParameter();
   if ( menuEditorMode === 'edit' ) {
     createMenuJSON['menu']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['menu']['LAST_UPDATE_TIMESTAMP'];
   }
@@ -1774,7 +1975,7 @@ const createRegistrationData = function( type ){
   createMenuJSON['menu']['columns'] = topColumns;
 
   // 解析スタート
-  tableAnalysis ( $menuTable, 0 );
+  tableAnalysis ( $menuTable, 0 );console.log( createMenuJSON );
   
   // JSON変換
   const menuData = JSON.stringify( createMenuJSON );
@@ -1796,7 +1997,7 @@ const createRegistrationData = function( type ){
 const loadMenu = function() {
     
     const loadJSON = menuEditorArray.selectMenuInfo;
-    
+    console.log( loadJSON );
     // メニュー名、表示順序、説明、備考は、流用新規時に空白にする
     if ( menuEditorMode === 'diversion' ){
       loadJSON['menu']['MENU_NAME'] = '';
@@ -1806,7 +2007,7 @@ const loadMenu = function() {
     }
 
     // パネル情報表示
-    menuParameter('set', loadJSON );
+    setPanelParameter( loadJSON['menu'] );
     
     // エディタクリア
     $menuTable.html('');
@@ -1897,6 +2098,7 @@ const loadMenu = function() {
     recursionMenuTable( $menuTable, loadJSON['menu'] );
 
     history.clear();
+    emptyCheck();
     previewTable();
 
 };
@@ -1907,118 +2109,229 @@ const loadMenu = function() {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const menuParameter = function( type, setData ) {
-
-    const menuParameterList = {
-      'CREATE_MENU_ID' : ['create-menu-id', 'span'],
-      'MENU_NAME' : ['create-menu-name', 'text'],
-      'TARGET' : ['create-menu-type', 'select'],
-      'DISP_SEQ' : ['create-menu-order', 'number'],
-      'PURPOSE' : ['create-menu-use', 'select'],
-      'LAST_UPDATE_TIMESTAMP_FOR_DISPLAY' : ['create-menu-last-modified', 'span'],
-      'LAST_UPDATE_USER' : ['create-last-update-user', 'span'],
-      'MENUGROUP_FOR_H' : ['create-menu-host', 'span'],
-      'MENUGROUP_FOR_HG' : ['create-menu-host-group', 'span'],
-      'MENUGROUP_FOR_VIEW' : ['create-menu-reference', 'span'],
-      'MENUGROUP_FOR_CONV' : ['create-menu-vertical', 'span'],
-      'MENUGROUP_FOR_CMDB' : ['create-menu-data-sheet', 'span'],
-      'DESCRIPTION' : ['create-menu-explanation', 'textarea'],
-      'NOTE' : ['create-menu-note', 'textarea']
-    };
-    // 流用時は不要
-    if ( menuEditorMode === 'diversion' ){
-      delete menuParameterList['CREATE_MENU_ID'];
-      delete menuParameterList['LAST_UPDATE_TIMESTAMP'];
-      delete menuParameterList['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'];
-      delete menuParameterList['LAST_UPDATE_USER'];
-    }
-
-    if ( type === 'get' ) {
-
-      let parameterArray = {};
-      for ( let key in menuParameterList ) {
-        const $target = $( '#' + menuParameterList[ key ][0] );
-        if ( $target.is(':visible') ) {
-          if ( menuParameterList[ key ][1] === 'span' ) {
-            if ( key === 'CREATE_MENU_ID' || key === 'LAST_UPDATE_TIMESTAMP' || key === 'LAST_UPDATE_USER') {
-              parameterArray[ key ] = $target.attr('data-value');
-            } else {
-              parameterArray[ key ] = $target.attr('data-id');
-            }
-          } else {
-            parameterArray[ key ] = $target.val();
-          }
-        } else {
-          parameterArray[ key ] = null;
-        }
-      }
-      parameterArray['number-item'] = itemCounter;
-      parameterArray['number-group'] = groupCounter;
-
-      return parameterArray;
-
-    } else if ( type === 'set' ) {
-      if ( menuEditorMode === 'view') {
-        const veticalFlag = ( setData['menu']['MENUGROUP_FOR_CONV'] !== null )? true : false;
-        $property.attr({
-          'data-menu-type': setData['menu']['TARGET'],
-          'data-host-type': setData['menu']['PURPOSE'],
-          'data-vertical-menu': veticalFlag
-        });
-        const viewModePanelInfo = [
-          ['#create-menu-id', setData['menu']['CREATE_MENU_ID'] ],
-          ['#create-menu-name', setData['menu']['MENU_NAME'] ],
-          ['#create-menu-type', listIdName( 'target', setData['menu']['TARGET'] )],
-          ['#create-menu-order', setData['menu']['DISP_SEQ'] ],
-          ['#create-menu-use', listIdName( 'use', setData['menu']['PURPOSE'] )],
-          ['#create-menu-host', listIdName( 'group', setData['menu']['MENUGROUP_FOR_H'] )],
-          ['#create-menu-host-group', listIdName( 'group', setData['menu']['MENUGROUP_FOR_HG'] )],
-          ['#create-menu-reference', listIdName( 'group', setData['menu']['MENUGROUP_FOR_VIEW'] )],
-          ['#create-menu-vertical', listIdName( 'group', setData['menu']['MENUGROUP_FOR_CONV'] )],
-          ['#create-menu-data-sheet', listIdName( 'group', setData['menu']['MENUGROUP_FOR_CMDB'] )],
-          ['#create-menu-explanation', setData['menu']['DESCRIPTION'] ],
-          ['#create-menu-note', setData['menu']['NOTE'] ],
-          ['#create-menu-last-modified', setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] ],
-          ['#create-last-update-user', setData['menu']['LAST_UPDATE_USER']]
-        ],
-          viewModePanelInfoLength = viewModePanelInfo.length;
-              
-        for ( let i = 0; i < viewModePanelInfoLength; i++ ) {
-          let panelText = viewModePanelInfo[i][1];
-          if ( panelText === null ) panelText = ''
-          $( viewModePanelInfo[i][0] ).text( panelText );
-        }
-      } else {
-        for ( let key in menuParameterList ) {
-          const $target = $( '#' + menuParameterList[ key ][0] );
-          if ( menuEditorMode !== 'view') {
-            if ( menuParameterList[ key ][1] === 'span' ) {
-              $target.attr('data-value', setData['menu'][ key ] );
-              let panelText = '';
-              if ( $target.closest('#menu-group').length ) {
-                $target.attr('data-id', setData['menu'][ key ] );
-                panelText = listIdName( 'group', setData['menu'][ key ] );
-              } else {
-                panelText = setData['menu'][ key ];
-              }
-              if ( panelText === null ) panelText = '';
-              $target.text( panelText );
-            } else {
-              $target.val( setData['menu'][ key ] ).change();
-            }
-          } else {
-            let panelText = setData['menu'][ key ];
-            if ( panelText === null ) panelText = '';
-            $target.text( panelText );
-          }
-        }
-      }
-      itemCounter = setData['menu']['number-item'] + 1;
-      groupCounter = setData['menu']['number-group'] + 1;
-      repeatCounter = 1;
-    }
+const getPanelParameter = function() {
+// 入力値を取得する
+    const parameterArray = {};
     
-}
+    parameterArray['CREATE_MENU_ID'] = $('#create-menu-id').attr('data-value'); // 項番
+    parameterArray['MENU_NAME'] = $('#create-menu-name').val(); // メニュー名
+    parameterArray['TARGET'] = $('#create-menu-type').val(); // 作成対象
+    parameterArray['DISP_SEQ'] = $('#create-menu-order').val(); // 表示順序
+    parameterArray['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] = $('#create-menu-last-modified').attr('data-value'); // 最終更新日時
+    parameterArray['LAST_UPDATE_USER'] = $('#create-last-update-user').attr('data-value'); // 最終更新者
+    parameterArray['DESCRIPTION'] = $('#create-menu-explanation').val(); // 説明
+    parameterArray['NOTE'] = $('#create-menu-note').val(); // 備考
+    
+    // 作成対象別項目
+    const type = parameterArray['TARGET'];
+    if ( type === '1' || type === '3') {
+      // パラメータシート
+        // 縦メニュー利用有無
+        const vertical = $('#create-menu-use-vertical').prop('checked');
+        if ( type === '1') {
+          // ホスト/オペレーション
+            // ホストグループ利用有無
+            const hostgroup = $('#create-menu-use-host-group').prop('checked');
+            if ( vertical ) {
+              // 縦メニュー利用する
+                // 入力用
+                parameterArray['MENUGROUP_FOR_CONV'] = $('#create-menu-for-input').attr('data-id');
+                // 代入値自動登録用
+                parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-substitution').attr('data-id');
+                if ( hostgroup ) {
+                  // ホストグループ利用する
+                  parameterArray['MENUGROUP_FOR_HG'] = '2100011613'; // 固定値（2100011613）
+                  parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[1]['PURPOSE_ID'];
+                } else {
+                  // ホストグループ利用しない
+                  parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[0]['PURPOSE_ID'];
+                }
+            } else {
+              // 縦メニュー利用しない
+                if ( hostgroup ) {
+                  // 入力用
+                  parameterArray['MENUGROUP_FOR_HG'] = $('#create-menu-for-input').attr('data-id');
+                  // 代入値自動登録用
+                  parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-substitution').attr('data-id');
+                  parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[1]['PURPOSE_ID'];
+                } else {
+                  // 入力用
+                  parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-input').attr('data-id');
+                  // 代入値自動登録用
+                  parameterArray['MENUGROUP_FOR_H_SUB'] = $('#create-menu-for-substitution').attr('data-id');
+                  parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[0]['PURPOSE_ID'];
+                }
+            }
+        } else {
+          // オペレーション
+            parameterArray['PURPOSE'] = null;
+            if ( vertical ) {
+              // 縦メニュー利用する
+                // 入力用
+                parameterArray['MENUGROUP_FOR_CONV'] = $('#create-menu-for-input').attr('data-id');
+                // 代入値自動登録用
+                parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-substitution').attr('data-id');
+            } else {
+              // 縦メニュー利用しない
+                // 入力用
+                parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-input').attr('data-id');
+                // 代入値自動登録用
+                parameterArray['MENUGROUP_FOR_H_SUB'] = $('#create-menu-for-substitution').attr('data-id');
+            }
+        }
+        // 参照用
+        parameterArray['MENUGROUP_FOR_VIEW'] = $('#create-menu-for-reference').attr('data-id');
+    } else if ( type === '2') {
+      // データシート
+        parameterArray['PURPOSE'] = null;
+        // 入力用
+        parameterArray['MENUGROUP_FOR_CMDB'] = $('#create-menu-for-input').attr('data-id');
+    }
+    // undefined, ''をnullに
+    for ( let key in parameterArray ) {
+      if ( parameterArray[key] === undefined || parameterArray[key] === '') {
+        parameterArray[key] = null;
+      }
+    }
+    parameterArray['number-item'] = itemCounter;
+    parameterArray['number-group'] = groupCounter;
+    
+    return parameterArray;
+};
+
+const setPanelParameter = function( setData ) {
+  // nullを空白に
+  for ( let key in setData ) {
+    if ( setData[key] === null ) {
+      setData[key] = '';
+    }
+  }console.log(setData);
+  // パネルに値をセットする
+    const type = setData['TARGET'];
+    $property.attr('data-menu-type', type );  
+    
+    // 項番
+    $('#create-menu-id')
+      .attr('data-value', setData['CREATE_MENU_ID'] )
+      .text( setData['CREATE_MENU_ID'] );
+    // 最終更新日時
+    $('#create-menu-last-modified')
+      .attr('data-value', setData['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] )
+      .text( setData['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] );
+    // 最終更新者
+    $('#create-last-update-user')
+      .attr('data-value', setData['LAST_UPDATE_USER'] )
+      .text( setData['LAST_UPDATE_USER'] );
+    
+    // エディットモード別
+    if ( menuEditorMode === 'view') {
+      $('#create-menu-name').text( setData['MENU_NAME'] ); // メニュー名
+      $('#create-menu-type').text( listIdName('target', setData['TARGET'] )); // 作成対象
+      $('#create-menu-order').text( setData['DISP_SEQ'] ); // 表示順序
+      $('#create-menu-explanation').text( setData['DESCRIPTION'] );  // 説明
+      $('#create-menu-note').text( setData['NOTE'] ); // 備考
+    } else {
+      $('#create-menu-name').val( setData['MENU_NAME'] ); // メニュー名
+      $('#create-menu-type').val( setData['TARGET'] ); // 作成対象
+      $('#create-menu-order').val( setData['DISP_SEQ'] ); // 表示順序
+      $('#create-menu-explanation').val( setData['DESCRIPTION'] );  // 説明
+      $('#create-menu-note').val( setData['NOTE'] ); // 備考
+    } 
+  
+    // 作成対象項目別
+    if ( type === '1' || type === '3') {
+      // パラメータシート
+        let inputID, inputName, substitutionID, substitutionName;
+        // 縦メニュー利用有無
+        let vertical = false;
+        if ( setData['MENUGROUP_FOR_CONV'] !== undefined && setData['MENUGROUP_FOR_CONV'] !== '') {
+          vertical = true;
+          if ( menuEditorMode === 'view') {
+            $('#create-menu-use-vertical').text(textCode('0041'));
+          } else {
+            $('#create-menu-use-vertical').prop('checked', true );
+          }
+        }
+        if ( type === '1') {
+          // ホスト/オペレーション
+            // ホストグループ利用有無
+            const hostgroup = setData['PURPOSE'];
+            if ( hostgroup === '2' ) {
+              if ( menuEditorMode === 'view') {
+                $('#create-menu-use-host-group').text(textCode('0041'));
+              } else {
+                $('#create-menu-use-host-group').prop('checked', true );
+              }
+            }
+            if ( vertical ) {
+              // 縦メニュー利用する
+                // 入力用
+                inputID = setData['MENUGROUP_FOR_CONV'];
+                inputName = listIdName( 'group', setData['MENUGROUP_FOR_CONV'] );
+                // 代入値自動登録用
+                substitutionID = setData['MENUGROUP_FOR_H'];
+                substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
+            } else {
+              // 縦メニュー利用しない
+                if ( hostgroup === '2' ) {
+                  // 入力用
+                  inputID = setData['MENUGROUP_FOR_HG'];
+                  inputName = listIdName( 'group', setData['MENUGROUP_FOR_HG'] );
+                  // 代入値自動登録用
+                  substitutionID = setData['MENUGROUP_FOR_H'];
+                  substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
+                } else {
+                  // 入力用
+                  inputID = setData['MENUGROUP_FOR_H'];
+                  inputName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
+                  // 代入値自動登録用
+                  substitutionID = setData['MENUGROUP_FOR_H_SUB'];
+                  substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H_SUB'] );
+                }
+            }
+        } else {
+          // オペレーション
+          if ( vertical ) {
+            // 縦メニュー利用する
+              // 入力用
+              inputID = setData['MENUGROUP_FOR_CONV'];
+              inputName = listIdName( 'group', setData['MENUGROUP_FOR_CONV'] );
+              // 代入値自動登録用
+              substitutionID = setData['MENUGROUP_FOR_H']
+              substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
+          } else {
+            // 縦メニュー利用しない
+              // 入力用
+              inputID = setData['MENUGROUP_FOR_H'];
+              inputName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
+              // 代入値自動登録用
+              substitutionID = setData['MENUGROUP_FOR_H_SUB']
+              substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H_SUB'] );
+          }
+        }
+        $('#create-menu-for-input')
+          .attr('data-id', inputID )
+          .text( inputName );
+        // 代入値自動登録用
+        $('#create-menu-for-substitution')
+          .attr('data-id', substitutionID )
+          .text( substitutionName );
+        // 参照用
+        $('#create-menu-for-reference')
+          .attr('data-id', setData['MENUGROUP_FOR_VIEW'] )
+          .text( listIdName( 'group', setData['MENUGROUP_FOR_VIEW'] ) );
+    } else if ( type === '2') {
+      // データシート
+        // 入力用
+        $('#create-menu-for-input')
+          .attr('data-id', setData['MENUGROUP_FOR_CMDB'] )
+          .text( listIdName( 'group', setData['MENUGROUP_FOR_CMDB'] ) );
+    }
+
+    itemCounter = setData['number-item'] + 1;
+    groupCounter = setData['number-group'] + 1;
+    repeatCounter = 1;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2026,11 +2339,44 @@ const menuParameter = function( type, setData ) {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// メニューグループ初期値
+const initialMenuGroup = function() {
+
+  const forInputID = '2100011610', // 入力用
+        forSubstitutionID = '2100011611', // 代入値自動登録用
+        forReference = '2100011612', // 参照用
+        forInputName = listIdName( 'group', forInputID ),
+        forSubstitutionName = listIdName( 'group', forSubstitutionID ),
+        forReferenceName = listIdName( 'group', forReference );
+  
+  // 入力用
+  if ( forInputName !== null ) {
+    $('#create-menu-for-input')
+      .attr('data-id', forInputID )
+      .text( forInputName );
+  }
+  // 代入値自動登録用
+  if ( forSubstitutionName !== null ) {
+    $('#create-menu-for-substitution')
+      .attr('data-id', forSubstitutionID )
+      .text( forSubstitutionName );
+  }
+  // 参照用
+  if ( forReferenceName !== null ) {
+    $('#create-menu-for-reference')
+      .attr('data-id', forReference )
+      .text( forReferenceName );
+  }
+};
+
+
 if ( menuEditorMode === 'new' ) {
+  initialMenuGroup();
   addColumn( $menuTable, 'item', itemCounter++ );
 } else {
   loadMenu();
 }
+repeatCheck();
 history.clear();
 
 };
