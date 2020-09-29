@@ -1803,7 +1803,7 @@ EOD;
         //////////////////////////
         // メニュー管理更新
         //////////////////////////
-        $result = updateMenuList($cmiData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $createConvFlg);
+        $result = updateMenuList($cmiData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $createConvFlg);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1814,7 +1814,7 @@ EOD;
         //////////////////////////
         // ロール・メニュー紐付管理更新
         //////////////////////////
-        $result = updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $roleUserLinkArray);
+        $result = updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $roleUserLinkArray);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1825,7 +1825,7 @@ EOD;
         //////////////////////////
         // メニュー・テーブル紐付更新
         //////////////////////////
-        $result = updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+        $result = updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1836,7 +1836,7 @@ EOD;
         //////////////////////////
         // 他メニュー連携テーブル更新
         //////////////////////////
-        $result = updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+        $result = updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
             updateMenuStatus($targetData, "4", $result, true, true);
@@ -1973,7 +1973,18 @@ EOD;
                     continue;
                 }
             }
-
+            else{
+                // 代入値自動登録用
+                $hostSubLoadTablePath = $menuTmpDir . sprintf("%010d", $hostSubMenuId) . "_loadTable.php";
+                $result = deployLoadTable($hostLoadTable,
+                                          $hostSubLoadTablePath,
+                                          sprintf("%010d", $hostSubMenuId),
+                                          $targetData
+                                         );
+                if(true !== $result){
+                    continue;
+                }
+            }
             // ホスト用
             $hostLoadTablePath = $menuTmpDir . sprintf("%010d", $hostMenuId) . "_loadTable.php";
             $result = deployLoadTable($hostLoadTable,
@@ -2068,6 +2079,20 @@ EOD;
 
                 if(true != $result){
                     $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $hgLoadTablePath));
+                    outputLog($msg);
+                    // パラメータシート作成管理更新処理を行う
+                    updateMenuStatus($targetData, "4", $msg, true, true);
+                    $zip->close();
+                    $zip = NULL;
+                    continue;
+                }
+            }
+            else{
+                // 代入値登録設定用の00_loadTable.php
+                $result = $zip->addFile($hostSubLoadTablePath, basename($hostSubLoadTablePath));
+
+                if(true != $result){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $hostSubLoadTablePath));
                     outputLog($msg);
                     // パラメータシート作成管理更新処理を行う
                     updateMenuStatus($targetData, "4", $msg, true, true);
@@ -2541,13 +2566,14 @@ function deployLoadTable($fileContents, $loadTablePath, $menuId, $targetData){
 /*
  * メニュー・テーブル紐付更新
  */
-function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
+function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
     global $objDBCA, $db_model_ch, $objMTS;
     $menuTableLinkTable = new MenuTableLinkTable($objDBCA, $db_model_ch);
 
     try{
         $menuInfoArray = array(array($hgMenuId,     "F_" . $menuTableName . "_HG",      "F_" . $menuTableName . "_HG_JNL"),
                                array($hostMenuId,   "F_" . $menuTableName . "_H",       "F_" . $menuTableName . "_H_JNL"),
+                               array($hostSubMenuId,"F_" . $menuTableName . "_H",       "F_" . $menuTableName . "_H_JNL"),
                                array($viewMenuId,   "F_" . $menuTableName . "_H",       "F_" . $menuTableName . "_H_JNL"),
                               );
 
@@ -2579,6 +2605,7 @@ function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $viewMenuId
             // メニューIDが一致した場合、廃止
             if($mtlData['MENU_ID'] == $hgMenuId ||
                $mtlData['MENU_ID'] == $hostMenuId ||
+               $mtlData['MENU_ID'] == $hostSubMenuId ||
                $mtlData['MENU_ID'] == $viewMenuId ||
                $mtlData['MENU_ID'] == $convMenuId ||
                $mtlData['MENU_ID'] == $convHostMenuId){
@@ -2638,7 +2665,7 @@ function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $viewMenuId
 /*
  * 他メニュー連携テーブル更新
  */
-function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
+function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
     global $objDBCA, $db_model_ch, $objMTS;
     $otherMenuLinkTable = new OtherMenuLinkTable($objDBCA, $db_model_ch);
 
@@ -2661,6 +2688,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
             // メニューIDが一致した場合、廃止
             if($omlData['MENU_ID'] == $hgMenuId ||
                $omlData['MENU_ID'] == $hostMenuId ||
+               $omlData['MENU_ID'] == $hostSubMenuId ||
                $omlData['MENU_ID'] == $viewMenuId ||
                $omlData['MENU_ID'] == $convMenuId ||
                $omlData['MENU_ID'] == $convHostMenuId){
@@ -2748,7 +2776,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
 /*
  * メニュー管理更新
  */
-function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$convMenuId, &$convHostMenuId, $createConvFlg){
+function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$viewMenuId, &$convMenuId, &$convHostMenuId, $createConvFlg){
     global $objDBCA, $db_model_ch, $objMTS;
     $menuListTable = new MenuListTable($objDBCA, $db_model_ch);
 
@@ -2769,12 +2797,14 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
 
         $hgMatchFlg = false;
         $hostMatchFlg = false;
+        $hostSubMatchGlf = false;
         $viewMatchFlg = false;
         $convMatchFlg = false;
         $convHostMatchFlg = false;
         $cmdbMatchFlg = false;
         $hgMenuList = NULL;
         $hostMenuList = NULL;
+        $hostSubMenuList = NULL;
         $viewMenuList = NULL;
         $convMenuList = NULL;
         $convHostMenuList = NULL;
@@ -2789,6 +2819,10 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
             else if($cmiData['MENUGROUP_FOR_H'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
                 $hostMatchFlg = true;
                 $hostMenuList = $menu;
+            }
+            else if($cmiData['MENUGROUP_FOR_H_SUB'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
+                $cmdbMatchFlg = true;
+                $cmdbMenuList = $menu;
             }
             else if($cmiData['MENUGROUP_FOR_VIEW'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
                 $viewMatchFlg = true;
@@ -2818,6 +2852,9 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
             }
             if("2" == $cmiData['PURPOSE']){
                 $targetArray[] = array('MATCH_FLG' => $hgMatchFlg, 'DATA' => $hgMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_HG']);
+            }
+            else{
+                $targetArray[] = array('MATCH_FLG' => $hostSubMatchFlg, 'DATA' => $hostSubMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_H_SUB']);
             }
             $targetArray[] = array('MATCH_FLG' => $hostMatchFlg, 'DATA' => $hostMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_H']);
             $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
@@ -2890,6 +2927,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
             $convMenuId = NULL;
             $hgMenuId   = NULL;
             $hostMenuId = $targetArray[0]['MENU_ID'];  // MenuID はホスト用を使用
+            $hostSubMenuId = NULL;
             $viewMenuId = NULL; 
             $convHostMenuId = NULL;
         }
@@ -2899,6 +2937,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
                     $convMenuId = $targetArray[0]['MENU_ID'];
                     $hgMenuId   = $targetArray[1]['MENU_ID'];
                     $hostMenuId = $targetArray[2]['MENU_ID'];
+                    $hostSubMenuId = NULL;
                     $viewMenuId = $targetArray[3]['MENU_ID'];
                     $convHostMenuId = $targetArray[4]['MENU_ID'];
                 }
@@ -2906,6 +2945,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
                     $convMenuId = $targetArray[0]['MENU_ID'];
                     $hgMenuId   = NULL;
                     $hostMenuId = $targetArray[1]['MENU_ID'];
+                    $hostSubMenuId = NULL;
                     $viewMenuId = $targetArray[2]['MENU_ID'];
                     $convHostMenuId = NULL;
                 }
@@ -2915,14 +2955,16 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
                     $convMenuId = NULL;
                     $hgMenuId   = $targetArray[0]['MENU_ID'];
                     $hostMenuId = $targetArray[1]['MENU_ID'];
+                    $hostSubMenuId = NULL;
                     $viewMenuId = $targetArray[2]['MENU_ID'];
                     $convHostMenuId = NULL;
                 }
                 else{
                     $convMenuId = NULL;
                     $hgMenuId   = NULL;
-                    $hostMenuId = $targetArray[0]['MENU_ID'];
-                    $viewMenuId = $targetArray[1]['MENU_ID'];
+                    $hostMenuId = $targetArray[1]['MENU_ID'];
+                    $hostSubMenuId = $targetArray[0]['MENU_ID'];
+                    $viewMenuId = $targetArray[2]['MENU_ID'];
                     $convHostMenuId = NULL;
                 }
             }
@@ -2938,7 +2980,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
 /*
  * ロール・メニュー紐付管理更新
  */
-function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target, $roleUserLinkArray){
+function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target, $roleUserLinkArray){
     global $objDBCA, $db_model_ch, $objMTS;
     $roleMenuLinkListTable = new RoleMenuLinkListTable($objDBCA, $db_model_ch);
 
@@ -2961,6 +3003,7 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId
             // メニューIDが一致したデータを廃止
             if($roleMenuLink['MENU_ID'] == $hgMenuId ||
                $roleMenuLink['MENU_ID'] == $hostMenuId ||
+               $roleMenuLink['MENU_ID'] == $hostSubMenuId ||
                $roleMenuLink['MENU_ID'] == $viewMenuId ||
                $roleMenuLink['MENU_ID'] == $convMenuId ||
                $roleMenuLink['MENU_ID'] == $convHostMenuId){
@@ -3010,6 +3053,7 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId
             }
             else{
                 $menuArray = array(array($hostMenuId,   1,  '0'),
+                                   array($hostSubMenuId,2,  '0'),
                                    array($viewMenuId,   2,  '0'),
                                   );
             }
