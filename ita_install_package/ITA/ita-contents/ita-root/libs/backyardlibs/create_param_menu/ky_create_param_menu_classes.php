@@ -472,6 +472,7 @@ class CreateMenuInfoTable extends BaseTable_CPM {
                                     'TARGET',
                                     'MENUGROUP_FOR_HG',
                                     'MENUGROUP_FOR_H',
+                                    'MENUGROUP_FOR_H_SUB',
                                     'MENUGROUP_FOR_VIEW',
                                     'MENUGROUP_FOR_CONV',
                                     'MENUGROUP_FOR_CMDB',
@@ -1126,7 +1127,7 @@ class MenuGroupTable extends BaseTable_CPM {
     public function __construct($objDBCA, $db_model_ch) {
 
         parent::__construct($objDBCA, $db_model_ch);
-        $this->tableName    = 'A_MENU_GROUP_LIST';
+        $this->tableName    = 'D_CMDB_MENU_GRP_LIST';
         $this->seqName      = $this->tableName . '_RIC';
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('MENU_GROUP_ID',
