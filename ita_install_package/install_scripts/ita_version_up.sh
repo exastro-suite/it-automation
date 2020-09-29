@@ -176,6 +176,18 @@ func_install_messasge() {
     echo "$MESSAGE"
 }
 
+############################################################
+# 全角文字をチェック
+# @param    なし
+# @return   なし
+############################################################
+setting_file_format_check(){
+    if [ `echo "$LINE" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
+        log "ERROR : Double-byte characters cannot be used in the setting files"
+        log "Applicable line : $LINE"
+        func_exit_and_delete_file
+}
+
 #-----関数定義ここまで-----
 
 #インストール済みフラグ
@@ -317,7 +329,7 @@ IFS="
 "
 for LINE in $ANSWERS_TEXT;do
     if [ "$(echo "$LINE"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
-
+        setting_file_format_check
         key="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
         val="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\2/")"
 
