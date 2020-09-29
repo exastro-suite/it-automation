@@ -60,6 +60,19 @@ func_answer_format_check() {
     FORMAT_CHECK_CNT=$((FORMAT_CHECK_CNT+1))
 }
 
+############################################################
+# 全角文字をチェック
+# @param    なし
+# @return   なし
+############################################################
+setting_file_format_check(){
+    if [ `echo "$LINE" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
+        log "ERROR : Double-byte characters cannot be used in the setting files"
+        log "Applicable line : $LINE"
+        func_exit_and_delete_file
+}
+
+
 #-----関数定義ここまで-----
 
 
@@ -154,6 +167,7 @@ IFS="
 "
 for LINE in $ANSWERS_TEXT;do
     if [ "$(echo "$LINE"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
+        setting_file_format_check
 
         key="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
         val="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\2/")"
@@ -192,7 +206,7 @@ for LINE in $ANSWERS_TEXT;do
             fi
         fi
         #--
-        
+    
         #ITA用のディレクトリ取得
         if [ "$key" = 'ita_directory' ]; then
             if [[ "$val" != "/"* ]]; then
