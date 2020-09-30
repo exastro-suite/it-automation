@@ -181,11 +181,12 @@ func_install_messasge() {
 # @param    なし
 # @return   なし
 ############################################################
-setting_file_format_check(){
+setting_file_format_check() {
     if [ `echo "$LINE" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
         log "ERROR : Double-byte characters cannot be used in the setting files"
         log "Applicable line : $LINE"
         func_exit_and_delete_file
+    fi
 }
 
 #-----関数定義ここまで-----
