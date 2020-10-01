@@ -193,8 +193,9 @@ $ary[103830] = "Terraform operation tracking list";
 $ary[103840] = "Terraform operation tracking list";
 $ary[103850] = "Confirm execution status";
 $ary[103860] = "Execution type";
-$ary[103870] = "The following states exist for execution type.\n
-• Normal";
+$ary[103870] = "The following states exist for execution type.
+・Normal
+・Plan check";
 $ary[103880] = "Status";
 $ary[103890] = "The following states exist for Status:
 ・Not executed
