@@ -340,7 +340,7 @@ try{
         $createConvFlg = false;
 
         // パラメータシート(縦)を作成する設定の場合
-        if("" != $cmiData['MENUGROUP_FOR_CONV']){
+        if("" != $cmiData['VERTICAL']){
 
             $createConvFlg = true;
 
@@ -1803,6 +1803,12 @@ EOD;
         //////////////////////////
         // メニュー管理更新
         //////////////////////////
+        $hgMenuId = null;
+        $hostMenuId = null;
+        $hostSubMenuId = null;
+        $viewMenuId = null;
+        $convMenuId = null;
+        $convHostMenuId = null;
         $result = updateMenuList($cmiData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $createConvFlg);
 
         if(true !== $result){
@@ -1862,10 +1868,18 @@ EOD;
                 }
             }
             
+            // 紐付対象メニューに登録するメニューIDを特定する
+            if("" != $hostSubMenuId){
+                $targetMenuId = $hostSubMenuId;
+            }
+            else{
+                $targetMenuId = $hostMenuId;
+            }
+
             //////////////////////////
             // 紐付対象メニュー更新
             //////////////////////////
-            $result = updateLinkTargetMenu($hostMenuId, $noLinkTarget);
+            $result = updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData['TARGET']);
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
                 updateMenuStatus($targetData, "4", $result, true, true);
@@ -2795,72 +2809,97 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$vi
         }
         $menuListArray = $result;
 
-        $hgMatchFlg = false;
-        $hostMatchFlg = false;
-        $hostSubMatchGlf = false;
+        $inputMatchFlg = false;
+        $substMatchFlg = false;
         $viewMatchFlg = false;
-        $convMatchFlg = false;
         $convHostMatchFlg = false;
-        $cmdbMatchFlg = false;
-        $hgMenuList = NULL;
-        $hostMenuList = NULL;
+        $middleHgMatchFlg = false;
         $hostSubMenuList = NULL;
+        $inputMenuList = NULL;
+        $substMenuList = NULL;
         $viewMenuList = NULL;
-        $convMenuList = NULL;
         $convHostMenuList = NULL;
-        $cmdbMenuList = NULL;
+        $middleHgMenuList = NULL;
 
         foreach($menuListArray as $menu){
             // メニューグループとメニューが一致するデータを検索
-            if($cmiData['MENUGROUP_FOR_HG'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
-                $hgMatchFlg = true;
-                $hgMenuList = $menu;
+            if($cmiData['MENUGROUP_FOR_INPUT'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
+                $inputMatchFlg = true;
+                $inputMenuList = $menu;
             }
-            else if($cmiData['MENUGROUP_FOR_H'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
-                $hostMatchFlg = true;
-                $hostMenuList = $menu;
-            }
-            else if($cmiData['MENUGROUP_FOR_H_SUB'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
-                $cmdbMatchFlg = true;
-                $cmdbMenuList = $menu;
+            if($cmiData['MENUGROUP_FOR_SUBST'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
+                $substMatchFlg = true;
+                $substMenuList = $menu;
             }
             else if($cmiData['MENUGROUP_FOR_VIEW'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
                 $viewMatchFlg = true;
                 $viewMenuList = $menu;
             }
-            else if($cmiData['MENUGROUP_FOR_CONV'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
-                $convMatchFlg = true;
-                $convMenuList = $menu;
-            }
-            else if($cmiData['MENUGROUP_FOR_CMDB'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
-                $cmdbMatchFlg = true;
-                $cmdbMenuList = $menu;
-            }
             else if(MENU_GROUP_ID_CONV_HOST == $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
                 $convHostMatchFlg = true;
                 $convHostMenuList = $menu;
             }
+            else if(MENU_GROUP_ID_MIDDLE_HG == $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
+                $middleHgMatchFlg = true;
+                $middleHgMenuList = $menu;
+            }
         }
 
         $targetArray = array();
-        if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
-            $targetArray[] = array('MATCH_FLG' => $cmdbMatchFlg, 'DATA' => $cmdbMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_CMDB']);
-        }
-        else{
-            if(true === $createConvFlg){
-                $targetArray[] = array('MATCH_FLG' => $convMatchFlg, 'DATA' => $convMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_CONV']);
-            }
+
+        // 作成対象:パラメータシート(ホスト/オペレーションあり)
+        if("1" == $cmiData['TARGET']){
+            // ホストグループあり
             if("2" == $cmiData['PURPOSE']){
-                $targetArray[] = array('MATCH_FLG' => $hgMatchFlg, 'DATA' => $hgMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_HG']);
+                // 縦メニューあり
+                if(true === $createConvFlg){
+                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                    $targetArray[] = array('MATCH_FLG' => $middleHgMatchFlg, 'DATA' => $middleHgMenuList, 'MENU_GROUP' => MENU_GROUP_ID_MIDDLE_HG);
+                    $targetArray[] = array('MATCH_FLG' => $convHostMatchFlg, 'DATA' => $convHostMenuList, 'MENU_GROUP' => MENU_GROUP_ID_CONV_HOST);
+                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+                }
+                // 縦メニューなし
+                else{
+                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+                }
             }
+            // ホストグループなし
             else{
-                $targetArray[] = array('MATCH_FLG' => $hostSubMatchFlg, 'DATA' => $hostSubMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_H_SUB']);
+                // 縦メニューあり
+                if(true === $createConvFlg){
+                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+                }
+                // 縦メニューなし
+                else{
+                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+                }
             }
-            $targetArray[] = array('MATCH_FLG' => $hostMatchFlg, 'DATA' => $hostMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_H']);
-            $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
-            if(true === $createConvFlg && "2" == $cmiData['PURPOSE']){
-                $targetArray[] = array('MATCH_FLG' => $convHostMatchFlg, 'DATA' => $convHostMenuList, 'MENU_GROUP' => MENU_GROUP_ID_CONV_HOST);
+        }
+        // 作成対象:パラメータシート(オペレーションあり)
+        else if("3" == $cmiData['TARGET']){
+            // 縦メニューあり
+            if(true === $createConvFlg){
+                $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
             }
+            // 縦メニューなし
+            else{
+                $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+            }
+        }
+        // 作成対象; データシート
+        else if("2" == $cmiData['TARGET']){
+            $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
         }
 
         foreach($targetArray as &$target){
@@ -2923,52 +2962,64 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$vi
         }
         unset($target);
 
-        if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
-            $convMenuId = NULL;
-            $hgMenuId   = NULL;
-            $hostMenuId = $targetArray[0]['MENU_ID'];  // MenuID はホスト用を使用
-            $hostSubMenuId = NULL;
-            $viewMenuId = NULL; 
-            $convHostMenuId = NULL;
-        }
-        else{
-            if(true === $createConvFlg){
-                if("2" == $cmiData['PURPOSE']){
+        //////////////////////////
+        // メニューIDを取得する
+        //////////////////////////
+        // 作成対象:パラメータシート(ホスト/オペレーションあり)
+        if("1" == $cmiData['TARGET']){
+            // ホストグループあり
+            if("2" == $cmiData['PURPOSE']){
+                // 縦メニューあり
+                if(true === $createConvFlg){
                     $convMenuId = $targetArray[0]['MENU_ID'];
                     $hgMenuId   = $targetArray[1]['MENU_ID'];
-                    $hostMenuId = $targetArray[2]['MENU_ID'];
-                    $hostSubMenuId = NULL;
-                    $viewMenuId = $targetArray[3]['MENU_ID'];
-                    $convHostMenuId = $targetArray[4]['MENU_ID'];
+                    $convHostMenuId = $targetArray[2]['MENU_ID'];
+                    $hostMenuId = $targetArray[3]['MENU_ID'];
+                    $viewMenuId = $targetArray[4]['MENU_ID'];
                 }
+                // 縦メニューなし
                 else{
-                    $convMenuId = $targetArray[0]['MENU_ID'];
-                    $hgMenuId   = NULL;
-                    $hostMenuId = $targetArray[1]['MENU_ID'];
-                    $hostSubMenuId = NULL;
-                    $viewMenuId = $targetArray[2]['MENU_ID'];
-                    $convHostMenuId = NULL;
-                }
-            }
-            else{
-                if("2" == $cmiData['PURPOSE']){
-                    $convMenuId = NULL;
                     $hgMenuId   = $targetArray[0]['MENU_ID'];
                     $hostMenuId = $targetArray[1]['MENU_ID'];
-                    $hostSubMenuId = NULL;
                     $viewMenuId = $targetArray[2]['MENU_ID'];
-                    $convHostMenuId = NULL;
-                }
-                else{
-                    $convMenuId = NULL;
-                    $hgMenuId   = NULL;
-                    $hostMenuId = $targetArray[1]['MENU_ID'];
-                    $hostSubMenuId = $targetArray[0]['MENU_ID'];
-                    $viewMenuId = $targetArray[2]['MENU_ID'];
-                    $convHostMenuId = NULL;
                 }
             }
-        }  
+            // ホストグループなし
+            else{
+                // 縦メニューあり
+                if(true === $createConvFlg){
+                    $convMenuId = $targetArray[0]['MENU_ID'];
+                    $hostMenuId = $targetArray[1]['MENU_ID'];
+                    $viewMenuId = $targetArray[2]['MENU_ID'];
+                }
+                // 縦メニューなし
+                else{
+                    $hostMenuId = $targetArray[0]['MENU_ID'];
+                    $hostSubMenuId = $targetArray[1]['MENU_ID'];
+                    $viewMenuId = $targetArray[2]['MENU_ID'];
+                }
+            }
+        }
+        // 作成対象:パラメータシート(オペレーションあり)
+        else if("3" == $cmiData['TARGET']){
+            // 縦メニューあり
+            if(true === $createConvFlg){
+                $convMenuId = $targetArray[0]['MENU_ID'];
+                $hostMenuId = $targetArray[1]['MENU_ID'];
+                $viewMenuId = $targetArray[2]['MENU_ID'];
+
+            }
+            // 縦メニューなし
+            else{
+                $hostMenuId = $targetArray[0]['MENU_ID'];
+                $hostSubMenuId = $targetArray[1]['MENU_ID'];
+                $viewMenuId = $targetArray[2]['MENU_ID'];
+            }
+        }
+        // 作成対象; データシート
+        else if("2" == $cmiData['TARGET']){
+            $hostMenuId = $targetArray[0]['MENU_ID'];  // MenuID はホスト用を使用
+        }
 
         return true;
     }
@@ -3033,7 +3084,7 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMen
         else{
             if(NULL !== $convMenuId && NULL !== $hgMenuId){
                 $menuArray = array(array($convMenuId,       1,  '0'),
-                                   array($hgMenuId,         2,  '0'),
+                                   array($hgMenuId,         2,  '1'),
                                    array($hostMenuId,       2,  '0'),
                                    array($viewMenuId,       2,  '0'),
                                    array($convHostMenuId,   2,  '1'),
@@ -3103,7 +3154,7 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMen
 /*
  * 紐付対象メニュー更新
  */
-function updateLinkTargetMenu($hostMenuId, $noLinkTarget){
+function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $sheetType){
     global $objDBCA, $db_model_ch, $objMTS;
     $matchFlg = false;
     $cmdbMenuListTable = new CmdbMenuListTable($objDBCA, $db_model_ch);
@@ -3125,14 +3176,15 @@ function updateLinkTargetMenu($hostMenuId, $noLinkTarget){
 
         foreach($cmdbMenuListArray as $cmdbMenuList){
             // メニューIDが一致するデータがあった場合
-            if($cmdbMenuList['MENU_ID'] == $hostMenuId){
+            if($cmdbMenuList['MENU_ID'] == $targetMenuId){
                 $matchFlg = true;
+                $updateData = $cmdbMenuList;
 
                 // 廃止、紐づけ対象カラムがある場合
                 if($cmdbMenuList['DISUSE_FLAG'] == "1" && $noLinkTarget == false){
 
                     // 復活する
-                    $updateData = $cmdbMenuList;
+                    $updateData['SHEET_TYPE']       = $sheetType;           // シートタイプ
                     $updateData['NOTE']             = "";                   // 備考
                     $updateData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
                     $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
@@ -3141,9 +3193,13 @@ function updateLinkTargetMenu($hostMenuId, $noLinkTarget){
                 else if($cmdbMenuList['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
 
                     // 廃止する
-                    $updateData = $cmdbMenuList;
+                    $updateData['SHEET_TYPE']       = $sheetType;           // シートタイプ
                     $updateData['NOTE']             = "";                   // 備考
                     $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                }
+                else if($updateData['SHEET_TYPE'] != $sheetType){
+                    $updateData['SHEET_TYPE']       = $sheetType;           // シートタイプ
                     $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
                 }
                 // 他の場合は更新しない
@@ -3168,7 +3224,8 @@ function updateLinkTargetMenu($hostMenuId, $noLinkTarget){
 
             // 登録する
             $insertData = array();
-            $insertData['MENU_ID']          = $hostMenuId;          // メニュー
+            $insertData['MENU_ID']          = $targetMenuId;        // メニュー
+            $insertData['SHEET_TYPE']       = $sheetType;           // シートタイプ
             $insertData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
             $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
 

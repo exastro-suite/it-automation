@@ -55,27 +55,31 @@
                 
                 // jsonからPHP配列に変換
                 $menuData = json_decode($menuData,true);
-                
+                if(!array_key_exists("MENUGROUP_FOR_INPUT",$menuData['menu']))  $menuData['menu']['MENUGROUP_FOR_INPUT'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_SUBST",$menuData['menu']))  $menuData['menu']['MENUGROUP_FOR_SUBST'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_VIEW",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_VIEW'] = "";
+                if(!array_key_exists("VERTICAL",$menuData['menu']))             $menuData['menu']['VERTICAL'] = "";
+
+                // 縦メニュー利用とリピートのチェック
+                if($menuData['menu']['VERTICAL'] == 1 && !array_key_exists('r1',$menuData['repeat'])){
+                    $arrayResult[0] = "002";
+                    $arrayResult[1] = "";
+                    $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1024');
+                    throw new Exception();
+                }
+
                 //////////////////////////
                 // メニュー作成情報を登録
                 //////////////////////////
-                if(!array_key_exists("MENUGROUP_FOR_CMDB",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CMDB'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_HG",$menuData['menu']))     $menuData['menu']['MENUGROUP_FOR_HG'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_CONV",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CONV'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_H",$menuData['menu']))      $menuData['menu']['MENUGROUP_FOR_H'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_H_SUB",$menuData['menu']))  $menuData['menu']['MENUGROUP_FOR_H_SUB'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_VIEW",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_VIEW'] = "";
-                
+
                 $arrayRegisterData = array("MENU_NAME"              => $menuData['menu']['MENU_NAME'],
                                            "TARGET"                 => $menuData['menu']['TARGET'],
                                            "DISP_SEQ"               => $menuData['menu']['DISP_SEQ'],
                                            "PURPOSE"                => $menuData['menu']['PURPOSE'],
-                                           "MENUGROUP_FOR_CMDB"     => $menuData['menu']['MENUGROUP_FOR_CMDB'],
-                                           "MENUGROUP_FOR_HG"       => $menuData['menu']['MENUGROUP_FOR_HG'],
-                                           "MENUGROUP_FOR_H"        => $menuData['menu']['MENUGROUP_FOR_H'],
-                                           "MENUGROUP_FOR_H_SUB"    => $menuData['menu']['MENUGROUP_FOR_H_SUB'],
+                                           "VERTICAL"               => $menuData['menu']['VERTICAL'],
+                                           "MENUGROUP_FOR_INPUT"    => $menuData['menu']['MENUGROUP_FOR_INPUT'],
+                                           "MENUGROUP_FOR_SUBST"    => $menuData['menu']['MENUGROUP_FOR_SUBST'],
                                            "MENUGROUP_FOR_VIEW"     => $menuData['menu']['MENUGROUP_FOR_VIEW'],
-                                           "MENUGROUP_FOR_CONV"     => $menuData['menu']['MENUGROUP_FOR_CONV'],
                                            "DESCRIPTION" => $menuData['menu']['DESCRIPTION'],
                                            "NOTE" => $menuData['menu']['NOTE'],
                                           );
@@ -332,7 +336,19 @@
                 $aryVariant = array("TCA_PRESERVED" => array("TCA_ACTION" => array("ACTION_MODE" => "DTUP_singleRecRegister")));
                 
                 $menuData = json_decode($menuData,true);
+                if(!array_key_exists("MENUGROUP_FOR_INPUT",$menuData['menu']))  $menuData['menu']['MENUGROUP_FOR_INPUT'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_SUBST",$menuData['menu']))  $menuData['menu']['MENUGROUP_FOR_SUBST'] = "";
+                if(!array_key_exists("MENUGROUP_FOR_VIEW",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_VIEW'] = "";
+                if(!array_key_exists("VERTICAL",$menuData['menu']))             $menuData['menu']['VERTICAL'] = "";
                 
+                // 縦メニュー利用とリピートのチェック
+                if($menuData['menu']['VERTICAL'] == 1 && !array_key_exists('r1',$menuData['repeat'])){
+                    $arrayResult[0] = "002";
+                    $arrayResult[1] = "";
+                    $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1024');
+                    throw new Exception();
+                }
+
                 //////////////////////////
                 // メニュー作成情報を取得
                 //////////////////////////
@@ -396,30 +412,21 @@
                 //////////////////////////
                 // メニュー作成情報を更新
                 //////////////////////////
-                if(!array_key_exists("MENUGROUP_FOR_CMDB",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CMDB'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_HG",$menuData['menu']))     $menuData['menu']['MENUGROUP_FOR_HG'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_H",$menuData['menu']))      $menuData['menu']['MENUGROUP_FOR_H'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_H_SUB",$menuData['menu']))  $menuData['menu']['MENUGROUP_FOR_H_SUB'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_VIEW",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_VIEW'] = "";
-                if(!array_key_exists("MENUGROUP_FOR_CONV",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_CONV'] = "";
-                
                 $arrayUpdateData = NULL;
                 foreach($createMenuInfoArray as $createMenuInfoData){
                     if($createMenuInfoData['CREATE_MENU_ID'] == $menuData['menu']['CREATE_MENU_ID']){
                          $strNumberForRI = $menuData['menu']['CREATE_MENU_ID'];
-                         $arrayUpdateData = array("MENU_NAME" => $menuData['menu']['MENU_NAME'],
-                                           "TARGET" => $menuData['menu']['TARGET'],
-                                           "DISP_SEQ" => $menuData['menu']['DISP_SEQ'],
-                                           "PURPOSE" => $menuData['menu']['PURPOSE'],
-                                           "MENUGROUP_FOR_CMDB" => $menuData['menu']['MENUGROUP_FOR_CMDB'],
-                                           "MENUGROUP_FOR_HG" => $menuData['menu']['MENUGROUP_FOR_HG'],
-                                           "MENUGROUP_FOR_H" => $menuData['menu']['MENUGROUP_FOR_H'],
-                                           "MENUGROUP_FOR_H_SUB" => $menuData['menu']['MENUGROUP_FOR_H_SUB'],
-                                           "MENUGROUP_FOR_VIEW" => $menuData['menu']['MENUGROUP_FOR_VIEW'],
-                                           "MENUGROUP_FOR_CONV" => $menuData['menu']['MENUGROUP_FOR_CONV'],
-                                           "DESCRIPTION" => $menuData['menu']['DESCRIPTION'],
-                                           "NOTE" => $menuData['menu']['NOTE'],
-                                           "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['menu']['LAST_UPDATE_TIMESTAMP'])
+                         $arrayUpdateData = array("MENU_NAME"               => $menuData['menu']['MENU_NAME'],
+                                                  "TARGET"                  => $menuData['menu']['TARGET'],
+                                                  "DISP_SEQ"                => $menuData['menu']['DISP_SEQ'],
+                                                  "PURPOSE"                 => $menuData['menu']['PURPOSE'],
+                                                  "VERTICAL"                => $menuData['menu']['VERTICAL'],
+                                                  "MENUGROUP_FOR_INPUT"     => $menuData['menu']['MENUGROUP_FOR_INPUT'],
+                                                  "MENUGROUP_FOR_SUBST"     => $menuData['menu']['MENUGROUP_FOR_SUBST'],
+                                                  "MENUGROUP_FOR_VIEW"      => $menuData['menu']['MENUGROUP_FOR_VIEW'],
+                                                  "DESCRIPTION"             => $menuData['menu']['DESCRIPTION'],
+                                                  "NOTE"                    => $menuData['menu']['NOTE'],
+                                                  "UPD_UPDATE_TIMESTAMP"    => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['menu']['LAST_UPDATE_TIMESTAMP'])
                                           );
                          break;
                     }
@@ -1108,12 +1115,10 @@
                             "MENU_NAME"                => $createMenuInfoData['MENU_NAME'],
                             "PURPOSE"                  => $createMenuInfoData['PURPOSE'],
                             "TARGET"                   => $createMenuInfoData['TARGET'],
-                            "MENUGROUP_FOR_HG"         => $createMenuInfoData['MENUGROUP_FOR_HG'],
-                            "MENUGROUP_FOR_H"          => $createMenuInfoData['MENUGROUP_FOR_H'],
-                            "MENUGROUP_FOR_H_SUB"      => $createMenuInfoData['MENUGROUP_FOR_H_SUB'],
+                            "VERTICAL"                 => $createMenuInfoData['VERTICAL'],
+                            "MENUGROUP_FOR_INPUT"      => $createMenuInfoData['MENUGROUP_FOR_INPUT'],
+                            "MENUGROUP_FOR_SUBST"      => $createMenuInfoData['MENUGROUP_FOR_SUBST'],
                             "MENUGROUP_FOR_VIEW"       => $createMenuInfoData['MENUGROUP_FOR_VIEW'],
-                            "MENUGROUP_FOR_CONV"       => $createMenuInfoData['MENUGROUP_FOR_CONV'],
-                            "MENUGROUP_FOR_CMDB"       => $createMenuInfoData['MENUGROUP_FOR_CMDB'],
                             "DISP_SEQ"                 => $createMenuInfoData['DISP_SEQ'],
                             "DESCRIPTION"              => $createMenuInfoData['DESCRIPTION'],
                             "NOTE"                     => $createMenuInfoData['NOTE'],
