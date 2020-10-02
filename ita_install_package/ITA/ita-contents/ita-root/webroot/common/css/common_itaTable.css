@@ -782,12 +782,11 @@ background-color: #007779;
 background-color: #00878A;
 }
 #KIZI [data-select-type="data"] .tableSettingBody li.level1.param,
-#KIZI [data-select-type="paraope"] .tableSettingBody li.level1.data,
-#KIZI [data-select-type="paraope"] .tableSettingBody li.level1.param,
-#KIZI [data-select-type="param"] .tableSettingBody li.level1.data {
+#KIZI [data-select-type="paraope"] .tableSettingBody li.level1.param {
 pointer-events: none;
 opacity: 0.5;
 }
+#KIZI [data-select-type="data"] .tableSettingBody li.level1.data,
 #KIZI [data-select-type="paraope"] .tableSettingBody li.level1.paraope {
 pointer-events: auto;
 opacity: 1;
