@@ -891,13 +891,13 @@ $(document).on('change', '#update_table2', function(){
 */    
 function selectTargetAction(action){
     // パラメータシート固有の項目の項目番号
-    var paramCols = [5, 7, 8, 9, 10];         
+    var paramCols = [5,6,7,8,9];
     // パラメータシート（オペレーション）
-    var paraOpeCols = [ 8, 9, 10];   
+    var paraOpeCols = [6,7,8,9],
+        paraOpeHideCols = [5];
     // データシート固有の項目の項目番号
-    var dataCols = [6];
-    // 切替項目番号
-    var changeCols = [5, 6, 7, 8, 9, 10];  
+    var dataCols = [7],
+        dataHideCols = [5,6,8,9];
   
     var selecter = getSelecter(action);
 		
@@ -918,9 +918,9 @@ function selectTargetAction(action){
 			});
 		}
 		
-    if (selecter.val == '2'){ // 「データシート」を選択
-        // 項目を非表示 + 値消去
-        changeCols.forEach(function(num){
+    if (selecter.val == '2'){ // 「データシート」を選択      
+          // 項目を非表示 + 値消去
+        dataHideCols.forEach(function(num){
             hideColumns(action, selecter, num);
         });
         
@@ -932,11 +932,6 @@ function selectTargetAction(action){
 				$fakeContainer.attr('data-select-type', 'data');
         
     }else if(selecter.val == '1'){    //「パラメータシート」を選択
-        // 項目を非表示 + 値消去
-        changeCols.forEach(function(num){
-            hideColumns(action, selecter, num);
-        });
-
         // 項目を表示
         paramCols.forEach(function(num){
             showColumns(selecter, num);
@@ -946,7 +941,7 @@ function selectTargetAction(action){
 
     }else if(selecter.val == '3'){    //「パラメータシート」を選択
         // 項目を非表示 + 値消去
-        changeCols.forEach(function(num){
+        paraOpeHideCols.forEach(function(num){
             hideColumns(action, selecter, num);
         });
 

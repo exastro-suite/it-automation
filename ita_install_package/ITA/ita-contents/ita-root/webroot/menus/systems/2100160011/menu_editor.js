@@ -1132,11 +1132,17 @@ $menuEditor.on('click', '.menu-column-copy', function(){
       if ( $eachColumn.is('.menu-column') ) {
         const i = itemCounter++;
         $input.val( title + '(' + i + ')' );
-        $eachColumn.attr('id', 'i' + i );
+        $eachColumn.attr({
+          'id': 'i' + i,
+          'data-item-id': ''
+        });
       } else if ( $eachColumn.is('.menu-column-group') ) {
         const g = groupCounter++;
         $input.val( title + '(' + g + ')' );
-        $eachColumn.attr('id', 'g' + g );
+        $eachColumn.attr({
+          'id': 'g' + g,
+          'data-group-id': ''
+        });
       }
       $input.attr('value', $input.val() );
       titleInputChange( $input );
@@ -2007,7 +2013,7 @@ const loadMenu = function() {
     }
 
     // パネル情報表示
-    setPanelParameter( loadJSON['menu'] );
+    setPanelParameter( loadJSON );
     
     // エディタクリア
     $menuTable.html('');
@@ -2126,66 +2132,31 @@ const getPanelParameter = function() {
     const type = parameterArray['TARGET'];
     if ( type === '1' || type === '3') {
       // パラメータシート
+        if ( type === '1' ) {
+          // ホストグループ利用有無
+          const hostgroup = $('#create-menu-use-host-group').prop('checked');
+          if ( hostgroup ) {
+            parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[1]['PURPOSE_ID'];
+          } else {
+            parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[0]['PURPOSE_ID'];
+          }
+        } else {
+          parameterArray['PURPOSE'] = null;
+        }
         // 縦メニュー利用有無
         const vertical = $('#create-menu-use-vertical').prop('checked');
-        if ( type === '1') {
-          // ホスト/オペレーション
-            // ホストグループ利用有無
-            const hostgroup = $('#create-menu-use-host-group').prop('checked');
-            if ( vertical ) {
-              // 縦メニュー利用する
-                // 入力用
-                parameterArray['MENUGROUP_FOR_CONV'] = $('#create-menu-for-input').attr('data-id');
-                // 代入値自動登録用
-                parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-substitution').attr('data-id');
-                if ( hostgroup ) {
-                  // ホストグループ利用する
-                  parameterArray['MENUGROUP_FOR_HG'] = '2100011613'; // 固定値（2100011613）
-                  parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[1]['PURPOSE_ID'];
-                } else {
-                  // ホストグループ利用しない
-                  parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[0]['PURPOSE_ID'];
-                }
-            } else {
-              // 縦メニュー利用しない
-                if ( hostgroup ) {
-                  // 入力用
-                  parameterArray['MENUGROUP_FOR_HG'] = $('#create-menu-for-input').attr('data-id');
-                  // 代入値自動登録用
-                  parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-substitution').attr('data-id');
-                  parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[1]['PURPOSE_ID'];
-                } else {
-                  // 入力用
-                  parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-input').attr('data-id');
-                  // 代入値自動登録用
-                  parameterArray['MENUGROUP_FOR_H_SUB'] = $('#create-menu-for-substitution').attr('data-id');
-                  parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[0]['PURPOSE_ID'];
-                }
-            }
+        if ( vertical ) {
+          parameterArray['VERTICAL'] = '1';
         } else {
-          // オペレーション
-            parameterArray['PURPOSE'] = null;
-            if ( vertical ) {
-              // 縦メニュー利用する
-                // 入力用
-                parameterArray['MENUGROUP_FOR_CONV'] = $('#create-menu-for-input').attr('data-id');
-                // 代入値自動登録用
-                parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-substitution').attr('data-id');
-            } else {
-              // 縦メニュー利用しない
-                // 入力用
-                parameterArray['MENUGROUP_FOR_H'] = $('#create-menu-for-input').attr('data-id');
-                // 代入値自動登録用
-                parameterArray['MENUGROUP_FOR_H_SUB'] = $('#create-menu-for-substitution').attr('data-id');
-            }
+          parameterArray['VERTICAL'] = null;
         }
-        // 参照用
-        parameterArray['MENUGROUP_FOR_VIEW'] = $('#create-menu-for-reference').attr('data-id');
+        parameterArray['MENUGROUP_FOR_INPUT'] = $('#create-menu-for-input').attr('data-id'); // 入力用
+        parameterArray['MENUGROUP_FOR_SUBST'] = $('#create-menu-for-substitution').attr('data-id'); // 代入値
+        parameterArray['MENUGROUP_FOR_VIEW'] = $('#create-menu-for-reference').attr('data-id'); // 参照用
     } else if ( type === '2') {
       // データシート
         parameterArray['PURPOSE'] = null;
-        // 入力用
-        parameterArray['MENUGROUP_FOR_CMDB'] = $('#create-menu-for-input').attr('data-id');
+        parameterArray['MENUGROUP_FOR_INPUT'] = $('#create-menu-for-input').attr('data-id'); // 入力用
     }
     // undefined, ''をnullに
     for ( let key in parameterArray ) {
@@ -2201,135 +2172,86 @@ const getPanelParameter = function() {
 
 const setPanelParameter = function( setData ) {
   // nullを空白に
-  for ( let key in setData ) {
-    if ( setData[key] === null ) {
-      setData[key] = '';
+  for ( let key in setData['menu'] ) {
+    if ( setData['menu'][key] === null ) {
+      setData['menu'][key] = '';
     }
-  }console.log(setData);
+  }
   // パネルに値をセットする
-    const type = setData['TARGET'];
+    const type = setData['menu']['TARGET'];
     $property.attr('data-menu-type', type );  
     
     // 項番
     $('#create-menu-id')
-      .attr('data-value', setData['CREATE_MENU_ID'] )
-      .text( setData['CREATE_MENU_ID'] );
+      .attr('data-value', setData['menu']['CREATE_MENU_ID'] )
+      .text( setData['menu']['CREATE_MENU_ID'] );
     // 最終更新日時
     $('#create-menu-last-modified')
-      .attr('data-value', setData['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] )
-      .text( setData['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] );
+      .attr('data-value', setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] )
+      .text( setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] );
     // 最終更新者
     $('#create-last-update-user')
-      .attr('data-value', setData['LAST_UPDATE_USER'] )
-      .text( setData['LAST_UPDATE_USER'] );
+      .attr('data-value', setData['menu']['LAST_UPDATE_USER'] )
+      .text( setData['menu']['LAST_UPDATE_USER'] );
     
     // エディットモード別
     if ( menuEditorMode === 'view') {
-      $('#create-menu-name').text( setData['MENU_NAME'] ); // メニュー名
-      $('#create-menu-type').text( listIdName('target', setData['TARGET'] )); // 作成対象
-      $('#create-menu-order').text( setData['DISP_SEQ'] ); // 表示順序
-      $('#create-menu-explanation').text( setData['DESCRIPTION'] );  // 説明
-      $('#create-menu-note').text( setData['NOTE'] ); // 備考
+      $('#create-menu-name').text( setData['menu']['MENU_NAME'] ); // メニュー名
+      $('#create-menu-type').text( listIdName('target', setData['menu']['TARGET'] )); // 作成対象
+      $('#create-menu-order').text( setData['menu']['DISP_SEQ'] ); // 表示順序
+      $('#create-menu-explanation').text( setData['menu']['DESCRIPTION'] );  // 説明
+      $('#create-menu-note').text( setData['menu']['NOTE'] ); // 備考
     } else {
-      $('#create-menu-name').val( setData['MENU_NAME'] ); // メニュー名
-      $('#create-menu-type').val( setData['TARGET'] ); // 作成対象
-      $('#create-menu-order').val( setData['DISP_SEQ'] ); // 表示順序
-      $('#create-menu-explanation').val( setData['DESCRIPTION'] );  // 説明
-      $('#create-menu-note').val( setData['NOTE'] ); // 備考
+      $('#create-menu-name').val( setData['menu']['MENU_NAME'] ); // メニュー名
+      $('#create-menu-type').val( setData['menu']['TARGET'] ); // 作成対象
+      $('#create-menu-order').val( setData['menu']['DISP_SEQ'] ); // 表示順序
+      $('#create-menu-explanation').val( setData['menu']['DESCRIPTION'] );  // 説明
+      $('#create-menu-note').val( setData['menu']['NOTE'] ); // 備考
     } 
   
     // 作成対象項目別
     if ( type === '1' || type === '3') {
       // パラメータシート
-        let inputID, inputName, substitutionID, substitutionName;
+        if ( type === '1') {
+          // ホストグループ利用有無
+          if ( setData['menu']['PURPOSE'] === '2' ) {
+            if ( menuEditorMode === 'view') {
+              $('#create-menu-use-host-group').text(textCode('0041'));
+            } else {
+              $('#create-menu-use-host-group').prop('checked', true );
+            }
+          }
+        }
         // 縦メニュー利用有無
-        let vertical = false;
-        if ( setData['MENUGROUP_FOR_CONV'] !== undefined && setData['MENUGROUP_FOR_CONV'] !== '') {
-          vertical = true;
+        if ( setData['menu']['VERTICAL'] === '1') {
           if ( menuEditorMode === 'view') {
             $('#create-menu-use-vertical').text(textCode('0041'));
           } else {
             $('#create-menu-use-vertical').prop('checked', true );
           }
         }
-        if ( type === '1') {
-          // ホスト/オペレーション
-            // ホストグループ利用有無
-            const hostgroup = setData['PURPOSE'];
-            if ( hostgroup === '2' ) {
-              if ( menuEditorMode === 'view') {
-                $('#create-menu-use-host-group').text(textCode('0041'));
-              } else {
-                $('#create-menu-use-host-group').prop('checked', true );
-              }
-            }
-            if ( vertical ) {
-              // 縦メニュー利用する
-                // 入力用
-                inputID = setData['MENUGROUP_FOR_CONV'];
-                inputName = listIdName( 'group', setData['MENUGROUP_FOR_CONV'] );
-                // 代入値自動登録用
-                substitutionID = setData['MENUGROUP_FOR_H'];
-                substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
-            } else {
-              // 縦メニュー利用しない
-                if ( hostgroup === '2' ) {
-                  // 入力用
-                  inputID = setData['MENUGROUP_FOR_HG'];
-                  inputName = listIdName( 'group', setData['MENUGROUP_FOR_HG'] );
-                  // 代入値自動登録用
-                  substitutionID = setData['MENUGROUP_FOR_H'];
-                  substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
-                } else {
-                  // 入力用
-                  inputID = setData['MENUGROUP_FOR_H'];
-                  inputName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
-                  // 代入値自動登録用
-                  substitutionID = setData['MENUGROUP_FOR_H_SUB'];
-                  substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H_SUB'] );
-                }
-            }
-        } else {
-          // オペレーション
-          if ( vertical ) {
-            // 縦メニュー利用する
-              // 入力用
-              inputID = setData['MENUGROUP_FOR_CONV'];
-              inputName = listIdName( 'group', setData['MENUGROUP_FOR_CONV'] );
-              // 代入値自動登録用
-              substitutionID = setData['MENUGROUP_FOR_H']
-              substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
-          } else {
-            // 縦メニュー利用しない
-              // 入力用
-              inputID = setData['MENUGROUP_FOR_H'];
-              inputName = listIdName( 'group', setData['MENUGROUP_FOR_H'] );
-              // 代入値自動登録用
-              substitutionID = setData['MENUGROUP_FOR_H_SUB']
-              substitutionName = listIdName( 'group', setData['MENUGROUP_FOR_H_SUB'] );
-          }
-        }
+        // 入力用
         $('#create-menu-for-input')
-          .attr('data-id', inputID )
-          .text( inputName );
+          .attr('data-id', setData['menu']['MENUGROUP_FOR_INPUT'] )
+          .text( listIdName( 'group', setData['menu']['MENUGROUP_FOR_INPUT'] ));
         // 代入値自動登録用
         $('#create-menu-for-substitution')
-          .attr('data-id', substitutionID )
-          .text( substitutionName );
+          .attr('data-id', setData['menu']['MENUGROUP_FOR_SUBST'] )
+          .text( listIdName( 'group', setData['menu']['MENUGROUP_FOR_SUBST'] ));
         // 参照用
         $('#create-menu-for-reference')
-          .attr('data-id', setData['MENUGROUP_FOR_VIEW'] )
-          .text( listIdName( 'group', setData['MENUGROUP_FOR_VIEW'] ) );
+          .attr('data-id', setData['menu']['MENUGROUP_FOR_VIEW'] )
+          .text( listIdName( 'group', setData['menu']['MENUGROUP_FOR_VIEW'] ));
     } else if ( type === '2') {
       // データシート
         // 入力用
         $('#create-menu-for-input')
-          .attr('data-id', setData['MENUGROUP_FOR_CMDB'] )
-          .text( listIdName( 'group', setData['MENUGROUP_FOR_CMDB'] ) );
+          .attr('data-id', setData['menu']['MENUGROUP_FOR_INPUT'] )
+          .text( listIdName( 'group', setData['menu']['MENUGROUP_FOR_INPUT'] ));
     }
 
-    itemCounter = setData['number-item'] + 1;
-    groupCounter = setData['number-group'] + 1;
+    itemCounter = setData['menu']['number-item'] + 1;
+    groupCounter = setData['menu']['number-group'] + 1;
     repeatCounter = 1;
 };
 
