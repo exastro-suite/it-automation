@@ -33,7 +33,8 @@ define('USER_ID_CREATE_PARAM',              -101601);                   // 最�
 define('USER_ID_CREATE_MASTER',             -101602);                   // 最終更新者
 define('USER_ID_CREATE_OTHER_MENU_LINK',    -101603);                   // 最終更新者
 
-define('MENU_GROUP_ID_CONV_HOST',           2100011609);                // 縦管理メニュー(ホスト)用のメニューグループID
+define('MENU_GROUP_ID_CONV_HOST',           2100011609);                // 縦メニューホスト分解用のメニューグループID
+define('MENU_GROUP_ID_MIDDLE_HG',           2100011613);                // 縦横変換用中間シート用のメニューグループID
 
 define('FILE_HG_LOADTABLE',             'hostgroup_00_loadTable.php');            // ホストグループ用の00_loadTable.phpテンプレート
 define('FILE_HG_LOADTABLE_VAL',         'hostgroup_00_loadTable_value.php');      // ホストグループ用の00_loadTable.phpのデータ部テンプレート(単一行文字列用)

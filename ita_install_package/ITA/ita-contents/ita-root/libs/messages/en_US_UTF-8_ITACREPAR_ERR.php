@@ -15,9 +15,7 @@
 //
 ////en_US_UTF-8_ITACREPAR_ERR
 $ary[1001] = "[Main Menu] can not be set.";
-$ary[1002] = "\"Menu group for HostGroup\" can not be set when \"For Host\" is set.";
 $ary[1003] = "\"For HostGroup\" can not be set because the hostgroup function is not installed.";
-$ary[1004] = "\"Menu group for HostGroup\" is required when \"For HostGroup\" is set.";
 $ary[1005] = "Can not set the same value used in other menu groups.";
 $ary[1006] = "Set so that it satisfies the following formula. \nSum of the size of menus with the same name (\"maximum number of bytes\"  x 3+2)  ≦ 53460";
 $ary[1007] = "Failed to search \"Menu item creation information\" table. SQL error = [{}].";
@@ -35,18 +33,12 @@ $ary[1018] = "The \"/\" symbol can not be used.";
 $ary[1019] = "Can not register an item from the same menu. Id = [{}].";
 $ary[1020] = "The \"\/:*?\"<>|[]：￥／＊［］\" symbols can not be used.";
 $ary[1021] = "Enter the form of the first argument of PHP function preg_match.";
-$ary[1022] = "When you select \"Parameter Sheet\", \"Use\" is required.";
-$ary[1023] = "When you select \"For HostGroup\", \"Menu Group for HostGroup\",\"Menu Group for Host\" and \"Menu Group for View\" are required.";
-$ary[1024] = "When you select \"For Host\", \"Menu Group for Host\" and \"Menu Group for View\" are required.";
-$ary[1025] = "When you select \"Data Sheet\", \"Menu Group of Data Sheet\" is required.";
+$ary[1022] = "When you select \"Parameter Sheet(Host/Operataion)\", \"Use\" is required.";
+$ary[1023] = "When you select \"Parameter Sheet(Host/Operataion)\", \"Menu group for Substitution value auto-registration\" and \"Menu Group for View\" are required.";
+$ary[1024] = "When you select \"Create as vertical menu\", \"Rpeat\" is required.";
 $ary[1026] = "\"Use\" can not be set when \"Data Sheet\" is set.";
-$ary[1027] = "\"Menu Group of Data Sheet\" can not be set when \"Parameter Sheet\" is set.";
-$ary[1028] = "\"Menu Group of Host Group\", \"Menu Group of Host\", \"Menu Group of View\", \"Vertical Menu Group\" can not be set when \"Data Sheet\" is set.";
-$ary[1029] = "This is a required item when you select \"For HostGroup\". (Item: Menu Group for HostGroup)";
-$ary[1030] = "This is a required item when you select \"For HostGroup\". (Item: Menu Group for View)";
-$ary[1031] = "This is a required item when you select \"For HostGroup\". (Item: Menu Group for Host)";
-$ary[1032] = "This is a required item when you select \"For Host\". (Item: Menu Group for Host)";
-$ary[1033] = "This is a required item when you select \"For Host\". (Item: Menu Group for View)";
+$ary[1027] = "\"Vertical\" can not be set when \"Data Sheet\" is set.";
+$ary[1028] = "\"Menu group for Substitution value auto-registration\", \"Menu Group of View\" can not be set when \"Data Sheet\" is set.";
 $ary[1034] = "\"Multi string maximum number of bytes\" can not be set when \"String\" is set.";
 $ary[1035] = "\"Multi string Regular expression\" can not be set when \"String\" is set.";
 $ary[1036] = "\"Integer maximum value\" can not be set when \"String\" is set.";
@@ -145,5 +137,5 @@ $ary[1109] = "\"Decimal number minimum value\" can not be set when \"Password\" 
 $ary[1110] = "\"Decimal number digit\" can not be set when \"Password\" is set.";
 $ary[1111] = "\"Menu group:Menu:Item\" can not be set when \"Password\" is set.";
 $ary[1112] = "\"Use\" can not be set when \"Parameter sheet(Operation)\" is set.";
-$ary[1113] = "\"Menu Group of Host Group\" and \"Menu Group of Datasheet\" can not be set when \"Parameter sheet(Operation)\" is set.";
+$ary[1113] = "When you select \"Parameter Sheet(Operation)\", \"Menu group for Substitution value auto-registration\" and \"Menu Group for View\" are required.";
 ?>

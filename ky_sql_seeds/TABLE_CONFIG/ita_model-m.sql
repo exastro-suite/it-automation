@@ -10,12 +10,10 @@ CREATE_MENU_ID                      %INT%                           , -- 識別�
 MENU_NAME                           %VARCHR%(256)                    ,
 PURPOSE                             %INT%                           ,
 TARGET                              %INT%                           ,
-MENUGROUP_FOR_HG                    %INT%                           ,
-MENUGROUP_FOR_H                     %INT%                           ,
-MENUGROUP_FOR_H_SUB                 %INT%                           ,
+VERTICAL                            %INT%                           ,
+MENUGROUP_FOR_INPUT                 %INT%                           ,
+MENUGROUP_FOR_SUBST                 %INT%                           ,
 MENUGROUP_FOR_VIEW                  %INT%                           ,
-MENUGROUP_FOR_CONV                  %INT%                           ,
-MENUGROUP_FOR_CMDB                  %INT%                           ,
 DISP_SEQ                            %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
@@ -35,12 +33,10 @@ CREATE_MENU_ID                      %INT%                           , -- 識別�
 MENU_NAME                           %VARCHR%(256)                    ,
 PURPOSE                             %INT%                           ,
 TARGET                              %INT%                           ,
-MENUGROUP_FOR_HG                    %INT%                           ,
-MENUGROUP_FOR_H                     %INT%                           ,
-MENUGROUP_FOR_H_SUB                 %INT%                           ,
+VERTICAL                            %INT%                           ,
+MENUGROUP_FOR_INPUT                 %INT%                           ,
+MENUGROUP_FOR_SUBST                 %INT%                           ,
 MENUGROUP_FOR_VIEW                  %INT%                           ,
-MENUGROUP_FOR_CONV                  %INT%                           ,
-MENUGROUP_FOR_CMDB                  %INT%                           ,
 DISP_SEQ                            %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
@@ -697,7 +693,7 @@ SELECT TAB_A.CREATE_ITEM_ID,
 FROM F_CREATE_ITEM_INFO TAB_A
 LEFT JOIN F_CREATE_MENU_INFO TAB_B ON (TAB_A.CREATE_MENU_ID = TAB_B.CREATE_MENU_ID)
 LEFT JOIN F_COLUMN_GROUP TAB_C ON (TAB_A.COL_GROUP_ID = TAB_C.COL_GROUP_ID)
-WHERE TAB_B.MENUGROUP_FOR_CONV != ""
+WHERE TAB_B.VERTICAL != ""
 ;
 
 CREATE VIEW G_CREATE_ITEM_INFO_JNL AS 
@@ -735,5 +731,5 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
 FROM F_CREATE_ITEM_INFO_JNL TAB_A
 LEFT JOIN F_CREATE_MENU_INFO TAB_B ON (TAB_A.CREATE_MENU_ID = TAB_B.CREATE_MENU_ID)
 LEFT JOIN F_COLUMN_GROUP TAB_C ON (TAB_A.COL_GROUP_ID = TAB_C.COL_GROUP_ID)
-WHERE TAB_B.MENUGROUP_FOR_CONV != ""
+WHERE TAB_B.VERTICAL != ""
 ;

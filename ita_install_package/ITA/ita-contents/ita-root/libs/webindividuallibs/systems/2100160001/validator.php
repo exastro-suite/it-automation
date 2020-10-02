@@ -148,16 +148,12 @@ class SubstitutionValidator extends IDValidator {
 
                 // 用途を取得
                 $purpose = array_key_exists('PURPOSE',$arrayRegData)?$arrayRegData['PURPOSE']:null;
-                // データシート用メニューグループを取得
-                $menugroupForData = array_key_exists('MENUGROUP_FOR_CMDB',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_CMDB']:null;
-                // ホストグループ用メニューグループを取得
-                $menugroupForHG = array_key_exists('MENUGROUP_FOR_HG',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_HG']:null;
-                // ホスト用メニューグループを取得
-                $menugroupForH = array_key_exists('MENUGROUP_FOR_H',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_H']:null;
+                // 入力用メニューグループを取得
+                $menugroupForInput= array_key_exists('MENUGROUP_FOR_INPUT',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_INPUT']:null;
+                // 代入値自動登録用メニューグループを取得
+                $menugroupForSubst= array_key_exists('MENUGROUP_FOR_SUBST',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_SUBST']:null;
                 // 参照用メニューグループを取得
                 $menugroupForView= array_key_exists('MENUGROUP_FOR_VIEW',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_VIEW']:null;
-                // 縦管理メニューグループを取得
-                $menugroupForConv = array_key_exists('MENUGROUP_FOR_CONV',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_CONV']:null;
 
                 // 作成対象で「データシート」を選択
                 if("2" == $value){  
@@ -166,40 +162,34 @@ class SubstitutionValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1026");
                     }
-                    // データシート用メニューグループが未選択の場合、エラー
-                    else if(!$menugroupForData){  
-                        $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1025");
-                    }
-                    // ホストグループ用メニューグループ、ホスト用メニューグループ、
-                    // 参照用メニューグループ、縦管理メニューグループが選択されている場合、エラー
-                    else if($menugroupForHG || $menugroupForH || $menugroupForView || $menugroupForConv){  
+                    // 代入値自動登録用メニューグループ、参照用メニューグループが選択されている場合、エラー
+                    else if($menugroupForSubst || $menugroupForView){  
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1028");
                     }
                 }
-                // 作成対象で「パラメータシート」を選択
+                // 作成対象で「パラメータシート(ホスト/オペレーションあり)」を選択
                 else if("1" == $value){ 
                     //用途が未選択の場合、エラー
                     if(!$purpose){ 
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1022");
                     } 
-                    // データシート用メニューグループが選択されている場合、エラー
-                    else if($menugroupForData){ 
+                    // 代入値自動登録用メニューグループ、または参照用メニューグループが設定されていない場合、エラー
+                    else if(!$menugroupForSubst || !$menugroupForView){
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1027");
-                    } 
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1023");
+                    }
                 } 
-                // 作成対象で「パラメータシート(オペレーションのみ)」を選択
+                // 作成対象で「パラメータシート(オペレーションあり)」を選択
                 else if("3" == $value){
                     //用途が選択されている場合、エラー
                     if($purpose){ 
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1112");
                     } 
-                    // データシート用メニューグループ、ホストグループ用メニューグループが選択されている場合、エラー
-                    else if($menugroupForData || $menugroupForHG){ 
+                    // 代入値自動登録用メニューグループ、または参照用メニューグループが設定されていない場合、エラー
+                    else if(!$menugroupForSubst || !$menugroupForView){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1113");
                     } 
@@ -270,14 +260,8 @@ class PurposeValidator extends IDValidator {
 
                   // 作成対象を取得
                 $target = array_key_exists('TARGET',$arrayRegData)?$arrayRegData['TARGET']:null;
-                // ホストグループ用メニューグループを取得
-                $menugroupForHG = array_key_exists('MENUGROUP_FOR_HG',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_HG']:null;
-                // ホスト用メニューグループを取得
-                $menugroupForHost = array_key_exists('MENUGROUP_FOR_H',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_H']:null;
-                // 参照用メニューグループを取得
-                $menugroupForView = array_key_exists('MENUGROUP_FOR_VIEW',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_VIEW']:null;
 
-                // 作成対象が「パラメータシート」選択時のみ
+                // 作成対象が「パラメータシート(ホスト/オペレーションあり)」選択時のみ
                 if("1" == $target){
                     // 用途がホストグループ用の場合
                     if("2" == $value){
@@ -287,26 +271,6 @@ class PurposeValidator extends IDValidator {
                             $retBool = false;
                             $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1003");
                         }
-                        // ホストグループ用メニューグループ、ホスト用メニューグループ、参照用メニューグループが設定されていない場合、エラー
-                        else if(!$menugroupForHG || !$menugroupForHost || !$menugroupForView){
-                            $retBool = false;
-                            $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1023");
-                        }
-                    }
-                    // 用途がホストの場合
-                    else if("1" == $value){
-
-                        // ホストグループ用メニューグループが設定されている場合、エラー
-                        if($menugroupForHG){
-                            $retBool = false;
-                            $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1002");
-                        }
-                        // ホスト用メニューグループ、または参照用メニューグループが設定されていない場合、エラー
-                        else if(!$menugroupForHost || !$menugroupForView){
-                            $retBool = false;
-                            $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1024");
-                        }
-
                     }
                 }
                 if( $retBool === false ){
@@ -319,10 +283,10 @@ class PurposeValidator extends IDValidator {
 }
 
 /**
-* ホストグループ用メニューグループ専用のバリデータクラス
+* 縦メニュー利用専用のバリデータクラス
 */
 
-class MgForHgValidator extends IDValidator {
+class VerticalValidator extends IDValidator {
 
     protected $eventMasterName;
 
@@ -372,21 +336,17 @@ class MgForHgValidator extends IDValidator {
                 $this->strModeIdOfLastErr = $strModeId;
                 $this->strErrAddMsg = "";
 
-                // 用途がホストグループ用の場合
-                if(array_key_exists('PURPOSE',$arrayRegData) && "2" == $arrayRegData['PURPOSE']){
+                  // 作成対象を取得
+                $target = array_key_exists('TARGET',$arrayRegData)?$arrayRegData['TARGET']:null;
 
-                    // ホスト用メニューグループを取得
-                    $menugroupForH = array_key_exists('MENUGROUP_FOR_H',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_H']:null;
-                    // 最新値参照用メニューグループを取得
-                    $menugroupForView = array_key_exists('MENUGROUP_FOR_VIEW',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_VIEW']:null;
-                    // 縦管理メニュー用メニューグループを取得
-                    $menugroupForConv = array_key_exists('MENUGROUP_FOR_CONV',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_CONV']:null;
+                // 作成対象で「データシート」を選択
+                if("2" == $value){  
 
-                    // 他のメニューグループと同じ場合、エラー
-                    if($value && ($value == $menugroupForH || $value == $menugroupForView || $value == $menugroupForConv)){
+                    //縦メニュー利用が設定されている場合、エラー
+                    if($value){ 
                         $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1005");
-                    }
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1027");
+                    } 
                 }
                 if( $retBool === false ){
                     $this->setValidRule($strErrAddMsg);
@@ -397,11 +357,12 @@ class MgForHgValidator extends IDValidator {
     }
 }
 
+
 /**
-* ホスト用メニューグループ専用のバリデータクラス
+* 代入値自動登録用メニューグループ専用のバリデータクラス
 */
 
-class MgForHostValidator extends IDValidator {
+class MgForSubstValidator extends IDValidator {
 
     protected $eventMasterName;
 
@@ -451,17 +412,21 @@ class MgForHostValidator extends IDValidator {
                 $this->strModeIdOfLastErr = $strModeId;
                 $this->strErrAddMsg = "";
 
-                // 値が設定されている場合
-                if("" != $value){
-                    // ホストグループ用メニューグループを取得
-                    $menugroupForHg = array_key_exists('MENUGROUP_FOR_HG',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_HG']:null;
-                    // 最新値参照用メニューグループを取得
-                    $menugroupForView  = array_key_exists('MENUGROUP_FOR_VIEW',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_VIEW']:null;
-                    // 縦管理メニュー用メニューグループを取得
-                    $menugroupForConv = array_key_exists('MENUGROUP_FOR_CONV',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_CONV']:null;
+                  // 作成対象を取得
+                $target = array_key_exists('TARGET',$arrayRegData)?$arrayRegData['TARGET']:null;
+
+                // 作成対象が「パラメータシート(ホスト/オペレーションあり)」、「パラメータシート(オペレーションあり)」選択時のみ
+                if("1" == $target || "3" == $target){
+
+                    // 入力用メニューグループを取得
+                    $menugroupForInput= array_key_exists('MENUGROUP_FOR_INPUT',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_INPUT']:null;
+                    // 代入値自動登録用メニューグループを取得
+                    $menugroupForSubst= array_key_exists('MENUGROUP_FOR_SUBST',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_SUBST']:null;
+                    // 参照用メニューグループを取得
+                    $menugroupForView= array_key_exists('MENUGROUP_FOR_VIEW',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_VIEW']:null;
 
                     // 他のメニューグループと同じ場合、エラー
-                    if($value == $menugroupForHg || $value == $menugroupForView || $value == $menugroupForConv){
+                    if($value && ($value == $menugroupForInput || $value == $menugroupForView)){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1005");
                     }
@@ -476,7 +441,7 @@ class MgForHostValidator extends IDValidator {
 }
 
 /**
-* 最新値参照用メニューグループ専用のバリデータクラス
+* 参照用メニューグループ専用のバリデータクラス
 */
 
 class MgForViewValidator extends IDValidator {
@@ -532,94 +497,15 @@ class MgForViewValidator extends IDValidator {
                 // 値が設定されている場合
                 if("" != $value){
 
-                    // ホストグループ用メニューグループを取得
-                    $menugroupForHg = array_key_exists('MENUGROUP_FOR_HG',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_HG']:null;
-                    // ホスト用メニューグループを取得
-                    $menugroupForH  = array_key_exists('MENUGROUP_FOR_H',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_H']:null;
-                    // 縦管理メニュー用メニューグループを取得
-                    $menugroupForConv = array_key_exists('MENUGROUP_FOR_CONV',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_CONV']:null;
+                    // 入力用メニューグループを取得
+                    $menugroupForInput= array_key_exists('MENUGROUP_FOR_INPUT',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_INPUT']:null;
+                    // 代入値自動登録用メニューグループを取得
+                    $menugroupForSubst= array_key_exists('MENUGROUP_FOR_SUBST',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_SUBST']:null;
+                    // 参照用メニューグループを取得
+                    $menugroupForView= array_key_exists('MENUGROUP_FOR_VIEW',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_VIEW']:null;
 
                     // 他のメニューグループと同じ場合、エラー
-                    if($value == $menugroupForHg || $value == $menugroupForH || $value == $menugroupForConv){
-                        $retBool = false;
-                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1005");
-                    }
-                }
-                if( $retBool === false ){
-                    $this->setValidRule($strErrAddMsg);
-                }
-            }
-        }
-        return $retBool;
-    }
-}
-
-/**
-* 縦管理メニュー用メニューグループ専用のバリデータクラス
-*/
-
-class MgForConvValidator extends IDValidator {
-
-    protected $eventMasterName;
-
-    function isValid($value, $strNumberForRI=null, $arrayRegData=null, &$arrayVariant=array()){
-
-        global $g;
-        $retBool = true;
-        $strModeId = "";
-        $modeValue_sub = "";
-        $boolCheckContinue = true;
-
-        if( parent::isValid($value, $strNumberForRI, $arrayRegData, $arrayVariant) != true ) {
-            return false;
-        }
-
-        if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
-            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
-                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
-                $strModeId = $aryTcaAction["ACTION_MODE"];
-            }
-        }
-
-        if( $strModeId != "" ){
-            $boolCheckContinue = false;
-            if($strModeId == "DTUP_singleRecRegister" ){
-                //----各種登録時
-                $boolCheckContinue = true;
-                //各種登録時----
-            }else if($strModeId == "DTUP_singleRecUpdate"){
-                //----各種更新時
-                $boolCheckContinue = true;
-                //各種更新時----
-            }else if($strModeId == "DTUP_singleRecDelete"){
-                $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];
-                if( $modeValue_sub=="on" ){
-                    //処理をしない
-                }else if( $modeValue_sub=="off" ){
-                    //復活時
-                    $boolCheckContinue = true;
-                }
-            }else{
-                //処理をしない
-            }
-
-            if($boolCheckContinue===true){
-
-                $this->strModeIdOfLastErr = $strModeId;
-                $this->strErrAddMsg = "";
-
-                // 値が設定されている場合
-                if("" != $value){
-
-                    // ホストグループ用メニューグループを取得
-                    $menugroupForHg = array_key_exists('MENUGROUP_FOR_HG',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_HG']:null;
-                    // ホスト用メニューグループを取得
-                    $menugroupForH  = array_key_exists('MENUGROUP_FOR_H',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_H']:null;
-                    // 最新値参照用メニューグループを取得
-                    $menugroupForView = array_key_exists('MENUGROUP_FOR_VIEW',$arrayRegData)?$arrayRegData['MENUGROUP_FOR_VIEW']:null;
-
-                    // 他のメニューグループと同じ場合、エラー
-                    if($value == $menugroupForHg || $value == $menugroupForH || $value == $menugroupForView){
+                    if($value == $menugroupForInput || $value == $menugroupForSubst){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1005");
                     }
