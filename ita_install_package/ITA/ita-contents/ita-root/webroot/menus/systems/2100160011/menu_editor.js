@@ -2004,12 +2004,16 @@ const loadMenu = function() {
     
     const loadJSON = menuEditorArray.selectMenuInfo;
     console.log( loadJSON );
-    // メニュー名、表示順序、説明、備考は、流用新規時に空白にする
+    // 流用新規時に引き継がない項目
     if ( menuEditorMode === 'diversion' ){
-      loadJSON['menu']['MENU_NAME'] = '';
-      loadJSON['menu']['DISP_SEQ'] = '';
-      loadJSON['menu']['NOTE'] = '';
-      loadJSON['menu']['DESCRIPTION'] = '';
+      loadJSON['menu']['CREATE_MENU_ID'] = null;
+      loadJSON['menu']['MENU_NAME'] = null;
+      loadJSON['menu']['DISP_SEQ'] = null;
+      loadJSON['menu']['LAST_UPDATE_TIMESTAMP'] = null;
+      loadJSON['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] = null;
+      loadJSON['menu']['LAST_UPDATE_USER'] = null;
+      loadJSON['menu']['DESCRIPTION'] = null;
+      loadJSON['menu']['NOTE'] = null;
     }
 
     // パネル情報表示
@@ -2181,18 +2185,20 @@ const setPanelParameter = function( setData ) {
     const type = setData['menu']['TARGET'];
     $property.attr('data-menu-type', type );  
     
-    // 項番
-    $('#create-menu-id')
-      .attr('data-value', setData['menu']['CREATE_MENU_ID'] )
-      .text( setData['menu']['CREATE_MENU_ID'] );
-    // 最終更新日時
-    $('#create-menu-last-modified')
-      .attr('data-value', setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] )
-      .text( setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] );
-    // 最終更新者
-    $('#create-last-update-user')
-      .attr('data-value', setData['menu']['LAST_UPDATE_USER'] )
-      .text( setData['menu']['LAST_UPDATE_USER'] );
+    if ( menuEditorMode !== 'diversion' ){
+      // 項番
+      $('#create-menu-id')
+        .attr('data-value', setData['menu']['CREATE_MENU_ID'] )
+        .text( setData['menu']['CREATE_MENU_ID'] );
+      // 最終更新日時
+      $('#create-menu-last-modified')
+        .attr('data-value', setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] )
+        .text( setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] );
+      // 最終更新者
+      $('#create-last-update-user')
+        .attr('data-value', setData['menu']['LAST_UPDATE_USER'] )
+        .text( setData['menu']['LAST_UPDATE_USER'] );
+    }
     
     // エディットモード別
     if ( menuEditorMode === 'view') {
