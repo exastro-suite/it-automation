@@ -1889,7 +1889,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューテーブル管理更新
             //////////////////////////
-            $result = updateLinkTargetTable($hostMenuId, "G_" . $menuTableName . "_H" ,$noLinkTarget);
+            $result = updateLinkTargetTable($targetMenuId, "G_" . $menuTableName . "_H" ,$noLinkTarget);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -1900,7 +1900,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューカラム管理更新
             //////////////////////////
-            $result = updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray);
+            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
