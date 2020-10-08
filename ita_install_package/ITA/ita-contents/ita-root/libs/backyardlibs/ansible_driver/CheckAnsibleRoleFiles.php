@@ -901,9 +901,7 @@ class CheckAnsibleRoleFiles {
             }
             unset($chkObj);
             // 定義されている変数(親)を取り出す。
-localdebuglog(__LINE__,$fullpath);
             foreach($parent_vars_list as $parent_var_name=>$parent_var_info) {
-localdebuglog(__LINE__,$parent_var_name);
                 // 同じ変数名が複数のdefault定義ファイルに記述されている場合はエラー
                 if(isset($ina_parent_vars_list[$parent_var_name])) {
                     //$ary[6000065] = ""変数が複数のdefault定義ファイルに記述されています。(ロールパッケージ名:{} ロール名:{} 変数名:{})"

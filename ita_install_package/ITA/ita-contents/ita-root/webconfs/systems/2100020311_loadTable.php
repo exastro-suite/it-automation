@@ -1071,12 +1071,24 @@ Ansible（Legacy Role）代入値管理
     //メンバー変数名----
 
 
+////////////////////////////////////////////////////////
+//----Sensitive設定
+////////////////////////////////////////////////////////
+    $c = new IDColumn('SENSITIVE_FLAG',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010002000"), 'B_SENSITIVE_FLAG', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010002010")); //エクセル・ヘッダでの説明
+    $c->setJournalTableOfMaster('B_SENSITIVE_FLAG_JNL');
+    $c->setRequired(true); //登録/更新時には、入力必須
+    //コンテンツのソースがヴューの場合、登録/更新の対象とする
+    $c->setHiddenMainTableColumn(true);
+
+    $table->addColumn($c);
+
 
 ////////////////////////////////////////////////////////
 //----具体値
 ////////////////////////////////////////////////////////
     $objVldt = new MultiTextValidator(0,8192,false);
-    $c = new MultiTextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1304010"));
+    $c = new SensitiveMultiTextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1304010"),'SENSITIVE_FLAG');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1304020"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
 

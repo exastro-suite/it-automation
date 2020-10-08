@@ -1229,4 +1229,6 @@ $ary[9010001050] = "ssh authentication key file";
 $ary[9010001051] = "ssh key authentication file for key authentication.";
 $ary[9010001060] = "isolated Tower";
 $ary[9010001061] = "Select ● for isolated Tower.";
+$ary[9010002000] = "Sensitive setting";
+$ary[9010002010] = "If \"ON\", the specific value will not be displayed after registration.";
 ?>
