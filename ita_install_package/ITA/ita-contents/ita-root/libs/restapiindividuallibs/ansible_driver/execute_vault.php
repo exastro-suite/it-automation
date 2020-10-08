@@ -62,6 +62,7 @@
     $in_DataRelayStorageTrunkPathNS = $aryReceptData['DATA_RELAY_STORAGE_TRUNK'];
     $in_ExecUser                    = $aryReceptData['EXEC_USER'];
     $in_TargetValue                 = $aryReceptData['TARGET_VALUE'];
+    $in_TargetValue                 = $this->ky_decrypt($in_TargetValue);
 
     $obj = new AnsibleVault();
 

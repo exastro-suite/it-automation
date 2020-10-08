@@ -73,6 +73,10 @@
         define("DF_VAR_TYPE_LCA"               ,"LCA");
         define("DF_VAR_TYPE_GBL"               ,"GBL");
         define("DF_VAR_TYPE_USER"              ,"USER");
+
+        // 具体値 SENSITIVE設定値
+        define("DF_SENSITIVE_OFF"              ,"1");  //OFF
+        define("DF_SENSITIVE_ON"               ,"2");  //ON
     }
 
     // ITA側で管理している legacy用 子playbookファイル格納先ディレクトリ
