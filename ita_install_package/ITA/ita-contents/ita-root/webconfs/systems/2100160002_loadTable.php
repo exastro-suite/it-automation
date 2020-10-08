@@ -211,6 +211,20 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->addColumn($cg);
 
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-104236"));
+
+    // パスワード最大バイト数
+    $c = new NumColumn('PW_MAX_LENGTH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102109"));
+    $objVldt = new SingleTextValidator(0,30,false);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102110"));//エクセル・ヘッダでの説明
+    $c->setValidator($objVldt);
+    $c->setSubtotalFlag(false);
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
+
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102134"));
+
     // 説明
     $objVldt = new MultiTextValidator(0,1024,false);
     $c = new MultiTextColumn('DESCRIPTION',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102117"));

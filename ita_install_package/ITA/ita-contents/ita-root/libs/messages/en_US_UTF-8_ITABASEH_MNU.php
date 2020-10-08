@@ -619,4 +619,5 @@ $ary[309023] = "Cancel";
 $ary[309024] = "Execution";
 $ary[309025] = "Cancel reservation";
 $ary[309026] = "Emergency stop";
+$ary[310001] = "Sheet type";
 ?>

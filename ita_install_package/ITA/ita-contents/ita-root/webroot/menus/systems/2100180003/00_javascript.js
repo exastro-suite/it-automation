@@ -168,14 +168,8 @@ callback.prototype = {
     //----Callリスト用-----//
     printConductorList : function( result ){
         conductorUseList.conductorCallList = JSON.parse( result );
-        // Editor起動時
         if ( conductorGetMode === 'starting') {
-          if ( conductorClassID !== null ) {
-             proxy.printconductorClass( Number( conductorClassID ) );
-          } else {
-            conductorUseList.conductorData = null;
-            initEditor('edit');
-          }
+          proxy.printSymphonyList();
         }
     }
     ,
@@ -186,7 +180,19 @@ callback.prototype = {
     //----Conductor登録----//
     register_execute : function( result ){
         conductorResultMessage('conductorRegister', result );
-    }
+    },
+    printSymphonyList : function( result ){
+        conductorUseList.symphonyCallList = JSON.parse( result );
+        // Editor起動時
+        if ( conductorGetMode === 'starting') {
+          if ( conductorClassID !== null ) {
+             proxy.printconductorClass( Number( conductorClassID ) );
+          } else {
+            conductorUseList.conductorData = null;
+            initEditor('edit');
+          }
+        }
+    }  
     //Conductor系メソッド----
     
 }
@@ -319,6 +325,15 @@ function printconductorClass(boolCallProxy,aryResultOfCalledProxy){
         proxy.printconductorClass(intConductorClassId);
     }else{
 
+    }
+}
+//----コールバック相互呼出系 Call一覧の展開
+function printSymphonyList(boolCallProxy,aryResultOfCalledProxy){
+    console.log("printSymphonyList");
+    if( boolCallProxy===true ){
+        proxy.printSymphonyList();
+    }else{
+        console.log(aryResultOfCalledProxy);
     }
 }
 

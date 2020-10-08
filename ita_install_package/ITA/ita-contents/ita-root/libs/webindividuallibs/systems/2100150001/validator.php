@@ -1097,6 +1097,97 @@ class LinkageCheckValidator2 extends IDValidator {
 }
 
 /**
+*資材紐付け先選択専用のバリデータクラス(Terraform用)
+*/
+class LinkageCheckValidator3 extends IDValidator {
+
+    protected $strErrAddMsg;
+
+    function isValid($value, $strNumberForRI=null, $arrayRegData=null, &$arrayVariant=array()){
+
+        global $g;
+        if( parent::isValid($value, $strNumberForRI, $arrayRegData, $arrayVariant) != true ) {
+            $this->strErrAddMsg = $g['objMTS']->getSomeMessage("ITAMATERIAL-ERR-1038");
+            $this->setValidRule($this->makeValidRule());
+            return false;
+        }
+
+        $retBool = true;
+
+        $strModeId = "";
+        $modeValue_sub = "";
+
+        $boolCheckContinue = true;
+
+        $p_reg_release_trig_date = "";
+        $p_reg_delete_trig_date = "";
+
+        if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                $strModeId = $aryTcaAction["ACTION_MODE"];
+            }
+        }
+
+        if( $strModeId != "" ){
+            //----更新前のレコード内容（登録時は空配列）
+            $editTgtRow = $arrayVariant['edit_target_row'];
+            //更新前のレコード内容（登録時は空配列）----
+
+            $boolCheckContinue = false;
+            if($strModeId == "DTUP_singleRecRegister" ){
+                //----各種登録時
+                $boolCheckContinue = true;
+                //各種登録時----
+            }else if($strModeId == "DTUP_singleRecUpdate"){
+                //----各種更新時
+                $boolCheckContinue = true;
+                //各種更新時----
+            }else if($strModeId == "DTUP_singleRecDelete"){
+                $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];
+                if( $modeValue_sub=="on" ){
+                    //処理をしない
+                }else if( $modeValue_sub=="off" ){
+                    //復活時
+                    $boolCheckContinue = true;
+                }
+            }else{
+                //処理をしない
+            }
+
+            if($boolCheckContinue===true){
+                if("" == $value) {
+                    $boolCheckContinue = false;
+                }
+            }
+
+            if($boolCheckContinue===true){
+
+                $chkCnt = 0;
+
+                if(array_key_exists('TERRAFORM_MODULE_CHK', $arrayRegData) && "1" == $arrayRegData['TERRAFORM_MODULE_CHK']){
+                    $chkCnt ++;
+                }
+                if(array_key_exists('TERRAFORM_POLICY_CHK', $arrayRegData) && "1" == $arrayRegData['TERRAFORM_POLICY_CHK']){
+                    $chkCnt ++;
+                }
+
+                if(1 < $chkCnt){
+                    $retBool = false;
+                    $boolCheckContinue = false;
+                    $this->strErrAddMsg = $g['objMTS']->getSomeMessage("ITAMATERIAL-ERR-1039");
+                }
+            }
+        }
+
+        if( $retBool === false ){
+            $this->setValidRule($this->strErrAddMsg);
+        }
+        return $retBool;
+    }
+}
+
+/**
 *リモートリポジトリURL専用のバリデータクラス
 */
 class RemortRepoUrlValidator extends SingleTextValidator {

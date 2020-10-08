@@ -10,11 +10,10 @@ CREATE_MENU_ID                      %INT%                           , -- 識別�
 MENU_NAME                           %VARCHR%(256)                    ,
 PURPOSE                             %INT%                           ,
 TARGET                              %INT%                           ,
-MENUGROUP_FOR_HG                    %INT%                           ,
-MENUGROUP_FOR_H                     %INT%                           ,
+VERTICAL                            %INT%                           ,
+MENUGROUP_FOR_INPUT                 %INT%                           ,
+MENUGROUP_FOR_SUBST                 %INT%                           ,
 MENUGROUP_FOR_VIEW                  %INT%                           ,
-MENUGROUP_FOR_CONV                  %INT%                           ,
-MENUGROUP_FOR_CMDB                  %INT%                           ,
 DISP_SEQ                            %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
@@ -34,11 +33,10 @@ CREATE_MENU_ID                      %INT%                           , -- 識別�
 MENU_NAME                           %VARCHR%(256)                    ,
 PURPOSE                             %INT%                           ,
 TARGET                              %INT%                           ,
-MENUGROUP_FOR_HG                    %INT%                           ,
-MENUGROUP_FOR_H                     %INT%                           ,
+VERTICAL                            %INT%                           ,
+MENUGROUP_FOR_INPUT                 %INT%                           ,
+MENUGROUP_FOR_SUBST                 %INT%                           ,
 MENUGROUP_FOR_VIEW                  %INT%                           ,
-MENUGROUP_FOR_CONV                  %INT%                           ,
-MENUGROUP_FOR_CMDB                  %INT%                           ,
 DISP_SEQ                            %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
@@ -63,14 +61,15 @@ COL_GROUP_ID                        %INT%                           ,
 INPUT_METHOD_ID                     %INT%                           ,
 MAX_LENGTH                          %INT%                           ,
 MULTI_MAX_LENGTH                    %INT%                           ,
-PREG_MATCH                          %VARCHR%(8192)                  ,
-MULTI_PREG_MATCH                    %VARCHR%(8192)                  ,
+PREG_MATCH                          %TEXT%(8192)                    ,
+MULTI_PREG_MATCH                    %TEXT%(8192)                    ,
 OTHER_MENU_LINK_ID                  %INT%                           ,
 INT_MAX                             %INT%                           ,
 INT_MIN                             %INT%                           ,
 FLOAT_MAX                           %DOUBLE%                        ,
 FLOAT_MIN                           %DOUBLE%                        ,
 FLOAT_DIGIT                         %INT%                           ,
+PW_MAX_LENGTH                       %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
@@ -95,14 +94,15 @@ COL_GROUP_ID                        %INT%                           ,
 INPUT_METHOD_ID                     %INT%                           ,
 MAX_LENGTH                          %INT%                           ,
 MULTI_MAX_LENGTH                    %INT%                           ,
-PREG_MATCH                          %VARCHR%(8192)                  ,
-MULTI_PREG_MATCH                    %VARCHR%(8192)                  ,
+PREG_MATCH                          %TEXT%(8192)                    ,
+MULTI_PREG_MATCH                    %TEXT%(8192)                    ,
 OTHER_MENU_LINK_ID                  %INT%                           ,
 INT_MAX                             %INT%                           ,
 INT_MIN                             %INT%                           ,
 FLOAT_MAX                           %DOUBLE%                        ,
 FLOAT_MIN                           %DOUBLE%                        ,
 FLOAT_DIGIT                         %INT%                           ,
+PW_MAX_LENGTH                       %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
@@ -232,35 +232,6 @@ JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴�
 
 PURPOSE_ID                          %INT%                           , -- 識別シーケンス項番
 PURPOSE_NAME                        %VARCHR%(64)                    ,
-NOTE                                %VARCHR% (4000)                 , -- 備考
-DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
-LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
-PRIMARY KEY(JOURNAL_SEQ_NO)
-)%%TABLE_CREATE_OUT_TAIL%%;
-
--- -------------------------
--- 作成対象マスタ
--- -------------------------
-CREATE TABLE F_PARAM_TARGET
-(
-TARGET_ID                           %INT%                           , -- 識別シーケンス項番
-TARGET_NAME                         %VARCHR%(64)                    ,
-NOTE                                %VARCHR% (4000)                 , -- 備考
-DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
-LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
-PRIMARY KEY (TARGET_ID)
-)%%TABLE_CREATE_OUT_TAIL%%;
-
-CREATE TABLE F_PARAM_TARGET_JNL
-(
-JOURNAL_SEQ_NO                      %INT%                           , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME                %DATETIME6%                     , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴用変更種別
-
-TARGET_ID                           %INT%                           , -- 識別シーケンス項番
-TARGET_NAME                         %VARCHR%(64)                    ,
 NOTE                                %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
@@ -708,6 +679,7 @@ SELECT TAB_A.CREATE_ITEM_ID,
        TAB_A.FLOAT_MAX,
        TAB_A.FLOAT_MIN,
        TAB_A.FLOAT_DIGIT,
+       TAB_A.PW_MAX_LENGTH,
        TAB_A.DESCRIPTION,
        TAB_C.FULL_COL_GROUP_NAME,
        CASE
@@ -721,7 +693,7 @@ SELECT TAB_A.CREATE_ITEM_ID,
 FROM F_CREATE_ITEM_INFO TAB_A
 LEFT JOIN F_CREATE_MENU_INFO TAB_B ON (TAB_A.CREATE_MENU_ID = TAB_B.CREATE_MENU_ID)
 LEFT JOIN F_COLUMN_GROUP TAB_C ON (TAB_A.COL_GROUP_ID = TAB_C.COL_GROUP_ID)
-WHERE TAB_B.MENUGROUP_FOR_CONV != ""
+WHERE TAB_B.VERTICAL != ""
 ;
 
 CREATE VIEW G_CREATE_ITEM_INFO_JNL AS 
@@ -746,6 +718,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
        TAB_A.FLOAT_MAX,
        TAB_A.FLOAT_MIN,
        TAB_A.FLOAT_DIGIT,
+       TAB_A.PW_MAX_LENGTH,
        TAB_A.DESCRIPTION,
        CASE
            WHEN TAB_C.FULL_COL_GROUP_NAME IS NULL THEN [%CONCAT_HEAD/%]TAB_B.MENU_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.ITEM_NAME[%CONCAT_TAIL/%]
@@ -758,5 +731,5 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
 FROM F_CREATE_ITEM_INFO_JNL TAB_A
 LEFT JOIN F_CREATE_MENU_INFO TAB_B ON (TAB_A.CREATE_MENU_ID = TAB_B.CREATE_MENU_ID)
 LEFT JOIN F_COLUMN_GROUP TAB_C ON (TAB_A.COL_GROUP_ID = TAB_C.COL_GROUP_ID)
-WHERE TAB_B.MENUGROUP_FOR_CONV != ""
+WHERE TAB_B.VERTICAL != ""
 ;

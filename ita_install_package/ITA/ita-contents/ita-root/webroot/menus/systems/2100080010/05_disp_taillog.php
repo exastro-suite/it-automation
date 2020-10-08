@@ -29,13 +29,19 @@
     $strColIdOfOfRefreshInt      = 'TERRAFORM_REFRESH_INTERVAL';
 
     $prg_recorder_array = array(1=>array('PRG_RCDR_ID'=>'1'
-                                        ,'PRG_RCDR_NAME'=>'実行ログ'
-                                        ,'PRG_FILE_NAME'=>'exec.log')
+                                        ,'PRG_RCDR_NAME'=>"Planログ"
+                                        ,'PRG_FILE_NAME'=>'plan.log')
                                 ,2=>array('PRG_RCDR_ID'=>'2'
-                                        ,'PRG_RCDR_NAME'=>'エラーログ'
+                                        ,'PRG_RCDR_NAME'=>"PolicyCheckログ"
+                                        ,'PRG_FILE_NAME'=>'policyCheck.log')
+                                ,3=>array('PRG_RCDR_ID'=>'3'
+                                        ,'PRG_RCDR_NAME'=>"Applyログ"
+                                        ,'PRG_FILE_NAME'=>'apply.log')
+                                ,4=>array('PRG_RCDR_ID'=>'4'
+                                        ,'PRG_RCDR_NAME'=>"エラーログ"
                                         ,'PRG_FILE_NAME'=>'error.log')
     );
-    
+
     //----オーケストレータ別の設定記述----
     
     // 各種ローカル変数を定義

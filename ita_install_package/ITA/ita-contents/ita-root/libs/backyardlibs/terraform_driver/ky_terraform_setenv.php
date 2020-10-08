@@ -60,8 +60,14 @@
     // 代入値管理テーブル名
     $vg_terraform_vars_assign_table_name         = "B_TERRAFORM_VARS_ASSIGN";
 
+    // 代入値自動登録設定テーブル名
+    $vg_terraform_val_assign_table_name          = "B_TERRAFORM_VAL_ASSIGN";
+
     // 代入値管理情報紐付け（代入値/変数名/Movement紐付け)管理VIEW
     $vg_terraform_vars_data_view_name            = "D_TERRAFORM_VARS_DATA";
+
+    // 代入値管理作業パターン紐付け管理VIEW
+    $vg_terraform_ptn_vars_link_view_name        = "D_TERRAFORM_PTN_VARS_LINK";
 
     // Module素材管理テーブル名
     $vg_terraform_module_table_name = "B_TERRAFORM_MODULE";

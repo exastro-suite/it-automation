@@ -41,6 +41,13 @@ callback.prototype = {
     printConductorList : function( result ){
         conductorUseList.conductorCallList = JSON.parse( result );
         if ( conductorGetMode === 'starting') {
+            proxy.printSymphonyList();
+        }
+    },
+    //---- Symphony Callリスト用-----//
+    printSymphonyList : function( result ){
+        conductorUseList.symphonyCallList = JSON.parse( result );
+        if ( conductorGetMode === 'starting') {
             proxy.printConductorStatus( conductorInstanceID );
         }
     },

@@ -487,7 +487,7 @@ window.onload = function(){
     else{
         initialFilter = initialFilterEl.innerHTML;
     }
-    initProcess('instanceConstruct');
+    initProcess('instanceConstructWithPlanExecute');
     show('SetsumeiMidashi','SetsumeiNakami');
 }
 

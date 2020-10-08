@@ -10,11 +10,10 @@ CREATE_MENU_ID                      INT                             , -- 識別�
 MENU_NAME                           VARCHAR (256)                    ,
 PURPOSE                             INT                             ,
 TARGET                              INT                             ,
-MENUGROUP_FOR_HG                    INT                             ,
-MENUGROUP_FOR_H                     INT                             ,
+VERTICAL                            INT                             ,
+MENUGROUP_FOR_INPUT                 INT                             ,
+MENUGROUP_FOR_SUBST                 INT                             ,
 MENUGROUP_FOR_VIEW                  INT                             ,
-MENUGROUP_FOR_CONV                  INT                             ,
-MENUGROUP_FOR_CMDB                  INT                             ,
 DISP_SEQ                            INT                             ,
 DESCRIPTION                         VARCHAR (1024)                  ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
@@ -34,11 +33,10 @@ CREATE_MENU_ID                      INT                             , -- 識別�
 MENU_NAME                           VARCHAR (256)                    ,
 PURPOSE                             INT                             ,
 TARGET                              INT                             ,
-MENUGROUP_FOR_HG                    INT                             ,
-MENUGROUP_FOR_H                     INT                             ,
+VERTICAL                            INT                             ,
+MENUGROUP_FOR_INPUT                 INT                             ,
+MENUGROUP_FOR_SUBST                 INT                             ,
 MENUGROUP_FOR_VIEW                  INT                             ,
-MENUGROUP_FOR_CONV                  INT                             ,
-MENUGROUP_FOR_CMDB                  INT                             ,
 DISP_SEQ                            INT                             ,
 DESCRIPTION                         VARCHAR (1024)                  ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
@@ -63,14 +61,15 @@ COL_GROUP_ID                        INT                             ,
 INPUT_METHOD_ID                     INT                             ,
 MAX_LENGTH                          INT                             ,
 MULTI_MAX_LENGTH                    INT                             ,
-PREG_MATCH                          VARCHAR (8192)                  ,
-MULTI_PREG_MATCH                    VARCHAR (8192)                  ,
+PREG_MATCH                          TEXT  (8192)                    ,
+MULTI_PREG_MATCH                    TEXT  (8192)                    ,
 OTHER_MENU_LINK_ID                  INT                             ,
 INT_MAX                             INT                             ,
 INT_MIN                             INT                             ,
 FLOAT_MAX                           DOUBLE                          ,
 FLOAT_MIN                           DOUBLE                          ,
 FLOAT_DIGIT                         INT                             ,
+PW_MAX_LENGTH                       INT                             ,
 DESCRIPTION                         VARCHAR (1024)                  ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
 DISUSE_FLAG                         VARCHAR  (1)                    , -- 廃止フラグ
@@ -95,14 +94,15 @@ COL_GROUP_ID                        INT                             ,
 INPUT_METHOD_ID                     INT                             ,
 MAX_LENGTH                          INT                             ,
 MULTI_MAX_LENGTH                    INT                             ,
-PREG_MATCH                          VARCHAR (8192)                  ,
-MULTI_PREG_MATCH                    VARCHAR (8192)                  ,
+PREG_MATCH                          TEXT  (8192)                    ,
+MULTI_PREG_MATCH                    TEXT  (8192)                    ,
 OTHER_MENU_LINK_ID                  INT                             ,
 INT_MAX                             INT                             ,
 INT_MIN                             INT                             ,
 FLOAT_MAX                           DOUBLE                          ,
 FLOAT_MIN                           DOUBLE                          ,
 FLOAT_DIGIT                         INT                             ,
+PW_MAX_LENGTH                       INT                             ,
 DESCRIPTION                         VARCHAR (1024)                  ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
 DISUSE_FLAG                         VARCHAR  (1)                    , -- 廃止フラグ
@@ -232,35 +232,6 @@ JOURNAL_ACTION_CLASS                VARCHAR  (8)                    , -- 履歴�
 
 PURPOSE_ID                          INT                             , -- 識別シーケンス項番
 PURPOSE_NAME                        VARCHAR (64)                    ,
-NOTE                                VARCHAR  (4000)                 , -- 備考
-DISUSE_FLAG                         VARCHAR  (1)                    , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP               DATETIME(6)                     , -- 最終更新日時
-LAST_UPDATE_USER                    INT                             , -- 最終更新ユーザ
-PRIMARY KEY(JOURNAL_SEQ_NO)
-)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
-
--- -------------------------
--- 作成対象マスタ
--- -------------------------
-CREATE TABLE F_PARAM_TARGET
-(
-TARGET_ID                           INT                             , -- 識別シーケンス項番
-TARGET_NAME                         VARCHAR (64)                    ,
-NOTE                                VARCHAR  (4000)                 , -- 備考
-DISUSE_FLAG                         VARCHAR  (1)                    , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP               DATETIME(6)                     , -- 最終更新日時
-LAST_UPDATE_USER                    INT                             , -- 最終更新ユーザ
-PRIMARY KEY (TARGET_ID)
-)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
-
-CREATE TABLE F_PARAM_TARGET_JNL
-(
-JOURNAL_SEQ_NO                      INT                             , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME                DATETIME(6)                     , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS                VARCHAR  (8)                    , -- 履歴用変更種別
-
-TARGET_ID                           INT                             , -- 識別シーケンス項番
-TARGET_NAME                         VARCHAR (64)                    ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
 DISUSE_FLAG                         VARCHAR  (1)                    , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP               DATETIME(6)                     , -- 最終更新日時
@@ -708,6 +679,7 @@ SELECT TAB_A.CREATE_ITEM_ID,
        TAB_A.FLOAT_MAX,
        TAB_A.FLOAT_MIN,
        TAB_A.FLOAT_DIGIT,
+       TAB_A.PW_MAX_LENGTH,
        TAB_A.DESCRIPTION,
        TAB_C.FULL_COL_GROUP_NAME,
        CASE
@@ -721,7 +693,7 @@ SELECT TAB_A.CREATE_ITEM_ID,
 FROM F_CREATE_ITEM_INFO TAB_A
 LEFT JOIN F_CREATE_MENU_INFO TAB_B ON (TAB_A.CREATE_MENU_ID = TAB_B.CREATE_MENU_ID)
 LEFT JOIN F_COLUMN_GROUP TAB_C ON (TAB_A.COL_GROUP_ID = TAB_C.COL_GROUP_ID)
-WHERE TAB_B.MENUGROUP_FOR_CONV != ""
+WHERE TAB_B.VERTICAL != ""
 ;
 
 CREATE VIEW G_CREATE_ITEM_INFO_JNL AS 
@@ -746,6 +718,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
        TAB_A.FLOAT_MAX,
        TAB_A.FLOAT_MIN,
        TAB_A.FLOAT_DIGIT,
+       TAB_A.PW_MAX_LENGTH,
        TAB_A.DESCRIPTION,
        CASE
            WHEN TAB_C.FULL_COL_GROUP_NAME IS NULL THEN CONCAT(TAB_B.MENU_NAME,':',TAB_A.ITEM_NAME)
@@ -758,7 +731,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
 FROM F_CREATE_ITEM_INFO_JNL TAB_A
 LEFT JOIN F_CREATE_MENU_INFO TAB_B ON (TAB_A.CREATE_MENU_ID = TAB_B.CREATE_MENU_ID)
 LEFT JOIN F_COLUMN_GROUP TAB_C ON (TAB_A.COL_GROUP_ID = TAB_C.COL_GROUP_ID)
-WHERE TAB_B.MENUGROUP_FOR_CONV != ""
+WHERE TAB_B.VERTICAL != ""
 ;
 INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_CREATE_MENU_INFO_RIC',1);
 
@@ -824,15 +797,19 @@ INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_CREATE_MST_MENU_STATUS_RIC',1);
 
 INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_CREATE_MST_MENU_STATUS_JSQ',1);
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_PARAM_TARGET_RIC',3);
-
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_PARAM_TARGET_JSQ',3);
-
 
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011601,'Create Menu','sheet.png',51,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100011601,'Create Menu','sheet.png',51,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011609,'Vertical Menu broken into host',NULL,59,'Vertical Menu broken into host','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160009,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100011609,'Vertical Menu broken into host',NULL,59,'Vertical Menu broken into host','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011610,'Input','for-input.png',52,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160010,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100011610,'Input','for-input.png',52,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011611,'Substitution value','for-subst.png',53,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160011,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100011611,'Substitution value','for-subst.png',53,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011612,'Reference','for-view.png',54,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160012,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100011612,'Reference','for-view.png',54,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011613,'Vertical conveｒsion',NULL,58,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160013,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100011613,'Vertical conveｒsion',NULL,58,'Create Menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160001,2100011601,'Menu definition information',NULL,NULL,NULL,1,0,1,2,2,'create_menu_info','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160001,2100011601,'Menu definition information',NULL,NULL,NULL,1,0,1,2,2,'create_menu_info','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -911,16 +888,13 @@ INSERT INTO F_INPUT_METHOD (INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,L
 INSERT INTO F_INPUT_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(6,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',6,'Date/time',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_INPUT_METHOD (INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(7,'Pulldown selection',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_INPUT_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(7,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',7,'Pulldown selection',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_INPUT_METHOD (INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(8,'Password',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_INPUT_METHOD_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,INPUT_METHOD_ID,INPUT_METHOD_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(8,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',8,'Password',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000001,2100000303,'Host name','C_STM_LIST','SYSTEM_ID','HOSTNAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000001,2100000303,'Host name','C_STM_LIST','SYSTEM_ID','HOSTNAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000002,2100000303,'IP address','C_STM_LIST','SYSTEM_ID','IP_ADDRESS',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000002,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000002,2100000303,'IP address','C_STM_LIST','SYSTEM_ID','IP_ADDRESS',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-
-INSERT INTO F_PARAM_TARGET (TARGET_ID,TARGET_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Parameter Sheet(Host/Operation)',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO F_PARAM_TARGET_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,TARGET_ID,TARGET_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Parameter Sheet(Host/Operation)',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO F_PARAM_TARGET (TARGET_ID,TARGET_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Data Sheet(Master available)',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO F_PARAM_TARGET_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,TARGET_ID,TARGET_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'Data Sheet(Master available)',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 
 COMMIT;

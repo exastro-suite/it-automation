@@ -74,16 +74,26 @@
             }
         }
         
-        $exec_log  = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101310");
+        //$exec_log  = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101310");
         $error_log = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101320");
+        $plan_log = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101340");
+        $policyCheck_log = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101350");
+        $apply_log = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101360");
 
         $prg_recorder_array = array(1=>array('PRG_RCDR_ID'=>'1'
-                                            ,'PRG_RCDR_NAME'=>$exec_log
-                                            ,'PRG_FILE_NAME'=>'exec.log')
+                                            ,'PRG_RCDR_NAME'=>$plan_log
+                                            ,'PRG_FILE_NAME'=>'plan.log')
                                     ,2=>array('PRG_RCDR_ID'=>'2'
+                                            ,'PRG_RCDR_NAME'=>$policyCheck_log
+                                            ,'PRG_FILE_NAME'=>'policyCheck.log')
+                                    ,3=>array('PRG_RCDR_ID'=>'3'
+                                            ,'PRG_RCDR_NAME'=>$apply_log
+                                            ,'PRG_FILE_NAME'=>'apply.log')
+                                    ,4=>array('PRG_RCDR_ID'=>'4'
                                             ,'PRG_RCDR_NAME'=>$error_log
                                             ,'PRG_FILE_NAME'=>'error.log')
                                    );
+
         // 作業№が設定されている場合
         if( isset($execution_no) ){
             ////////////////////////////////////////////////////////////////
@@ -306,7 +316,7 @@ print <<< EOD
 
 EOD;
         }
-        
+
         // 進行記録ファイル
         if( count( $prg_recorder_array ) > 0 ){
             $loop_counter = 0;
@@ -343,7 +353,7 @@ EOD;
             }
         }
     }
-    
+
 print <<< EOD
     
     <!-------------------------------- 緊急停止 -------------------------------->

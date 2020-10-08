@@ -79,7 +79,6 @@
             $aryUtnSqlBind = $retWorkspaceData[1];
             $registerData['organizationID'] = $retWorkspaceData[1]['ORGANIZATION_ID'];
             $registerData['workspaceName'] = $retWorkspaceData[1]['WORKSPACE_NAME'];
-            $registerData['applyMethod'] = $retWorkspaceData[1]['APPLY_METHOD'];
             $registerData['terraformVersion'] = $retWorkspaceData[1]['TERRAFORM_VERSION'];
 
             //----------------------------------------------
@@ -177,7 +176,6 @@
             $aryUtnSqlBind = $retWorkspaceData[1];
             $checkData['organizationID'] = $retWorkspaceData[1]['ORGANIZATION_ID'];
             $checkData['workspaceName'] = $retWorkspaceData[1]['WORKSPACE_NAME'];
-            $checkData['applyMethod'] = $retWorkspaceData[1]['APPLY_METHOD'];
             $checkData['terraformVersion'] = $retWorkspaceData[1]['TERRAFORM_VERSION'];
 
             //----------------------------------------------
@@ -225,13 +223,6 @@
                 if($retCheckWorkspace[2] == true){
                     //中身をチェックし、差異があるかどうかを確認
                     $diffFlag = false;
-
-                    //Apply Methodをチェック(Auto apply(ID:1)=>true, Manual apply(ID:2)=>false,null(default)=>false)
-                    $TFE_ApplyMethod = $retCheckWorkspace[3]['attributes']['auto-apply'];
-                    $ITA_ApplyMethod = ($checkData['applyMethod'] == 2) ? false : true;
-                    if($TFE_ApplyMethod != $ITA_ApplyMethod){
-                        $diffFlag = true;
-                    }
 
                     //Terraform Versionをチェック(ITA側の登録がNULLの場合はチェックをしない)
                     $TFE_TerraformVersion = $retCheckWorkspace[3]['attributes']['terraform-version'];

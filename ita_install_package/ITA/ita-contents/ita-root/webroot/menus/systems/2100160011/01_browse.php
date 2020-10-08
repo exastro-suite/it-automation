@@ -92,7 +92,6 @@ EOD;
     $timeStamp_menu_editor_css = filemtime("$root_dir_path/webroot/menus/systems/2100160011/menu_editor.css");
     
     $timeStamp_00_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/00_javascript.js");
-    $timeStamp_common_editor_func_js = filemtime("$root_dir_path/webroot/common/javascripts/common_editor_func.js");
     $timeStamp_menu_editor_js = filemtime("$root_dir_path/webroot/menus/systems/2100160011/menu_editor.js");
     
     // メニューID
@@ -119,7 +118,6 @@ EOD;
 <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
 <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
 
-<script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/common_editor_func.js?{$timeStamp_common_editor_func_js}"></script>
 <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/2100160011/menu_editor.js?{$timeStamp_menu_editor_js}"></script>
 
 <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/00_javascript.js?{$timeStamp_00_javascript_js}"></script>
@@ -224,35 +222,41 @@ EOD;
       <div id="menu-info" class="editor-tab-body">
 
           <div class="property-group">
-            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104210")}</div>
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104210")} :</div>
             <table class="property-table">
               <tbody>
                 <tr>
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104211")}</th>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104211")} :</th>
                   <td class="property-td" colspan="3"><span id="create-menu-id" class="property-span">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
                 <tr>
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104212")}</th>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104212")} :</th>
                   <td class="property-td" colspan="3"><span id="create-menu-name" class="property-span"></span></td>
                 </tr>
                 <tr>
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104213")}</th>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104213")} :</th>
                   <td class="property-td" colspan="3"><span id="create-menu-type" class="property-span"></span></td>
                 </tr>
                 <tr>
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104214")}</th>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104214")} :</th>
                   <td class="property-td" colspan="3"><span id="create-menu-order" class="property-span"></span></td>
                 </tr>
                 <tr class="parameter-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104215")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-use" class="property-span"></span></td>
+                  <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104237")} :</th>
+                  <td class="property-td" colspan="2"><span id="create-menu-use-host-group" class="property-span"></span>
+                  </td>
+                </tr>
+                <tr class="parameter-sheet parameter-operation">
+                  <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104238")} :</th>
+                  <td class="property-td" colspan="2"><span id="create-menu-use-vertical" class="property-span"></span>
+                  </td>
                 </tr>
                 <tr>
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104216")}</th>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104216")} :</th>
                   <td class="property-td" colspan="3"><span id="create-menu-last-modified" class="property-span">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
                 <tr>
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104217")}</th>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104217")} :</th>
                   <td class="property-td" colspan="3"><span id="create-last-update-user" class="property-span">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
               </tbody>
@@ -263,25 +267,17 @@ EOD;
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</div>
             <table class="property-table">
               <tbody>
-                <tr class="parameter-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104219")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-host" type="text" class="property-span"></span></td>
+                <tr class="data-sheet parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104239")} :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-for-input" type="text" class="property-span"></span></td>
                 </tr>
-                <tr class="host-group">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104220")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-host-group" type="text" class="property-span"></span></td>
+                <tr class="parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104240")} :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-for-substitution" type="text" class="property-span"></span></td>
                 </tr>
-                <tr class="parameter-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104221")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-reference" type="text" class="property-span"></span></td>
-                </tr>
-                <tr class="parameter-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104222")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-vertical" type="text" class="property-span"></span></td>
-                </tr>
-                <tr class="data-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104223")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-data-sheet" type="text" class="property-span"></span></td>
+                <tr class="parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104241")} :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-for-reference" type="text" class="property-span"></span></td>
                 </tr>
               </tbody>
             </table>
@@ -317,7 +313,7 @@ EOD;
       <div id="menu-info" class="editor-tab-body">
 
           <div class="property-group">
-            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104210")}</div>
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104210")} :</div>
             <table class="property-table">
               <tbody>
                 <tr>
@@ -329,7 +325,7 @@ EOD;
                   <td class="property-td" colspan="3"><input id="create-menu-name" class="property-text" type="text"></td>
                 </tr>
                 <tr>
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104213")}<span class="input_required">*</span> :</th>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104213")} :</th>
                   <td class="property-td" colspan="3">
                     <select id="create-menu-type" class="property-select">
                     </select>
@@ -340,18 +336,23 @@ EOD;
                   <td class="property-td" colspan="3"><input id="create-menu-order" class="property-number" type="number"></td>
                 </tr>
                 <tr class="parameter-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104215")}<span class="input_required">*</span> :</th>
-                  <td class="property-td" colspan="3">
-                    <select id="create-menu-use" class="property-select">
-                    </select>
+                  <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104237")} :</th>
+                  <td class="property-td" colspan="2">
+                    <label class="property-label" ><input type="checkbox" id="create-menu-use-host-group"> {$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104242")}</label>
+                  </td>
+                </tr>
+                <tr class="parameter-sheet parameter-operation">
+                  <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104238")} <span id="vertical-menu-help" class="editor-help" title="Help">?</span> :</th>
+                  <td class="property-td" colspan="2">
+                    <label class="property-label" ><input type="checkbox" id="create-menu-use-vertical"> {$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104242")}</label>
                   </td>
                 </tr>
                 <tr>
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104216")}</th>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104216")} :</th>
                   <td class="property-td" colspan="3"><span id="create-menu-last-modified" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
                 <tr>
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104217")}</th>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104217")} :</th>
                   <td class="property-td" colspan="3"><span id="create-last-update-user" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
               </tbody>
@@ -362,25 +363,17 @@ EOD;
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</div>
             <table class="property-table">
               <tbody>
-                <tr class="parameter-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104219")}<span class="input_required">*</span> :</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-host" type="text" class="property-span" data-id="" data-value=""></span></td>
+                <tr class="data-sheet parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104239")}<span class="input_required">*</span> :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-for-input" type="text" class="property-span" data-id="" data-value=""></span></td>
                 </tr>
-                <tr class="host-group">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104220")}<span class="input_required">*</span> :</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-host-group" type="text" class="property-span" data-id="" data-value=""></span></td>
+                <tr class="parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104240")}<span class="input_required">*</span> :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-for-substitution" type="text" class="property-span" data-id="" data-value=""></span></td>
                 </tr>
-                <tr class="parameter-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104221")}<span class="input_required">*</span> :</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-reference" type="text" class="property-span" data-id="" data-value=""></span></td>
-                </tr>
-                <tr class="parameter-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104222")}</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-vertical" type="text" class="property-span" data-id="" data-value=""></span></td>
-                </tr>
-                <tr class="data-sheet">
-                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104223")}<span class="input_required">*</span> :</th>
-                  <td class="property-td" colspan="3"><span id="create-menu-data-sheet" type="text" class="property-span" data-id="" data-value=""></span></td>
+                <tr class="parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104241")}<span class="input_required">*</span> :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-for-reference" type="text" class="property-span" data-id="" data-value=""></span></td>
                 </tr>
               </tbody>
             </table>

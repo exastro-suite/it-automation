@@ -245,4 +245,5 @@ $ary[170101] = "Node instance: Not in a status that can be released (pending).";
 $ary[170102] = "Node instance: Not a Node that can be released.";
 $ary[170013] = "Cannot find TargetMovement. Record may have been discarded.";
 $ary[170014] = "ConductorCall-Cannot register because an infinite loop occurs.";
+$ary[170015] = "SymphonyCall-A Symphony class ID that cannot be specified.";
 ?>
