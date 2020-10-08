@@ -51,6 +51,8 @@ $ary[1034] = "The data of item 1 can not be updated.";
 $ary[1035] = "Update can not be performed because request data exists in the directory. Request No = [{}]";
 $ary[1036] = "Failed to execute SQL. SQL error = [{}].";
 $ary[1037] = "Update can not be performed because request data exists. Request No = [{}]";
+$ary[1038] = "This value cannot be used.";
+$ary[1039] = "Select only one link destination (●).";
 $ary[5001] = "Failed to execute SQL. SQL error = [{}].";
 $ary[5002] = "\"Interface information\" of \"File control management\" is not set correctly.";
 $ary[5003] = "Git is not set in the clone repository [{}] of \"Interface information\" in \"File control management\".";

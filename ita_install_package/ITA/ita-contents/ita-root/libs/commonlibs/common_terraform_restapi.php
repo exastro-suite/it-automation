@@ -294,16 +294,7 @@
 
         //オプション
         $executionMode = true; //設定値に関係なくtrueにする。（ITA側ではこのオプションを設定できない仕様とする）
-        //autoApply(true = [Auto apply] / false = [Manual apply])
-        /*
-        $autoApply = $option['applyMethod'];
-        if($autoApply != null){
-            $autoApply = ($autoApply == 1) ? true : false;
-        }else{
-            $autoApply = true; //設定値がnullの場合、true(Auto Apply)に設定
-        }
-        */
-        $autoApply = true; //設定値に関係なくtrueにする。v1.6以降で設定できるよう改修予定あり。
+        $autoApply = false; //設定値に関係なくfalse(Manual apply)に固定。
         $terraformVersion = $option['terraformVersion'];
         $terraformWorkingDirectory = ""; //設定値に関係なく空欄にする。（ITA側ではこのオプションを設定できない仕様とする）
 
@@ -345,16 +336,7 @@
 
         //オプション
         $executionMode = true; //設定値に関係なくtrueにする。（ITA側ではこのオプションを設定できない仕様とする）
-        //autoApply(true = [Auto apply] / false = [Manual apply])
-        /*
-        $autoApply = $option['applyMethod'];
-        if($autoApply != null){
-            $autoApply = ($autoApply == 1) ? true : false;
-        }else{
-            $autoApply = true; //設定値がnullの場合、true(Auto Apply)に設定
-        }
-        */
-        $autoApply = true; //設定値に関係なくtrueにする。v1.6以降で設定できるよう改修予定あり。
+        $autoApply = false; //設定値に関係なくfalse(Manual apply)に固定。
         $terraformVersion = $option['terraformVersion'];
         $terraformWorkingDirectory = ""; //設定値に関係なく空欄にする。（ITA側ではこのオプションを設定できない仕様とする）
 
@@ -545,7 +527,7 @@
         $method = "POST";
 
         //requestContents
-        //auto-queue-runsがtrueなら、アップロード後自動的にplan&applyが実行される
+        //auto-queue-runsがtrueなら、アップロード後自動的にplanが実行される
         $requestContents = array(
             "data" => array(
                 "type" => "configuration-versions",
@@ -738,6 +720,48 @@
         $requestURI = "api/v2/applies/" . $applyID;
         //method
         $method = "GET";
+
+        //restApiResponse
+        $restApiResponse = terraform_restapi_access(
+            $hostname, //hostname
+            $token, //token
+            $requestURI, //requestURI
+            $method, //method
+            null //requestContents
+        );
+
+        return $restApiResponse;
+    }
+
+    //////////////////////////
+    // RUNを適用する(Applyを実行)//
+    //////////////////////////
+    function apply_execution($hostname, $token, $runID){
+        //requestURI
+        $requestURI = "api/v2/runs/" . $runID . "/actions/apply";
+        //method
+        $method = "POST";
+
+        //restApiResponse
+        $restApiResponse = terraform_restapi_access(
+            $hostname, //hostname
+            $token, //token
+            $requestURI, //requestURI
+            $method, //method
+            null //requestContents
+        );
+
+        return $restApiResponse;
+    }
+
+    //////////////////////////
+    // RUNを破棄する(Applyを中止)//
+    //////////////////////////
+    function apply_discard($hostname, $token, $runID){
+        //requestURI
+        $requestURI = "api/v2/runs/" . $runID . "/actions/discard";
+        //method
+        $method = "POST";
 
         //restApiResponse
         $restApiResponse = terraform_restapi_access(

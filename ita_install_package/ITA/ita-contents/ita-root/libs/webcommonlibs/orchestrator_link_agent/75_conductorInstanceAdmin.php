@@ -1946,9 +1946,14 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
 
             }
 
-            if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" ){
+            if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" && $row['I_NODE_TYPE_ID'] == 4  ){
                 //----ジャンプ用(ITA-ROOTからの)相対URL
                 $aryInstanceItems['JUMP']             = $g['scheme_n_authority']."/default/menu/01_browse.php?no=2100180005&conductor_instance_id=".$row['CONDUCTOR_INSTANCE_CALL_NO'];
+                //----ジャンプ用(ITA-ROOTからの)相対URL
+            }
+            if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" && $row['I_NODE_TYPE_ID'] == 10 ){
+                //----ジャンプ用(ITA-ROOTからの)相対URL
+                $aryInstanceItems['JUMP']             = $g['scheme_n_authority']."/default/menu/01_browse.php?no=2100000309&symphony_instance_id=".$row['CONDUCTOR_INSTANCE_CALL_NO'];
                 //----ジャンプ用(ITA-ROOTからの)相対URL
             }
 

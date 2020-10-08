@@ -3516,7 +3516,7 @@ class OrchestratorLinkAgent {
 
 
                 //Callの場合  [NODE_TYPE_ID(=4)の場合]       
-                if( $aryDataForMovement['NODE_TYPE_ID'] == 4){
+                if( $aryDataForMovement['NODE_TYPE_ID'] == 4 ||  $aryDataForMovement['NODE_TYPE_ID'] == 10){
                    
                     if( $aryDataForMovement['SKIP_FLAG'] != 1 ){
                         $register_tgt_row['EXE_SKIP_FLAG']        = 1; //スキップしない
@@ -4288,6 +4288,7 @@ class OrchestratorLinkAgent {
             if( $value['NODE_TYPE_ID'] == 7) $arr_json[$value['NODE_NAME']]['type']="merge";
             if( $value['NODE_TYPE_ID'] == 8) $arr_json[$value['NODE_NAME']]['type']="pause";
             if( $value['NODE_TYPE_ID'] == 9) $arr_json[$value['NODE_NAME']]['type']="blank"; 
+            if( $value['NODE_TYPE_ID'] == 10) $arr_json[$value['NODE_NAME']]['type']="call_s"; 
 
             //Movement個別
             if( $value['NODE_TYPE_ID'] == 3) {
@@ -4323,8 +4324,30 @@ class OrchestratorLinkAgent {
                 $arr_json[$value['NODE_NAME']]['CONDUCTOR_NAME']=$strConductorName;
             }
 
-            //Movement,call共通
-            if( $value['NODE_TYPE_ID'] == 3 || $value['NODE_TYPE_ID'] == 4 ) {
+            //call(symphony)個別
+            if( $value['NODE_TYPE_ID'] == 10) {
+                #$arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
+                $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
+
+                $strConductorName="";
+                if( $value['CONDUCTOR_CALL_CLASS_NO'] != "" ){
+                    //Symphonyクラス情報取得
+                    $aryRetBody = $this->getInfoFromOneOfSymphonyClasses($value['CONDUCTOR_CALL_CLASS_NO'], 0);
+
+                    if( $aryRetBody[1] !== null ){
+                        //廃止済みの場合
+                        $strConductorName = "";
+                        #$arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
+                        $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']="---";
+                    }else{
+                        $strConductorName = $aryRetBody[4]['SYMPHONY_NAME'];    
+                    }
+                }
+                $arr_json[$value['NODE_NAME']]['SYMPHONY_NAME']=$strConductorName;
+            }
+
+            //Movement,call,call_s共通
+            if( $value['NODE_TYPE_ID'] == 3 || $value['NODE_TYPE_ID'] == 4 || $value['NODE_TYPE_ID'] == 10 ) {
                 $arr_json[$value['NODE_NAME']]['OPERATION_NO_IDBH']=$value['OPERATION_NO_IDBH'];
                 $arr_json[$value['NODE_NAME']]['SKIP_FLAG']=$value['SKIP_FLAG'];
 
@@ -5383,6 +5406,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             if( !isset( $aryDataForMovement['OPERATION_NO_IDBH'] ) )$aryDataForMovement['OPERATION_NO_IDBH']="";
             if( !isset( $aryDataForMovement['SKIP_FLAG'] ) )$aryDataForMovement['SKIP_FLAG']="";
             if( !isset( $aryDataForMovement['NEXT_PENDING_FLAG'] ) )$aryDataForMovement['NEXT_PENDING_FLAG']="";
+            if( !isset( $aryDataForMovement['CALL_SYMPHONY_ID'] ) )$aryDataForMovement['CALL_SYMPHONY_ID']="";
 
             if( !isset( $aryDataForMovement['x'] ) )$aryDataForMovement['x']="";
             if( !isset( $aryDataForMovement['y'] ) )$aryDataForMovement['y']="";
@@ -5419,6 +5443,13 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                 }
             }
 
+            //CALL呼び出し値有無(symphony)
+            if( $aryDataForMovement['type'] == "call_s" && ( $aryDataForMovement['CALL_SYMPHONY_ID'] == "" || !is_numeric( $aryDataForMovement['CALL_SYMPHONY_ID'] ) ) ){
+                    $intErrorType = 2;
+                    $strErrStepIdInFx="00002800";
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170015");
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
 
             $varNodeClassID = $varRISeq;
             $register_tgt_row = array();
@@ -5427,7 +5458,10 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row['NODE_TYPE_ID']      = $aryDataForMovement['type'];            
             $register_tgt_row['ORCHESTRATOR_ID']   = $aryDataForMovement['ORCHESTRATOR_ID'];
             $register_tgt_row['PATTERN_ID']        = $aryDataForMovement['PATTERN_ID'];
-            $register_tgt_row['CONDUCTOR_CALL_CLASS_NO']   = $aryDataForMovement['CALL_CONDUCTOR_ID'];
+
+            if( $aryDataForMovement['type'] == "call" )$register_tgt_row['CONDUCTOR_CALL_CLASS_NO']   = $aryDataForMovement['CALL_CONDUCTOR_ID'];
+            if( $aryDataForMovement['type'] == "call_s" )$register_tgt_row['CONDUCTOR_CALL_CLASS_NO']   = $aryDataForMovement['CALL_SYMPHONY_ID'];
+
             $register_tgt_row['DESCRIPTION']       = $aryDataForMovement['note'];
             $register_tgt_row['CONDUCTOR_CLASS_NO'] = $varConductorClassNo;
             $register_tgt_row['OPERATION_NO_IDBH'] = $aryDataForMovement['OPERATION_NO_IDBH'];         
@@ -5451,7 +5485,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             if( $aryDataForMovement['type'] == "merge")             $register_tgt_row['NODE_TYPE_ID']=7;
             if( $aryDataForMovement['type'] == "pause")             $register_tgt_row['NODE_TYPE_ID']=8;
             if( $aryDataForMovement['type'] == "blank")             $register_tgt_row['NODE_TYPE_ID']=9; 
-
+            if( $aryDataForMovement['type'] == "call_s")             $register_tgt_row['NODE_TYPE_ID']=10; 
 
             $arrayConfigForIUD = $arrayConfigForNodeClassIUD;
             $tgtSource_row = $register_tgt_row;
@@ -5702,7 +5736,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
     //node分繰り返し
     $aryNode = array();
     $arrpatternDel = array('/__proto__/');
-    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/' );
+    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/' );
 
     foreach( $fxVarsStrSortedData as $nodename => $nodeinfo ){
         //　nodeの処理開始
@@ -5743,6 +5777,823 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
     return $aryNode;
 
 }
+
+
+//----symphony一覧を取得する
+    function getInfoOfSymphonyList(){
+        /////////////////////////////////////////////////////////////
+        // オペレーション情報を取得                                //
+        /////////////////////////////////////////////////////////////
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $aryRowOfOperationTable = array();
+        
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+        
+        $strSysErrMsgBody = "";
+        //
+        try{
+            $objDBCA = $this->getDBConnectAgent();
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            
+            $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
+            $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
+            
+            // ----全行および全行中、最後に更新された日時を取得する
+            $arrayConfigForSelect = array(
+                "JOURNAL_SEQ_NO"=>"",
+                "JOURNAL_ACTION_CLASS"=>"",
+                "JOURNAL_REG_DATETIME"=>"",
+                "SYMPHONY_CLASS_NO"=>"",
+                "SYMPHONY_NAME"=>"",
+                "DESCRIPTION"=>"",
+                "NOTE"=>"",
+                "DISUSE_FLAG"=>"",
+                "LAST_UPDATE_TIMESTAMP"=>"",
+                "LAST_UPDATE_USER"=>"",
+                $strSelectMaxLastUpdateTimestamp=>""
+            );
+            
+            $arrayValueTmpl = array(
+                "JOURNAL_SEQ_NO"=>"",
+                "JOURNAL_ACTION_CLASS"=>"",
+                "JOURNAL_REG_DATETIME"=>"",
+                "SYMPHONY_CLASS_NO"=>"",
+                "CSYMPHONY_NAME"=>"",
+                "DESCRIPTION"=>"",
+                "NOTE"=>"",
+                "DISUSE_FLAG"=>"",
+                "LAST_UPDATE_TIMESTAMP"=>"",
+                "LAST_UPDATE_USER"=>"",
+                $strSelectMaxLastUpdateTimestamp=>""
+            );
+            $arrayValue = $arrayValueTmpl;
+            
+            $strSelectMode = "SELECT";
+            $strSelectForUpdateLock = "";
+            
+            $temp_array = array('WHERE'=>" DISUSE_FLAG IN ('0') {$strSelectForUpdateLock}");
+            
+            $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
+                                                ,$strSelectMode
+                                                ,"SYMPHONY_CLASS_NO"
+                                                ,"C_SYMPHONY_CLASS_MNG"
+                                                ,"C_SYMPHONY_CLASS_MNG_JNL"
+                                                ,$arrayConfigForSelect
+                                                ,$arrayValue
+                                                ,$temp_array );
+            $sqlUtnBody = $retArray[1];
+            $arrayUtnBind = $retArray[2];
+            
+            $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
+            if( $retArray[0]!==true ){
+                $intErrorType = $retArray[1];
+                $aryErrMsgBody = $retArray[2];
+                $strErrMsg = $retArray[4];
+                // 例外処理へ
+                $strErrStepIdInFx="00000200";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $objQueryUtn =& $retArray[3];
+            
+            //----発見行だけループ
+            $aryRowOfSymClassTable = array();
+            while ( $row = $objQueryUtn->resultFetch() ){
+                    $aryRowOfOperationTable[] = $row;
+            }
+            //発見行だけループ----
+            
+            unset($objQueryUtn);
+            unset($retArray);
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfOperationTable);
+        return $retArray;
+    }
+//symphony一覧を取得する----
+//----シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録する(ConductorからのSymphony呼び出し)
+    function registerSymphonyInstanceForConductor($intShmphonyClassId, $intOperationNoUAPK, $strPreserveDatetime, $aryOptionOrder, $aryOptionOrderOverride=null, $userId, $userName){
+
+        // グローバル変数宣言
+        global $g;
+
+        // ----変数定義
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $intSymphonyInstanceId = null;
+        $strExpectedErrMsgBodyForUI = "";
+        $aryFreeErrMsgBody = array();
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+        $strSysErrMsgBody = "";
+        $boolInTransactionFlag = false;
+
+        $arrayConfigForSymInsIUD = array(
+            "JOURNAL_SEQ_NO"=>"",
+            "JOURNAL_ACTION_CLASS"=>"",
+            "JOURNAL_REG_DATETIME"=>"",
+            "SYMPHONY_INSTANCE_NO"=>"",
+            "I_SYMPHONY_CLASS_NO"=>"",
+            "I_SYMPHONY_NAME"=>"",
+            "I_DESCRIPTION"=>"",
+            "OPERATION_NO_UAPK"=>"",
+            "I_OPERATION_NAME"=>"",
+            "STATUS_ID"=>"",
+            "EXECUTION_USER"=>"",
+            "ABORT_EXECUTE_FLAG"=>"",
+            "TIME_BOOK"=>"DATETIME",
+            "TIME_START"=>"DATETIME",
+            "TIME_END"=>"DATETIME",
+            "NOTE"=>"",
+            "DISUSE_FLAG"=>"",
+            "LAST_UPDATE_TIMESTAMP"=>"",
+            "LAST_UPDATE_USER"=>""
+        );
+        
+        $arraySymInsValueTmpl = array(
+            "JOURNAL_SEQ_NO"=>"",
+            "JOURNAL_ACTION_CLASS"=>"",
+            "JOURNAL_REG_DATETIME"=>"",
+            "SYMPHONY_INSTANCE_NO"=>"",
+            "I_SYMPHONY_CLASS_NO"=>"",
+            "I_SYMPHONY_NAME"=>"",
+            "I_DESCRIPTION"=>"",
+            "OPERATION_NO_UAPK"=>"",
+            "I_OPERATION_NAME"=>"",
+            "STATUS_ID"=>"",
+            "EXECUTION_USER"=>"",
+            "ABORT_EXECUTE_FLAG"=>"",
+            "TIME_BOOK"=>"",
+            "TIME_START"=>"",
+            "TIME_END"=>"",
+            "NOTE"=>"",
+            "DISUSE_FLAG"=>"",
+            "LAST_UPDATE_TIMESTAMP"=>"",
+            "LAST_UPDATE_USER"=>""
+        );
+        
+        $arrayConfigForMovInsIUD = array(
+            "JOURNAL_SEQ_NO"=>"",
+            "JOURNAL_ACTION_CLASS"=>"",
+            "JOURNAL_REG_DATETIME"=>"",
+            "MOVEMENT_INSTANCE_NO"=>"",
+            "I_MOVEMENT_CLASS_NO"=>"",
+            "I_ORCHESTRATOR_ID"=>"",
+            "I_PATTERN_ID"=>"",
+            "I_PATTERN_NAME"=>"",
+            "I_ANS_HOST_DESIGNATE_TYPE_ID"=>"",
+            "I_ANS_WINRM_ID"=>"",
+            "I_MOVEMENT_SEQ"=>"",
+            "I_NEXT_PENDING_FLAG"=>"",
+            "I_DESCRIPTION"=>"",
+            "SYMPHONY_INSTANCE_NO"=>"",
+            "EXECUTION_NO"=>"",
+            "STATUS_ID"=>"",
+            "ABORT_RECEPTED_FLAG"=>"",
+            "TIME_START"=>"DATETIME",
+            "TIME_END"=>"DATETIME",
+            "RELEASED_FLAG"=>"",
+            "EXE_SKIP_FLAG"=>"",
+            "OVRD_OPERATION_NO_UAPK"=>"",
+            "OVRD_I_OPERATION_NAME"=>"",
+            "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "NOTE"=>"",
+            "DISUSE_FLAG"=>"",
+            "LAST_UPDATE_TIMESTAMP"=>"",
+            "LAST_UPDATE_USER"=>""
+        );
+        
+        $arrayMovInsValueTmpl = array(
+            "JOURNAL_SEQ_NO"=>"",
+            "JOURNAL_ACTION_CLASS"=>"",
+            "JOURNAL_REG_DATETIME"=>"",
+            "MOVEMENT_INSTANCE_NO"=>"",
+            "I_MOVEMENT_CLASS_NO"=>"",
+            "I_ORCHESTRATOR_ID"=>"",
+            "I_PATTERN_ID"=>"",
+            "I_PATTERN_NAME"=>"",
+            "I_ANS_HOST_DESIGNATE_TYPE_ID"=>"",
+            "I_ANS_WINRM_ID"=>"",
+            "I_MOVEMENT_SEQ"=>"",
+            "I_NEXT_PENDING_FLAG"=>"",
+            "I_DESCRIPTION"=>"",
+            "SYMPHONY_INSTANCE_NO"=>"",
+            "EXECUTION_NO"=>"",
+            "STATUS_ID"=>"",
+            "ABORT_RECEPTED_FLAG"=>"",
+            "TIME_START"=>"DATETIME",
+            "TIME_END"=>"DATETIME",
+            "RELEASED_FLAG"=>"",
+            "EXE_SKIP_FLAG"=>"",
+            "OVRD_OPERATION_NO_UAPK"=>"",
+            "OVRD_I_OPERATION_NAME"=>"",
+            "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "NOTE"=>"",
+            "DISUSE_FLAG"=>"",
+            "LAST_UPDATE_TIMESTAMP"=>"",
+            "LAST_UPDATE_USER"=>""
+        );
+        // 変数定義----
+
+
+        try{
+            $objDBCA = $g['objDBCA'];
+            $objMTS  = $g['objMTS'];
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+
+            ////////////////////////////////////////////////////////
+            // (ここから) シンフォニーとムーブメントのCUR/JNLの、シーケンスを取得する//
+            ///////////////////////////////////////////////////////
+            // ----MOV-INSTANCE-シーケンスを掴む
+            $retArray = getSequenceLockInTrz('C_MOVEMENT_INSTANCE_MNG_JSQ','A_SEQUENCE');
+            if( $retArray[1] != 0 ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000200";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $retArray = getSequenceLockInTrz('C_MOVEMENT_INSTANCE_MNG_RIC','A_SEQUENCE');
+            if( $retArray[1] != 0 ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000300";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            // MOV-INSTANCE-シーケンスを掴む----
+
+            // ----SYM-INSTANCE-シーケンスを掴む
+            $retArray = getSequenceLockInTrz('C_SYMPHONY_INSTANCE_MNG_JSQ','A_SEQUENCE');
+            if( $retArray[1] != 0 ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000400";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $retArray = getSequenceLockInTrz('C_SYMPHONY_INSTANCE_MNG_RIC','A_SEQUENCE');
+            if( $retArray[1] != 0 ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000500";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            // -SYM-INSTANCE-シーケンスを掴む----
+            ////////////////////////////////////////////////////////
+            // (ここまで) シンフォニーとムーブメントのCUR/JNLの、シーケンスを取得する//
+            ///////////////////////////////////////////////////////
+
+
+            //////////////////////////////////////////////////////
+            // (ここから) シンフォニー、ムーブメント、オペレーションの情報を取得する//
+            /////////////////////////////////////////////////////
+            // ----シンフォニークラスIDからシンフォニー部分、ムーブメント部分の情報を取得する
+            $aryRetBody = $this->getInfoFromOneOfSymphonyClasses($intShmphonyClassId, 0);
+            if( $aryRetBody[1] !== null ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000600";
+                if( $aryRetBody[1] === 101 ){
+                    //----該当のシンフォニーClassIDが１行も発見できなかった場合
+                    $intErrorType = 101;
+                    //$strExpectedErrMsgBodyForUI = "SymphonyクラスID：存在している必要があります。";
+                    $strErrMsg = $aryRetBody[3];
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733107");
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    //該当のシンフォニーClassIDが１行も発見できなかった場合----
+                }
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $aryRowOfSymClassTable = $aryRetBody[4];
+            $aryRowOfMovClassTable = $aryRetBody[5];
+            // シンフォニークラスIDからシンフォニー部分、ムーブメント部分の情報を取得する----
+
+            // ----オペレーションNoからオペレーションの情報を取得する
+            $arrayRetBody = $this->getInfoOfOneOperation($intOperationNoUAPK);
+            if( $arrayRetBody[1] !== null ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000700";
+                if( $arrayRetBody[1] === 101 ){
+                    $intErrorType = 102;
+                    //$strExpectedErrMsgBodyForUI = "オペレーション№：存在している必要があります。";
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733108");
+                }
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $aryRowOfOperationTable = $arrayRetBody[4];
+            // オペレーションNoからオペレーションの情報を取得する----
+            //////////////////////////////////////////////////////
+            // (ここまで) シンフォニー、ムーブメント、オペレーションの情報を取得する//
+            /////////////////////////////////////////////////////
+
+
+            /////////////////////////////////////
+            // (ここから) シンフォニーインスタンスを登録する//
+            /////////////////////////////////////
+            //テーブル情報をセット
+            $arrayConfigForIUD = $arrayConfigForSymInsIUD;
+            $register_tgt_row = $arraySymInsValueTmpl;
+
+            // ----シーケンス払い出し
+            $retArray = getSequenceValueFromTable('C_SYMPHONY_INSTANCE_MNG_RIC', 'A_SEQUENCE', FALSE );
+            if( $retArray[1] != 0 ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000800";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            else{
+                $varRISeq = $retArray[0];
+            }
+            // シーケンス払い出し----
+
+            // ----シンフォニーインスタンス登録用の値をセット
+            $varSymphonyInstanceNo = $varRISeq;
+            $register_tgt_row['SYMPHONY_INSTANCE_NO'] = $varSymphonyInstanceNo;
+            $register_tgt_row['I_SYMPHONY_CLASS_NO']  = $aryRowOfSymClassTable['SYMPHONY_CLASS_NO'];
+            $register_tgt_row['I_SYMPHONY_NAME']      = $aryRowOfSymClassTable['SYMPHONY_NAME'];
+            $register_tgt_row['I_DESCRIPTION']        = $aryRowOfSymClassTable['DESCRIPTION'];
+            //----開始予約時刻が設定されていた場合
+            if( strlen($strPreserveDatetime)==0 ){
+                $varStatus = 1; //未実行
+            }
+            else{
+                $varStatus = 2; //未実行(予約)
+                $register_tgt_row['TIME_BOOK']            = $strPreserveDatetime;
+            }
+            //開始予約時刻が設定されていた場合----
+            $register_tgt_row['STATUS_ID']            = $varStatus; //未実行[1]または未実行(予約)[2]
+            $register_tgt_row['EXECUTION_USER']       = $userName;
+            $register_tgt_row['OPERATION_NO_UAPK']    = $intOperationNoUAPK;
+            $register_tgt_row['I_OPERATION_NAME']     = $aryRowOfOperationTable['OPERATION_NAME'];
+            $register_tgt_row['ABORT_EXECUTE_FLAG']   = 1; //緊急停止発令フラグ(未発令)=[1]
+            $register_tgt_row['DISUSE_FLAG']          = '0';
+            $register_tgt_row['LAST_UPDATE_USER']     = $userId;
+            $tgtSource_row = $register_tgt_row;
+            // シンフォニーインスタンス登録用の値をセット----
+
+            // ----シンフォニーインスタンス登録用SQLを作成
+            $sqlType = "INSERT";
+            $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
+                                                ,$sqlType
+                                                ,"SYMPHONY_INSTANCE_NO"
+                                                ,"C_SYMPHONY_INSTANCE_MNG"
+                                                ,"C_SYMPHONY_INSTANCE_MNG_JNL"
+                                                ,$arrayConfigForIUD
+                                                ,$tgtSource_row);
+            if( $retArray[0] === false ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000900";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $sqlUtnBody = $retArray[1];
+            $arrayUtnBind = $retArray[2];
+            $sqlJnlBody = $retArray[3];
+            $arrayJnlBind = $retArray[4];
+            // シンフォニーインスタンス登録用SQLを作成----
+
+            // ----履歴シーケンス払い出し
+            $retArray = getSequenceValueFromTable('C_SYMPHONY_INSTANCE_MNG_JSQ', 'A_SEQUENCE', FALSE );
+            if( $retArray[1] != 0 ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00001000";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            else{
+                $varJSeq = $retArray[0];
+                $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
+            }
+            // 履歴シーケンス払い出し----
+
+            // ----シンフォニーインスタンス登録の実行
+            $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
+            $retArray02 = singleSQLCoreExecute($objDBCA, $sqlJnlBody, $arrayJnlBind, $strFxName);
+            if( $retArray01[0] !== true || $retArray02[0] !== true ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00001100";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            unset($retArray01);
+            unset($retArray02);
+            // シンフォニーインスタンス登録の実行----
+
+            /////////////////////////////////////
+            // (ここまで) シンフォニーインスタンスを登録する//
+            /////////////////////////////////////
+
+
+            /////////////////////////////////////
+            // (ここから) ムーブメントインスタンスを登録する//
+            /////////////////////////////////////
+            // ----ムーブメントから、廃止されているレコードを除外する
+            $aryMovement = array();
+            foreach($aryRowOfMovClassTable as $aryDataForMovement){
+                if( $aryDataForMovement['DISUSE_FLAG']=='0' ){
+                    $aryMovement[] = $aryDataForMovement;
+                }
+            }
+            // ムーブメントから、廃止されているレコードを除外する----
+
+            //----$aryOptionOrderOverrideがnullでない場合、各値をセットする
+            //（RESTおよびbackyard処理で登録する場合を想定。）
+            if( is_array($aryOptionOrderOverride) === true ){
+                $intFocusIndex = 0;
+                $aryOptionOrder = array();
+                foreach($aryMovement as $aryDataForMovement){
+                    $aryTmp1ForOverride = array();
+                    $aryTmp1ForOverride['MOVEMENT_SEQ']           = $intFocusIndex + 1;
+                    $tmp1StrOrcId     = $aryDataForMovement['ORCHESTRATOR_ID'];
+                    $tmp1StrPatternId = $aryDataForMovement['PATTERN_ID'];
+                    
+                    if( array_key_exists($intFocusIndex + 1, $aryOptionOrderOverride) === true ){
+                        //----あるムーブメントについて指定があった場合
+                        $aryTmp2ForOverride = $aryOptionOrderOverride[$intFocusIndex + 1];
+                        //あるムーブメントについて指定があった場合----
+                    }
+                    else{
+                        $aryTmp2ForOverride = array();
+                    }
+                    
+                    list($tmp1StrExeSkipFlag, $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('SKIP')        , ""); 
+                    list($tmp1StrOvrdOpeId  , $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('OPERATION_ID'), "");
+                    
+                    if( $tmp1StrExeSkipFlag === "YES" ){
+                        // checkedValueならスキップ
+                        $tmp1StrExeSkipFlag = "checkedValue";
+                    }
+                    else if( $tmp1StrExeSkipFlag === "NO" || strlen($tmp1StrExeSkipFlag) === 0 ){
+                        $tmp1StrExeSkipFlag = "";
+                    }
+                    else{
+                        $tmp1StrExeSkipFlag = "FORBIDDEN_VALUE";
+                    }
+                    
+                    $aryTmp1ForOverride['ORCHESTRATOR_ID']        = $tmp1StrOrcId;
+                    $aryTmp1ForOverride['PATTERN_ID']             = $tmp1StrPatternId;
+                    $aryTmp1ForOverride['EXE_SKIP_FLAG']          = $tmp1StrExeSkipFlag;
+                    $aryTmp1ForOverride['OVRD_OPERATION_NO_IDBH'] = $tmp1StrOvrdOpeId;
+                    $aryOptionOrder[] = $aryTmp1ForOverride;
+                    
+                    unset($tmp1StrOrcId);
+                    unset($tmp1StrPatternId);
+                    unset($tmp1StrExeSkipFlag);
+                    unset($tmp1StrOvrdOpeNo);
+                    unset($aryTmp1ForOverride);
+                    unset($aryTmp2ForOverride);
+                    
+                    $intFocusIndex += 1;
+                }
+                unset($tmpAryMultiLivePatternFromMaster);
+            }
+            //$aryOptionOrderOverrideがnullでない場合、各値をセットする----
+
+            //----$aryMovementのカウントチェック
+            if( count($aryMovement) !== count($aryOptionOrder) ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00001200";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            //$aryMovementのカウントチェック----
+            //----$aryOptionOrderのカウントチェック
+            if( count($aryOptionOrder) == 0 ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00001300";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            //$aryOptionOrderのカウントチェック----
+            
+
+            // ----ムーブメントインスタンス登録処理
+            $MovementErrorMsg = "";
+            $intFocusIndex = 0;
+
+            foreach($aryMovement as $aryDataForMovement){
+                $aryValuePerOptionOrderKey = $aryOptionOrder[$intFocusIndex];
+                //テーブル情報をセット
+                $arrayConfigForIUD = $arrayConfigForMovInsIUD;
+                $register_tgt_row = $arrayMovInsValueTmpl;
+
+                // ----シーケンス払い出し
+                $retArray = getSequenceValueFromTable('C_MOVEMENT_INSTANCE_MNG_RIC', 'A_SEQUENCE', FALSE );
+                if( $retArray[1] != 0 ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001400";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                else{
+                    $varRISeq = $retArray[0];
+                }
+                // シーケンス払い出し----
+
+                // ----PATTERN_IDからパターン情報を取得
+                $strPatternIdNumeric = $aryDataForMovement['PATTERN_ID'];
+                $retArray = $this->getLivePatternFromMaster(array($aryDataForMovement['ORCHESTRATOR_ID']),"",array($strPatternIdNumeric));
+                if($retArray[1] !== null ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001500";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                $aryMultiLivePatternFromMaster = $retArray[0];
+                // PATTERN_IDからパターン情報を取得----
+
+                // ----movementの存在をチェック
+                if( array_key_exists($strPatternIdNumeric, $aryMultiLivePatternFromMaster) === false ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001600";
+                    $intErrorType = 2;
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-1990037",array($intFocusIndex + 1));
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                // movementの存在をチェック----
+
+                //----差分がないかをチェック
+                if( ($intFocusIndex + 1) != $aryValuePerOptionOrderKey['MOVEMENT_SEQ'] ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001700";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                // オーケストレータが同じかどうか、をチェック
+                if( $aryDataForMovement['ORCHESTRATOR_ID'] != $aryValuePerOptionOrderKey['ORCHESTRATOR_ID'] ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001800";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                // 作業パターンが同じかどうか、をチェック
+                if( $strPatternIdNumeric != $aryValuePerOptionOrderKey['PATTERN_ID'] ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001900";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+
+                $arySinglePatternSource = $aryMultiLivePatternFromMaster[$strPatternIdNumeric];
+                unset($aryMultiLivePatternFromMaster);
+                //差分がないかをチェック----
+
+                // ----ムーブメントインスタンス登録用の値をセット
+                $register_tgt_row = array();
+                $register_tgt_row['MOVEMENT_INSTANCE_NO'] = $varRISeq;
+                $register_tgt_row['I_MOVEMENT_SEQ']       = $intFocusIndex + 1;
+                $register_tgt_row['I_MOVEMENT_CLASS_NO']  = $aryDataForMovement['MOVEMENT_CLASS_NO'];
+                $register_tgt_row['I_PATTERN_ID']         = $strPatternIdNumeric;
+                $register_tgt_row['I_PATTERN_NAME']       = $arySinglePatternSource['PATTERN_NAME'];
+                $register_tgt_row['I_ANS_HOST_DESIGNATE_TYPE_ID'] = $arySinglePatternSource['ANS_HOST_DESIGNATE_TYPE_ID'];
+                $register_tgt_row['I_ANS_WINRM_ID'] = $arySinglePatternSource['ANS_WINRM_ID'];
+                $register_tgt_row['I_ORCHESTRATOR_ID']    = $aryDataForMovement['ORCHESTRATOR_ID'];
+                $register_tgt_row['I_NEXT_PENDING_FLAG']  = $aryDataForMovement['NEXT_PENDING_FLAG'];
+                if( $aryDataForMovement['NEXT_PENDING_FLAG'] === '1' ){
+                    //----保留解除ポイントが存在する場合
+                    $register_tgt_row['RELEASED_FLAG']  = '1'; //1=未解除
+                    //保留解除ポイントが存在する場合----
+                }
+                else if( $aryDataForMovement['NEXT_PENDING_FLAG'] === '2' ){
+                    //----保留解除ポイントが存在しない場合
+                    //$register_tgt_row['RELEASED_FLAG']  = '';
+                    //保留解除ポイントが存在しない場合----
+                }
+                else{
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00002000";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+
+                if( $aryValuePerOptionOrderKey['EXE_SKIP_FLAG'] == '' ){
+                    $register_tgt_row['EXE_SKIP_FLAG']        = 1; //スキップしない
+                }
+                else if( $aryValuePerOptionOrderKey['EXE_SKIP_FLAG'] == 'checkedValue' ){
+                    $register_tgt_row['EXE_SKIP_FLAG']        = 2; //スキップする
+                }
+                else{
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00002100";
+                    $intErrorType = 2;
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733111",array($intFocusIndex + 1));
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                // ----オペレーション情報を取得し値をセット
+                if( 0 < strlen($aryValuePerOptionOrderKey['OVRD_OPERATION_NO_IDBH']) ){
+                    $tmpStrOpeNoIDBH = $aryValuePerOptionOrderKey['OVRD_OPERATION_NO_IDBH'];
+                    $strRegexpFormat='/^0$|^-?[1-9][0-9]*$/s';
+                    if( preg_match($strRegexpFormat, $tmpStrOpeNoIDBH) !== 1 ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00002200";
+                        $intErrorType = 2;
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733109",array($intFocusIndex + 1),$tmpStrOpeNoIDBH);
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                    $tmpAryRetBody = $this->getInfoOfOneOperation($tmpStrOpeNoIDBH,1);
+                    if( $tmpAryRetBody[1] !== null ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00002300";
+                        if( $tmpAryRetBody[1] == 101 ){
+                            $intErrorType = 2;
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733110",array($intFocusIndex + 1));
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+                    }
+                    $tmpAryRowOfOpeTblPerMov = $tmpAryRetBody[4];
+                    $register_tgt_row['OVRD_OPERATION_NO_UAPK']   = $tmpAryRowOfOpeTblPerMov['OPERATION_NO_UAPK'];
+                    $register_tgt_row['OVRD_I_OPERATION_NAME']    = $tmpAryRowOfOpeTblPerMov['OPERATION_NAME'];
+                    $register_tgt_row['OVRD_I_OPERATION_NO_IDBH'] = $tmpStrOpeNoIDBH;
+                    unset($tmpAryRowOfOpeTblPerMov);
+                    unset($tmpAryRetBody);
+                }
+                else{
+                    $register_tgt_row['OVRD_OPERATION_NO_UAPK']   = $intOperationNoUAPK;
+                }
+                // オペレーション情報を取得し値をセット----
+
+                $register_tgt_row['I_DESCRIPTION']        = $aryDataForMovement['DESCRIPTION'];
+                $register_tgt_row['ABORT_RECEPTED_FLAG']  = 1; //緊急停止受付確認フラグ=未確認[1]
+                $register_tgt_row['SYMPHONY_INSTANCE_NO'] = $varSymphonyInstanceNo;
+                $register_tgt_row['STATUS_ID']            = 1; //未実行[1]で
+                $register_tgt_row['EXECUTION_USER']       = $userName;
+                $register_tgt_row['DISUSE_FLAG']          = '0';
+                $register_tgt_row['LAST_UPDATE_USER']     = $userId;
+                // ムーブメントインスタンス登録用の値をセット----
+
+                // 各Movementの登録状態を確認する。
+                $tgtSource_row = $register_tgt_row;
+                $ret = $this->MovementValidator($tgtSource_row,$intOperationNoUAPK,$MovementErrorMsg,($intFocusIndex + 1),$aryFreeErrMsgBody);
+                if( $ret === false ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00002400";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                // ----ムーブメントインスタンス登録用SQLを作成
+                $sqlType = "INSERT";
+                $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
+                                                    ,$sqlType
+                                                    ,"MOVEMENT_INSTANCE_NO"
+                                                    ,"C_MOVEMENT_INSTANCE_MNG"
+                                                    ,"C_MOVEMENT_INSTANCE_MNG_JNL"
+                                                    ,$arrayConfigForIUD
+                                                    ,$tgtSource_row);
+                if( $retArray[0] === false ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00002500";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                $sqlUtnBody = $retArray[1];
+                $arrayUtnBind = $retArray[2];
+                $sqlJnlBody = $retArray[3];
+                $arrayJnlBind = $retArray[4];
+                // ムーブメントインスタンス登録用SQLを作成----
+
+                // ----履歴シーケンス払い出し
+                $retArray = getSequenceValueFromTable('C_MOVEMENT_INSTANCE_MNG_JSQ', 'A_SEQUENCE', FALSE );
+                if( $retArray[1] != 0 ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00002600";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                else{
+                    $varJSeq = $retArray[0];
+                    $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
+                }
+                // 履歴シーケンス払い出し----
+
+                // ----ムーブメントインスタンス登録の実行
+                $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
+                $retArray02 = singleSQLCoreExecute($objDBCA, $sqlJnlBody, $arrayJnlBind, $strFxName);
+                if( $retArray01[0] !== true || $retArray02[0] !== true ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00002700";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                unset($retArray01);
+                unset($retArray02);
+                // ムーブメントインスタンス登録の実行----
+
+
+                $intFocusIndex += 1;
+            }
+            // ムーブメントインスタンス登録処理----
+
+            // ----ムーブメントインスタンス登録処理後のチェック
+            // ムーブメントの登録内容に不備がなかったことを確認
+            if($MovementErrorMsg != ""){
+                $strErrStepIdInFx="00002800";
+                $intErrorType = 2;
+                $strExpectedErrMsgBodyForUI = $MovementErrorMsg;
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+
+            // Symphonyインターフェース情報の登録データ確認する。
+            $strQuery = "SELECT * FROM C_SYMPHONY_IF_INFO WHERE DISUSE_FLAG = '0'";
+            $tmpStrInterVal = "";
+            $IF_Errormsg = "";
+            $objQuery = $objDBCA->sqlPrepare($strQuery);
+            $retBoolResult = $objQuery->sqlExecute();
+            if($retBoolResult!=true){
+                // 例外処理へ
+                $strErrStepIdInFx="0002900";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            if($objQuery->effectedRowCount() == 0) {
+                // 未登録
+                $IF_Errormsg= $objMTS->getSomeMessage("ITABASEH-ERR-900067");
+            } else {
+                if($objQuery->effectedRowCount() == 1) {
+                    $row = $objQuery->resultFetch();
+                    $tmpStrInterVal = $row['SYMPHONY_REFRESH_INTERVAL'];
+                    // データリレイストレージのパスを確認
+                    if( !is_dir( $row['SYMPHONY_STORAGE_PATH_ITA'] ) ) {
+                        $IF_Errormsg = $objMTS->getSomeMessage("ITABASEH-ERR-900069");
+                    }
+                } else {
+                    // 複数登録
+                    $IF_Errormsg = $objMTS->getSomeMessage("ITABASEH-ERR-900068");
+                }
+            }
+            unset($objQuery);
+
+            if($IF_Errormsg != "")
+            {
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00003000";
+                $intErrorType = 2;
+                $strExpectedErrMsgBodyForUI = $IF_Errormsg;
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            // ムーブメントインスタンス登録処理後のチェック----
+
+            /////////////////////////////////////
+            // (ここまで) ムーブメントインスタンスを登録する//
+            /////////////////////////////////////
+
+            $boolRet = true;
+            $intSymphonyInstanceId = $varSymphonyInstanceNo;
+        }catch(Exception $e){
+            //----トランザクション中のエラーの場合
+            if( $boolInTransactionFlag === true){
+                if( $objDBCA->transactionRollBack() === true ){
+                    $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-STD-102090");
+                }
+                else{
+                    $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-ERR-102070");
+                }
+                $aryErrMsgBody[] = $tmpMsgBody;
+                
+                // トランザクション終了
+                if( $objDBCA->transactionExit() === true ){
+                    $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-STD-103010");
+                }
+                else{
+                    $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-ERR-102080");
+                }
+                $aryErrMsgBody[] = $tmpMsgBody;
+                unset($tmpMsgBody);
+            }
+            //トランザクション中のエラーの場合---- 
+
+            // エラーフラグをON
+            if( $intErrorType === null ) $intErrorType = 500;
+            $tmpErrMsgBody = $e->getMessage();
+            if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        }
+
+        $retArray = array($boolRet,
+                          $intErrorType,
+                          $aryErrMsgBody,
+                          $strErrMsg,
+                          $strSysErrMsgBody,
+                          $intSymphonyInstanceId,
+                          $strExpectedErrMsgBodyForUI,
+                          $aryFreeErrMsgBody,
+                          );
+
+        return $retArray;
+    }
+//シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録する(ConductorからのSymphony呼び出し)----
+
 
 //ここまでConductor用----
 

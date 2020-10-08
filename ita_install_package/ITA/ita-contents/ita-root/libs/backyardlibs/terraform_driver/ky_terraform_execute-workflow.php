@@ -497,15 +497,18 @@
             $RequestContents = array();
             $operation_no = "";
             $pattern_id = "";
+            $run_mode = "";
             $organization_id = ""; //組織ID
             $organization_name = ""; //組織名
             $workspace_id = ""; //ワークスペースID
             $workspace_name = ""; //ワークスペース名
             $tfe_workspace_id = ""; //TFE側で管理するワークスペースのID
+            $tfe_auto_apply = false; //TFE側で管理するワークスペースでのApply方法（falseならApply前で作業を停止、trueならApplyを自動実行）
             $ary_vars_data = array(); //対象の変数を格納する配列
             $ary_module_matter_id = array(); //モジュール素材IDを格納する配列
             $ary_module_matter = array(); //モジュール素材情報を格納する配列
             $ary_policy_id = array(); //対象のPolicyIDを格納する配列
+            $ary_policy_file = array(); //対象のpolicyファイルを格納する配列
             $ary_tfe_policy_id = array(); //ITA側で管理するPolicyIDとTFE側で管理するPolicyIDを紐づけるための配列
             $ary_policy_set_policy = array();//対象のPolicySetに紐づくPolicyIDを格納する配列
             $ary_policy_data = array(); //対象のPolicy情報を格納する配列
@@ -525,7 +528,9 @@
             $data_type = "out";
             $log_path = $log_save_dir . "/" . $tgt_execution_no_str_pad . "/" . $data_type;
             $error_log = $log_path . "/error.log";
-            $exec_log = $log_path . "/exec.log";
+            $plan_log = $log_path . "/plan.log";
+            $policyCheck_log = $log_path . "/policyCheck.log";
+            $apply_log = $log_path . "/apply.log";
 
             //log格納ディレクトリを作成
             if(!file_exists($log_path)){
@@ -561,15 +566,15 @@
                 }
             }
 
-            //exec_logファイルを作成
-            if(!file_exists($exec_log)){
-                if(!touch($exec_log)){
+            //plan_logファイルを作成
+            if(!file_exists($plan_log)){
+                if(!touch($plan_log)){
                     // 警告フラグON
                     $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
-                    if(!chmod($exec_log, 0777)){
+                    if(!chmod($plan_log, 0777)){
                         // 警告フラグON
                         $warning_flag = 1;
                         // 例外処理へ
@@ -578,6 +583,39 @@
                 }
             }
 
+            //policyCheck_logファイルを作成
+            if(!file_exists($policyCheck_log)){
+                if(!touch($policyCheck_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
+                }else{
+                    if(!chmod($policyCheck_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
+                        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
+                    }
+                }
+            }
+
+            //apply_logファイルを作成
+            if(!file_exists($apply_log)){
+                if(!touch($apply_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
+                }else{
+                    if(!chmod($apply_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
+                        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
+                    }
+                }
+            }
 
             //----------------------------------------------
             // トランザクション開始
@@ -692,6 +730,8 @@
             $operation_no = $tgt_execution_row['OPERATION_NO_UAPK'];
             //pattern_idを定義
             $pattern_id = $tgt_execution_row['PATTERN_ID'];
+            //RUN_MODEを定義
+            $run_mode = $tgt_execution_row['RUN_MODE'];
 
             // トレースメッセージ
             if ( $log_level === 'DEBUG' ){
@@ -971,6 +1011,7 @@
                         $exist_flag = true;
                         //tfe側で管理しているworkspaceのIDを格納
                         $tfe_workspace_id = $data['id'];
+                        $tfe_auto_apply = $data['attributes']['auto-apply'];
                     }
                 }
 
@@ -984,6 +1025,19 @@
                     // 例外処理へ
                     throw new Exception( $message );
                 }
+
+                //Plan確認の場合、WorkspaceのApplyMethod設定がAuto Applyになっている場合はエラーにする（Plan確認の場合にApplyが実行されてしまうため）
+                if($run_mode == 2 && $tfe_auto_apply == true){
+                    //error_logにメッセージを追記
+                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141205", $workspace_name); //Terraform Enterpriseに対象のWorkspaceが登録されていません。(WorkspaceName:{})
+                    LocalLogPrint($error_log, $message);
+
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception( $message );
+                }
+
             }
 
 
@@ -1237,6 +1291,90 @@
             // DBアクセス事後処理
             unset($objQuery);
 
+            //--------------------------------------------------------------
+            // 作業実行前に対象のWorkspaceからpolicySetを切り離す
+            //--------------------------------------------------------------
+            //TFEのPolicySet一覧を取得
+            $statusCode = 0;
+            $count = 0;
+            while ($statusCode != 200 && $count < $apiRetryCount){
+                $apiResponse = get_policy_sets_list($lv_terraform_hostname, $lv_terraform_token ,$organization_name);
+                $statusCode = $apiResponse['StatusCode'];
+                if($statusCode == 200){
+                    //返却StatusCodeが正常なので終了
+                    break;
+                }else{
+                    //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                    sleep(3);
+                    $count++;
+                }
+            }
+            //API結果を判定
+            if($statusCode != 200){
+                //error_logにメッセージを追記
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141110"); //[API Error]PolicySet情報取得に失敗しました。
+                LocalLogPrint($error_log, $message);
+
+                // 異常フラグON
+                $error_flag = 1;
+                // 例外処理へ
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141111",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
+            }
+            $policySetsListResponsContents = $apiResponse['ResponsContents'];
+
+            //PolicySetに紐づくWorkspaceの中で、今回の対象Workspaceがあればすべて切り離す
+            $tfe_policy_set_id = ""; //TFE側で管理しているPolicySetID
+            $ary_registered_policy_set_workspace = array(); //TFE側に登録済みのPolicySetに紐づいているWorkspace
+            foreach($policySetsListResponsContents['data'] as $data){
+                $tfe_policy_set_id = $data['id'];
+
+                foreach($data['relationships']['workspaces']['data'] as $workspace_data){
+                    //紐づいているworkspaceが無い場合はbreak
+                    if(empty($workspace_data)){
+                        break;
+                    }
+
+                    //紐づいているworkspaceで今回の処理対象のworkspace(id)と一致するものがあれば切り離しを実行
+                    if($workspace_data['id'] == $tfe_workspace_id){
+                        $ary_registered_policy_set_workspace = array(
+                            'data' => array(
+                                array(
+                                    "id" => $tfe_workspace_id,
+                                    "type" => "workspaces"
+                                ),
+                            )
+                        );
+
+                        $statusCode = 0;
+                        $count = 0;
+                        while ($statusCode != 204 && $count < $apiRetryCount){
+                            $apiResponse = delete_relationships_workspace($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_registered_policy_set_workspace);
+                            $statusCode = $apiResponse['StatusCode'];
+                            if($statusCode == 204){
+                                //返却StatusCodeが正常なので終了
+                                break;
+                            }else{
+                                //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                sleep(3);
+                                $count++;
+                            }
+                        }
+                        //API結果を判定
+                        if($statusCode != 204){
+                            //error_logにメッセージを追記
+                            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141120"); //[API Error]PolicySetからのWorkspace切り離し処理に失敗しました。
+                            LocalLogPrint($error_log, $message);
+
+                            // 異常フラグON
+                            $error_flag = 1;
+                            // 例外処理へ
+                            $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141121",array(__FILE__,__LINE__,$statusCode));
+                            throw new Exception( $backyard_log );
+                        }
+                    }
+                }
+            }
 
             //--------------------------------------------------------------
             // Workspaceに紐づくPolicySetがある場合、Policy登録処理を実施
@@ -1427,6 +1565,10 @@
                             $exist_flag = false;
                             $tfe_policy_id = ""; //TFE側で管理しているPolicySetID
                             $trg_policy_matter_path = $vg_terraform_policy_contents_dir . "/" . str_pad($ita_data['policy_id'], $intNumPadding, "0", STR_PAD_LEFT ) . "/" .$ita_data['policy_matter_file'];
+
+                            //policyファイルのpathを配列に格納
+                            array_push($ary_policy_file, $trg_policy_matter_path);
+
                             //PolicyがTFE側に登録済みかどうかをチェック
                             foreach($policyListResponsContents['data'] as $tfe_data){
                                 if($tfe_data['attributes']['name'] == $ita_data['policy_name']){
@@ -1563,285 +1705,197 @@
                         }
                     }
 
-
-                    //--------------------------------------------------------------
-                    // TFE側のPolicySetの登録状態を確認し、API処理を実行
-                    //--------------------------------------------------------------
-                    //TFEのPolicySet一覧を取得
-                    $statusCode = 0;
-                    $count = 0;
-                    while ($statusCode != 200 && $count < $apiRetryCount){
-                        $apiResponse = get_policy_sets_list($lv_terraform_hostname, $lv_terraform_token ,$organization_name);
-                        $statusCode = $apiResponse['StatusCode'];
-                        if($statusCode == 200){
-                            //返却StatusCodeが正常なので終了
-                            break;
-                        }else{
-                            //返却StatusCodeが異常なので、3秒間sleepして再度実行
-                            sleep(3);
-                            $count++;
-                        }
-                    }
-                    //API結果を判定
-                    if($statusCode != 200){
-                        //error_logにメッセージを追記
-                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141110"); //[API Error]PolicySet情報取得に失敗しました。
-                        LocalLogPrint($error_log, $message);
-
-                        // 異常フラグON
-                        $error_flag = 1;
-                        // 例外処理へ
-                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141111",array(__FILE__,__LINE__,$statusCode));
-                        throw new Exception( $backyard_log );
-                    }else{
-                        $policySetsListResponsContents = $apiResponse['ResponsContents'];
-                        //----------------------------------------------
-                        // PolicySetに紐づくWorkspaceの中で、今回の対象Workspaceがあればすべて切り離す
-                        //----------------------------------------------
+                    //----------------------------------------------
+                    // TFEのPolicySet一覧と適用するPolicySetを照らし合わせて登録・更新を実行
+                    //----------------------------------------------
+                    foreach($ary_policy_set_data as $ita_data){
+                        $exist_flag = false;
                         $tfe_policy_set_id = ""; //TFE側で管理しているPolicySetID
-                        $ary_registered_policy_set_workspace = array(); //TFE側に登録済みのPolicySetに紐づいているWorkspace
-                        foreach($policySetsListResponsContents['data'] as $data){
-                            $tfe_policy_set_id = $data['id'];
+                        $ary_register_policy_set_workspace = array(); //PolicySetに紐づけるWorkspace
+                        $ary_register_policy_set_policy = array(); //PolicySetに紐づけるPolicy
+                        $ary_registered_policy_set_policy = array(); //TFE側に登録済みのPolicySetに紐づいているPolicy
+                        //PolicySetがTFE側に登録済みかどうかをチェック
+                        foreach($policySetsListResponsContents['data'] as $tfe_data){
+                            if($tfe_data['attributes']['name'] == $ita_data['policy_set_name']){
+                                //TFEで管理しているPolicySetのIDを取得
+                                $tfe_policy_set_id = $tfe_data['id'];
 
-                            foreach($data['relationships']['workspaces']['data'] as $workspace_data){
-                                //紐づいているworkspaceが無い場合はbreak
-                                if(empty($workspace_data)){
+                                //登録済みフラグをたてる
+                                $exist_flag = true;
+                            }
+                        }
+                        if($exist_flag == true){
+                            //PolicySetが既にTFEに登録されている場合、更新APIを実行する
+                            $statusCode = 0;
+                            $count = 0;
+                            while ($statusCode != 200 && $count < $apiRetryCount){
+                                $apiResponse = update_policy_set($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ita_data['policy_set_name'], $ita_data['policy_set_note']);
+                                $statusCode = $apiResponse['StatusCode'];
+                                if($statusCode == 200){
+                                    //返却StatusCodeが正常なので終了
                                     break;
-                                }
-
-                                //紐づいているworkspaceで今回の処理対象のworkspace(id)と一致するものがあれば切り離しを実行
-                                if($workspace_data['id'] == $tfe_workspace_id){
-                                    $ary_registered_policy_set_workspace = array(
-                                        'data' => array(
-                                            array(
-                                                "id" => $tfe_workspace_id,
-                                                "type" => "workspaces"
-                                            ),
-                                        )
-                                    );
-
-                                    $statusCode = 0;
-                                    $count = 0;
-                                    while ($statusCode != 204 && $count < $apiRetryCount){
-                                        $apiResponse = delete_relationships_workspace($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_registered_policy_set_workspace);
-                                        $statusCode = $apiResponse['StatusCode'];
-                                        if($statusCode == 204){
-                                            //返却StatusCodeが正常なので終了
-                                            break;
-                                        }else{
-                                            //返却StatusCodeが異常なので、3秒間sleepして再度実行
-                                            sleep(3);
-                                            $count++;
-                                        }
-                                    }
-                                    //API結果を判定
-                                    if($statusCode != 204){
-                                        //error_logにメッセージを追記
-                                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141120"); //[API Error]PolicySetからのWorkspace切り離し処理に失敗しました。
-                                        LocalLogPrint($error_log, $message);
-
-                                        // 異常フラグON
-                                        $error_flag = 1;
-                                        // 例外処理へ
-                                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141121",array(__FILE__,__LINE__,$statusCode));
-                                        throw new Exception( $backyard_log );
-                                    }
+                                }else{
+                                    //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                    sleep(3);
+                                    $count++;
                                 }
                             }
+                            //API結果を判定
+                            if($statusCode != 200){
+                                //error_logにメッセージを追記
+                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141130"); //[API Error]PolicySetの更新に失敗しました。
+                                LocalLogPrint($error_log, $message);
+
+                                // 異常フラグON
+                                $error_flag = 1;
+                                // 例外処理へ
+                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141131",array(__FILE__,__LINE__,$statusCode));
+                                throw new Exception( $backyard_log );
+                            }
+                            $updatePolicySetResponsContents = $apiResponse['ResponsContents'];
+
+                            //紐づいているpolicyをすべて切り離す
+                            $ary_registered_policy_set_policy = $updatePolicySetResponsContents['data']['relationships']['policies'];
+                            $statusCode = 0;
+                            $count = 0;
+                            while ($statusCode != 204 && $count < $apiRetryCount){
+                                $apiResponse = delete_relationships_policy($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_registered_policy_set_policy);
+                                $statusCode = $apiResponse['StatusCode'];
+                                if($statusCode == 204){
+                                    //返却StatusCodeが正常なので終了
+                                    break;
+                                }else{
+                                    //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                    sleep(3);
+                                    $count++;
+                                }
+                            }
+                            //API結果を判定
+                            if($statusCode != 204){
+                                //error_logにメッセージを追記
+                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141140"); //[API Error]PolicySetからのPolicy切り離し処理に失敗しました。
+                                LocalLogPrint($error_log, $message);
+
+                                // 異常フラグON
+                                $error_flag = 1;
+                                // 例外処理へ
+                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141141",array(__FILE__,__LINE__,$statusCode));
+                                throw new Exception( $backyard_log );
+                            }
+
+                        }else{
+                            //PolicySetが登録されていない場合、登録APIを実行する
+                            $statusCode = 0;
+                            $count = 0;
+                            while ($statusCode != 201 && $count < $apiRetryCount){
+                                $apiResponse = create_policy_set($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $ita_data['policy_set_name'], $ita_data['policy_set_note']);
+                                $statusCode = $apiResponse['StatusCode'];
+                                if($statusCode == 201){
+                                    //返却StatusCodeが正常なので終了
+                                    break;
+                                }else{
+                                    //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                    sleep(3);
+                                    $count++;
+                                }
+                            }
+                            //API結果を判定
+                            if($statusCode != 201){
+                                //error_logにメッセージを追記
+                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141150"); //[API Error]PolicySetの登録に失敗しました。
+                                LocalLogPrint($error_log, $message);
+
+                                // 異常フラグON
+                                $error_flag = 1;
+                                // 例外処理へ
+                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141151",array(__FILE__,__LINE__,$statusCode));
+                                throw new Exception( $backyard_log );
+                            }
+                            $createPolicySetResponsContents = $apiResponse['ResponsContents'];
+
+                            //登録したPolicySetの(TFE側で管理する)IDを取得
+                            $tfe_policy_set_id = $createPolicySetResponsContents['data']['id'];
+
                         }
 
                         //----------------------------------------------
-                        // TFEのPolicySet一覧と適用するPolicySetを照らし合わせて登録・更新を実行
+                        // PolicySetとWorkspaceの紐付け処理
                         //----------------------------------------------
-                        foreach($ary_policy_set_data as $ita_data){
-                            $exist_flag = false;
-                            $tfe_policy_set_id = ""; //TFE側で管理しているPolicySetID
-                            $ary_register_policy_set_workspace = array(); //PolicySetに紐づけるWorkspace
-                            $ary_register_policy_set_policy = array(); //PolicySetに紐づけるPolicy
-                            $ary_registered_policy_set_policy = array(); //TFE側に登録済みのPolicySetに紐づいているPolicy
-                            //PolicySetがTFE側に登録済みかどうかをチェック
-                            foreach($policySetsListResponsContents['data'] as $tfe_data){
-                                if($tfe_data['attributes']['name'] == $ita_data['policy_set_name']){
-                                    //TFEで管理しているPolicySetのIDを取得
-                                    $tfe_policy_set_id = $tfe_data['id'];
-
-                                    //登録済みフラグをたてる
-                                    $exist_flag = true;
-                                }
-                            }
-                            if($exist_flag == true){
-                                //PolicySetが既にTFEに登録されている場合、更新APIを実行する
-                                $statusCode = 0;
-                                $count = 0;
-                                while ($statusCode != 200 && $count < $apiRetryCount){
-                                    $apiResponse = update_policy_set($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ita_data['policy_set_name'], $ita_data['policy_set_note']);
-                                    $statusCode = $apiResponse['StatusCode'];
-                                    if($statusCode == 200){
-                                        //返却StatusCodeが正常なので終了
-                                        break;
-                                    }else{
-                                        //返却StatusCodeが異常なので、3秒間sleepして再度実行
-                                        sleep(3);
-                                        $count++;
-                                    }
-                                }
-                                //API結果を判定
-                                if($statusCode != 200){
-                                    //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141130"); //[API Error]PolicySetの更新に失敗しました。
-                                    LocalLogPrint($error_log, $message);
-
-                                    // 異常フラグON
-                                    $error_flag = 1;
-                                    // 例外処理へ
-                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141131",array(__FILE__,__LINE__,$statusCode));
-                                    throw new Exception( $backyard_log );
-                                }
-                                $updatePolicySetResponsContents = $apiResponse['ResponsContents'];
-
-                                //紐づいているpolicyをすべて切り離す
-                                $ary_registered_policy_set_policy = $updatePolicySetResponsContents['data']['relationships']['policies'];
-                                $statusCode = 0;
-                                $count = 0;
-                                while ($statusCode != 204 && $count < $apiRetryCount){
-                                    $apiResponse = delete_relationships_policy($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_registered_policy_set_policy);
-                                    $statusCode = $apiResponse['StatusCode'];
-                                    if($statusCode == 204){
-                                        //返却StatusCodeが正常なので終了
-                                        break;
-                                    }else{
-                                        //返却StatusCodeが異常なので、3秒間sleepして再度実行
-                                        sleep(3);
-                                        $count++;
-                                    }
-                                }
-                                //API結果を判定
-                                if($statusCode != 204){
-                                    //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141140"); //[API Error]PolicySetからのPolicy切り離し処理に失敗しました。
-                                    LocalLogPrint($error_log, $message);
-
-                                    // 異常フラグON
-                                    $error_flag = 1;
-                                    // 例外処理へ
-                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141141",array(__FILE__,__LINE__,$statusCode));
-                                    throw new Exception( $backyard_log );
-                                }
-
-                            }else{
-                                //PolicySetが登録されていない場合、登録APIを実行する
-                                $statusCode = 0;
-                                $count = 0;
-                                while ($statusCode != 201 && $count < $apiRetryCount){
-                                    $apiResponse = create_policy_set($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $ita_data['policy_set_name'], $ita_data['policy_set_note']);
-                                    $statusCode = $apiResponse['StatusCode'];
-                                    if($statusCode == 201){
-                                        //返却StatusCodeが正常なので終了
-                                        break;
-                                    }else{
-                                        //返却StatusCodeが異常なので、3秒間sleepして再度実行
-                                        sleep(3);
-                                        $count++;
-                                    }
-                                }
-                                //API結果を判定
-                                if($statusCode != 201){
-                                    //error_logにメッセージを追記
-                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141150"); //[API Error]PolicySetの登録に失敗しました。
-                                    LocalLogPrint($error_log, $message);
-
-                                    // 異常フラグON
-                                    $error_flag = 1;
-                                    // 例外処理へ
-                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141151",array(__FILE__,__LINE__,$statusCode));
-                                    throw new Exception( $backyard_log );
-                                }
-                                $createPolicySetResponsContents = $apiResponse['ResponsContents'];
-
-                                //登録したPolicySetの(TFE側で管理する)IDを取得
-                                $tfe_policy_set_id = $createPolicySetResponsContents['data']['id'];
-
-                            }
-
-                            //----------------------------------------------
-                            // PolicySetとWorkspaceの紐付け処理
-                            //----------------------------------------------
-                            $ary_register_policy_set_workspace = array(
-                                "data" => array(
-                                    array(
-                                        "id" => $tfe_workspace_id,
-                                        "type" => "workspaces"
-                                    ),
+                        $ary_register_policy_set_workspace = array(
+                            "data" => array(
+                                array(
+                                    "id" => $tfe_workspace_id,
+                                    "type" => "workspaces"
                                 ),
+                            ),
+                        );
+
+                        $statusCode = 0;
+                        $count = 0;
+                        while ($statusCode != 204 && $count < $apiRetryCount){
+                            $apiResponse = relationships_workspace($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_register_policy_set_workspace);
+                            $statusCode = $apiResponse['StatusCode'];
+                            if($statusCode == 204){
+                                //返却StatusCodeが正常なので終了
+                                break;
+                            }else{
+                                //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                sleep(3);
+                                $count++;
+                            }
+                        }
+                        //API結果を判定
+                        if($statusCode != 204){
+                            //error_logにメッセージを追記
+                            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141160"); //[API Error]PolicySetとWorkspaceの紐付けに失敗しました。
+                            LocalLogPrint($error_log, $message);
+
+                            // 異常フラグON
+                            $error_flag = 1;
+                            // 例外処理へ
+                            $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141161",array(__FILE__,__LINE__,$statusCode));
+                            throw new Exception( $backyard_log );
+                        }
+
+                        //----------------------------------------------
+                        // PolicySetとPolicyの紐付け処理
+                        //----------------------------------------------
+                        //APIでPolicyを紐づけるためのContentsを作成
+                        $ary_trg_policy_id = $ary_policy_set_policy[$ita_data['policy_set_id']];
+                        $ary_register_policy_set_policy = array("data" => array());
+                        foreach($ary_trg_policy_id as $trg_policy_id){
+                            $add_tfe_policy_data = array(
+                                "id" => $ary_tfe_policy_id[$trg_policy_id],
+                                "type" => "policies"
                             );
+                            array_push($ary_register_policy_set_policy['data'], $add_tfe_policy_data);
+                        }
 
-                            $statusCode = 0;
-                            $count = 0;
-                            while ($statusCode != 204 && $count < $apiRetryCount){
-                                $apiResponse = relationships_workspace($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_register_policy_set_workspace);
-                                $statusCode = $apiResponse['StatusCode'];
-                                if($statusCode == 204){
-                                    //返却StatusCodeが正常なので終了
-                                    break;
-                                }else{
-                                    //返却StatusCodeが異常なので、3秒間sleepして再度実行
-                                    sleep(3);
-                                    $count++;
-                                }
+                        $statusCode = 0;
+                        $count = 0;
+                        while ($statusCode != 204 && $count < $apiRetryCount){
+                            $apiResponse = relationships_policy($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_register_policy_set_policy);
+                            $statusCode = $apiResponse['StatusCode'];
+                            if($statusCode == 204){
+                                //返却StatusCodeが正常なので終了
+                                break;
+                            }else{
+                                //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                sleep(3);
+                                $count++;
                             }
-                            //API結果を判定
-                            if($statusCode != 204){
-                                //error_logにメッセージを追記
-                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141160"); //[API Error]PolicySetとWorkspaceの紐付けに失敗しました。
-                                LocalLogPrint($error_log, $message);
+                        }
+                        //API結果を判定
+                        if($statusCode != 204){
+                            //error_logにメッセージを追記
+                            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141170"); //[API Error]PolicySetとPolicyの紐付けに失敗しました。
+                            LocalLogPrint($error_log, $message);
 
-                                // 異常フラグON
-                                $error_flag = 1;
-                                // 例外処理へ
-                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141161",array(__FILE__,__LINE__,$statusCode));
-                                throw new Exception( $backyard_log );
-                            }
-
-                            //----------------------------------------------
-                            // PolicySetとPolicyの紐付け処理
-                            //----------------------------------------------
-                            //APIでPolicyを紐づけるためのContentsを作成
-                            $ary_trg_policy_id = $ary_policy_set_policy[$ita_data['policy_set_id']];
-                            $ary_register_policy_set_policy = array("data" => array());
-                            foreach($ary_trg_policy_id as $trg_policy_id){
-                                $add_tfe_policy_data = array(
-                                    "id" => $ary_tfe_policy_id[$trg_policy_id],
-                                    "type" => "policies"
-                                );
-                                array_push($ary_register_policy_set_policy['data'], $add_tfe_policy_data);
-                            }
-
-                            $statusCode = 0;
-                            $count = 0;
-                            while ($statusCode != 204 && $count < $apiRetryCount){
-                                $apiResponse = relationships_policy($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_register_policy_set_policy);
-                                $statusCode = $apiResponse['StatusCode'];
-                                if($statusCode == 204){
-                                    //返却StatusCodeが正常なので終了
-                                    break;
-                                }else{
-                                    //返却StatusCodeが異常なので、3秒間sleepして再度実行
-                                    sleep(3);
-                                    $count++;
-                                }
-                            }
-                            //API結果を判定
-                            if($statusCode != 204){
-                                //error_logにメッセージを追記
-                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141170"); //[API Error]PolicySetとPolicyの紐付けに失敗しました。
-                                LocalLogPrint($error_log, $message);
-
-                                // 異常フラグON
-                                $error_flag = 1;
-                                // 例外処理へ
-                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141171",array(__FILE__,__LINE__,$statusCode));
-                                throw new Exception( $backyard_log );
-                            }
+                            // 異常フラグON
+                            $error_flag = 1;
+                            // 例外処理へ
+                            $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141171",array(__FILE__,__LINE__,$statusCode));
+                            throw new Exception( $backyard_log );
                         }
                     }
                 }
@@ -1959,6 +2013,12 @@
                 $tgt_matter_no_str_pad = str_pad( $matter_id, $intNumPadding, "0", STR_PAD_LEFT );
                 $tgt_matter_file = $matter['matter_file'];
                 $cp_cmd = sprintf("/bin/cp -rfp %s %s/.", $vg_terraform_module_contents_dir."/".$tgt_matter_no_str_pad."/".$tgt_matter_file, $tgt_execution_dir);
+                system($cp_cmd);
+            }
+
+            //作業実行Noディレクトリに、対象のpolicyファイルをコピー
+            foreach($ary_policy_file as $policy_file_path){
+                $cp_cmd = sprintf("/bin/cp -rfp %s %s/.", $policy_file_path, $tgt_execution_dir);
                 system($cp_cmd);
             }
 

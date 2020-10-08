@@ -242,6 +242,37 @@ LAST_UPDATE_USER               %INT%                        , -- 最終更新ユ
 PRIMARY KEY (ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
+-- -------------------------
+-- 作成対象マスタ
+-- -------------------------
+CREATE TABLE F_PARAM_TARGET
+(
+TARGET_ID                           %INT%                           , -- 識別シーケンス項番
+DISP_SEQ                            %INT%                           , 
+TARGET_NAME                         %VARCHR%(64)                    ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY (TARGET_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_PARAM_TARGET_JNL
+(
+JOURNAL_SEQ_NO                      %INT%                           , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                %DATETIME6%                     , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴用変更種別
+
+TARGET_ID                           %INT%                           , -- 識別シーケンス項番
+DISP_SEQ                            %INT%                           , 
+TARGET_NAME                         %VARCHR%(64)                    ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
 -- 履歴系テーブル作成
 CREATE TABLE A_ACCOUNT_LIST_JNL
 (
@@ -3538,6 +3569,57 @@ WHERE
    TAB_B.DISUSE_FLAG = '0' AND
    TAB_C.DISUSE_FLAG = '0' AND
    TAB_D.DISUSE_FLAG = '0';
+
+-- -------------------------------------------------------
+-- --代入値自動登録設定の「メニューグループ:メニュー:項目」SHEET_TYPE=3用
+-- -------------------------------------------------------
+CREATE VIEW D_CMDB_MENU_LIST_SHEET_TYPE_3 AS
+SELECT
+ *
+FROM D_CMDB_MENU_LIST TAB_A
+WHERE SHEET_TYPE = 3
+;
+
+CREATE VIEW D_CMDB_MENU_LIST_SHEET_TYPE_3_JNL AS
+SELECT
+ *
+FROM D_CMDB_MENU_LIST_JNL TAB_A
+WHERE SHEET_TYPE = 3
+;
+
+CREATE VIEW D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_3 AS
+SELECT
+ *
+FROM D_CMDB_MG_MU_COL_LIST TAB_A
+WHERE SHEET_TYPE = 3
+;
+
+CREATE VIEW D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_3_JNL AS
+SELECT
+ *
+FROM D_CMDB_MG_MU_COL_LIST_JNL TAB_A
+WHERE SHEET_TYPE = 3
+;
+
+CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_3 AS
+SELECT
+  TAB_B.*
+FROM
+  D_CMDB_MENU_LIST_SHEET_TYPE_3         TAB_A
+  LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+WHERE
+  TAB_B.DISUSE_FLAG = '0'
+;
+
+CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_3_JNL AS
+SELECT
+  TAB_B.*
+FROM
+  D_CMDB_MENU_LIST_SHEET_TYPE_3_JNL         TAB_A
+  LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+WHERE
+  TAB_B.DISUSE_FLAG = '0'
+;
 
 -- *****************************************************************************
 -- *** ***** 削除関連

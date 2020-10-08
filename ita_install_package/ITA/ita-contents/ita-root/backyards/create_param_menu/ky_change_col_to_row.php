@@ -228,8 +228,11 @@ function changeColToRow($colToRowMng, $menuTableLinkArray){
         if("1" == $colToRowMng['PURPOSE']){
             $hostKeyName = "HOST_ID";
         }
-        else{
+        else if("2" == $colToRowMng['PURPOSE']){
             $hostKeyName = "KY_KEY";
+        }
+        else{
+            $hostKeyName = "OPERATION_ID";
         }
 
         $sql = "SELECT " . implode(",", $fromColList) .
@@ -377,7 +380,7 @@ function changeColToRow($colToRowMng, $menuTableLinkArray){
             //////////////////////////
             // 用途がホストグループ用の場合、ホストグループ分割対象の分割済みフラグをOFFにする
             //////////////////////////
-            else{
+            else if("2" == $colToRowMng['PURPOSE']){
                 $sql = "UPDATE F_SPLIT_TARGET "
                        ."SET DIVIDED_FLG = :DIVIDED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
                        ."WHERE INPUT_MENU_ID = :INPUT_MENU_ID";
@@ -392,6 +395,29 @@ function changeColToRow($colToRowMng, $menuTableLinkArray){
                     outputLog($msg);
                     outputLog($sql);
                     throw new Exception();
+                }
+            }
+            //////////////////////////
+            // オペレーションのみの場合、代入値自動登録設定のbackyard処理の処理済みフラグをOFFにする
+            //////////////////////////
+            else{
+                if(file_exists(ROOT_DIR_PATH . "/libs/release/ita_terraform-driver")){
+
+                    $sql = "UPDATE A_PROC_LOADED_LIST "
+                          ."SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
+                          ."WHERE ROW_ID IN (2100080002)";
+
+                    $objDBCA->setQueryTime();
+                    $aryForBind = array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP' => $objDBCA->getQueryTime());
+
+                    // SQL実行
+                    $result = $baseTable->execQuery($sql, $aryForBind, $objQuery);
+                    if(true !== $result){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', array($result));
+                        outputLog($msg);
+                        outputLog($sql);
+                        throw new Exception();
+                    }
                 }
             }
         }

@@ -470,11 +470,10 @@ class CreateMenuInfoTable extends BaseTable_CPM {
                                     'MENU_NAME',
                                     'PURPOSE',
                                     'TARGET',
-                                    'MENUGROUP_FOR_HG',
-                                    'MENUGROUP_FOR_H',
+                                    'VERTICAL',
+                                    'MENUGROUP_FOR_INPUT',
+                                    'MENUGROUP_FOR_SUBST',
                                     'MENUGROUP_FOR_VIEW',
-                                    'MENUGROUP_FOR_CONV',
-                                    'MENUGROUP_FOR_CMDB',
                                     'DISP_SEQ',
                                     'DESCRIPTION',
                                     'NOTE',
@@ -517,6 +516,7 @@ class CreateItemInfoTable extends BaseTable_CPM {
                                     'FLOAT_MAX',
                                     'FLOAT_MIN',
                                     'FLOAT_DIGIT',
+                                    'PW_MAX_LENGTH',
                                     'DESCRIPTION',
                                     'NOTE',
                                     'DISUSE_FLAG',
@@ -679,6 +679,7 @@ class CmdbMenuListTable extends BaseTable_CPM {
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('MENU_LIST_ID',
                                     'MENU_ID',
+                                    'SHEET_TYPE',
                                     'DISP_SEQ',
                                     'NOTE',
                                     'DISUSE_FLAG',
@@ -1080,6 +1081,7 @@ class ParamTargetTable extends BaseTable_CPM {
         $this->seqName      = $this->tableName . '_RIC';
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('TARGET_ID',
+                                    'DISP_SEQ',
                                     'TARGET_NAME',
                                     'NOTE',
                                     'DISUSE_FLAG',
@@ -1124,7 +1126,7 @@ class MenuGroupTable extends BaseTable_CPM {
     public function __construct($objDBCA, $db_model_ch) {
 
         parent::__construct($objDBCA, $db_model_ch);
-        $this->tableName    = 'A_MENU_GROUP_LIST';
+        $this->tableName    = 'D_CMDB_MENU_GRP_LIST';
         $this->seqName      = $this->tableName . '_RIC';
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('MENU_GROUP_ID',

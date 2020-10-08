@@ -233,8 +233,8 @@ const headingSizeUpdate = function() {
   
   fixedStyleHTML = '';
 
-  $tHeadTh = $itaTable.find( tHeadClass ).eq( 0 ).find('th');
-  $tBodyTd = $itaTable.find('tr:visible').not( tHeadClass ).eq( 0 ).find('td');
+  var $tHeadTh = $itaTable.find( tHeadClass ).eq( 0 ).find('th');
+  var $tBodyTd = $itaTable.find('tr:visible').not( tHeadClass ).eq( 0 ).find('td');
   
   // 行左側の見出しの数を調べStyleを作成する
   fixedSize = 1;
@@ -615,14 +615,15 @@ var thDataFunc = function( $th ) {
 }
 
 // テーブルからリスト作成
+var rowNumberArray = [0]; // 階層ごとの番号
+
 var trDataFunc = function( $tr, start, end, level, parentStat, parentID ) {
 
     dataMaxLevel = ( dataMaxLevel < level ) ? level : dataMaxLevel;
-    headerListHTML += '\n<ul class="level' + level + '" data-level="' + level + '">\n';
+    headerListHTML += '\n<ul class="table-setting-list level' + level + '" data-level="' + level + '">\n';
 
-    var colNumber = parentStat,
-        nextStart = 0;
-
+    var colNumber = parentStat;
+        
     $tr.find('th').slice( start, end ).each( function(){
 
       var $th = $( this );
@@ -645,7 +646,7 @@ var trDataFunc = function( $tr, start, end, level, parentStat, parentID ) {
       colNumberID++;
 
       headerListHTML += ''
-      + '<li class="' + listClass + '">'
+      + '<li class="table-setting-item ' + listClass + '">'
         + '<span>'
           + '<input type="checkbox" id="' + tableID + '_' + inputID + '" class="" data-parent-id="' + tableID + '_' + parentID + '" data-colspan="' + data[1] + '" data-level="' + level + '" data-col-start="' + dataColStart + '" data-col-end="' + dataColEnd + '" ' + inputStatus + '>'
       + '<label for="' + tableID + '_' + inputID + '">' + data[0] + '</label>';
@@ -660,15 +661,17 @@ var trDataFunc = function( $tr, start, end, level, parentStat, parentID ) {
         var nextRowCounter = 0,
             nextRowSum = 0;
 
-        $tr.next('tr.defaultExplainRow').find('th').slice( nextStart, nextStart + data[1] ).each( function(){
+        if ( rowNumberArray[level] === undefined ) rowNumberArray[level] = 0;
+        
+        $tr.next('tr.defaultExplainRow').find('th').slice( rowNumberArray[level], rowNumberArray[level] + data[1] ).each( function(){
           var nextTh = thDataFunc( $( this ) );
           nextRowSum += nextTh[1];
           nextRowCounter++;
           if( nextRowSum >= data[1] ) return false;
         });
 
-        trDataFunc( $tr.next(), nextStart, nextStart + nextRowCounter, level + 1, dataColStart, inputID );
-        nextStart += nextRowCounter;
+        trDataFunc( $tr.next(), rowNumberArray[level], rowNumberArray[level] + nextRowCounter, level + 1, dataColStart, inputID );
+        rowNumberArray[level] += nextRowCounter;
       } else {
         headerListHTML += '</span>';
       }
@@ -745,11 +748,11 @@ $tableSetting.find('input[type="checkbox"]').on('change', function(){
     var checkSiblingsInput = function( $checkInput ){
     
       // 親要素が無ければ終了する
-      var $parentInput = $checkInput.closest('ul').siblings('span').find('input');
+      var $parentInput = $checkInput.closest('.table-setting-list').siblings('span').find('input');
       if ( $parentInput.length == 0 ) return false;
       
       // 自分も含めた兄弟要素
-      var $siblingInput = $checkInput.add( $checkInput.closest('li').siblings('li').children('span').find('input') );
+      var $siblingInput = $checkInput.add( $checkInput.closest('.table-setting-item').siblings('.table-setting-item').children('span').find('input') );
       
       // inputの数
       var inputCount = $siblingInput.length,
@@ -776,18 +779,19 @@ $tableSetting.find('input[type="checkbox"]').on('change', function(){
 
     if( $input.prop('checked') ) {
       // 子要素すべてをチェックする
-      $input.removeClass('noCheck').closest('span').next('ul').find('input').not(':disabled').removeClass('noCheck').prop('checked', true );
+      $input.removeClass('noCheck').closest('span').next('.table-setting-list').find('input').not(':disabled').removeClass('noCheck').prop('checked', true );
       checkSiblingsInput( $input );
     } else {
 			// 子要素に未チェックがあればすべてチェックにする
 			if( $input.is('.noCheck') ) {
 				$input.removeClass('noCheck').prop('checked', true )
-					.closest('span').next('ul').find('input').not(':disabled').removeClass('noCheck').prop('checked', true );
+					.closest('span').next('.table-setting-list').find('input').not(':disabled').removeClass('noCheck').prop('checked', true );
 			} else {
 				// 子要素すべてのチェックを外す
-				$input.closest('span').next('ul').find('input').not(':disabled').prop('checked', false );
+				$input.closest('span').next('.table-setting-list').find('input').not(':disabled').prop('checked', false );
 				// 子にinput:disabledがあればチェックしなおす。
-				if ( $input.closest('span').next('ul').find('input:disabled').length ) $input.addClass('noCheck').prop('checked', true );
+        var $disabledParentInput = $input.closest('span').next('.table-setting-list').find('input:disabled')
+        $disabledParentInput.parents('.table-setting-list').prev('span').find('input').addClass('noCheck').prop('checked', true )    
 			}
 			checkSiblingsInput( $input );
     }

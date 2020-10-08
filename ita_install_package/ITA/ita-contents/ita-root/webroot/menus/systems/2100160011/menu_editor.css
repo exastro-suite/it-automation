@@ -600,6 +600,7 @@ border-collapse: collapse;
 .menu-column-config-table[date-select-value="4"] tr.number-float,
 .menu-column-config-table[date-select-value="5"] tr.date-time,
 .menu-column-config-table[date-select-value="6"] tr.date,
+.menu-column-config-table[date-select-value="8"] tr.password,
 .menu-column-config-table[date-select-value="7"] tr.select {
   display: table-row;
 }
@@ -664,6 +665,7 @@ outline: none;
 
 .required-label,
 .unique-label {
+overflow: hidden;
 position: relative;
 z-index: 1;
 display: inline-block;
@@ -893,7 +895,9 @@ display: none;
 display: none;
 }
 #property tr.parameter-sheet,
+#property tr.parameter-operation,
 #property tr.data-sheet,
+#property tr.operation,
 #property tr.host,
 #property tr.host-group,
 #property #vertical-menu {
@@ -901,23 +905,59 @@ display: none;
 }
 #property[data-menu-type="1"] tr.parameter-sheet,
 #property[data-menu-type="2"] tr.data-sheet,
+#property[data-menu-type="3"] tr.parameter-operation,
 #property[data-host-type="1"] tr.host,
 #property[data-host-type="2"] tr.host-group {
 display: table-row;
 }
 #property[data-menu-type="2"] .host,
-#property[data-menu-type="2"] .host-group {
+#property[data-menu-type="2"] .host-group
+{
 display: none!important;
 }
-#property[data-menu-type="1"][data-vertical-menu="true"] #vertical-menu {
+#property[data-menu-type="1"][data-vertical-menu="true"] #vertical-menu,
+#property[data-menu-type="3"][data-vertical-menu="true"] #vertical-menu
+{
 display: block;
 }
 #KIZI textarea.property-textarea {
 min-height: 48px;
 }
 .property-th {
+width: 8px;
 padding: 0 2px 0 4px;
 white-space: nowrap;
+}
+.property-td[colspan="2"],
+.property-td[colspan="3"] {
+width: auto;
+}
+.property-label {
+color: #EEE;
+font-size: 11px;
+line-height: 16px;
+cursor: pointer;
+}
+.property-label input {
+vertical-align: middle;
+}
+.editor-help {
+display: inline-block;
+width: 12px; height: 12px;
+background-color: #330;
+border: 1px solid #EE0;
+border-radius: 50%;
+vertical-align: middle;
+line-height: 11px;
+text-align: center;
+font-size: 10px;
+font-weight: bold;
+color: #EE0;
+cursor: pointer;
+transition-duration: .2s;
+}
+.editor-help:hover {
+opacity: .7;
 }
 #KIZI input[type="text"].property-text,
 #KIZI input[type="number"].property-number,
@@ -1074,38 +1114,34 @@ background-color: rgba(255,255,255,.05);
 margin-top: 4px;
 }
 
-#editor-modal.host th.host-group,
-#editor-modal.host th.data-sheet,
-#editor-modal.host-group th.data-sheet,
-#editor-modal.data-sheet th.host,
-#editor-modal.data-sheet th.host-group,
-#editor-modal.data-sheet th.reference,
-#editor-modal.data-sheet th.vertical {
+#editor-modal.data-sheet th.for-substitution,
+#editor-modal.data-sheet th.for-reference {
 display: none;
 }
 
 #menu-group-list thead .radio,
-#menu-group-list thead .id,
 #menu-group-list thead .data {
-width: 16px;
+width: 10%;
+padding: 4px;
 white-space: nowrap;
 }
 #menu-group-list tbody .id {
+width: 16px;
 text-align: right;
 }
 #menu-group-list .unselected {
 text-align: center;
 color: rgba( 255,255,255,.5 );
 }
-#menu-group-list th.radio {
-padding: 0 4px;
+#menu-group-list tbody th.radio {
+padding: 0;
 }
 #menu-group-list .menu-group-radio {
 overflow: hidden;
 display: inline-block;
 position: relative;
 z-index: 1;
-width: 32px; height: 32px;
+width: 100%; height: 32px;
 margin: 0 auto;
 }
 #menu-group-list .select-menu {
@@ -1129,6 +1165,9 @@ background-color: rgba( 0,0,0,.5 );
 border: 1px solid #111;
 border-radius: 50%;
 box-shadow: 0 0 8px rgba( 0,0,0,.5 ) inset;
+}
+#menu-group-list .select-menu-label:hover {
+background-color: rgba( 255,255,255,.1 );
 }
 #menu-group-list .select-menu-label:hover::before {
 box-shadow: 0 0 8px rgba( 0,0,0,.5 ) inset, 0 0 4px 1px #4F80FF;
@@ -1167,11 +1206,9 @@ box-shadow: 0 0 8px rgba( 0,0,0,.5 ) inset, 0 0 4px 1px #4F80FF;
 }
 
 /* 入れ子禁止 */
-.menu-table[data-move-type="menu-column-group"] .menu-column-repeat-body,
 .menu-table[data-move-type="menu-column-repeat"] .menu-column-repeat-body {
 cursor: no-drop!important;
 }
-.menu-table[data-move-type="menu-column-group"] .menu-column-repeat-body *,
 .menu-table[data-move-type="menu-column-repeat"] .menu-column-repeat-body * {
 pointer-events: none;
 }
@@ -1202,6 +1239,16 @@ box-shadow: 0 0 0 1px #555;
 .editor-log-table {
 width: 100%;
 border-collapse: collapse;
+}
+.editor-log-row {
+animation: logFadeIn .3s;
+}
+@keyframes logFadeIn {
+  0% { opacity: 0; }
+100% { opacity: 1; }
+}
+.editor-log-content  br:last-child {
+display: none;
 }
 .editor-log-row:nth-child(even) {
 background-color: rgba( 255,255,255,.04 );

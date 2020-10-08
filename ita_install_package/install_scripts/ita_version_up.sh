@@ -149,6 +149,10 @@ func_install_messasge() {
         MESSAGE="Material3"
     fi
     
+    if [ MATERIAL4_FLG = ${1} ]; then
+        MESSAGE="Material4"
+    fi
+
     if [ CREATEPARAM_FLG = ${1} ]; then
         MESSAGE="Createparam"
     fi
@@ -172,6 +176,19 @@ func_install_messasge() {
     echo "$MESSAGE"
 }
 
+############################################################
+# 全角文字をチェック
+# @param    なし
+# @return   なし
+############################################################
+setting_file_format_check() {
+    if [ `echo "$LINE" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
+        log "ERROR : Double-byte characters cannot be used in the setting files"
+        log "Applicable line : $LINE"
+        func_exit_and_delete_file
+    fi
+}
+
 #-----関数定義ここまで-----
 
 #インストール済みフラグ
@@ -183,6 +200,7 @@ TERRAFORM_FLG=0
 MATERIAL_FLG=0
 MATERIAL2_FLG=0
 MATERIAL3_FLG=0
+MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 HOSTGROUP_FLG=0
@@ -199,6 +217,7 @@ INSTALLED_FLG_LIST=(
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
+    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
@@ -217,6 +236,7 @@ RELEASE_PLASE=(
     ita_material
     ita_material2
     ita_material3
+    ita_material4
     ita_createparam
     ita_hostgroup
     ita_hostgroup2
@@ -302,20 +322,17 @@ sed -i -e '1s/^\xef\xbb\xbf//' "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
 echo "$(cat "$COPY_ANSWER_FILE")" 1> "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
 
 #answersファイル読み込み
-while read LINE; do
-    if [ "$LINE" ]; then
-        #空白の削除
-        PARAM=`echo $LINE | tr -d " "`
-
-        #コメント行、空行は無視する
-        if [ `echo "$PARAM" | cut -c 1` = "#" ]; then
-            continue
-        elif [ `echo "$PARAM" | wc -l` -eq 0 ]; then
-            continue
-        fi
-
-        key=`echo $PARAM | cut -d ":" -f 1 | sed 's/^ \(.*\) $/\1/'`
-        val=`echo $PARAM | cut -d ":" -f 2 | sed 's/^ \(.*\) $/\1/'`
+ANSWERS_TEXT=$(cat "$COPY_ANSWER_FILE")
+#IFSバックアップ
+SRC_IFS="$IFS"
+#IFSに"\n"をセット
+IFS="
+"
+for LINE in $ANSWERS_TEXT;do
+    if [ "$(echo "$LINE"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
+        setting_file_format_check
+        key="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
+        val="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\2/")"
 
         #ITA用のディレクトリ取得
         if [ "$key" = 'ita_directory' ]; then
@@ -328,7 +345,10 @@ while read LINE; do
             ITA_DIRECTORY="$val"
         fi
     fi
-done < "$COPY_ANSWER_FILE"
+done
+
+#IFSリストア
+IFS="$SRC_IFS"
 
 #作業用アンサーファイルの削除
 if ! test -e /tmp/ita_answers.txt ; then
@@ -471,6 +491,9 @@ if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material2" ; then
 fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material3" ; then
     MATERIAL3_FLG=1
+fi
+if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material4" ; then
+    MATERIAL4_FLG=1
 fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_createparam" ; then
     CREATEPARAM_FLG=1
@@ -639,7 +662,7 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
                 sed -i -e "s:%%%%%ITA_DIRECTORY%%%%%:${ITA_DIRECTORY}:g" ${SQL_REPLACE}
 
                 #SQLの実行
-                mysql --show-warnings -u${DB_USERNAME} -p${DB_PASSWORD} ${DB_NAME} -h ${DB_HOST} < "$SQL_REPLACE" 1>${SQL_LOGFILE} 2>&1
+                env MYSQL_PWD=${DB_PASSWORD} mysql -u${DB_USERNAME} --show-warnings ${DB_NAME} -h ${DB_HOST} < "$SQL_REPLACE" 1>${SQL_LOGFILE} 2>&1
 
                 rm -rf ${SQL_REPLACE}
 
@@ -720,6 +743,13 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
             fi
         fi
     done
+
+    #その他必要なスクリプトを実行する
+    SHELL_FILE="${VERSION_UP_DIR}/${LIST_VERSION}/other_exec.sh"
+    if test -e ${SHELL_FILE} ; then
+        sh ${SHELL_FILE} >> "$LOG_FILE" 2>&1
+    fi
+
 done < ${VERSION_UP_LIST_FILE}
 
 #リリースファイルを変更する

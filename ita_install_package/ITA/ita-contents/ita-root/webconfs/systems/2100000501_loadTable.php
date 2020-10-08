@@ -201,7 +201,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
-
+    
+    $c = new IDColumn('SHEET_TYPE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-310001"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME','',array('ORDER'=>'ORDER BY DISP_SEQ'));
+    $c->setDescription('');//エクセル・ヘッダでの説明
+    $c->setHiddenMainTableColumn(true); 
+    $c->setRequired(true);//登録/更新時には、入力必須
+    $table->addColumn($c);
 
     $table->fixColumn();
 
