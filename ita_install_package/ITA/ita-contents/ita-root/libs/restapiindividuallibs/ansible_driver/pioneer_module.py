@@ -93,8 +93,8 @@ import codecs
 from ansible.module_utils.basic import *
 
 import base64
-password  = 'undefine'
-output_password = '********'
+vault_vars_def = {}
+output_password = '********' 
 log_file_name = ''
 exit_dict = {}
 
@@ -126,8 +126,8 @@ def main():
     sys.setdefaultencoding('utf-8')
 
   global log_file_name
-  global password
   global output_password
+  global vault_vars_def
   module = AnsibleModule(
     argument_spec = dict(
       username=dict(required=True),
@@ -190,13 +190,6 @@ def main():
     fp.write(str(pid))
     fp.close()
 
-    # パスワードをデコードする
-    host_vars = yaml.load(open(module.params['host_vars_file']).read())
-    if '__loginpassword__' in host_vars:
-      password = host_vars['__loginpassword__']
-      password = base64.b64decode(codecs.encode(password, "rot-13"))
-      password = password.decode('utf-8','replace')
-      
     # ログに表示するパスワード
     output_password = '********'
 
@@ -235,6 +228,13 @@ def main():
     else:
       chk_mode = ''
 
+    vault_vars_file = module.params['host_vars_file']
+    vault_vars_file = vault_vars_file.replace("/original_host_vars/", "/vault_host_vars/")
+    vault_vars_def  = yaml.load(open(vault_vars_file).read())
+    for var,value in vault_vars_def.items():
+        enc_value = base64.b64decode(codecs.encode(value, "rot-13"))
+        enc_value= enc_value.decode('utf-8','replace')
+        vault_vars_def[var] = enc_value;
 
     # exec_list read
     for input in config['exec_list']:
@@ -278,7 +278,7 @@ def main():
 
       # log output
       private_log_output(log_file_name,host_name,'=== execute command =================================================')
-      input_cmd = password_replace(output_password,str(input))
+      input_cmd = password_hide(vault_vars_def,str(input))
       private_log_output(log_file_name,host_name,'execute command:' + input_cmd)
       private_log_output(log_file_name,host_name,'=====================================================================')
       exec_log_output('=== execute command: =================================================')
@@ -333,8 +333,11 @@ def main():
             exec_name = 'localaction command:(' + exec_cmd + ')'
           elif 'ignore_errors' == cmd:
             ignore_errors = str(input[cmd])
-            if ignore_errors != str(False) and ignore_errors != str(True):
-              logstr = 'ignore_errors=(' + str(input[cmd]) + '): Only yes or no set'
+            pass_rep_ignore_errors = password_replace(vault_vars_def,ignore_errors) 
+            output_ignore_errors = password_hide(vault_vars_def,ignore_errors) 
+
+            if pass_rep_ignore_errors != str(False) and pass_rep_ignore_errors != str(True) and  pass_rep_ignore_errors != 'no' and pass_rep_ignore_errors != 'yes':
+              logstr = 'ignore_errors=(' + output_ignore_errors + '): Only yes or no set'
               exec_log_output(logstr)
               private_log_output(log_file_name,host_name,logstr)
               #########################################################
@@ -368,8 +371,10 @@ def main():
             stdout_file = str(input[cmd])
           elif 'success_exit' == cmd:
             success_exit = str(input[cmd])
-            if success_exit != str(False) and success_exit != str(True):
-              logstr = 'success_exit=(' + str(input[cmd]) + '): only yes or no set'
+            pass_rep_success_exit = password_replace(vault_vars_def,success_exit) 
+            output_success_exit   = password_hide(vault_vars_def,success_exit) 
+            if pass_rep_success_exit != str(False) and pass_rep_success_exit != str(True) and pass_rep_success_exit != 'no' and pass_rep_success_exit != 'yes':
+              logstr = 'success_exit=(' + output_success_exit + '): only yes or no set'
               exec_log_output(logstr)
               private_log_output(log_file_name,host_name,logstr)
 
@@ -380,8 +385,10 @@ def main():
 
           elif 'ignore_errors' == cmd:
             ignore_errors = str(input[cmd])
-            if ignore_errors != str(False) and ignore_errors != str(True):
-              logstr = 'ignore_errors=(' + str(input[cmd]) + '): Only yes or no set'
+            pass_rep_ignore_errors = password_replace(vault_vars_def,ignore_errors) 
+            output_ignore_errors = password_hide(vault_vars_def,ignore_errors) 
+            if pass_rep_ignore_errors != str(False) and pass_rep_ignore_errors != str(True) and  pass_rep_ignore_errors != 'no' and pass_rep_ignore_errors != 'yes':
+              logstr = 'ignore_errors=(' + output_ignore_errors + '): Only yes or no set'
               exec_log_output(logstr)
               private_log_output(log_file_name,host_name,logstr)
               #########################################################
@@ -424,7 +431,7 @@ def main():
         edit_stdout_data = last_escstr_cut(p.before)
         # stdout log file create
         if stdout_file:
-          pass_rep_stdout_file = password_replace(password,stdout_file)
+          pass_rep_stdout_file = password_replace(vault_vars_def,stdout_file) 
 
           craete_stdout_file(pass_rep_stdout_file,edit_stdout_data)
         else:
@@ -434,11 +441,11 @@ def main():
         if shell_cmd:
           # user shell execute
           try:
-            pass_rep_shell_cmd = password_replace(password,shell_cmd)
-            output_shell_cmd  = password_replace(output_password,shell_cmd)
-            pass_rep_parameter_cmd = password_replace(password,parameter_cmd)
-            output_parameter_cmd  = password_replace(output_password,parameter_cmd)
-            pass_rep_stdout_file = password_replace(password,stdout_file)
+            pass_rep_shell_cmd = password_replace(vault_vars_def,shell_cmd) 
+            output_shell_cmd  = password_hide(vault_vars_def,shell_cmd) 
+            pass_rep_parameter_cmd = password_replace(vault_vars_def,parameter_cmd) 
+            output_parameter_cmd  = password_hide(vault_vars_def,parameter_cmd) 
+            pass_rep_stdout_file = password_replace(vault_vars_def,stdout_file) 
 
             logstr = 'user shell ' + output_shell_cmd + ' parameter(' + output_parameter_cmd + ') execute'
             private_log_output(log_file_name,host_name,logstr)
@@ -461,9 +468,9 @@ def main():
         else:
           # default shell execute
           try:
-            pass_rep_parameter_cmd = password_replace(password,parameter_cmd)
-            pass_rep_stdout_file = password_replace(password,stdout_file)
-            output_parameter_cmd  = password_replace(output_password,parameter_cmd)
+            pass_rep_parameter_cmd = password_replace(vault_vars_def,parameter_cmd) 
+            pass_rep_stdout_file = password_replace(vault_vars_def,stdout_file) 
+            output_parameter_cmd  = password_hide(vault_vars_def,parameter_cmd) 
 
             logstr = 'default shell parameter(' + output_parameter_cmd + ') execute'
             private_log_output(log_file_name,host_name,logstr)
@@ -492,7 +499,8 @@ def main():
           exec_log_output(logstr)
 
           # success_exit check
-          if success_exit == str(True):
+          pass_rep_success_exit = password_replace(vault_vars_def,success_exit) 
+          if pass_rep_success_exit == str(True) or pass_rep_success_exit == 'yes':
             logstr = 'dialog_file normal exit. (success_exit: yes)'
             private_log_output(log_file_name,host_name,logstr)
             exec_log_output(logstr)
@@ -512,7 +520,8 @@ def main():
           exec_log_output(logstr)
 
           # ignore_errors check
-          if ignore_errors == str(False):
+          pass_rep_ignore_errors = password_replace(vault_vars_def,ignore_errors) 
+          if pass_rep_ignore_errors == str(False) or pass_rep_ignore_errors == 'no':
             logstr = 'dialog_file fail exit. (ignore_errors: no)'
             private_log_output(log_file_name,host_name,logstr)
             exec_log_output(logstr)
@@ -568,6 +577,7 @@ def main():
             for input2 in with_file['exec_list']:
               for cmd2 in input2:
                 if 'with_items' == cmd2:
+                  ## with_itemsに設定されている変数名を取得
                   max = len(input2[cmd2])
                   for i in range(0,max,1):
                     with_tmp2 = str(input2[cmd2][i])
@@ -585,16 +595,21 @@ def main():
             cnt = len(with_cmd[with_items_count])
             def_cmd = defaultdict(dict)
             for i in range(0,cnt,1):
+              ## with_itemsの変数名を取得
               def_temp = with_cmd[with_items_count][i]
               if def_temp.find('VAR_prompt') != -1:
                 prompt_num = i
               if def_temp.find('VAR_timeout') != -1:
                 timeout_num = i
+              ## with_itemsの変数の具体値の数を取得
               max = len(with_def[def_temp])
               for j in range(0,max,1):
+                ## with_itemsの変数の具体値をホスト変数ファイルから取得
                 def_tmp = str(with_def[def_temp][j])
+                ## with_itemsの変数の具体値リスト取得
                 def_cmd[i][j] = def_tmp
             with_items_count = with_items_count + 1
+
           elif 'failed_when' == cmd:
             failed_max = len(input[cmd])
             for i in range(0,failed_max,1):
@@ -627,8 +642,9 @@ def main():
         ####################################################
         # command command execute
         ####################################################
-        # whenパラメータがある場合
+        # whenパラメータ有無判定  -- block-0 start
         if when_cmd:
+          # whenパラメータがある場合
 
           # ループ処理
           for i in range(0,when_max,1):
@@ -712,11 +728,16 @@ def main():
               skip_flg = 1
               break
 
-        # skip_flgが0であった場合
-        if skip_flg == 0:
+        # whenパラメータ有無判定  -- block-0 end
 
-          # with_itemsがある場合
+        # when条件判定結果判定  -- block-1 start
+        ## 
+        if skip_flg == 0:
+          # when条件マッチ(skip_flg=0)
+
+          # with_items有無判定  -- block-2 start
           if with_cmd:
+            # with_itemsありの場合 
 
             with_items_flg = 1
 
@@ -733,17 +754,19 @@ def main():
               if timeout_num == i:
                 continue
 
-              # 変数に対して要素数を取得
+              # 変数の具体値の数を取得
               tmp_count = len(def_cmd[i])
 
-              # 最大の要素数を取得
+              # with_itemsの変数の最大具体値数を取得
               if max_count < tmp_count:
                 max_count = tmp_count
 
+            ## with_itemsの変数数分繰返し
             for i in range(0,max,1):
 
               tmp_count = len(def_cmd[i])
               if max_count > tmp_count:
+                ## 具体値が不足している場合に具体値を空白に設定する
                 for j in range(tmp_count,max_count,1):
                   def_cmd[i][j] = ''
 
@@ -755,7 +778,7 @@ def main():
               # コマンド文を退避
               temp_cmd = exec_cmd
 
-              # コマンドにitem.Xの記述があるかチェック
+              # コマンドにitem.Xの記述があるかチェック -- block-3 start
               if com_re_search("{{ item.[0-9]|[1-9][0-9] }}", temp_cmd ):
 
                 # with_itemsの変数分ループ
@@ -788,8 +811,9 @@ def main():
 
                   continue
 
-                # exec_whenがある場合
+                # exec_when有無判定 -- block-4 start
                 if exec_when_cmd:
+                  # exec_whenがある場合
 
                   exec_when_flg = 1
 
@@ -1019,7 +1043,7 @@ def main():
                           else:
                             break
 
-                      # timeout値を退避
+                      # timeout値を退避 exec_whenあり
                       temp_cmd5 = str(timeout2)
 
                       # timeoutにitem.Xの記述があるかチェック
@@ -1100,7 +1124,7 @@ def main():
                         else:
                           break
 
-                    # timeout値を退避
+                    # timeout値を退避  exec_whenあり
                     temp_cmd5 = str(timeout2)
 
                     # timeoutにitem.Xの記述があるかチェック
@@ -1355,8 +1379,9 @@ def main():
                             #########################################################
                             private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
-                # exec_whenがない場合
+                # exec_when有無判定 -- block-4 else
                 else:
+                  # exec_whenがない場合
 
                   if prompt_count2 == 0:
 
@@ -1395,7 +1420,7 @@ def main():
                         else:
                           break
 
-                    # timeout値を退避
+                    # timeout値を退避  exec_whenなし
                     temp_cmd5 = str(timeout2)
 
                     # timeoutにitem.Xの記述があるかチェック
@@ -1477,7 +1502,7 @@ def main():
                       else:
                         break
 
-                  # timeout値を退避
+                  # timeout値を退避  exec_whenなし
                   temp_cmd5 = str(timeout2)
 
                   # timeoutにitem.Xの記述があるかチェック
@@ -1730,11 +1755,15 @@ def main():
                           #########################################################
                           private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
-              # コマンドにitem.Xの記述がない場合そのまま実行
-              else:
+                # exec_when有無判定 -- block-4 end
 
-                # exec_whenがある場合
+              # コマンドにitem.Xの記述があるかチェック -- block-3 else
+              else:
+                # コマンドにitem.Xの記述がない場合そのまま実行
+
+                # exec_when有無判定 -- block-5 start
                 if exec_when_cmd:
+                  # exec_whenがある場合
 
                   exec_when_flg = 1
 
@@ -2309,8 +2338,9 @@ def main():
                             #########################################################
                             private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
-                # exec_whenがない場合
+                # exec_when有無判定 -- block-5 else
                 else:
+                  # exec_whenがない場合
 
                   if prompt_count2 == 0:
 
@@ -2689,19 +2719,28 @@ def main():
                           #########################################################
                           private_fail_json(obj=module,msg=host_name + ":" + logstr,exec_log=exec_log)
 
-          # with_itemsを使用していないので、そのまま実行
+                # exec_when有無判定 -- block-5 end
+
+              # コマンドにitem.Xの記述があるかチェック -- block-3 end
+
+          # with_items有無判定 -- block-2 else
           else:
+            # with_itemsを使用していないので、そのまま実行
             expect_prompt(p,log_file_name,host_name,expect_cmd,timeout2)
 
             # コマンド実行
             exec_command(p,log_file_name,host_name,exec_cmd)
 
-        # スキップフラグが1であった場合
+          # with_items有無判定 -- block-2 end
+        # when条件判定結果判定  -- block-1 else
         else:
+          # スキップフラグが1であった場合
           # スキップする。
           logstr = 'Skip ...'
           exec_log_output(logstr)
           private_log_output(log_file_name,host_name,logstr)
+
+        # when条件判定結果判定  -- block-1 end
 
         if register_used_flg == 1:
           register_cmd == ''
@@ -2867,12 +2906,11 @@ def craete_stdout_file(file,data):
 
 def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,host_name):
 
- # pass
-  global password
+  global vault_vars_def
   global register_used_flg
   r = re.compile("(.*)(\n)(.*)")
 
-  when_cmd = password_replace(password,when_cmd)
+  when_cmd = password_replace(vault_vars_def,when_cmd) 
 
   # whenが"no match"である場合
   if com_re_search( "no match", when_cmd ):
@@ -3908,11 +3946,10 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
 def failed_when_check(when_cmd,register_cmd,log_file_name,host_name):
 
- # pass
-  global password
+  global vault_vars_def
   r = re.compile("(.*)(\n)(.*)")
 
-  when_cmd = password_replace(password,when_cmd)
+  when_cmd = password_replace(vault_vars_def,when_cmd) 
 
   # whenが"no match"である場合
   if com_re_search( "no match", when_cmd ):
@@ -4182,31 +4219,40 @@ def last_escstr_cut(sometext):
     stdout_data += newline
   return stdout_data
 
-def password_replace(password,data):
-  rep_str = data.replace('<<__loginpassword__>>', password)
-  return rep_str
+def password_hide(vault_vars_def,data):
+  global output_password
+  rep_str = data
+  for var,value in vault_vars_def.items():
+    rep_str = rep_str.replace("<< "+var+" >>",output_password)
+  return rep_str 
+
+def password_replace(vault_vars_def,data):
+  rep_str = data
+  for var,value in vault_vars_def.items():
+    rep_str = rep_str.replace("<< "+var+" >>",value)
+  return rep_str 
 
 def exec_log_output(log,replace_flg = True):
   global exec_log
-  global output_password
+  global vault_vars_def 
   output_log = str(log)
   if replace_flg == True:
-    output_log = password_replace(output_password,str(log))
+    output_log = password_hide(vault_vars_def,str(log)) 
   exec_log.append(output_log)
 
 def debug_exec_log_output(log,replace_flg = True):
   global exec_log
-  global output_password
+  global vault_vars_def 
   output_log = str(log)
   if replace_flg == True:
-    output_log = password_replace(output_password,str(log))
+    output_log = password_hide(vault_vars_def,str(log)) 
   exec_log.append(output_log)
 
 def private_log_output(log_file_name,host_name,log,replace_flg = True):
-  global output_password
+  global vault_vars_def
   output_log = str(log)
   if replace_flg == True:
-    output_log = password_replace(output_password,str(log))
+    output_log = password_hide(vault_vars_def,str(log)) 
   private_log(log_file_name,host_name,output_log)
 
 # python2/3で文字型に差異があり、re.searchに渡す文字型を調整
@@ -4235,22 +4281,28 @@ def unicode2encode(in_str,code='utf-8',errors='replace'):
   return in_str
 
 def expect_prompt(p,log_file_name,host_name,cmd,timeout):
-  global password
   global prompt_log_str
+  global vault_vars_def
 
   # 隠蔽文字デコード
-  pass_rep_cmd = password_replace(password,cmd)
+  pass_rep_cmd = password_replace(vault_vars_def,cmd) 
+  output_rep_cmd = password_hide(vault_vars_def,cmd)
+
+  # タイマ値の隠蔽文字デコード
+  pass_rep_timeout = timeout
+  if type(timeout) is str:
+    pass_rep_timeout = password_replace(vault_vars_def,timeout) 
 
   # promptログ生成
   # prompt: [%s]
-  logstr =  prompt_log_str % (cmd)
+  logstr =  prompt_log_str % (output_rep_cmd) 
 
   # promptログ出力
   exec_log_output(logstr)
   private_log_output(log_file_name,host_name,logstr)
 
   # prompt待ち
-  p.expect(pass_rep_cmd, timeout=int(timeout))
+  p.expect(pass_rep_cmd, timeout=int(pass_rep_timeout))
 
   # 標準出力ログ
   exec_log_output('prompt match')
@@ -4265,15 +4317,17 @@ def expect_prompt(p,log_file_name,host_name,cmd,timeout):
   private_log_output(log_file_name,host_name,"Ok")
 
 def exec_command(p,log_file_name,host_name,cmd):
-  global password
   global command_log_str
+  global vault_vars_def
 
   # 隠蔽文字デコード
-  pass_rep_cmd = password_replace(password,cmd)
+  pass_rep_cmd = password_replace(vault_vars_def,cmd) 
+  output_rep_cmd = password_hide(vault_vars_def,cmd) 
 
   # execコマンドログ生成
   # "command: [%s]"
-  logstr =  command_log_str % (cmd)
+  ##logstr =  command_log_str % (cmd)
+  logstr =  command_log_str % (output_rep_cmd)
 
   # execコマンドログ出力
   exec_log_output(logstr)
@@ -4285,16 +4339,20 @@ def exec_command(p,log_file_name,host_name,cmd):
   private_log_output(log_file_name,host_name,"Ok")
 
 def exec_localaction(module,p,log_file_name,host_name,cmd,ignore_errors):
-  global password
   global localaction_log_str
   global exec_log
+  global vault_vars_def
+
+  pass_rep_ignore_errors = password_replace(vault_vars_def,ignore_errors) 
+  output_ignore_errors = password_hide(vault_vars_def,ignore_errors) 
 
   # 隠蔽文字デコード
-  pass_rep_cmd = password_replace(password,cmd)
+  pass_rep_cmd = password_replace(vault_vars_def,cmd) 
+  output_rep_cmd = password_hide(vault_vars_def,cmd) 
 
   # localactionコマンドログ生成
   # "localaction: [%s]"
-  logstr =  localaction_log_str % (cmd)
+  logstr =  localaction_log_str % (output_rep_cmd)
 
   # localactionコマンドログ出力
   exec_log_output(logstr)
@@ -4329,7 +4387,7 @@ def exec_localaction(module,p,log_file_name,host_name,cmd,ignore_errors):
     private_log_output(log_file_name,host_name,"Ok")
   else:
     # ignore_errors check
-    if ignore_errors == str(False):
+    if pass_rep_ignore_errors == str(False) or pass_rep_ignore_errors == 'no':
       logstr = 'dialog_file fail exit. (ignore_errors: no)'
       private_log_output(log_file_name,host_name,logstr)
       exec_log_output(logstr)
