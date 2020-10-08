@@ -184,4 +184,10 @@ $ary[171270] = "Commit transaction has failed.";
 $ary[171280] = "An exception occurred.";
 $ary[171290] = "Rollback has failed.";
 $ary[171300] = "An error occurred at the time of ending the transaction.";
+$ary[181010] = "Failed to get interface information.";
+$ary[181020] = "Failed to get data from Terraform Enterprise. Please check the interface information.";
+$ary[181030] = "Organization is not registered.";
+$ary[181040] = "Workspace is not registered.";
+$ary[181050] = "Policy is not registered.";
+$ary[181060] = "PolicySet is not registered.";
 ?>
