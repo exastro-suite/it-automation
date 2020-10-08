@@ -156,6 +156,7 @@
         "VARS_LINK_ID"=>""            ,
         "COL_SEQ_COMBINATION_ID"=>""  ,
         "VARS_ENTRY"=>""              ,
+        "SENSITIVE_FLAG"=>""          ,
         "VARS_ENTRY_USE_TPFVARS"=>""  ,
         "ASSIGN_SEQ"=>""              ,
         "DISP_SEQ"=>""                ,

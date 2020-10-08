@@ -50,6 +50,8 @@
         $aryOrderToReqGate = array('DBConnect'=>'LATE');
         require_once($root_dir_path . $php_req_gate_php);
 
+        require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
+
         // 開始メッセージ
         if($log_level === "DEBUG") {
             $traceMsg = $objMTS->getSomeMessage("ITAWDCH-STD-50001");
@@ -586,6 +588,8 @@ function readValAssign(&$inout_tableNameToMenuIdList,
     $sql = $sql .     "   TBL_B.REF_TABLE_NAME                                        ,  \n";
     $sql = $sql .     "   TBL_B.REF_PKEY_NAME                                         ,  \n";
     $sql = $sql .     "   TBL_B.REF_COL_NAME                                          ,  \n";
+    $sql = $sql .     "   TBL_B.COL_CLASS                                             ,  \n";
+
     $sql = $sql .     "   TBL_B.DISUSE_FLAG  AS COL_DISUSE_FLAG                       ,  \n";
     $sql = $sql .     "   TBL_A.COL_TYPE                                              ,  \n";
    
@@ -819,17 +823,20 @@ function readValAssign(&$inout_tableNameToMenuIdList,
     $sql = $sql .     "         )                                                        \n";
     $sql = $sql .     "       AND                                                        \n";
     $sql = $sql .     "       DISUSE_FLAG = '0'                                          \n";
-    $sql = $sql .     "   ) AS KEY_ASSIGN_SEQ_NEED                                       \n";
-
+    $sql = $sql .     "   ) AS KEY_ASSIGN_SEQ_NEED,                                      \n";
+    $sql = $sql .     "   TBL_D.DISUSE_FLAG AS ANSIBLE_TARGET_TABLE                      \n";
     $sql = $sql .     " FROM                                                             \n";
     $sql = $sql .     "   $lv_val_assign_tbl TBL_A                                       \n";
-    $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_COLUMN TBL_B ON                          \n";
+    $sql = $sql .     "   LEFT JOIN D_CMDB_MENU_COLUMN_SHEET_TYPE_1 TBL_B ON             \n";
     $sql = $sql .     "          (TBL_A.COLUMN_LIST_ID = TBL_B.COLUMN_LIST_ID)           \n";
-    $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_TABLE  TBL_C ON                          \n";
+    $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_TABLE               TBL_C ON             \n";
     $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_C.MENU_ID)                  \n";
+    $sql = $sql .     "   LEFT JOIN D_CMDB_MENU_LIST_SHEET_TYPE_1   TBL_D ON             \n";
+    $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_D.MENU_ID)                  \n";
     $sql = $sql .     " WHERE                                                            \n";
     $sql = $sql .     "   TBL_A.DISUSE_FLAG='0'                                          \n";
     $sql = $sql .     " ORDER BY TBL_A.COLUMN_ID                                         \n";
+
 
     $sqlUtnBody = $sql;
     $arrayUtnBind = array();
@@ -843,6 +850,17 @@ function readValAssign(&$inout_tableNameToMenuIdList,
         if($row['TBL_DISUSE_FLAG'] != '0') {
             if($log_level === "DEBUG"){
                 $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90014",array($row['COLUMN_ID']));
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            }
+            // 次のカラムへ
+            continue;
+        }
+
+        // SHEET_TYPEが1(ホスト・オペレーション)で廃止レコードでないかを判定
+        if($row['ANSIBLE_TARGET_TABLE'] != 0) {
+            if ( $log_level === 'DEBUG' ){
+                // ary[90134] = "Ansibleでは処理出来ない紐付対象メニューが代入値自動登録設定に登録されています。このレコードを処理対象外にします。(代入値自動登録設定 項番:{})";
+                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90134",array($row['COLUMN_ID']));
                 LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             }
             // 次のカラムへ
@@ -980,6 +998,15 @@ function readValAssign(&$inout_tableNameToMenuIdList,
 
         $inout_tableNameToMenuIdList[$row['TABLE_NAME']] = $row['MENU_ID'];
 
+        // PasswordColumnかを判定
+        $key_sensitive_flg   = DF_SENSITIVE_OFF;
+        $value_sensitive_flg = DF_SENSITIVE_OFF;
+        switch($row['COL_CLASS']) {
+        case 'PasswordColumn':
+            $value_sensitive_flg = DF_SENSITIVE_ON;
+            break;
+        }
+
         $inout_tabColNameToValAssRowList[$row['TABLE_NAME']][$row['COL_NAME']][] = 
             array(
                 'COLUMN_ID'                         => $row['COLUMN_ID'],
@@ -996,6 +1023,7 @@ function readValAssign(&$inout_tableNameToMenuIdList,
                 'VAL_COL_SEQ_COMBINATION_ID'        => $row['VAL_COL_SEQ_COMBINATION_ID'],
                 'VAL_COL_COMBINATION_MEMBER_ALIAS'  => $row['VAL_COL_COMBINATION_MEMBER_ALIAS'],
                 'VAL_ASSIGN_SEQ'                    => $row['VAL_ASSIGN_SEQ'],
+                'VALUE_SENSITIVE_FLAG'              => $value_sensitive_flg,
                 // Key項目
                 'KEY_VARS_LINK_ID'                  => $row['KEY_VARS_LINK_ID'],
                 'KEY_VARS_NAME'                     => $row['KEY_VARS_NAME'],
@@ -1003,8 +1031,8 @@ function readValAssign(&$inout_tableNameToMenuIdList,
                 'KEY_COL_SEQ_COMBINATION_ID'        => $row['KEY_COL_SEQ_COMBINATION_ID'],
                 'KEY_COL_COMBINATION_MEMBER_ALIAS'  => $row['KEY_COL_COMBINATION_MEMBER_ALIAS'],
                 'KEY_ASSIGN_SEQ'                    => $row['KEY_ASSIGN_SEQ'],
-                'NULL_DATA_HANDLING_FLG'            => $row['NULL_DATA_HANDLING_FLG']
-
+                'NULL_DATA_HANDLING_FLG'            => $row['NULL_DATA_HANDLING_FLG'],
+                'KEY_SENSITIVE_FLAG'                => $key_sensitive_flg,
             );
 
         // テーブルの主キー名退避
@@ -1553,6 +1581,7 @@ function makeVarsAssignData($in_table_name,
                                      $in_col_list['VAL_COL_SEQ_COMBINATION_ID'],
                                      $in_col_list['VAL_ASSIGN_SEQ'],
                                      $in_col_val,
+                                     $in_col_list['VALUE_SENSITIVE_FLAG'],
                                      $ina_vars_ass_list,
                                      $ina_vars_ass_chk_list,
                                      $ina_array_vars_ass_list,
@@ -1586,6 +1615,7 @@ function makeVarsAssignData($in_table_name,
                                      $in_col_list['KEY_COL_SEQ_COMBINATION_ID'],
                                      $in_col_list['KEY_ASSIGN_SEQ'],
                                      $col_name,
+                                     $in_col_list['KEY_SENSITIVE_FLAG'],
                                      $ina_vars_ass_list,
                                      $ina_vars_ass_chk_list,
                                      $ina_array_vars_ass_list,
@@ -1613,6 +1643,7 @@ function makeVarsAssignData($in_table_name,
 //   $in_col_seq_combination_id:    メンバー変数ID
 //   $in_vars_assign_seq:           代入順序
 //   $in_col_val:                   具体値
+//   $in_sensitive_flg:             sensitive設定
 //   $ina_vars_ass_list:            一般変数・複数具体値変数用 代入値登録情報配列
 //   $ina_vars_ass_chk_list:        一般変数・複数具体値変数用 代入順序重複チェック配列
 //   $ina_array_vars_ass_list:      多次元変数配列変数用 代入値登録情報配列
@@ -1635,6 +1666,7 @@ function checkAndCreateVarsAssignData($in_table_name,
                                       $in_col_seq_combination_id,
                                       $in_vars_assign_seq,
                                       $in_col_val,
+                                      $in_sensitive_flg,
                                       &$ina_vars_ass_list,
                                       &$ina_vars_ass_chk_list,
                                       &$ina_array_vars_ass_list,
@@ -1694,6 +1726,7 @@ function checkAndCreateVarsAssignData($in_table_name,
                                      'VARS_LINK_ID'      => $in_vars_link_id,
                                      'ASSIGN_SEQ'        => $in_vars_assign_seq,
                                      'VARS_ENTRY'        => $in_col_val,
+                                     'SENSITIVE_FLAG'    => $in_sensitive_flg,
                                      'VAR_TYPE'          => $in_vars_attr,
                                      'STATUS'            => $chk_status);
         break;
@@ -1744,6 +1777,7 @@ function checkAndCreateVarsAssignData($in_table_name,
                                            'COL_SEQ_COMBINATION_ID'=> $in_col_seq_combination_id,
                                            'ASSIGN_SEQ'            => $in_vars_assign_seq,
                                            'VARS_ENTRY'            => $in_col_val,
+                                           'SENSITIVE_FLAG'    => $in_sensitive_flg,
                                            'VAR_TYPE'              => $in_vars_attr,
                                            'STATUS'                => $chk_status);
         break;
@@ -1803,7 +1837,9 @@ function addStg1StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
     if(isset($in_VarsAssignRecodes[$key]))
     {
         // 具体値が一致しているか判定
-        if($in_VarsAssignRecodes[$key]['VARS_ENTRY'] == $in_varsAssignList['VARS_ENTRY']) {
+            if(($in_VarsAssignRecodes[$key]["VARS_ENTRY"]      == $in_varsAssignList['VARS_ENTRY']) &&
+               ($in_VarsAssignRecodes[$key]["SENSITIVE_FLAG"]  == $in_varsAssignList['SENSITIVE_FLAG'])) {
+
             // 代入値管理に必要なレコードを削除
             unset($in_VarsAssignRecodes[$key]);
 
@@ -1894,6 +1930,8 @@ function addStg1StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
     $tgt_row['JOURNAL_SEQ_NO']          = $seqValueOfJnlTable;
     $tgt_row['VARS_ENTRY']              = $in_varsAssignList['VARS_ENTRY'];
 
+    $tgt_row["SENSITIVE_FLAG"]          = $in_varsAssignList['SENSITIVE_FLAG'];
+
     $tgt_row['VARS_ENTRY_USE_TPFVARS']  = $VARS_ENTRY_USE_TPFVARS;
 
     $tgt_row['COL_SEQ_COMBINATION_ID']  = "";
@@ -1976,7 +2014,8 @@ function addStg1ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
     if(isset($in_ArryVarsAssignRecodes[$key]))
     {
         // 具体値が一致しているか判定
-        if($in_ArryVarsAssignRecodes[$key]['VARS_ENTRY'] == $in_varsAssignList['VARS_ENTRY']) {
+          if(($in_ArryVarsAssignRecodes[$key]["VARS_ENTRY"]      == $in_varsAssignList['VARS_ENTRY']) &&
+             ($in_ArryVarsAssignRecodes[$key]["SENSITIVE_FLAG"]  == $in_varsAssignList['SENSITIVE_FLAG'])) {
 
             // 代入値管理に必要なレコードはリストから削除
             unset($in_ArryVarsAssignRecodes[$key]);
@@ -2054,6 +2093,8 @@ function addStg1ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
     }
     $tgt_row['JOURNAL_SEQ_NO']   = $seqValueOfJnlTable;
     $tgt_row['VARS_ENTRY']       = $in_varsAssignList['VARS_ENTRY'];
+
+    $tgt_row["SENSITIVE_FLAG"]   = $in_varsAssignList['SENSITIVE_FLAG'];
 
     $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
 
@@ -2457,6 +2498,8 @@ function addStg2StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
     $tgt_row['JOURNAL_SEQ_NO']          = $seqValueOfJnlTable;
     $tgt_row['VARS_ENTRY']              = $in_varsAssignList['VARS_ENTRY'];
     
+    $tgt_row["SENSITIVE_FLAG"]          = $ina_varsass_list['SENSITIVE_FLAG'];
+
     $tgt_row['VARS_ENTRY_USE_TPFVARS']  = $VARS_ENTRY_USE_TPFVARS;
     
     $tgt_row['COL_SEQ_COMBINATION_ID']  = "";
@@ -2609,6 +2652,8 @@ function addStg2ArrayVarsAssign($in_varsAssignList, &$in_ArryVarsAssignRecodes) 
     }
     $tgt_row['JOURNAL_SEQ_NO']   = $seqValueOfJnlTable;
     $tgt_row['VARS_ENTRY']       = $in_varsAssignList['VARS_ENTRY'];
+
+    $tgt_row["SENSITIVE_FLAG"]   = $in_varsAssignList['SENSITIVE_FLAG'];
 
     $tgt_row['VARS_ENTRY_USE_TPFVARS']  = $VARS_ENTRY_USE_TPFVARS;
 

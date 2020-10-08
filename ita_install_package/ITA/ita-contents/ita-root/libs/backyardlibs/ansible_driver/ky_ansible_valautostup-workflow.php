@@ -220,6 +220,7 @@
             "SYSTEM_ID"=>""               ,
             "VARS_LINK_ID"=>""            ,
             "VARS_ENTRY"=>""              ,
+            "SENSITIVE_FLAG"=>""          ,
             "ASSIGN_SEQ"=>""              ,
             "VARS_ENTRY_USE_TPFVARS"=>""  ,
             "DISP_SEQ"=>""                ,
@@ -241,30 +242,10 @@
             "SYSTEM_ID"=>""               ,
             "VARS_LINK_ID"=>""            ,
             "VARS_ENTRY"=>""              ,
+            "SENSITIVE_FLAG"=>""          ,
+//#ADD-END
             "ASSIGN_SEQ"=>""              ,
             "VARS_ENTRY_USE_TPFVARS"=>""  ,
-            "DISP_SEQ"=>""                ,
-            "DISUSE_FLAG"=>""             ,
-            "NOTE"=>""                    ,
-            "LAST_UPDATE_TIMESTAMP"=>""   ,
-            "LAST_UPDATE_USER"=>""
-        );
-        $arrayValueTmplOfVarAss = $arrayConfigOfVarAss;
-        break;
-    case DF_ROLE_DRIVER:
-        $arrayConfigOfVarAss = array(
-            "JOURNAL_SEQ_NO"=>""          ,
-            "JOURNAL_ACTION_CLASS"=>""    ,
-            "JOURNAL_REG_DATETIME"=>""    ,
-            "ASSIGN_ID"=>""               ,
-            "OPERATION_NO_UAPK"=>""       ,
-            "PATTERN_ID"=>""              ,
-            "SYSTEM_ID"=>""               ,
-            "VARS_LINK_ID"=>""            ,
-            "CHILD_VARS_LINK_ID"=>""      ,
-            "VARS_ENTRY"=>""              ,
-            "ASSIGN_SEQ"=>""              ,
-            "CHILD_VARS_COL_SEQ"=>""      ,
             "DISP_SEQ"=>""                ,
             "DISUSE_FLAG"=>""             ,
             "NOTE"=>""                    ,
@@ -430,6 +411,7 @@
 
         $aryOrderToReqGate = array('DBConnect'=>'LATE');
         require_once ($root_dir_path . $php_req_gate_php );
+        require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
 
         // 開始メッセージ
         if ( $log_level === 'DEBUG' ){
@@ -947,9 +929,11 @@
         global    $objDBCA;
         global    $log_level;
 
-        $cmdb_menu_column_tbl = 'B_CMDB_MENU_COLUMN';
+        $cmdb_menu_column_tbl     = 'D_CMDB_MENU_COLUMN_SHEET_TYPE_1';
+        $tgt_cmdb_menu_column_tbl = 'D_CMDB_MENU_LIST_SHEET_TYPE_1';
         if($in_driver_name == DF_PIONEER_DRIVER) {
-            $cmdb_menu_column_tbl = 'D_ANS_PNS_CMDB_MENU_COLUMN';
+            $cmdb_menu_column_tbl     = 'D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER';
+            $tgt_cmdb_menu_column_tbl = 'D_CMDB_MENU_LIST_SHEET_TYPE_1_PIONEER';
         }
 
         $sql =            " SELECT                                                           \n";
@@ -964,6 +948,7 @@
         $sql = $sql .     "   TBL_B.REF_TABLE_NAME                                        ,  \n";
         $sql = $sql .     "   TBL_B.REF_PKEY_NAME                                         ,  \n";
         $sql = $sql .     "   TBL_B.REF_COL_NAME                                          ,  \n";
+        $sql = $sql .     "   TBL_B.COL_CLASS                                             ,  \n";
         $sql = $sql .     "   TBL_B.DISUSE_FLAG  AS COL_DISUSE_FLAG                       ,  \n";
         $sql = $sql .     "   TBL_A.COL_TYPE                                              ,  \n";
         // 代入値管理データ連携フラグ
@@ -1051,13 +1036,16 @@
         // legacy/pioneerにはないのでnull設定
         $sql = $sql .     "   NULL AS KEY_CHILD_VARS_NAME                                  , \n";
         $sql = $sql .     "   TBL_A.KEY_ASSIGN_SEQ                                         , \n";
-        $sql = $sql .     "   TBL_A.KEY_CHILD_VARS_COL_SEQ                                   \n";
+        $sql = $sql .     "   TBL_A.KEY_CHILD_VARS_COL_SEQ                                 , \n";
+        $sql = $sql .     "   TBL_D.DISUSE_FLAG AS ANSIBLE_TARGET_TABLE                      \n";
         $sql = $sql .     " FROM                                                             \n";
         $sql = $sql .     "   $in_val_assign_tbl TBL_A                                       \n";
         $sql = $sql .     "   LEFT JOIN $cmdb_menu_column_tbl TBL_B ON                       \n";
         $sql = $sql .     "          (TBL_A.COLUMN_LIST_ID = TBL_B.COLUMN_LIST_ID)           \n";
         $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_TABLE  TBL_C ON                          \n";
         $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_C.MENU_ID)                  \n";
+        $sql = $sql .     "   LEFT JOIN D_CMDB_MENU_LIST_SHEET_TYPE_1 TBL_D ON               \n";
+        $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_D.MENU_ID)                  \n";
         $sql = $sql .     " WHERE                                                            \n";
         $sql = $sql .     "   TBL_A.DISUSE_FLAG='0'                                          \n";
         $sql = $sql .     " ORDER BY TBL_A.COLUMN_ID                                         \n";
@@ -1097,6 +1085,7 @@
             // CMDB代入値紐付メニューが廃止されているか判定
             if($row['TBL_DISUSE_FLAG'] != '0'){
                 if ( $log_level === 'DEBUG' ){
+                    // $ary[90014] = "代入値自動登録設定に登録されている紐付対象メニューが廃止されています。このレコードを処理対象外にします。(代入値自動登録設定 項番:{})";
                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90014",array($row['COLUMN_ID']));
                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 }
@@ -1104,9 +1093,21 @@
                 continue;
             }
 
+            // SHEET_TYPEが1(ホスト・オペレーション)で廃止レコードでないかを判定
+            if($row['ANSIBLE_TARGET_TABLE'] != 0) {
+                if ( $log_level === 'DEBUG' ){
+                    // ary[90134] = "Ansibleでは処理出来ない紐付対象メニューが代入値自動登録設定に登録されています。このレコードを処理対象外にします。(代入値自動登録設定 項番:{})";
+                    $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90134",array($row['COLUMN_ID']));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                }
+                // 次のカラムへ
+                continue;
+            } 
+
             // CMDB代入値紐付メニューのカラムが廃止されているか判定
             if($row['COL_DISUSE_FLAG'] != '0'){
                 if ( $log_level === 'DEBUG' ){
+                    // ary[90016] = "代入値自動登録設定に登録されている紐付対象メニューの項目情報が廃止されています。このレコードを処理対象外にします>。(代入値自動登録設定 項番:{})";
                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90016",array($row['COLUMN_ID']));
                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 }
@@ -1128,6 +1129,7 @@
             // CMDB代入値紐付メニューが登録されているか判定
             if(@strlen($row['TABLE_NAME']) == 0){
                 if ( $log_level === 'DEBUG' ){
+                    // $ary[90015] = "代入値自動登録設定に登録されている紐付対象メニューのテーブル名が取得出来ません。このレコードを処理対象外にします>。(代入値自動登録設定 項番:{})";
                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90015",array($row['COLUMN_ID']));
                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 }
@@ -1138,6 +1140,7 @@
             // CMDB代入値紐付メニューの主キーが登録されているか判定
             if(@strlen($row['PKEY_NAME']) == 0){
                 if ( $log_level === 'DEBUG' ){
+                    // $ary[90086] = "代入値自動登録設定に紐付く紐付対象メニューの主キー名が取得出来ません。このレコードを処理対象外にします。(代入値自動登録設定 項番:{})";
                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90086",array($row['COLUMN_ID']));
                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 }
@@ -1148,6 +1151,7 @@
             // CMDB代入値紐付メニューのカラムが未登録か判定
             if(@strlen($row['COL_NAME']) == 0){
                 if ( $log_level === 'DEBUG' ){
+                    // $ary[90017] = "代入値自動登録設定に登録されている紐付対象メニューの項目情報が取得出来ません。このレコードを処理対象外にします。(代入値自動登録設定 項番:{})";
                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90017",array($row['COLUMN_ID']));
                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 }
@@ -1158,6 +1162,7 @@
             // CMDB代入値紐付メニューのカラムタイトルが未登録か判定
             if(@strlen($row['COL_TITLE']) == 0){
                 if ( $log_level === 'DEBUG' ){
+                    // $ary[90018] = "代入値自動登録設定に登録されている紐付対象メニューの項目名が取得出来ません。このレコードを処理対象外にします。(代入値自動登録設定 項番:{})";
                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90018",array($row['COLUMN_ID']));
                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 }
@@ -1234,7 +1239,15 @@
             }
             $ina_table_nameTOid_list[$row['TABLE_NAME']]=$row['MENU_ID'];
             $ina_table_colnameTOid_list[$row['TABLE_NAME']][$row['COL_NAME']][]=$row['COLUMN_ID'];
-            // #1207 Update start 同じカラムに複数の変数を割り当てた場合の対応
+
+            $key_sensitive_flg   = DF_SENSITIVE_OFF;
+            $value_sensitive_flg = DF_SENSITIVE_OFF;
+            switch($row['COL_CLASS']) {
+            case 'PasswordColumn':
+                $value_sensitive_flg = DF_SENSITIVE_ON;
+                break;
+            }
+            // Update start 同じカラムに複数の変数を割り当てた場合の対応
             $ina_table_col_list[$row['TABLE_NAME']][$row['COL_NAME']][] =
                                array('COLUMN_ID'=>$row['COLUMN_ID'],
                                      'COL_TYPE'=>$row['COL_TYPE'],
@@ -1257,7 +1270,10 @@
                                      'KEY_CHILD_VARS_COL_SEQ'=>$row['KEY_CHILD_VARS_COL_SEQ'],
                                      'VAL_VAR_TYPE'=>$val_child_var_type,
                                      'KEY_VAR_TYPE'=>$key_child_var_type,
-                                     'NULL_DATA_HANDLING_FLG'=>$row['NULL_DATA_HANDLING_FLG']);
+                                     'NULL_DATA_HANDLING_FLG'=>$row['NULL_DATA_HANDLING_FLG'],
+                                     'KEY_SENSITIVE_FLAG'=>$key_sensitive_flg,
+                                     'VALUE_SENSITIVE_FLAG'=>$value_sensitive_flg,
+                                     );
 
             // テーブルの主キー名退避
             $ina_table_nameTOPkeyname_list[$row['TABLE_NAME']]=$row['PKEY_NAME'];
@@ -1568,6 +1584,7 @@
         $VariableColumnAry['B_ANS_CONTENTS_FILE']['CONTENTS_FILE_VARS_NAME'] = 0;
 
         foreach($ina_table_nameTOsql_list as $table_name=>$sql){
+
             if ( $log_level === 'DEBUG' ){
                 $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70017",array($ina_table_nameTOid_list[$table_name]));
                 LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -1869,6 +1886,7 @@
                            $ina_col_list['VAL_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['VAL_ASSIGN_SEQ'],
                            $in_col_val,
+                           $ina_col_list['VALUE_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
                            $ina_child_vars_ass_list,
@@ -1899,6 +1917,7 @@
                            $ina_col_list['KEY_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['KEY_ASSIGN_SEQ'],
                            $col_name,
+                           $ina_col_list['KEY_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
                            $ina_child_vars_ass_list,
@@ -1930,6 +1949,7 @@
                            $ina_col_list['VAL_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['VAL_ASSIGN_SEQ'],
                            $in_col_val,
+                           $ina_col_list['VALUE_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
                            $ina_child_vars_ass_list,
@@ -1952,6 +1972,7 @@
                            $ina_col_list['KEY_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['KEY_ASSIGN_SEQ'],
                            $col_name,
+                           $ina_col_list['KEY_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
                            $ina_child_vars_ass_list,
@@ -1982,6 +2003,7 @@
     //   $in_child_vars_col_seq:        列順序
     //   $in_vars_assign_seq:           代入順序
     //   $in_col_val:                   具体値
+    //   $in_sensitive_flg:             sensitive設定
     //   $ina_child_vars_ass_list:      配列変数用 代入値登録情報配列
     //   $ina_child_vars_ass_chk_list:  配列変数用 列順序重複チェック配列
     //   $ina_vars_ass_list:            一般変数用 代入値登録情報配列
@@ -2006,6 +2028,7 @@
                             $in_child_vars_col_seq,
                             $in_vars_assign_seq,
                             $in_col_val,
+                            $in_sensitive_flg,
                             &$ina_vars_ass_list,
                             &$ina_vars_ass_chk_list,
                             &$ina_child_vars_ass_list,
@@ -2066,6 +2089,7 @@
                                                       'CHILD_VARS_LINK_ID'=>$in_child_vars_link_id,
                                                       'CHILD_VARS_COL_SEQ'=>$in_child_vars_col_seq,
                                                       'VARS_ENTRY'=>$in_col_val,
+                                                      'SENSITIVE_FLAG'=>$in_sensitive_flg,
                                                       'VAR_TYPE'=>$in_var_type,
                                                       'STATUS'=>$chk_status);
         }
@@ -2109,6 +2133,7 @@
                                          'SYSTEM_ID'=>$in_host_id,
                                          'VARS_LINK_ID'=>$in_vars_link_id,
                                          'VARS_ENTRY'=>$in_col_val,
+                                         'SENSITIVE_FLAG'=>$in_sensitive_flg,
                                          'ASSIGN_SEQ'=>$in_vars_assign_seq,
                                          'VAR_TYPE'=>$in_var_type,
                                          'STATUS'=>$chk_status);
@@ -2171,7 +2196,8 @@
             unset($in_VarsAssignRecodes[$key]);
 
             // 具体値が変更になっているか判定する。
-            if($tgt_row["VARS_ENTRY"]  == $ina_varsass_list['VARS_ENTRY']){
+            if(($tgt_row["VARS_ENTRY"]  == $ina_varsass_list['VARS_ENTRY']) &&
+               ($tgt_row["SENSITIVE_FLAG"]  == $ina_varsass_list['SENSITIVE_FLAG'])) {
 
                 // トレースメッセージ
                 if ( $log_level === 'DEBUG' )
@@ -2260,6 +2286,7 @@
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
             $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
+            $tgt_row["SENSITIVE_FLAG"]   = $ina_varsass_list['SENSITIVE_FLAG'];
             $tgt_row["DISUSE_FLAG"]      = '0';
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
         }
@@ -2882,6 +2909,7 @@
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["SENSITIVE_FLAG"]  = $ina_varsass_list['SENSITIVE_FLAG'];
             $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
             $tgt_row["DISUSE_FLAG"]      = '0';
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
@@ -2916,6 +2944,7 @@
             $tgt_row['VARS_LINK_ID']      = $ina_varsass_list['VARS_LINK_ID'];
             $tgt_row['ASSIGN_SEQ']        = $ina_varsass_list['ASSIGN_SEQ'];
             $tgt_row["VARS_ENTRY"]        = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["SENSITIVE_FLAG"]    = $ina_varsass_list['SENSITIVE_FLAG'];
             $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
             $tgt_row["DISUSE_FLAG"]      = '0';
