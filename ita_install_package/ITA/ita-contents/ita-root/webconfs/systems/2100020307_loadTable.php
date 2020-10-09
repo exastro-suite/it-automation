@@ -622,6 +622,36 @@ Ansible（Legacy Role）作業パターン詳細
         }
         //ロールパッケージとロールの組合せチェック----
 
+        //----同一Movementに複数のロールパッケージが登録されていないか判定
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            $retBool = false;
+            $query = " SELECT COUNT(*) REC_COUNT FROM D_B_ANSIBLE_LRL_PATTERN_LINK "
+                    ." WHERE  "
+                    ."   LINK_ID         <> :LINK_ID          AND "
+                    ."   PATTERN_ID      =  :PATTERN_ID       AND "
+                    ."   ROLE_PACKAGE_ID <> :ROLE_PACKAGE_ID  AND "
+                    ."   DISUSE_FLAG = 0;                         ";
+            $aryForBind = array();
+            $aryForBind['LINK_ID']         = $columnId;
+            $aryForBind['PATTERN_ID']      = $rg_pattern_id;
+            $aryForBind['ROLE_PACKAGE_ID'] = $rg_role_package_id;
+
+            $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK1)");
+            if( $retArray[0] === true ){
+                $objQuery =& $retArray[1];
+                $aryDiscover = array();
+                $row = $objQuery->resultFetch();
+                unset($objQuery);
+                if( $row['REC_COUNT'] == '0' ){
+                    $retBool = true;
+                }else{
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-90081");
+                    $boolExecuteContinue = false;
+                }
+            }
+        }
+        //同一Movementに複数のロールパッケージが登録されていないか判定----
+
         if( $boolSystemErrorFlag === true ){
             $retBool = false;
             //----システムエラー
