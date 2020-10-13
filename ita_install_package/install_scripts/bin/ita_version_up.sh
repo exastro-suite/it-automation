@@ -260,7 +260,7 @@ if [ ! -e "$LOG_DIR" ]; then
 fi
 
 ############################################################
-log 'INFO : Start process.'
+log 'INFO : -----MODE[VERSIONUP] START-----'
 ############################################################
 
 ############################################################
@@ -271,23 +271,6 @@ if [ ${EUID:-${UID}} -ne 0 ]; then
     log "INFO : Abort version up."
     exit
 fi
-
-############################################################
-log 'INFO : Duplicate start-up check.'
-############################################################
-for((i=0; i<3; i++)); do
-    PS_RES=`ps -ef`
-    RES=`echo "$PS_RES" | grep "$0" -c`
-    if [ "$RES" -gt 1 ]; then
-        log "INFO : Duplicate start-up is detected."
-        log "INFO : Abort version up."
-        exit
-    fi
-
-    if [ "$i" -ne 2 ]; then
-        sleep 0.1
-    fi
-done
 
 ############################################################
 log 'INFO : Reading answer-file.'
@@ -310,6 +293,8 @@ DB_ROOT_PASSWORD=''
 DB_NAME=''
 DB_USERNAME=''
 DB_PASSWORD=''
+#answersファイルのフォーマットチェック用変数リセット
+FORMAT_CHECK_CNT='' 
 
 # ita_answers.txtを/tmpにコピー
 rm -f "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
