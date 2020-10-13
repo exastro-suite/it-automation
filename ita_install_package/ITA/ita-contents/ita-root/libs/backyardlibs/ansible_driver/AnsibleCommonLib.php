@@ -1022,6 +1022,10 @@ class YAMLParse {
             $this->SetLastError("");
             return false;
         } else {
+            // yaml定義がない場合にnullが帰るので、空配列に設定
+            if($val === null) {
+                $val = array();
+            }
             return $val;
         }
     }
@@ -1062,6 +1066,10 @@ class YAMLParse {
             $this->SetLastError($msg);
             return false;
         } else {
+            // yaml定義がない場合にnullが帰るので、空配列に設定
+            if($val === null) {
+                $val = array();
+            }
             return $val;
         }
     }
