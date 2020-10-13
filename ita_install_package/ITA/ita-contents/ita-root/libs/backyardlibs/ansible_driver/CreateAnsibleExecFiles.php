@@ -1072,18 +1072,17 @@ class CreateAnsibleExecFiles {
                 }
 
                 // グローバル変数管理からグローバル変数の情報を取得
-                $global_vars_list = array();
-                $msgstr = "";
-                $ret = getDBGlobalVarsMaster($global_vars_list,$msgstr);
-                if($ret === false){
+                $this->lva_global_vars_list = array();
+                $ret = $this->getDBGlobalVarsMaster($this->lva_global_vars_list);
+                if($ret = false){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90235");
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    return(false);
+                    return false;
                 }
-
                 $chkObj = new DefaultVarsFileAnalysis($this->lv_objMTS);
                 $msgstr = "";
                 // ロールパッケージ内のPlaybookで定義しているグローバル変数がグローバル変数管理にあるか
-                $ret = $chkObj->chkDefVarsListPlayBookGlobalVarsList($ina_roleglobalvars, $global_vars_list, $msgstr);
+                $ret = $chkObj->chkDefVarsListPlayBookGlobalVarsList($ina_roleglobalvars, $this->lva_global_vars_list, $msgstr);
                 if($ret === false){
                     unset($chkObj);
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -1126,6 +1125,57 @@ class CreateAnsibleExecFiles {
                     unset($objLibs);
                     return false;
                 }
+// #280
+                // テンプレート管理に登録されている変数情報取得
+                $temlate_ctl_gbl_vars_list = array();
+                foreach($this->lva_tpf_vars_list as $rolename=>$tpfinfo_1) {
+                    foreach($tpfinfo_1 as $filename=>$tpfinfo_2) {
+                        foreach($tpfinfo_2 as $line_no=>$tpfinfo_3) {
+                            foreach($tpfinfo_3 as $tpf_var_name=>$tpfinfo_4) {
+                                 if( ! isset($tpfinfo_4['VAR_STRUCT_ANAL_JSON_STRING'])) {
+                                     continue;
+                                 }
+                                 // Jsonでエンコードされている変数情報をデコードする
+                                 $fileObj = new TemplateVarsStructAnalFileAccess($this->lv_objMTS,$this->lv_objDBCA);
+                               
+                                 $Vars_list          = array();
+                                 $Array_vars_list    = array();
+                                 $LCA_vars_use       = array();
+                                 $Array_vars_use     = array();
+                                 $GBL_vars_info      = array();
+                                 $VarVal_list        = array();
+                                 //戻り値なし
+                                 $fileObj->JsonStringTOArray($tpfinfo_4['VAR_STRUCT_ANAL_JSON_STRING'],
+                                                             $Vars_list,
+                                                             $Array_vars_list,
+                                                             $LCA_vars_use,
+                                                             $Array_vars_use,
+                                                             $GBL_vars_info,
+                                                             $VarVal_list);
+
+                                 // ロール内で使用しているTPF変数で、テンプレート管理の変数定義に登録されているグローバル変数を抜き出す。
+                                 foreach($GBL_vars_info as $dummy=>$gblinfo_1) {
+                                     foreach($gblinfo_1 as $gbl_var_name=>$dummy) {
+                                         $temlate_ctl_gbl_vars_list[$rolename][$gbl_var_name] = 0;
+                                         // テンプレート管理の変数定義に登録されているグローバル変数をマーク
+                                         $this->lv_use_gbl_vars_list[$gbl_var_name] = 0;
+                                     }
+                                 }
+                            }
+                        }
+                    }
+                }
+                // ロール内で使用しているTPF変数で、テンプレート管理の変数定義に登録されているグローバル変数がグローバル変数管理に登録されているか判定
+                $chkObj = new DefaultVarsFileAnalysis($this->lv_objMTS);
+                $msgstr = "";
+                $ret = $chkObj->chkDefVarsListPlayBookGlobalVarsList($temlate_ctl_gbl_vars_list, $this->lva_global_vars_list, $msgstr);
+                if($ret === false){
+                    unset($chkObj);
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return(false);
+                }
+                unset($chkObj);
+
                 unset($objLibs);
 
                 // ロール名取得
@@ -1367,17 +1417,6 @@ class CreateAnsibleExecFiles {
     {
 
         $this->lv_hostinfolist = $ina_hostinfolist;
-
-        //////////////////////////////////////
-        // グローバル変数管理よりグローバル変数を取得
-        //////////////////////////////////////
-        $this->lva_global_vars_list = array();
-        $ret = $this->getDBGlobalVarsMaster($this->lva_global_vars_list);
-        if($ret = false){
-            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90235");
-            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            return false;
-        }
 
         // 作業パターンに紐づいているグローバル変数を退避
         switch($this->getAnsibleDriverID()){

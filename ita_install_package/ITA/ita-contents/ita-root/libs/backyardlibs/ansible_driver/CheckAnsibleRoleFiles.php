@@ -561,8 +561,8 @@ class CheckAnsibleRoleFiles {
                 return(false);
             }
 
-             // 該当ロールの読替表を読込
-             $ret = $this->readTranslationFile($translation_table_file,
+            // 該当ロールの読替表を読込
+            $ret = $this->readTranslationFile($translation_table_file,
                                                $ITA2User_var_list,
                                                $User2ITA_var_list,
                                                $errmsg);
@@ -1054,7 +1054,6 @@ class CheckAnsibleRoleFiles {
                              $this->lva_varname[$in_rolename][$var] = 0;
                          }
                     }
-
                     // ファイル内で定義されていたグローバル変数を退避
                     if(count($file_global_vars_list) > 0){
                          foreach ($file_global_vars_list as $var){
@@ -4064,6 +4063,7 @@ class VarStructAnalysisFileAccess{
     //   なし
     ////////////////////////////////////////////////////////////////////////////////
     function getTemplateUseVarsStructSub($tpf_var_name,$rolename,$ITA2User_var_list,&$gbl_vars_list,&$tpf_vars_struct,&$errormsg) {
+        global $g;
         if(isset($this->lva_template_master_list[$tpf_var_name])) {
             // 変数構造解析結果
             $php_array = json_decode($this->lva_template_master_list[$tpf_var_name]['VAR_STRUCT_ANAL_JSON_STRING'],true);
@@ -4112,9 +4112,9 @@ class VarStructAnalysisFileAccess{
                             if($this->web_mode === true) {
                                 // $ary[6000033] = "(テンプレート埋込変数:{} グローバル変数:{})";
                                 if(strlen($errormsg)!=0) $errormsg .= "\n";
-                                $parammsg .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000033",array($tpf_var_name,$gbl_var_name));
+                                $parammsg = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000033",array($tpf_var_name,$var_name));
                                 // $ary[6000032] = "テンプレート管理で使用しているグローバル変数がグローバル変数管理に登録されていません。{}";
-                                $parammsg .= $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000032",array($parammsg));
+                                $errormsg .= $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000032",array($parammsg));
                             } else {
                                 if($this->log_level == "DEBUG") {
                                     //グローバル変数管理に変数未登録

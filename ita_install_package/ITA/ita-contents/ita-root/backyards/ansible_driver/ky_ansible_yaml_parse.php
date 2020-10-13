@@ -96,6 +96,10 @@
 //            return false;
 
         } else {
+            // yaml定義がない場合にnullが帰るので、空配列に設定
+            if($analys === null) {
+                $analys = array();
+            }
             $json = json_encode($analys);
             // エラー出力は抑止
             $ret = @file_put_contents($ouy_yaml_analys_result_json_file,$json);
