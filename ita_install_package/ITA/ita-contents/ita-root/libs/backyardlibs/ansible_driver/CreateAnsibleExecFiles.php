@@ -1133,7 +1133,6 @@ class CreateAnsibleExecFiles {
                         foreach($tpfinfo_2 as $line_no=>$tpfinfo_3) {
                             foreach($tpfinfo_3 as $tpf_var_name=>$tpfinfo_4) {
                                  if( ! isset($tpfinfo_4['VAR_STRUCT_ANAL_JSON_STRING'])) {
-$this->LocalLogPrint(basename(__FILE__),__LINE__,"テンプレート管理に登録されている変数情報取得"."continue");
                                      continue;
                                  }
                                  // Jsonでエンコードされている変数情報をデコードする
