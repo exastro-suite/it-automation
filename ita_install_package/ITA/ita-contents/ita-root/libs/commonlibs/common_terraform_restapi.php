@@ -1118,6 +1118,51 @@
 
     }
 
+    ///////////////////////////////
+    // Policyを削除する//
+    ///////////////////////////////
+    function delete_policy($hostname, $token, $policyID){
+        //requestURI
+        $requestURI = "api/v2/policies/" . $policyID;
+
+        //method
+        $method = "DELETE";
+
+        //restApiResponse
+        $restApiResponse = terraform_restapi_access(
+            $hostname, //hostname
+            $token, //token
+            $requestURI, //requestURI
+            $method, //method
+            null //requestContents
+        );
+
+        return $restApiResponse;
+
+    }
+
+    ///////////////////////////////
+    // PolicySetを削除する//
+    ///////////////////////////////
+    function delete_policy_set($hostname, $token, $policySetID){
+        //requestURI
+        $requestURI = "api/v2/policy-sets/" . $policySetID;
+
+        //method
+        $method = "DELETE";
+
+        //restApiResponse
+        $restApiResponse = terraform_restapi_access(
+            $hostname, //hostname
+            $token, //token
+            $requestURI, //requestURI
+            $method, //method
+            null //requestContents
+        );
+
+        return $restApiResponse;
+
+    }
 
     ///////////////////////////////
     // Policy素材をアップロードする//
