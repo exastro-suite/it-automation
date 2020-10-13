@@ -165,6 +165,63 @@ error_check() {
     fi
 }
 
+ita_package_check() {
+    if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+        yum_package_check yum-utils createrepo
+        yum_package_check MariaDB MariaDB-server expect
+    fi
+    if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+        yum_package_check mariadb mariadb-server expect
+    fi
+
+    yum_package_check ${YUM_PACKAGE["httpd"]}
+    yum_package_check ${YUM_PACKAGE["php"]}
+
+    # Check installation HTML_AJAX
+    pear list | grep HTML_AJAX >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+       log "ERROR:Package not installed [${PEAR_PACKAGE["php"]}]"
+       func_exit
+    fi
+
+    #Check installation php-yaml
+    pecl list | grep yaml >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+       log "ERROR:Package not installed [php-yaml]"
+       func_exit
+    fi
+
+    #Check installation PhpSpreadsheet.
+    if [ ! -d /usr/share/php/vendor/phpoffice/phpspreadsheet ]; then
+       log "ERROR:Package not installed [PhpSpreadsheet]"
+       func_exit
+    fi
+
+    if [ "$material" == "yes" ]; then
+        # Check installation git packages.
+        echo "----------Check Installed packages[git]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        yum list installed ${YUM_PACKAGE["git"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ $? != 0 ]; then
+            log "ERROR:Package not installed [git]"
+            func_exit
+        fi
+    fi
+
+    if [ "$ansible_driver" == "yes" ]; then
+        yum_package_check ${YUM_PACKAGE["ansible"]}
+        # Check installation some pip packages.
+        for key in ${PIP_PACKAGE_ANSIBLE["remote"]}; do
+            echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            pip3 list --format=legacy | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                if [ $? -ne 0 ]; then
+                    log "ERROR:Package not installed [$key]"
+                    func_exit
+                fi
+        done
+    fi
+}
+
+
 # enable yum repository
 # ex.
 #   yum_repository http://example.com/example-repo.rpm --enable test-repo
@@ -203,7 +260,7 @@ yum_repository() {
 
             # Check Creating repository
             if [ "${REPOSITORY}" != "yum_all" ]; then
-               case "${linux_os}" in
+               case "${LINUX_OS}" in
                     "CentOS7") create_repo_check remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "RHEL7") create_repo_check remi-php72 rhel-7-server-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "RHEL7_AWS") create_repo_check remi-php72 rhui-rhel-7-server-rhui-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
@@ -458,21 +515,26 @@ configure_mariadb() {
             fi
             
         else
-            # enable MariaDB repository
-            mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
+            if [ "$INSTALL_LIBRARY" == "yes" ]; then
+                # enable MariaDB repository
+                mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
 
-            # install some packages
-            echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            #Installation
-            yum install -y MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                # install some packages
+                echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                #Installation
+                yum install -y MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
-            #Check installation
-            if [ $? != 0 ]; then
-                log "ERROR:Installation failed[MariaDB]"
+                #Check installation
+                if [ $? != 0 ]; then
+                    log "ERROR:Installation failed[MariaDB]"
+                    func_exit
+                fi
+            
+                yum_package_check MariaDB MariaDB-server expect
+            else
+                log 'ERROR:MariaDB is not installed.'
                 func_exit
             fi
-            
-            yum_package_check MariaDB MariaDB-server expect
 
             # enable and start (initialize) MariaDB Server
             #--------CentOS7,RHEL7--------
@@ -562,18 +624,23 @@ configure_mariadb() {
             fi
             
         else
-            # install some packages
-            echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            #Installation
-            yum install -y mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ "$INSTALL_LIBRARY" == "yes" ]; then
+                # install some packages
+                echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                #Installation
+                yum install -y mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
-            #Check installation
-            if [ $? != 0 ]; then
-                log "ERROR:Installation failed[MariaDB]"
+                #Check installation
+                if [ $? != 0 ]; then
+                    log "ERROR:Installation failed[MariaDB]"
+                    func_exit
+                fi
+            
+                yum_package_check mariadb mariadb-server expect
+            else
+                log 'ERROR:MariaDB is not installed.'
                 func_exit
             fi
-            
-            yum_package_check mariadb mariadb-server expect
 
             # enable and start (initialize) MariaDB Server
             #--------CentOS8,RHEL8--------
@@ -816,7 +883,7 @@ EOS
     fi
 
     # install ITA
-    source "$ITA_INSTALL_SCRIPTS_DIR/ita_installer.sh"
+    source "$ITA_INSTALL_SCRIPTS_DIR/bin/install.sh"
 
 }
 
@@ -826,38 +893,61 @@ EOS
 
 make_ita() {
 
-    # configure_yum_env() will setup repository.
-    log "Set up repository"
-    configure_yum_env
-
-    # offline install(RHEL8 or CentOS8)
-    if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "CentOS8" ]; then
-        if [ "${MODE}" == "local" ]; then
-            log "RPM install"
-            install_rpm
-        fi
-    fi
-    
     log "OS setting"
     configure_os
-    
-    log "MariaDB install and setting"
-    configure_mariadb
 
-    log "Apache install and setting"
-    configure_httpd
+    if [ "$INSTALL_LIBRARY" == "yes" ]; then
+        # configure_yum_env() will setup repository.
+        log "Set up repository"
+        configure_yum_env
+
+        # offline install(RHEL8 or CentOS8)
+        if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "CentOS8" ]; then
+            if [ "${MODE}" == "local" ]; then
+                log "RPM install"
+                install_rpm
+            fi
+        fi
+
+        log "MariaDB install and setting"
+        configure_mariadb
+
+        log "Apache install and setting"
+        configure_httpd
     
-    log "php install and setting"
-    configure_php
+        log "php install and setting"
+        configure_php
         
-    if [ "$material" == "yes" ]; then
-        log "git install and setting"
-        configure_git
-    fi
+        if [ "$material" == "yes" ]; then
+            log "git install and setting"
+            configure_git
+        fi
     
-    if [ "$ansible_driver" == "yes" ]; then
-        log "ansible install and setting"
-        configure_ansible
+        if [ "$ansible_driver" == "yes" ]; then
+            log "ansible install and setting"
+            configure_ansible
+        fi
+    else
+        log "MariaDB setting"
+        configure_mariadb
+
+        log "Apache setting"
+        systemctl enable httpd >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+        log "php setting"
+        ln -s /usr/share/pear-data/HTML_AJAX/js /usr/share/pear/HTML/js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
+        sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX.js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
+        sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX_lite.js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
+
+        if [ "$ansible_driver" == "yes" ]; then
+            log "ansible setting"
+            copy_and_backup "$ITA_EXT_FILE_DIR/etc_ansible/ansible.cfg" "/etc/ansible/"
+        fi
+    fi
+
+    if [ "$INSTALL_LIBRARY" == "no" ]; then
+        log "Check the installation of the required libraries for ITA"
+        ita_package_check
     fi
 
     log "Running the ITA installer"
@@ -1009,7 +1099,6 @@ ITA_INSTALL_PACKAGE_DIR=$(cd $(dirname $ITA_INSTALL_SCRIPTS_DIR);pwd)
 ITA_PACKAGE_OPEN_DIR=$(cd $(dirname $ITA_INSTALL_PACKAGE_DIR);pwd)
 
 ITA_ANSWER_FILE=$ITA_INSTALL_SCRIPTS_DIR/ita_answers.txt
-ITA_BUILDER_SETTING_FILE=$ITA_INSTALL_SCRIPTS_DIR/ita_builder_setting.txt
 
 if [ ! -e "$ITA_INSTALL_SCRIPTS_DIR""/log/" ]; then
     mkdir -m 755 "$ITA_INSTALL_SCRIPTS_DIR""/log/"
@@ -1029,28 +1118,11 @@ if [ ${EUID:-${UID}} -ne 0 ]; then
     exit
 fi
 
-#read setting file and answer file
-log "read setting file"
-read_setting_file "$ITA_BUILDER_SETTING_FILE"
+#read answer file
+log "read answer file"
+read_setting_file "$ITA_ANSWER_FILE"
 
-#check (ita_builder_setting.txt)
-if [ "${linux_os}" != 'CentOS7' -a "${linux_os}" != 'CentOS8' -a "${linux_os}" != 'RHEL7' -a "${linux_os}" != 'RHEL8' -a "${linux_os}" != 'RHEL7_AWS' -a "${linux_os}" != 'RHEL8_AWS' ]; then
-    log "ERROR:should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8 or RHEL7_AWS or RHEL8_AWS"
-    func_exit
-else
-    LINUX_OS="${linux_os}"
-fi
-
-if [ "${linux_os}" == 'RHEL7_AWS' ]; then
-    LINUX_OS='RHEL7'
-    AWS_FLG='yes'
-elif [ "${linux_os}" == 'RHEL8_AWS' ]; then
-    LINUX_OS='RHEL8'
-    AWS_FLG='yes'
-else
-    AWS_FLG='no'
-fi
-
+#check (ita_answer.txt)
 if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ] && [ $AWS_FLG == 'no' ]; then
     if [ ! -n "$redhat_user_name" ]; then
         log "ERROR:should be set[redhat_user_name]"
@@ -1068,10 +1140,14 @@ if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ] && [ $AWS_FLG == 'no' ];
     fi
 fi
 
-#read answer file
+if [ "${install_library}" != 'yes' -a "${install_library}" != 'no' ]; then
+    log "ERROR:install_library should be set to yes or no"
+    func_exit
+else
+    INSTALL_LIBRARY="${install_library}"
+fi
+
 if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
-    log "read answer file"
-    read_setting_file "$ITA_ANSWER_FILE"
     #check (ita_answers.txt)-----
     if [ "${material}" != 'yes' -a "${material}" != 'no' ]; then
         log "ERROR:material should be set to yes or no"
@@ -1237,7 +1313,7 @@ declare -A YUM_REPO_PACKAGE;
 YUM_REPO_PACKAGE=(
     ["yum-env-enable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO[${REPOSITORY}]}
     ["yum-env-disable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO[${REPOSITORY}]}
-    ["php"]=${YUM_REPO_PACKAGE_PHP[${linux_os}]}
+    ["php"]=${YUM_REPO_PACKAGE_PHP[${LINUX_OS}]}
 )
 
 
