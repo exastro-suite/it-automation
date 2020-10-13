@@ -397,5 +397,20 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
 
         return(json_encode($php_array));
     }
+    function JsonStringTOArray($json_string,
+                              &$Vars_list,
+                              &$Array_vars_list,
+                              &$LCA_vars_use,
+                              &$Array_vars_use,
+                              &$GBL_vars_info,
+                              &$VarVal_list) {
+        $php_array       = json_decode($json_string,true);
+        $Vars_list       = $php_array['Vars_list'];
+        $Array_vars_list = $php_array['Array_vars_list'];
+        $LCA_vars_use    = $php_array['LCA_vars_use'];
+        $Array_vars_use  = $php_array['Array_vars_use'];
+        $GBL_vars_info   = $php_array['GBL_vars_info'];
+        $VarVal_list     = $php_array['VarVal_list'];
+    }
 }
 ?>
