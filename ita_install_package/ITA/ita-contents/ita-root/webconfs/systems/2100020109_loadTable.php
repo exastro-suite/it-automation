@@ -768,6 +768,7 @@ Ansible（Legacy）代入値管理
     $c->setRequired(true); //登録/更新時には、入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
+    $c->setDefaultValue("register_table", 1);
 
     $table->addColumn($c);
     //Sensitive設定----
