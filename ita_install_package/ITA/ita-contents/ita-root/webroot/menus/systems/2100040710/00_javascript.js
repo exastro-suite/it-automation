@@ -1319,7 +1319,7 @@ function Mix1_1_menu_upd(){
 function Mix2_1_menu_reg(){
     var rangeId = 'Mix2_1';
     
-    var objOpe = document.getElementById('Mix2_1_1');
+    var objOpe = document.getElementById('Mix2_1_5');
     proxy.Mix2_1_menu_reg(objOpe.value);
 }
 
