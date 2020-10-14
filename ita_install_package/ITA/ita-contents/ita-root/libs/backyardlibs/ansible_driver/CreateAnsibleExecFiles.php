@@ -928,6 +928,14 @@ class CreateAnsibleExecFiles {
             }
         }
 
+        // グローバル変数管理からグローバル変数の情報を取得
+        $this->lva_global_vars_list = array();
+        $ret = $this->getDBGlobalVarsMaster($this->lva_global_vars_list);
+        if($ret = false){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90235");
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
         // ドライバ区分がLegacy-Roleの場合
         // 作業パターンIDに紐づくパッケージファイルを取得
         // パッケージファイルをZIPファイルをinディレクトリに解凍し
@@ -1071,14 +1079,6 @@ class CreateAnsibleExecFiles {
                     }
                 }
 
-                // グローバル変数管理からグローバル変数の情報を取得
-                $this->lva_global_vars_list = array();
-                $ret = $this->getDBGlobalVarsMaster($this->lva_global_vars_list);
-                if($ret = false){
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90235");
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    return false;
-                }
                 $chkObj = new DefaultVarsFileAnalysis($this->lv_objMTS);
                 $msgstr = "";
                 // ロールパッケージ内のPlaybookで定義しているグローバル変数がグローバル変数管理にあるか
@@ -2150,11 +2150,15 @@ class CreateAnsibleExecFiles {
                 }
                 $parent_vars_list[$var] = 0;
             
+// 999
                 //ホスト変数ファイルのレコード生成
                 //変数名: 具体値
+                //複数行具体値の場合に複数行の扱い記号を付ける ----
+                $edit_val = $this->makeMultilineValue($val);
+                //-----複数行具体値の場合に複数行の扱い記号を付ける
                 $NumPadding = 2;
-                $edit_val = $this->HostVarEdit($val,$NumPadding);
-                $var_str = $var_str . sprintf("%s: %s\n",$var,$edit_val);
+                $out_val = $this->MultilineValueEdit($edit_val,$NumPadding);
+                $var_str = $var_str . sprintf("%s: %s\n",$var,$out_val);
 
                 //グローバル変数の具体値にコピー変数があるか確認
                 $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
@@ -2334,13 +2338,14 @@ class CreateAnsibleExecFiles {
                         }
                         $this->lv_parent_vars_list[$in_host_name][$var] = 0;
 
-                        // 複数行具体値のyaml書式対応
-                        $NumPadding = 2;
-                        $val = $this->HostVarEdit($val,$NumPadding);
-
                         //ホスト変数ファイルのレコード生成
                         //変数名: 具体値
-                        $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+                        //複数行具体値の場合に複数行の扱い記号を付ける ----
+                        $edit_val = $this->makeMultilineValue($val);
+                        //-----複数行具体値の場合に複数行の扱い記号を付ける
+                        $NumPadding = 2;
+                        $out_val = $this->MultilineValueEdit($edit_val,$NumPadding);
+                        $var_str = $var_str . sprintf("%s: %s\n",$var,$out_val);
 
                         // playbookのテンプレートモジュールでグローバル変数を使用している場合
                         // テンプレートファイル内の変数具体値登録をチェックする設定にする。
@@ -11761,13 +11766,13 @@ class CreateAnsibleExecFiles {
                 if( $rest_api_response['StatusCode'] == 200 ){
                     $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
                     if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array(''));
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
                         return false;
                     }
                 } else {
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array(''));
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -11792,7 +11797,7 @@ class CreateAnsibleExecFiles {
                 $ret = $this->RecordAccess($strQuery,$aryForBind);
   
                 if($ret !== true ){
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array(""));
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     return false;
                 }
@@ -11870,13 +11875,13 @@ class CreateAnsibleExecFiles {
                     if( $rest_api_response['StatusCode'] == 200 ){
                         $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
                         if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
-                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array(''));
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($in_assign_id));
                             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                             $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
                             return false;
                         }
                     } else {
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array(''));
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($in_assign_id));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -11908,7 +11913,7 @@ if(isset($Expansion_root)) {
                 $ret = $this->RecordAccess($strQuery,$aryForBind);
   
                 if($ret !== true ){
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array(""));
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($in_assign_id));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     return false;
                 }
