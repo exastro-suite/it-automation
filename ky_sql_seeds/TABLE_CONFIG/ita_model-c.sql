@@ -1060,6 +1060,9 @@ LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マル�
 CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
+COLLECT_STATUS                    %INT%                            , -- 収集ステータス
+COLLECT_LOG                       %VARCHR%(1024)                   , -- 収集ログ(テキスト形式)
+
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
@@ -1107,6 +1110,9 @@ LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マル�
 
 CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
+
+COLLECT_STATUS                    %INT%                            , -- 収集ステータス
+COLLECT_LOG                       %VARCHR%(1024)                   , -- 収集ログ(テキスト形式)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -1799,6 +1805,9 @@ LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マル�
 CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
+COLLECT_STATUS                    %INT%                            , -- 収集ステータス
+COLLECT_LOG                       %VARCHR%(1024)                   , -- 収集ログ(テキスト形式)
+
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
@@ -1845,6 +1854,9 @@ MULTIPLELOG_MODE                  %INT%                            , -- マル�
 LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
+
+COLLECT_STATUS                    %INT%                            , -- 収集ステータス
+COLLECT_LOG                       %VARCHR%(1024)                   , -- 収集ログ(テキスト形式)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -2256,6 +2268,9 @@ LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マル�
 CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
 
+COLLECT_STATUS                    %INT%                            , -- 収集ステータス
+COLLECT_LOG                       %VARCHR%(1024)                   , -- 収集ログ(テキスト形式)
+
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
@@ -2302,6 +2317,9 @@ MULTIPLELOG_MODE                  %INT%                            , -- マル�
 LOGFILELIST_JSON                  %VARCHR%(8000)                   , -- マルチログモード時のログファイル名リスト(json形式の配列)
 CONDUCTOR_NAME                    %VARCHR%(256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             %INT%                            , -- コンダクタ インスタンスID
+
+COLLECT_STATUS                    %INT%                            , -- 収集ステータス
+COLLECT_LOG                       %VARCHR%(1024)                   , -- 収集ログ(テキスト形式)
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
