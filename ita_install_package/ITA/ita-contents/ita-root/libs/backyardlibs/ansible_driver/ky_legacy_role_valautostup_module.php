@@ -2496,7 +2496,7 @@ function addStg2StdListVarsAssign($in_varsAssignList, &$in_VarsAssignRecodes) {
         return false;
     }
     $tgt_row['JOURNAL_SEQ_NO']          = $seqValueOfJnlTable;
-    $tgt_row['VARS_ENTRY']              = $in_varsAssignList['VARS_ENTRY'];
+    $tgt_row['VARS_ENTRY']              = $ina_varsass_list['VARS_ENTRY'];  // 999
     
     $tgt_row["SENSITIVE_FLAG"]          = $ina_varsass_list['SENSITIVE_FLAG'];
 

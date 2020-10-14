@@ -57,6 +57,7 @@ Ansible 共通 グローバル変数管理
     // 検索機能の制御----
 
     $objVldt = new TextValidator(1, 128, false, '/^GBL_[_a-zA-Z0-9]+$/', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1940011"));
+    $objVldt->setRegexp("/^[^\r\n]*$/s","DTiS_filterDefault");
     $c = new TextColumn('VARS_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1940010"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1940011"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
