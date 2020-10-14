@@ -6,3 +6,4 @@
 /ita-root/backyards/ansible_driver/ky_pioneer_varsautolistup-workflow
 /ita-root/backyards/ansible_driver/ky_pioneer_valautostup-workflow
 /ita-root/backyards/ansible_driver/ky_ansible_towermasterSync-workflow
+/ita-root/backyards/ansible_driver/ky_std_synchronize-Collector
