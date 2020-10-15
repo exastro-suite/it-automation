@@ -74,6 +74,7 @@ CREATE OR REPLACE VIEW G_★★★TABLE★★★_CONV_H_JNL AS
 SELECT TAB_A.JOURNAL_SEQ_NO             ,
        TAB_A.JOURNAL_REG_DATETIME       ,
        TAB_A.JOURNAL_ACTION_CLASS       ,
+       TAB_A.ROW_ID                     ,
        TAB_A.OPERATION_ID               AS OPERATION_ID_DISP,
        TAB_A.OPERATION_ID               AS OPERATION_ID_NAME_DISP,
        TAB_A.OPERATION_ID               ,
