@@ -90,6 +90,43 @@ function conductorInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $st
             unset($tmpAryRetBody);
         }
         //$strPreserveDatetimeの形式チェック----
+        
+        // ---ConductorクラスIDの廃止チェック
+        $aryRetBody = $objOLA->getInfoFromOneOfConductorClass($intShmphonyClassId, 0,0,0,1);
+
+        $disuseFlg = '';
+        if( isset( $aryRetBody[4]['DISUSE_FLAG'] ) === true ) $disuseFlg = $aryRetBody[4]['DISUSE_FLAG'];
+
+        if( $disuseFlg != 0 ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000600";
+
+            //----該当のConductorClassIDが１行も発見できなかった場合
+            $intErrorType = 2;
+            //$strExpectedErrMsgBodyForUI = "ConductorクラスID：存在している必要があります。";
+            $strErrMsg = $aryRetBody[3];
+            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170008");
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            //該当のConductorClassIDが１行も発見できなかった場合----
+
+        }
+        //ConductorクラスIDの廃止チェック ---
+
+        // ----オペレーションNO廃止チェック
+        $arrayRetBody = $objOLA->getInfoOfOneOperation($intOperationNoUAPK);
+        if( $arrayRetBody[1] !== null ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000700";
+            if( $arrayRetBody[1] === 101 ){
+                $intErrorType = 2;
+                //$strExpectedErrMsgBodyForUI = "オペレーションNO：存在している必要があります。";
+                $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733108");
+            }
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        // オペレーションNO廃止チェック----
 
         //--- Conductorクラス状態保存 
         $arrayResult = $objOLA->convertConductorClassJson($intShmphonyClassId,1);
