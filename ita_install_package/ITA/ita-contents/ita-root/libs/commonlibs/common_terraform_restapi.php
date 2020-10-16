@@ -458,7 +458,7 @@
     ////////////////////////////
     // Workspace変数を作成する//
     ////////////////////////////
-    function create_workspace_var($hostname, $token, $workspaceID, $workspaceVarKey, $workspaceVarValue, $sensitiveFlag = false, $category = "terraform"){
+    function create_workspace_var($hostname, $token, $workspaceID, $workspaceVarKey, $workspaceVarValue, $hclFlag = false, $sensitiveFlag = false, $category = "terraform"){
         //requestURI
         $requestURI = "api/v2/workspaces/" . $workspaceID . "/vars";
         //method
@@ -477,7 +477,7 @@
                     "value" => $workspaceVarValue,
                     "description" => "",
                     "category" => $category,
-                    "hcl" => false,
+                    "hcl" => $hclFlag,
                     "sensitive" => $sensitiveFlag,
                 ),
             ),
