@@ -402,7 +402,7 @@ EOD;
             
               <div class="editor-tab-menu">
                 <ul class="editor-tab-menu-list">
-                  <li class="editor-tab-menu-item" data-tab="conductor">Conductor</li>
+                  <li class="editor-tab-menu-item" data-tab="conductor">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309027")}</li>
                   <li class="editor-tab-menu-item" data-tab="movement">Movement</li>
                   <li class="editor-tab-menu-item" data-tab="function">Function</li>
                   <li class="editor-tab-menu-item" data-tab="conditional-branch">Conditional branch</li>
