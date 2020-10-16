@@ -109,6 +109,39 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- 履歴系テーブル作成----
 
+-- ----更新系テーブル作成----
+-- HCLフラグ
+CREATE TABLE B_TERRAFORM_HCL_FLAG
+(
+HCL_FLAG                          %INT%                            ,
+HCL_FLAG_SELECT                   %VARCHR%(32)                     ,
+DISP_SEQ                          %INT%                            , -- 表示順序
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (HCL_FLAG)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成----
+-- HCLフラグ(履歴)
+CREATE TABLE B_TERRAFORM_HCL_FLAG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+HCL_FLAG                          %INT%                            ,
+HCL_FLAG_SELECT                   %VARCHR%(32)                     ,
+DISP_SEQ                          %INT%                            , -- 表示順序
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
 -- *****************************************************************************
 -- *** ***** Terraform Common Tables                                         ***
 -- *****************************************************************************
@@ -477,7 +510,8 @@ OPERATION_NO_UAPK                 %INT%                            , -- オペ�
 PATTERN_ID                        %INT%                            , -- パターンID
 MODULE_VARS_LINK_ID               %INT%                            , -- 代入値リンクID
 VARS_ENTRY                        text                             ,
-SENSITIVE_FLAG                    %VARCHR%(1)                      ,
+HCL_FLAG                          %VARCHR%(1)                      , -- HCL設定
+SENSITIVE_FLAG                    %VARCHR%(1)                      , -- Sensitive設定
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
@@ -499,7 +533,8 @@ OPERATION_NO_UAPK                 %INT%                            , -- オペ�
 PATTERN_ID                        %INT%                            , -- パターンID
 MODULE_VARS_LINK_ID               %INT%                            , -- 代入値リンクID
 VARS_ENTRY                        text                             ,
-SENSITIVE_FLAG                    %VARCHR%(1)                      ,
+HCL_FLAG                          %VARCHR%(1)                      , -- HCL設定
+SENSITIVE_FLAG                    %VARCHR%(1)                      , -- Sensitive設定
 DISP_SEQ                          %INT%                            , -- 表示順序
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
@@ -519,6 +554,7 @@ COL_TYPE                          %INT%                   , -- カラムタイ�
 PATTERN_ID                        %INT%                   , -- 作業パターンID
 VAL_VARS_LINK_ID                  %INT%                   , -- Value値　作業パターン変数紐付
 KEY_VARS_LINK_ID                  %INT%                   , -- Key値　作業パターン変数紐付
+HCL_FLAG                          %VARCHR%(1)             , -- HCL設定
 NULL_DATA_HANDLING_FLG            %INT%                   , -- Null値の連携
 DISP_SEQ                          %INT%                   , -- 表示順序
 NOTE                              %VARCHR%(4000)          , -- 備考
@@ -543,6 +579,7 @@ COL_TYPE                          %INT%                   , -- カラムタイ�
 PATTERN_ID                        %INT%                   , -- 作業パターンID
 VAL_VARS_LINK_ID                  %INT%                   , -- Value値　作業パターン変数紐付
 KEY_VARS_LINK_ID                  %INT%                   , -- Key値　作業パターン変数紐付
+HCL_FLAG                          %VARCHR%(1)             , -- HCL設定
 NULL_DATA_HANDLING_FLG            %INT%                   , -- Null値の連携
 DISP_SEQ                          %INT%                   , -- 表示順序
 NOTE                              %VARCHR%(4000)          , -- 備考
@@ -802,6 +839,7 @@ SELECT
        TAB_A.PATTERN_ID                     , -- 作業パターンID
        TAB_A.VAL_VARS_LINK_ID               , -- Value値　作業パターン変数紐付
        TAB_A.KEY_VARS_LINK_ID               , -- Key値　作業パターン変数紐付
+       TAB_A.HCL_FLAG                       , -- HCL設定
        TAB_A.NULL_DATA_HANDLING_FLG         , -- Null値の連携
        TAB_B.MENU_GROUP_ID                  ,
        TAB_C.MENU_GROUP_NAME                ,
@@ -830,6 +868,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.PATTERN_ID                     , -- 作業パターンID
        TAB_A.VAL_VARS_LINK_ID               , -- Value値　作業パターン変数紐付
        TAB_A.KEY_VARS_LINK_ID               , -- Key値　作業パターン変数紐付
+       TAB_A.HCL_FLAG                       , -- HCL設定
        TAB_A.NULL_DATA_HANDLING_FLG         , -- Null値の連携
        TAB_B.MENU_GROUP_ID                  ,
        TAB_C.MENU_GROUP_NAME                ,
@@ -912,9 +951,10 @@ SELECT
          TAB_A.ASSIGN_ID                 ,
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.PATTERN_ID                ,
-         TAB_A.MODULE_VARS_LINK_ID        ,
+         TAB_A.MODULE_VARS_LINK_ID       ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.HCL_FLAG                  ,
          TAB_A.SENSITIVE_FLAG            ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,

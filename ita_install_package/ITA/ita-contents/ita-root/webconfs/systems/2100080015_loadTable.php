@@ -1051,6 +1051,18 @@ Terrraform 代入値自動登録設定
     //////////////////////////////////////////////////
     $table->addColumn($cgg);
 
+    ////////////////////////////////////////////////////////////////////
+    // Sensitive設定
+    ////////////////////////////////////////////////////////////////////
+    $c = new IDColumn('HCL_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105240"), 'B_TERRAFORM_HCL_FLAG', 'HCL_FLAG', 'HCL_FLAG_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('HCL_FLAG'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105250")); //エクセル・ヘッダでの説明
+    $c->setJournalTableOfMaster('B_TERRAFORM_VARS_SENSITIVE_JNL');
+    $c->setDefaultValue("register_table", 1); //デフォルト値で1(OFF)
+    $c->setRequired(true); //登録/更新時には、入力必須
+    //コンテンツのソースがヴューの場合、登録/更新の対象とする
+    $c->setHiddenMainTableColumn(true);
+
+    $table->addColumn($c);
 
     ////////////////////////////////////////////////////////////////////
     // パラメータシートの具体値がNULLでも代入値管理に登録するかのフラグ

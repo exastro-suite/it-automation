@@ -376,11 +376,25 @@ Terraform代入値管理
     //変数名----
 
     //************************************************************************************
+    //----HCL設定
+    //************************************************************************************
+    $c = new IDColumn('HCL_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103780"), 'B_TERRAFORM_HCL_FLAG', 'HCL_FLAG', 'HCL_FLAG_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('HCL_FLAG'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103790")); //エクセル・ヘッダでの説明
+    $c->setJournalTableOfMaster('B_TERRAFORNM_HCL_FLAG_JNL');
+    $c->setDefaultValue("register_table", 1); //デフォルト値で1(OFF)
+    $c->setRequired(true); //登録/更新時には、入力必須
+    //コンテンツのソースがヴューの場合、登録/更新の対象とする
+    $c->setHiddenMainTableColumn(true);
+
+    $table->addColumn($c);
+
+    //************************************************************************************
     //----Sensitive設定
     //************************************************************************************
     $c = new IDColumn('SENSITIVE_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103760"), 'B_SENSITIVE_FLAG', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103770")); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('B_SENSITIVE_FLAG_JNL');
+    $c->setDefaultValue("register_table", 1); //デフォルト値で1(OFF)
     $c->setRequired(true); //登録/更新時には、入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
