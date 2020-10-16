@@ -260,7 +260,7 @@ if [ ! -e "$LOG_DIR" ]; then
 fi
 
 ############################################################
-log 'INFO : Start process.'
+log 'INFO : -----MODE[VERSIONUP] START-----'
 ############################################################
 
 ############################################################
@@ -271,23 +271,6 @@ if [ ${EUID:-${UID}} -ne 0 ]; then
     log "INFO : Abort version up."
     exit
 fi
-
-############################################################
-log 'INFO : Duplicate start-up check.'
-############################################################
-for((i=0; i<3; i++)); do
-    PS_RES=`ps -ef`
-    RES=`echo "$PS_RES" | grep "$0" -c`
-    if [ "$RES" -gt 1 ]; then
-        log "INFO : Duplicate start-up is detected."
-        log "INFO : Abort version up."
-        exit
-    fi
-
-    if [ "$i" -ne 2 ]; then
-        sleep 0.1
-    fi
-done
 
 ############################################################
 log 'INFO : Reading answer-file.'
@@ -302,14 +285,14 @@ fi
 
 #answersファイルの内容を格納する変数を定義
 COPY_ANSWER_FILE="/tmp/ita_answers.txt"
-INSTALL_MODE=''
 ITA_DIRECTORY=''
 ITA_LANGUAGE=''
-ITA_OS=''
 DB_ROOT_PASSWORD=''
 DB_NAME=''
 DB_USERNAME=''
 DB_PASSWORD=''
+#answersファイルのフォーマットチェック用変数リセット
+FORMAT_CHECK_CNT='' 
 
 # ita_answers.txtを/tmpにコピー
 rm -f "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
@@ -459,16 +442,6 @@ if [ "${RTN}" -eq 1 ] || [ "${RTN}" -eq 2 ] ; then
     exit
 fi
 
-#ライブラリをインストールするかどうか確認
-echo "["`date +"%Y-%m-%d %H:%M:%S"`"] QUESTION : Automatically install the libraries that are required for ITA? Enter \"yes\" or \"no\"."
-read LIB_INSTALL_FLG
-
-if [ "${LIB_INSTALL_FLG}" != "yes" ] && [ "${LIB_INSTALL_FLG}" != "no" ] ; then
-    log "ERROR : Input \"yes\" or \"no\"."
-    log "INFO : Abort version up."
-    exit
-fi
-
 #インストールされているドライバの確認
 BASE_FLG=1
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_ansible-driver" ; then
@@ -537,7 +510,8 @@ if ! test -e ${VERSION_UP_LIST_FILE} ; then
     exit
 fi
 
-if [ ${LIB_INSTALL_FLG} = "yes" ] ; then
+#ライブラリのインストール（INSTALL_MODE = Versionup_All の時のみ）
+if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
     #リポジトリを有効にする
     yum install -y yum-utils dnf-utils >> "$LOG_FILE" 2>&1
     yum-config-manager --enable rhel-7-server-optional-rpms >> "$LOG_FILE" 2>&1
