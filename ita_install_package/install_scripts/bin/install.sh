@@ -105,7 +105,7 @@ func_set_total_cnt() {
     fi
 
     if [ "$CREATEPARAM2_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+1))
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+2))
     fi
 
     if [ "$HOSTGROUP_FLG" -eq 1 ]; then
@@ -415,6 +415,7 @@ SERVICES_SET=(
     MATERIAL3_FLG
     MATERIAL4_FLG
     CREATEPARAM_FLG
+    CREATEPARAM2_FLG
     HOSTGROUP_FLG
     HOSTGROUP2_FLG
     HOSTGROUP3_FLG
@@ -736,7 +737,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     #################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Place the self-signed certificate for https access."
     #################################################################################################
-    if [ ${ITA_OS} = 'RHEL7' ]; then
+    if [ ${LINUX_OS} = 'RHEL7' -o ${LINUX_OS} = 'CentOS7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc_pki_tls_certs/exastro-it-automation.crt /etc/pki/tls/certs/ 2>> "$LOG_FILE"
     else
         cp -p ../ext_files_for_CentOS8.x/etc_pki_tls_certs/exastro-it-automation.crt /etc/pki/tls/certs/ 2>> "$LOG_FILE"
@@ -745,7 +746,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log 'WARNING : Failed to place /etc/pki/tls/certs/exastro-it-automation.crt.'
     fi
 
-    if [ ${ITA_OS} = 'RHEL7' ]; then
+    if [ ${LINUX_OS} = 'RHEL7' -o ${LINUX_OS} = 'CentOS7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc_pki_tls_certs/exastro-it-automation.key /etc/pki/tls/certs/ 2>> "$LOG_FILE"
     else
         cp -p ../ext_files_for_CentOS8.x/etc_pki_tls_certs/exastro-it-automation.key /etc/pki/tls/certs/ 2>> "$LOG_FILE"
@@ -764,7 +765,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log 'WARNING : Failed to place /etc/php.ini_original.'
     fi
 
-    if [ ${ITA_OS} = 'RHEL7' ]; then
+    if [ ${LINUX_OS} = 'RHEL7' -o ${LINUX_OS} = 'CentOS7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc/php.ini /etc/ 2>> "$LOG_FILE"
     else
         cp -p ../ext_files_for_CentOS8.x/etc/php.ini /etc/ 2>> "$LOG_FILE"
@@ -773,7 +774,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log 'WARNING : Failed to place /etc/php.ini.'
     fi
     
-    if [ ${ITA_OS} = 'RHEL8' ]; then
+    if [ ${LINUX_OS} = 'RHEL8' -o ${LINUX_OS} = 'CentOS8' ]; then
         mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.conf_original 2>> "$LOG_FILE"
         if ! test -e /etc/php-fpm.d/www.conf_original ; then
             log 'WARNING : Failed to place /etc/php-fpm.d/www.conf_original.'
@@ -790,7 +791,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     #################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Place Apache(httpd) configuration file."
     #################################################################################################
-    if [ ${ITA_OS} = 'RHEL7' ]; then
+    if [ ${LINUX_OS} = 'RHEL7' -o ${LINUX_OS} = 'CentOS7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc_httpd_conf.d/vhosts_exastro-it-automation.conf /etc/httpd/conf.d/ 2>> "$LOG_FILE"
     else
         cp -p ../ext_files_for_CentOS8.x/etc_httpd_conf.d/vhosts_exastro-it-automation.conf /etc/httpd/conf.d/ 2>> "$LOG_FILE"
@@ -1028,7 +1029,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     ################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Modify Apache(httpd) configuration file."
     ################################################################################################
-    if [ ${ITA_OS} = 'RHEL7' ]; then
+    if [ ${LINUX_OS} = 'RHEL7' -o ${LINUX_OS} = 'CentOS7' ]; then
         RES=`cat /etc/sysconfig/httpd | grep "^LANG=\"*ja_JP.UTF-8\"*" -c`
         if [ "$RES" -eq 0 ]; then
             sed -i -e '/^LANG/s/^/# /g' '/etc/sysconfig/httpd' 2>> "$LOG_FILE"
