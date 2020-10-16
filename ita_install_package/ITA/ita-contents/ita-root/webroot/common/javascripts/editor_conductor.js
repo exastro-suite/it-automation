@@ -3183,7 +3183,7 @@ const panelChange = function( nodeID ) {
         // Jump
         if ( 'JUMP' in nodeInfo ) {
           const jumpURL = nodeInfo.JUMP;
-          $('#node-Jump').html('<a href="' + jumpURL + '" target="_blank">' + jumpURL + '</a>');
+          $('#node-Jump').html('<a href="' + jumpURL + '" target="_blank">' + getSomeMessage("ITABASEC020123") + '</a>');
         } else {
           $('#node-Jump').empty();
         }
