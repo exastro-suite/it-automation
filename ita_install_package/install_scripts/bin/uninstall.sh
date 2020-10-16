@@ -162,66 +162,32 @@ PROCESS_CNT=$((PROCESS_CNT+1))
 #----------------------------------------
 #(6/14) ITAバックヤードスクリプトを全停止し常駐起動設定を解除する
 #----------------------------------------
+BACK_PROCESS=`ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE" | wc -l`
+log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete backyard script.Process count=[$BACK_PROCESS]"
+for var in `ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"`; do
+    FILE_NAME=`basename ${var}`
 
-#SentOS6の場合
-if [ ${ITA_OS} = 'RHEL6' ]; then
-    BACK_PROCESS=`ls /etc/init.d/ky_* 2>> "$LOG_FILE" | wc -l`
-    log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete backyard script.Process count=[$BACK_PROCESS]"
-    for var in `ls /etc/init.d/ky_* 2>> "$LOG_FILE"`; do
-        FILE_NAME=`basename ${var}`
-        
-        #バックヤードスクリプトを全停止
-        BACKYARD_ACTIVE=`/etc/init.d/"$FILE_NAME" stop | grep "OK" -c`
-        #停止しているか確認
-        if [ ${#BACKYARD_ACTIVE} -eq 0 ]; then
-            log "WARNING : ${FILE_NAME} is not stopped."
-        fi
-        
-        #常駐起動設定を解除
-        chkconfig "$FILE_NAME" off; 2>> "$LOG_FILE"
-        #解除されているか確認
-        STARTUP_SET=`chkconfig --list "$FILE_NAME" | grep ":on" -c`
-        if [ "$STARTUP_SET" -ne 0 ]; then
-            log "WARNING : ${FILE_NAME} is not stopped."
-        fi
-        
-        #解除終了ログを出す
-        log "INFO :       [$FILE_NAME] stopped."
+    #バックヤードスクリプトを全停止
+    systemctl stop "$FILE_NAME"; 2>> "$LOG_FILE"
+    #停止しているか確認
+    BACKYARD_ACTIVE=`systemctl status "$FILE_NAME" | grep "running"`
+    if [ ${#BACKYARD_ACTIVE} -ne 0 ]; then
+        log "WARNING : ${FILE_NAME} is not stopped."
+    fi
 
-    done 2>> "$LOG_FILE"
-
-#SentOS7の場合
-else
-    BACK_PROCESS=`ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE" | wc -l`
-    log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete backyard script.Process count=[$BACK_PROCESS]"
-    for var in `ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"`; do
-        FILE_NAME=`basename ${var}`
-
-            #バックヤードスクリプトを全停止
-            systemctl stop "$FILE_NAME"; 2>> "$LOG_FILE"
-            #停止しているか確認
-            BACKYARD_ACTIVE=`systemctl status "$FILE_NAME" | grep "running"`
-            if [ ${#BACKYARD_ACTIVE} -ne 0 ]; then
-                log "WARNING : ${FILE_NAME} is not stopped."
-            fi
-
-            #常駐起動設定を解除
-            systemctl disable "$FILE_NAME"; 2>> "$LOG_FILE"
-            #解除されているか確認
-            STARTUP_SET=`systemctl is-enabled "$FILE_NAME"`
-            if [ "$STARTUP_SET" != "disabled" ]; then
-                log "WARNING : ${FILE_NAME} is not stopped."
-            fi
+    #常駐起動設定を解除
+    systemctl disable "$FILE_NAME"; 2>> "$LOG_FILE"
+    #解除されているか確認
+    STARTUP_SET=`systemctl is-enabled "$FILE_NAME"`
+    if [ "$STARTUP_SET" != "disabled" ]; then
+        log "WARNING : ${FILE_NAME} is not stopped."
+    fi
             
-            #解除終了ログを出す
-            log "INFO :       [$FILE_NAME] stopped."
+    #解除終了ログを出す
+    log "INFO :       [$FILE_NAME] stopped."
             
-    done 2>> "$LOG_FILE"
-    systemctl daemon-reload 2>> "$LOG_FILE"
-    
-fi
-
-
+done 2>> "$LOG_FILE"
+systemctl daemon-reload 2>> "$LOG_FILE"
 
 #プロセスカウント+1
 PROCESS_CNT=$((PROCESS_CNT+1))
@@ -231,29 +197,16 @@ PROCESS_CNT=$((PROCESS_CNT+1))
 #----------------------------------------
 log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete start-up configuration file."
 
-if [ ${ITA_OS} = 'RHEL6' ]; then
-    for var in `ls /etc/init.d/ky_* 2>> "$LOG_FILE"`; do
-        FILE_NAME=`basename ${var}`
-        #設定ファイル削除
-        rm -f /etc/init.d/ky_* 2>> "$LOG_FILE"
+for var in `ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"`; do
+    FILE_NAME=`basename ${var}`
+    #設定ファイル削除
+    rm -f /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"
         
-        #削除されているか確認
-        if [ -e /etc/init.d/"$FILE_NAME" ]; then
-            log "WARNING : Failure to delete ${FILE_NAME}"
-        fi
-    done
-else
-    for var in `ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"`; do
-        FILE_NAME=`basename ${var}`
-        #設定ファイル削除
-        rm -f /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"
-        
-        #削除されているか確認
-        if [ -e /usr/lib/systemd/system/"$FILE_NAME" ]; then
-            log "WARNING : Failure to delete ${FILE_NAME}"
-        fi
-    done
-fi
+    #削除されているか確認
+    if [ -e /usr/lib/systemd/system/"$FILE_NAME" ]; then
+        log "WARNING : Failure to delete ${FILE_NAME}"
+    fi
+done
 
 #プロセスカウント+1
 PROCESS_CNT=$((PROCESS_CNT+1))

@@ -112,7 +112,7 @@ log 'INFO : Duplicate start-up check.'
 for((i=0; i<3; i++)); do
     PS_RES=`ps -ef`
     RES=`echo "$PS_RES" | grep "$0" -c`
-    if [ "$RES" -gt 2 ]; then
+    if [ "$RES" -gt 1 ]; then
         log 'INFO : Duplicate start-up is detected.'
         log 'INFO : Abort installation.'
         exit
@@ -142,7 +142,7 @@ COPY_ANSWER_FILE="/tmp/ita_answers.txt"
 INSTALL_MODE=''
 ITA_DIRECTORY=''
 ITA_LANGUAGE=''
-ITA_OS=''
+LINUX_OS=''
 DB_ROOT_PASSWORD=''
 DB_NAME=''
 DB_USERNAME=''
@@ -178,15 +178,15 @@ for LINE in $ANSWERS_TEXT;do
             func_answer_format_check
             INSTALL_MODE="$val"
             #フォーマットのチェック
-            if [ "${INSTALL_MODE}" != 'Install' -a "${INSTALL_MODE}" != 'Uninstall' ]; then
-                log "ERROR : $key should be set to Install or Uninstall."
+            if [ "${INSTALL_MODE}" != 'Install_Online' -a "${INSTALL_MODE}" != 'Install_Offline' -a "${INSTALL_MODE}" != 'Gather_Library' -a "${INSTALL_MODE}" != 'Install_ITA' -a "${INSTALL_MODE}" != 'Versionup_All' -a "${INSTALL_MODE}" != 'Versionup_ITA' -a "${INSTALL_MODE}" != 'Uninstall' ]; then
+                log "ERROR : $key should be set to Install_Online or Install_Offline or Gather_Library or Install_ITA or Versionup_All or Versionup_ITA or Uninstall."
                 log 'INFO : Abort installation.'
                 func_exit_and_delete_file
             fi
         fi
 
-        #--ita_language,db_password画必要なのはINSTALL_MODE = Installの時だけ
-        if [ "$INSTALL_MODE" = "Install" ]; then
+        #--ita_language,db_passwordが必要なのはINSTALL_MODE = Install_Online or Install_Offline or Install_ITAの時
+        if [ "$INSTALL_MODE" = "Install_Online" -o "$INSTALL_MODE" = "Install_Offline" -o "$INSTALL_MODE" = "Install_ITA" ]; then
             #言語の取得
             if [ "$key" = 'ita_language' ]; then
                 func_answer_format_check
@@ -218,14 +218,16 @@ for LINE in $ANSWERS_TEXT;do
             func_answer_format_check
             ITA_DIRECTORY="$val"
         #OSの取得
-        elif [ "$key" = 'ita_os' ]; then
+        elif [ "$key" = 'linux_os' ]; then
             func_answer_format_check
-            ITA_OS="$val"
-            if [ "${ITA_OS}" != 'RHEL7' -a "${ITA_OS}" != 'RHEL8' ]; then
-                log "ERROR : $key should be set to RHEL7 or RHEL8."
+            LINUX_OS="$val"
+
+            if [ "${LINUX_OS}" != 'CentOS7' -a "${LINUX_OS}" != 'CentOS8' -a "${LINUX_OS}" != 'RHEL7' -a "${LINUX_OS}" != 'RHEL8' ]; then
+                log "ERROR : $key should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8"
                 log 'INFO : Abort installation.'
                 func_exit_and_delete_file
             fi
+
         #DBルートパスワード取得
         elif [ "$key" = 'db_root_password' ]; then
             func_answer_format_check
@@ -247,12 +249,12 @@ IFS="$SRC_IFS"
 
 #アンサーファイルの内容が読み取れているか
 
-if [ "$INSTALL_MODE" = "Install" ]; then
+if [ "$INSTALL_MODE" = "Install_Online" -o "$INSTALL_MODE" = "Install_Offline" -o "$INSTALL_MODE" = "Install_ITA" ]; then
     if [ "$FORMAT_CHECK_CNT" != 8 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
         log 'INFO : Abort installation.'
     fi
-elif [ "$INSTALL_MODE" = "Uninstall" ]; then
+elif [ "$INSTALL_MODE" = "Gather_Library" -o "$INSTALL_MODE" = "Versionup_All" -o "$INSTALL_MODE" = "Versionup_ITA" -o "$INSTALL_MODE" = "Uninstall" ]; then
     if [ "$FORMAT_CHECK_CNT" != 6 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
         log 'INFO : Abort installation.'
@@ -263,30 +265,79 @@ else
 fi
 
 
-
 #$keyの値が正しいかチェック用
 FORMAT_CHECK_CNT=$((FORMAT_CHECK_CNT+1))
 
 
-
-if [ "$INSTALL_MODE" = 'Install' ]; then
-#インストール処理実行
-    if [ -e ./bin/install.sh ]; then
-        source ./bin/install.sh
-        exit
-    else
-        log 'ERROR : ./bin/install.sh does not exist.'
-        log 'INFO : Abort installation.'
-        exit
-    fi
-#アンインストール処理実行
-elif [ "$INSTALL_MODE" = 'Uninstall' ]; then
-    if [ -e ./bin/uninstall.sh ]; then
-        source ./bin/uninstall.sh
-        exit
-    else
-        log 'ERROR : ./bin/uninstall.sh does not exist.'
-        log 'INFO : Abort uninstallation.'
-        exit
-    fi
-fi
+#インストールモード分岐
+case "$INSTALL_MODE" in
+    "Install_Online")
+    #オンラインインストール処理実行
+        if [ -e ./bin/ita_builder_core.sh ]; then
+            exec_mode=3
+            source ./bin/ita_builder_core.sh
+            exit
+        else
+            log 'ERROR : ./bin/ita_builder_core.sh does not exist.'
+            log 'INFO : Abort installation.'
+            exit
+        fi
+    ;;
+    "Install_Offline")
+    #オフラインインストール処理実行
+        if [ -e ./bin/ita_builder_core.sh ]; then
+            exec_mode=2
+            source ./bin/ita_builder_core.sh
+            exit
+        else
+            log 'ERROR : ./bin/ita_builder_core.sh does not exist.'
+            log 'INFO : Abort installation.'
+            exit
+        fi
+    ;;
+    "Gather_Library")
+    #ライブラリ収集スクリプト実行
+        if [ -e ./bin/ita_builder_core.sh ]; then
+            exec_mode=1
+            source ./bin/ita_builder_core.sh
+            exit
+        else
+            log 'ERROR : ./bin/ita_builder_core.sh does not exist.'
+            log 'INFO : Abort installation.'
+            exit
+        fi
+    ;;
+    "Install_ITA")
+    #ITAインストール処理実行
+        if [ -e ./bin/install.sh ]; then
+            source ./bin/install.sh
+            exit
+        else
+            log 'ERROR : ./bin/install.sh does not exist.'
+            log 'INFO : Abort installation.'
+            exit
+        fi
+    ;;
+    "Versionup_All" | "Versionup_ITA")
+    #バージョンアップ処理実行
+        if [ -e ./bin/ita_version_up.sh ]; then
+            source ./bin/ita_version_up.sh
+            exit
+        else
+            log 'ERROR : ./bin/ita_version_up.sh does not exist.'
+            log 'INFO : Abort installation.'
+            exit
+        fi
+    ;;
+    "Uninstall")
+    #アンインストール処理実行
+        if [ -e ./bin/uninstall.sh ]; then
+            source ./bin/uninstall.sh
+            exit
+        else
+            log 'ERROR : ./bin/uninstall.sh does not exist.'
+            log 'INFO : Abort uninstallation.'
+            exit
+        fi
+    ;;
+esac    
