@@ -203,7 +203,7 @@ yum_repository() {
 
             # Check Creating repository
             if [ "${REPOSITORY}" != "yum_all" ]; then
-               case "${linux_os}" in
+               case "${LINUX_OS}" in
                     "CentOS7") create_repo_check remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "RHEL7") create_repo_check remi-php72 rhel-7-server-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "RHEL7_AWS") create_repo_check remi-php72 rhui-rhel-7-server-rhui-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
@@ -458,6 +458,7 @@ configure_mariadb() {
             fi
             
         else
+
             # enable MariaDB repository
             mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
 
@@ -562,6 +563,7 @@ configure_mariadb() {
             fi
             
         else
+
             # install some packages
             echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             #Installation
@@ -816,7 +818,7 @@ EOS
     fi
 
     # install ITA
-    source "$ITA_INSTALL_SCRIPTS_DIR/ita_installer.sh"
+    source "$ITA_INSTALL_SCRIPTS_DIR/bin/install.sh"
 
 }
 
@@ -1009,7 +1011,6 @@ ITA_INSTALL_PACKAGE_DIR=$(cd $(dirname $ITA_INSTALL_SCRIPTS_DIR);pwd)
 ITA_PACKAGE_OPEN_DIR=$(cd $(dirname $ITA_INSTALL_PACKAGE_DIR);pwd)
 
 ITA_ANSWER_FILE=$ITA_INSTALL_SCRIPTS_DIR/ita_answers.txt
-ITA_BUILDER_SETTING_FILE=$ITA_INSTALL_SCRIPTS_DIR/ita_builder_setting.txt
 
 if [ ! -e "$ITA_INSTALL_SCRIPTS_DIR""/log/" ]; then
     mkdir -m 755 "$ITA_INSTALL_SCRIPTS_DIR""/log/"
@@ -1029,49 +1030,11 @@ if [ ${EUID:-${UID}} -ne 0 ]; then
     exit
 fi
 
-#read setting file and answer file
-log "read setting file"
-read_setting_file "$ITA_BUILDER_SETTING_FILE"
-
-#check (ita_builder_setting.txt)
-if [ "${linux_os}" != 'CentOS7' -a "${linux_os}" != 'CentOS8' -a "${linux_os}" != 'RHEL7' -a "${linux_os}" != 'RHEL8' -a "${linux_os}" != 'RHEL7_AWS' -a "${linux_os}" != 'RHEL8_AWS' ]; then
-    log "ERROR:should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8 or RHEL7_AWS or RHEL8_AWS"
-    func_exit
-else
-    LINUX_OS="${linux_os}"
-fi
-
-if [ "${linux_os}" == 'RHEL7_AWS' ]; then
-    LINUX_OS='RHEL7'
-    AWS_FLG='yes'
-elif [ "${linux_os}" == 'RHEL8_AWS' ]; then
-    LINUX_OS='RHEL8'
-    AWS_FLG='yes'
-else
-    AWS_FLG='no'
-fi
-
-if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ] && [ $AWS_FLG == 'no' ]; then
-    if [ ! -n "$redhat_user_name" ]; then
-        log "ERROR:should be set[redhat_user_name]"
-        func_exit
-    fi
-
-    if [ ! -n "$redhat_user_password" ]; then
-        log "ERROR:should be set[redhat_user_password]"
-        func_exit
-    fi
-
-    if [ ! -n "$pool_id" ]; then
-        log "ERROR:should be set[pool_id]"
-        func_exit
-    fi
-fi
-
 #read answer file
+log "read answer file"
+read_setting_file "$ITA_ANSWER_FILE"
+
 if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
-    log "read answer file"
-    read_setting_file "$ITA_ANSWER_FILE"
     #check (ita_answers.txt)-----
     if [ "${material}" != 'yes' -a "${material}" != 'no' ]; then
         log "ERROR:material should be set to yes or no"
@@ -1116,51 +1079,6 @@ if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
     ITA_EXT_FILE_DIR=$ITA_INSTALL_PACKAGE_DIR/ext_files_for_CentOS8.x
 elif [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
     ITA_EXT_FILE_DIR=$ITA_INSTALL_PACKAGE_DIR/ext_files_for_CentOS7.x
-fi
-
-################################################################################
-# set subscription
-if [ "$exec_mode" != "2" ]; then
-    if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ] && [ $AWS_FLG == 'no' ]; then
-
-        log "setting subscriction of RHEL"
-
-        #IDPW
-        REDHAT_USER_NAME="${redhat_user_name}"
-        REDHAT_USER_PASSWORD="${redhat_user_password}"
-        POOL_ID="${pool_id}"
-
-        #Subscription registration
-        subscription-manager register --username=${REDHAT_USER_NAME} --password=${REDHAT_USER_PASSWORD} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        REGISTER_CHK=`echo $?`
-        
-        if [ "${REGISTER_CHK}" -ne 0 -a "${REGISTER_CHK}" -ne 64 ]; then
-            log "ERROR:The Red Hat user is not available."
-            func_exit
-        fi
-
-        #Check consumed
-        CONSUMED_POOL_ID=`subscription-manager list --consumed | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
-
-        if [ "${CONSUMED_POOL_ID}" != "" ]; then
-            echo "Subscription is already attached." >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        else
-            #Check available
-            SUBSCRIPTION_POOL_ID=`subscription-manager list --available | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
-
-            if [ "${SUBSCRIPTION_POOL_ID}" != "" ]; then
-                #Attach
-                subscription-manager attach --pool="${POOL_ID}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                if [ $? -ne 0 ]; then
-                    log "ERROR:Command[subscription-manager attach] is failed."
-                    func_exit
-                fi
-            else
-                log "ERROR:No subscriptions are available from the pool with ID \"${POOL_ID}\"."
-                func_exit
-            fi
-        fi
-    fi
 fi
 
 ################################################################################
@@ -1237,7 +1155,7 @@ declare -A YUM_REPO_PACKAGE;
 YUM_REPO_PACKAGE=(
     ["yum-env-enable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO[${REPOSITORY}]}
     ["yum-env-disable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO[${REPOSITORY}]}
-    ["php"]=${YUM_REPO_PACKAGE_PHP[${linux_os}]}
+    ["php"]=${YUM_REPO_PACKAGE_PHP[${LINUX_OS}]}
 )
 
 
