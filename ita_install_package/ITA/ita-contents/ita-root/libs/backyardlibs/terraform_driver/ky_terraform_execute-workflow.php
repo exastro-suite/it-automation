@@ -1089,6 +1089,17 @@
                     $vars_link_id = $row['MODULE_VARS_LINK_ID'];
                     $vars_name = $row['VARS_NAME'];
                     $vars_entry = $row['VARS_ENTRY'];
+
+                    //HCL設定を判定
+                    $hcl_flag = $row['HCL_FLAG'];
+                    $hcl_boolean = false;
+                    if($hcl_flag == 1){
+                        $hcl_boolean = false; //1(OFF)ならfalse
+                    }elseif($hcl_flag == 2){
+                        $hcl_boolean = true; //2(ON)ならtrue
+                    }
+
+                    //Sensitive設定を判定
                     $sensitive_flag = $row['SENSITIVE_FLAG'];
                     $sensitive_boolean = false;
                     if($sensitive_flag == 1){
@@ -1097,7 +1108,7 @@
                         $sensitive_boolean = true; //2(ON)ならtrue
                         $vars_entry = ky_decrypt($vars_entry); //具体値をデコード
                     }
-                    $ary_vars_data[$vars_link_id] = array('VARS_NAME' => $vars_name, 'VARS_ENTRY' => $vars_entry, 'SENSITIVE_FLAG' => $sensitive_boolean);
+                    $ary_vars_data[$vars_link_id] = array('VARS_NAME' => $vars_name, 'VARS_ENTRY' => $vars_entry, 'HCL_FLAG' => $hcl_boolean, 'SENSITIVE_FLAG' => $sensitive_boolean);
                 }
 
                 //変数追加処理のフラグをtrueにする
@@ -1181,9 +1192,10 @@
             $var_key = "TF_CLI_ARGS";
             $var_value = "-no-color";
             $category = "env"; //環境変数
+            $hclFlag = false;
             $sensitiveFlag = false;
             while ($statusCode != 201 && $count < $apiRetryCount){
-                $apiResponse = create_workspace_var($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $var_key, $var_value, $sensitiveFlag, $category);
+                $apiResponse = create_workspace_var($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $var_key, $var_value, $hclFlag, $sensitiveFlag, $category);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 201){
                     //返却StatusCodeが正常なので終了
@@ -1214,17 +1226,15 @@
                 foreach($ary_vars_data as $data){
                     $var_key = $data['VARS_NAME'];
                     $var_value = $data['VARS_ENTRY'];
+                    $hclFlag = $data['HCL_FLAG'];
                     $sensitiveFlag = $data['SENSITIVE_FLAG'];
                     $category = "terraform";
-                    //key名から変数名の先頭文字を除外
-                    $numVarHeadCount = mb_strlen(DF_HOST_VAR_HED, 'UTF-8');
-                    $var_key = mb_substr($var_key, $numVarHeadCount);
 
                     //Workspaceに対し変数を登録
                     $statusCode = 0;
                     $count = 0;
                     while ($statusCode != 201 && $count < $apiRetryCount){
-                        $apiResponse = create_workspace_var($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $var_key, $var_value, $sensitiveFlag, $category);
+                        $apiResponse = create_workspace_var($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $var_key, $var_value, $hclFlag, $sensitiveFlag, $category);
                         $statusCode = $apiResponse['StatusCode'];
                         if($statusCode == 201){
                             //返却StatusCodeが正常なので終了
@@ -1564,10 +1574,12 @@
                         foreach($ary_policy_data as $ita_data){
                             $exist_flag = false;
                             $tfe_policy_id = ""; //TFE側で管理しているPolicySetID
-                            $trg_policy_matter_path = $vg_terraform_policy_contents_dir . "/" . str_pad($ita_data['policy_id'], $intNumPadding, "0", STR_PAD_LEFT ) . "/" .$ita_data['policy_matter_file'];
+                            $trg_policy_matter_path = $vg_terraform_policy_contents_dir . '/' . str_pad($ita_data['policy_id'], $intNumPadding, '0', STR_PAD_LEFT ) . '/' .$ita_data['policy_matter_file'];
 
                             //policyファイルのpathを配列に格納
-                            array_push($ary_policy_file, $trg_policy_matter_path);
+                            $ary_policy_file[$ita_data['policy_id']] = array();
+                            $ary_policy_file[$ita_data['policy_id']]['path'] = $vg_terraform_policy_contents_dir . '/' . str_pad($ita_data['policy_id'], $intNumPadding, '0', STR_PAD_LEFT ) . '/';
+                            $ary_policy_file[$ita_data['policy_id']]['file'] = $ita_data['policy_matter_file'];
 
                             //PolicyがTFE側に登録済みかどうかをチェック
                             foreach($policyListResponsContents['data'] as $tfe_data){
@@ -2012,13 +2024,13 @@
             foreach($ary_module_matter as $matter_id => $matter){
                 $tgt_matter_no_str_pad = str_pad( $matter_id, $intNumPadding, "0", STR_PAD_LEFT );
                 $tgt_matter_file = $matter['matter_file'];
-                $cp_cmd = sprintf("/bin/cp -rfp %s %s/.", $vg_terraform_module_contents_dir."/".$tgt_matter_no_str_pad."/".$tgt_matter_file, $tgt_execution_dir);
+                $cp_cmd = sprintf('/bin/cp -rfp %s %s/.', $vg_terraform_module_contents_dir.'/'.$tgt_matter_no_str_pad.'/"'.$tgt_matter_file.'"', $tgt_execution_dir);
                 system($cp_cmd);
             }
 
             //作業実行Noディレクトリに、対象のpolicyファイルをコピー
-            foreach($ary_policy_file as $policy_file_path){
-                $cp_cmd = sprintf("/bin/cp -rfp %s %s/.", $policy_file_path, $tgt_execution_dir);
+            foreach($ary_policy_file as $policy_id => $policy_file){
+                $cp_cmd = sprintf('/bin/cp -rfp %s %s/.', $policy_file['path'] . '"'. $policy_file['file'] .'"' , $tgt_execution_dir);
                 system($cp_cmd);
             }
 

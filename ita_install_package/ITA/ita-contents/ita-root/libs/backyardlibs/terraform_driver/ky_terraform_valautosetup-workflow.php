@@ -43,6 +43,7 @@
     //                                        ['MODULE_VARS_LINK_ID']=>$in_vars_link_id,
     //                                        ['VARS_ENTRY']=>$col_val,
     //                                        ['VAR_TYPE']=>$in_var_type,
+    //                                        ['HCL_FLAG']=>$in_hcl_flag,
     //
     //  F0001  readValAssDB
     //  F0002  ColVarInfoAnalysis
@@ -80,7 +81,6 @@
     $log_output_php      = '/libs/backyardlibs/backyard_log_output.php';
     $php_req_gate_php    = '/libs/commonlibs/common_php_req_gate.php';
     $db_connect_php      = '/libs/commonlibs/common_db_connect.php';
-    $hostvar_search_php  = '/libs/backyardlibs/terraform_driver/WrappedStringReplaceAdmin.php';
     $db_access_user_id   = -101804; //Terraform代入値自動登録設定プロシージャ
 
     ////////////////////////////////
@@ -144,6 +144,7 @@
         "PATTERN_ID"=>""              ,
         "MODULE_VARS_LINK_ID"=>""     ,
         "VARS_ENTRY"=>""              ,
+        "HCL_FLAG"=>""                ,
         "SENSITIVE_FLAG"=>""          ,
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
@@ -225,6 +226,7 @@
         "PATTERN_ID"=>""              ,
         "VAL_VARS_LINK_ID"=>""        ,
         "KEY_VARS_LINK_ID"=>""        ,
+        "HCL_FLAG"=>""                ,
         "NULL_DATA_HANDLING_FLG"=>""  ,
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
@@ -244,6 +246,7 @@
         "PATTERN_ID"=>""              ,
         "VAL_VARS_LINK_ID"=>""        ,
         "KEY_VARS_LINK_ID"=>""        ,
+        "HCL_FLAG"=>""                ,
         "NULL_DATA_HANDLING_FLG"=>""  ,
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
@@ -796,7 +799,8 @@
         $sql = $sql .     "       PATTERN_ID    = TBL_A.PATTERN_ID        AND                \n";
         $sql = $sql .     "       MODULE_VARS_LINK_ID  = TBL_A.KEY_VARS_LINK_ID  AND         \n";
         $sql = $sql .     "       DISUSE_FLAG   = '0'                                        \n";
-        $sql = $sql .     "   ) AS KEY_PTN_VARS_LINK_CNT                                     \n";
+        $sql = $sql .     "   ) AS KEY_PTN_VARS_LINK_CNT                                  ,  \n";
+        $sql = $sql .     "   TBL_A.HCL_FLAG                                                 \n";
         $sql = $sql .     " FROM                                                             \n";
         $sql = $sql .     "   $in_val_assign_tbl TBL_A                                       \n";
         $sql = $sql .     "   LEFT JOIN $cmdb_menu_column_tbl TBL_B ON                       \n";
@@ -989,7 +993,8 @@
                                      'KEY_VARS_NAME'=>$row['KEY_VARS_NAME'],
                                      'VAL_VAR_TYPE'=>$val_child_var_type,
                                      'KEY_VAR_TYPE'=>$key_child_var_type,
-                                     'NULL_DATA_HANDLING_FLG'=>$row['NULL_DATA_HANDLING_FLG']
+                                     'NULL_DATA_HANDLING_FLG'=>$row['NULL_DATA_HANDLING_FLG'],
+                                     'HCL_FLAG'=>$row['HCL_FLAG']
                                );
 
             // テーブルの主キー名退避
@@ -1130,7 +1135,6 @@
                     $make_sql = "SELECT "                                               . "\n" .
                                 $opeid_chk_sql                                          . "\n" .
                                 "  TBL_A." . $pkey_name . " AS " . DF_ITA_LOCAL_PKEY    . "\n" .
-                                ", TBL_A.HOST_ID "                                      . "\n" .
                                 ", TBL_A." . $col_name . " \n";
                 }
                 else{
@@ -1452,6 +1456,7 @@
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            $ina_col_list['COL_CLASS'],
+                           $ina_col_list['HCL_FLAG'],
                            'Value',
                            $in_row_id);
             break;
@@ -1479,6 +1484,7 @@
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            $ina_col_list['COL_CLASS'],
+                           $ina_col_list['HCL_FLAG'],
                            'Key',
                            $in_row_id);
             break;
@@ -1504,6 +1510,7 @@
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            $ina_col_list['COL_CLASS'],
+                           $ina_col_list['HCL_FLAG'],
                            'Value',
                            $in_row_id);
                            
@@ -1520,6 +1527,7 @@
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            $ina_col_list['COL_CLASS'],
+                           $ina_col_list['HCL_FLAG'],
                            'Key',
                            $in_row_id);
             break;
@@ -1542,7 +1550,8 @@
     //   $ina_vars_ass_list:            一般変数用 代入値登録情報配列
     //   $ina_vars_ass_chk_list:        一般変数用 代入順序重複チェック配列
     //   $in_menu_id:                   紐付メニューID
-    //   $in_column_id:                 代入値自動設定登録   
+    //   $in_column_id:                 代入値自動設定登録
+    //   $in_hcl_flag                   HCL設定
     //   $in_key_value_vars_id          Value/Key
     //   $in_row_id:                    紐付テーブル主キー値
     //
@@ -1561,6 +1570,7 @@
                             $in_menu_id,
                             $in_column_id,
                             $in_col_class,
+                            $in_hcl_flag,
                             $in_key_value_vars_id,
                             $in_row_id){
         global $log_level;
@@ -1604,6 +1614,7 @@
                                      'MODULE_VARS_LINK_ID'=>$in_vars_link_id,
                                      'VARS_ENTRY'=>$in_col_val,
                                      'VAR_TYPE'=>$in_var_type,
+                                     'HCL_FLAG'=>$in_hcl_flag,
                                      'STATUS'=>$chk_status);
     }
     
@@ -1645,9 +1656,9 @@
         $key = $ina_varsass_list['OPERATION_NO_UAPK']   . "_" .
                $ina_varsass_list['PATTERN_ID']          . "_" .
                $ina_varsass_list['MODULE_VARS_LINK_ID'] . "_" .
+               $ina_varsass_list['HCL_FLAG']            . "_" .
                "0";
-var_dump("具体値登録処理を実行");
-var_dump($ina_varsass_list['COL_CLASS']);
+
         // 代入値管理に登録されているか判定
         if( ! isset($in_VarsAssignRecodes[$key])) {
             return addStg2VarsAssDB($ina_varsass_list,$in_VarsAssignRecodes);
@@ -1728,8 +1739,8 @@ var_dump($ina_varsass_list['COL_CLASS']);
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["HCL_FLAG"]         = $ina_varsass_list['HCL_FLAG'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
-            var_dump($ina_varsass_list['COL_CLASS']);
             if($ina_varsass_list['COL_CLASS'] == "PasswordColumn"){
                 $tgt_row["SENSITIVE_FLAG"]   = 2; //ON
             }else{
@@ -2067,6 +2078,7 @@ var_dump($ina_varsass_list['COL_CLASS']);
         $key = $ina_varsass_list['OPERATION_NO_UAPK']   . "_" .
                $ina_varsass_list['PATTERN_ID']          . "_" .
                $ina_varsass_list['MODULE_VARS_LINK_ID'] . "_" .
+               $ina_varsass_list['HCL_FLAG']            . "_" .
                "1";
 
         if(! isset($in_VarsAssignRecodes[$key]))
@@ -2132,6 +2144,7 @@ var_dump($ina_varsass_list['COL_CLASS']);
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["HCL_FLAG"]         = $ina_varsass_list['HCL_FLAG'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
             if($ina_varsass_list['COL_CLASS'] == "PasswordColumn"){
                 $tgt_row["SENSITIVE_FLAG"]   = 2; //ON
@@ -2169,6 +2182,7 @@ var_dump($ina_varsass_list['COL_CLASS']);
             $tgt_row['PATTERN_ID']          = $ina_varsass_list['PATTERN_ID'];
             $tgt_row['MODULE_VARS_LINK_ID'] = $ina_varsass_list['MODULE_VARS_LINK_ID'];
             $tgt_row["VARS_ENTRY"]          = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["HCL_FLAG"]            = $ina_varsass_list['HCL_FLAG'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
             if($ina_varsass_list['COL_CLASS'] == "PasswordColumn"){
                 $tgt_row["SENSITIVE_FLAG"]   = 2; //ON
@@ -2476,6 +2490,7 @@ var_dump($ina_varsass_list['COL_CLASS']);
             $key = $row["OPERATION_NO_UAPK"]   . "_" .
                    $row["PATTERN_ID"]          . "_" .
                    $row["MODULE_VARS_LINK_ID"] . "_" .
+                   $row['HCL_FLAG']            . "_" .
                    $row["DISUSE_FLAG"];
             $in_VarsAssignRecodes[$key] = $row;
         }

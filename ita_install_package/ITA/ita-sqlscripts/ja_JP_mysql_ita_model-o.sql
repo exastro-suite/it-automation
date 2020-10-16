@@ -109,6 +109,39 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 -- 履歴系テーブル作成----
 
+-- ----更新系テーブル作成----
+-- HCLフラグ
+CREATE TABLE B_TERRAFORM_HCL_FLAG
+(
+HCL_FLAG                          INT                              ,
+HCL_FLAG_SELECT                   VARCHAR (32)                     ,
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY (HCL_FLAG)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成----
+-- HCLフラグ(履歴)
+CREATE TABLE B_TERRAFORM_HCL_FLAG_JNL
+(
+JOURNAL_SEQ_NO                    INT                              , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              DATETIME(6)                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              VARCHAR (8)                      , -- 履歴用変更種別
+HCL_FLAG                          INT                              ,
+HCL_FLAG_SELECT                   VARCHAR (32)                     ,
+DISP_SEQ                          INT                              , -- 表示順序
+NOTE                              VARCHAR (4000)                   , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
+LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+-- 履歴系テーブル作成----
+
 -- *****************************************************************************
 -- *** ***** Terraform Common Tables                                         ***
 -- *****************************************************************************
@@ -477,7 +510,8 @@ OPERATION_NO_UAPK                 INT                              , -- オペ�
 PATTERN_ID                        INT                              , -- パターンID
 MODULE_VARS_LINK_ID               INT                              , -- 代入値リンクID
 VARS_ENTRY                        text                             ,
-SENSITIVE_FLAG                    VARCHAR (1)                      ,
+HCL_FLAG                          VARCHAR (1)                      , -- HCL設定
+SENSITIVE_FLAG                    VARCHAR (1)                      , -- Sensitive設定
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
@@ -499,7 +533,8 @@ OPERATION_NO_UAPK                 INT                              , -- オペ�
 PATTERN_ID                        INT                              , -- パターンID
 MODULE_VARS_LINK_ID               INT                              , -- 代入値リンクID
 VARS_ENTRY                        text                             ,
-SENSITIVE_FLAG                    VARCHAR (1)                      ,
+HCL_FLAG                          VARCHAR (1)                      , -- HCL設定
+SENSITIVE_FLAG                    VARCHAR (1)                      , -- Sensitive設定
 DISP_SEQ                          INT                              , -- 表示順序
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
@@ -519,6 +554,7 @@ COL_TYPE                          INT                     , -- カラムタイ�
 PATTERN_ID                        INT                     , -- 作業パターンID
 VAL_VARS_LINK_ID                  INT                     , -- Value値　作業パターン変数紐付
 KEY_VARS_LINK_ID                  INT                     , -- Key値　作業パターン変数紐付
+HCL_FLAG                          VARCHAR (1)             , -- HCL設定
 NULL_DATA_HANDLING_FLG            INT                     , -- Null値の連携
 DISP_SEQ                          INT                     , -- 表示順序
 NOTE                              VARCHAR (4000)          , -- 備考
@@ -543,6 +579,7 @@ COL_TYPE                          INT                     , -- カラムタイ�
 PATTERN_ID                        INT                     , -- 作業パターンID
 VAL_VARS_LINK_ID                  INT                     , -- Value値　作業パターン変数紐付
 KEY_VARS_LINK_ID                  INT                     , -- Key値　作業パターン変数紐付
+HCL_FLAG                          VARCHAR (1)             , -- HCL設定
 NULL_DATA_HANDLING_FLG            INT                     , -- Null値の連携
 DISP_SEQ                          INT                     , -- 表示順序
 NOTE                              VARCHAR (4000)          , -- 備考
@@ -802,6 +839,7 @@ SELECT
        TAB_A.PATTERN_ID                     , -- 作業パターンID
        TAB_A.VAL_VARS_LINK_ID               , -- Value値　作業パターン変数紐付
        TAB_A.KEY_VARS_LINK_ID               , -- Key値　作業パターン変数紐付
+       TAB_A.HCL_FLAG                       , -- HCL設定
        TAB_A.NULL_DATA_HANDLING_FLG         , -- Null値の連携
        TAB_B.MENU_GROUP_ID                  ,
        TAB_C.MENU_GROUP_NAME                ,
@@ -830,6 +868,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.PATTERN_ID                     , -- 作業パターンID
        TAB_A.VAL_VARS_LINK_ID               , -- Value値　作業パターン変数紐付
        TAB_A.KEY_VARS_LINK_ID               , -- Key値　作業パターン変数紐付
+       TAB_A.HCL_FLAG                       , -- HCL設定
        TAB_A.NULL_DATA_HANDLING_FLG         , -- Null値の連携
        TAB_B.MENU_GROUP_ID                  ,
        TAB_C.MENU_GROUP_NAME                ,
@@ -912,9 +951,10 @@ SELECT
          TAB_A.ASSIGN_ID                 ,
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.PATTERN_ID                ,
-         TAB_A.MODULE_VARS_LINK_ID        ,
+         TAB_A.MODULE_VARS_LINK_ID       ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.HCL_FLAG                  ,
          TAB_A.SENSITIVE_FLAG            ,
          TAB_A.DISP_SEQ                  ,
          TAB_A.NOTE                      ,
@@ -1270,6 +1310,11 @@ INSERT INTO B_TERRAFORM_RUN_MODE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNA
 
 INSERT INTO B_TERRAFORM_IF_INFO (TERRAFORM_IF_INFO_ID,TERRAFORM_HOSTNAME,TERRAFORM_TOKEN,TERRAFORM_REFRESH_INTERVAL,TERRAFORM_TAILLOG_LINES,NULL_DATA_HANDLING_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Terraform Enterpriseのホスト名を記載','Terraform Enterpriseの[User Settings]より発行したTokenを記載','3000','1000','2',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_TERRAFORM_IF_INFO_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,TERRAFORM_IF_INFO_ID,TERRAFORM_HOSTNAME,TERRAFORM_TOKEN,TERRAFORM_REFRESH_INTERVAL,TERRAFORM_TAILLOG_LINES,NULL_DATA_HANDLING_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Terraform Enterpriseのホスト名を記載','Terraform Enterpriseの[User Settings]より発行したTokenを記載','3000','1000','2',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO B_TERRAFORM_HCL_FLAG (HCL_FLAG,HCL_FLAG_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'OFF',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_TERRAFORM_HCL_FLAG_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,HCL_FLAG,HCL_FLAG_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'OFF',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_TERRAFORM_HCL_FLAG (HCL_FLAG,HCL_FLAG_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'ON',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_TERRAFORM_HCL_FLAG_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,HCL_FLAG,HCL_FLAG_SELECT,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'ON',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 
 COMMIT;

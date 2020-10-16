@@ -32,10 +32,6 @@
     $hostvar_search_php  = '/libs/backyardlibs/terraform_driver/WrappedStringReplaceAdmin.php';
     $db_access_user_id   = -101803; //Terraform変数更新プロシージャ
 
-    // WrappedStringReplaceAdmin.phpで使用する変数定義
-    // ユーザーホスト変数名の先頭文字
-    //define("DF_HOST_VAR_HED"               ,"var."); //ky_terraform_common_setenv.phpで定義
-
     //----変数名テーブル関連
     $strCurTableTerraformVarsTable = $vg_terraform_module_vars_link_table_name;
     $strJnlTableTerraformVarsTable = $strCurTableTerraformVarsTable."_JNL";
@@ -897,6 +893,10 @@
         $ina_vars     = array();
         $intNumPadding = 10;
 
+        // WrappedStringReplaceAdmin.phpで使用する変数定義
+        // ユーザーホスト変数名の先頭文字(『variable "xxx"{}』という形式の変数宣言からxxxを抽出するため、戦闘文字列を『variable "』とする。）
+        $in_var_heder = 'variable "';
+
         //////////////////////////////////////////////
         // Module素材に登録されている変数を抜出す。
         //////////////////////////////////////////////
@@ -922,7 +922,7 @@
 
         // リソースファイル（Module素材）に登録されている変数を抜出。
         $local_vars = array();
-        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$local_vars);
+        $objWSRA = new WrappedStringReplaceAdmin($in_var_heder, $dataString, $local_vars);
 
         $aryResultParse = $objWSRA->getParsedResult();
         unset($objWSRA);
