@@ -20,6 +20,7 @@ ita_language:en_US
 
 # Select Operation System. ("CentOS7","CentOS8","RHEL7","RHEL8")
 # e.g) linux_os:RHEL8
+# * If registering a subscription is needed in order to acquire the RHEL7 and RHEL8 libraries, please do so in advance.
 linux_os:
 
 # Enter the MariaDB root user's password
