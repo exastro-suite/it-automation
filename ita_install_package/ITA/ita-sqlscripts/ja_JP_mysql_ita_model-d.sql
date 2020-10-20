@@ -7,6 +7,7 @@ COBBLER_IF_INFO_ID                INT                              ,
 COBBLER_STORAGE_PATH_LNX          VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -28,6 +29,7 @@ COBBLER_IF_INFO_ID                INT                              ,
 COBBLER_STORAGE_PATH_LNX          VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
