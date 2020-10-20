@@ -172,6 +172,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);    
     $table->addColumn($c);
 
+    $c = new IDColumn('DEF_ACCESS_AUTH_FLAG',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090603"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090604"));//エクセル・ヘッダでの説明
+    $c->setHiddenMainTableColumn(true);
+    $table->addColumn($c);
+
     $table->fixColumn();
 
 	return $table;

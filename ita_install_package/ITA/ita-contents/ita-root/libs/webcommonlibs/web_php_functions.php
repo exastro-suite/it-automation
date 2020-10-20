@@ -1150,4 +1150,201 @@ EOD;
 
     // ここまで業務色を排除した汎用系関数----
 
+//////////////////////////////////////////////////////////////////////
+//
+//【概要】
+//  ロールアクセス権の判定
+//
+//////////////////////////////////////////////////////////////////////
+class RoleBasedAccessControl {
+   private  $role_account_link_list;
+   private  $objDBCA;
+   private  $DefaultAccessRoles;
+   private  $AccessRoles;
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   コンストラクタ
+   // 【パラメータ】
+   //   $objDBCA: DBアクセスクラスオブジェクト
+   ///////////////////////////////////////////////////////////////////
+   function __construct($objDBCA){
+      $this->objDBCA                = $objDBCA;
+      $this->role_account_link_list = array();
+      $this->DefaultAccessRoles     = array();
+      $this->AccessRoles            = array();
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   該当ユーザーのロール・ユーザー紐づけの情報を取得
+   // 【パラメータ】
+   //   $userID: 絞り込み対象のユーザーID
+   //            一部例外を除きログインユーザーID $g['login_id'];
+   // 【戻り値】
+   //   true:    正常
+   //   false:   異常
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getAccountInfo($userID) {
+       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_ACCOUNT_LINK_LIST user ID:%s)";
+       $error_msg2 = "[%s:%s]:Recode not found. (Table:A_ROLE_ACCOUNT_LINK_LIST user ID:%s)";
+       try {
+           $sql =  " SELECT * FROM A_ROLE_ACCOUNT_LINK_LIST "
+                  ." WHERE USER_ID = :USER_ID AND DISUSE_FLAG='0' ";
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if($objQuery->getStatus()===false){
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $objQuery->sqlBind( array('USER_ID'=>$userID));
+           $r = $objQuery->sqlExecute();
+           if(!$r) {
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           if($objQuery->effectedRowCount() == 0) {
+               // ロール・ユーザー紐づけにデータ未登録の場合
+               $message = sprintf($error_msg2,basename(__FILE__),__LINE__,$userID);
+               throw new Exception($message);
+           }
+           $this->role_account_link_list = array();
+           $this->DefaultAccessRoles = array();
+           $this->AccessRoles = array();
+           while($row = $objQuery->resultFetch()) {
+               $role_account_link_list[] = $row;
+               // デフォルトアクセス権が設定されているRoleIDのリストを作成
+               if($row["DEF_ACCESS_AUTH_FLAG"] == "1") {
+                   // デフォルトアクセスロールを配列を生成
+                   $this->DefaultAccessRoles[] = $row["ROLE_ID"];
+               }
+               // アクセス権のあるRoleIDを退避
+               $this->AccessRoles[$row["ROLE_ID"]] = 0;
+           }
+           unset($objQuery);
+           return true;
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return false;
+       }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   getAccountInfoで指定したユーザーのデフォルトアクセス権取得(RoleID)を
+   //  ロール・ユーザー紐づけより取得しカンマ区切りの文字列で返却
+   // 【パラメータ】
+   //   なし
+   // 【戻り値】
+   //   該当ユーザーのデフォルトアクセス権取得(RoleID)をカンマ区切りの文字列で返却
+   // 【備考】
+   //   getAccountInfoを呼び出し後に呼び出す。
+   //   パックヤードからの場合、異常の場合など、phpのerror_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getDefaultAccessRoles() {
+       return(implode(",",$this->DefaultAccessRoles));
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   指定レコードのアクセス権と該当ユーザーのロールけユーザー紐づけに紐づいているロール
+   //   が一致しているか判定(表示対象の有無を判定)
+   // 【パラメータ】
+   //   $chkRow: $objQuery->sqlExecute()などのselect結果を1レコード毎に指定する。
+   //            レコードにACCESS_AUTHがあるのが前提
+   // 【戻り値】
+   //   戻り値1
+   //     true:    正常
+   //     false:   異常
+   //   戻り値2
+   //     true:    表示対象
+   //     false:   異常
+   // 【備考】
+   //   getAccountInfoを呼び出し後に呼び出す。
+   //   webからの場合、戻り値1が異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、戻り値1が異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function chkOneRecodeAccessPermission($chkRow) {
+       $ret = true;
+       try {
+           $access_auth = $chkRow["ACCESS_AUTH"];
+           // アクセス権が空の場合
+           if(strlen($access_auth) == 0) {
+               // アクセス権あり
+               $permission = true;        
+               return [$ret, $permission]; 
+           }
+           $access_auth_arry = explode(',', $access_auth);
+           foreach($access_auth_arry as $access_role) {
+               if(array_key_exists($access_role,$this->AccessRoles) === true) {
+                   // アクセス権あり
+                   $permission = true;        
+                   return [$ret, $permission]; 
+               }
+           }
+           // アクセス権なし
+           $permission = false;        
+           return [$ret, $permission]; 
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           $ret        = false;
+           $permission = false;
+           return [$ret, $permission]; 
+       }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   指定レコード配列のアクセス権と該当ユーザーのロールけユーザー紐づけに紐づいているロール
+   //   が一致しているか判定(表示対象の有無を判定)し、表示対象でないレコードを指定レコード配列
+   //   から削除
+   // 【パラメータ】
+   //   $chkRow: $objQuery->sqlExecute()などのselectした複数レコードに指定する。
+   //            レコードにACCESS_AUTHがあるのが前提
+   //            表示対象でないレコードは削除される
+   // 【戻り値】
+   //     true:    正常
+   //     false:   異常
+   // 【備考】
+   //   getAccountInfoを呼び出し後に呼び出す。
+   //   webからの場合、戻り値1が異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、戻り値1が異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function chkRecodeArrayAccessPermission(&$chkRows) {
+       $ret = true;
+       try {
+           foreach($chkRows as $no=>$chkRow) {
+               list($ret,$permission) = $this->chkOneRecodeAccessPermission($chkRow);
+               if($ret === false) {
+                   return false;
+               }
+               if($permission === false)
+               {
+                   unset($chkRows[$no]);
+               }
+           }
+           return true;
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return false;
+       }
+   }
+}
 ?>
