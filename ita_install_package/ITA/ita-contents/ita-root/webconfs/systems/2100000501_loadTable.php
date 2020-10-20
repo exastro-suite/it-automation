@@ -202,7 +202,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
     
-    $c = new IDColumn('SHEET_TYPE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-310001"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME','',array('ORDER'=>'ORDER BY DISP_SEQ'));
+    $c = new IDColumn('SHEET_TYPE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-310001"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME','',array('OrderByThirdColumn'=>'DISP_SEQ'));
     $c->setDescription('');//エクセル・ヘッダでの説明
     $c->setHiddenMainTableColumn(true); 
     $c->setRequired(true);//登録/更新時には、入力必須
