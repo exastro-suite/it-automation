@@ -11,6 +11,7 @@ CLOSE_REVISION_ID                  %INT%                           ,
 TERRAFORM_MODULE_CHK               %INT%                           , -- Moduleファイル
 TERRAFORM_POLICY_CHK               %INT%                           , -- Policyファイル
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               %VARCHR%(4000)                  , -- 備考
 DISUSE_FLAG                        %VARCHR%(1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              %DATETIME6%                     , -- 最終更新日時
@@ -33,6 +34,7 @@ CLOSE_REVISION_ID                  %INT%                           ,
 TERRAFORM_MODULE_CHK               %INT%                           , -- Moduleファイル
 TERRAFORM_POLICY_CHK               %INT%                           , -- Policyファイル
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               %VARCHR%(4000)                  , -- 備考
 DISUSE_FLAG                        %VARCHR%(1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              %DATETIME6%                     , -- 最終更新日時
