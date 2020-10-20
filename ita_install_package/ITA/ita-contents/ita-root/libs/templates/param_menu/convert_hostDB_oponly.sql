@@ -13,6 +13,7 @@ INPUT_ORDER                   INT             ,
 ★★★COLUMN_TYPE★★★
 -- 個別項目
 
+ACCESS_AUTH                   TEXT            ,
 NOTE                          VARCHAR(4000)   ,
 DISUSE_FLAG                   VARCHAR(1)      ,
 LAST_UPDATE_TIMESTAMP         DATETIME(6)     ,
@@ -37,6 +38,7 @@ SELECT TAB_A.ROW_ID                     ,
 ★★★COLUMN★★★
 -- 個別項目
 
+       TAB_A.ACCESS_AUTH                ,
        TAB_A.NOTE                       ,
        TAB_A.DISUSE_FLAG                ,
        TAB_A.LAST_UPDATE_TIMESTAMP      ,
@@ -60,6 +62,7 @@ INPUT_ORDER                   INT             ,
 ★★★COLUMN_TYPE★★★
 -- 個別項目
 
+ACCESS_AUTH                   TEXT            ,
 NOTE                          VARCHAR(4000)   ,
 DISUSE_FLAG                   VARCHAR(1)      ,
 LAST_UPDATE_TIMESTAMP         DATETIME(6)     ,
@@ -88,6 +91,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO             ,
 ★★★COLUMN★★★
 -- 個別項目
 
+       TAB_A.ACCESS_AUTH                ,
        TAB_A.NOTE                       ,
        TAB_A.DISUSE_FLAG                ,
        TAB_A.LAST_UPDATE_TIMESTAMP      ,
