@@ -444,6 +444,7 @@ class CreateMenuStatusTable extends BaseTable_CPM {
                                     'CREATE_MENU_ID',
                                     'STATUS_ID',
                                     'FILE_NAME',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -476,6 +477,7 @@ class CreateMenuInfoTable extends BaseTable_CPM {
                                     'MENUGROUP_FOR_VIEW',
                                     'DISP_SEQ',
                                     'DESCRIPTION',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -518,6 +520,7 @@ class CreateItemInfoTable extends BaseTable_CPM {
                                     'FLOAT_DIGIT',
                                     'PW_MAX_LENGTH',
                                     'DESCRIPTION',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -545,32 +548,7 @@ class MenuTableLinkTable extends BaseTable_CPM {
                                     'TABLE_NAME',
                                     'KEY_COL_NAME',
                                     'TABLE_NAME_JNL',
-                                    'NOTE',
-                                    'DISUSE_FLAG',
-                                    'LAST_UPDATE_TIMESTAMP',
-                                    'LAST_UPDATE_USER',
-                                   );
-    }
-}
-
-/**
- * テーブル項目名一覧テーブルクラス
- */
-class TableItemListTable extends BaseTable_CPM {
-
-    /**
-     * コンストラクタ
-     */
-    public function __construct($objDBCA, $db_model_ch) {
-
-        parent::__construct($objDBCA, $db_model_ch);
-        $this->tableName    = 'F_TABLE_ITEM_LIST';
-        $this->seqName      = $this->tableName . '_RIC';
-        $this->jnlSeqName   = $this->tableName . '_JSQ';
-        $this->columnNames  = array('TABLE_ITEM_ID',
-                                    'CREATE_MENU_ID',
-                                    'CREATE_ITEM_ID',
-                                    'COLUMN_NAME',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -604,6 +582,7 @@ class MenuListTable extends BaseTable_CPM {
                                     'WEB_PRINT_CONFIRM',
                                     'XLS_PRINT_LIMIT',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -630,6 +609,7 @@ class RoleMenuLinkListTable extends BaseTable_CPM {
                                     'ROLE_ID',
                                     'MENU_ID',
                                     'PRIVILEGE',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -655,6 +635,7 @@ class RoleAccountLinkListTable extends BaseTable_CPM {
         $this->columnNames  = array('LINK_ID',
                                     'ROLE_ID',
                                     'USER_ID',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -681,6 +662,7 @@ class CmdbMenuListTable extends BaseTable_CPM {
                                     'MENU_ID',
                                     'SHEET_TYPE',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -708,6 +690,7 @@ class CmdbMenuTableTable extends BaseTable_CPM {
                                     'TABLE_NAME',
                                     'PKEY_NAME',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -740,6 +723,7 @@ class CmdbMenuColumnTable extends BaseTable_CPM {
                                     'REF_PKEY_NAME',
                                     'REF_COL_NAME',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -766,140 +750,7 @@ class SplitTargetTable extends BaseTable_CPM {
                                     'INPUT_MENU_ID',
                                     'OUTPUT_MENU_ID',
                                     'DIVIDED_FLG',
-                                    'NOTE',
-                                    'DISUSE_FLAG',
-                                    'LAST_UPDATE_TIMESTAMP',
-                                    'LAST_UPDATE_USER',
-                                   );
-    }
-}
-
-/**
- * マスタ作成管理テーブルクラス
- */
-class CreateMstMenuStatusTable extends BaseTable_CPM {
-
-    /**
-     * コンストラクタ
-     */
-    public function __construct($objDBCA, $db_model_ch) {
-
-        parent::__construct($objDBCA, $db_model_ch);
-        $this->tableName    = 'F_CREATE_MST_MENU_STATUS';
-        $this->seqName      = $this->tableName . '_RIC';
-        $this->jnlSeqName   = $this->tableName . '_JSQ';
-        $this->columnNames  = array('MM_STATUS_ID',
-                                    'CREATE_MENU_ID',
-                                    'STATUS_ID',
-                                    'FILE_NAME',
-                                    'NOTE',
-                                    'DISUSE_FLAG',
-                                    'LAST_UPDATE_TIMESTAMP',
-                                    'LAST_UPDATE_USER',
-                                   );
-    }
-}
-
-/**
- * マスタ作成情報テーブルクラス
- */
-class CreateMstMenuInfoTable extends BaseTable_CPM {
-
-    /**
-     * コンストラクタ
-     */
-    public function __construct($objDBCA, $db_model_ch) {
-
-        parent::__construct($objDBCA, $db_model_ch);
-        $this->tableName    = 'F_CREATE_MST_MENU_INFO';
-        $this->seqName      = $this->tableName . '_RIC';
-        $this->jnlSeqName   = $this->tableName . '_JSQ';
-        $this->columnNames  = array('CREATE_MENU_ID',
-                                    'MENU_NAME',
-                                    'MENUGROUP_FOR_MST',
-                                    'DISP_SEQ',
-                                    'DESCRIPTION',
-                                    'NOTE',
-                                    'DISUSE_FLAG',
-                                    'LAST_UPDATE_TIMESTAMP',
-                                    'LAST_UPDATE_USER',
-                                   );
-    }
-}
-
-/**
- * マスタ項目情報テーブルクラス
- */
-class CreateMstItemInfoTable extends BaseTable_CPM {
-
-    /**
-     * コンストラクタ
-     */
-    public function __construct($objDBCA, $db_model_ch) {
-
-        parent::__construct($objDBCA, $db_model_ch);
-        $this->tableName    = 'F_CREATE_MST_ITEM_INFO';
-        $this->seqName      = $this->tableName . '_RIC';
-        $this->jnlSeqName   = $this->tableName . '_JSQ';
-        $this->columnNames  = array('CREATE_ITEM_ID',
-                                    'CREATE_MENU_ID',
-                                    'ITEM_NAME',
-                                    'DISP_SEQ',
-                                    'MAX_LENGTH',
-                                    'PREG_MATCH',
-                                    'DESCRIPTION',
-                                    'NOTE',
-                                    'DISUSE_FLAG',
-                                    'LAST_UPDATE_TIMESTAMP',
-                                    'LAST_UPDATE_USER',
-                                   );
-    }
-}
-
-/**
- * マスタ・テーブル紐付テーブルクラス
- */
-class MstTableLinkTable extends BaseTable_CPM {
-
-    /**
-     * コンストラクタ
-     */
-    public function __construct($objDBCA, $db_model_ch) {
-
-        parent::__construct($objDBCA, $db_model_ch);
-        $this->tableName    = 'F_MST_MENU_TABLE_LINK';
-        $this->seqName      = $this->tableName . '_RIC';
-        $this->jnlSeqName   = $this->tableName . '_JSQ';
-        $this->columnNames  = array('MENU_TABLE_LINK_ID',
-                                    'CREATE_MENU_ID',
-                                    'TABLE_NAME_MST',
-                                    'TABLE_NAME_MST_JNL',
-                                    'NOTE',
-                                    'DISUSE_FLAG',
-                                    'LAST_UPDATE_TIMESTAMP',
-                                    'LAST_UPDATE_USER',
-                                   );
-    }
-}
-
-/**
- * テーブル項目名一覧テーブルクラス
- */
-class MstTableItemListTable extends BaseTable_CPM {
-
-    /**
-     * コンストラクタ
-     */
-    public function __construct($objDBCA, $db_model_ch) {
-
-        parent::__construct($objDBCA, $db_model_ch);
-        $this->tableName    = 'F_MST_TABLE_ITEM_LIST';
-        $this->seqName      = $this->tableName . '_RIC';
-        $this->jnlSeqName   = $this->tableName . '_JSQ';
-        $this->columnNames  = array('TABLE_ITEM_ID',
-                                    'CREATE_MENU_ID',
-                                    'CREATE_ITEM_ID',
-                                    'COLUMN_NAME',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -954,6 +805,7 @@ class OtherMenuLinkTable extends BaseTable_CPM {
                                     'PRI_NAME',
                                     'COLUMN_NAME',
                                     'COLUMN_TYPE',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -978,6 +830,7 @@ class ColumnGroupTable extends BaseTable_CPM {
                                     'FULL_COL_GROUP_NAME',
                                     'COL_GROUP_NAME',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -1004,6 +857,7 @@ class ConvertParamInfoTable extends BaseTable_CPM {
                                     'CREATE_ITEM_ID',
                                     'COL_CNT',
                                     'REPEAT_CNT',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -1034,6 +888,7 @@ class ColToRowMngTable extends BaseTable_CPM {
                                     'COL_CNT',
                                     'REPEAT_CNT',
                                     'CHANGED_FLG',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -1058,6 +913,7 @@ class InputMethodTable extends BaseTable_CPM {
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('INPUT_METHOD_ID',
                                     'INPUT_METHOD_NAME',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -1083,6 +939,7 @@ class ParamTargetTable extends BaseTable_CPM {
         $this->columnNames  = array('TARGET_ID',
                                     'DISP_SEQ',
                                     'TARGET_NAME',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -1107,6 +964,7 @@ class ParamPurposeTable extends BaseTable_CPM {
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('PURPOSE_ID',
                                     'PURPOSE_NAME',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -1133,6 +991,7 @@ class MenuGroupTable extends BaseTable_CPM {
                                     'MENU_GROUP_NAME',
                                     'MENU_GROUP_ICON',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -1167,6 +1026,7 @@ class PullDownTable extends BaseTable_CPM {
                                     'PRI_NAME',
                                     'COLUMN_NAME',
                                     'COLUMN_TYPE',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -1196,6 +1056,7 @@ class AccountListTable extends BaseTable_CPM {
                                     'AUTH_TYPE',
                                     'PROVIDER_ID',
                                     'PROVIDER_USER_ID',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
