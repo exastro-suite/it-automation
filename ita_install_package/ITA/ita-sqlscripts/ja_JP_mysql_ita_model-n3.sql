@@ -11,6 +11,7 @@ SYSTEM_ID                          INT                             ,
 VARS_NAME                          VARCHAR (512)                   ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -33,6 +34,7 @@ SYSTEM_ID                          INT                             ,
 VARS_NAME                          VARCHAR (512)                   ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -50,6 +52,7 @@ SYSTEM_ID                          INT                             ,
 VARS_NAME                          VARCHAR (512)                   ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -72,6 +75,7 @@ SYSTEM_ID                          INT                             ,
 VARS_NAME                          VARCHAR (512)                   ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
