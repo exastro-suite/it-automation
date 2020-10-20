@@ -15,6 +15,7 @@ OS_TYPE_ID                         %INT%                           ,
 ANSIBLE_DIALOG_CHK                 %INT%                           ,
 ANSIBLE_ROLE_CHK                   %INT%                           ,
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               %VARCHR%(4000)                  , -- 備考
 DISUSE_FLAG                        %VARCHR%(1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              %DATETIME6%                     , -- 最終更新日時
@@ -41,6 +42,7 @@ OS_TYPE_ID                         %INT%                           ,
 ANSIBLE_DIALOG_CHK                 %INT%                           ,
 ANSIBLE_ROLE_CHK                   %INT%                           ,
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               %VARCHR%(4000)                  , -- 備考
 DISUSE_FLAG                        %VARCHR%(1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              %DATETIME6%                     , -- 最終更新日時

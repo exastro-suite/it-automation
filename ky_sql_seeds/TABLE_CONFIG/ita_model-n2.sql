@@ -10,6 +10,7 @@ VARS_NAME                          %VARCHR% (512)                  ,
 HOSTNAME                           %INT%                           ,
 
 DISP_SEQ                           %INT%                           , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                        %VARCHR% (1)                    , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              %DATETIME6%                     , -- 最終更新日時
@@ -31,6 +32,7 @@ VARS_NAME                          %VARCHR% (512)                  ,
 HOSTNAME                           %INT%                           ,
 
 DISP_SEQ                           %INT%                           , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               %VARCHR% (4000)                 , -- 備考
 DISUSE_FLAG                        %VARCHR% (1)                    , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              %DATETIME6%                     , -- 最終更新日時

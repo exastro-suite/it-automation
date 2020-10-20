@@ -7,6 +7,7 @@ CREATE TABLE B_PARSE_TYPE_MASTER
 PARSE_TYPE_ID                     %INT%                             ,
 PARSE_TYPE_NAME                   %VARCHR%(64)                      ,
 DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
@@ -23,6 +24,7 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴�
 PARSE_TYPE_ID                     %INT%                             ,
 PARSE_TYPE_NAME                   %VARCHR%(64)                      ,
 DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
@@ -39,6 +41,7 @@ CREATE TABLE B_COLLECT_STATUS
 COLLECT_STATUS_ID                 %INT%                             ,
 COLLECT_STATUS_NAME               %VARCHR%(64)                      ,
 DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
@@ -55,6 +58,7 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴�
 COLLECT_STATUS_ID                 %INT%                             ,
 COLLECT_STATUS_NAME               %VARCHR%(64)                      ,
 DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
@@ -80,6 +84,7 @@ LOGIN_PW                          %VARCHR%(60)                      ,
 LOGIN_PW_ANSIBLE_VAULT            %VARCHR%(512)                     ,
 
 DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
@@ -104,6 +109,7 @@ LOGIN_PW                          %VARCHR%(60)                      ,
 LOGIN_PW_ANSIBLE_VAULT            %VARCHR%(512)                     ,
 
 DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
@@ -125,6 +131,7 @@ VRAS_MEMBER_NAME                  %VARCHR%(256)                     ,
 PARSE_TYPE_ID                     %INT%                             ,
 
 DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
@@ -147,6 +154,7 @@ VRAS_MEMBER_NAME                  %VARCHR%(256)                     ,
 PARSE_TYPE_ID                     %INT%                             ,
 
 DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
