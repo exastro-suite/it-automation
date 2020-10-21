@@ -202,11 +202,37 @@ try{
                                                                        )
                                          )
                  );
+    }
 
-        if(true === $errorFlg){
+    if(true === $errorFlg){
+        throw new Exception();
+    }
+
+    // データベースを更新した事をマークする
+    $updateKey = "";
+    if($ansTemplateCnt > 0){
+        $updateKey .= "2100080001";
+    }
+
+    if($updateKey != ""){
+
+        $baseTable = new BaseTable($objDBCA, $db_model_ch);
+
+        $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                   ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                   ."WHERE ROW_ID IN (${updateKey}) ";
+
+        $aryForBind = array();
+
+        $result = $baseTable->execQuery($strQuery, $aryForBind, $objQuery);
+
+        if( $result !== true ){
+            outputLog($result);
             throw new Exception();
         }
+    }
 
+    if(LOG_LEVEL === 'DEBUG'){
         // 終了ログ出力
         outputLog($objMTS->getSomeMessage('ITAMATERIAL-STD-10002', basename( __FILE__, '.php' )));
     }
