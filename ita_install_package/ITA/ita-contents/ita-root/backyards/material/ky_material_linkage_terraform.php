@@ -210,7 +210,7 @@ try{
 
     // データベースを更新した事をマークする
     $updateKey = "";
-    if($ansTemplateCnt > 0){
+    if($terraformModuleCnt > 0){
         $updateKey .= "2100080001";
     }
 
