@@ -859,30 +859,34 @@ class TableControlAgent {
 	public function beforeFixColumn(&$arrayVariant=array()){
 		global $g;
 
-		// アクセス権系カラム----
-		$cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300001"));
-		$c = new TextColumn('ACCESS_AUTH',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300002"));
-		$c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300003"));//エクセル・ヘッダでの説明
+                // ACCESS_AUTHカラムがある場合 ----
+                if($this->getAccessAuth()) {
+		    // アクセス権系カラム----
+		    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300001"));
+		    $c = new TextColumn('ACCESS_AUTH',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300002"));
+		    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300003"));//エクセル・ヘッダでの説明
 //                     $strWebUIText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300005");
 //                     $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 更新時は「自動入力」を表示 */
 //                     $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 登録時は「自動入力」を表示 */
-		$c->setHiddenMainTableColumn(true);
-		$cg->addColumn($c);
+		    $c->setHiddenMainTableColumn(true);
+		    $cg->addColumn($c);
               
-		$strTextBody = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300004");
-		$c = new LinkButtonColumn( 'SETACCESSPERMISSION', $strTextBody, $strTextBody, 'setAccessPermission', array() );
-		$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
-		$outputType->setVisible(false); //一覧時は非表示
-		$c->setOutputType("print_table", $outputType);
-		$outputType = new OutputType(new TabHFmt(), new LinkButtonTabBFmt());
-		$c->setOutputType("update_table", $outputType);
-		$c->setEvent("update_table", "onClick", "setAccessPermission", array()); 
-		$c->setOutputType("register_table", $outputType);
-		$c->setEvent("register_table", "onClick", "setAccessPermission", array());
-		$c->setDBColumn(false);
-		$cg->addColumn($c);
-		$this->addColumn($cg);
-		//----アクセス権系カラム
+		    $strTextBody = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300004");
+		    $c = new LinkButtonColumn( 'SETACCESSPERMISSION', $strTextBody, $strTextBody, 'setAccessPermission', array() );
+		    $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+		    $outputType->setVisible(false); //一覧時は非表示
+		    $c->setOutputType("print_table", $outputType);
+		    $outputType = new OutputType(new TabHFmt(), new LinkButtonTabBFmt());
+		    $c->setOutputType("update_table", $outputType);
+		    $c->setEvent("update_table", "onClick", "setAccessPermission", array()); 
+		    $c->setOutputType("register_table", $outputType);
+		    $c->setEvent("register_table", "onClick", "setAccessPermission", array());
+		    $c->setDBColumn(false);
+		    $cg->addColumn($c);
+		    $this->addColumn($cg);
+		    //----アクセス権系カラム
+		}
+                //----ACCESS_AUTHカラムがある場合
 
 		$boolDefaultColumnsSet = isset($arrayVariant['DEFAULT_COLUMNS_SET'])?$arrayVariant['DEFAULT_COLUMNS_SET']:true;
 		
