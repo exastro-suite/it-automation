@@ -52,16 +52,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', '★★★MENU★★★');
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
-    //$cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102612"));
 
 ★★★ITEM★★★
-
-    //$table->addColumn($cg);
-    //$table->addColumn($cg1);
 
     //----隠し保存テーブルがある場合の、カウント高速化
    $objFxCountTableRowLengthAgent = function($objTable, $aryVariant, $arySetting, $strFormatterId)

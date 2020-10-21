@@ -30,9 +30,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100504"));
     
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);
-    
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
+
     //---- マルチユニーク制約
     $table->addUniqueColumnSet(array('OPERATION_NO_UAPK','PATTERN_ID','SYSTEM_ID','VARS_NAME'));
 

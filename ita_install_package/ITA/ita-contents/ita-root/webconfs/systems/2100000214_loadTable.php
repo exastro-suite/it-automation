@@ -52,6 +52,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage('ITABASEH-MNU-214004'));
 
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
     // 論理削除日数
     $c = new NumColumn('LG_DAYS',  $g['objMTS']->getSomeMessage('ITABASEH-MNU-214005'));
     $c->setDescription( $g['objMTS']->getSomeMessage('ITABASEH-MNU-214006'));

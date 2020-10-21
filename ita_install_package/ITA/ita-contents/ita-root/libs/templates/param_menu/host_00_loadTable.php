@@ -52,9 +52,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', '★★★MENU★★★');
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     $c = new IDColumn('HOST_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102601"),'C_STM_LIST','SYSTEM_ID','HOSTNAME','');
     $c->setDescription('choose host');//エクセル・ヘッダでの説明

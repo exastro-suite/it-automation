@@ -52,10 +52,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', '★★★MENU★★★');
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);
-    // 検索機能の制御----
-    
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
+
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102603"));
 
         // オペレーションID

@@ -52,9 +52,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile','AnsibleCommonVarsUsedList');
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',false);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     $c = new IDColumn('FILE_ID','File Type','B_ANS_COMVRAS_USLIST_F_ID','ROW_ID','NAME','',array('OrderByThirdColumn'=>'ROW_ID'));
     $c->setDescription("File Type\nPlaybook: Legacy playbook\nDialog file: Pioneer dialog file\nRole package: LegacyRole role package\nTemplate file: Ansible common template file");

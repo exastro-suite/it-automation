@@ -55,9 +55,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102440'));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     //Organization ID
     $c = new IDColumn('ORGANIZATION_ID', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102450'), 'B_TERRAFORM_ORGANIZATIONS', 'ORGANIZATION_ID', 'ORGANIZATION_NAME', '');

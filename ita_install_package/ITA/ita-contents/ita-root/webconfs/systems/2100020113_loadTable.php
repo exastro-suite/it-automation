@@ -55,9 +55,8 @@ Ansible(Legacy)作業管理
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108050")
 );
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     $table->setDBSortKey(array("EXECUTION_NO"=>"DESC"));
 
