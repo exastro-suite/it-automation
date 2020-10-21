@@ -44,9 +44,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',  $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102204"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',false);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     // メニューグループ:メニュー

@@ -84,10 +84,7 @@ Ansible(Legacy Role)作業パターン
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1206050"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     $table->addUniqueColumnSet(array('ITA_EXT_STM_ID','PATTERN_NAME'));

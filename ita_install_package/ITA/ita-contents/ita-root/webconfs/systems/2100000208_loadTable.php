@@ -31,7 +31,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070002"));
     $table->getFormatter("excel")->setGeneValue("sheetNameForEditByFile",$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070003"));
     
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
+    $table->setAccessAuth(true);    // データごとのRBAC設定
     
     $tmpAryObjColumn = $table->getColumns();
     $tmpAryObjColumn['USER_ID']->setSequenceID('SEQ_A_ACCOUNT_LIST');

@@ -51,7 +51,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207203"));
 
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     //ホスト名
 	$objVldt = new SingleTextValidator(1,256,false);
