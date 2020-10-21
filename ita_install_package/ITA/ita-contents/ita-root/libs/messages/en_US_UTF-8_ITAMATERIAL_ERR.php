@@ -18,7 +18,7 @@ $ary[1001] = "Process stopped due to a file existing in the clone repository.";
 $ary[1002] = "Process stopped due to a file with the same name existing in the clone repository.";
 $ary[1003] = "The password is incorrect.";
 $ary[1004] = "Failed to clone Git repository because remote repository URL is not valid.";
-$ary[1005] = "The following setting is necessary for a remote repository. \ncore.bare=true\ncore.sharedrepository=1\npush.default=simple";
+$ary[1005] = "Push to remote repository failed.\nEnter pushable remote repository.";
 $ary[1006] = "A directory can not set its parent directory to itself.";
 $ary[1007] = "Cannot be selected because a loop relation will be generated";
 $ary[1008] = "Failed to get parent directory. SQL error = [{}]";
