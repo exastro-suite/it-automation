@@ -30,8 +30,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100004"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true );
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     // ホストグループ名
     $c = new TextColumn('HOSTGROUP_NAME',$g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100005"));

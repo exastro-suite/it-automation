@@ -53,10 +53,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITABASEH-MNU-306040"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     // UL/DL機能の制御----

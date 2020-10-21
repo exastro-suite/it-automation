@@ -56,9 +56,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage('ITABASEH-MNU-920004'));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     //Symphony作業一覧へのリンクボタン
     $c = new LinkButtonColumn('detail_show', $g['objMTS']->getSomeMessage('ITABASEH-MNU-920005'), $g['objMTS']->getSomeMessage('ITABASEH-MNU-920005'), 'jumpToSymphonyIntList', array('this'));

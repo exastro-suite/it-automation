@@ -32,7 +32,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1020002"));
     $table->getFormatter("excel")->setGeneValue("sheetNameForEditByFile",$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1020003"));
 
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
+    $table->setAccessAuth(true);    // データごとのRBAC設定
     
     $table->setJsEventNamePrefix(true);
     $table->setGeneObject("webSetting", $arrayWebSetting);
