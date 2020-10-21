@@ -53,10 +53,7 @@ Ansible（Legacy Role）ロール変数名管理
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1701040"));
 
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     $c = new IDColumn('PARENT_VARS_NAME_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1702010"),'B_ANSIBLE_LRL_VARS_MASTER','VARS_NAME_ID','VARS_NAME','');

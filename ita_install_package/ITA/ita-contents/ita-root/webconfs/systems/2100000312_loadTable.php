@@ -54,9 +54,8 @@ Symphony紐付Movementの一覧
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITABASEH-MNU-209102"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     $c = new NumColumn('I_MOVEMENT_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-209103"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-209103"));//エクセル・ヘッダでの説明

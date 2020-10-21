@@ -51,7 +51,8 @@ Symphonyインターフェース情報
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITABASEH-MNU-303030"));
 
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     //Symphony作業用データリレイストレージパス(ITA)
 	$objVldt = new SingleTextValidator(1,256,false);

@@ -36,8 +36,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100704"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true );
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     // ----カラムグループ（分割対象メニュー）
