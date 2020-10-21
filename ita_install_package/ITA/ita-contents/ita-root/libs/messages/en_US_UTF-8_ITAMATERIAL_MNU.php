@@ -21,7 +21,7 @@ $ary[100704] = "Error";
 $ary[100705] = "Interface information";
 $ary[100706] = "Interface information";
 $ary[100707] = "Remote repository URL";
-$ary[100708] = "Enter the URL of a Git remote repository that has already been created.\n*The following settings must be configured for this repository.\n ・push.default=simple\n ・core.bare=true\n ・core.sharedrepository=1\n\n(E.g.) ssh://root@192.168.1.1/dir1/dir2/main.git";
+$ary[100708] = "Enter the URL of a pushable Git remote repository.\n\n(E.g.) ssh://root@192.168.1.1/dir1/dir2/main.git";
 $ary[100709] = "Clone repository";
 $ary[100710] = "Enter the path of the local directory where you want to clone the repository. \nIf the entered directory does not exist, it will be created.\n*A repository currently in use cannot be specified because differential synchronization is not possible. If you specify an existing directory, it must be empty.";
 $ary[100711] = "Password";
