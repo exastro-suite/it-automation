@@ -148,6 +148,9 @@ DB_NAME=''
 DB_USERNAME=''
 DB_PASSWORD=''
 DB_PASSWORD_ON_CMD=''
+ITA_DOMAIN=''
+CERTIFICATE_PATH=''
+PRIVATE_KEY_PATH=''
 
 # ita_answers.txtを/tmpにコピー
 rm -f "$COPY_ANSWER_FILE" 2>> "$LOG_FILE"
@@ -167,11 +170,11 @@ SRC_IFS="$IFS"
 IFS="
 "
 for LINE in $ANSWERS_TEXT;do
-    if [ "$(echo "$LINE"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
+    if [ "$(echo "$LINE"|grep -E '^[^#: ]+:.*$')" != "" ];then
         setting_file_format_check
 
-        key="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
-        val="$(echo "$LINE" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\2/")"
+        key="$(echo "$LINE" | sed 's/[[:space:]]*$//' | cut -d ":" -f 1 | sed -E "s/^([^:]+)$/\1/")"
+        val="$(echo "$LINE" | sed 's/[[:space:]]*$//' | cut -d ":" -f 2- | sed -E "s/^[[:space:]]*(.+)$/\1/")"
 
         #インストールモード取得
         if [ "$key" = 'install_mode' ]; then
@@ -240,6 +243,18 @@ for LINE in $ANSWERS_TEXT;do
         elif [ "$key" = 'db_username' ]; then
             func_answer_format_check
             DB_USERNAME="$val"
+        #ITAドメイン名取得
+        elif [ "$key" = 'ita_domain' ]; then
+            func_answer_format_check
+            ITA_DOMAIN="$val"
+        #ユーザー指定証明書ファイルパス取得
+        elif [ "$key" = 'certificate_path' ]; then
+            CERTIFICATE_PATH="$val"
+            FORMAT_CHECK_CNT=$((FORMAT_CHECK_CNT+1))
+        #ユーザー指定秘密鍵ファイルパス取得
+        elif [ "$key" = 'private_key_path' ]; then
+            PRIVATE_KEY_PATH="$val"
+            FORMAT_CHECK_CNT=$((FORMAT_CHECK_CNT+1))
         fi
     fi
 done
@@ -250,18 +265,21 @@ IFS="$SRC_IFS"
 #アンサーファイルの内容が読み取れているか
 
 if [ "$INSTALL_MODE" = "Install_Online" -o "$INSTALL_MODE" = "Install_Offline" -o "$INSTALL_MODE" = "Install_ITA" ]; then
-    if [ "$FORMAT_CHECK_CNT" != 8 ]; then
+    if [ "$FORMAT_CHECK_CNT" != 11 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
         log 'INFO : Abort installation.'
+        func_exit_and_delete_file
     fi
 elif [ "$INSTALL_MODE" = "Gather_Library" -o "$INSTALL_MODE" = "Versionup_All" -o "$INSTALL_MODE" = "Versionup_ITA" -o "$INSTALL_MODE" = "Uninstall" ]; then
-    if [ "$FORMAT_CHECK_CNT" != 6 ]; then
+    if [ "$FORMAT_CHECK_CNT" != 9 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
         log 'INFO : Abort installation.'
+        func_exit_and_delete_file
     fi
 else
     log 'ERROR : The format of Answer-file is incorrect.'
     log 'INFO : Abort installation.'
+    func_exit_and_delete_file
 fi
 
 
