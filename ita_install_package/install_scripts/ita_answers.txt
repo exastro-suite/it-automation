@@ -46,3 +46,20 @@ ansible_driver:yes
 cobbler_driver:no
 openstack_driver:no
 terraform_driver:no
+
+# Enter the ita domain name.
+# e.g) ita_domain:exastro-it-automation.local
+ita_domain:exastro-it-automation.local
+
+#########################################################################
+#Enter only when using user-specified certificate and private key
+
+# Enter the file path where the certificate to be install.
+# e.g) certificate_path:/temp/etc_pki_tls_certs/exastro-it-automation.crt
+certificate_path:
+
+# Enter the file path where the private key to be install.
+# e.g) private_key_path:/temp/etc_pki_tls_certs/exastro-it-automation.key
+private_key_path:
+
+#########################################################################

@@ -84,30 +84,36 @@ PROCESS_CNT=$((PROCESS_CNT+1))
 #----------------------------------------
 log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete self-signed certificate."
 
-#exastro-it-automation.crtが存在するか
-if [ -e /etc/pki/tls/certs/exastro-it-automation.crt ]; then
-    #exastro-it-automation.crtを削除する
-    rm -f /etc/pki/tls/certs/exastro-it-automation.crt 2>> "$LOG_FILE"
+#ITAの接続に使われているサーバー証明書と秘密鍵のファイル名を取得
+crt_line=$(echo $(grep SSLCertificateFile /etc/httpd/conf.d/vhosts_exastro-it-automation.conf))
+key_line=$(echo $(grep SSLCertificateKeyFile /etc/httpd/conf.d/vhosts_exastro-it-automation.conf))
+CRT_FILE=$(echo "$crt_line" | sed -E 's/^.*(\/etc\/.+\.crt)$/\1/')
+KEY_FILE=$(echo "$key_line" | sed -E 's/^.*(\/etc\/.+\.key)$/\1/')
+
+#サーバー証明書が存在するか
+if [ -e "$CRT_FILE" ]; then
+    #サーバー証明書を削除する
+    rm -f "$CRT_FILE" 2>> "$LOG_FILE"
 else
-    log 'WARNING : exastro-it-automation.crt does not exist.'
+    log "WARNING : ${CRT_FILE} does not exist."
 fi
 
-#exastro-it-automation.keyが存在するか
-if [ -e /etc/pki/tls/certs/exastro-it-automation.key ]; then
-    #exastro-it-automation.keyを削除する
-    rm -f /etc/pki/tls/certs/exastro-it-automation.key 2>> "$LOG_FILE"
+#秘密鍵が存在するか
+if [ -e "$KEY_FILE" ]; then
+    #秘密鍵を削除する
+    rm -f "$KEY_FILE" 2>> "$LOG_FILE"
 else
-    log 'WARNING : exastro-it-automation.key does not exist.'
+    log "WARNING : ${KEY_FILE} does not exist."
 fi
 
 
 #サーバ証明書が削除されているか確認
-if [ -e /etc/pki/tls/certs/exastro-it-automation.crt ]; then
-    log 'WARNING : Failed to delete exastro-it-automation.crt.'
+if [ -e "$CRT_FILE" ]; then
+    log "WARNING : Failed to delete ${CRT_FILE}."
 fi
 
-if [ -e /etc/pki/tls/certs/exastro-it-automation.key ]; then
-    log 'WARNING : Failed to delete exastro-it-automation.key.'
+if [ -e "$KEY_FILE" ]; then
+    log "WARNING : Failed to delete ${KEY_FILE}."
 fi
 
 
