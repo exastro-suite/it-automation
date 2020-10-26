@@ -1615,7 +1615,8 @@
                                      'VARS_ENTRY'=>$in_col_val,
                                      'VAR_TYPE'=>$in_var_type,
                                      'HCL_FLAG'=>$in_hcl_flag,
-                                     'STATUS'=>$chk_status);
+                                     'STATUS'=>$chk_status,
+                                     'KEY_VALUE_VARS_ID'=>$in_key_value_vars_id);
     }
     
     ////////////////////////////////////////////////////////////////////////////////
@@ -1741,7 +1742,7 @@
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
             $tgt_row["HCL_FLAG"]         = $ina_varsass_list['HCL_FLAG'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
-            if($ina_varsass_list['COL_CLASS'] == "PasswordColumn"){
+            if($ina_varsass_list['COL_CLASS'] == "PasswordColumn" && $ina_varsass_list['KEY_VALUE_VARS_ID'] == "Value"){
                 $tgt_row["SENSITIVE_FLAG"]   = 2; //ON
             }else{
                 $tgt_row["SENSITIVE_FLAG"]   = 1; //OFF
@@ -2146,7 +2147,7 @@
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
             $tgt_row["HCL_FLAG"]         = $ina_varsass_list['HCL_FLAG'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
-            if($ina_varsass_list['COL_CLASS'] == "PasswordColumn"){
+            if($ina_varsass_list['COL_CLASS'] == "PasswordColumn" && $ina_varsass_list['KEY_VALUE_VARS_ID'] == "Value"){
                 $tgt_row["SENSITIVE_FLAG"]   = 2; //ON
             }else{
                 $tgt_row["SENSITIVE_FLAG"]   = 1; //OFF
@@ -2184,7 +2185,7 @@
             $tgt_row["VARS_ENTRY"]          = $ina_varsass_list['VARS_ENTRY'];
             $tgt_row["HCL_FLAG"]            = $ina_varsass_list['HCL_FLAG'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
-            if($ina_varsass_list['COL_CLASS'] == "PasswordColumn"){
+            if($ina_varsass_list['COL_CLASS'] == "PasswordColumn" && $ina_varsass_list['KEY_VALUE_VARS_ID'] == "Value"){
                 $tgt_row["SENSITIVE_FLAG"]   = 2; //ON
             }else{
                 $tgt_row["SENSITIVE_FLAG"]   = 1; //OFF
