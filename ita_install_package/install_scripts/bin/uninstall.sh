@@ -85,34 +85,39 @@ PROCESS_CNT=$((PROCESS_CNT+1))
 log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete self-signed certificate."
 
 #ITAの接続に使われているサーバー証明書と秘密鍵のファイル名を取得
-crt_line=$(echo $(grep SSLCertificateFile /etc/httpd/conf.d/vhosts_exastro-it-automation.conf))
-key_line=$(echo $(grep SSLCertificateKeyFile /etc/httpd/conf.d/vhosts_exastro-it-automation.conf))
-CRT_FILE=$(echo "$crt_line" | sed -E 's/^.*(\/etc\/.+\.crt)$/\1/')
-KEY_FILE=$(echo "$key_line" | sed -E 's/^.*(\/etc\/.+\.key)$/\1/')
+# ita_answers.txtに両方ファイル指定がある場合は、answerファイルから取得
+if [ "$CERTIFICATE_PATH" != "" -a "$PRIVATE_KEY_PATH" != "" ]; then
+    CRT_FILE=$(echo $(basename ${CERTIFICATE_PATH})) 2>> "$LOG_FILE"
+    KEY_FILE=$(echo $(basename ${PRIVATE_KEY_PATH})) 2>> "$LOG_FILE"
+else
+# それ以外はデフォルトのファイル名(ita_domainの値)を取得する。
+    CRT_FILE="$ITA_DOMAIN.crt"
+    KEY_FILE="$ITA_DOMAIN.key"
+fi
 
 #サーバー証明書が存在するか
-if [ -e "$CRT_FILE" ]; then
+if [ -e /etc/pki/tls/certs/"$CRT_FILE" ]; then
     #サーバー証明書を削除する
-    rm -f "$CRT_FILE" 2>> "$LOG_FILE"
+    rm -f /etc/pki/tls/certs/"$CRT_FILE" 2>> "$LOG_FILE"
 else
     log "WARNING : ${CRT_FILE} does not exist."
 fi
 
 #秘密鍵が存在するか
-if [ -e "$KEY_FILE" ]; then
+if [ -e /etc/pki/tls/certs/"$KEY_FILE" ]; then
     #秘密鍵を削除する
-    rm -f "$KEY_FILE" 2>> "$LOG_FILE"
+    rm -f /etc/pki/tls/certs/"$KEY_FILE" 2>> "$LOG_FILE"
 else
     log "WARNING : ${KEY_FILE} does not exist."
 fi
 
 
 #サーバ証明書が削除されているか確認
-if [ -e "$CRT_FILE" ]; then
+if [ -e /etc/pki/tls/certs/"$CRT_FILE" ]; then
     log "WARNING : Failed to delete ${CRT_FILE}."
 fi
 
-if [ -e "$KEY_FILE" ]; then
+if [ -e /etc/pki/tls/certs/"$KEY_FILE" ]; then
     log "WARNING : Failed to delete ${KEY_FILE}."
 fi
 
