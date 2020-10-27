@@ -568,7 +568,7 @@ configure_php() {
     # Install Composer.
     if [ "${exec_mode}" == "3" ]; then
         echo "----------Installation[Composer]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        curl -sS $COMPOSER | php -- --install-dir=/usr/bin  >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        curl -sS $COMPOSER | php -- --install-dir=/usr/bin --version=1.10.16 >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
     # Install PhpSpreadsheet.
@@ -758,7 +758,7 @@ download() {
     yum_install php php-json php-zip php-xml php-gd php-mbstring unzip
     
     mkdir -p vendor/composer
-    curl -sS $COMPOSER | php -- --install-dir=vendor/composer >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    curl -sS $COMPOSER | php -- --install-dir=vendor/composer --version=1.10.16 >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
     local download_dir="${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1167,7 +1167,7 @@ PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR="${DOWNLOAD_DIR["php-tar-gz"]}/PhpSpr
 COMPOSER=https://getcomposer.org/installer
 
 # PhpSpreadsheet
-PHPSPREADSHEET=""phpoffice/phpspreadsheet":"*""
+PHPSPREADSHEET=""phpoffice/phpspreadsheet":"1.12.0""
 
 ################################################################################
 # main
