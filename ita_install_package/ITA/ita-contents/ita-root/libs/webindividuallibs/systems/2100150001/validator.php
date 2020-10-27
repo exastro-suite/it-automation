@@ -428,6 +428,11 @@ class fileValidator extends SingleTextValidator {
                 }
             }
 
+            // ディレクトリが指定されなかった場合、以降のチェックは行わない
+            if(!array_key_exists('DIR_ID', $arrayRegData)){
+                $boolCheckContinue = false;
+            }
+
             if($boolCheckContinue===true){
                 // ディレクトリ名の取得
                 $query01 = "SELECT DIR_NAME_FULLPATH "
