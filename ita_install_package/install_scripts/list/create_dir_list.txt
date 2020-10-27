@@ -5,8 +5,10 @@
 /ita-root/logs/backyardlogs
 /ita-root/logs/dev_log
 /ita-root/logs/restapilogs/ansible_driver
+/ita-root/logs/terraform_out_logs
 /ita-root/logs/update_by_file
 /ita-root/logs/webaplogs
+/ita-root/temp/data_download
 /ita-root/temp/data_export
 /ita-root/temp/data_import/backup
 /ita-root/temp/data_import/import
@@ -21,6 +23,8 @@
 /ita-root/temp/sym_ope_export
 /ita-root/temp/sym_ope_import/import
 /ita-root/temp/sym_ope_import/upload
+/ita-root/temp/terraform_download_temp
+/ita-root/temp/terraform_module_temp
 /ita-root/webconfs/sheets
 /ita-root/webconfs/users
 /ita-root/webroot/menus/sheets
