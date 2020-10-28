@@ -88,6 +88,86 @@
             
             return $executionResult;
         }
+        // name変更
+        function get_widget_info(){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $executionResult = "";
+
+            // 本体ロジックをコール
+            require_once ( $g['root_dir_path'] . "/libs/webindividuallibs/systems/mainmenu/web_php_panel_functions.php");
+            $executionResult = b_get_widget_info();
+
+            return $executionResult;
+        }
+
+        function regist_widget_info($json){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $executionResult = "";
+
+            // 本体ロジックをコール
+            require_once ( $g['root_dir_path'] . "/libs/webindividuallibs/systems/mainmenu/web_php_panel_functions.php");
+            $executionResult = b_regist_widget_info($json);
+            
+            return $executionResult;
+        }
+        function get_movement(){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $executionResult = "";
+
+            // 本体ロジックをコール
+            require_once ( $g['root_dir_path'] . "/libs/webindividuallibs/systems/mainmenu/web_php_panel_functions.php");
+            $executionResult = b_get_movement();
+            
+            return $executionResult;
+        }
+        function get_work_info(){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $executionResult = "";
+
+            // 本体ロジックをコール
+            require_once ( $g['root_dir_path'] . "/libs/webindividuallibs/systems/mainmenu/web_php_panel_functions.php");
+            $executionResult = b_get_work_info();
+            
+            return $executionResult;
+        }
+        function get_work_result(){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $executionResult = "";
+
+            // 本体ロジックをコール
+            require_once ( $g['root_dir_path'] . "/libs/webindividuallibs/systems/mainmenu/web_php_panel_functions.php");
+            $executionResult = b_get_work_result();
+            
+            return $executionResult;
+        }
+        function get_work_history(){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $executionResult = "";
+
+            // 本体ロジックをコール
+            require_once ( $g['root_dir_path'] . "/libs/webindividuallibs/systems/mainmenu/web_php_panel_functions.php");
+            $executionResult = b_get_work_history();
+            
+            return $executionResult;
+        }
 
         //-- サイト個別PHP要素、ここまで--
     }
