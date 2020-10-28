@@ -51,6 +51,33 @@
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_db_access_exception.php");
     }
     
+    //----JS-MSGテンプレートのリスト作成
+    $aryImportFilePath = array();
+    $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath("ITAWDCC","STD","_js");
+    $strTemplateBody = getJscriptMessageTemplate($aryImportFilePath,$g['objMTS']);
+    
+    //JS-MSGテンプレートのリスト作成----
+    print 
+<<< EOD
+    <!-------------------------------- ユーザ・コンテンツ情報 -------------------------------->
+    <div id="messageTemplate" style="display:none" class="text">{$strTemplateBody}</div>
+    <!-------------------------------- ユーザ・コンテンツ情報 -------------------------------->
+EOD;
+
+    // ダッシュボード関連ファイルのタイムスタンプを取得
+    $timeStamp_editor_common_style_css=filemtime("$root_dir_path/webroot/common/css/editor_common.css");
+    $timeStamp_dashboard_css = filemtime("$root_dir_path/webroot/default/mainmenu/dashboard.css");
+    $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
+    $timeStamp_dashboard_js = filemtime("$root_dir_path/webroot/default/mainmenu/dashboard.js");
+    
+    // ダッシュボード関連ファイルの読み込み
+print <<< EOD
+    <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_style_css}">
+    <link rel="stylesheet" type="text/css" href="{$scheme_n_authority}/default/mainmenu/dashboard.css?{$timeStamp_dashboard_css}">
+    <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
+    <script type="text/javascript" src="{$scheme_n_authority}/default/mainmenu/dashboard.js?{$timeStamp_dashboard_js}"></script>
+EOD;
+
     // 共通HTMLステートメントパーツ
     require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_html_statement.php");
 
@@ -68,61 +95,38 @@
     require_once ( $root_dir_path . "/libs/webcommonlibs/web_php_tag_print_functions.php");
     
 print <<< EOD
-    <!-------------------------------- メインメニュー -------------------------------->
-    <h2>
-        <table width="100%">
-            <tr>
-                <td>{$objMTS->getSomeMessage("ITAWDCH-MNU-1100001")}</td>
-            </tr>
-        </table>
-    </h2>
+<!-------------------------------- ダッシュボード -------------------------------->
+<div id="dashboard" data-mode="">
+
+  <style id="dashboard-grid-style"></style>
+
+  <div class="dashboard-header">
+    <h2 class="dashboard-title">DASHBOARD</h2>
+    <div class="dashboard-menu">
+      <div class="dashboard-view-menu">
+        <ul class="dashboard-menu-list">
+          <li class="dashboard-menu-item"><button class="dashboard-menu-button positive" data-button="edit"></button></li>
+        </ul>
+      </div>
+      <div class="dashboard-edit-menu">
+        <ul class="dashboard-menu-list">
+          <li class="dashboard-menu-item"><button class="dashboard-menu-button positive" data-button="add"></button></li>
+        </ul>
+        <ul class="dashboard-menu-list">
+          <li class="dashboard-menu-item"><button class="dashboard-menu-button positive" data-button="regist"></button></li>
+          <li class="dashboard-menu-item"><button class="dashboard-menu-button negative" data-button="reset"></button></li>
+          <li class="dashboard-menu-item"><button class="dashboard-menu-button negative" data-button="cancel"></button></li>
+        </ul>
+      </div>
+    </div>
+  </div><!-- /#dashboard-header -->
+
+  <div class="dashboard-body">
+    <div class="dashboard-loading"></div>
+  </div><!-- /#dashboard-body -->
+
+</div>
 EOD;
-
-    // ログインユーザごとの表示モードを取得
-    $mode = default_mode_select();
-
-    // クラシックモードであれば従来の画面を表示
-    if( $mode == "classic"){
-
-print <<< EOD
-        <div style="margin-left:10px;margin-top:10px;">
-            {$objMTS->getSomeMessage("ITAWDCH-MNU-1100003")}<br>
-            {$strMailTag}<br>
-        </div>
-        <br>
-        <br>
-EOD;
-
-        printReleasedMainMenuLinks(2, "classic");
-    }
-    // クラシックモード以外はパネルを表示
-    else{
-
-print <<< EOD
-    <div style="margin-top: 30px;"></div>
-    <ul id="sortable">    
-EOD;
-
-    printReleasedMainMenuLinks(0, "large_panel");
-
-print <<< EOD
-    </ul>
-        <script>
-            $(function(){ 
-                $("#sortable").sortable({ 
-                    handle: "i",
-                    animation: true,
-                    revert: 150,
-                    update: function(e, ui) { 
-                        var result = $("#sortable").sortable("toArray", { attribute: "value" }); 
-                        panel_sort_update(result); 
-                    }
-                }); 
-            }); 
-       </script>
-EOD;
-    }
-
     //  共通HTMLフッタパーツ
     require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_html_footer.php");
 ?>

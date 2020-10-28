@@ -137,16 +137,6 @@ if (isset($_GET['grp']) && !empty($_GET['grp'])) {
                       <div class="headerMenu">
 
                         <?php if ($boolVisibleSelectPanel) { ?>
-
-                        <!----  表示モードを変更するセレクトボックス  ---->
-                        <select id="size_select" style="margin-right:15px;">
-                            <option value="large_panel"><?= $objMTS->getSomeMessage("ITAWDCH-STD-1007") ?></option>
-                            <option value="middle_panel"><?= $objMTS->getSomeMessage("ITAWDCH-STD-1008") ?></option>
-                            <option value="small_panel"><?= $objMTS->getSomeMessage("ITAWDCH-STD-1009") ?></option>
-                            <option value="classic"><?= $objMTS->getSomeMessage("ITAWDCH-STD-1010") ?></option>
-                        </select>
-                        <!----  /表示モードを変更するセレクトボックス  ---->
-
                         <?php } ?>
                         <?php if ($boolVisibleChangePasswordButton) { ?>
 
