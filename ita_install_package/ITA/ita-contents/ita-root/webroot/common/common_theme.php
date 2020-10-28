@@ -650,6 +650,13 @@ th.sortTriggerInTbl:hover {
 #import_form label:hover {
   background-color: {$color->hex($c['TABLE'][4],100)};
 }
+
+#KIZI .widget {
+background-color: {$color->hex($c['KIZI'],20)};
+}
+#KIZI .widget-header {
+background-color: {$color->hex($c['KIZI'],40)};
+}
 EOF;
 
 if ( $c['DARKMODE'] == 'ON' ) {
@@ -704,6 +711,228 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .start::after, .end::after,
 .arrow::after, .highlight::after {
   background-color: #666666!important;
+}
+
+/* -------------------------------------------------- *
+
+   DASHBOARD
+
+ * -------------------------------------------------- */
+#KIZI #dashboard .dashboard-loading::after {
+background-color: #444;
+background-image: linear-gradient( -45deg, transparent 25%, rgba( 0,0,0,.1 ) 25%, rgba( 0,0,0,.1 ) 50%, transparent 50%, transparent 75%, rgba( 0,0,0,.1 ) 75% );
+box-shadow: 0 0 4px rgba( 0,0,0,.5 ) inset,
+            0 0 8px rgba( 0,0,0,.2 ),
+            0 0 0 2px #555;
+}
+#KIZI #dashboard .dashboard-header {
+background-color: #222;
+}
+#KIZI #dashboard  .dashboard-menu-list {
+border-left: 1px solid #555;
+border-right: 1px solid #111;
+}
+#KIZI #dashboard .widget {
+background-color: #222;
+border: 1px solid #444;
+box-shadow: 0 0 4px rgba( 0,0,0,.2 );
+}
+#KIZI #dashboard  .widget-header {
+background: linear-gradient( rgba(0,0,0,0),rgba(0,0,0,.5));
+border-bottom: 1px solid #444;
+}
+#KIZI #dashboard[data-mode="view"] .widget-move-knob::before {
+background-color: #111;
+border-top: 1px solid rgba( 0,0,0,.5 );
+border-left: 1px solid rgba( 0,0,0,.5 );
+border-right: 1px solid rgba( 255,255,255,.3 );
+border-bottom: 1px solid rgba( 255,255,255,.3 );
+}
+#KIZI #dashboard[data-mode="edit"] .widget-move-knob::before {
+background-image: linear-gradient( 90deg, rgba( 255,255,255,.2 ) 50%, transparent 50% );
+}
+#KIZI #dashboard .widget-edit-button:hover {
+background-color: #333;
+}
+#KIZI #dashboard .widget-edit-button:active {
+background-color: #444;
+}
+#KIZI #dashboard .widget-blank {
+height: 100%;
+background-color: rgba( 255,255,255,.1 );
+border-radius: 4px;
+animation: widgetBlank .3s;
+}
+@keyframes widgetBlank {
+from { transform: scale(.7); opacity: 0; }
+to   { transform: scale(1); opacity: 1; }
+}
+#KIZI #dashboard .widget-blank-grid.movable-blank .widget-blank {
+background-color: #222;
+}
+#KIZI #dashboard .widget-blank-grid.movable-blank .widget-blank::after {
+background-color: rgba( 96,198,13,.1 );
+border: 2px solid rgba( 96,198,13,.1 );
+}
+#KIZI #dashboard .widget-blank-grid.movable-blank .widget-blank:hover::after {
+background-color: rgba( 255,100,10,.1 );
+border-color: rgba( 255,100,10,.1 );
+}
+#KIZI #dashboard[data-action="none"] .remove-blank .widget-blank {
+background-color: #222;
+}
+#KIZI #dashboard[data-action="none"] .remove-blank .widget-blank::after {
+background-color: rgba( 255,0,0,.2 );
+border: 2px solid rgba( 255,0,0,.2 );
+}
+
+#KIZI #dashboard .add-blank {
+border-left: 2px solid #4F80FF;
+border-right: 2px solid #4F80FF;
+}
+#KIZI #dashboard .add-blank::before {
+background-color: #4F80FF;
+border: 2px solid #4F80FF;
+color: #FFF;
+}
+#KIZI #dashboard .add-blank:active::before {
+background-color: #7299FF;
+}
+#KIZI #dashboard .add-blank::after {
+content: '';
+display: block;
+width: 100%; height: 2px;
+background-color: #4F80FF;
+}
+#KIZI #dashboard .widget-loading::before {
+border: 8px solid #EEE;
+}
+#KIZI #dashboard .widget-loading::after {
+border-bottom-color: #CCC;
+}
+#KIZI #dashboard .widget-menu-list,
+#KIZI #dashboard .shortcut-list {
+background-color: rgba( 255,255,255,.05 );
+border: 1px solid transparent;
+}
+#KIZI #dashboard[data-action="menu-move"] .widget-menu-list,
+#KIZI #dashboard[data-action="link-move"] .shortcut-list {
+background-color: rgba( 96,198,13,.1 );
+border-color: rgba( 96,198,13,.1 );
+}
+#KIZI #dashboard[data-action="menu-move"] .widget-grid[data-widget-id="1"]:hover .widget-menu-list,
+#KIZI #dashboard[data-action="menu-move"] .widget-grid[data-widget-id="2"]:hover .widget-menu-list,
+#KIZI #dashboard[data-action="link-move"] .widget-grid[data-widget-id="3"]:hover .shortcut-list {
+background-color: rgba( 255,100,10,.1 );
+border-color: rgba( 255,100,10,.1 );
+}
+#KIZI #dashboard .widget-menu-item.left::before,
+#KIZI #dashboard .widget-menu-item.right::before,
+#KIZI #dashboard .shortcut-item.left::before,
+#KIZI #dashboard .shortcut-item.right::before{
+background-color: #4F80FF;
+}
+#KIZI #dashboard .widget-menu-item.left::after,
+#KIZI #dashboard .widget-menu-item.right::after,
+#KIZI #dashboard .shortcut-item.left::after,
+#KIZI #dashboard .shortcut-item.right::after{
+border-top: 2px solid #4F80FF;
+border-bottom: 2px solid #4F80FF;
+}
+#KIZI #dashboard .widget-menu-item.move,
+#KIZI #dashboard .shortcut-item.move {
+box-shadow: 4px 4px 16px rgba( 0,0,0,.6 );
+}
+#KIZI #dashboard .widget-menu-link:visited,
+#KIZI #dashboard .widget-menu-link:link {
+color: #EEE;
+}
+#KIZI #dashboard .widget-menu-item.link-hover .widget-menu-link .widget-menu-name {
+background-image: linear-gradient( #222, #333 );
+border: 1px solid #444;
+box-shadow: 0 0 0 1px #666, 0 2px 4px 0 rgba( 0, 0, 0, 0.3 );
+color: #EEE;
+}
+#KIZI #dashboard .shortcut-link:link,
+#KIZI #dashboard .shortcut-link:visited {
+background-color: #222;
+border: 1px solid #444;
+color: #EEE;
+}
+#KIZI #dashboard .shortcut-link:hover,
+#KIZI #dashboard .shortcut-link:active {
+background-color: #333;
+}
+#KIZI #dashboard .shortcut-link::before {
+background-color: rgba( 255,255,255,.2 );
+}
+#KIZI #dashboard .shortcut-link:hover::before,
+#KIZI #dashboard .shortcut-link:active::before {
+background-color: rgba( 255,255,255,.4 );
+}
+#KIZI .circle-zero {
+stroke: rgba( 255,255,255,.1 );
+} 
+#KIZI #dashboard .pie-chart-total-name,
+#KIZI #dashboard .pie-chart-total-text {
+fill: #BBB;
+}
+#KIZI #dashboard .pie-chart-total-number {
+fill: #999;
+}
+#KIZI #dashboard .number-table th,
+#KIZI #dashboard .number-table td {
+border-top: 1px solid #444;
+border-bottom: 1px solid #444;
+}
+#KIZI #dashboard .number-table thead th {
+background-color: rgba( 255,255,255,.05 );
+}
+#KIZI #dashboard .number-table .emphasis th,
+#KIZI #dashboard .number-table .emphasis td {
+background-color: rgba( 255,255,170,.2 );
+}
+#KIZI #dashboard .zero {
+color: #666!important;
+}
+#KIZI #dashboard .stacked-graph-vertical-axis {
+border-right: 1px solid #666;
+}
+#KIZI #dashboard .stacked-graph-vertical-axis-item::before {
+background-color: #555;
+}
+#KIZI #dashboard .stacked-graph-item-title {
+color: #EEE;
+}
+#KIZI #dashboard .stacked-graph-bar {
+border-right: 1px dashed #555;
+border-left: 1px solid transparent;
+}
+#KIZI #dashboard .stacked-graph-item-inner:hover {
+background-color: rgba( 255,255,170,.2 );
+}
+#KIZI #dashboard .stacked-graph-popup {
+background-color: #111;
+border: 1px solid #666;
+box-shadow: 2px 2px 8px rgba( 0,0,0,.3 );
+}
+#KIZI .widget-name-inner,
+#KIZI .number-table,
+#KIZI .stacked-graph-vertical-axis-item,
+#KIZI .stacked-graph-popup {
+color: #EEE;
+}
+#KIZI .widget-edit::after {
+background-position: -60px -80px;
+}
+#KIZI .widget-display::after {
+  background-position: -20px -80px;
+}
+#KIZI .widget-grid[data-widget-display="0"] .widget-display::after {
+background-position: 0 -80px;
+}
+#KIZI .widget-delete::after {
+background-position: -40px -80px;
 }
 
 EOF;
