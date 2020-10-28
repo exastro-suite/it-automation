@@ -870,6 +870,21 @@ function Mix1_1_jumpToSymphonyInstanceMonitor(symphony_instance_id){
     open( url, "_blank");
 }
 
+function Mix1_1_in_dl(symphony_instance_id){
+    // 遷移先URLを作成
+    var url = '/default/menu/05_preupload.php?no=2100000310&mode=in&symphony_instance_id=' + symphony_instance_id;
+    
+    // 作業状態確認メニューに遷移
+    open( url, "_blank");
+}
+
+function Mix1_1_out_dl(symphony_instance_id){
+    // 遷移先URLを作成
+    var url = '/default/menu/05_preupload.php?no=2100000310&mode=out&symphony_instance_id=' + symphony_instance_id;
+    
+    // 作業状態確認メニューに遷移
+    open( url, "_blank");
+}
 
 function queryDataToFilter(){
     // クエリから値を取得
