@@ -188,6 +188,20 @@ for LINE in $ANSWERS_TEXT;do
             fi
         fi
 
+        # INSTALL_MODEがGather_Library以外の場合はITA用ディレクトリを取得する
+        if [ "$INSTALL_MODE" != "Gather_Library" ]; then
+            #ITA用のディレクトリ取得
+            if [ "$key" = 'ita_directory' ]; then
+                if [[ "$val" != "/"* ]]; then
+                    log "ERROR : Enter the absolute path in $key."
+                    log 'INFO : Abort installation.'
+                    func_exit_and_delete_file
+                fi
+                func_answer_format_check
+                ITA_DIRECTORY="$val"
+            fi
+        fi
+
         #--ita_language,db_passwordが必要なのはINSTALL_MODE = Install_Online or Install_Offline or Install_ITAの時
         if [ "$INSTALL_MODE" = "Install_Online" -o "$INSTALL_MODE" = "Install_Offline" -o "$INSTALL_MODE" = "Install_ITA" ]; then
             #言語の取得
@@ -210,51 +224,49 @@ for LINE in $ANSWERS_TEXT;do
             fi
         fi
         #--
-    
-        #ITA用のディレクトリ取得
-        if [ "$key" = 'ita_directory' ]; then
-            if [[ "$val" != "/"* ]]; then
-                log "ERROR : Enter the absolute path in $key."
-                log 'INFO : Abort installation.'
-                func_exit_and_delete_file
-            fi
-            func_answer_format_check
-            ITA_DIRECTORY="$val"
-        #OSの取得
-        elif [ "$key" = 'linux_os' ]; then
-            func_answer_format_check
-            LINUX_OS="$val"
 
-            if [ "${LINUX_OS}" != 'CentOS7' -a "${LINUX_OS}" != 'CentOS8' -a "${LINUX_OS}" != 'RHEL7' -a "${LINUX_OS}" != 'RHEL8' ]; then
-                log "ERROR : $key should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8"
-                log 'INFO : Abort installation.'
-                func_exit_and_delete_file
-            fi
+        # INSTALL_MODEがInstall_Online, Install_Offline, Install_ITA, Gather_Libraryの場合はOSを取得する。
+        if [ "$INSTALL_MODE" = "Install_Online" -o "$INSTALL_MODE" = "Install_Offline" -o "$INSTALL_MODE" = "Install_ITA" -o "$INSTALL_MODE" = "Gather_Library" ]; then
+            #OSの取得
+            if [ "$key" = 'linux_os' ]; then
+                func_answer_format_check
+                LINUX_OS="$val"
 
-        #DBルートパスワード取得
-        elif [ "$key" = 'db_root_password' ]; then
-            func_answer_format_check
-            DB_ROOT_PASSWORD="$val"
-        #DB名取得
-        elif [ "$key" = 'db_name' ]; then
-            func_answer_format_check
-            DB_NAME="$val"
-        #DBユーザー名取得
-        elif [ "$key" = 'db_username' ]; then
-            func_answer_format_check
-            DB_USERNAME="$val"
-        #ITAドメイン名取得
-        elif [ "$key" = 'ita_domain' ]; then
-            func_answer_format_check
-            ITA_DOMAIN="$val"
-        #ユーザー指定証明書ファイルパス取得
-        elif [ "$key" = 'certificate_path' ]; then
-            CERTIFICATE_PATH="$val"
-            FORMAT_CHECK_CNT=$((FORMAT_CHECK_CNT+1))
-        #ユーザー指定秘密鍵ファイルパス取得
-        elif [ "$key" = 'private_key_path' ]; then
-            PRIVATE_KEY_PATH="$val"
-            FORMAT_CHECK_CNT=$((FORMAT_CHECK_CNT+1))
+                if [ "${LINUX_OS}" != 'CentOS7' -a "${LINUX_OS}" != 'CentOS8' -a "${LINUX_OS}" != 'RHEL7' -a "${LINUX_OS}" != 'RHEL8' ]; then
+                    log "ERROR : $key should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8"
+                    log 'INFO : Abort installation.'
+                    func_exit_and_delete_file
+                fi
+            fi
+        fi
+
+        # INSTALL_MODEがInstall_Online, Install_Offline, Install_ITA, Uninstallの場合は以下の項目を取得する。
+        if [ "$INSTALL_MODE" = "Install_Online" -o "$INSTALL_MODE" = "Install_Offline" -o "$INSTALL_MODE" = "Install_ITA" -o "$INSTALL_MODE" = "Uninstall" ]; then
+            #DBルートパスワード取得
+            if [ "$key" = 'db_root_password' ]; then
+                func_answer_format_check
+                DB_ROOT_PASSWORD="$val"
+            #DB名取得
+            elif [ "$key" = 'db_name' ]; then
+                func_answer_format_check
+                DB_NAME="$val"
+            #DBユーザー名取得
+            elif [ "$key" = 'db_username' ]; then
+                func_answer_format_check
+                DB_USERNAME="$val"
+            #ITAドメイン名取得
+            elif [ "$key" = 'ita_domain' ]; then
+                func_answer_format_check
+                ITA_DOMAIN="$val"
+            #ユーザー指定証明書ファイルパス取得
+            elif [ "$key" = 'certificate_path' ]; then
+                CERTIFICATE_PATH="$val"
+                FORMAT_CHECK_CNT=$((FORMAT_CHECK_CNT+1))
+            #ユーザー指定秘密鍵ファイルパス取得
+            elif [ "$key" = 'private_key_path' ]; then
+                PRIVATE_KEY_PATH="$val"
+                FORMAT_CHECK_CNT=$((FORMAT_CHECK_CNT+1))
+            fi
         fi
     fi
 done
@@ -263,15 +275,20 @@ done
 IFS="$SRC_IFS"
 
 #アンサーファイルの内容が読み取れているか
-
 if [ "$INSTALL_MODE" = "Install_Online" -o "$INSTALL_MODE" = "Install_Offline" -o "$INSTALL_MODE" = "Install_ITA" ]; then
     if [ "$FORMAT_CHECK_CNT" != 11 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
         log 'INFO : Abort installation.'
         func_exit_and_delete_file
     fi
-elif [ "$INSTALL_MODE" = "Gather_Library" -o "$INSTALL_MODE" = "Versionup_All" -o "$INSTALL_MODE" = "Versionup_ITA" -o "$INSTALL_MODE" = "Uninstall" ]; then
-    if [ "$FORMAT_CHECK_CNT" != 9 ]; then
+elif [ "$INSTALL_MODE" = "Uninstall" ]; then
+    if [ "$FORMAT_CHECK_CNT" != 8 ]; then
+        log 'ERROR : The format of Answer-file is incorrect.'
+        log 'INFO : Abort installation.'
+        func_exit_and_delete_file
+    fi
+elif [ "$INSTALL_MODE" = "Gather_Library" -o "$INSTALL_MODE" = "Versionup_All" -o "$INSTALL_MODE" = "Versionup_ITA" ]; then
+    if [ "$FORMAT_CHECK_CNT" != 2 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
         log 'INFO : Abort installation.'
         func_exit_and_delete_file
@@ -285,7 +302,6 @@ fi
 
 #$keyの値が正しいかチェック用
 FORMAT_CHECK_CNT=$((FORMAT_CHECK_CNT+1))
-
 
 #インストールモード分岐
 case "$INSTALL_MODE" in
