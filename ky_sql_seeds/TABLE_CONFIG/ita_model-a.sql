@@ -263,6 +263,14 @@ LAST_UPDATE_USER               %INT%                        , -- 最終更新ユ
 PRIMARY KEY (ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
+CREATE TABLE A_WIDGET_LIST (
+WIDGET_ID                      %INT%                        , -- ウィジェットID
+WIDGET_DATA                    TEXT                         , -- ウィジェット本体(JSON)
+USER_ID                        %INT%                        , -- ユーザID
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+PRIMARY KEY (WIDGET_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
 -- -------------------------
 -- 作成対象マスタ
 -- -------------------------
