@@ -406,6 +406,7 @@ $ary[1230041] = "Menu";
 $ary[1230042] = "Can't be changed";
 $ary[1230051] = "Display Order";
 $ary[1230052] = "Set the default display order (ascending) in this menu.\nRange:-2147483648 to 2147483647 (Numeric)";
+$ary[1230061] = "Comments section.";
 $ary[1300001] = "Access permission";
 $ary[1300002] = "Role ID to allow access";
 $ary[1300003] = "The roleID that allows access to the record. \nIf you want to allow access to multiple roleIDs, separate the roleIDs with commas (,).";
