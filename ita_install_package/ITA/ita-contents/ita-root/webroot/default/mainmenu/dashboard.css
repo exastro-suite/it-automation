@@ -348,7 +348,7 @@ cursor: pointer;
 content: '';
 display: block;
 width: 20px; height: 20px;
-background-image: url(/common/imgs/ita_icon_sprite.png);
+background-image: url(/common/imgs/ita_icon_sprite.png?v=160);
 background-size: 200px 180px;
 opacity: .5;
 }
