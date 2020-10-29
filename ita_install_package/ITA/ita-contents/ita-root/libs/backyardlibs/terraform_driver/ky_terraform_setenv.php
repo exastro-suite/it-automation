@@ -91,7 +91,7 @@
     $tar_temp_save_dir                  = $root_dir_path . '/temp/terraform_module_temp';
 
     //logファイル格納ディレクトリ
-    $log_save_dir                       = $root_dir_path . '/temp/terraform_data';
+    $log_save_dir                       = $root_dir_path . '/logs/terraform_out_logs';
 
     // 入力ファイル格納先ディレクトリ  /FILE_INPUT
     $vg_exe_ins_input_file_dir          = $root_dir_path . "/uploadfiles/2100080011/FILE_INPUT";
