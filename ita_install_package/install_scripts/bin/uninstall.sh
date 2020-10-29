@@ -99,18 +99,13 @@ fi
 if [ -e /etc/pki/tls/certs/"$CRT_FILE" ]; then
     #サーバー証明書を削除する
     rm -f /etc/pki/tls/certs/"$CRT_FILE" 2>> "$LOG_FILE"
-else
-    log "WARNING : ${CRT_FILE} does not exist."
 fi
 
 #秘密鍵が存在するか
 if [ -e /etc/pki/tls/certs/"$KEY_FILE" ]; then
     #秘密鍵を削除する
     rm -f /etc/pki/tls/certs/"$KEY_FILE" 2>> "$LOG_FILE"
-else
-    log "WARNING : ${KEY_FILE} does not exist."
 fi
-
 
 #サーバ証明書が削除されているか確認
 if [ -e /etc/pki/tls/certs/"$CRT_FILE" ]; then
