@@ -13,6 +13,10 @@ CREATE TABLE A_SEQUENCE
 (
 NAME                    %VARCHR%(64)            ,
 VALUE                   %INT%                   ,
+MENU_ID                 %INT%                   ,
+DISP_SEQ                %INT%                   ,
+NOTE                    %VARCHR%(4000)          ,
+LAST_UPDATE_TIMESTAMP   %DATETIME6%             ,
 PRIMARY KEY(NAME)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
@@ -257,6 +261,14 @@ DISUSE_FLAG                    %VARCHR%(1)                  , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
 LAST_UPDATE_USER               %INT%                        , -- 最終更新ユーザ
 PRIMARY KEY (ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE A_WIDGET_LIST (
+WIDGET_ID                      %INT%                        , -- ウィジェットID
+WIDGET_DATA                    TEXT                         , -- ウィジェット本体(JSON)
+USER_ID                        %INT%                        , -- ユーザID
+LAST_UPDATE_TIMESTAMP          %DATETIME6%                  , -- 最終更新日時
+PRIMARY KEY (WIDGET_ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
 -- -------------------------
@@ -3221,6 +3233,19 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
        TAB_A.LAST_UPDATE_TIMESTAMP,
        TAB_A.LAST_UPDATE_USER
 FROM A_PROVIDER_ATTRIBUTE_LIST_JNL TAB_A;
+
+CREATE VIEW D_SEQUENCE AS 
+SELECT TAB_A.NAME                 ,
+       TAB_A.VALUE                ,
+       TAB_A.MENU_ID              ,
+       TAB_B.MENU_GROUP_ID        ,
+       TAB_A.DISP_SEQ             ,
+       TAB_A.NOTE                 ,
+       '0' as DISUSE_FLAG         ,
+       TAB_A.LAST_UPDATE_TIMESTAMP
+FROM A_SEQUENCE  as TAB_A
+     LEFT JOIN D_MENU_LIST as TAB_B on TAB_A.MENU_ID = TAB_B.MENU_ID
+WHERE TAB_A.MENU_ID IS NOT NULL;
 
 -- *****************************************************************************
 -- *** WEB-DBCORE Views *****                                                ***
