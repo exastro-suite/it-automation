@@ -3237,8 +3237,8 @@ FROM A_PROVIDER_ATTRIBUTE_LIST_JNL TAB_A;
 CREATE VIEW D_SEQUENCE AS 
 SELECT TAB_A.NAME                 ,
        TAB_A.VALUE                ,
-       TAB_A.MENU_ID              ,
-       TAB_B.MENU_GROUP_ID        ,
+       TAB_B.MENU_NAME            ,
+       TAB_B.MENU_GROUP_NAME      ,
        TAB_A.DISP_SEQ             ,
        TAB_A.NOTE                 ,
        '0' as DISUSE_FLAG         ,
