@@ -613,9 +613,11 @@ cursor: pointer;
 display: block;
 transition-duration: .2s;
 }
-#dashboard[data-mode="view"] .current-menu-group {
-opacity: .2;
+#dashboard[data-mode="view"] .current-menu-group .widget-menu-link {
 pointer-events: none;
+}
+#dashboard[data-mode="view"] .current-menu-group .widget-menu-icon {
+opacity: .2;
 }
 .widget-menu-link:visited,
 .widget-menu-link:link {
