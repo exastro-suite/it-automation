@@ -65,7 +65,7 @@ func_set_total_cnt() {
     PROCCESS_TOTAL_CNT=0
 
     if [ "$BASE_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+19))
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+20))
     fi
 
     if [ "$ANSIBLE_FLG" -eq 1 ]; then
@@ -889,10 +889,37 @@ if [ "$BASE_FLG" -eq 1 ]; then
     if ! test -d "$ITA_DIRECTORY" ; then
         mkdir -p "$ITA_DIRECTORY" 2>> "$LOG_FILE"
         if ! test -d "$ITA_DIRECTORY" ; then
-            log "WARNING : Failed to make $ITA_DIRECTORY directory."
+            log "ERROR : Failed to make $ITA_DIRECTORY directory."
+            log 'INFO : Abort installation.'
+            func_exit_and_delete_file
         fi
     else
         log "INFO : $ITA_DIRECTORY already exists."
+    fi
+    PROCCESS_CNT=$((PROCCESS_CNT+1))
+
+    #################################################################################################
+    log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Check the execute permission of the parent directory of ITA."
+    #################################################################################################
+    #ITAディレクトリの親ディレクトリ取得
+    PARENT_DIR=$(dirname "$ITA_DIRECTORY")
+    #親ディレクトリの権限のOthersに実行権限があるかチェックする(PARENT_DIRが"/"になるまで繰り返し)
+    while [ "$PARENT_DIR" != "/" ] ; do
+        ls -ld "$PARENT_DIR" | awk '{print substr($0, 8, 3)}' | grep -q x 
+        if [ $? != 0 ]; then
+            log "ERROR : The parent directory of ITA does not have execute permission for \"Other users\".(dir:$PARENT_DIR)"
+            log 'INFO : Abort installation.'
+            func_exit_and_delete_file
+        fi
+        #権限をチェックしたディレクトリの親ディレクトリを取得する。
+        PARENT_DIR=$(dirname "$PARENT_DIR")
+    done
+    #ルートディレクトリのOthersに実行権限があるかチェックする。
+    ls -ld / | awk '{print substr($0, 8, 3)}' | grep -q x
+    if [ $? != 0 ]; then
+        log "ERROR : The parent directory of ITA does not have execute permission for \"Other users\".(dir:$PARENT_DIR)"
+        log 'INFO : Abort installation.'
+        func_exit_and_delete_file
     fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
 
