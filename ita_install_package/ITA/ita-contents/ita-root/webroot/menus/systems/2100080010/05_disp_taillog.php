@@ -202,7 +202,7 @@
             ////////////////////////////////////////////////////////////////
             // tail対象のファイルパスを作成                               //
             ////////////////////////////////////////////////////////////////
-            $terraform_data_dir = "/temp/terraform_data";
+            $terraform_data_dir = "/logs/terraform_out_logs";
             $data_type = "out";
             $prg_record_file_name_fullpath  = $root_dir_path . $terraform_data_dir . "/" . str_pad( $execution_no, $intNumPadding, "0", STR_PAD_LEFT ) . "/" . $data_type . "/" . $prg_record_file_name;
 

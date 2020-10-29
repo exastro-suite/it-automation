@@ -1,4 +1,4 @@
-//   Copyright 2019 NEC Corporation
+//   Copyright 2020 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,20 +19,14 @@ callback.prototype = {
         var filterAreaWrap = 'Filter1_Nakami';
         var strFilterPrintId = 'Filter1Tbl';
         var containerClassName = 'fakeContainer_Filter1Setting';
-
         var intMaxWidth = 650;
-
         var htmlSetExcute = true;
         var errMsgBody = '';
-
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-
         var resultSetTargetSeq = ary_result[2];
         var resultContentTag = ary_result[3];
-
         var objHtmlSetArea = $('#'+filterAreaWrap+' .'+resultSetTargetSeq).get()[0];
-
         if( objHtmlSetArea === null ){
             htmlSetExcute = false;
         }else{
@@ -41,12 +35,10 @@ callback.prototype = {
                 errMsgBody = ary_result[2];
             }
         }
-
         if( htmlSetExcute == true ){
             //----生成されたセレクトタグ、を埋め込み
             $(objHtmlSetArea).html(resultContentTag);
             //生成されたセレクトタグ、を埋め込み----
-
             addPullDownBox(filterAreaWrap, strFilterPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
@@ -56,17 +48,12 @@ callback.prototype = {
     Filter1Tbl_reload : function( result ){
         var filterAreaWrap = 'Filter1_Nakami';
         var strFilterPrintId = 'Filter1Tbl';
-
         var htmlSetExcute = true;
         var errMsgBody = '';
-
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-
         var resultContentTag = ary_result[2];
-
         var objTableArea=$('#'+filterAreaWrap+' .table_area').get()[0];
-
         if( objTableArea === null){
             htmlSetExcute = false;
         }else{
@@ -75,7 +62,6 @@ callback.prototype = {
                 errMsgBody = ary_result[2];
             }
         }
-
         if( htmlSetExcute == true ){
             objTableArea.innerHTML = resultContentTag;
             adjustTableAuto (strFilterPrintId,
@@ -85,11 +71,7 @@ callback.prototype = {
                    webStdTableWidth );
             linkDateInputHelper(filterAreaWrap);
             if( ary_result[3]==1 ){
-                Filter1Tbl_reset_filter(true);
-            }
-            // 定期作業実行から遷移してきた場合の対応
-            else if( ary_result[3]==0 ){
-                queryDataToFilter();
+                reset_filter(true);
             }
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
@@ -99,46 +81,34 @@ callback.prototype = {
         if( filter_on == false ){
             filter_on = true;
             if(initialFilter == 1){
-                Filter1Tbl_search_async('orderFromFilterCmdBtn');
+                search_async('orderFromFilterCmdBtn');
             }
         }
     },
     Filter1Tbl_recCount : function(result){
         var strMixOuterFrameName = 'Mix1_Nakami';
-
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-
         var resultContentTag = ary_result[2];
-
         var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
         objAlertArea.style.display = "none";
-
         if( ary_result[0] == "000" ){
             if( ckRangeOfAlert(ary_result[2], webPrintRowLimit) ){
                 window.alert(getSomeMessage("ITAWDCC90103",{0:webPrintRowLimit,1:ary_result[2]}));
                 // Web表を表示しない
-                Filter1Tbl_print_async(0);
-                GraphDisplaySwich(0);
-                Graphs_purge();
+                print_async(0);
             }else{
                 if( ckRangeOfConfirm(ary_result[2] , webPrintRowConfirm, webPrintRowLimit) ){
                     if( window.confirm( getSomeMessage("ITAWDCC20201",{0:ary_result[2]})) ){
                         // Web表を表示する
-                        Filter1Tbl_print_async(1);
-                        Graphs_print();
-                        GraphDisplaySwich(1);
+                        print_async(1);
                     }else{
                         // Web表を表示しない
-                        Filter1Tbl_print_async(0);
-                        GraphDisplaySwich(0);
-                        Graphs_purge();
+                        print_async(0);
                     }
                 }else{
                     // Web表を表示する
-                    Filter1Tbl_print_async(1);
-                    Graphs_print();
-                    GraphDisplaySwich(1);
+                    print_async(1);
                 }
             }
         }else if( ary_result[0] == "002" ){
@@ -153,21 +123,14 @@ callback.prototype = {
     Filter1Tbl_printTable : function(result){
         var strMixOuterFrameName = 'Mix1_Nakami';
         var strMixInnerFramePrefix = 'Mix1_';
-
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-
         var resultContentTag = ary_result[2];
-
         var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
         objAlertArea.style.display = "none";
-
         var objPrintArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
-
         if( ary_result[0] == "000" ){
-
             objPrintArea.innerHTML = resultContentTag;
-
             adjustTableAuto (strMixInnerFramePrefix+'1',
                             "sDefault",
                             "fakeContainer_Filter1Print",
@@ -191,25 +154,19 @@ callback.prototype = {
     Mix1_1_updateTable : function( result ){
         var strMixOuterFrameName = 'Mix1_Nakami';
         var strMixInnerFramePrefix = 'Mix1_';
-
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-
         var resultContentTag = ary_result[2];
-
         var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
-
         if( ary_result[0] == "000" ){
-
             var objUpdateArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
-
             switch( ary_result[1] ){
                 case "200":
                     // エラーなく更新完了
                 case "100":
                     window.alert(ary_result[2]);
                     objUpdateArea.innerHTML = "";
-                    Filter1Tbl_search_async();
+                    search_async();
                     break;
                 default:
                     objUpdateArea.innerHTML="";
@@ -236,22 +193,18 @@ callback.prototype = {
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
+        // formのNAME,MENU_IDをreadonly(編集不可)にする
+        turnToReadonly();
     },
     Mix1_1_deleteTable : function( result ){
         var strMixOuterFrameName = 'Mix1_Nakami';
         var strMixInnerFramePrefix = 'Mix1_';
-
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-
         var resultContentTag = ary_result[2];
-
         var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
-
         if( ary_result[0] == "000" ){
-
             var objDeleteArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
-
             switch( ary_result[1] ){
                 case "210":
                     // エラーなく廃止完了
@@ -260,7 +213,7 @@ callback.prototype = {
                 case "100":
                     window.alert(resultContentTag);
                     objDeleteArea.innerHTML = "";
-                    Filter1Tbl_search_async();
+                    search_async();
                     break;
                 default:
                     objDeleteArea.innerHTML="";
@@ -284,36 +237,28 @@ callback.prototype = {
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
-
         showForDeveloper(result);
     },
     Mix2_1_registerTable : function( result ){
         var strMixOuterFrameName = 'Mix2_Nakami';
         var strMixInnerFramePrefix = 'Mix2_';
-
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-
         var resultContentTag = ary_result[2];
-
         var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
-
         if( ary_result[0] == "000" ){
-
             var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
-
             switch( ary_result[1] ){
                 case "100":
                     window.alert(resultContentTag);
                     objRegiterArea.innerHTML = "";
-                    Filter1Tbl_search_async();
+                    search_async();
                     break;
                 case "201":
                     // エラーなく登録完了
                 default:                
                     objRegiterArea.innerHTML="";
                     $(objRegiterArea).html(resultContentTag);
-
                     objAlertArea.style.display = "none";
                     
                     adjustTableAuto (strMixInnerFramePrefix+'1',
@@ -336,27 +281,19 @@ callback.prototype = {
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
-
         showForDeveloper(result);
     },
     Journal1Tbl_printJournal : function( result ){
         var strMixOuterFrameName = 'Journal1_Nakami';
         var strMixInnerFrame = 'Journal1Tbl';
-
         var ary_result = getArrayBySafeSeparator(result);
-        checkTypicalFlagInHADACResult(ary_result);
-
         var resultContentTag = ary_result[2];
-
         var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
+        checkTypicalFlagInHADACResult(ary_result);
         objAlertArea.style.display = "none";
-
         var objPrintArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
-
         if( ary_result[0] == "000" ){
-
             objPrintArea.innerHTML = resultContentTag;
-
             adjustTableAuto (strMixInnerFrame,
                             "sDefault",
                             "fakeContainer_Journal1Print",
@@ -371,11 +308,9 @@ callback.prototype = {
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
-    },
-    //---- ここからカスタマイズした場合の[callback]メソッド配置域
-    Filter1Cht_recDraw : function(result){
-        Graph1_drawBlock(result);
     }
+    //---- ここからカスタマイズした場合の[callback]メソッド配置域
+
     // ここまでカスタマイズした場合の[callback]メソッド配置域----
 }
 
@@ -396,6 +331,7 @@ var filter_on = false;
 
 window.onload = function(){
     var filter1AreaWrap = 'Filter1_Nakami';
+
     pageType = document.getElementById('pageType').innerHTML;
     privilege = parseInt(document.getElementById('privilege').innerHTML);
     initialFilterEl = document.getElementById('sysInitialFilter');
@@ -421,24 +357,29 @@ window.onload = function(){
     // テーブル表示用領域に初期メッセ時を表示しておく
     //----※ここに一覧が表示されます。
     document.getElementById('table_area').innerHTML = getSomeMessage("ITAWDCC10101");
-    //----※ここにグラフが表示されます。
-    document.getElementById('Graph_msg').innerHTML = getSomeMessage("ITAWDCC10103");
 
-    if(privilege != 2){
-        // 登録の初期HTMLを表示する
-        show('Mix2_Midashi' ,'Mix2_Nakami'  );
-        Mix2_1_register_async(0);
-    }
+   if (document.getElementById('Mix2_Midashi') !== null &&
+       document.getElementById('Mix2_Nakami') !== null) {
+
+       if(privilege != 2){
+           // 登録の初期HTMLを表示する
+           show('Mix2_Midashi' ,'Mix2_Nakami'  );
+           register_async(0);
+       }
+   }
 
 // ----サイト個別、事前処理
 // サイト個別、事前処理----
 
-    GraphDisplaySwich(0);
+
     show('SetsumeiMidashi'      ,'SetsumeiNakami'       );
-    show('Graph1_Midashi'       ,'Graph1_Nakami'        );
     show('Mix1_Midashi'         ,'Mix1_Nakami'          );
-    show('AllDumpMidashi'       ,'AllDumpNakami'        );
-    show('Journal1_Midashi'     ,'Journal1_Nakami'      );
+    if (document.getElementById('AllDumpNakami') !== null) {
+        show('AllDumpMidashi'       ,'AllDumpNakami'        );
+    }
+    if (document.getElementById('Journal_Nakami') !== null) {
+        show('Journal1_Midashi'     ,'Journal1_Nakami'      );
+    }
 
 // ----サイト個別メニュー、ここから
 // サイト個別メニュー、ここまで----
@@ -448,14 +389,14 @@ window.onload = function(){
 //////// コールバックファンクション---- ////////
 
 //////// ----セレクトタグ追加ファンクション ////////
-function Filter1Tbl_add_selectbox( show_seq ){
+function add_selectbox( show_seq ){
+    //alert('wake-fx(add_selectbox)');
     proxy.Filter1Tbl_add_selectbox(show_seq);
 }
 //////// セレクトタグ追加ファンクション---- ////////
 
 //////// ----表示フィルタリセット用ファンクション ////////
-function Filter1Tbl_reset_filter(boolBack){
-    // 検索条件をクリア(リセット)
+function reset_filter(boolBack){
     var filterAreaWrap = 'Filter1_Nakami';
     var strMixOuterFrameName = 'Mix1_Nakami';
     if( boolBack===true ){
@@ -469,7 +410,7 @@ function Filter1Tbl_reset_filter(boolBack){
                     // タグが存在し、オートフィルタにチェックが入っている
                     //----再表示しますか？
                     if( window.confirm( getSomeMessage("ITAWDCC20204")) ){
-                        Filter1Tbl_search_async();
+                        search_async();
                     }
                 }
             }
@@ -480,19 +421,20 @@ function Filter1Tbl_reset_filter(boolBack){
 }
 //////// 表示フィルタリセット用ファンクション---- ////////
 
-//////// ----Filter1Tbl_search_asyncを呼ぶかどうか判断するファンクション ////////
-function Filter1Tbl_pre_search_async(inputedCode){
+//////// ----search_asyncを呼ぶかどうか判断するファンクション ////////
+function pre_search_async(inputedCode){
+    //alert('pre_search_async)');
 
     // ----Enterキーが押された場合
     if( inputedCode == 13 ){
-        Filter1Tbl_search_async('keyInput13');
+        search_async('keyInput13');
     }
     // Enterキーが押された場合----
 }
-//////// Filter1Tbl_search_asyncを呼ぶかどうか判断するファンクション---- ////////
+//////// search_asyncを呼ぶかどうか判断するファンクション---- ////////
 
 //////// ----フィルタ結果表示呼出ファンクション[1] ////////
-function Filter1Tbl_search_async( value1 ){
+function search_async( value1 ){
 
     var filterAreaWrap = 'Filter1_Nakami';
     var printAreaWrap = 'Mix1_Nakami';
@@ -503,7 +445,7 @@ function Filter1Tbl_search_async( value1 ){
     // 引数を準備
     var filter_data = $("#"+filterAreaWrap+" :input").serializeArray();
 
-    exec_flag = Filter1Tbl_search_control(exec_flag, value1);
+    exec_flag = search_control(exec_flag, value1);
     var objUpdTag = $('#'+printAreaWrap+' .editing_flag').get()[0];
     if ( objUpdTag != null ){
         // 更新系(更新/廃止/復活)モード中の場合はSELECTモードに戻っていいか尋ねる
@@ -530,22 +472,18 @@ function Filter1Tbl_search_async( value1 ){
         if( checkOpenNow(printAreaWrap)===false ){
             show(printAreaHead, printAreaWrap);
         }
-
         // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
         restruct_for_IE();
 
-        // proxy.Filter1Tbl_recCount実行
         proxy.Filter1Tbl_recCount(filter_data);
     }
 }
 //////// フィルタ結果表示呼出ファンクション[1]---- ////////
 
 //////// ----フィルタ結果表示呼出ファンクション[2] ////////
-function Filter1Tbl_search_control( exec_flag_var, value1 ){
+function search_control( exec_flag_var, value1 ){
     var filterAreaWrap = 'Filter1_Nakami';
-
     var exec_flag_ret = true;
-
     if( typeof(value1) == 'undefined' ){
         // value1がundefined型の場合
         exec_flag_ret = exec_flag_var;
@@ -585,7 +523,7 @@ function Filter1Tbl_search_control( exec_flag_var, value1 ){
 //////// フィルタ結果表示呼出ファンクション[2]---- ////////
 
 //////// ----検索条件指定用ファンクション ////////
-function Filter1Tbl_print_async( intPrintMode ){
+function print_async( intPrintMode ){
 
     var filterAreaWrap = 'Filter1_Nakami';
     var printAreaWrap = 'Mix1_Nakami';
@@ -611,18 +549,18 @@ function Filter1Tbl_print_async( intPrintMode ){
 //////// 検索条件指定用ファンクション---- ////////
 
 //////// ----登録初期画面に戻るかどうか判定するファンクション ////////
-function Mix2_1_pre_register_async( mode ){
+function pre_register_async( mode ){
 
     //----登録中ですが中断してよろしいですか？
     if( window.confirm( getSomeMessage("ITAWDCC20202")) ){
-        Mix2_1_register_async(0);
+        register_async(0);
     }
 
 }
 //////// 登録初期画面に戻るかどうか判定するファンクション---- ////////
 
 //////// ----登録画面遷移用ファンクション ////////
-function Mix2_1_register_async( mode ){
+function register_async( mode ){
 
     var registerAreaWrap = 'Mix2_Nakami';
 
@@ -672,7 +610,8 @@ function Mix2_1_register_async( mode ){
 //////// 登録画面遷移用ファンクション---- ////////
 
 //////// ----更新画面遷移用ファンクション ////////
-function Mix1_1_update_async( mode, inner_seq, updateAreaName ){
+function update_async( mode, inner_seq, updateAreaName ){
+    //alert('wake-fx(update_async)');
 
     var updateAreaWrap = 'Mix1_Nakami';
 
@@ -699,8 +638,8 @@ function Mix1_1_update_async( mode, inner_seq, updateAreaName ){
             // 呼び出し要否フラグをOFF
             exec_flag = false;
 
-            // Filter1Tbl_search_asyncを呼び出し
-            Filter1Tbl_search_async();
+            // search_asyncを呼び出し
+            search_async();
 
             break;
         case 3 :
@@ -729,7 +668,7 @@ function Mix1_1_update_async( mode, inner_seq, updateAreaName ){
 //////// 更新画面遷移用ファンクション---- ////////
 
 //////// ----削除画面遷移用ファンクション ////////
-function Mix1_1_delete_async( mode, inner_seq ){
+function delete_async( mode, inner_seq ){
 
     var deleteAreaWrap = 'Mix1_Nakami';
 
@@ -757,8 +696,8 @@ function Mix1_1_delete_async( mode, inner_seq ){
             // 呼び出し要否フラグをOFF
             exec_flag = false;
 
-            // Filter1Tbl_search_asyncを呼び出し
-            Filter1Tbl_search_async();
+            // search_asyncを呼び出し
+            search_async();
 
             break;
         case 3 :
@@ -862,67 +801,24 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 //////// 汎用系ファンクション---- ////////
 
 //---- ここからカスタマイズした場合の一般メソッド配置域
-function Mix1_1_jumpToSymphonyInstanceMonitor(symphony_instance_id){
-    // 遷移先URLを作成
-    var url = '/default/menu/01_browse.php?no=2100000309&symphony_instance_id=' + symphony_instance_id;
-    
-    // 作業状態確認メニューに遷移
-    open( url, "_blank");
-}
+// 更新formのNAME,MENU_GROUP_ID,MENU_IDを編集不可(読み取り専用)にする
+function turnToReadonly () {
+    if (document.getElementById('update_table2') !== null &&
+        document.getElementById('update_table3') !== null ) {
 
-function Mix1_1_in_dl(symphony_instance_id,status_id){
-    if(status_id == 3 || status_id == 5 || status_id == 6 || status_id == 7 || status_id == 10){
-    // 遷移先URLを作成
-        var url = '/default/menu/05_preupload.php?no=2100000310&mode=in&symphony_instance_id=' + symphony_instance_id;
-        open( url, "_blank");
-    }else{
-        alert( getSomeMessage("ITAWDCC92003") );
-        var objAlertArea = $('#'+deleteAreaWrap+' .alert_area').get()[0];
-        objAlertArea.innerHTML = '';
-        objAlertArea.style.display = "none";
-        setInputButtonDisable(deleteAreaWrap,'disableAfterPush',true);
-        // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
-        restruct_for_IE();
-    }
+        // MENU_GROUPのselectBoxを隠して読み取り専用で表示しなおす
+        let menugroupSelect = document.getElementById('update_table2');
+        let menugroupnameNode = document.createElement('span');
+        menugroupnameNode.textContent = menugroupSelect.options[menugroupSelect.selectedIndex].text;
+        menugroupSelect.nextElementSibling.style.display = 'none';
+        menugroupSelect.parentNode.appendChild(menugroupnameNode);
 
-}
-
-function Mix1_1_out_dl(symphony_instance_id,status_id){
-    if(status_id == 3 || status_id == 5 || status_id == 6 || status_id == 7 || status_id == 10){
-    // 遷移先URLを作成
-        var url = '/default/menu/05_preupload.php?no=2100000310&mode=out&symphony_instance_id=' + symphony_instance_id;
-        open( url, "_blank");
-    }else{
-        alert(getSomeMessage("ITAWDCC92003"));
-        var objAlertArea = $('#'+deleteAreaWrap+' .alert_area').get()[0];
-        objAlertArea.innerHTML = '';
-        objAlertArea.style.display = "none";
-        setInputButtonDisable(deleteAreaWrap,'disableAfterPush',true);
-        // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
-        restruct_for_IE();
-    }
-}
-
-function queryDataToFilter(){
-    // クエリから値を取得
-    var symphony_name = getQuerystring("symphony_name");
-    var operation_name = getQuerystring("operation_name");
-    var user_name = getQuerystring("user_name");
-
-    var filter_flag = false;
-
-    // 各NAMEが取得された場合
-    if ( symphony_name.length > 0 || operation_name.length > 0 || user_name.length > 0){
-            document.getElementById('Filter1Tbl_2').value = decodeURIComponent(symphony_name);
-            document.getElementById('Filter1Tbl_3').value = decodeURIComponent(operation_name);
-            document.getElementById('Filter1Tbl_5').value = decodeURIComponent(user_name);
-
-            filter_flag = true;
-    }
-    if(filter_flag === true){
-            filter_on = true;
-            // フィルタボタンを押下したことにする
-            Filter1Tbl_search_async('orderFromFilterCmdBtn');
+        // MENUのselectBoxを隠して読み取り専用で表示しなおす
+        let menuSelect = document.getElementById('update_table3');
+        let menunameNode = document.createElement('span');
+        menunameNode.textContent = menuSelect.options[menuSelect.selectedIndex].text;
+        menuSelect.nextElementSibling.style.display = 'none';
+        menuSelect.parentNode.appendChild(menunameNode);
     }
 }
 // ここまでカスタマイズした場合の一般メソッド配置域----

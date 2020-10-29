@@ -621,4 +621,12 @@ $ary[309025] = "Cancel reservation";
 $ary[309026] = "Emergency stop";
 $ary[310001] = "Sheet type";
 $ary[309027] = "Conductor name";
+$ary[309028] = "Input data set (zip)";
+$ary[309029] = "Result data set (zip)";
+$ary[309030] = "Input data";
+$ary[309031] = "Result data";
+$ary[309032] = "Input data set (zip)";
+$ary[309033] = "Result data set (zip)";
+$ary[309034] = "Input data";
+$ary[309035] = "Result data";
 ?>

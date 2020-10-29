@@ -685,7 +685,7 @@ configure_php() {
     # Install Composer.
     if [ "${exec_mode}" == "3" ]; then
         echo "----------Installation[Composer]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        curl -sS $COMPOSER | php -- --install-dir=/usr/bin  >> "$ITA_BUILDER_LOG_FILE" 2>&1       
+        curl -sS $COMPOSER | php -- --install-dir=/usr/bin --version=1.10.16 >> "$ITA_BUILDER_LOG_FILE" 2>&1       
         # install check Composer.
         if [ ! -e /usr/bin/composer.phar ]; then
             log "ERROR:Installation failed[Composer]"
@@ -966,7 +966,7 @@ download() {
     yum_install php php-json php-zip php-xml php-gd php-mbstring unzip
     
     mkdir -p vendor/composer
-    curl -sS $COMPOSER | php -- --install-dir=vendor/composer >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    curl -sS $COMPOSER | php -- --install-dir=vendor/composer --version=1.10.16 >> "$ITA_BUILDER_LOG_FILE" 2>&1
     # install check Composer.
     if [ ! -e ./vendor/composer/composer.phar ]; then
         log "ERROR:Installation failed[Composer]"
