@@ -69,11 +69,6 @@ $varInitialFilter = "";
 if (!empty($g['menu_initial_filter'])) {
     $varInitialFilter = $g['menu_initial_filter'];
 }
-// パネル選択BOX(メインメニューのみ表示)
-$boolVisibleSelectPanel = false;
-if (isset($_GET['grp']) && !empty($_GET['grp'])) {
-    $boolVisibleSelectPanel = true;
-}
 
 // 以下コンテンツの表示
 ?>
@@ -136,8 +131,6 @@ if (isset($_GET['grp']) && !empty($_GET['grp'])) {
                       <!-- FORM AREA  -->
                       <div class="headerMenu">
 
-                        <?php if ($boolVisibleSelectPanel) { ?>
-                        <?php } ?>
                         <?php if ($boolVisibleChangePasswordButton) { ?>
 
                         <!----  パスワード変更ボタン  ---->

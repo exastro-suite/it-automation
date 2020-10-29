@@ -1985,8 +1985,10 @@ function setPieChart( resultData, type ) {
         for ( let key in resultData[type] ) {
           const status = resultData[type][key]['status'],
                 typeNumber = ( type === 'conductor')?2:3;
-          pieChartData[status][typeNumber] += 1;
-          pieChartData[status][1] += 1;
+          if ( pieChartData[status] !== undefined ) {
+            pieChartData[status][typeNumber] += 1;
+            pieChartData[status][1] += 1;
+          }
         }
       }
       break;
@@ -2183,7 +2185,7 @@ for ( let type in result ) {
           days = today - targetDay,
           typeNumber = ( type === 'conductor')? 1:2;
           
-    let resultNumber = 0;
+    let resultNumber;
 
     if ( days < period ) {
       switch( status ) {
@@ -2192,11 +2194,14 @@ for ( let type in result ) {
         case resultText[3][0]: resultNumber = 3; break;
         case resultText[4][0]: resultNumber = 4; break;
         case resultText[5][0]: resultNumber = 5; break;
+        default: resultNumber = 0;
       }
-      histryData[ days ][ typeNumber ][ resultNumber ] += 1;
-      histryData[ days ][ typeNumber ][0] += 1;
-      histryData[ days ][0][ resultNumber ] += 1;
-      histryData[ days ][0][0] += 1;
+      if ( resultNumber !== 0 ) {
+        histryData[ days ][ typeNumber ][ resultNumber ] += 1;
+        histryData[ days ][ typeNumber ][0] += 1;
+        histryData[ days ][0][ resultNumber ] += 1;
+        histryData[ days ][0][0] += 1;
+      }
     }
   }
 }
