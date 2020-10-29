@@ -870,20 +870,37 @@ function Mix1_1_jumpToSymphonyInstanceMonitor(symphony_instance_id){
     open( url, "_blank");
 }
 
-function Mix1_1_in_dl(symphony_instance_id){
+function Mix1_1_in_dl(symphony_instance_id,status_id){
+    if(status_id == 3 || status_id == 5 || status_id == 6 || status_id == 7 || status_id == 10){
     // 遷移先URLを作成
-    var url = '/default/menu/05_preupload.php?no=2100000310&mode=in&symphony_instance_id=' + symphony_instance_id;
-    
-    // 作業状態確認メニューに遷移
-    open( url, "_blank");
+        var url = '/default/menu/05_preupload.php?no=2100000310&mode=in&symphony_instance_id=' + symphony_instance_id;
+        open( url, "_blank");
+    }else{
+        alert( getSomeMessage("ITAWDCC92003") );
+        var objAlertArea = $('#'+deleteAreaWrap+' .alert_area').get()[0];
+        objAlertArea.innerHTML = '';
+        objAlertArea.style.display = "none";
+        setInputButtonDisable(deleteAreaWrap,'disableAfterPush',true);
+        // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
+        restruct_for_IE();
+    }
+
 }
 
-function Mix1_1_out_dl(symphony_instance_id){
+function Mix1_1_out_dl(symphony_instance_id,status_id){
+    if(status_id == 3 || status_id == 5 || status_id == 6 || status_id == 7 || status_id == 10){
     // 遷移先URLを作成
-    var url = '/default/menu/05_preupload.php?no=2100000310&mode=out&symphony_instance_id=' + symphony_instance_id;
-    
-    // 作業状態確認メニューに遷移
-    open( url, "_blank");
+        var url = '/default/menu/05_preupload.php?no=2100000310&mode=out&symphony_instance_id=' + symphony_instance_id;
+        open( url, "_blank");
+    }else{
+        alert(getSomeMessage("ITAWDCC92003"));
+        var objAlertArea = $('#'+deleteAreaWrap+' .alert_area').get()[0];
+        objAlertArea.innerHTML = '';
+        objAlertArea.style.display = "none";
+        setInputButtonDisable(deleteAreaWrap,'disableAfterPush',true);
+        // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
+        restruct_for_IE();
+    }
 }
 
 function queryDataToFilter(){
