@@ -32,15 +32,16 @@ $tmpFx = function (&$aryVariant=[],&$arySetting=[]){
 
     $aryVariant['TT_SYS_06_LUP_USER_SET'] = false; // LAST_UPDATE_USERを使用しない
 
-    // シーケンス名
+    // 主キー：シーケンス名
     $table = new simpleTableControlAgent('D_SEQUENCE', 'NAME', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230011"), null, $aryVariant);
 
     // Table settings
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230002"));
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
+    $table->setGeneObject('AutoSearchStart',true); //('',true,false)
+    $table->setDBSortKey(["DISP_SEQ"=>"ASC"]); // SORT条件を指定
+    $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true); // Excel出力ボタンを非表示
     $table->setGeneObject('webSetting', $arrayWebSetting);
     $table->setDBMainTableHiddenID('A_SEQUENCE');
-    $table->setDBSortKey(["DISP_SEQ"=>"ASC"]);
 
     // 設定値
     $c = new NumColumn('VALUE',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230021"));
@@ -77,6 +78,7 @@ $tmpFx = function (&$aryVariant=[],&$arySetting=[]){
     $table->fixColumn($aryVariant);
 
     $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['NOTE']->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230061")); // 備考のdefautの説明文から「廃止」「復活」に関する部分の削除
     // ----非表示項目設定
     // 廃止ボタン
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('filter_table')->setVisible(false);
