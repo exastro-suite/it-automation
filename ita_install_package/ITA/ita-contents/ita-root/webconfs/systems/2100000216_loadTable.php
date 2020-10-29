@@ -53,17 +53,19 @@ $tmpFx = function (&$aryVariant=[],&$arySetting=[]){
     $table->addColumn($c);
 
     // MENU_GROUP
-    $c = new IDColumn('MENU_GROUP_ID', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230031"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME', NULL);
+    $c = new TextColumn('MENU_GROUP_NAME',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230031"));
     $c->setRequired(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230032"));
     $c->setHiddenMainTableColumn(false);
+    $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt("",true))); // 更新FORMでREADONLY状態にする
     $table->addColumn($c);
 
     // MENU
-    $c = new IDColumn('MENU_ID', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230041"), 'D_MENU_LIST', 'MENU_ID', 'MENU_NAME', NULL);
+    $c = new TextColumn('MENU_NAME',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230041"));
     $c->setRequired(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230042"));
     $c->setHiddenMainTableColumn(true);
+    $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt("",true))); // 更新FORMでREADONLY状態にする
     $table->addColumn($c);
 
     // 表示順序
