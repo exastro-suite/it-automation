@@ -955,6 +955,18 @@ function Mix1_1_jumpToSymphonyInstanceMonitor(symphony_instance_id){
     open( url, "_blank");
 }
 
+function Mix1_1_in_dl(conductor_instance_id){
+    // 遷移先URLを作成
+    var url = '/default/menu/05_preupload.php?no=2100180006&mode=in&conductor_instance_id=' + conductor_instance_id;
+    open( url, "_blank");
+}
+
+function Mix1_1_out_dl(conductor_instance_id){
+    // 遷移先URLを作成
+    var url = '/default/menu/05_preupload.php?no=2100180006&mode=out&conductor_instance_id=' + conductor_instance_id;
+    open( url, "_blank");
+}
+
 
 function queryDataToFilter(){
     // クエリから値を取得
