@@ -64,7 +64,7 @@ $tmpFx = function (&$aryVariant=[],&$arySetting=[]){
     $c = new TextColumn('MENU_NAME',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230041"));
     $c->setRequired(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230042"));
-    $c->setHiddenMainTableColumn(true);
+    $c->setHiddenMainTableColumn(false);
     $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt("",true))); // 更新FORMでREADONLY状態にする
     $table->addColumn($c);
 
