@@ -70,7 +70,6 @@ $ary["ITAWDCC-91024"] = "Month";
 $ary["ITAWDCC-91025"] = "Regularly management procedure";
 $ary["ITAWDCC-92001"] = "Decision";
 $ary["ITAWDCC-92002"] = "Cansel";
-$ary["ITAWDCC-92003"] = "ERROR:The file could not be downloaded\nThe file that can be downloaded does not exist";
 $ary["ITAWDCC-92101"] = "Do you want to delete it?";
 $ary["ITAWDCC-92102"] = "Main menu cannot be deleted.";
 $ary["ITAWDCC-92103"] = "Name";
