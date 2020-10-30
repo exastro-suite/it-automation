@@ -103,6 +103,14 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-306080"));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
+    //リンクボタン
+    $c = new LinkButtonColumn('INPUT_DOWNLOAD',$g['objMTS']->getSomeMessage("ITABASEH-MNU-309031"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-309033"), 'in_dl', array(':CONDUCTOR_INSTANCE_NO')); 
+    $table->addColumn($c);
+   
+    //リンクボタン
+    $c = new LinkButtonColumn('RESULT_DOWNLOAD',$g['objMTS']->getSomeMessage("ITABASEH-MNU-309032"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-309033"), 'out_dl', array(':CONDUCTOR_INSTANCE_NO')); 
+    $table->addColumn($c);
+
     $c = new DateTimeColumn('TIME_BOOK',$g['objMTS']->getSomeMessage("ITABASEH-MNU-203040"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-203050"));//エクセル・ヘッダでの説明
 	$c->setValidator(new DateTimeValidator(null,null));

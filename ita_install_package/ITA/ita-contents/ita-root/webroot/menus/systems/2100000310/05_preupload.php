@@ -53,6 +53,9 @@
     require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_05_preupload.php");
     //-- サイト個別PHP要素、ここから--
     require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_02_access.php");
+    require_once ($root_dir_path . "/libs/commonlibs/common_php_functions.php");
+    require_once ($root_dir_path . "/libs/commonlibs/common_php_classes.php");
+    $objMTS = new MessageTemplateStorage();
 
 
     if(array_key_exists("mode",$_GET)===true && array_key_exists("symphony_instance_id",$_GET)===true){
@@ -105,6 +108,7 @@
                 }
                 foreach($list as $dllist){
                     $selectZip = $callDir.str_pad($dllist['EXECUTION_NO'],10,0,STR_PAD_LEFT)."/".$dllist[$inOrOut];
+                    if(!file_exists($selectZip)) continue;
                     $empDir = str_pad($dllist['PATTERN_ID'],10,0,STR_PAD_LEFT);
                     $zip->addEmptyDir($empDir);
                     $zip->addFile($selectZip,$empDir."/".$dllist[$inOrOut]);
@@ -114,11 +118,16 @@
         }
 
         $zip->close();
-        
+
         $res = $zip->open($filepath.$filename, ZipArchive::CHECKCONS);
-        if($res !== true){
+        if($res !== true || !file_exists($filepath.$filename)){
+            //zipファイルの中身がない場合にアラート出力
             ob_end_clean();
-            echo "<script type='text/javascript'>window.close();</script>";
+            $msg = $objMTS->getSomeMessage("ITABASEH-ERR-170016");
+            print <<< EOD
+            <script type="text/javascript">window.alert("{$msg}");</script>
+            <script type="text/javascript">window.close();</script>
+EOD;
         }else{
              // 上記で作ったZIPをダウンロードします。
             header("Content-Type: application/zip");
@@ -127,10 +136,11 @@
             // ファイルを出力する前に、バッファの内容をクリア（ファイルの破損防止）
             ob_end_clean();
             readfile($filepath.$filename); 
+            //DL後ZIPファイル削除
+            unlink($filepath.$filename);
         }
  
-        //DL後ZIPファイル削除
-        unlink($filepath.$filename);
+
 
     }
 
