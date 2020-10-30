@@ -1,11 +1,18 @@
-# Select install mode. ("Install_Online","Install_Offline","Gather_Library","Install_ITA","Versionup_All","Versionup_ITA","Uninstall")
+# Select install mode. 
+# ("Install_Online","Install_Offline","Gather_Library","Install_ITA",
+# "Versionup_All","Versionup_ITA","Uninstall")
 # e.g) install_mode:Install_Online
-# *This installer operates according to the inputted values below
-#  Install_Online: ITA will be installed after the necessary libraries has been installed via internet.
-#  Install_Offline: ITA will start installing using the package created in Gather Library.
-#  Gather_Library: Gathers the necessary libraries via internet and creates the package necessary to execute Install_Offline. (Execute this before executing Install_Offline)
+# *This installer operates according to the inputted values below.
+#  Install_Online: ITA will be installed after the necessary libraries
+#                  has been installed via internet.
+#  Install_Offline: ITA will start installing using the package created
+#                   in Gather Library.
+#  Gather_Library: Gathers the necessary libraries via internet and creates
+#                  the package necessary to execute Install_Offline.
+#                  (Execute this before executing Install_Offline)
 #  Install_ITA: Installs ITA without installing any libraries.
-#  Versionup_All: Installs ITA after installing the necessary libraries for the desired ITA version via internet.
+#  Versionup_All: Installs ITA after installing the necessary libraries for
+#                 the desired ITA version via internet.
 #  Versionup_ITA: Updates ITA without installing any libraries.
 #  Uninstall: ITA Uninstalls ITA.(Libraries will not be uninstalled)
 install_mode:Install_Online
@@ -20,7 +27,8 @@ ita_language:en_US
 
 # Select Operation System. ("CentOS7","CentOS8","RHEL7","RHEL8")
 # e.g) linux_os:RHEL8
-# * If registering a subscription is needed in order to acquire the RHEL7 and RHEL8 libraries, please do so in advance.
+# * If registering a subscription is needed in order to acquire
+#   the RHEL7 and RHEL8 libraries, please do so in advance.
 linux_os:
 
 # Enter the MariaDB root user's password
@@ -51,8 +59,11 @@ terraform_driver:no
 # e.g) ita_domain:exastro-it-automation.local
 ita_domain:exastro-it-automation.local
 
-#########################################################################
-#Enter only when using user-specified certificate and private key
+################################################################################
+# Enter when using user-specified certificates and private keys.
+# If no file path is entered for both "certificate_path" and "private_key_path",
+# the ITA installer creates and installs a self-certificate and private key
+# using the values entered in "ita_domain".
 
 # Enter the file path where the certificate to be install.
 # e.g) certificate_path:/temp/etc_pki_tls_certs/exastro-it-automation.crt
@@ -62,4 +73,4 @@ certificate_path:
 # e.g) private_key_path:/temp/etc_pki_tls_certs/exastro-it-automation.key
 private_key_path:
 
-#########################################################################
+################################################################################
