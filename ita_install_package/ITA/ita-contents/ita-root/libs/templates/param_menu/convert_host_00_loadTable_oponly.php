@@ -158,21 +158,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
        $intErrorType = null;
        $aryErrorMsgBody = array();
        $strFxName = "NONAME(countTableRowLengthAgent)";
-       // RBAC対応
-       $query = "SELECT ACCESS_AUTH FROM " . $objTable->getDBMainTableHiddenID() . " T1 WHERE T1.".$objTable->getRequiredDisuseColumnID() ." IN ('0','1') ";
+       $query = "SELECT COUNT(*) AS REC_CNT FROM " . $objTable->getDBMainTableHiddenID() . " T1 WHERE T1.".$objTable->getRequiredDisuseColumnID() ." IN ('0','1') ";
        $aryForBind = array();
        $aryRetBody = singleSQLExecuteAgent($query, $aryForBind, $strFxName);
        
        if( $aryRetBody[0] === true ){
            $objQuery = $aryRetBody[1];
-           // RBAC対応
-           $intRowLength = 0;
-           $ret = getTargetRecodeCount($objTable,$objQuery,$ntRowLength);
-           if($ret === false) {
-               $intErrorType = 500;
-               $intRowLength = -1;
-           }
+           $row = $objQuery->resultFetch();
            unset($objQuery);
+           $intRowLength = $row['REC_CNT'];
        }
        else{
            $intErrorType = 500;
