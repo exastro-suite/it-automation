@@ -38,7 +38,7 @@ $tmpFx = function (&$aryVariant=[],&$arySetting=[]){
     // Table settings
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230002"));
     $table->setGeneObject('AutoSearchStart',true); //('',true,false)
-    $table->setDBSortKey(["DISP_SEQ"=>"ASC"]); // SORT条件を指定
+    $table->setDBSortKey(["DISP_SEQ"=>"ASC","NAME"=>"ASC"]); // SORT条件を指定
     $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true); // Excel出力ボタンを非表示
     $table->setGeneObject('webSetting', $arrayWebSetting);
     $table->setDBMainTableHiddenID('A_SEQUENCE');
