@@ -1540,18 +1540,18 @@ $c->getOutputType("filter_table")->setVisible(false);
 $c->setSubtotalFlag(false);
 $table->addColumn($c);
 EOD;
-            $work = str_replace(REPLACE_INPUT_ORDER, $inputOrder, $work);
+                $work = str_replace(REPLACE_INPUT_ORDER, $inputOrder, $work);
 
-            $convertViewLoadTableVal .= $convColumnGrpParts;
-            $work = str_replace(REPLACE_ITEM,   $convertViewLoadTableVal,  $work);
-        }
-        else{
-            $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
-            $work = str_replace(REPLACE_INPUT_ORDER, "", $work);
-            $viewLoadTableVal .= $columnGrpParts;
-            $work = str_replace(REPLACE_ITEM,   $viewLoadTableVal,  $work);
-        }
-        $viewLoadTable = $work;
+                $convertViewLoadTableVal .= $convColumnGrpParts;
+                $work = str_replace(REPLACE_ITEM,   $convertViewLoadTableVal,  $work);
+            }
+            else{
+                $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_INPUT_ORDER, "", $work);
+                $viewLoadTableVal .= $columnGrpParts;
+                $work = str_replace(REPLACE_ITEM,   $viewLoadTableVal,  $work);
+            }
+            $viewLoadTable = $work;
 
             // ホストグループ用のSQL
             $work = $hgSqlTmpl;
@@ -1810,6 +1810,17 @@ EOD;
         $convMenuId = null;
         $convHostMenuId = null;
         $result = updateMenuList($cmiData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $createConvFlg);
+
+        if(true !== $result){
+            // パラメータシート作成管理更新処理を行う
+            updateMenuStatus($targetData, "4", $result, true, true);
+            continue;
+        }
+
+        //////////////////////////
+        // シーケンステーブル更新(シーケンス管理メニュー対応)
+        //////////////////////////
+        $result = updateSequence($hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $menuTableName);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -3019,6 +3030,72 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$vi
         // 作成対象; データシート
         else if("2" == $cmiData['TARGET']){
             $hostMenuId = $targetArray[0]['MENU_ID'];  // MenuID はホスト用を使用
+        }
+
+        return true;
+    }
+    catch(Exception $e){
+        return $e->getMessage();
+    }
+}
+
+/*
+ * シーケンステーブル更新(シーケンス管理メニュー対応)
+ */
+function updateSequence($hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target, $menuTableName){
+    global $objDBCA, $db_model_ch, $objMTS;
+    $sqlArray = array();
+    try{
+        // データシートの場合
+        if("2" == $target){
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+        }
+        // パラメータシートの場合
+        else{
+            // ホストグループかつ縦メニュー
+            if(NULL !== $convMenuId && NULL !== $hgMenuId){
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hgMenuId} WHERE NAME ='F_${menuTableName}_HG_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hgMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_HG_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convMenuId} WHERE NAME ='F_${menuTableName}_CONV_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_CONV_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convHostMenuId} WHERE NAME ='F_${menuTableName}_CONV_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convHostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_CONV_H_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+            }
+            // 縦メニュー
+            else if(NULL !== $convMenuId && NULL === $hgMenuId){
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convMenuId} WHERE NAME ='F_${menuTableName}_CONV_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_CONV_H_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+            }
+            // ホストグループ
+            else if(NULL === $convMenuId && NULL !== $hgMenuId){
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hgMenuId} WHERE NAME ='F_${menuTableName}_HG_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hgMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_HG_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+            }
+            // 通常
+            else{
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+            }
+        }
+
+        $baseTable = new BaseTable_CPM($objDBCA, $db_model_ch);
+        foreach($sqlArray as $sql){
+
+            // SQL実行
+            $result = $baseTable->execQuery($sql, NULL, $objQuery);
+            if(true !== $result){
+                outputLog("SQL=$sql");
+                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                outputLog($msg);
+                throw new Exception($msg);
+            }
         }
 
         return true;
