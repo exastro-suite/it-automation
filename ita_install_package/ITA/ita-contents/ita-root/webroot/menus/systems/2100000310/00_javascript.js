@@ -119,26 +119,18 @@ callback.prototype = {
                 window.alert(getSomeMessage("ITAWDCC90103",{0:webPrintRowLimit,1:ary_result[2]}));
                 // Web表を表示しない
                 Filter1Tbl_print_async(0);
-                GraphDisplaySwich(0);
-                Graphs_purge();
             }else{
                 if( ckRangeOfConfirm(ary_result[2] , webPrintRowConfirm, webPrintRowLimit) ){
                     if( window.confirm( getSomeMessage("ITAWDCC20201",{0:ary_result[2]})) ){
                         // Web表を表示する
                         Filter1Tbl_print_async(1);
-                        Graphs_print();
-                        GraphDisplaySwich(1);
                     }else{
                         // Web表を表示しない
                         Filter1Tbl_print_async(0);
-                        GraphDisplaySwich(0);
-                        Graphs_purge();
                     }
                 }else{
                     // Web表を表示する
                     Filter1Tbl_print_async(1);
-                    Graphs_print();
-                    GraphDisplaySwich(1);
                 }
             }
         }else if( ary_result[0] == "002" ){
@@ -374,7 +366,6 @@ callback.prototype = {
     },
     //---- ここからカスタマイズした場合の[callback]メソッド配置域
     Filter1Cht_recDraw : function(result){
-        Graph1_drawBlock(result);
     }
     // ここまでカスタマイズした場合の[callback]メソッド配置域----
 }
@@ -422,7 +413,6 @@ window.onload = function(){
     //----※ここに一覧が表示されます。
     document.getElementById('table_area').innerHTML = getSomeMessage("ITAWDCC10101");
     //----※ここにグラフが表示されます。
-    document.getElementById('Graph_msg').innerHTML = getSomeMessage("ITAWDCC10103");
 
     if(privilege != 2){
         // 登録の初期HTMLを表示する
@@ -433,9 +423,7 @@ window.onload = function(){
 // ----サイト個別、事前処理
 // サイト個別、事前処理----
 
-    GraphDisplaySwich(0);
     show('SetsumeiMidashi'      ,'SetsumeiNakami'       );
-    show('Graph1_Midashi'       ,'Graph1_Nakami'        );
     show('Mix1_Midashi'         ,'Mix1_Nakami'          );
     show('AllDumpMidashi'       ,'AllDumpNakami'        );
     show('Journal1_Midashi'     ,'Journal1_Nakami'      );
