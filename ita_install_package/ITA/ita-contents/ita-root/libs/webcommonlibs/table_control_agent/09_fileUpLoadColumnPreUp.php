@@ -531,7 +531,8 @@
                 $objRIColumn = $arrayColumn[$strRIColumnId];
                 $objRIColumn->addFilterValueForDTiS($strRIN, null);
                 
-                $sql = generateJournalSelectSQL($objTable,true);
+                // RBAC アクセス権による絞り込みは不要
+                $sql = generateJournalSelectSQL($objTable,true);  
                 $arrayFileterBody = $objTable->getFilterArray(true);
                 $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
                 if( $retArray[0] === true ){

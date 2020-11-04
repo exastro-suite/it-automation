@@ -2731,6 +2731,8 @@ class SelectTabBFmt extends InputTabBFmt {
 
 		//----初期表示用のリストソースを取得する
 		$aryRetBody = $this->getSelectList($rowData,$aryVariant);
+		// #28 HTMLが帰ってきてする
+
 		if( $aryRetBody[1]!==null ){
 			$arraySelectElement = null;
 		}else{
@@ -3064,15 +3066,20 @@ EOD;
 		$aryDataSet = array();
 
 		$objFunction = $this->objFunctionForGetFADSelectList;
+
 		if( is_callable($objFunction)=== true ){
+
 			$aryRetBody = $objFunction($this, $aryVariant, $arySetting, $aryOverride);
 		}else{
+
+
 			if( is_a($this->objColumn, "Column")===true ){
 				//----IDColumnとの連動系
 				
 				$objOT = $this->objColumn->getOutputType($this->strFormatterId);
+
 				$aryRetBody = $objOT->getFADSelectList($aryVariant, $arySetting, $aryOverride);
-				
+
 				//IDColumnとの連動系----
 			}else{
 				$aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -3139,6 +3146,7 @@ EOD;
 	}
 
 	//----初期表示後に、(後発)動的に、リストタグを表示するメソッド
+	// SelectTabBFmt::printTagFromFADSelectList
 	function printTagFromFADSelectList(&$aryVariant=array(), &$arySetting=array(), $aryOverride=array()){
 		$retStrBody = "";
 		$intErrorType = null;
@@ -3936,6 +3944,7 @@ class FilterTabBFmt extends TabBFmt {
 		return $body;
 	}
 
+	// FilterTabBFmt::printTagFromFADSelectList
 	function printTagFromFADSelectList(&$aryVariant=array(), &$arySetting=array(), $aryOverride=array()){
 		global $g;
 		$retStrBody = "";
@@ -4633,7 +4642,14 @@ class SelectFilterTabBFmt extends TextFilterTabBFmt {
 			//----filter等、各Formatter用に、独自に設定されていなかった場合（通常の場合）
 			$arrayDispSelectTag=$this->objColumn->getMasterTableArrayFromMainTable();
 			if(is_null($arrayDispSelectTag)===true){
-				$arraySelectElement=createMasterTableDistinctArray($strMainTableBody, $strColId, $strDUColIdOfMainTable, $strMasterTableBody, $strKeyColumnOfMasterTable, $strDispColumnOfMasterTable, $strDUColumnOfMasterTable, $aryEtcetera);
+                                // ---- RBAC対応
+                                // SQLに埋め込むアクセス権のカラム名取得
+                                $AccessAuthColumName    = $g['global_getAccessAuthColumnName'];
+                                // loadtableに紐づいているオブジェクトのACCESS_AUTHカラム定義の有無取得
+                                $AccessAuthColumUse    = $g['global_getAccessAuth'];
+
+				$arraySelectElement=createMasterTableDistinctArray($strMainTableBody, $strColId, $strDUColIdOfMainTable, $strMasterTableBody, $strKeyColumnOfMasterTable, $strDispColumnOfMasterTable, $strDUColumnOfMasterTable, $aryEtcetera, $AccessAuthColumUse, $AccessAuthColumName);
+                                // RBAC対応 ----
 			}else{
 				$arraySelectElement=$arrayDispSelectTag;
 			}
