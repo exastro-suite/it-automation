@@ -91,8 +91,8 @@ $ary["ITAWDCC-92118"] = "Abnormal end";
 $ary["ITAWDCC-92119"] = "Unexpected error";
 $ary["ITAWDCC-92120"] = "Emergency stop";
 $ary["ITAWDCC-92121"] = "Schedule cancellation";
-$ary["ITAWDCC-92122"] = "Running";
-$ary["ITAWDCC-92123"] = "Not executed";
+$ary["ITAWDCC-92122"] = "Executing";
+$ary["ITAWDCC-92123"] = "Unexecuted (schedule)";
 $ary["ITAWDCC-92124"] = "Edit";
 $ary["ITAWDCC-92125"] = "Add widget";
 $ary["ITAWDCC-92126"] = "Registration";
@@ -123,4 +123,5 @@ $ary["ITAWDCC-92150"] = "Embed html";
 $ary["ITAWDCC-92151"] = "Display the entered HTML";
 $ary["ITAWDCC-92152"] = "Image";
 $ary["ITAWDCC-92153"] = "Attach image.";
+$ary["ITAWDCC-92154"] = "Unexecuted";
 ?>

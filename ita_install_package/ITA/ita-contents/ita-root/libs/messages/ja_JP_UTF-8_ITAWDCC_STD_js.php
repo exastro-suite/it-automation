@@ -123,4 +123,5 @@ $ary["ITAWDCC-92150"] = "HTML埋め込み";
 $ary["ITAWDCC-92151"] = "HTMLを入力して表示できます。";
 $ary["ITAWDCC-92152"] = "画像";
 $ary["ITAWDCC-92153"] = "画像を貼り付けます。";
+$ary["ITAWDCC-92154"] = "未実行";
 ?>
