@@ -59,6 +59,7 @@ const getWidgetMessage = function( id ) {
       '36':getSomeMessage("ITAWDCC92136"), // 画像URL
       '37':getSomeMessage("ITAWDCC92137"), // リンクURL
       '38':getSomeMessage("ITAWDCC92154"), // 未実行
+      '39':getSomeMessage("ITAWDCC92155")  // 表示できるメニューグループはありません。
     };
 
     if ( message[ id ] ) {
@@ -407,7 +408,7 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
         } else {
           contentHTML = ''
           + '<div id="dashboard-error-message">'
-            + '<p class="dashboard-error-message-text">表示できるメニューグループはありません。</p>'
+            + '<p class="dashboard-error-message-text">' + getWidgetMessage('39') + '</p>'
           + '</div>';
         }
         break;
