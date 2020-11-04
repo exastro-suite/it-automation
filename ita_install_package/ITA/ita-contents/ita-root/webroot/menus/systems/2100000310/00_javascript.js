@@ -412,7 +412,6 @@ window.onload = function(){
     // テーブル表示用領域に初期メッセ時を表示しておく
     //----※ここに一覧が表示されます。
     document.getElementById('table_area').innerHTML = getSomeMessage("ITAWDCC10101");
-    //----※ここにグラフが表示されます。
 
     if(privilege != 2){
         // 登録の初期HTMLを表示する
