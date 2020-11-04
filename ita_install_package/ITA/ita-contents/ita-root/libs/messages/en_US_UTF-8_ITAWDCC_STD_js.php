@@ -124,4 +124,5 @@ $ary["ITAWDCC-92151"] = "Display the entered HTML";
 $ary["ITAWDCC-92152"] = "Image";
 $ary["ITAWDCC-92153"] = "Attach image.";
 $ary["ITAWDCC-92154"] = "Unexecuted";
+$ary["ITAWDCC-92155"] = "There are no \"Menu group\" that can be displayed.";
 ?>
