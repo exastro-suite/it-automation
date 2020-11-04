@@ -649,62 +649,7 @@
             // (ここまで)現在のNODEの状態を取得する //
             ////////////////////////////////////////////////////////
 
-            ////////////////////////////////////////////////////////
-            // (ここから)ConductorCallループ確認 //
-            ////////////////////////////////////////////////////////
-            $boolCallConductorloopflg = false;
-            $arrCallInstanceNo = array($rowOfConductor['CONDUCTOR_INSTANCE_NO']);
 
-
-            //----各NODEの情報収集
-            
-            $aryTempForSql = array('WHERE'=>"CONDUCTOR_CLASS_NO = :CONDUCTOR_CLASS_NO AND CONDUCTOR_CALL_CLASS_NO IS NOT NULL AND DISUSE_FLAG IN ('0') ORDER BY NODE_CLASS_NO ASC");
-
-            // 更新用のテーブル定義
-            $aryConfigForIUD = $arrayConfigForNodeClassIUD;
-            
-            // BIND用のベースソース
-            $aryBaseSourceForBind = $aryNodeClassValueTmpl;
-
-            $intConductorclass = $rowOfConductor['I_CONDUCTOR_CLASS_NO'];
-
-            $aryCallNodes =  getNodeClassInfo($objDBCA,$db_model_ch,$intConductorclass,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
-          
-            $arrConductorList = array();
-            $aryRetBody = ConductorCallLoopValidator($objDBCA,$db_model_ch,$strFxName,$intConductorclass,$aryCallNodes,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$arrConductorList);
-
-            if( is_array($aryRetBody) ) {
-                $boolNodeExecuteFlg = true;
-            }else{
-                $boolNodeExecuteFlg = false;
-            }
-
-            ////////////////////////////////////////////////////////
-            // (ここまで)ConductorCallループ確認 //
-            ////////////////////////////////////////////////////////
-
-            //ループの場合
-            if( $boolNodeExecuteFlg === false){
-
-                $arySymInsUpdateTgtSource = $rowOfConductor;
-                $arySymInsUpdateTgtSource['LAST_UPDATE_USER'] = $db_access_user_id;
-                $arySymInsUpdateTgtSource['STATUS_ID']= 10; //準備エラー
-                $arySymInsUpdateTgtSource['TIME_START'] = "DATETIMEAUTO(6)";
-                $arySymInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";  
-                // 更新用のテーブル定義
-                $aryConfigForIUD = $aryConfigForSymInsIUD;
-
-                // BIND用のベースソース
-                $aryBaseSourceForBind = $arySymInsUpdateTgtSource;
-                
-                $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
-                
-                if( $aryRetBody !== true  ){
-                    // 例外処理へ
-                    $strErrStepIdInFx="00001100";
-                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                }
-            }else{
                 //////////////////////////////////////////////////////
                 // (ここから)未実行の場合 STARTノード実行準備　//
                 //////////////////////////////////////////////////////
@@ -2657,7 +2602,6 @@
                 }
                 //NODEとCONDUCTORインスタンスのへのステータス同期 ---   
 
-            }
 
             if( $objDBCA->transactionCommit() !== true ){
                 // 異常フラグON
@@ -3044,43 +2988,6 @@ function getMovementStatus($objOLA,$rowOfFocusMovement){
 
 }
 
-//Callループチェック処理呼び出し用
-function ConductorCallLoopValidator( $objDBCA,$db_model_ch,$strFxName,$intConductorclass,$aryCallNodes,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$arrCallInstanceNo=array(),$arrConductorList=array() ){
-
-    $aryRetBody = checkCallLoopValidator ($objDBCA,$db_model_ch,$strFxName,$intConductorclass,$aryCallNodes,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,array(),$arrConductorList);
-    return $aryRetBody;
-
-}
-
-//Callループチェック処理
-function checkCallLoopValidator( $objDBCA,$db_model_ch,$strFxName,$intConductorclass,$aryCallNodes,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$arrCallInstanceNo=array(),$arrConductorList=array() ){
-
-            $retArray =  getNodeClassInfo($objDBCA,$db_model_ch,$intConductorclass,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
-
-                foreach ($retArray as $key => $value) {
-
-                        $arrConductorList[$value["CONDUCTOR_CLASS_NO"]][]=$value["CONDUCTOR_CALL_CLASS_NO"];
-
-                    $retArray2 =  getNodeClassInfo($objDBCA,$db_model_ch,$value["CONDUCTOR_CALL_CLASS_NO"],$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
-                    foreach ($retArray2 as $key2 => $value2) {
-
-                        if( !isset( $arrConductorList[$value2["CONDUCTOR_CLASS_NO"]] ) ){
-                            $arrConductorList[$value2["CONDUCTOR_CLASS_NO"]][]=$value2["CONDUCTOR_CALL_CLASS_NO"];
-                            $arrConductorList = checkCallLoopValidator ($objDBCA,$db_model_ch,$strFxName,$value2["CONDUCTOR_CALL_CLASS_NO"],$retArray,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,array(),$arrConductorList);
-
-                        }elseif( !array_search( $value2["CONDUCTOR_CALL_CLASS_NO"] , $arrConductorList[$value2["CONDUCTOR_CLASS_NO"]] ) ){
-                            $arrConductorList[$value2["CONDUCTOR_CLASS_NO"]][]=$value2["CONDUCTOR_CALL_CLASS_NO"];
-
-                            $arrConductorList = checkCallLoopValidator ($objDBCA,$db_model_ch,$strFxName,$value2["CONDUCTOR_CALL_CLASS_NO"],$retArray,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,array(),$arrConductorList);
-                        }else{
-                            // 例外処理へ
-                            return false;
-                        }
-                    }
-                }
-                return $arrConductorList;
-
-}
 //nodeインスタンスの取得（Conductorインスタンス単体）intConductorInsetance
 function getNodeInstanceInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName){
 
