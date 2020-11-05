@@ -58,6 +58,8 @@ const getWidgetMessage = function( id ) {
       '35':getSomeMessage("ITAWDCC92135"), // 表示しない
       '36':getSomeMessage("ITAWDCC92136"), // 画像URL
       '37':getSomeMessage("ITAWDCC92137"), // リンクURL
+      '38':getSomeMessage("ITAWDCC92154"), // 未実行
+      '39':getSomeMessage("ITAWDCC92155")  // 表示できるメニューグループはありません。
     };
 
     if ( message[ id ] ) {
@@ -400,6 +402,16 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
     switch ( widgetData['widget_id'] ) {
       // メインメニュー、メニューセット
       case '1':
+        if ( Object.keys( widgetInfo['menu'] ).length !== 0 ) {
+          contentHTML = '<ul class="widget-menu-list">' + widgetMenu( widgetSetID ) + '</ul>';
+          dataHTML = ' data-menu-col="' + widgetData['data']['menu_col_number'] + '"';
+        } else {
+          contentHTML = ''
+          + '<div id="dashboard-error-message">'
+            + '<p class="dashboard-error-message-text">' + getWidgetMessage('39') + '</p>'
+          + '</div>';
+        }
+        break;
       case '2':
         contentHTML = '<ul class="widget-menu-list">' + widgetMenu( widgetSetID ) + '</ul>';
         dataHTML = ' data-menu-col="' + widgetData['data']['menu_col_number'] + '"';
@@ -983,7 +995,7 @@ const editWidget = function( setID ) {
   
   // 基本設定
   widgetEditHTML += ''
-    + getRowHTML( getWidgetMessage('3'), '<input class="edit-input-text edit-display-name" type="text" value="' + widgetData['display_name'] + '">')
+    + getRowHTML( getWidgetMessage('3'), '<input data-max-length="32" class="edit-input-text edit-display-name" type="text" value="' + widgetData['display_name'] + '">')
     + getRowHTML( getWidgetMessage('4'), getRadioHTML('colspan',[[1,1],[2,2],[3,3]], Number( widgetData['colspan'] ) ) )
     + getRowHTML( getWidgetMessage('5'), getRadioHTML('rowspan',[[1,1],[2,2],[3,3],[4,4],[5,5]], Number(widgetData['rowspan'] ) ) )
     + getRowHTML( getWidgetMessage('32'), getRadioHTML('title',[[getWidgetMessage('34'),1],[getWidgetMessage('35'),0]], Number(widgetData['title'] ) ) )
@@ -998,9 +1010,9 @@ const editWidget = function( setID ) {
     case '3': {
       const getShortcutInputRow = function( name, url, target ) {
         return '<tr class="edit-shortcut-row">'
-          + '<td class="edit-shortcut-cell edit-shortcut-name"><input class="edit-shortcut-input edit-shortcut-input-name" type="text" value="' + name + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-url"><input class="edit-shortcut-input edit-shortcut-input-url" type="text" value="' + url + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-target"><input class="edit-shortcut-input edit-shortcut-input-target" type="text" value="' + target + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-name"><input data-max-length="32" class="edit-shortcut-input edit-shortcut-input-name" type="text" value="' + name + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-url"><input data-max-length="256" class="edit-shortcut-input edit-shortcut-input-url" type="text" value="' + url + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-target"><input data-max-length="16" class="edit-shortcut-input edit-shortcut-input-target" type="text" value="' + target + '"></td>'
           + '<td class="edit-shortcut-cell edit-shortcut-remove"><button class="edit-shortcut-remove-button"><span class="cross-mark"></span></button></td>'
         + '</tr>';
       };
@@ -1038,20 +1050,24 @@ const editWidget = function( setID ) {
       });
       } break;
     case '7':
-      widgetEditHTML += getRowHTML( getWidgetMessage('29'), '<input class="edit-input-number edit-period-number" type="number" value="' + widgetData['data']['period'] + '">');
+      widgetEditHTML += getRowHTML( getWidgetMessage('29'), '<input data-min="1" data-max="365" class="edit-input-number edit-period-number" type="number" value="' + widgetData['data']['period'] + '">');
       break;
     case '8':
       widgetEditHTML += getRowHTML('HTML', '<textarea class="widget-edit-textarea" id="edit-html">' + widgetTemp[setID]['html'] + '</textarea>');
       break;
     case '9':
-      widgetEditHTML += getRowHTML( getWidgetMessage('36'), '<input class="edit-input-text edit-image-url" type="text" value="' + widgetData['data']['image'] + '">');
-      widgetEditHTML += getRowHTML('Link URL', '<input class="edit-input-text edit-image-link" type="text" value="' + widgetData['data']['link'] + '">');
-      widgetEditHTML += getRowHTML('Link target', '<input class="edit-input-text edit-image-target" type="text" value="' + widgetData['data']['target'] + '">');
+      widgetEditHTML += getRowHTML( getWidgetMessage('36'), '<input data-max-length="256" class="edit-input-text edit-image-url" type="text" value="' + widgetData['data']['image'] + '">');
+      widgetEditHTML += getRowHTML('Link URL', '<input data-max-length="256" class="edit-input-text edit-image-link" type="text" value="' + widgetData['data']['link'] + '">');
+      widgetEditHTML += getRowHTML('Link target', '<input data-max-length="16" class="edit-input-text edit-image-target" type="text" value="' + widgetData['data']['target'] + '">');
       break;
   }
  
   widgetEditHTML += '</tbody></table></div>'
   $modalBody.html( widgetEditHTML );
+  
+  // 入力チェック
+  editor.inputTextValidation('.editor-modal-body', '.edit-input-text, .edit-shortcut-input');
+  editor.inputNumberValidation('.editor-modal-body', '.edit-input-number');
   
   // 決定・取り消しボタン
   const $modalButton = $('.editor-modal-footer-menu-button');
@@ -1959,14 +1975,17 @@ function setPieChart( resultData, type ) {
       
       pieChartData = {};
       pieChartData[ getWidgetMessage('22') ] = ['runing',0,0,0];
-      pieChartData[ getWidgetMessage('23') ] = ['waiting',0,0,0];
+      pieChartData[ getWidgetMessage('23') ] = ['schedule',0,0,0];
+      pieChartData[ getWidgetMessage('38') ] = ['waiting',0,0,0];
       
       for ( let type in resultData ) {
         for ( let key in resultData[type] ) {
           const status = resultData[type][key]['status'],
                 typeNumber = ( type === 'conductor')?2:3;
-          pieChartData[status][typeNumber] += 1;
-          pieChartData[status][1] += 1;
+          if ( pieChartData[status] !== undefined ) {
+            pieChartData[status][typeNumber] += 1;
+            pieChartData[status][1] += 1;
+          }
         }
       }
       break;
@@ -2165,7 +2184,7 @@ const widgetID = 7,
       year = ('000' + date.getFullYear() ).slice( -4 ),
       month = ('0' + ( date.getMonth() + 1 )).slice( -2 ),
       day = ('0' + date.getDate() ).slice( -2 ),
-      today = Number ( [ year, month, day ].join('') );
+      today = new Date( year +'-'+ month +'-'+ day );
 
 // 履歴配列初期化
 for ( let i = 0; i < period; i++ ) {
@@ -2181,8 +2200,8 @@ for ( let i = 0; i < period; i++ ) {
 for ( let type in result ) {
   for ( let key in result[type] ) {
     const status = result[type][key]['status'],
-          targetDay = Number ( result[type][key]['end'].replace(/-/g, '').slice( 0, 8 ) ),
-          days = today - targetDay,
+          targetDay = new Date( result[type][key]['end'].slice( 0, 10 ) ),
+          days = ( today - targetDay ) / 86400000,
           typeNumber = ( type === 'conductor')? 1:2;
           
     let resultNumber;
@@ -2206,7 +2225,8 @@ for ( let type in result ) {
   }
 }
 
-let historyHTML = '<div class="stacked-graph">';
+const historyClass = ( period > 99 )? ' period-many': '';
+let historyHTML = '<div class="stacked-graph'+ historyClass + '">';
 
 // 最大値を求める
 let maxNumber = 0;
