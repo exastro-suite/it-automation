@@ -80,8 +80,9 @@
                                            "MENUGROUP_FOR_INPUT"    => $menuData['menu']['MENUGROUP_FOR_INPUT'],
                                            "MENUGROUP_FOR_SUBST"    => $menuData['menu']['MENUGROUP_FOR_SUBST'],
                                            "MENUGROUP_FOR_VIEW"     => $menuData['menu']['MENUGROUP_FOR_VIEW'],
-                                           "DESCRIPTION" => $menuData['menu']['DESCRIPTION'],
-                                           "NOTE" => $menuData['menu']['NOTE'],
+                                           "DESCRIPTION"            => $menuData['menu']['DESCRIPTION'],
+                                           "ACCESS_AUTH"            => $menuData['menu']['ACCESS_AUTH'],
+                                           "NOTE"                   => $menuData['menu']['NOTE'],
                                           );
                 
                 $g["page_dir"] = "2100160001";
@@ -178,38 +179,39 @@
                             }
                         }
                     }
-                    if(!array_key_exists("MAX_LENGTH",$itemData))         $itemData["MAX_LENGTH"] = "";
-                    if(!array_key_exists("PREG_MATCH",$itemData))         $itemData["PREG_MATCH"] = "";
-                    if(!array_key_exists("MULTI_MAX_LENGTH",$itemData))   $itemData["MULTI_MAX_LENGTH"] = "";
-                    if(!array_key_exists("MULTI_PREG_MATCH",$itemData))   $itemData["MULTI_PREG_MATCH"] = "";
-                    if(!array_key_exists("INT_MIN",$itemData))            $itemData["INT_MIN"] = "";
-                    if(!array_key_exists("INT_MAX",$itemData))            $itemData["INT_MAX"] = "";
-                    if(!array_key_exists("FLOAT_MIN",$itemData))          $itemData["FLOAT_MIN"] = "";
-                    if(!array_key_exists("FLOAT_MAX",$itemData))          $itemData["FLOAT_MAX"] = "";
-                    if(!array_key_exists("FLOAT_DIGIT",$itemData))        $itemData["FLOAT_DIGIT"] = "";
-                    if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))    $itemData["OTHER_MENU_LINK_ID"] = "";
-                    if(!array_key_exists("PW_MAX_LENGTH",$itemData))      $itemData["PW_MAX_LENGTH"] = "";
+                    if(!array_key_exists("MAX_LENGTH",$itemData))           $itemData["MAX_LENGTH"] = "";
+                    if(!array_key_exists("PREG_MATCH",$itemData))           $itemData["PREG_MATCH"] = "";
+                    if(!array_key_exists("MULTI_MAX_LENGTH",$itemData))     $itemData["MULTI_MAX_LENGTH"] = "";
+                    if(!array_key_exists("MULTI_PREG_MATCH",$itemData))     $itemData["MULTI_PREG_MATCH"] = "";
+                    if(!array_key_exists("INT_MIN",$itemData))              $itemData["INT_MIN"] = "";
+                    if(!array_key_exists("INT_MAX",$itemData))              $itemData["INT_MAX"] = "";
+                    if(!array_key_exists("FLOAT_MIN",$itemData))            $itemData["FLOAT_MIN"] = "";
+                    if(!array_key_exists("FLOAT_MAX",$itemData))            $itemData["FLOAT_MAX"] = "";
+                    if(!array_key_exists("FLOAT_DIGIT",$itemData))          $itemData["FLOAT_DIGIT"] = "";
+                    if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))   $itemData["OTHER_MENU_LINK_ID"] = "";
+                    if(!array_key_exists("PW_MAX_LENGTH",$itemData))        $itemData["PW_MAX_LENGTH"] = "";
                     
-                    $arrayRegisterData = array("CREATE_MENU_ID" => $menuData['menu']['CREATE_MENU_ID'],
-                                               "ITEM_NAME" => $itemData['ITEM_NAME'],
-                                               "DISP_SEQ" => $itemData['DISP_SEQ'],
-                                               "REQUIRED" => $required,
-                                               "UNIQUED" => $uniqued,
-                                               "COL_GROUP_ID" => $itemData['COL_GROUP_ID'],
-                                               "INPUT_METHOD_ID" => $itemData['INPUT_METHOD_ID'],
-                                               "MAX_LENGTH" => $itemData['MAX_LENGTH'],
-                                               "PREG_MATCH" => $itemData['PREG_MATCH'],
-                                               "MULTI_MAX_LENGTH" => $itemData['MULTI_MAX_LENGTH'],
-                                               "MULTI_PREG_MATCH" => $itemData['MULTI_PREG_MATCH'],
-                                               "INT_MIN" => $itemData['INT_MIN'],
-                                               "INT_MAX" => $itemData['INT_MAX'],
-                                               "FLOAT_MIN" => $itemData['FLOAT_MIN'],
-                                               "FLOAT_MAX" => $itemData['FLOAT_MAX'],
-                                               "FLOAT_DIGIT" => $itemData['FLOAT_DIGIT'],
+                    $arrayRegisterData = array("CREATE_MENU_ID"     => $menuData['menu']['CREATE_MENU_ID'],
+                                               "ITEM_NAME"          => $itemData['ITEM_NAME'],
+                                               "DISP_SEQ"           => $itemData['DISP_SEQ'],
+                                               "REQUIRED"           => $required,
+                                               "UNIQUED"            => $uniqued,
+                                               "COL_GROUP_ID"       => $itemData['COL_GROUP_ID'],
+                                               "INPUT_METHOD_ID"    => $itemData['INPUT_METHOD_ID'],
+                                               "MAX_LENGTH"         => $itemData['MAX_LENGTH'],
+                                               "PREG_MATCH"         => $itemData['PREG_MATCH'],
+                                               "MULTI_MAX_LENGTH"   => $itemData['MULTI_MAX_LENGTH'],
+                                               "MULTI_PREG_MATCH"   => $itemData['MULTI_PREG_MATCH'],
+                                               "INT_MIN"            => $itemData['INT_MIN'],
+                                               "INT_MAX"            => $itemData['INT_MAX'],
+                                               "FLOAT_MIN"          => $itemData['FLOAT_MIN'],
+                                               "FLOAT_MAX"          => $itemData['FLOAT_MAX'],
+                                               "FLOAT_DIGIT"        => $itemData['FLOAT_DIGIT'],
                                                "OTHER_MENU_LINK_ID" => $itemData['OTHER_MENU_LINK_ID'],
-                                               "PW_MAX_LENGTH" => $itemData['PW_MAX_LENGTH'],
-                                               "DESCRIPTION" => $itemData['DESCRIPTION'],
-                                               "NOTE" => $itemData['NOTE']
+                                               "PW_MAX_LENGTH"      => $itemData['PW_MAX_LENGTH'],
+                                               "DESCRIPTION"        => $itemData['DESCRIPTION'],
+                                               "ACCESS_AUTH"        => $menuData['menu']['ACCESS_AUTH'],
+                                               "NOTE"               => $itemData['NOTE']
                                               );
 
                     $g["page_dir"] = "2100160002";
@@ -241,8 +243,9 @@
                         $createItemID = $menuData['item'][$curGroup]['CREATE_ITEM_ID'];
                     }
                     $arrayRegisterData = array("CREATE_ITEM_ID" => $createItemID,
-                                               "COL_CNT" => $repeatCount / ($menuData['repeat']['r1']['REPEAT_CNT'] - 1),
-                                               "REPEAT_CNT" => $menuData['repeat']['r1']['REPEAT_CNT']
+                                               "COL_CNT"        => $repeatCount / ($menuData['repeat']['r1']['REPEAT_CNT'] - 1),
+                                               "REPEAT_CNT"     => $menuData['repeat']['r1']['REPEAT_CNT'],
+                                               "ACCESS_AUTH"    => $menuData['menu']['ACCESS_AUTH'],
                                               );
 
                     $g["page_dir"] = "2100160009";
@@ -261,6 +264,7 @@
                 $insertData['CREATE_MENU_ID'] = $menuData['menu']['CREATE_MENU_ID'];
                 $insertData['STATUS_ID'] = "1";
                 $insertData['FILE_NAME'] = "";
+                $insertData['ACCESS_AUTH'] = $menuData['menu']['ACCESS_AUTH'];
                 $insertData['NOTE'] = "";
                 $insertData['DISUSE_FLAG'] = "0";
                 $insertData['LAST_UPDATE_USER'] = $g['login_id'];
@@ -425,6 +429,7 @@
                                                   "MENUGROUP_FOR_SUBST"     => $menuData['menu']['MENUGROUP_FOR_SUBST'],
                                                   "MENUGROUP_FOR_VIEW"      => $menuData['menu']['MENUGROUP_FOR_VIEW'],
                                                   "DESCRIPTION"             => $menuData['menu']['DESCRIPTION'],
+                                                  "ACCESS_AUTH"             => $menuData['menu']['ACCESS_AUTH'],
                                                   "NOTE"                    => $menuData['menu']['NOTE'],
                                                   "UPD_UPDATE_TIMESTAMP"    => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['menu']['LAST_UPDATE_TIMESTAMP'])
                                           );
@@ -565,26 +570,27 @@
                         if(!array_key_exists("PW_MAX_LENGTH",$itemData))      $itemData["PW_MAX_LENGTH"] = "";
                         
                         $strNumberForRI = $itemData['CREATE_ITEM_ID'];
-                        $arrayUpdateData = array("CREATE_MENU_ID"   => $menuData['menu']['CREATE_MENU_ID'],
-                                                 "ITEM_NAME"        => $itemData['ITEM_NAME'],
-                                                 "DISP_SEQ"         => $itemData['DISP_SEQ'],
-                                                 "REQUIRED"         => $required,
-                                                 "UNIQUED"          => $uniqued,
-                                                 "COL_GROUP_ID"     => $itemData['COL_GROUP_ID'],
-                                                 "INPUT_METHOD_ID"  => $itemData['INPUT_METHOD_ID'],
-                                                 "MAX_LENGTH"       => $itemData['MAX_LENGTH'],
-                                                 "PREG_MATCH"       => $itemData['PREG_MATCH'],
-                                                 "MULTI_MAX_LENGTH" => $itemData['MULTI_MAX_LENGTH'],
-                                                 "MULTI_PREG_MATCH" => $itemData['MULTI_PREG_MATCH'],
-                                                 "INT_MIN"          => $itemData['INT_MIN'],
-                                                 "INT_MAX"          => $itemData['INT_MAX'],
-                                                 "FLOAT_MIN"        => $itemData['FLOAT_MIN'],
-                                                 "FLOAT_MAX"        => $itemData['FLOAT_MAX'],
-                                                 "FLOAT_DIGIT"      => $itemData['FLOAT_DIGIT'],
-                                                 "OTHER_MENU_LINK_ID"  => $itemData['OTHER_MENU_LINK_ID'],
-                                                 "PW_MAX_LENGTH" => $itemData['PW_MAX_LENGTH'],
-                                                 "DESCRIPTION"      => $itemData['DESCRIPTION'],
-                                                 "NOTE"             => $itemData['NOTE'],
+                        $arrayUpdateData = array("CREATE_MENU_ID"       => $menuData['menu']['CREATE_MENU_ID'],
+                                                 "ITEM_NAME"            => $itemData['ITEM_NAME'],
+                                                 "DISP_SEQ"             => $itemData['DISP_SEQ'],
+                                                 "REQUIRED"             => $required,
+                                                 "UNIQUED"              => $uniqued,
+                                                 "COL_GROUP_ID"         => $itemData['COL_GROUP_ID'],
+                                                 "INPUT_METHOD_ID"      => $itemData['INPUT_METHOD_ID'],
+                                                 "MAX_LENGTH"           => $itemData['MAX_LENGTH'],
+                                                 "PREG_MATCH"           => $itemData['PREG_MATCH'],
+                                                 "MULTI_MAX_LENGTH"     => $itemData['MULTI_MAX_LENGTH'],
+                                                 "MULTI_PREG_MATCH"     => $itemData['MULTI_PREG_MATCH'],
+                                                 "INT_MIN"              => $itemData['INT_MIN'],
+                                                 "INT_MAX"              => $itemData['INT_MAX'],
+                                                 "FLOAT_MIN"            => $itemData['FLOAT_MIN'],
+                                                 "FLOAT_MAX"            => $itemData['FLOAT_MAX'],
+                                                 "FLOAT_DIGIT"          => $itemData['FLOAT_DIGIT'],
+                                                 "OTHER_MENU_LINK_ID"   => $itemData['OTHER_MENU_LINK_ID'],
+                                                 "PW_MAX_LENGTH"        => $itemData['PW_MAX_LENGTH'],
+                                                 "DESCRIPTION"          => $itemData['DESCRIPTION'],
+                                                 "ACCESS_AUTH"          => $menuData['menu']['ACCESS_AUTH'],
+                                                 "NOTE"                 => $itemData['NOTE'],
                                                  "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $itemData['LAST_UPDATE_TIMESTAMP'])
                                                  );
 
@@ -634,26 +640,27 @@
                         if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))    $itemData["OTHER_MENU_LINK_ID"] = "";
                         if(!array_key_exists("PW_MAX_LENGTH",$itemData))      $itemData["PW_MAX_LENGTH"] = "";
                         
-                        $arrayRegisterData = array("CREATE_MENU_ID"   => $menuData['menu']['CREATE_MENU_ID'],
-                                                   "ITEM_NAME"        => $itemData['ITEM_NAME'],
-                                                   "DISP_SEQ"         => $itemData['DISP_SEQ'],
-                                                   "REQUIRED"         => $required,
-                                                   "UNIQUED"          => $uniqued,
-                                                   "COL_GROUP_ID"     => $itemData['COL_GROUP_ID'],
-                                                   "INPUT_METHOD_ID"  => $itemData['INPUT_METHOD_ID'],
-                                                   "MAX_LENGTH"       => $itemData['MAX_LENGTH'],
-                                                   "PREG_MATCH"       => $itemData['PREG_MATCH'],
-                                                   "MULTI_MAX_LENGTH" => $itemData['MULTI_MAX_LENGTH'],
-                                                   "MULTI_PREG_MATCH" => $itemData['MULTI_PREG_MATCH'],
-                                                   "INT_MIN"          => $itemData['INT_MIN'],
-                                                   "INT_MAX"          => $itemData['INT_MAX'],
-                                                   "FLOAT_MIN"        => $itemData['FLOAT_MIN'],
-                                                   "FLOAT_MAX"        => $itemData['FLOAT_MAX'],
-                                                   "FLOAT_DIGIT"      => $itemData['FLOAT_DIGIT'],
-                                                   "OTHER_MENU_LINK_ID"  => $itemData['OTHER_MENU_LINK_ID'],
-                                                   "PW_MAX_LENGTH"    => $itemData['PW_MAX_LENGTH'],
-                                                   "DESCRIPTION"      => $itemData['DESCRIPTION'],
-                                                   "NOTE"             => $itemData['NOTE']
+                        $arrayRegisterData = array("CREATE_MENU_ID"         => $menuData['menu']['CREATE_MENU_ID'],
+                                                   "ITEM_NAME"              => $itemData['ITEM_NAME'],
+                                                   "DISP_SEQ"               => $itemData['DISP_SEQ'],
+                                                   "REQUIRED"               => $required,
+                                                   "UNIQUED"                => $uniqued,
+                                                   "COL_GROUP_ID"           => $itemData['COL_GROUP_ID'],
+                                                   "INPUT_METHOD_ID"        => $itemData['INPUT_METHOD_ID'],
+                                                   "MAX_LENGTH"             => $itemData['MAX_LENGTH'],
+                                                   "PREG_MATCH"             => $itemData['PREG_MATCH'],
+                                                   "MULTI_MAX_LENGTH"       => $itemData['MULTI_MAX_LENGTH'],
+                                                   "MULTI_PREG_MATCH"       => $itemData['MULTI_PREG_MATCH'],
+                                                   "INT_MIN"                => $itemData['INT_MIN'],
+                                                   "INT_MAX"                => $itemData['INT_MAX'],
+                                                   "FLOAT_MIN"              => $itemData['FLOAT_MIN'],
+                                                   "FLOAT_MAX"              => $itemData['FLOAT_MAX'],
+                                                   "FLOAT_DIGIT"            => $itemData['FLOAT_DIGIT'],
+                                                   "OTHER_MENU_LINK_ID"     => $itemData['OTHER_MENU_LINK_ID'],
+                                                   "PW_MAX_LENGTH"          => $itemData['PW_MAX_LENGTH'],
+                                                   "DESCRIPTION"            => $itemData['DESCRIPTION'],
+                                                   "ACCESS_AUTH"            => $menuData['menu']['ACCESS_AUTH'],
+                                                   "NOTE"                   => $itemData['NOTE']
                                                   );
 
                         $g["page_dir"] = "2100160002";
@@ -711,10 +718,11 @@
                         $createItemID = $menuData['item'][$curGroup]['CREATE_ITEM_ID'];
                     }
                     $strNumberForRI = $updateData['CONVERT_PARAM_ID'];       // 主キー
-                    $arrayUpdateData = array("CREATE_ITEM_ID" => $createItemID,
-                                               "COL_CNT" => $repeatCount / ($menuData['repeat']['r1']['REPEAT_CNT'] - 1),
-                                               "REPEAT_CNT" => $menuData['repeat']['r1']['REPEAT_CNT'],
-                                               "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['repeat']['LAST_UPDATE_TIMESTAMP'])
+                    $arrayUpdateData = array("CREATE_ITEM_ID"           => $createItemID,
+                                               "COL_CNT"                => $repeatCount / ($menuData['repeat']['r1']['REPEAT_CNT'] - 1),
+                                               "REPEAT_CNT"             => $menuData['repeat']['r1']['REPEAT_CNT'],
+                                               "ACCESS_AUTH"            => $menuData['menu']['ACCESS_AUTH'],
+                                               "UPD_UPDATE_TIMESTAMP"   => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $menuData['repeat']['LAST_UPDATE_TIMESTAMP'])
                                               );
 
                     $g["page_dir"] = "2100160009";
@@ -738,8 +746,9 @@
                         $createItemID = $menuData['item'][$curGroup]['CREATE_ITEM_ID'];
                     }
                     $arrayRegisterData = array("CREATE_ITEM_ID" => $createItemID,
-                                               "COL_CNT" => $repeatCount / ($menuData['repeat']['r1']['REPEAT_CNT'] - 1),
-                                               "REPEAT_CNT" => $menuData['repeat']['r1']['REPEAT_CNT']
+                                               "COL_CNT"        => $repeatCount / ($menuData['repeat']['r1']['REPEAT_CNT'] - 1),
+                                               "REPEAT_CNT"     => $menuData['repeat']['r1']['REPEAT_CNT'],
+                                               "ACCESS_AUTH"    => $menuData['menu']['ACCESS_AUTH'],
                                               );
 
                     $g["page_dir"] = "2100160009";
@@ -761,6 +770,7 @@
                 $insertData['CREATE_MENU_ID'] = $menuData['menu']['CREATE_MENU_ID'];
                 $insertData['STATUS_ID'] = "1";
                 $insertData['FILE_NAME'] = "";
+                $insertData['ACCESS_AUTH'] = $menuData['menu']['ACCESS_AUTH'];
                 $insertData['NOTE'] = "";
                 $insertData['DISUSE_FLAG'] = "0";
                 $insertData['LAST_UPDATE_USER'] = $g['login_id'];
@@ -823,6 +833,24 @@
                 $arrayResult = array("999","", $msg);
                 return makeAjaxProxyResultStream($arrayResult);
             }
+
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            // 権限があるでーたのみに絞る
+            $ret = $obj->chkRecodeArrayAccessPermission($result);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
             $filteredData = array();
             foreach($result as $imData){
                 $addArray = array();
@@ -864,6 +892,24 @@
                 $arrayResult = array("999","", $msg);
                 return makeAjaxProxyResultStream($arrayResult);
             }
+
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            // 権限があるでーたのみに絞る
+            $ret = $obj->chkRecodeArrayAccessPermission($result);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
             $filteredData = array();
             foreach($result as $ptData){
                 $addArray = array();
@@ -904,6 +950,24 @@
                 $arrayResult = array("999","", $msg);
                 return makeAjaxProxyResultStream($arrayResult);
             }
+
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            // 権限があるでーたのみに絞る
+            $ret = $obj->chkRecodeArrayAccessPermission($result);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
             $filteredData = array();
             foreach($result as $ppData){
                 $addArray = array();
@@ -945,6 +1009,24 @@
                 $arrayResult = array("999","", $msg);
                 return makeAjaxProxyResultStream($arrayResult);
             }
+
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            // 権限があるでーたのみに絞る
+            $ret = $obj->chkRecodeArrayAccessPermission($result);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
             $filteredData = array();
             foreach($result as $mgData){
                 $addArray = array();
@@ -985,6 +1067,24 @@
                 $arrayResult = array("999","", $result);
                 return makeAjaxProxyResultStream($arrayResult);
             }
+
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            // 権限があるデータのみに絞る
+            $ret = $obj->chkRecodeArrayAccessPermission($result);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
             $filteredData = array();
 
             foreach($result as $pdData){
@@ -1121,6 +1221,7 @@
                             "MENUGROUP_FOR_VIEW"       => $createMenuInfoData['MENUGROUP_FOR_VIEW'],
                             "DISP_SEQ"                 => $createMenuInfoData['DISP_SEQ'],
                             "DESCRIPTION"              => $createMenuInfoData['DESCRIPTION'],
+                            "ACCESS_AUTH"              => $createMenuInfoData['ACCESS_AUTH'],
                             "NOTE"                     => $createMenuInfoData['NOTE'],
                             "LAST_UPDATE_USER"         => $username,
                             "LAST_UPDATE_TIMESTAMP"    => $createMenuInfoData['LAST_UPDATE_TIMESTAMP'],
@@ -1268,6 +1369,7 @@
                         "DESCRIPTION"           => $itemInfoData['DESCRIPTION'],
                         "REPEAT_ITEM"           => $repeatItem,
                         "MIN_WIDTH"             => "",
+                        "ACCESS_AUTH"           => $createMenuInfoData['ACCESS_AUTH'],
                         "NOTE"                  => $itemInfoData['NOTE'],
                         "LAST_UPDATE_TIMESTAMP" => $itemInfoData['LAST_UPDATE_TIMESTAMP']
                     );
