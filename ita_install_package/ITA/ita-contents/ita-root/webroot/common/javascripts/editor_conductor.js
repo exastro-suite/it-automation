@@ -4172,6 +4172,11 @@ const loadConductor = function( loadConductorData, mode ) {
       $editor.removeClass('load-conductor');
       clearConductor();
       message('1001');
+       
+      alert( getSomeMessage("ITABASEC020008") );
+      var url = '/default/menu/01_browse.php?no=2100180002';
+      location.href = url;
+
     }
     
 };
