@@ -324,6 +324,10 @@ const listIdName = function( type, id ) {
     list = menuEditorArray.selectMenuGroupList;
     idKey = 'MENU_GROUP_ID';
     nameKey = 'MENU_GROUP_NAME';
+  } else if ( type === 'role') {
+    list = menuEditorArray.roleList;
+    idKey = 'ROLE_ID';
+    nameKey = 'ROLE_NAME';
   }
   
   const listLength = list.length;
@@ -1730,11 +1734,54 @@ $menuGroupSlectButton.on('click', function() {
   itaModalOpen( textCode('0033'), menuGroupBody, type );
 });
 
+// 縦メニューヘルプ
+const verticalMenuHelp = function() {
+  const $modalBody = $('.editor-modal-body');
+  $modalBody.html( $('#vertical-menu-description').html() );
+};
 $('#vertical-menu-help').on('click', function() {
-  itaModalOpen( textCode('0040'), function(){console.log('HELP')}, 'help');
+  itaModalOpen( textCode('0040'), verticalMenuHelp, 'help');
 });
 
+// カンマ区切りロールIDリストからロールNAMEリストを返す
+const getRoleListIdToName = function( roleListText ) {
+  if ( roleListText !== undefined ) {
+    const roleList = roleListText.split(','),
+          roleListLength = roleList.length,
+          roleNameList = new Array;
 
+    for ( let i = 0; i < roleListLength; i++ ) {
+      const roleName = listIdName('role', roleList[i]);
+      if ( roleName !== undefined ) {
+        roleNameList.push( roleName );
+      }
+    }
+
+    return roleNameList.join(', ');
+  }
+};
+// ロールセレクト
+const modalRoleList = function() {
+  const $input = $('#permission-role-name-list');
+  const initRoleList = ( $input.attr('data-role-id') === undefined )? '': $input.attr('data-role-id');
+  // 決定時の処理    
+  const okEvent = function( newRoleList ) {
+    $input.text(　getRoleListIdToName( newRoleList ) ).attr('data-role-id', newRoleList );
+    itaModalClose();
+  };
+  // キャンセル時の処理    
+  const cancelEvent = function( newRoleList ) {
+    itaModalClose();
+  };
+  
+  setRoleSelectModalBody( menuEditorArray.roleList, initRoleList, okEvent, cancelEvent );
+  
+};
+// ロールセレクトモーダルを開く
+const $roleSlectButton = $('#permission-role-select');
+$roleSlectButton.on('click', function() {
+  itaModalOpen('Permission role select', modalRoleList, 'role');
+});
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1984,6 +2031,7 @@ const createRegistrationData = function( type ){
   tableAnalysis ( $menuTable, 0 );console.log( createMenuJSON );
   
   // JSON変換
+  console.log( createMenuJSON );
   const menuData = JSON.stringify( createMenuJSON );
 
   if ( type === 'registration' ) {
@@ -2130,6 +2178,7 @@ const getPanelParameter = function() {
     parameterArray['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] = $('#create-menu-last-modified').attr('data-value'); // 最終更新日時
     parameterArray['LAST_UPDATE_USER'] = $('#create-last-update-user').attr('data-value'); // 最終更新者
     parameterArray['DESCRIPTION'] = $('#create-menu-explanation').val(); // 説明
+    parameterArray['ACCESS_AUTH'] = $('#permission-role-name-list').attr('data-role-id'); // ロール
     parameterArray['NOTE'] = $('#create-menu-note').val(); // 備考
     
     // 作成対象別項目
@@ -2198,6 +2247,11 @@ const setPanelParameter = function( setData ) {
       $('#create-last-update-user')
         .attr('data-value', setData['menu']['LAST_UPDATE_USER'] )
         .text( setData['menu']['LAST_UPDATE_USER'] );
+      // ロール
+      const roleList = ( setData['menu']['ACCESS_AUTH'] === undefined )? '': setData['menu']['ACCESS_AUTH'];
+      $('#permission-role-name-list')
+        .attr('data-role-id', roleList )
+        .text( getRoleListIdToName( roleList ) );
     }
     
     // エディットモード別
@@ -2294,6 +2348,18 @@ const initialMenuGroup = function() {
     $('#create-menu-for-reference')
       .attr('data-id', forReference )
       .text( forReferenceName );
+  }
+  // ACCESS_AUTHの初期値を入れる
+  if ( menuEditorArray.roleList !== undefined ) {
+    const roleDefault = new Array,
+          roleLength = menuEditorArray.roleList.length;
+    for ( let i = 0; i < roleLength; i++ ) {
+      if ( menuEditorArray.roleList[i]['DEFAULT'] === 'checked') {
+        roleDefault.push( menuEditorArray.roleList[i]['ROLE_ID'] );
+      } 
+    }
+    const newRoleList = roleDefault.join(',');
+    $('#permission-role-name-list').text(　getRoleListIdToName( newRoleList ) ).attr('data-role-id', newRoleList );
   }
 };
 

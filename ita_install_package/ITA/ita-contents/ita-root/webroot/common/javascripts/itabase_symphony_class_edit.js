@@ -68,7 +68,7 @@ function symphonyRegister(boolCallProxy, aryResultOfCalledProxy){
             
             var register_data = $("#"+editInfoAreaWrap+" :input").serializeArray();
             var sorted_Data = collectElementInfoForEdit();
-
+          
             proxy.register_execute(register_data, sorted_Data);
         }
     }

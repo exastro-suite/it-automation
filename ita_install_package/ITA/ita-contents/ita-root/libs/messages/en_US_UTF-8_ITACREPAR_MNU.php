@@ -239,4 +239,16 @@ $ary[104239] = "Input";
 $ary[104240] = "Substitution value";
 $ary[104241] = "Reference";
 $ary[104242] = "Yes";
+$ary[104243] = "Permission role";
+$ary[104244] = "Role";
+$ary[104245] = "Permission role select";
+$ary[104246] = "Vertical menus are menus that have better visibility when defining the same parameters repeatedly.";
+$ary[104247] = "Normal menus will become a horzontal long menu when there are a large amount of items. However, vertical menus will display the same items in a verticall manner to make it easier to see them.";
+$ary[104248] = "※For vertical menus, the input subtitute value auto-registration menu is as follows:";
+$ary[104249] = "Input";
+$ary[104250] = "Substitution value";
+$ary[104251] = "Vertical menu";
+$ary[104252] = "Manu automatically converted from vertical to normal  menu(horizontal)";
+$ary[104253] = "/menus/systems/2100160011/imgs/vertical-menu-help-en.png";
+$ary[104254] = "Normal menu and vertical menu";
 ?>
