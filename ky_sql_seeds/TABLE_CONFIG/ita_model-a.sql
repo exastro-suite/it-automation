@@ -3408,6 +3408,7 @@ MENU_LIST_ID                   %INT%                   , -- 識別シーケン�
 MENU_ID                        %INT%                   , -- メニューID
 
 SHEET_TYPE                     %INT%                   , -- シートタイプ　null/1:ホスト/オペレーションを含む　2:ホストのみ
+ACCESS_AUTH_FLG                %INT%                   , -- アクセス許可ロール有無(メニューにアクセス許可ロールがあるかどうか　1:あり,それ以外:なし)
 
 DISP_SEQ                       %INT%                   , -- 表示順序
 ACCESS_AUTH                    TEXT                    ,
@@ -3427,6 +3428,7 @@ MENU_LIST_ID                   %INT%                   , -- 識別シーケン�
 MENU_ID                        %INT%                   , -- メニューID
 
 SHEET_TYPE                     %INT%                   , -- シートタイプ　null/1:ホスト/オペレーションを含む　2:ホストのみ
+ACCESS_AUTH_FLG                %INT%                   , -- アクセス許可ロール有無(メニューにアクセス許可ロールがあるかどうか　1:あり,それ以外:なし)
 
 DISP_SEQ                       %INT%                   , -- 表示順序
 ACCESS_AUTH                    TEXT                    ,
@@ -3447,6 +3449,7 @@ SELECT
        TAB_B.MENU_NAME                      ,
        [%CONCAT_HEAD/%]TAB_B.MENU_GROUP_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.MENU_GROUP_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.MENU_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.MENU_NAME[%CONCAT_TAIL/%] MENU_PULLDOWN,
        TAB_A.SHEET_TYPE                     ,
+       TAB_A.ACCESS_AUTH_FLG                ,
        TAB_A.DISP_SEQ                       ,
        TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
@@ -3471,6 +3474,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_B.MENU_NAME                      ,
        [%CONCAT_HEAD/%]TAB_B.MENU_GROUP_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.MENU_GROUP_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.MENU_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.MENU_NAME[%CONCAT_TAIL/%] MENU_PULLDOWN,
        TAB_A.SHEET_TYPE                     ,
+       TAB_A.ACCESS_AUTH_FLG                ,
        TAB_A.DISP_SEQ                       ,
        TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
