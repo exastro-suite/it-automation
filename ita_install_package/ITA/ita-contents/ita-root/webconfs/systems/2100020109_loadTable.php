@@ -104,6 +104,7 @@ Ansible（Legacy）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
                    .",TAB_2.PATTERN    DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_LNS_PHO_LINK          TAB_1 "
                    ." LEFT JOIN E_ANSIBLE_LNS_PATTERN TAB_2 ON (TAB_1.PATTERN_ID = TAB_2.PATTERN_ID) "
@@ -116,11 +117,28 @@ Ansible（Legacy）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
@@ -148,6 +166,7 @@ Ansible（Legacy）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
                    .",TAB_2.PATTERN    DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_LNS_PHO_LINK          TAB_1 "
                    ." LEFT JOIN E_ANSIBLE_LNS_PATTERN TAB_2 ON (TAB_1.PATTERN_ID = TAB_2.PATTERN_ID) "
@@ -160,11 +179,28 @@ Ansible（Legacy）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
         
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
@@ -192,6 +228,7 @@ Ansible（Legacy）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
                    .",TAB_2.PATTERN    DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_LNS_PHO_LINK          TAB_1 "
                    ." LEFT JOIN E_ANSIBLE_LNS_PATTERN TAB_2 ON (TAB_1.PATTERN_ID = TAB_2.PATTERN_ID) "
@@ -204,11 +241,28 @@ Ansible（Legacy）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
@@ -374,6 +428,7 @@ Ansible（Legacy）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
                    .",TAB_2.HOST_PULLDOWN DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_LNS_PHO_LINK TAB_1 "
                    ." LEFT JOIN E_STM_LIST   TAB_2 ON (TAB_1.SYSTEM_ID = TAB_2.SYSTEM_ID) "
@@ -386,11 +441,28 @@ Ansible（Legacy）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
@@ -418,6 +490,7 @@ Ansible（Legacy）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
                    .",TAB_2.HOST_PULLDOWN DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_LNS_PHO_LINK TAB_1 "
                    ." LEFT JOIN E_STM_LIST   TAB_2 ON (TAB_1.SYSTEM_ID = TAB_2.SYSTEM_ID) "
@@ -430,11 +503,28 @@ Ansible（Legacy）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
@@ -462,6 +552,7 @@ Ansible（Legacy）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
                    .",TAB_2.HOST_PULLDOWN DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_LNS_PHO_LINK TAB_1 "
                    ." LEFT JOIN E_STM_LIST   TAB_2 ON (TAB_1.SYSTEM_ID = TAB_2.SYSTEM_ID) "
@@ -474,11 +565,28 @@ Ansible（Legacy）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
