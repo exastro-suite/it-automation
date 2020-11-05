@@ -38,7 +38,7 @@
         // 想定外エラー通知画面にリダイレクト
         webRequestForceQuitFromEveryWhere(400,11110101);
     }
-    if(count($tmpAryRetBody[0]['MenuNames']) < 1){
+    if(count($tmpAryRetBody[0]['MenuNames']) < 1 && $_SERVER['REQUEST_URI'] != "/default/mainmenu/01_browse.php"){
         // アクセスログ出力(不正アクセス操作)
         web_log($objMTS->getSomeMessage("ITAWDCH-ERR-47"));
 
