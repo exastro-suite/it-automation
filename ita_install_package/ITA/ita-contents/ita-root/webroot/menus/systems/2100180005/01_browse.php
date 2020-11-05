@@ -38,7 +38,61 @@
         
         // browse系共通ロジックパーツ01
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_browse_01.php");
-        
+
+        //アクセス権を判定
+        if( array_key_exists( "conductor_instance_id", $_GET ) === true ){
+            // クエリからconductor_instance_idを取得
+            $conductor_instance_id = $_GET["conductor_instance_id"];
+            
+            // 整数の場合のみ判定
+            $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
+            if( $objIntNumVali->isValid($conductor_instance_id) === true ){
+                // SQL生成
+                $sql = "SELECT  ACCESS_AUTH
+                        FROM    C_CONDUCTOR_INSTANCE_MNG
+                        WHERE   DISUSE_FLAG = '0'
+                        AND     CONDUCTOR_INSTANCE_NO = :CONDUCTOR_INSTANCE_NO_BV ";
+                
+                $objQuery = $g['objDBCA']->sqlPrepare($sql);
+                
+                if($objQuery->getStatus()===false){
+                    // 例外処理へ
+                    throw new Exception();
+                }
+                
+                $objQuery->sqlBind( array( 'CONDUCTOR_INSTANCE_NO_BV'=>$conductor_instance_id ) );
+                
+                $r = $objQuery->sqlExecute();
+                
+                if (!$r){
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                while ( $row = $objQuery->resultFetch() ){
+                    // アクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        // 例外処理へ
+                        throw new Exception();
+                    } else {
+                        if($permission === false) {
+                            //アクセス権が無いため、例外処理へ
+                            throw new Exception();
+                        }
+                    }
+                }
+            }
+        }
+
     }
     catch (Exception $e){
         // DBアクセス例外処理パーツ

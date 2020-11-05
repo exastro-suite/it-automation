@@ -61,6 +61,7 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
         "RUN_MODE"=>"",
+        "ACCESS_AUTH"=>"",
         "DISUSE_FLAG"=>"",
         "NOTE"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -90,6 +91,7 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         "TIME_START"=>"",
         "TIME_END"=>"",
         "RUN_MODE"=>"",
+        "ACCESS_AUTH"=>"",
         "DISUSE_FLAG"=>"",
         "NOTE"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -457,6 +459,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
         "RUN_MODE"=>"",
+        "ACCESS_AUTH"=>"",
         "DISUSE_FLAG"=>"",
         "NOTE"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -480,6 +483,15 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
             // 例外処理へ
             $strErrStepIdInFx="00000008";
             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        
+        //Symphony/Conductorから実行する場合はアクセス権を継承する
+        $strAccessAuth = "";
+        if(array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true){
+            $strAccessAuth = $g['__TOP_ACCESS_AUTH__'];
+        }else{
+            //Movement単体実行の場合は、Movementのアクセス権を継承する
+            $strAccessAuth = $arySinglePatternSource["ACCESS_AUTH"];
         }
 
         $arrayValue = array(
@@ -507,6 +519,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "TIME_START"=>"",
         "TIME_END"=>"",
         "RUN_MODE"=>$strRunMode,
+        "ACCESS_AUTH"=>$strAccessAuth,
         "DISUSE_FLAG"=>"0",
         "NOTE"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
