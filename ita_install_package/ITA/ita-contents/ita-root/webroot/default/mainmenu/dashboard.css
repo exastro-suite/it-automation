@@ -196,7 +196,6 @@ float: left;
 display: grid;
 grid-template-columns: 33.333% 33.333% 33.333%;
 width: 50%; max-width: 864px;
-margin: 0 auto;
 padding: 8px;
 }
 @media screen and ( max-width: 1360px ){
@@ -259,9 +258,14 @@ opacity: .3;
 .widget-edit-menu {
 display: none;
 }
-.widget-move-knob,
-#dashboard[data-mode="edit"] .widget-edit-menu {
+.widget-move-knob {
 display: table-cell;
+vertical-align: middle;
+}
+#dashboard[data-mode="edit"] .widget-edit-menu {
+display: block;
+float: right;
+padding-top: 4px;
 vertical-align: middle;
 }
 #dashboard[data-mode="view"] .widget-move-knob {
@@ -309,15 +313,17 @@ display: table-cell;
 vertical-align: middle;
 }
 .widget-name-inner {
-overflow: hidden;
-display: block;
+display: inline-block;
 padding: 8px;
-line-height: 1.75;
+line-height: 1.5;
 vertical-align: middle;
 word-break: break-all;
 }
-.widget-edit-menu {
-width: 120px;
+#dashboard[data-mode="edit"] .widget-name {
+vertical-align: top;
+}
+#dashboard[data-mode="edit"] .widget-name-inner {
+padding-bottom: 0;
 }
 #KIZI .widget-edit-menu-list {
 margin: 0; padding: 0 8px;
