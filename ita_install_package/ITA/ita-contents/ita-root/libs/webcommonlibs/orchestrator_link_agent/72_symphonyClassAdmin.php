@@ -321,6 +321,7 @@ function printOneOfSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode){
         $arySymphonySource = array(htmlspecialchars($aryRowOfSymClassTable['SYMPHONY_NAME'])
                                     ,htmlspecialchars($aryRowOfSymClassTable['DESCRIPTION'])
                                     ,$strLT4UBody
+                                    ,htmlspecialchars($aryRowOfSymClassTable['ACCESS_AUTH'])
         );
         //シンフォニー情報を固める----
         
@@ -383,6 +384,7 @@ function symphonyClassUpdateExecute($fxVarsIntSymphonyClassId, $fxVarsAryReceptD
         "SYMPHONY_CLASS_NO"=>"",
         "SYMPHONY_NAME"=>"",
         "DESCRIPTION"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -401,6 +403,7 @@ function symphonyClassUpdateExecute($fxVarsIntSymphonyClassId, $fxVarsAryReceptD
         "DESCRIPTION"=>"",
         "SYMPHONY_CLASS_NO"=>"",
         "OPERATION_NO_IDBH"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -585,7 +588,14 @@ function symphonyClassUpdateExecute($fxVarsIntSymphonyClassId, $fxVarsAryReceptD
         $update_tgt_row['DESCRIPTION']       = $aryExecuteData['symphony_tips'];
         $update_tgt_row['DISUSE_FLAG']       = '0';
         $update_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
-        
+
+        if( isset($aryExecuteData['ACCESS_AUTH'] ) ){
+            $update_tgt_row['ACCESS_AUTH']       = $aryExecuteData['ACCESS_AUTH'];
+        }else{
+            $update_tgt_row['ACCESS_AUTH']="";
+        }
+
+
         $tgtSource_row = $update_tgt_row;
         $sqlType = "UPDATE";
         
@@ -707,7 +717,7 @@ function symphonyClassUpdateExecute($fxVarsIntSymphonyClassId, $fxVarsAryReceptD
                 $update_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
                 //MOV数が少なくなった場合なので、廃止する----
             }
-            
+
             $tgtSource_row = $update_tgt_row;
             $sqlType = "UPDATE";
             
@@ -939,6 +949,7 @@ function symphonyClassRegisterExecute($fxVarsIntSymphonyClassId ,$fxVarsAryRecep
         "SYMPHONY_CLASS_NO"=>"",
         "SYMPHONY_NAME"=>"",
         "DESCRIPTION"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -952,6 +963,7 @@ function symphonyClassRegisterExecute($fxVarsIntSymphonyClassId ,$fxVarsAryRecep
         "SYMPHONY_CLASS_NO"=>"",
         "SYMPHONY_NAME"=>"",
         "DESCRIPTION"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -970,6 +982,7 @@ function symphonyClassRegisterExecute($fxVarsIntSymphonyClassId ,$fxVarsAryRecep
         "DESCRIPTION"=>"",
         "SYMPHONY_CLASS_NO"=>"",
         "OPERATION_NO_IDBH"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -988,6 +1001,7 @@ function symphonyClassRegisterExecute($fxVarsIntSymphonyClassId ,$fxVarsAryRecep
         "DESCRIPTION"=>"",
         "SYMPHONY_CLASS_NO"=>"",
         "OPERATION_NO_IDBH"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -1143,6 +1157,13 @@ function symphonyClassRegisterExecute($fxVarsIntSymphonyClassId ,$fxVarsAryRecep
         $register_tgt_row['DISUSE_FLAG']       = '0';
         $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
         
+        
+        if( isset($aryExecuteData['ACCESS_AUTH'] ) ){
+            $register_tgt_row['ACCESS_AUTH']       = $aryExecuteData['ACCESS_AUTH'];
+        }else{
+            $register_tgt_row['ACCESS_AUTH']="1,2,3,4";
+        }
+
         $arrayConfigForIUD = $aryConfigForSymClassIUD;
         $tgtSource_row = $register_tgt_row;
         $sqlType = "INSERT";
@@ -1718,7 +1739,8 @@ function getPatternListWithOrchestratorInfo($fxVarsStrFilterData="",$fxVarsResul
     try{
         require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
         $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA);
-        
+        $obj = new RoleBasedAccessControl($objDBCA);
+
         $aryRet = $objOLA->getLiveOrchestratorFromMaster();
         if( $aryRet[1] !== null ){
             // エラーフラグをON
@@ -1769,10 +1791,33 @@ function getPatternListWithOrchestratorInfo($fxVarsStrFilterData="",$fxVarsResul
             
             if( $fxVarsResultType === 1 ){
                 foreach($aryRow as $arySingleRow){
-                    $aryListSource[] = $varOrcId;
-                    $aryListSource[] = $arySingleRow['PATTERN_ID'];
-                    $aryListSource[] = $arySingleRow['PATTERN_NAME'];
-                    $aryListSource[] = $strThemeColor;
+
+                    $intPatternId = $arySingleRow['PATTERN_ID'];
+                    //
+                    // 表示データをSELECT
+                    $sql =  " SELECT * FROM C_PATTERN_PER_ORCH "
+                           ." WHERE DISUSE_FLAG='0' "
+                           ." AND PATTERN_ID = $intPatternId "
+                           ."";
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                    $rows = array();
+
+                    $row = $objQuery->resultFetch();
+
+                    $user_id = $g['login_id'];
+                    $ret  = $obj->getAccountInfo($user_id); 
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                    } else {
+                        if($permission === true) {
+                            $aryListSource[] = $varOrcId;
+                            $aryListSource[] = $arySingleRow['PATTERN_ID'];
+                            $aryListSource[] = $arySingleRow['PATTERN_NAME'];
+                            $aryListSource[] = $strThemeColor;
+                        }
+                    }
                 }
             }
             else{
@@ -1785,7 +1830,27 @@ function getPatternListWithOrchestratorInfo($fxVarsStrFilterData="",$fxVarsResul
                     $tmpRow['PATTERN_NAME']    = $arySingleRow['PATTERN_NAME'];
                     $tmpRow['ThemeColor']      = $strThemeColor;
                     //
-                    $aryListSource[$intPatternId] = $tmpRow;
+                    // 表示データをSELECT
+                    $sql =  " SELECT * FROM C_PATTERN_PER_ORCH "
+                           ." WHERE DISUSE_FLAG='0' "
+                           ." AND PATTERN_ID = $intPatternId "
+                           ."";
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                    $rows = array();
+
+                    $row = $objQuery->resultFetch();
+
+                    $user_id = $g['login_id'];
+                    $ret  = $obj->getAccountInfo($user_id); 
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                    } else {
+                        if($permission === true) {
+                            $aryListSource[$intPatternId] = $tmpRow;
+                        }
+                    }
                 }
             }
         }
