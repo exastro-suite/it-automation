@@ -237,6 +237,14 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         $conductor_instance_no = "";
         list($strTmpRunMode,$boolKeyExists) = isSetInArrayNestThenAssign($aryProperParameter,array('RUN_MODE'),"");
         if( $boolKeyExists === false ){
+            // ---- RBAC対応
+            // 上位でアクセス権が設定されているか判定
+            if(array_key_exists('__TOP_ACCESS_AUTH__',$g) === false) {
+                $strErrStepIdInFx="00000001";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            // RBAC対応 ----
+
             //----シンフォニーから呼ばれる場合を想定
             $strRunMode = 1;
             
@@ -323,6 +331,38 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
 
         }
         else{
+            // ---- RBAC対応
+            // Movement一覧のアクセス権を取得　
+            $sql = "SELECT ACCESS_AUTH FROM C_PATTERN_PER_ORCH WHERE PATTERN_ID=$intPatternId";
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            if( $objQuery->getStatus()===false ){
+                $strErrStepIdInFx="00000001";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $r = $objQuery->sqlExecute();
+
+            if (!$r){
+                unset($objQuery);
+                $strErrStepIdInFx="00000001";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            while ( $row = $objQuery->resultFetch() ){
+                // アクセス権退避
+                $g['__TOP_ACCESS_AUTH__'] = $row['ACCESS_AUTH'];
+            }
+            unset($objQuery);
+            // RBAC対応 ----
+
+            //----各オーケストレータ個別で呼ばれる場合を想定
+            if( $strTmpRunMode == '1' || $strTmpRunMode == '2' ){
+                // 1:通常実行/2:ドライラン
+                $strRunMode = $strTmpRunMode;
+            }
+            else{
+                // 例外処理へ
+                $strErrStepIdInFx="00000001";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
             //----各オーケストレータ個別で呼ばれる場合を想定
             if( $strTmpRunMode == '1' || $strTmpRunMode == '2' ){
                 // 1:通常実行/2:ドライラン
@@ -474,6 +514,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "CONDUCTOR_NAME"=>$conductor_name,
         "CONDUCTOR_INSTANCE_NO"=>$conductor_instance_no,
         "DISUSE_FLAG"=>"0",
+        "ACCESS_AUTH"=>$g['__TOP_ACCESS_AUTH__'],
         "NOTE"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
         "LAST_UPDATE_USER"=>$update_user_id
