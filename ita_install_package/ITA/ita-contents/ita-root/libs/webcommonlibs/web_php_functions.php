@@ -1150,6 +1150,7 @@ EOD;
 
     // ここまで業務色を排除した汎用系関数----
 
+// ----RBAC対応 
 //////////////////////////////////////////////////////////////////////
 //
 //【概要】
@@ -1168,10 +1169,357 @@ class RoleBasedAccessControl {
    //   $objDBCA: DBアクセスクラスオブジェクト
    ///////////////////////////////////////////////////////////////////
    function __construct($objDBCA){
-      $this->objDBCA                = $objDBCA;
-      $this->role_account_link_list = array();
-      $this->DefaultAccessRoles     = array();
-      $this->AccessRoles            = array();
+       $this->objDBCA                = $objDBCA;
+       $this->role_account_link_list = array();
+       $this->DefaultAccessRoles     = array();
+       $this->AccessRoles            = array();
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   指定ユーザーのデフォルトアクセス権ロールをCSV文字列で取得
+   // 【パラメータ】
+   //   $userId:        ログインID
+   //   $RoleIDString:  指定ユーザーのデフォルトアクセス権ロールのCSV文字列タイプ
+   //                   ID:ロールID  NAME:ロール名称
+   // 【戻り値】
+   //   false:   異常
+   //   他:      指定ユーザーのデフォルトアクセス権ロールのCSV文字列
+   //              
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getDefaultAccessRoleString($userId,$type) {
+       // 廃止されているレコードは除かれる
+       $RolesList = $this->getUserRoleList($userId);
+       if($RolesList === false) {
+           return false;
+       }
+       $DefaultAccessRoleString = "";
+       foreach($RolesList as $Role) {
+           if($Role['DEFAULT'] === 'checked') {
+               if($DefaultAccessRoleString != '')  $DefaultAccessRoleString .= ',';
+               if($type == 'ID') {
+                   $DefaultAccessRoleString .= $Role['ROLE_ID'];
+               } else {
+                   $DefaultAccessRoleString .= $Role['ROLE_NAME'];
+               }
+           }
+       }
+       return $DefaultAccessRoleString;
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   ロール名のCSV文字列をロールIDのCSV文字列に変換
+   //   ロール名の表示用を想定しているので廃止も含む
+   // 【パラメータ】
+   //   $userId:        ログインID
+   //   $RoleNameString:  ロール名のCSV文字列
+   // 【戻り値】
+   //   false:   異常
+   //   他:      ロールIDのCSV文字列
+   //              
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getRoleNameStringToRoleIDString($userId,$RoleNameString) {
+       $RoleID2Name = array();
+       $RoleName2ID = array();
+       // 廃止されているレコードは除かれる
+       $ret = $this->getRoleSearchHashList($userId,$RoleID2Name,$RoleName2ID);
+       if($ret === false) {
+           return false;
+       }
+       $RoleIDString = "";
+       // ロールIDをロール名称に置換
+       if(strlen($RoleNameString) != 0) {
+           $updRoleNamelist = explode(',',$RoleNameString);
+           foreach($updRoleNamelist as $updRoleName) {
+               if(array_key_exists($updRoleName,$RoleName2ID)) {
+                   if($RoleIDString != '') { $RoleIDString .= ',';}
+                   $RoleIDString .= $RoleName2ID[$updRoleName];
+               } else {
+                   //$error_msg1 = "[%s:%s]:Role Name Failed.(Name:%s)";
+                   //$message = sprintf($error_msg1,basename(__FILE__),__LINE__,$updRoleName);
+                   //web_log($message);
+               }
+           }
+       }
+       return $RoleIDString;
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   ロールIDのCSV文字列をロール名称のCSV文字列に変換
+   //   ロール名の表示用を想定しているので廃止も含む
+   // 【パラメータ】
+   //   $userID:        ユーザーID
+   //   $RoleIDString:  ロールIDのCSV文字列
+   // 【戻り値】
+   //   false:   異常
+   //   他:      ロール名称のCSV文字列
+   //              
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getRoleIDStringToRoleNameString($userId,$RoleIDString) {
+       $RoleID2Name = array();
+       $RoleName2ID = array();
+       // 廃止されているレコードは除かれる
+       $ret = $this->getRoleSearchHashList($userId,$RoleID2Name,$RoleName2ID);
+       if($ret === false) {
+           return false;
+       }
+       $RoleNameString = "";
+       // ロールIDをロール名称に置換
+       if(strlen($RoleIDString) != 0) {
+           $updRoleIDlist = explode(',',$RoleIDString);
+           foreach($updRoleIDlist as $updRoleID) {
+               if(array_key_exists($updRoleID,$RoleID2Name)) {
+                   if($RoleNameString != '') { $RoleNameString .= ',';}
+                   $RoleNameString .= $RoleID2Name[$updRoleID];
+               } else {
+                   //$error_msg1 = "[%s:%s]:Role ID Failed.(ID:%s)";
+                   //$message = sprintf($error_msg1,basename(__FILE__),__LINE__,$updRoleID);
+                   //web_log($message);
+               }
+           }
+       }
+       return $RoleNameString;
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   ロールIDのCSV文字列をロール名称のCSV文字列に変換
+   //   ジャーナルに出力するロール名を想定しているので廃止も含む
+   // 【パラメータ】
+   //   $userID:        ユーザーID
+   //   $RoleIDString:  ロールIDのCSV文字列
+   // 【戻り値】
+   //   false:   異常
+   //   他:      ロール名称のCSV文字列
+   //              
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getJarnalRoleIDStringToRoleNameString($RoleIDString) {
+       $RoleID2Name = array();
+       $RoleName2ID = array();
+       // 廃止されているレコードは除かれる
+       $ret = $this->getALLRoleSearchHashList($RoleID2Name,$RoleName2ID);
+       if($ret === false) {
+           return false;
+       }
+       $RoleNameString = "";
+       // ロールIDをロール名称に置換
+       if(strlen($RoleIDString) != 0) {
+           $updRoleIDlist = explode(',',$RoleIDString);
+           foreach($updRoleIDlist as $updRoleID) {
+               if(array_key_exists($updRoleID,$RoleID2Name)) {
+                   if($RoleNameString != '') { $RoleNameString .= ',';}
+                   $RoleNameString .= $RoleID2Name[$updRoleID];
+               } else {
+                   if($RoleNameString != '') { $RoleNameString .= ',';}
+                   $RoleNameString .= $updRoleID;
+               }
+           }
+       }
+       return $RoleNameString;
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   ロール情報を取得(廃止レコードも含む)
+   // 【パラメータ】
+   //   $userID:        ユーザーID
+   //   $RoleID2Name:   $RoleID2Name[ロールID] = ロール名称
+   //   $RoleName2ID:   $RoleName2ID[ロール名] = ロールID
+   // 【戻り値】
+   //   false:   異常
+   //   itrue:   正常
+   //              
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getALLRoleSearchHashList(&$RoleID2Name,&$RoleName2ID) {
+       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_LIST)";
+       $error_msg2 = "[%s:%s]:Recode not found. (Table:A_ROLE_LIST)";
+       $RoleID2Name = array();
+       $RoleName2ID = array();
+       try {
+           // ロール名やロールIDを取得
+           $sql  = "SELECT   ";
+           $sql .= " TAB_1.ROLE_ID, ";
+           $sql .= " TAB_1.ROLE_NAME ";
+           $sql .= "FROM ";
+           $sql .= " A_ROLE_LIST TAB_1 ";
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if($objQuery->getStatus()===false){
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $r = $objQuery->sqlExecute();
+           if(!$r) {
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           while($row = $objQuery->resultFetch()) {
+               $RoleID2Name[$row['ROLE_ID']]   = $row['ROLE_NAME'];
+               $RoleName2ID[$row['ROLE_NAME']] = $row['ROLE_ID'];
+           }
+           unset($objQuery);
+           return true;
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return flase;
+       }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   ロール情報を取得
+   // 【パラメータ】
+   //   $userID:        ユーザーID
+   //   $RoleID2Name:   $RoleID2Name[ロールID] = ロール名称
+   //   $RoleName2ID:   $RoleName2ID[ロール名] = ロールID
+   // 【戻り値】
+   //   false:   異常
+   //   itrue:   正常
+   //              
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getRoleSearchHashList($userID,&$RoleID2Name,&$RoleName2ID) {
+       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_ACCOUNT_LINK_LIST JOIN A_ROLE_LIST)";
+       $error_msg2 = "[%s:%s]:Recode not found. (Table:A_ROLE_ACCOUNT_LINK_LIST JOIN A_ROLE_LIST)";
+       $RoleID2Name = array();
+       $RoleName2ID = array();
+       try {
+           // ロール名やロールIDを取得
+           $sql  = "SELECT   ";
+           $sql .= " TAB_1.ROLE_ID, ";
+           $sql .= " TAB_1.DEF_ACCESS_AUTH_FLAG, ";
+           $sql .= " TAB_2.ROLE_NAME ";
+           $sql .= "FROM ";
+           $sql .= " A_ROLE_ACCOUNT_LINK_LIST TAB_1 ";
+           $sql .= " LEFT JOIN A_ROLE_LIST    TAB_2 ON (TAB_1.ROLE_ID=TAB_2.ROLE_ID) ";
+           $sql .= "WHERE ";
+           $sql .= " TAB_1.DISUSE_FLAG='0' AND ";
+           $sql .= " TAB_2.DISUSE_FLAG='0' AND ";
+           $sql .= " TAB_1.USER_ID = {$userID}";
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if($objQuery->getStatus()===false){
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $objQuery->sqlBind( array('USER_ID'=>$userID));
+           $r = $objQuery->sqlExecute();
+           if(!$r) {
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           while($row = $objQuery->resultFetch()) {
+               $RoleID2Name[$row['ROLE_ID']]   = $row['ROLE_NAME'];
+               $RoleName2ID[$row['ROLE_NAME']] = $row['ROLE_ID'];
+           }
+           unset($objQuery);
+           return true;
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return false;
+       }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   該当ユーザーのロール情報を取得
+   // 【パラメータ】
+   //   $userID: 該当ユーザー
+   // 【戻り値】
+   //   false:   異常
+   //   他:      下記ハッシュ配列
+   //               "ROLE_ID"=> "1", "ROLE_NAME"=> "システム管理者", "DEFAULT"=> "checked"
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getUserRoleList($userID) {
+       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_ACCOUNT_LINK_LIST JOIN A_ROLE_LIST user ID:%s)";
+       $error_msg2 = "[%s:%s]:Recode not found. (Table:A_ROLE_ACCOUNT_LINK_LIST JOIN A_ROLE_LIST user ID:%s)";
+       try {
+           $sql  = "SELECT   ";
+           $sql .= " TAB_1.ROLE_ID, ";
+           $sql .= " TAB_1.DEF_ACCESS_AUTH_FLAG, ";
+           $sql .= " TAB_2.ROLE_NAME ";
+           $sql .= "FROM ";
+           $sql .= " A_ROLE_ACCOUNT_LINK_LIST TAB_1 ";
+           $sql .= " LEFT JOIN A_ROLE_LIST    TAB_2 ON (TAB_1.ROLE_ID=TAB_2.ROLE_ID) ";
+           $sql .= "WHERE ";
+           $sql .= " TAB_1.DISUSE_FLAG='0' AND ";
+           $sql .= " TAB_2.DISUSE_FLAG='0' AND ";
+           $sql .= " TAB_1.USER_ID = {$userID}";
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if($objQuery->getStatus()===false){
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $objQuery->sqlBind( array('USER_ID'=>$userID));
+           $r = $objQuery->sqlExecute();
+           if(!$r) {
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $user_role_list = array();
+           if($objQuery->effectedRowCount() == 0) {
+               // ロール・ユーザー紐づけにデータ未登録の場合
+               $message = sprintf($error_msg2,basename(__FILE__),__LINE__,$userID);
+               throw new Exception($message);
+           }
+           while($row = $objQuery->resultFetch()) {
+               $array = array();
+               $array["ROLE_ID"]   = $row["ROLE_ID"];
+               $array["ROLE_NAME"] = $row["ROLE_NAME"];
+               if($row["DEF_ACCESS_AUTH_FLAG"] == "1") {
+                   $array["DEFAULT"]   = "checked";
+               } else {
+                   $array["DEFAULT"]   = "";
+               }
+               $user_role_list[] = $array;
+           }
+           unset($objQuery);
+           return $user_role_list;
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return false;
+       }
    }
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
@@ -1191,8 +1539,17 @@ class RoleBasedAccessControl {
        $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_ACCOUNT_LINK_LIST user ID:%s)";
        $error_msg2 = "[%s:%s]:Recode not found. (Table:A_ROLE_ACCOUNT_LINK_LIST user ID:%s)";
        try {
-           $sql =  " SELECT * FROM A_ROLE_ACCOUNT_LINK_LIST "
-                  ." WHERE USER_ID = :USER_ID AND DISUSE_FLAG='0' ";
+           $sql = "SELECT   ";
+           $sql .= " TAB_1.ROLE_ID, ";
+           $sql .= " TAB_1.DEF_ACCESS_AUTH_FLAG, ";
+           $sql .= " TAB_2.ROLE_NAME ";
+           $sql .= "FROM ";
+           $sql .= " A_ROLE_ACCOUNT_LINK_LIST TAB_1 ";
+           $sql .= " LEFT JOIN A_ROLE_LIST    TAB_2 ON (TAB_1.ROLE_ID=TAB_2.ROLE_ID) ";
+           $sql .= "WHERE ";
+           $sql .= " TAB_1.DISUSE_FLAG='0' AND ";
+           $sql .= " TAB_2.DISUSE_FLAG='0' AND ";
+           $sql .= " TAB_1.USER_ID = {$userID}";
            $objQuery = $this->objDBCA->sqlPrepare($sql);
            if($objQuery->getStatus()===false){
                $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
@@ -1212,7 +1569,9 @@ class RoleBasedAccessControl {
                throw new Exception($message);
            }
            $this->role_account_link_list = array();
+           // getDefaultAccessRolesで使用
            $this->DefaultAccessRoles = array();
+           // chkOneRecodeAccessPermissionで使用
            $this->AccessRoles = array();
            while($row = $objQuery->resultFetch()) {
                $role_account_link_list[] = $row;
@@ -1273,7 +1632,12 @@ class RoleBasedAccessControl {
    ///////////////////////////////////////////////////////////////////
    function chkOneRecodeAccessPermission($chkRow) {
        $ret = true;
+       $error_msg = "[%s:%s]:ACCESS_AUTH Column not found.";
        try {
+           if(array_key_exists("ACCESS_AUTH",$chkRow) === false) {
+               $message = sprintf($error_msg,basename(__FILE__),__LINE__);
+               throw new Exception($message);
+           }
            $access_auth = $chkRow["ACCESS_AUTH"];
            // アクセス権が空の場合
            if(strlen($access_auth) == 0) {
@@ -1346,5 +1710,270 @@ class RoleBasedAccessControl {
            return false;
        }
    }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   指定されたオブジェクトにアクセス権カラムが定義されているかを判定
+   // 【パラメータ】
+   //   $tgt_table: 確認するオブジェクト(テーブル・ビュー)
+   //   $chkColumname: チェックするカラム名
+   //                  基本、未設定
+   // 【戻り値】
+   //   戻り値1
+   //     true:    正常
+   //     false:   異常
+   //   戻り値2
+   //     true:    カラムあり
+   //     false:   カラムなし
+   // 【備考】
+   //   webからの場合、戻り値1が異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、戻り値1が異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function chkTableHasAccessPermissionColumDefine($tgt_table,$chkColumname='ACCESS_AUTH') {
+       try {
+           $error_msg1 = "[%s:%s]:DB Access Error. (Table %s)";
+           $error_msg2 = "[%s:%s]:Object not found. (Table %s)";
+
+           $sql = sprintf("desc %s",$tgt_table);
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if($objQuery->getStatus()===false){
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$tgt_table);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $r = $objQuery->sqlExecute();
+           if(!$r) {
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$tgt_table);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           if($objQuery->effectedRowCount() == 0) {
+               // ロール・ユーザー紐づけにデータ未登録の場合
+               $message = sprintf($error_msg2,basename(__FILE__),__LINE__,$tgt_table);
+               throw new Exception($message);
+           }
+           $permission = false;
+           while($row = $objQuery->resultFetch()) {
+               if(isset($row["Field"])) {
+                   if($row["Field"] == $chkColumname) {
+                       $permission = true;
+                       break;
+                   }
+               }
+           }
+           unset($objQuery);
+           $ret = true;
+           return [$ret, $permission]; 
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           $ret        = false;
+           $permission = false;
+           return [$ret, $permission]; 
+       }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   $loadtableのACCESS_AUTHの定義有無とIDColumの紐づいているオブジェクトに
+   //   ACCESS_AUTHの定義有無により、IDColum・表示ファイル・Excelのマスタ一覧に
+   //   表示するデータをACCESS_AUTHで絞り込むか判定する。
+   //   指定されたオブジェクトにアクセス権カラムが定義されているかを判定
+   //
+   //   $loadtable_AccessAuth    true   true   false  false
+   //   $AccessAuthColumDefine   true   false  true   false
+   //   ACCESS_AUTHで絞り込み    あり   なし   なし   なし
+   //
+   // 【パラメータ】
+   //   $loadtable_AccessAuth:   $loadtableのACCESS_AUTHの定義有無
+   //                            $table->setAccessAuth() true:定義あり false:定義なし
+   //   $AccessAuthColumDefine:  IDColumの紐づいているオブジェクトのACCESS_AUTHの定義有無
+   //                            true:定義あり false:定義なし
+   // 【戻り値】
+   //   戻り値1
+   //     true:    絞り込みあり
+   //     false:   絞り込みなし
+   // 【備考】
+   //   webからの場合、戻り値1が異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、戻り値1が異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getPullDownListAccessPermissionNeedCheck($loadtable_AccessAuth,$AccessAuthColumDefine) {
+       $chkarray[true][true]   = true;
+       $chkarray[true][false]  = false;
+       $chkarray[false][true]  = false;
+       $chkarray[false][false] = false;
+       return($chkarray[$loadtable_AccessAuth][$AccessAuthColumDefine]);
+   }
 }
+// RBAC対応 ----
+// ---- RBAC対応
+    function getTargetRecodeCount($objTable,$objQuery,&$strRecCnt) {
+        // unset($objQuery); $objQueryの開放は呼び元で実施
+        global $g;
+        // ACCESS_AUTHカラムの有無を判定し対象レコードをカウント ----
+        if($objTable->getAccessAuth()) {
+            // ログインユーザーに紐づていてるロールを取得 ----
+            $userID = $g['login_id'];
+            $obj  = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($userID);
+            if($ret === false) {
+                $error_msg = "[%s:%s]:Failed to get user access role. (user ID:%s)";
+                $message = sprintf($error_msg,basename(__FILE__),__LINE__,$userID);
+                if(function_exists("web_log")) {
+                    web_log($message);
+                } else {
+                    error_log($message);
+                }
+                return false;
+            }
+            // ---- ログインユーザーに紐づていてるロールを取得
+            while($row = $objQuery->resultFetch()) {
+               // ACCESS_AUTHカラムが有る場合は各レコードのアクセス権を判定し、対象レコードをカウント ----
+               list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+               if($ret === false) {
+                   $error_msg = "[%s:%s]:User access permission check failed.(user ID:%s)";
+                   $message = sprintf($error_msg,basename(__FILE__),__LINE__,$userID);
+                   if(function_exists("web_log")) {
+                       web_log($message);
+                   } else {
+                       error_log($message);
+                   }
+                   return false;
+               } else {
+                   if($permission === true) {
+                       $strRecCnt++;
+                   }
+               }
+               // ---- ACCESS_AUTHカラムが有る場合は各レコードのアクセス権を判定し、対象レコードをカウント
+            }
+            unset($obj);
+        } else {
+            // ACCESS_AUTHカラムが無い場合はselect count値を設定 ----
+            $row = $objQuery->resultFetch();
+            $strRecCnt = $row['REC_CNT'];
+            // ---- ACCESS_AUTHカラムが無い場合はselect count値を設定
+        }
+        // ---- ACCESS_AUTHカラムの有無を判定し対象レコードをカウント
+        unset($obj);
+        return true;
+    }
+    // $chkobjは呼び出し元で初期値をNULL設定
+    function chkTargetRecodePermission($chkAccessAuth,&$chkobj,$row) {
+
+        global $g;
+        $userID = $g['login_id'];
+
+        // ACCESS_AUTHカラムの有無を判定
+        if($chkAccessAuth === true) {
+            if($chkobj === null) {
+                // ログインユーザーに紐づていてるロールを取得 ----
+                $chkobj  = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $chkobj->getAccountInfo($userID);
+                if($ret === false) {
+                    $error_msg = "[%s:%s]:Failed to get user access role. (user ID:%s)";
+                    $message = sprintf($error_msg,basename(__FILE__),__LINE__,$userID);
+                    if(function_exists("web_log")) {
+                        web_log($message);
+                    } else {
+                        error_log($message);
+                    }
+                    return [false,false];
+                }
+                // ログインユーザーに紐づていてるロールを取得 ----
+            }
+            // 対象レコードのACCESS_AUTHカラムでアクセス権を判定 ----
+            list($ret,$permission) = $chkobj->chkOneRecodeAccessPermission($row);
+            if($ret === false) {
+                $error_msg = "[%s:%s]:Access permission check failed. (user ID:%s)";
+                $message = sprintf($error_msg,basename(__FILE__),__LINE__,$userID);
+                if(function_exists("web_log")) {
+                    web_log($message);
+                } else {
+                    error_log($message);
+                }
+                return [false,false];
+            } else {
+                return [true,$permission];
+            }
+            // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
+        } else {
+            // ACCESS_AUTHカラムがない場合 ----
+            return [true,true];
+            // ---- ACCESS_AUTHカラムがない場合
+        }
+    }
+    function AccessAuthColumnFileterDataReplace($objDBCA,$AccessAuthColumnName,&$arrayFileterBody) {
+        $obj = new RoleBasedAccessControl($objDBCA);
+        foreach($arrayFileterBody as $key=>$val) {
+            $LikeFileter = sprintf("/^%s__[0-9]*$/",$AccessAuthColumnName);
+            if(preg_match($LikeFileter,$key) == 1) {
+                $val = preg_replace("/^%/","",$val);
+                $val = preg_replace("/%$/","",$val);
+                $val = $obj->getRoleNameStringToRoleIDString(1,$val);
+                if($val === false) {
+                    return false;
+                }
+                $val = "%". $val . "%";
+                $arrayFileterBody[$key] = $val;
+            }
+            $ListFileter = sprintf("/^%s_RF__[0-9]*$/",$AccessAuthColumnName);
+            if(preg_match($ListFileter,$key) == 1) {
+                $val = $obj->getRoleNameStringToRoleIDString(1,$val);
+                if($val === false) {
+                    return false;
+                }
+                $arrayFileterBody[$key] = $val;
+            }
+        }
+        return true;
+    }
+    // RBAC対応 ----
+    function ky_debug($file,$func,$line,$title,$data) {
+       return;
+       try {
+         $dump = var_export($data,true);
+         $tmpVarTimeStamp = time();
+         $logtime = date("Y/m/d H:i:s",$tmpVarTimeStamp);
+
+         $log = sprintf("%s:%s:%s:%s:--%s--\n[%s]\n",$logtime,basename($file),$func,$line,$title,$dump);
+         error_log($log,3,"/temp/logs/trace.log");
+         error_log($log,3,"/temp/logs/" . $func . ".log");
+       }catch (Exception $e){
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+       }
+    }
+    function ky_backtrace($file,$func,$line,$title) {
+       return;
+       try {
+         $print_backtrace = "------backtrace--\n";
+         $tmpVarTimeStamp = time();
+         $logtime = date("Y/m/d H:i:s",$tmpVarTimeStamp);
+         $trace = debug_backtrace();
+         foreach($trace as $oneline) {
+             $nowfile = 'None';
+             $nowline = 'None';
+             if(isset($oneline['file'])) $nowfile = $oneline['file'];
+             if(isset($oneline['line'])) $nowline = $oneline['line'];
+             $print_backtrace .= sprintf("%s: line:%s\n",$nowfile,$nowline);
+         }
+         //$log = sprintf("%s:%s:%s:%s:--%s--\n%s\n",$logtime,basename($file),$func,$line,$title,$print_backtrace);
+         $log = sprintf("%s:%s:%s:%s\n%s\n",$logtime,basename($file),$func,$line,$print_backtrace);
+         error_log($log,3,"/temp/logs/trace.log");
+         error_log($log,3,"/temp/logs/" . $func . ".log");
+       }catch (Exception $e){
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+       }
+    }
 ?>

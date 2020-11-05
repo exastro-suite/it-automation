@@ -360,10 +360,8 @@ callback.prototype = {
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
-    },
-    //---- ここからカスタマイズした場合の[callback]メソッド配置域
-    Filter1Cht_recDraw : function(result){
     }
+    //---- ここからカスタマイズした場合の[callback]メソッド配置域
     // ここまでカスタマイズした場合の[callback]メソッド配置域----
 }
 
