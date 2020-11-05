@@ -123,4 +123,5 @@ $ary["ITABASEC-020120"] = "The reading was successful.";
 $ary["ITABASEC-020121"] = "Are you sure you want to cancel the suspension?";
 $ary["ITABASEC-020122"] = "Do you want to reset it?";
 $ary["ITABASEC-020123"] = "Check execution status";
+$ary["ITABASEC-020008"] = "Select a class from the Conductor class list.";
 ?>

@@ -55,6 +55,14 @@ callback.prototype = {
     printConductorStatus : function( result ){
         //console.log( result );
         conductorUseList.conductorStatus = JSON.parse( result );
+
+        //ステータス情報がが無い場合はConductor作業一覧へ飛ばす
+        if ( conductorUseList.conductorStatus.length == 0 ) {
+            alert( getSomeMessage("ITABASEC020001") );
+            var url = '/default/menu/01_browse.php?no=2100180006';
+            location.href = url;
+        }
+
         if ( conductorGetMode === 'starting') {
             var conductorID = Number( conductorUseList.conductorStatus.CONDUCTOR_INSTANCE_INFO.CONDUCTOR_CLASS_NO );
             proxy.printconductorClass( conductorID );
@@ -117,6 +125,12 @@ const conductorInstanceID = editor.getParam('conductor_instance_id');
 // DOM読み込み完了
 $( function(){
     if ( conductorInstanceID !== null ) {
+      // conductor_instance_idが数値無い場合はConductor作業一覧へ飛ばす
+      if( isNaN( conductorInstanceID ) === true ){
+        alert( getSomeMessage("ITABASEC020001") );
+        var url = '/default/menu/01_browse.php?no=2100180006';
+        location.href = url;
+      }
       // リスト取得開始
       proxy.printOperationList();
       // タブ切り替え
