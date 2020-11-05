@@ -63,7 +63,7 @@
 print <<< EOD
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
-    
+    <script>const gLoginUserID = {$g['login_id']};</script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_conductor.js?{$timeStamp_editor_conductor_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/00_javascript.js?{$timeStamp_00_javascript_js}"></script>
@@ -233,8 +233,26 @@ EOD;
                           <th class="panel-th">Name :</th>
                           <td class="panel-td"><input id="conductor-class-name" class="edit panel-text" type="text"><span id="conductor-class-name-view" class="view panel-span"></span></td>
                         </tr>
+                        <tr class="view">
+                          <th class="panel-th">Role :</th>
+                          <td class="panel-td"><span id="conductor-view-role" class="panel-span"></span></td>
+                        </tr>
                       </tbody>
                     </table>
+                    <div class="panel-group edit">
+                      <div class="panel-group-title">Permission role</div>
+                      <table class="panel-table">
+                        <tbody>
+                          <tr>
+                            <th class="panel-th">Role :</th>
+                            <td class="panel-td"><span id="conductor-edit-role" class="panel-span"></span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <ul class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="conductor-role-select" class="panel-button">Permission role select</button></li>
+                      </ul>                      
+                    </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
                       <textarea id="conductor-class-note" class="edit panel-note panel-textarea" spellcheck="false"></textarea>
