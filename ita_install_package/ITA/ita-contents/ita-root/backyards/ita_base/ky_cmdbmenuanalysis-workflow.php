@@ -103,8 +103,9 @@ $arrayConfigOfMenu = array(
     "MENU_ID"=>""                 ,
     "SHEET_TYPE"=>""              ,
     "DISP_SEQ"=>""                ,
-    "DISUSE_FLAG"=>""             ,
+    "ACCESS_AUTH"=>""             ,
     "NOTE"=>""                    ,
+    "DISUSE_FLAG"=>""             ,
     "LAST_UPDATE_TIMESTAMP"=>""   ,
     "LAST_UPDATE_USER"=>""
 );
@@ -117,8 +118,9 @@ $arrayValueTmplOfMenu = array(
     "MENU_ID"=>""                 ,
     "SHEET_TYPE"=>""              ,
     "DISP_SEQ"=>""                ,
-    "DISUSE_FLAG"=>""             ,
+    "ACCESS_AUTH"=>""             ,
     "NOTE"=>""                    ,
+    "DISUSE_FLAG"=>""             ,
     "LAST_UPDATE_TIMESTAMP"=>""   ,
     "LAST_UPDATE_USER"=>""
 );
@@ -141,8 +143,9 @@ $arrayConfigOfMenuTbl = array(
     "TABLE_NAME"=>""              ,
     "PKEY_NAME"=>""               ,
     "DISP_SEQ"=>""                ,
-    "DISUSE_FLAG"=>""             ,
+    "ACCESS_AUTH"=>""             ,
     "NOTE"=>""                    ,
+    "DISUSE_FLAG"=>""             ,
     "LAST_UPDATE_TIMESTAMP"=>""   ,
     "LAST_UPDATE_USER"=>""
 );
@@ -156,8 +159,9 @@ $arrayValueTmplOfMenuTbl = array(
     "TABLE_NAME"=>""              ,
     "PKEY_NAME"=>""               ,
     "DISP_SEQ"=>""                ,
-    "DISUSE_FLAG"=>""             ,
+    "ACCESS_AUTH"=>""             ,
     "NOTE"=>""                    ,
+    "DISUSE_FLAG"=>""             ,
     "LAST_UPDATE_TIMESTAMP"=>""   ,
     "LAST_UPDATE_USER"=>""
 );
@@ -185,8 +189,9 @@ $arrayConfigOfMenuCol = array(
     "REF_PKEY_NAME"=>""           ,
     "REF_COL_NAME"=>""            ,
     "DISP_SEQ"=>""                ,
-    "DISUSE_FLAG"=>""             ,
+    "ACCESS_AUTH"=>""             ,
     "NOTE"=>""                    ,
+    "DISUSE_FLAG"=>""             ,
     "LAST_UPDATE_TIMESTAMP"=>""   ,
     "LAST_UPDATE_USER"=>""
 );
@@ -205,8 +210,9 @@ $arrayValueTmplOfMenuCol = array(
     "REF_PKEY_NAME"=>""           ,
     "REF_COL_NAME"=>""            ,
     "DISP_SEQ"=>""                ,
-    "DISUSE_FLAG"=>""             ,
+    "ACCESS_AUTH"=>""             ,
     "NOTE"=>""                    ,
+    "DISUSE_FLAG"=>""             ,
     "LAST_UPDATE_TIMESTAMP"=>""   ,
     "LAST_UPDATE_USER"=>""
 );
@@ -226,6 +232,7 @@ $arrayHideMenuColumnList = array(
     "LAST_EXECUTE_TIMESTAMP",
     "OPERATION_NAME",
     "OPERATION_DATE",
+    "ACCESS_AUTH",
     "NOTE",
     "DISUSE_FLAG",
     "LAST_UPDATE_TIMESTAMP",
@@ -419,6 +426,7 @@ try{
         // CMDB内の代入値紐付対象メニューのカラム情報を取得
         ///////////////////////////////////////////////////////////////////////////
         $menu_id       = $row['MENU_ID'];
+        $access_auth   = $row['ACCESS_AUTH'];
 
 
         // トレースメッセージ
@@ -600,7 +608,14 @@ try{
             }
 
             // カラム情報登録
-            $lva_col_list[$list[0]] = array('COL_TITLE_DISP_SEQ'=>$no,'COL_TITLE'=>$list[1],'REF_TABLE_NAME'=>$list[2],'REF_PKEY_NAME'=>$list[3],'REF_COL_NAME'=>$list[4],"COL_CLASS"=>$clomn_class);
+            $lva_col_list[$list[0]] = array('COL_TITLE_DISP_SEQ'    =>$no,
+                                            'COL_TITLE'             =>$list[1],
+                                            'REF_TABLE_NAME'        =>$list[2],
+                                            'REF_PKEY_NAME'         =>$list[3],
+                                            'REF_COL_NAME'          =>$list[4],
+                                            'COL_CLASS'             =>$clomn_class,
+                                            'ACCESS_AUTH'           =>$access_auth,
+                                           );
         }
         if($host_hit === false){
             if ( $log_level === 'DEBUG' ){
@@ -631,7 +646,7 @@ try{
                              $arrayConfigOfMenuTbl,    $arrayValueTmplOfMenuTbl,
                              $menu_id, $table_name,
                              $pkey_name,
-                             $db_access_user_id);
+                             $db_access_user_id, $access_auth);
         if($ret === false){
             $error_flag = 1;
 
@@ -958,7 +973,8 @@ function DBGetMenuList(&$in_menu_info){
     $in_menu_info = array();
     // CMDB内の代入値紐付対象メニューを抽出
     $sql = "SELECT                          \n" .
-           "  TAB_A.MENU_ID        MENU_ID  \n" .
+           "  TAB_A.MENU_ID        MENU_ID, \n" .
+           "  TAB_A.ACCESS_AUTH             \n" .
            "FROM                            \n" .
            "  B_CMDB_MENU_LIST TAB_A        \n" .
            "WHERE                           \n" .
@@ -1018,7 +1034,7 @@ function addCMDBMenuTblDB($in_strCurTable,           $in_strJnlTable,
                           $in_arrayConfig,           $in_arrayValue,
                           $in_menu_id, $in_tablename,
                           $in_pkeyname,
-                          $in_access_user_id){
+                          $in_access_user_id, $in_access_auth){
     global    $db_model_ch;
     global    $objMTS;
     global    $objDBCA;
@@ -1101,9 +1117,10 @@ function addCMDBMenuTblDB($in_strCurTable,           $in_strJnlTable,
             }
         }
         else{
-            // テーブル名とPkeyが変更になっているか判定する。
+            // テーブル名とPkeyとアクセス許可ロールが変更になっているか判定する。
             if($row["TABLE_NAME"]  == $in_tablename &&
-               $row["PKEY_NAME"]   == $in_pkeyname ){
+               $row["PKEY_NAME"]   == $in_pkeyname &&
+               $row["ACCESS_AUTH"] == $in_access_auth ){
                 //同一みなので処理終了
                 return true;
             }
@@ -1142,6 +1159,7 @@ function addCMDBMenuTblDB($in_strCurTable,           $in_strJnlTable,
         $tgt_row["MENU_ID"]          = $in_menu_id;
         $tgt_row["TABLE_NAME"]       = $in_tablename;
         $tgt_row["PKEY_NAME"]        = $in_pkeyname;
+        $tgt_row["ACCESS_AUTH"]      = $in_access_auth;
         $tgt_row["DISUSE_FLAG"]      = '0';
         $tgt_row["LAST_UPDATE_USER"] = $in_access_user_id;
 
@@ -1174,6 +1192,7 @@ function addCMDBMenuTblDB($in_strCurTable,           $in_strJnlTable,
         $tgt_row["MENU_ID"]          = $in_menu_id;
         $tgt_row["TABLE_NAME"]       = $in_tablename;
         $tgt_row["PKEY_NAME"]        = $in_pkeyname;
+        $tgt_row["ACCESS_AUTH"]      = $in_access_auth;
         $tgt_row["LAST_UPDATE_USER"] = $in_access_user_id;
         $tgt_row["DISUSE_FLAG"]      = '0';
 
@@ -1597,7 +1616,8 @@ function addCMDBMenuColDB($in_strCurTable,           $in_strJnlTable,
                 $row['COL_TITLE_DISP_SEQ'] == $in_col_data['COL_TITLE_DISP_SEQ'] &&
                 $row['REF_TABLE_NAME']     == $in_col_data['REF_TABLE_NAME'] &&
                 $row['REF_PKEY_NAME']      == $in_col_data['REF_PKEY_NAME'] &&
-                $row['REF_COL_NAME']       == $in_col_data['REF_COL_NAME']){
+                $row['REF_COL_NAME']       == $in_col_data['REF_COL_NAME'] &&
+                $row['ACCESS_AUTH']        == $in_col_data['ACCESS_AUTH']){
 
                  //同一なので処理終了
                  return true;
@@ -1644,6 +1664,7 @@ function addCMDBMenuColDB($in_strCurTable,           $in_strJnlTable,
         $tgt_row["REF_TABLE_NAME"]     = $in_col_data['REF_TABLE_NAME'];
         $tgt_row["REF_PKEY_NAME"]      = $in_col_data['REF_PKEY_NAME'];
         $tgt_row["REF_COL_NAME"]       = $in_col_data['REF_COL_NAME'];
+        $tgt_row["ACCESS_AUTH"]        = $in_col_data['ACCESS_AUTH'];
         $tgt_row["DISUSE_FLAG"]        = '0';
         $tgt_row["LAST_UPDATE_USER"]   = $in_access_user_id;
         
@@ -1681,6 +1702,7 @@ function addCMDBMenuColDB($in_strCurTable,           $in_strJnlTable,
         $tgt_row["REF_TABLE_NAME"]     = $in_col_data['REF_TABLE_NAME'];
         $tgt_row["REF_PKEY_NAME"]      = $in_col_data['REF_PKEY_NAME'];
         $tgt_row["REF_COL_NAME"]       = $in_col_data['REF_COL_NAME'];
+        $tgt_row["ACCESS_AUTH"]        = $in_col_data['ACCESS_AUTH'];
         $tgt_row["LAST_UPDATE_USER"]   = $in_access_user_id;
         $tgt_row["DISUSE_FLAG"]        = '0';
 
