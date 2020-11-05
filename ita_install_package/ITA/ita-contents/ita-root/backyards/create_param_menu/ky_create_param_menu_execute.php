@@ -3279,6 +3279,7 @@ function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData){
 
                     // 復活する
                     $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
                     $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
                     $updateData['NOTE']             = "";                       // 備考
                     $updateData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
@@ -3293,8 +3294,10 @@ function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData){
                     $updateData['DISUSE_FLAG']      = "1";                      // 廃止フラグ
                     $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
-                else if(($updateData['SHEET_TYPE'] != $cmiData['TARGET'] || $updateData['ACCESS_AUTH'] != $cmiData['ACCESS_AUTH']) &&  $noLinkTarget == false){
+                // 値が更新されている場合
+                else if(($updateData['SHEET_TYPE'] != $cmiData['TARGET'] || $updateData['ACCESS_AUTH_FLG'] != 1 || $updateData['ACCESS_AUTH'] != $cmiData['ACCESS_AUTH']) &&  $noLinkTarget == false){
                     $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
                     $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
                     $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
@@ -3322,6 +3325,7 @@ function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData){
             $insertData = array();
             $insertData['MENU_ID']          = $targetMenuId;            // メニュー
             $insertData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+            $insertData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
             $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
             $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
             $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
