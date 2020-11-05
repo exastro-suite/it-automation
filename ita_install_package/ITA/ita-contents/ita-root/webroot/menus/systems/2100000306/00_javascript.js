@@ -17,7 +17,7 @@ function callback() {}
 callback.prototype = {
     //----Symphony系メソッド
     printSymphonyClass : function( result ){
-
+    
         var strAlertAreaName = 'symphony_message';
 
         var ary_result = getArrayBySafeSeparator(result);
@@ -134,8 +134,23 @@ callback.prototype = {
         }
 
         showForDeveloper(result);
-    }
+    }  
     //Symphony系メソッド----
+}
+
+// ロール一覧を取得する
+function getRoleList() {
+    const printRoleListURL = '/common/common_printRoleList.php?user_id=' + gLoginUserID;
+    $.ajax({
+      type: 'get',
+      url: printRoleListURL,
+      dataType: 'text'
+    }).done( function( result ) {
+        gRoleList = JSON.parse( result );
+        // Symphonyクラス編集 初期プロセス
+        initProcess('classEdit');
+    }).fail( function( result ) {
+    });
 }
 
 //////// ----汎用系ファンクション ////////
@@ -151,6 +166,9 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 //////// テーブルレイアウト設定 ////////
 var msgTmpl = {};
 var privilege;
+
+// ロールリスト
+var gRoleList;
 //////// 画面生成時に初回実行する処理 ////////
 
 var proxy = new Db_Access(new callback());
@@ -166,8 +184,9 @@ window.onload = function(){
     else{
         initialFilter = initialFilterEl.innerHTML;
     }
-
-    initProcess('classEdit');
+    
+    // ロールリスト読み込み > 初期プロセス
+    getRoleList();
 
     if(privilege != 1){
         var strCommandAreaWrap = 'symphony_footer';

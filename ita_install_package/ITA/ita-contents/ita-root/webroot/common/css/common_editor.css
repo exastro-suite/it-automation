@@ -2093,37 +2093,14 @@ padding-left: 16px;
 background-color: rgba( 255,255,255,.2 );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* -------------------------------------------------- *
 
    Modal
 
  * -------------------------------------------------- */
+ #INDEX.modal-open {
+overflow: hidden;
+}
 #editor-modal {
 box-sizing: border-box;
 overflow: hidden;
@@ -2133,6 +2110,7 @@ left: 0; top: 0;
 display: flex;
 align-content: center;
 justify-content: center;
+flex-direction: column;
 width: 100%; height: 100%;
 padding: 16px;
 background-color: rgba( 0,0,0,.5 );
@@ -2143,7 +2121,10 @@ background-color: rgba( 0,0,0,.5 );
 box-sizing: border-box;
 }
 .editor-modal-container {
-width: 800px; height: 100%;
+width: 800px;
+height: auto;
+max-height: 100%;
+margin: 0 auto;
 background-color: #444;
 border-left: 1px solid rgba( 255,255,255,.1 );
 border-top: 1px solid rgba( 255,255,255,.1 );
@@ -2301,6 +2282,25 @@ background-color: hsl( 0,0%,28% );
 .modal-table tbody tr:nth-child( even ) td {
 background-color: hsl( 0,0%,20% );
 }
+.modal-table thead th.id,
+.modal-table thead th.select {
+width: 8px;
+white-space: nowrap;
+}
+.modal-table .modal-checkbox {
+width: 16px; height: 16px;
+pointer-events: none;
+cursor: pointer;
+}
+.modal-select-table tbody tr {
+cursor: pointer;
+}
+.modal-select-table tbody tr:hover th {
+background-color: hsl( 0,0%,40% );
+}
+.modal-select-table tbody tr:hover td {
+background-color: hsl( 0,0%,30% );
+}
 .editor-modal-footer-menu {
 margin: 0; padding: 0;
 list-style: none;
@@ -2361,4 +2361,54 @@ background-color: #58B60C;
 }
 .editor-modal-footer-menu-button.positive:active {
 background-color: #49960A;
+}
+
+.modal-body-html {
+display: none;
+}
+.modal-description-paragraph {
+margin-bottom: 32px;
+line-height: 1.75;
+font-size: 16px;
+color: #EEE;
+}
+.modal-description-image {
+width: 100%; height: auto;
+vertical-align: top;
+}
+.modal-description-table {
+width: 100%;
+border-collapse: collapse;
+}
+.modal-description-cell {
+padding: 4px 8px;
+background-color: rgba( 0,0,0,.05 );
+border: 1px solid rgba( 0,0,0,.4 );
+line-height: 1.75;
+font-size: 16px;
+color: #EEE;
+}
+th.modal-description-cell {
+background-color: rgba( 0,0,0,.2 );
+}
+.modal-description-note {
+margin-bottom: 8px;
+line-height: 1.75;
+font-size: 14px;
+color: #EEE;
+}
+.modal-description-note-table {
+width: 100%;
+border-collapse: collapse;
+}
+.modal-description-note-cell {
+padding: 4px 8px;
+background-color: rgba( 0,0,0,.05 );
+border: 1px solid rgba( 0,0,0,.4 );
+line-height: 1.75;
+font-size: 14px;
+color: #EEE;
+}
+th.modal-description-note-cell {
+background-color: rgba( 0,0,0,.2 );
 }
