@@ -86,49 +86,6 @@
     </div>
     <!-------------------------------- 絞込み(表示フィルタ) -------------------------------->
 EOD;
-/*
-    <!-------------------------------- スコア -------------------------------->
-    <h2>
-        <table width="100%">
-            <tr>
-                <td>
-                   <div onClick=location.href="javascript:show('Graph1_Midashi','Graph1_Nakami');" class="midashi_class" >{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30033")}</div>
-                </td>
-                <td>
-                    <div id="Graph1_Midashi" align="right">
-                        <input type="button" value="{$strCmdWordAreaClose}" class="showbutton" onClick=location.href="javascript:show('Graph1_Midashi','Graph1_Nakami');" >
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </h2>
-    <div id="Graph1_Nakami" style="display:block; padding-bottom:1px;" class="text">
-        <div id="Graph_msg" style="display:block;"></div>
-        <div id="blank" style="margin: 0 0 -21px 0; position:relative; height:25px; z-index:10">
-            <div class="switch" style="margin: 0 0 -22px 10px; position:absolute; height:25px; ">
-                <input type="radio" name="graph_type_select" id="g_type1" checked onclick="javascript:Graph_change_button(1);">
-                <label for="g_type1" class="switch-1">Line Graph</label>
-                <input type="radio" name="graph_type_select" id="g_type2" onclick="javascript:Graph_change_button(2);">
-                <label for="g_type2" class="switch-2">Bar Graph</label>
-            </div>
-        </div>
-
-        <div id="DL_buttons" class="DL_buttons" style="position:absolute; width:1040px; z-index:6;">
-            <div id="line_dl" class="line_dl DL_button" style="text-align:right; position:absolute; margin:28px 0 0 10px; padding-right:5px; width:545px;" onmouseover="Graph_onmouse(1,1)" onmouseout="Graph_onmouse(1,0)">
-                <span style="cursor:pointer"><img src="/common/imgs/dl.png?{$timeStamp_dl_png}" title="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30034")}" onclick="Graph_DL(1);" /></span>
-            </div>
-            <div id="pie_dl" class="pie_dl DL_button" style="text-align:right; margin:28px 0 0 600px; padding-right:5px; width:425px;" onmouseover="Graph_onmouse(2,1)" onmouseout="Graph_onmouse(2,0)">
-                <span style="cursor:pointer"><img src="/common/imgs/dl.png?{$timeStamp_dl_png}" title="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30034")}" onclick="Graph_DL(2);" /></span>
-            </div>
-        </div>
-        <div class="flex" style="margin-top:20px; width:1040px;">
-            <div id="stage" class="stage" style="margin:0 0 0 10px; width:550px; z-index:0;"></div>
-            <div id="donuts_pie" class="table_area" style="margin:0 10px 0 40px; width:430px; z-index:0; flex: flex-end;"></div>
-        </div>
-    </div>
-    <!-------------------------------- スコア -------------------------------->
-EOD;
-*/
 	$listSectionMsg = ($privilege=="1")?$g['objMTS']->getSomeMessage("ITAWDCH-STD-30031"):$g['objMTS']->getSomeMessage("ITAWDCH-STD-30032");
 	print
 <<<EOD
