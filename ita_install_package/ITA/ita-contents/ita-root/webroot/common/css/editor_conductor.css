@@ -1,6 +1,32 @@
 @charset "utf-8";
 /* CSS Document */
 
+html, body,
+.wholecontainer,
+#PAGETOP {
+  box-sizing: border-box;
+  height: 100%;
+}
+#INDEX {
+  overflow: auto;
+  min-height: 480px!important;
+}
+#HEADER {
+  box-sizing: border-box;
+  height: 80px;
+}
+#KIZI {
+
+  box-sizing: border-box;
+  height: calc( 100% - 117px );
+  padding: 0;
+}
+#FOOTER {
+  box-sizing: border-box;
+  height: 37px;
+}
+
+
 #editor.load-conductor > div {
 opacity: .5!important;
 pointer-events: none!important;
