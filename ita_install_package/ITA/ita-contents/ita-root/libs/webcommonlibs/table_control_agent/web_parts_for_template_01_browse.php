@@ -121,7 +121,6 @@
     <script type="text/javascript" src="/default/menu/02_access.php?client=all$url_add_param"></script>
     <script type="text/javascript" src="/default/menu/02_access.php?stub=all$url_add_param"></script>
     <script type="text/javascript" src="{$jsFile}?$timeStamp_00_javascript_js"></script>
-    <script type="text/javascript" src="{$jsFile}?$timeStamp_00_javascript_js"></script>
 EOD;
 
     // browse系共通ロジックパーツ02

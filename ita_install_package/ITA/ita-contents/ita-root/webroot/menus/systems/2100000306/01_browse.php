@@ -111,6 +111,7 @@
     $timeStamp_itabase_symphony_class_edit_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_edit.js");
     
     $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
+    $timeStamp_editor_common_css=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
 
 print <<< EOD
     <script>const gLoginUserID = {$g['login_id']};</script>
@@ -122,6 +123,7 @@ print <<< EOD
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_symphony_class_edit.js?{$timeStamp_itabase_symphony_class_edit_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
     
+    <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_css}">
     <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/itabase_symphony_style.css?{$timeStamp_itabase_symphony_style_css}">
 EOD;
 
@@ -206,7 +208,7 @@ EOD;
                             <label for="symphony_name">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-204070")}<!--Symphonyクラス名称--></label>　<span id="print_symphony_name"></span>
                         </div>
                         <div class="heightAndWidthFixed01">
-                            <label for="symphony_role">Symphony Role</label>　<span id="print_symphony_role"></span>
+                            <label for="symphony_role">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-204071")}<!--Symphonyロール--></label>　<span id="print_symphony_role"></span>
                         </div>
                         <div style="display:none"><span id="print_symphony_lt4u"></span></div>
                     </div>

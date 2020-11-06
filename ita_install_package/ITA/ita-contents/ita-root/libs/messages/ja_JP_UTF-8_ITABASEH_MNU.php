@@ -257,6 +257,7 @@ $ary[204040] = "説明";
 $ary[204050] = "Symphony編集";
 $ary[204060] = "SymphonyクラスID";
 $ary[204070] = "Symphony名称";
+$ary[204071] = "Symphonyロール";
 $ary[204080] = "説明";
 $ary[204090] = "start";
 $ary[205010] = "表示フィルタ";
