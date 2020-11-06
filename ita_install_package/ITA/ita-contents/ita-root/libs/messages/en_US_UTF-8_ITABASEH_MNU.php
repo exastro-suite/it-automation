@@ -254,6 +254,7 @@ $ary[201110] = "Executing user";
 $ary[204060] = "Symphony class ID";
 $ary[201120] = "[Original data] User list";
 $ary[204070] = "Symphony name";
+$ary[204071] = "Symphony role";
 $ary[204080] = "Note";
 $ary[204090] = "Start";
 $ary[205010] = "Display filter";
