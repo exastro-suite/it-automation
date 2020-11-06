@@ -738,7 +738,12 @@
                 case 20310201: // 不正操作によるアクセス警告画面にリダイレクト
                 case 20310202: // 不正操作によるアクセス警告画面にリダイレクト
                 case 20410201: // 不正操作によるアクセス警告画面にリダイレクト
-                    insideRedirectCodePrint("/common/common_illegal_access.php",$intInsideRedirectMode);
+                    $objMTS = $g['objMTS'];
+                    if ( $_GET["grp"] != "0000000000" ) {
+                        $alert = "<script type='text/javascript'>alert('".$objMTS->getSomeMessage("ITAWDCH-MNU-4030004")."');</script>";
+                        echo $alert;
+                    }
+                    insideRedirectCodePrint("/default/mainmenu/01_browse.php",$intInsideRedirectMode);
                     break;
                 case 10410301: // IPアドレス（ホワイトリスト）に登録されていない
                     insideRedirectCodePrint("/common/common_access_filter.php",$intInsideRedirectMode);

@@ -25,7 +25,7 @@
     $uri = $_SERVER['REQUEST_URI'];
     if($uri == "/"){
         $grp = $_GET['grp'];
-        $url = '/default/mainmenu/01_browse.php?grp=' . $grp;
+        $url = '/default/mainmenu/01_browse.php';
         header('Location: ' . $url, true, 301);
     }
 
