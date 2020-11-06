@@ -892,16 +892,22 @@ min-height: 240px;
 .stacked-graph-item-title {
 box-sizing: border-box;
 position: absolute;
+z-index: 1;
 left: 0; bottom: 0;
 width: 100%; height: 24px;
-text-align: center;
 line-height: 22px;
 font-size: 10px;
 color: #111;
 }
-.period-many .stacked-graph-item-title {
-color: transparent;
+.stacked-graph-item-title .day-number {
+display: inline-block;
+position: absolute;
+left: 50%;
+z-index: 2;
+transform: translateX(-50%);
+text-align: center;
 }
+
 .stacked-graph-bar {
 box-sizing: border-box;
 position: absolute;
