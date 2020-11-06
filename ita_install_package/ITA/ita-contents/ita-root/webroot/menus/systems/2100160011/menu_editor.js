@@ -96,7 +96,7 @@ function itaModalOpen( headerTitle, bodyFunc, modalType ) {
       footerHTML = ''
       + '<div class="editor-modal-footer">'
         + '<ul class="editor-modal-footer-menu">'
-          + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">閉じる</li>'
+          + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">' + getSomeMessage("ITAWDCC92003") + '</li>'
         + '</ul>'
       + '</div>'
     } else {
