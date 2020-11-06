@@ -563,10 +563,21 @@ editorFunction.inputTextValidation = function( parent, target ) {
             maxLength = $input.attr('data-max-length');
       let inputLength = value.length;
       if ( inputLength > maxLength ) {
-        $input.val( value.slice( 0, maxLength ) );
-        inputLength = maxLength;
+        $input.next('.input-check-length').addClass('input-check-over');
+      } else {
+        $input.next('.input-check-length').removeClass('input-check-over');
       }
       $input.next('.input-check-length').text( inputLength + ' / ' + maxLength );
+    },
+    'blur': function() {
+      const $input = $( this ),
+            value = $input.val(),
+            maxLength = $input.attr('data-max-length'),
+            inputLength = value.length;
+      $input.next('.input-check-length').text('').removeClass('input-check-over');
+      if ( inputLength > maxLength ) {
+        $input.val( value.slice( 0, maxLength ) );
+      }
     }
   }, target );
 };
@@ -574,18 +585,26 @@ editorFunction.inputTextValidation = function( parent, target ) {
 editorFunction.inputNumberValidation = function( parent, target ) {
   
   $( parent ).on({
-    'focus input': function() {
+    'focus': function() {
       const $input = $( this );
       if ( !$input.is('.input-check-target') ) {
         $input.addClass('input-check-target')
           .wrap('<div class="input-check-wrap"/>').after('<span class="input-check-length"/>').focus();
       }
-      const value = $input.val(),
+      const min = Number( $input.attr('data-min') ),
+            max = Number( $input.attr('data-max') );
+      $input.next('.input-check-length').text( min + ' - ' + max );
+    },
+    'blur': function() {
+      const $input = $( this ),
+            value = $( this ).val(),
             min = Number( $input.attr('data-min') ),
             max = Number( $input.attr('data-max') );
-      if ( value < min ) { $input.val( min ); }
-      if ( value > max ) { $input.val( max ); }
-      $input.next('.input-check-length').text( min + ' - ' + max );
+      if ( value === '' || value < min ) {
+        $input.val( min );      
+      } else if ( value > max ) {
+        $input.val( max );
+      }
     }
   }, target );
 };
