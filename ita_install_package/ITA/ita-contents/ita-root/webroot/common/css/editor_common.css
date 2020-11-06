@@ -942,11 +942,14 @@ position: absolute;
 z-index: 2;
 top: -100%; left: 0;
 padding: 0 8px;
-background: rgba( 0,0,0,.5 );
+background: #111;
 border-radius: 4px;
 line-height: 24px;
 color: #EEE;
 }
 .input-check-target:focus + .input-check-length {
 display: block;
+}
+.input-check-length.input-check-over {
+color: #FF0;
 }
