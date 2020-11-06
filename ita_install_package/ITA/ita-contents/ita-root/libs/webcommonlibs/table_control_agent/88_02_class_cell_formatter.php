@@ -3280,14 +3280,32 @@ EOD;
 				}
 				//追い越し判定用フラグなどの追加タグ----
 
+				//$aryOverrideから対象を取得
+				if(isset($aryOverride[0])){
+					$targetMixName = $aryOverride[0];
+				}else{
+					$targetMixName = "";
+				}
+
                 // プルダウンあいまい検索
     			$retStrBody .= 
 <<< EOD
                 <script type="text/javascript">
                     var strAdjustRulerClassName = "psl_{$printTagId}";
-                    var objAdjustRulerForWidth = $('#Mix2_Nakami'+' .'+strAdjustRulerClassName).get()[0];
-                    if(objAdjustRulerForWidth == null){
+                    var targetMixName = "{$targetMixName}";
+                    if(targetMixName == 'Mix1_1'){
                         var objAdjustRulerForWidth = $('#Mix1_Nakami'+' .'+strAdjustRulerClassName).get()[0];
+                        var targetId = '#Mix1_Nakami';
+                    }else if(targetMixName == 'Mix2_1'){
+                        var objAdjustRulerForWidth = $('#Mix2_Nakami'+' .'+strAdjustRulerClassName).get()[0];
+                        var targetId = '#Mix2_Nakami';
+                    }else{
+                        var objAdjustRulerForWidth = $('#Mix2_Nakami'+' .'+strAdjustRulerClassName).get()[0];
+                        var targetId = '#Mix2_Nakami';
+                        if(objAdjustRulerForWidth == null){
+                            var objAdjustRulerForWidth = $('#Mix1_Nakami'+' .'+strAdjustRulerClassName).get()[0];
+                            var targetId = '#Mix1_Nakami';
+                        }
                     }
                     var intNewWidth = objAdjustRulerForWidth.offsetWidth;
                     if(30 == intNewWidth){
@@ -3299,7 +3317,7 @@ EOD;
                         intNewWidth = 650;
                     }
                     $(document).ready(function(){
-                        $(".psl_{$printTagId}").select2({
+                        $(targetId+" .psl_{$printTagId}").select2({
                             width:intNewWidth
 
                         });
