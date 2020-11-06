@@ -17,17 +17,17 @@
     try{
         require_once ($root_dir_path . "/libs/webcommonlibs/web_functions_for_menu_info.php");
 
-        if(array_key_exists('grp', $_GET) && "" != $_GET['grp']){
+        if( array_key_exists('grp', $_GET) && "" != $_GET['grp'] ){
             $ACRCM_group_id = sprintf("%010d", $_GET['grp']);
             $ACRCM_id = "";
             $ACRCM_login_nf = "1";
         }
-        else if($_SERVER['REQUEST_URI'] === "/default/mainmenu/01_browse.php"){
+        else if( $_SERVER['REQUEST_URI'] === "/default/mainmenu/01_browse.php" ){
             $ACRCM_group_id = "";
             $ACRCM_id = "";
             $ACRCM_login_nf = "1";
         }
-        else if($_GET['no'] == ""){
+        else if( isset($_GET['no']) && $_GET['no'] == "" ){
             $ACRCM_group_id = "";
             $ACRCM_id = "";
             $ACRCM_login_nf = "1";
