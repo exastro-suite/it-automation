@@ -421,4 +421,6 @@ $ary[4010003] = "Contact <a href={}> administrator </a>.";
 $ary[4030001] = "Unauthorized operations";
 $ary[4030002] = "The operation is not allowed. Check your permissions.";
 $ary[4030003] = "Contact <a href={}> administrator </a>.";
+$ary[4030004] = "You don't have permission to see this menu. \n
+You will now be moved to the top page.";
 ?>
