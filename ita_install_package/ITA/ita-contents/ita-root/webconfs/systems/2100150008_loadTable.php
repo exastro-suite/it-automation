@@ -93,6 +93,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $strQuery = "SELECT "
                    ." TAB_1.FILE_M_ID       KEY_COLUMN "
                    .",TAB_1.CLOSE_REVISION  DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." G_FILE_MANAGEMENT_NEWEST TAB_1 "
                    ."WHERE "
@@ -103,11 +104,28 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $aryForBind['FILE_ID'] = $fileId;
 
         if( 0 < strlen($fileId) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
@@ -137,6 +155,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $strQuery = "SELECT "
                    ." TAB_1.FILE_M_ID       KEY_COLUMN "
                    .",TAB_1.CLOSE_REVISION  DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." G_FILE_MANAGEMENT_NEWEST TAB_1 "
                    ."WHERE "
@@ -147,11 +166,28 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $aryForBind['FILE_ID'] = $fileId;
 
         if( 0 < strlen($fileId) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
