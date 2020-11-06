@@ -1362,7 +1362,7 @@ function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symph
           objHtmlRoleSpan.innerHTML = getRoleListIdToName( symphony_role );
           
           objHtmlRoleSelectButton.className = "role_select_button"
-          objHtmlRoleSelectButtonText.innerHTML = 'Select';
+          objHtmlRoleSelectButtonText.innerHTML = getSomeMessage("ITABASEC010413");
           objHtmlRoleSelectButton.appendChild( objHtmlRoleSelectButtonText );
 
           objHtmlRole.type = "hidden";
