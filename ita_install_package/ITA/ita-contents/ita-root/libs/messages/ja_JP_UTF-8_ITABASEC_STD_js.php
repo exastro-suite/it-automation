@@ -58,6 +58,7 @@ $ary["ITABASEC-010409"] = "説明";
 $ary["ITABASEC-010410"] = "スキップ";
 $ary["ITABASEC-010411"] = "キャンセル";
 $ary["ITABASEC-010412"] = "流用新規";
+$ary["ITABASEC-010413"] = "選択";
 $ary["ITABASEC-010501"] = "未実行";
 $ary["ITABASEC-010502"] = "準備エラー";
 $ary["ITABASEC-010503"] = "準備中";
@@ -123,4 +124,5 @@ $ary["ITABASEC-020120"] = "読み込みに成功しました。";
 $ary["ITABASEC-020121"] = "一時停止を解除しますか？";
 $ary["ITABASEC-020122"] = "リセットしますか？";
 $ary["ITABASEC-020123"] = "作業状態確認";
+$ary["ITABASEC-020008"] = "Conductorクラス一覧からクラスを選択して下さい。";
 ?>

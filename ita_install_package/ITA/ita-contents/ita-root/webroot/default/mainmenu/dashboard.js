@@ -460,13 +460,14 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
       + '<div class="widget">'
         + '<div class="widget-header">'
           + '<div class="widget-move-knob"></div>'
-          + '<div class="widget-name"><span class="widget-name-inner">' + widgetData['display_name'] + '</span></div>'
-          + '<div class="widget-edit-menu">'
-            + '<ul class="widget-edit-menu-list">'
-              + '<li class="widget-edit-menu-item"><button class="widget-edit-button widget-edit" data-type="edit"></button></li>'
-              + '<li class="widget-edit-menu-item"><button class="widget-edit-button widget-display" data-type="display"></button></li>'
-              + '<li class="widget-edit-menu-item"><button class="widget-edit-button widget-delete" data-type="delete"></button></li>'
-            + '</ul>'
+          + '<div class="widget-name"><span class="widget-name-inner">' + widgetData['display_name'] + '</span>'
+            + '<div class="widget-edit-menu">'
+              + '<ul class="widget-edit-menu-list">'
+                + '<li class="widget-edit-menu-item"><button class="widget-edit-button widget-edit" data-type="edit"></button></li>'
+                + '<li class="widget-edit-menu-item"><button class="widget-edit-button widget-display" data-type="display"></button></li>'
+                + '<li class="widget-edit-menu-item"><button class="widget-edit-button widget-delete" data-type="delete"></button></li>'
+              + '</ul>'
+            + '</div>'
           + '</div>'
         + '</div>'
         + '<div class="widget-body">' + contentHTML + '</div>'
@@ -1526,7 +1527,7 @@ $dashboardBody.on({
       }
       const topBottomBarSet = function( direction ){
         const topBottomNum = ( direction === 'top')? -1 : rowspan,
-              topBottomAdd = ( direction === 'top')? 0 : 1,
+              topBottomAdd = ( direction === 'top')? 0 : rowspan,
               topBottomPositionTop = ( direction === 'top')?
                 barTop - areaPadding + scrollTop :
                 barTop - areaPadding + scrollTop + widgetHeight;
@@ -1861,6 +1862,7 @@ const registWidgetInfo = function( registData ) {
       window.location.reload();
     },
     'registWidgetInfoFail': function(){
+      $window.off('registWidgetInfoDone registWidgetInfoFail');
       alert( registFailMessage );
       releaseRestriction();
     }
@@ -2250,8 +2252,7 @@ historyHTML += '</ol>';
 // グラフ本体
 historyHTML += '<ol class="stacked-graph-horizontal-axis">';
 for ( let i = historyLength - 1; i >= 0; i-- ) {
-  const day = histryDay[i][2],
-        sum = histryData[i][0][0],
+  const sum = histryData[i][0][0],
         sumPer = Math.round( sum / graphMaxNumber * 100 ),
         donePer = Math.round( histryData[i][0][1] / sum * 100 ),
         failPer = Math.round( histryData[i][0][2] / sum * 100 ),
@@ -2259,10 +2260,35 @@ for ( let i = historyLength - 1; i >= 0; i-- ) {
         stopPer = Math.round( histryData[i][0][4] / sum * 100 ),
         cancelPer = Math.round( histryData[i][0][5] / sum * 100 );
   
+  // 期間ごとに表示する日付を制限する
+  let showDayArray = new Array,
+      day = histryDay[i][2];
+  if ( period >= 300 ) {
+    showDayArray = [1];
+  } else if ( period >= 200 ) {
+    showDayArray = [1,15];
+  } else if ( period >= 100 ) {
+    showDayArray = [1,10,20];
+  } else if ( period >= 50 ) {
+    showDayArray = [1,5,10,15,20,25];
+  }
+  
+  if ( period >= 50 ) {
+    if ( showDayArray.indexOf( day ) === -1 ) {
+      day = '';
+    } else {
+      if ( day === 1 ) {
+        day = histryDay[i][1] + '/' + histryDay[i][2];
+      } else {
+        day = histryDay[i][2];
+      }
+    }
+  }  
+  
   historyHTML += ''
     + '<li class="stacked-graph-item">'
       + '<dl class="stacked-graph-item-inner" data-id="' + i + '">'
-        + '<dt class="stacked-graph-item-title">' + day + '</dt>'
+        + '<dt class="stacked-graph-item-title"><span class="day-number">' + day + '</span></dt>'
         + '<dd class="stacked-graph-bar">';
   if ( sum !== 0 ) {
     historyHTML += ''

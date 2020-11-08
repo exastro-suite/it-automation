@@ -626,6 +626,7 @@ class OrchestratorLinkAgent {
         $strPatternMasterDispColId = 'PATTERN_NAME';
         $strPatternMasterOrcColId  = 'ITA_EXT_STM_ID';
         $strPatternMasterTimeLimit = 'TIME_LIMIT';
+        $strPatternMasterAccessAuth = 'ACCESS_AUTH';
         
         $strPatternMasterAnsHostDesignType = 'ANS_HOST_DESIGNATE_TYPE_ID';
         $strPatternMasterAnsWinRM = 'ANS_WINRM_ID';
@@ -719,6 +720,7 @@ class OrchestratorLinkAgent {
                   .",{$strPatternMasterDispColId} PATTERN_NAME "
                   .",{$strPatternMasterOrcColId} ITA_EXT_STM_ID "
                   .",{$strPatternMasterTimeLimit} TIME_LIMIT "
+                  .",{$strPatternMasterAccessAuth} ACCESS_AUTH "
                   .",{$strPatternMasterAnsHostDesignType} ANS_HOST_DESIGNATE_TYPE_ID "
                   .",{$strPatternMasterAnsParaEx} ANS_PARALLEL_EXE "
                   .",{$strPatternMasterAnsWinRM} ANS_WINRM_ID "
@@ -919,6 +921,7 @@ class OrchestratorLinkAgent {
                 "SYMPHONY_CLASS_NO"=>"",
                 "SYMPHONY_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -933,6 +936,7 @@ class OrchestratorLinkAgent {
                 "SYMPHONY_CLASS_NO"=>"",
                 "SYMPHONY_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -1210,6 +1214,10 @@ class OrchestratorLinkAgent {
 
 //----シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録する
     function registerSymphonyInstance($intShmphonyClassId, $intOperationNoUAPK, $strPreserveDatetime, $aryOptionOrder, $aryOptionOrderOverride=null, $userId, $userName){
+
+        // グローバル変数宣言
+        global $g;
+        
         // ----変数定義
         $boolRet = false;
         $intErrorType = null;
@@ -1239,6 +1247,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"DATETIME",
             "TIME_START"=>"DATETIME",
             "TIME_END"=>"DATETIME",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -1261,6 +1270,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"",
             "TIME_START"=>"",
             "TIME_END"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -1292,6 +1302,7 @@ class OrchestratorLinkAgent {
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -1323,6 +1334,7 @@ class OrchestratorLinkAgent {
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -1475,6 +1487,14 @@ class OrchestratorLinkAgent {
             $register_tgt_row['ABORT_EXECUTE_FLAG']   = 1; //緊急停止発令フラグ(未発令)=[1]
             $register_tgt_row['DISUSE_FLAG']          = '0';
             $register_tgt_row['LAST_UPDATE_USER']     = $userId;
+
+            $register_tgt_row['ACCESS_AUTH']     = $aryRowOfSymClassTable['ACCESS_AUTH'];
+
+            //上位アクセス権継承
+            if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+                $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+            }
+
             $tgtSource_row = $register_tgt_row;
             // シンフォニーインスタンス登録用の値をセット----
 
@@ -1771,6 +1791,13 @@ class OrchestratorLinkAgent {
                 $register_tgt_row['DISUSE_FLAG']          = '0';
                 $register_tgt_row['LAST_UPDATE_USER']     = $userId;
                 // ムーブメントインスタンス登録用の値をセット----
+
+                $register_tgt_row['ACCESS_AUTH']     = $aryRowOfSymClassTable['ACCESS_AUTH'];
+
+                //上位アクセス権継承
+                if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+                    $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+                }
 
                 // 各Movementの登録状態を確認する。
                 $tgtSource_row = $register_tgt_row;
@@ -2338,6 +2365,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"DATETIME",
             "TIME_START"=>"DATETIME",
             "TIME_END"=>"DATETIME",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -2362,6 +2390,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"",
             "TIME_START"=>"",
             "TIME_END"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -2395,6 +2424,7 @@ class OrchestratorLinkAgent {
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
             "NOTE"=>"",
+            #ACCESS_AUTH"=>"",  
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
@@ -2823,6 +2853,10 @@ class OrchestratorLinkAgent {
 
 //----Conductor　Conductorインスタンスの新規登録処理
     function conductorInstanceRegister($objDBCA, $lc_db_model_ch, $objMTS, $intConductorClassId, $intOperationNoUAPK, $strPreserveDatetime, $aryOptionOrder, $aryOptionOrderOverride=null, $userId, $userName,$intCallNo=0){
+
+        // グローバル変数宣言
+        global $g;
+
         // ----変数定義
         $boolRet = false;
         $intErrorType = null;
@@ -2854,6 +2888,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"DATETIME",
             "TIME_START"=>"DATETIME",
             "TIME_END"=>"DATETIME",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -2878,6 +2913,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"",
             "TIME_START"=>"",
             "TIME_END"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -2911,6 +2947,7 @@ class OrchestratorLinkAgent {
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -2944,6 +2981,7 @@ class OrchestratorLinkAgent {
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -3023,7 +3061,15 @@ class OrchestratorLinkAgent {
             $register_tgt_row['CONDUCTOR_INSTANCE_NO'] = $varConductorInstanceNo;
             $register_tgt_row['I_CONDUCTOR_CLASS_NO']  = $aryRowOfSymClassTable['CONDUCTOR_CLASS_NO'];
             $register_tgt_row['I_CONDUCTOR_NAME']      = $aryRowOfSymClassTable['CONDUCTOR_NAME'];
-            $register_tgt_row['I_DESCRIPTION']        = $aryRowOfSymClassTable['DESCRIPTION'];
+            $register_tgt_row['I_DESCRIPTION']         = $aryRowOfSymClassTable['DESCRIPTION'];
+            $register_tgt_row['ACCESS_AUTH']           = $aryRowOfSymClassTable['ACCESS_AUTH'];
+
+            //上位アクセス権継承
+            if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+                $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+            }
+
+
             //----開始予約時刻が設定されていた場合
 
             if( strlen($strPreserveDatetime)==0 ){
@@ -3210,6 +3256,10 @@ class OrchestratorLinkAgent {
 
 //----Conductor　Nodeインスタンスの新規登録処理
     function nodeInstanceRegister($objDBCA, $lc_db_model_ch, $objMTS, $intConductorClassId, $intOperationNoUAPK, $strPreserveDatetime, $aryOptionOrder, $aryOptionOrderOverride=null, $userId, $userName,$intCallNo=0,$intConductorInstanceId){
+
+        // グローバル変数宣言
+        global $g;
+
         // ----変数定義
         $boolRet = false;
         $intErrorType = null;
@@ -3240,6 +3290,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"DATETIME",
             "TIME_START"=>"DATETIME",
             "TIME_END"=>"DATETIME",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -3264,6 +3315,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"",
             "TIME_START"=>"",
             "TIME_END"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -3297,6 +3349,7 @@ class OrchestratorLinkAgent {
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -3330,6 +3383,7 @@ class OrchestratorLinkAgent {
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -3426,6 +3480,13 @@ class OrchestratorLinkAgent {
                 $register_tgt_row['I_NODE_CLASS_NO']  = $aryDataForMovement['NODE_CLASS_NO'];
                 $register_tgt_row['I_NODE_TYPE_ID']   = $aryDataForMovement['NODE_TYPE_ID'];
                 $register_tgt_row['I_DESCRIPTION']    = $aryDataForMovement['DESCRIPTION'];
+                $register_tgt_row['ACCESS_AUTH']      = $aryRowOfSymClassTable['ACCESS_AUTH'];
+
+                //上位アクセス権継承
+                if( isset( $g['__TOP_ACCESS_AUTH__']) === true ){
+                    $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+                }
+
 
                 //Movementの場合  [NODE_TYPE_ID(=3)の場合]       
                 if( $aryDataForMovement['NODE_TYPE_ID'] == 3){
@@ -3719,6 +3780,7 @@ class OrchestratorLinkAgent {
                 "CONDUCTOR_CLASS_NO"=>"",
                 "CONDUCTOR_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -3733,6 +3795,7 @@ class OrchestratorLinkAgent {
                 "CONDUCTOR_CLASS_NO"=>"",
                 "CONDUCTOR_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -3928,7 +3991,11 @@ class OrchestratorLinkAgent {
                     "conductor"     => "C_CONDUCTOR_EDIT_CLASS_MNG",
                     "node"          => "C_NODE_EDIT_CLASS_MNG",
                     "terminal"      => "C_NODE_TERMINALS_EDIT_CLASS_MNG"
-                ); 
+                );
+
+                $arrayConfigForSelect["ACCESS_AUTH"]="";
+                $arrayValue["ACCESS_AUTH"]="";
+
             }else{
                 //クラス状態保存 (2100180004)
                 $arrTableName=array(
@@ -3995,6 +4062,7 @@ class OrchestratorLinkAgent {
             $aryErrMsgBody[] = $tmpErrMsgBody;
         }
         $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfMovClassTable);
+
         return $retArray;
     }
 //NODEクラス情報を取得する----
@@ -4101,6 +4169,10 @@ class OrchestratorLinkAgent {
                     "node"          => "C_NODE_EDIT_CLASS_MNG",
                     "terminal"      => "C_NODE_TERMINALS_EDIT_CLASS_MNG"
                 ); 
+
+                $arrayConfigForSelect["ACCESS_AUTH"]="";
+                $arrayValue["ACCESS_AUTH"]="";
+
             }else{
                 //クラス状態保存 (2100180004)
                 $arrTableName=array(
@@ -4268,6 +4340,13 @@ class OrchestratorLinkAgent {
         $arr_json['conductor']['note']=$arrConductorData['DESCRIPTION'];
         $arr_json['conductor']['id']=$intConductorClassId;
         $arr_json['conductor']['LUT4U']=$arrConductorData['LUT4U'];
+        
+        $arr_json['conductor']['ACCESS_AUTH'] = ""; 
+        if( isset( $arrConductorData['ACCESS_AUTH'] )  == true ){
+            $arr_json['conductor']['ACCESS_AUTH']=$arrConductorData['ACCESS_AUTH'];
+        }
+
+
         $intNodeNumber=0;
         $intTerminalNumber=0;
         $intEdgeNumber=0;
@@ -4563,6 +4642,9 @@ class OrchestratorLinkAgent {
         /////////////////////////////////////////////////////////////
         // オペレーション情報を取得                                //
         /////////////////////////////////////////////////////////////
+        // グローバル変数宣言
+        global $g;
+
         $boolRet = false;
         $intErrorType = null;
         $aryErrMsgBody = array();
@@ -4576,7 +4658,8 @@ class OrchestratorLinkAgent {
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+            $obj = new RoleBasedAccessControl($objDBCA);     
+
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
             
@@ -4589,6 +4672,7 @@ class OrchestratorLinkAgent {
                 "OPERATION_NAME"=>"",
                 "OPERATION_DATE"=>"DATEDATE",
                 "OPERATION_NO_IDBH"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -4604,6 +4688,7 @@ class OrchestratorLinkAgent {
                 "OPERATION_NAME"=>"",
                 "OPERATION_DATE"=>"",
                 "OPERATION_NO_IDBH"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -4640,9 +4725,19 @@ class OrchestratorLinkAgent {
             $objQueryUtn =& $retArray[3];
             
             //----発見行だけループ
-            $aryRowOfSymClassTable = array();
+            $rows = array();
             while ( $row = $objQueryUtn->resultFetch() ){
-                    $aryRowOfOperationTable[] = $row;
+
+                $user_id = $g['login_id'];
+                $ret  = $obj->getAccountInfo($user_id); 
+                list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                if($ret === false) {
+                } else {
+                    if($permission === true) {
+                        $rows[] = $row;
+                    }
+                }
             }
             //発見行だけループ----
             
@@ -4655,7 +4750,7 @@ class OrchestratorLinkAgent {
             $tmpErrMsgBody = $e->getMessage();
             $aryErrMsgBody[] = $tmpErrMsgBody;
         }
-        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfOperationTable);
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$rows);
         return $retArray;
     }
 //オペレーション一覧を取得する----
@@ -4663,8 +4758,12 @@ class OrchestratorLinkAgent {
 //----conductor一覧を取得する
     function getInfoOfCocductorList(){
         /////////////////////////////////////////////////////////////
-        // オペレーション情報を取得                                //
+        // conductor一覧を取得                                //
         /////////////////////////////////////////////////////////////
+
+        // グローバル変数宣言
+        global $g;
+
         $boolRet = false;
         $intErrorType = null;
         $aryErrMsgBody = array();
@@ -4678,7 +4777,8 @@ class OrchestratorLinkAgent {
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+            $obj = new RoleBasedAccessControl($objDBCA);
+
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
             
@@ -4690,6 +4790,7 @@ class OrchestratorLinkAgent {
                 "CONDUCTOR_CLASS_NO"=>"",
                 "CONDUCTOR_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -4704,6 +4805,7 @@ class OrchestratorLinkAgent {
                 "CONDUCTOR_CLASS_NO"=>"",
                 "CONDUCTOR_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -4740,9 +4842,19 @@ class OrchestratorLinkAgent {
             $objQueryUtn =& $retArray[3];
             
             //----発見行だけループ
-            $aryRowOfSymClassTable = array();
+            $rows = array();
             while ( $row = $objQueryUtn->resultFetch() ){
-                    $aryRowOfOperationTable[] = $row;
+
+                $user_id = $g['login_id'];
+                $ret  = $obj->getAccountInfo($user_id); 
+                list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                if($ret === false) {
+                } else {
+                    if($permission === true) {
+                        $rows[] = $row;
+                    }
+                }       
             }
             //発見行だけループ----
             
@@ -4755,7 +4867,7 @@ class OrchestratorLinkAgent {
             $tmpErrMsgBody = $e->getMessage();
             $aryErrMsgBody[] = $tmpErrMsgBody;
         }
-        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfOperationTable);
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$rows);
         return $retArray;
     }
 //conductor一覧を取得する----
@@ -4791,6 +4903,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "CONDUCTOR_CLASS_NO"=>"",
         "CONDUCTOR_NAME"=>"",
         "DESCRIPTION"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -4804,6 +4917,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "CONDUCTOR_CLASS_NO"=>"",
         "CONDUCTOR_NAME"=>"",
         "DESCRIPTION"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -4922,7 +5036,13 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             "conductor"     => "C_CONDUCTOR_EDIT_CLASS_MNG",
             "node"          => "C_NODE_EDIT_CLASS_MNG",
             "terminal"      => "C_NODE_TERMINALS_EDIT_CLASS_MNG"
-        ); 
+        );
+
+        $arrayConfigForNodeClassIUD["ACCESS_AUTH"]="";
+        $aryNodeClassValueTmpl["ACCESS_AUTH"]="";
+        $arrayConfigForTermClassIUD["ACCESS_AUTH"]="";
+        $aryTermClassValueTmpl["ACCESS_AUTH"]="";
+
     }else{
         //クラス状態保存 (2100180004)
         $arrTableName=array(
@@ -5039,7 +5159,20 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row['DESCRIPTION']       = $aryExecuteData['note'];
             $register_tgt_row['DISUSE_FLAG']       = '0';
             $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
-            
+
+            $register_tgt_row['ACCESS_AUTH'] = ""; 
+
+            if( isset( $aryExecuteData['ACCESS_AUTH'] ) === true ){
+                $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
+            }
+
+            //上位アクセス権継承
+            if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+
+                $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+            }
+
+
             $arrayConfigForIUD = $aryConfigForSymClassIUD;
             $tgtSource_row = $register_tgt_row;
             $sqlType = "INSERT";
@@ -5070,7 +5203,19 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row['DESCRIPTION']       = $aryExecuteData['note'];
             $register_tgt_row['DISUSE_FLAG']       = '0';
             $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
-            
+
+            $register_tgt_row['ACCESS_AUTH'] = ""; 
+            if( isset( $aryExecuteData['ACCESS_AUTH'] )  == true ){
+                $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
+            }
+
+            //上位アクセス権継承
+            if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+
+                $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+            }
+
+
             $arrayConfigForIUD = $aryConfigForSymClassIUD;
             $tgtSource_row = $register_tgt_row;
             $sqlType = "UPDATE";
@@ -5487,6 +5632,18 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             if( $aryDataForMovement['type'] == "blank")             $register_tgt_row['NODE_TYPE_ID']=9; 
             if( $aryDataForMovement['type'] == "call_s")             $register_tgt_row['NODE_TYPE_ID']=10; 
 
+            $register_tgt_row['ACCESS_AUTH'] = ""; 
+            if( isset( $aryExecuteData['ACCESS_AUTH'] ) === true ){
+                $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
+            }
+
+            //上位アクセス権継承
+            if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+
+                $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+            }
+
+
             $arrayConfigForIUD = $arrayConfigForNodeClassIUD;
             $tgtSource_row = $register_tgt_row;
             $sqlType = "INSERT";
@@ -5603,6 +5760,17 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
                     if( $aryDataForTerminal['type'] == "in" )$register_tgt_row['TERMINAL_TYPE_ID']=1;
                     if( $aryDataForTerminal['type'] == "out")$register_tgt_row['TERMINAL_TYPE_ID']=2;
+
+                    $register_tgt_row['ACCESS_AUTH'] = ""; 
+                    if( isset( $aryExecuteData['ACCESS_AUTH'] )  == true ){
+                        $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
+                    }
+
+                    //上位アクセス権継承
+                    if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+
+                        $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+                    }
 
 
                     $arrayConfigForIUD = $arrayConfigForTermClassIUD;
@@ -5736,7 +5904,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
     //node分繰り返し
     $aryNode = array();
     $arrpatternDel = array('/__proto__/');
-    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/' );
+    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/','/ACCESS_AUTH/' );
 
     foreach( $fxVarsStrSortedData as $nodename => $nodeinfo ){
         //　nodeの処理開始
@@ -5782,8 +5950,12 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
 //----symphony一覧を取得する
     function getInfoOfSymphonyList(){
         /////////////////////////////////////////////////////////////
-        // オペレーション情報を取得                                //
+        // symphony一覧を取得                                //
         /////////////////////////////////////////////////////////////
+
+        // グローバル変数宣言
+        global $g;
+
         $boolRet = false;
         $intErrorType = null;
         $aryErrMsgBody = array();
@@ -5797,7 +5969,8 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+            $obj = new RoleBasedAccessControl($objDBCA);
+
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
             
@@ -5809,6 +5982,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 "SYMPHONY_CLASS_NO"=>"",
                 "SYMPHONY_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -5823,6 +5997,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 "SYMPHONY_CLASS_NO"=>"",
                 "CSYMPHONY_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -5859,9 +6034,19 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             $objQueryUtn =& $retArray[3];
             
             //----発見行だけループ
-            $aryRowOfSymClassTable = array();
+            $rows = array();
             while ( $row = $objQueryUtn->resultFetch() ){
-                    $aryRowOfOperationTable[] = $row;
+
+                $user_id = $g['login_id'];
+                $ret  = $obj->getAccountInfo($user_id); 
+                list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                if($ret === false) {
+                } else {
+                    if($permission === true) {
+                        $rows[] = $row;
+                    }
+                }
             }
             //発見行だけループ----
             
@@ -5874,7 +6059,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             $tmpErrMsgBody = $e->getMessage();
             $aryErrMsgBody[] = $tmpErrMsgBody;
         }
-        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfOperationTable);
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$rows);
         return $retArray;
     }
 //symphony一覧を取得する----
@@ -5913,6 +6098,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             "TIME_BOOK"=>"DATETIME",
             "TIME_START"=>"DATETIME",
             "TIME_END"=>"DATETIME",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -5935,6 +6121,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             "TIME_BOOK"=>"",
             "TIME_START"=>"",
             "TIME_END"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -5966,6 +6153,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -5997,6 +6185,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -6137,6 +6326,14 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             $register_tgt_row['ABORT_EXECUTE_FLAG']   = 1; //緊急停止発令フラグ(未発令)=[1]
             $register_tgt_row['DISUSE_FLAG']          = '0';
             $register_tgt_row['LAST_UPDATE_USER']     = $userId;
+
+            $register_tgt_row['ACCESS_AUTH']          = $aryRowOfSymClassTable['ACCESS_AUTH'];
+
+            //上位アクセス権継承
+            if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+                $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+            }
+
             $tgtSource_row = $register_tgt_row;
             // シンフォニーインスタンス登録用の値をセット----
 
@@ -6376,6 +6573,10 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                     throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                 }
 
+                //Conductor(SymphonyCall)用処理
+                if( isset( $aryValuePerOptionOrderKey['EXE_SKIP_FLAG'] ) !== true )$aryValuePerOptionOrderKey['EXE_SKIP_FLAG']='';
+                if( isset( $aryValuePerOptionOrderKey['OVRD_OPERATION_NO_IDBH'] ) !== true )$aryValuePerOptionOrderKey['OVRD_OPERATION_NO_IDBH']='';
+
                 if( $aryValuePerOptionOrderKey['EXE_SKIP_FLAG'] == '' ){
                     $register_tgt_row['EXE_SKIP_FLAG']        = 1; //スキップしない
                 }
@@ -6432,6 +6633,14 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 $register_tgt_row['EXECUTION_USER']       = $userName;
                 $register_tgt_row['DISUSE_FLAG']          = '0';
                 $register_tgt_row['LAST_UPDATE_USER']     = $userId;
+
+                $register_tgt_row['ACCESS_AUTH']          = $aryRowOfSymClassTable['ACCESS_AUTH'];
+
+                //上位アクセス権継承
+                if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+                    $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+                }
+
                 // ムーブメントインスタンス登録用の値をセット----
 
                 // 各Movementの登録状態を確認する。
@@ -6593,6 +6802,71 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
         return $retArray;
     }
 //シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録する(ConductorからのSymphony呼び出し)----
+
+//----ロール一覧を取得する
+    function getInfoOfRoleList(){
+        /////////////////////////////////////////////////////////////
+        // ロール一覧を取得                                //
+        /////////////////////////////////////////////////////////////
+
+        global $g;
+
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $rows = array();
+        
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+        
+        $strSysErrMsgBody = "";
+        //
+        try{
+            $objDBCA = $this->getDBConnectAgent();
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            $obj = new RoleBasedAccessControl($objDBCA);
+            
+            $user_id = $g['login_id'];
+            $ret  = $obj->getAccountInfo($user_id);
+            $DefaultAccessRoles = $obj->getDefaultAccessRoles();
+            $arrAccessAuth = explode( ",", $DefaultAccessRoles );
+
+            // 表示データをSELECT
+            $sql =  " SELECT "
+                   ." TAB_A.*,TAB_B.ROLE_NAME AS ROLE_NAME "
+                   ." FROM A_ROLE_ACCOUNT_LINK_LIST TAB_A "
+                   ." LEFT JOIN A_ROLE_LIST TAB_B"
+                   ." ON TAB_A.ROLE_ID = TAB_B.ROLE_ID "
+                   ." WHERE TAB_A.DISUSE_FLAG='0' "
+                   ." AND TAB_A.USER_ID = ${user_id} "
+                   ."";
+
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            $r = $objQuery->sqlExecute();
+            $rows = array();
+
+            while($row = $objQuery->resultFetch()) {
+                if( in_array( $row['ROLE_ID'], $arrAccessAuth) ){
+                    $row['DEFAULT_ROLE'] = "checked";
+                }else{
+                    $row['DEFAULT_ROLE'] = "";
+                }
+                $rows[] = $row;
+            }
+
+            unset($objQuery);
+            unset($r);
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$rows);
+        return $retArray;
+    }
+//ロール一覧を取得する----
 
 
 //ここまでConductor用----

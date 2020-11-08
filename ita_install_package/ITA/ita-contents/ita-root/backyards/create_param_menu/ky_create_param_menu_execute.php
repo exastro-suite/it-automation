@@ -1831,7 +1831,7 @@ EOD;
         //////////////////////////
         // ロール・メニュー紐付管理更新
         //////////////////////////
-        $result = updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $roleUserLinkArray);
+        $result = updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData, $roleUserLinkArray);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1842,7 +1842,7 @@ EOD;
         //////////////////////////
         // メニュー・テーブル紐付更新
         //////////////////////////
-        $result = updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+        $result = updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1853,7 +1853,7 @@ EOD;
         //////////////////////////
         // 他メニュー連携テーブル更新
         //////////////////////////
-        $result = updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+        $result = updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData);
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
             updateMenuStatus($targetData, "4", $result, true, true);
@@ -1890,7 +1890,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニュー更新
             //////////////////////////
-            $result = updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData['TARGET']);
+            $result = updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData);
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
                 updateMenuStatus($targetData, "4", $result, true, true);
@@ -1900,7 +1900,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューテーブル管理更新
             //////////////////////////
-            $result = updateLinkTargetTable($targetMenuId, "G_" . $menuTableName . "_H" ,$noLinkTarget);
+            $result = updateLinkTargetTable($targetMenuId, "G_" . $menuTableName . "_H" ,$noLinkTarget, $cmiData);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -1911,7 +1911,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューカラム管理更新
             //////////////////////////
-            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray);
+            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -2591,7 +2591,7 @@ function deployLoadTable($fileContents, $loadTablePath, $menuId, $targetData){
 /*
  * メニュー・テーブル紐付更新
  */
-function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
+function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $menuTableLinkTable = new MenuTableLinkTable($objDBCA, $db_model_ch);
 
@@ -2659,12 +2659,13 @@ function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMen
             // メニューIDが設定されている場合
             if("" != $menuInfo[0]){
                 $insertData = array();
-                $insertData['MENU_ID']          = $menuInfo[0];         // メニュー名
-                $insertData['TABLE_NAME']       = $menuInfo[1];         // テーブル名
-                $insertData['KEY_COL_NAME']     = "ROW_ID";             // 主キー
-                $insertData['TABLE_NAME_JNL']   = $menuInfo[2];         // テーブル名(履歴)
-                $insertData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
-                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                $insertData['MENU_ID']          = $menuInfo[0];             // メニュー名
+                $insertData['TABLE_NAME']       = $menuInfo[1];             // テーブル名
+                $insertData['KEY_COL_NAME']     = "ROW_ID";                 // 主キー
+                $insertData['TABLE_NAME_JNL']   = $menuInfo[2];             // テーブル名(履歴)
+                $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
+                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
 
                 //////////////////////////
                 // メニュー・テーブル紐付テーブルに登録
@@ -2690,7 +2691,7 @@ function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMen
 /*
  * 他メニュー連携テーブル更新
  */
-function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
+function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $otherMenuLinkTable = new OtherMenuLinkTable($objDBCA, $db_model_ch);
 
@@ -2775,6 +2776,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
                 $insertData['PRI_NAME']         = "ROW_ID";                     // 主キー
                 $insertData['COLUMN_NAME']      = $itemInfo['COLUMN_NAME'];     // カラム名
                 $insertData['COLUMN_TYPE']      = $itemInfo['INPUT_METHOD_ID']; // カラム種別
+                $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];      // アクセス許可ロール
                 $insertData['DISUSE_FLAG']      = "0";                          // 廃止フラグ
                 $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;         // 最終更新者
 
@@ -2922,16 +2924,17 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$vi
 
                 // 更新する
                 $updateData = $target['DATA'];
-                $updateData['LOGIN_NECESSITY']      = 1;                    // 認証要否
-                $updateData['SERVICE_STATUS']       = 0;                    // サービス状態
-                $updateData['DISP_SEQ']             = $cmiData['DISP_SEQ']; // メニューグループ内表示順序
-                $updateData['AUTOFILTER_FLG']       = 1;                    // オートフィルタチェック
-                $updateData['INITIAL_FILTER_FLG']   = 2;                    // 初回フィルタ
-                $updateData['WEB_PRINT_LIMIT']      = NULL;                 // Web表示最大行数
-                $updateData['WEB_PRINT_CONFIRM']    = NULL;                 // Web表示前確認行数
-                $updateData['XLS_PRINT_LIMIT']      = NULL;                 // Excel出力最大行数
-                $updateData['NOTE']                 = NULL;                 // 備考
-                $updateData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM; // 最終更新者
+                $updateData['LOGIN_NECESSITY']      = 1;                        // 認証要否
+                $updateData['SERVICE_STATUS']       = 0;                        // サービス状態
+                $updateData['DISP_SEQ']             = $cmiData['DISP_SEQ'];     // メニューグループ内表示順序
+                $updateData['AUTOFILTER_FLG']       = 1;                        // オートフィルタチェック
+                $updateData['INITIAL_FILTER_FLG']   = 2;                        // 初回フィルタ
+                $updateData['WEB_PRINT_LIMIT']      = NULL;                     // Web表示最大行数
+                $updateData['WEB_PRINT_CONFIRM']    = NULL;                     // Web表示前確認行数
+                $updateData['XLS_PRINT_LIMIT']      = NULL;                     // Excel出力最大行数
+                $updateData['ACCESS_AUTH']          = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['NOTE']                 = NULL;                     // 備考
+                $updateData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;     // 最終更新者
 
                 //////////////////////////
                 // メニュー管理テーブルを更新
@@ -2955,6 +2958,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$vi
                 $insertData['DISP_SEQ']             = $cmiData['DISP_SEQ'];     // メニューグループ内表示順序
                 $insertData['AUTOFILTER_FLG']       = 1;                        // オートフィルタチェック
                 $insertData['INITIAL_FILTER_FLG']   = 2;                        // 初回フィルタ
+                $insertData['ACCESS_AUTH']          = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
                 $insertData['DISUSE_FLAG']          = "0";                      // 廃止フラグ
                 $insertData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;     // 最終更新者
 
@@ -3108,7 +3112,7 @@ function updateSequence($hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $co
 /*
  * ロール・メニュー紐付管理更新
  */
-function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target, $roleUserLinkArray){
+function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData, $roleUserLinkArray){
     global $objDBCA, $db_model_ch, $objMTS;
     $roleMenuLinkListTable = new RoleMenuLinkListTable($objDBCA, $db_model_ch);
 
@@ -3136,6 +3140,11 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMen
                $roleMenuLink['MENU_ID'] == $convMenuId ||
                $roleMenuLink['MENU_ID'] == $convHostMenuId){
 
+                // すでに廃止ならスキップ
+                if($roleMenuLink['DISUSE_FLAG'] == "1"){
+                    continue;
+                }
+
                 // 廃止する
                 $updateData = $roleMenuLink;
                 $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
@@ -3154,7 +3163,7 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMen
         }
         
         // データシートの場合
-        if("2" == $target){
+        if("2" == $cmiData['TARGET']){
                 $menuArray = array(array($hostMenuId,   1,  '0'));
         }
         // パラメータシートの場合
@@ -3186,29 +3195,37 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMen
                                   );
             }
         }
-        
+
         $roles = array();
-        
-        foreach($roleUserLinkArray as $rUL){
-            if($rUL['USER_ID'] == $targetData['LAST_UPDATE_USER']){
-                $roles[] = $rUL['ROLE_ID'];
+
+        // アクセス許可ロールが設定されている場合、アクセス許可ロールにのみレコードを作成する
+        if($cmiData['ACCESS_AUTH'] != ""){
+            $roles = explode(",", $cmiData['ACCESS_AUTH']);
+        }
+        // アクセス許可ロールが設定されていない場合、administrator＋所属するロールにレコードを作成する
+        else{
+            foreach($roleUserLinkArray as $rUL){
+                if($rUL['USER_ID'] == $targetData['LAST_UPDATE_USER']){
+                    $roles[] = $rUL['ROLE_ID'];
+                }
+
             }
-            
+            // 管理者ロールは入れていない場合
+            if(!in_array("1",$roles)){
+                $roles[] = "1";
+            }
         }
-        // 管理者ロールは入れていない場合
-        if(!in_array("1",$roles)){
-            $roles[] = "1";
-        }
-        
+
         foreach($menuArray as $menu){
             foreach($roles as $role){
                 // 登録する
                 $insertData = array();
-                $insertData['ROLE_ID']          = $role;                // ロール
-                $insertData['MENU_ID']          = $menu[0];             // メニュー
-                $insertData['PRIVILEGE']        = $menu[1];             // 紐付
-                $insertData['DISUSE_FLAG']      = $menu[2];             // 廃止フラグ
-                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                $insertData['ROLE_ID']          = $role;                    // ロール
+                $insertData['MENU_ID']          = $menu[0];                 // メニュー
+                $insertData['PRIVILEGE']        = $menu[1];                 // 紐付
+                $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                $insertData['DISUSE_FLAG']      = $menu[2];                 // 廃止フラグ
+                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
 
                 //////////////////////////
                 // ロール・メニュー紐付管理テーブルに登録
@@ -3231,7 +3248,7 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMen
 /*
  * 紐付対象メニュー更新
  */
-function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $sheetType){
+function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $matchFlg = false;
     $cmdbMenuListTable = new CmdbMenuListTable($objDBCA, $db_model_ch);
@@ -3261,23 +3278,28 @@ function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $sheetType){
                 if($cmdbMenuList['DISUSE_FLAG'] == "1" && $noLinkTarget == false){
 
                     // 復活する
-                    $updateData['SHEET_TYPE']       = $sheetType;           // シートタイプ
-                    $updateData['NOTE']             = "";                   // 備考
-                    $updateData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
-                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                    $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
+                    $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                    $updateData['NOTE']             = "";                       // 備考
+                    $updateData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
                 // 紐づけ対象カラムがない場合 
                 else if($cmdbMenuList['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
 
                     // 廃止する
-                    $updateData['SHEET_TYPE']       = $sheetType;           // シートタイプ
-                    $updateData['NOTE']             = "";                   // 備考
-                    $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
-                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                    $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['NOTE']             = "";                       // 備考
+                    $updateData['DISUSE_FLAG']      = "1";                      // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
-                else if($updateData['SHEET_TYPE'] != $sheetType){
-                    $updateData['SHEET_TYPE']       = $sheetType;           // シートタイプ
-                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                // 値が更新されている場合
+                else if(($updateData['SHEET_TYPE'] != $cmiData['TARGET'] || $updateData['ACCESS_AUTH_FLG'] != 1 || $updateData['ACCESS_AUTH'] != $cmiData['ACCESS_AUTH']) &&  $noLinkTarget == false){
+                    $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
+                    $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
                 // 他の場合は更新しない
                 else{
@@ -3301,10 +3323,12 @@ function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $sheetType){
 
             // 登録する
             $insertData = array();
-            $insertData['MENU_ID']          = $targetMenuId;        // メニュー
-            $insertData['SHEET_TYPE']       = $sheetType;           // シートタイプ
-            $insertData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
-            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+            $insertData['MENU_ID']          = $targetMenuId;            // メニュー
+            $insertData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+            $insertData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
+            $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+            $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
+            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
 
             //////////////////////////
             // 紐付対象メニューテーブルに登録
@@ -3326,7 +3350,7 @@ function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $sheetType){
 /*
  * 紐付対象メニューテーブル管理更新
  */
-function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget){
+function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $matchFlg = false;
     $cmdbMenuTableTable = new CmdbMenuTableTable($objDBCA, $db_model_ch);
@@ -3350,45 +3374,43 @@ function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget){
             // メニューIDが一致するデータがあった場合
             if($cmdbMenuTable['MENU_ID'] == $hostMenuId){
                 $matchFlg = true;
+                $updateData = $cmdbMenuTable;
 
-                $updateFlg = false;
                 // 廃止の場合は更新する
                 if($cmdbMenuTable['DISUSE_FLAG'] == "1" && $noLinkTarget == false){
-                    $updateFlg = true;
+                    $updateData['TABLE_NAME']       = $tableName;               // テーブル名
+                    $updateData['PKEY_NAME']        = "ROW_ID";                 // 主キー
+                    $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                    $updateData['NOTE']             = "";                       // 備考
+                    $updateData['DISUSE_FLAG']      = "0";                      // 廃止フラグ(紐づけ対象あり)
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
                 // 紐づけ対象がなくなった場合、更新する
-                if($cmdbMenuTable['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
-                    $updateFlg = true;
+                else if($cmdbMenuTable['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
+                    $updateData['DISUSE_FLAG']  = "1";                          // 廃止フラグ(紐づけ対象なし)
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
                 // テーブル名が異なる場合は更新する
-                if($cmdbMenuTable['TABLE_NAME'] != $tableName){
-                    $updateFlg = true;
+                else if(($cmdbMenuTable['TABLE_NAME'] != $tableName || $cmdbMenuTable['ACCESS_AUTH'] != $cmiData['ACCESS_AUTH']) && $noLinkTarget == false){
+                    $updateData['TABLE_NAME']       = $tableName;               // テーブル名
+                    $updateData['PKEY_NAME']        = "ROW_ID";                 // 主キー
+                    $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                    $updateData['NOTE']             = "";                       // 備考
+                    $updateData['DISUSE_FLAG']      = "0";                      // 廃止フラグ(紐づけ対象あり)
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
+                }
+                else{
+                    break;
                 }
 
-                if(true === $updateFlg){
-                    // 更新する
-                    $updateData = $cmdbMenuTable;
-                    $updateData['TABLE_NAME']       = $tableName;           // テーブル名
-                    $updateData['PKEY_NAME']        = "ROW_ID";             // 主キー
-                    $updateData['NOTE']             = "";                   // 備考
-
-                    if($noLinkTarget == false){
-                        $updateData['DISUSE_FLAG']  = "0";                  // 廃止フラグ(紐づけ対象あり)
-                    }
-                    else if($noLinkTarget == true){
-                        $updateData['DISUSE_FLAG']  = "1";                  // 廃止フラグ(紐づけ対象なし)
-                    }
-                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
-
-                    //////////////////////////
-                    // 紐付対象メニューテーブル管理テーブルを更新
-                    //////////////////////////
-                    $result = $cmdbMenuTableTable->updateTable($updateData, $jnlSeqNo);
-                    if(true !== $result){
-                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                        outputLog($msg);
-                        throw new Exception($msg);
-                    }
+                //////////////////////////
+                // 紐付対象メニューテーブル管理テーブルを更新
+                //////////////////////////
+                $result = $cmdbMenuTableTable->updateTable($updateData, $jnlSeqNo);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                    outputLog($msg);
+                    throw new Exception($msg);
                 }
                 break;
             }
@@ -3399,11 +3421,12 @@ function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget){
 
             // 登録する
             $insertData = array();
-            $insertData['MENU_ID']          = $hostMenuId;          // メニュー
-            $insertData['TABLE_NAME']       = $tableName;           // テーブル名
-            $insertData['PKEY_NAME']        = "ROW_ID";             // 主キー
-            $insertData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
-            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+            $insertData['MENU_ID']          = $hostMenuId;              // メニュー
+            $insertData['TABLE_NAME']       = $tableName;               // テーブル名
+            $insertData['PKEY_NAME']        = "ROW_ID";                 // 主キー
+            $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+            $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
+            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
 
             //////////////////////////
             // 紐付対象メニューテーブル管理テーブルに登録
@@ -3425,7 +3448,7 @@ function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget){
 /*
  * 紐付対象メニューカラム管理更新
  */
-function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray){
+function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $otherMenuLinkTable = new OtherMenuLinkTable($objDBCA, $db_model_ch);
     $cmdbMenuColumnTable = new CmdbMenuColumnTable($objDBCA, $db_model_ch);
@@ -3553,7 +3576,8 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                        $cmdbMenuColumn['COL_TITLE_DISP_SEQ']    != $columnInfo['COL_TITLE_DISP_SEQ'] ||
                        $cmdbMenuColumn['REF_TABLE_NAME']        != $columnInfo['REF_TABLE_NAME'] ||
                        $cmdbMenuColumn['REF_PKEY_NAME']         != $columnInfo['REF_PKEY_NAME'] ||
-                       $cmdbMenuColumn['REF_COL_NAME']          != $columnInfo['REF_COL_NAME']){
+                       $cmdbMenuColumn['REF_COL_NAME']          != $columnInfo['REF_COL_NAME'] ||
+                       $cmdbMenuColumn['ACCESS_AUTH']           != $cmiData['ACCESS_AUTH']){
 
                         $updateFlg = true;
                     }
@@ -3569,6 +3593,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                         $updateData['REF_TABLE_NAME']       = $columnInfo['REF_TABLE_NAME'];        // 参照テーブル
                         $updateData['REF_PKEY_NAME']        = $columnInfo['REF_PKEY_NAME'];         // 参照主キー
                         $updateData['REF_COL_NAME']         = $columnInfo['REF_COL_NAME'];          // 参照カラム
+                        $updateData['ACCESS_AUTH']          = $cmiData['ACCESS_AUTH'];              // アクセス許可ロール
                         $updateData['NOTE']                 = "";                                   // 備考
                         $updateData['DISUSE_FLAG']          = "0";                                  // 廃止フラグ
                         $updateData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;                 // 最終更新者
@@ -3600,6 +3625,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 $insertData['REF_TABLE_NAME']       = $columnInfo['REF_TABLE_NAME'];        // 参照テーブル
                 $insertData['REF_PKEY_NAME']        = $columnInfo['REF_PKEY_NAME'];         // 参照主キー
                 $insertData['REF_COL_NAME']         = $columnInfo['REF_COL_NAME'];          // 参照カラム
+                $insertData['ACCESS_AUTH']          = $cmiData['ACCESS_AUTH'];              // アクセス許可ロール
                 $insertData['DISUSE_FLAG']          = "0";                                  // 廃止フラグ
                 $insertData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;                 // 最終更新者
 

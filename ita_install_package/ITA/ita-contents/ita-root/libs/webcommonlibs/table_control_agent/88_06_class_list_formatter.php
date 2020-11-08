@@ -783,12 +783,23 @@ class JSONFormatter extends ListFormatter {
                 $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
+                    // ---- RBAC対応
+                    $chkobj = null;
                     while ( $row = $objQuery->resultFetch() ){
-                        $intFetchCount += 1;
-                        if( $intJsonLimit === null || $intFetchCount <= $intJsonLimit ){
-                            $objTable->addData($row, false);
+                        // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                        list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                        if($ret === false) {
+                            $intErrorType = 501;
+                            throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                        }
+                        if($permission === true) {
+                            $intFetchCount += 1;
+                            if( $intJsonLimit === null || $intFetchCount <= $intJsonLimit ){
+                                $objTable->addData($row, false);
+                            }
                         }
                     }
+                    // RBAC対応 ----
 
                     // ----取得したレコード数を取得
                     $intRowLength = $intFetchCount;
@@ -992,6 +1003,7 @@ class ExcelFormatter extends ListFormatter {
                 if( $mode == 0 ){
                     //----入力制限版をフィルタに設定する
                     $arrayDispSelectTag = $objColumn->getMasterTableArrayForInput();
+
                     //入力制限版をフィルタに設定する----
                 }else if( $mode == 1 ){
                     //----開発者モード
@@ -2021,16 +2033,38 @@ class ExcelFormatter extends ListFormatter {
                 $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
+// #28 update start
+//                    while ( $row = $objQuery->resultFetch() ){
+//                        $intFetchCount += 1;
+//                        if( $intXlsLimit === null || $intFetchCount <= $intXlsLimit ){
+//                            $objTable->addData($row, false);
+//                            //----注意ポイント（エクセルフォーマッタへデータ転写）
+//                            $this->editWorkSheetRecordAdd();
+//                            //注意ポイント（エクセルフォーマッタへデータ転写）----
+//                            $objTable->setData(array());
+//                        }
+//                    }
+                    $chkobj = null;
                     while ( $row = $objQuery->resultFetch() ){
-                        $intFetchCount += 1;
-                        if( $intXlsLimit === null || $intFetchCount <= $intXlsLimit ){
-                            $objTable->addData($row, false);
-                            //----注意ポイント（エクセルフォーマッタへデータ転写）
-                            $this->editWorkSheetRecordAdd();
-                            //注意ポイント（エクセルフォーマッタへデータ転写）----
-                            $objTable->setData(array());
+                        // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                        list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                        if($ret === false) {
+                            $intErrorType = 501;
+                            throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                        }
+                        if($permission === true) {
+                            $intFetchCount += 1;
+                            if( $intXlsLimit === null || $intFetchCount <= $intXlsLimit ){
+                                $objTable->addData($row, false);
+                                //----注意ポイント（エクセルフォーマッタへデータ転写）
+                                $this->editWorkSheetRecordAdd();
+                                //注意ポイント（エクセルフォーマッタへデータ転写）----
+                                $objTable->setData(array());
+                            }
+                        } else {
                         }
                     }
+// #28 update end
 
                     // ----取得したレコード数を取得
                     $intRowLength = $intFetchCount;
@@ -2260,6 +2294,51 @@ class SingleRowTableFormatter extends TableFormatter {
         //表示上のシーケンス値(幅を変更するための仕込み)----
 
         foreach($aryObjColumn as $objColumn){
+            // ---- RBAC対応
+            global $g;
+            if($g['global_getAccessAuth'] === true) {
+                $AccessAuthColumnName = $g['global_getAccessAuthColumnName'];
+                if($objColumn->getID() == $AccessAuthColumnName) {
+                    // 登録時にアクセス権の初期表示をロール・ユーザー紐づけの
+                    // デフォルトアクセス権にマーク付いているロール名にする。
+                    if($this->strFormatterId == "register_table") {
+                        $RoleList = array();
+                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                        // 廃止以外のロールリスト
+                        $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'NAME');
+                        unset($obj);
+                        if($DefaultAccessRoleString === false) {
+                            $message = sprintf("[%s:%s]Failed get Role information.",basename(__FILE__),__LINE__);
+                            web_log($message);
+                            throw new Exception($message);
+                        }
+                        // 登録画面に表示するアクセス権をロール名称の文字列に設定
+                        $outputRowData[$AccessAuthColumnName] = $DefaultAccessRoleString;
+                    } elseif($this->strFormatterId == "update_table") {
+                        if(array_key_exists($AccessAuthColumnName,$outputRowData) === false) {
+                            $message = sprintf("[%s:%s] %s Column not found.",basename(__FILE__),__LINE__,$AccessAuthColumnName);
+                            web_log($message);
+                            throw new Exception($message);
+                        } else {
+                            global $g;
+                            $RoleNameString = "";
+                            // ロールID文字列のアクセス権をロール名称の文字列に変換
+                            $obj = new RoleBasedAccessControl($g['objDBCA']);
+                            $RoleIDString   = $outputRowData[$AccessAuthColumnName];
+                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString);
+                            unset($obj);
+                            if($RoleNameString === false) {
+                                $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Faile.",basename(__FILE__),__LINE__);
+                                web_log($message);
+                                throw new Exception($message);
+                            }
+                            // 更新画面に表示するアクセス権をロール名称の文字列に設定
+                            $outputRowData[$AccessAuthColumnName] = $RoleNameString;
+                        }
+                    }
+                }
+            }
+            // RBAC対応 ----
             $tmpStr .= $objColumn->getOutputBody($this->strFormatterId, $outputRowData);
         }
 

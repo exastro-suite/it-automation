@@ -58,6 +58,7 @@ $ary["ITABASEC-010409"] = "Description";
 $ary["ITABASEC-010410"] = "Skip";
 $ary["ITABASEC-010411"] = "cancel";
 $ary["ITABASEC-010412"] = "Diversion";
+$ary["ITABASEC-010413"] = "Select";
 $ary["ITABASEC-010501"] = "Unexecuted";
 $ary["ITABASEC-010502"] = "Preparation error";
 $ary["ITABASEC-010503"] = "Preparing";
@@ -123,4 +124,5 @@ $ary["ITABASEC-020120"] = "The reading was successful.";
 $ary["ITABASEC-020121"] = "Are you sure you want to cancel the suspension?";
 $ary["ITABASEC-020122"] = "Do you want to reset it?";
 $ary["ITABASEC-020123"] = "Check execution status";
+$ary["ITABASEC-020008"] = "Select a class from the Conductor class list.";
 ?>

@@ -1741,9 +1741,7 @@ function getInfoWriteMenuInfo($objDBCA,$db_model_ch,$aryConfigForIUD,$arySqlBind
     $aryDataSet = array();
     $aryForBind = array();
 
-    $strQuery = "SELECT "
-                ." TAB_A.LINK_ID AS LINK_ID ,"
-                ." TAB_A.ROLE_ID AS ROLE_ID ,"
+    $strQuery = "SELECT DISTINCT "
                 ." TAB_A.MENU_ID AS MENU_ID ,"
                 ." TAB_A.PRIVILEGE AS PRIVILEGE"
                ." FROM "

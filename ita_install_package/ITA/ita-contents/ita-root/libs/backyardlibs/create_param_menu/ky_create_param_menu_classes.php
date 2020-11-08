@@ -661,6 +661,7 @@ class CmdbMenuListTable extends BaseTable_CPM {
         $this->columnNames  = array('MENU_LIST_ID',
                                     'MENU_ID',
                                     'SHEET_TYPE',
+                                    'ACCESS_AUTH_FLG',
                                     'DISP_SEQ',
                                     'ACCESS_AUTH',
                                     'NOTE',
