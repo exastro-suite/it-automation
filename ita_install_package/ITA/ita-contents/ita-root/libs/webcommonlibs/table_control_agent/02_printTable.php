@@ -230,11 +230,17 @@
 
                     //デフォルト。通常は、検出時、大文字と小文字、カタカナと平仮名の区別なし----
                 }
-
-                $sql1 = generateSelectSql2(1, $objTable, $boolBinaryDistinctOnDTiS);
+                // ---- RBAC対応
+                // ACCESS_AUTHカラムの有無を判定
+                if($objTable->getAccessAuth()) {
+                   $sqltype = 3;   // ACCESS_AUTHカラムあり
+                } else {
+                   $sqltype = 1;   // ACCESS_AUTHカラムなし
+                }
+                $sql1 = generateSelectSql2($sqltype, $objTable, $boolBinaryDistinctOnDTiS);
                 $sql2 = generateSelectSql2(2, $objTable, $boolBinaryDistinctOnDTiS);
-
-                //通常モード----
+                // RBAC対応 ----
+                // 通常モード----
             }
 
             if( $aryFunctionForOverride!==null ){
@@ -246,23 +252,44 @@
                  unset($tmpObjFunction02ForOverride);
             }
 
+            // ---- RBAC対応
+            // アクセス権カラムのフィルタ条件をロール名からロール名称に置換
+            if($objTable->getAccessAuth() === true) {
+                $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                $ret = AccessAuthColumnFileterDataReplace($g['objDBCA'],$AccessAuthColumnName,$arrayFileterBody);
+                if($ret === false) {
+                    $intErrorType = 500;
+                    throw new Exception( '00010600-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+            }
+            // RBAC対応 ----
+
             if( $objFunction02ForOverride===null ){
                 if( $sql1!="" ){
                     $row_counter = 0;
                     $retArray = singleSQLExecuteAgent($sql1, $arrayFileterBody, $strFxName);
                     if( $retArray[0] === true ){
                         $objQuery =& $retArray[1];
-                        $row = $objQuery->resultFetch();
-                        $row_counter = $row['REC_CNT'];
+                        // ---- RBAC対応
+                        // ACCESS_AUTHカラムの有無を判定し対象レコードをカウント
+                        $ret = getTargetRecodeCount($objTable,$objQuery,$row_counter);
                         unset($objQuery);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            throw new Exception( '00010701-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                        }
+                        // RBAC対応 ----
                     }
                     else{
                         $intErrorType = 500;
                         throw new Exception( '00010700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     }
+
+
                 }
                 if($mode=='1' && ($intWebLimit===null || $row_counter <= $intWebLimit)){
                     $row_counter = 0;
+
                     $retArray = singleSQLExecuteAgent($sql2, $arrayFileterBody, $strFxName);
                     if( $retArray[0] === true ){
                         $objQuery =& $retArray[1];
@@ -271,14 +298,45 @@
                             //
                             $intFetchCount=0;
                             $arrayTempVariantData=array();
-                            //
+                            $chkobj = null;  // RBAC対応 RBACクラスオブジェクト初期化
                             while ( $row = $objQuery->resultFetch() ){
-                                $intFetchCount+=1;
-                                if($intWebLimit === null || $intFetchCount <= $intWebLimit){
-                                    //----プリント上限まではデータを追加
-                                    $objTable->addData($row, true, $arrayTempVariantData);
-                                    //プリント上限まではデータを追加----
+                                // ---- RBAC対応 
+                                // 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                                list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                                if($ret === false) {
+                                    $intErrorType = 500;
+                                    throw new Exception( '00010800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                                 }
+                                if($permission === true) { 
+                                    $intFetchCount+=1;
+
+                                    if($objTable->getAccessAuth() === true) {
+                                        $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                                        if(array_key_exists($AccessAuthColumnName,$row)) {
+                                            // アクセス権カラムの場合にロールIDからRole名称に変更
+                                            // 廃止されてするロールはカットされる
+                                            global $g;
+                                            $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$row[$AccessAuthColumnName]);
+                                            unset($obj);
+                                            if($RoleNameString === false) {
+                                                $retBool = false;
+                                                $intErrorType = 500;
+                                                $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString is failed.",basename(__FILE__),__LINE__);
+                                                web_log($message);
+                                                throw new Exception( '00010800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                            }
+                                            $row[$AccessAuthColumnName] = $RoleNameString;
+                                        }
+                                    }
+                                    if($intWebLimit === null || $intFetchCount <= $intWebLimit){
+                                        //----プリント上限まではデータを追加
+                                        $objTable->addData($row, true, $arrayTempVariantData);
+                                        //プリント上限まではデータを追加----
+                                    }
+                                } else {
+                                }
+                                // RBAC対応 ----
                             }
                             
                             unset($arrayTempVariantData);

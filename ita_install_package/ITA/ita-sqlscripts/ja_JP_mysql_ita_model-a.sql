@@ -3408,6 +3408,7 @@ MENU_LIST_ID                   INT                     , -- 識別シーケン�
 MENU_ID                        INT                     , -- メニューID
 
 SHEET_TYPE                     INT                     , -- シートタイプ　null/1:ホスト/オペレーションを含む　2:ホストのみ
+ACCESS_AUTH_FLG                INT                     , -- アクセス許可ロール有無(メニューにアクセス許可ロールがあるかどうか　1:あり,それ以外:なし)
 
 DISP_SEQ                       INT                     , -- 表示順序
 ACCESS_AUTH                    TEXT                    ,
@@ -3427,6 +3428,7 @@ MENU_LIST_ID                   INT                     , -- 識別シーケン�
 MENU_ID                        INT                     , -- メニューID
 
 SHEET_TYPE                     INT                     , -- シートタイプ　null/1:ホスト/オペレーションを含む　2:ホストのみ
+ACCESS_AUTH_FLG                INT                     , -- アクセス許可ロール有無(メニューにアクセス許可ロールがあるかどうか　1:あり,それ以外:なし)
 
 DISP_SEQ                       INT                     , -- 表示順序
 ACCESS_AUTH                    TEXT                    ,
@@ -3447,6 +3449,7 @@ SELECT
        TAB_B.MENU_NAME                      ,
        CONCAT(TAB_B.MENU_GROUP_ID,':',TAB_C.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_B.MENU_NAME) MENU_PULLDOWN,
        TAB_A.SHEET_TYPE                     ,
+       TAB_A.ACCESS_AUTH_FLG                ,
        TAB_A.DISP_SEQ                       ,
        TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
@@ -3471,6 +3474,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_B.MENU_NAME                      ,
        CONCAT(TAB_B.MENU_GROUP_ID,':',TAB_C.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_B.MENU_NAME) MENU_PULLDOWN,
        TAB_A.SHEET_TYPE                     ,
+       TAB_A.ACCESS_AUTH_FLG                ,
        TAB_A.DISP_SEQ                       ,
        TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
@@ -4903,6 +4907,8 @@ INSERT INTO B_DP_HIDE_MENU_LIST (HIDE_ID,MENU_ID) VALUES('58','2100180009');
 INSERT INTO B_DP_HIDE_MENU_LIST (HIDE_ID,MENU_ID) VALUES('59','2100180010');
 
 INSERT INTO B_DP_HIDE_MENU_LIST (HIDE_ID,MENU_ID) VALUES('60','2100000216');
+
+INSERT INTO B_DP_HIDE_MENU_LIST (HIDE_ID,MENU_ID) VALUES('61','2100080017');
 
 
 INSERT INTO B_DP_TYPE (ROW_ID,DP_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'エクスポート',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

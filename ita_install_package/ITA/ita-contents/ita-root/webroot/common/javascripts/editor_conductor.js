@@ -88,6 +88,9 @@ function conductorEditor() {
 // 言語
 const language = editor.getLang();
 
+// 読み込み用input set
+editor.readText.set();
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   コンダクターエディタ初期設定
@@ -114,20 +117,26 @@ const listIdName = function( type, id ) {
       list = conductorUseList.symphonyCallList;
       idKey = 'SYMPHONY_CLASS_NO';
       nameKey = 'SYMPHONY_NAME';
+    } else if ( type === 'role') {
+      list = conductorUseList.roleList;
+      idKey = 'ROLE_ID';
+      nameKey = 'ROLE_NAME';
     }
-
-    const listLength = list.length;
-    for ( let i = 0; i < listLength; i++ ) {
-      if ( Number( list[i][idKey] ) === Number( id ) ) {
-        if ( type === 'movement') {
-          name = [ list[i][nameKey], list[i]['ORCHESTRATOR_ID'] ];
-        } else {
-          name = list[i][nameKey];
+    
+    if ( list !== undefined ) {
+      const listLength = list.length;
+      for ( let i = 0; i < listLength; i++ ) {
+        if ( Number( list[i][idKey] ) === Number( id ) ) {
+          if ( type === 'movement') {
+            name = [ list[i][nameKey], list[i]['ORCHESTRATOR_ID'] ];
+          } else {
+            name = list[i][nameKey];
+          }
+          return name;
         }
-        return name;
       }
+      return undefined; 
     }
-    return undefined;  
   } else {
     return undefined;  
   }
@@ -311,6 +320,17 @@ const setInitialConductorData = function() {
     'note': null,
     'LUT4U': null
   };
+  // ACCESS_AUTHの初期値を入れる
+  if ( conductorUseList.roleList !== undefined ) {
+    const roleDefault = new Array,
+          roleLength = conductorUseList.roleList.length;
+    for ( let i = 0; i < roleLength; i++ ) {
+      if ( conductorUseList.roleList[i]['DEFAULT'] === 'checked') {
+        roleDefault.push( conductorUseList.roleList[i]['ROLE_ID'] );
+      } 
+    }
+    conductorData['conductor']['ACCESS_AUTH'] = roleDefault.join(',');
+  }
 }
 setInitialConductorData();
 
@@ -3386,6 +3406,29 @@ const modalSelectList = function( type ) {
   });
   
 };
+
+const modalRoleList = function() {
+
+  const initRoleList = conductorData['conductor']['ACCESS_AUTH'];
+  // 決定時の処理    
+  const okEvent = function( newRoleList ) {
+    conductorData['conductor']['ACCESS_AUTH'] = newRoleList;
+    $('#conductor-edit-role').text(　getRoleListIdToName( newRoleList ) );
+    editor.modalClose();
+  };
+  // キャンセル時の処理    
+  const cancelEvent = function( newRoleList ) {
+    editor.modalClose();
+  };
+  
+  setRoleSelectModalBody( conductorUseList.roleList, initRoleList, okEvent, cancelEvent );
+  
+};
+
+// Role select
+$('#conductor-role-select').on('click', function(){
+  editor.modalOpen('Permission role select', modalRoleList, 'role' );
+});
 // Movement operation select
 $('#movement-operation-select').on('click', function(){
   editor.modalOpen('Select movement operation', modalSelectList, 'operation' );
@@ -3918,23 +3961,39 @@ const updateConductorData = function() {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// カンマ区切りロールIDリストからロールNAMEリストを返す
+const getRoleListIdToName = function( roleListText ) {
+  if ( roleListText !== undefined ) {
+    const roleList = roleListText.split(','),
+          roleListLength = roleList.length,
+          roleNameList = new Array;
+
+    for ( let i = 0; i < roleListLength; i++ ) {
+      const roleName = listIdName('role', roleList[i]);
+      if ( roleName !== undefined ) {
+        roleNameList.push( roleName );
+      }
+    }
+
+    return roleNameList.join(', ');
+  }
+};
+
 const panelConductorReset = function() {
   $('#conductor-class-id').text('');
   if ( conductorEditorMode === 'edit' || conductorEditorMode === 'view') {
     $('#conductor-class-name').val('');
     $('#conductor-class-note').val('');
+    $('#conductor-edit-role').text( getRoleListIdToName( conductorData['conductor']['ACCESS_AUTH'] ) );
   }
   $('#conductor-class-name-view').text('');
-  $('#conductor-class-note-view').text('');
+  $('#conductor-view-role').text( getRoleListIdToName( conductorData['conductor']['ACCESS_AUTH'] ) );
 };
 
 // リセット
 const clearConductor = function() {
     // 選択を解除
     nodeDeselect();
-    // パネル情報
-    panelChange();
-    panelConductorReset();
     // 全て消す
     $svgArea.empty();
     $artBoard.find('.node').remove()
@@ -3952,6 +4011,9 @@ const clearConductor = function() {
     // 初期値
     setInitialConductorData();
     canvasPositionReset(0);
+    // パネル情報
+    panelChange();
+    panelConductorReset();
 }
 // ローカルストレージに保存する
 const saveConductor = function( saveConductorData ) {
@@ -4095,9 +4157,11 @@ const loadConductor = function( loadConductorData, mode ) {
       if ( conductorEditorMode === 'edit' || conductorEditorMode === 'view' ) {
         $('#conductor-class-name').val( conductorData['conductor'].conductor_name );
         $('#conductor-class-note').val( conductorNoteText );
+        $('#conductor-edit-role').text( getRoleListIdToName( conductorData['conductor'].ACCESS_AUTH ) );
       }
       $('#conductor-class-name-view').text( conductorData['conductor'].conductor_name );
       $('#conductor-class-note-view').text( conductorNoteText );
+      $('#conductor-view-role').text( getRoleListIdToName( conductorData['conductor'].ACCESS_AUTH ) );
 
       nodeReSet( conductorData );
       nodeViewAll( 0 );
@@ -4108,6 +4172,11 @@ const loadConductor = function( loadConductorData, mode ) {
       $editor.removeClass('load-conductor');
       clearConductor();
       message('1001');
+       
+      alert( getSomeMessage("ITABASEC020008") );
+      var url = '/default/menu/01_browse.php?no=2100180002';
+      location.href = url;
+
     }
     
 };
@@ -4445,6 +4514,7 @@ const InitialSetNode = function() {
 
   newNode('start', 'left', 'center');
   newNode('end', 'right', 'center');
+  panelConductorReset();
   $('#conductor-class-id').text('Auto numbering');
   
 };

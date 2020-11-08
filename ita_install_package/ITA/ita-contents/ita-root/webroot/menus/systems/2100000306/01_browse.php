@@ -38,7 +38,60 @@
         
         // browse系共通ロジックパーツ01
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_browse_01.php");
-        
+
+       //アクセス権を判定
+        if( array_key_exists( "symphony_class_id", $_GET ) === true ){
+            // クエリからsymphony_instance_idを取得
+            $symphony_class_id = $_GET["symphony_class_id"];
+
+            // 整数の場合のみ判定
+            $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
+            if( $objIntNumVali->isValid($symphony_class_id) === true ){
+                // SQL生成
+                $sql = "SELECT  ACCESS_AUTH
+                        FROM    C_SYMPHONY_CLASS_MNG
+                        WHERE   DISUSE_FLAG = '0'
+                        AND     SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO_BV ";
+
+                $objQuery = $g['objDBCA']->sqlPrepare($sql);
+
+                if($objQuery->getStatus()===false){
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                $objQuery->sqlBind( array( 'SYMPHONY_CLASS_NO_BV'=>$symphony_class_id ) );
+
+                $r = $objQuery->sqlExecute();
+
+                if (!$r){
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                while ( $row = $objQuery->resultFetch() ){
+                    // アクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        // 例外処理へ
+                        throw new Exception();
+                    } else {
+                        if($permission === false) {
+                            //アクセス権が無いため、例外処理へ
+                            throw new Exception();
+                        }
+                    }
+                }
+            }
+        } 
     }
     catch (Exception $e){
         // DBアクセス例外処理パーツ
@@ -56,13 +109,21 @@
     $timeStamp_00_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/00_javascript.js");
     $timeStamp_itabase_symphony_class_info_access_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_info_access.js");
     $timeStamp_itabase_symphony_class_edit_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_edit.js");
+    
+    $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
+    $timeStamp_editor_common_css=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
 
 print <<< EOD
+    <script>const gLoginUserID = {$g['login_id']};</script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/00_javascript.js?{$timeStamp_00_javascript_js}"></script>
+    
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_symphony_class_info_access.js?{$timeStamp_itabase_symphony_class_info_access_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_symphony_class_edit.js?{$timeStamp_itabase_symphony_class_edit_js}"></script>
+    <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
+    
+    <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_css}">
     <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/itabase_symphony_style.css?{$timeStamp_itabase_symphony_style_css}">
 EOD;
 
@@ -145,6 +206,9 @@ EOD;
                         </div>
                         <div class="heightAndWidthFixed01">
                             <label for="symphony_name">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-204070")}<!--Symphonyクラス名称--></label>　<span id="print_symphony_name"></span>
+                        </div>
+                        <div class="heightAndWidthFixed01">
+                            <label for="symphony_role">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-204071")}<!--Symphonyロール--></label>　<span id="print_symphony_role"></span>
                         </div>
                         <div style="display:none"><span id="print_symphony_lt4u"></span></div>
                     </div>

@@ -67,6 +67,7 @@
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -91,6 +92,7 @@
         "TIME_BOOK"=>"",
         "TIME_START"=>"",
         "TIME_END"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -124,6 +126,7 @@
         "OVRD_OPERATION_NO_UAPK"=>"",
         "OVRD_I_OPERATION_NAME"=>"",
         "OVRD_I_OPERATION_NO_IDBH"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -157,6 +160,7 @@
         "OVRD_OPERATION_NO_UAPK"=>"",
         "OVRD_I_OPERATION_NAME"=>"",
         "OVRD_I_OPERATION_NO_IDBH"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -233,6 +237,7 @@
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -264,6 +269,7 @@
         "OVRD_OPERATION_NO_UAPK"=>"",
         "OVRD_I_OPERATION_NAME"=>"",
         "OVRD_I_OPERATION_NO_IDBH"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -289,6 +295,8 @@
     ////////////////////////////////
     global $g;
     
+    $g['login_id'] = $db_access_user_id;
+
     ////////////////////////////////
     // 業務処理開始               //
     ////////////////////////////////
@@ -510,6 +518,7 @@
 
             // ansible/DSC/AnsibleTower の00_shymphonyLinker.php で参照
             $g['__CONDUCTOR_INSTANCE_NO__'] = $rowOfConductor['CONDUCTOR_INSTANCE_NO'];
+            $g['__TOP_ACCESS_AUTH__'] = $rowOfConductor['ACCESS_AUTH'];   
 
             ////////////////////////////
             // 変数初期化(ループ冒頭) //
@@ -716,7 +725,7 @@
                 //////////////////////////////////////////////////////
                 // (ここから)実行中の場合　//
                 //////////////////////////////////////////////////////
-
+                $intSymInsStatus = $rowOfConductor["STATUS_ID"] ;
                 //実行中のノード毎に繰り返し
                 foreach ($arrOfFocusMovement as $Movementkey => $rowOfFocusMovement) {
 
@@ -1085,7 +1094,7 @@
                                             //----オーケストレータ側に、レコードを挿入できた
                                             $aryMovInsUpdateTgtSource['STATUS_ID']    = '2'; //準備中
                                             $aryMovInsUpdateTgtSource['EXECUTION_NO'] = $aryRetBody[0];
-                                            $aryMovInsUpdateTgtSource['TIME_START']   = $aryRetBody[4];
+
                                             //オーケストレータ側に、レコードを挿入できた----
 
                                         }
@@ -1106,23 +1115,29 @@
 
                                 if( $boolNodeStatusUpdateReadyflg == true){
                                     $aryMovInsUpdateTgtSource['TIME_START'] = str_replace("-","/",$aryMovInsUpdateTgtSource['TIME_START']) ;
-                                    $aryMovInsUpdateTgtSource['TIME_END'] = str_replace("-","/",$aryMovInsUpdateTgtSource['TIME_END']) ;
-                                    
-                                    // 更新用のテーブル定義
-                                    $aryConfigForIUD = $aryConfigForMovInsIUD;
-                                    
-                                    // BIND用のベースソース
-                                    $aryBaseSourceForBind = $aryMovInsUpdateTgtSource;
-
-                                    $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
-                                    
-                                    if( $aryRetBody !== true  ){
-                                        // 例外処理へ
-                                        $strErrStepIdInFx="00001301";
-                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    $aryMovInsUpdateTgtSource['TIME_END']="";
+                                    if($arrTargetNodeInstance['STATUS_ID'] == 5 ){
+                                        $aryMovInsUpdateTgtSource['TIME_END']  = "DATETIMEAUTO(6)";
                                     }
 
-                                    $arySymInsUpdateTgtSource['STATUS_ID'] = 3;     //実行中へ
+                                    if( $arrTargetNodeInstance['STATUS_ID'] == 2 || ( $arrTargetNodeInstance['STATUS_ID'] >= 3 && $arrTargetNodeInstance['STATUS_ID'] != $aryMovInsUpdateTgtSource['STATUS_ID'] ) ){
+
+                                        // 更新用のテーブル定義
+                                        $aryConfigForIUD = $aryConfigForMovInsIUD;
+                                        
+                                        // BIND用のベースソース
+                                        $aryBaseSourceForBind = $aryMovInsUpdateTgtSource;
+
+                                        $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                                        
+                                        if( $aryRetBody !== true  ){
+                                            // 例外処理へ
+                                            $strErrStepIdInFx="00001301";
+                                            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                        }
+
+                                    }
+
                                     //後続処理conditional用
                                     switch( $aryMovInsUpdateTgtSource["STATUS_ID"] ){
                                         case "10":  //準備エラー
@@ -2471,31 +2486,34 @@
                     }
 
 
-                    //---NODE-Conductorインスタンスのステータス同期
-                    switch( $aryMovInsUpdateTgtSource["STATUS_ID"] ){
-                        case "1": // mov.未実行
-                        case "2": // mov.準備中
-                        case "3": // mov.実行中
-                        case "5": // mov.実行完了（下位オーケストレータは、正常に終了していた場合）
-                        case "9": // mov.正常終了
-                            break;
-                        case "4": // mov.実行中(遅延)
-                            $arySymInsUpdateTgtSource['STATUS_ID'] = 4;     //.実行中(遅延)へ
-                            break;
-                        case "10": // mov.準備エラー
-                        case "6": // mov.異常終了
-                            $arySymInsUpdateTgtSource['STATUS_ID'] = 7;     //異常終了へ
-                            break;
-                        case "7": // mov.緊急停止
-                            $arySymInsUpdateTgtSource['STATUS_ID'] = 6;     //緊急停止へ
-                            break;
-                        case "11": // mov.想定外エラー
-                            $arySymInsUpdateTgtSource['STATUS_ID'] = 8;     //想定外エラー
-                            break;
-                        default:
-                            break;
-                    } 
-                    //NODE-Conductorインスタンスのステータス同期---
+                    if( $arySymInsUpdateTgtSource['STATUS_ID'] >= $intSymInsStatus ){
+
+                        //---NODE-Conductorインスタンスのステータス同期
+                        switch( $aryMovInsUpdateTgtSource["STATUS_ID"] ){
+                            case "1": // mov.未実行
+                            case "2": // mov.準備中
+                            case "3": // mov.実行中
+                            case "5": // mov.実行完了（下位オーケストレータは、正常に終了していた場合）
+                            case "9": // mov.正常終了
+                                break;
+                            case "4": // mov.実行中(遅延)
+                                $arySymInsUpdateTgtSource['STATUS_ID'] = 4;     //.実行中(遅延)へ
+                                break;
+                            case "10": // mov.準備エラー
+                            case "6": // mov.異常終了
+                                $arySymInsUpdateTgtSource['STATUS_ID'] = 7;     //異常終了へ
+                                break;
+                            case "7": // mov.緊急停止
+                                $arySymInsUpdateTgtSource['STATUS_ID'] = 6;     //緊急停止へ
+                                break;
+                            case "11": // mov.想定外エラー
+                                $arySymInsUpdateTgtSource['STATUS_ID'] = 8;     //想定外エラー
+                                break;
+                            default:
+                                break;
+                        } 
+                        //NODE-Conductorインスタンスのステータス同期---
+                    }
 
 
                     //---次のノードを準備中へ
@@ -2569,6 +2587,7 @@
                             break;
                     }
                     //次のノードを準備中へ---
+                    $intSymInsStatus = $arySymInsUpdateTgtSource['STATUS_ID'];
 
                 }
 
@@ -2618,6 +2637,8 @@
                 require ($root_dir_path . $log_output_php );
             }
             unset($g['__CONDUCTOR_INSTANCE_NO__']);
+            unset($g['__TOP_ACCESS_AUTH__']);
+
         }
         //CONDUCTORを、一個ずつループする----
         

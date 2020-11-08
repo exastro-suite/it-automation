@@ -36,7 +36,8 @@ function getPatternListWithOrchestratorInfo($fxVarsStrFilterData="",$fxVarsResul
     try{
         require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
         $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA);
-        
+        $obj = new RoleBasedAccessControl($objDBCA);
+
         $aryRet = $objOLA->getLiveOrchestratorFromMaster();
         if( $aryRet[1] !== null ){
             // エラーフラグをON
@@ -87,10 +88,33 @@ function getPatternListWithOrchestratorInfo($fxVarsStrFilterData="",$fxVarsResul
             
             if( $fxVarsResultType === 1 ){
                 foreach($aryRow as $arySingleRow){
-                    $aryListSource[] = $varOrcId;
-                    $aryListSource[] = $arySingleRow['PATTERN_ID'];
-                    $aryListSource[] = $arySingleRow['PATTERN_NAME'];
-                    $aryListSource[] = $strThemeColor;
+
+                    $intPatternId = $arySingleRow['PATTERN_ID'];
+                    //
+                    // 表示データをSELECT
+                    $sql =  " SELECT * FROM C_PATTERN_PER_ORCH "
+                           ." WHERE DISUSE_FLAG='0' "
+                           ." AND PATTERN_ID = $intPatternId "
+                           ."";
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                    $rows = array();
+
+                    $row = $objQuery->resultFetch();
+
+                    $user_id = $g['login_id'];
+                    $ret  = $obj->getAccountInfo($user_id); 
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                    } else {
+                        if($permission === true) {
+                            $aryListSource[] = $varOrcId;
+                            $aryListSource[] = $arySingleRow['PATTERN_ID'];
+                            $aryListSource[] = $arySingleRow['PATTERN_NAME'];
+                            $aryListSource[] = $strThemeColor;
+                        }
+                    }
                 }
             }
             else{
@@ -102,8 +126,28 @@ function getPatternListWithOrchestratorInfo($fxVarsStrFilterData="",$fxVarsResul
                     $tmpRow['ORCHESTRATOR_ID'] = $varOrcId;
                     $tmpRow['PATTERN_NAME']    = $arySingleRow['PATTERN_NAME'];
                     $tmpRow['ThemeColor']      = $strThemeColor;
-                    //
-                    $aryListSource[$intPatternId] = $tmpRow;
+
+                    // 表示データをSELECT
+                    $sql =  " SELECT * FROM C_PATTERN_PER_ORCH "
+                           ." WHERE DISUSE_FLAG='0' "
+                           ." AND PATTERN_ID = $intPatternId "
+                           ."";
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                    $rows = array();
+
+                    $row = $objQuery->resultFetch();
+
+                    $user_id = $g['login_id'];
+                    $ret  = $obj->getAccountInfo($user_id); 
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                    } else {
+                        if($permission === true) {
+                            $aryListSource[$intPatternId] = $tmpRow;
+                        }
+                    }
                 }
             }
         }
@@ -144,7 +188,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
     //node分繰り返し
     $aryNode = array();
     $arrpatternDel = array('/__proto__/');
-    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/'  );
+    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/','/ACCESS_AUTH/'  );
 
     foreach( $fxVarsStrSortedData as $nodename => $nodeinfo ){
         //　nodeの処理開始
@@ -218,6 +262,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         "CONDUCTOR_CLASS_NO"=>"",
         "CONDUCTOR_NAME"=>"",
         "DESCRIPTION"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -231,6 +276,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         "CONDUCTOR_CLASS_NO"=>"",
         "CONDUCTOR_NAME"=>"",
         "DESCRIPTION"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -257,6 +303,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         "POINT_W"=>"",
         "POINT_H"=>"",
         "DISP_SEQ"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -283,6 +330,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         "POINT_W"=>"",
         "POINT_H"=>"",
         "DISP_SEQ"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -308,6 +356,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         "POINT_X"=>"",
         "POINT_Y"=>"",
         "DISP_SEQ"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -332,6 +381,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         "POINT_X"=>"",
         "POINT_Y"=>"",
         "DISP_SEQ"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -685,6 +735,21 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
 
             //CALL呼び出しのループバリデーション
             if( $aryDataForMovement['type'] == "call" && is_numeric( $aryDataForMovement['CALL_CONDUCTOR_ID'] ) ){
+
+                    if( $fxVarsIntConductorClassId != "" ){
+                        $getmode = 1;
+                        $retArray = $objOLA->getInfoFromOneOfConductorClass($aryDataForMovement['CALL_CONDUCTOR_ID'], 0,0,0,$getmode);#TERMINALあり
+                        $tmpNodeLists = $retArray[5];
+                        foreach ($tmpNodeLists as $key => $value) {
+                            if( ( $value["NODE_TYPE_ID"] == 4 ) && ( $fxVarsIntConductorClassId == $value["CONDUCTOR_CALL_CLASS_NO"] ) ){
+                                $intErrorType = 2;
+                                $strErrStepIdInFx="00002800";
+                                $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170014",array($fxVarsIntConductorClassId));
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );    
+                            }
+                        }
+                    }
+
                     $arrConductorList = array();
                     $aryRetBody = ConductorCallLoopValidator( $objOLA,$aryDataForMovement['CALL_CONDUCTOR_ID'],$arrConductorList );
 
@@ -755,13 +820,46 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
             $intErrorType = $arrayResult[0];
             $intDetailType = $arrayResult[1];
             $aryErrMsgBody[]=$arrayResult[3];
-            $intSymphonyInstanceId= $arrayResult[2];
+            $intShmphonyClassId= $arrayResult[2];
             $strExpectedErrMsgBodyForUI = $arrayResult[3];
 
             $strErrStepIdInFx="00000500";
             throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
         }
         //登録処理---
+
+        //----バリデーションチェック(CALL呼び出しのループバリデーション)
+        $aryMovement  = $aryNodeData;
+        foreach($aryMovement as $aryDataForMovement){
+
+            //CALL呼び出しのループバリデーション
+            if( $aryDataForMovement['type'] == "call" && is_numeric( $aryDataForMovement['CALL_CONDUCTOR_ID'] ) ){
+                if( $intShmphonyClassId != "" ){
+                    $getmode = 1;
+                    $retArray = $objOLA->getInfoFromOneOfConductorClass($aryDataForMovement['CALL_CONDUCTOR_ID'], 0,0,0,$getmode);#TERMINALあり
+                    $tmpNodeLists = $retArray[5];
+                    foreach ($tmpNodeLists as $key => $value) {
+                        if( ( $value["NODE_TYPE_ID"] == 4 ) && ( $intShmphonyClassId == $value["CONDUCTOR_CALL_CLASS_NO"] ) ){
+                            $intErrorType = 2;
+                            $strErrStepIdInFx="00002800";
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170014",array($intShmphonyClassId));
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );    
+                        }
+                    }
+                }
+
+                $arrConductorList = array();
+                $aryRetBody = ConductorCallLoopValidator( $objOLA,$aryDataForMovement['CALL_CONDUCTOR_ID'],$arrConductorList );
+
+                if( $aryRetBody === false  ) {
+                    $intErrorType = 2;
+                    $strErrStepIdInFx="00002800";
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170014",array($intShmphonyClassId));
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }        
+            }
+        }
+         //-バリデーションチェック(CALL呼び出しのループバリデーション)---
 
         // ----トランザクション終了
         $boolResult = $objDBCA->transactionCommit();

@@ -490,10 +490,15 @@
             if($retArray[0] === true){
                 $objQuery =& $retArray[1];
                 while( $row = $objQuery->resultFetch() ){
+                    if ( can_get_menu_info($row["MENU_ID"]) ) {
+                        $number = count(get_movements_by_orch($row["ITA_EXT_STM_ID"]));
+                    } else {
+                        $number = 0;
+                    }
                    $rows[$row["ITA_EXT_STM_ID"]] = array(
                         "name" => $row["ITA_EXT_STM_NAME"], // オーケストレータ名
                         "menu_id" => $row["MENU_ID"], //
-                        "number" => count(get_movements_by_orch($row["ITA_EXT_STM_ID"])),
+                        "number" => $number,
                     );
                  }
             }
@@ -577,9 +582,21 @@
             3, // 実行中
             4, // 実行中(遅延)
         );
+        $con_menu_id = "2100180006";
+        $sym_menu_id = "2100000310";
+        if ( can_get_menu_info($con_menu_id) ) {
+            $con_list = get_conductor($status_list);
+        } else {
+            $con_list = array();
+        }
+        if ( can_get_menu_info($sym_menu_id) ) {
+            $sym_list = get_symphony($status_list);
+        } else {
+            $sym_list = array();
+        }
         $result = array(
-            "conductor" => get_conductor($status_list),
-            "symphony" => get_symphony($status_list),
+            "conductor" => $con_list,
+            "symphony" => $sym_list,
         );
         return $result;
     }
@@ -601,9 +618,21 @@
             9, // 予約取り消し
             10, // 想定外エラー(ループ)
         );
+        $con_menu_id = "2100180006";
+        $sym_menu_id = "2100000310";
+        if ( can_get_menu_info($con_menu_id) ) {
+            $con_list = get_conductor($status_list);
+        } else {
+            $con_list = array();
+        }
+        if ( can_get_menu_info($sym_menu_id) ) {
+            $sym_list = get_symphony($status_list);
+        } else {
+            $sym_list = array();
+        }
         $result = array(
-            "conductor" => get_conductor($status_list),
-            "symphony" => get_symphony($status_list),
+            "conductor" => $con_list,
+            "symphony" => $sym_list,
         );
         return $result;
     }
@@ -669,6 +698,43 @@
             $is_ok = false;
         }
         return $is_ok;
+    }
+
+    function can_get_menu_info($menu_id) {
+        global $g;
+        $user_id = $g['login_id'];
+        try{
+            // ユーザのメニュー表示権限
+            $sql = "SELECT A_ROLE_MENU_LINK_LIST.MENU_ID
+                    FROM   A_ROLE_ACCOUNT_LINK_LIST
+                    LEFT OUTER JOIN A_ROLE_MENU_LINK_LIST
+                    ON A_ROLE_ACCOUNT_LINK_LIST.ROLE_ID = A_ROLE_MENU_LINK_LIST.ROLE_ID
+                    WHERE A_ROLE_ACCOUNT_LINK_LIST.DISUSE_FLAG = '0'
+                    AND A_ROLE_MENU_LINK_LIST.DISUSE_FLAG = '0'
+                    AND A_ROLE_ACCOUNT_LINK_LIST.USER_ID = :USER_ID
+                    AND A_ROLE_MENU_LINK_LIST.MENU_ID = :MENU_ID";
+            $tmpAryBind = array(
+                "USER_ID" => $user_id,
+                "MENU_ID" => $menu_id
+            );
+            $role_list = array();
+            $retArray = singleSQLExecuteAgent($sql, $tmpAryBind,  __FUNCTION__);
+            if($retArray[0] === true){
+                $objQuery =& $retArray[1];
+                if ( $objQuery->effectedRowCount() > 0 ) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } catch (Exception $e){
+            $result = array(
+                "100",
+                "000",
+                $e->getMessage()
+            );
+            return $result;
+        }
     }
 
     // コンダクター取得
@@ -951,5 +1017,36 @@
             $login_status_flag = true;
         }
         return $login_status_flag;
+    }
+
+    function get_orch() {
+        global $g;
+        $uer_id = $g['login_id'];
+        try{
+            // オーケストレーションの取得
+            $sql = "SELECT ITA_EXT_STM_ID,ITA_EXT_STM_NAME,MENU_ID
+                    FROM   B_ITA_EXT_STM_MASTER
+                    WHERE  DISUSE_FLAG = '0' ";
+            $orch_list = array();
+            $tmpAryBind = array();
+            $retArray = singleSQLExecuteAgent($sql, $tmpAryBind,  __FUNCTION__);
+            if($retArray[0] === true){
+                $objQuery =& $retArray[1];
+                while( $row = $objQuery->resultFetch() ){
+                   $orch_list[$row["ITA_EXT_STM_ID"]] = array(
+                        "name" => $row["ITA_EXT_STM_NAME"], // オーケストレータ名
+                        "menu_id" => $row["MENU_ID"], //
+                    );
+                 }
+            }
+            return $orch_list;
+        } catch (Exception $e){
+            $result = array(
+                "100",
+                "000",
+                $e->getMessage()
+            );
+            return $result;
+        }
     }
 ?>

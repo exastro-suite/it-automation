@@ -23,24 +23,6 @@
     class Db_Access extends Db_Access_Core {
         //-- サイト個別PHP要素、ここから--
 
-        ////////////////////////////////////////
-        //  Filter1Cht_recDrawファンクション  //
-        ////////////////////////////////////////
-        function Filter1Cht_recDraw($arrayReceptData){
-            // グローバル変数宣言
-            global $g;
-
-            // ローカル変数宣言
-            $arrayResult = array();
-
-            // 本体ロジックをコール
-            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/web_php_functions.php");
-            $arrayResult = Filter1Cht_recDraw($arrayReceptData);
-
-            return $arrayResult;
-        }
-
-
         function bookCancelSymphonyInstance($intShyphonyInstanceId){
             // グローバル変数宣言
             global $g;

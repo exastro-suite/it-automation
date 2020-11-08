@@ -408,8 +408,8 @@ $ary[1230051] = "Display Order";
 $ary[1230052] = "Set the default display order (ascending) in this menu.\nRange:-2147483648 to 2147483647 (Numeric)";
 $ary[1230061] = "Comments section.";
 $ary[1300001] = "Access permission";
-$ary[1300002] = "Role ID to allow access";
-$ary[1300003] = "The roleID that allows access to the record. \nIf you want to allow access to multiple roleIDs, separate the roleIDs with commas (,).";
+$ary[1300002] = "Role to allow access";
+$ary[1300003] = "The role that allows access to the record. \nIf you want to allow access to multiple roles, separate the roles with comma (,).";
 $ary[1300004] = "Setting";
 $ary[1300005] = "Auto-input";
 $ary[4000001] = "Request Error";
@@ -421,4 +421,6 @@ $ary[4010003] = "Contact <a href={}> administrator </a>.";
 $ary[4030001] = "Unauthorized operations";
 $ary[4030002] = "The operation is not allowed. Check your permissions.";
 $ary[4030003] = "Contact <a href={}> administrator </a>.";
+$ary[4030004] = "You don't have permission to see this menu. \n
+You will now be moved to the top page.";
 ?>

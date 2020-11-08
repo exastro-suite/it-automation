@@ -126,7 +126,9 @@ editorFunction.modalOpen = function( headerTitle, bodyFunc, modalType ) {
 
     // 初期値
     if ( headerTitle === undefined ) headerTitle = 'Undefined title';
-    if ( modalType === undefined ) modalType = 'default';       
+    if ( modalType === undefined ) modalType = 'default';
+    
+    $body.addClass('modal-open');
     
     let modalHTML = ''
       + '<div id="editor-modal" class="' + modalType + '">'
@@ -140,8 +142,8 @@ editorFunction.modalOpen = function( headerTitle, bodyFunc, modalType ) {
           + '</div>'
           + '<div class="editor-modal-footer">'
             + '<ul class="editor-modal-footer-menu">'
-              + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button positive" data-button-type="ok" disabled>決定</li>'
-              + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="cancel" disabled>取消</li>'
+              + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button positive" data-button-type="ok" disabled>' + getSomeMessage("ITAWDCC92001") + '</li>'
+              + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="cancel" disabled>' + getSomeMessage("ITAWDCC92002") + '</li>'
             + '</ul>'
           + '</div>'
         + '</div>'
@@ -187,14 +189,14 @@ editorFunction.modalOpen = function( headerTitle, bodyFunc, modalType ) {
 // モーダルを閉じる
 editorFunction.modalClose = function() {
 
-  const $window = $( window ),
-        $container = $('.wholecontainer'),
+  const $container = $('.wholecontainer'),
         $editorModal = $('#editor-modal');
   
   if ( $editorModal.length ) {
     $window.off('keyup.modal');
     $editorModal.remove();
     $container.css('filter','none');
+    $body.removeClass('modal-open');
   }
 
 }
@@ -518,15 +520,17 @@ editorFunction.downloadText = function( text, extension, fileName ) {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const inputFile = '<div id="read-file"><input id="read-file-input" type="file"></div>';
-$body.append( inputFile );
-
-const $readInputFile = $('#read-file-input');
 editorFunction.readText = {
+  'set': function() {
+    const inputFile = '<div id="read-file"><input id="read-file-input" type="file"></div>';
+    $body.append( inputFile );
+  },
   'open': function() {
+    const $readInputFile = $('#read-file-input');
     $readInputFile.val('').click();
   },
   'setInput': function( extension, readFunction ) {
+    const $readInputFile = $('#read-file-input');
     $readInputFile.attr('accept', extension ).on('change', function( e ) {
       const readFile = e.target.files[0];
       if ( readFile ) {
@@ -540,5 +544,69 @@ editorFunction.readText = {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   入力チェック
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+editorFunction.inputTextValidation = function( parent, target ) {
+  
+  $( parent ).on({
+    'focus input': function() {
+      const $input = $( this );
+      if ( !$input.is('.input-check-target') ) {
+        $input.addClass('input-check-target')
+          .wrap('<div class="input-check-wrap"/>').after('<span class="input-check-length"/>').focus();
+      }
+      const value = $input.val(),
+            maxLength = $input.attr('data-max-length');
+      let inputLength = value.length;
+      if ( inputLength > maxLength ) {
+        $input.next('.input-check-length').addClass('input-check-over');
+      } else {
+        $input.next('.input-check-length').removeClass('input-check-over');
+      }
+      $input.next('.input-check-length').text( inputLength + ' / ' + maxLength );
+    },
+    'blur': function() {
+      const $input = $( this ),
+            value = $input.val(),
+            maxLength = $input.attr('data-max-length'),
+            inputLength = value.length;
+      $input.next('.input-check-length').text('').removeClass('input-check-over');
+      if ( inputLength > maxLength ) {
+        $input.val( value.slice( 0, maxLength ) );
+      }
+    }
+  }, target );
+};
+
+editorFunction.inputNumberValidation = function( parent, target ) {
+  
+  $( parent ).on({
+    'focus': function() {
+      const $input = $( this );
+      if ( !$input.is('.input-check-target') ) {
+        $input.addClass('input-check-target')
+          .wrap('<div class="input-check-wrap"/>').after('<span class="input-check-length"/>').focus();
+      }
+      const min = Number( $input.attr('data-min') ),
+            max = Number( $input.attr('data-max') );
+      $input.next('.input-check-length').text( min + ' - ' + max );
+    },
+    'blur': function() {
+      const $input = $( this ),
+            value = $( this ).val(),
+            min = Number( $input.attr('data-min') ),
+            max = Number( $input.attr('data-max') );
+      if ( value === '' || value < min ) {
+        $input.val( min );      
+      } else if ( value > max ) {
+        $input.val( max );
+      }
+    }
+  }, target );
+};
 
 }

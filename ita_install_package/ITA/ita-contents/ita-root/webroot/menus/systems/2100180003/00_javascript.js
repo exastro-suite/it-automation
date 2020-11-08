@@ -169,7 +169,7 @@ callback.prototype = {
     printConductorList : function( result ){
         conductorUseList.conductorCallList = JSON.parse( result );
         if ( conductorGetMode === 'starting') {
-          proxy.printSymphonyList();
+          getRoleList();
         }
     }
     ,
@@ -192,10 +192,29 @@ callback.prototype = {
             initEditor('edit');
           }
         }
-    }  
+    },
     //Conductor系メソッド----
     
 }
+
+// ロール一覧を取得する
+function getRoleList() {
+    const printRoleListURL = '/common/common_printRoleList.php?user_id=' + gLoginUserID;
+    $.ajax({
+      type: 'get',
+      url: printRoleListURL,
+      dataType: 'text'
+    }).done( function( result ) {
+        conductorUseList.roleList = JSON.parse( result );
+        if ( conductorGetMode === 'starting') {
+          proxy.printSymphonyList();
+        }
+    }).fail( function( result ) {
+    });
+}
+
+
+
 
 /* 登録・更新処理結果 */
 function conductorResultMessage( type, result ) {

@@ -40,6 +40,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $tmpAryObjColumn = $table->getColumns();
     $tmpAryObjColumn['ROLE_ID']->setSequenceID('SEQ_A_ROLE_LIST');
 
+
+
     // ロール名称
     $c = new TextColumn('ROLE_NAME',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1060201"));
     $c->setRequired(true);
@@ -47,6 +49,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1060202"));
     $c->setValidator(new SingleTextValidator(1, 256, false));
     $table->addColumn($c);
+
 
     // ユーザ情報
     $strLabelText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1060301");
@@ -61,7 +64,66 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     $table->fixColumn();
-    
+
+    //----組み合わせバリデータ----
+    $tmpAryColumn = $table->getColumns();
+    $objLU4UColumn = $tmpAryColumn[$table->getRequiredUpdateDate4UColumnID()];
+
+    $objFunction = function($objClientValidator, $value, $strNumberForRI, $arrayRegData, $arrayVariant){
+        global $g;
+        global $root_dir_path;
+        $retBool = true;
+        $retStrBody = '';
+        $boolExecuteContinue = true;
+        $boolSystemErrorFlag = false;
+
+        $strModeId = "";
+        $modeValue_sub = "";
+
+        $aryVariantForIsValid = $objClientValidator->getVariantForIsValid();
+
+        if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                $strModeId = $aryTcaAction["ACTION_MODE"];
+            }
+        }
+            
+        if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
+            $RoleName = array_key_exists('ROLE_NAME',$arrayRegData)?$arrayRegData['ROLE_NAME']:null;
+        } else {
+            $boolExecuteContinue = false;
+        }
+        
+        if($boolExecuteContinue === true && $boolSystemErrorFlag === false) {
+            // ロール名にカンマが含まれていないかチェック
+            $ret = preg_match("/,/",$RoleName);
+            if($ret == 1) {
+            $retBool = false;
+            $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19020");
+            }
+        }
+        if( $boolSystemErrorFlag === true ){
+            $retBool = false;
+            //----システムエラー
+            $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
+        }
+        if($retBool===false){
+            $objClientValidator->setValidRule($retStrBody);
+        }
+        return $retBool;
+    };
+
+    $objVarVali = new VariableValidator();
+    $objVarVali->setErrShowPrefix(false);
+    $objVarVali->setFunctionForIsValid($objFunction);
+    $objVarVali->setVariantForIsValid(array());
+
+    $objLU4UColumn->addValidator($objVarVali);
+    //組み合わせバリデータ----
+
+    $table->setGeneObject('webSetting', $arrayWebSetting);
+
     return $table;
 };
 loadTableFunctionAdd($tmpFx,__FILE__);
