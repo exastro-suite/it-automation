@@ -24,7 +24,7 @@ $root_dir_path = preg_replace('|^(.*/ita-root)/.*$|', '$1', __FILE__);
 require_once $root_dir_path.'/libs/webindividuallibs/systems/2100000216/simpleTableControlAgent_class.php';
 require_once $root_dir_path.'/libs/webindividuallibs/systems/2100000216/column_class.php';
 
-$tmpFx = function (&$aryVariant=[],&$arySetting=[]){
+$tmpFx = function (&$aryVariant=[], &$arySetting=[]) {
     global $g;
 
     $arrayWebSetting = [];
@@ -47,7 +47,7 @@ $tmpFx = function (&$aryVariant=[],&$arySetting=[]){
     $c = new NumColumn('VALUE',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230021"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230022"));
     $c->setRequired(true);
-    $c->setValidator(new IntNumValidator(-2147483648, 2147483647, false));
+    $c->setValidator(new IntNumValidator(-2147483648, 2147483646, false));
     $c->setHiddenMainTableColumn(true);
     $c->setSubtotalFlag(false);
     $table->addColumn($c);
