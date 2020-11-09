@@ -658,14 +658,7 @@
 
             //USER：PWの簡易チェック
             if( $arycollectSVInfo['LOGIN_USER'] == "" || $arycollectSVInfo['LOGIN_PW'] == "" ){
-                // トレースメッセージ
-                    #$FREE_LOG = "[処理]REST接続情報に不備があります。"
-                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80000");
-                    require ($root_dir_path . $log_output_php );
-
-                    $strErrStepIdInFx="00000400";
-                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-
+                exit(0);
             }
 
             //RESTベースパラメータ作成
