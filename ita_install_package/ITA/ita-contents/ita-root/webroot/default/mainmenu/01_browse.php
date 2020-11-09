@@ -26,6 +26,7 @@
     if($uri == "/"){
         $url = '/default/mainmenu/01_browse.php';
         header('Location: ' . $url, true, 301);
+        exit;
     }
 
     // browse系メインメニュー用ロジックパーツ01
