@@ -24,9 +24,9 @@
     // パラメータを持たないURLは使用できないため、基本コンソールへリダイレクト
     $uri = $_SERVER['REQUEST_URI'];
     if($uri == "/"){
-        $grp = $_GET['grp'];
         $url = '/default/mainmenu/01_browse.php';
         header('Location: ' . $url, true, 301);
+        exit;
     }
 
     // browse系メインメニュー用ロジックパーツ01

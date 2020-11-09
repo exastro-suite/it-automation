@@ -415,31 +415,17 @@
                 $retArray = singleSQLExecuteAgent($sql, $tmpAryBind,  __FUNCTION__);
                 if($retArray[0] === true){
                     $objQuery =& $retArray[1];
-                    $num_of_rows = $objQuery->effectedRowCount();
-                    if ( $num_of_rows < 1) {
-                        throw new Exception($err_msg);
-                    }
-                    $row = $objQuery->resultFetch();
                 }
-
-                //FETCH行数を取得
-                $num_of_rows = $objQuery->effectedRowCount();
-
-                if( $num_of_rows == 1 ){
-                    $table_name = "A_WIDGET_LIST";
-                    $add_ric_result = add_ric($table_name);
-                    if ($add_ric_result[1] == 200) {
-                        $result = array(
-                            "000",
-                            "200",
-                            ""
-                        );
-                        return $result;
-                    } else {
-                        throw new Exception($err_msg);
-                    }
+                $table_name = "A_WIDGET_LIST";
+                $add_ric_result = add_ric($table_name);
+                if ($add_ric_result[1] == 200) {
+                    $result = array(
+                        "000",
+                        "200",
+                        ""
+                    );
+                    return $result;
                 } else {
-                    $err_msg = $objMTS->getSomeMessage("ITAWDCH-ERR-11404");
                     throw new Exception($err_msg);
                 }
             }
@@ -969,11 +955,15 @@
         $err_msg = "";
         $objMTS = $g['objMTS'];
         try{
-            $sql = "UPDATE A_SEQUENCE ".
-                   "SET VALUE = ".$added_num." ".
-                   "WHERE NAME = '".$column_name."'";
-            $rows = array();
-            $tmpAryBind = array();
+            $sql = "UPDATE A_SEQUENCE
+                    SET VALUE = :VALUE,
+                    LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP
+                    WHERE NAME = :NAME";
+            $tmpAryBind = array(
+                "VALUE" => $added_num,
+                "LAST_UPDATE_TIMESTAMP" => date("Y-m-d H:i:s"),
+                "NAME" => $column_name,
+            );
             $retArray = singleSQLExecuteAgent($sql, $tmpAryBind,  __FUNCTION__);
             if($retArray[0] === true){
                 $objQuery =& $retArray[1];
