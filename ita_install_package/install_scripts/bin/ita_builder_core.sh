@@ -30,12 +30,6 @@ log() {
     echo "["`date +"%Y-%m-%d %H:%M:%S"`"] $1" | tee -a "$ITA_BUILDER_LOG_FILE"
 }
 
-func_exit() {
-    if [ -e /tmp/pear ]; then
-        rm -rf /tmp/pear >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    fi
-    exit
-}
 
 backup_suffix() {
     echo "."`date +%Y%m%d-%H%M%S.bak`
@@ -112,7 +106,8 @@ yum_install() {
                 yum install -y "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
                 if [ $? != 0 ]; then
                     log "ERROR:Installation failed[$key]"
-                    func_exit
+                    ERR_FLG="false"
+                    func_exit_and_delete_file
                 fi
             done
         fi
@@ -127,7 +122,8 @@ yum_package_check() {
             yum list installed | grep "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Package not installed [$key]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
         done
     fi
@@ -153,7 +149,8 @@ download_check() {
     DOWNLOAD_CHK=`echo $?`
     if [ $DOWNLOAD_CHK -ne 0 ]; then
         log "ERROR:Download of file failed"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 }
 
@@ -161,7 +158,8 @@ error_check() {
     DOWNLOAD_CHK=`echo $?`
     if [ $DOWNLOAD_CHK -ne 0 ]; then
         log "ERROR:Stop installation"
-        exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 }
 
@@ -188,7 +186,8 @@ yum_repository() {
             fi
             if [ $? -ne 0 ]; then
                 log "ERROR:Failed to get repository"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
 
             shift
@@ -213,7 +212,8 @@ yum_repository() {
                 esac 
                 if [ $? -ne 0 ]; then
                    log "ERROR:Failed to get repository"
-                    func_exit
+                   ERR_FLG="false"
+                   func_exit_and_delete_file
                 fi
             fi
             yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -235,7 +235,8 @@ mariadb_repository() {
             create_repo_check mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Failed to get repository"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
 
             yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -258,7 +259,8 @@ setting_file_format_check(){
     if [ `echo "$line" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
         log "ERROR : Double-byte characters cannot be used in the setting files"
         log "Applicable line : $line"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 }
 
@@ -336,7 +338,8 @@ enabled=0
                 CREATEREPO_CHK=`echo $?`
                 if [ "${CREATEREPO_CHK}" -ne 0 ]; then
                     log "ERROR:Repository creation failure"
-                    func_exit
+                    ERR_FLG="false"
+                    func_exit_and_delete_file
                 fi
             else
                 log "Already exist[/etc/yum.repos.d/ita.repo]"
@@ -470,7 +473,8 @@ configure_mariadb() {
             #Check installation
             if [ $? != 0 ]; then
                 log "ERROR:Installation failed[MariaDB]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
             
             yum_package_check MariaDB MariaDB-server expect
@@ -572,7 +576,8 @@ configure_mariadb() {
             #Check installation
             if [ $? != 0 ]; then
                 log "ERROR:Installation failed[MariaDB]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
             
             yum_package_check mariadb mariadb-server expect
@@ -656,7 +661,8 @@ configure_php() {
         echo "Success pear Install" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     else
        log "ERROR:Installation failed[${PEAR_PACKAGE["php"]}]"
-       func_exit
+       ERR_FLG="false"
+       func_exit_and_delete_file
     fi
 
     # WORKAROUND! Symbolic link must exist.
@@ -679,7 +685,8 @@ configure_php() {
     pecl list | grep yaml >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? -ne 0 ]; then
        log "ERROR:Installation failed[php-yaml]"
-       func_exit
+       ERR_FLG="false"
+       func_exit_and_delete_file
     fi
 
     # Install Composer.
@@ -689,7 +696,8 @@ configure_php() {
         # install check Composer.
         if [ ! -e /usr/bin/composer.phar ]; then
             log "ERROR:Installation failed[Composer]"
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     fi
 
@@ -700,7 +708,8 @@ configure_php() {
         # install check PhpSpreadsheet.
         if [ $? -ne 0 ]; then
             log "ERROR:Installation failed[PhpSpreadsheet]"
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi       
         mv vendor /usr/share/php/  >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     else
@@ -709,7 +718,8 @@ configure_php() {
         # install check  PhpSpreadsheet.
         if [ $? -ne 0 ]; then
             log "ERROR:Installation failed[PhpSpreadsheet]"
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi       
     fi
 
@@ -728,7 +738,8 @@ configure_git() {
     yum list installed "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? != 0 ]; then
         log "ERROR:Package not installed [$key]"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
 }
@@ -750,7 +761,8 @@ configure_ansible() {
             pip3 install $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Installation failed[$key]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
         done
     else
@@ -759,7 +771,8 @@ configure_ansible() {
             pip3 install --no-index --find-links=${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]} $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Installation failed pip packages."
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
         done
     fi
@@ -770,7 +783,8 @@ configure_ansible() {
         pip3 list --format=legacy | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Package not installed [$key]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
     done
 
@@ -794,11 +808,13 @@ EOS
 
         if [ $daemon_txt -ne 0 ] || [ $apache_txt -ne 0 ]; then
             log 'ERROR:Failed to create configuration text in /etc/sudoers.d/it-automation.'
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     else
         log 'ERROR:Failed to create /etc/sudoers.d/it-automation.'
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
     chmod 440 /etc/sudoers.d/it-automation >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -813,7 +829,8 @@ EOS
         grep '^#' /etc/sudoers | grep -E "^.*Defaults.*requiretty" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         if [ $? -ne 0 ]; then
             log "ERROR:Defaults requiretty is not commented out"
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     fi
 
@@ -970,7 +987,8 @@ download() {
     # install check Composer.
     if [ ! -e ./vendor/composer/composer.phar ]; then
         log "ERROR:Installation failed[Composer]"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
     local download_dir="${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1027,7 +1045,8 @@ log "INFO : Authorization check."
 if [ ${EUID:-${UID}} -ne 0 ]; then
     log 'ERROR : Execute with root authority.'
     log 'INFO : Abort installation.'
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #read answer file
@@ -1038,22 +1057,26 @@ if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
     #check (ita_answers.txt)-----
     if [ "${material}" != 'yes' -a "${material}" != 'no' ]; then
         log "ERROR:material should be set to yes or no"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
     if [ "${ansible_driver}" != 'yes' -a "${ansible_driver}" != 'no' ]; then
         log "ERROR:ansible_driver should be set to yes or no"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
     if [ "${cobbler_driver}" != 'yes' -a "${cobbler_driver}" != 'no' ]; then
        log "ERROR:cobbler_driver should be set to yes or no"
-       func_exit
+       ERR_FLG="false"
+       func_exit_and_delete_file
     fi
 
     if [ ! -n "$db_root_password" ]; then
         log "ERROR:should be set[db_root_password]"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 fi
 
@@ -1336,6 +1359,4 @@ else
 fi
 
 log "$END_MESSAGE"
-
-func_exit
 
