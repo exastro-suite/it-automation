@@ -34,7 +34,12 @@
         }
         else{
             //----メニューの情報取得
-            $tmpAryRetBody = getMenuInfo(intval($_GET['no']), $objDBCA);
+            if ( isset($_GET['no']) && !empty($_GET['no']) ) {
+                $no = $_GET['no'];
+            } else {
+                $no = "";
+            }
+            $tmpAryRetBody = getMenuInfo(intval($no), $objDBCA);
 
             if( $tmpAryRetBody[1] !== null ){
                 if( $tmpAryRetBody[1] == 502 ){

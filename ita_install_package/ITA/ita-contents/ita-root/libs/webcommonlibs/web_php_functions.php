@@ -738,8 +738,13 @@
                 case 20310201: // 不正操作によるアクセス警告画面にリダイレクト
                 case 20310202: // 不正操作によるアクセス警告画面にリダイレクト
                 case 20410201: // 不正操作によるアクセス警告画面にリダイレクト
-                    $objMTS = $g['objMTS'];
-                    if ( isset($_GET["grp"]) && $_GET["grp"] != "0000000000" && $_GET["grp"] != "" ) {
+                    if ( isset($_GET['grp']) ) {
+                        if ( $_GET["grp"] != "0000000000" ) {
+                            $alert = "<script type='text/javascript'>alert('".$g['objMTS']->getSomeMessage("ITAWDCH-MNU-4030004")."');</script>";
+                            echo $alert;
+                        }
+                    } else {
+                        global $objMTS;
                         $alert = "<script type='text/javascript'>alert('".$objMTS->getSomeMessage("ITAWDCH-MNU-4030004")."');</script>";
                         echo $alert;
                     }
