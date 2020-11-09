@@ -37,10 +37,19 @@ log() {
 # @return   なし
 ############################################################
 func_exit_and_delete_file() {
-    if ! test -e /tmp/ita_answers.txt ; then
+    if test -e /tmp/ita_answers.txt ; then
         rm -rf /tmp/ita_answers.txt
     fi
-    exit
+
+    if [ -e /tmp/pear ]; then
+        rm -rf /tmp/pear >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
+
+    if [ "$ERR_FLG" = "true" ]; then
+        exit 0
+    else
+        exit 1
+    fi
 }
 
 ############################################################
@@ -54,6 +63,7 @@ func_answer_format_check() {
         ANSWER_ERR_FLG=1
         log "ERROR : The format of Answer-file is incorrect.(key:$key)"
         log 'INFO : Abort installation.'
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
     #$keyの値が正しいかチェック用
@@ -69,6 +79,7 @@ setting_file_format_check() {
     if [ `echo "$LINE" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
         log "ERROR : Double-byte characters cannot be used in the setting files"
         log "Applicable line : $LINE"
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
 }
@@ -76,7 +87,8 @@ setting_file_format_check() {
 
 #-----関数定義ここまで-----
 
-
+#エラーフラグ定義
+ERR_FLG="true"
 
 #ディレクトリ変数定義
 BASE_DIR=`dirname ${0}`
@@ -103,7 +115,8 @@ log 'INFO : Authorization check.'
 if [ ${EUID:-${UID}} -ne 0 ]; then
     log 'ERROR : Execute with root authority.'
     log 'INFO : Abort installation.'
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 ############################################################
@@ -115,7 +128,8 @@ for((i=0; i<3; i++)); do
     if [ "$RES" -gt 1 ]; then
         log 'INFO : Duplicate start-up is detected.'
         log 'INFO : Abort installation.'
-        exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
     if [ "$i" -ne 2 ]; then
@@ -134,7 +148,8 @@ log 'INFO : Reading answer-file.'
 if ! test -e "$ANSWER_FILE" ; then
     log 'ERROR : Answer-file does not be found.'
     log 'INFO : Abort installation.'
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #answersファイルの内容を格納する変数を定義
@@ -184,6 +199,7 @@ for LINE in $ANSWERS_TEXT;do
             if [ "${INSTALL_MODE}" != 'Install_Online' -a "${INSTALL_MODE}" != 'Install_Offline' -a "${INSTALL_MODE}" != 'Gather_Library' -a "${INSTALL_MODE}" != 'Install_ITA' -a "${INSTALL_MODE}" != 'Versionup_All' -a "${INSTALL_MODE}" != 'Versionup_ITA' -a "${INSTALL_MODE}" != 'Uninstall' ]; then
                 log "ERROR : $key should be set to Install_Online or Install_Offline or Gather_Library or Install_ITA or Versionup_All or Versionup_ITA or Uninstall."
                 log 'INFO : Abort installation.'
+                ERR_FLG="false"
                 func_exit_and_delete_file
             fi
         fi
@@ -195,6 +211,7 @@ for LINE in $ANSWERS_TEXT;do
                 if [[ "$val" != "/"* ]]; then
                     log "ERROR : Enter the absolute path in $key."
                     log 'INFO : Abort installation.'
+                    ERR_FLG="false"
                     func_exit_and_delete_file
                 fi
                 func_answer_format_check
@@ -211,6 +228,7 @@ for LINE in $ANSWERS_TEXT;do
                 if [ "${ITA_LANGUAGE}" != 'ja_JP' -a "${ITA_LANGUAGE}" != 'en_US' ]; then
                     log "ERROR : $key should be set to ja_JP or en_US."
                     log 'INFO : Abort installation.'
+                    ERR_FLG="false"
                     func_exit_and_delete_file
                 fi
             #DBパスワード取得
@@ -235,6 +253,7 @@ for LINE in $ANSWERS_TEXT;do
                 if [ "${LINUX_OS}" != 'CentOS7' -a "${LINUX_OS}" != 'CentOS8' -a "${LINUX_OS}" != 'RHEL7' -a "${LINUX_OS}" != 'RHEL8' ]; then
                     log "ERROR : $key should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8"
                     log 'INFO : Abort installation.'
+                    ERR_FLG="false"
                     func_exit_and_delete_file
                 fi
             fi
@@ -279,23 +298,27 @@ if [ "$INSTALL_MODE" = "Install_Online" -o "$INSTALL_MODE" = "Install_Offline" -
     if [ "$FORMAT_CHECK_CNT" != 11 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
         log 'INFO : Abort installation.'
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
 elif [ "$INSTALL_MODE" = "Uninstall" ]; then
     if [ "$FORMAT_CHECK_CNT" != 8 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
         log 'INFO : Abort installation.'
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
 elif [ "$INSTALL_MODE" = "Gather_Library" -o "$INSTALL_MODE" = "Versionup_All" -o "$INSTALL_MODE" = "Versionup_ITA" ]; then
     if [ "$FORMAT_CHECK_CNT" != 2 ]; then
         log 'ERROR : The format of Answer-file is incorrect.'
         log 'INFO : Abort installation.'
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
 else
     log 'ERROR : The format of Answer-file is incorrect.'
     log 'INFO : Abort installation.'
+    ERR_FLG="false"
     func_exit_and_delete_file
 fi
 
@@ -310,11 +333,11 @@ case "$INSTALL_MODE" in
         if [ -e ./bin/ita_builder_core.sh ]; then
             exec_mode=3
             source ./bin/ita_builder_core.sh
-            exit
         else
             log 'ERROR : ./bin/ita_builder_core.sh does not exist.'
             log 'INFO : Abort installation.'
-            exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     ;;
     "Install_Offline")
@@ -322,11 +345,11 @@ case "$INSTALL_MODE" in
         if [ -e ./bin/ita_builder_core.sh ]; then
             exec_mode=2
             source ./bin/ita_builder_core.sh
-            exit
         else
             log 'ERROR : ./bin/ita_builder_core.sh does not exist.'
             log 'INFO : Abort installation.'
-            exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     ;;
     "Gather_Library")
@@ -334,44 +357,46 @@ case "$INSTALL_MODE" in
         if [ -e ./bin/ita_builder_core.sh ]; then
             exec_mode=1
             source ./bin/ita_builder_core.sh
-            exit
         else
             log 'ERROR : ./bin/ita_builder_core.sh does not exist.'
             log 'INFO : Abort installation.'
-            exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     ;;
     "Install_ITA")
     #ITAインストール処理実行
         if [ -e ./bin/install.sh ]; then
             source ./bin/install.sh
-            exit
         else
             log 'ERROR : ./bin/install.sh does not exist.'
             log 'INFO : Abort installation.'
-            exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     ;;
     "Versionup_All" | "Versionup_ITA")
     #バージョンアップ処理実行
         if [ -e ./bin/ita_version_up.sh ]; then
             source ./bin/ita_version_up.sh
-            exit
         else
             log 'ERROR : ./bin/ita_version_up.sh does not exist.'
             log 'INFO : Abort installation.'
-            exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     ;;
     "Uninstall")
     #アンインストール処理実行
         if [ -e ./bin/uninstall.sh ]; then
             source ./bin/uninstall.sh
-            exit
         else
             log 'ERROR : ./bin/uninstall.sh does not exist.'
             log 'INFO : Abort uninstallation.'
-            exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     ;;
 esac    
+
+func_exit_and_delete_file

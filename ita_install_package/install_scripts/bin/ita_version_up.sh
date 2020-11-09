@@ -31,18 +31,6 @@ log() {
 }
 
 ############################################################
-# exit時に/tmp等にコピーしたファイルを削除する
-# @param    なし
-# @return   なし
-############################################################
-func_exit_and_delete_file() {
-    if ! test -e /tmp/ita_answers.txt ; then
-        rm -rf /tmp/ita_answers.txt
-    fi
-    exit
-}
-
-############################################################
 # 記入漏れをチェック
 # @param    なし
 # @return   なし
@@ -53,6 +41,7 @@ func_answer_format_check() {
         ANSWER_ERR_FLG=1
         log "ERROR : The format of Answer-file is incorrect.(key:$key)"
         log "INFO : Abort version up."
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
     #$keyの値が正しいかチェック用
@@ -185,6 +174,7 @@ setting_file_format_check() {
     if [ `echo "$LINE" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
         log "ERROR : Double-byte characters cannot be used in the setting files"
         log "Applicable line : $LINE"
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
 }
@@ -269,7 +259,8 @@ log 'INFO : Authorization check.'
 if [ ${EUID:-${UID}} -ne 0 ]; then
     log "ERROR : Execute with root authority."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 ############################################################
@@ -280,7 +271,8 @@ log 'INFO : Reading answer-file.'
 if ! test -e "$ANSWER_FILE" ; then
     log "ERROR : Answer-file does not be found."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #answersファイルの内容を格納する変数を定義
@@ -322,6 +314,7 @@ for LINE in $ANSWERS_TEXT;do
             if [[ "$val" != "/"* ]]; then
                 log "ERROR : Enter the absolute path in $key."
                 log "INFO : Abort version up."
+                ERR_FLG="false"
                 func_exit_and_delete_file
             fi
             func_answer_format_check
@@ -342,7 +335,8 @@ fi
 if [ "$FORMAT_CHECK_CNT" != 1 ]; then
     log "ERROR : The format of Answer-file is incorrect."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #現在のITAバージョンを取得
@@ -350,7 +344,8 @@ NOW_VERSION_FILE="${ITA_DIRECTORY}/ita-root/libs/release/ita_base"
 if ! test -e ${NOW_VERSION_FILE} ; then
     log "ERROR : ITA is not installed in [${ITA_DIRECTORY}]."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 NOW_VERSION=`cat ${NOW_VERSION_FILE} | cut -d " " -f 7 | sed -e "s/[\r\n]\+//g"`
 
@@ -359,14 +354,16 @@ LANGUAGE_FILE="${ITA_DIRECTORY}/ita-root/confs/commonconfs/app_msg_language.txt"
 if ! test -e ${LANGUAGE_FILE} ; then
     log "ERROR : [${LANGUAGE_FILE}] does not be found."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 ITA_LANGUAGE=`cat ${LANGUAGE_FILE} | sed -e "s/[\r\n]\+//g"`
 
 if [ "${ITA_LANGUAGE}" != 'ja_JP' -a "${ITA_LANGUAGE}" != 'en_US' ]; then
     log "ERROR : [${LANGUAGE_FILE}] is incorrect."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #DB接続情報の取得
@@ -374,7 +371,8 @@ DB_CONNECT_FILE="${ITA_DIRECTORY}/ita-root/confs/commonconfs/db_connection_strin
 if ! test -e ${DB_CONNECT_FILE} ; then
     log "ERROR : [${DB_CONNECT_FILE}] does not be found."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 DB_CONNECT=`cat ${DB_CONNECT_FILE} | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' | base64 -d`
 DB_CONNECT_SPLIT=(${DB_CONNECT//;/ })
@@ -388,7 +386,8 @@ DB_USER_FILE="${ITA_DIRECTORY}/ita-root/confs/commonconfs/db_username.txt"
 if ! test -e ${DB_USER_FILE} ; then
     log "ERROR : [${DB_USER_FILE}] does not be found."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 DB_USERNAME=`cat ${DB_USER_FILE} | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' | base64 -d`
 
@@ -397,7 +396,8 @@ DB_PASSWORD_FILE="${ITA_DIRECTORY}/ita-root/confs/commonconfs/db_password.txt"
 if ! test -e ${DB_PASSWORD_FILE} ; then
     log "ERROR : [${DB_PASSWORD_FILE}] does not be found."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 DB_PASSWORD=`cat ${DB_PASSWORD_FILE} | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' | base64 -d`
 
@@ -408,7 +408,8 @@ log 'INFO : Version check.'
 if ! [[ ${NOW_VERSION} =~ [0-9]+\.[0-9]+\.[0-9]+ ]] ; then
     log "ERROR : [${NOW_VERSION_FILE}] is incorrect."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #現在のITAバージョンが1.4.0以降であることをチェック
@@ -416,6 +417,8 @@ RTN=`func_compare_version ${NOW_VERSION} 1.4.0`
 if [ "${RTN}" -eq 0 ] ; then
     log "ERROR : Version up is support with 1.4.0 or later.The installed ITA version is [${NOW_VERSION}]."
     log "INFO : Abort version up."
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #インストーラのITAバージョンを取得
@@ -423,7 +426,8 @@ INSTALLER_VERSION_FILE="${BASE_DIR}/../ITA/ita-releasefiles/ita_base"
 if ! test -e ${INSTALLER_VERSION_FILE} ; then
     log "ERROR : [${INSTALLER_VERSION_FILE}] does not be found."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 INSTALLER_VERSION=`cat ${INSTALLER_VERSION_FILE} | cut -d " " -f 7 | sed -e "s/[\r\n]\+//g"`
 
@@ -431,7 +435,8 @@ INSTALLER_VERSION=`cat ${INSTALLER_VERSION_FILE} | cut -d " " -f 7 | sed -e "s/[
 if ! [[ ${INSTALLER_VERSION} =~ [0-9]+\.[0-9]+\.[0-9]+ ]] ; then
     log "ERROR : [${INSTALLER_VERSION_FILE}] is incorrect."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #現在のITAバージョンがインストーラのITAバージョンよりも低いことのチェック
@@ -439,7 +444,8 @@ RTN=`func_compare_version ${NOW_VERSION} ${INSTALLER_VERSION}`
 if [ "${RTN}" -eq 1 ] || [ "${RTN}" -eq 2 ] ; then
     log "ERROR : The installed ITA has been version up."
     log "INFO : Abort version up."
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #インストールされているドライバの確認
@@ -507,7 +513,8 @@ if ! test -e ${VERSION_UP_LIST_FILE} ; then
     log "ERROR : [${VERSION_UP_LIST_FILE}] does not be found."
     log "INFO : Abort version up."
     func_start_service
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #ライブラリのインストール（INSTALL_MODE = Versionup_All の時のみ）
@@ -551,7 +558,8 @@ if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
                             log "ERROR : Installation failed [$key]"
                             log "INFO : Abort version up."
                             func_start_service
-                            exit
+                            ERR_FLG="false"
+                            func_exit_and_delete_file
                         fi
                     done
                 fi
@@ -574,7 +582,8 @@ if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
                             log "ERROR : Installation failed [$key]"
                             log "INFO : Abort version up."
                             func_start_service
-                            exit
+                            ERR_FLG="false"
+                            func_exit_and_delete_file
                         fi
                     done
                 fi
@@ -597,7 +606,8 @@ if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
                             log "ERROR : Installation failed [$key]"
                             log "INFO : Abort version up."
                             func_start_service
-                            exit
+                            ERR_FLG="false"
+                            func_exit_and_delete_file
                         fi
                     done
                 fi
@@ -645,14 +655,16 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
                     log "ERROR : [$SQL_LOGFILE] does not be found."
                     log "INFO : Abort version up."
                     func_start_service
-                    exit
+                    ERR_FLG="false"
+                    func_exit_and_delete_file
                 else
                     FILE_SIZE=`wc -c < "$SQL_LOGFILE"`
                     if [ "$FILE_SIZE" -ne 0 ]; then
                         log "ERROR : SQL Error. Check logfile[$SQL_LOGFILE]."
                         log "INFO : Abort version up."
                         func_start_service
-                        exit
+                        ERR_FLG="false"
+                        func_exit_and_delete_file
                     fi
                 fi
             fi

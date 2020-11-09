@@ -46,6 +46,7 @@ func_answer_format_check() {
     if [ "$val" != 'yes' -a "$val" != 'no' ]; then
         log "ERROR : $key should be set to yes or no."
         log 'INFO : Abort installation.'
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
     for VALUE in "${ARR_DRIVER_CHK[@]}"; do
@@ -485,6 +486,7 @@ while read LINE; do
             if ! test -d "$ITA_DIRECTORY"/ita-root ; then
                 log 'ERROR : It is necessary to install ITA main functions (ita_base).'
                 log 'INFO : Abort installation.'
+                ERR_FLG="false"
                 func_exit_and_delete_file
             fi
         elif [ "$key" = 'ita_base' ]; then
@@ -493,6 +495,7 @@ while read LINE; do
                 if test -d "$ITA_DIRECTORY"/ita-root ; then
                     log 'ERROR : ITA main functions (ita_base) have already been installed.'
                     log 'INFO : Abort installation.'
+                    ERR_FLG="false"
                     func_exit_and_delete_file
                 fi
             fi
@@ -541,6 +544,7 @@ done < "$COPY_ANSWER_FILE"
 if [ "$ANSWER_DRIVER_CNT" -ne ${#ARR_DRIVER_CHK[@]} ]; then
     log 'ERROR : The format of Answer-file is incorrect.'
     log 'INFO : Abort installation.'
+    ERR_FLG="false"
     func_exit_and_delete_file
 fi
 
@@ -555,7 +559,9 @@ INSTALL_CNT=$((DRIVER_CNT+BASE_FLG))
 if [ "$INSTALL_CNT" -eq 0 ]; then
     log 'ERROR : No installation target has been selected.'
     log 'INFO : Abort installation.'
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
+
 fi
 
 if [ $BASE_FLG -eq 1 ]; then
@@ -732,7 +738,8 @@ if [ "$BASE_FLG" -eq 1 ]; then
         if echo "$RES" | grep ERROR ; then
             log 'ERROR : Failed to connect to the database.'
             log 'INFO : Abort installation.'
-            exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
         rm -f /tmp/create-db-and-user_for_MySQL.sql
     fi
@@ -768,12 +775,14 @@ if [ "$BASE_FLG" -eq 1 ]; then
                 # 指定のパスにファイルがない場合は異常終了
                 log "ERORR : ${PRIVATE_KEY_PATH} does not be found."
                 log 'INFO : Abort installation.'
+                ERR_FLG="false"
                 func_exit_and_delete_file
             fi
         else 
             # 指定のパスにファイルがない場合は異常終了
             log "ERORR : ${CERTIFICATE_PATH} does not be found."
             log 'INFO : Abort installation.'
+            ERR_FLG="false"
             func_exit_and_delete_file
         fi
     elif [ "${CERTIFICATE_PATH}" = "" -a "${PRIVATE_KEY_PATH}" = "" ]; then
@@ -816,10 +825,12 @@ if [ "$BASE_FLG" -eq 1 ]; then
         if [ "${CERTIFICATE_PATH}" = "" ]; then
             log "ERORR : Should be Enter [certificate_path]."
             log 'INFO : Abort installation.'
+            ERR_FLG="false"
             func_exit_and_delete_file
         elif [ "${PRIVATE_KEY_PATH}" = "" ]; then
             log "ERORR : Should be Enter [private_key_path]."
             log 'INFO : Abort installation.'
+            ERR_FLG="false"
             func_exit_and_delete_file
         fi
     fi
@@ -891,6 +902,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         if ! test -d "$ITA_DIRECTORY" ; then
             log "ERROR : Failed to make $ITA_DIRECTORY directory."
             log 'INFO : Abort installation.'
+            ERR_FLG="false"
             func_exit_and_delete_file
         fi
     else
@@ -909,6 +921,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         if [ $? != 0 ]; then
             log "ERROR : The parent directory of ITA does not have execute permission for \"Other users\".(dir:$PARENT_DIR)"
             log 'INFO : Abort installation.'
+            ERR_FLG="false"
             func_exit_and_delete_file
         fi
         #権限をチェックしたディレクトリの親ディレクトリを取得する。
@@ -919,6 +932,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     if [ $? != 0 ]; then
         log "ERROR : The parent directory of ITA does not have execute permission for \"Other users\".(dir:$PARENT_DIR)"
         log 'INFO : Abort installation.'
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
@@ -1068,6 +1082,7 @@ if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_base ; then
     if [ $? -ne 0 ]; then
         log "ERROR : The version of the installer and the already installed ITA are different."
         log "INFO : Abort installation."
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
 fi
