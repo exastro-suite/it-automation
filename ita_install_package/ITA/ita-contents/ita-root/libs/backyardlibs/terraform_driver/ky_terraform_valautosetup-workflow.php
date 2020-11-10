@@ -148,6 +148,7 @@
         "SENSITIVE_FLAG"=>""          ,
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
+        "ACCESS_AUTH"=>""             ,
         "NOTE"=>""                    ,
         "LAST_UPDATE_TIMESTAMP"=>""   ,
         "LAST_UPDATE_USER"=>""
@@ -230,6 +231,7 @@
         "NULL_DATA_HANDLING_FLG"=>""  ,
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
+        "ACCESS_AUTH"=>""             ,
         "NOTE"=>""                    ,
         "LAST_UPDATE_TIMESTAMP"=>""   ,
         "LAST_UPDATE_USER"=>""
@@ -250,6 +252,7 @@
         "NULL_DATA_HANDLING_FLG"=>""  ,
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
+        "ACCESS_AUTH"=>""             ,
         "NOTE"=>""                    ,
         "LAST_UPDATE_TIMESTAMP"=>""   ,
         "LAST_UPDATE_USER"=>""
@@ -1116,6 +1119,49 @@
         foreach($ina_table_colnameTOid_list as $table_name=>$col_list){
             $pkey_name = $ina_table_nameTOPkeyname_list[$table_name];
 
+            //B_CMDB_MENU_LISTから対象のMENU_IDのACCESS_AUTH_FLGを取得する
+            $access_auth_flg ="";
+            $access_auth_flg_chk_sql = "SELECT "                                            . "\n" .
+                                       "ACCESS_AUTH_FLG "                                   . "\n" .
+                                       "FROM "                                              . "\n" .
+                                       "B_CMDB_MENU_LIST "                                  . "\n" .
+                                       "WHERE "                                             . "\n" .
+                                       "MENU_ID = " . $ina_table_nameTOid_list[$table_name];
+
+            $objQuery = $objDBCA->sqlPrepare($access_auth_flg_chk_sql);
+            if($objQuery->getStatus()===false){
+                $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                LocalLogPrint(basename(__FILE__),__LINE__,$access_auth_flg_chk_sql);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+                unset($objQuery);
+                continue;
+            }
+
+            $r = $objQuery->sqlExecute();
+            if (!$r){
+                $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                LocalLogPrint(basename(__FILE__),__LINE__,$access_auth_flg_chk_sql);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+                unset($objQuery);
+                continue;
+            }
+
+            // fetch行数を取得
+            $count = $objQuery->effectedRowCount();
+
+            $col_val = "";
+            // 0件ではない場合
+            if(0 != $count){
+                // fetch行を取得
+                $tgt_row = $objQuery->resultFetch();
+                $access_auth_flg = $tgt_row['ACCESS_AUTH_FLG'];
+            }
+            unset($objQuery);
+
             $make_sql = "";
             $col_name_sql = "";
             foreach($col_list as $col_name=>$col_id_list){
@@ -1132,10 +1178,18 @@
                 }
                 // SELECT文を生成
                 if($make_sql == ""){
-                    $make_sql = "SELECT "                                               . "\n" .
-                                $opeid_chk_sql                                          . "\n" .
-                                "  TBL_A." . $pkey_name . " AS " . DF_ITA_LOCAL_PKEY    . "\n" .
-                                ", TBL_A." . $col_name . " \n";
+                    if($access_auth_flg == 1){
+                        $make_sql = "SELECT "                                               . "\n" .
+                                    $opeid_chk_sql                                          . "\n" .
+                                    "  TBL_A." . $pkey_name . " AS " . DF_ITA_LOCAL_PKEY    . "\n" .
+                                    ", TBL_A." . $col_name . " \n".
+                                    ", TBL_A." . "ACCESS_AUTH" . " \n";
+                    }else{
+                        $make_sql = "SELECT "                                               . "\n" .
+                                    $opeid_chk_sql                                          . "\n" .
+                                    "  TBL_A." . $pkey_name . " AS " . DF_ITA_LOCAL_PKEY    . "\n" .
+                                    ", TBL_A." . $col_name . " \n";
+                    }
                 }
                 else{
                     if($col_name_sql != ""){
@@ -1246,6 +1300,13 @@
                     }
                     $operation_id = $row['OPERATION_ID'];
 
+                    //ACCESS_AUTHが存在しない（v1.5以前のパラメータシートでACCESS_AUTHがない）場合は空を入れる
+                    if(isset($row['ACCESS_AUTH'])){
+                        $access_auth = $row['ACCESS_AUTH'];
+                    }else{
+                        $access_auth = "";
+                    }
+
                     // 代入値紐付に登録されている変数に対応する具体値を取得する。
                     foreach($row as $col_name=>$col_val){
 
@@ -1324,7 +1385,8 @@
                                             $ina_vars_ass_list,
                                             $ina_vars_ass_chk_list,
                                             $ina_table_nameTOid_list[$table_name],
-                                            $row[DF_ITA_LOCAL_PKEY]);
+                                            $row[DF_ITA_LOCAL_PKEY],
+                                            $access_auth);
                             //戻り値は判定しない
                         }
                     }
@@ -1412,7 +1474,8 @@
                              &$ina_vars_ass_list,
                              &$ina_vars_ass_chk_list,
                              $in_menu_id,
-                             $in_row_id){
+                             $in_row_id,
+                             $in_access_auth){
         global $log_level;
         global $objMTS;
         global $objDBCA;
@@ -1458,7 +1521,8 @@
                            $ina_col_list['COL_CLASS'],
                            $ina_col_list['HCL_FLAG'],
                            'Value',
-                           $in_row_id);
+                           $in_row_id,
+                           $in_access_auth);
             break;
         case DF_COL_TYPE_KEY:
             // Key型カラムの場合
@@ -1486,7 +1550,8 @@
                            $ina_col_list['COL_CLASS'],
                            $ina_col_list['HCL_FLAG'],
                            'Key',
-                           $in_row_id);
+                           $in_row_id,
+                           $in_access_auth);
             break;
         case DF_COL_TYPE_KEYVAL:
             //具体値が空白または8192バイト以上ないか判定
@@ -1512,7 +1577,8 @@
                            $ina_col_list['COL_CLASS'],
                            $ina_col_list['HCL_FLAG'],
                            'Value',
-                           $in_row_id);
+                           $in_row_id,
+                           $in_access_auth);
                            
             // chkVarsAssDataの戻りは判定しない。
             chkVarsAssData($in_table_name,
@@ -1529,7 +1595,8 @@
                            $ina_col_list['COL_CLASS'],
                            $ina_col_list['HCL_FLAG'],
                            'Key',
-                           $in_row_id);
+                           $in_row_id,
+                           $in_access_auth);
             break;
         }
     }
@@ -1572,7 +1639,8 @@
                             $in_col_class,
                             $in_hcl_flag,
                             $in_key_value_vars_id,
-                            $in_row_id){
+                            $in_row_id,
+                            $in_access_auth){
         global $log_level;
         global $objMTS;
         global $objDBCA;
@@ -1616,7 +1684,8 @@
                                      'VAR_TYPE'=>$in_var_type,
                                      'HCL_FLAG'=>$in_hcl_flag,
                                      'STATUS'=>$chk_status,
-                                     'KEY_VALUE_VARS_ID'=>$in_key_value_vars_id);
+                                     'KEY_VALUE_VARS_ID'=>$in_key_value_vars_id,
+                                     'ACCESS_AUTH'=>$in_access_auth);
     }
     
     ////////////////////////////////////////////////////////////////////////////////
@@ -1658,6 +1727,7 @@
                $ina_varsass_list['PATTERN_ID']          . "_" .
                $ina_varsass_list['MODULE_VARS_LINK_ID'] . "_" .
                $ina_varsass_list['HCL_FLAG']            . "_" .
+               $ina_varsass_list['ACCESS_AUTH']         . "_" .
                "0";
 
         // 代入値管理に登録されているか判定
@@ -1741,6 +1811,7 @@
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
             $tgt_row["HCL_FLAG"]         = $ina_varsass_list['HCL_FLAG'];
+            $tgt_row["ACCESS_AUTH"]      = $ina_varsass_list['ACCESS_AUTH'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
             if($ina_varsass_list['COL_CLASS'] == "PasswordColumn" && $ina_varsass_list['KEY_VALUE_VARS_ID'] == "Value"){
                 $tgt_row["SENSITIVE_FLAG"]   = 2; //ON
@@ -2080,6 +2151,7 @@
                $ina_varsass_list['PATTERN_ID']          . "_" .
                $ina_varsass_list['MODULE_VARS_LINK_ID'] . "_" .
                $ina_varsass_list['HCL_FLAG']            . "_" .
+               $ina_varsass_list['ACCESS_AUTH']         . "_" .
                "1";
 
         if(! isset($in_VarsAssignRecodes[$key]))
@@ -2146,6 +2218,7 @@
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
             $tgt_row["HCL_FLAG"]         = $ina_varsass_list['HCL_FLAG'];
+            $tgt_row["ACCESS_AUTH"]      = $ina_varsass_list['ACCESS_AUTH'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
             if($ina_varsass_list['COL_CLASS'] == "PasswordColumn" && $ina_varsass_list['KEY_VALUE_VARS_ID'] == "Value"){
                 $tgt_row["SENSITIVE_FLAG"]   = 2; //ON
@@ -2184,6 +2257,7 @@
             $tgt_row['MODULE_VARS_LINK_ID'] = $ina_varsass_list['MODULE_VARS_LINK_ID'];
             $tgt_row["VARS_ENTRY"]          = $ina_varsass_list['VARS_ENTRY'];
             $tgt_row["HCL_FLAG"]            = $ina_varsass_list['HCL_FLAG'];
+            $tgt_row["ACCESS_AUTH"]         = $ina_varsass_list['ACCESS_AUTH'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
             if($ina_varsass_list['COL_CLASS'] == "PasswordColumn" && $ina_varsass_list['KEY_VALUE_VARS_ID'] == "Value"){
                 $tgt_row["SENSITIVE_FLAG"]   = 2; //ON
@@ -2492,6 +2566,7 @@
                    $row["PATTERN_ID"]          . "_" .
                    $row["MODULE_VARS_LINK_ID"] . "_" .
                    $row['HCL_FLAG']            . "_" .
+                   $row['ACCESS_AUTH']         . "_" .
                    $row["DISUSE_FLAG"];
             $in_VarsAssignRecodes[$key] = $row;
         }
