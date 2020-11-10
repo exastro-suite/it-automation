@@ -105,10 +105,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     //リンクボタン
     $c = new LinkButtonColumn('INPUT_DOWNLOAD',$g['objMTS']->getSomeMessage("ITABASEH-MNU-309028"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-309030"), 'in_dl', array(':SYMPHONY_INSTANCE_NO')); 
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-309034")); 
     $table->addColumn($c);
 
     //リンクボタン
     $c = new LinkButtonColumn('RESULT_DOWNLOAD',$g['objMTS']->getSomeMessage("ITABASEH-MNU-309029"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-309030"), 'out_dl', array(':SYMPHONY_INSTANCE_NO')); 
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-309035"));
     $table->addColumn($c);
 
     $c = new DateTimeColumn('TIME_BOOK',$g['objMTS']->getSomeMessage("ITABASEH-MNU-203040"));
