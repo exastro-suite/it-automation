@@ -48,7 +48,7 @@ class  AnsibleVault {
         $value = str_replace("\r\n","\n", $value);
         //error_log(__FILE__.__LINE__."[\n".bin2hex($value). "\n]\n");
 
-        $vault_value_file  = "/temp/ansible_vault_value_" . getmypid();
+        $vault_value_file  = "/tmp/ansible_vault_value_" . getmypid();
         exec("/bin/rm -rf " . $vault_value_file);
 
         $ret = file_put_contents($vault_value_file,$value);

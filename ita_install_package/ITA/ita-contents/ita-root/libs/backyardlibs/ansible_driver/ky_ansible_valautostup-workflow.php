@@ -26,6 +26,8 @@
     //
     //      $lva_table_nameTOid_list:      テーブル名配列
     //                                      [テーブル名]=MENU_ID
+    //      $lva_table_nameTOaccess_auth_flg: テーブル名配列
+    //                                      [テーブル名]=ACCESS_AUTH_FLG
     //      $lva_table_nameTOPkeyname_list:テーブル 主キー名配列
     //                                      [テーブル名]=主キー名
     //      $lva_table_colnameTOid_list:   テーブル名+カラム名配列
@@ -223,6 +225,7 @@
             "SENSITIVE_FLAG"=>""          ,
             "ASSIGN_SEQ"=>""              ,
             "VARS_ENTRY_USE_TPFVARS"=>""  ,
+            "ACCESS_AUTH"=>""             , 
             "DISP_SEQ"=>""                ,
             "DISUSE_FLAG"=>""             ,
             "NOTE"=>""                    ,
@@ -243,9 +246,9 @@
             "VARS_LINK_ID"=>""            ,
             "VARS_ENTRY"=>""              ,
             "SENSITIVE_FLAG"=>""          ,
-//#ADD-END
             "ASSIGN_SEQ"=>""              ,
             "VARS_ENTRY_USE_TPFVARS"=>""  ,
+            "ACCESS_AUTH"=>""             , 
             "DISP_SEQ"=>""                ,
             "DISUSE_FLAG"=>""             ,
             "NOTE"=>""                    ,
@@ -272,6 +275,7 @@
             "OPERATION_NO_UAPK"=>""       ,
             "PATTERN_ID"=>""              ,
             "SYSTEM_ID"=>""               ,
+            "ACCESS_AUTH"=>""             , 
             "DISP_SEQ"=>""                ,
             "DISUSE_FLAG"=>""             ,
             "NOTE"=>""                    ,
@@ -303,6 +307,7 @@
         "TABLE_ID"=>""            ,
         "MENU_ID"=>""                 ,
         "TABLE_NAME"=>""              ,
+        "ACCESS_AUTH"=>""             , 
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
         "NOTE"=>""                    ,
@@ -317,6 +322,7 @@
         "TABLE_ID"=>""            ,
         "MENU_ID"=>""                 ,
         "TABLE_NAME"=>""              ,
+        "ACCESS_AUTH"=>""             , 
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
         "NOTE"=>""                    ,
@@ -358,6 +364,7 @@
         "KEY_CHILD_VARS_LINK_ID"=>""  ,
         "KEY_ASSIGN_SEQ"=>""          ,
         "KEY_CHILD_VARS_COL_SEQ"=>""  ,
+        "ACCESS_AUTH"=>""             , 
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
         "NOTE"=>""                    ,
@@ -382,6 +389,7 @@
         "KEY_CHILD_VARS_LINK_ID"=>""  ,
         "KEY_ASSIGN_SEQ"=>""          ,
         "KEY_CHILD_VARS_COL_SEQ"=>""  ,
+        "ACCESS_AUTH"=>""             , 
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
         "NOTE"=>""                    ,
@@ -475,6 +483,7 @@
         }
         // テーブル名配列
         $lva_table_nameTOid_list    = array();
+        $lva_table_nameTOaccess_auth_flg = array();
         // テーブル名+カラム名配列
         $lva_table_colnameTOid_list = array(); 
         // カラム情報配列
@@ -498,6 +507,7 @@
                             $lv_child_vars_tbl,    
                             $lv_ptn_vars_link_tbl, 
                             $lva_table_nameTOid_list,    
+                            $lva_table_nameTOaccess_auth_flg,
                             $lva_table_colnameTOid_list, 
                             $lva_table_col_list,         
                             $lva_error_column_id_list,
@@ -515,6 +525,7 @@
         ///////////////////////////////////////////////////////////////////////////////
         makeMenuSelectSQL($lva_table_colnameTOid_list,
                           $lva_table_nameTOid_list,
+                          $lva_table_nameTOaccess_auth_flg,
                           $lva_error_column_id_list,
                           $lva_table_nameTOsql_list,
                           $lva_table_nameTOPkeyname_list);
@@ -549,6 +560,7 @@
         unset($lva_table_colnameTOid_list);
         unset($lva_child_vars_ass_list);
         unset($lva_child_vars_ass_chk_list);
+        unset($lva_table_nameTOaccess_auth_flg);
 
         // メモリ最適化
         $ret = gc_mem_caches();
@@ -620,7 +632,7 @@
             // 作業対象ホストに登録が必要な情報を退避
             $lva_pho_link_list[$vars_ass_list['OPERATION_NO_UAPK']]
                               [$vars_ass_list['PATTERN_ID']]
-                              [$vars_ass_list['SYSTEM_ID']] = 1;
+                              [$vars_ass_list['SYSTEM_ID']] = $vars_ass_list['ACCESS_AUTH'];
         }
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
@@ -725,10 +737,11 @@
         ////////////////////////////////////////////////////////////////////////////////
         foreach($lva_pho_link_list as $ope_id=>$ptn_list){
             foreach($ptn_list as $ptn_id=>$host_list){
-                foreach($host_list as $host_id=>$dummy){
+                foreach($host_list as $host_id=>$access_auth){
                     $pho_link_list = array('OPERATION_NO_UAPK'=>$ope_id,
                                            'PATTERN_ID'=>$ptn_id,
-                                           'SYSTEM_ID'=>$host_id);
+                                           'SYSTEM_ID'=>$host_id, 
+                                           'ACCESS_AUTH'=>$access_auth);
                     $out_pho_link_id = '';
                     $ret = addStg1PhoLnkDB( $pho_link_list, $lv_PhoLinkRecodes);
 
@@ -901,6 +914,8 @@
     //   $in_ptn_vars_link_tbl:          作業パターン変数紐付テーブル名
     //   &$ina_table_nameTOid_list:      テーブル名配列
     //                                   [テーブル名]=MENU_ID
+    //   &$ina_table_nameTOaccess_auth_flg: テーブル名配列
+    //                                   [テーブル名]=ACCESS_AUTH_FLG
     //   &$ina_table_colnameTOid_list:   テーブル名+カラム名配列
     //                                   [テーブル名][カラム名]=代入値紐付主キー
     //   &$ina_table_col_list:           カラム情報配列
@@ -919,6 +934,7 @@
                           $in_child_vars_tbl,    
                           $in_ptn_vars_link_tbl, 
                           &$ina_table_nameTOid_list,    
+                          &$ina_table_nameTOaccess_auth_flg,
                           &$ina_table_colnameTOid_list, 
                           &$ina_table_col_list,         
                           &$ina_error_column_id_list,
@@ -942,6 +958,8 @@
         $sql = $sql .     "   TBL_C.TABLE_NAME                                            ,  \n";
         $sql = $sql .     "   TBL_C.PKEY_NAME                                             ,  \n";
         $sql = $sql .     "   TBL_C.DISUSE_FLAG  AS TBL_DISUSE_FLAG                       ,  \n";
+        $sql = $sql .     "   TBL_E.DISUSE_FLAG  AS TBL_E_DISUSE_FLAG                     ,  \n";
+        $sql = $sql .     "   TBL_E.ACCESS_AUTH_FLG                                       ,  \n";
         $sql = $sql .     "   TBL_A.COLUMN_LIST_ID                                        ,  \n";
         $sql = $sql .     "   TBL_B.COL_NAME                                              ,  \n";
         $sql = $sql .     "   TBL_B.COL_TITLE                                             ,  \n";
@@ -1035,6 +1053,7 @@
         $sql = $sql .     "   TBL_A.KEY_CHILD_VARS_LINK_ID                                 , \n";
         // legacy/pioneerにはないのでnull設定
         $sql = $sql .     "   NULL AS KEY_CHILD_VARS_NAME                                  , \n";
+        $sql = $sql .     "   TBL_A.ACCESS_AUTH                                            , \n";
         $sql = $sql .     "   TBL_A.KEY_ASSIGN_SEQ                                         , \n";
         $sql = $sql .     "   TBL_A.KEY_CHILD_VARS_COL_SEQ                                 , \n";
         $sql = $sql .     "   TBL_D.DISUSE_FLAG AS ANSIBLE_TARGET_TABLE                      \n";
@@ -1046,6 +1065,8 @@
         $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_C.MENU_ID)                  \n";
         $sql = $sql .     "   LEFT JOIN D_CMDB_MENU_LIST_SHEET_TYPE_1 TBL_D ON               \n";
         $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_D.MENU_ID)                  \n";
+        $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_LIST   TBL_E ON                          \n";
+        $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_E.MENU_ID)                  \n";
         $sql = $sql .     " WHERE                                                            \n";
         $sql = $sql .     "   TBL_A.DISUSE_FLAG='0'                                          \n";
         $sql = $sql .     " ORDER BY TBL_A.COLUMN_ID                                         \n";
@@ -1083,7 +1104,8 @@
             $key_child_var_type = false;
 
             // CMDB代入値紐付メニューが廃止されているか判定
-            if($row['TBL_DISUSE_FLAG'] != '0'){
+            if(($row['TBL_DISUSE_FLAG'] != '0') ||
+               ($row['TBL_E_DISUSE_FLAG'] != '0')) {
                 if ( $log_level === 'DEBUG' ){
                     // $ary[90014] = "代入値自動登録設定に登録されている紐付対象メニューが廃止されています。このレコードを処理対象外にします。(代入値自動登録設定 項番:{})";
                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90014",array($row['COLUMN_ID']));
@@ -1239,6 +1261,7 @@
             }
             $ina_table_nameTOid_list[$row['TABLE_NAME']]=$row['MENU_ID'];
             $ina_table_colnameTOid_list[$row['TABLE_NAME']][$row['COL_NAME']][]=$row['COLUMN_ID'];
+            $ina_table_nameTOaccess_auth_flg[$row['TABLE_NAME']]=$row['ACCESS_AUTH_FLG'];
 
             $key_sensitive_flg   = DF_SENSITIVE_OFF;
             $value_sensitive_flg = DF_SENSITIVE_OFF;
@@ -1273,6 +1296,7 @@
                                      'NULL_DATA_HANDLING_FLG'=>$row['NULL_DATA_HANDLING_FLG'],
                                      'KEY_SENSITIVE_FLAG'=>$key_sensitive_flg,
                                      'VALUE_SENSITIVE_FLAG'=>$value_sensitive_flg,
+                                     'ACCESS_AUTH'=>$row['ACCESS_AUTH'],
                                      );
 
             // テーブルの主キー名退避
@@ -1452,6 +1476,8 @@
     //                                  [テーブル名][カラム名]=代入値紐付主キー
     //   $ina_table_nameTOid_list:      テーブル名配列
     //                                  [テーブル名]=MENU_ID
+    //   &$ina_table_nameTOaccess_auth_flg: テーブル名配列
+    //                                   [テーブル名]=ACCESS_AUTH_FLG
     //   $ina_error_column_id_list:     代入値紐付の登録に不備がある主キーの配列
     //                                  [代入値紐付主キー]=1
     //   $ina_table_nameTOsql_list:     代入値紐付メニュー毎のSELECT文配列
@@ -1463,6 +1489,7 @@
     ////////////////////////////////////////////////////////////////////////////////
     function makeMenuSelectSQL( $ina_table_colnameTOid_list,
                                 $ina_table_nameTOid_list,
+                                $ina_table_nameTOaccess_auth_flg,
                                 $ina_error_column_id_list,
                                &$ina_table_nameTOsql_list,
                                 $ina_table_nameTOPkeyname_list)
@@ -1491,10 +1518,18 @@
                           "    DISUSE_FLAG = '0'                          \n" .
                           ") AS " . DF_ITA_LOCAL_HOST_CNT  . ",           \n";
 
-             
         // テーブル名+カラム名配列からテーブル名と配列名を取得
         foreach($ina_table_colnameTOid_list as $table_name=>$col_list){
             $pkey_name = $ina_table_nameTOPkeyname_list[$table_name];
+  
+            // 紐付けメニューのアクセス権カラム有無
+            $Access_auth_col = $ina_table_nameTOaccess_auth_flg[$table_name];
+            if($Access_auth_col == 1) {
+                $Access_auth_col = " ACCESS_AUTH , ";
+            } else {
+                // アクセス権カラムが無い場合はACCESS_AUTHを空に設定
+                $Access_auth_col = " null ACCESS_AUTH , ";
+            }
 
             $make_sql = "";
             $col_name_sql = "";
@@ -1513,7 +1548,7 @@
                 // SELECT文を生成
                 if($make_sql == ""){
                     $make_sql = "SELECT "                                               . "\n" .
-                                $opeid_chk_sql . $hostid_chk_sql                        . "\n" .
+                                $opeid_chk_sql . $hostid_chk_sql . $Access_auth_col     . "\n" .
                                 "  TBL_A." . $pkey_name . " AS " . DF_ITA_LOCAL_PKEY    . "\n" .
                                 ", TBL_A.HOST_ID "                                      . "\n" .
                                 ", TBL_A." . $col_name . " \n";
@@ -1673,6 +1708,7 @@
                         case 'OPERATION_ID':
                         case 'HOST_ID':
                         case DF_ITA_LOCAL_PKEY:
+                        case 'ACCESS_AUTH':
                             continue 2;
                         }
                         //再度カラムをチェック
@@ -1683,11 +1719,13 @@
                             if( isset($ina_error_column_id_list[$ina_col_list['COLUMN_ID']])){
                                 continue;
                             }
+                            // 該当レコードのアクセス権退避
+                            $access_auth = $row['ACCESS_AUTH'];
 
                             // IDcolumnの場合は参照元から具体値を取得する
                             if("" != $ina_col_list['REF_TABLE_NAME']){
-                                $sql = "";
-                                $sql = $sql . "SELECT " . $ina_col_list['REF_COL_NAME'] . " ";
+                                $sql = "SELECT ";
+                                $sql = $sql . $ina_col_list['REF_COL_NAME'] . " ";
                                 $sql = $sql . "FROM   " . $ina_col_list['REF_TABLE_NAME'] . " ";
                                 $sql = $sql . "WHERE " . $ina_col_list['REF_PKEY_NAME'] . "=:" . $ina_col_list['REF_PKEY_NAME'] . " ";
                                 $sql = $sql . " AND DISUSE_FLAG='0'";
@@ -1729,6 +1767,18 @@
                                     if(isset($VariableColumnAry[$ina_col_list['REF_TABLE_NAME']][$ina_col_list['REF_COL_NAME']])) {
                                         $col_val = "'{{ $col_val }}'";
                                     }
+                                } else {
+                                    // プルダウン選択先のレコードが廃止されている
+                                    if ( $log_level === 'DEBUG' ){
+                                        $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90135",
+                                                                          array($in_tableNameToMenuIdList[$table_name],
+                                                                                $row[DF_ITA_LOCAL_PKEY],
+                                                                                $col_data['COL_TITLE']));
+                                        LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                        $warning_flag = true;
+                                        continue;
+                                    }
+                        
                                 }
                                 unset($objQuery);
                             }
@@ -1738,6 +1788,7 @@
                                             $table_name,
                                             $col_name,
                                             $col_val,
+                                            $access_auth,
                                             $ina_col_list['NULL_DATA_HANDLING_FLG'],
                                             $operation_id,
                                             $host_id,
@@ -1765,7 +1816,7 @@
     //   $in_sql:       代入値紐付対象メニューからデータを抽出するSQL文
     //   $ina_row:      抽出したデータ
     // 戻り値
-    //   true:   正常
+    //   true:  常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function DBGetMenuData($in_sql,&$ina_row){
@@ -1815,6 +1866,7 @@
     //   $in_table_name:                テーブル名
     //   $in_col_name:                  カラム名
     //   $in_col_val:                   カラムの具体値
+    //   $in_access_auth:               該当レコードのアクセス権
     //   $in_null_data_handling_flg     代入値管理へのNULLデータ連携フラグ
     //   $in_operation_id:              オペレーションID
     //   $in_host_id:                   ホストID
@@ -1834,6 +1886,7 @@
                              $in_table_name,
                              $in_col_name,
                              $in_col_val,
+                             $in_access_auth,
                              $in_null_data_handling_flg,
                              $in_operation_id,
                              $in_host_id,
@@ -1886,6 +1939,7 @@
                            $ina_col_list['VAL_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['VAL_ASSIGN_SEQ'],
                            $in_col_val,
+                           $in_access_auth,
                            $ina_col_list['VALUE_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
@@ -1917,6 +1971,7 @@
                            $ina_col_list['KEY_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['KEY_ASSIGN_SEQ'],
                            $col_name,
+                           $in_access_auth,
                            $ina_col_list['KEY_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
@@ -1949,6 +2004,7 @@
                            $ina_col_list['VAL_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['VAL_ASSIGN_SEQ'],
                            $in_col_val,
+                           $in_access_auth,
                            $ina_col_list['VALUE_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
@@ -1972,6 +2028,7 @@
                            $ina_col_list['KEY_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['KEY_ASSIGN_SEQ'],
                            $col_name,
+                           $in_access_auth,
                            $ina_col_list['KEY_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
@@ -2003,6 +2060,7 @@
     //   $in_child_vars_col_seq:        列順序
     //   $in_vars_assign_seq:           代入順序
     //   $in_col_val:                   具体値
+    //   $in_access_auth:               アクセス権
     //   $in_sensitive_flg:             sensitive設定
     //   $ina_child_vars_ass_list:      配列変数用 代入値登録情報配列
     //   $ina_child_vars_ass_chk_list:  配列変数用 列順序重複チェック配列
@@ -2028,6 +2086,7 @@
                             $in_child_vars_col_seq,
                             $in_vars_assign_seq,
                             $in_col_val,
+                            $in_access_auth,
                             $in_sensitive_flg,
                             &$ina_vars_ass_list,
                             &$ina_vars_ass_chk_list,
@@ -2089,6 +2148,7 @@
                                                       'CHILD_VARS_LINK_ID'=>$in_child_vars_link_id,
                                                       'CHILD_VARS_COL_SEQ'=>$in_child_vars_col_seq,
                                                       'VARS_ENTRY'=>$in_col_val,
+                                                      'ACCESS_AUTH'=>$in_access_auth,
                                                       'SENSITIVE_FLAG'=>$in_sensitive_flg,
                                                       'VAR_TYPE'=>$in_var_type,
                                                       'STATUS'=>$chk_status);
@@ -2133,6 +2193,7 @@
                                          'SYSTEM_ID'=>$in_host_id,
                                          'VARS_LINK_ID'=>$in_vars_link_id,
                                          'VARS_ENTRY'=>$in_col_val,
+                                         'ACCESS_AUTH'=>$in_access_auth,
                                          'SENSITIVE_FLAG'=>$in_sensitive_flg,
                                          'ASSIGN_SEQ'=>$in_vars_assign_seq,
                                          'VAR_TYPE'=>$in_var_type,
@@ -2182,7 +2243,6 @@
                $ina_varsass_list['VARS_LINK_ID']      . "_" .
                $ina_varsass_list['ASSIGN_SEQ']        . "_" .
                "0";
-    
         // 代入値管理に登録されているか判定
         if( ! isset($in_VarsAssignRecodes[$key])) {
             return addStg2VarsAssDB($ina_varsass_list,$in_VarsAssignRecodes);
@@ -2197,6 +2257,7 @@
 
             // 具体値が変更になっているか判定する。
             if(($tgt_row["VARS_ENTRY"]  == $ina_varsass_list['VARS_ENTRY']) &&
+               ($tgt_row["ACCESS_AUTH"]  == $ina_varsass_list['ACCESS_AUTH']) &&
                ($tgt_row["SENSITIVE_FLAG"]  == $ina_varsass_list['SENSITIVE_FLAG'])) {
 
                 // トレースメッセージ
@@ -2285,6 +2346,7 @@
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["ACCESS_AUTH"]      = $ina_varsass_list['ACCESS_AUTH'];
             $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
             $tgt_row["SENSITIVE_FLAG"]   = $ina_varsass_list['SENSITIVE_FLAG'];
             $tgt_row["DISUSE_FLAG"]      = '0';
@@ -2583,10 +2645,146 @@
             // 廃止レコードを復活または新規レコード追加
             return addStg2PhoLnkDB($in_phoLinkData, $in_PhoLinkRecodes);
         } else {
-
-
+            $tgt_row = $in_PhoLinkRecodes[$key];
             unset($in_PhoLinkRecodes[$key]);
-            //同一なので処理終了
+
+            // アクセス権が変更になっているか判定する。
+            if($tgt_row["ACCESS_AUTH"]  == $in_phoLinkData['ACCESS_AUTH']) { 
+                // トレースメッセージ
+                if ( $log_level === 'DEBUG' ){
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70057",
+                                                        array($tgt_row['PHO_LINK_ID'],
+                                                              $tgt_row['OPERATION_NO_UAPK'],
+                                                              $tgt_row['PATTERN_ID'],
+                                                              $tgt_row['SYSTEM_ID']));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                }
+
+                //更新処理はスキップ
+                return true;
+            }
+
+            // 最終更新者が自分でない場合、更新処理はスキップする。
+            if($tgt_row["LAST_UPDATE_USER"] != $db_access_user_id){
+                // トレースメッセージ
+                if ( $log_level === 'DEBUG' ){
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70039",
+                                                        array($tgt_row['PHO_LINK_ID']));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                }
+
+                //更新処理はスキップ
+                return true;
+            }
+
+            // トレースメッセージ
+            if ( $log_level === 'DEBUG' ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70058",
+                                            array($tgt_row['PHO_LINK_ID'],
+                                                  $tgt_row['OPERATION_NO_UAPK'],
+                                                  $tgt_row['PATTERN_ID'],
+                                                  $tgt_row['SYSTEM_ID']));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+            }
+
+            ////////////////////////////////////////////////////////////////
+            // ジャーナルシーケンスをロック                               //
+            ////////////////////////////////////////////////////////////////
+            $retArray = getSequenceLockInTrz($strSeqOfJnlTable,'A_SEQUENCE');
+            if( $retArray[1] != 0 ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                return false;
+            }
+            ////////////////////////////////////////////////////////////////
+            // ジャーナルシーケンスを採番                                 //
+            ////////////////////////////////////////////////////////////////
+            $retArray = getSequenceValueFromTable($strSeqOfJnlTable, 'A_SEQUENCE', FALSE );
+            if( $retArray[1] != 0 ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                return false;
+            }
+            $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
+            $tgt_row["ACCESS_AUTH"]      = $in_phoLinkData['ACCESS_AUTH'];
+            $tgt_row["DISUSE_FLAG"]      = '0';
+            $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
+ 
+            $temp_array = array();
+            $retArray = makeSQLForUtnTableUpdate($db_model_ch,
+                                             "UPDATE",
+                                             "PHO_LINK_ID",
+                                             $strCurTable, 
+                                             $strJnlTable, 
+                                             $arrayConfig, 
+                                             $tgt_row,
+                                             $temp_array );
+        
+            $sqlUtnBody = $retArray[1];
+            $arrayUtnBind = $retArray[2];
+        
+            $sqlJnlBody = $retArray[3];
+            $arrayJnlBind = $retArray[4];
+        
+            $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
+            $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
+        
+            if( $objQueryUtn->getStatus()===false || 
+                $objQueryJnl->getStatus()===false ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                $FREE_LOG = $objQueryUtn->getLastError();
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+ 
+                unset($objQueryUtn);
+                unset($objQueryJnl);
+                return false;
+            }
+        
+            if( $objQueryUtn->sqlBind($arrayUtnBind) != "" ||
+                $objQueryJnl->sqlBind($arrayJnlBind) != "" ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                $FREE_LOG = $objQueryUtn->getLastError();
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                unset($objQueryUtn);
+                unset($objQueryJnl);
+                return false;
+            }
+        
+            $rUtn = $objQueryUtn->sqlExecute();
+            if($rUtn!=true){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                $FREE_LOG = $objQueryUtn->getLastError();
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                unset($objQueryUtn);
+                unset($objQueryJnl);
+                return false;
+            }
+        
+            $rJnl = $objQueryJnl->sqlExecute();
+            if($rJnl!=true){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                $FREE_LOG = $objQueryUtn->getLastError();
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                unset($objQueryUtn);
+                unset($objQueryJnl);
+                return false;
+            }
+            unset($objQueryUtn);
+            unset($objQueryJnl);
+            //処理終了
             return true;
         }
     }
@@ -2909,7 +3107,8 @@
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
-            $tgt_row["SENSITIVE_FLAG"]  = $ina_varsass_list['SENSITIVE_FLAG'];
+            $tgt_row["ACCESS_AUTH"]      = $ina_varsass_list['ACCESS_AUTH'];
+            $tgt_row["SENSITIVE_FLAG"]   = $ina_varsass_list['SENSITIVE_FLAG'];
             $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
             $tgt_row["DISUSE_FLAG"]      = '0';
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
@@ -2944,6 +3143,7 @@
             $tgt_row['VARS_LINK_ID']      = $ina_varsass_list['VARS_LINK_ID'];
             $tgt_row['ASSIGN_SEQ']        = $ina_varsass_list['ASSIGN_SEQ'];
             $tgt_row["VARS_ENTRY"]        = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["ACCESS_AUTH"]       = $ina_varsass_list['ACCESS_AUTH'];
             $tgt_row["SENSITIVE_FLAG"]    = $ina_varsass_list['SENSITIVE_FLAG'];
             $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
@@ -3147,6 +3347,7 @@
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["DISUSE_FLAG"]      = '0';
+            $tgt_row["ACCESS_AUTH"]      = $in_phoLinkData["ACCESS_AUTH"];
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
             
         }
@@ -3177,6 +3378,7 @@
             $tgt_row['OPERATION_NO_UAPK'] = $in_phoLinkData['OPERATION_NO_UAPK'];
             $tgt_row['PATTERN_ID']        = $in_phoLinkData['PATTERN_ID'];
             $tgt_row['SYSTEM_ID']         = $in_phoLinkData['SYSTEM_ID'];
+            $tgt_row["ACCESS_AUTH"]       = $in_phoLinkData["ACCESS_AUTH"];
             $tgt_row["LAST_UPDATE_USER"]  = $db_access_user_id;
             $tgt_row["DISUSE_FLAG"]       = '0';
 

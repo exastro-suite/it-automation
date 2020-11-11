@@ -341,6 +341,7 @@ Ansible（Legacy）代入値自動登録設定
             $strQuery = "SELECT "
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
+                       .",TAB_1.ACCESS_AUTH                 "
                        ."FROM "
                        ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1 TAB_1 "   
                        ."WHERE "
@@ -351,17 +352,35 @@ Ansible（Legacy）代入値自動登録設定
             $aryForBind['MENU_ID'] = $strMenuIDNumeric;
 
             if( 0 < strlen($strMenuIDNumeric) ){
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
+
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
-                        $aryDataSet[]= $row;
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[]= $row;
+                            }
+                        }
                     }
                     unset($objQuery);
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
             $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -385,6 +404,7 @@ Ansible（Legacy）代入値自動登録設定
             $strQuery = "SELECT "
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
+                       .",TAB_1.ACCESS_AUTH                 "
                        ."FROM "
                        ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1 TAB_1 " 
                        ."WHERE "
@@ -395,17 +415,35 @@ Ansible（Legacy）代入値自動登録設定
             $aryForBind['MENU_ID'] = $strMenuIDNumeric;
 
             if( 0 < strlen($strMenuIDNumeric) ){
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
+
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
-                        $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                            }
+                        }
                     }
                     unset($objQuery);
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
             $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -629,6 +667,7 @@ Ansible（Legacy）代入値自動登録設定
                 $strQuery = "SELECT "
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                           .",TAB_1.ACCESS_AUTH    "
                            ."FROM "
                            ." D_ANS_LNS_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -639,17 +678,35 @@ Ansible（Legacy）代入値自動登録設定
                 $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
                 if( 0 < strlen($strPatternIdNumeric) ){
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
+
                     $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                     if( $aryRetBody[0] === true ){
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
-                            $aryDataSet[]= $row;
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                                break;
+                            }else{
+                                if($permission === true){
+                                    $aryDataSet[]= $row;
+                                }
+                            }
                         }
                         unset($objQuery);
                         $retBool = true;
                     }else{
                         $intErrorType = 500;
-                        $intRowLength = -1;
+                        $retBool = false;
                     }
                 }
                 $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -674,6 +731,7 @@ Ansible（Legacy）代入値自動登録設定
                 $strQuery = "SELECT "
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                           .",TAB_1.ACCESS_AUTH    "
                            ."FROM "
                            ." D_ANS_LNS_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -684,17 +742,35 @@ Ansible（Legacy）代入値自動登録設定
                 $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
                 if( 0 < strlen($strPatternIdNumeric) ){
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
+
                     $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                     if( $aryRetBody[0] === true ){
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
-                            $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                                break;
+                            }else{
+                                if($permission === true){
+                                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                                }
+                            }
                         }
                         unset($objQuery);
                         $retBool = true;
                     }else{
                         $intErrorType = 500;
-                        $intRowLength = -1;
+                        $retBool = false;
                     }
                 }
                 $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -868,6 +944,7 @@ Ansible（Legacy）代入値自動登録設定
                 $strQuery = "SELECT "
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                           .",TAB_1.ACCESS_AUTH     "
                            ."FROM "
                            ." D_ANS_LNS_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -878,17 +955,35 @@ Ansible（Legacy）代入値自動登録設定
                 $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
                 if( 0 < strlen($strPatternIdNumeric) ){
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
+        
                     $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                     if( $aryRetBody[0] === true ){
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
-                            $aryDataSet[]= $row;
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                                break;
+                            }else{
+                                if($permission === true){
+                                    $aryDataSet[]= $row;
+                                }
+                            }
                         }
                         unset($objQuery);
                         $retBool = true;
                     }else{
                         $intErrorType = 500;
-                        $intRowLength = -1;
+                        $retBool = false;
                     }
                 }
                 $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -913,6 +1008,7 @@ Ansible（Legacy）代入値自動登録設定
                 $strQuery = "SELECT "
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                           .",TAB_1.ACCESS_AUTH     "
                            ."FROM "
                            ." D_ANS_LNS_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -923,17 +1019,34 @@ Ansible（Legacy）代入値自動登録設定
                 $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
                 if( 0 < strlen($strPatternIdNumeric) ){
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                        if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
                     $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                     if( $aryRetBody[0] === true ){
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
-                            $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                                break;
+                            }else{
+                                if($permission === true){
+                                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                                }
+                            }
                         }
                         unset($objQuery);
                         $retBool = true;
                     }else{
                         $intErrorType = 500;
-                        $intRowLength = -1;
+                        $retBool = false;
                     }
                 }
                 $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);

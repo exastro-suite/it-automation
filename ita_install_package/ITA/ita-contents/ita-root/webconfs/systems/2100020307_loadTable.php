@@ -193,6 +193,7 @@ Ansible（Legacy Role）作業パターン詳細
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
+                            break;
                         }else{
                             if($permission === true){
                                 $aryDataSet[]= $row;
@@ -203,7 +204,7 @@ Ansible（Legacy Role）作業パターン詳細
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
         }
@@ -256,6 +257,7 @@ Ansible（Legacy Role）作業パターン詳細
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
+                            break;
                         }else{
                             if($permission === true){
                                 $aryDataSet[]= $row;
@@ -266,7 +268,7 @@ Ansible（Legacy Role）作業パターン詳細
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
         }
@@ -318,6 +320,7 @@ Ansible（Legacy Role）作業パターン詳細
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
+                            break;
                         }else{
                             if($permission === true){
                                 $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
@@ -328,7 +331,7 @@ Ansible（Legacy Role）作業パターン詳細
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
         }
