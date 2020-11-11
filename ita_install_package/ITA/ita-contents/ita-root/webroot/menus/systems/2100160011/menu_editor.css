@@ -601,7 +601,9 @@ border-collapse: collapse;
 .menu-column-config-table[date-select-value="5"] tr.date-time,
 .menu-column-config-table[date-select-value="6"] tr.date,
 .menu-column-config-table[date-select-value="8"] tr.password,
-.menu-column-config-table[date-select-value="7"] tr.select {
+.menu-column-config-table[date-select-value="7"] tr.select,
+.menu-column-config-table[date-select-value="9"] tr.file,
+.menu-column-config-table[date-select-value="10"] tr.link {
   display: table-row;
 }
 .menu-column-config-table th,
@@ -617,6 +619,7 @@ width: 8px;
 padding: 2px 4px;
 background-color: #DDD;
 white-space: nowrap;
+line-height: 1.3;
 }
 .menu-column-config-table td {
 background-color: #F2F2F2;
