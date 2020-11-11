@@ -519,6 +519,8 @@ class CreateItemInfoTable extends BaseTable_CPM {
                                     'FLOAT_MIN',
                                     'FLOAT_DIGIT',
                                     'PW_MAX_LENGTH',
+                                    'UPLOAD_MAX_SIZE',
+                                    'LINK_LENGTH',
                                     'DESCRIPTION',
                                     'ACCESS_AUTH',
                                     'NOTE',

@@ -5136,17 +5136,16 @@ class HostInsideLinkTextTabBFmt extends TextTabBFmt {
 			$strColId = $this->getPrintTargetKey();
 
 			list($strUrlBody,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array($strColId),"");
+			$strUrlBody = $this->makeSafeValueForBrowse($strUrlBody);
 			$strTextInTag = $strUrlBody;
-			if( $this->checkListFormatterMode("CurrentTableFormatter") === true ){
-				if( 1 <= strlen($strUrlBody) ){
-					list($strRepresentiveNumeric,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array('REPRESENTATIVE_FLAG'),"");
-					if( $tmpBoolKeyExist01===false ){
-						$strRepresentiveNumeric = "1";
-					}
-					if( $strRepresentiveNumeric == "1" ){
-						$strOrigin = $this->getOrigin();
-						$strTextInTag = "<a href=\"{$strOrigin}{$strUrlBody}\" target=\"blank\">{$strUrlBody}</a>";
-					}
+			if( 1 <= strlen($strUrlBody) ){
+				list($strRepresentiveNumeric,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array('REPRESENTATIVE_FLAG'),"");
+				if( $tmpBoolKeyExist01===false ){
+					$strRepresentiveNumeric = "1";
+				}
+				if( $strRepresentiveNumeric == "1" ){
+					$strOrigin = $this->getOrigin();
+					$strTextInTag = "<a href=\"{$strOrigin}{$strUrlBody}\" target=\"blank\">{$strUrlBody}</a>";
 				}
 			}
 			$aryRetBody = array($strTextInTag, $intErrorType, $aryErrMsgBody, $strErrMsg);

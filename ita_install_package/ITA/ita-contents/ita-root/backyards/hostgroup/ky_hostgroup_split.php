@@ -111,12 +111,12 @@ try{
         // INPUT_ORDERカラムを持っていない場合
         if(false === array_search('INPUT_ORDER', $inputTable->columnNames)){
             // ホストグループ分解
-            $result = splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target['ROW_ID'], $target['TIMESTAMP']);
+            $result = splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target['ROW_ID'], $target['TIMESTAMP'], $target['INPUT_MENU_ID'], $target['OUTPUT_MENU_ID']);
         }
         // INPUT_ORDERカラムを持っている場合
         else{
             // ホストグループ分解（縦用）
-            $result = splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy, $target['ROW_ID'], $target['TIMESTAMP']);
+            $result = splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy, $target['ROW_ID'], $target['TIMESTAMP'], $target['INPUT_MENU_ID'], $target['OUTPUT_MENU_ID']);
         }
 
         if(false === $result) {
@@ -220,6 +220,8 @@ function getTargetMenu(&$targetArray) {
                                    'ROW_ID'             => $splitTarget['ROW_ID'],
                                    'DIVIDED_FLG'        => $splitTarget['DIVIDED_FLG'],
                                    'TIMESTAMP'          => $splitTarget['LAST_UPDATE_TIMESTAMP'],
+                                   'INPUT_MENU_ID'      => $splitTarget['INPUT_MENU_ID'],
+                                   'OUTPUT_MENU_ID'     => $splitTarget['OUTPUT_MENU_ID'],
                                   );
         }
 
@@ -235,11 +237,12 @@ function getTargetMenu(&$targetArray) {
  * ホストグループ分解
  * 
  */
-function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $targetRowId, $targetTimestamp){
+function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $targetRowId, $targetTimestamp, $inputMenuId, $outputMenuId){
 
     global $objDBCA, $db_model_ch, $objMTS, $insertCnt, $updateCnt, $disuseCnt;
     $tranStartFlg = false;
     $idxs = array();
+    $copyFileArray = array();
 
     try{
         // トランザクション開始
@@ -366,7 +369,7 @@ function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target
             }
 
             // オペレーションIDが異なっていた場合、ホストデータを作成する
-            $result = makeHostData($idxs, $outputDataArray, $updateArray, $sameIdArray, $treeArray, $hierarchy, $holdHostID, $outputTable);
+            $result = makeHostData($idxs, $outputDataArray, $updateArray, $sameIdArray, $treeArray, $hierarchy, $holdHostID, $outputTable, $inputMenuId, $outputMenuId, $copyFileArray);
 
             if(false === $result) {
                 return false;
@@ -379,7 +382,7 @@ function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target
 
         if(NULL != $sameIdArray) {
             // オペレーションIDが異なっていた場合、ホストデータを作成する
-            $result = makeHostData($idxs, $outputDataArray, $updateArray, $sameIdArray, $treeArray, $hierarchy, $holdHostID, $outputTable);
+            $result = makeHostData($idxs, $outputDataArray, $updateArray, $sameIdArray, $treeArray, $hierarchy, $holdHostID, $outputTable, $inputMenuId, $outputMenuId, $copyFileArray);
 
             if(false === $result) {
                 return false;
@@ -463,6 +466,12 @@ function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target
             throw new Exception($msg);
         }
 
+        // アップロードファイルコピー
+        $result = copyUploadFile($copyFileArray);
+        if(true !== $result){
+            throw new Exception();
+        }
+
         // コミット
         $result = $objDBCA->transactionCommit();
         if(false === $result){
@@ -487,11 +496,12 @@ function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target
  * ホストグループ分解（縦用）
  * 
  */
-function splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy, $targetRowId, $targetTimestamp){
+function splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy, $targetRowId, $targetTimestamp, $inputMenuId, $outputMenuId){
 
     global $objDBCA, $db_model_ch, $objMTS, $insertCnt, $updateCnt, $disuseCnt;
     $tranStartFlg = false;
     $idxs = array();
+    $copyFileArray = array();
 
     try{
         // トランザクション開始
@@ -619,7 +629,7 @@ function splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy,
             }
 
             // オペレーションIDと入力順序が異なっていた場合、ホストデータを作成する
-            $result = makeHostData($idxs, $outputDataArray, $updateArray, $sameIdArray, $treeArray, $hierarchy, $holdHostID, $outputTable, true);
+            $result = makeHostData($idxs, $outputDataArray, $updateArray, $sameIdArray, $treeArray, $hierarchy, $holdHostID, $outputTable, $inputMenuId, $outputMenuId, $copyFileArray, true);
 
             if(false === $result) {
                 return false;
@@ -632,7 +642,7 @@ function splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy,
 
         if(NULL != $sameIdArray) {
             // ホストデータを作成する
-            $result = makeHostData($idxs, $outputDataArray, $updateArray, $sameIdArray, $treeArray, $hierarchy, $holdHostID, $outputTable, true);
+            $result = makeHostData($idxs, $outputDataArray, $updateArray, $sameIdArray, $treeArray, $hierarchy, $holdHostID, $outputTable, $inputMenuId, $outputMenuId, $copyFileArray, true);
 
             if(false === $result) {
                 return false;
@@ -692,6 +702,12 @@ function splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy,
             throw new Exception($msg);
         }
 
+        // アップロードファイルコピー
+        $result = copyUploadFile($copyFileArray);
+        if(true !== $result){
+            throw new Exception();
+        }
+
         // コミット
         $result = $objDBCA->transactionCommit();
         if(false === $result){
@@ -716,9 +732,10 @@ function splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy,
  * ホストデータ作成
  * 
  */
-function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $treeArray, $hierarchy, &$holdHostID, $outputTable, $verticalFlg = false) {
+function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $treeArray, $hierarchy, &$holdHostID, $outputTable, $inputMenuId, $outputMenuId, &$copyFileArray, $verticalFlg = false) {
 
     global $objDBCA, $db_model_ch, $objMTS, $insertCnt, $updateCnt, $disuseCnt;
+    $tmpCopyFileArray = array();
 
     try{
 
@@ -735,6 +752,13 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                     $treeMatchFlg = true;
                     $treeData['DATA'] = $sameIdData;
                     $treeData['DATA_HIERARCHY'] = $treeData['HIERARCHY'];
+                    // アップロードファイルがあるか確認
+                    for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 1; $i++) {
+                        $uploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $inputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $sameIdData['ROW_ID']) . "/" . $sameIdData[$outputTable->columnNames[$i]];
+                        if(file_exists($uploadFile)){
+                            $treeData['UPLOAD_FILES'][$outputTable->columnNames[$i]] = $uploadFile;
+                        }
+                    }
                 }
             }
             if(false === $treeMatchFlg){
@@ -789,7 +813,22 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                 for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 2; $i++) {
                     if($outputData[$outputTable->columnNames[$i]] != $aloneData[$outputTable->columnNames[$i]]) {
                         $chgFlg = true;
-                        break;
+                    }
+                    // アップロードファイルの比較
+                    $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $inputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $aloneData['ROW_ID']) . "/" . $aloneData[$outputTable->columnNames[$i]];
+                    $outputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $outputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $outputData['ROW_ID']) . "/" . $aloneData[$outputTable->columnNames[$i]];
+                    if(file_exists($inputUploadFile)){
+                        if(file_exists($outputUploadFile)){
+                            if($aloneData[$outputTable->columnNames[$i]] != $outputData[$outputTable->columnNames[$i]] ||
+                               (binary)file_get_contents($inputUploadFile, FILE_BINARY) != (binary)file_get_contents($outputUploadFile, FILE_BINARY)){
+                                $chgFlg = true;
+                                $tmpCopyFileArray[] = array('INPUT_FILE' => $inputUploadFile, 'OUTPUT_FILE' => $outputUploadFile); 
+                            }
+                        }
+                        else{
+                            $chgFlg = true;
+                            $tmpCopyFileArray[] = array('INPUT_FILE' => $inputUploadFile, 'OUTPUT_FILE' => $outputUploadFile); 
+                        }
                     }
                 }
 
@@ -811,10 +850,16 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                         outputLog($msg);
                         throw new Exception($msg);
                     }
+
+                    // ファイルアップロードを退避する
+                    foreach($tmpCopyFileArray as $tmpCopyFile){
+                        $tmpCopyFile['JOURNAL_SEQ_NO'] = $jnlSeqNo;
+                        $copyFileArray[] = $tmpCopyFile;
+                    }
+
                     $updateCnt ++;
                 }
                 break;
-                
             }
             if(false === $matchFlg) {
                 // 登録する
@@ -839,6 +884,14 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                     $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
                     outputLog($msg);
                     throw new Exception($msg);
+                }
+                // アップロードファイルがあるか確認
+                for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 2; $i++) {
+                    $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $inputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $aloneData['ROW_ID']) . "/" . $aloneData[$outputTable->columnNames[$i]];
+                    $outputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $outputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $seqNo) . "/" . $aloneData[$outputTable->columnNames[$i]];
+                    if(file_exists($inputUploadFile)){
+                        $copyFileArray[] = array('INPUT_FILE' => $inputUploadFile, 'OUTPUT_FILE' => $outputUploadFile, 'JOURNAL_SEQ_NO' => $jnlSeqNo); 
+                    }
                 }
                 $insertCnt ++;
             }
@@ -868,23 +921,24 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                             continue;
                         }
 
-                       // 子のIDと親のIDが紐づいている場合
+                        // 子のIDと親のIDが紐づいている場合
                         if($childId == $treeDataChild['KY_KEY'] && in_array($parentData['KY_KEY'], $treeDataChild['PARENT_IDS'])) {
 
-                        if(0 < count($treeDataChild['ALL_PARENT_IDS'])){
-                            $treeDataChild['ALL_PARENT_IDS'] = array_merge($treeDataChild['ALL_PARENT_IDS'], $parentData['PARENT_IDS']);
-                        }
-                        else{
-                            $treeDataChild['ALL_PARENT_IDS'] = array_merge($treeDataChild['PARENT_IDS'], $parentData['PARENT_IDS']);
-                        }
-                        $treeDataChild['ALL_PARENT_IDS'] = array_unique($treeDataChild['ALL_PARENT_IDS']);
-                        $treeDataChild['ALL_PARENT_IDS'] = array_values($treeDataChild['ALL_PARENT_IDS']);
+                            if(0 < count($treeDataChild['ALL_PARENT_IDS'])){
+                                $treeDataChild['ALL_PARENT_IDS'] = array_merge($treeDataChild['ALL_PARENT_IDS'], $parentData['PARENT_IDS']);
+                            }
+                            else{
+                                $treeDataChild['ALL_PARENT_IDS'] = array_merge($treeDataChild['PARENT_IDS'], $parentData['PARENT_IDS']);
+                            }
+                            $treeDataChild['ALL_PARENT_IDS'] = array_unique($treeDataChild['ALL_PARENT_IDS']);
+                            $treeDataChild['ALL_PARENT_IDS'] = array_values($treeDataChild['ALL_PARENT_IDS']);
 
                             // 子のデータが入っていない場合
                             if(NULL === $treeDataChild['DATA']) {
                                 // 親のデータをそのままコピー
                                 $treeDataChild['DATA'] = $parentData['DATA'];
                                 $treeDataChild['DATA_HIERARCHY'] = $parentData['DATA_HIERARCHY'];
+                                $treeDataChild['UPLOAD_FILES'] = $parentData['UPLOAD_FILES'];
                             }
                             // 親も子もデータが入っている場合
                             else {
@@ -898,6 +952,10 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                                     // 親のみに値が入っている場合
                                     else if($treeDataChild['DATA'][$outputTable->columnNames[$j]] == "" && $parentData['DATA'][$outputTable->columnNames[$j]] != "") {
                                         $treeDataChild['DATA'][$outputTable->columnNames[$j]] = $parentData['DATA'][$outputTable->columnNames[$j]];
+                                        //アップロードファイルがあればコピー
+                                        if(array_key_exists($outputTable->columnNames[$j], $parentData['UPLOAD_FILES'])){
+                                            $treeDataChild['UPLOAD_FILES'][$outputTable->columnNames[$j]] = $parentData['UPLOAD_FILES'][$outputTable->columnNames[$j]];
+                                        }
                                         $chgFlg = true;
                                     }
                                     // 子のみに値が入っている場合
@@ -916,6 +974,10 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                                             // 子のデータの優先順位が親のデータの優先順位より小さい場合
                                             if($treeDataChild['DATA']['STRENGTH'] < $parentData['DATA']['STRENGTH']) {
                                                 $treeDataChild['DATA'][$outputTable->columnNames[$j]] = $parentData['DATA'][$outputTable->columnNames[$j]];
+                                                //アップロードファイルがあればコピー
+                                                if(array_key_exists($outputTable->columnNames[$j], $parentData['UPLOAD_FILES'])){
+                                                    $treeDataChild['UPLOAD_FILES'][$outputTable->columnNames[$j]] = $parentData['UPLOAD_FILES'][$outputTable->columnNames[$j]];
+                                                }
                                                 $chgFlg = true;
                                             }
                                          }
@@ -942,6 +1004,7 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
 
         // ホストデータの作成を行う
         foreach($treeArray as $key => $hostData) {
+            $tmpCopyFileArray = array();
 
             if(1 != $hostData['HIERARCHY']) {
                 continue;
@@ -1026,7 +1089,25 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                 for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 2; $i++) {
                     if($outputData[$outputTable->columnNames[$i]] != $hostData['DATA'][$outputTable->columnNames[$i]]) {
                         $chgFlg = true;
-                        break;
+                    }
+
+                    // アップロードファイルの比較
+                    if(array_key_exists($outputTable->columnNames[$i], $hostData['UPLOAD_FILES'])){
+                        $inputUploadFile = $hostData['UPLOAD_FILES'][$outputTable->columnNames[$i]];
+                        $outputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $outputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $outputData['ROW_ID']) . "/" . $hostData['DATA'][$outputTable->columnNames[$i]];
+                        if(file_exists($inputUploadFile)){
+                            if(file_exists($outputUploadFile)){
+                                if($hostData['DATA'][$outputTable->columnNames[$i]] != $outputData[$outputTable->columnNames[$i]] ||
+                                   (binary)file_get_contents($inputUploadFile, FILE_BINARY) != (binary)file_get_contents($outputUploadFile, FILE_BINARY)){
+                                    $chgFlg = true;
+                                    $tmpCopyFileArray[] = array('INPUT_FILE' => $inputUploadFile, 'OUTPUT_FILE' => $outputUploadFile); 
+                                }
+                            }
+                            else{
+                                $chgFlg = true;
+                                $tmpCopyFileArray[] = array('INPUT_FILE' => $inputUploadFile, 'OUTPUT_FILE' => $outputUploadFile); 
+                            }
+                        }
                     }
                 }
 
@@ -1054,6 +1135,13 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                         outputLog($msg);
                         throw new Exception($msg);
                     }
+
+                    // ファイルアップロードを退避する
+                    foreach($tmpCopyFileArray as $tmpCopyFile){
+                        $tmpCopyFile['JOURNAL_SEQ_NO'] = $jnlSeqNo;
+                        $copyFileArray[] = $tmpCopyFile;
+                    }
+
                     $updateCnt ++;
                 }
             }
@@ -1091,8 +1179,18 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                     throw new Exception($msg);
                 }
 
+                // アップロードファイルがあるか確認
+                for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 2; $i++) {
+                    if(array_key_exists($outputTable->columnNames[$i], $hostData['UPLOAD_FILES'])){
+                        $inputUploadFile = $hostData['UPLOAD_FILES'][$outputTable->columnNames[$i]];
+                        $outputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $outputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $seqNo) . "/" . $hostData['DATA'][$outputTable->columnNames[$i]];
+                        if(file_exists($inputUploadFile)){
+                            $copyFileArray[] = array('INPUT_FILE' => $inputUploadFile, 'OUTPUT_FILE' => $outputUploadFile, 'JOURNAL_SEQ_NO' => $jnlSeqNo); 
+                        }
+                    }
+                }
+
                 $insertCnt ++;
-                
             }
         }
         return true;
@@ -1102,3 +1200,57 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
     }
 }
 
+/**
+ * アップロードファイルコピー
+ * 
+ */
+function copyUploadFile($copyFileArray) {
+
+    global $objMTS;
+
+    foreach($copyFileArray as $copyFile){
+
+        // 出力先のディレクトリを作成する
+        $fileName = basename($copyFile['INPUT_FILE']);
+        $jnlDir = dirname($copyFile['OUTPUT_FILE']) . "/old/" . sprintf("%010d", $copyFile['JOURNAL_SEQ_NO']);
+        $tmpDir = explode(ROOT_DIR_PATH . "/uploadfiles/", $jnlDir)[1];
+        $makeDirArray = explode('/', $tmpDir);
+
+        $workDir = ROOT_DIR_PATH . "/uploadfiles/";
+        foreach($makeDirArray as $makeDir){
+            $workDir .= $makeDir;
+            if(!is_dir($workDir)){
+
+                $result = mkdir($workDir, 0777);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5007', $workDir);
+                    outputLog($msg);
+                    return false;
+                }
+                $result = chmod($workDir, 0777);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5008', $workDir);
+                    outputLog($msg);
+                    return false;
+                }
+            }
+            $workDir .= '/';
+        }
+
+        // アップロードファイルをコピーする
+        $result = copy($copyFile['INPUT_FILE'], $copyFile['OUTPUT_FILE']);
+        if(true !== $result){
+            $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5009', $workDir);
+            outputLog($msg);
+            return false;
+        }
+
+        $result = copy($copyFile['INPUT_FILE'], "${jnlDir}/${fileName}");
+        if(true !== $result){
+            $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5009', $workDir);
+            outputLog($msg);
+            return false;
+        }
+    }
+    return true;
+}

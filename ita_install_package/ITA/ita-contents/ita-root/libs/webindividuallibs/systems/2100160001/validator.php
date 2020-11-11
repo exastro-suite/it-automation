@@ -620,10 +620,20 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1010");
                     }
-                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    // パスワード最大バイト数が設定されている場合、エラー
                     if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1094");
+                    }
+                    // ファイルアップロード/ファイル最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) && "" != $arrayRegData['UPLOAD_MAX_SIZE']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1114");
+                    }
+                    // リンク/最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1134");
                     }
                 }
                 // 入力方式が文字列(複数行)の場合
@@ -673,10 +683,20 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1068");
                     }
-                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    // パスワード最大バイト数が設定されている場合、エラー
                     if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1095");
+                    }
+                    // ファイルアップロード/ファイル最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) && "" != $arrayRegData['UPLOAD_MAX_SIZE']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1115");
+                    }
+                    // リンク/最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1135");
                     }
                 }
                 // 入力方式が整数の場合
@@ -734,10 +754,20 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1056");
                     }
-                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    // パスワード最大バイト数が設定されている場合、エラー
                     if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1096");
+                    }
+                    // ファイルアップロード/ファイル最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) && "" != $arrayRegData['UPLOAD_MAX_SIZE']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1116");
+                    }
+                    // リンク/最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1136");
                     }
                 }
                 // 入力方式が小数の場合
@@ -790,10 +820,20 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1064");
                     }
-                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    // パスワード最大バイト数が設定されている場合、エラー
                     if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1097");
+                    }
+                    // ファイルアップロード/ファイル最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) && "" != $arrayRegData['UPLOAD_MAX_SIZE']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1117");
+                    }
+                    // リンク/最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1137");
                     }
                 }
                 // 入力方式が日時の場合
@@ -848,10 +888,20 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1083");
                     }
-                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    // パスワード最大バイト数が設定されている場合、エラー
                     if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1098");
+                    }
+                    // ファイルアップロード/ファイル最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) && "" != $arrayRegData['UPLOAD_MAX_SIZE']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1118");
+                    }
+                    // リンク/最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1138");
                     }
                 }
                 // 入力方式が日付の場合
@@ -906,10 +956,20 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1093");
                     } 
-                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    // パスワード最大バイト数が設定されている場合、エラー
                     if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1099");
+                    }
+                    // ファイルアップロード/ファイル最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) && "" != $arrayRegData['UPLOAD_MAX_SIZE']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1119");
+                    }
+                    // リンク/最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1139");
                     }
                 }
                 // 入力方式がプルダウンの場合
@@ -964,13 +1024,23 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1013");
                     }
-                    // 文字列(PW)最大バイト数が設定されている場合、エラー
+                    // パスワード最大バイト数が設定されている場合、エラー
                     if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1100");
                     }
+                    // ファイルアップロード/ファイル最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) && "" != $arrayRegData['UPLOAD_MAX_SIZE']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1120");
+                    }
+                    // リンク/最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1140");
+                    }
                 }
-                // 入力方式が文字列(PW)の場合
+                // 入力方式がパスワードの場合
                 else if("8" == $value){
                     // 文字列(単一行)最大バイト数が設定されている場合、エラー
                     if($retBool == true && array_key_exists('MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MAX_LENGTH']){
@@ -1022,10 +1092,156 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1111");
                     }
-                    // 文字列(PW)最大バイト数が設定されていない場合、エラー
+                    // パスワード最大バイト数が設定されていない場合、エラー
                     if($retBool == true && (!array_key_exists('PW_MAX_LENGTH',$arrayRegData) || "" == $arrayRegData['PW_MAX_LENGTH'])){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1101");
+                    }
+                    // ファイルアップロード/ファイル最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) && "" != $arrayRegData['UPLOAD_MAX_SIZE']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1121");
+                    }
+                    // リンク/最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1141");
+                    }
+                }
+                // 入力方式がファイルアップロードの場合
+                else if("9" == $value){
+                    // 文字列(単一行)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1123");
+                    }
+                    // 文字列(単一行)正規表現が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PREG_MATCH',$arrayRegData) && "" != $arrayRegData['PREG_MATCH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1124");
+                    }
+                    // 文字列(複数行)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('MULTI_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MULTI_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1125");
+                    }
+                    // 文字列(複数行)正規表現が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('MULTI_PREG_MATCH',$arrayRegData) && "" != $arrayRegData['MULTI_PREG_MATCH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1126");
+                    }
+                    // 整数最小値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('INT_MIN',$arrayRegData) && "" != $arrayRegData['INT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1127");
+                    } 
+                    // 整数最大値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('INT_MAX',$arrayRegData) && "" != $arrayRegData['INT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1128");
+                    } 
+                    // 小数最小値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('FLOAT_MIN',$arrayRegData) && "" != $arrayRegData['FLOAT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1129");
+                    } 
+                    // 小数最大値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('FLOAT_MAX',$arrayRegData) && "" != $arrayRegData['FLOAT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1130");
+                    } 
+                    // 小数桁数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('FLOAT_DIGIT',$arrayRegData) && "" != $arrayRegData['FLOAT_DIGIT']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1131");
+                    }
+                    // メニューグループ：メニュー：項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) && "" != $arrayRegData['OTHER_MENU_LINK_ID']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1132");
+                    }
+                    // パスワード最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1133");
+                    }
+                    // ファイルアップロード/ファイル最大バイト数が設定されていない場合、エラー
+                    if($retBool == true && (!array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) || "" == $arrayRegData['UPLOAD_MAX_SIZE'])){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1122");
+                    }
+                    // リンク/最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1142");
+                    }
+                }
+                // 入力方式がリンクの場合
+                else if("10" == $value){
+                    // 文字列(単一行)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1144");
+                    }
+                    // 文字列(単一行)正規表現が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PREG_MATCH',$arrayRegData) && "" != $arrayRegData['PREG_MATCH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1145");
+                    }
+                    // 文字列(複数行)最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('MULTI_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['MULTI_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1146");
+                    }
+                    // 文字列(複数行)正規表現が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('MULTI_PREG_MATCH',$arrayRegData) && "" != $arrayRegData['MULTI_PREG_MATCH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1147");
+                    }
+                    // 整数最小値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('INT_MIN',$arrayRegData) && "" != $arrayRegData['INT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1148");
+                    } 
+                    // 整数最大値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('INT_MAX',$arrayRegData) && "" != $arrayRegData['INT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1149");
+                    } 
+                    // 小数最小値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('FLOAT_MIN',$arrayRegData) && "" != $arrayRegData['FLOAT_MIN']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1150");
+                    } 
+                    // 小数最大値が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('FLOAT_MAX',$arrayRegData) && "" != $arrayRegData['FLOAT_MAX']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1151");
+                    } 
+                    // 小数桁数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('FLOAT_DIGIT',$arrayRegData) && "" != $arrayRegData['FLOAT_DIGIT']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1152");
+                    }
+                    // メニューグループ：メニュー：項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('OTHER_MENU_LINK_ID',$arrayRegData) && "" != $arrayRegData['OTHER_MENU_LINK_ID']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1153");
+                    }
+                    // パスワード最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('PW_MAX_LENGTH',$arrayRegData) && "" != $arrayRegData['PW_MAX_LENGTH']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1154");
+                    }
+                    // ファイルアップロード/ファイル最大バイト数が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('UPLOAD_MAX_SIZE',$arrayRegData) && "" != $arrayRegData['UPLOAD_MAX_SIZE']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1155");
+                    }
+                    // リンク/最大バイト数が設定されていない場合、エラー
+                    if($retBool == true && (!array_key_exists('LINK_LENGTH',$arrayRegData) || "" == $arrayRegData['LINK_LENGTH'])){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1143");
                     }
                 }
                 if( $retBool === false ){
