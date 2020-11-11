@@ -9628,20 +9628,22 @@ class FileUploadColumn extends Column{
 						}
 					}
 
-					$boolMkDir = @mkdir($LAPathToDstJnlJsn);
-					if($boolMkDir===true){
-						$boolChmod = @chmod($LAPathToDstJnlJsn,0777);
-						if( $boolChmod === false ){
-							$intErrorType = 9;
-							$aryTempForMsg[] = $LAPathToDstJnlJsn;
-							throw new Exception( '00000900-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
-						}
-					}
-					else{
-						$intErrorType = 10;
-						$aryTempForMsg[] = $LAPathToDstJnlJsn;
-						throw new Exception( '00001000-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
-					}
+					if( is_dir($LAPathToDstJnlJsn) !== true ){
+    					$boolMkDir = @mkdir($LAPathToDstJnlJsn);
+    					if($boolMkDir===true){
+    						$boolChmod = @chmod($LAPathToDstJnlJsn,0777);
+    						if( $boolChmod === false ){
+    							$intErrorType = 9;
+    							$aryTempForMsg[] = $LAPathToDstJnlJsn;
+    							throw new Exception( '00000900-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+    						}
+    					}
+    					else{
+    						$intErrorType = 10;
+    						$aryTempForMsg[] = $LAPathToDstJnlJsn;
+    						throw new Exception( '00001000-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+    					}
+                    }
 
 					$boolRename = @rename($srcPath, $LAPathToDstJnlJsnFile);
 					if( $boolRename === true ){

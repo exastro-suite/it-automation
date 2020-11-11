@@ -190,6 +190,8 @@
                     if(!array_key_exists("FLOAT_DIGIT",$itemData))          $itemData["FLOAT_DIGIT"] = "";
                     if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))   $itemData["OTHER_MENU_LINK_ID"] = "";
                     if(!array_key_exists("PW_MAX_LENGTH",$itemData))        $itemData["PW_MAX_LENGTH"] = "";
+                    if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
+                    if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
                     
                     $arrayRegisterData = array("CREATE_MENU_ID"     => $menuData['menu']['CREATE_MENU_ID'],
                                                "ITEM_NAME"          => $itemData['ITEM_NAME'],
@@ -209,6 +211,8 @@
                                                "FLOAT_DIGIT"        => $itemData['FLOAT_DIGIT'],
                                                "OTHER_MENU_LINK_ID" => $itemData['OTHER_MENU_LINK_ID'],
                                                "PW_MAX_LENGTH"      => $itemData['PW_MAX_LENGTH'],
+                                               "UPLOAD_MAX_SIZE"    => $itemData['UPLOAD_MAX_SIZE'],
+                                               "LINK_LENGTH"        => $itemData['LINK_LENGTH'],
                                                "DESCRIPTION"        => $itemData['DESCRIPTION'],
                                                "ACCESS_AUTH"        => $menuData['menu']['ACCESS_AUTH'],
                                                "NOTE"               => $itemData['NOTE']
@@ -557,17 +561,19 @@
                                 }
                             }
                         }
-                        if(!array_key_exists("MAX_LENGTH",$itemData))         $itemData["MAX_LENGTH"] = "";
-                        if(!array_key_exists("PREG_MATCH",$itemData))         $itemData["PREG_MATCH"] = "";
-                        if(!array_key_exists("MULTI_MAX_LENGTH",$itemData))   $itemData["MULTI_MAX_LENGTH"] = "";
-                        if(!array_key_exists("MULTI_PREG_MATCH",$itemData))   $itemData["MULTI_PREG_MATCH"] = "";
-                        if(!array_key_exists("INT_MIN",$itemData))            $itemData["INT_MIN"] = "";
-                        if(!array_key_exists("INT_MAX",$itemData))            $itemData["INT_MAX"] = "";
-                        if(!array_key_exists("FLOAT_MIN",$itemData))          $itemData["FLOAT_MIN"] = "";
-                        if(!array_key_exists("FLOAT_MAX",$itemData))          $itemData["FLOAT_MAX"] = "";
-                        if(!array_key_exists("FLOAT_DIGIT",$itemData))        $itemData["FLOAT_DIGIT"] = "";
-                        if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))    $itemData["OTHER_MENU_LINK_ID"] = "";
-                        if(!array_key_exists("PW_MAX_LENGTH",$itemData))      $itemData["PW_MAX_LENGTH"] = "";
+                        if(!array_key_exists("MAX_LENGTH",$itemData))           $itemData["MAX_LENGTH"] = "";
+                        if(!array_key_exists("PREG_MATCH",$itemData))           $itemData["PREG_MATCH"] = "";
+                        if(!array_key_exists("MULTI_MAX_LENGTH",$itemData))     $itemData["MULTI_MAX_LENGTH"] = "";
+                        if(!array_key_exists("MULTI_PREG_MATCH",$itemData))     $itemData["MULTI_PREG_MATCH"] = "";
+                        if(!array_key_exists("INT_MIN",$itemData))              $itemData["INT_MIN"] = "";
+                        if(!array_key_exists("INT_MAX",$itemData))              $itemData["INT_MAX"] = "";
+                        if(!array_key_exists("FLOAT_MIN",$itemData))            $itemData["FLOAT_MIN"] = "";
+                        if(!array_key_exists("FLOAT_MAX",$itemData))            $itemData["FLOAT_MAX"] = "";
+                        if(!array_key_exists("FLOAT_DIGIT",$itemData))          $itemData["FLOAT_DIGIT"] = "";
+                        if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))   $itemData["OTHER_MENU_LINK_ID"] = "";
+                        if(!array_key_exists("PW_MAX_LENGTH",$itemData))        $itemData["PW_MAX_LENGTH"] = "";
+                        if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
+                        if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
                         
                         $strNumberForRI = $itemData['CREATE_ITEM_ID'];
                         $arrayUpdateData = array("CREATE_MENU_ID"       => $menuData['menu']['CREATE_MENU_ID'],
@@ -588,6 +594,8 @@
                                                  "FLOAT_DIGIT"          => $itemData['FLOAT_DIGIT'],
                                                  "OTHER_MENU_LINK_ID"   => $itemData['OTHER_MENU_LINK_ID'],
                                                  "PW_MAX_LENGTH"        => $itemData['PW_MAX_LENGTH'],
+                                                 "UPLOAD_MAX_SIZE"      => $itemData['UPLOAD_MAX_SIZE'],
+                                                 "LINK_LENGTH"          => $itemData['LINK_LENGTH'],
                                                  "DESCRIPTION"          => $itemData['DESCRIPTION'],
                                                  "ACCESS_AUTH"          => $menuData['menu']['ACCESS_AUTH'],
                                                  "NOTE"                 => $itemData['NOTE'],
@@ -628,17 +636,19 @@
                                 }
                             }
                         }
-                        if(!array_key_exists("MAX_LENGTH",$itemData))         $itemData["MAX_LENGTH"] = "";
-                        if(!array_key_exists("PREG_MATCH",$itemData))         $itemData["PREG_MATCH"] = "";
-                        if(!array_key_exists("MULTI_MAX_LENGTH",$itemData))   $itemData["MULTI_MAX_LENGTH"] = "";
-                        if(!array_key_exists("MULTI_PREG_MATCH",$itemData))   $itemData["MULTI_PREG_MATCH"] = "";
-                        if(!array_key_exists("INT_MIN",$itemData))            $itemData["INT_MIN"] = "";
-                        if(!array_key_exists("INT_MAX",$itemData))            $itemData["INT_MAX"] = "";
-                        if(!array_key_exists("FLOAT_MIN",$itemData))          $itemData["FLOAT_MIN"] = "";
-                        if(!array_key_exists("FLOAT_MAX",$itemData))          $itemData["FLOAT_MAX"] = "";
-                        if(!array_key_exists("FLOAT_DIGIT",$itemData))        $itemData["FLOAT_DIGIT"] = "";
-                        if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))    $itemData["OTHER_MENU_LINK_ID"] = "";
-                        if(!array_key_exists("PW_MAX_LENGTH",$itemData))      $itemData["PW_MAX_LENGTH"] = "";
+                        if(!array_key_exists("MAX_LENGTH",$itemData))           $itemData["MAX_LENGTH"] = "";
+                        if(!array_key_exists("PREG_MATCH",$itemData))           $itemData["PREG_MATCH"] = "";
+                        if(!array_key_exists("MULTI_MAX_LENGTH",$itemData))     $itemData["MULTI_MAX_LENGTH"] = "";
+                        if(!array_key_exists("MULTI_PREG_MATCH",$itemData))     $itemData["MULTI_PREG_MATCH"] = "";
+                        if(!array_key_exists("INT_MIN",$itemData))              $itemData["INT_MIN"] = "";
+                        if(!array_key_exists("INT_MAX",$itemData))              $itemData["INT_MAX"] = "";
+                        if(!array_key_exists("FLOAT_MIN",$itemData))            $itemData["FLOAT_MIN"] = "";
+                        if(!array_key_exists("FLOAT_MAX",$itemData))            $itemData["FLOAT_MAX"] = "";
+                        if(!array_key_exists("FLOAT_DIGIT",$itemData))          $itemData["FLOAT_DIGIT"] = "";
+                        if(!array_key_exists("OTHER_MENU_LINK_ID",$itemData))   $itemData["OTHER_MENU_LINK_ID"] = "";
+                        if(!array_key_exists("PW_MAX_LENGTH",$itemData))        $itemData["PW_MAX_LENGTH"] = "";
+                        if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
+                        if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
                         
                         $arrayRegisterData = array("CREATE_MENU_ID"         => $menuData['menu']['CREATE_MENU_ID'],
                                                    "ITEM_NAME"              => $itemData['ITEM_NAME'],
@@ -658,6 +668,8 @@
                                                    "FLOAT_DIGIT"            => $itemData['FLOAT_DIGIT'],
                                                    "OTHER_MENU_LINK_ID"     => $itemData['OTHER_MENU_LINK_ID'],
                                                    "PW_MAX_LENGTH"          => $itemData['PW_MAX_LENGTH'],
+                                                   "UPLOAD_MAX_SIZE"        => $itemData['UPLOAD_MAX_SIZE'],
+                                                   "LINK_LENGTH"            => $itemData['LINK_LENGTH'],
                                                    "DESCRIPTION"            => $itemData['DESCRIPTION'],
                                                    "ACCESS_AUTH"            => $menuData['menu']['ACCESS_AUTH'],
                                                    "NOTE"                   => $itemData['NOTE']
@@ -1366,6 +1378,8 @@
                         "FLOAT_DIGIT"           => $itemInfoData['FLOAT_DIGIT'],
                         "OTHER_MENU_LINK_ID"    => $itemInfoData['OTHER_MENU_LINK_ID'],
                         "PW_MAX_LENGTH"         => $itemInfoData['PW_MAX_LENGTH'],
+                        "UPLOAD_MAX_SIZE"       => $itemInfoData['UPLOAD_MAX_SIZE'],
+                        "LINK_LENGTH"           => $itemInfoData['LINK_LENGTH'],
                         "DESCRIPTION"           => $itemInfoData['DESCRIPTION'],
                         "REPEAT_ITEM"           => $repeatItem,
                         "MIN_WIDTH"             => "",

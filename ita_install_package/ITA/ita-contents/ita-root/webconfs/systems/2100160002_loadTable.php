@@ -110,10 +110,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
+    // 文字列(単一行)
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102125"));
 
-    // 文字列(単一行)
-    // 最大バイト数
+    // 文字列(単一行)/最大バイト数
     $c = new NumColumn('MAX_LENGTH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102109"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102110"));//エクセル・ヘッダでの説明
     $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
@@ -123,7 +123,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new IntNumValidator(1,8192));
     $cg->addColumn($c);
 
-    // 正規表現
+    // 文字列(単一行)/正規表現
     $c = new TextColumn('PREG_MATCH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102115"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102116"));//エクセル・ヘッダでの説明
     $c->setValidator(new PregMatchValidator(0,8192));
@@ -131,10 +131,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->addColumn($cg);
 
+    // 文字列(複数行)
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102141"));
 
-    // 文字列(複数行)
-    // 最大バイト数
+    // 文字列(複数行)/最大バイト数
     $c = new NumColumn('MULTI_MAX_LENGTH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102109"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102110"));//エクセル・ヘッダでの説明
     $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
@@ -144,7 +144,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new IntNumValidator(1,8192));
     $cg->addColumn($c);
 
-    // 正規表現
+    // 文字列(複数行)/正規表現
     $c = new TextColumn('MULTI_PREG_MATCH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102115"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102116"));//エクセル・ヘッダでの説明
     $c->setValidator(new PregMatchValidator(0,8192));
@@ -152,9 +152,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->addColumn($cg);
     
+    // 整数
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102129"));
     
-    // 整数最小値
+    // 整数/最小値
     $objVldt = new IntNumValidator(null,null);
     $c = new NumColumn('INT_MIN',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102132"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102133"));
@@ -162,7 +163,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
-    // 整数最大値
+    // 整数/最大値
     $objVldt = new IntNumValidator(null,null);
     $c = new NumColumn('INT_MAX',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102130"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102131"));
@@ -172,9 +173,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->addColumn($cg);
 
+    // 小数
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102134"));
     
-    // 小数最小値
+    // 小数/最小値
     $objVldt = new FloatNumValidator(-99999999999999,99999999999999,14);
     $c = new NumColumn('FLOAT_MIN',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102137"),14);
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102138"));
@@ -182,7 +184,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
-    // 小数最大値
+    // 小数/最大値
     $objVldt = new FloatNumValidator(-99999999999999,99999999999999,14);
     $c = new NumColumn('FLOAT_MAX',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102135"),14);
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102136"));
@@ -190,7 +192,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
-    // 小数桁数
+    // 小数/桁数
     $objVldt = new IntNumValidator(1,14);
     $c = new NumColumn('FLOAT_DIGIT',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102139"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102140"));
@@ -200,24 +202,58 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->addColumn($cg);
     
+    // プルダウン選択
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102126"));
 
-    // メニューグループ：メニュー：項目
+    // プルダウン選択/メニューグループ：メニュー：項目
     $c = new IDColumn('OTHER_MENU_LINK_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102123"),'G_OTHER_MENU_LINK','LINK_ID','LINK_PULLDOWN','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102124"));//エクセル・ヘッダでの説明
     $cg->addColumn($c);
 
     $table->addColumn($cg);
 
-    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-104236"));
+    // パスワード
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102142"));
 
-    // パスワード最大バイト数
+    // パスワード/最大バイト数
     $c = new NumColumn('PW_MAX_LENGTH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102109"));
     $objVldt = new SingleTextValidator(0,30,false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102110"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
     $c->setSubtotalFlag(false);
     $cg->addColumn($c);
+
+    $table->addColumn($cg);
+
+    // ファイルアップロード
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102143"));
+
+    // ファイルアップロード/ファイル最大バイト数
+    $c = new NumColumn('UPLOAD_MAX_SIZE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102144"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102145"));//エクセル・ヘッダでの説明
+    $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
+    $c->getOutputType('register_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
+    $c->getOutputType('update_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new IntNumValidator(1,4294967296));
+    $cg->addColumn($c);
+
+
+    $table->addColumn($cg);
+
+    // リンク
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102146"));
+
+    // リンク/最大バイト数
+    $c = new NumColumn('LINK_LENGTH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102109"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102110"));//エクセル・ヘッダでの説明
+    $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
+    $c->getOutputType('register_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
+    $c->getOutputType('update_table')->setTextTagLastAttr('style = "ime-mode :inactive"');
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new IntNumValidator(1,8192));
+    $cg->addColumn($c);
+
 
     $table->addColumn($cg);
 

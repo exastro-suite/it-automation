@@ -55,61 +55,41 @@ try{
     // テンプレートファイル読み込み
     //////////////////////////
     $templatePathArray =array(TEMPLATE_PATH . FILE_HG_LOADTABLE,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_VAL,
                               TEMPLATE_PATH . FILE_H_LOADTABLE,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_VAL,
                               TEMPLATE_PATH . FILE_VIEW_LOADTABLE,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_VAL,
                               TEMPLATE_PATH . FILE_HG_SQL,
                               TEMPLATE_PATH . FILE_H_SQL,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_ID,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_ID,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_ID,
                               TEMPLATE_PATH . FILE_CONVERT_LOADTABLE,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_VAL,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_ID,
                               TEMPLATE_PATH . FILE_CONVERT_SQL,
                               TEMPLATE_PATH . FILE_CONVERT_H_LOADTABLE,
                               TEMPLATE_PATH . FILE_CONVERT_H_SQL,
                               TEMPLATE_PATH . FILE_CMDB_LOADTABLE,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_ID,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_VAL,
                               TEMPLATE_PATH . FILE_CMDB_SQL,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_PW,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_PW,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_PW,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_PW,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_PW,
                               TEMPLATE_PATH . FILE_H_LOADTABLE_OP,
                               TEMPLATE_PATH . FILE_VIEW_LOADTABLE_OP,
                               TEMPLATE_PATH . FILE_CONVERT_H_LOADTABLE_OP,
                               TEMPLATE_PATH . FILE_H_OP_SQL,
-                              TEMPLATE_PATH . FILE_CONVERT_H_OP_SQL
+                              TEMPLATE_PATH . FILE_CONVERT_H_OP_SQL,
+                              TEMPLATE_PATH . FILE_PARTS_SNG,
+                              TEMPLATE_PATH . FILE_PARTS_MUL,
+                              TEMPLATE_PATH . FILE_PARTS_INT,
+                              TEMPLATE_PATH . FILE_PARTS_FLT,
+                              TEMPLATE_PATH . FILE_PARTS_DAY,
+                              TEMPLATE_PATH . FILE_PARTS_DT,
+                              TEMPLATE_PATH . FILE_PARTS_ID,
+                              TEMPLATE_PATH . FILE_PARTS_PW,
+                              TEMPLATE_PATH . FILE_PARTS_UPL,
+                              TEMPLATE_PATH . FILE_PARTS_LNK,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_SNG,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_MUL,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_INT,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_FLT,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_DAY,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_DT,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_ID,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_PW,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_UPL,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_LNK,
                              );
     $templateArray = array();
     foreach($templatePathArray as $templatePath){
@@ -128,61 +108,41 @@ try{
     }
 
     $hgLoadTableTmpl            = $templateArray[0];
-    $hgLoadTableValTmpl         = $templateArray[1];
-    $hostLoadTableTmpl          = $templateArray[2];
-    $hostLoadTableValTmpl       = $templateArray[3];
-    $viewLoadTableTmpl          = $templateArray[4];
-    $viewLoadTableValTmpl       = $templateArray[5];
-    $hgSqlTmpl                  = $templateArray[6];
-    $hostSqlTmpl                = $templateArray[7];
-    $hgLoadTableIdTmpl          = $templateArray[8];
-    $hostLoadTableIdTmpl        = $templateArray[9];
-    $viewLoadTableIdTmpl        = $templateArray[10];
-    $convLoadTableTmpl          = $templateArray[11];
-    $convLoadTableValTmpl       = $templateArray[12];
-    $convLoadTableIdTmpl        = $templateArray[13];
-    $convSqlTmpl                = $templateArray[14];
-    $convHostLoadTableTmpl      = $templateArray[15];
-    $convHostSqlTmpl            = $templateArray[16];
-    $cmdbLoadTableTmpl          = $templateArray[17];
-    $cmdbLoadTableIdTmpl        = $templateArray[18];
-    $cmdbLoadTableValTmpl       = $templateArray[19];
-    $cmdbSqlTmpl                = $templateArray[20];
-    $hostLoadTableIntTmpl       = $templateArray[21];
-    $hostLoadTableFltTmpl       = $templateArray[22];
-    $hostLoadTableDayTmpl       = $templateArray[23];
-    $hostLoadTableDtTmpl        = $templateArray[24];
-    $hgLoadTableIntTmpl         = $templateArray[25];
-    $hgLoadTableFltTmpl         = $templateArray[26];
-    $hgLoadTableDayTmpl         = $templateArray[27];
-    $hgLoadTableDtTmpl          = $templateArray[28];
-    $convLoadTableIntTmpl       = $templateArray[29];
-    $convLoadTableFltTmpl       = $templateArray[30];
-    $convLoadTableDayTmpl       = $templateArray[31];
-    $convLoadTableDtTmpl        = $templateArray[32];
-    $cmdbLoadTableIntTmpl       = $templateArray[33];
-    $cmdbLoadTableFltTmpl       = $templateArray[34];
-    $cmdbLoadTableDayTmpl       = $templateArray[35];
-    $cmdbLoadTableDtTmpl        = $templateArray[36];
-    $viewLoadTableIntTmpl       = $templateArray[37];
-    $viewLoadTableFltTmpl       = $templateArray[38];
-    $viewLoadTableDayTmpl       = $templateArray[39];
-    $viewLoadTableDtTmpl        = $templateArray[40];
-    $hostLoadTableMulTmpl       = $templateArray[41];
-    $hgLoadTableMulTmpl         = $templateArray[42];
-    $convLoadTableMulTmpl       = $templateArray[43];
-    $cmdbLoadTableMulTmpl       = $templateArray[44];
-    $viewLoadTableMulTmpl       = $templateArray[45];
-    $hostLoadTablePwTmpl        = $templateArray[46];
-    $hgLoadTablePwTmpl          = $templateArray[47];
-    $convLoadTablePwTmpl        = $templateArray[48];
-    $cmdbLoadTablePwTmpl        = $templateArray[49];
-    $viewLoadTablePwTmpl        = $templateArray[50];
-    $hostLoadTableOpTmpl        = $templateArray[51];
-    $viewLoadTableOpTmpl        = $templateArray[52];
-    $convHostLoadTableOpTmpl    = $templateArray[53];
-    $hostSqlOpTmpl              = $templateArray[54];
-    $convHostSqlOpTmpl          = $templateArray[55];
+    $hostLoadTableTmpl          = $templateArray[1];
+    $viewLoadTableTmpl          = $templateArray[2];
+    $hgSqlTmpl                  = $templateArray[3];
+    $hostSqlTmpl                = $templateArray[4];
+    $convLoadTableTmpl          = $templateArray[5];
+    $convSqlTmpl                = $templateArray[6];
+    $convHostLoadTableTmpl      = $templateArray[7];
+    $convHostSqlTmpl            = $templateArray[8];
+    $cmdbLoadTableTmpl          = $templateArray[9];
+    $cmdbSqlTmpl                = $templateArray[10];
+    $hostLoadTableOpTmpl        = $templateArray[11];
+    $viewLoadTableOpTmpl        = $templateArray[12];
+    $convHostLoadTableOpTmpl    = $templateArray[13];
+    $hostSqlOpTmpl              = $templateArray[14];
+    $convHostSqlOpTmpl          = $templateArray[15];
+    $partSingle                 = $templateArray[16];
+    $partMulti                  = $templateArray[17];
+    $partInteger                = $templateArray[18];
+    $partFloat                  = $templateArray[19];
+    $partDate                   = $templateArray[20];
+    $partDateTime               = $templateArray[21];
+    $partId                     = $templateArray[22];
+    $partPassword               = $templateArray[23];
+    $partUpload                 = $templateArray[24];
+    $partLink                   = $templateArray[25];
+    $partViewSingle             = $templateArray[26];
+    $partViewMulti              = $templateArray[27];
+    $partViewInteger            = $templateArray[28];
+    $partViewFloat              = $templateArray[29];
+    $partViewDate               = $templateArray[30];
+    $partViewDateTime           = $templateArray[31];
+    $partViewId                 = $templateArray[32];
+    $partViewPassword           = $templateArray[33];
+    $partViewUpload             = $templateArray[34];
+    $partViewLink               = $templateArray[35];
 
     //////////////////////////
     // パラメータシート作成情報を取得
@@ -413,6 +373,9 @@ try{
             $floatMaxArray          = array();
             $floatMinArray          = array();
             $floatDigitArray        = array();
+            $pwMaxLengthArray       = array();
+            $uploadMaxSizeArray     = array();
+            $linkLengthArray        = array();
             $errFlg = false;
 
             for($i = 0; $i < $cpiData['REPEAT_CNT']; $i ++){
@@ -428,6 +391,9 @@ try{
                         $floatMinArray[]        = $repeatItemArray[$j]['FLOAT_MIN'];
                         $floatDigitArray[]      = $repeatItemArray[$j]['FLOAT_DIGIT'];
                         $otherMenuLinkIdArray[] = $repeatItemArray[$j]['OTHER_MENU_LINK_ID'];
+                        $pwMaxLengthArray[]     = $repeatItemArray[$j]['PW_MAX_LENGTH'];
+                        $uploadMaxSizeArray[]   = $repeatItemArray[$j]['UPLOAD_MAX_SIZE'];
+                        $linkLengthArray[]      = $repeatItemArray[$j]['LINK_LENGTH'];
                         continue;
                     }
 
@@ -486,7 +452,25 @@ try{
                         break;
                     }
                     // 最大バイト数(PW)チェック
-                    if(8 == $inputMethodIdArray[$j] && $multiMaxLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['MULTI_MAX_LENGTH']){
+                    if(8 == $inputMethodIdArray[$j] && $pwMaxLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['PW_MAX_LENGTH']){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // ファイル最大バイト数(ファイルアップロード)チェック
+                    if(9 == $inputMethodIdArray[$j] && $uploadMaxSizeArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['UPLOAD_MAX_SIZE']){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // 最大バイト数(リンク)チェック
+                    if(10 == $inputMethodIdArray[$j] && $linkLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['LINK_LENGTH']){
                         $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
                         outputLog($msg);
                         // パラメータシート作成管理更新処理を行う
@@ -577,6 +561,12 @@ try{
                 case 8: //文字列(PW)
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
                     break;
+                case 9: //ファイルアップロード
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                    break;
+                case 10://リンク
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                    break;
             }
             $columns = $columns . "       TAB_A." . $itemInfo['COLUMN_NAME'] . ",\n";
 
@@ -588,28 +578,34 @@ try{
                 // データシート用loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $cmdbLoadTableValTmpl;  // 文字列(単一行)
+                        $work = $partSingle;    // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $cmdbLoadTableMulTmpl;  // 文字列(複数行)
+                        $work = $partMulti;     // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $cmdbLoadTableIntTmpl;  // 整数
+                        $work = $partInteger;   // 整数
                         break;
                     case 4:
-                        $work = $cmdbLoadTableFltTmpl;  // 小数
+                        $work = $partFloat;     // 小数
                         break;
                     case 5:
-                        $work = $cmdbLoadTableDtTmpl;   // 日時
+                        $work = $partDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $cmdbLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;  // 日付
                         break;
                     case 7:
-                        $work = $cmdbLoadTableIdTmpl;   // プルダウン
+                        $work = $partId;        // プルダウン
                         break;
                     case 8:
-                        $work = $cmdbLoadTablePwTmpl;   // 文字列(PW)
+                        $work = $partPassword;  // 文字列(PW)
+                        break;
+                    case 9:
+                        $work = $partUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partLink;      // リンク
                         break;
                 }
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -634,6 +630,8 @@ try{
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
                 $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -715,29 +713,35 @@ try{
                     // ホストグループ用loadTableのカラム埋め込み部分を作成する
                     switch($itemInfo['INPUT_METHOD_ID']){
                         case 1:
-                            $work = $hgLoadTableValTmpl;  // 文字列(単一行)
+                            $work = $partSingle;    // 文字列(単一行)
                             break;
                         case 2:
-                            $work = $hgLoadTableMulTmpl;  // 文字列(複数行)
-                            break;                                
+                            $work = $partMulti;     // 文字列(複数行)
+                            break;
                         case 3:
-                            $work = $hgLoadTableIntTmpl;  // 整数
+                            $work = $partInteger;   // 整数
                             break;
                         case 4:
-                            $work = $hgLoadTableFltTmpl;  // 小数
+                            $work = $partFloat;     // 小数
                             break;
                         case 5:
-                            $work = $hgLoadTableDtTmpl;   // 日時
+                            $work = $partDateTime;  // 日時
                             break;
                         case 6:
-                            $work = $hgLoadTableDayTmpl;  // 日付
+                            $work = $partViewDate;  // 日付
                             break;
                         case 7:
-                            $work = $hgLoadTableIdTmpl;   // プルダウン
+                            $work = $partId;        // プルダウン
                             break;
                         case 8:
-                            $work = $hgLoadTablePwTmpl;  // 文字列(PW)
-                            break;  
+                            $work = $partPassword;  // 文字列(PW)
+                            break;
+                        case 9:
+                            $work = $partUpload;    // ファイルアップロード
+                            break;
+                        case 10:
+                            $work = $partLink;      // リンク
+                            break;
                     }  
 
                     $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -762,6 +766,8 @@ try{
                     $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                     $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
                     $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                    $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                    $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                     if(1 == $itemInfo['REQUIRED']){
                         $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -842,28 +848,34 @@ try{
                 // ホスト用loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $hostLoadTableValTmpl;  // 文字列(単一行)
+                        $work = $partSingle;    // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $hostLoadTableMulTmpl;  // 文字列(複数行)
+                        $work = $partMulti;     // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $hostLoadTableIntTmpl;  // 整数
+                        $work = $partInteger;   // 整数
                         break;
                     case 4:
-                        $work = $hostLoadTableFltTmpl;  // 小数
+                        $work = $partFloat;     // 小数
                         break;
                     case 5:
-                        $work = $hostLoadTableDtTmpl;   // 日時
+                        $work = $partDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $hostLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;  // 日付
                         break;
                     case 7:
-                        $work = $hostLoadTableIdTmpl;   // プルダウン
+                        $work = $partId;        // プルダウン
                         break;
                     case 8:
-                        $work = $hostLoadTablePwTmpl;   // 文字列(PW)
+                        $work = $partPassword;  // 文字列(PW)
+                        break;
+                    case 9:
+                        $work = $partUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partLink;      // リンク
                         break;
                 }
 
@@ -889,6 +901,8 @@ try{
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
                 $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -970,28 +984,34 @@ try{
                 // 文字列の場合
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $viewLoadTableValTmpl;  // 文字列(単一行)
+                        $work = $partViewSingle;    // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $viewLoadTableMulTmpl;  // 文字列(複数行)
+                        $work = $partViewMulti;     // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $viewLoadTableIntTmpl;  // 整数
+                        $work = $partViewInteger;   // 整数
                         break;
                     case 4:
-                        $work = $viewLoadTableFltTmpl;  // 小数
+                        $work = $partViewFloat;     // 小数
                         break;
                     case 5:
-                        $work = $viewLoadTableDtTmpl;   // 日時
+                        $work = $partViewDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $viewLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;      // 日付
                         break;
                     case 7:
-                        $work = $viewLoadTableIdTmpl;   // プルダウン
+                        $work = $partViewId;        // プルダウン
                         break;
                     case 8:
-                        $work = $viewLoadTablePwTmpl;   // 文字列(PW)
+                        $work = $partViewPassword;  // 文字列(PW)
+                        break;
+                    case 9:
+                        $work = $partViewUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partViewLink;      // リンク
                         break;
                 }
 
@@ -1017,6 +1037,8 @@ try{
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
                 $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
@@ -1156,6 +1178,12 @@ try{
                     case 8:
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
                         break;
+                    case 9:
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                        break;
+                    case 10:
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                        break;
                 }
         
                 $convColumns = $convColumns . "       TAB_A." . $itemInfo['COLUMN_NAME'] . ",\n";
@@ -1167,28 +1195,34 @@ try{
                 // loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $convLoadTableValTmpl;  // 文字列（単一行）
+                        $work = $partSingle;    // 文字列（単一行）
                         break;
                     case 2:
-                        $work = $convLoadTableMulTmpl;  // 文字列（複数行）
+                        $work = $partMulti;     // 文字列（複数行）
                         break;
                     case 3:
-                        $work = $convLoadTableIntTmpl;  // 整数
+                        $work = $partInteger;   // 整数
                         break;
                     case 4:
-                        $work = $convLoadTableFltTmpl;  // 小数
+                        $work = $partFloat;     // 小数
                         break;
                     case 5:
-                        $work = $convLoadTableDtTmpl;   // 日時
+                        $work = $partDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $convLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;  // 日付
                         break;
                     case 7:
-                        $work = $convLoadTableIdTmpl;   // プルダウン
+                        $work = $partId;        // プルダウン
                         break;
                     case 8:
-                        $work = $convLoadTablePwTmpl;   // 文字列（PW）
+                        $work = $partPassword;  // 文字列（PW）
+                        break;
+                    case 9:
+                        $work = $partUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partLink;      // リンク
                         break;
                 }
 
@@ -1214,6 +1248,8 @@ try{
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
                 $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -1293,28 +1329,34 @@ try{
                 // 最新値参照用loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $viewLoadTableValTmpl;  // 文字列(単一行)
+                        $work = $partViewSingle;    // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $viewLoadTableMulTmpl;  // 文字列(複数行)
+                        $work = $partViewMulti;     // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $viewLoadTableIntTmpl;  // 整数
+                        $work = $partViewInteger;   // 整数
                         break;
                     case 4:
-                        $work = $viewLoadTableFltTmpl;  // 小数
+                        $work = $partViewFloat;     // 小数
                         break;
                     case 5:
-                        $work = $viewLoadTableDtTmpl;   // 日時
+                        $work = $partViewDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $viewLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;      // 日付
                         break;
                     case 7:
-                        $work = $viewLoadTableIdTmpl;   // プルダウン
+                        $work = $partViewId;        // プルダウン
                         break;
                     case 8:
-                        $work = $viewLoadTablePwTmpl;   // 文字列(PW)
+                        $work = $partViewPassword;  // 文字列(PW)
+                        break;
+                    case 9:
+                        $work = $partViewUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partViewLink;      // リンク
                         break;
                 }
 
@@ -1343,6 +1385,8 @@ try{
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
                 $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
@@ -1865,12 +1909,12 @@ EOD;
             // 紐づけ対象だけを確認 (紐づけ対象がないの場合はtrue)
             $noLinkTarget = true;
             foreach($itemInfoArray as $key => $itemInfo){
-                if(5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID']){
+                if(5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID'] && 9 != $itemInfo['INPUT_METHOD_ID']){
                     // プルダウン選択の中身タイプをチェック
                     if(7 == $itemInfo['INPUT_METHOD_ID']){
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                        if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
+                        if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE'] || 9 == $otherMenuLink['COLUMN_TYPE']){
                             continue;
                         } 
                     }
@@ -1976,6 +2020,7 @@ EOD;
         if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
                 //データシート用
                 $cmdbLoadTablePath = $menuTmpDir . sprintf("%010d", $hostMenuId) . "_loadTable.php";
+                $cmdbLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hostMenuId), $cmdbLoadTable);
                 $result = deployLoadTable($cmdbLoadTable,
                                           $cmdbLoadTablePath,
                                           sprintf("%010d", $hostMenuId),
@@ -1989,6 +2034,7 @@ EOD;
             if("2" == $cmiData['PURPOSE']){
                 // ホストグループ用
                 $hgLoadTablePath = $menuTmpDir . sprintf("%010d", $hgMenuId) . "_loadTable.php";
+                $hgLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hgMenuId), $hgLoadTable);
                 $result = deployLoadTable($hgLoadTable,
                                           $hgLoadTablePath,
                                           sprintf("%010d", $hgMenuId),
@@ -1998,9 +2044,10 @@ EOD;
                     continue;
                 }
             }
-            else{
+            else if(true !== $createConvFlg){
                 // 代入値自動登録用
                 $hostSubLoadTablePath = $menuTmpDir . sprintf("%010d", $hostSubMenuId) . "_loadTable.php";
+                $hostLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hostMenuId), $hostLoadTable);
                 $result = deployLoadTable($hostLoadTable,
                                           $hostSubLoadTablePath,
                                           sprintf("%010d", $hostSubMenuId),
@@ -2012,6 +2059,7 @@ EOD;
             }
             // ホスト用
             $hostLoadTablePath = $menuTmpDir . sprintf("%010d", $hostMenuId) . "_loadTable.php";
+            $hostLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hostMenuId), $hostLoadTable);
             $result = deployLoadTable($hostLoadTable,
                                       $hostLoadTablePath,
                                       sprintf("%010d", $hostMenuId),
@@ -2023,6 +2071,15 @@ EOD;
 
             // 最新値参照用
             $viewLoadTablePath = $menuTmpDir . sprintf("%010d", $viewMenuId) . "_loadTable.php";
+            if("2" == $cmiData['PURPOSE'] && true === $createConvFlg){
+                $viewLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $convHostMenuId), $viewLoadTable);
+            }
+            else if("2" != $cmiData['PURPOSE'] && true === $createConvFlg){
+                $viewLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $convMenuId), $viewLoadTable);
+            }
+            else{
+                $viewLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hostMenuId), $viewLoadTable);
+            }
             $result = deployLoadTable($viewLoadTable,
                                       $viewLoadTablePath,
                                       sprintf("%010d", $viewMenuId),
@@ -2036,6 +2093,7 @@ EOD;
             if(true === $createConvFlg){
                 // 縦メニュー用
                 $convertLoadTablePath = $menuTmpDir . sprintf("%010d", $convMenuId) . "_loadTable.php";
+                $convertLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $convMenuId), $convertLoadTable);
                 $result = deployLoadTable($convertLoadTable,
                                           $convertLoadTablePath,
                                           sprintf("%010d", $convMenuId),
@@ -2047,6 +2105,7 @@ EOD;
 
                 if("2" == $cmiData['PURPOSE']){
                     $convertHostLoadTablePath = $menuTmpDir . sprintf("%010d", $convHostMenuId) . "_loadTable.php";
+                    $convertHostLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $convHostMenuId), $convertHostLoadTable);
                     $result = deployLoadTable($convertHostLoadTable,
                                               $convertHostLoadTablePath,
                                               sprintf("%010d", $convHostMenuId),
@@ -2112,7 +2171,7 @@ EOD;
                     continue;
                 }
             }
-            else{
+            else if(true !== $createConvFlg){
                 // 代入値登録設定用の00_loadTable.php
                 $result = $zip->addFile($hostSubLoadTablePath, basename($hostSubLoadTablePath));
 
@@ -2749,7 +2808,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
         // 登録する
         foreach($itemInfoArray as $itemInfo){
             // プルダウン選択は対象外のため、スキップする
-            if(7 == $itemInfo['INPUT_METHOD_ID'] || 8 == $itemInfo['INPUT_METHOD_ID']){
+            if(7 == $itemInfo['INPUT_METHOD_ID'] || 8 == $itemInfo['INPUT_METHOD_ID'] || 9 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             // 必須かつ一意の場合
@@ -3474,13 +3533,13 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
         $columnInfoArray = array();
 
         foreach($itemInfoArray as $key => $itemInfo){
-            if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
+            if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID'] || 9 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             if(7 == $itemInfo['INPUT_METHOD_ID']){
                 $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                 $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE'] || 8 == $otherMenuLink['COLUMN_TYPE']){
+                if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE'] || 8 == $otherMenuLink['COLUMN_TYPE'] || 9 == $otherMenuLink['COLUMN_TYPE']){
                     continue;
                 }
                 if(1 == $otherMenuLink['COLUMN_TYPE']){
@@ -3491,6 +3550,9 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 }
                 else if(3 == $otherMenuLink['COLUMN_TYPE'] || 4 == $otherMenuLink['COLUMN_TYPE']){
                     $colClass = "NumColumn";
+                }
+                else if(10 == $otherMenuLink['COLUMN_TYPE']){
+                    $colClass = "HostInsideLinkTextColumn";
                 }
             }
             else if(1 == $itemInfo['INPUT_METHOD_ID']){
@@ -3504,6 +3566,9 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             }
             else if(8 == $itemInfo['INPUT_METHOD_ID']){
                 $colClass = "PasswordColumn";
+            }
+            else if(10 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "HostInsideLinkTextColumn";
             }
             
             // 項目名を作成

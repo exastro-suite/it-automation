@@ -136,6 +136,7 @@ catch(Exception $e){
 function changeColToRow($colToRowMng, $menuTableLinkArray){
     global $objDBCA, $db_model_ch, $objMTS;
     global $updateCnt, $insertCnt, $disuseCnt;
+    $copyFileArray = array();
     $tranStartFlg = false;
     $baseTable = new BaseTable_CPM($objDBCA, $db_model_ch);
 
@@ -301,7 +302,10 @@ function changeColToRow($colToRowMng, $menuTableLinkArray){
                                      $toDataArray,
                                      $colToRowMng['START_COL_NAME'],
                                      $colToRowMng['COL_CNT'],
-                                     $colToRowMng['REPEAT_CNT']);
+                                     $colToRowMng['REPEAT_CNT'],
+                                     $colToRowMng['FROM_MENU_ID'],
+                                     $colToRowMng['TO_MENU_ID'],
+                                     $copyFileArray);
 
                 if(false === $result){
                     throw new Exception();
@@ -329,7 +333,10 @@ function changeColToRow($colToRowMng, $menuTableLinkArray){
                              $toDataArray,
                              $colToRowMng['START_COL_NAME'],
                              $colToRowMng['COL_CNT'],
-                             $colToRowMng['REPEAT_CNT']);
+                             $colToRowMng['REPEAT_CNT'],
+                             $colToRowMng['FROM_MENU_ID'],
+                             $colToRowMng['TO_MENU_ID'],
+                             $copyFileArray);
 
         if(false === $result){
             throw new Exception();
@@ -445,6 +452,12 @@ function changeColToRow($colToRowMng, $menuTableLinkArray){
             throw new Exception($msg);
         }
 
+        // アップロードファイルコピー
+        $result = copyUploadFile($copyFileArray);
+        if(true !== $result){
+            throw new Exception();
+        }
+
         //////////////////////////
         // コミット
         //////////////////////////
@@ -515,10 +528,11 @@ function getTableInfo($menuId, $menuTableLinkArray){
 /*
  * データ登録処理
  */
-function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDataColList, $toColList, $toDataColList, $workArray, $toDataArray, $startColName, $targetColCnt, $repeatCnt){
+function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDataColList, $toColList, $toDataColList, $workArray, $toDataArray, $startColName, $targetColCnt, $repeatCnt, $fromMenuId, $toMenuId, &$copyFileArray){
     global $objDBCA, $db_model_ch, $objMTS;
     global $updateCnt, $insertCnt;
     $baseTable = new BaseTable_CPM($objDBCA, $db_model_ch);
+    $fromUploadFilesArray = array();
 
     if(0 === count($workArray)){
         return true;
@@ -533,6 +547,11 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
         }
         $beforeCnt ++;
         $dataPartsArray[$fromDataCol] = $workArray[0][$fromDataCol];
+        // アップロードファイルの確認
+        $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $fromMenuId) . "/" . $fromDataCol . "/" . sprintf("%010d", $workArray[0]['ROW_ID']) . "/" . $workArray[0][$fromDataCol];
+        if(file_exists($inputUploadFile)){
+            $fromUploadFilesArray[] = array('FROM_COL' => $fromDataCol, 'TO_COL' => $fromDataCol, 'UPLOAD_FILE' => $inputUploadFile);
+        }
     }
 
     // 繰り返し部分のデータを設定する
@@ -544,6 +563,11 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
 
             if(false !== $workKey){
                 $dataPartsArray[$toDataColList[$beforeCnt + $i * $targetColCnt + $j]] = $workArray[$workKey][$fromDataColList[$beforeCnt + $j]];
+                // アップロードファイルの確認
+                $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $fromMenuId) . "/" . $fromDataColList[$beforeCnt + $j] . "/" . sprintf("%010d", $workArray[$workKey]['ROW_ID']) . "/" . $workArray[$workKey][$fromDataColList[$beforeCnt + $j]];
+                if(file_exists($inputUploadFile)){
+                $fromUploadFilesArray[] = array('FROM_COL' => $fromDataColList[$beforeCnt + $j], 'TO_COL' => $toDataColList[$beforeCnt + $i * $targetColCnt + $j], 'UPLOAD_FILE' => $inputUploadFile);
+                }
             }
             else{
                 $dataPartsArray[$toDataColList[$beforeCnt + $i * $targetColCnt + $j]] = "";
@@ -554,6 +578,11 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
     // 後半部分のデータを設定する
     for($k = 0; $k < count($fromDataColList) - $beforeCnt - $targetColCnt; $k++){
         $dataPartsArray[$toDataColList[$beforeCnt + $repeatCnt * $targetColCnt + $k]] = $workArray[0][$fromDataColList[$beforeCnt + $targetColCnt + $k]];
+        // アップロードファイルの確認
+        $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $fromMenuId) . "/" . $fromDataColList[$beforeCnt + $targetColCnt + $k] . "/" . sprintf("%010d", $workArray[0]['ROW_ID']) . "/" . $workArray[0][$fromDataColList[$beforeCnt + $targetColCnt + $k]];
+        if(file_exists($inputUploadFile)){
+            $fromUploadFilesArray[] = array('FROM_COL' => $fromDataColList[$beforeCnt + $targetColCnt + $k], 'TO_COL' => $toDataColList[$beforeCnt + $repeatCnt * $targetColCnt + $k], 'UPLOAD_FILE' => $inputUploadFile);
+        }
     }
 
     $targetData = null;
@@ -575,7 +604,28 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
         }
         $updateData['DISUSE_FLAG'] = "0";
 
-        if($updateData != $targetData){
+        // アップロードファイルの比較
+        $chgFlg = false;
+        $tmpCopyFileArray = array();
+
+        foreach($fromUploadFilesArray as $fromUploadFile){
+            $outputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $toMenuId) . "/" . $fromUploadFile['TO_COL'] . "/" . sprintf("%010d", $updateData['ROW_ID']) . "/" . $updateData[$fromUploadFile['TO_COL']];
+            if(file_exists($fromUploadFile['UPLOAD_FILE'])){
+                if(file_exists($outputUploadFile)){
+                    if($targetData[$fromUploadFile['TO_COL']] != $updateData[$fromUploadFile['TO_COL']] ||
+                       (binary)file_get_contents($fromUploadFile['UPLOAD_FILE'], FILE_BINARY) != (binary)file_get_contents($outputUploadFile, FILE_BINARY)){
+                        $chgFlg = true;
+                        $tmpCopyFileArray[] = array('INPUT_FILE' => $fromUploadFile['UPLOAD_FILE'], 'OUTPUT_FILE' => $outputUploadFile); 
+                    }
+                }
+                else{
+                    $chgFlg = true;
+                    $tmpCopyFileArray[] = array('INPUT_FILE' => $fromUploadFile['UPLOAD_FILE'], 'OUTPUT_FILE' => $outputUploadFile); 
+                }
+            }
+        }
+
+        if($updateData != $targetData || true === $chgFlg){
             // 更新する
 
             // JNLのIDを取得する
@@ -633,6 +683,13 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
                 outputLog($msg);
                 return false;
             }
+
+            // ファイルアップロードを退避する
+            foreach($tmpCopyFileArray as $tmpCopyFile){
+                $tmpCopyFile['JOURNAL_SEQ_NO'] = $jnlSeqNo;
+                $copyFileArray[] = $tmpCopyFile;
+            }
+
             $updateCnt++;
         }
     }
@@ -709,6 +766,13 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
             outputLog($msg);
             return false;
         }
+
+        // ファイルアップロードを退避する
+        foreach($fromUploadFilesArray as $fromUploadFile){
+            $outputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $toMenuId) . "/" . $fromUploadFile['TO_COL'] . "/" . sprintf("%010d", $seqNo) . "/" . basename($fromUploadFile['UPLOAD_FILE']);
+            $copyFileArray[] = array('INPUT_FILE' => $fromUploadFile['UPLOAD_FILE'], 'OUTPUT_FILE' => $outputUploadFile, 'JOURNAL_SEQ_NO' => $jnlSeqNo);
+        }
+
         $insertCnt++;
     }
 
@@ -789,5 +853,60 @@ function disuseData($hostKeyName, $toTableInfo, $toColList, $toDataArray, $exist
         }
     }
 
+    return true;
+}
+
+/**
+ * アップロードファイルコピー
+ * 
+ */
+function copyUploadFile($copyFileArray) {
+
+    global $objMTS;
+
+    foreach($copyFileArray as $copyFile){
+
+        // 出力先のディレクトリを作成する
+        $fileName = basename($copyFile['INPUT_FILE']);
+        $jnlDir = dirname($copyFile['OUTPUT_FILE']) . "/old/" . sprintf("%010d", $copyFile['JOURNAL_SEQ_NO']);
+        $tmpDir = explode(ROOT_DIR_PATH . "/uploadfiles/", $jnlDir)[1];
+        $makeDirArray = explode('/', $tmpDir);
+
+        $workDir = ROOT_DIR_PATH . "/uploadfiles/";
+        foreach($makeDirArray as $makeDir){
+            $workDir .= $makeDir;
+            if(!is_dir($workDir)){
+
+                $result = mkdir($workDir, 0777);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5020', $workDir);
+                    outputLog($msg);
+                    return false;
+                }
+                $result = chmod($workDir, 0777);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5021', $workDir);
+                    outputLog($msg);
+                    return false;
+                }
+            }
+            $workDir .= '/';
+        }
+
+        // アップロードファイルをコピーする
+        $result = copy($copyFile['INPUT_FILE'], $copyFile['OUTPUT_FILE']);
+        if(true !== $result){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5022', $workDir);
+            outputLog($msg);
+            return false;
+        }
+
+        $result = copy($copyFile['INPUT_FILE'], "${jnlDir}/${fileName}");
+        if(true !== $result){
+            $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5022', $workDir);
+            outputLog($msg);
+            return false;
+        }
+    }
     return true;
 }
