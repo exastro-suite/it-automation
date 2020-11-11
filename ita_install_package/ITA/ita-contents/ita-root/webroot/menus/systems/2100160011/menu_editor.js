@@ -2044,7 +2044,6 @@ const createRegistrationData = function( type ){
   tableAnalysis ( $menuTable, 0 );
   
   // JSON変換
-  console.log( createMenuJSON );
   const menuData = JSON.stringify( createMenuJSON );
 
   if ( type === 'registration' ) {
@@ -2064,7 +2063,6 @@ const createRegistrationData = function( type ){
 const loadMenu = function() {
     
     const loadJSON = menuEditorArray.selectMenuInfo;
-    console.log( loadJSON );
     // 流用新規時に引き継がない項目
     if ( menuEditorMode === 'diversion' ){
       loadJSON['menu']['CREATE_MENU_ID'] = null;
