@@ -249,6 +249,7 @@ $arrayTargetClassList = array(
     "MaskColumn",
     "MultiTextColumn",
     "PasswordColumn",
+    "HostInsideLinkTextColumn",
 );
 
 ////////////////////////////////
@@ -617,7 +618,7 @@ try{
                                             'ACCESS_AUTH'           =>$access_auth,
                                            );
         }
-        if($host_hit === false){
+        if($host_hit === false && $row['MENU_ID'] == 1){
             if ( $log_level === 'DEBUG' ){
                 $FREE_LOG = 'A host ID column is not set in the associated menu. (MENU_ID:{' . $menu_id . '} Column:HOST_ID)';
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);

@@ -20,4 +20,7 @@ $ary[5003] = "Processing ended due to the \"parent-child\" heirarchy exceeding t
 $ary[5004] = "Failed to get Information of LoadTable. Menu ID = [{}]";
 $ary[5005] = "The table was not in a format that can be processed. Table name = [{}].";
 $ary[5006] = "The format of the splitting target table is different from the registration target table. Splitting target table = [{}], registration target table = [{}]";
+$ary[5007] = "Failed to create directory. directory = [{}].";
+$ary[5008] = "Failed to change permission. target = [{}], permission = [{}].";
+$ary[5009] = "Failed to copy file. src = [{}], destination = [{}].";
 ?>

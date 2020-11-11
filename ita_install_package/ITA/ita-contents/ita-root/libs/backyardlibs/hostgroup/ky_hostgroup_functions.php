@@ -128,6 +128,7 @@ function makeTree(&$hierarchy) {
                                  'PARENT_IDS' => array($hostLink['HOSTGROUP_NAME'] + 10000),
                                  'CHILD_IDS' => array(),
                                  'ALL_CHILD_IDS' => array(),
+                                 'UPLOAD_FILES' => array(),
                                 );
 
         }
@@ -140,6 +141,7 @@ function makeTree(&$hierarchy) {
                                  'PARENT_IDS' => array(),
                                  'CHILD_IDS' => array($hostLink['HOSTNAME']),
                                  'ALL_CHILD_IDS' => array($hostLink['HOSTNAME']),
+                                 'UPLOAD_FILES' => array(),
                                 );
         }
     }
@@ -199,6 +201,7 @@ function makeTree(&$hierarchy) {
                                          'PARENT_IDS' => array(),
                                          'CHILD_IDS' => array($hostLinkList['CH_HOSTGROUP'] + 10000),
                                          'ALL_CHILD_IDS' => $treeData['ALL_CHILD_IDS'],
+                                         'UPLOAD_FILES' => array(),
                                         );
                 }
             }
