@@ -61,4 +61,7 @@ $ary["ITACREPAR_1242"] = "Reference";
 $ary["ITACREPAR_1243"] = "Menu group name";
 $ary["ITACREPAR_1244"] = "About vertical menu";
 $ary["ITACREPAR_1245"] = "Yes";
+$ary["ITACREPAR_1246"] = "Maximum number of<br>bytes in the file";
+$ary["ITACREPAR_1247"] = "File";
+$ary["ITACREPAR_1248"] = "Link";
 ?>
