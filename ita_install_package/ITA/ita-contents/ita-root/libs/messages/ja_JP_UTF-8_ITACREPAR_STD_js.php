@@ -62,4 +62,7 @@ $ary["ITACREPAR_1242"] = "参照用";
 $ary["ITACREPAR_1243"] = "メニューグループ名称";
 $ary["ITACREPAR_1244"] = "縦メニューについて";
 $ary["ITACREPAR_1245"] = "利用する";
+$ary["ITACREPAR_1246"] = "ファイル最大バイト数";
+$ary["ITACREPAR_1247"] = "ファイル";
+$ary["ITACREPAR_1248"] = "リンク";
 ?>
