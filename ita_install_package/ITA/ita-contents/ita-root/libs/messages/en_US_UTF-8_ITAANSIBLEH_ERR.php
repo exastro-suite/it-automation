@@ -377,6 +377,7 @@ $ary[90131] = "Member variable can't be input.";
 $ary[90132] = "Member variable isn't input.";
 $ary[90133] = "Combination of variable and member variable is not match.";
 $ary[90134] = "Associate menu that cannot be processed by Ansible is registered in Substitution value auto-registration setting. This record will be out of scope of processing. (Substitution value auto-registration setting: Item No.:{})";
+$ary[90135] = "The record selected in the pull-down selection is discard. . This record will be out of scope of processing. (MENU_ID:{} Associated menu item No.:{} Item name:{})";
 $ary[90204] = "Variables registered in the Substitution value auto-registration setting cannot be classified. This record will be out of scope of processing. (Substitution value auto-registration setting: Item No.:{} Variable classification:{})";
 $ary[90208] = "Substitution order of Substitution value auto-registration setting is duplicate. (Substitution value auto-registration setting Item No.:{}/{} Variable classification:{})";
 $ary[90210] = "Register the specific value of nested variable for substitution value list has failed.";
