@@ -279,7 +279,8 @@ const languageText = {
 '0038':[getSomeMessage("ITACREPAR_1242"),''],
 '0039':[getSomeMessage("ITACREPAR_1243"),''],
 '0040':[getSomeMessage("ITACREPAR_1244"),''],
-'0041':[getSomeMessage("ITACREPAR_1245"),'']
+'0041':[getSomeMessage("ITACREPAR_1245"),''],
+'0042':[getSomeMessage("ITACREPAR_1246"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
@@ -296,7 +297,9 @@ const selectDummyText = {
   '5' : ['2020/01/01 00:00','2020/01/01 00:00','string'],
   '6' : ['2020/01/01','2020/01/01','string'],
   '7' : ['','','select'],
-  '8' : [getSomeMessage("ITACREPAR_1237"),'','string']
+  '8' : [getSomeMessage("ITACREPAR_1237"),'','string'],
+  '9' : [getSomeMessage("ITACREPAR_1247"),'','string'],
+  '10' : [getSomeMessage("ITACREPAR_1248"),'','string']
 };
 
 const titleHeight = 32;
@@ -420,7 +423,7 @@ const columnHTML = ''
       + '</div>'
       + '<div class="menu-column-config">'
         + '<table class="menu-column-config-table" date-select-value="1">'
-          + '<tr class="multiple single">'
+          + '<tr class="multiple single link">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
             + '<td><input class="config-number max-byte" type="number" data-min="2" data-max="8192" value=""'+modeDisabled+'></td>'
           + '</tr>'
@@ -457,6 +460,10 @@ const columnHTML = ''
           + '<tr class="password">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
             + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
+          + '</tr>'
+          + '<tr class="file">'
+            + '<th>' + textCode('0042') + '<span class="input_required">*</span></th>'
+            + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="all">'
             + '<td colspan="2">'
@@ -1943,6 +1950,12 @@ const createRegistrationData = function( type ){
               case '8':
                 createMenuJSON['item'][key]['PW_MAX_LENGTH'] = $column.find('.password-max-byte').val();
                 break;
+              case '9':
+                createMenuJSON['item'][key]['UPLOAD_MAX_SIZE'] = $column.find('.file-max-size').val();
+                break;
+              case '10':
+                createMenuJSON['item'][key]['LINK_LENGTH'] = $column.find('.max-byte').val();
+                break;
             }
           // Item end
         } else if ( $column.is('.menu-column-repeat') ) {
@@ -2028,10 +2041,9 @@ const createRegistrationData = function( type ){
   createMenuJSON['menu']['columns'] = topColumns;
 
   // 解析スタート
-  tableAnalysis ( $menuTable, 0 );console.log( createMenuJSON );
+  tableAnalysis ( $menuTable, 0 );
   
   // JSON変換
-  console.log( createMenuJSON );
   const menuData = JSON.stringify( createMenuJSON );
 
   if ( type === 'registration' ) {
@@ -2051,7 +2063,6 @@ const createRegistrationData = function( type ){
 const loadMenu = function() {
     
     const loadJSON = menuEditorArray.selectMenuInfo;
-    console.log( loadJSON );
     // 流用新規時に引き継がない項目
     if ( menuEditorMode === 'diversion' ){
       loadJSON['menu']['CREATE_MENU_ID'] = null;
@@ -2147,6 +2158,12 @@ const loadMenu = function() {
               break;
             case '8':
               $item.find('.password-max-byte').val( itemData['PW_MAX_LENGTH'] ).change();
+              break;
+            case '9':
+              $item.find('.file-max-size').val( itemData['UPLOAD_MAX_SIZE'] ).change();
+              break;
+            case '10':
+              $item.find('.max-byte').val( itemData['LINK_LENGTH'] ).change();
               break;
           }
         }
