@@ -35,6 +35,8 @@ PHP_PROCEDURE=${3}
 LOG_DIR=${4}
 INTERVAL=${5}
 LOG_LEVEL=${6}
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
+SKIP_FILE=${SCRIPT_DIR}/../../temp/data_import/skip_all_service
 
 #----------------------------------------------------#
 # PROCESS名を取得
@@ -131,18 +133,23 @@ do
         RET_CD=0
         break
     fi
-    # PHPプロシージャ実行
-    commonFunction -1 "PHP-Procedure : Execute"
-    ${PHP_MODULE} ${PHP_PROCEDURE}
-    RET_CD=$?
-    if [ ${RET_CD} -eq 1 ]
+
+    # スキップファイル存在確認
+    if [ ! -f ${SKIP_FILE} ]
     then
-        commonFunction -1 "PHP-Procedure : Abort(Error：[code]${RET_CD})"
-        error_flag=1
-        break
+        # PHPプロシージャ実行
+        commonFunction -1 "PHP-Procedure : Execute"
+        ${PHP_MODULE} ${PHP_PROCEDURE}
+        RET_CD=$?
+        if [ ${RET_CD} -eq 1 ]
+        then
+            commonFunction -1 "PHP-Procedure : Abort(Error：[code]${RET_CD})"
+            error_flag=1
+            break
+        fi
+        commonFunction -1 "PHP-Procedure : Result OK"
+        
     fi
-    commonFunction -1 "PHP-Procedure : Result OK"
-    
     # インターバル(sec)だけスリープ
     sleep ${INTERVAL}
 done
