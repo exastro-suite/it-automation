@@ -72,9 +72,7 @@
     $strCmdWordAreaClose = $objMTS->getSomeMessage("ITAWDCH-STD-252");
     
     // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
-    $timeStamp_editor_common_style_css=filemtime("$root_dir_path/webroot/common/css/editor_common.css");
     $timeStamp_editor_conductor_style_css=filemtime("$root_dir_path/webroot/common/css/editor_conductor.css");
-    $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
     $timeStamp_editor_conductor_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_conductor.js");
     $timeStamp_00_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/00_javascript.js");
     $timeStamp_itabase_symphony_class_info_access_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_info_access.js");
@@ -82,12 +80,10 @@
 print <<< EOD
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
-    <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_conductor.js?{$timeStamp_editor_conductor_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/00_javascript.js?{$timeStamp_00_javascript_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_symphony_class_info_access.js?{$timeStamp_itabase_symphony_class_info_access_js}"></script>
 
-    <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_style_css}">
     <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_conductor.css?{$timeStamp_editor_conductor_style_css}">
     <style>
       #KIZI { height: auto; padding: 24px 24px 48px; }

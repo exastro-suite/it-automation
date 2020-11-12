@@ -513,6 +513,12 @@ color: #AAA;
  #INDEX.modal-open {
 overflow: hidden;
 }
+#INDEX.modal-open #HEADER,
+#INDEX.modal-open #FOOTER,
+#INDEX.modal-open #MENU,
+#INDEX.modal-open #KIZI {
+filter: blur(2px);
+}
 #editor-modal {
 box-sizing: border-box;
 overflow: hidden;
@@ -714,6 +720,14 @@ background-color: hsl( 0,0%,40% );
 }
 .modal-select-table tbody tr:hover td {
 background-color: hsl( 0,0%,30% );
+}
+.modal-select-table tbody tr.disabled {
+cursor: default;
+pointer-events: none;
+}
+.modal-select-table tbody tr.disabled th,
+.modal-select-table tbody tr.disabled td {
+color: #999;
 }
 .modal-select-table tbody tr.selected th,
 .modal-select-table tbody tr.selected td {

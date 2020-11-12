@@ -45,6 +45,9 @@
     $timeStamp_common_itaTable_css=filemtime("$root_dir_path/webroot/common/css/common_itaTable.css");
     $timeStamp_common_itaTable_js=filemtime("$root_dir_path/webroot/common/javascripts/common_itaTable.js");
     $timeStamp_common_javasctipts_js=filemtime("$root_dir_path/webroot/common/javascripts/common_javasctipts.js");
+    
+    $timeStamp_editor_common_style_css=filemtime("$root_dir_path/webroot/common/css/editor_common.css");
+    $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
 
 print <<< EOD
     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
@@ -68,6 +71,7 @@ print <<< EOD
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/select2.js?{$timeStamp_select2_js}"></script>
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/plotly-latest.min.js?{$timeStamp_plotly_latest_min_js}"></script>
         <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/common_javasctipts.js?{$timeStamp_common_javasctipts_js}"></script>
+        <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
         
         <link rel="stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/common_style.css?{$timeStamp_common_style_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/common_superTables.css?{$timeStamp_common_superTables_css}">
@@ -75,8 +79,11 @@ print <<< EOD
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/jquery-ui-1.10.4.custom.min.css?{$timeStamp_jquery_ui_1_10_4_custom_min_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/jquery.datetimepicker.css?{$timeStamp_jquery_datetimepicker_css}">
         <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/select2.css?{$timeStamp_select2_css}">
+        <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_style_css}">
+        
         <link id="theme" rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/common_theme.php?theme={$design_type}">
         <link rel="shortcut icon" href="{$scheme_n_authority}/common/imgs/favicon.ico?{$timeStamp_favicon_ico}" type="image/vnd.microsoft.icon">
+    
         <span style="display:none;" id="HTML_AJAX_LOADING"></span>
         <!-- #1241 2107/09/14 datetimepickerなどで使用する言語モードを設定 -->
         <div id="LanguageMode" style="display:none" class="text">{$strLang}</div>

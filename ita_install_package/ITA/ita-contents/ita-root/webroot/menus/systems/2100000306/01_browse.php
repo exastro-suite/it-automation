@@ -109,9 +109,6 @@
     $timeStamp_00_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/00_javascript.js");
     $timeStamp_itabase_symphony_class_info_access_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_info_access.js");
     $timeStamp_itabase_symphony_class_edit_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_edit.js");
-    
-    $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
-    $timeStamp_editor_common_css=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
 
 print <<< EOD
     <script>const gLoginUserID = {$g['login_id']};</script>
@@ -121,9 +118,7 @@ print <<< EOD
     
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_symphony_class_info_access.js?{$timeStamp_itabase_symphony_class_info_access_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_symphony_class_edit.js?{$timeStamp_itabase_symphony_class_edit_js}"></script>
-    <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
     
-    <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_css}">
     <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/itabase_symphony_style.css?{$timeStamp_itabase_symphony_style_css}">
 EOD;
 

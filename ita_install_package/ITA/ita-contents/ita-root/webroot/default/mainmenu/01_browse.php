@@ -65,16 +65,12 @@
 EOD;
 
     // ダッシュボード関連ファイルのタイムスタンプを取得
-    $timeStamp_editor_common_style_css=filemtime("$root_dir_path/webroot/common/css/editor_common.css");
     $timeStamp_dashboard_css = filemtime("$root_dir_path/webroot/default/mainmenu/dashboard.css");
-    $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
     $timeStamp_dashboard_js = filemtime("$root_dir_path/webroot/default/mainmenu/dashboard.js");
     
     // ダッシュボード関連ファイルの読み込み
 print <<< EOD
-    <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_style_css}">
     <link rel="stylesheet" type="text/css" href="{$scheme_n_authority}/default/mainmenu/dashboard.css?{$timeStamp_dashboard_css}">
-    <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/mainmenu/dashboard.js?{$timeStamp_dashboard_js}"></script>
 EOD;
 
