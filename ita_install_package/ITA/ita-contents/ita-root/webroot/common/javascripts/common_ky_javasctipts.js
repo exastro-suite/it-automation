@@ -556,8 +556,11 @@ function jumpToSelfHtml(strElementId){
         retBool = false;
     }
     else{
-        retBool = true;
         var varOffSet = objJumpTarget.offset().top;
+        // 固定レイアウトの場合ヘッダーの高さ分調整する
+        if( $('html').is('.ita-fixed-layout') ) {
+          varOffSet -= $('#HEADER').outerHeight();
+        }
         $('html,body').animate({scrollTop:varOffSet}, 500 );
         retBool = true;
     }
@@ -1167,25 +1170,26 @@ function restruct_for_IE(){
 //////// 表示/非表示ファンクション ////////
 var slideOpenSpeed = 0;
 function show( midashi, nakami ){
-    
-    // console.log( slideOpenSpeed + ' / ' + midashi + ' / ' + nakami );
-    
+    var $nakami = $('#' + nakami ),
+        dataStatus = $nakami.attr('data-init-close');
     // div class.openで囲まれていなかったら囲む
-    if( !$('#' + nakami ).closest('.open').length > 0 ){
-        $('#' + nakami ).wrap('<div class="open"></div>');
+    if( !$nakami.closest('.open').length > 0 ){
+        $nakami.wrap('<div class="open"></div>');
     }
-    
-    var nowOpenFlag = checkOpenNow(nakami);
-    
-    if( nowOpenFlag == 1 ){
-        openToClose( midashi, nakami, slideOpenSpeed );
-    }
-    else{
-        closeToOpen( midashi, nakami, slideOpenSpeed );
-    }
+    // 属性data-init-closeがあれば開閉しない
+    if ( dataStatus === undefined ) {
+        var nowOpenFlag = checkOpenNow(nakami);
 
-    // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
-    restruct_for_IE();
+        if( nowOpenFlag == 1 ){
+            openToClose( midashi, nakami, slideOpenSpeed );
+        }
+        else{
+            closeToOpen( midashi, nakami, slideOpenSpeed );
+        }
+
+        // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
+        restruct_for_IE();
+    }
 }
 
 function openToClose( midashi, nakami, speed ){
@@ -1291,7 +1295,10 @@ function relayout() {
 
     
     // 読み込み完了1秒後に開閉速度を変える
-    if ( slideOpenSpeed == 0 ) setTimeout( function(){ slideOpenSpeed = 500; }, 1000 );
+    if ( slideOpenSpeed == 0 ) setTimeout( function(){
+      slideOpenSpeed = 500;
+      $('#KIZI').find('.text').removeAttr('data-init-close');
+    }, 1000 );
     
     //#KIZIの高さを指定することでFOOTER位置と同時に配色も整える
     if (wh < mh)//KIZIのheightをMENUより小さくしない

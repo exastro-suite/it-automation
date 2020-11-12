@@ -154,7 +154,6 @@ editorFunction.modalOpen = function( headerTitle, bodyFunc, modalType ) {
           $lastFocus = $editorModal.find('.editor-modal-footer-menu-button[data-button-type="cancel"]');
 
     $body.append( $editorModal );
-    $container.css('filter','blur(2px)');
     $firstFocus.focus();
     
     $window.on('keydown.modal', function( e ) {
