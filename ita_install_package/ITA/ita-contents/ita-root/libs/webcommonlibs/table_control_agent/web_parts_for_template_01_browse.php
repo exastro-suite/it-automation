@@ -109,15 +109,10 @@
 
     // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
     $timeStamp_00_javascript_js = filemtime("$jsFile_Absolute_path");
-    $timeStamp_editor_common_style_css=filemtime("$root_dir_path/webroot/common/css/editor_common.css");
-    $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
 
     print 
 <<< EOD
-    <script>const gLoginUserID = {$g['login_id']};</script>
-    <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
-    <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_style_css}">
-    
+    <script>const gLoginUserID = {$g['login_id']};</script>    
     <script type="text/javascript" src="/default/menu/02_access.php?client=all$url_add_param"></script>
     <script type="text/javascript" src="/default/menu/02_access.php?stub=all$url_add_param"></script>
     <script type="text/javascript" src="{$jsFile}?$timeStamp_00_javascript_js"></script>
