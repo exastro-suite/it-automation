@@ -63,7 +63,13 @@
     else{
         $menus .= "<li id=\"MENU00\" class=\"menu-on\">";
     }
-    $menus .= "<a href=\"/default/mainmenu/01_browse.php?grp=" . $ACRCM_group_id . "\">" . trim($objMTS->getSomeMessage("ITAWDCH-MNU-1100001")) . "</a></li>\n";
+    if ( isset($ACRCM_group_id) && !empty($ACRCM_group_id) ) {
+        $dashboard_link = "<a href=\"/default/mainmenu/01_browse.php?grp=" . $ACRCM_group_id . "\">";
+    }
+    else {
+        $dashboard_link = "<a href=\"/default/mainmenu/01_browse.php\">";
+    }
+    $menus .= $dashboard_link . trim($objMTS->getSomeMessage("ITAWDCH-MNU-1100001")) . "</a></li>\n";
     foreach($menu_name_array as $menu_name){
         $menu_num_zeropad = sprintf('%02d', $menu_num + 1 );
         if(array_key_exists('no', $_GET) && $_GET['no'] == sprintf("%010d", $menu_id_array[$menu_num])){
