@@ -38,6 +38,9 @@ define('STATUS_PROCESSED',     3); // 完了
 define('STATUS_FAILURE',       4); // 完了(異常) 
 define('LOG_PREFIX',           basename( __FILE__, '.php' ) . '_');
 
+define('SKIP_SERVICE_FILE',         ROOT_DIR_PATH . '/temp/data_import/skip_all_service');
+define('SKIP_SERVICE_INTERVAL',     10);
+
 try {
     require_once ROOT_DIR_PATH . '/libs/commonlibs/common_php_req_gate.php';
     require_once ROOT_DIR_PATH . '/libs/commonlibs/common_db_connect.php';
@@ -65,9 +68,6 @@ try {
     } else {
         throw new Exception($objMTS->getSomeMessage('ITABASEH-STD-900005'));
     }
-
-    // サービス一覧を取得する
-    $serviceAry = getService();
 
     $importedTableAry = array();
     foreach ($recordAry as $record) {
@@ -158,14 +158,14 @@ try {
         else if(2 == $record['DP_TYPE']){
 
             // サービスを停止する
-            stopService($serviceAry);
+            stopService();
 
             $taskId = registData($record, $importedTableAry);
             if ($taskId === false) {
                 restoreTables();
                 setStatus($record['TASK_ID'], STATUS_FAILURE);
                 // サービスを開始する
-                startpService($serviceAry);
+                startService();
                 continue;
             }
 
@@ -176,7 +176,7 @@ try {
                 restoreTables();
                 setStatus($record['TASK_ID'], STATUS_FAILURE);
                 // サービスを開始する
-                startpService($serviceAry);
+                startService();
                 continue;
             }
 
@@ -186,7 +186,7 @@ try {
                 restoreTables();
                 setStatus($record['TASK_ID'], STATUS_FAILURE);
                 // サービスを開始する
-                startpService($serviceAry);
+                startService();
                 continue;
             }
 
@@ -197,7 +197,7 @@ try {
                 restoreFiles($taskId);
                 setStatus($record['TASK_ID'], STATUS_FAILURE);
                 // サービスを開始する
-                startpService($serviceAry);
+                startService();
                 continue;
             }
 
@@ -208,7 +208,7 @@ try {
                 restoreFiles($taskId);
                 setStatus($record['TASK_ID'], STATUS_FAILURE);
                 // サービスを開始する
-                startpService($serviceAry);
+                startService();
                 continue;
             }
 
@@ -226,7 +226,7 @@ try {
                 restoreFiles($taskId);
                 setStatus($record['TASK_ID'], STATUS_FAILURE);
                 // サービスを開始する
-                startpService($serviceAry);
+                startService();
                 continue;
             }
 
@@ -236,7 +236,7 @@ try {
             }
 
             // サービスを開始する
-            startpService($serviceAry);
+            startService();
         }
     }
 
@@ -1508,81 +1508,26 @@ function getRunningRecord(){
 }
 
 /**
- * サービスの一覧を取得する
- *
- * @return   array     $retAry            取得したサービス一覧
- */
-function getService(){
-
-    $tmpAry = array();
-    $resAry = array();
-
-    $targetDir1 = '/etc/init.d/';
-    $targetDir2 = '/usr/lib/systemd/system/';
-
-    // RHEL6系のサービスを確認する
-    if(is_dir($targetDir1)){
-        foreach(glob($targetDir1 . 'ky_*') as $file) {
-            if(false === strpos($file, 'ky_data_portability_execute-workflow')){
-                $tmpAry[] = basename($file);
-            }
-        }
-    }
-
-    // RHEL7系のサービスを確認する
-    if(is_dir($targetDir2)){
-        foreach(glob($targetDir2 . 'ky_*') as $file) {
-            if(false === strpos($file, 'ky_data_portability_execute-workflow')){
-                $tmpAry[] = str_replace(".service", "", basename($file));
-            }
-        }
-    }
-
-    // 起動中のサービスを確認する
-    $cmd = "ps -ef | grep ky_";
-    $output = NULL;
-    $return_var = NULL;
-    exec($cmd, $output, $return_var);
-
-    foreach($tmpAry as $service){
-        foreach($output as $psData){
-
-            if(false !== strpos($psData, $service)){
-                $resAry[] = $service;
-                break;
-            }
-        }
-    }
-
-    return $resAry;
-}
-
-/**
  * サービスを停止する
  *
- * @param    array     $serviceAry    サービス一覧
+ * @param    なし
  * @return   なし
  */
-function stopService($serviceAry){
-
-    foreach($serviceAry as $service){
-        $cmd = "service {$service} stop 2>/dev/null";
-        shell_exec($cmd);
-    }
+function stopService(){
+    // サービススキップファイルを配置する
+    file_put_contents(SKIP_SERVICE_FILE, "");
+    sleep(SKIP_SERVICE_INTERVAL);
 }
 
 /**
  * サービスを開始する
  *
- * @param    array     $serviceAry    サービス一覧
+ * @param    なし
  * @return   なし
  */
-function startpService($serviceAry){
-
-    foreach($serviceAry as $service){
-        $cmd = "service {$service} start 2>/dev/null";
-        shell_exec($cmd);
-    }
+function startService(){
+    // サービススキップファイルを削除する
+    unlink(SKIP_SERVICE_FILE);
 }
 
 /**
@@ -3383,44 +3328,8 @@ function importSymOpe($record, $lastUpdateUser){
             throw new Exception();
         }
 
-        // 起動中のサービスを取得する
-        $serviceAry = getService();
-
-        // 停止するサービスを取得する
-        $sql  = "SELECT ROW_ID,SERVICE_NAME FROM B_SVC_TO_STOP_IMP_SYM_OPE ";
-
-        $objQuery = $objDBCA->sqlPrepare($sql);
-        if ($objQuery->getStatus() === false) {
-            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
-            outputLog(LOG_PREFIX, $objQuery->getLastError());
-            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
-            // 例外処理へ
-            throw new Exception();
-        }
-        $res = $objQuery->sqlExecute();
-        if ($res === false) {
-            outputLog(LOG_PREFIX, "SQL=[{$sql}].");
-            outputLog(LOG_PREFIX, $objQuery->getLastError());
-            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
-            // 例外処理へ
-            throw new Exception();
-        }
-
-        while ($row = $objQuery->resultFetch()){
-            $resultArray[] = $row;
-        }
-
-        $tmpArray = array_column($resultArray, 'SERVICE_NAME');
-
-        // 停止するサービスを特定する
-        foreach($tmpArray as $value){
-            if(false !== array_search($value, $serviceAry)){
-                $stopSvcArray[] = $value;
-            }
-        }
-
         // サービスを停止する
-        stopService($stopSvcArray);
+        stopService();
         $stopSvcFlg = true;
 
         // トランザクション開始
@@ -3590,7 +3499,7 @@ function importSymOpe($record, $lastUpdateUser){
         $transactionFlg = false;
 
         // サービスを起動する
-        startpService($stopSvcArray);
+        startService();
         $stopSvcFlg = false;
 
         // 作業ディレクトリ削除
@@ -3610,7 +3519,7 @@ function importSymOpe($record, $lastUpdateUser){
 
         if(true === $stopSvcFlg){
             // サービスを起動する
-            startpService($stopSvcArray);
+            startService();
         }
 
         // 作業ディレクトリ削除
