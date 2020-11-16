@@ -482,10 +482,10 @@ contionue;
 							// ---- RBAC対応
                                                         if($AccessAuthColumn_flag === true) {
                                                             // ---- アクセス権カラムの場合にロールIDからRole名称に変更
-                                                            // 廃止されたレコードはカットされる
+                                                            // 廃止されているロールはID変換失敗で表示
                                                             global $g;
                                                             $obj = new RoleBasedAccessControl($g['objDBCA']); 
-                                                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$row['KEY_COLUMN']);
+                                                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$row['KEY_COLUMN'],true);  // 廃止を含む
                                                             unset($obj);
                                                             if($RoleNameString === false) {
 								$retBool = false;

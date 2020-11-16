@@ -2305,7 +2305,8 @@ class SingleRowTableFormatter extends TableFormatter {
                         $RoleList = array();
                         $obj = new RoleBasedAccessControl($g['objDBCA']);
                         // 廃止以外のロールリスト
-                        $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'NAME');
+                        $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'NAME',true); // 廃止を含む
+
                         unset($obj);
                         if($DefaultAccessRoleString === false) {
                             $message = sprintf("[%s:%s]Failed get Role information.",basename(__FILE__),__LINE__);
@@ -2325,7 +2326,7 @@ class SingleRowTableFormatter extends TableFormatter {
                             // ロールID文字列のアクセス権をロール名称の文字列に変換
                             $obj = new RoleBasedAccessControl($g['objDBCA']);
                             $RoleIDString   = $outputRowData[$AccessAuthColumnName];
-                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString);
+                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);  // 廃止を含む
                             unset($obj);
                             if($RoleNameString === false) {
                                 $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Faile.",basename(__FILE__),__LINE__);
