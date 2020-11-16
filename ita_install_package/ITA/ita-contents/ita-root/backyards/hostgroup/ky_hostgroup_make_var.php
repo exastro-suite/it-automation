@@ -135,6 +135,7 @@ try{
 
             if($hostgroupList['ROW_ID'] == $treeData['KY_KEY'] - 10000){
                 $hgName = $hostgroupList['HOSTGROUP_NAME'];
+                $accessAuth = $hostgroupList['ACCESS_AUTH'];
             }
         }
 
@@ -143,6 +144,7 @@ try{
                 $linkDataArray[] = array('VARS_NAME'    => "VAR_hostgroup_" . $hgName,
                                          'HOSTGROUP_ID' => $treeData['KY_KEY'] - 10000,
                                          'CHILD_ID'     => $childId,
+                                         'ACCESS_AUTH'  => $accessAuth,
                                         );
             }
         }
@@ -208,6 +210,7 @@ try{
             $insertData['HOSTGROUP_NAME']   = $linkData['HOSTGROUP_ID'];    // ホストグループ名
             $insertData['VARS_NAME']        = $linkData['VARS_NAME'];       // ホストグループ変数名
             $insertData['HOSTNAME']         = $linkData['CHILD_ID'];        // ホスト名
+            $insertData['ACCESS_AUTH']      = $linkData['ACCESS_AUTH'];     // アクセス許可ロール
             $insertData['DISUSE_FLAG']      = "0";                          // 廃止フラグ
             $insertData['LAST_UPDATE_USER'] = USER_ID_MAKE_HOST_GRP_VAR;    // 最終更新者
 
@@ -223,9 +226,10 @@ try{
             $insertCnt ++;
         }
         // ホストグループ変数化メニューのデータとホストグループ変数名が一致しない場合
-        else if($linkData['VARS_NAME'] != $hostGrpVar['VARS_NAME']){
+        else if($linkData['VARS_NAME'] != $hostGrpVar['VARS_NAME'] || $linkData['ACCESS_AUTH'] != $hostGrpVar['ACCESS_AUTH']){
             // 更新する
             $updateData['VARS_NAME']        = $linkData['VARS_NAME'];       // ホストグループ変数名
+            $updateData['ACCESS_AUTH']      = $linkData['ACCESS_AUTH'];     // アクセス許可ロール
             $updateData['LAST_UPDATE_USER'] = USER_ID_MAKE_HOST_GRP_VAR;    // 最終更新者
 
             //////////////////////////
