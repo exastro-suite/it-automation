@@ -11,6 +11,7 @@ CLOSE_REVISION_ID                  INT                             ,
 OPENST_TEMPLATE_CHK                INT                             , -- HEATテンプレート
 OPENST_ENVIRONMENT_CHK             INT                             , -- 環境設定ファイル
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -33,15 +34,16 @@ CLOSE_REVISION_ID                  INT                             ,
 OPENST_TEMPLATE_CHK                INT                             , -- HEATテンプレート
 OPENST_ENVIRONMENT_CHK             INT                             , -- 環境設定ファイル
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
 LAST_UPDATE_USER                   INT                             , -- 最終更新ユーザ
 PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_MATERIAL_LINKAGE_OPENSTACK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_MATERIAL_LINKAGE_OPENSTACK_RIC',1,'2100150007',2100530001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_MATERIAL_LINKAGE_OPENSTACK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_MATERIAL_LINKAGE_OPENSTACK_JSQ',1,'2100150007',2100530002,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
 
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100150007,2100011501,'資材紐付け管理(OpenStack)',NULL,NULL,NULL,1,0,1,2,10,'linkage_OpenStack','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

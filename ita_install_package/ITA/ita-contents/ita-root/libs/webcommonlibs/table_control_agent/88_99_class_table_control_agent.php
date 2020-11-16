@@ -89,6 +89,11 @@ class TableControlAgent {
 
 	protected $varCommitSpanOnTableIUDByFile;
 
+	protected $boolAccessAuth;    // ACCESS_AUTH Column flag indicator  true:yes false:no
+
+        // #28enomoto Add
+        protected $strAccessAuthColumnName; // ACCESS_AUTH Column Name
+
 	public function __construct($strDBMainTableId, $strRIColumnId, $strRIColumnLabel="", $strDBJournalTableId=null, $arrayVariant=array()){
 		global $g;
 		if( $strRIColumnLabel == "" ){
@@ -193,7 +198,29 @@ class TableControlAgent {
 		$this->setJsEventNamePrefix(false);
 		
 		$this->setCommitSpanOnTableIUDByFile(0); //ファイルアップロードによる更新の場合のcommitタイミング(0は、ALLEnd時/1は行ごと)
+		$this->setAccessAuth(false);
+		$this->setAccessAuthColumnName("ACCESS_AUTH");
 	}
+	// ----RBAC対応
+	public function setAccessAuthColumnName($strAccessAuthColumnName){
+		global $g;
+		$this->strAccessAuthColumnName = $strAccessAuthColumnName;
+		// TableControlAgent Classが参照できないfunction用
+		$g['global_getAccessAuthColumnName'] = $strAccessAuthColumnName;
+	}
+	public function getAccessAuthColumnName(){
+		return $this->strAccessAuthColumnName;
+	}
+	public function setAccessAuth($boolAccessAuth){
+		global $g;
+		$this->boolAccessAuth = $boolAccessAuth;
+		// TableControlAgent Classが参照できないfunction用
+		$g['global_getAccessAuth'] = $boolAccessAuth;
+	}
+	public function getAccessAuth(){
+		return $this->boolAccessAuth;
+	}
+	// RBAC対応----
 
 	public function setInitInfo($array){
 		$this->arrayInfoOfObjInit = array($array[0]['file'],$array[0]['line']);
@@ -847,6 +874,54 @@ class TableControlAgent {
 	//----ここからFixColumn系
 	public function beforeFixColumn(&$arrayVariant=array()){
 		global $g;
+
+                // ACCESS_AUTHカラムがある場合 ----
+                if($this->getAccessAuth()) {
+		    // アクセス権系カラム----
+		    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300001"));
+
+		    $strTextBody = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300004");
+                    // 更新時のボタン  setEventの不備により更新・登録用のLinkButtonColumnを定義
+		    $c = new LinkButtonColumn( 'ACCESSPERMISSION_UPD', $strTextBody, $strTextBody, 'setAccessPermissionUpdate', array() );
+		    $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+		    $outputType->setVisible(false); //一覧時は非表示
+		    $c->setOutputType("print_table", $outputType);
+		    $outputType = new OutputType(new TabHFmt(), new LinkButtonTabBFmt());
+		    $c->setOutputType("update_table", $outputType);
+		    $c->setEvent("update_table", "onClick", "UpdateAccessPermission", array()); 
+		    $c->setDBColumn(false);
+                    $c->getOutputType('register_table')->setVisible(false);
+		    $cg->addColumn($c);
+
+                    // 登録時のボタン
+		    $c = new LinkButtonColumn( 'ACCESSPERMISSION_INS', $strTextBody, $strTextBody, 'setAccessPermissionInsert', array() );
+		    $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+		    $outputType->setVisible(false); //一覧時は非表示
+		    $c->setOutputType("print_table", $outputType);
+		    $outputType = new OutputType(new TabHFmt(), new LinkButtonTabBFmt());
+		    $c->setOutputType("register_table", $outputType);
+		    $c->setEvent("register_table", "onClick", "InsertAccessPermission", array());
+		    $c->setDBColumn(false);
+                    $c->getOutputType('update_table')->setVisible(false);
+		    $cg->addColumn($c);
+
+		    $c = new TextColumn('ACCESS_AUTH',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300002"));
+		    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300003"));//エクセル・ヘッダでの説明
+                    $c->getOutputType('update_table')->setAttr('upd-access-auth-id', 'access_auth_data');
+                    $c->getOutputType('update_table')->setAttr('readonly', 'readonly');
+                    $c->getOutputType('register_table')->setAttr('ins-access-auth-id', 'access_auth_data');
+                    $c->getOutputType('register_table')->setAttr('readonly', 'readonly');
+		    $c->setHiddenMainTableColumn(true);
+                    $c->getOutputType('excel')->setVisible(false);
+                    $c->getOutputType('csv')->setVisible(false);
+                    $c->getOutputType('json')->setVisible(false);
+
+		    $cg->addColumn($c);
+		    $this->addColumn($cg);
+		    //----アクセス権系カラム
+		}
+                //----ACCESS_AUTHカラムがある場合
+
 		$boolDefaultColumnsSet = isset($arrayVariant['DEFAULT_COLUMNS_SET'])?$arrayVariant['DEFAULT_COLUMNS_SET']:true;
 		
 		if( $boolDefaultColumnsSet === true ){

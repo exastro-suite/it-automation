@@ -52,9 +52,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', '★★★MENU★★★');
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     $c = new IDColumn('HOST_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102601"),'C_STM_LIST','SYSTEM_ID','HOSTNAME','');
     $c->setDescription('choose host');//エクセル・ヘッダでの説明
@@ -157,15 +156,21 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
        $intErrorType = null;
        $aryErrorMsgBody = array();
        $strFxName = "NONAME(countTableRowLengthAgent)";
-       $query = "SELECT COUNT(*) AS REC_CNT FROM " . $objTable->getDBMainTableHiddenID() . " T1 WHERE T1.".$objTable->getRequiredDisuseColumnID() ." IN ('0','1') ";
+       // RBAC対応
+       $query = "SELECT ACCESS_AUTH FROM " . $objTable->getDBMainTableHiddenID() . " T1 WHERE T1.".$objTable->getRequiredDisuseColumnID() ." IN ('0','1') ";
        $aryForBind = array();
        $aryRetBody = singleSQLExecuteAgent($query, $aryForBind, $strFxName);
        
        if( $aryRetBody[0] === true ){
            $objQuery = $aryRetBody[1];
-           $row = $objQuery->resultFetch();
+           // RBAC対応
+           $intRowLength = 0;
+           $ret = getTargetRecodeCount($objTable,$objQuery,$ntRowLength);
+           if($ret === false) {
+               $intErrorType = 500;
+               $intRowLength = -1;
+           }
            unset($objQuery);
-           $intRowLength = $row['REC_CNT'];
        }
        else{
            $intErrorType = 500;
@@ -182,6 +187,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = $table->getColumns();
     $c['ROW_ID']->getOutputType("filter_table")->setVisible(false);
+    $c['ACCESS_AUTH']->getOutputType("filter_table")->setVisible(false);
     $c['NOTE']->getOutputType("filter_table")->setVisible(false);
     $c['DISUSE_FLAG']->getOutputType("filter_table")->setVisible(false);
     $c['LAST_UPDATE_TIMESTAMP']->getOutputType("filter_table")->setVisible(false);

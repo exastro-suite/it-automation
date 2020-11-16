@@ -55,10 +55,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     //Cobllerプロファイル一覧
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITACBLH-MNU-1012"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     //プロファイル名

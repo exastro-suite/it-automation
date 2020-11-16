@@ -65,6 +65,7 @@
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -87,6 +88,7 @@
         "TIME_BOOK"=>"",
         "TIME_START"=>"",
         "TIME_END"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -376,6 +378,7 @@
 
             // ansible/AnsibleTower の00_shymphonyLinker.php で参照
             $g['__SYMPHONY_INSTANCE_NO__'] = $rowOfSymphony['SYMPHONY_INSTANCE_NO'];
+            $g['__TOP_ACCESS_AUTH__'] = $rowOfSymphony['ACCESS_AUTH'];  
 
             ////////////////////////////
             // 変数初期化(ループ冒頭) //

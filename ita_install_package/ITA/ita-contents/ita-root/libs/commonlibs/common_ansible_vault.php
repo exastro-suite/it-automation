@@ -43,12 +43,30 @@ class  AnsibleVault {
             $encode_value = 'ansible path file not found';
             return false;
         }
-        $cmd = "echo -n $value | sudo -u $exec_user -i $ansible_path/ansible-vault encrypt --vault-password-file $password_file 2>&1";
+        // CR+LFをLFに置換
+
+        $value = str_replace("\r\n","\n", $value);
+        //error_log(__FILE__.__LINE__."[\n".bin2hex($value). "\n]\n");
+
+        $vault_value_file  = "/tmp/ansible_vault_value_" . getmypid();
+        exec("/bin/rm -rf " . $vault_value_file);
+
+        $ret = file_put_contents($vault_value_file,$value);
+        if($ret === false) {
+            exec("/bin/rm -rf " . $vault_value_file);
+            $encode_value = 'Failed to create temporary file for ansible vault.';
+            return false;
+        }
+
+        $cmd = "cat $vault_value_file | sudo -u $exec_user -i $ansible_path/ansible-vault encrypt --vault-password-file $password_file 2>&1";
 
         exec($cmd,$output,$return_var);
         if($return_var != 0) {
             $indento = '';
         }
+
+        exec("/bin/rm -rf " . $vault_value_file);
+
         foreach($output as $line) {
             if(strlen(trim($line)) == 0) {
                 continue;

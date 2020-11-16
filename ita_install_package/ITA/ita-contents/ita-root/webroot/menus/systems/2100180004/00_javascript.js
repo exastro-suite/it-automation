@@ -471,6 +471,13 @@ callback.prototype = {
     //----Callリスト用-----//
     printConductorList : function( result ){
         conductorUseList.conductorCallList = JSON.parse( result );
+        if ( conductorGetMode === 'starting') {
+            proxy.printSymphonyList();
+        }
+    },
+    //---- Symphony Callリスト用-----//
+    printSymphonyList : function( result ){
+        conductorUseList.symphonyCallList = JSON.parse( result );
         // Editor起動時
         if ( conductorGetMode === 'starting') {
             conductorUseList.conductorData = null;

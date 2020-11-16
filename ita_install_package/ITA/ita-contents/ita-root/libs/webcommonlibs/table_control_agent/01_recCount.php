@@ -189,8 +189,17 @@
                 }
 
                 // ----generateSelectSql2呼び出し[Where句に各カラムの名前が記述され、値の部分が置換される前のSQLが作成される]
-                $mode = 1;
-                $sql = generateSelectSql2($mode, $objTable, $boolBinaryDistinctOnDTiS);
+                // RBAC対応 ----
+                // ACCESS_AUTHカラムの有無を判定 ----
+                //$mode  = 1;  // 1=>3 #28
+                if($objTable->getAccessAuth()) {
+                   $sql_type = 3;   // ACCESS_AUTHカラムあり
+                } else {
+                   $sql_type = 1;   // ACCESS_AUTHカラムなし
+                }
+                // ---- ACCESS_AUTHカラムの有無を判定
+                $sql = generateSelectSql2($sql_type, $objTable, $boolBinaryDistinctOnDTiS);
+                // ---- RBAC対応
                 // generateSelectSql2呼び出し[Where句に各カラムの名前が記述され、値の部分が置換される前のSQLが作成される]----
 
                 //通常モード----
@@ -211,9 +220,16 @@
                 $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
-                    $row = $objQuery->resultFetch();
-                    $strRecCnt = $row['REC_CNT'];
+                    // RBAC対応 ----
+                    // ACCESS_AUTHカラムの有無を判定し対象レコードをカウント ----
+                    $ret = getTargetRecodeCount($objTable,$objQuery,$strRecCnt);
                     unset($objQuery);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        throw new Exception( '00010701-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                    }
+                    // ---- ACCESS_AUTHカラムの有無を判定し対象レコードをカウント
+                    // ---- RBAC対応
                 }
                 else{
                     $intErrorType = 500;

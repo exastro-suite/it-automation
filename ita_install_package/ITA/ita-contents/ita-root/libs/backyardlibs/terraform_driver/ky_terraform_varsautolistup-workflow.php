@@ -32,10 +32,6 @@
     $hostvar_search_php  = '/libs/backyardlibs/terraform_driver/WrappedStringReplaceAdmin.php';
     $db_access_user_id   = -101803; //Terraform変数更新プロシージャ
 
-    // WrappedStringReplaceAdmin.phpで使用する変数定義
-    // ユーザーホスト変数名の先頭文字
-    //define("DF_HOST_VAR_HED"               ,"var."); //ky_terraform_common_setenv.phpで定義
-
     //----変数名テーブル関連
     $strCurTableTerraformVarsTable = $vg_terraform_module_vars_link_table_name;
     $strJnlTableTerraformVarsTable = $strCurTableTerraformVarsTable."_JNL";
@@ -79,6 +75,8 @@
     $warning_flag               = 0;        // 警告フラグ(1：警告発生)
     $error_flag                 = 0;        // 異常フラグ(1：異常発生)
     $db_update_flg              = false;    // DB更新フラグ
+    $lv_a_proc_loaded_list_varsetup_pkey = 2100080001;
+    $lv_a_proc_loaded_list_valsetup_pkey = 2100080002;
 
     try{
         ////////////////////////////////
@@ -105,6 +103,37 @@
         if ( $log_level === 'DEBUG' ){
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-90003");
             require ($root_dir_path . $log_output_php );
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
+        // 関連データベースが更新されバックヤード処理が必要か判定
+        ///////////////////////////////////////////////////////////////////////////
+        // トレースメッセージ
+        if($log_level === "DEBUG") {
+            //[処理]関連データベースに変更があるか確認
+            $traceMsg = $objMTS->getSomeMessage("ITATERRAFORM-STD-110001");
+            LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
+        }
+
+        $lv_UpdateRecodeInfo        = array();
+        $ret = chkBackyardExecute($lv_a_proc_loaded_list_varsetup_pkey,
+                                  $lv_UpdateRecodeInfo);
+
+        if($ret === false) {
+            $error_flag = 1;
+            //「関連データベースの変更があるか確認に失敗しました。」
+            $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-161010");
+            throw new Exception($errorMsg);
+        }
+
+        if(count($lv_UpdateRecodeInfo) == 0) {
+            // トレースメッセージ
+            if($log_level === "DEBUG") {
+                //[処理]関連データベースに変更がないので処理終了
+                $traceMsg = $objMTS->getSomeMessage("ITATERRAFORM-STD-110002");
+                LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
+            }
+            exit(0);
         }
 
         ////////////////////////////////
@@ -434,6 +463,9 @@
                 LocalLogPrint(basename(__FILE__),__LINE__, $objMTS->getSomeMessage("ITATERRAFORM-STD-90004") . "\n" . $msgstr);
             }
 
+            //データベース更新フラグをたてる
+            $db_update_flg = true;
+
             //----------------------------------------------
             // SQL作成  Module変数紐付けテーブル  B_TERRAFORM_MODULE_VARS_LINK
             //----------------------------------------------
@@ -598,6 +630,9 @@
                     LocalLogPrint(basename(__FILE__),__LINE__, $objMTS->getSomeMessage("ITATERRAFORM-STD-90005") . "\n" . $msgstr);
                 }
 
+                //データベース更新フラグをたてる
+                $db_update_flg = true;
+
                 //----------------------------------------------
                 // SQL作成  Module変数紐付けテーブル  B_TERRAFORM_MODULE_VARS_LINK
                 //----------------------------------------------
@@ -708,6 +743,41 @@
             // [処理]トランザクション終了
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-100002");
             require ($root_dir_path . $log_output_php );
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
+        // 関連データベースの更新反映完了を登録
+        ///////////////////////////////////////////////////////////////////////////
+        if($log_level === "DEBUG") {
+            //[処理]関連データベースの更新の反映完了を登録
+            $traceMsg = $objMTS->getSomeMessage("ITATERRAFORM-STD-110003");
+            LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
+        }
+
+        $ret = setBackyardExecuteComplete($lv_UpdateRecodeInfo);
+        if($ret === false) {
+            $error_flag = 1;
+            //関連データベースの更新の反映完了の登録に失敗しました。
+            $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-161020");
+            throw new Exception($errorMsg);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
+        // 関連データベースを更新している場合、代入値自動登録設定のバックヤード起動を登録
+        ///////////////////////////////////////////////////////////////////////////
+        if($db_update_flg === true) {
+            if($log_level === "DEBUG") {
+                //[処理]関連データベースを更新したのでバックヤード処理(valautostup-workflow)の起動を登録
+                $traceMsg = $objMTS->getSomeMessage("ITATERRAFORM-STD-110004");
+                LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
+            }
+            $ret = setBackyardExecute($lv_a_proc_loaded_list_valsetup_pkey);
+            if($ret === false) {
+                $error_flag = 1;
+                //バックヤード処理(valautostup-workflow)起動の登録に失敗しました。
+                $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-161030");
+                throw new Exception($errorMsg);
+            }
         }
 
     }
@@ -823,6 +893,10 @@
         $ina_vars     = array();
         $intNumPadding = 10;
 
+        // WrappedStringReplaceAdmin.phpで使用する変数定義
+        // ユーザーホスト変数名の先頭文字(『variable "xxx"{}』という形式の変数宣言からxxxを抽出するため、戦闘文字列を『variable "』とする。）
+        $in_var_heder = 'variable "';
+
         //////////////////////////////////////////////
         // Module素材に登録されている変数を抜出す。
         //////////////////////////////////////////////
@@ -848,7 +922,7 @@
 
         // リソースファイル（Module素材）に登録されている変数を抜出。
         $local_vars = array();
-        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$local_vars);
+        $objWSRA = new WrappedStringReplaceAdmin($in_var_heder, $dataString, $local_vars);
 
         $aryResultParse = $objWSRA->getParsedResult();
         unset($objWSRA);
@@ -862,8 +936,160 @@
         return true;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   関連するデータベースが更新されバックヤード処理を実行する必要があるか判定
+    //
+    // パラメータ
+    //   $in_a_proc_loaded_list_pkey: A_PROC_LOADED_LISTのROW_ID
+    //   &$inout_UpdateRecodeInfo:    バックヤード処理を実行する必要がある場合
+    //                                A_PROC_LOADED_LISTのROW_IDとLAST_UPDATE_TIMESTAMPを待避
+    //
+    // 戻り値
+    //   True:正常　　False:異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function chkBackyardExecute($in_a_proc_loaded_list_pkey,&$inout_UpdateRecodeInfo)
+    {
+        $inout_UpdateRecodeInfo = array();
 
+        $sql =            " SELECT                                                            \n";
+        $sql = $sql .     "   ROW_ID                                                      ,   \n";
+        $sql = $sql .     "   LOADED_FLG                                                  ,   \n";
+        $sql = $sql .     "   DATE_FORMAT(LAST_UPDATE_TIMESTAMP,'%Y%m%d%H%i%s%f') LAST_UPDATE_TIMESTAMP \n";
+        $sql = $sql .     " FROM                                                              \n";
+        $sql = $sql .     "   A_PROC_LOADED_LIST                                              \n";
+        $sql = $sql .     " WHERE  ROW_ID = $in_a_proc_loaded_list_pkey and (LOADED_FLG is NULL or LOADED_FLG <> '1') \n";
 
+        $sqlUtnBody = $sql;
+        $arrayUtnBind = array();
+        $objQuery = recordSelect($sqlUtnBody, $arrayUtnBind);
+
+        if($objQuery == null) {
+            return false;
+        }
+
+        while($row = $objQuery->resultFetch()) {
+            // 代入値自動登録設定で更新されたレコード情報待避
+            $inout_UpdateRecodeInfo['ROW_ID']                = $row['ROW_ID'];
+            $inout_UpdateRecodeInfo['LAST_UPDATE_TIMESTAMP'] = $row['LAST_UPDATE_TIMESTAMP'];
+        }
+
+        unset($objQuery);
+
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   関連するデータベースが更新さりれバックヤード処理が完了したことを記録
+    //
+    // パラメータ
+    //   &$inout_UpdateRecodeInfo:    バックヤード処理が完了したことを記録する情報
+    //                                A_PROC_LOADED_LISTのROW_IDとLAST_UPDATE_TIMESTAMP
+    //
+    // 戻り値
+    //   True:正常　　False:異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function setBackyardExecuteComplete($inout_UpdateRecodeInfo)
+    {
+        $sql =            " UPDATE A_PROC_LOADED_LIST SET                              \n";
+        $sql = $sql .     "   LOADED_FLG = '1' ,LAST_UPDATE_TIMESTAMP = NOW(6)         \n";
+        $sql = $sql .     " WHERE                                                      \n";
+        $sql = $sql .     "   ROW_ID = :ROW_ID AND                                     \n";
+        $sql = $sql .     "   DATE_FORMAT(LAST_UPDATE_TIMESTAMP,'%Y%m%d%H%i%s%f') = :LAST_UPDATE_TIMESTAMP \n";
+
+        $sqlUtnBody = $sql;
+        $arrayUtnBind = array("ROW_ID"=>$inout_UpdateRecodeInfo['ROW_ID'],
+                              "LAST_UPDATE_TIMESTAMP"=>$inout_UpdateRecodeInfo['LAST_UPDATE_TIMESTAMP']);
+
+        $objQuery = recordSelect($sqlUtnBody, $arrayUtnBind);
+        if($objQuery == null) {
+            return false;
+        }
+
+        unset($objQuery);
+
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   バックヤード処理の起動が必要なことを記録
+    //
+    // パラメータ
+    //   $row_id:                      バックヤード処理ID
+    //
+    // 戻り値
+    //   True:正常　　False:異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function setBackyardExecute($row_id)
+    {
+        $sql =            " UPDATE A_PROC_LOADED_LIST SET                              \n";
+        $sql = $sql .     "   LOADED_FLG = '0' ,LAST_UPDATE_TIMESTAMP = NOW(6)         \n";
+        $sql = $sql .     " WHERE                                                      \n";
+        $sql = $sql .     "   ROW_ID = :ROW_ID                                         \n";
+
+        $sqlUtnBody = $sql;
+        $arrayUtnBind = array("ROW_ID"=>$row_id);
+
+        $objQuery = recordSelect($sqlUtnBody, $arrayUtnBind);
+        if($objQuery == null) {
+            return false;
+        }
+
+        unset($objQuery);
+
+        return true;
+    }
+    // ExecuteしてFetch前のDBアクセスオブジェクトを返却
+    function recordSelect($sqlUtnBody, $arrayUtnBind) {
+
+        global    $objMTS;
+        global    $objDBCA;
+
+        $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
+        if($objQueryUtn->getStatus()===false) {
+            $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $objQueryUtn->getLastError();
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $sqlUtnBody . "\n" . $arrayUtnBind;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            return null;
+        }
+        $errstr = $objQueryUtn->sqlBind($arrayUtnBind);
+        if($errstr != "") {
+            $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $errstr;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $sqlUtnBody . "\n" . $arrayUtnBind;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            return null;
+        }
+
+        $r = $objQueryUtn->sqlExecute();
+        if(!$r) {
+            $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $objQueryUtn->getLastError();
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $msgstr = $sqlUtnBody . "\n" . $arrayUtnBind;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            return null;
+        }
+
+        return $objQueryUtn;
+    }
 
 
 ?>

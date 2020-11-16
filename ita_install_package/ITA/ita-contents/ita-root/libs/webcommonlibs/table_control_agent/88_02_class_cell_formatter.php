@@ -2731,6 +2731,8 @@ class SelectTabBFmt extends InputTabBFmt {
 
 		//----初期表示用のリストソースを取得する
 		$aryRetBody = $this->getSelectList($rowData,$aryVariant);
+		// #28 HTMLが帰ってきてする
+
 		if( $aryRetBody[1]!==null ){
 			$arraySelectElement = null;
 		}else{
@@ -3064,15 +3066,20 @@ EOD;
 		$aryDataSet = array();
 
 		$objFunction = $this->objFunctionForGetFADSelectList;
+
 		if( is_callable($objFunction)=== true ){
+
 			$aryRetBody = $objFunction($this, $aryVariant, $arySetting, $aryOverride);
 		}else{
+
+
 			if( is_a($this->objColumn, "Column")===true ){
 				//----IDColumnとの連動系
 				
 				$objOT = $this->objColumn->getOutputType($this->strFormatterId);
+
 				$aryRetBody = $objOT->getFADSelectList($aryVariant, $arySetting, $aryOverride);
-				
+
 				//IDColumnとの連動系----
 			}else{
 				$aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -3139,6 +3146,7 @@ EOD;
 	}
 
 	//----初期表示後に、(後発)動的に、リストタグを表示するメソッド
+	// SelectTabBFmt::printTagFromFADSelectList
 	function printTagFromFADSelectList(&$aryVariant=array(), &$arySetting=array(), $aryOverride=array()){
 		$retStrBody = "";
 		$intErrorType = null;
@@ -3272,14 +3280,32 @@ EOD;
 				}
 				//追い越し判定用フラグなどの追加タグ----
 
+				//$aryOverrideから対象を取得
+				if(isset($aryOverride[0])){
+					$targetMixName = $aryOverride[0];
+				}else{
+					$targetMixName = "";
+				}
+
                 // プルダウンあいまい検索
     			$retStrBody .= 
 <<< EOD
                 <script type="text/javascript">
                     var strAdjustRulerClassName = "psl_{$printTagId}";
-                    var objAdjustRulerForWidth = $('#Mix2_Nakami'+' .'+strAdjustRulerClassName).get()[0];
-                    if(objAdjustRulerForWidth == null){
+                    var targetMixName = "{$targetMixName}";
+                    if(targetMixName == 'Mix1_1'){
                         var objAdjustRulerForWidth = $('#Mix1_Nakami'+' .'+strAdjustRulerClassName).get()[0];
+                        var targetId = '#Mix1_Nakami';
+                    }else if(targetMixName == 'Mix2_1'){
+                        var objAdjustRulerForWidth = $('#Mix2_Nakami'+' .'+strAdjustRulerClassName).get()[0];
+                        var targetId = '#Mix2_Nakami';
+                    }else{
+                        var objAdjustRulerForWidth = $('#Mix2_Nakami'+' .'+strAdjustRulerClassName).get()[0];
+                        var targetId = '#Mix2_Nakami';
+                        if(objAdjustRulerForWidth == null){
+                            var objAdjustRulerForWidth = $('#Mix1_Nakami'+' .'+strAdjustRulerClassName).get()[0];
+                            var targetId = '#Mix1_Nakami';
+                        }
                     }
                     var intNewWidth = objAdjustRulerForWidth.offsetWidth;
                     if(30 == intNewWidth){
@@ -3291,7 +3317,7 @@ EOD;
                         intNewWidth = 650;
                     }
                     $(document).ready(function(){
-                        $(".psl_{$printTagId}").select2({
+                        $(targetId+" .psl_{$printTagId}").select2({
                             width:intNewWidth
 
                         });
@@ -3936,6 +3962,7 @@ class FilterTabBFmt extends TabBFmt {
 		return $body;
 	}
 
+	// FilterTabBFmt::printTagFromFADSelectList
 	function printTagFromFADSelectList(&$aryVariant=array(), &$arySetting=array(), $aryOverride=array()){
 		global $g;
 		$retStrBody = "";
@@ -4633,7 +4660,14 @@ class SelectFilterTabBFmt extends TextFilterTabBFmt {
 			//----filter等、各Formatter用に、独自に設定されていなかった場合（通常の場合）
 			$arrayDispSelectTag=$this->objColumn->getMasterTableArrayFromMainTable();
 			if(is_null($arrayDispSelectTag)===true){
-				$arraySelectElement=createMasterTableDistinctArray($strMainTableBody, $strColId, $strDUColIdOfMainTable, $strMasterTableBody, $strKeyColumnOfMasterTable, $strDispColumnOfMasterTable, $strDUColumnOfMasterTable, $aryEtcetera);
+                                // ---- RBAC対応
+                                // SQLに埋め込むアクセス権のカラム名取得
+                                $AccessAuthColumName    = $g['global_getAccessAuthColumnName'];
+                                // loadtableに紐づいているオブジェクトのACCESS_AUTHカラム定義の有無取得
+                                $AccessAuthColumUse    = $g['global_getAccessAuth'];
+
+				$arraySelectElement=createMasterTableDistinctArray($strMainTableBody, $strColId, $strDUColIdOfMainTable, $strMasterTableBody, $strKeyColumnOfMasterTable, $strDispColumnOfMasterTable, $strDUColumnOfMasterTable, $aryEtcetera, $AccessAuthColumUse, $AccessAuthColumName);
+                                // RBAC対応 ----
 			}else{
 				$arraySelectElement=$arrayDispSelectTag;
 			}
@@ -5102,17 +5136,16 @@ class HostInsideLinkTextTabBFmt extends TextTabBFmt {
 			$strColId = $this->getPrintTargetKey();
 
 			list($strUrlBody,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array($strColId),"");
+			$strUrlBody = $this->makeSafeValueForBrowse($strUrlBody);
 			$strTextInTag = $strUrlBody;
-			if( $this->checkListFormatterMode("CurrentTableFormatter") === true ){
-				if( 1 <= strlen($strUrlBody) ){
-					list($strRepresentiveNumeric,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array('REPRESENTATIVE_FLAG'),"");
-					if( $tmpBoolKeyExist01===false ){
-						$strRepresentiveNumeric = "1";
-					}
-					if( $strRepresentiveNumeric == "1" ){
-						$strOrigin = $this->getOrigin();
-						$strTextInTag = "<a href=\"{$strOrigin}{$strUrlBody}\" target=\"blank\">{$strUrlBody}</a>";
-					}
+			if( 1 <= strlen($strUrlBody) ){
+				list($strRepresentiveNumeric,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array('REPRESENTATIVE_FLAG'),"");
+				if( $tmpBoolKeyExist01===false ){
+					$strRepresentiveNumeric = "1";
+				}
+				if( $strRepresentiveNumeric == "1" ){
+					$strOrigin = $this->getOrigin();
+					$strTextInTag = "<a href=\"{$strOrigin}{$strUrlBody}\" target=\"blank\">{$strUrlBody}</a>";
 				}
 			}
 			$aryRetBody = array($strTextInTag, $intErrorType, $aryErrMsgBody, $strErrMsg);
@@ -5737,5 +5770,168 @@ class EditStatusControlBtnTabBFmt extends ReviewTemplateTableTabBFmt {
 }
 //レヴューページテンプレート用の編集コマンドボタン----
 //レヴューページテンプレート用の各種タブ----
+
+class SensitiveTextTabBFmt extends TabBFmt {
+	private $sensitiveFlagColumn; // SensitiveのON/OFFを判定するフラグのカラム（1ならOFF、2ならON）
+
+	public function __construct($sensitiveFlagColumn){
+		parent::__construct();
+		$this->sensitiveFlagColumn = $sensitiveFlagColumn;
+	}
+
+	public function getData($rowData,$aryVariant){
+		$strTagInnerBody = "";
+
+		//sensitive_flagの値により処理を分岐（1ならOFF、2ならON）
+		$sensitive_flag = $rowData[$this->sensitiveFlagColumn];
+		if($sensitive_flag == 2){
+			$strTagInnerBody = "********";
+		}else{
+			$strColKey = $this->getPrintTargetKey();
+			$strTempValue = (array_key_exists($strColKey, $rowData))?$rowData[$strColKey]:"";
+			$escapedData = $this->makeSafeValueForBrowse($strTempValue);
+			if( $escapedData != "" ){
+				$strTagInnerBody = $escapedData;
+				//$strTagInnerBody = nl2br($strTagInnerBody);
+			}
+		}
+
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
+}
+
+class SensitiveTextInputTabBFmt extends InputTabBFmt {
+	private $sensitiveFlagColumn; // SensitiveのON/OFFを判定するフラグのカラム（1ならOFF、2ならON）
+
+	public function __construct($sensitiveFlagColumn){
+		parent::__construct();
+		$this->sensitiveFlagColumn = $sensitiveFlagColumn;
+	}
+
+	public function getData($rowData,$aryVariant){
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+		$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
+
+		//----htmlタグがdataに入っている場合に異常動作させないための処理
+		$data = $this->makeSafeValueForBrowse($data);
+		//htmlタグがdataに入っている場合に異常動作させないための処理----
+
+		$aryAddOnDefault["maxLength"] = $this->getMaxInputLength();
+		$aryAddOnDefault["size"]      = 15;
+		$aryOverWrite["id"]   = $this->getFSTIDForIdentify();
+		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
+		$aryOverWrite["type"] = "text";
+
+		//sensitive_flagの値により処理を分岐（1ならOFF、2ならON）
+		$sensitive_flag = $rowData[$this->sensitiveFlagColumn];
+		if($sensitive_flag == 2){
+			$aryOverWrite["value"] = "";
+		}else{
+			$aryOverWrite["value"] = $data;
+		}
+		$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>";
+
+		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
+			$objFunction = $this->objFunctionForReturnOverrideGetData;
+			$strTagInnerBody = $objFunction($strTagInnerBody,$this,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite);
+		}
+
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
+}
+
+class SensitiveTextAreaTabBFmt extends InputTabBFmt {
+	private $sensitiveFlagColumn; // SensitiveのON/OFFを判定するフラグのカラム（1ならOFF、2ならON）
+
+	public function __construct($sensitiveFlagColumn){
+		parent::__construct();
+		$this->sensitiveFlagColumn = $sensitiveFlagColumn;
+	}
+
+	public function getData($rowData,$aryVariant){
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+		$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
+		$strColId = $this->getPrintTargetKey();
+
+		//----<textarea></textarea>がdataに入っている場合に異常動作させないための処理
+		$data = $this->makeSafeValueForBrowse($data);
+		//<textarea></textarea>がdataに入っている場合に異常動作させないための処理----
+
+		$aryAddOnDefault["maxLength"] = $this->getMaxInputLength();
+		$aryAddOnDefault["rows"]      = 5;
+		$aryAddOnDefault["cols"]      = 60;
+		$aryOverWrite["id"] = $this->getFSTIDForIdentify();
+		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
+
+		//sensitive_flagの値により処理を分岐（1ならOFF、2ならON）
+		$sensitive_flag = $rowData[$this->sensitiveFlagColumn];
+		if($sensitive_flag == 2){
+			$data = "";
+		}
+		
+		$strTagInnerBody = "<textarea {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>{$data}</textarea>";
+
+
+		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
+			$objFunction = $this->objFunctionForReturnOverrideGetData;
+			$strTagInnerBody = $objFunction($strTagInnerBody,$this,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite);
+		}
+
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
+}
+
+class SensitiveExcelBFmt extends BFmt {
+	private $sensitiveFlagColumn; // SensitiveのON/OFFを判定するフラグのカラム（1ならOFF、2ならON）
+
+	public function __construct($sensitiveFlagColumn){
+		parent::__construct();
+		$this->sensitiveFlagColumn = $sensitiveFlagColumn;
+	}
+
+	public function getData($rowData,$aryVariant){
+		//sensitive_flagの値により処理を分岐（1ならOFF、2ならON）
+		$sensitive_flag = $rowData[$this->sensitiveFlagColumn];
+		if($sensitive_flag == 2){
+			$strColKey = $this->getPrintTargetKey();
+			$rowData[$strColKey] = "";
+		}
+
+		$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
+		return $data;
+	}
+}
+
+class SensitiveCSVBFmt extends CSVBFmt {
+	private $sensitiveFlagColumn; // SensitiveのON/OFFを判定するフラグのカラム（1ならOFF、2ならON）
+
+	public function __construct($sensitiveFlagColumn){
+		parent::__construct();
+		$this->sensitiveFlagColumn = $sensitiveFlagColumn;
+	}
+
+	public function getData($rowData,$aryVariant){
+		$strRetData = "";
+		$strColId = $this->getPrintTargetKey();
+		//sensitive_flagの値により処理を分岐（1ならOFF、2ならON）
+		$sensitive_flag = $rowData[$this->sensitiveFlagColumn];
+		if($sensitive_flag == 2){
+			$rowData[$strColId] = "";
+		}
+		$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
+		if( $this->strOutputPrintType == "noWrapData" ){
+			$strRetData = $data;
+		}else if( $this->strOutputPrintType == "wrapData" ){
+			$strRetData = '"'.$data.'"'.$this->ColumnSepa;
+		}
+		return $strRetData;
+	}
+}
+
 //ここまでBFmt系----
 ?>

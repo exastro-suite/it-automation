@@ -55,51 +55,41 @@ try{
     // テンプレートファイル読み込み
     //////////////////////////
     $templatePathArray =array(TEMPLATE_PATH . FILE_HG_LOADTABLE,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_VAL,
                               TEMPLATE_PATH . FILE_H_LOADTABLE,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_VAL,
                               TEMPLATE_PATH . FILE_VIEW_LOADTABLE,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_VAL,
                               TEMPLATE_PATH . FILE_HG_SQL,
                               TEMPLATE_PATH . FILE_H_SQL,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_ID,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_ID,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_ID,
                               TEMPLATE_PATH . FILE_CONVERT_LOADTABLE,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_VAL,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_ID,
                               TEMPLATE_PATH . FILE_CONVERT_SQL,
                               TEMPLATE_PATH . FILE_CONVERT_H_LOADTABLE,
                               TEMPLATE_PATH . FILE_CONVERT_H_SQL,
                               TEMPLATE_PATH . FILE_CMDB_LOADTABLE,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_ID,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_VAL,
                               TEMPLATE_PATH . FILE_CMDB_SQL,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_INT,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_FLT,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_DAY,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_DT,
-                              TEMPLATE_PATH . FILE_H_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_HG_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_CONVERT_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_CMDB_LOADTABLE_MUL,
-                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_MUL
+                              TEMPLATE_PATH . FILE_H_LOADTABLE_OP,
+                              TEMPLATE_PATH . FILE_VIEW_LOADTABLE_OP,
+                              TEMPLATE_PATH . FILE_CONVERT_H_LOADTABLE_OP,
+                              TEMPLATE_PATH . FILE_H_OP_SQL,
+                              TEMPLATE_PATH . FILE_CONVERT_H_OP_SQL,
+                              TEMPLATE_PATH . FILE_PARTS_SNG,
+                              TEMPLATE_PATH . FILE_PARTS_MUL,
+                              TEMPLATE_PATH . FILE_PARTS_INT,
+                              TEMPLATE_PATH . FILE_PARTS_FLT,
+                              TEMPLATE_PATH . FILE_PARTS_DAY,
+                              TEMPLATE_PATH . FILE_PARTS_DT,
+                              TEMPLATE_PATH . FILE_PARTS_ID,
+                              TEMPLATE_PATH . FILE_PARTS_PW,
+                              TEMPLATE_PATH . FILE_PARTS_UPL,
+                              TEMPLATE_PATH . FILE_PARTS_LNK,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_SNG,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_MUL,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_INT,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_FLT,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_DAY,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_DT,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_ID,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_PW,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_UPL,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_LNK,
                              );
     $templateArray = array();
     foreach($templatePathArray as $templatePath){
@@ -118,51 +108,41 @@ try{
     }
 
     $hgLoadTableTmpl            = $templateArray[0];
-    $hgLoadTableValTmpl         = $templateArray[1];
-    $hostLoadTableTmpl          = $templateArray[2];
-    $hostLoadTableValTmpl       = $templateArray[3];
-    $viewLoadTableTmpl          = $templateArray[4];
-    $viewLoadTableValTmpl       = $templateArray[5];
-    $hgSqlTmpl                  = $templateArray[6];
-    $hostSqlTmpl                = $templateArray[7];
-    $hgLoadTableIdTmpl          = $templateArray[8];
-    $hostLoadTableIdTmpl        = $templateArray[9];
-    $viewLoadTableIdTmpl        = $templateArray[10];
-    $convLoadTableTmpl          = $templateArray[11];
-    $convLoadTableValTmpl       = $templateArray[12];
-    $convLoadTableIdTmpl        = $templateArray[13];
-    $convSqlTmpl                = $templateArray[14];
-    $convHostLoadTableTmpl      = $templateArray[15];
-    $convHostSqlTmpl            = $templateArray[16];
-    $cmdbLoadTableTmpl          = $templateArray[17];
-    $cmdbLoadTableIdTmpl        = $templateArray[18];
-    $cmdbLoadTableValTmpl       = $templateArray[19];
-    $cmdbSqlTmpl                = $templateArray[20];
-    $hostLoadTableIntTmpl       = $templateArray[21];
-    $hostLoadTableFltTmpl       = $templateArray[22];
-    $hostLoadTableDayTmpl       = $templateArray[23];
-    $hostLoadTableDtTmpl        = $templateArray[24];
-    $hgLoadTableIntTmpl         = $templateArray[25];
-    $hgLoadTableFltTmpl         = $templateArray[26];
-    $hgLoadTableDayTmpl         = $templateArray[27];
-    $hgLoadTableDtTmpl          = $templateArray[28];
-    $convLoadTableIntTmpl       = $templateArray[29];
-    $convLoadTableFltTmpl       = $templateArray[30];
-    $convLoadTableDayTmpl       = $templateArray[31];
-    $convLoadTableDtTmpl        = $templateArray[32];
-    $cmdbLoadTableIntTmpl       = $templateArray[33];
-    $cmdbLoadTableFltTmpl       = $templateArray[34];
-    $cmdbLoadTableDayTmpl       = $templateArray[35];
-    $cmdbLoadTableDtTmpl        = $templateArray[36];
-    $viewLoadTableIntTmpl       = $templateArray[37];
-    $viewLoadTableFltTmpl       = $templateArray[38];
-    $viewLoadTableDayTmpl       = $templateArray[39];
-    $viewLoadTableDtTmpl        = $templateArray[40];
-    $hostLoadTableMulTmpl       = $templateArray[41];
-    $hgLoadTableMulTmpl         = $templateArray[42];
-    $convLoadTableMulTmpl       = $templateArray[43];
-    $cmdbLoadTableMulTmpl       = $templateArray[44];
-    $viewLoadTableMulTmpl       = $templateArray[45];
+    $hostLoadTableTmpl          = $templateArray[1];
+    $viewLoadTableTmpl          = $templateArray[2];
+    $hgSqlTmpl                  = $templateArray[3];
+    $hostSqlTmpl                = $templateArray[4];
+    $convLoadTableTmpl          = $templateArray[5];
+    $convSqlTmpl                = $templateArray[6];
+    $convHostLoadTableTmpl      = $templateArray[7];
+    $convHostSqlTmpl            = $templateArray[8];
+    $cmdbLoadTableTmpl          = $templateArray[9];
+    $cmdbSqlTmpl                = $templateArray[10];
+    $hostLoadTableOpTmpl        = $templateArray[11];
+    $viewLoadTableOpTmpl        = $templateArray[12];
+    $convHostLoadTableOpTmpl    = $templateArray[13];
+    $hostSqlOpTmpl              = $templateArray[14];
+    $convHostSqlOpTmpl          = $templateArray[15];
+    $partSingle                 = $templateArray[16];
+    $partMulti                  = $templateArray[17];
+    $partInteger                = $templateArray[18];
+    $partFloat                  = $templateArray[19];
+    $partDate                   = $templateArray[20];
+    $partDateTime               = $templateArray[21];
+    $partId                     = $templateArray[22];
+    $partPassword               = $templateArray[23];
+    $partUpload                 = $templateArray[24];
+    $partLink                   = $templateArray[25];
+    $partViewSingle             = $templateArray[26];
+    $partViewMulti              = $templateArray[27];
+    $partViewInteger            = $templateArray[28];
+    $partViewFloat              = $templateArray[29];
+    $partViewDate               = $templateArray[30];
+    $partViewDateTime           = $templateArray[31];
+    $partViewId                 = $templateArray[32];
+    $partViewPassword           = $templateArray[33];
+    $partViewUpload             = $templateArray[34];
+    $partViewLink               = $templateArray[35];
 
     //////////////////////////
     // パラメータシート作成情報を取得
@@ -320,7 +300,7 @@ try{
         $createConvFlg = false;
 
         // パラメータシート(縦)を作成する設定の場合
-        if("" != $cmiData['MENUGROUP_FOR_CONV']){
+        if("" != $cmiData['VERTICAL']){
 
             $createConvFlg = true;
 
@@ -393,6 +373,9 @@ try{
             $floatMaxArray          = array();
             $floatMinArray          = array();
             $floatDigitArray        = array();
+            $pwMaxLengthArray       = array();
+            $uploadMaxSizeArray     = array();
+            $linkLengthArray        = array();
             $errFlg = false;
 
             for($i = 0; $i < $cpiData['REPEAT_CNT']; $i ++){
@@ -408,6 +391,9 @@ try{
                         $floatMinArray[]        = $repeatItemArray[$j]['FLOAT_MIN'];
                         $floatDigitArray[]      = $repeatItemArray[$j]['FLOAT_DIGIT'];
                         $otherMenuLinkIdArray[] = $repeatItemArray[$j]['OTHER_MENU_LINK_ID'];
+                        $pwMaxLengthArray[]     = $repeatItemArray[$j]['PW_MAX_LENGTH'];
+                        $uploadMaxSizeArray[]   = $repeatItemArray[$j]['UPLOAD_MAX_SIZE'];
+                        $linkLengthArray[]      = $repeatItemArray[$j]['LINK_LENGTH'];
                         continue;
                     }
 
@@ -459,6 +445,33 @@ try{
                     // プルダウン選択チェック
                     if(7 == $inputMethodIdArray[$j] && $otherMenuLinkIdArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['OTHER_MENU_LINK_ID']){
                         $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5018');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // 最大バイト数(PW)チェック
+                    if(8 == $inputMethodIdArray[$j] && $pwMaxLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['PW_MAX_LENGTH']){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // ファイル最大バイト数(ファイルアップロード)チェック
+                    if(9 == $inputMethodIdArray[$j] && $uploadMaxSizeArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['UPLOAD_MAX_SIZE']){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
+                        outputLog($msg);
+                        // パラメータシート作成管理更新処理を行う
+                        updateMenuStatus($targetData, "4", $msg, false, true);
+                        $errFlg = true;
+                        break;
+                    }
+                    // 最大バイト数(リンク)チェック
+                    if(10 == $inputMethodIdArray[$j] && $linkLengthArray[$j] != $repeatItemArray[$i * $cpiData['COL_CNT'] + $j]['LINK_LENGTH']){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5017');
                         outputLog($msg);
                         // パラメータシート作成管理更新処理を行う
                         updateMenuStatus($targetData, "4", $msg, false, true);
@@ -545,6 +558,15 @@ try{
                 case 7: //プルダウン
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                     break;
+                case 8: //文字列(PW)
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                    break;
+                case 9: //ファイルアップロード
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                    break;
+                case 10://リンク
+                    $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                    break;
             }
             $columns = $columns . "       TAB_A." . $itemInfo['COLUMN_NAME'] . ",\n";
 
@@ -556,25 +578,34 @@ try{
                 // データシート用loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $cmdbLoadTableValTmpl;  // 文字列(単一行)
+                        $work = $partSingle;    // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $cmdbLoadTableMulTmpl;  // 文字列(複数行)
+                        $work = $partMulti;     // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $cmdbLoadTableIntTmpl;  // 整数
+                        $work = $partInteger;   // 整数
                         break;
                     case 4:
-                        $work = $cmdbLoadTableFltTmpl;  // 小数
+                        $work = $partFloat;     // 小数
                         break;
                     case 5:
-                        $work = $cmdbLoadTableDtTmpl;   // 日時
+                        $work = $partDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $cmdbLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;  // 日付
                         break;
                     case 7:
-                        $work = $cmdbLoadTableIdTmpl;   // プルダウン
+                        $work = $partId;        // プルダウン
+                        break;
+                    case 8:
+                        $work = $partPassword;  // 文字列(PW)
+                        break;
+                    case 9:
+                        $work = $partUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partLink;      // リンク
                         break;
                 }
                 $work = str_replace(REPLACE_NUM, $itemInfo['CREATE_ITEM_ID'], $work);
@@ -598,6 +629,9 @@ try{
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -679,25 +713,34 @@ try{
                     // ホストグループ用loadTableのカラム埋め込み部分を作成する
                     switch($itemInfo['INPUT_METHOD_ID']){
                         case 1:
-                            $work = $hgLoadTableValTmpl;  // 文字列(単一行)
+                            $work = $partSingle;    // 文字列(単一行)
                             break;
                         case 2:
-                            $work = $hgLoadTableMulTmpl;   // 文字列(複数行)
-                            break;                                
+                            $work = $partMulti;     // 文字列(複数行)
+                            break;
                         case 3:
-                            $work = $hgLoadTableIntTmpl;  // 整数
+                            $work = $partInteger;   // 整数
                             break;
                         case 4:
-                            $work = $hgLoadTableFltTmpl;  // 小数
+                            $work = $partFloat;     // 小数
                             break;
                         case 5:
-                            $work = $hgLoadTableDtTmpl;   // 日時
+                            $work = $partDateTime;  // 日時
                             break;
                         case 6:
-                            $work = $hgLoadTableDayTmpl;  // 日付
+                            $work = $partViewDate;  // 日付
                             break;
                         case 7:
-                            $work = $hgLoadTableIdTmpl;   // プルダウン
+                            $work = $partId;        // プルダウン
+                            break;
+                        case 8:
+                            $work = $partPassword;  // 文字列(PW)
+                            break;
+                        case 9:
+                            $work = $partUpload;    // ファイルアップロード
+                            break;
+                        case 10:
+                            $work = $partLink;      // リンク
                             break;
                     }  
 
@@ -722,6 +765,9 @@ try{
                     $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                     $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                     $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                    $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                    $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                    $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                     if(1 == $itemInfo['REQUIRED']){
                         $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -802,25 +848,34 @@ try{
                 // ホスト用loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $hostLoadTableValTmpl;  // 文字列(単一行)
+                        $work = $partSingle;    // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $hostLoadTableMulTmpl;  // 文字列(複数行)
+                        $work = $partMulti;     // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $hostLoadTableIntTmpl;  // 整数
+                        $work = $partInteger;   // 整数
                         break;
                     case 4:
-                        $work = $hostLoadTableFltTmpl;  // 小数
+                        $work = $partFloat;     // 小数
                         break;
                     case 5:
-                        $work = $hostLoadTableDtTmpl;   // 日時
+                        $work = $partDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $hostLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;  // 日付
                         break;
                     case 7:
-                        $work = $hostLoadTableIdTmpl;   // プルダウン
+                        $work = $partId;        // プルダウン
+                        break;
+                    case 8:
+                        $work = $partPassword;  // 文字列(PW)
+                        break;
+                    case 9:
+                        $work = $partUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partLink;      // リンク
                         break;
                 }
 
@@ -845,6 +900,9 @@ try{
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -853,7 +911,7 @@ try{
                     $work = str_replace(REPLACE_REQUIRED, "", $work);
                 }
 
-                if(1 == $itemInfo['UNIQUED'] && "1" == $cmiData['PURPOSE']){
+                if(1 == $itemInfo['UNIQUED'] && "2" != $cmiData['PURPOSE']){
                     $work = str_replace(REPLACE_UNIQUED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setUnique(true);", $work);
                 }
                 else{
@@ -926,25 +984,34 @@ try{
                 // 文字列の場合
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $viewLoadTableValTmpl;  // 文字列(単一行)
+                        $work = $partViewSingle;    // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $viewLoadTableMulTmpl;  // 文字列(複数行)
+                        $work = $partViewMulti;     // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $viewLoadTableIntTmpl;  // 整数
+                        $work = $partViewInteger;   // 整数
                         break;
                     case 4:
-                        $work = $viewLoadTableFltTmpl;  // 小数
+                        $work = $partViewFloat;     // 小数
                         break;
                     case 5:
-                        $work = $viewLoadTableDtTmpl;   // 日時
+                        $work = $partViewDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $viewLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;      // 日付
                         break;
                     case 7:
-                        $work = $viewLoadTableIdTmpl;   // プルダウン
+                        $work = $partViewId;        // プルダウン
+                        break;
+                    case 8:
+                        $work = $partViewPassword;  // 文字列(PW)
+                        break;
+                    case 9:
+                        $work = $partViewUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partViewLink;      // リンク
                         break;
                 }
 
@@ -969,6 +1036,9 @@ try{
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
@@ -1105,6 +1175,15 @@ try{
                     case 7:
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
                         break;
+                    case 8:
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                        break;
+                    case 9:
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                        break;
+                    case 10:
+                        $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
+                        break;
                 }
         
                 $convColumns = $convColumns . "       TAB_A." . $itemInfo['COLUMN_NAME'] . ",\n";
@@ -1116,25 +1195,34 @@ try{
                 // loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $convLoadTableValTmpl;  // 文字列（単一行）
+                        $work = $partSingle;    // 文字列（単一行）
                         break;
                     case 2:
-                        $work = $convLoadTableMulTmpl;  // 文字列（複数行）
+                        $work = $partMulti;     // 文字列（複数行）
                         break;
                     case 3:
-                        $work = $convLoadTableIntTmpl;  // 整数
+                        $work = $partInteger;   // 整数
                         break;
                     case 4:
-                        $work = $convLoadTableFltTmpl;  // 小数
+                        $work = $partFloat;     // 小数
                         break;
                     case 5:
-                        $work = $convLoadTableDtTmpl;   // 日時
+                        $work = $partDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $convLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;  // 日付
                         break;
                     case 7:
-                        $work = $convLoadTableIdTmpl;   // プルダウン
+                        $work = $partId;        // プルダウン
+                        break;
+                    case 8:
+                        $work = $partPassword;  // 文字列（PW）
+                        break;
+                    case 9:
+                        $work = $partUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partLink;      // リンク
                         break;
                 }
 
@@ -1159,6 +1247,9 @@ try{
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 if(1 == $itemInfo['REQUIRED']){
                     $work = str_replace(REPLACE_REQUIRED, "\$c" . $itemInfo['CREATE_ITEM_ID'] . "->setRequired(true);", $work);
@@ -1238,25 +1329,34 @@ try{
                 // 最新値参照用loadTableのカラム埋め込み部分を作成する
                 switch($itemInfo['INPUT_METHOD_ID']){
                     case 1:
-                        $work = $viewLoadTableValTmpl;  // 文字列(単一行)
+                        $work = $partViewSingle;    // 文字列(単一行)
                         break;
                     case 2:
-                        $work = $viewLoadTableMulTmpl;  // 文字列(複数行)
+                        $work = $partViewMulti;     // 文字列(複数行)
                         break;
                     case 3:
-                        $work = $viewLoadTableIntTmpl;  // 整数
+                        $work = $partViewInteger;   // 整数
                         break;
                     case 4:
-                        $work = $viewLoadTableFltTmpl;  // 小数
+                        $work = $partViewFloat;     // 小数
                         break;
                     case 5:
-                        $work = $viewLoadTableDtTmpl;   // 日時
+                        $work = $partViewDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $viewLoadTableDayTmpl;  // 日付
+                        $work = $partViewDate;      // 日付
                         break;
                     case 7:
-                        $work = $viewLoadTableIdTmpl;   // プルダウン
+                        $work = $partViewId;        // プルダウン
+                        break;
+                    case 8:
+                        $work = $partViewPassword;  // 文字列(PW)
+                        break;
+                    case 9:
+                        $work = $partViewUpload;    // ファイルアップロード
+                        break;
+                    case 10:
+                        $work = $partViewLink;      // リンク
                         break;
                 }
 
@@ -1278,11 +1378,15 @@ try{
                 }
                 else{
                     $work = str_replace(REPLACE_MULTI_PREG, "", $work);
+                    
                 }
                 $work = str_replace(REPLACE_VALUE,            $itemInfo['COLUMN_NAME'],      $work);
                 $work = str_replace(REPLACE_DISP,             $itemName,                     $work);
                 $work = str_replace(REPLACE_SIZE,             $itemInfo['MAX_LENGTH'],       $work);
                 $work = str_replace(REPLACE_MULTI_MAX_LENGTH, $itemInfo['MULTI_MAX_LENGTH'], $work);
+                $work = str_replace(REPLACE_PW_MAX_LENGTH,    $itemInfo['PW_MAX_LENGTH'],    $work);
+                $work = str_replace(REPLACE_UPLOAD_FILE_SIZE, $itemInfo['UPLOAD_MAX_SIZE'],  $work);
+                $work = str_replace(REPLACE_LINK_MAX_LENGTH,  $itemInfo['LINK_LENGTH'],      $work);
 
                 // 他メニュー参照の場合
                 if(7 == $itemInfo['INPUT_METHOD_ID']){
@@ -1401,15 +1505,26 @@ try{
                 $work = str_replace(REPLACE_ITEM,   $hgLoadTableVal, $work);
                 $hgLoadTable = $work;
             }
-
-            // ホスト用の00_loadTable.php
-            $work = $hostLoadTableTmpl;
-            $work = str_replace(REPLACE_INFO,   $description,       $work);
-            $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
-            $work = str_replace(REPLACE_MENU,   $menuName,          $work);
-            $hostLoadTableVal .= $columnGrpParts;
-            $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
-            $hostLoadTable = $work;
+            if("1" == $cmiData['TARGET']){
+                // ホスト用の00_loadTable.php
+                $work = $hostLoadTableTmpl;
+                $work = str_replace(REPLACE_INFO,   $description,       $work);
+                $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_MENU,   $menuName,          $work);
+                $hostLoadTableVal .= $columnGrpParts;
+                $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
+                $hostLoadTable = $work;
+            }
+            else if("3" == $cmiData['TARGET']){
+                // ホスト用(オペレーションのみ)の00_loadTable.php
+                $work = $hostLoadTableOpTmpl;
+                $work = str_replace(REPLACE_INFO,   $description,       $work);
+                $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_MENU,   $menuName,          $work);
+                $hostLoadTableVal .= $columnGrpParts;
+                $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
+                $hostLoadTable = $work;
+            }
 
             // パラメータシート(縦)を作成する設定の場合
             if(true === $createConvFlg){
@@ -1430,8 +1545,16 @@ try{
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertHostLoadTable = $work;
                 }
-                else{
+                else if("1" == $cmiData['TARGET']){
                     $work = $convHostLoadTableTmpl;
+                    $work = str_replace(REPLACE_INFO,       $description,           $work);
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_MENU,       $menuName,              $work);
+                    $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
+                    $convertLoadTable = $work;
+                }
+                else if("3" == $cmiData['TARGET']){
+                    $work = $convHostLoadTableOpTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
@@ -1441,7 +1564,12 @@ try{
             }
 
             // 最新値参照用の00_loadTable.php
-            $work = $viewLoadTableTmpl;
+            if("3" == $cmiData['TARGET']){
+                $work = $viewLoadTableOpTmpl;
+            }
+            else{
+                $work = $viewLoadTableTmpl;
+            }
             $work = str_replace(REPLACE_INFO,   $description,       $work);
             $work = str_replace(REPLACE_MENU,   $menuName,          $work);
             if(true === $createConvFlg){
@@ -1456,18 +1584,18 @@ $c->getOutputType("filter_table")->setVisible(false);
 $c->setSubtotalFlag(false);
 $table->addColumn($c);
 EOD;
-            $work = str_replace(REPLACE_INPUT_ORDER, $inputOrder, $work);
+                $work = str_replace(REPLACE_INPUT_ORDER, $inputOrder, $work);
 
-            $convertViewLoadTableVal .= $convColumnGrpParts;
-            $work = str_replace(REPLACE_ITEM,   $convertViewLoadTableVal,  $work);
-        }
-        else{
-            $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
-            $work = str_replace(REPLACE_INPUT_ORDER, "", $work);
-            $viewLoadTableVal .= $columnGrpParts;
-            $work = str_replace(REPLACE_ITEM,   $viewLoadTableVal,  $work);
-        }
-        $viewLoadTable = $work;
+                $convertViewLoadTableVal .= $convColumnGrpParts;
+                $work = str_replace(REPLACE_ITEM,   $convertViewLoadTableVal,  $work);
+            }
+            else{
+                $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_INPUT_ORDER, "", $work);
+                $viewLoadTableVal .= $columnGrpParts;
+                $work = str_replace(REPLACE_ITEM,   $viewLoadTableVal,  $work);
+            }
+            $viewLoadTable = $work;
 
             // ホストグループ用のSQL
             $work = $hgSqlTmpl;
@@ -1475,9 +1603,15 @@ EOD;
             $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
             $work = str_replace(REPLACE_COL,        $columns,       $work);
             $hgSql = $work;
-
+            
             // ホスト用のSQL
-            $work = $hostSqlTmpl;
+            if("1" == $cmiData['TARGET']){
+                $work = $hostSqlTmpl;
+            }
+            // ホスト(オペレーションのみ)用のSQL
+            else if("3" == $cmiData['TARGET']){
+                $work = $hostSqlOpTmpl;
+            }
             $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
             $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
             $work = str_replace(REPLACE_COL,        $columns,       $work);
@@ -1499,8 +1633,15 @@ EOD;
                     $work = str_replace(REPLACE_COL,        $convColumns,           $work);
                     $convertSql .= $work;
                 }
-                else{
+                else if("1" == $cmiData['TARGET']){
                     $work = $convHostSqlTmpl;
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
+                    $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                    $convertSql = $work;
+                }
+                else if("3" == $cmiData['TARGET']){
+                    $work = $convHostSqlOpTmpl;
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
                     $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
                     $work = str_replace(REPLACE_COL,        $convColumns,           $work);
@@ -1706,7 +1847,24 @@ EOD;
         //////////////////////////
         // メニュー管理更新
         //////////////////////////
-        $result = updateMenuList($cmiData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $createConvFlg);
+        $hgMenuId = null;
+        $hostMenuId = null;
+        $hostSubMenuId = null;
+        $viewMenuId = null;
+        $convMenuId = null;
+        $convHostMenuId = null;
+        $result = updateMenuList($cmiData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $createConvFlg);
+
+        if(true !== $result){
+            // パラメータシート作成管理更新処理を行う
+            updateMenuStatus($targetData, "4", $result, true, true);
+            continue;
+        }
+
+        //////////////////////////
+        // シーケンステーブル更新(シーケンス管理メニュー対応)
+        //////////////////////////
+        $result = updateSequence($hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $menuTableName);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1717,7 +1875,7 @@ EOD;
         //////////////////////////
         // ロール・メニュー紐付管理更新
         //////////////////////////
-        $result = updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $roleUserLinkArray);
+        $result = updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData, $roleUserLinkArray);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1728,7 +1886,7 @@ EOD;
         //////////////////////////
         // メニュー・テーブル紐付更新
         //////////////////////////
-        $result = updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+        $result = updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData);
 
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
@@ -1739,24 +1897,24 @@ EOD;
         //////////////////////////
         // 他メニュー連携テーブル更新
         //////////////////////////
-        $result = updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId);
+        $result = updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData);
         if(true !== $result){
             // パラメータシート作成管理更新処理を行う
             updateMenuStatus($targetData, "4", $result, true, true);
             continue;
         }
 
-        if("1" == $cmiData['TARGET']){  // 作成対象: パラメータシート
+        if("1" == $cmiData['TARGET']||"3" == $cmiData['TARGET']){  // 作成対象: パラメータシート
             
             // 紐づけ対象だけを確認 (紐づけ対象がないの場合はtrue)
             $noLinkTarget = true;
             foreach($itemInfoArray as $key => $itemInfo){
-                if(5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID']){
+                if(5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID'] && 9 != $itemInfo['INPUT_METHOD_ID']){
                     // プルダウン選択の中身タイプをチェック
                     if(7 == $itemInfo['INPUT_METHOD_ID']){
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                        if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
+                        if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE'] || 9 == $otherMenuLink['COLUMN_TYPE']){
                             continue;
                         } 
                     }
@@ -1765,10 +1923,18 @@ EOD;
                 }
             }
             
+            // 紐付対象メニューに登録するメニューIDを特定する
+            if("" != $hostSubMenuId){
+                $targetMenuId = $hostSubMenuId;
+            }
+            else{
+                $targetMenuId = $hostMenuId;
+            }
+
             //////////////////////////
             // 紐付対象メニュー更新
             //////////////////////////
-            $result = updateLinkTargetMenu($hostMenuId, $noLinkTarget);
+            $result = updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData);
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
                 updateMenuStatus($targetData, "4", $result, true, true);
@@ -1778,7 +1944,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューテーブル管理更新
             //////////////////////////
-            $result = updateLinkTargetTable($hostMenuId, "G_" . $menuTableName . "_H" ,$noLinkTarget);
+            $result = updateLinkTargetTable($targetMenuId, "G_" . $menuTableName . "_H" ,$noLinkTarget, $cmiData);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -1789,7 +1955,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューカラム管理更新
             //////////////////////////
-            $result = updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray);
+            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -1854,6 +2020,7 @@ EOD;
         if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
                 //データシート用
                 $cmdbLoadTablePath = $menuTmpDir . sprintf("%010d", $hostMenuId) . "_loadTable.php";
+                $cmdbLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hostMenuId), $cmdbLoadTable);
                 $result = deployLoadTable($cmdbLoadTable,
                                           $cmdbLoadTablePath,
                                           sprintf("%010d", $hostMenuId),
@@ -1867,6 +2034,7 @@ EOD;
             if("2" == $cmiData['PURPOSE']){
                 // ホストグループ用
                 $hgLoadTablePath = $menuTmpDir . sprintf("%010d", $hgMenuId) . "_loadTable.php";
+                $hgLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hgMenuId), $hgLoadTable);
                 $result = deployLoadTable($hgLoadTable,
                                           $hgLoadTablePath,
                                           sprintf("%010d", $hgMenuId),
@@ -1876,9 +2044,22 @@ EOD;
                     continue;
                 }
             }
-
+            else if(true !== $createConvFlg){
+                // 代入値自動登録用
+                $hostSubLoadTablePath = $menuTmpDir . sprintf("%010d", $hostSubMenuId) . "_loadTable.php";
+                $hostLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hostMenuId), $hostLoadTable);
+                $result = deployLoadTable($hostLoadTable,
+                                          $hostSubLoadTablePath,
+                                          sprintf("%010d", $hostSubMenuId),
+                                          $targetData
+                                         );
+                if(true !== $result){
+                    continue;
+                }
+            }
             // ホスト用
             $hostLoadTablePath = $menuTmpDir . sprintf("%010d", $hostMenuId) . "_loadTable.php";
+            $hostLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hostMenuId), $hostLoadTable);
             $result = deployLoadTable($hostLoadTable,
                                       $hostLoadTablePath,
                                       sprintf("%010d", $hostMenuId),
@@ -1890,6 +2071,15 @@ EOD;
 
             // 最新値参照用
             $viewLoadTablePath = $menuTmpDir . sprintf("%010d", $viewMenuId) . "_loadTable.php";
+            if("2" == $cmiData['PURPOSE'] && true === $createConvFlg){
+                $viewLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $convHostMenuId), $viewLoadTable);
+            }
+            else if("2" != $cmiData['PURPOSE'] && true === $createConvFlg){
+                $viewLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $convMenuId), $viewLoadTable);
+            }
+            else{
+                $viewLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $hostMenuId), $viewLoadTable);
+            }
             $result = deployLoadTable($viewLoadTable,
                                       $viewLoadTablePath,
                                       sprintf("%010d", $viewMenuId),
@@ -1903,6 +2093,7 @@ EOD;
             if(true === $createConvFlg){
                 // 縦メニュー用
                 $convertLoadTablePath = $menuTmpDir . sprintf("%010d", $convMenuId) . "_loadTable.php";
+                $convertLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $convMenuId), $convertLoadTable);
                 $result = deployLoadTable($convertLoadTable,
                                           $convertLoadTablePath,
                                           sprintf("%010d", $convMenuId),
@@ -1914,6 +2105,7 @@ EOD;
 
                 if("2" == $cmiData['PURPOSE']){
                     $convertHostLoadTablePath = $menuTmpDir . sprintf("%010d", $convHostMenuId) . "_loadTable.php";
+                    $convertHostLoadTable = str_replace(REPLACE_UPLOAD_REF_MENU_ID, sprintf("%010d", $convHostMenuId), $convertHostLoadTable);
                     $result = deployLoadTable($convertHostLoadTable,
                                               $convertHostLoadTablePath,
                                               sprintf("%010d", $convHostMenuId),
@@ -1971,6 +2163,20 @@ EOD;
 
                 if(true != $result){
                     $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $hgLoadTablePath));
+                    outputLog($msg);
+                    // パラメータシート作成管理更新処理を行う
+                    updateMenuStatus($targetData, "4", $msg, true, true);
+                    $zip->close();
+                    $zip = NULL;
+                    continue;
+                }
+            }
+            else if(true !== $createConvFlg){
+                // 代入値登録設定用の00_loadTable.php
+                $result = $zip->addFile($hostSubLoadTablePath, basename($hostSubLoadTablePath));
+
+                if(true != $result){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5007', array($zipFilePath, $hostSubLoadTablePath));
                     outputLog($msg);
                     // パラメータシート作成管理更新処理を行う
                     updateMenuStatus($targetData, "4", $msg, true, true);
@@ -2444,13 +2650,14 @@ function deployLoadTable($fileContents, $loadTablePath, $menuId, $targetData){
 /*
  * メニュー・テーブル紐付更新
  */
-function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
+function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $menuTableLinkTable = new MenuTableLinkTable($objDBCA, $db_model_ch);
 
     try{
         $menuInfoArray = array(array($hgMenuId,     "F_" . $menuTableName . "_HG",      "F_" . $menuTableName . "_HG_JNL"),
                                array($hostMenuId,   "F_" . $menuTableName . "_H",       "F_" . $menuTableName . "_H_JNL"),
+                               array($hostSubMenuId,"F_" . $menuTableName . "_H",       "F_" . $menuTableName . "_H_JNL"),
                                array($viewMenuId,   "F_" . $menuTableName . "_H",       "F_" . $menuTableName . "_H_JNL"),
                               );
 
@@ -2482,6 +2689,7 @@ function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $viewMenuId
             // メニューIDが一致した場合、廃止
             if($mtlData['MENU_ID'] == $hgMenuId ||
                $mtlData['MENU_ID'] == $hostMenuId ||
+               $mtlData['MENU_ID'] == $hostSubMenuId ||
                $mtlData['MENU_ID'] == $viewMenuId ||
                $mtlData['MENU_ID'] == $convMenuId ||
                $mtlData['MENU_ID'] == $convHostMenuId){
@@ -2510,12 +2718,13 @@ function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $viewMenuId
             // メニューIDが設定されている場合
             if("" != $menuInfo[0]){
                 $insertData = array();
-                $insertData['MENU_ID']          = $menuInfo[0];         // メニュー名
-                $insertData['TABLE_NAME']       = $menuInfo[1];         // テーブル名
-                $insertData['KEY_COL_NAME']     = "ROW_ID";             // 主キー
-                $insertData['TABLE_NAME_JNL']   = $menuInfo[2];         // テーブル名(履歴)
-                $insertData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
-                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                $insertData['MENU_ID']          = $menuInfo[0];             // メニュー名
+                $insertData['TABLE_NAME']       = $menuInfo[1];             // テーブル名
+                $insertData['KEY_COL_NAME']     = "ROW_ID";                 // 主キー
+                $insertData['TABLE_NAME_JNL']   = $menuInfo[2];             // テーブル名(履歴)
+                $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
+                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
 
                 //////////////////////////
                 // メニュー・テーブル紐付テーブルに登録
@@ -2541,7 +2750,7 @@ function updateMenuTableLink($menuTableName, $hgMenuId, $hostMenuId, $viewMenuId
 /*
  * 他メニュー連携テーブル更新
  */
-function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId){
+function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArrayArray, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $otherMenuLinkTable = new OtherMenuLinkTable($objDBCA, $db_model_ch);
 
@@ -2564,6 +2773,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
             // メニューIDが一致した場合、廃止
             if($omlData['MENU_ID'] == $hgMenuId ||
                $omlData['MENU_ID'] == $hostMenuId ||
+               $omlData['MENU_ID'] == $hostSubMenuId ||
                $omlData['MENU_ID'] == $viewMenuId ||
                $omlData['MENU_ID'] == $convMenuId ||
                $omlData['MENU_ID'] == $convHostMenuId){
@@ -2598,17 +2808,11 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
         // 登録する
         foreach($itemInfoArray as $itemInfo){
             // プルダウン選択は対象外のため、スキップする
-            if(7 == $itemInfo['INPUT_METHOD_ID']){
+            if(7 == $itemInfo['INPUT_METHOD_ID'] || 8 == $itemInfo['INPUT_METHOD_ID'] || 9 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             // 必須かつ一意の場合
             if(1 == $itemInfo['REQUIRED'] && 1 == $itemInfo['UNIQUED']){
-                
-                if($substitutionFlag == true){
-                    $strParameter = "";      // データシート用は「パラメータ」をつけない
-                }else{
-                    $strParameter = $objMTS->getSomeMessage("ITACREPAR-MNU-102612") ."/"; 
-                }
 
                 // 項目名を決定する
                 if(0 < count($itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']])){
@@ -2631,6 +2835,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
                 $insertData['PRI_NAME']         = "ROW_ID";                     // 主キー
                 $insertData['COLUMN_NAME']      = $itemInfo['COLUMN_NAME'];     // カラム名
                 $insertData['COLUMN_TYPE']      = $itemInfo['INPUT_METHOD_ID']; // カラム種別
+                $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];      // アクセス許可ロール
                 $insertData['DISUSE_FLAG']      = "0";                          // 廃止フラグ
                 $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;         // 最終更新者
 
@@ -2657,7 +2862,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
 /*
  * メニュー管理更新
  */
-function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$convMenuId, &$convHostMenuId, $createConvFlg){
+function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$viewMenuId, &$convMenuId, &$convHostMenuId, $createConvFlg){
     global $objDBCA, $db_model_ch, $objMTS;
     $menuListTable = new MenuListTable($objDBCA, $db_model_ch);
 
@@ -2676,63 +2881,97 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
         }
         $menuListArray = $result;
 
-        $hgMatchFlg = false;
-        $hostMatchFlg = false;
+        $inputMatchFlg = false;
+        $substMatchFlg = false;
         $viewMatchFlg = false;
-        $convMatchFlg = false;
         $convHostMatchFlg = false;
-        $cmdbMatchFlg = false;
-        $hgMenuList = NULL;
-        $hostMenuList = NULL;
+        $middleHgMatchFlg = false;
+        $hostSubMenuList = NULL;
+        $inputMenuList = NULL;
+        $substMenuList = NULL;
         $viewMenuList = NULL;
-        $convMenuList = NULL;
         $convHostMenuList = NULL;
-        $cmdbMenuList = NULL;
+        $middleHgMenuList = NULL;
 
         foreach($menuListArray as $menu){
             // メニューグループとメニューが一致するデータを検索
-            if($cmiData['MENUGROUP_FOR_HG'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
-                $hgMatchFlg = true;
-                $hgMenuList = $menu;
+            if($cmiData['MENUGROUP_FOR_INPUT'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
+                $inputMatchFlg = true;
+                $inputMenuList = $menu;
             }
-            else if($cmiData['MENUGROUP_FOR_H'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
-                $hostMatchFlg = true;
-                $hostMenuList = $menu;
+            if($cmiData['MENUGROUP_FOR_SUBST'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
+                $substMatchFlg = true;
+                $substMenuList = $menu;
             }
             else if($cmiData['MENUGROUP_FOR_VIEW'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
                 $viewMatchFlg = true;
                 $viewMenuList = $menu;
             }
-            else if($cmiData['MENUGROUP_FOR_CONV'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
-                $convMatchFlg = true;
-                $convMenuList = $menu;
-            }
-            else if($cmiData['MENUGROUP_FOR_CMDB'] === $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
-                $cmdbMatchFlg = true;
-                $cmdbMenuList = $menu;
-            }
             else if(MENU_GROUP_ID_CONV_HOST == $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
                 $convHostMatchFlg = true;
                 $convHostMenuList = $menu;
             }
+            else if(MENU_GROUP_ID_MIDDLE_HG == $menu['MENU_GROUP_ID'] && $cmiData['MENU_NAME'] === $menu['MENU_NAME']){
+                $middleHgMatchFlg = true;
+                $middleHgMenuList = $menu;
+            }
         }
 
         $targetArray = array();
-        if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
-            $targetArray[] = array('MATCH_FLG' => $cmdbMatchFlg, 'DATA' => $cmdbMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_CMDB']);
-        }
-        else{
-            if(true === $createConvFlg){
-                $targetArray[] = array('MATCH_FLG' => $convMatchFlg, 'DATA' => $convMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_CONV']);
-            }
+
+        // 作成対象:パラメータシート(ホスト/オペレーションあり)
+        if("1" == $cmiData['TARGET']){
+            // ホストグループあり
             if("2" == $cmiData['PURPOSE']){
-                $targetArray[] = array('MATCH_FLG' => $hgMatchFlg, 'DATA' => $hgMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_HG']);
+                // 縦メニューあり
+                if(true === $createConvFlg){
+                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                    $targetArray[] = array('MATCH_FLG' => $middleHgMatchFlg, 'DATA' => $middleHgMenuList, 'MENU_GROUP' => MENU_GROUP_ID_MIDDLE_HG);
+                    $targetArray[] = array('MATCH_FLG' => $convHostMatchFlg, 'DATA' => $convHostMenuList, 'MENU_GROUP' => MENU_GROUP_ID_CONV_HOST);
+                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+                }
+                // 縦メニューなし
+                else{
+                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+                }
             }
-            $targetArray[] = array('MATCH_FLG' => $hostMatchFlg, 'DATA' => $hostMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_H']);
-            $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
-            if(true === $createConvFlg && "2" == $cmiData['PURPOSE']){
-                $targetArray[] = array('MATCH_FLG' => $convHostMatchFlg, 'DATA' => $convHostMenuList, 'MENU_GROUP' => MENU_GROUP_ID_CONV_HOST);
+            // ホストグループなし
+            else{
+                // 縦メニューあり
+                if(true === $createConvFlg){
+                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+                }
+                // 縦メニューなし
+                else{
+                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+                }
             }
+        }
+        // 作成対象:パラメータシート(オペレーションあり)
+        else if("3" == $cmiData['TARGET']){
+            // 縦メニューあり
+            if(true === $createConvFlg){
+                $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+            }
+            // 縦メニューなし
+            else{
+                $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
+            }
+        }
+        // 作成対象; データシート
+        else if("2" == $cmiData['TARGET']){
+            $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
         }
 
         foreach($targetArray as &$target){
@@ -2744,16 +2983,17 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
 
                 // 更新する
                 $updateData = $target['DATA'];
-                $updateData['LOGIN_NECESSITY']      = 1;                    // 認証要否
-                $updateData['SERVICE_STATUS']       = 0;                    // サービス状態
-                $updateData['DISP_SEQ']             = $cmiData['DISP_SEQ']; // メニューグループ内表示順序
-                $updateData['AUTOFILTER_FLG']       = 1;                    // オートフィルタチェック
-                $updateData['INITIAL_FILTER_FLG']   = 2;                    // 初回フィルタ
-                $updateData['WEB_PRINT_LIMIT']      = NULL;                 // Web表示最大行数
-                $updateData['WEB_PRINT_CONFIRM']    = NULL;                 // Web表示前確認行数
-                $updateData['XLS_PRINT_LIMIT']      = NULL;                 // Excel出力最大行数
-                $updateData['NOTE']                 = NULL;                 // 備考
-                $updateData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM; // 最終更新者
+                $updateData['LOGIN_NECESSITY']      = 1;                        // 認証要否
+                $updateData['SERVICE_STATUS']       = 0;                        // サービス状態
+                $updateData['DISP_SEQ']             = $cmiData['DISP_SEQ'];     // メニューグループ内表示順序
+                $updateData['AUTOFILTER_FLG']       = 1;                        // オートフィルタチェック
+                $updateData['INITIAL_FILTER_FLG']   = 2;                        // 初回フィルタ
+                $updateData['WEB_PRINT_LIMIT']      = NULL;                     // Web表示最大行数
+                $updateData['WEB_PRINT_CONFIRM']    = NULL;                     // Web表示前確認行数
+                $updateData['XLS_PRINT_LIMIT']      = NULL;                     // Excel出力最大行数
+                $updateData['ACCESS_AUTH']          = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['NOTE']                 = NULL;                     // 備考
+                $updateData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;     // 最終更新者
 
                 //////////////////////////
                 // メニュー管理テーブルを更新
@@ -2777,6 +3017,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
                 $insertData['DISP_SEQ']             = $cmiData['DISP_SEQ'];     // メニューグループ内表示順序
                 $insertData['AUTOFILTER_FLG']       = 1;                        // オートフィルタチェック
                 $insertData['INITIAL_FILTER_FLG']   = 2;                        // 初回フィルタ
+                $insertData['ACCESS_AUTH']          = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
                 $insertData['DISUSE_FLAG']          = "0";                      // 廃止フラグ
                 $insertData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;     // 最終更新者
 
@@ -2795,47 +3036,130 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
         }
         unset($target);
 
-        if("2" == $cmiData['TARGET']){  // 作成対象; データシート用
-            $convMenuId = NULL;
-            $hgMenuId   = NULL;
-            $hostMenuId = $targetArray[0]['MENU_ID'];  // MenuID はホスト用を使用
-            $viewMenuId = NULL; 
-            $convHostMenuId = NULL;
-        }
-        else{
-            if(true === $createConvFlg){
-                if("2" == $cmiData['PURPOSE']){
+        //////////////////////////
+        // メニューIDを取得する
+        //////////////////////////
+        // 作成対象:パラメータシート(ホスト/オペレーションあり)
+        if("1" == $cmiData['TARGET']){
+            // ホストグループあり
+            if("2" == $cmiData['PURPOSE']){
+                // 縦メニューあり
+                if(true === $createConvFlg){
                     $convMenuId = $targetArray[0]['MENU_ID'];
                     $hgMenuId   = $targetArray[1]['MENU_ID'];
-                    $hostMenuId = $targetArray[2]['MENU_ID'];
-                    $viewMenuId = $targetArray[3]['MENU_ID'];
-                    $convHostMenuId = $targetArray[4]['MENU_ID'];
+                    $convHostMenuId = $targetArray[2]['MENU_ID'];
+                    $hostMenuId = $targetArray[3]['MENU_ID'];
+                    $viewMenuId = $targetArray[4]['MENU_ID'];
                 }
+                // 縦メニューなし
                 else{
-                    $convMenuId = $targetArray[0]['MENU_ID'];
-                    $hgMenuId   = NULL;
-                    $hostMenuId = $targetArray[1]['MENU_ID'];
-                    $viewMenuId = $targetArray[2]['MENU_ID'];
-                    $convHostMenuId = NULL;
-                }
-            }
-            else{
-                if("2" == $cmiData['PURPOSE']){
-                    $convMenuId = NULL;
                     $hgMenuId   = $targetArray[0]['MENU_ID'];
                     $hostMenuId = $targetArray[1]['MENU_ID'];
                     $viewMenuId = $targetArray[2]['MENU_ID'];
-                    $convHostMenuId = NULL;
-                }
-                else{
-                    $convMenuId = NULL;
-                    $hgMenuId   = NULL;
-                    $hostMenuId = $targetArray[0]['MENU_ID'];
-                    $viewMenuId = $targetArray[1]['MENU_ID'];
-                    $convHostMenuId = NULL;
                 }
             }
-        }  
+            // ホストグループなし
+            else{
+                // 縦メニューあり
+                if(true === $createConvFlg){
+                    $convMenuId = $targetArray[0]['MENU_ID'];
+                    $hostMenuId = $targetArray[1]['MENU_ID'];
+                    $viewMenuId = $targetArray[2]['MENU_ID'];
+                }
+                // 縦メニューなし
+                else{
+                    $hostMenuId = $targetArray[0]['MENU_ID'];
+                    $hostSubMenuId = $targetArray[1]['MENU_ID'];
+                    $viewMenuId = $targetArray[2]['MENU_ID'];
+                }
+            }
+        }
+        // 作成対象:パラメータシート(オペレーションあり)
+        else if("3" == $cmiData['TARGET']){
+            // 縦メニューあり
+            if(true === $createConvFlg){
+                $convMenuId = $targetArray[0]['MENU_ID'];
+                $hostMenuId = $targetArray[1]['MENU_ID'];
+                $viewMenuId = $targetArray[2]['MENU_ID'];
+
+            }
+            // 縦メニューなし
+            else{
+                $hostMenuId = $targetArray[0]['MENU_ID'];
+                $hostSubMenuId = $targetArray[1]['MENU_ID'];
+                $viewMenuId = $targetArray[2]['MENU_ID'];
+            }
+        }
+        // 作成対象; データシート
+        else if("2" == $cmiData['TARGET']){
+            $hostMenuId = $targetArray[0]['MENU_ID'];  // MenuID はホスト用を使用
+        }
+
+        return true;
+    }
+    catch(Exception $e){
+        return $e->getMessage();
+    }
+}
+
+/*
+ * シーケンステーブル更新(シーケンス管理メニュー対応)
+ */
+function updateSequence($hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target, $menuTableName){
+    global $objDBCA, $db_model_ch, $objMTS;
+    $sqlArray = array();
+    try{
+        // データシートの場合
+        if("2" == $target){
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+        }
+        // パラメータシートの場合
+        else{
+            // ホストグループかつ縦メニュー
+            if(NULL !== $convMenuId && NULL !== $hgMenuId){
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hgMenuId} WHERE NAME ='F_${menuTableName}_HG_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hgMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_HG_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convMenuId} WHERE NAME ='F_${menuTableName}_CONV_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_CONV_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convHostMenuId} WHERE NAME ='F_${menuTableName}_CONV_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convHostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_CONV_H_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+            }
+            // 縦メニュー
+            else if(NULL !== $convMenuId && NULL === $hgMenuId){
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convMenuId} WHERE NAME ='F_${menuTableName}_CONV_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${convMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_CONV_H_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+            }
+            // ホストグループ
+            else if(NULL === $convMenuId && NULL !== $hgMenuId){
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hgMenuId} WHERE NAME ='F_${menuTableName}_HG_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hgMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_HG_JSQ'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+            }
+            // 通常
+            else{
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} WHERE NAME ='F_${menuTableName}_H_RIC'";
+                $sqlArray[] = "UPDATE A_SEQUENCE SET MENU_ID=${hostMenuId} ,NOTE='" . $objMTS->getSomeMessage('ITACREPAR-STD-50003') . "' WHERE NAME ='F_${menuTableName}_H_JSQ'";
+            }
+        }
+
+        $baseTable = new BaseTable_CPM($objDBCA, $db_model_ch);
+        foreach($sqlArray as $sql){
+
+            // SQL実行
+            $result = $baseTable->execQuery($sql, NULL, $objQuery);
+            if(true !== $result){
+                outputLog("SQL=$sql");
+                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                outputLog($msg);
+                throw new Exception($msg);
+            }
+        }
 
         return true;
     }
@@ -2847,7 +3171,7 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$viewMenuId, &$conv
 /*
  * ロール・メニュー紐付管理更新
  */
-function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $target, $roleUserLinkArray){
+function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData, $roleUserLinkArray){
     global $objDBCA, $db_model_ch, $objMTS;
     $roleMenuLinkListTable = new RoleMenuLinkListTable($objDBCA, $db_model_ch);
 
@@ -2870,9 +3194,15 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId
             // メニューIDが一致したデータを廃止
             if($roleMenuLink['MENU_ID'] == $hgMenuId ||
                $roleMenuLink['MENU_ID'] == $hostMenuId ||
+               $roleMenuLink['MENU_ID'] == $hostSubMenuId ||
                $roleMenuLink['MENU_ID'] == $viewMenuId ||
                $roleMenuLink['MENU_ID'] == $convMenuId ||
                $roleMenuLink['MENU_ID'] == $convHostMenuId){
+
+                // すでに廃止ならスキップ
+                if($roleMenuLink['DISUSE_FLAG'] == "1"){
+                    continue;
+                }
 
                 // 廃止する
                 $updateData = $roleMenuLink;
@@ -2892,14 +3222,14 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId
         }
         
         // データシートの場合
-        if("2" == $target){
+        if("2" == $cmiData['TARGET']){
                 $menuArray = array(array($hostMenuId,   1,  '0'));
         }
         // パラメータシートの場合
         else{
             if(NULL !== $convMenuId && NULL !== $hgMenuId){
                 $menuArray = array(array($convMenuId,       1,  '0'),
-                                   array($hgMenuId,         2,  '0'),
+                                   array($hgMenuId,         2,  '1'),
                                    array($hostMenuId,       2,  '0'),
                                    array($viewMenuId,       2,  '0'),
                                    array($convHostMenuId,   2,  '1'),
@@ -2919,33 +3249,42 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId
             }
             else{
                 $menuArray = array(array($hostMenuId,   1,  '0'),
+                                   array($hostSubMenuId,2,  '0'),
                                    array($viewMenuId,   2,  '0'),
                                   );
             }
         }
-        
+
         $roles = array();
-        
-        foreach($roleUserLinkArray as $rUL){
-            if($rUL['USER_ID'] == $targetData['LAST_UPDATE_USER']){
-                $roles[] = $rUL['ROLE_ID'];
+
+        // アクセス許可ロールが設定されている場合、アクセス許可ロールにのみレコードを作成する
+        if($cmiData['ACCESS_AUTH'] != ""){
+            $roles = explode(",", $cmiData['ACCESS_AUTH']);
+        }
+        // アクセス許可ロールが設定されていない場合、administrator＋所属するロールにレコードを作成する
+        else{
+            foreach($roleUserLinkArray as $rUL){
+                if($rUL['USER_ID'] == $targetData['LAST_UPDATE_USER']){
+                    $roles[] = $rUL['ROLE_ID'];
+                }
+
             }
-            
+            // 管理者ロールは入れていない場合
+            if(!in_array("1",$roles)){
+                $roles[] = "1";
+            }
         }
-        // 管理者ロールは入れていない場合
-        if(!in_array("1",$roles)){
-            $roles[] = "1";
-        }
-        
+
         foreach($menuArray as $menu){
             foreach($roles as $role){
                 // 登録する
                 $insertData = array();
-                $insertData['ROLE_ID']          = $role;                // ロール
-                $insertData['MENU_ID']          = $menu[0];             // メニュー
-                $insertData['PRIVILEGE']        = $menu[1];             // 紐付
-                $insertData['DISUSE_FLAG']      = $menu[2];             // 廃止フラグ
-                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                $insertData['ROLE_ID']          = $role;                    // ロール
+                $insertData['MENU_ID']          = $menu[0];                 // メニュー
+                $insertData['PRIVILEGE']        = $menu[1];                 // 紐付
+                $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                $insertData['DISUSE_FLAG']      = $menu[2];                 // 廃止フラグ
+                $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
 
                 //////////////////////////
                 // ロール・メニュー紐付管理テーブルに登録
@@ -2968,7 +3307,7 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $viewMenuId
 /*
  * 紐付対象メニュー更新
  */
-function updateLinkTargetMenu($hostMenuId, $noLinkTarget){
+function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $matchFlg = false;
     $cmdbMenuListTable = new CmdbMenuListTable($objDBCA, $db_model_ch);
@@ -2990,26 +3329,36 @@ function updateLinkTargetMenu($hostMenuId, $noLinkTarget){
 
         foreach($cmdbMenuListArray as $cmdbMenuList){
             // メニューIDが一致するデータがあった場合
-            if($cmdbMenuList['MENU_ID'] == $hostMenuId){
+            if($cmdbMenuList['MENU_ID'] == $targetMenuId){
                 $matchFlg = true;
+                $updateData = $cmdbMenuList;
 
                 // 廃止、紐づけ対象カラムがある場合
                 if($cmdbMenuList['DISUSE_FLAG'] == "1" && $noLinkTarget == false){
 
                     // 復活する
-                    $updateData = $cmdbMenuList;
-                    $updateData['NOTE']             = "";                   // 備考
-                    $updateData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
-                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                    $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
+                    $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                    $updateData['NOTE']             = "";                       // 備考
+                    $updateData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
                 // 紐づけ対象カラムがない場合 
                 else if($cmdbMenuList['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
 
                     // 廃止する
-                    $updateData = $cmdbMenuList;
-                    $updateData['NOTE']             = "";                   // 備考
-                    $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
-                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+                    $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['NOTE']             = "";                       // 備考
+                    $updateData['DISUSE_FLAG']      = "1";                      // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
+                }
+                // 値が更新されている場合
+                else if(($updateData['SHEET_TYPE'] != $cmiData['TARGET'] || $updateData['ACCESS_AUTH_FLG'] != 1 || $updateData['ACCESS_AUTH'] != $cmiData['ACCESS_AUTH']) &&  $noLinkTarget == false){
+                    $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
+                    $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
                 // 他の場合は更新しない
                 else{
@@ -3033,9 +3382,12 @@ function updateLinkTargetMenu($hostMenuId, $noLinkTarget){
 
             // 登録する
             $insertData = array();
-            $insertData['MENU_ID']          = $hostMenuId;          // メニュー
-            $insertData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
-            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+            $insertData['MENU_ID']          = $targetMenuId;            // メニュー
+            $insertData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+            $insertData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
+            $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+            $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
+            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
 
             //////////////////////////
             // 紐付対象メニューテーブルに登録
@@ -3057,7 +3409,7 @@ function updateLinkTargetMenu($hostMenuId, $noLinkTarget){
 /*
  * 紐付対象メニューテーブル管理更新
  */
-function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget){
+function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $matchFlg = false;
     $cmdbMenuTableTable = new CmdbMenuTableTable($objDBCA, $db_model_ch);
@@ -3081,45 +3433,43 @@ function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget){
             // メニューIDが一致するデータがあった場合
             if($cmdbMenuTable['MENU_ID'] == $hostMenuId){
                 $matchFlg = true;
+                $updateData = $cmdbMenuTable;
 
-                $updateFlg = false;
                 // 廃止の場合は更新する
                 if($cmdbMenuTable['DISUSE_FLAG'] == "1" && $noLinkTarget == false){
-                    $updateFlg = true;
+                    $updateData['TABLE_NAME']       = $tableName;               // テーブル名
+                    $updateData['PKEY_NAME']        = "ROW_ID";                 // 主キー
+                    $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                    $updateData['NOTE']             = "";                       // 備考
+                    $updateData['DISUSE_FLAG']      = "0";                      // 廃止フラグ(紐づけ対象あり)
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
                 // 紐づけ対象がなくなった場合、更新する
-                if($cmdbMenuTable['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
-                    $updateFlg = true;
+                else if($cmdbMenuTable['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
+                    $updateData['DISUSE_FLAG']  = "1";                          // 廃止フラグ(紐づけ対象なし)
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
                 // テーブル名が異なる場合は更新する
-                if($cmdbMenuTable['TABLE_NAME'] != $tableName){
-                    $updateFlg = true;
+                else if(($cmdbMenuTable['TABLE_NAME'] != $tableName || $cmdbMenuTable['ACCESS_AUTH'] != $cmiData['ACCESS_AUTH']) && $noLinkTarget == false){
+                    $updateData['TABLE_NAME']       = $tableName;               // テーブル名
+                    $updateData['PKEY_NAME']        = "ROW_ID";                 // 主キー
+                    $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+                    $updateData['NOTE']             = "";                       // 備考
+                    $updateData['DISUSE_FLAG']      = "0";                      // 廃止フラグ(紐づけ対象あり)
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
+                }
+                else{
+                    break;
                 }
 
-                if(true === $updateFlg){
-                    // 更新する
-                    $updateData = $cmdbMenuTable;
-                    $updateData['TABLE_NAME']       = $tableName;           // テーブル名
-                    $updateData['PKEY_NAME']        = "ROW_ID";             // 主キー
-                    $updateData['NOTE']             = "";                   // 備考
-
-                    if($noLinkTarget == false){
-                        $updateData['DISUSE_FLAG']  = "0";                  // 廃止フラグ(紐づけ対象あり)
-                    }
-                    else if($noLinkTarget == true){
-                        $updateData['DISUSE_FLAG']  = "1";                  // 廃止フラグ(紐づけ対象なし)
-                    }
-                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
-
-                    //////////////////////////
-                    // 紐付対象メニューテーブル管理テーブルを更新
-                    //////////////////////////
-                    $result = $cmdbMenuTableTable->updateTable($updateData, $jnlSeqNo);
-                    if(true !== $result){
-                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                        outputLog($msg);
-                        throw new Exception($msg);
-                    }
+                //////////////////////////
+                // 紐付対象メニューテーブル管理テーブルを更新
+                //////////////////////////
+                $result = $cmdbMenuTableTable->updateTable($updateData, $jnlSeqNo);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                    outputLog($msg);
+                    throw new Exception($msg);
                 }
                 break;
             }
@@ -3130,11 +3480,12 @@ function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget){
 
             // 登録する
             $insertData = array();
-            $insertData['MENU_ID']          = $hostMenuId;          // メニュー
-            $insertData['TABLE_NAME']       = $tableName;           // テーブル名
-            $insertData['PKEY_NAME']        = "ROW_ID";             // 主キー
-            $insertData['DISUSE_FLAG']      = "0";                  // 廃止フラグ
-            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+            $insertData['MENU_ID']          = $hostMenuId;              // メニュー
+            $insertData['TABLE_NAME']       = $tableName;               // テーブル名
+            $insertData['PKEY_NAME']        = "ROW_ID";                 // 主キー
+            $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
+            $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
+            $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
 
             //////////////////////////
             // 紐付対象メニューテーブル管理テーブルに登録
@@ -3156,7 +3507,7 @@ function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget){
 /*
  * 紐付対象メニューカラム管理更新
  */
-function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray){
+function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData){
     global $objDBCA, $db_model_ch, $objMTS;
     $otherMenuLinkTable = new OtherMenuLinkTable($objDBCA, $db_model_ch);
     $cmdbMenuColumnTable = new CmdbMenuColumnTable($objDBCA, $db_model_ch);
@@ -3182,13 +3533,13 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
         $columnInfoArray = array();
 
         foreach($itemInfoArray as $key => $itemInfo){
-            if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
+            if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID'] || 9 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             if(7 == $itemInfo['INPUT_METHOD_ID']){
                 $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                 $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE']){
+                if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE'] || 8 == $otherMenuLink['COLUMN_TYPE'] || 9 == $otherMenuLink['COLUMN_TYPE']){
                     continue;
                 }
                 if(1 == $otherMenuLink['COLUMN_TYPE']){
@@ -3200,6 +3551,9 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 else if(3 == $otherMenuLink['COLUMN_TYPE'] || 4 == $otherMenuLink['COLUMN_TYPE']){
                     $colClass = "NumColumn";
                 }
+                else if(10 == $otherMenuLink['COLUMN_TYPE']){
+                    $colClass = "HostInsideLinkTextColumn";
+                }
             }
             else if(1 == $itemInfo['INPUT_METHOD_ID']){
                 $colClass = "TextColumn";
@@ -3209,6 +3563,12 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             }
             else if(3 == $itemInfo['INPUT_METHOD_ID'] || 4 == $itemInfo['INPUT_METHOD_ID']){
                 $colClass = "NumColumn";
+            }
+            else if(8 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "PasswordColumn";
+            }
+            else if(10 == $itemInfo['INPUT_METHOD_ID']){
+                $colClass = "HostInsideLinkTextColumn";
             }
             
             // 項目名を作成
@@ -3281,7 +3641,8 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                        $cmdbMenuColumn['COL_TITLE_DISP_SEQ']    != $columnInfo['COL_TITLE_DISP_SEQ'] ||
                        $cmdbMenuColumn['REF_TABLE_NAME']        != $columnInfo['REF_TABLE_NAME'] ||
                        $cmdbMenuColumn['REF_PKEY_NAME']         != $columnInfo['REF_PKEY_NAME'] ||
-                       $cmdbMenuColumn['REF_COL_NAME']          != $columnInfo['REF_COL_NAME']){
+                       $cmdbMenuColumn['REF_COL_NAME']          != $columnInfo['REF_COL_NAME'] ||
+                       $cmdbMenuColumn['ACCESS_AUTH']           != $cmiData['ACCESS_AUTH']){
 
                         $updateFlg = true;
                     }
@@ -3297,6 +3658,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                         $updateData['REF_TABLE_NAME']       = $columnInfo['REF_TABLE_NAME'];        // 参照テーブル
                         $updateData['REF_PKEY_NAME']        = $columnInfo['REF_PKEY_NAME'];         // 参照主キー
                         $updateData['REF_COL_NAME']         = $columnInfo['REF_COL_NAME'];          // 参照カラム
+                        $updateData['ACCESS_AUTH']          = $cmiData['ACCESS_AUTH'];              // アクセス許可ロール
                         $updateData['NOTE']                 = "";                                   // 備考
                         $updateData['DISUSE_FLAG']          = "0";                                  // 廃止フラグ
                         $updateData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;                 // 最終更新者
@@ -3328,6 +3690,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 $insertData['REF_TABLE_NAME']       = $columnInfo['REF_TABLE_NAME'];        // 参照テーブル
                 $insertData['REF_PKEY_NAME']        = $columnInfo['REF_PKEY_NAME'];         // 参照主キー
                 $insertData['REF_COL_NAME']         = $columnInfo['REF_COL_NAME'];          // 参照カラム
+                $insertData['ACCESS_AUTH']          = $cmiData['ACCESS_AUTH'];              // アクセス許可ロール
                 $insertData['DISUSE_FLAG']          = "0";                                  // 廃止フラグ
                 $insertData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;                 // 最終更新者
 
@@ -3507,7 +3870,6 @@ function updateColToRowMng($cpiData, $menuId, $toMenuId, $purpose, $startColName
                 }
             }
         }
-
         // 登録する
         $insertData = array();
         $insertData['FROM_MENU_ID']     = $menuId;                  // 変換元メニュー

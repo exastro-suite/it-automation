@@ -2,9 +2,11 @@
 /ita-root/logs/dev_log
 /ita-root/logs/restapilogs
 /ita-root/logs/restapilogs/ansible_driver
+/ita-root/logs/terraform_out_logs
 /ita-root/logs/update_by_file
 /ita-root/logs/webaplogs
 /ita-root/temp
+/ita-root/temp/data_download
 /ita-root/temp/data_export
 /ita-root/temp/data_import
 /ita-root/temp/data_import/backup
@@ -21,6 +23,8 @@
 /ita-root/temp/sym_ope_import
 /ita-root/temp/sym_ope_import/import
 /ita-root/temp/sym_ope_import/upload
+/ita-root/temp/terraform_download_temp
+/ita-root/temp/terraform_module_temp
 /ita-root/temp/update_by_file_error
 /ita-root/uploadfiles
 /ita-root/webroot/uploadfiles
@@ -32,6 +36,9 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011501
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011502
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011601
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011610
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011611
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011612
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011701
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100020000
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100020001
@@ -48,6 +55,9 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011501/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011502/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011601/old
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011610/old
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011611/old
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011612/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011701/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100020000/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100020001/old
@@ -64,6 +74,9 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011501/old/-000150001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011502/old/-000150002
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011601/old/-000160001
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011610/old/-000160010
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011611/old/-000160011
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011612/old/-000160012
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011701/old/-000170001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100020000/old/-000020000
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100020001/old/-000020001
@@ -72,5 +85,5 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100030001/old/-000030001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100070001/old/-000070001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100080001/old/-000080001
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100090001/old/-000090001
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100100001/old/-000100001
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100090001/old/-000000005
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100100001/old/-000000006

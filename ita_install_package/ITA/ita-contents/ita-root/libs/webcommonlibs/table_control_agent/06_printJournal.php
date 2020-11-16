@@ -25,6 +25,7 @@
     //////////////////////////////////////////////////////////////////////
 
     function printJournalMain($objTable, $strFormatterId="print_journal_table", $filterData, &$aryVariant=array(), &$arySetting=array(), $aryOverride=array()){
+
         global $g;
         require_once ( "{$g['root_dir_path']}/libs/webcommonlibs/table_control_agent/99_functions2.php");
         // ----ローカル変数宣言
@@ -242,29 +243,110 @@
             }
 
             if( $objFunction02ForOverride===null ){
-	            $sql = generateJournalSelectSQL($objTable, $boolBinaryDistinctOnDTiS);
+	            // RBAC対応 ----
+	            // 指定された変更履歴の項番のマスタデータのアクセス権を判定 ----
+                    $MasterRecodePermission = true;
+	            if($objTable->getAccessAuth() === true) {
+	                $dbQM=$objTable->getDBQuoteMark();
+	                $dbTAS = $objTable->getShareTableAlias();
+	                $strRIColumn = $objTable->getRowIdentifyColumnID();
+	                $strAccessAuthColumnName = $objTable->getAccessAuthColumnName();
+	                $strColStream = " {$dbQM}{$dbTAS}{$dbQM}.{$dbQM}{$strAccessAuthColumnName}{$dbQM} {$strAccessAuthColumnName} ";
+	                // 履歴検索条件を取得
+	                foreach($filterData as $dummy=>$keyAry);
+	                foreach($keyAry as $dummy=>$keyStr);
+	                $strwhere  = " WHERE ";
+	                $strwhere .= " {$dbQM}{$dbTAS}{$dbQM}.{$dbQM}{$strRIColumn}{$dbQM} = '{$keyStr}' ";
+	                $query  = "SELECT {$strColStream} ";
+	                $query .= "FROM {$objTable->getDBMainTableBody()} {$dbTAS} {$strwhere}";
+                        $nullarry = array();
+	                $retArray = singleSQLExecuteAgent($query, $nullarry, $strFxName);
+	                if( $retArray[0] === true ){
+	                    $objQuery =& $retArray[1];
+			    $chkobj = null;
+                            // 対象レコードのACCESS_AUTHカラムでアクセス権を判定
+	                    while($row = $objQuery->resultFetch()) {   // 対象レコードは1レコードの想定
+                                list($ret,$MasterRecodePermission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                                if($ret === false) {
+                                    $message = sprintf("[%s:%s]Master recode select failed. (TABLE:%s Pkey:%s)",basename(__FILE__),__LINE__,$objTable->getDBMainTableBody(),$objTable->getRowIdentifyColumnID());
+	                            web_log($message);
+                                    $intErrorType = 500;
+                                    throw new Exception( '00010801-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+	                        }
+	                        break;
+
+	                    }
+	                } else {
+                            $message = sprintf("[%s:%s]Master recode select execute failed. (TABLE:%s Pkey:%s)",basename(__FILE__),__LINE__,$objTable->getDBMainTableBody(),$objTable->getRowIdentifyColumnID());
+	                    web_log($message);
+                            $intErrorType = 500;
+                            throw new Exception( '00010801-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+	                }
+	            }
+	            // ---- 変更履歴で指定された項番のマスタデータのアクセス権を判定 ----
+	            // ---- RBAC対応
 
 	            $row_counter = 0;
+	            // ---- RBAC対応
+	            // ----マスタレコードにアクセス権が無い場合は履歴を表示しない
+	            if($MasterRecodePermission === true) {
+	                $sql = generateJournalSelectSQL($objTable, $boolBinaryDistinctOnDTiS);
 
-	            $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
-	            if( $retArray[0] === true ){
-	                $objQuery =& $retArray[1];
-	                $intTmpRowCount = 0;
-	                //
-	                while ( $row = $objQuery->resultFetch() ){
-	                    if( $row !== false){
-	                        $intTmpRowCount+=1;
-	                    }
-	                    $objTable->addData($row, false);
+	                $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
+	                if( $retArray[0] === true ){
+	                    $objQuery =& $retArray[1];
+                            // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
+			    $intTmpRowCount = 0;
+			    $chkobj = null;
+	                    while ( $row = $objQuery->resultFetch() ){
+                                // ----RBAC対応
+                                if($objTable->getAccessAuth() === false) {
+                                    // アクセス権の判定が不要な場合
+                                    $intTmpRowCount +=1;
+				    $objTable->addData($row, false);
+                                    continue;
+                                }
+                                // 対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                                list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                                if($ret === false) {
+                                    $intErrorType = 500;
+                                    throw new Exception( '00010801-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                }
+                                if($permission === true) {
+                                    global $g;
+                                    $AccessAuthColumName    = $objTable->getAccessAuthColumnName();
+                                    // アクセス権カラム有無判定
+                                    if(array_key_exists($AccessAuthColumName,$row)) {
+                                        // ---- アクセス権カラムの表示データをロールIDからRole名称に変更
+                                        // 廃止されているロールはID変換失敗で表示
+                                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                        $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$row[$AccessAuthColumName],true);  // 廃止も含む
+                                        unset($obj);
+                                        if($RoleNameString === false) {
+                                            $intErrorType = 500;
+                                            $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString is failed.",basename(__FILE__),__LINE__);
+                                            web_log($message);
+                                            throw new Exception( '00010801-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                        }
+                                        $row[$AccessAuthColumName] = $RoleNameString;
+                                        // アクセス権カラムの表示データをロールIDからRole名称に変更----
+                                        $intTmpRowCount +=1;
+				        $objTable->addData($row, false);
+                                    }
+                                }
+                                // RBAC対応----
+			    }
+                            // 対象レコードのACCESS_AUTHカラムでアクセス権を判定 ----
+	                    $row_counter = $intTmpRowCount;
+	                    unset($objQuery);
 	                }
-	                //
-	                $row_counter = $intTmpRowCount;
-	                unset($objQuery);
+	                else{
+	                    $intErrorType = 500;
+	                    throw new Exception( '00010800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+	                }
 	            }
-	            else{
-	                $intErrorType = 500;
-	                throw new Exception( '00010800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-	            }
+	            // RBAC対応 ----
+	            // マスタレコードにアクセス権が無い場合は履歴を表示しない ----
             }
             else{
                 $tmpAryRet = $objFunction02ForOverride($objTable, $strFormatterId, $filterData, $aryVariant, $arySetting, $aryOverride);

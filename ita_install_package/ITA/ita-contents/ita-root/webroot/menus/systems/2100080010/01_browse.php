@@ -74,23 +74,33 @@
             }
         }
         
-        $exec_log  = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101310");
+        //$exec_log  = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101310");
         $error_log = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101320");
+        $plan_log = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101340");
+        $policyCheck_log = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101350");
+        $apply_log = $objMTS->getSomeMessage("ITATERRAFORM-MNU-101360");
 
         $prg_recorder_array = array(1=>array('PRG_RCDR_ID'=>'1'
-                                            ,'PRG_RCDR_NAME'=>$exec_log
-                                            ,'PRG_FILE_NAME'=>'exec.log')
+                                            ,'PRG_RCDR_NAME'=>$plan_log
+                                            ,'PRG_FILE_NAME'=>'plan.log')
                                     ,2=>array('PRG_RCDR_ID'=>'2'
+                                            ,'PRG_RCDR_NAME'=>$policyCheck_log
+                                            ,'PRG_FILE_NAME'=>'policyCheck.log')
+                                    ,3=>array('PRG_RCDR_ID'=>'3'
+                                            ,'PRG_RCDR_NAME'=>$apply_log
+                                            ,'PRG_FILE_NAME'=>'apply.log')
+                                    ,4=>array('PRG_RCDR_ID'=>'4'
                                             ,'PRG_RCDR_NAME'=>$error_log
                                             ,'PRG_FILE_NAME'=>'error.log')
                                    );
+
         // 作業№が設定されている場合
         if( isset($execution_no) ){
             ////////////////////////////////////////////////////////////////
             // ステータスを取得                                           //
             ////////////////////////////////////////////////////////////////
             // SQL生成
-            $sql = "SELECT  STATUS_ID
+            $sql = "SELECT  STATUS_ID, ACCESS_AUTH
                     FROM    {$strExeTableIdForSelect}
                     WHERE   DISUSE_FLAG = '0'
                     AND     EXECUTION_NO = :EXECUTION_NO_BV ";
@@ -120,10 +130,38 @@
                 // 例外処理へ
                 throw new Exception();
             }
-            
+
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                // アクセスログ出力(想定外エラー)
+                web_log( $objMTS->getSomeMessage("ITATERRAFORM-ERR-404",array(__FILE__,__LINE__,"00000400")) );
+                unset($objQuery);
+
+                // 例外処理へ
+                throw new Exception();
+            }
+
             while ( $row = $objQuery->resultFetch() ){
                 // ステータスIDを取得
                 $status_id_temp = $row['STATUS_ID'];
+
+                // アクセス権を判定
+                list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                if($ret === false) {
+                    // アクセスログ出力(想定外エラー)
+                    web_log( $objMTS->getSomeMessage("ITATERRAFORM-ERR-404",array(__FILE__,__LINE__,"00000900")) );
+                    unset($objQuery);
+
+                    // 例外処理へ
+                    throw new Exception();
+                } else {
+                    if($permission === false) {
+                        //アクセス権が無いため、例外処理へ
+                        throw new Exception();
+                    }
+                }
             }
             // ループ回数を取得
             $num_rows = $objQuery->effectedRowCount();
@@ -306,7 +344,7 @@ print <<< EOD
 
 EOD;
         }
-        
+
         // 進行記録ファイル
         if( count( $prg_recorder_array ) > 0 ){
             $loop_counter = 0;
@@ -343,7 +381,7 @@ EOD;
             }
         }
     }
-    
+
 print <<< EOD
     
     <!-------------------------------- 緊急停止 -------------------------------->

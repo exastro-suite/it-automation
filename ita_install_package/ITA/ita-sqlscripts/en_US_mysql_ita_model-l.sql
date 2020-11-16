@@ -13,6 +13,7 @@ DISP_FLAG_4                        INT                              ,
 DISP_FLAG_5                        INT                              ,
 DISP_FLAG_6                        INT                              ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -38,6 +39,7 @@ DISP_FLAG_4                        INT                              ,
 DISP_FLAG_5                        INT                              ,
 DISP_FLAG_6                        INT                              ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -58,6 +60,7 @@ GROUP_AUTH                         VARCHAR (256)                    ,
 USER_AUTH                          VARCHAR (128)                    ,
 DIR_USAGE                          VARCHAR (4000)                   ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -83,6 +86,7 @@ GROUP_AUTH                         VARCHAR (256)                    ,
 USER_AUTH                          VARCHAR (128)                    ,
 DIR_USAGE                          VARCHAR (4000)                   ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -98,6 +102,7 @@ ROW_ID                             INT                              , -- 識別�
 AUTO_FLAG                          INT                              ,
 AUTO_CONFIG                        VARCHAR (128)                    ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -118,6 +123,7 @@ ROW_ID                             INT                              , -- 識別�
 AUTO_FLAG                          INT                              ,
 AUTO_CONFIG                        VARCHAR (128)                    ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -138,6 +144,7 @@ GROUP_AUTH                         text(256)                        ,
 USER_AUTH                          text(128)                        ,
 DIR_USAGE                          VARCHAR (4000)                   ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -163,6 +170,7 @@ GROUP_AUTH                         text(256)                        ,
 USER_AUTH                          text(128)                        ,
 DIR_USAGE                          VARCHAR (4000)                   ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -196,6 +204,7 @@ CLOSE_DATE                         DATETIME(6)                      ,
 CLOSE_USER_ID                      INT                              ,
 CLOSE_REVISION                     VARCHAR (64)                     ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -230,6 +239,7 @@ CLOSE_DATE                         DATETIME(6)                      ,
 CLOSE_USER_ID                      INT                              ,
 CLOSE_REVISION                     VARCHAR (64)                     ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -268,6 +278,7 @@ CLOSE_DATE                         DATETIME(6)                      ,
 CLOSE_USER_ID                      INT                              ,
 CLOSE_REVISION                     VARCHAR (64)                     ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -305,6 +316,7 @@ CLOSE_DATE                         DATETIME(6)                      ,
 CLOSE_USER_ID                      INT                              ,
 CLOSE_REVISION                     VARCHAR (64)                     ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -322,6 +334,7 @@ BRANCH                             VARCHAR (256)                    ,
 CLONE_REPO_DIR                     VARCHAR (256)                    ,
 PASSWORD                           VARCHAR (128)                    ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -344,6 +357,7 @@ BRANCH                             VARCHAR (256)                    ,
 CLONE_REPO_DIR                     VARCHAR (256)                    ,
 PASSWORD                           VARCHAR (128)                    ,
 
+ACCESS_AUTH                        TEXT                             ,
 NOTE                               VARCHAR  (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR  (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                      , -- 最終更新日時
@@ -400,6 +414,7 @@ SELECT TAB_A.FILE_ID                                                            
        TAB_A.GROUP_AUTH                                                          ,
        TAB_A.USER_AUTH                                                           ,
        TAB_A.DIR_USAGE                                                           ,
+       TAB_A.ACCESS_AUTH                                                         ,
        TAB_A.NOTE                                                                ,
        TAB_A.DISUSE_FLAG                                                         ,
        TAB_A.LAST_UPDATE_TIMESTAMP                                               ,
@@ -421,6 +436,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                                                     
        TAB_A.GROUP_AUTH                                                          ,
        TAB_A.USER_AUTH                                                           ,
        TAB_A.DIR_USAGE                                                           ,
+       TAB_A.ACCESS_AUTH                                                         ,
        TAB_A.NOTE                                                                ,
        TAB_A.DISUSE_FLAG                                                         ,
        TAB_A.LAST_UPDATE_TIMESTAMP                                               ,
@@ -452,6 +468,7 @@ SELECT TAB_A.FILE_M_ID             ,
        TAB_A.CLOSE_DATE            ,
        TAB_A.CLOSE_USER_ID         ,
        TAB_A.CLOSE_REVISION        ,
+       TAB_A.ACCESS_AUTH           ,
        TAB_A.NOTE                  ,
        TAB_A.DISUSE_FLAG           ,
        TAB_A.LAST_UPDATE_TIMESTAMP ,
@@ -488,6 +505,7 @@ SELECT TAB_A.FILE_M_ID             ,
        TAB_A.CLOSE_DATE            ,
        TAB_A.CLOSE_USER_ID         ,
        TAB_A.CLOSE_REVISION        ,
+       TAB_A.ACCESS_AUTH           ,
        TAB_A.NOTE                  ,
        TAB_A.DISUSE_FLAG           ,
        TAB_A.LAST_UPDATE_TIMESTAMP ,
@@ -524,6 +542,7 @@ SELECT TAB_A.FILE_M_ID             ,
        TAB_A.CLOSE_DATE            ,
        TAB_A.CLOSE_USER_ID         ,
        TAB_A.CLOSE_REVISION        ,
+       TAB_A.ACCESS_AUTH           ,
        TAB_A.NOTE                  ,
        TAB_A.DISUSE_FLAG           ,
        TAB_A.LAST_UPDATE_TIMESTAMP ,
@@ -560,6 +579,7 @@ SELECT TAB_A.FILE_M_ID             ,
        TAB_A.CLOSE_DATE            ,
        TAB_A.CLOSE_USER_ID         ,
        TAB_A.CLOSE_REVISION        ,
+       TAB_A.ACCESS_AUTH           ,
        TAB_A.NOTE                  ,
        TAB_A.DISUSE_FLAG           ,
        TAB_A.LAST_UPDATE_TIMESTAMP ,
@@ -596,6 +616,7 @@ SELECT TAB_A.FILE_M_ID             ,
        TAB_A.CLOSE_DATE            ,
        TAB_A.CLOSE_USER_ID         ,
        TAB_A.CLOSE_REVISION        ,
+       TAB_A.ACCESS_AUTH           ,
        TAB_A.NOTE                  ,
        TAB_A.DISUSE_FLAG           ,
        TAB_A.LAST_UPDATE_TIMESTAMP ,
@@ -632,6 +653,7 @@ SELECT TAB_A.FILE_M_ID             ,
        TAB_A.CLOSE_DATE            ,
        TAB_A.CLOSE_USER_ID         ,
        TAB_A.CLOSE_REVISION        ,
+       TAB_A.ACCESS_AUTH           ,
        TAB_A.NOTE                  ,
        TAB_A.DISUSE_FLAG           ,
        TAB_A.LAST_UPDATE_TIMESTAMP ,
@@ -672,6 +694,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO        ,
        TAB_A.CLOSE_DATE            ,
        TAB_A.CLOSE_USER_ID         ,
        TAB_A.CLOSE_REVISION        ,
+       TAB_A.ACCESS_AUTH           ,
        TAB_A.NOTE                  ,
        TAB_A.DISUSE_FLAG           ,
        TAB_A.LAST_UPDATE_TIMESTAMP ,
@@ -693,6 +716,7 @@ SELECT  TAB_A.FILE_M_ID             AS FILE_M_ID            ,
         TAB_A.CLOSE_DATE            AS CLOSE_DATE           ,
         TAB_A.RETURN_USER_ID        AS RETURN_USER_ID       ,
         TAB_A.CLOSE_REVISION        AS CLOSE_REVISION       ,
+        TAB_A.ACCESS_AUTH           AS ACCESS_AUTH          ,
         TAB_A.NOTE                  AS NOTE                 ,
         TAB_A.DISUSE_FLAG           AS DISUSE_FLAG          ,
         TAB_A.LAST_UPDATE_TIMESTAMP AS LAST_UPDATE_TIMESTAMP,
@@ -707,6 +731,7 @@ SELECT -TAB_B.FILE_M_ID             AS FILE_M_ID            ,
         TAB_B.CLOSE_DATE            AS CLOSE_DATE           ,
         TAB_B.RETURN_USER_ID        AS RETURN_USER_ID       ,
         TAB_B.CLOSE_REVISION        AS CLOSE_REVISION       ,
+        TAB_B.ACCESS_AUTH           AS ACCESS_AUTH          ,
         TAB_B.NOTE                  AS NOTE                 ,
         TAB_B.DISUSE_FLAG           AS DISUSE_FLAG          ,
         TAB_B.LAST_UPDATE_TIMESTAMP AS LAST_UPDATE_TIMESTAMP,
@@ -722,6 +747,7 @@ SELECT TAB_A.FILE_M_ID             ,
        TAB_A.CLOSE_DATE            ,
        TAB_A.RETURN_USER_ID        ,
        TAB_A.CLOSE_REVISION        ,
+       TAB_A.ACCESS_AUTH           ,
        TAB_A.NOTE                  ,
        TAB_A.DISUSE_FLAG           ,
        TAB_A.LAST_UPDATE_TIMESTAMP ,
@@ -732,33 +758,33 @@ LEFT JOIN G_FILE_MASTER TAB_C ON (TAB_A.FILE_ID = TAB_C.FILE_ID)
 WHERE TAB_C.DISUSE_FLAG='0'
 ;
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_MM_STATUS_MASTER_RIC',11);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_MM_STATUS_MASTER_RIC',11,'2100150005',2100510001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_MM_STATUS_MASTER_JSQ',11);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_MM_STATUS_MASTER_JSQ',11,'2100150005',2100510002,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_DIR_MASTER_RIC',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_DIR_MASTER_RIC',2,'2100150002',2100510003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_DIR_MASTER_JSQ',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_DIR_MASTER_JSQ',2,'2100150002',2100510004,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_AUTO_RETURN_RIC',3);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_FILE_MASTER_RIC',1,'2100150003',2100510005,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_AUTO_RETURN_JSQ',3);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_FILE_MASTER_JSQ',1,'2100150003',2100510006,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_FILE_MASTER_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_FILE_MANAGEMENT_RIC',1,'2100150101',2100510007,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_FILE_MASTER_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_FILE_MANAGEMENT_JSQ',1,'2100150101',2100510008,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_FILE_MANAGEMENT_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_MATERIAL_IF_INFO_RIC',2,'2100150001',2100510009,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_FILE_MANAGEMENT_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_MATERIAL_IF_INFO_JSQ',2,'2100150001',2100510010,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_FILE_MANAGEMENT_INITIAL_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_AUTO_RETURN_RIC',3,NULL,2100590001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_FILE_MANAGEMENT_INITIAL_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_AUTO_RETURN_JSQ',3,NULL,2100590002,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_MATERIAL_IF_INFO_RIC',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_FILE_MANAGEMENT_INITIAL_RIC',1,NULL,2100590003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_MATERIAL_IF_INFO_JSQ',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_FILE_MANAGEMENT_INITIAL_JSQ',1,NULL,2100590004,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
 
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011501,'File control management','sizai_kanri.png',30,'File control management','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

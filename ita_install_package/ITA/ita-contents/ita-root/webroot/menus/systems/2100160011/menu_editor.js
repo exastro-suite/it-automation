@@ -69,6 +69,152 @@ const menuEditorLog = {
     menuEditorLogNumber = 1;
     $('.editor-log').find('tbody').empty();
   }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   モーダル
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// モーダルを開く
+function itaModalOpen( headerTitle, bodyFunc, modalType ) {
+    
+    if ( typeof bodyFunc !== 'function' ) return false;
+
+    // 初期値
+    if ( headerTitle === undefined ) headerTitle = 'Undefined title';
+    if ( modalType === undefined ) modalType = 'default';
+
+    const $window = $( window ),
+          $body = $('body'),
+          $container = $('.wholecontainer');
+    
+    let footerHTML1;
+    
+    if ( modalType === 'help' ) {
+      footerHTML = ''
+      + '<div class="editor-modal-footer">'
+        + '<ul class="editor-modal-footer-menu">'
+          + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">' + getSomeMessage("ITAWDCC92003") + '</li>'
+        + '</ul>'
+      + '</div>'
+    } else {
+      footerHTML = ''
+      + '<div class="editor-modal-footer">'
+        + '<ul class="editor-modal-footer-menu">'
+          + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button positive" data-button-type="ok">' + getSomeMessage("ITAWDCC92001") + '</li>'
+          + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="cancel">' + getSomeMessage("ITAWDCC92002") + '</li>'
+        + '</ul>'
+      + '</div>'
+    }
+    
+    
+    let modalHTML = ''
+      + '<div id="editor-modal" class="' + modalType + '">'
+        + '<div class="editor-modal-container">'
+          + '<div class="editor-modal-header">'
+            + '<span class="editor-modal-title">' + headerTitle + '</span>'
+            + '<button class="editor-modal-header-close"></button>'
+          + '</div>'
+          + '<div class="editor-modal-body">'
+            + '<div class="editor-modal-loading"></div>'
+          + '</div>'
+          + footerHTML
+        + '</div>'
+      + '</div>';
+
+    const $editorModal = $( modalHTML ),
+          $firstFocus = $editorModal.find('.editor-modal-header-close'),
+          $lastFocus = $editorModal.find('.editor-modal-footer-menu-button[data-button-type="cancel"]');
+
+    $body.append( $editorModal );
+    $container.css('filter','blur(2px)');
+    $firstFocus.focus();
+    
+    $window.on('keydown.modal', function( e ) {
+      
+      switch ( e.keyCode ) {
+        case 9: // Tabでの移動をモーダル内に制限する
+          {
+            const $focusElement = $( document.activeElement );
+            if ( $focusElement.is( $firstFocus ) && e.shiftKey ) {
+              e.preventDefault();
+              $lastFocus.focus();
+            } else if ( $focusElement.is( $lastFocus ) && !e.shiftKey ) {
+              e.preventDefault();
+              $firstFocus.focus();
+            }
+          }
+          break;
+        case 27: // Escでモーダルを閉じる
+          itaModalClose();
+          break;
+      }
+    });
+
+    $firstFocus.on('click', function() {
+      itaModalClose();
+    });
+    if ( modalType === 'help' ) {
+      $editorModal.find('.editor-modal-footer-menu-button[data-button-type="close"]').on('click', itaModalClose );
+    }
+    
+    bodyFunc();
+
+}
+
+// モーダルを閉じる
+function itaModalClose() {
+
+  const $window = $( window ),
+        $container = $('.wholecontainer'),
+        $editorModal = $('#editor-modal');
+  
+  if ( $editorModal.length ) {
+    $window.off('keyup.modal');
+    $editorModal.remove();
+    $container.css('filter','blur(0)');
+  }
+
+}
+
+// モーダルエラー表示
+function itaModalError( message ) {
+
+  const $modalBody = $('.editor-modal-body');
+  
+  $modalBody.html('<div class="editor-modal-error"><p>' + message + '</p></div>');
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   タブ切替初期設定
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function itaTabMenu() {
+
+  $('.editor-tab').each( function() {
+  
+    const $tab = $( this ),
+          $tabItem = $tab.find('.editor-tab-menu-list-item'),
+          $tabBody = $tab.find('.editor-tab-body');
+
+    $tabItem.eq(0).addClass('selected');
+    $tabBody.eq(0).addClass('selected');
+    
+    $tabItem.on('click', function() {
+      const $clickTab = $( this ),
+            $openTab = $('#' + $clickTab.attr('data-tab') );
+            
+      $tab.find('.selected').removeClass('selected');
+      $clickTab.add( $openTab ).addClass('selected');
+    });
+    
+  });
+
 }
 
 const menuEditor = function() {
@@ -84,17 +230,12 @@ const $window = $( window ),
       $menuTable = $menuEditor.find('.menu-table'),
       $property = $('#property');
 
-// common_editor_func.js
+// タブ
 itaTabMenu();
 
 // 読み込み完了
 $menuEditor.removeClass('load-editor');
 
-// 言語 0:ja 1:en
-let languageCode = 0;
-const lang = $html.attr('lang');
-if ( lang === 'en' ) languageCode = 1;
-      
 // テキスト
 const languageText = {
 '0000':[getSomeMessage("ITACREPAR_1202"),''],
@@ -130,7 +271,16 @@ const languageText = {
 '0030':[getSomeMessage("ITACREPAR_1232"),''],
 '0031':[getSomeMessage("ITACREPAR_1233"),''],
 '0032':[getSomeMessage("ITACREPAR_1234"),''],
-'0033':[getSomeMessage("ITACREPAR_1235"),'']
+'0033':[getSomeMessage("ITACREPAR_1235"),''],
+'0034':[getSomeMessage("ITACREPAR_1238"),''],
+'0035':[getSomeMessage("ITACREPAR_1239"),''],
+'0036':[getSomeMessage("ITACREPAR_1240"),''],
+'0037':[getSomeMessage("ITACREPAR_1241"),''],
+'0038':[getSomeMessage("ITACREPAR_1242"),''],
+'0039':[getSomeMessage("ITACREPAR_1243"),''],
+'0040':[getSomeMessage("ITACREPAR_1244"),''],
+'0041':[getSomeMessage("ITACREPAR_1245"),''],
+'0042':[getSomeMessage("ITACREPAR_1246"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
@@ -147,7 +297,13 @@ const selectDummyText = {
   '5' : ['2020/01/01 00:00','2020/01/01 00:00','string'],
   '6' : ['2020/01/01','2020/01/01','string'],
   '7' : ['','','select'],
+<<<<<<< HEAD
   '8' : [getSomeMessage("ITACREPAR_1237"),'','string']
+=======
+  '8' : [getSomeMessage("ITACREPAR_1237"),'','string'],
+  '9' : [getSomeMessage("ITACREPAR_1247"),'','string'],
+  '10' : [getSomeMessage("ITACREPAR_1248"),'','string']
+>>>>>>> upstream/v1.6.0
 };
 
 const titleHeight = 32;
@@ -175,6 +331,10 @@ const listIdName = function( type, id ) {
     list = menuEditorArray.selectMenuGroupList;
     idKey = 'MENU_GROUP_ID';
     nameKey = 'MENU_GROUP_NAME';
+  } else if ( type === 'role') {
+    list = menuEditorArray.roleList;
+    idKey = 'ROLE_ID';
+    nameKey = 'ROLE_NAME';
   }
   
   const listLength = list.length;
@@ -245,9 +405,8 @@ for ( let i = 0; i < selectPulldownListDataLength ; i++ ) {
   selectPulldownListHTML += '<option value="' + selectPulldownListData[i].LINK_ID + '">' + selectPulldownListData[i].LINK_PULLDOWN + '</option>';
 }
 
-
+// 作成対象 select
 if ( menuEditorMode !== 'view') {
-    // 作成対象 select
     const selectParamTargetData = menuEditorArray.selectParamTarget,
           selectParamTargetDataLength = selectParamTargetData.length;
     let selectParamTargetHTML = '';
@@ -255,20 +414,10 @@ if ( menuEditorMode !== 'view') {
       selectParamTargetHTML += '<option value="' + selectParamTargetData[i].TARGET_ID + '">' + selectParamTargetData[i].TARGET_NAME + '</option>';
     }
     $('#create-menu-type').html( selectParamTargetHTML );
-
-    // 用途 select
-    const selectParamPurposeData = menuEditorArray.selectParamPurpose,
-          selectParamPurposeDataLength = selectParamPurposeData.length;
-    let selectParamPurposeHTML = '';
-    for ( let i = 0; i < selectParamPurposeDataLength ; i++ ) {
-      selectParamPurposeHTML += '<option value="' + selectParamPurposeData[i].PURPOSE_ID + '">' + selectParamPurposeData[i].PURPOSE_NAME + '</option>';
-    }
-    $('#create-menu-use').html( selectParamPurposeHTML );
 }
 
-
 const columnHTML = ''
-  + '<div class="menu-column" data-rowpan="1" data-item-id="">'
+  + '<div class="menu-column" data-rowpan="1" data-item-id="" style="min-width: 180px">'
     + '<div class="menu-column-header">'
       + columnHeaderHTML
     + '</div>'
@@ -278,9 +427,9 @@ const columnHTML = ''
       + '</div>'
       + '<div class="menu-column-config">'
         + '<table class="menu-column-config-table" date-select-value="1">'
-          + '<tr class="multiple single">'
+          + '<tr class="multiple single link">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number max-byte" type="number" data-min="2" data-max="8192" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="multiple single">'
             + '<th>' + textCode('0012') + '</th>'
@@ -316,6 +465,13 @@ const columnHTML = ''
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
             + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
           + '</tr>'
+<<<<<<< HEAD
+=======
+          + '<tr class="file">'
+            + '<th>' + textCode('0042') + '<span class="input_required">*</span></th>'
+            + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+'></td>'
+          + '</tr>'
+>>>>>>> upstream/v1.6.0
           + '<tr class="all">'
             + '<td colspan="2">'
               + '<label class="required-label on-hover"><input class="config-checkbox required" type="checkbox"'+modeDisabled+'><span></span>' + textCode('0017') + '</label>'
@@ -379,17 +535,17 @@ const $undoButton = $('#button-undo'),
       $redoButton = $('#button-redo'),
       maxHistroy = 10; // 最大履歴数
 
-let workHistroy = [''],
+let workHistory = [''],
     workCounter = 0;
 
 // 取り消し、やり直しボタンチェック
 const historyButtonCheck = function() {
-    if ( workHistroy[ workCounter - 1 ] !== undefined ) {
+    if ( workHistory[ workCounter - 1 ] !== undefined ) {
       $undoButton.prop('disabled', false );
     } else {
       $undoButton.prop('disabled', true );
     }
-    if ( workHistroy[ workCounter + 1 ] !== undefined ) {
+    if ( workHistory[ workCounter + 1 ] !== undefined ) {
       $redoButton.prop('disabled', false );
     } else {
       $redoButton.prop('disabled', true );
@@ -402,15 +558,15 @@ const history = {
     workCounter++;
     const $clone = $menuTable.clone();
     $clone.find('.hover').removeClass('hover');
-    workHistroy[ workCounter ] = $clone.html();
+    workHistory[ workCounter ] = $clone.html();
 
     // 履歴追加後の履歴を削除する
-    if ( workHistroy[ workCounter + 1 ] !== undefined ) {
-      workHistroy.length = workCounter + 1;
+    if ( workHistory[ workCounter + 1 ] !== undefined ) {
+      workHistory.length = workCounter + 1;
     } 
     // 最大履歴数を超えた場合最初の履歴を削除する
-    if ( workHistroy.length > maxHistroy ) {
-      workHistroy.shift();
+    if ( workHistory.length > maxHistroy ) {
+      workHistory.shift();
       workCounter--;
     }
     
@@ -418,20 +574,20 @@ const history = {
   },
   'undo' : function() {
     workCounter--;
-    $menuTable.html( workHistroy[ workCounter ] );
+    $menuTable.html( workHistory[ workCounter ] );
     historyButtonCheck();
     previewTable();
   },
   'redo' : function() {
     workCounter++;
-    $menuTable.html( workHistroy[ workCounter ] );
+    $menuTable.html( workHistory[ workCounter ] );
     historyButtonCheck();
     previewTable();
   },
   'clear' : function() {
     workCounter = 0;
-    workHistroy = [];
-    workHistroy[ workCounter ] = $menuTable.html();
+    workHistory = [];
+    workHistory[ workCounter ] = $menuTable.html();
     historyButtonCheck();
   }
 };
@@ -476,6 +632,7 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
         $addColumnInput = $addColumn.find('.menu-column-title-input');
   
   $target.append( $addColumn );
+
   
   $addColumn.attr('id', id );
 
@@ -511,6 +668,13 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
   if ( previewFlag === true ) {
     history.add();
     previewTable();
+  }
+  
+  // 追加した項目に合わせスクロールさせる
+  const editorWindowWidth = $menuEditWindow.outerWidth(),
+        tableWidth = $menuEditWindow.find('.menu-table-wrapper').width()
+  if ( editorWindowWidth < tableWidth ) {
+    $menuEditWindow.children().stop(0,0).animate({'scrollLeft': tableWidth - editorWindowWidth }, 200 );
   }
   
   emptyCheck();
@@ -913,8 +1077,17 @@ const emptyCheck = function() {
 };
 // リピートがあるかチェックする
 const repeatCheck = function() {
-  if ( $menuTable.find('.menu-column-repeat').length === 0 ) {
-    $('.menu-editor-menu-button[data-menu-button="newColumnRepeat"]').prop('disabled', false );
+  const $repeatButton = $('.menu-editor-menu-button[data-menu-button="newColumnRepeat"]'),
+        type = $('#create-menu-type').val();
+  // パラメータシートかつ、縦メニュー利用有無チェック
+  if ( ( type === '1' || type === '3' ) && $('#create-menu-use-vertical').prop('checked') ) {
+    if ( $menuTable.find('.menu-column-repeat').length === 0 ) {
+      $repeatButton.prop('disabled', false );
+    } else {
+      $repeatButton.prop('disabled', true );
+    }
+  } else {
+    $repeatButton.prop('disabled', true );
   }
 };
 
@@ -948,7 +1121,7 @@ $menuEditor.on('click', '.menu-column-copy', function(){
   
   // リピートを含む要素はコピーできないようにする
   if ( $column.find('.menu-column-repeat').length ) {
-    alert('"Repeat" cannot be duplicate.');
+    alert(textCode('0035'));
     return false;
   }
   
@@ -977,11 +1150,17 @@ $menuEditor.on('click', '.menu-column-copy', function(){
       if ( $eachColumn.is('.menu-column') ) {
         const i = itemCounter++;
         $input.val( title + '(' + i + ')' );
-        $eachColumn.attr('id', 'i' + i );
+        $eachColumn.attr({
+          'id': 'i' + i,
+          'data-item-id': ''
+        });
       } else if ( $eachColumn.is('.menu-column-group') ) {
         const g = groupCounter++;
         $input.val( title + '(' + g + ')' );
-        $eachColumn.attr('id', 'g' + g );
+        $eachColumn.attr({
+          'id': 'g' + g,
+          'data-group-id': ''
+        });
       }
       $input.attr('value', $input.val() );
       titleInputChange( $input );
@@ -1054,6 +1233,9 @@ const sortMark = '<span class="sortMarkWrap"><span class="sortNotSelected"></spa
         + '<th rowspan="{{rowspan}}"><span class="generalBold">' + textCode('0021') + '</span>' + sortMark + '</th>'
         + '<th colspan="4"><span class="generalBold">' + textCode('0022') + '</span></th>'
         + '<th colspan="{{colspan}}"><span class="generalBold">' + textCode('0023') + '</span></th>',
+      tHeadOperationrHeaderLeftHTML = ''
+        + '<th colspan="4"><span class="generalBold">' + textCode('0022') + '</span></th>'
+        + '<th colspan="{{colspan}}"><span class="generalBold">' + textCode('0023') + '</span></th>',  
       tHeadParameterOpeHeaderLeftHTML = ''
         + '<th rowspan="{{rowspan}}"><span class="generalBold">' + textCode('0024') + '</span>' + sortMark + '</th>'
         + '<th rowspan="{{rowspan}}"><span class="generalBold">' + textCode('0025') + '</span>' + sortMark + '</th>'
@@ -1067,6 +1249,11 @@ const sortMark = '<span class="sortMarkWrap"><span class="sortNotSelected"></spa
         + '<td class="likeHeader number">{{id}}</td>',
       tBodyParameterHeaderLeftHTML = ''
         + '<td>192.168.0.1</td>'
+        + '<td>' + textCode('0031') + '</td>'
+        + '<td>2020/01/01 00:00</td>'
+        + '<td>2020/01/01 00:00</td>'
+        + '<td></td>',
+      tBodyOperationHeaderLeftHTML = ''
         + '<td>' + textCode('0031') + '</td>'
         + '<td>2020/01/01 00:00</td>'
         + '<td>2020/01/01 00:00</td>'
@@ -1098,7 +1285,11 @@ const previewTable = function(){
       maxLevel = rowNumberCheck();
   
   // パラメータシート or データシート
+<<<<<<< HEAD
   const previewType = Number( $('#create-menu-type').val() );
+=======
+  const previewType = Number( $property.attr('data-menu-type') );
+>>>>>>> upstream/v1.6.0
     
   // エディタ要素をTableに変換
   const tableAnalysis = function( $cols, repeatCount ) {
@@ -1124,7 +1315,11 @@ const previewTable = function(){
             tableArray[ currentFloor ].push( itemHTML );
             // Body
             const selectTypeValue = $column.find('.menu-column-type-select').val();
+<<<<<<< HEAD
             let dummyText = selectDummyText[ selectTypeValue ][ languageCode ],
+=======
+            let dummyText = selectDummyText[ selectTypeValue ][ 0 ],
+>>>>>>> upstream/v1.6.0
                 dummyType = selectDummyText[ selectTypeValue ][ 2 ];
             if ( dummyType === 'select' ) {
               dummyText = $column.find('.config-select').find('option:selected').text();
@@ -1180,7 +1375,7 @@ const previewTable = function(){
   // thead HTMLを生成
   const itemLength = childColumnCount( $menuTable );
   
-  if ( previewType === 1 ) {
+  if ( previewType === 1 || previewType === 3 ) {
     maxLevel++;
     tableArray.unshift('');
   }   
@@ -1194,8 +1389,13 @@ const previewTable = function(){
           .replace(/{{rowspan}}/g, maxLevel )
           .replace(/{{colspan}}/g, itemLength );
       }
+      if ( previewType === 3 ) {
+        tableHTML += tHeadOperationrHeaderLeftHTML
+          .replace(/{{rowspan}}/g, maxLevel )
+          .replace(/{{colspan}}/g, itemLength );
+      }
     }
-    if ( i === 1 && previewType === 1 ) {
+    if ( i === 1 && previewType === 1 || i === 1 && previewType === 3 ) {
       tableHTML += tHeadParameterOpeHeaderLeftHTML.replace(/{{rowspan}}/g, maxLevel - 1 );
     }
     tableHTML += tableArray[i];
@@ -1208,6 +1408,9 @@ const previewTable = function(){
     tableHTML += '<tr>' + tBodyHeaderLeftHTML.replace('{{id}}', i );
     if ( previewType === 1 ) {
       tableHTML += tBodyParameterHeaderLeftHTML;
+    }
+    if ( previewType === 3 ) {
+      tableHTML += tBodyOperationHeaderLeftHTML;
     }
     tableHTML += tbodyArray.join() + tBodyHeaderRightHTML + '</tr>';
   }
@@ -1223,17 +1426,67 @@ const previewTable = function(){
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// 作成対象セレクト
+let beforeSelectType = '1';
 $('#create-menu-type').on('change', function(){
-  $property.attr('data-menu-type', $( this ).val() );
+  const $select = $( this ),
+        menuType = $select.val();
+  // データタイプに変更した場合、リピートをチェックする
+  if ( menuType === '2') {
+    const repeatFlag = repeatRemoveConfirm();
+    if ( repeatFlag === true ) {
+      history.clear();
+    } else if ( repeatFlag === false) {
+      // 選択を戻す
+      $select.val( beforeSelectType );
+      return false; 
+    }    
+  }
+  beforeSelectType = menuType;
+  $property.attr('data-menu-type', menuType );
+  repeatCheck();
   previewTable();
 });
-$('#create-menu-use').on('change', function(){
-  $property.attr('data-host-type', $( this ).val() );
+
+// 縦メニュー利用有無チェックボックス
+$('#create-menu-use-vertical').on('change', function(){
+  const $checkBox = $( this );
+  if ( !$checkBox.prop('checked') ) {
+    const repeatFlag = repeatRemoveConfirm();
+    if ( repeatFlag === true ) {
+      history.clear();
+    } else if ( repeatFlag === false ) {
+      // チェックしなおす
+      $checkBox.prop('checked', true );
+      return false;
+    }
+  }
+  repeatCheck();
 });
-$('#create-menu-vertical-menu').on('change', function(){
-  const verticalFlag = ( $( this ).val() !== '0' ) ? true : false;
-  $property.attr('data-vertical-menu', verticalFlag );
-});
+
+// リピートを解除するか確認する
+const repeatRemoveConfirm = function() {
+    // リピートを使用しているか？
+    const $repeat = $menuEditor.find('.menu-column-repeat').eq(0);
+    if ( $repeat.length ) {
+      if ( confirm( textCode('0034')) ) {
+        // リピートが空か？
+        if ( $repeat.children('.menu-column-repeat-body').children('.column-empty').length ) {
+          $repeat.remove();
+        } else {
+          // 中身をリピートと入れ替える
+          $repeat.replaceWith( $repeat.children('.menu-column-repeat-body').html() );
+        }
+        emptyCheck();
+        previewTable();
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return undefined;
+    }
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1242,7 +1495,7 @@ $('#create-menu-vertical-menu').on('change', function(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const $columnResizeLine = $('#column-resize'),
-      defMinWidth = 160;
+      defMinWidth = 180;
 $menuEditor.on('mousedown', '.column-resize', function( e ) {
   
   // 左クリックチェック
@@ -1366,8 +1619,8 @@ const menuGroupBody = function() {
 
   const menuGroupData = menuEditorArray.selectMenuGroupList,
         menuListRowLength = menuGroupData.length,
-        menuGroupType = ['host','host-group','reference','vertical','data-sheet'],
-        menuGroupAbbreviation = ['Host','Host group','Reference','Vertical','Data sheet'],
+        menuGroupType = ['for-input','for-substitution','for-reference'],
+        menuGroupAbbreviation = [textCode('0036'),textCode('0037'),textCode('0038')],
         menuGroupTypeLength = menuGroupType.length;
 
   let html = ''
@@ -1382,7 +1635,7 @@ const menuGroupBody = function() {
   }
   // header Title
   html += '<th class="id">ID</th>'
-        + '<th class="name">Menu group name</th>';
+        + '<th class="name">' + textCode('0039') + '</th>';
 
   html += '</tr></thead><tbody><tr>';
 
@@ -1418,7 +1671,7 @@ const menuGroupBody = function() {
     }
     // Menu group Data
     html += '<td class="id">' + menuGroupData[i]['MENU_GROUP_ID'] + '</td>'
-          + '<td class="name">' + menuGroupData[i]['MENU_GROUP_NAME'] + '</td>';
+          + '<td class="name">' + textEntities( menuGroupData[i]['MENU_GROUP_NAME'] ) + '</td>';
 
     html += '</tr>';      
   }
@@ -1495,17 +1748,61 @@ const $menuGroupSlectButton = $('#create-menu-group-select');
 $menuGroupSlectButton.on('click', function() {
   let type;
   // パラメータシートorデータシート
-  if ( $('#create-menu-type').val() === '1') {
-    // ホストorホストグループ
-    if ( $('#create-menu-use').val() === '1' ) {
-      type = 'host';
-    } else {
-      type = 'host-group';
-    }
+  if ( $('#create-menu-type').val() === '1' || $('#create-menu-type').val() === '3' ) {
+    type = 'parameter-sheet';
   } else {
     type = 'data-sheet';
   }
   itaModalOpen( textCode('0033'), menuGroupBody, type );
+});
+
+// 縦メニューヘルプ
+const verticalMenuHelp = function() {
+  const $modalBody = $('.editor-modal-body');
+  $modalBody.html( $('#vertical-menu-description').html() );
+};
+$('#vertical-menu-help').on('click', function() {
+  itaModalOpen( textCode('0040'), verticalMenuHelp, 'help');
+});
+
+// カンマ区切りロールIDリストからロールNAMEリストを返す
+const getRoleListIdToName = function( roleListText ) {
+  if ( roleListText !== undefined ) {
+    const roleList = roleListText.split(','),
+          roleListLength = roleList.length,
+          roleNameList = new Array;
+
+    for ( let i = 0; i < roleListLength; i++ ) {
+      const roleName = listIdName('role', roleList[i]);
+      if ( roleName !== undefined ) {
+        roleNameList.push( roleName );
+      }
+    }
+
+    return roleNameList.join(', ');
+  }
+};
+// ロールセレクト
+const modalRoleList = function() {
+  const $input = $('#permission-role-name-list');
+  const initRoleList = ( $input.attr('data-role-id') === undefined )? '': $input.attr('data-role-id');
+  // 決定時の処理    
+  const okEvent = function( newRoleList ) {
+    $input.text(　getRoleListIdToName( newRoleList ) ).attr('data-role-id', newRoleList );
+    itaModalClose();
+  };
+  // キャンセル時の処理    
+  const cancelEvent = function( newRoleList ) {
+    itaModalClose();
+  };
+  
+  setRoleSelectModalBody( menuEditorArray.roleList, initRoleList, okEvent, cancelEvent );
+  
+};
+// ロールセレクトモーダルを開く
+const $roleSlectButton = $('#permission-role-select');
+$roleSlectButton.on('click', function() {
+  itaModalOpen('Permission role select', modalRoleList, 'role');
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1532,7 +1829,7 @@ const createRegistrationData = function( type ){
   let itemCount = 0;
   
   // メニュー作成情報
-  createMenuJSON['menu'] = menuParameter('get');
+  createMenuJSON['menu'] = getPanelParameter();
   if ( menuEditorMode === 'edit' ) {
     createMenuJSON['menu']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['menu']['LAST_UPDATE_TIMESTAMP'];
   }
@@ -1660,7 +1957,11 @@ const createRegistrationData = function( type ){
               case '4':
                 createMenuJSON['item'][key]['FLOAT_MIN'] = $column.find('.float-min-number').val();
                 createMenuJSON['item'][key]['FLOAT_MAX'] = $column.find('.float-max-number').val();
+<<<<<<< HEAD
                 createMenuJSON['item'][key]['FLOAT_DIGIT'] = $column.find('.digit').val();
+=======
+                createMenuJSON['item'][key]['FLOAT_DIGIT'] = $column.find('.digit-number').val();
+>>>>>>> upstream/v1.6.0
                 break;
               case '7':
                 createMenuJSON['item'][key]['OTHER_MENU_LINK_ID'] = $column.find('.pulldown-select').val();
@@ -1668,6 +1969,15 @@ const createRegistrationData = function( type ){
               case '8':
                 createMenuJSON['item'][key]['PW_MAX_LENGTH'] = $column.find('.password-max-byte').val();
                 break;
+<<<<<<< HEAD
+=======
+              case '9':
+                createMenuJSON['item'][key]['UPLOAD_MAX_SIZE'] = $column.find('.file-max-size').val();
+                break;
+              case '10':
+                createMenuJSON['item'][key]['LINK_LENGTH'] = $column.find('.max-byte').val();
+                break;
+>>>>>>> upstream/v1.6.0
             }
           // Item end
         } else if ( $column.is('.menu-column-repeat') ) {
@@ -1775,17 +2085,25 @@ const createRegistrationData = function( type ){
 const loadMenu = function() {
     
     const loadJSON = menuEditorArray.selectMenuInfo;
+<<<<<<< HEAD
     
     // メニュー名、表示順序、説明、備考は、流用新規時に空白にする
+=======
+    // 流用新規時に引き継がない項目
+>>>>>>> upstream/v1.6.0
     if ( menuEditorMode === 'diversion' ){
-      loadJSON['menu']['MENU_NAME'] = '';
-      loadJSON['menu']['DISP_SEQ'] = '';
-      loadJSON['menu']['NOTE'] = '';
-      loadJSON['menu']['DESCRIPTION'] = '';
+      loadJSON['menu']['CREATE_MENU_ID'] = null;
+      loadJSON['menu']['MENU_NAME'] = null;
+      loadJSON['menu']['DISP_SEQ'] = null;
+      loadJSON['menu']['LAST_UPDATE_TIMESTAMP'] = null;
+      loadJSON['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] = null;
+      loadJSON['menu']['LAST_UPDATE_USER'] = null;
+      loadJSON['menu']['DESCRIPTION'] = null;
+      loadJSON['menu']['NOTE'] = null;
     }
 
     // パネル情報表示
-    menuParameter('set', loadJSON );
+    setPanelParameter( loadJSON );
     
     // エディタクリア
     $menuTable.html('');
@@ -1860,7 +2178,7 @@ const loadMenu = function() {
             case '4':
               $item.find('.float-min-number').val( itemData['FLOAT_MIN'] ).change();
               $item.find('.float-max-number').val( itemData['FLOAT_MAX'] ).change();
-              $item.find('.digit').val( itemData['FLOAT_DIGIT'] ).change();
+              $item.find('.digit-number').val( itemData['FLOAT_DIGIT'] ).change();
               break;
             case '7':
               $item.find('.pulldown-select').val( itemData['OTHER_MENU_LINK_ID'] ).change();
@@ -1868,6 +2186,15 @@ const loadMenu = function() {
             case '8':
               $item.find('.password-max-byte').val( itemData['PW_MAX_LENGTH'] ).change();
               break;
+<<<<<<< HEAD
+=======
+            case '9':
+              $item.find('.file-max-size').val( itemData['UPLOAD_MAX_SIZE'] ).change();
+              break;
+            case '10':
+              $item.find('.max-byte').val( itemData['LINK_LENGTH'] ).change();
+              break;
+>>>>>>> upstream/v1.6.0
           }
         }
 
@@ -1876,6 +2203,7 @@ const loadMenu = function() {
     recursionMenuTable( $menuTable, loadJSON['menu'] );
 
     history.clear();
+    emptyCheck();
     previewTable();
 
 };
@@ -1886,118 +2214,153 @@ const loadMenu = function() {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const menuParameter = function( type, setData ) {
-
-    const menuParameterList = {
-      'CREATE_MENU_ID' : ['create-menu-id', 'span'],
-      'MENU_NAME' : ['create-menu-name', 'text'],
-      'TARGET' : ['create-menu-type', 'select'],
-      'DISP_SEQ' : ['create-menu-order', 'number'],
-      'PURPOSE' : ['create-menu-use', 'select'],
-      'LAST_UPDATE_TIMESTAMP_FOR_DISPLAY' : ['create-menu-last-modified', 'span'],
-      'LAST_UPDATE_USER' : ['create-last-update-user', 'span'],
-      'MENUGROUP_FOR_H' : ['create-menu-host', 'span'],
-      'MENUGROUP_FOR_HG' : ['create-menu-host-group', 'span'],
-      'MENUGROUP_FOR_VIEW' : ['create-menu-reference', 'span'],
-      'MENUGROUP_FOR_CONV' : ['create-menu-vertical', 'span'],
-      'MENUGROUP_FOR_CMDB' : ['create-menu-data-sheet', 'span'],
-      'DESCRIPTION' : ['create-menu-explanation', 'textarea'],
-      'NOTE' : ['create-menu-note', 'textarea']
-    };
-    // 流用時は不要
-    if ( menuEditorMode === 'diversion' ){
-      delete menuParameterList['CREATE_MENU_ID'];
-      delete menuParameterList['LAST_UPDATE_TIMESTAMP'];
-      delete menuParameterList['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'];
-      delete menuParameterList['LAST_UPDATE_USER'];
-    }
-
-    if ( type === 'get' ) {
-
-      let parameterArray = {};
-      for ( let key in menuParameterList ) {
-        const $target = $( '#' + menuParameterList[ key ][0] );
-        if ( $target.is(':visible') ) {
-          if ( menuParameterList[ key ][1] === 'span' ) {
-            if ( key === 'CREATE_MENU_ID' || key === 'LAST_UPDATE_TIMESTAMP' || key === 'LAST_UPDATE_USER') {
-              parameterArray[ key ] = $target.attr('data-value');
-            } else {
-              parameterArray[ key ] = $target.attr('data-id');
-            }
+const getPanelParameter = function() {
+// 入力値を取得する
+    const parameterArray = {};
+    
+    parameterArray['CREATE_MENU_ID'] = $('#create-menu-id').attr('data-value'); // 項番
+    parameterArray['MENU_NAME'] = $('#create-menu-name').val(); // メニュー名
+    parameterArray['TARGET'] = $('#create-menu-type').val(); // 作成対象
+    parameterArray['DISP_SEQ'] = $('#create-menu-order').val(); // 表示順序
+    parameterArray['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] = $('#create-menu-last-modified').attr('data-value'); // 最終更新日時
+    parameterArray['LAST_UPDATE_USER'] = $('#create-last-update-user').attr('data-value'); // 最終更新者
+    parameterArray['DESCRIPTION'] = $('#create-menu-explanation').val(); // 説明
+    parameterArray['ACCESS_AUTH'] = $('#permission-role-name-list').attr('data-role-id'); // ロール
+    parameterArray['NOTE'] = $('#create-menu-note').val(); // 備考
+    
+    // 作成対象別項目
+    const type = parameterArray['TARGET'];
+    if ( type === '1' || type === '3') {
+      // パラメータシート
+        if ( type === '1' ) {
+          // ホストグループ利用有無
+          const hostgroup = $('#create-menu-use-host-group').prop('checked');
+          if ( hostgroup ) {
+            parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[1]['PURPOSE_ID'];
           } else {
-            parameterArray[ key ] = $target.val();
+            parameterArray['PURPOSE'] = menuEditorArray.selectParamPurpose[0]['PURPOSE_ID'];
           }
         } else {
-          parameterArray[ key ] = null;
+          parameterArray['PURPOSE'] = null;
         }
+        // 縦メニュー利用有無
+        const vertical = $('#create-menu-use-vertical').prop('checked');
+        if ( vertical ) {
+          parameterArray['VERTICAL'] = '1';
+        } else {
+          parameterArray['VERTICAL'] = null;
+        }
+        parameterArray['MENUGROUP_FOR_INPUT'] = $('#create-menu-for-input').attr('data-id'); // 入力用
+        parameterArray['MENUGROUP_FOR_SUBST'] = $('#create-menu-for-substitution').attr('data-id'); // 代入値
+        parameterArray['MENUGROUP_FOR_VIEW'] = $('#create-menu-for-reference').attr('data-id'); // 参照用
+    } else if ( type === '2') {
+      // データシート
+        parameterArray['PURPOSE'] = null;
+        parameterArray['MENUGROUP_FOR_INPUT'] = $('#create-menu-for-input').attr('data-id'); // 入力用
+    }
+    // undefined, ''をnullに
+    for ( let key in parameterArray ) {
+      if ( parameterArray[key] === undefined || parameterArray[key] === '') {
+        parameterArray[key] = null;
       }
-      parameterArray['number-item'] = itemCounter;
-      parameterArray['number-group'] = groupCounter;
+    }
+    parameterArray['number-item'] = itemCounter;
+    parameterArray['number-group'] = groupCounter;
+    
+    return parameterArray;
+};
 
-      return parameterArray;
-
-    } else if ( type === 'set' ) {
-      if ( menuEditorMode === 'view') {
-        const veticalFlag = ( setData['menu']['MENUGROUP_FOR_CONV'] !== null )? true : false;
-        $property.attr({
-          'data-menu-type': setData['menu']['TARGET'],
-          'data-host-type': setData['menu']['PURPOSE'],
-          'data-vertical-menu': veticalFlag
-        });
-        const viewModePanelInfo = [
-          ['#create-menu-id', setData['menu']['CREATE_MENU_ID'] ],
-          ['#create-menu-name', setData['menu']['MENU_NAME'] ],
-          ['#create-menu-type', listIdName( 'target', setData['menu']['TARGET'] )],
-          ['#create-menu-order', setData['menu']['DISP_SEQ'] ],
-          ['#create-menu-use', listIdName( 'use', setData['menu']['PURPOSE'] )],
-          ['#create-menu-host', listIdName( 'group', setData['menu']['MENUGROUP_FOR_H'] )],
-          ['#create-menu-host-group', listIdName( 'group', setData['menu']['MENUGROUP_FOR_HG'] )],
-          ['#create-menu-reference', listIdName( 'group', setData['menu']['MENUGROUP_FOR_VIEW'] )],
-          ['#create-menu-vertical', listIdName( 'group', setData['menu']['MENUGROUP_FOR_CONV'] )],
-          ['#create-menu-data-sheet', listIdName( 'group', setData['menu']['MENUGROUP_FOR_CMDB'] )],
-          ['#create-menu-explanation', setData['menu']['DESCRIPTION'] ],
-          ['#create-menu-note', setData['menu']['NOTE'] ],
-          ['#create-menu-last-modified', setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] ],
-          ['#create-last-update-user', setData['menu']['LAST_UPDATE_USER']]
-        ],
-          viewModePanelInfoLength = viewModePanelInfo.length;
-              
-        for ( let i = 0; i < viewModePanelInfoLength; i++ ) {
-          let panelText = viewModePanelInfo[i][1];
-          if ( panelText === null ) panelText = ''
-          $( viewModePanelInfo[i][0] ).text( panelText );
-        }
-      } else {
-        for ( let key in menuParameterList ) {
-          const $target = $( '#' + menuParameterList[ key ][0] );
-          if ( menuEditorMode !== 'view') {
-            if ( menuParameterList[ key ][1] === 'span' ) {
-              $target.attr('data-value', setData['menu'][ key ] );
-              let panelText = '';
-              if ( $target.closest('#menu-group').length ) {
-                $target.attr('data-id', setData['menu'][ key ] );
-                panelText = listIdName( 'group', setData['menu'][ key ] );
-              } else {
-                panelText = setData['menu'][ key ];
-              }
-              if ( panelText === null ) panelText = '';
-              $target.text( panelText );
-            } else {
-              $target.val( setData['menu'][ key ] ).change();
-            }
-          } else {
-            let panelText = setData['menu'][ key ];
-            if ( panelText === null ) panelText = '';
-            $target.text( panelText );
-          }
-        }
-      }
-      itemCounter = setData['menu']['number-item'] + 1;
-      groupCounter = setData['menu']['number-group'] + 1;
-      repeatCounter = 1;
+const setPanelParameter = function( setData ) {
+  // nullを空白に
+  for ( let key in setData['menu'] ) {
+    if ( setData['menu'][key] === null ) {
+      setData['menu'][key] = '';
+    }
+  }
+  // パネルに値をセットする
+    const type = setData['menu']['TARGET'];
+    $property.attr('data-menu-type', type );  
+    
+    if ( menuEditorMode !== 'diversion' ){
+      // 項番
+      $('#create-menu-id')
+        .attr('data-value', setData['menu']['CREATE_MENU_ID'] )
+        .text( setData['menu']['CREATE_MENU_ID'] );
+      // 最終更新日時
+      $('#create-menu-last-modified')
+        .attr('data-value', setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] )
+        .text( setData['menu']['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] );
+      // 最終更新者
+      $('#create-last-update-user')
+        .attr('data-value', setData['menu']['LAST_UPDATE_USER'] )
+        .text( setData['menu']['LAST_UPDATE_USER'] );
+      // ロール
+      const roleList = ( setData['menu']['ACCESS_AUTH'] === undefined )? '': setData['menu']['ACCESS_AUTH'];
+      $('#permission-role-name-list')
+        .attr('data-role-id', roleList )
+        .text( getRoleListIdToName( roleList ) );
     }
     
-}
+    // エディットモード別
+    if ( menuEditorMode === 'view') {
+      $('#create-menu-name').text( setData['menu']['MENU_NAME'] ); // メニュー名
+      $('#create-menu-type').text( listIdName('target', setData['menu']['TARGET'] )); // 作成対象
+      $('#create-menu-order').text( setData['menu']['DISP_SEQ'] ); // 表示順序
+      $('#create-menu-explanation').text( setData['menu']['DESCRIPTION'] );  // 説明
+      $('#create-menu-note').text( setData['menu']['NOTE'] ); // 備考
+    } else {
+      $('#create-menu-name').val( setData['menu']['MENU_NAME'] ); // メニュー名
+      $('#create-menu-type').val( setData['menu']['TARGET'] ); // 作成対象
+      $('#create-menu-order').val( setData['menu']['DISP_SEQ'] ); // 表示順序
+      $('#create-menu-explanation').val( setData['menu']['DESCRIPTION'] );  // 説明
+      $('#create-menu-note').val( setData['menu']['NOTE'] ); // 備考
+    } 
+  
+    // 作成対象項目別
+    if ( type === '1' || type === '3') {
+      // パラメータシート
+        if ( type === '1') {
+          // ホストグループ利用有無
+          if ( setData['menu']['PURPOSE'] === '2' ) {
+            if ( menuEditorMode === 'view') {
+              $('#create-menu-use-host-group').text(textCode('0041'));
+            } else {
+              $('#create-menu-use-host-group').prop('checked', true );
+            }
+          }
+        }
+        // 縦メニュー利用有無
+        if ( setData['menu']['VERTICAL'] === '1') {
+          if ( menuEditorMode === 'view') {
+            $('#create-menu-use-vertical').text(textCode('0041'));
+          } else {
+            $('#create-menu-use-vertical').prop('checked', true );
+          }
+        }
+        // 入力用
+        $('#create-menu-for-input')
+          .attr('data-id', setData['menu']['MENUGROUP_FOR_INPUT'] )
+          .text( listIdName( 'group', setData['menu']['MENUGROUP_FOR_INPUT'] ));
+        // 代入値自動登録用
+        $('#create-menu-for-substitution')
+          .attr('data-id', setData['menu']['MENUGROUP_FOR_SUBST'] )
+          .text( listIdName( 'group', setData['menu']['MENUGROUP_FOR_SUBST'] ));
+        // 参照用
+        $('#create-menu-for-reference')
+          .attr('data-id', setData['menu']['MENUGROUP_FOR_VIEW'] )
+          .text( listIdName( 'group', setData['menu']['MENUGROUP_FOR_VIEW'] ));
+    } else if ( type === '2') {
+      // データシート
+        // 入力用
+        $('#create-menu-for-input')
+          .attr('data-id', setData['menu']['MENUGROUP_FOR_INPUT'] )
+          .text( listIdName( 'group', setData['menu']['MENUGROUP_FOR_INPUT'] ));
+    }
+
+    itemCounter = setData['menu']['number-item'] + 1;
+    groupCounter = setData['menu']['number-group'] + 1;
+    repeatCounter = 1;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2005,11 +2368,56 @@ const menuParameter = function( type, setData ) {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// メニューグループ初期値
+const initialMenuGroup = function() {
+
+  const forInputID = '2100011610', // 入力用
+        forSubstitutionID = '2100011611', // 代入値自動登録用
+        forReference = '2100011612', // 参照用
+        forInputName = listIdName( 'group', forInputID ),
+        forSubstitutionName = listIdName( 'group', forSubstitutionID ),
+        forReferenceName = listIdName( 'group', forReference );
+  
+  // 入力用
+  if ( forInputName !== null ) {
+    $('#create-menu-for-input')
+      .attr('data-id', forInputID )
+      .text( forInputName );
+  }
+  // 代入値自動登録用
+  if ( forSubstitutionName !== null ) {
+    $('#create-menu-for-substitution')
+      .attr('data-id', forSubstitutionID )
+      .text( forSubstitutionName );
+  }
+  // 参照用
+  if ( forReferenceName !== null ) {
+    $('#create-menu-for-reference')
+      .attr('data-id', forReference )
+      .text( forReferenceName );
+  }
+  // ACCESS_AUTHの初期値を入れる
+  if ( menuEditorArray.roleList !== undefined ) {
+    const roleDefault = new Array,
+          roleLength = menuEditorArray.roleList.length;
+    for ( let i = 0; i < roleLength; i++ ) {
+      if ( menuEditorArray.roleList[i]['DEFAULT'] === 'checked') {
+        roleDefault.push( menuEditorArray.roleList[i]['ROLE_ID'] );
+      } 
+    }
+    const newRoleList = roleDefault.join(',');
+    $('#permission-role-name-list').text(　getRoleListIdToName( newRoleList ) ).attr('data-role-id', newRoleList );
+  }
+};
+
+
 if ( menuEditorMode === 'new' ) {
+  initialMenuGroup();
   addColumn( $menuTable, 'item', itemCounter++ );
 } else {
   loadMenu();
 }
+repeatCheck();
 history.clear();
 
 };

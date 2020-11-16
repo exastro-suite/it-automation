@@ -61,9 +61,7 @@ Ansible（Legacy Role）作業パターン詳細
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208020"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208030"),'E_ANSIBLE_LRL_PATTERN','PATTERN_ID','PATTERN','',array('OrderByThirdColumn'=>'PATTERN_ID'));
@@ -163,9 +161,11 @@ Ansible（Legacy Role）作業パターン詳細
 
         $strPackageIdNumeric = $aryVariant['ROLE_PACKAGE_ID'];
 
+        // RBAC対応 ----
         $strQuery = "SELECT "
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
@@ -177,19 +177,38 @@ Ansible（Legacy Role）作業パターン詳細
         $aryForBind['ROLE_PACKAGE_ID']        = $strPackageIdNumeric;
 
         if( 0 < strlen($strPackageIdNumeric) ){
-            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-            if( $aryRetBody[0] === true ){
-                $objQuery = $aryRetBody[1];
-                while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
-                }
-                unset($objQuery);
-                $retBool = true;
-            }else{
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
+            } else { 
+                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                if( $aryRetBody[0] === true ){
+                    $objQuery = $aryRetBody[1];
+                    while($row = $objQuery->resultFetch() ){
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[]= $row;
+                            }
+                        }
+                    }
+                    unset($objQuery);
+                    $retBool = true;
+                }else{
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
             }
         }
+        // ---- RBAC対応
         $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
         return $retArray;
     };
@@ -206,9 +225,11 @@ Ansible（Legacy Role）作業パターン詳細
 
         $strPackageIdNumeric = $aryVariant['ROLE_PACKAGE_ID'];
 
+        // RBAC対応 ----
         $strQuery = "SELECT "
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
@@ -220,19 +241,38 @@ Ansible（Legacy Role）作業パターン詳細
         $aryForBind['ROLE_PACKAGE_ID']        = $strPackageIdNumeric;
 
         if( 0 < strlen($strPackageIdNumeric) ){
-            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-            if( $aryRetBody[0] === true ){
-                $objQuery = $aryRetBody[1];
-                while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
-                }
-                unset($objQuery);
-                $retBool = true;
-            }else{
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
+            } else { 
+                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                if( $aryRetBody[0] === true ){
+                    $objQuery = $aryRetBody[1];
+                    while($row = $objQuery->resultFetch() ){
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[]= $row;
+                            }
+                        }
+                    }
+                    unset($objQuery);
+                    $retBool = true;
+                }else{
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
             }
         }
+        // ---- RBAC対応
         $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
         return $retArray;
     };
@@ -252,6 +292,7 @@ Ansible（Legacy Role）作業パターン詳細
         $strQuery = "SELECT "
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
@@ -263,17 +304,35 @@ Ansible（Legacy Role）作業パターン詳細
         $aryForBind['ROLE_PACKAGE_ID']        = $strPackageIdNumeric;
 
         if( 0 < strlen($strPackageIdNumeric) ){
-            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-            if( $aryRetBody[0] === true ){
-                $objQuery = $aryRetBody[1];
-                while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
-                }
-                unset($objQuery);
-                $retBool = true;
-            }else{
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
+            } else { 
+                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                if( $aryRetBody[0] === true ){
+                    $objQuery = $aryRetBody[1];
+                    while($row = $objQuery->resultFetch() ){
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                            }
+                        }
+                    }
+                    unset($objQuery);
+                    $retBool = true;
+                }else{
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
             }
         }
         $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -621,6 +680,36 @@ Ansible（Legacy Role）作業パターン詳細
             }
         }
         //ロールパッケージとロールの組合せチェック----
+
+        //----同一Movementに複数のロールパッケージが登録されていないか判定
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            $retBool = false;
+            $query = " SELECT COUNT(*) REC_COUNT FROM D_B_ANSIBLE_LRL_PATTERN_LINK "
+                    ." WHERE  "
+                    ."   LINK_ID         <> :LINK_ID          AND "
+                    ."   PATTERN_ID      =  :PATTERN_ID       AND "
+                    ."   ROLE_PACKAGE_ID <> :ROLE_PACKAGE_ID  AND "
+                    ."   DISUSE_FLAG = 0;                         ";
+            $aryForBind = array();
+            $aryForBind['LINK_ID']         = $columnId;
+            $aryForBind['PATTERN_ID']      = $rg_pattern_id;
+            $aryForBind['ROLE_PACKAGE_ID'] = $rg_role_package_id;
+
+            $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK1)");
+            if( $retArray[0] === true ){
+                $objQuery =& $retArray[1];
+                $aryDiscover = array();
+                $row = $objQuery->resultFetch();
+                unset($objQuery);
+                if( $row['REC_COUNT'] == '0' ){
+                    $retBool = true;
+                }else{
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-90081");
+                    $boolExecuteContinue = false;
+                }
+            }
+        }
+        //同一Movementに複数のロールパッケージが登録されていないか判定----
 
         if( $boolSystemErrorFlag === true ){
             $retBool = false;

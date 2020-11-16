@@ -556,8 +556,11 @@ function jumpToSelfHtml(strElementId){
         retBool = false;
     }
     else{
-        retBool = true;
         var varOffSet = objJumpTarget.offset().top;
+        // 固定レイアウトの場合ヘッダーの高さ分調整する
+        if( $('html').is('.ita-fixed-layout') ) {
+          varOffSet -= $('#HEADER').outerHeight();
+        }
         $('html,body').animate({scrollTop:varOffSet}, 500 );
         retBool = true;
     }
@@ -1167,25 +1170,26 @@ function restruct_for_IE(){
 //////// 表示/非表示ファンクション ////////
 var slideOpenSpeed = 0;
 function show( midashi, nakami ){
-    
-    // console.log( slideOpenSpeed + ' / ' + midashi + ' / ' + nakami );
-    
+    var $nakami = $('#' + nakami ),
+        dataStatus = $nakami.attr('data-init-close');
     // div class.openで囲まれていなかったら囲む
-    if( !$('#' + nakami ).closest('.open').length > 0 ){
-        $('#' + nakami ).wrap('<div class="open"></div>');
+    if( !$nakami.closest('.open').length > 0 ){
+        $nakami.wrap('<div class="open"></div>');
     }
-    
-    var nowOpenFlag = checkOpenNow(nakami);
-    
-    if( nowOpenFlag == 1 ){
-        openToClose( midashi, nakami, slideOpenSpeed );
-    }
-    else{
-        closeToOpen( midashi, nakami, slideOpenSpeed );
-    }
+    // 属性data-init-closeがあれば開閉しない
+    if ( dataStatus === undefined ) {
+        var nowOpenFlag = checkOpenNow(nakami);
 
-    // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
-    restruct_for_IE();
+        if( nowOpenFlag == 1 ){
+            openToClose( midashi, nakami, slideOpenSpeed );
+        }
+        else{
+            closeToOpen( midashi, nakami, slideOpenSpeed );
+        }
+
+        // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
+        restruct_for_IE();
+    }
 }
 
 function openToClose( midashi, nakami, speed ){
@@ -1291,7 +1295,10 @@ function relayout() {
 
     
     // 読み込み完了1秒後に開閉速度を変える
-    if ( slideOpenSpeed == 0 ) setTimeout( function(){ slideOpenSpeed = 500; }, 1000 );
+    if ( slideOpenSpeed == 0 ) setTimeout( function(){
+      slideOpenSpeed = 500;
+      $('#KIZI').find('.text').removeAttr('data-init-close');
+    }, 1000 );
     
     //#KIZIの高さを指定することでFOOTER位置と同時に配色も整える
     if (wh < mh)//KIZIのheightをMENUより小さくしない
@@ -1325,4 +1332,137 @@ function Click_Change_Color(obj) {
     else{
         obj.style.backgroundColor = ''
     }
+}
+
+//////////////////////////////////////////////////////
+// ロール一覧取得・選択
+//////////////////////////////////////////////////////
+
+// モーダル Body HTML
+function setRoleSelectModalBody( roleList, initData, okCallback, cancelCallBack, valueType ) {
+
+      if ( valueType === undefined ) valueType = 'id';
+      const $modalBody = $('.editor-modal-body');
+
+      let roleSelectHTML = ''
+      + '<div class="modal-table-wrap">'
+        + '<form id="modal-role-select">'
+        + '<table class="modal-table modal-select-table">'
+          + '<thead>'
+            + '<th class="select">Select</th><th class="id">ID</th><th class="name">Name</th>'
+          + '</thead>'
+          + '<tbody>';
+
+      // 入力値を取得する
+      const checkList = ( initData !== null || initData !== undefined )? initData.split(','): [''];
+
+      const roleLength = roleList.length;
+      for ( let i = 0; i < roleLength; i++ ) {
+        const roleName = roleList[i]['ROLE_NAME'],
+              roleID = roleList[i]['ROLE_ID'],
+              checkValue = ( valueType === 'name')? roleName: roleID,
+              checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
+              value = ( valueType === 'name')? roleName: roleID;
+        roleSelectHTML += '<tr>'
+        + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
+        + '<th>' + roleID + '</th><td>' + roleName + '</td></tr>';
+      }
+
+      roleSelectHTML += ''      
+          + '</tbody>'
+        + '</table>'
+        + '</form>'
+      + '</div>';
+
+      $modalBody.html( roleSelectHTML );
+
+      // 行で選択
+      $modalBody.find('.modal-select-table').on('click', 'tr', function(){
+        const $tr = $( this ),
+              checked = $tr.find('.modal-checkbox').prop('checked');
+        if ( checked ) {
+          $tr.find('.modal-checkbox').prop('checked', false );
+        } else {
+          $tr.find('.modal-checkbox').prop('checked', true );
+        }
+      });
+
+      // 決定・取り消しボタン
+      const $modalButton = $('.editor-modal-footer-menu-button');
+      $modalButton.prop('disabled', false ).on('click', function() {
+        const $button = $( this ),
+              btnType = $button.attr('data-button-type');
+        switch( btnType ) {
+          case 'ok':
+            // 選択しているチェックボックスを取得
+            let checkboxArray = new Array;
+            $modalBody.find('.modal-checkbox:checked').each( function(){
+              checkboxArray.push( $( this ).val() );
+            });
+            const newRoleList = checkboxArray.join(',');
+            okCallback( newRoleList );
+            break;
+          case 'cancel':
+            cancelCallBack();
+            break;
+        }
+      });
+}
+
+// ロール一覧を取得し、選択モーダルを表示する
+function setAccessPermission( inputDataValue ) {
+
+    const modal = new itaEditorFunctions,
+          printRoleListURL = '/common/common_printRoleList.php?user_id=' + gLoginUserID;
+    
+    // モーダルBody
+    const modalRoleList = function() {
+      // ロール一覧を取得する
+      $.ajax({
+        type: 'get',
+        url: printRoleListURL,
+        dataType: 'text'
+      }).done( function( result ) {
+          if ( result !== '') {
+              const roleList = JSON.parse( result ),
+                    $input = $('input[' + inputDataValue + ']');
+              if ( $input.length ) {
+                  const initValue = $input.val();
+                  // 決定時の処理    
+                  const okEvent = function( newRoleList ) {
+                    $input.val( newRoleList );
+                    modal.modalClose();
+                  };
+                  // キャンセル時の処理    
+                  const cancelEvent = function( newRoleList ) {
+                    modal.modalClose();
+                  };
+                  setRoleSelectModalBody( roleList, initValue, okEvent, cancelEvent, 'name');              
+              }
+          } else {
+              modal.modalError('Failed to get the list.');
+          }
+      }).fail( function( result ) {
+          modal.modalError('Failed to get the list.');
+      });
+    };
+
+    modal.modalOpen('Role select', modalRoleList,'role-selet-modal');
+
+}
+
+// 一覧/更新
+function Mix1_1_UpdateAccessPermission() {
+    setAccessPermission('upd-access-auth-id="access_auth_data"');
+}
+function UpdateAccessPermission() {
+    setAccessPermission('upd-access-auth-id="access_auth_data"');
+}
+
+// 登録
+function Mix2_1_InsertAccessPermission() {
+    setAccessPermission('ins-access-auth-id="access_auth_data"');
+}
+function InsertAccessPermission() {
+    setAccessPermission('ins-access-auth-id="access_auth_data"');
 }

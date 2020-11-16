@@ -38,7 +38,61 @@
         
         // browse系共通ロジックパーツ01
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_browse_01.php");
-        
+
+       //アクセス権を判定
+        if( array_key_exists( "conductor_class_id", $_GET ) === true ){
+            // クエリからsymphony_instance_idを取得
+            $conductor_class_id = $_GET["conductor_class_id"];
+
+            // 整数の場合のみ判定
+            $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
+            if( $objIntNumVali->isValid($conductor_class_id) === true ){
+                // SQL生成
+                $sql = "SELECT  ACCESS_AUTH
+                        FROM    C_CONDUCTOR_EDIT_CLASS_MNG
+                        WHERE   DISUSE_FLAG = '0'
+                        AND     CONDUCTOR_CLASS_NO = :CONDUCTOR_CLASS_NO_BV ";
+
+                $objQuery = $g['objDBCA']->sqlPrepare($sql);
+
+                if($objQuery->getStatus()===false){
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                $objQuery->sqlBind( array( 'CONDUCTOR_CLASS_NO_BV'=>$conductor_class_id ) );
+
+                $r = $objQuery->sqlExecute();
+
+                if (!$r){
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                while ( $row = $objQuery->resultFetch() ){
+                    // アクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        // 例外処理へ
+                        throw new Exception();
+                    } else {
+                        if($permission === false) {
+                            //アクセス権が無いため、例外処理へ
+                            throw new Exception();
+                        }
+                    }
+                }
+            }
+        }
+
     }
     catch (Exception $e){
         // DBアクセス例外処理パーツ
@@ -52,24 +106,20 @@
     $strCmdWordAreaClose = $objMTS->getSomeMessage("ITAWDCH-STD-252");
     
     // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
-    $timeStamp_editor_common_style_css=filemtime("$root_dir_path/webroot/common/css/editor_common.css");
     $timeStamp_editor_conductor_style_css=filemtime("$root_dir_path/webroot/common/css/editor_conductor.css");
-    $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
     $timeStamp_editor_conductor_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_conductor.js");
     $timeStamp_00_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/00_javascript.js");
-   $timeStamp_itabase_symphony_class_info_access_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_info_access.js");
+    $timeStamp_itabase_symphony_class_info_access_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_info_access.js");
     $timeStamp_itabase_symphony_class_edit_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_edit.js");
 
 print <<< EOD
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
-    
-    <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
+    <script>const gLoginUserID = {$g['login_id']};</script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_conductor.js?{$timeStamp_editor_conductor_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/00_javascript.js?{$timeStamp_00_javascript_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_symphony_class_info_access.js?{$timeStamp_itabase_symphony_class_info_access_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_symphony_class_edit.js?{$timeStamp_itabase_symphony_class_edit_js}"></script>
-    <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_style_css}">
     <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_conductor.css?{$timeStamp_editor_conductor_style_css}">
 EOD;
 
@@ -207,13 +257,14 @@ EOD;
             
               <div class="editor-tab-menu">
                 <ul class="editor-tab-menu-list">
-                  <li class="editor-tab-menu-item" data-tab="conductor">Conductor</li>
+                  <li class="editor-tab-menu-item" data-tab="conductor">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309027")}</li>
                   <li class="editor-tab-menu-item" data-tab="movement">Movement</li>
                   <li class="editor-tab-menu-item" data-tab="function">Function</li>
                   <li class="editor-tab-menu-item" data-tab="conditional-branch">Conditional branch</li>
                   <li class="editor-tab-menu-item" data-tab="parallel-branch">Parallel branch</li>
                   <li class="editor-tab-menu-item" data-tab="merge">Merge</li>
                   <li class="editor-tab-menu-item" data-tab="call">Conductor call</li>
+                  <li class="editor-tab-menu-item" data-tab="call_s">Symphony call</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
 
@@ -232,8 +283,26 @@ EOD;
                           <th class="panel-th">Name :</th>
                           <td class="panel-td"><input id="conductor-class-name" class="edit panel-text" type="text"><span id="conductor-class-name-view" class="view panel-span"></span></td>
                         </tr>
+                        <tr class="view">
+                          <th class="panel-th">Role :</th>
+                          <td class="panel-td"><span id="conductor-view-role" class="panel-span"></span></td>
+                        </tr>
                       </tbody>
                     </table>
+                    <div class="panel-group edit">
+                      <div class="panel-group-title">Permission role</div>
+                      <table class="panel-table">
+                        <tbody>
+                          <tr>
+                            <th class="panel-th">Role :</th>
+                            <td class="panel-td"><span id="conductor-edit-role" class="panel-span"></span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <ul class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="conductor-role-select" class="panel-button">Permission role select</button></li>
+                      </ul>                      
+                    </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
                       <textarea id="conductor-class-note" class="edit panel-note panel-textarea" spellcheck="false"></textarea>
@@ -437,6 +506,54 @@ EOD;
                     </div>
                   </div>
                 </div>
+                
+                <!-- Symphony call -->
+                <div id="call_s" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <table class="panel-table">
+                      <tbody>
+                        <tr>
+                          <th class="panel-th">Default skip :</th>
+                          <td class="panel-td"><input id="symphony-call-default-skip" class="panel-checkbox" type="checkbox"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Symphony select</div>
+                      <table class="panel-table">
+                        <tbody>
+                          <tr>
+                            <th class="panel-th">Symphony :</th>
+                            <td class="panel-td"><span id="symphony-call-name" class="panel-span" data-id="" data-value=""></span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <ul class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="symphony-call-select" class="panel-button">Symphony select</button></li>
+                        <li class="panel-button-group-item"><button id="symphony-call-clear" class="panel-button">Clear</button></li>
+                      </ul>
+                    </div>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Operation select</div>
+                      <table class="panel-table">
+                        <tbody>
+                          <tr>
+                            <th class="panel-th">Operation :</th>
+                            <td class="panel-td"><span id="symphony-call-operation" class="panel-span" data-id="" data-value=""></span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <ul class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="symphony-call-operation-select" class="panel-button">Operation select</button></li>
+                        <li class="panel-button-group-item"><button id="symphony-call-operation-clear" class="panel-button">Clear</button></li>
+                      </ul>
+                    </div>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Note</div>
+                      <textarea id="symphony-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                    </div>
+                  </div>
+                </div>
 
               </div><!-- /.editor-tab-contents -->
               
@@ -496,6 +613,7 @@ EOD;
                           <tr><th><span class="add-node function" data-function-type="end"></span></th><td><div>Conductor end</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="pause"></span></th><td><div>Conductor pause</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="call"></span></th><td><div>Conductor call</div></td></tr>
+                          <tr><th><span class="add-node function" data-function-type="call_s"></span></th><td><div>Symphony call</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="conditional-branch"></span></th><td><div>Conditional branch</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="parallel-branch"></span></th><td><div>Parallel branch</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="merge"></span></th><td><div>Parallel merge</div></td></tr>

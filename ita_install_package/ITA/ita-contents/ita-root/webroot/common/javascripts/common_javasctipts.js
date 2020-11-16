@@ -86,10 +86,196 @@ $( function() {
         });
       }
     });
-
+    
+    set_layout_setting();
 });
 
+function set_layout_setting() {    
+    // editor_common.jsが読み込まれているかチェック
+    if ( typeof( itaEditorFunctions ) !== 'undefined') {
+      const func = new itaEditorFunctions,
+            grpNo = func.getParam('grp'),
+            pageNo = func.getParam('no'),
+            exclusionPageNo = [
+              '2100180003','2100180005',
+              '2100160011',
+              '2100000211','2100000212','2100000401','2100000402'
+            ];
+      
+      if ( pageNo !== null && grpNo === null && exclusionPageNo.indexOf( pageNo ) === -1 ) {
+          const $html = $('html'),
+                $footerUL = $('#FOOTER').find('ul'),
+                layoutKeyName = 'ita_layout',
+                headingKeyName = 'no' + pageNo + '_submenu_close_id',
+                fixedLayoutClassName = 'ita-fixed-layout';          
 
+          // FOOTERにLayout切り替えボタン、見出し開閉状態変更ボタンを追加する
+          let layoutButtonHTML = ''
+          + '<li class="fixed-layout"><button class="footer-menu-button fixed-layout-button"></button></li>';
+          
+          // h2とdiv.textがあるかチェック
+          const submenuFlag = ( $('#KIZI').find('h2').length && $('#KIZI').find('div.text').length )? true: false;
+          if ( submenuFlag ) {
+              layoutButtonHTML += ''
+              + '<li class="heading-status"><button class="footer-menu-button heading-status-button"></button></li>';
+          }
+          
+          $footerUL.append( layoutButtonHTML );
+
+          // Local storageに登録があれば読み込む
+          if ( func.keyCheckLocalStorage( layoutKeyName ) ) {
+              if ( func.getLocalStorage( layoutKeyName ) === 'fixed') {
+                  $footerUL.find('.fixed-layout-button').addClass('on');
+                  $html.addClass( fixedLayoutClassName );
+              }
+          }
+          
+          if ( submenuFlag ) {
+              // Local storageに登録があれば読み込む
+              if ( func.keyCheckLocalStorage( headingKeyName ) ) {
+                  const headingCloseList = JSON.parse( func.getLocalStorage( headingKeyName ) );
+                  // 指定のサブメニューを閉じる
+                  for ( let midashiID in headingCloseList ) {
+                    show( midashiID, headingCloseList[midashiID] );
+                  }
+                  // 00_javascriptのwindow.load後のshow()を無視するため属性を付ける
+                  let prevNakamiID = '';
+                  $('#KIZI').find('h2').each( function(){
+                      const $heading = $( this ),
+                            midashiID = $heading.find('.showbutton').closest('div').attr('id');
+                      let nakamiID;
+                      if ( $heading.next().is('.open') ) {
+                          nakamiID = $heading.next('.open').find('.text').attr('id')
+                      } else {
+                          nakamiID = $heading.next('.text').attr('id');
+                      }
+                      if ( prevNakamiID !== undefined && !prevNakamiID.match(/^Filter/) ) {
+                          $('#' + nakamiID ).attr('data-init-close','on');
+                      }
+                      prevNakamiID = nakamiID;
+                  });
+              }
+              $footerUL.find('.heading-status-button').on('click', function(){
+                  const headingArray = new Array();
+
+                  // 見出しとIDの取得
+                  let prevNakamiID = '';
+                  $('#KIZI').find('h2').each( function(){
+                      const $heading = $( this ),
+                            midashiID = $heading.find('.showbutton').closest('div').attr('id'),
+                            midashiTEXT = $heading.find('.midashi_class').text();
+                      let nakamiID;
+                      if ( $heading.next().is('.open') ) {
+                          nakamiID = $heading.next('.open').find('.text').attr('id')
+                      } else {
+                          nakamiID = $heading.next('.text').attr('id');
+                      }
+                      // 開閉できないものとFilterの次に来るもは除外する
+                      if ( midashiID !== undefined && !prevNakamiID.match(/^Filter/) ) {                      
+                          headingArray.push([ midashiID, midashiTEXT, nakamiID, '']);
+                      } else {
+                          headingArray.push([ undefined, midashiTEXT, undefined, 'disabled']);
+                      }
+                      prevNakamiID = nakamiID;
+                  });
+
+                  // 開閉状態変更リスト作成
+                  const subMenuSelect = function() {
+                      const $modalBody = $('.editor-modal-body');
+                      // 見出しテーブル作成
+                      let headingListHtml = ''
+                      + '<div class="modal-table-wrap">'
+                        + '<table class="modal-table modal-select-table">'
+                          + '<thead>'
+                            + '<th class="select">' + getSomeMessage("ITAWDCC92005") + '</th><th class="name">' + getSomeMessage("ITAWDCC92006") + '</th>'
+                          + '</thead>'
+                          + '<tbody>';
+                      const headingArrayLength = headingArray.length,
+                            headingCloseList = ( func.keyCheckLocalStorage( headingKeyName ) )? JSON.parse( func.getLocalStorage( headingKeyName ) ): null;
+                      for ( let i = 0; i < headingArrayLength; i++ ) {
+                          // チェック状態確認
+                          let checkedStatus = '';
+                          if ( headingCloseList !== null && headingArray[i][0] !== undefined ) {
+                              if ( headingCloseList[headingArray[i][0]] ) {
+                                  checkedStatus = '';
+                              } else {
+                                  checkedStatus = ' checked';
+                              }
+                          }
+                          if ( headingArray[i][0] !== undefined ) {
+                              headingListHtml += '<tr>'
+                              + '<th><input value="' + headingArray[i][0] + '" data-nakami="' + headingArray[i][2] + '" class="modal-checkbox" type="checkbox"' + checkedStatus + '></th>'
+                              + '<td>' + headingArray[i][1] + '</td></tr>';
+                          } else {
+                              headingListHtml += '<tr class="disabled">'
+                              + '<th><input class="modal-checkbox" type="checkbox" style="opacity:.3;" disabled></th>'
+                              + '<td>' + headingArray[i][1] + '</td></tr>';
+                          }
+                      }
+                      headingListHtml += '</tbody></table>';
+
+                      $modalBody.html( headingListHtml );
+
+                      // 行で選択
+                      $modalBody.find('.modal-select-table').on('click', 'tr', function(){
+                        const $tr = $( this ),
+                              checked = $tr.find('.modal-checkbox').prop('checked');
+                        if ( !$tr.is('.disabled') && checked ) {
+                          $tr.find('.modal-checkbox').prop('checked', false );
+                        } else {
+                          $tr.find('.modal-checkbox').prop('checked', true );
+                        }
+                      });
+
+                      // 決定・取り消しボタン
+                      const $modalButton = $('.editor-modal-footer-menu-button');
+                      $modalButton.prop('disabled', false ).on('click', function() {
+                        const $button = $( this ),
+                              btnType = $button.attr('data-button-type');
+                        switch( btnType ) {
+                          case 'ok': {
+                            const registArray = {};
+                            $modalBody.find('.modal-checkbox').not(':disabled').each( function(){
+                              const $checkbox = $( this ),
+                                    midashiID = $checkbox.val(),
+                                    nakamiID = $checkbox.attr('data-nakami'),
+                                    checkFlag = $checkbox.prop('checked');
+                              if ( !checkFlag ) {
+                                registArray[midashiID] = nakamiID;
+                              }
+                              if ( checkOpenNow( nakamiID ) !== checkFlag  ) {
+                                show( midashiID, nakamiID );
+                              } 
+                            });
+                            func.setLocalStorage( headingKeyName, JSON.stringify( registArray ) );
+                            func.modalClose();
+                            } break;
+                          case 'cancel':
+                            func.modalClose();
+                            break;
+                        }
+                      });
+                  }              
+                  func.modalOpen( getSomeMessage("ITAWDCC92004"), subMenuSelect,'init-sub-menu')
+              });
+          }
+
+          // Layoutタイプを切り替えてLocal storageに登録する
+          $footerUL.find('.fixed-layout-button').on('click', function(){
+            const $button = $( this );
+            if ( $button.is('.on') ) {
+              $button.removeClass('on');
+              $html.removeClass( fixedLayoutClassName );
+              func.setLocalStorage( layoutKeyName, 'default');
+            } else {
+              $button.addClass('on');
+              $html.addClass( fixedLayoutClassName );
+              func.setLocalStorage( layoutKeyName, 'fixed');
+            }
+          });
+        }
+    }
+}
 
 
 

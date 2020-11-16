@@ -702,7 +702,7 @@ class AnsibleCommonLibs {
             $Ret = file_put_contents($path, $json);
             if($Ret === false) {
                 $boolRet = false;
-                $strErrMsg = $g['objMTS']->getSomeMessage('ITABASEH-ERR-6000018');
+                $strErrMsg = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000018');
             }
             unset($objLibs);
         }
@@ -988,7 +988,7 @@ class YAMLParse {
         return $this->lv_lasterrmsg;
     }
     function Parse($yamlfile) {
-        $this->lv_lasterrmsg = array();
+        $this->lv_lasterrmsg = "";
         if(!extension_loaded('yaml')) {
             $msg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000107');
             $this->SetLastError($msg);
@@ -1022,11 +1022,15 @@ class YAMLParse {
             $this->SetLastError("");
             return false;
         } else {
+            // yaml定義がない場合にnullが帰るので、空配列に設定
+            if($val === null) {
+                $val = array();
+            }
             return $val;
         }
     }
     function StringParse($yamltext) {
-        $this->lv_lasterrmsg = array();
+        $this->lv_lasterrmsg = "";
         if(!extension_loaded('yaml')) {
             $msg = $this->lv_objMTS->getSomeMessage('ITAANSIBLEH-ERR-6000107');
             $this->SetLastError($msg);
@@ -1062,7 +1066,71 @@ class YAMLParse {
             $this->SetLastError($msg);
             return false;
         } else {
+            // yaml定義がない場合にnullが帰るので、空配列に設定
+            if($val === null) {
+                $val = array();
+            }
             return $val;
+        }
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   yamlファイルをパースする。
+    //   ajaxを経由するとyaml_parse時のエラーが取得できないので
+    //　 子プロセスでパースする。
+    //
+    // パラメータ
+    //   $yaml_file: パースするyamlファイル
+    //   $yaml_analys_array: パース結果
+    //
+    // 戻り値
+    //   true:正常
+    //   false:異常
+    //
+    ////////////////////////////////////////////////////////////////////////////////
+    function yaml_file_parse($yaml_file,&$yaml_analys_array) {
+
+        $yaml_analys_array = array();
+        $this->lv_lasterrmsg = "";
+        $error_msg = "";
+
+        global $root_dir_path;    
+        if ( empty($root_dir_path) ){
+            $root_dir_temp = array();
+            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+            $root_dir_path = $root_dir_temp[0] . "ita-root";
+        }
+    
+        // PHPコマンドのパス取得
+        $php_command = @file_get_contents($root_dir_path . "/confs/backyardconfs/path_PHP_MODULE.txt");
+
+        // 改行コードが付いている場合に取り除く
+        $php_command = str_replace("\n","",$php_command);
+    
+        $yaml_analys_result_file = "/tmp/yaml_analys_result_file_" . getmypid();
+        // yaml parse
+        $cmd = sprintf("%s %s/backyards/ansible_driver/ky_ansible_yaml_parse.php %s %s",$php_command,$root_dir_path,$yaml_file,$yaml_analys_result_file);
+        $arry_out = array();
+        $return_var = 0;
+        exec($cmd,$arry_out,$return_var);
+        if($return_var != 0) {
+            foreach($arry_out as $line) {
+                if(strlen(trim($line)) == 0) {
+                    continue;
+                }
+                if(strlen($error_msg) != 0) {
+                    $error_msg .= "\n";
+                }
+                $error_msg .= $line;
+            }
+            $this->SetLastError($error_msg);
+            @unlink($yaml_analys_result_file);
+            return false;
+        } else {
+            $json = file_get_contents($yaml_analys_result_file);
+            $yaml_analys_array =  json_decode($json,true);
+            @unlink($yaml_analys_result_file);
+            return true;
         }
     }
 }

@@ -25,6 +25,14 @@
 ##################################
 #     -----関数定義ここから-----     #
 ##################################
+############################################################
+# ログ出力
+# @param    $1    string    ログに出力する文字列
+# @return   なし
+############################################################
+log() {
+    echo "["`date +"%Y-%m-%d %H:%M:%S"`"] $1" | tee -a "$LOG_FILE"
+}
 
 ############################################################
 # エンコード
@@ -32,8 +40,8 @@
 # @return   STR    string    エンコードした文字列
 ############################################################
 func_str_encode() {
-    STR=`echo -ne "$1" | base64 2>> "$LOG_FILE"`
-    STR=`echo "$STR" | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' 2>> "$LOG_FILE"`
+    STR=$(echo -n "$1" | base64 2>> "$LOG_FILE")
+    STR=$(echo "$STR" | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' 2>> "$LOG_FILE")
     echo "$STR"
 }
 
@@ -46,6 +54,7 @@ func_answer_format_check() {
     if [ "$val" != 'yes' -a "$val" != 'no' ]; then
         log "ERROR : $key should be set to yes or no."
         log 'INFO : Abort installation.'
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
     for VALUE in "${ARR_DRIVER_CHK[@]}"; do
@@ -65,7 +74,7 @@ func_set_total_cnt() {
     PROCCESS_TOTAL_CNT=0
 
     if [ "$BASE_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+19))
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+20))
     fi
 
     if [ "$ANSIBLE_FLG" -eq 1 ]; then
@@ -96,12 +105,16 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
+    if [ "$MATERIAL4_FLG" -eq 1 ]; then
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
+    fi
+
     if [ "$CREATEPARAM_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
     if [ "$CREATEPARAM2_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+1))
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+2))
     fi
 
     if [ "$HOSTGROUP_FLG" -eq 1 ]; then
@@ -155,6 +168,10 @@ func_install_messasge() {
     
     if [ MATERIAL3_FLG = ${1} ]; then
         MESSAGE="Material3"
+    fi
+    
+    if [ MATERIAL4_FLG = ${1} ]; then
+        MESSAGE="Material4"
     fi
     
     if [ CREATEPARAM_FLG = ${1} ]; then
@@ -214,7 +231,7 @@ func_create_tables() {
         if ! test -e "$LIST_DIR/${DRIVER,,}_table_list.txt" ; then
             log "WARNING : ${DRIVER,,}_table_list.txt does not be found."
         else
-            source "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
+            source "$BIN_DIR/create-tables-and-views.sh" "${DRIVER,,}_table_list.txt" "$DB_USERNAME" "$DB_PASSWORD_ON_CMD" "$DB_NAME" "$ITA_LANGUAGE" "$ITA_DIRECTORY" 2>> "$LOG_FILE"
             while read LINE; do
                 FILE_PATH="$LOG_DIR/$LINE.log"
                 if ! test -e "$FILE_PATH" ; then
@@ -321,7 +338,7 @@ func_crontab_set() {
             log "WARNING : ${DRIVER,,}_crontab_list.txt does not be found."
         else
             cp "$LIST_DIR/${DRIVER,,}_crontab_list.txt" "/tmp/" 2>> "$LOG_FILE"
-            sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" "/tmp/${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
+            sed -i -e "s:${REPLACE_CHAR["ita_directory"]}:$ITA_DIRECTORY:g" "/tmp/${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
             sed -i -e '/^$/d' "/tmp/${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
             source "$BIN_DIR/register-crontab.sh" "${DRIVER,,}_crontab_list.txt" 2>> "$LOG_FILE"
             while read LINE; do
@@ -363,6 +380,7 @@ CREATE_TABLES=(
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
+    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
@@ -380,6 +398,7 @@ RELEASE_PLASE=(
     ita_material
     ita_material2
     ita_material3
+    ita_material4
     ita_createparam
     ita_hostgroup
     ita_hostgroup2
@@ -403,7 +422,9 @@ SERVICES_SET=(
     MATERIAL_FLG
     MATERIAL2_FLG
     MATERIAL3_FLG
+    MATERIAL4_FLG
     CREATEPARAM_FLG
+    CREATEPARAM2_FLG
     HOSTGROUP_FLG
     HOSTGROUP2_FLG
     HOSTGROUP3_FLG
@@ -431,18 +452,28 @@ TERRAFORM_FLG=0
 MATERIAL_FLG=0
 MATERIAL2_FLG=0
 MATERIAL3_FLG=0
+MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 HOSTGROUP_FLG=0
 HOSTGROUP2_FLG=0
 HOSTGROUP3_FLG=0
 
-REPLACE_CHAR="%%%%%ITA_DIRECTORY%%%%%"
+declare -A REPLACE_CHAR;
+REPLACE_CHAR=(
+    ["ita_directory"]="%%%%%ITA_DIRECTORY%%%%%"
+    ["ita_domain"]="%%%%%ITA_DOMAIN%%%%%"
+    ["certificate"]="%%%%%CERTIFICATE_FILE%%%%%"
+    ["private_key"]="%%%%%PRIVATE_KEY_FILE%%%%%"
+)
 
 DRIVER_CNT=0
 ANSWER_DRIVER_CNT=0
 ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'openstack_driver' 'terraform_driver' 'material'  'createparam'  'hostgroup')
 
+CERTIFICATE_FILE=''
+PRIVATE_KEY_FILE=''
+CSR_FILE=''
 
 #answerファイル読み取り
 while read LINE; do
@@ -463,6 +494,7 @@ while read LINE; do
             if ! test -d "$ITA_DIRECTORY"/ita-root ; then
                 log 'ERROR : It is necessary to install ITA main functions (ita_base).'
                 log 'INFO : Abort installation.'
+                ERR_FLG="false"
                 func_exit_and_delete_file
             fi
         elif [ "$key" = 'ita_base' ]; then
@@ -471,6 +503,7 @@ while read LINE; do
                 if test -d "$ITA_DIRECTORY"/ita-root ; then
                     log 'ERROR : ITA main functions (ita_base) have already been installed.'
                     log 'INFO : Abort installation.'
+                    ERR_FLG="false"
                     func_exit_and_delete_file
                 fi
             fi
@@ -519,6 +552,7 @@ done < "$COPY_ANSWER_FILE"
 if [ "$ANSWER_DRIVER_CNT" -ne ${#ARR_DRIVER_CHK[@]} ]; then
     log 'ERROR : The format of Answer-file is incorrect.'
     log 'INFO : Abort installation.'
+    ERR_FLG="false"
     func_exit_and_delete_file
 fi
 
@@ -533,7 +567,9 @@ INSTALL_CNT=$((DRIVER_CNT+BASE_FLG))
 if [ "$INSTALL_CNT" -eq 0 ]; then
     log 'ERROR : No installation target has been selected.'
     log 'INFO : Abort installation.'
-    exit
+    ERR_FLG="false"
+    func_exit_and_delete_file
+
 fi
 
 if [ $BASE_FLG -eq 1 ]; then
@@ -618,6 +654,16 @@ elif [ "$OPENSTACK_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
     MATERIAL3_FLG=1
 fi
 
+if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material4 ; then
+    MATERIAL4_FLG=0
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_terraform-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
+    MATERIAL4_FLG=1
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$TERRAFORM_FLG" -eq 1 ] ; then
+    MATERIAL4_FLG=1
+elif [ "$TERRAFORM_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
+    MATERIAL4_FLG=1
+fi
+
 if [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] &&  [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] ; then
     CREATEPARAM2_FLG=0
 elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] && [ "$CREATEPARAM_FLG" -eq 1 ] ; then
@@ -658,6 +704,16 @@ elif [ "$HOSTGROUP3_FLG" -eq 1 ] ; then
     HOSTGROUP2_FLG=1
 fi
 
+#秘密鍵と証明書のファイル名を取得（ITA自己証明書を作成する場合は証明書署名要求ファイル名も設定）
+if [ "$CERTIFICATE_PATH" != "" -a "$PRIVATE_KEY_PATH" != "" ]; then
+    CERTIFICATE_FILE=$(echo $(basename ${CERTIFICATE_PATH})) 2>> "$LOG_FILE"
+    PRIVATE_KEY_FILE=$(echo $(basename ${PRIVATE_KEY_PATH})) 2>> "$LOG_FILE"
+else
+    CERTIFICATE_FILE="$ITA_DOMAIN.crt"
+    PRIVATE_KEY_FILE="$ITA_DOMAIN.key"
+    CSR_FILE="$ITA_DOMAIN.csr"
+fi
+
 PROCCESS_TOTAL_CNT=`func_set_total_cnt`
 
 PROCCESS_CNT=1
@@ -686,11 +742,12 @@ if [ "$BASE_FLG" -eq 1 ]; then
         sed -i -e "s/ITA_DB/$DB_NAME/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
         sed -i -e "s/ITA_USER/$DB_USERNAME/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
         sed -i -e "s/ITA_PASSWD/$DB_PASSWORD/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
-        RES=`mysql -u root -p"$DB_ROOT_PASSWORD" < /tmp/create-db-and-user_for_MySQL.sql 2>&1 | tee -a "$LOG_FILE"`
+        RES=$(env MYSQL_PWD="$DB_ROOT_PASSWORD" mysql -uroot < /tmp/create-db-and-user_for_MySQL.sql 2>&1 | tee -a "$LOG_FILE")
         if echo "$RES" | grep ERROR ; then
             log 'ERROR : Failed to connect to the database.'
             log 'INFO : Abort installation.'
-            exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
         rm -f /tmp/create-db-and-user_for_MySQL.sql
     fi
@@ -708,30 +765,92 @@ if [ "$BASE_FLG" -eq 1 ]; then
     #################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Write exastro-it-automation in /etc/hosts."
     #################################################################################################
-    echo '127.0.0.1    exastro-it-automation' >> /etc/hosts 2>> "$LOG_FILE"
+    echo "127.0.0.1     $ITA_DOMAIN exastro-it-automation" >> /etc/hosts 2>> "$LOG_FILE"
     PROCCESS_CNT=$((PROCCESS_CNT+1))
 
     #################################################################################################
-    log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Place the self-signed certificate for https access."
+    log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Place the certificate and private-key for https access."
     #################################################################################################
-    if [ ${ITA_OS} = 'RHEL7' ]; then
-        cp -p ../ext_files_for_CentOS7.x/etc_pki_tls_certs/exastro-it-automation.crt /etc/pki/tls/certs/ 2>> "$LOG_FILE"
+    if [ "${CERTIFICATE_PATH}" != "" -a "${PRIVATE_KEY_PATH}" != "" ]; then
+        # CERTIFICATE_PATH と PRIVATE_KEY_PATH がita_answers.txtに両方入力されている場合は、ユーザー指定の証明書・秘密鍵を設置
+        # ユーザー指定証明書・秘密鍵設置
+        if test -e "${CERTIFICATE_PATH}" ; then
+            if test -e "${PRIVATE_KEY_PATH}" ; then
+                # 両方の指定のパスにファイルが存在する場合のみ/etc/pki/tls/certs/にファイルをコピー
+                cp -p "${CERTIFICATE_PATH}" /etc/pki/tls/certs/ 2>> "$LOG_FILE"
+                cp -p "${PRIVATE_KEY_PATH}" /etc/pki/tls/certs/ 2>> "$LOG_FILE"
+            else
+                # 指定のパスにファイルがない場合は異常終了
+                log "ERORR : ${PRIVATE_KEY_PATH} does not be found."
+                log 'INFO : Abort installation.'
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+        else 
+            # 指定のパスにファイルがない場合は異常終了
+            log "ERORR : ${CERTIFICATE_PATH} does not be found."
+            log 'INFO : Abort installation.'
+            ERR_FLG="false"
+            func_exit_and_delete_file
+        fi
+    elif [ "${CERTIFICATE_PATH}" = "" -a "${PRIVATE_KEY_PATH}" = "" ]; then
+        # CERTIFICATE_PATH と PRIVATE_KEY_PATH がどちらも入力されていない場合は、ITAで作成する自己証明書・秘密鍵を設置 
+        # 秘密鍵を生成
+        openssl genrsa 2048 > /tmp/"$PRIVATE_KEY_FILE" 2>> "$LOG_FILE"
+        # 証明書署名要求を生成
+        expect -c "
+        set timeout -1
+        spawn openssl req -new -key /tmp/${PRIVATE_KEY_FILE} -out /tmp/${CSR_FILE}
+        expect \"Country Name\"
+        send \"JP\\r\"
+        expect \"State or Province Name\"
+        send \"\\r\"
+        expect \"Locality Name\"
+        send \"\\r\"
+        expect \"Organization Name\"
+        send \"\\r\"
+        expect \"Organizational Unit Name\"
+        send \"\\r\"
+        expect \"Common Name\"
+        send \"${ITA_DOMAIN}\\r\"
+        expect \"Email Address\"
+        send \"\\r\"
+        expect \"A challenge password\"
+        send \"\\r\"
+        expect \"An optional company name\"
+        send \"\\r\"
+        interact
+        " >> "$LOG_FILE" 2>&1
+        # サーバ証明書を生成
+        openssl x509 -days 3650 -req -signkey /tmp/"$PRIVATE_KEY_FILE" < /tmp/"$CSR_FILE" > /tmp/"$CERTIFICATE_FILE" 2>> "$LOG_FILE"
+        # 作成した証明書署名要求を削除
+        rm -f /tmp/"$CSR_FILE" 2>> "$LOG_FILE"
+        # 作成した秘密鍵とサーバ証明書を/etc/pki/tls/certs/へ移動
+        mv /tmp/"$PRIVATE_KEY_FILE" /etc/pki/tls/certs/ 2>> "$LOG_FILE"
+        mv /tmp/"$CERTIFICATE_FILE" /etc/pki/tls/certs/ 2>> "$LOG_FILE"
     else
-        cp -p ../ext_files_for_CentOS8.x/etc_pki_tls_certs/exastro-it-automation.crt /etc/pki/tls/certs/ 2>> "$LOG_FILE"
-    fi
-    if ! test -e /etc/pki/tls/certs/exastro-it-automation.crt ; then
-        log 'WARNING : Failed to place /etc/pki/tls/certs/exastro-it-automation.crt.'
+        # CERTIFICATE_PATH と PRIVATE_KEY_PATH どちらか一方だけ入力されている場合は異常終了
+        if [ "${CERTIFICATE_PATH}" = "" ]; then
+            log "ERORR : Should be Enter [certificate_path]."
+            log 'INFO : Abort installation.'
+            ERR_FLG="false"
+            func_exit_and_delete_file
+        elif [ "${PRIVATE_KEY_PATH}" = "" ]; then
+            log "ERORR : Should be Enter [private_key_path]."
+            log 'INFO : Abort installation.'
+            ERR_FLG="false"
+            func_exit_and_delete_file
+        fi
     fi
 
-    if [ ${ITA_OS} = 'RHEL7' ]; then
-        cp -p ../ext_files_for_CentOS7.x/etc_pki_tls_certs/exastro-it-automation.key /etc/pki/tls/certs/ 2>> "$LOG_FILE"
-    else
-        cp -p ../ext_files_for_CentOS8.x/etc_pki_tls_certs/exastro-it-automation.key /etc/pki/tls/certs/ 2>> "$LOG_FILE"
+    # /etc/pki/tls/certs/ に秘密鍵とサーバ証明書が設置できたかをチェック
+    if ! test -e /etc/pki/tls/certs/"$PRIVATE_KEY_FILE" ; then
+        log "WARNING : Failed to place /etc/pki/tls/certs/$PRIVATE_KEY_FILE."
+    fi
+    if ! test -e /etc/pki/tls/certs/"$CERTIFICATE_FILE" ; then
+        log "WARNING : Failed to place /etc/pki/tls/certs/$CERTIFICATE_FILE."
     fi
 
-    if ! test -e /etc/pki/tls/certs/exastro-it-automation.key ; then
-        log 'WARNING : Failed to place /etc/pki/tls/certs/exastro-it-automation.key.'
-    fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
 
     #################################################################################################
@@ -742,7 +861,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log 'WARNING : Failed to place /etc/php.ini_original.'
     fi
 
-    if [ ${ITA_OS} = 'RHEL7' ]; then
+    if [ ${LINUX_OS} = 'RHEL7' -o ${LINUX_OS} = 'CentOS7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc/php.ini /etc/ 2>> "$LOG_FILE"
     else
         cp -p ../ext_files_for_CentOS8.x/etc/php.ini /etc/ 2>> "$LOG_FILE"
@@ -751,14 +870,14 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log 'WARNING : Failed to place /etc/php.ini.'
     fi
     
-    if [ ${ITA_OS} = 'RHEL8' ]; then
+    if [ ${LINUX_OS} = 'RHEL8' -o ${LINUX_OS} = 'CentOS8' ]; then
         mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.conf_original 2>> "$LOG_FILE"
         if ! test -e /etc/php-fpm.d/www.conf_original ; then
             log 'WARNING : Failed to place /etc/php-fpm.d/www.conf_original.'
         fi
         cp -p ../ext_files_for_CentOS8.x/etc_php-fpm.d/www.conf /etc/php-fpm.d/ 2>> "$LOG_FILE"
         if test -e /etc/php-fpm.d/www.conf ; then
-            sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" /etc/php-fpm.d/www.conf 2>> "$LOG_FILE"
+            sed -i -e "s:${REPLACE_CHAR["ita_directory"]}:$ITA_DIRECTORY:g" /etc/php-fpm.d/www.conf 2>> "$LOG_FILE"
         else
             log 'WARNING : Failed to place /etc/php-fpm.d/www.conf.'
         fi
@@ -768,13 +887,16 @@ if [ "$BASE_FLG" -eq 1 ]; then
     #################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Place Apache(httpd) configuration file."
     #################################################################################################
-    if [ ${ITA_OS} = 'RHEL7' ]; then
+    if [ ${LINUX_OS} = 'RHEL7' -o ${LINUX_OS} = 'CentOS7' ]; then
         cp -p ../ext_files_for_CentOS7.x/etc_httpd_conf.d/vhosts_exastro-it-automation.conf /etc/httpd/conf.d/ 2>> "$LOG_FILE"
     else
         cp -p ../ext_files_for_CentOS8.x/etc_httpd_conf.d/vhosts_exastro-it-automation.conf /etc/httpd/conf.d/ 2>> "$LOG_FILE"
     fi
     if test -e /etc/httpd/conf.d/vhosts_exastro-it-automation.conf ; then
-        sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" /etc/httpd/conf.d/vhosts_exastro-it-automation.conf 2>> "$LOG_FILE"
+        sed -i -e "s:${REPLACE_CHAR["ita_directory"]}:$ITA_DIRECTORY:g" /etc/httpd/conf.d/vhosts_exastro-it-automation.conf 2>> "$LOG_FILE"
+        sed -i -e "s:${REPLACE_CHAR["ita_domain"]}:$ITA_DOMAIN:g" /etc/httpd/conf.d/vhosts_exastro-it-automation.conf 2>> "$LOG_FILE"
+        sed -i -e "s:${REPLACE_CHAR["certificate"]}:$CERTIFICATE_FILE:g" /etc/httpd/conf.d/vhosts_exastro-it-automation.conf 2>> "$LOG_FILE"
+        sed -i -e "s:${REPLACE_CHAR["private_key"]}:$PRIVATE_KEY_FILE:g" /etc/httpd/conf.d/vhosts_exastro-it-automation.conf 2>> "$LOG_FILE"
     else
         log 'WARNING : Failed to place /etc/httpd/conf.d/vhosts_exastro-it-automation.conf.'
     fi
@@ -786,10 +908,40 @@ if [ "$BASE_FLG" -eq 1 ]; then
     if ! test -d "$ITA_DIRECTORY" ; then
         mkdir -p "$ITA_DIRECTORY" 2>> "$LOG_FILE"
         if ! test -d "$ITA_DIRECTORY" ; then
-            log "WARNING : Failed to make $ITA_DIRECTORY directory."
+            log "ERROR : Failed to make $ITA_DIRECTORY directory."
+            log 'INFO : Abort installation.'
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     else
         log "INFO : $ITA_DIRECTORY already exists."
+    fi
+    PROCCESS_CNT=$((PROCCESS_CNT+1))
+
+    #################################################################################################
+    log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Check the execute permission of the parent directory of ITA."
+    #################################################################################################
+    #ITAディレクトリの親ディレクトリ取得
+    PARENT_DIR=$(dirname "$ITA_DIRECTORY")
+    #親ディレクトリの権限のOthersに実行権限があるかチェックする(PARENT_DIRが"/"になるまで繰り返し)
+    while [ "$PARENT_DIR" != "/" ] ; do
+        ls -ld "$PARENT_DIR" | awk '{print substr($0, 8, 3)}' | grep -q x 
+        if [ $? != 0 ]; then
+            log "ERROR : The parent directory of ITA does not have execute permission for \"Other users\".(dir:$PARENT_DIR)"
+            log 'INFO : Abort installation.'
+            ERR_FLG="false"
+            func_exit_and_delete_file
+        fi
+        #権限をチェックしたディレクトリの親ディレクトリを取得する。
+        PARENT_DIR=$(dirname "$PARENT_DIR")
+    done
+    #ルートディレクトリのOthersに実行権限があるかチェックする。
+    ls -ld / | awk '{print substr($0, 8, 3)}' | grep -q x
+    if [ $? != 0 ]; then
+        log "ERROR : The parent directory of ITA does not have execute permission for \"Other users\".(dir:$PARENT_DIR)"
+        log 'INFO : Abort installation.'
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
 
@@ -884,7 +1036,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     cp -rp ../ITA/ita-confs/* "$ITA_DIRECTORY"/ita-root/confs/ 2>> "$LOG_FILE"
     
     for file in `find "$ITA_DIRECTORY"/ita-root/confs/ -type f`; do
-        sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" "$file" 2>> "$LOG_FILE"
+        sed -i -e "s:${REPLACE_CHAR["ita_directory"]}:$ITA_DIRECTORY:g" "$file" 2>> "$LOG_FILE"
     done
     
     func_config_place BASE_FLG
@@ -901,7 +1053,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log "WARNING : Failed to place db_username.txt."
     fi
 
-    DB_PASSWORD_ENC=`func_str_encode "$DB_PASSWORD"`
+    DB_PASSWORD_ENC=`func_str_encode "$DB_PASSWORD_ON_CMD"`
     echo "$DB_PASSWORD_ENC" > "$ITA_DIRECTORY"/ita-root/confs/commonconfs/db_password.txt
     if ! test -e "$ITA_DIRECTORY"/ita-root/confs/commonconfs/db_password.txt ; then
         log "WARNING : Failed to place db_password.txt."
@@ -911,7 +1063,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     #################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Create symbolic link of ITA environment file."
     #################################################################################################
-    sed -i -e "s:$REPLACE_CHAR:$ITA_DIRECTORY:g" "$ITA_DIRECTORY"/ita-root/confs/backyardconfs/ita_env 2>> "$LOG_FILE"
+    sed -i -e "s:${REPLACE_CHAR["ita_directory"]}:$ITA_DIRECTORY:g" "$ITA_DIRECTORY"/ita-root/confs/backyardconfs/ita_env 2>> "$LOG_FILE"
     ln -s "$ITA_DIRECTORY"/ita-root/confs/backyardconfs/ita_env /etc/sysconfig/ita_env 2>> "$LOG_FILE"
     if [ ! -L /etc/sysconfig/ita_env ]; then
         log 'WARNING : Failed to create symbolic link /etc/sysconfig/ita_env.'
@@ -938,6 +1090,7 @@ if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_base ; then
     if [ $? -ne 0 ]; then
         log "ERROR : The version of the installer and the already installed ITA are different."
         log "INFO : Abort installation."
+        ERR_FLG="false"
         func_exit_and_delete_file
     fi
 fi
@@ -1006,7 +1159,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     ################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Modify Apache(httpd) configuration file."
     ################################################################################################
-    if [ ${ITA_OS} = 'RHEL7' ]; then
+    if [ ${LINUX_OS} = 'RHEL7' -o ${LINUX_OS} = 'CentOS7' ]; then
         RES=`cat /etc/sysconfig/httpd | grep "^LANG=\"*ja_JP.UTF-8\"*" -c`
         if [ "$RES" -eq 0 ]; then
             sed -i -e '/^LANG/s/^/# /g' '/etc/sysconfig/httpd' 2>> "$LOG_FILE"

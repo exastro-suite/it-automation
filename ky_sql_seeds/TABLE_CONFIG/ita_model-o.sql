@@ -10,7 +10,9 @@ TERRAFORM_HOSTNAME                %VARCHR%(256)                    ,
 TERRAFORM_TOKEN                   %VARCHR%(512)                    ,
 TERRAFORM_REFRESH_INTERVAL        %INT%                            ,
 TERRAFORM_TAILLOG_LINES           %INT%                            ,
+NULL_DATA_HANDLING_FLG            %INT%                            , -- Null値の連携 1:有効　2:無効
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -31,7 +33,9 @@ TERRAFORM_HOSTNAME                %VARCHR%(256)                    ,
 TERRAFORM_TOKEN                   %VARCHR%(512)                    ,
 TERRAFORM_REFRESH_INTERVAL        %INT%                            ,
 TERRAFORM_TAILLOG_LINES           %INT%                            ,
+NULL_DATA_HANDLING_FLG            %INT%                            , -- Null値の連携 1:有効　2:無効
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -107,6 +111,41 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- 履歴系テーブル作成----
 
+-- ----更新系テーブル作成----
+-- HCLフラグ
+CREATE TABLE B_TERRAFORM_HCL_FLAG
+(
+HCL_FLAG                          %INT%                            ,
+HCL_FLAG_SELECT                   %VARCHR%(32)                     ,
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (HCL_FLAG)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成----
+-- HCLフラグ(履歴)
+CREATE TABLE B_TERRAFORM_HCL_FLAG_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+HCL_FLAG                          %INT%                            ,
+HCL_FLAG_SELECT                   %VARCHR%(32)                     ,
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
 -- *****************************************************************************
 -- *** ***** Terraform Common Tables                                         ***
 -- *****************************************************************************
@@ -123,6 +162,7 @@ ORGANIZATION_NAME                 %VARCHR%(40)                     ,
 EMAIL_ADDRESS                     %VARCHR%(128)                    ,
 CHECK_RESULT                      %VARCHR%(8)                      ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -143,6 +183,7 @@ ORGANIZATION_NAME                 %VARCHR%(40)                     ,
 EMAIL_ADDRESS                     %VARCHR%(128)                    ,
 CHECK_RESULT                      %VARCHR%(8)                      ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -158,10 +199,10 @@ CREATE TABLE B_TERRAFORM_WORKSPACES
 WORKSPACE_ID                      %INT%                            ,
 ORGANIZATION_ID                   %INT%                            ,
 WORKSPACE_NAME                    %VARCHR%(90)                     ,
-APPLY_METHOD                      %VARCHR%(32)                     ,
 TERRAFORM_VERSION                 %VARCHR%(32)                     ,
 CHECK_RESULT                      %VARCHR%(8)                      ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -180,10 +221,10 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴�
 WORKSPACE_ID                      %INT%                            ,
 ORGANIZATION_ID                   %INT%                            ,
 WORKSPACE_NAME                    %VARCHR%(90)                     ,
-APPLY_METHOD                      %VARCHR%(32)                     ,
 TERRAFORM_VERSION                 %VARCHR%(32)                     ,
 CHECK_RESULT                      %VARCHR%(8)                      ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -200,6 +241,7 @@ MODULE_MATTER_ID                  %INT%                            ,
 MODULE_MATTER_NAME                %VARCHR%(256)                    ,
 MODULE_MATTER_FILE                %VARCHR%(256)                    ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -219,6 +261,7 @@ MODULE_MATTER_ID                  %INT%                            ,
 MODULE_MATTER_NAME                %VARCHR%(256)                    ,
 MODULE_MATTER_FILE                %VARCHR%(256)                    ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -235,6 +278,7 @@ POLICY_ID                         %INT%                            ,
 POLICY_NAME                       %VARCHR%(256)                    , 
 POLICY_MATTER_FILE                %VARCHR%(256)                    ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -254,6 +298,7 @@ POLICY_ID                         %INT%                            ,
 POLICY_NAME                       %VARCHR%(256)                    , 
 POLICY_MATTER_FILE                %VARCHR%(256)                    ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -269,6 +314,7 @@ CREATE TABLE B_TERRAFORM_POLICY_SETS
 POLICY_SET_ID                     %INT%                            ,
 POLICY_SET_NAME                   %VARCHR%(256)                    ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -287,6 +333,7 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴�
 POLICY_SET_ID                     %INT%                            ,
 POLICY_SET_NAME                   %VARCHR%(256)                    ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -302,6 +349,7 @@ POLICYSET_POLICY_LINK_ID          %INT%                            ,
 POLICY_SET_ID                     %INT%                            ,
 POLICY_ID                         %INT%                            ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -321,6 +369,7 @@ POLICYSET_POLICY_LINK_ID          %INT%                            ,
 POLICY_SET_ID                     %INT%                            ,
 POLICY_ID                         %INT%                            ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -336,6 +385,7 @@ POLICYSET_WORKSPACE_LINK_ID       %INT%                            ,
 POLICY_SET_ID                     %INT%                            ,
 WORKSPACE_ID                      %INT%                            ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -355,6 +405,7 @@ POLICYSET_WORKSPACE_LINK_ID       %INT%                            ,
 POLICY_SET_ID                     %INT%                            ,
 WORKSPACE_ID                      %INT%                            ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -371,6 +422,7 @@ LINK_ID                           %INT%                            ,
 PATTERN_ID                        %INT%                            ,
 MODULE_MATTER_ID                  %INT%                            ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -390,6 +442,7 @@ LINK_ID                           %INT%                            ,
 PATTERN_ID                        %INT%                            ,
 MODULE_MATTER_ID                  %INT%                            ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -423,6 +476,7 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -460,6 +514,7 @@ FILE_INPUT                        %VARCHR%(1024)                   ,
 FILE_RESULT                       %VARCHR%(1024)                   ,
 RUN_MODE                          %INT%                            ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -476,9 +531,11 @@ ASSIGN_ID                         %INT%                            ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションID
 PATTERN_ID                        %INT%                            , -- パターンID
 MODULE_VARS_LINK_ID               %INT%                            , -- 代入値リンクID
-VARS_ENTRY                        %VARCHR%(8192)                   ,
-SENSITIVE_FLAG                    %VARCHR%(1)                      ,
+VARS_ENTRY                        text                             ,
+HCL_FLAG                          %VARCHR%(1)                      , -- HCL設定
+SENSITIVE_FLAG                    %VARCHR%(1)                      , -- Sensitive設定
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -498,9 +555,11 @@ ASSIGN_ID                         %INT%                            ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションID
 PATTERN_ID                        %INT%                            , -- パターンID
 MODULE_VARS_LINK_ID               %INT%                            , -- 代入値リンクID
-VARS_ENTRY                        %VARCHR%(8192)                   ,
-SENSITIVE_FLAG                    %VARCHR%(1)                      ,
+VARS_ENTRY                        text                             ,
+HCL_FLAG                          %VARCHR%(1)                      , -- HCL設定
+SENSITIVE_FLAG                    %VARCHR%(1)                      , -- Sensitive設定
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -509,35 +568,50 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- 履歴系テーブル作成----
 
--- ----更新系テーブル作成----
---代入値管理オプション(Sensitive)管理
-CREATE TABLE B_TERRAFORM_VARS_SENSITIVE
-(
-VARS_SENSITIVE                    %INT%                            ,
-VARS_SENSITIVE_SELECT             %VARCHR%(16)                     ,
-DISP_SEQ                          %INT%                            , -- 表示順序
-NOTE                              %VARCHR%(4000)                   , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
-PRIMARY KEY (VARS_SENSITIVE)
+-- ----更新系テーブル作成
+--代入値自動登録設定
+CREATE TABLE B_TERRAFORM_VAL_ASSIGN (
+COLUMN_ID                         %INT%                   , -- 識別シーケンス
+MENU_ID                           %INT%                   , -- メニューID
+COLUMN_LIST_ID                    %INT%                   , -- CMDB処理対象メニューカラム一覧の識別シーケンス
+COL_TYPE                          %INT%                   , -- カラムタイプ　1/空白:Value型　2:Key-Value型　
+PATTERN_ID                        %INT%                   , -- 作業パターンID
+VAL_VARS_LINK_ID                  %INT%                   , -- Value値　作業パターン変数紐付
+KEY_VARS_LINK_ID                  %INT%                   , -- Key値　作業パターン変数紐付
+HCL_FLAG                          %VARCHR%(1)             , -- HCL設定
+NULL_DATA_HANDLING_FLG            %INT%                   , -- Null値の連携
+DISP_SEQ                          %INT%                   , -- 表示順序
+ACCESS_AUTH                       TEXT                    ,
+NOTE                              %VARCHR%(4000)          , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)             , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%             , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                   , -- 最終更新ユーザ
+PRIMARY KEY(COLUMN_ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- 更新系テーブル作成----
 
--- ----履歴系テーブル作成----
---代入値管理オプション(Sensitive)管理(履歴)
-CREATE TABLE B_TERRAFORM_VARS_SENSITIVE_JNL
+-- ----履歴系テーブル作成
+--代入値自動登録設定(履歴)
+CREATE TABLE B_TERRAFORM_VAL_ASSIGN_JNL
 (
-JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
-VARS_SENSITIVE                    %INT%                            ,
-VARS_SENSITIVE_SELECT             %VARCHR%(16)                     ,
-DISP_SEQ                          %INT%                            , -- 表示順序
-NOTE                              %VARCHR%(4000)                   , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+JOURNAL_SEQ_NO                    %INT%                   , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%             , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)             , -- 履歴用変更種別
+COLUMN_ID                         %INT%                   , -- 識別シーケンス
+MENU_ID                           %INT%                   , -- メニューID
+COLUMN_LIST_ID                    %INT%                   , -- CMDB処理対象メニューカラム一覧の識別シーケンス
+COL_TYPE                          %INT%                   , -- カラムタイプ　1/空白:Value型　2:Key-Value型　
+PATTERN_ID                        %INT%                   , -- 作業パターンID
+VAL_VARS_LINK_ID                  %INT%                   , -- Value値　作業パターン変数紐付
+KEY_VARS_LINK_ID                  %INT%                   , -- Key値　作業パターン変数紐付
+HCL_FLAG                          %VARCHR%(1)             , -- HCL設定
+NULL_DATA_HANDLING_FLG            %INT%                   , -- Null値の連携
+DISP_SEQ                          %INT%                   , -- 表示順序
+ACCESS_AUTH                       TEXT                    ,
+NOTE                              %VARCHR%(4000)          , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)             , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%             , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                   , -- 最終更新ユーザ
 PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- 履歴系テーブル作成----
@@ -551,6 +625,7 @@ MODULE_MATTER_ID                  %INT%                            ,
 VARS_NAME                         %VARCHR%(256)                    ,
 VARS_DESCRIPTION                  %VARCHR%(256)                    ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -571,6 +646,7 @@ MODULE_MATTER_ID                  %INT%                            ,
 VARS_NAME                         %VARCHR%(256)                    ,
 VARS_DESCRIPTION                  %VARCHR%(256)                    ,
 DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
 DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
@@ -580,75 +656,6 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 -- 履歴系テーブル作成----
 
 
--- ----更新系テーブル作成----
---Workspaceオプション(Apply Method)管理
-CREATE TABLE B_TERRAFORM_WORKSPACE_APPLY_METHOD
-(
-WORKSPACE_OPTION_ID               %INT%                            ,
-WORKSPACE_OPTION_NAME             %VARCHR%(16)                     ,
-DISP_SEQ                          %INT%                            , -- 表示順序
-NOTE                              %VARCHR%(4000)                   , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
-
-PRIMARY KEY (WORKSPACE_OPTION_ID)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- 更新系テーブル作成----
-
--- ----履歴系テーブル作成----
---Workspaceオプション(Apply Method)管理(履歴)
-CREATE TABLE B_TERRAFORM_WORKSPACE_APPLY_METHOD_JNL
-(
-JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
-WORKSPACE_OPTION_ID               %INT%                            ,
-WORKSPACE_OPTION_NAME             %VARCHR%(16)                     ,
-DISP_SEQ                          %INT%                            , -- 表示順序
-NOTE                              %VARCHR%(4000)                   , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
-PRIMARY KEY(JOURNAL_SEQ_NO)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- 履歴系テーブル作成----
-
-/*
--- ----更新系テーブル作成----
---TFE登録ステータス
-CREATE TABLE B_TERRAFORM_ENTERPRISE_REGISTER_STATUS
-(
-TFE_REGISTER_STATUS_ID            %INT%                            ,
-TFE_REGISTER_STATUS_NAME          %VARCHR%(32)                     ,
-DISP_SEQ                          %INT%                            , -- 表示順序
-NOTE                              %VARCHR%(4000)                   , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
-
-PRIMARY KEY (TFE_REGISTER_STATUS_ID)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- 更新系テーブル作成----
-
--- ----履歴系テーブル作成----
---TFE登録ステータス(履歴)
-CREATE TABLE B_TERRAFORM_ENTERPRISE_REGISTER_STATUS_JNL
-(
-JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
-TFE_REGISTER_STATUS_ID            %INT%                            ,
-TFE_REGISTER_STATUS_NAME          %VARCHR%(32)                     ,
-DISP_SEQ                          %INT%                            , -- 表示順序
-NOTE                              %VARCHR%(4000)                   , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
-PRIMARY KEY(JOURNAL_SEQ_NO)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- 履歴系テーブル作成----
-*/
 -- *****************************************************************************
 -- *** Terraform Tables *****                                                ***
 -- *****************************************************************************
@@ -694,6 +701,7 @@ SELECT
         TAB_A.WORKSPACE_NAME WORKSPACE_NAME          ,
         [%CONCAT_HEAD/%]ORGANIZATION_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]WORKSPACE_NAME[%CONCAT_TAIL/%] ORGANIZATION_WORKSPACE,
         TAB_A.DISP_SEQ             ,
+        TAB_A.ACCESS_AUTH          ,
         TAB_A.NOTE                 ,
         TAB_A.DISUSE_FLAG          ,
         TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -712,6 +720,7 @@ SELECT
         TAB_A.WORKSPACE_NAME WORKSPACE_NAME          ,
         [%CONCAT_HEAD/%]ORGANIZATION_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]WORKSPACE_NAME[%CONCAT_TAIL/%] ORGANIZATION_WORKSPACE,
         TAB_A.DISP_SEQ             ,
+        TAB_A.ACCESS_AUTH          ,
         TAB_A.NOTE                 ,
         TAB_A.DISUSE_FLAG          ,
         TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -730,6 +739,7 @@ SELECT
         TERRAFORM_WORKSPACE_ID        ,
         TIME_LIMIT                    ,
         DISP_SEQ                      ,
+        ACCESS_AUTH                   ,
         NOTE                          ,
         DISUSE_FLAG                   ,
         LAST_UPDATE_TIMESTAMP         ,
@@ -749,6 +759,7 @@ SELECT
         TERRAFORM_WORKSPACE_ID        ,
         TIME_LIMIT                    ,
         DISP_SEQ                      ,
+        ACCESS_AUTH                   ,
         NOTE                          ,
         DISUSE_FLAG                   ,
         LAST_UPDATE_TIMESTAMP         ,
@@ -784,6 +795,7 @@ SELECT
          TAB_A.RUN_MODE                  ,
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.DISP_SEQ                  ,
+         TAB_A.ACCESS_AUTH               ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
          TAB_A.LAST_UPDATE_TIMESTAMP     ,
@@ -823,6 +835,7 @@ SELECT
          TAB_A.RUN_MODE                  ,
          TAB_D.RUN_MODE_NAME             ,
          TAB_A.DISP_SEQ                  ,
+         TAB_A.ACCESS_AUTH               ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
          TAB_A.LAST_UPDATE_TIMESTAMP     ,
@@ -850,6 +863,65 @@ FROM
   B_TERRAFORM_VARS_ASSIGN_JNL TAB_A
 ;
 
+--代入値自動登録設定メニュー用　VIEW
+CREATE VIEW D_TERRAFORM_VAL_ASSIGN AS 
+SELECT 
+       TAB_A.COLUMN_ID                      , -- 識別シーケンス
+       TAB_A.MENU_ID                        , -- メニューID
+       TAB_A.COLUMN_LIST_ID                 , -- CMDB処理対象メニューカラム一覧の識別シーケンス
+       TAB_A.COL_TYPE                       , -- カラムタイプ　1/空白:Value型　2:Key-Value型　
+       TAB_A.PATTERN_ID                     , -- 作業パターンID
+       TAB_A.VAL_VARS_LINK_ID               , -- Value値　作業パターン変数紐付
+       TAB_A.KEY_VARS_LINK_ID               , -- Key値　作業パターン変数紐付
+       TAB_A.HCL_FLAG                       , -- HCL設定
+       TAB_A.NULL_DATA_HANDLING_FLG         , -- Null値の連携
+       TAB_B.MENU_GROUP_ID                  ,
+       TAB_C.MENU_GROUP_NAME                ,
+       TAB_A.MENU_ID           MENU_ID_CLONE,
+       TAB_B.MENU_NAME                      ,
+       TAB_A.COLUMN_LIST_ID    REST_COLUMN_LIST_ID,      -- REST/EXCEL/CSV用　CMDB処理対象メニューグループ+メニュー+カラム一覧の識別シーケンス
+       TAB_A.VAL_VARS_LINK_ID  REST_VAL_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Value値　作業パターン+変数名(作業パターン変数紐付)
+       TAB_A.KEY_VARS_LINK_ID  REST_KEY_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
+       TAB_A.DISP_SEQ                       ,
+       TAB_A.ACCESS_AUTH                    ,
+       TAB_A.NOTE                           ,
+       TAB_A.DISUSE_FLAG                    ,
+       TAB_A.LAST_UPDATE_TIMESTAMP          ,
+       TAB_A.LAST_UPDATE_USER 
+FROM B_TERRAFORM_VAL_ASSIGN TAB_A
+LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID);
+
+CREATE VIEW D_TERRAFORM_VAL_ASSIGN_JNL AS 
+SELECT TAB_A.JOURNAL_SEQ_NO                 ,
+       TAB_A.JOURNAL_REG_DATETIME           ,
+       TAB_A.JOURNAL_ACTION_CLASS           ,
+       TAB_A.COLUMN_ID                      , -- 識別シーケンス
+       TAB_A.MENU_ID                        , -- メニューID
+       TAB_A.COLUMN_LIST_ID                 , -- CMDB処理対象メニューカラム一覧の識別シーケンス
+       TAB_A.COL_TYPE                       , -- カラムタイプ　1/空白:Value型　2:Key-Value型　
+       TAB_A.PATTERN_ID                     , -- 作業パターンID
+       TAB_A.VAL_VARS_LINK_ID               , -- Value値　作業パターン変数紐付
+       TAB_A.KEY_VARS_LINK_ID               , -- Key値　作業パターン変数紐付
+       TAB_A.HCL_FLAG                       , -- HCL設定
+       TAB_A.NULL_DATA_HANDLING_FLG         , -- Null値の連携
+       TAB_B.MENU_GROUP_ID                  ,
+       TAB_C.MENU_GROUP_NAME                ,
+       TAB_A.MENU_ID           MENU_ID_CLONE,
+       TAB_B.MENU_NAME                      ,
+       TAB_A.COLUMN_LIST_ID    REST_COLUMN_LIST_ID,      -- REST/EXCEL/CSV用　CMDB処理対象メニューグループ+メニュー+カラム一覧の識別シーケンス
+       TAB_A.VAL_VARS_LINK_ID  REST_VAL_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Value値　作業パターン+変数名(作業パターン変数紐付)
+       TAB_A.KEY_VARS_LINK_ID  REST_KEY_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
+       TAB_A.DISP_SEQ                       ,
+       TAB_A.ACCESS_AUTH                    ,
+       TAB_A.NOTE                           ,
+       TAB_A.DISUSE_FLAG                    ,
+       TAB_A.LAST_UPDATE_TIMESTAMP          ,
+       TAB_A.LAST_UPDATE_USER 
+FROM B_TERRAFORM_VAL_ASSIGN_JNL TAB_A
+LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID);
+
 --Module変数紐付管理 VIEW
 CREATE VIEW D_TERRAFORM_PTN_VARS_LINK AS 
 SELECT 
@@ -859,6 +931,7 @@ SELECT
         TAB_A.VARS_NAME               ,
         [%CONCAT_HEAD/%]TAB_A.MODULE_VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -879,6 +952,7 @@ SELECT
         TAB_A.VARS_NAME               ,
         [%CONCAT_HEAD/%]TAB_A.MODULE_VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -897,6 +971,7 @@ SELECT
         TAB_A.VARS_NAME               ,
         [%CONCAT_HEAD/%]TAB_A.MODULE_VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -915,11 +990,13 @@ SELECT
          TAB_A.ASSIGN_ID                 ,
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.PATTERN_ID                ,
-         TAB_A.MODULE_VARS_LINK_ID        ,
+         TAB_A.MODULE_VARS_LINK_ID       ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.HCL_FLAG                  ,
          TAB_A.SENSITIVE_FLAG            ,
          TAB_A.DISP_SEQ                  ,
+         TAB_A.ACCESS_AUTH               ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
          TAB_A.LAST_UPDATE_TIMESTAMP     ,
@@ -938,6 +1015,7 @@ SELECT TAB_A.OPERATION_NO_UAPK    ,
        TAB_A.OPERATION_NO_IDBH    ,
        TAB_A.OPERATION            ,
        TAB_A.DISP_SEQ             ,
+       TAB_A.ACCESS_AUTH          ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -954,7 +1032,17 @@ WHERE
 -- -------------------------------------------------------
 CREATE VIEW E_TERRAFORM_PTN_VAR_LIST AS
 SELECT DISTINCT
-  TAB_A.*,
+  TAB_A.MODULE_VARS_LINK_ID,
+  TAB_A.PATTERN_ID,
+  TAB_A.PATTERN_NAME,
+  TAB_A.VARS_NAME,
+  TAB_A.VARS_LINK_PULLDOWN,
+  TAB_A.DISP_SEQ,
+  TAB_C.ACCESS_AUTH,
+  TAB_A.NOTE,
+  TAB_A.DISUSE_FLAG,
+  TAB_A.LAST_UPDATE_TIMESTAMP,
+  TAB_A.LAST_UPDATE_USER,
   [%CONCAT_HEAD/%]TAB_A.PATTERN_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.PATTERN_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.MODULE_VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.VARS_NAME[%CONCAT_TAIL/%] PTN_VAR_PULLDOWN
 FROM
   D_TERRAFORM_PTN_VARS_LINK          TAB_A
@@ -967,7 +1055,17 @@ WHERE
 
 CREATE VIEW E_TERRAFORM_PTN_VAR_LIST_JNL AS
 SELECT DISTINCT
-  TAB_A.*,
+  TAB_A.MODULE_VARS_LINK_ID,
+  TAB_A.PATTERN_ID,
+  TAB_A.PATTERN_NAME,
+  TAB_A.VARS_NAME,
+  TAB_A.VARS_LINK_PULLDOWN,
+  TAB_A.DISP_SEQ,
+  TAB_C.ACCESS_AUTH,
+  TAB_A.NOTE,
+  TAB_A.DISUSE_FLAG,
+  TAB_A.LAST_UPDATE_TIMESTAMP,
+  TAB_A.LAST_UPDATE_USER,
   [%CONCAT_HEAD/%]TAB_A.PATTERN_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.PATTERN_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.MODULE_VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.VARS_NAME[%CONCAT_TAIL/%] PTN_VAR_PULLDOWN
 FROM
   D_TERRAFORM_PTN_VARS_LINK_JNL     TAB_A
@@ -986,6 +1084,7 @@ SELECT  MODULE_MATTER_ID      ,
         [%CONCAT_HEAD/%]MODULE_MATTER_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]MODULE_MATTER_NAME[%CONCAT_TAIL/%] MODULE,
         MODULE_MATTER_FILE    ,
         DISP_SEQ              ,
+        ACCESS_AUTH           ,
         NOTE                  ,
         DISUSE_FLAG           ,
         LAST_UPDATE_TIMESTAMP ,
@@ -1001,6 +1100,7 @@ SELECT  JOURNAL_SEQ_NO          ,
         [%CONCAT_HEAD/%]MODULE_MATTER_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]MODULE_MATTER_NAME[%CONCAT_TAIL/%] MODULE,
         MODULE_MATTER_FILE    ,
         DISP_SEQ              ,
+        ACCESS_AUTH           ,
         NOTE                  ,
         DISUSE_FLAG           ,
         LAST_UPDATE_TIMESTAMP ,
@@ -1014,6 +1114,7 @@ SELECT  POLICY_ID      ,
         [%CONCAT_HEAD/%]POLICY_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]POLICY_NAME[%CONCAT_TAIL/%] POLICY,
         POLICY_MATTER_FILE    ,
         DISP_SEQ              ,
+        ACCESS_AUTH           ,
         NOTE                  ,
         DISUSE_FLAG           ,
         LAST_UPDATE_TIMESTAMP ,
@@ -1029,6 +1130,7 @@ SELECT  JOURNAL_SEQ_NO          ,
         [%CONCAT_HEAD/%]POLICY_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]POLICY_NAME[%CONCAT_TAIL/%] POLICY,
         POLICY_MATTER_FILE    ,
         DISP_SEQ              ,
+        ACCESS_AUTH           ,
         NOTE                  ,
         DISUSE_FLAG           ,
         LAST_UPDATE_TIMESTAMP ,
@@ -1041,6 +1143,7 @@ SELECT  POLICY_SET_ID      ,
         POLICY_SET_NAME    ,
         [%CONCAT_HEAD/%]POLICY_SET_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]POLICY_SET_NAME[%CONCAT_TAIL/%] POLICY_SET,
         DISP_SEQ              ,
+        ACCESS_AUTH           ,
         NOTE                  ,
         DISUSE_FLAG           ,
         LAST_UPDATE_TIMESTAMP ,
@@ -1055,6 +1158,7 @@ SELECT  JOURNAL_SEQ_NO          ,
         POLICY_SET_NAME           ,
         [%CONCAT_HEAD/%]POLICY_SET_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]POLICY_SET_NAME[%CONCAT_TAIL/%] POLICY_SET,
         DISP_SEQ              ,
+        ACCESS_AUTH           ,
         NOTE                  ,
         DISUSE_FLAG           ,
         LAST_UPDATE_TIMESTAMP ,

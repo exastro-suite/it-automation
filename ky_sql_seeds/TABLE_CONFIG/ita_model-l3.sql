@@ -11,6 +11,7 @@ CLOSE_REVISION_ID                  %INT%                           ,
 OPENST_TEMPLATE_CHK                %INT%                           , -- HEATテンプレート
 OPENST_ENVIRONMENT_CHK             %INT%                           , -- 環境設定ファイル
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               %VARCHR%(4000)                  , -- 備考
 DISUSE_FLAG                        %VARCHR%(1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              %DATETIME6%                     , -- 最終更新日時
@@ -33,6 +34,7 @@ CLOSE_REVISION_ID                  %INT%                           ,
 OPENST_TEMPLATE_CHK                %INT%                           , -- HEATテンプレート
 OPENST_ENVIRONMENT_CHK             %INT%                           , -- 環境設定ファイル
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               %VARCHR%(4000)                  , -- 備考
 DISUSE_FLAG                        %VARCHR%(1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              %DATETIME6%                     , -- 最終更新日時

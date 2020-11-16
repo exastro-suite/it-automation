@@ -52,9 +52,8 @@ Ansible 共通 Ansible Tower インスタンス一覧
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001003"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     //----ホスト名
     $objVldt = new SingleTextValidator(1,128,false);

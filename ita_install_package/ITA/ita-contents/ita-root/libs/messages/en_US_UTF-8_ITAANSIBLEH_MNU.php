@@ -974,8 +974,8 @@ $ary[1900251] = "If array variable is specified in the variable name, input is r
 $ary[1900260] = "Substitution order";
 $ary[1900261] = "If array variable is specified in the variable name, input is not allowed. \n Otherwise, enter positive integer. Input value is substituted in ascending order. \n Enter positive integer even if there are no multiple specific values.";
 $ary[1900262] = "Select menu";
-$ary[1900301] = "Parameter sheet";
-$ary[1900302] = "IaC variable";
+$ary[1900301] = "Parameter sheet(From)";
+$ary[1900302] = "IaC variable(To)";
 $ary[1901000] = "You can perform maintenance (view/register/update/discard) of operations registered in the associated menu, and Movement and variables associated with the setting value of item for each host. <br><br>There are three methods to register the setting value of item. <br>Value type: Setting value of item is registered in the substitution value list as a specific value of associated variable. <br>Key-Value type: Name (Key) and setting value (Value) of item are registered in the substitution value list as a specific value of associated variable. <br> Key type: Item name is registered in the substitution value list as a specific value of associated variable. When the setting value of the item is blank, it is not registered in the substitution value list";
 $ary[1901001] = "Item No.";
 $ary[1901002] = "Legacy Substitut val-auto-reg";
@@ -1011,8 +1011,8 @@ $ary[1901222] = "Select Movement";
 $ary[1901260] = "Substitution order";
 $ary[1901261] = "Blank or positive integer \n Description available: Substituted in ascending order \n Blank: Substituted as single substitution value \n Mixed: After the substitution values with description are substituted in ascending order, blank substitution values are substituted.";
 $ary[1901262] = "Select menu";
-$ary[1901301] = "Parameter sheet";
-$ary[1901302] = "IaC variable";
+$ary[1901301] = "Parameter sheet(From)";
+$ary[1901302] = "IaC variable(To)";
 $ary[1902000] = "You can perform maintenance (view/register/update/discard) of operations registered in the associated menu, and Movement and variables associated with the setting value of item for each host. <br><br>There are three methods to register the setting value of item. <br>Value type: Setting value of item is registered in the substitution value list as a specific value of associated variable. <br>Key-Value type: Name (Key) and setting value (Value) of item are registered in the substitution value list as a specific value of associated variable. <br>Key type: Item name is registered in the substitution value list as a specific value of associated variable. When the setting value of the item is blank, it is not registered in the substitution value list";
 $ary[1902001] = "Item No.";
 $ary[1902002] = "Pioneer Substitut val-auto-reg";
@@ -1050,8 +1050,8 @@ $ary[1902220] = "Variable name";
 $ary[1902221] = "Auto acquire from dialog file \n Setup variable associated with item. \n The setting value of item becomes the specific value of the variable.";
 $ary[1902222] = "Select Movement";
 $ary[1902262] = "Select menu";
-$ary[1902301] = "Parameter sheet";
-$ary[1902302] = "IaC variable";
+$ary[1902301] = "Parameter sheet(From)";
+$ary[1902302] = "IaC variable(To)";
 $ary[1910000] = "You can perform maintenance (view/register/update/discard) of the menu associated with the substitution value auto-registration setting.";
 $ary[1910001] = "Item No.";
 $ary[1910002] = "Associated menu";
@@ -1229,4 +1229,61 @@ $ary[9010001050] = "ssh authentication key file";
 $ary[9010001051] = "ssh key authentication file for key authentication.";
 $ary[9010001060] = "isolated Tower";
 $ary[9010001061] = "Select ● for isolated Tower.";
+$ary[9010002000] = "Sensitive setting";
+$ary[9010002010] = "If \"ON\", the specific value will not be displayed after registration.";
+$ary[1207100] = "Collection status";
+$ary[1207101] = "status";
+$ary[1207102] = "Displays the collection status.";
+$ary[1207103] = "Collection log";
+$ary[1207104] = "You can download the run-time log at the time of collection.";
+$ary[1207200] = "You can maintain (view / register / update / discontinue) the connection interface information for the REST API used by the collection function. <br> This menu must be one record.";
+$ary[1207201] = "ID";
+$ary[1207202] = "Collection interface information";
+$ary[1207203] = "Collection interface information";
+$ary[1207204] = "hostname";
+$ary[1207205] = "[Maximum length] 128 bytes";
+$ary[1207206] = "IP";
+$ary[1207207] = "[Maximum length] 15 bytes
+Please enter in the format xxx.xxx.xxx.xxx. ";
+$ary[1207208] = "REST user";
+$ary[1207209] = "Users associated with the role of system administrator,
+Alternatively, create an equivalent role and enter the user associated with it. ";
+$ary[1207210] = "REST password";
+$ary[1207211] = "[Maximum length] 30 bytes";
+$ary[1207212] = "REST method";
+$ary[1207213] = "Select the type to use for REST communication";
+$ary[1207214] = "protocol";
+$ary[1207215] = "Protocol used for REST communication";
+$ary[1207216] = "port";
+$ary[1207217] = "Port used for REST communication";
+$ary[1207300] = "You can maintain (view / register / update / abolish) the association information between the parameter sheet and the collection target used in the collection function. <br> The parameter sheet is only applicable to the one created by creating the menu.";
+$ary[1207301] = "ID";
+$ary[1207302] = "Collected item value list";
+$ary[1207303] = "Collected item value list";
+$ary[1207304] = "Collected items(FROM)";
+$ary[1207305] = "Perth format";
+$ary[1207306] = "YAML: Parses a YAML-formatted file and generates parameters.";
+$ary[1207307] = "PREFIX (file name)";
+$ary[1207308] = "Enter without extension";
+$ary[1207309] = "Variable name";
+$ary[1207310] = "Enter the name of the variable to be collected.
+For arrays and hash structures, you must enter member variables.
+
+ex1)If you want to collect ZZZZZ
+  Variable name:     VAR_SAMPLE_1
+ex2)If you want to collect XXXXXX
+  Variable name:     VAR_SAMPLE_1
+  Member variables: AAA[0].BBB1
+
+---
+VAR_SAMPLE_1: 'ZZZZZ'
+VAR_SAMPLE_2:
+  AAA:
+    - BBB1: 'XXXXXX'
+      BBB2: 'XXX.XXX.XXX.XXX'
+    - BBB1: 'YYYYYY'
+      BBB2: 'YYY.YYY.YYY.YYY'";
+$ary[1207311] = "Member variables";
+$ary[1207312] = "If the variable name is an array or hash structure, you must enter a member variable.";
+$ary[1207313] = "Parameter sheet(TO)";
 ?>

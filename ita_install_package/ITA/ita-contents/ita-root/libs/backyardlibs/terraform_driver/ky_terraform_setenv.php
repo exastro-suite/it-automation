@@ -23,13 +23,6 @@
         $root_dir_path = $root_dir_temp[0] . "ita-root";
     }
 
-
-    ///////////////////////
-    // 定数定義           //
-    ///////////////////////
-    // 変数名の先頭文字
-    define("DF_HOST_VAR_HED"               ,"var.");
-
     ///////////////////////
     // テーブル関連         //
     ///////////////////////
@@ -60,8 +53,14 @@
     // 代入値管理テーブル名
     $vg_terraform_vars_assign_table_name         = "B_TERRAFORM_VARS_ASSIGN";
 
+    // 代入値自動登録設定テーブル名
+    $vg_terraform_val_assign_table_name          = "B_TERRAFORM_VAL_ASSIGN";
+
     // 代入値管理情報紐付け（代入値/変数名/Movement紐付け)管理VIEW
     $vg_terraform_vars_data_view_name            = "D_TERRAFORM_VARS_DATA";
+
+    // 代入値管理作業パターン紐付け管理VIEW
+    $vg_terraform_ptn_vars_link_view_name        = "D_TERRAFORM_PTN_VARS_LINK";
 
     // Module素材管理テーブル名
     $vg_terraform_module_table_name = "B_TERRAFORM_MODULE";
@@ -92,7 +91,7 @@
     $tar_temp_save_dir                  = $root_dir_path . '/temp/terraform_module_temp';
 
     //logファイル格納ディレクトリ
-    $log_save_dir                       = $root_dir_path . '/temp/terraform_data';
+    $log_save_dir                       = $root_dir_path . '/logs/terraform_out_logs';
 
     // 入力ファイル格納先ディレクトリ  /FILE_INPUT
     $vg_exe_ins_input_file_dir          = $root_dir_path . "/uploadfiles/2100080011/FILE_INPUT";

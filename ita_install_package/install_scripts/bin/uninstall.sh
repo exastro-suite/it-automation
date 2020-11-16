@@ -84,30 +84,36 @@ PROCESS_CNT=$((PROCESS_CNT+1))
 #----------------------------------------
 log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete self-signed certificate."
 
-#exastro-it-automation.crtが存在するか
-if [ -e /etc/pki/tls/certs/exastro-it-automation.crt ]; then
-    #exastro-it-automation.crtを削除する
-    rm -f /etc/pki/tls/certs/exastro-it-automation.crt 2>> "$LOG_FILE"
+#ITAの接続に使われているサーバー証明書と秘密鍵のファイル名を取得
+# ita_answers.txtに両方ファイル指定がある場合は、answerファイルから取得
+if [ "$CERTIFICATE_PATH" != "" -a "$PRIVATE_KEY_PATH" != "" ]; then
+    CRT_FILE=$(echo $(basename ${CERTIFICATE_PATH})) 2>> "$LOG_FILE"
+    KEY_FILE=$(echo $(basename ${PRIVATE_KEY_PATH})) 2>> "$LOG_FILE"
 else
-    log 'WARNING : exastro-it-automation.crt does not exist.'
+# それ以外はデフォルトのファイル名(ita_domainの値)を取得する。
+    CRT_FILE="$ITA_DOMAIN.crt"
+    KEY_FILE="$ITA_DOMAIN.key"
 fi
 
-#exastro-it-automation.keyが存在するか
-if [ -e /etc/pki/tls/certs/exastro-it-automation.key ]; then
-    #exastro-it-automation.keyを削除する
-    rm -f /etc/pki/tls/certs/exastro-it-automation.key 2>> "$LOG_FILE"
-else
-    log 'WARNING : exastro-it-automation.key does not exist.'
+#サーバー証明書が存在するか
+if [ -e /etc/pki/tls/certs/"$CRT_FILE" ]; then
+    #サーバー証明書を削除する
+    rm -f /etc/pki/tls/certs/"$CRT_FILE" 2>> "$LOG_FILE"
 fi
 
+#秘密鍵が存在するか
+if [ -e /etc/pki/tls/certs/"$KEY_FILE" ]; then
+    #秘密鍵を削除する
+    rm -f /etc/pki/tls/certs/"$KEY_FILE" 2>> "$LOG_FILE"
+fi
 
 #サーバ証明書が削除されているか確認
-if [ -e /etc/pki/tls/certs/exastro-it-automation.crt ]; then
-    log 'WARNING : Failed to delete exastro-it-automation.crt.'
+if [ -e /etc/pki/tls/certs/"$CRT_FILE" ]; then
+    log "WARNING : Failed to delete ${CRT_FILE}."
 fi
 
-if [ -e /etc/pki/tls/certs/exastro-it-automation.key ]; then
-    log 'WARNING : Failed to delete exastro-it-automation.key.'
+if [ -e /etc/pki/tls/certs/"$KEY_FILE" ]; then
+    log "WARNING : Failed to delete ${KEY_FILE}."
 fi
 
 
@@ -162,66 +168,32 @@ PROCESS_CNT=$((PROCESS_CNT+1))
 #----------------------------------------
 #(6/14) ITAバックヤードスクリプトを全停止し常駐起動設定を解除する
 #----------------------------------------
+BACK_PROCESS=`ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE" | wc -l`
+log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete backyard script.Process count=[$BACK_PROCESS]"
+for var in `ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"`; do
+    FILE_NAME=`basename ${var}`
 
-#SentOS6の場合
-if [ ${ITA_OS} = 'RHEL6' ]; then
-    BACK_PROCESS=`ls /etc/init.d/ky_* 2>> "$LOG_FILE" | wc -l`
-    log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete backyard script.Process count=[$BACK_PROCESS]"
-    for var in `ls /etc/init.d/ky_* 2>> "$LOG_FILE"`; do
-        FILE_NAME=`basename ${var}`
-        
-        #バックヤードスクリプトを全停止
-        BACKYARD_ACTIVE=`/etc/init.d/"$FILE_NAME" stop | grep "OK" -c`
-        #停止しているか確認
-        if [ ${#BACKYARD_ACTIVE} -eq 0 ]; then
-            log "WARNING : ${FILE_NAME} is not stopped."
-        fi
-        
-        #常駐起動設定を解除
-        chkconfig "$FILE_NAME" off; 2>> "$LOG_FILE"
-        #解除されているか確認
-        STARTUP_SET=`chkconfig --list "$FILE_NAME" | grep ":on" -c`
-        if [ "$STARTUP_SET" -ne 0 ]; then
-            log "WARNING : ${FILE_NAME} is not stopped."
-        fi
-        
-        #解除終了ログを出す
-        log "INFO :       [$FILE_NAME] stopped."
+    #バックヤードスクリプトを全停止
+    systemctl stop "$FILE_NAME"; 2>> "$LOG_FILE"
+    #停止しているか確認
+    BACKYARD_ACTIVE=`systemctl status "$FILE_NAME" | grep "running"`
+    if [ ${#BACKYARD_ACTIVE} -ne 0 ]; then
+        log "WARNING : ${FILE_NAME} is not stopped."
+    fi
 
-    done 2>> "$LOG_FILE"
-
-#SentOS7の場合
-else
-    BACK_PROCESS=`ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE" | wc -l`
-    log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete backyard script.Process count=[$BACK_PROCESS]"
-    for var in `ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"`; do
-        FILE_NAME=`basename ${var}`
-
-            #バックヤードスクリプトを全停止
-            systemctl stop "$FILE_NAME"; 2>> "$LOG_FILE"
-            #停止しているか確認
-            BACKYARD_ACTIVE=`systemctl status "$FILE_NAME" | grep "running"`
-            if [ ${#BACKYARD_ACTIVE} -ne 0 ]; then
-                log "WARNING : ${FILE_NAME} is not stopped."
-            fi
-
-            #常駐起動設定を解除
-            systemctl disable "$FILE_NAME"; 2>> "$LOG_FILE"
-            #解除されているか確認
-            STARTUP_SET=`systemctl is-enabled "$FILE_NAME"`
-            if [ "$STARTUP_SET" != "disabled" ]; then
-                log "WARNING : ${FILE_NAME} is not stopped."
-            fi
+    #常駐起動設定を解除
+    systemctl disable "$FILE_NAME"; 2>> "$LOG_FILE"
+    #解除されているか確認
+    STARTUP_SET=`systemctl is-enabled "$FILE_NAME"`
+    if [ "$STARTUP_SET" != "disabled" ]; then
+        log "WARNING : ${FILE_NAME} is not stopped."
+    fi
             
-            #解除終了ログを出す
-            log "INFO :       [$FILE_NAME] stopped."
+    #解除終了ログを出す
+    log "INFO :       [$FILE_NAME] stopped."
             
-    done 2>> "$LOG_FILE"
-    systemctl daemon-reload 2>> "$LOG_FILE"
-    
-fi
-
-
+done 2>> "$LOG_FILE"
+systemctl daemon-reload 2>> "$LOG_FILE"
 
 #プロセスカウント+1
 PROCESS_CNT=$((PROCESS_CNT+1))
@@ -231,29 +203,16 @@ PROCESS_CNT=$((PROCESS_CNT+1))
 #----------------------------------------
 log "INFO : `printf %02d $PROCESS_CNT`/$PROCESS_TOTAL_CNT Delete start-up configuration file."
 
-if [ ${ITA_OS} = 'RHEL6' ]; then
-    for var in `ls /etc/init.d/ky_* 2>> "$LOG_FILE"`; do
-        FILE_NAME=`basename ${var}`
-        #設定ファイル削除
-        rm -f /etc/init.d/ky_* 2>> "$LOG_FILE"
+for var in `ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"`; do
+    FILE_NAME=`basename ${var}`
+    #設定ファイル削除
+    rm -f /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"
         
-        #削除されているか確認
-        if [ -e /etc/init.d/"$FILE_NAME" ]; then
-            log "WARNING : Failure to delete ${FILE_NAME}"
-        fi
-    done
-else
-    for var in `ls /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"`; do
-        FILE_NAME=`basename ${var}`
-        #設定ファイル削除
-        rm -f /usr/lib/systemd/system/ky_* 2>> "$LOG_FILE"
-        
-        #削除されているか確認
-        if [ -e /usr/lib/systemd/system/"$FILE_NAME" ]; then
-            log "WARNING : Failure to delete ${FILE_NAME}"
-        fi
-    done
-fi
+    #削除されているか確認
+    if [ -e /usr/lib/systemd/system/"$FILE_NAME" ]; then
+        log "WARNING : Failure to delete ${FILE_NAME}"
+    fi
+done
 
 #プロセスカウント+1
 PROCESS_CNT=$((PROCESS_CNT+1))
@@ -274,13 +233,13 @@ else
     sed -i -e "s/DB_USERNAME/$DB_USERNAME/g" /tmp/drop_db_and_user_for_MySQL.sql 2>> "$LOG_FILE"
 
     #rootパスワード、DB名、DBユーザ名が間違えていなければ削除処理実行
-    DB_NAME_CHK=`mysql -u root -p"$DB_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" 2>> "$LOG_FILE"`
-    DB_USERNAME_CHK=`mysql -u root -p"$DB_ROOT_PASSWORD" -e "SELECT user, host FROM mysql.user where user = '$DB_USERNAME';" 2>> "$LOG_FILE"`
+    DB_NAME_CHK=$(env MYSQL_PWD="$DB_ROOT_PASSWORD" mysql -uroot -e "SHOW DATABASES LIKE '$DB_NAME';" 2>> "$LOG_FILE")
+    DB_USERNAME_CHK=$(env MYSQL_PWD="$DB_ROOT_PASSWORD" mysql -uroot -e "SELECT user, host FROM mysql.user where user = '$DB_USERNAME';" 2>> "$LOG_FILE")
 
     if [ -z "$DB_NAME_CHK" -o -z "$DB_USERNAME_CHK" ] ; then
         log 'ERROR : Should be set correct [db_root_password][db_name][db_username].'
     else
-        mysql -u root -p"$DB_ROOT_PASSWORD" < /tmp/drop_db_and_user_for_MySQL.sql 2>> "$LOG_FILE"
+        env MYSQL_PWD="$DB_ROOT_PASSWORD" mysql -uroot < /tmp/drop_db_and_user_for_MySQL.sql 2>> "$LOG_FILE"
     fi
 
     rm -f /tmp/drop_db_and_user_for_MySQL.sql
@@ -419,4 +378,3 @@ fi
 ############################################################
 log "INFO : Uninstallation complete!"
 
-exit

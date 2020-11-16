@@ -247,6 +247,22 @@ function selectMenuInfo(createMenuId){
     proxy.selectMenuInfo(createMenuId);
 }
 
+/////////////////////
+// ロールリストを取得
+/////////////////////
+function getRoleList() {
+    const printRoleListURL = '/common/common_printRoleList.php?user_id=' + gLoginUserID;
+    $.ajax({
+      type: 'get',
+      url: printRoleListURL,
+      dataType: 'text'
+    }).done( function( result ) {
+        menuEditorArray.roleList = JSON.parse( result );
+        selectInputMethod();
+    }).fail( function( result ) {
+        window.alert(getSomeMessage("ITAWDCC90101"));
+    });
+}
 
 $( function(){
 
@@ -254,6 +270,6 @@ $( function(){
     menuEditorTargetID = $('#menu-editor').attr('data-load-menu-id');
     
     // 各種リストを順次読み込む
-    selectInputMethod();
+    getRoleList();
 
 });

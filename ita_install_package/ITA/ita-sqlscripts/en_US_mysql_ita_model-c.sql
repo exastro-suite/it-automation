@@ -72,6 +72,7 @@ ANSIBLE_REFRESH_INTERVAL        INT                               ,
 ANSIBLE_TAILLOG_LINES           INT                               , 
 --
 DISP_SEQ                        INT                               , -- 表示順序
+ACCESS_AUTH                     TEXT                              ,
 NOTE                            VARCHAR (4000)                    , -- 備考
 DISUSE_FLAG                     VARCHAR (1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , -- 最終更新日時
@@ -118,6 +119,7 @@ ANSIBLE_REFRESH_INTERVAL        INT                               ,
 ANSIBLE_TAILLOG_LINES           INT                               , 
 --
 DISP_SEQ                        INT                               , -- 表示順序
+ACCESS_AUTH                     TEXT                              ,
 NOTE                            VARCHAR (4000)                    , -- 備考
 DISUSE_FLAG                     VARCHAR (1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , -- 最終更新日時
@@ -138,6 +140,7 @@ CREATE TABLE B_ANS_TWR_HOST (
   ANSTWR_ISOLATED_TYPE            INT                               , -- 1:isolated tower 
 -- 
   DISP_SEQ                        INT                               ,
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    ,
   DISUSE_FLAG                     VARCHAR (1)                       ,
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       ,
@@ -161,6 +164,7 @@ CREATE TABLE B_ANS_TWR_HOST_JNL (
   ANSTWR_ISOLATED_TYPE            INT                               , -- 1:isolated tower 
 -- 
   DISP_SEQ                        INT                               ,
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    ,
   DISUSE_FLAG                     VARCHAR (1)                       ,
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       ,
@@ -175,6 +179,7 @@ CREATE TABLE B_ANS_TWR_CREDENTIAL_TYPE (
   CREDENTIAL_TYPE_NAME            VARCHAR (256)                     ,
    
   DISP_SEQ                        INT                               ,
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    ,
   DISUSE_FLAG                     VARCHAR (1)                       ,
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       ,
@@ -193,6 +198,7 @@ CREATE TABLE B_ANS_TWR_CREDENTIAL_TYPE_JNL (
   CREDENTIAL_TYPE_NAME            VARCHAR (256)                     ,
 -- 
   DISP_SEQ                        INT                               ,
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    ,
   DISUSE_FLAG                     VARCHAR (1)                       ,
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       ,
@@ -249,6 +255,7 @@ VARS_TYPE_ID                      INT                              , -- 識別�
 VARS_TYPE_NAME                    VARCHAR (64)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -270,6 +277,7 @@ VARS_TYPE_ID                      INT                              , -- 識別�
 VARS_TYPE_NAME                    VARCHAR (64)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -289,6 +297,7 @@ CONTENTS_FILE_VARS_NAME           VARCHAR (256)                    , -- 変数�
 CONTENTS_FILE                     VARCHAR (256)                    , -- コンテンツ ファイル名
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -309,6 +318,7 @@ CONTENTS_FILE_VARS_NAME           VARCHAR (256)                    , -- 変数�
 CONTENTS_FILE                     VARCHAR (256)                    , -- コンテンツ ファイル名
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -332,6 +342,7 @@ VARS_LIST                         VARCHAR (8192)                   , -- 変数�
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -357,6 +368,7 @@ VARS_LIST                         VARCHAR (8192)                   , -- 変数�
 ROLE_ONLY_FLAG                    VARCHAR (1)                      , -- 多段変数定義有無　1:定義有
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -376,6 +388,7 @@ ID                                INT                              ,
 NAME                              VARCHAR (32)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -396,6 +409,7 @@ ID                                INT                              ,
 NAME                              VARCHAR (32)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -410,6 +424,7 @@ CREATE TABLE B_ANS_TWER_RUNDATA_DEL_FLAG
 FLAG_ID                           INT                               , -- 識別シーケンス
 FLAG_NAME                         VARCHAR (32)                      , -- 表示名
 DISP_SEQ                          INT                               , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              VARCHAR (4000)                    , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                       , -- 最終更新日時
@@ -427,6 +442,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                       , -- 履歴�
 FLAG_ID                           INT                               , -- 識別シーケンス
 FLAG_NAME                         VARCHAR (32)                      , -- 表示名
 DISP_SEQ                          INT                               , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
 NOTE                              VARCHAR (4000)                    , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                       , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                       , -- 最終更新日時
@@ -444,6 +460,7 @@ CREATE TABLE B_ANS_TWR_INSTANCE_GROUP (
   INSTANCE_GROUP_NAME             VARCHAR (512)                     , 
   INSTANCE_GROUP_ID               INT                               , 
   DISP_SEQ                        INT                               , 
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    , 
   DISUSE_FLAG                     VARCHAR (1)                       , 
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
@@ -461,6 +478,7 @@ CREATE TABLE B_ANS_TWR_INSTANCE_GROUP_JNL (
   INSTANCE_GROUP_NAME             VARCHAR (512)                     , 
   INSTANCE_GROUP_ID               INT                               , 
   DISP_SEQ                        INT                               , 
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    , 
   DISUSE_FLAG                     VARCHAR (1)                       , 
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
@@ -478,6 +496,7 @@ CREATE TABLE B_ANS_TWR_VIRTUALENV (
   VIRTUALENV_NAME                 VARCHAR (512)                     , 
   VIRTUALENV_NO                   INT                               , 
   DISP_SEQ                        INT                               , 
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    , 
   DISUSE_FLAG                     VARCHAR (1)                       , 
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
@@ -495,6 +514,7 @@ CREATE TABLE B_ANS_TWR_VIRTUALENV_JNL (
   VIRTUALENV_NAME                 VARCHAR (512)                     , 
   VIRTUALENV_NO                   INT                               , 
   DISP_SEQ                        INT                               , 
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    , 
   DISUSE_FLAG                     VARCHAR (1)                       , 
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
@@ -513,6 +533,7 @@ B_ANS_TWR_ORGANIZATION (
   ORGANIZATION_NAME               VARCHAR (512)                     , 
   ORGANIZATION_ID                 INT                               , 
   DISP_SEQ                        INT                               , 
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    , 
   DISUSE_FLAG                     VARCHAR (1)                       , 
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
@@ -531,6 +552,7 @@ B_ANS_TWR_ORGANIZATION_JNL (
   ORGANIZATION_NAME               VARCHAR (512)                     , 
   ORGANIZATION_ID                 INT                               , 
   DISP_SEQ                        INT                               , 
+  ACCESS_AUTH                     TEXT                              ,
   NOTE                            VARCHAR (4000)                    , 
   DISUSE_FLAG                     VARCHAR (1)                       , 
   LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
@@ -610,6 +632,7 @@ VAR_NAME                          VARCHAR (256)                    , -- 変数�
 REVIVAL_FLAG                      VARCHAR (1)                      , -- 復活時の有効レコードフラグ
 -- ----
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -632,6 +655,7 @@ VAR_NAME                          VARCHAR (256)                    , -- 変数�
 REVIVAL_FLAG                      VARCHAR (1)                      , -- 復活時の有効レコードフラグ
 -- ----
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -650,6 +674,7 @@ ROW_ID                            INT                              ,
 NAME                              VARCHAR (64)                     , -- 変数種別　1:GBL/2:CPF/3:TPF
 -- ----
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -668,6 +693,7 @@ ROW_ID                            INT                              ,
 NAME                              VARCHAR (64)                     , -- 変数種別　1:GBL/2:CPF/3:TPF
 -- ----
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -686,6 +712,7 @@ ROW_ID                            INT                              ,
 NAME                              VARCHAR (64)                     , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
 -- ----
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -704,6 +731,7 @@ ROW_ID                            INT                              ,
 NAME                              VARCHAR (64)                     , -- ファイル種別　1:playbook/2:対話ファイル/3:ロールパッケージ/4:テンプレートファイル
 -- ----
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -785,6 +813,7 @@ PLAYBOOK_MATTER_NAME              VARCHAR (256)                     ,
 PLAYBOOK_MATTER_FILE              VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -807,6 +836,7 @@ PLAYBOOK_MATTER_NAME              VARCHAR (256)                     ,
 PLAYBOOK_MATTER_FILE              VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -825,6 +855,7 @@ PLAYBOOK_MATTER_ID                INT                              ,
 INCLUDE_SEQ                       INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -848,6 +879,7 @@ PLAYBOOK_MATTER_ID                INT                              ,
 INCLUDE_SEQ                       INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -866,6 +898,7 @@ PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -889,6 +922,7 @@ PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -906,6 +940,7 @@ VARS_NAME                         VARCHAR (256)                    ,
 VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -928,6 +963,7 @@ VARS_NAME                         VARCHAR (256)                    ,
 VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -945,6 +981,7 @@ PATTERN_ID                        INT                              ,
 VARS_NAME_ID                      INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -967,6 +1004,7 @@ PATTERN_ID                        INT                              ,
 VARS_NAME_ID                      INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -984,11 +1022,13 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1011,11 +1051,13 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1058,7 +1100,11 @@ LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マル�
 CONDUCTOR_NAME                    VARCHAR (256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             INT                              , -- コンダクタ インスタンスID
 
+COLLECT_STATUS                    INT                              , -- 収集ステータス
+COLLECT_LOG                       VARCHAR (1024)                   , -- 収集ログ(テキスト形式)
+
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1106,7 +1152,11 @@ LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マル�
 CONDUCTOR_NAME                    VARCHAR (256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             INT                              , -- コンダクタ インスタンスID
 
+COLLECT_STATUS                    INT                              , -- 収集ステータス
+COLLECT_LOG                       VARCHAR (1024)                   , -- 収集ログ(テキスト形式)
+
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1153,6 +1203,7 @@ SELECT  PLAYBOOK_MATTER_ID      ,
         CONCAT(PLAYBOOK_MATTER_ID,':',PLAYBOOK_MATTER_NAME) PLAYBOOK,
         PLAYBOOK_MATTER_FILE    ,
         DISP_SEQ                ,
+        ACCESS_AUTH             ,
         NOTE                    ,
         DISUSE_FLAG             ,
         LAST_UPDATE_TIMESTAMP   ,
@@ -1168,6 +1219,7 @@ SELECT  JOURNAL_SEQ_NO          ,
         CONCAT(PLAYBOOK_MATTER_ID,':',PLAYBOOK_MATTER_NAME) PLAYBOOK,
         PLAYBOOK_MATTER_FILE    ,
         DISP_SEQ                ,
+        ACCESS_AUTH             ,
         NOTE                    ,
         DISUSE_FLAG             ,
         LAST_UPDATE_TIMESTAMP   ,
@@ -1196,6 +1248,7 @@ SELECT
            DISUSE_FLAG = '0'
         ) VARS_COUNT                  ,
         DISP_SEQ                      ,
+        ACCESS_AUTH                   ,
         NOTE                          ,
         DISUSE_FLAG                   ,
         LAST_UPDATE_TIMESTAMP         ,
@@ -1228,6 +1281,7 @@ SELECT
            DISUSE_FLAG = '0'
         ) VARS_COUNT                  ,
         DISP_SEQ                      ,
+        ACCESS_AUTH                   ,
         NOTE                          ,
         DISUSE_FLAG                   ,
         LAST_UPDATE_TIMESTAMP         ,
@@ -1244,6 +1298,7 @@ SELECT
         TAB_C.VARS_NAME               ,
         CONCAT(TAB_A.VARS_LINK_ID,':',TAB_C.VARS_NAME) VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -1264,6 +1319,7 @@ SELECT
         TAB_C.VARS_NAME               ,
         CONCAT(TAB_A.VARS_LINK_ID,':',TAB_C.VARS_NAME) VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -1283,6 +1339,7 @@ SELECT
         TAB_C.VARS_NAME               ,
         CONCAT(TAB_A.VARS_LINK_ID,':',TAB_C.VARS_NAME) VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -1331,6 +1388,7 @@ SELECT
          TAB_A.CONDUCTOR_NAME            ,
          TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
+         TAB_A.ACCESS_AUTH               ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
          TAB_A.LAST_UPDATE_TIMESTAMP     ,
@@ -1383,6 +1441,7 @@ SELECT
          TAB_A.CONDUCTOR_NAME            ,
          TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
+         TAB_A.ACCESS_AUTH               ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
          TAB_A.LAST_UPDATE_TIMESTAMP     ,
@@ -1404,6 +1463,7 @@ SELECT TAB_A.OPERATION_NO_UAPK    ,
        TAB_A.OPERATION_NO_IDBH    ,
        TAB_A.OPERATION            ,
        TAB_A.DISP_SEQ             ,
+       TAB_A.ACCESS_AUTH          ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -1419,29 +1479,6 @@ WHERE
     TAB_B.PHO_LINK_ID IS NOT NULL 
     AND 
     TAB_B.DISUSE_FLAG IN ('0')
-;
-
-CREATE VIEW D_ANSIBLE_LNS_VARS_ASSIGN AS
-SELECT 
-         TAB_A.ASSIGN_ID                 ,
-         
-         TAB_A.OPERATION_NO_UAPK         ,
-         TAB_A.PATTERN_ID                ,
-         TAB_A.SYSTEM_ID                 ,
-         TAB_A.VARS_LINK_ID              ,
-         TAB_B.VARS_NAME_ID              ,
-         TAB_B.VARS_NAME                 ,
-         TAB_A.VARS_ENTRY                ,
-         TAB_A.VARS_ENTRY_USE_TPFVARS    ,
-         TAB_A.ASSIGN_SEQ                ,
-         
-         TAB_A.DISP_SEQ                  ,
-         TAB_A.NOTE                      ,
-         TAB_A.DISUSE_FLAG               ,
-         TAB_A.LAST_UPDATE_TIMESTAMP     ,
-         TAB_A.LAST_UPDATE_USER
-FROM B_ANSIBLE_LNS_VARS_ASSIGN         TAB_A
-LEFT JOIN D_ANS_LNS_PTN_VARS_LINK  TAB_B ON ( TAB_B.VARS_LINK_ID = TAB_A.VARS_LINK_ID )
 ;
 
 -- *****************************************************************************
@@ -1464,6 +1501,7 @@ HARDAWRE_TYPE_ST                  INT                       ,
 HARDAWRE_TYPE_NW                  INT                       ,
 
 DISP_SEQ                          INT                       , -- 表示順序
+ACCESS_AUTH                       TEXT                      ,
 NOTE                              VARCHAR (4000)            , -- 備考
 DISUSE_FLAG                       VARCHAR (1)               , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)               , -- 最終更新日時
@@ -1488,6 +1526,7 @@ HARDAWRE_TYPE_ST                  INT                       ,
 HARDAWRE_TYPE_NW                  INT                       ,
 
 DISP_SEQ                          INT                       , -- 表示順序
+ACCESS_AUTH                       TEXT                      ,
 NOTE                              VARCHAR (4000)            , -- 備考
 DISUSE_FLAG                       VARCHAR (1)               , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)               , -- 最終更新日時
@@ -1506,6 +1545,7 @@ DIALOG_TYPE_ID                    INT                              , -- 識別�
 DIALOG_TYPE_NAME                  VARCHAR (256)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1527,6 +1567,7 @@ DIALOG_TYPE_ID                    INT                              , -- 識別�
 DIALOG_TYPE_NAME                  VARCHAR (256)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1545,6 +1586,7 @@ OS_TYPE_ID                        INT                              ,
 DIALOG_MATTER_FILE                VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1568,6 +1610,7 @@ OS_TYPE_ID                        INT                              ,
 DIALOG_MATTER_FILE                VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1586,6 +1629,7 @@ DIALOG_TYPE_ID                    INT                              ,
 INCLUDE_SEQ                       INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1609,6 +1653,7 @@ DIALOG_TYPE_ID                    INT                              ,
 INCLUDE_SEQ                       INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1627,6 +1672,7 @@ PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1650,6 +1696,7 @@ PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1667,6 +1714,7 @@ VARS_NAME                         VARCHAR (256)                    ,
 VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1689,6 +1737,7 @@ VARS_NAME                         VARCHAR (256)                    ,
 VARS_DESCRIPTION                  VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1706,6 +1755,7 @@ PATTERN_ID                        INT                              ,
 VARS_NAME_ID                      INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1728,6 +1778,7 @@ PATTERN_ID                        INT                              ,
 VARS_NAME_ID                      INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1745,11 +1796,13 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1772,11 +1825,13 @@ OPERATION_NO_UAPK                 INT                              ,
 PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
-VARS_ENTRY                        VARCHAR (8192)                   ,
+VARS_ENTRY                        text                             ,
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1818,7 +1873,11 @@ LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マル�
 CONDUCTOR_NAME                    VARCHAR (256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             INT                              , -- コンダクタ インスタンスID
 
+COLLECT_STATUS                    INT                              , -- 収集ステータス
+COLLECT_LOG                       VARCHAR (1024)                   , -- 収集ログ(テキスト形式)
+
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1865,7 +1924,11 @@ LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マル�
 CONDUCTOR_NAME                    VARCHAR (256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             INT                              , -- コンダクタ インスタンスID
 
+COLLECT_STATUS                    INT                              , -- 収集ステータス
+COLLECT_LOG                       VARCHAR (1024)                   , -- 収集ログ(テキスト形式)
+
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -1967,6 +2030,7 @@ SELECT  DIALOG_MATTER_ID        ,
         CONCAT(DIALOG_MATTER_ID,':',DIALOG_MATTER_FILE) DIALOG,
         DIALOG_MATTER_FILE      ,
         DISP_SEQ                ,
+        ACCESS_AUTH             ,
         NOTE                    ,
         DISUSE_FLAG             ,
         LAST_UPDATE_TIMESTAMP   ,
@@ -1981,6 +2045,7 @@ SELECT  JOURNAL_SEQ_NO          ,
         CONCAT(DIALOG_MATTER_ID,':',DIALOG_MATTER_FILE) DIALOG,
         DIALOG_MATTER_FILE      ,
         DISP_SEQ                ,
+        ACCESS_AUTH             ,
         NOTE                    ,
         DISUSE_FLAG             ,
         LAST_UPDATE_TIMESTAMP   ,
@@ -2007,6 +2072,7 @@ SELECT
         ) VARS_COUNT                  ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
+        ACCESS_AUTH                   ,
         NOTE                          ,
         DISUSE_FLAG                   ,
         LAST_UPDATE_TIMESTAMP         ,
@@ -2037,6 +2103,7 @@ SELECT
         ) VARS_COUNT                  ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
+        ACCESS_AUTH                   ,
         NOTE                          ,
         DISUSE_FLAG                   ,
         LAST_UPDATE_TIMESTAMP         ,
@@ -2053,6 +2120,7 @@ SELECT
         TAB_C.VARS_NAME               ,
         CONCAT(TAB_A.VARS_LINK_ID,':',TAB_C.VARS_NAME) VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -2074,6 +2142,7 @@ SELECT
         TAB_C.VARS_NAME               ,
         CONCAT(TAB_A.VARS_LINK_ID,':',TAB_C.VARS_NAME) VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -2093,6 +2162,7 @@ SELECT
         TAB_C.VARS_NAME               ,
         CONCAT(TAB_A.VARS_LINK_ID,':',TAB_C.VARS_NAME) VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -2141,6 +2211,7 @@ SELECT
          TAB_A.CONDUCTOR_NAME            ,
          TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
+         TAB_A.ACCESS_AUTH               ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
          TAB_A.LAST_UPDATE_TIMESTAMP     ,
@@ -2193,6 +2264,7 @@ SELECT
          TAB_A.CONDUCTOR_NAME            ,
          TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
+         TAB_A.ACCESS_AUTH               ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
          TAB_A.LAST_UPDATE_TIMESTAMP     ,
@@ -2214,6 +2286,7 @@ SELECT TAB_A.OPERATION_NO_UAPK    ,
        TAB_A.OPERATION_NO_IDBH    ,
        TAB_A.OPERATION            ,
        TAB_A.DISP_SEQ             ,
+       TAB_A.ACCESS_AUTH          ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -2229,125 +2302,6 @@ WHERE
     TAB_B.PHO_LINK_ID IS NOT NULL 
     AND 
     TAB_B.DISUSE_FLAG IN ('0')
-;
-
-CREATE VIEW D_ANSIBLE_PNS_VARS_ASSIGN AS
-SELECT 
-         TAB_A.ASSIGN_ID                 ,
-         
-         TAB_A.OPERATION_NO_UAPK         ,
-         TAB_A.PATTERN_ID                ,
-         TAB_A.SYSTEM_ID                 ,
-         TAB_A.VARS_LINK_ID              ,
-         TAB_B.VARS_NAME_ID              ,
-         TAB_B.VARS_NAME                 ,
-         TAB_A.VARS_ENTRY                ,
-         TAB_A.VARS_ENTRY_USE_TPFVARS    ,
-         TAB_A.ASSIGN_SEQ                ,
-         
-         TAB_A.DISP_SEQ                  ,
-         TAB_A.NOTE                      ,
-         TAB_A.DISUSE_FLAG               ,
-         TAB_A.LAST_UPDATE_TIMESTAMP     ,
-         TAB_A.LAST_UPDATE_USER
-FROM B_ANSIBLE_PNS_VARS_ASSIGN         TAB_A
-LEFT JOIN D_ANS_PNS_PTN_VARS_LINK  TAB_B ON ( TAB_B.VARS_LINK_ID = TAB_A.VARS_LINK_ID )
-;
-
-CREATE VIEW D_ANS_PNS_CMDB_MENU_COLUMN AS
-SELECT
-  TBL_A.*
-FROM 
-  B_CMDB_MENU_COLUMN TBL_A
-WHERE
-  TBL_A.COL_CLASS   <>  'MultiTextColumn'
-;
-  
-CREATE VIEW D_ANS_PNS_CMDB_MENU_COLUMN_JNL AS
-SELECT
-  TBL_A.*
-FROM 
-  B_CMDB_MENU_COLUMN_JNL TBL_A
-WHERE
-  TBL_A.COL_CLASS   <>  'MultiTextColumn'
-;
-
-CREATE VIEW D_ANS_PNS_CMDB_MENU_LIST AS
-SELECT 
-  TBL_A.*
-FROM 
-  D_CMDB_MENU_LIST TBL_A
-WHERE
-  (SELECT 
-     COUNT(*) 
-   FROM 
-     B_CMDB_MENU_COLUMN TBL_B
-   WHERE
-     TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
-     TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
-     TBL_B.DISUSE_FLAG =   '0'
-  ) <> 0
-;
-
-CREATE VIEW D_ANS_PNS_CMDB_MENU_LIST_JNL AS
-SELECT 
-  TBL_A.*
-FROM 
-  D_CMDB_MENU_LIST_JNL TBL_A
-WHERE
-  (SELECT 
-     COUNT(*) 
-   FROM 
-     B_CMDB_MENU_COLUMN_JNL TBL_B
-   WHERE
-     TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
-     TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
-     TBL_B.DISUSE_FLAG =   '0'
-  ) <> 0
-;
-
-CREATE VIEW D_ANS_PNS_CMDB_MG_MU_COL_LIST AS
-SELECT
-  TAB_A.COLUMN_LIST_ID                 ,
-  CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_TITLE_PULLDOWN,
-  TAB_C.MENU_ID                        ,
-  TAB_A.COL_TITLE_DISP_SEQ             ,
-  TAB_A.DISP_SEQ                       ,
-  TAB_A.NOTE                           ,
-  TAB_A.DISUSE_FLAG                    ,
-  TAB_A.LAST_UPDATE_TIMESTAMP          ,
-  TAB_A.LAST_UPDATE_USER
-FROM        D_ANS_PNS_CMDB_MENU_COLUMN TAB_A
-  LEFT JOIN D_ANS_PNS_CMDB_MENU_LIST   TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
-  LEFT JOIN A_MENU_LIST                TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
-  LEFT JOIN A_MENU_GROUP_LIST          TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
-WHERE
-   TAB_A.DISUSE_FLAG = '0' AND
-   TAB_B.DISUSE_FLAG = '0' AND
-   TAB_C.DISUSE_FLAG = '0' AND
-   TAB_D.DISUSE_FLAG = '0'
-;
-
-CREATE VIEW D_ANS_PNS_CMDB_MG_MU_COL_LIST_JNL AS
-SELECT
-  TAB_A.COLUMN_LIST_ID                 ,
-  CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_PULLDOWN,
-  TAB_C.MENU_ID                        ,
-  TAB_A.COL_TITLE_DISP_SEQ             ,
-  TAB_A.DISP_SEQ                       ,
-  TAB_A.NOTE                           ,
-  TAB_A.DISUSE_FLAG                    ,
-  TAB_A.LAST_UPDATE_TIMESTAMP          ,
-  TAB_A.LAST_UPDATE_USER
-FROM        D_ANS_PNS_CMDB_MENU_COLUMN_JNL TAB_A
-  LEFT JOIN D_ANS_PNS_CMDB_MENU_LIST       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
-  LEFT JOIN A_MENU_LIST                    TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
-  LEFT JOIN A_MENU_GROUP_LIST              TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
-WHERE
-   TAB_A.DISUSE_FLAG = '0' AND
-   TAB_B.DISUSE_FLAG = '0' AND
-   TAB_C.DISUSE_FLAG = '0' AND
-   TAB_D.DISUSE_FLAG = '0'
 ;
 
 -- *****************************************************************************
@@ -2394,7 +2348,11 @@ LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マル�
 CONDUCTOR_NAME                    VARCHAR (256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             INT                              , -- コンダクタ インスタンスID
 
+COLLECT_STATUS                    INT                              , -- 収集ステータス
+COLLECT_LOG                       VARCHAR (1024)                   , -- 収集ログ(テキスト形式)
+
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2441,7 +2399,11 @@ LOGFILELIST_JSON                  VARCHAR (8000)                   , -- マル�
 CONDUCTOR_NAME                    VARCHAR (256)                    , -- コンダクタ名
 CONDUCTOR_INSTANCE_NO             INT                              , -- コンダクタ インスタンスID
 
+COLLECT_STATUS                    INT                              , -- 収集ステータス
+COLLECT_LOG                       VARCHAR (1024)                   , -- 収集ログ(テキスト形式)
+
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2465,6 +2427,7 @@ ROLE_PACKAGE_FILE                 VARCHAR (256)                    , -- ロー�
 VAR_STRUCT_ANAL_JSON_STRING_FILE  VARCHAR (100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2488,6 +2451,7 @@ ROLE_PACKAGE_FILE                 VARCHAR (256)                    , -- ロー�
 VAR_STRUCT_ANAL_JSON_STRING_FILE  VARCHAR (100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2509,6 +2473,7 @@ ROLE_PACKAGE_ID                   INT                              , -- ロー�
 ROLE_NAME                         VARCHAR (1024)                   , -- ロール名
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2531,6 +2496,7 @@ ROLE_PACKAGE_ID                   INT                              , -- ロー�
 ROLE_NAME                         VARCHAR (1024)                   , -- ロール名
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2558,6 +2524,7 @@ VARS_ATTRIBUTE_01                 INT                              , -- 変数�
                                                                      -- -- 3:多次元変数
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2585,6 +2552,7 @@ VARS_ATTRIBUTE_01                 INT                              , -- 変数�
                                                                      -- -- 3:多次元変数
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2609,6 +2577,7 @@ ROLE_ID                           INT                              , -- ロー�
 INCLUDE_SEQ                       INT                              , -- include順序
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2633,6 +2602,7 @@ ROLE_ID                           INT                              , -- ロー�
 INCLUDE_SEQ                       INT                              , -- include順序
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2656,6 +2626,7 @@ VARS_ATTRIBUTE_01                 INT                              ,
 VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2679,6 +2650,7 @@ VARS_ATTRIBUTE_01                 INT                              ,
 VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2704,6 +2676,7 @@ ASSIGN_SEQ_NEED                   INT                              , -- 代入�
 COL_SEQ_NEED                      INT                              , -- 列順序の入力有(1)/無(null)
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2729,6 +2702,7 @@ ASSIGN_SEQ_NEED                   INT                              , -- 代入�
 COL_SEQ_NEED                      INT                              , -- 列順序の入力有(1)/無(null)
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2750,6 +2724,7 @@ PATTERN_ID                        INT                              , -- 作業�
 VARS_NAME_ID                      INT                              , -- 変数
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2772,6 +2747,7 @@ PATTERN_ID                        INT                              , -- 作業�
 VARS_NAME_ID                      INT                              , -- 変数
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2795,11 +2771,13 @@ PATTERN_ID                        INT                              , -- 作業�
 SYSTEM_ID                         INT                              , -- 機器(ホスト)
 VARS_LINK_ID                      INT                              , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            INT                              , -- 多次元変数配列組合せ管理 Pkey
-VARS_ENTRY                        VARCHAR (8192)                   , -- 具体値
+VARS_ENTRY                        text                             , -- 具体値
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2823,11 +2801,13 @@ PATTERN_ID                        INT                              , -- 作業�
 SYSTEM_ID                         INT                              , -- 機器(ホスト)
 VARS_LINK_ID                      INT                              , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            INT                              , -- 多次元変数配列組合せ管理 Pkey
-VARS_ENTRY                        VARCHAR (8192)                   , -- 具体値
+VARS_ENTRY                        text                             , -- 具体値
+SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2851,6 +2831,7 @@ PATTERN_ID                        INT                              , -- 作業�
 SYSTEM_ID                         INT                              , -- ホスト
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2874,6 +2855,7 @@ PATTERN_ID                        INT                              , -- 作業�
 SYSTEM_ID                         INT                              , -- ホスト
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2900,6 +2882,7 @@ ASSIGN_SEQ                        INT                              , -- 代入�
 VARS_VALUE                        VARCHAR (8192)                   , -- 具体値
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2927,6 +2910,7 @@ ASSIGN_SEQ                        INT                              , -- 代入�
 VARS_VALUE                        VARCHAR (8192)                   , -- 具体値
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2956,6 +2940,7 @@ VRAS_NAME_PATH                    VARCHAR (512)                    , -- メン�
 VRAS_NAME_ALIAS                   VARCHAR (1024)                   , -- メンバー変数名
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -2987,6 +2972,7 @@ VRAS_NAME_PATH                    VARCHAR (512)                    , -- メン�
 VRAS_NAME_ALIAS                   VARCHAR (1024)                   , -- メンバー変数名
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -3009,6 +2995,7 @@ ARRAY_MEMBER_ID                   INT                              , -- 多次�
 MAX_COL_SEQ                       INT                              , -- 最大繰返数
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -3032,6 +3019,7 @@ ARRAY_MEMBER_ID                   INT                              , -- 多次�
 MAX_COL_SEQ                       INT                              , -- 最大繰返数
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -3055,6 +3043,7 @@ COL_COMBINATION_MEMBER_ALIAS      VARCHAR (4000)                   , -- プル�
 COL_SEQ_VALUE                     VARCHAR (4000)                   , -- すべての列順序
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -3079,6 +3068,7 @@ COL_COMBINATION_MEMBER_ALIAS      VARCHAR (4000)                   , -- プル�
 COL_SEQ_VALUE                     VARCHAR (4000)                   , -- すべての列順序
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -3099,6 +3089,7 @@ REP_VARS_NAME                     VARCHAR (256)                    , -- 読替�
 ANY_VARS_NAME                     VARCHAR (256)                    , -- 任意変数名
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -3120,6 +3111,7 @@ REP_VARS_NAME                     VARCHAR (256)                    , -- 読替�
 ANY_VARS_NAME                     VARCHAR (256)                    , -- 任意変数名
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -3182,6 +3174,7 @@ SELECT
            DISUSE_FLAG = '0'
         ) VARS_COUNT                  ,
         DISP_SEQ                      ,
+        ACCESS_AUTH                   ,
         NOTE                          ,
         DISUSE_FLAG                   ,
         LAST_UPDATE_TIMESTAMP         ,
@@ -3214,6 +3207,7 @@ SELECT
            DISUSE_FLAG = '0'
         ) VARS_COUNT                  ,
         DISP_SEQ                      ,
+        ACCESS_AUTH                   ,
         NOTE                          ,
         DISUSE_FLAG                   ,
         LAST_UPDATE_TIMESTAMP         ,
@@ -3261,6 +3255,7 @@ SELECT
          TAB_A.CONDUCTOR_NAME            ,
          TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
+         TAB_A.ACCESS_AUTH               ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
          TAB_A.LAST_UPDATE_TIMESTAMP     ,
@@ -3313,6 +3308,7 @@ SELECT
          TAB_A.CONDUCTOR_NAME            ,
          TAB_A.CONDUCTOR_INSTANCE_NO     ,
          TAB_A.DISP_SEQ                  ,
+         TAB_A.ACCESS_AUTH               ,
          TAB_A.NOTE                      ,
          TAB_A.DISUSE_FLAG               ,
          TAB_A.LAST_UPDATE_TIMESTAMP     ,
@@ -3340,6 +3336,7 @@ SELECT
         CONCAT(TAB_B.ROLE_PACKAGE_ID,':',TAB_B.ROLE_PACKAGE_NAME) ROLE_PACKAGE_NAME_PULLDOWN,
         CONCAT(TAB_A.ROLE_ID,':',TAB_A.ROLE_NAME) ROLE_NAME_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_B.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_B.DISUSE_FLAG             ,
         TAB_A.DISUSE_FLAG   AS PACKAGE_DISUSE_FLAG ,
@@ -3359,6 +3356,7 @@ SELECT
         CONCAT(TAB_B.ROLE_PACKAGE_ID,':',TAB_B.ROLE_PACKAGE_NAME) ROLE_PACKAGE_NAME_PULLDOWN,
         CONCAT(TAB_A.ROLE_ID,':',TAB_A.ROLE_NAME) ROLE_NAME_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_B.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_B.DISUSE_FLAG             ,
         TAB_A.DISUSE_FLAG   AS PACKAGE_DISUSE_FLAG ,
@@ -3386,6 +3384,7 @@ SELECT
         TAB_C.VARS_ATTRIBUTE_01       ,
         CONCAT(TAB_A.VARS_LINK_ID,':',TAB_C.VARS_NAME) VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -3412,6 +3411,7 @@ SELECT
         TAB_C.VARS_ATTRIBUTE_01       ,
         CONCAT(TAB_A.VARS_LINK_ID,':',TAB_C.VARS_NAME) VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -3433,6 +3433,7 @@ SELECT
         TAB_C.VARS_ATTRIBUTE_01       ,
         CONCAT(TAB_A.VARS_LINK_ID,':',TAB_C.VARS_NAME) VARS_LINK_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -3462,6 +3463,7 @@ SELECT
         TAB_C.VARS_LINK_ID            ,
         CONCAT(TAB_A.CHILD_VARS_NAME_ID,':',TAB_A.CHILD_VARS_NAME) CHILD_VARS_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -3490,6 +3492,7 @@ SELECT
         TAB_C.VARS_LINK_ID            ,
         CONCAT(TAB_A.CHILD_VARS_NAME_ID,':',TAB_A.CHILD_VARS_NAME) CHILD_VARS_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -3512,6 +3515,7 @@ SELECT
         TAB_C.VARS_LINK_ID            ,
         CONCAT(TAB_A.CHILD_VARS_NAME_ID,':',TAB_A.CHILD_VARS_NAME) CHILD_VARS_PULLDOWN,
         TAB_A.DISP_SEQ                ,
+        TAB_A.ACCESS_AUTH             ,
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
@@ -3534,6 +3538,7 @@ SELECT TAB_A.OPERATION_NO_UAPK    ,
        TAB_A.OPERATION_NO_IDBH    ,
        TAB_A.OPERATION            ,
        TAB_A.DISP_SEQ             ,
+       TAB_A.ACCESS_AUTH          ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -3579,6 +3584,7 @@ SELECT
     END VRAS_NAME                   ,
     
     DISP_SEQ                        ,
+    ACCESS_AUTH                     ,
     NOTE                            ,
     DISUSE_FLAG                     ,
     LAST_UPDATE_TIMESTAMP           ,
@@ -3612,6 +3618,7 @@ SELECT
     END VRAS_NAME                   ,
     
     DISP_SEQ                        ,
+    ACCESS_AUTH                     ,
     NOTE                            ,
     DISUSE_FLAG                     ,
     LAST_UPDATE_TIMESTAMP           ,
@@ -3634,6 +3641,7 @@ SELECT
     CONCAT(COL_SEQ_COMBINATION_ID,':',COL_COMBINATION_MEMBER_ALIAS) COMBINATION_MEMBER,
     
     DISP_SEQ                        ,
+    ACCESS_AUTH                     ,
     NOTE                            ,
     DISUSE_FLAG                     ,
     LAST_UPDATE_TIMESTAMP           ,
@@ -3657,6 +3665,7 @@ SELECT
     CONCAT(COL_SEQ_COMBINATION_ID,':',COL_COMBINATION_MEMBER_ALIAS) COMBINATION_MEMBER,
     
     DISP_SEQ                        ,
+    ACCESS_AUTH                     ,
     NOTE                            ,
     DISUSE_FLAG                     ,
     LAST_UPDATE_TIMESTAMP           ,
@@ -3686,6 +3695,7 @@ KEY_CHILD_VARS_COL_SEQ         INT                     , -- Key値　列順序
 NULL_DATA_HANDLING_FLG         INT                     , -- Null値の連携
 
 DISP_SEQ                       INT                     , -- 表示順序
+ACCESS_AUTH                    TEXT                    ,
 NOTE                           VARCHAR (4000)          , -- 備考
 DISUSE_FLAG                    VARCHAR (1)             , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          DATETIME(6)             , -- 最終更新日時
@@ -3717,6 +3727,7 @@ KEY_CHILD_VARS_COL_SEQ         INT                     , -- Key値　列順序
 NULL_DATA_HANDLING_FLG         INT                     , -- Null値の連携
 
 DISP_SEQ                       INT                     , -- 表示順序
+ACCESS_AUTH                    TEXT                    ,
 NOTE                           VARCHAR (4000)          , -- 備考
 DISUSE_FLAG                    VARCHAR (1)             , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          DATETIME(6)             , -- 最終更新日時
@@ -3744,6 +3755,7 @@ KEY_ASSIGN_SEQ                 INT                     , -- Key値　代入順�
 NULL_DATA_HANDLING_FLG         INT                     , -- Null値の連携
 
 DISP_SEQ                       INT                     , -- 表示順序
+ACCESS_AUTH                    TEXT                    ,
 NOTE                           VARCHAR (4000)          , -- 備考
 DISUSE_FLAG                    VARCHAR (1)             , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          DATETIME(6)             , -- 最終更新日時
@@ -3773,6 +3785,7 @@ KEY_ASSIGN_SEQ                 INT                     , -- Key値　代入順�
 NULL_DATA_HANDLING_FLG         INT                     , -- Null値の連携
 
 DISP_SEQ                       INT                     , -- 表示順序
+ACCESS_AUTH                    TEXT                    ,
 NOTE                           VARCHAR (4000)          , -- 備考
 DISUSE_FLAG                    VARCHAR (1)             , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          DATETIME(6)             , -- 最終更新日時
@@ -3802,6 +3815,7 @@ KEY_CHILD_VARS_COL_SEQ         INT                     , -- Key値　列順序
 NULL_DATA_HANDLING_FLG         INT                     , -- Null値の連携
 
 DISP_SEQ                       INT                     , -- 表示順序
+ACCESS_AUTH                    TEXT                    ,
 NOTE                           VARCHAR (4000)          , -- 備考
 DISUSE_FLAG                    VARCHAR (1)             , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          DATETIME(6)             , -- 最終更新日時
@@ -3833,6 +3847,7 @@ KEY_CHILD_VARS_COL_SEQ         INT                     , -- Key値　列順序
 NULL_DATA_HANDLING_FLG         INT                     , -- Null値の連携
 
 DISP_SEQ                       INT                     , -- 表示順序
+ACCESS_AUTH                    TEXT                    ,
 NOTE                           VARCHAR (4000)          , -- 備考
 DISUSE_FLAG                    VARCHAR (1)             , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP          DATETIME(6)             , -- 最終更新日時
@@ -3868,6 +3883,7 @@ SELECT
        TAB_A.VAL_VARS_LINK_ID  REST_VAL_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Value値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.KEY_VARS_LINK_ID  REST_KEY_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.DISP_SEQ                       ,
+       TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
        TAB_A.LAST_UPDATE_TIMESTAMP          ,
@@ -3902,6 +3918,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.VAL_VARS_LINK_ID  REST_VAL_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Value値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.KEY_VARS_LINK_ID  REST_KEY_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.DISP_SEQ                       ,
+       TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
        TAB_A.LAST_UPDATE_TIMESTAMP          ,
@@ -3937,6 +3954,7 @@ SELECT
        TAB_A.KEY_VARS_LINK_ID           REST_KEY_VARS_LINK_ID,           -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.KEY_COL_SEQ_COMBINATION_ID REST_KEY_COL_SEQ_COMBINATION_ID, -- REST/EXCEL/CSV用　Key値　多次元変数配列組合せ管理 Pkey
        TAB_A.DISP_SEQ                       ,
+       TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
        TAB_A.LAST_UPDATE_TIMESTAMP          ,
@@ -3971,6 +3989,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.KEY_VARS_LINK_ID           REST_KEY_VARS_LINK_ID,           -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.KEY_COL_SEQ_COMBINATION_ID REST_KEY_COL_SEQ_COMBINATION_ID, -- REST/EXCEL/CSV用　Key値　多次元変数配列組合せ管理 Pkey
        TAB_A.DISP_SEQ                       ,
+       TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
        TAB_A.LAST_UPDATE_TIMESTAMP          ,
@@ -4006,6 +4025,7 @@ SELECT
        TAB_A.VAL_VARS_LINK_ID  REST_VAL_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Value値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.KEY_VARS_LINK_ID  REST_KEY_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.DISP_SEQ                       ,
+       TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
        TAB_A.LAST_UPDATE_TIMESTAMP          ,
@@ -4040,6 +4060,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.VAL_VARS_LINK_ID  REST_VAL_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Value値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.KEY_VARS_LINK_ID  REST_KEY_VARS_LINK_ID,    -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
        TAB_A.DISP_SEQ                       ,
+       TAB_A.ACCESS_AUTH                    ,
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
        TAB_A.LAST_UPDATE_TIMESTAMP          ,
@@ -4061,6 +4082,7 @@ VARS_ENTRY                        VARCHAR (8192)                   , -- 具体�
 VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -4084,6 +4106,7 @@ VARS_ENTRY                        VARCHAR (8192)                   , -- 具体�
 VARS_DESCRIPTION                  VARCHAR (256)                    , -- 変数説明
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -4565,221 +4588,217 @@ FROM
   C_ANSIBLE_LRL_EXE_INS_MNG
 WHERE
   DISUSE_FLAG = '0';
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OS_TYPE_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_IF_INFO_RIC',2,'2100040702',2100210001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OS_TYPE_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_IF_INFO_JSQ',2,'2100040702',2100210002,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_IF_INFO_RIC',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_GLOBAL_VARS_MASTER_RIC',1,'2100040706',2100210003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_IF_INFO_JSQ',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_GLOBAL_VARS_MASTER_JSQ',1,'2100040706',2100210004,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_STATUS_RIC',11);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_CONTENTS_FILE_RIC',1,'2100040703',2100210005,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_STATUS_JSQ',11);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_CONTENTS_FILE_JSQ',1,'2100040703',2100210006,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_RUN_MODE_RIC',3);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TEMPLATE_FILE_RIC',1,'2100040704',2100210007,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_RUN_MODE_JSQ',3);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TEMPLATE_FILE_JSQ',1,'2100040704',2100210008,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_PLAYBOOK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_COMVRAS_USLIST_RIC',1,'2100040707',2100210009,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_PLAYBOOK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_COMVRAS_USLIST_JSQ',1,'2100040707',2100210010,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_PHO_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_HOST_RIC',1,'2100040708',2100210011,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_PHO_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_HOST_JSQ',1,'2100040708',2100210012,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_PATTERN_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_PLAYBOOK_RIC',1,'2100020104',2100220001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_PATTERN_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_PLAYBOOK_JSQ',1,'2100020104',2100220002,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_VARS_MASTER_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_PHO_LINK_RIC',1,'2100020108',2100220003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_VARS_MASTER_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_PHO_LINK_JSQ',1,'2100020108',2100220004,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LNS_PTN_VARS_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_PATTERN_LINK_RIC',1,'2100020105',2100220005,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LNS_PTN_VARS_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_PATTERN_LINK_JSQ',1,'2100020105',2100220006,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_VARS_ASSIGN_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_VARS_MASTER_RIC',1,'2100020106',2100220007,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LNS_VARS_ASSIGN_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_VARS_MASTER_JSQ',1,'2100020106',2100220008,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_ANSIBLE_LNS_EXE_INS_MNG_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LNS_PTN_VARS_LINK_RIC',1,'2100020107',2100220009,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_ANSIBLE_LNS_EXE_INS_MNG_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LNS_PTN_VARS_LINK_JSQ',1,'2100020107',2100220010,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_DIALOG_TYPE_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_VARS_ASSIGN_RIC',1,'2100020109',2100220011,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_DIALOG_TYPE_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LNS_VARS_ASSIGN_JSQ',1,'2100020109',2100220012,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_DIALOG_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_ANSIBLE_LNS_EXE_INS_MNG_RIC',1,'2100020113',2100220013,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_DIALOG_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_ANSIBLE_LNS_EXE_INS_MNG_JSQ',1,'2100020113',2100220014,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_PHO_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_ROLE_PACKAGE_RIC',1,'2100020303',2100220015,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_PHO_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_ROLE_PACKAGE_JSQ',1,'2100020303',2100220016,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_PATTERN_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_ROLE_RIC',1,'2100020304',2100220017,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_PATTERN_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_ROLE_JSQ',1,'2100020304',2100220018,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_VARS_MASTER_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_ROLE_VARS_RIC',1,'2100020305',2100220019,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_VARS_MASTER_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_ROLE_VARS_JSQ',1,'2100020305',2100220020,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_PNS_PTN_VARS_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_ANSIBLE_LRL_EXE_INS_MNG_RIC',1,'2100020314',2100220021,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_PNS_PTN_VARS_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_ANSIBLE_LRL_EXE_INS_MNG_JSQ',1,'2100020314',2100220022,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_VARS_ASSIGN_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_PATTERN_LINK_RIC',1,'2100020307',2100220023,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_PNS_VARS_ASSIGN_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_PATTERN_LINK_JSQ',1,'2100020307',2100220024,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_ANSIBLE_PNS_EXE_INS_MNG_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_PHO_LINK_RIC',1,'2100020310',2100220025,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_ANSIBLE_PNS_EXE_INS_MNG_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_PHO_LINK_JSQ',1,'2100020310',2100220026,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_COBBLER_IF_INFO_RIC',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_VARS_MASTER_RIC',1,'2100020308',2100220027,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_COBBLER_IF_INFO_JSQ',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_VARS_MASTER_JSQ',1,'2100020308',2100220028,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_ROLE_PACKAGE_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_CHILD_VARS_RIC',1,'2100020315',2100220029,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_ROLE_PACKAGE_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_CHILD_VARS_JSQ',1,'2100020315',2100220030,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_ROLE_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_PTN_VARS_LINK_RIC',1,'2100020309',2100220031,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_ROLE_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_PTN_VARS_LINK_JSQ',1,'2100020309',2100220032,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_ROLE_VARS_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_VARS_ASSIGN_RIC',1,'2100020311',2100220033,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_ROLE_VARS_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_LRL_VARS_ASSIGN_JSQ',1,'2100020311',2100220034,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_ANSIBLE_LRL_EXE_INS_MNG_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LNS_VAL_ASSIGN_RIC',1,'2100020115',2100220035,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_ANSIBLE_LRL_EXE_INS_MNG_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LNS_VAL_ASSIGN_JSQ',1,'2100020115',2100220036,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_PATTERN_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_VAL_ASSIGN_RIC',1,'2100020316',2100220037,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_PATTERN_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_VAL_ASSIGN_JSQ',1,'2100020316',2100220038,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_PHO_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_ROLE_VARSVAL_RIC',1,'2100020317',2100220039,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_PHO_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_ROLE_VARSVAL_JSQ',1,'2100020317',2100220040,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_VARS_MASTER_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_ARRAY_MEMBER_RIC',1,'2100020318',2100220041,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_VARS_MASTER_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_ARRAY_MEMBER_JSQ',1,'2100020318',2100220042,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_CHILD_VARS_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_MAX_MEMBER_COL_RIC',1,'2100020319',2100220043,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_CHILD_VARS_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_MAX_MEMBER_COL_JSQ',1,'2100020319',2100220044,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_PTN_VARS_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_MEMBER_COL_COMB_RIC',1,'2100020320',2100220045,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_PTN_VARS_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_MEMBER_COL_COMB_JSQ',1,'2100020320',2100220046,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_VARS_ASSIGN_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_RP_REP_VARS_LIST_RIC',1,'2100020322',2100220047,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_LRL_VARS_ASSIGN_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_LRL_RP_REP_VARS_LIST_JSQ',1,'2100020322',2100220048,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LNS_VAL_ASSIGN_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OS_TYPE_RIC',1,'2100000302',2100230001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LNS_VAL_ASSIGN_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OS_TYPE_JSQ',1,'2100000302',2100230002,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_VAL_ASSIGN_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_DIALOG_TYPE_RIC',1,'2100020204',2100230003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_VAL_ASSIGN_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_DIALOG_TYPE_JSQ',1,'2100020204',2100230004,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_PNS_VAL_ASSIGN_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_DIALOG_RIC',1,'2100020205',2100230005,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_PNS_VAL_ASSIGN_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_DIALOG_JSQ',1,'2100020205',2100230006,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_ROLE_VARSVAL_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_PHO_LINK_RIC',1,'2100020209',2100230007,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_ROLE_VARSVAL_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_PHO_LINK_JSQ',1,'2100020209',2100230008,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_ARRAY_MEMBER_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_PATTERN_LINK_RIC',1,'2100020206',2100230009,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_ARRAY_MEMBER_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_PATTERN_LINK_JSQ',1,'2100020206',2100230010,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_MAX_MEMBER_COL_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_VARS_MASTER_RIC',1,'2100020207',2100230011,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_MAX_MEMBER_COL_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_VARS_MASTER_JSQ',1,'2100020207',2100230012,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_VARS_TYPE_RIC',4);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_PNS_PTN_VARS_LINK_RIC',1,'2100020208',2100230013,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_VARS_TYPE_JSQ',4);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_PNS_PTN_VARS_LINK_JSQ',1,'2100020208',2100230014,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_MEMBER_COL_COMB_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_VARS_ASSIGN_RIC',1,'2100020210',2100230015,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_MEMBER_COL_COMB_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_PNS_VARS_ASSIGN_JSQ',1,'2100020210',2100230016,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_GLOBAL_VARS_MASTER_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_ANSIBLE_PNS_EXE_INS_MNG_RIC',1,'2100020213',2100230017,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_GLOBAL_VARS_MASTER_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_ANSIBLE_PNS_EXE_INS_MNG_JSQ',1,'2100020213',2100230018,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_RP_REP_VARS_LIST_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_PNS_VAL_ASSIGN_RIC',1,'2100020214',2100230019,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_LRL_RP_REP_VARS_LIST_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_PNS_VAL_ASSIGN_JSQ',1,'2100020214',2100230020,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSTWR_INSTANCE_GROUP_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_STATUS_RIC',11,NULL,2100290001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSTWR_INSTANCE_GROUP_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_STATUS_JSQ',11,NULL,2100290002,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_CONTENTS_FILE_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_RUN_MODE_RIC',3,NULL,2100290003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_CONTENTS_FILE_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_RUN_MODE_JSQ',3,NULL,2100290004,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TEMPLATE_FILE_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_VARS_TYPE_RIC',4,NULL,2100290005,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TEMPLATE_FILE_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_VARS_TYPE_JSQ',4,NULL,2100290006,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWER_RUNDATA_DEL_FLAG_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSTWR_INSTANCE_GROUP_RIC',1,NULL,2100290007,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWER_RUNDATA_DEL_FLAG_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSTWR_INSTANCE_GROUP_JSQ',1,NULL,2100290008,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_EXEC_MODE_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWER_RUNDATA_DEL_FLAG_RIC',1,NULL,2100290009,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANSIBLE_EXEC_MODE_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWER_RUNDATA_DEL_FLAG_JSQ',1,NULL,2100290010,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_INSTANCE_GROUP_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_EXEC_MODE_RIC',1,NULL,2100290011,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_INSTANCE_GROUP_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANSIBLE_EXEC_MODE_JSQ',1,NULL,2100290012,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_JOBTP_PROPERTY_RIC',12);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_INSTANCE_GROUP_RIC',1,NULL,2100290013,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_JOBTP_PROPERTY_JSQ',12);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_INSTANCE_GROUP_JSQ',1,NULL,2100290014,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_JOBTP_PROPERTY_RIC',12,NULL,2100290015,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_JOBTP_PROPERTY_JSQ',12,NULL,2100290016,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_V_ID_RIC',4);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_COMVRAS_USLIST_V_ID_RIC',4,NULL,2100290017,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_V_ID_JSQ',4);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_COMVRAS_USLIST_V_ID_JSQ',4,NULL,2100290018,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_F_ID_RIC',5);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_COMVRAS_USLIST_F_ID_RIC',5,NULL,2100290019,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_COMVRAS_USLIST_F_ID_JSQ',5);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_COMVRAS_USLIST_F_ID_JSQ',5,NULL,2100290020,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_VIRTUALENV_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_VIRTUALENV_RIC',1,NULL,2100290021,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_VIRTUALENV_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_VIRTUALENV_JSQ',1,NULL,2100290022,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_ORGANIZATION_RIC',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_ORGANIZATION_RIC',2,NULL,2100290023,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_ORGANIZATION_JSQ',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_ORGANIZATION_JSQ',2,NULL,2100290024,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_HOST_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_CREDENTIAL_TYPE_RIC',20,NULL,2100290025,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_HOST_JSQ',1);
-
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_CREDENTIAL_TYPE_RIC',20);
-
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_ANS_TWR_CREDENTIAL_TYPE_JSQ',20);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_CREDENTIAL_TYPE_JSQ',20,NULL,2100290026,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
 
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100020000,'Ansible Common','anscmn.png',70,'Ansible Common','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

@@ -52,9 +52,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',  $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102004"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',false);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     // メニュー名
@@ -64,7 +62,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('register_table')->setTextTagLastAttr('style = "ime-mode :active"');
     $c->getOutputType('update_table')->setTextTagLastAttr('style = "ime-mode :active"');
     $objVldt = new MenuNameValidator(1,256,false);
-	$c->setValidator($objVldt);
+    $c->setValidator($objVldt);
     $c->setRequired(true);//登録/更新時には、入力必須
     $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
     $table->addColumn($c);
@@ -74,7 +72,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     // 作成対象 
-    $c = new IDColumn('TARGET',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102023"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME', '', array('OrderByThirdColumn'=>'TARGET_ID'));
+    $c = new IDColumn('TARGET',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102023"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME', '', array('ORDER'=>'ORDER BY DISP_SEQ'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102026"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
     $objVldt = new SubstitutionValidator($c);
@@ -99,41 +97,32 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
-    // データシート用メニューグループ
-    $c = new IDColumn('MENUGROUP_FOR_CMDB',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102024"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME','');
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102025"));//エクセル・ヘッダでの説明
-    $c->setRequired(false);
-//    $objVldt = new MgForCmdbValidator($c);
-//    $c->setValidator($objVldt);
-    $table->addColumn($c);
-
-    // ホストグループ用メニューグループ
-    $c = new IDColumn('MENUGROUP_FOR_HG',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102011"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME','');
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102012"));//エクセル・ヘッダでの説明
-    $objVldt = new MgForHgValidator($c);
+    // 縦メニュー利用
+    $c = new IDColumn('VERTICAL',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102019"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102020"));//エクセル・ヘッダでの説明
+    $objVldt = new VerticalValidator($c);
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
-    // ホスト用メニューグループ
-    $c = new IDColumn('MENUGROUP_FOR_H',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102013"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME','');
+    // 入力用メニューグループ
+    $c = new IDColumn('MENUGROUP_FOR_INPUT',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102011"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102012"));//エクセル・ヘッダでの説明
+    $c->setRequired(true);//登録/更新時には、入力必須
+    $table->addColumn($c);
+
+    // 代入値自動登録用メニューグループ
+    $c = new IDColumn('MENUGROUP_FOR_SUBST',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102013"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102014"));//エクセル・ヘッダでの説明
     $c->setRequired(false);
-    $objVldt = new MgForHostValidator($c);
+    $objVldt = new MgForSubstValidator($c);
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
-    // 最新値参照用メニューグループ
+    // 参照用メニューグループ
     $c = new IDColumn('MENUGROUP_FOR_VIEW',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102015"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102016"));//エクセル・ヘッダでの説明
     $c->setRequired(false);
     $objVldt = new MgForViewValidator($c);
-    $c->setValidator($objVldt);
-    $table->addColumn($c);
-
-    // 縦管理メニュー用メニューグループ
-    $c = new IDColumn('MENUGROUP_FOR_CONV',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102021"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME','');
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102022"));//エクセル・ヘッダでの説明
-    $objVldt = new MgForConvValidator($c);
     $c->setValidator($objVldt);
     $table->addColumn($c);
 

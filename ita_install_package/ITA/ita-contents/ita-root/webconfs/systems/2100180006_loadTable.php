@@ -53,10 +53,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITABASEH-MNU-306040"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     // UL/DL機能の制御----
@@ -104,6 +101,16 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = new IDColumn('ABORT_EXECUTE_FLAG',$g['objMTS']->getSomeMessage("ITABASEH-MNU-306070"),'B_SYM_ABORT_FLAG','SYM_ABORT_FLAG_ID','SYM_ABORT_FLAG_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-306080"));//エクセル・ヘッダでの説明
+    $table->addColumn($c);
+
+    //リンクボタン
+    $c = new LinkButtonColumn('INPUT_DOWNLOAD',$g['objMTS']->getSomeMessage("ITABASEH-MNU-309031"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-309033"), 'in_dl', array(':CONDUCTOR_INSTANCE_NO'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-309034")); 
+    $table->addColumn($c);
+   
+    //リンクボタン
+    $c = new LinkButtonColumn('RESULT_DOWNLOAD',$g['objMTS']->getSomeMessage("ITABASEH-MNU-309032"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-309033"), 'out_dl', array(':CONDUCTOR_INSTANCE_NO')); 
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-309035"));
     $table->addColumn($c);
 
     $c = new DateTimeColumn('TIME_BOOK',$g['objMTS']->getSomeMessage("ITABASEH-MNU-203040"));

@@ -30,6 +30,8 @@ SH_SCRIPT=${2}
 LOG_DIR=${3}
 INTERVAL=${4}
 LOG_LEVEL=${5}
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
+SKIP_FILE=${SCRIPT_DIR}/../../temp/data_import/skip_all_service
 
 #----------------------------------------------------#
 # PROCESS名を取得
@@ -125,18 +127,24 @@ do
         RET_CD=0
         break
     fi
-    # シェルスクリプト実行
-    commonFunction -1 "Shell-Script : Execute"
-    ${SH_SCRIPT}
-    RET_CD=$?
-    if [ ${RET_CD} -ne 0 ]
+
+    # スキップファイル存在確認
+    if [ ! -f ${SKIP_FILE} ]
     then
-        commonFunction -1 "Shell-Script : Abort(Error：[code]${RET_CD})"
-        error_flag=1
-        break
+
+        # シェルスクリプト実行
+        commonFunction -1 "Shell-Script : Execute"
+        ${SH_SCRIPT}
+        RET_CD=$?
+        if [ ${RET_CD} -ne 0 ]
+        then
+            commonFunction -1 "Shell-Script : Abort(Error：[code]${RET_CD})"
+            error_flag=1
+            break
+        fi
+        commonFunction -1 "Shell-Script : Result OK"
     fi
-    commonFunction -1 "Shell-Script : Result OK"
-    
+
     # インターバル(sec)だけスリープ
     sleep ${INTERVAL}
 done

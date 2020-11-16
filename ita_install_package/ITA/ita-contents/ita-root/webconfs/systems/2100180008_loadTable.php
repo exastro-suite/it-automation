@@ -44,10 +44,10 @@ Symphony紐付Movementの一覧
         'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
     );
 
-    $table = new TableControlAgent('C_NODE_TERMINALS_CLASS_MNG','TERMINAL_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-308101"), 'C_NODE_TERMINALS_CLASS_MNG_JNL', $tmpAry); 
+    $table = new TableControlAgent('C_NODE_TERMINALS_EDIT_CLASS_MNG','TERMINAL_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-308101"), 'C_NODE_TERMINALS_EDIT_CLASS_MNG_JNL', $tmpAry); 
     $tmpAryColumn = $table->getColumns();
-    $tmpAryColumn['TERMINAL_CLASS_NO']->setSequenceID('C_NODE_TERMINALS_CLASS_MNG_RIC');
-    $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('C_NODE_TERMINALS_CLASS_MNG_JSQ');
+    $tmpAryColumn['TERMINAL_CLASS_NO']->setSequenceID('C_NODE_TERMINALS_EDIT_CLASS_MNG_RIC');
+    $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('C_NODE_TERMINALS_EDIT_CLASS_MNG_JSQ');
     unset($tmpAryColumn);
 
     // QMファイル名プレフィックス
@@ -55,9 +55,8 @@ Symphony紐付Movementの一覧
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITABASEH-MNU-308102"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     $aryTermClassColumn = array(
         "TERMINAL_CLASS_NAME"=>"",
