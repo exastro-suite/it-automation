@@ -5105,32 +5105,6 @@ class JournalSeqNoColumn extends NumColumn {
 
 			$sqlJnlBody = generateJournalRegisterSQL($exeJournalData,$arrayObjColumn,$objTable->getDBJournalTableID(),$objTable->getDBJournalTableHiddenID() );
 
-			// ----RBAC対応
-			if($objTable->getAccessAuth() === true) {
-				global $g;
-				$AccessAuthColumName    = $objTable->getAccessAuthColumnName();
-				// アクセス権カラム有無判定
-				if(array_key_exists($AccessAuthColumName,$exeJournalData)) {
-                                        // アクセス権が空白か判定
-                                        if( ! is_array($exeJournalData[$AccessAuthColumName])) {
-					    // ---- アクセス権カラムの表示データをロールIDからRole名称に変更
-					    // 廃止されているロールはカットされる
-					    $obj = new RoleBasedAccessControl($g['objDBCA']);
-					    $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$exeJournalData[$AccessAuthColumName]);
-					    unset($obj);
-					    if($RoleNameString === false) {
-						$intErrorType = 500;
-						$message = sprintf("[%s:%s]getRoleIDStringToRoleNameString is failed.",basename(__FILE__),__LINE__);
-						web_log($message);
-						throw new Exception( '00010801-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-					    }
-					    $exeJournalData[$AccessAuthColumName] = $RoleNameString;
-                                        }
-					// アクセス権カラムの表示データをロールIDからRole名称に変更----
-				}
-			}
-			// RBAC対応 ----
-
 			$retSQLResultArray = singleSQLExecuteAgent($sqlJnlBody, $exeJournalData, $strFxName);
 			if( $retSQLResultArray[0]===true ){
 				$objQueryJnl =& $retSQLResultArray[1];

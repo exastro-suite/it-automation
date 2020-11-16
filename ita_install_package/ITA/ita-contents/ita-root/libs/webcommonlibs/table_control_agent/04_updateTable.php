@@ -199,9 +199,9 @@
                                 $RoleIDString = "";
                                 if(strlen($RoleNameString) != 0) {
                                     // ロールID文字列のアクセス権をロール名称の文字列に変換
-                                    // 廃止されているロールはカットされる
+                                    // 廃止ロールはカットする。
                                     $obj = new RoleBasedAccessControl($g['objDBCA']);
-                                    $RoleIDString = $obj->getRoleNameStringToRoleIDString($g['login_id'],$RoleNameString);
+                                    $RoleIDString = $obj->getRoleNameStringToRoleIDString($g['login_id'],$RoleNameString,false);  // 廃止を除く
                                     unset($obj);
                                 }
                                 if($RoleIDString === false) {

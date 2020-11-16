@@ -174,7 +174,7 @@
                     // 初期画面(mode=0)----
                 case 1 :
                     // ----登録フォーム画面(mode=1)
-                    
+                    // TableFormatter::bodyFormatでアクセス権の初期値の設定 
                     $strOutputStr = $objListFormatter->printWebUIEditForm($arySetting,$objTable,$aryVariant,$strFormatterId);
                     
                     break;
@@ -198,7 +198,7 @@
                                     // ロールID文字列のアクセス権をロール名称の文字列に変換
                                     // 廃止されているロールはカットされる
                                     $obj = new RoleBasedAccessControl($g['objDBCA']);
-                                    $RoleIDString = $obj->getRoleNameStringToRoleIDString($g['login_id'],$RoleNameString);
+                                    $RoleIDString = $obj->getRoleNameStringToRoleIDString($g['login_id'],$RoleNameString,false);  // 廃止は除く
                                     unset($obj);
                                 }
                                 if($RoleIDString === false) {
@@ -221,7 +221,8 @@
                         if($objTable->getAccessAuth()) {
                             $obj = new RoleBasedAccessControl($g['objDBCA']);
                             // ログインユーザーのデフォルトアクセス権ロールIDを取得
-                            $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'ID');
+                            // 廃止されているロールは除外
+                            $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'ID',false);  // 廃止は除外
                             unset($obj);
                             if($DefaultAccessRoleString === false) {
                                 $message = sprintf("[%s:%s]Failed get Role information.",basename(__FILE__),__LINE__);
