@@ -188,13 +188,13 @@
                             $RoleNameString = "";
                             if(strlen($RoleIDString) != 0) {
                                 // ロールID文字列のアクセス権をロール名称の文字列に変換
-                                // 廃止されているロールはカットされる
+                                // 廃止されているロールはID変換失敗で表示
                                 $obj = new RoleBasedAccessControl($g['objDBCA']);
-                                $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString);
+                                $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);  // 廃止も含む
                                 unset($obj);
                             }
                             if($RoleIDString === false) {
-                                $message = sprintf("[%s:%s]getRoleNameStringToRoleIDString Failed.",basename(__FILE__),__LINE__);
+                                $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Failed.",basename(__FILE__),__LINE__);
                                 web_log($message);
                                 $intErrorType = 500;
                                 throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );

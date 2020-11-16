@@ -299,8 +299,42 @@
 			    $intTmpRowCount = 0;
 			    $chkobj = null;
 	                    while ( $row = $objQuery->resultFetch() ){
-                                $intTmpRowCount +=1;
-				$objTable->addData($row, false);
+                                // ----RBAC対応
+                                if($objTable->getAccessAuth() === false) {
+                                    // アクセス権の判定が不要な場合
+                                    $intTmpRowCount +=1;
+				    $objTable->addData($row, false);
+                                    continue;
+                                }
+                                // 対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                                list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                                if($ret === false) {
+                                    $intErrorType = 500;
+                                    throw new Exception( '00010801-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                }
+                                if($permission === true) {
+                                    global $g;
+                                    $AccessAuthColumName    = $objTable->getAccessAuthColumnName();
+                                    // アクセス権カラム有無判定
+                                    if(array_key_exists($AccessAuthColumName,$row)) {
+                                        // ---- アクセス権カラムの表示データをロールIDからRole名称に変更
+                                        // 廃止されているロールはID変換失敗で表示
+                                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                        $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$row[$AccessAuthColumName],true);  // 廃止も含む
+                                        unset($obj);
+                                        if($RoleNameString === false) {
+                                            $intErrorType = 500;
+                                            $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString is failed.",basename(__FILE__),__LINE__);
+                                            web_log($message);
+                                            throw new Exception( '00010801-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                        }
+                                        $row[$AccessAuthColumName] = $RoleNameString;
+                                        // アクセス権カラムの表示データをロールIDからRole名称に変更----
+                                        $intTmpRowCount +=1;
+				        $objTable->addData($row, false);
+                                    }
+                                }
+                                // RBAC対応----
 			    }
                             // 対象レコードのACCESS_AUTHカラムでアクセス権を判定 ----
 	                    $row_counter = $intTmpRowCount;
