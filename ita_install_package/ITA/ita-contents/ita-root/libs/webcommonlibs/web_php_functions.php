@@ -1188,9 +1188,12 @@ class RoleBasedAccessControl {
    // 【処理概要】
    //   指定ユーザーのデフォルトアクセス権ロールをCSV文字列で取得
    // 【パラメータ】
-   //   $userId:        ログインID
-   //   $RoleIDString:  指定ユーザーのデフォルトアクセス権ロールのCSV文字列タイプ
+   //   $userID:        ログインID
+   //   $type:          指定ユーザーのデフォルトアクセス権ロールのCSV文字列タイプ
    //                   ID:ロールID  NAME:ロール名称
+   //   $disuse_recode: 廃止レコードの扱い
+   //                   true:廃止レコードはID変換エラー(x)として扱う
+   //                   false:廃止レコードは無視する。
    // 【戻り値】
    //   false:   異常
    //   他:      指定ユーザーのデフォルトアクセス権ロールのCSV文字列
@@ -1200,20 +1203,30 @@ class RoleBasedAccessControl {
    //   パックヤードからの場合、異常の場合など、エラーログをphpの
    //   error_logの出力先に出力
    ///////////////////////////////////////////////////////////////////
-   function getDefaultAccessRoleString($userId,$type) {
+   function getDefaultAccessRoleString($userID,$type,$disuse_recode) {
        // 廃止されているレコードは除かれる
-       $RolesList = $this->getUserRoleList($userId);
+       $RolesList = $this->getAllRoleList($userID);
        if($RolesList === false) {
            return false;
        }
        $DefaultAccessRoleString = "";
        foreach($RolesList as $Role) {
            if($Role['DEFAULT'] === 'checked') {
-               if($DefaultAccessRoleString != '')  $DefaultAccessRoleString .= ',';
-               if($type == 'ID') {
-                   $DefaultAccessRoleString .= $Role['ROLE_ID'];
+               // 廃止ロールの扱い判定
+               if(($Role['ROLE_DISUSE_FLAG'] == '1') && ($disuse_recode === false)) {
+                   continue;
                } else {
-                   $DefaultAccessRoleString .= $Role['ROLE_NAME'];
+                   if($DefaultAccessRoleString != '')  $DefaultAccessRoleString .= ',';
+                   if($type == 'ID') {
+                       $DefaultAccessRoleString .= $Role['ROLE_ID'];
+                   } else {
+                       if($Role['ROLE_DISUSE_FLAG'] == '1') {
+                           $rolename = $this->makeDisUseRoleName($Role['ROLE_ID']);
+                           $DefaultAccessRoleString .= $rolename;
+                       } else {
+                           $DefaultAccessRoleString .= $Role['ROLE_NAME'];
+                       }
+                   }
                }
            }
        }
@@ -1221,11 +1234,137 @@ class RoleBasedAccessControl {
    }
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
-   //   ロール名のCSV文字列をロールIDのCSV文字列に変換
-   //   ロール名の表示用を想定しているので廃止も含む
+   //   廃止ロール名か判定しロールIDを取得
    // 【パラメータ】
-   //   $userId:        ログインID
+   //   $RoleName: ロール名
+   // 【戻り値】
+   //   false:  廃止ロール名でない
+   //   他:     廃止ロールID
+   // 【備考】
+   ///////////////////////////////////////////////////////////////////
+   function chkDisUseRoleName($RoleName) {
+       global $objMTS;
+       $name = $objMTS->getSomeMessage("ITAWDCH-STD-11101");
+       $DisUseRoleName = sprintf("/^%s\([0-9]+\)$/",$objMTS->getSomeMessage("ITAWDCH-STD-11101"));
+       // ロール名が廃止ロール名(ID変換失敗)か判定
+       if(preg_match($DisUseRoleName,$RoleName) == 1) {
+           // 廃止ロール名のIDを取得
+           $DisUseRoleID = str_replace($objMTS->getSomeMessage("ITAWDCH-STD-11101"),'',$RoleName);
+           $DisUseRoleID = str_replace('(','',$DisUseRoleID);
+           $DisUseRoleID = str_replace(')','',$DisUseRoleID);
+           return $DisUseRoleID;
+       } else {
+           return false;
+       }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   廃止ロール名を取得
+   // 【パラメータ】
+   //   $id:      ロールID
+   // 【戻り値】
+   //   廃止ロール名
+   // 【備考】
+   ///////////////////////////////////////////////////////////////////
+   function makeDisUseRoleName($id) {
+       global $objMTS;
+       $DisUseRoleName = sprintf("%s(%s)",$objMTS->getSomeMessage("ITAWDCH-STD-11101"),$id);
+       return $DisUseRoleName;
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   該当ユーザーのロール情報(廃止も含む)を取得
+   // 【パラメータ】
+   //   $userID: 該当ユーザー
+   // 【戻り値】
+   //   false:   異常
+   //   他:      下記ハッシュ配列
+   //               "ROLE_ID"=> "1", 
+   //               "ROLE_NAME"=> "システム管理者"
+   //               "DEFAULT"=> "checked"
+   //               "ROLE_DISUSE_FLAG"=>0:有効レコード
+   //                                   1:廃止
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getAllRoleList($userID) {
+       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_ACCOUNT_LINK_LIST JOIN A_ROLE_LIST user ID:%s)";
+       $error_msg2 = "[%s:%s]:Recode not found. (Table:A_ROLE_ACCOUNT_LINK_LIST JOIN A_ROLE_LIST user ID:%s)";
+       try {
+           $sql  = "SELECT   ";
+           $sql .= " TAB_1.ROLE_ID, ";
+           $sql .= " TAB_1.DEF_ACCESS_AUTH_FLAG, ";
+           $sql .= " TAB_2.ROLE_NAME, ";
+           $sql .= " TAB_2.DISUSE_FLAG ";
+           $sql .= "FROM ";
+           $sql .= " A_ROLE_ACCOUNT_LINK_LIST TAB_1 ";
+           $sql .= " LEFT JOIN A_ROLE_LIST    TAB_2 ON (TAB_1.ROLE_ID=TAB_2.ROLE_ID) ";
+           $sql .= "WHERE ";
+           $sql .= " TAB_1.DISUSE_FLAG='0' AND ";
+           $sql .= " TAB_1.USER_ID = {$userID}";
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if($objQuery->getStatus()===false){
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $objQuery->sqlBind( array('USER_ID'=>$userID));
+           $r = $objQuery->sqlExecute();
+           if(!$r) {
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $user_role_list = array();
+           if($objQuery->effectedRowCount() == 0) {
+               // ロール・ユーザー紐づけにデータ未登録の場合
+               $message = sprintf($error_msg2,basename(__FILE__),__LINE__,$userID);
+               throw new Exception($message);
+           }
+           while($row = $objQuery->resultFetch()) {
+               $array = array();
+               $array["ROLE_ID"]     = $row["ROLE_ID"];
+               $array["ROLE_NAME"]   = $row["ROLE_NAME"];
+               if($row["DISUSE_FLAG"] == '0') {
+                   $array["ROLE_DISUSE_FLAG"] = '0';
+               } else {
+                   $array["ROLE_DISUSE_FLAG"] = '1';
+               }
+               if($row["DEF_ACCESS_AUTH_FLAG"] == "1") {
+                   $array["DEFAULT"]   = "checked";
+               } else {
+                   $array["DEFAULT"]   = "";
+               }
+               $user_role_list[] = $array;
+           }
+           unset($objQuery);
+           return $user_role_list;
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return false;
+       }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   ロール名のCSV文字列をロールIDのCSV文字列に変換
+   //   ID変換失敗ロールを有効なロールとして扱うかを指定する。
+   //   一覧表示や変更履歴の表示は、ID変換失敗ロールを有効なロールとして扱う
+   // 【パラメータ】
+   //   $userID:          ログインID
    //   $RoleNameString:  ロール名のCSV文字列
+   //   $disuse_role:     ID変換失敗ロールを有効なロールとして扱うかを指定する。
+   //                     true:ID変換失敗(x)のロール名を有効ロールとして扱う
+   //                          ロールIDをxとして扱う
+   //                     false:D変換失敗(x)のロール名を無視する
+   //   $Convert_error_char: ロール名からIDに変換できなかった場合のロール名
+   //   
    // 【戻り値】
    //   false:   異常
    //   他:      ロールIDのCSV文字列
@@ -1235,16 +1374,16 @@ class RoleBasedAccessControl {
    //   パックヤードからの場合、異常の場合など、エラーログをphpの
    //   error_logの出力先に出力
    ///////////////////////////////////////////////////////////////////
-   function getRoleNameStringToRoleIDString($userId,$RoleNameString) {
+   function getRoleNameStringToRoleIDString($userID,$RoleNameString,$disuse_role,$Convert_error_char="") {
        $RoleID2Name = array();
        $RoleName2ID = array();
        // 廃止されているレコードは除かれる
-       $ret = $this->getRoleSearchHashList($userId,$RoleID2Name,$RoleName2ID);
+       $ret = $this->getRoleSearchHashList($userID,$RoleID2Name,$RoleName2ID);
        if($ret === false) {
            return false;
        }
        $RoleIDString = "";
-       // ロールIDをロール名称に置換
+       // ロール名をロールIDに置換
        if(strlen($RoleNameString) != 0) {
            $updRoleNamelist = explode(',',$RoleNameString);
            foreach($updRoleNamelist as $updRoleName) {
@@ -1252,9 +1391,30 @@ class RoleBasedAccessControl {
                    if($RoleIDString != '') { $RoleIDString .= ',';}
                    $RoleIDString .= $RoleName2ID[$updRoleName];
                } else {
-                   //$error_msg1 = "[%s:%s]:Role Name Failed.(Name:%s)";
-                   //$message = sprintf($error_msg1,basename(__FILE__),__LINE__,$updRoleName);
-                   //web_log($message);
+                   // ロール名をロールIDに置換した文字列はUI表示用の処理なので
+                   // ロール名が廃止を含めてロール管理に登録されているかは判定はしない。
+                   // 廃止ロール名を扱うか判定
+                   if($disuse_role === true) {
+                       // 廃止ロール名か判定
+                       $DisUserRoleIDString = $this->chkDisUseRoleName($updRoleName);
+                       if($DisUserRoleIDString !== false) {
+                           if($RoleIDString != '') { $RoleIDString .= ',';}
+                           $RoleIDString .= $DisUserRoleIDString;
+                       } else {
+                           // 廃止ロール名が不正の場合
+                           $error_msg1 = "[%s:%s]:Role Name Failed.(Name:%s)";
+                           $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$updRoleName);
+                           if(function_exists("web_log")) {
+                               web_log($message);
+                           } else {
+                               error_log($message);
+                           }
+                           if($Convert_error_char != "") {
+                               if($RoleIDString != '') { $RoleIDString .= ',';}
+                               $RoleIDString .= $Convert_error_char;
+                           }
+                       }
+                   }
                }
            }
        }
@@ -1263,24 +1423,34 @@ class RoleBasedAccessControl {
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
    //   ロールIDのCSV文字列をロール名称のCSV文字列に変換
-   //   ロール名の表示用を想定しているので廃止も含む
+   //   廃止されているロールをID変換失敗ロールとして扱うかを指定する。
+   //   プルダウン検索の表示は、廃止されているロールをID変換失敗ロールとして扱う
    // 【パラメータ】
    //   $userID:        ユーザーID
    //   $RoleIDString:  ロールIDのCSV文字列
+   //   $disuse_role:   廃止されているロールをID変換失敗ロールとして扱うかを指定する。
+   //                     true:廃止されているロールIDを変換失敗(x)として扱う
+   //                          ロールIDをxとして扱う
+   //                     false:廃止されているロールIDを無視する。
    // 【戻り値】
    //   false:   異常
-   //   他:      ロール名称のCSV文字列
+   //   他:      ロールCSVのCSV文字列
    //              
    // 【備考】
    //   webからの場合、異常の場合など、エラーログをweb_logに出力
    //   パックヤードからの場合、異常の場合など、エラーログをphpの
    //   error_logの出力先に出力
    ///////////////////////////////////////////////////////////////////
-   function getRoleIDStringToRoleNameString($userId,$RoleIDString) {
+   function getRoleIDStringToRoleNameString($userID,$RoleIDString,$disuse_role) {
        $RoleID2Name = array();
        $RoleName2ID = array();
+       // 廃止されているレコードを含む
+       $ret = $this->getAllRoleSearchHashList($userID,$AllRoleID2Name,$AllRoleName2ID);
+       if($ret === false) {
+           return false;
+       }
        // 廃止されているレコードは除かれる
-       $ret = $this->getRoleSearchHashList($userId,$RoleID2Name,$RoleName2ID);
+       $ret = $this->getRoleSearchHashList($userID,$RoleID2Name,$RoleName2ID);
        if($ret === false) {
            return false;
        }
@@ -1293,9 +1463,25 @@ class RoleBasedAccessControl {
                    if($RoleNameString != '') { $RoleNameString .= ',';}
                    $RoleNameString .= $RoleID2Name[$updRoleID];
                } else {
-                   //$error_msg1 = "[%s:%s]:Role ID Failed.(ID:%s)";
-                   //$message = sprintf($error_msg1,basename(__FILE__),__LINE__,$updRoleID);
-                   //web_log($message);
+                   // ロールIDからロール名に置換した文字列がDB登録用になるので
+                   // ロールIDが廃止も含めてロール管理にあるか判定
+                   if(array_key_exists($updRoleID,$AllRoleID2Name)) {
+                       // 廃止ロールを扱うか判定
+                       if($disuse_role === true) {
+                           $DisUseRoleName = $this->makeDisUseRoleName($updRoleID);
+                           if($RoleNameString != '') { $RoleNameString .= ',';}
+                           $RoleNameString .= $DisUseRoleName;
+                       }
+                   } else {
+                       // 不正なロールIDの場合はエラーにする。
+                       $error_msg1 = "[%s:%s]:Role ID Failed.(ID:%s)";
+                       $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$updRoleID);
+                       if(function_exists("web_log")) {
+                           web_log($message);
+                       } else {
+                           error_log($message);
+                       }
+                   }
                }
            }
        }
@@ -1303,47 +1489,7 @@ class RoleBasedAccessControl {
    }
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
-   //   ロールIDのCSV文字列をロール名称のCSV文字列に変換
-   //   ジャーナルに出力するロール名を想定しているので廃止も含む
-   // 【パラメータ】
-   //   $userID:        ユーザーID
-   //   $RoleIDString:  ロールIDのCSV文字列
-   // 【戻り値】
-   //   false:   異常
-   //   他:      ロール名称のCSV文字列
-   //              
-   // 【備考】
-   //   webからの場合、異常の場合など、エラーログをweb_logに出力
-   //   パックヤードからの場合、異常の場合など、エラーログをphpの
-   //   error_logの出力先に出力
-   ///////////////////////////////////////////////////////////////////
-   function getJarnalRoleIDStringToRoleNameString($RoleIDString) {
-       $RoleID2Name = array();
-       $RoleName2ID = array();
-       // 廃止されているレコードは除かれる
-       $ret = $this->getALLRoleSearchHashList($RoleID2Name,$RoleName2ID);
-       if($ret === false) {
-           return false;
-       }
-       $RoleNameString = "";
-       // ロールIDをロール名称に置換
-       if(strlen($RoleIDString) != 0) {
-           $updRoleIDlist = explode(',',$RoleIDString);
-           foreach($updRoleIDlist as $updRoleID) {
-               if(array_key_exists($updRoleID,$RoleID2Name)) {
-                   if($RoleNameString != '') { $RoleNameString .= ',';}
-                   $RoleNameString .= $RoleID2Name[$updRoleID];
-               } else {
-                   if($RoleNameString != '') { $RoleNameString .= ',';}
-                   $RoleNameString .= $updRoleID;
-               }
-           }
-       }
-       return $RoleNameString;
-   }
-   ///////////////////////////////////////////////////////////////////
-   // 【処理概要】
-   //   ロール情報を取得(廃止レコードも含む)
+   //   ロール情報を取得(廃止も含む)
    // 【パラメータ】
    //   $userID:        ユーザーID
    //   $RoleID2Name:   $RoleID2Name[ロールID] = ロール名称
@@ -1351,15 +1497,13 @@ class RoleBasedAccessControl {
    // 【戻り値】
    //   false:   異常
    //   itrue:   正常
-   //              
+   //
    // 【備考】
    //   webからの場合、異常の場合など、エラーログをweb_logに出力
    //   パックヤードからの場合、異常の場合など、エラーログをphpの
    //   error_logの出力先に出力
    ///////////////////////////////////////////////////////////////////
-   function getALLRoleSearchHashList(&$RoleID2Name,&$RoleName2ID) {
-       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_LIST)";
-       $error_msg2 = "[%s:%s]:Recode not found. (Table:A_ROLE_LIST)";
+   function getAllRoleSearchHashList($userID,&$RoleID2Name,&$RoleName2ID) {
        $RoleID2Name = array();
        $RoleName2ID = array();
        try {
@@ -1369,12 +1513,17 @@ class RoleBasedAccessControl {
            $sql .= " TAB_1.ROLE_NAME ";
            $sql .= "FROM ";
            $sql .= " A_ROLE_LIST TAB_1 ";
+           //$sql .= " A_ROLE_ACCOUNT_LINK_LIST TAB_1 ";
+           //$sql .= " LEFT JOIN A_ROLE_LIST    TAB_2 ON (TAB_1.ROLE_ID=TAB_2.ROLE_ID) ";
+           //$sql .= "WHERE ";
+           //$sql .= " TAB_1.USER_ID = {$userID}";
            $objQuery = $this->objDBCA->sqlPrepare($sql);
            if($objQuery->getStatus()===false){
                $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
                $message .= "\n" . $objQuery->getLastError();
                throw new Exception($message);
            }
+//           $objQuery->sqlBind( array('USER_ID'=>$userID));
            $r = $objQuery->sqlExecute();
            if(!$r) {
                $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
@@ -1394,7 +1543,7 @@ class RoleBasedAccessControl {
            } else {
                error_log($e->getMessage());
            }
-           return flase;
+           return false;
        }
    }
    ///////////////////////////////////////////////////////////////////
@@ -1407,15 +1556,13 @@ class RoleBasedAccessControl {
    // 【戻り値】
    //   false:   異常
    //   itrue:   正常
-   //              
+   //
    // 【備考】
    //   webからの場合、異常の場合など、エラーログをweb_logに出力
    //   パックヤードからの場合、異常の場合など、エラーログをphpの
    //   error_logの出力先に出力
    ///////////////////////////////////////////////////////////////////
    function getRoleSearchHashList($userID,&$RoleID2Name,&$RoleName2ID) {
-       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_ACCOUNT_LINK_LIST JOIN A_ROLE_LIST)";
-       $error_msg2 = "[%s:%s]:Recode not found. (Table:A_ROLE_ACCOUNT_LINK_LIST JOIN A_ROLE_LIST)";
        $RoleID2Name = array();
        $RoleName2ID = array();
        try {
@@ -1463,6 +1610,7 @@ class RoleBasedAccessControl {
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
    //   該当ユーザーのロール情報を取得
+   //   アクセス権ロール設定モーダル用
    // 【パラメータ】
    //   $userID: 該当ユーザー
    // 【戻り値】
@@ -1819,8 +1967,6 @@ class RoleBasedAccessControl {
        return($chkarray[$loadtable_AccessAuth][$AccessAuthColumDefine]);
    }
 }
-// RBAC対応 ----
-// ---- RBAC対応
     function getTargetRecodeCount($objTable,$objQuery,&$strRecCnt) {
         // unset($objQuery); $objQueryの開放は呼び元で実施
         global $g;
@@ -1916,14 +2062,14 @@ class RoleBasedAccessControl {
             // ---- ACCESS_AUTHカラムがない場合
         }
     }
-    function AccessAuthColumnFileterDataReplace($objDBCA,$AccessAuthColumnName,&$arrayFileterBody) {
+    function AccessAuthColumnFileterDataReplace($userID,$objDBCA,$AccessAuthColumnName,&$arrayFileterBody) {
         $obj = new RoleBasedAccessControl($objDBCA);
         foreach($arrayFileterBody as $key=>$val) {
             $LikeFileter = sprintf("/^%s__[0-9]*$/",$AccessAuthColumnName);
             if(preg_match($LikeFileter,$key) == 1) {
                 $val = preg_replace("/^%/","",$val);
                 $val = preg_replace("/%$/","",$val);
-                $val = $obj->getRoleNameStringToRoleIDString(1,$val);
+                $val = $obj->getRoleNameStringToRoleIDString($userID,$val,true,"Error"); // 廃止を含む
                 if($val === false) {
                     return false;
                 }
@@ -1932,7 +2078,7 @@ class RoleBasedAccessControl {
             }
             $ListFileter = sprintf("/^%s_RF__[0-9]*$/",$AccessAuthColumnName);
             if(preg_match($ListFileter,$key) == 1) {
-                $val = $obj->getRoleNameStringToRoleIDString(1,$val);
+                $val = $obj->getRoleNameStringToRoleIDString($userID,$val,true,"Error");  // 廃止を含む
                 if($val === false) {
                     return false;
                 }

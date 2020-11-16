@@ -253,10 +253,10 @@
             }
 
             // ---- RBAC対応
-            // アクセス権カラムのフィルタ条件をロール名からロール名称に置換
+            // 表示フィルター検索: アクセス権カラムのフィルタ条件をロール名からロール名称に置換
             if($objTable->getAccessAuth() === true) {
                 $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
-                $ret = AccessAuthColumnFileterDataReplace($g['objDBCA'],$AccessAuthColumnName,$arrayFileterBody);
+                $ret = AccessAuthColumnFileterDataReplace($g['login_id'],$g['objDBCA'],$AccessAuthColumnName,$arrayFileterBody);  // 廃止も含む
                 if($ret === false) {
                     $intErrorType = 500;
                     throw new Exception( '00010600-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
@@ -314,10 +314,10 @@
                                         $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
                                         if(array_key_exists($AccessAuthColumnName,$row)) {
                                             // アクセス権カラムの場合にロールIDからRole名称に変更
-                                            // 廃止されてするロールはカットされる
+                                            // 廃止されているロールはID変換失敗で表示
                                             global $g;
                                             $obj = new RoleBasedAccessControl($g['objDBCA']);
-                                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$row[$AccessAuthColumnName]);
+                                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$row[$AccessAuthColumnName],true);   // 廃止を含む
                                             unset($obj);
                                             if($RoleNameString === false) {
                                                 $retBool = false;
