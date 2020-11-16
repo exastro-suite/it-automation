@@ -519,10 +519,14 @@ fi
 
 #ライブラリのインストール（INSTALL_MODE = Versionup_All の時のみ）
 if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
+    #RHEL8用アーキテクチャ判定用変数定義
+    ARCH=$(arch)
     #リポジトリを有効にする
     yum install -y yum-utils dnf-utils >> "$LOG_FILE" 2>&1
     yum-config-manager --enable rhel-7-server-optional-rpms >> "$LOG_FILE" 2>&1
     yum-config-manager --enable rhui-rhel-7-server-rhui-optional-rpms >> "$LOG_FILE" 2>&1
+    yum-config-manager --enable rhui-REGION-rhel-server-optional >> "$LOG_FILE" 2>&1
+    yum-config-manager --enable rhel-7-server-rhui-optional-rpms >> "$LOG_FILE" 2>&1
     dnf config-manager --set-enabled PowerTools >> "$LOG_FILE" 2>&1
     dnf config-manager --set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms >> "$LOG_FILE" 2>&1
     dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms >> "$LOG_FILE" 2>&1

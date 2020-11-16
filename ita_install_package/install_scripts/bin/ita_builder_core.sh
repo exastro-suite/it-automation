@@ -119,7 +119,7 @@ yum_package_check() {
     if [ $# -gt 0 ];then
         for key in $@; do
             echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            yum list installed | grep "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            yum list installed | grep -i "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Package not installed [$key]"
                 ERR_FLG="false"
@@ -204,11 +204,25 @@ yum_repository() {
             if [ "${REPOSITORY}" != "yum_all" ]; then
                case "${LINUX_OS}" in
                     "CentOS7") create_repo_check remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
-                    "RHEL7") create_repo_check remi-php72 rhel-7-server-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
-                    "RHEL7_AWS") create_repo_check remi-php72 rhui-rhel-7-server-rhui-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "RHEL7") 
+                        if [ "${CLOUD_REPO}" == "RHEL7_RHUI2" ]; then
+                            create_repo_check remi-php72 rhui-rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        elif [ "${CLOUD_REPO}" == "RHEL7_RHUI2_AWS" ]; then
+                            create_repo_check remi-php72 rhui-REGION-rhel-server-optional >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        elif [ "${CLOUD_REPO}" == "RHEL7_RHUI3" ]; then
+                            create_repo_check remi-php72 rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        else
+                            create_repo_check remi-php72 rhel-7-server-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        fi
+                    ;;
                     "CentOS8") create_repo_check PowerTools >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
-                    "RHEL8") create_repo_check codeready-builder-for-rhel-8 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
-                    "RHEL8_AWS") create_repo_check codeready-builder-for-rhel-8-rhui-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "RHEL8")
+                        if [ "${CLOUD_REPO}" == "RHEL8_RHUI" ]; then
+                            create_repo_check codeready-builder-for-rhel-8-rhui-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        else
+                            create_repo_check codeready-builder-for-rhel-8 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        fi
+                    ;;
                 esac 
                 if [ $? -ne 0 ]; then
                    log "ERROR:Failed to get repository"
@@ -259,6 +273,47 @@ setting_file_format_check(){
     if [ `echo "$line" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
         log "ERROR : Double-byte characters cannot be used in the setting files"
         log "Applicable line : $line"
+        ERR_FLG="false"
+        func_exit_and_delete_file
+    fi
+}
+
+cloud_repo_setting(){
+    yum repolist all &> /tmp/ita_repolist.txt 
+    if [ -e /tmp/ita_repolist.txt ]; then
+        if [ "${LINUX_OS}" == "RHEL8" ]; then
+            if grep -q codeready-builder-for-rhel-8-rhui-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="RHEL8_RHUI"
+            elif grep -q codeready-builder-for-rhel-8-"${ARCH}"-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="physical"
+            else
+                log "ERROR : The repository required to install ITA cannot be found.
+codeready-builder-for-rhel-8-${ARCH}-rpms
+codeready-builder-for-rhel-8-rhui-rpms"
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+        elif [ "${LINUX_OS}" == "RHEL7" ]; then
+            if grep -q rhui-rhel-7-server-rhui-optional-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="RHEL7_RHUI2"
+            elif grep -q rhui-REGION-rhel-server-optional /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="RHEL7_RHUI2_AWS"
+            elif grep -q rhel-7-server-rhui-optional-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="RHEL7_RHUI3"
+            elif grep -q rhel-7-server-optional-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="physical"
+            else 
+                log "ERROR : The repository required to install ITA cannot be found.
+rhui-rhel-7-server-rhui-optional-rpms
+rhui-REGION-rhel-server-optional
+rhel-7-server-rhui-optional-rpms
+rhel-7-server-optional-rpms"
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+        fi
+    else
+        log 'ERROR:Failed to create /tmp/ita_repolist.txt.'
         ERR_FLG="false"
         func_exit_and_delete_file
     fi
@@ -637,9 +692,14 @@ configure_httpd() {
 
 # PHP
 configure_php() {
+    echo "${CLOUD_REPO}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     # enable yum repository
     if [ "${REPOSITORY}" != "yum_all" ]; then
-        yum_repository ${YUM_REPO_PACKAGE["php"]}
+        if [ "${CLOUD_REPO}" != "physical" ]; then
+            yum_repository ${YUM_REPO_PACKAGE["php_cloud"]}
+        else
+            yum_repository ${YUM_REPO_PACKAGE["php"]}
+        fi
     fi
     # Install some packages.
     yum_install ${YUM_PACKAGE["php"]}
@@ -906,9 +966,13 @@ download() {
 
     # Enable all yum repositories(Other than mariadb).
     log "Enable the required yum repositories."
-    for key in ${!YUM_REPO_PACKAGE[@]}; do
-        yum_repository ${YUM_REPO_PACKAGE[$key]} 
-    done
+    yum_repository ${YUM_REPO_PACKAGE["yum-env-enable-repo"]}
+    yum_repository ${YUM_REPO_PACKAGE["yum-env-disable-repo"]}
+    if [ "${CLOUD_REPO}" != "physical" ]; then
+        yum_repository ${YUM_REPO_PACKAGE["php_cloud"]}
+    else
+        yum_repository ${YUM_REPO_PACKAGE["php"]}
+    fi
     # Enable mariadb repositories.
     mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
     
@@ -1104,6 +1168,16 @@ elif [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
     ITA_EXT_FILE_DIR=$ITA_INSTALL_PACKAGE_DIR/ext_files_for_CentOS7.x
 fi
 
+#クラウド環境用リポジトリフラグ設定
+ARCH=$(arch)
+CLOUD_REPO="physical"
+# オフラインインストール時以外かつRHEL8、RHEL7の場合は、インストール環境のyum repolist allをgrepする。
+if [ "${exec_mode}" == "1" -o "${exec_mode}" == "3" ]; then
+    if [ "${LINUX_OS}" == "RHEL8" -o "${LINUX_OS}" == "RHEL7" ]; then
+        cloud_repo_setting
+    fi
+fi
+
 ################################################################################
 # base
 
@@ -1161,16 +1235,22 @@ YUM_REPO_PACKAGE_MARIADB=(
 )
 
 # yum repository package (for php)
-ARCH=$(arch)
 declare -A YUM_REPO_PACKAGE_PHP;
 YUM_REPO_PACKAGE_PHP=(
     ["RHEL8"]="--set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms"
     ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-optional-rpms"
-    ["RHEL8_AWS"]="--set-enabled codeready-builder-for-rhel-8-rhui-rpms"
-    ["RHEL7_AWS"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-rhel-7-server-rhui-optional-rpms"
     ["CentOS8"]="--set-enabled PowerTools"
     ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
     ["yum_all"]=""
+)
+
+declare -A YUM_REPO_PACKAGE_PHP_CLOUD;
+YUM_REPO_PACKAGE_PHP_CLOUD=(
+    ["RHEL8_RHUI"]="--set-enabled codeready-builder-for-rhel-8-rhui-rpms"
+    ["RHEL7_RHUI2"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-rhel-7-server-rhui-optional-rpms"
+    ["RHEL7_RHUI2_AWS"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-REGION-rhel-server-optional"
+    ["RHEL7_RHUI3"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-rhui-optional-rpms"
+    ["physical"]=""
 )
 
 # all yum repository packages
@@ -1179,6 +1259,7 @@ YUM_REPO_PACKAGE=(
     ["yum-env-enable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO[${REPOSITORY}]}
     ["yum-env-disable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO[${REPOSITORY}]}
     ["php"]=${YUM_REPO_PACKAGE_PHP[${LINUX_OS}]}
+    ["php_cloud"]=${YUM_REPO_PACKAGE_PHP_CLOUD[${CLOUD_REPO}]}
 )
 
 
