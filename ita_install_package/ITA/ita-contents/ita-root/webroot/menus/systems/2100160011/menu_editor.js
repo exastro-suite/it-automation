@@ -2264,12 +2264,12 @@ const setPanelParameter = function( setData ) {
       $('#create-last-update-user')
         .attr('data-value', setData['menu']['LAST_UPDATE_USER'] )
         .text( setData['menu']['LAST_UPDATE_USER'] );
-      // ロール
-      const roleList = ( setData['menu']['ACCESS_AUTH'] === undefined )? '': setData['menu']['ACCESS_AUTH'];
-      $('#permission-role-name-list')
-        .attr('data-role-id', roleList )
-        .text( getRoleListIdToName( roleList ) );
     }
+    // ロール
+    const roleList = ( setData['menu']['ACCESS_AUTH'] === undefined )? '': setData['menu']['ACCESS_AUTH'];
+    $('#permission-role-name-list')
+      .attr('data-role-id', roleList )
+      .text( getRoleListIdToName( roleList ) );
     
     // エディットモード別
     if ( menuEditorMode === 'view') {
