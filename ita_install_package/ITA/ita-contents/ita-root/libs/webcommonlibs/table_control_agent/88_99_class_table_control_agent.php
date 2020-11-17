@@ -907,10 +907,14 @@ class TableControlAgent {
 
 		    $c = new TextColumn('ACCESS_AUTH',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300002"));
 		    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300003"));//エクセル・ヘッダでの説明
+//                  $c->getOutputType('update_table')->setAttr('upd-access-auth-id', 'access_auth_data');
+//                  $c->getOutputType('update_table')->setAttr('readonly', 'readonly');
+//                  $c->getOutputType('register_table')->setAttr('ins-access-auth-id', 'access_auth_data');
+//                  $c->getOutputType('register_table')->setAttr('readonly', 'readonly');
+                    $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt('')));
                     $c->getOutputType('update_table')->setAttr('upd-access-auth-id', 'access_auth_data');
-                    $c->getOutputType('update_table')->setAttr('readonly', 'readonly');
+                    $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt('')));
                     $c->getOutputType('register_table')->setAttr('ins-access-auth-id', 'access_auth_data');
-                    $c->getOutputType('register_table')->setAttr('readonly', 'readonly');
 		    $c->setHiddenMainTableColumn(true);
                     $c->getOutputType('excel')->setVisible(false);
                     $c->getOutputType('csv')->setVisible(false);
