@@ -596,8 +596,16 @@ configure_mariadb() {
                     spawn mysql_secure_installation
                     expect \"Enter current password for root \\(enter for none\\):\"
                     send \"\\r\"
-                    expect -re \"Set root password\\?.* $\"
-                    send \"Y\\r\"
+                    expect { 
+                        -re \"Switch to unix_socket authentication.* $\" {
+                            send \"n\\r\"
+                            expect -re \"Change the root password\\?.* $\"
+                            send \"Y\\r\"
+                        }
+                        -re \"Set root password\\?.* $\" {
+                            send \"Y\\r\"
+                        }
+                    }
                     expect \"New password:\"
                     send \""${send_db_root_password}\\r"\"
                     expect \"Re-enter new password:\"
@@ -649,8 +657,16 @@ configure_mariadb() {
                 spawn mysql_secure_installation
                 expect \"Enter current password for root \\(enter for none\\):\"
                 send \"\\r\"
-                expect -re \"Set root password\\?.* $\"
-                send \"Y\\r\"
+                expect { 
+                    -re \"Switch to unix_socket authentication.* $\" {
+                        send \"n\\r\"
+                        expect -re \"Change the root password\\?.* $\"
+                        send \"Y\\r\"
+                    }
+                    -re \"Set root password\\?.* $\" {
+                        send \"Y\\r\"
+                    }
+                }
                 expect \"New password:\"
                 send \""${send_db_root_password}\\r"\"
                 expect \"Re-enter new password:\"
