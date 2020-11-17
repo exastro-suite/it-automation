@@ -454,7 +454,7 @@
         $root_dir_path = $g["root_dir_path"];
 
         $user_id = $g["login_id"];
-        $db_access_user_id                = $user_id;
+        $db_access_user_id = $user_id;
         $objDBCA = $g["objDBCA"];
         $err_msg = "";
         try{
@@ -464,6 +464,7 @@
             }
             require_once($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
             $obj = new RoleBasedAccessControl($objDBCA);
+            $ret  = $obj->getAccountInfo($g['login_id']);
             //----------------------------------------------
             // movement一覧の取得
             //----------------------------------------------
@@ -477,17 +478,23 @@
             if($retArray[0] === true){
                 $objQuery =& $retArray[1];
                 while( $row = $objQuery->resultFetch() ){
-                    if ( $obj->chkOneRecodeAccessPermission($row) ) {
-                        if ( can_get_menu_info($row["MENU_ID"]) ) {
-                            $number = count(get_movements_by_orch($row["ITA_EXT_STM_ID"]));
-                        } else {
-                            $number = 0;
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                        throw new Exception($err_msg);
+                    } else {
+                        if($permission === true) {
+                            if ( can_get_menu_info($row["MENU_ID"]) ) {
+                                $number = count(get_movements_by_orch($row["ITA_EXT_STM_ID"]));
+                            } else {
+                                $number = 0;
+                            }
+                            $rows[$row["ITA_EXT_STM_ID"]] = array(
+                                "name" => $row["ITA_EXT_STM_NAME"], // オーケストレータ名
+                                "menu_id" => $row["MENU_ID"], //
+                                "number" => $number,
+                            );
                         }
-                        $rows[$row["ITA_EXT_STM_ID"]] = array(
-                            "name" => $row["ITA_EXT_STM_NAME"], // オーケストレータ名
-                            "menu_id" => $row["MENU_ID"], //
-                            "number" => $number,
-                        );
                     }
                  }
             }
@@ -516,6 +523,7 @@
         try{
             require_once($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
             $obj = new RoleBasedAccessControl($objDBCA);
+            $ret  = $obj->getAccountInfo($g['login_id']);
             //----------------------------------------------
             // 共通モジュールの呼び出し
             //----------------------------------------------
@@ -538,8 +546,14 @@
                 $result = array();
                 //廃止フラグOFFの全レコード処理(FETCH
                 while ( $row = $objQuery->resultFetch() ){
-                    if ( $obj->chkOneRecodeAccessPermission($row) ) {
-                        $result[] = $row;
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                        throw new Exception($err_msg);
+                    } else {
+                        if($permission === true) {
+                            $result[] = $row;
+                        }
                     }
                 }
             }
@@ -740,6 +754,7 @@
         try{
             require_once($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
             $obj = new RoleBasedAccessControl($objDBCA);
+            $ret  = $obj->getAccountInfo($g['login_id']);
             //----------------------------------------------
             // コンダクター一覧の取得
             //----------------------------------------------
@@ -769,11 +784,17 @@
             if($retArray[0] === true){
                 $objQuery =& $retArray[1];
                 while ( $row = $objQuery->resultFetch() ){
-                    if ( $obj->chkOneRecodeAccessPermission($row) ) {
-                        $result[$row["CONDUCTOR_INSTANCE_NO"]] = array(
-                            "status" => $row["SYM_EXE_STATUS_NAME"],
-                            "end" => $row["TIME_END"],
-                        );
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                        throw new Exception($err_msg);
+                    } else {
+                        if($permission === true) {
+                            $result[$row["CONDUCTOR_INSTANCE_NO"]] = array(
+                                "status" => $row["SYM_EXE_STATUS_NAME"],
+                                "end" => $row["TIME_END"],
+                            );
+                        }
                     }
                 }
             }
@@ -803,6 +824,7 @@
         try{
             require_once($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
             $obj = new RoleBasedAccessControl($objDBCA);
+            $ret  = $obj->getAccountInfo($g['login_id']);
             //----------------------------------------------
             // 共通モジュールの呼び出し
             //----------------------------------------------
@@ -821,7 +843,7 @@
             //----------------------------------------------
             // Symphony情報取得
             //----------------------------------------------
-            //SQL作成
+            // SQL作成
             // TIME_ENDがNULLの場合、LAST_UPDATE_TIME_STAMPを入れる
             $sql = "SELECT C_SYMPHONY_INSTANCE_MNG.SYMPHONY_INSTANCE_NO,C_SYMPHONY_INSTANCE_MNG.ACCESS_AUTH,SYM_EXE_STATUS_NAME,
                     CASE WHEN C_SYMPHONY_INSTANCE_MNG.TIME_END IS NULL THEN C_SYMPHONY_INSTANCE_MNG.LAST_UPDATE_TIMESTAMP ELSE C_SYMPHONY_INSTANCE_MNG.TIME_END END AS TIME_END
@@ -837,11 +859,17 @@
             if($retArray[0] === true){
                 $objQuery =& $retArray[1];
                 while ( $row = $objQuery->resultFetch() ){
-                    if ( $obj->chkOneRecodeAccessPermission($row) ) {
-                        $result[$row["SYMPHONY_INSTANCE_NO"]] = array(
-                            "status" => $row["SYM_EXE_STATUS_NAME"],
-                            "end" => $row["TIME_END"],
-                        );
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                        throw new Exception($err_msg);
+                    } else {
+                        if($permission === true) {
+                            $result[$row["SYMPHONY_INSTANCE_NO"]] = array(
+                                "status" => $row["SYM_EXE_STATUS_NAME"],
+                                "end" => $row["TIME_END"],
+                            );
+                        }
                     }
                 }
             }
@@ -894,7 +922,7 @@
                 $row = $objQuery->resultFetch();
             }
 
-            if (!$row) {
+            if ( !$row ) {
                  $menu_group = array();
             } else {
                 $strMenuGroupId = sprintf("%010d", strval($menu_group_id));
@@ -968,7 +996,7 @@
         $err_msg = "";
         $objMTS = $g['objMTS'];
         try{
-            $sql = "UPDATE A_SEQUENCE
+            $sql = "UPDATE A_SEQUENCE 
                     SET VALUE = :VALUE,
                     LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP
                     WHERE NAME = :NAME";
@@ -1030,6 +1058,7 @@
         try{
             require_once($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
             $obj = new RoleBasedAccessControl($objDBCA);
+            $ret  = $obj->getAccountInfo($g['login_id']);
             // オーケストレーションの取得
             $sql = "SELECT ITA_EXT_STM_ID,ITA_EXT_STM_NAME,MENU_ID,ACCESS_AUTH
                     FROM   B_ITA_EXT_STM_MASTER
@@ -1040,11 +1069,17 @@
             if($retArray[0] === true){
                 $objQuery =& $retArray[1];
                 while( $row = $objQuery->resultFetch() ){
-                    if ( $obj->chkOneRecodeAccessPermission($row) ) {
-                        $orch_list[$row["ITA_EXT_STM_ID"]] = array(
-                            "name" => $row["ITA_EXT_STM_NAME"], // オーケストレータ名
-                            "menu_id" => $row["MENU_ID"], //
-                        );
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                        throw new Exception($err_msg);
+                    } else {
+                        if($permission === true) {
+                            $orch_list[$row["ITA_EXT_STM_ID"]] = array(
+                                "name" => $row["ITA_EXT_STM_NAME"], // オーケストレータ名
+                                "menu_id" => $row["MENU_ID"], //
+                            );
+                        }
                     }
                  }
             }
