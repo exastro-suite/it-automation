@@ -664,12 +664,13 @@ function registPatternHostOpLinkMaster(&$hostGrpVarLinkArray) {
             // オペレーション、Movement、ホストが一致するデータがある場合
             if(true === $matchFlg) {
             
-                // 廃止の場合
-                if("1" === $patternHostOpLinkMaster['DISUSE_FLAG']) {
+                // 廃止の場合、またはアクセス許可ロールが一致しない場合
+                if("1" === $patternHostOpLinkMaster['DISUSE_FLAG'] || $hostGrpVarLink['ACCESS_AUTH'] != $patternHostOpLinkMaster['ACCESS_AUTH']) {
 
-                    // 復活する
-                    $updateData['DISUSE_FLAG']      = "0";                          // 廃止フラグ
-                    $updateData['LAST_UPDATE_USER'] = USER_ID_REGIST_HOST_GRP_VAR;  // 最終更新者
+                    // 更新する
+                    $updateData['ACCESS_AUTH']      = $hostGrpVarLink['ACCESS_AUTH'];   // アクセス許可ロール
+                    $updateData['DISUSE_FLAG']      = "0";                              // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_REGIST_HOST_GRP_VAR;      // 最終更新者
 
                     //////////////////////////
                     // 作業対象ホストテーブルを更新
@@ -692,6 +693,7 @@ function registPatternHostOpLinkMaster(&$hostGrpVarLinkArray) {
                 $insertData['OPERATION_NO_UAPK']    = $hostGrpVarLink['OPERATION_NO_UAPK']; // オペレーション
                 $insertData['PATTERN_ID']           = $hostGrpVarLink['PATTERN_ID'];        // Movement
                 $insertData['SYSTEM_ID']            = $hostGrpVarLink['SYSTEM_ID'];         // ホスト
+                $insertData['ACCESS_AUTH']          = $hostGrpVarLink['ACCESS_AUTH'];       // アクセス許可ロール
                 $insertData['DISUSE_FLAG']          = "0";                                  // 廃止フラグ
                 $insertData['LAST_UPDATE_USER']     = USER_ID_REGIST_HOST_GRP_VAR;          // 最終更新者
 
@@ -868,6 +870,7 @@ function registVarsAssignMaster($hostGrpVarLinkArray) {
                                              'SYSTEM_ID'            => $hostGrpVarLink['SYSTEM_ID'],
                                              'VARS_LINK_ID'         => $hostGrpVarLink['VARS_LINK_ID'],
                                              'VARS_ENTRY'           => $hostGrpVar['HOST_NAME'],
+                                             'ACCESS_AUTH'          => $hostGrpVarLink['ACCESS_AUTH'],
                                             );
                 }
             }
@@ -940,8 +943,8 @@ function registVarsAssignMaster($hostGrpVarLinkArray) {
             // オペレーション、Movement、ホスト、変数名、具体値が一致するデータがある場合
             if(true === $matchFlg) {
 
-                // 廃止の場合
-                if("1" === $varsAssignMaster['DISUSE_FLAG']) {
+                // 廃止の場合、またはアクセス許可ロールが一致しない場合
+                if("1" === $varsAssignMaster['DISUSE_FLAG'] || $linkData['ACCESS_AUTH'] != $varsAssignMaster['ACCESS_AUTH']) {
 
                     // 代入順序を決定する
                    $key = strval($linkData['OPERATION_NO_UAPK']) .
@@ -959,8 +962,9 @@ function registVarsAssignMaster($hostGrpVarLinkArray) {
                         $assignSeq = $maxAssignSeqArray[$key];
                    }
 
-                    // 復活する
+                    // 更新する
                     $updateData['ASSIGN_SEQ']       = $assignSeq;                   // 代入順序
+                    $updateData['ACCESS_AUTH']      = $linkData['ACCESS_AUTH'];     // アクセス許可ロール
                     $updateData['DISUSE_FLAG']      = "0";                          // 廃止フラグ
                     $updateData['LAST_UPDATE_USER'] = USER_ID_REGIST_HOST_GRP_VAR;  // 最終更新者
 
@@ -1004,6 +1008,7 @@ function registVarsAssignMaster($hostGrpVarLinkArray) {
                 $insertData['VARS_LINK_ID']         = $linkData['VARS_LINK_ID'];        // 変数名
                 $insertData['VARS_ENTRY']           = $linkData['VARS_ENTRY'];          // 具体値
                 $insertData['ASSIGN_SEQ']           = $assignSeq;                       // 代入順序
+                $insertData['ACCESS_AUTH']          = $linkData['ACCESS_AUTH'];         // アクセス許可ロール
                 $insertData['DISUSE_FLAG']          = "0";                              // 廃止フラグ
                 $insertData['LAST_UPDATE_USER']     = USER_ID_REGIST_HOST_GRP_VAR;      // 最終更新者
 
