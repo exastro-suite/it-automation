@@ -296,8 +296,8 @@ function linkTerraformModule($materialLinkageData, $fileName, $base64File) {
         if(true === $matchFlg) {
 
             $updateFlg = true;
-            // 資材が一致した場合
-            if($fileName == $updateData['MODULE_MATTER_FILE']){
+            // 資材とアクセス設定ロールが一致した場合
+            if($fileName == $updateData['MODULE_MATTER_FILE'] && $updateData['ACCESS_AUTH'] == $materialLinkageData['ACCESS_AUTH']){
                 $materialPath = TERRAFORM_MODULE_PATH . sprintf("%010d", $updateData['MODULE_MATTER_ID']) . "/" . $updateData['MODULE_MATTER_FILE'];
                 if(file_exists($materialPath)){
                     // 資材に変更がない場合は更新しない
@@ -311,8 +311,9 @@ function linkTerraformModule($materialLinkageData, $fileName, $base64File) {
             if(true === $updateFlg){
                 $cntFlg = true;
                 // 更新する
-                $updateData['MODULE_MATTER_FILE']    = $fileName;                // ファイル素材
-                $updateData['LAST_UPDATE_USER'] = USER_ID_MATERIAL_LINKAGE; // 最終更新者
+                $updateData['MODULE_MATTER_FILE']   = $fileName;                            // ファイル素材
+                $updateData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;             // 最終更新者
 
                 //////////////////////////
                 // ファイル管理テーブルを更新
@@ -341,10 +342,11 @@ function linkTerraformModule($materialLinkageData, $fileName, $base64File) {
             $cntFlg = true;
             // 登録する
             $insertData = array();
-            $insertData['MODULE_MATTER_NAME']  = $materialLinkageData['MATERIAL_LINK_NAME'];   // ファイル埋込変数名
-            $insertData['MODULE_MATTER_FILE']  = $fileName;                                    // ファイル素材
-            $insertData['DISUSE_FLAG']         = "0";                                          // 廃止フラグ
-            $insertData['LAST_UPDATE_USER']    = USER_ID_MATERIAL_LINKAGE;                     // 最終更新者
+            $insertData['MODULE_MATTER_NAME']   = $materialLinkageData['MATERIAL_LINK_NAME'];   // ファイル埋込変数名
+            $insertData['MODULE_MATTER_FILE']   = $fileName;                                    // ファイル素材
+            $insertData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];          // アクセス許可ロール
+            $insertData['DISUSE_FLAG']          = "0";                                          // 廃止フラグ
+            $insertData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;                     // 最終更新者
 
             //////////////////////////
             // ファイル管理テーブルに登録
@@ -444,8 +446,8 @@ function linkTerraformPolicy($materialLinkageData, $fileName, $base64File) {
         if(true === $matchFlg) {
 
             $updateFlg = true;
-            // 資材が一致した場合
-            if($fileName == $updateData['POLICY_MATTER_FILE']){
+            // 資材とアクセス設定ロールが一致した場合
+            if($fileName == $updateData['POLICY_MATTER_FILE'] && $updateData['ACCESS_AUTH'] == $materialLinkageData['ACCESS_AUTH']){
                 $materialPath = TERRAFORM_POLICY_PATH . sprintf("%010d", $updateData['POLICY_ID']) . "/" . $updateData['POLICY_MATTER_FILE'];
                 if(file_exists($materialPath)){
                     // 資材に変更がない場合は更新しない
@@ -459,8 +461,9 @@ function linkTerraformPolicy($materialLinkageData, $fileName, $base64File) {
             if(true === $updateFlg){
                 $cntFlg = true;
                 // 更新する
-                $updateData['POLICY_MATTER_FILE']    = $fileName;                // テンプレート素材
-                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE; // 最終更新者
+                $updateData['POLICY_MATTER_FILE']   = $fileName;                            // テンプレート素材
+                $updateData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;             // 最終更新者
 
                 //////////////////////////
                 // テンプレート管理テーブルを更新
@@ -490,10 +493,11 @@ function linkTerraformPolicy($materialLinkageData, $fileName, $base64File) {
             $cntFlg = true;
             // 登録する
             $insertData = array();
-            $insertData['POLICY_NAME']   = $materialLinkageData['MATERIAL_LINK_NAME'];   // テンプレート埋込変数名
-            $insertData['POLICY_MATTER_FILE']        = $fileName;                                    // テンプレート素材
-            $insertData['DISUSE_FLAG']              = "0";                                          // 廃止フラグ
-            $insertData['LAST_UPDATE_USER']         = USER_ID_MATERIAL_LINKAGE;                     // 最終更新者
+            $insertData['POLICY_NAME']          = $materialLinkageData['MATERIAL_LINK_NAME'];   // テンプレート埋込変数名
+            $insertData['POLICY_MATTER_FILE']   = $fileName;                                    // テンプレート素材
+            $insertData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];          // アクセス許可ロール
+            $insertData['DISUSE_FLAG']          = "0";                                          // 廃止フラグ
+            $insertData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;                     // 最終更新者
 
             //////////////////////////
             // テンプレート管理テーブルに登録
