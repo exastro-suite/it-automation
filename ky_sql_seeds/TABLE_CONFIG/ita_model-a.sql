@@ -3858,6 +3858,52 @@ WHERE
   ) <> 0
 ;
 
+CREATE VIEW D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_1_PIONEER AS
+SELECT
+  TAB_A.COLUMN_LIST_ID                 ,
+  CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_TITLE_PULLDOWN,
+  TAB_C.MENU_ID                        ,
+  TAB_A.COL_TITLE_DISP_SEQ             ,
+  TAB_B.ACCESS_AUTH                    ,
+  TAB_A.DISP_SEQ                       ,
+  TAB_A.NOTE                           ,
+  TAB_A.DISUSE_FLAG                    ,
+  TAB_A.LAST_UPDATE_TIMESTAMP          ,
+  TAB_A.LAST_UPDATE_USER
+FROM        D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER    TAB_A
+  LEFT JOIN D_CMDB_MENU_LIST_SHEET_TYPE_1_PIONEER      TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+  LEFT JOIN A_MENU_LIST                                TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+  LEFT JOIN A_MENU_GROUP_LIST                          TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+   TAB_A.DISUSE_FLAG = '0' AND
+   TAB_B.DISUSE_FLAG = '0' AND
+   TAB_C.DISUSE_FLAG = '0' AND
+   TAB_D.DISUSE_FLAG = '0'
+;
+
+CREATE VIEW D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_1_PIONEER_JNL AS
+SELECT
+  TAB_A.COLUMN_LIST_ID                 ,
+  CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_C.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_PULLDOWN,
+  TAB_C.MENU_ID                        ,
+  TAB_A.COL_TITLE_DISP_SEQ             ,
+  TAB_B.ACCESS_AUTH                    ,
+  TAB_A.DISP_SEQ                       ,
+  TAB_A.NOTE                           ,
+  TAB_A.DISUSE_FLAG                    ,
+  TAB_A.LAST_UPDATE_TIMESTAMP          ,
+  TAB_A.LAST_UPDATE_USER
+FROM        D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER_JNL TAB_A
+  LEFT JOIN D_CMDB_MENU_LIST_SHEET_TYPE_1_PIONEER       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+  LEFT JOIN A_MENU_LIST                                 TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+  LEFT JOIN A_MENU_GROUP_LIST                           TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+   TAB_A.DISUSE_FLAG = '0' AND
+   TAB_B.DISUSE_FLAG = '0' AND
+   TAB_C.DISUSE_FLAG = '0' AND
+   TAB_D.DISUSE_FLAG = '0'
+;
+
 -- -------------------------------------------------------
 -- --代入値自動登録設定の「メニューグループ:メニュー:項目」SHEET_TYPE=3用
 -- -------------------------------------------------------

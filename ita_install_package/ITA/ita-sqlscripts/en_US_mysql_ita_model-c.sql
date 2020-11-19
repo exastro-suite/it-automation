@@ -4228,7 +4228,15 @@ FROM
 -- -------------------------------------------------------
 CREATE VIEW E_ANS_PNS_PTN_VAR_LIST AS
 SELECT DISTINCT
-  TAB_A.*,
+  TAB_A.VARS_LINK_ID          ,
+  TAB_A.PATTERN_ID            ,
+  TAB_A.VARS_NAME_ID          ,
+  TAB_A.DISP_SEQ              ,
+  TAB_C.ACCESS_AUTH           ,
+  TAB_A.NOTE                  ,
+  TAB_A.DISUSE_FLAG           ,
+  TAB_A.LAST_UPDATE_TIMESTAMP ,
+  TAB_A.LAST_UPDATE_USER      ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_PNS_PTN_VARS_LINK             TAB_A
@@ -4239,9 +4247,18 @@ WHERE
   TAB_B.DISUSE_FLAG = '0' AND
   TAB_C.DISUSE_FLAG = '0';
 
+
 CREATE VIEW E_ANS_PNS_PTN_VAR_LIST_JNL AS
 SELECT DISTINCT
-  TAB_A.*,
+  TAB_A.VARS_LINK_ID          ,
+  TAB_A.PATTERN_ID            ,
+  TAB_A.VARS_NAME_ID          ,
+  TAB_A.DISP_SEQ              ,
+  TAB_C.ACCESS_AUTH           ,
+  TAB_A.NOTE                  ,
+  TAB_A.DISUSE_FLAG           ,
+  TAB_A.LAST_UPDATE_TIMESTAMP ,
+  TAB_A.LAST_UPDATE_USER      ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_PNS_PTN_VARS_LINK_JNL             TAB_A
@@ -4314,7 +4331,15 @@ FROM
 -- -------------------------------------------------------
 CREATE VIEW E_ANS_LNS_PTN_VAR_LIST AS
 SELECT DISTINCT
-  TAB_A.*,
+  TAB_A.VARS_LINK_ID          ,
+  TAB_A.PATTERN_ID            ,
+  TAB_A.VARS_NAME_ID          ,
+  TAB_A.DISP_SEQ              ,
+  TAB_C.ACCESS_AUTH           ,
+  TAB_A.NOTE                  ,
+  TAB_A.DISUSE_FLAG           ,
+  TAB_A.LAST_UPDATE_TIMESTAMP ,
+  TAB_A.LAST_UPDATE_USER      ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_LNS_PTN_VARS_LINK             TAB_A
@@ -4327,7 +4352,15 @@ WHERE
 
 CREATE VIEW E_ANS_LNS_PTN_VAR_LIST_JNL AS
 SELECT DISTINCT
-  TAB_A.*,
+  TAB_A.VARS_LINK_ID          ,
+  TAB_A.PATTERN_ID            ,
+  TAB_A.VARS_NAME_ID          ,
+  TAB_A.DISP_SEQ              ,
+  TAB_C.ACCESS_AUTH           ,
+  TAB_A.NOTE                  ,
+  TAB_A.DISUSE_FLAG           ,
+  TAB_A.LAST_UPDATE_TIMESTAMP ,
+  TAB_A.LAST_UPDATE_USER      ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_LNS_PTN_VARS_LINK_JNL             TAB_A
@@ -4337,7 +4370,6 @@ WHERE
   TAB_A.DISUSE_FLAG = '0' AND
   TAB_B.DISUSE_FLAG = '0' AND
   TAB_C.DISUSE_FLAG = '0';
-
 
 -- -------------------------------------------------------
 -- Legacy  代入値管理/代入値自動登録用 REST API対応
@@ -4451,7 +4483,15 @@ FROM
 -- -------------------------------------------------------
 CREATE VIEW E_ANS_LRL_PTN_VAR_LIST AS
 SELECT DISTINCT
-  TAB_A.*,
+  TAB_A.VARS_LINK_ID          ,
+  TAB_A.PATTERN_ID            ,
+  TAB_A.VARS_NAME_ID          ,
+  TAB_A.DISP_SEQ              ,
+  TAB_C.ACCESS_AUTH           ,
+  TAB_A.NOTE                  ,
+  TAB_A.DISUSE_FLAG           ,
+  TAB_A.LAST_UPDATE_TIMESTAMP ,
+  TAB_A.LAST_UPDATE_USER      ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_LRL_PTN_VARS_LINK             TAB_A
@@ -4464,7 +4504,15 @@ WHERE
 
 CREATE VIEW E_ANS_LRL_PTN_VAR_LIST_JNL AS
 SELECT DISTINCT
-  TAB_A.*,
+  TAB_A.VARS_LINK_ID          ,
+  TAB_A.PATTERN_ID            ,
+  TAB_A.VARS_NAME_ID          ,
+  TAB_A.DISP_SEQ              ,
+  TAB_C.ACCESS_AUTH           ,
+  TAB_A.NOTE                  ,
+  TAB_A.DISUSE_FLAG           ,
+  TAB_A.LAST_UPDATE_TIMESTAMP ,
+  TAB_A.LAST_UPDATE_USER      ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_LRL_PTN_VARS_LINK_JNL             TAB_A
@@ -4474,7 +4522,7 @@ WHERE
   TAB_A.DISUSE_FLAG = '0' AND
   TAB_B.DISUSE_FLAG = '0' AND
   TAB_C.DISUSE_FLAG = '0';
-  
+
 -- -------------------------------------------------------
 -- Legacy Role 代入値管理/代入値自動登録用 REST API対応
 --             変数名+メンバー変数  リスト用 View
