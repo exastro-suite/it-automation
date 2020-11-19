@@ -15,8 +15,50 @@
 
 
 // レイアウト初期化
-$( window ).on('load resize', function(){
+$( window ).on({
+  'resize': function(){
     relayout();
+  },
+  'load': function(){
+    relayout();
+    
+    // サブメニュー初期状態設チェック
+    setTimeout( function() {
+        if ( $('#FOOTER').find('.heading-status').length ) {
+        
+            $('#FOOTER').find('.heading-status-button').removeClass('heading-status-button-wait');
+            $('#KIZI').find('.text').removeAttr('data-init-close');
+
+            // サブメニュー初期状態設定の登録がないか確認する
+            const func = new itaEditorFunctions,
+                  pageNo = func.getParam('no'),
+                  keyName = 'no' + pageNo + '_submenu_close_id';
+            if ( !func.keyCheckLocalStorage( keyName ) ) {
+                // 登録がない場合、初期状態をサブメニュー初期状態設定に適用する
+
+                // 閉じているサブメニューを取得する
+                const headingArray = {};
+                let prevNakamiID = '';
+                $('#KIZI').find('h2').each( function(){
+                    const $heading = $( this ),
+                          midashiID = $heading.find('.showbutton').closest('div').attr('id');
+                    let nakamiID;
+                    if ( $heading.next().is('.open') ) {
+                        nakamiID = $heading.next('.open').find('.text').attr('id')
+                    } else {
+                        nakamiID = $heading.next('.text').attr('id');
+                    }
+                    // 開閉できないものとFilterの次に来るもは除外する
+                    if ( !checkOpenNow( nakamiID ) && midashiID !== undefined && !prevNakamiID.match(/^Filter/) ) {                      
+                        headingArray[midashiID] = nakamiID;
+                    }
+                    prevNakamiID = nakamiID;
+                });
+                func.setSessionStorage( keyName, JSON.stringify( headingArray ) );
+            }
+        }
+      }, 100 );
+  }
 });
 
 $( function() {
@@ -117,7 +159,7 @@ function set_layout_setting() {
           const submenuFlag = ( $('#KIZI').find('h2').length && $('#KIZI').find('div.text').length )? true: false;
           if ( submenuFlag ) {
               layoutButtonHTML += ''
-              + '<li class="heading-status"><button class="footer-menu-button heading-status-button"></button></li>';
+              + '<li class="heading-status"><button class="footer-menu-button heading-status-button heading-status-button-wait"></button></li>';
           }
           
           $footerUL.append( layoutButtonHTML );
@@ -156,6 +198,10 @@ function set_layout_setting() {
                   });
               }
               $footerUL.find('.heading-status-button').on('click', function(){
+                  
+                  // ロード完了前なら終了
+                  if ( $( this ).is('.heading-status-button-wait') ) return false;
+                  
                   const headingArray = new Array();
 
                   // 見出しとIDの取得
@@ -190,8 +236,16 @@ function set_layout_setting() {
                             + '<th class="select">' + getSomeMessage("ITAWDCC92005") + '</th><th class="name">' + getSomeMessage("ITAWDCC92006") + '</th>'
                           + '</thead>'
                           + '<tbody>';
-                      const headingArrayLength = headingArray.length,
-                            headingCloseList = ( func.keyCheckLocalStorage( headingKeyName ) )? JSON.parse( func.getLocalStorage( headingKeyName ) ): null;
+                      const headingArrayLength = headingArray.length;
+                      
+                      let headingCloseList;
+                      if ( func.keyCheckLocalStorage( headingKeyName ) ) {
+                        headingCloseList = JSON.parse( func.getLocalStorage( headingKeyName ) );
+                      } else if ( func.keyCheckSessionStorage( headingKeyName ) ) {
+                        headingCloseList = JSON.parse( func.getSessionStorage( headingKeyName ) );
+                      } else {
+                        headingCloseList = null;
+                      }
                       for ( let i = 0; i < headingArrayLength; i++ ) {
                           // チェック状態確認
                           let checkedStatus = '';
