@@ -434,10 +434,12 @@ const storageAvailable = function( type ) {
       storage.length !== 0;
     }
 }
-const localStrageFlag = storageAvailable('localStorage');
+editorFunction.localStrageFlag = storageAvailable('localStorage');
+editorFunction.sessionStrageFlag = storageAvailable('sessionStorage');
 
+// Local storage
 editorFunction.setLocalStorage = function( key, value ) {
-    if( localStrageFlag ) {
+    if( editorFunction.localStrageFlag ) {
       try {
         localStorage.setItem( key, JSON.stringify( value ) );
       } catch( e ) {
@@ -449,26 +451,57 @@ editorFunction.setLocalStorage = function( key, value ) {
       return false;
     }
 }
-
 editorFunction.getLocalStorage = function( key ) {
-    if( localStrageFlag && localStorage.getItem( key ) !== null ) {
+    if( editorFunction.localStrageFlag && localStorage.getItem( key ) !== null ) {
       return JSON.parse( localStorage.getItem( key ) );
     } else {
       return false;
     }
 }
-
 editorFunction.keyCheckLocalStorage = function( key ) {
-    if( localStrageFlag && localStorage.getItem( key ) !== null ) {
+    if( editorFunction.localStrageFlag && localStorage.getItem( key ) !== null ) {
       return true;
     } else {
       return false;
     }
 }
-
 editorFunction.keyRemoveLocalStorage = function( key ) {
-    if( localStrageFlag ) {
+    if( editorFunction.localStrageFlag ) {
       localStorage.removeItem( key )
+    }
+}
+
+// Session storage
+editorFunction.setSessionStorage = function( key, value ) {
+    if( editorFunction.sessionStrageFlag ) {
+      try {
+        sessionStorage.setItem( key, JSON.stringify( value ) );
+      } catch( e ) {
+        // Errorで書き込めなかった場合削除する
+        window.console.error('sessionStorage.setItem( ' + key + ' ) : ' + e.message );
+        sessionStorage.removeItem( key );
+      }
+    } else {
+      return false;
+    }
+}
+editorFunction.getSessionStorage = function( key ) {
+    if( editorFunction.sessionStrageFlag && sessionStorage.getItem( key ) !== null ) {
+      return JSON.parse( sessionStorage.getItem( key ) );
+    } else {
+      return false;
+    }
+}
+editorFunction.keyCheckSessionStorage = function( key ) {
+    if( editorFunction.sessionStrageFlag && sessionStorage.getItem( key ) !== null ) {
+      return true;
+    } else {
+      return false;
+    }
+}
+editorFunction.keyRemoveSessionStorage = function( key ) {
+    if( editorFunction.sessionStrageFlag ) {
+      sessionStorage.removeItem( key )
     }
 }
 
