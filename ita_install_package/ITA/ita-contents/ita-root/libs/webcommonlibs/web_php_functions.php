@@ -1304,6 +1304,7 @@ class RoleBasedAccessControl {
            $sql .= "WHERE ";
            $sql .= " TAB_1.DISUSE_FLAG='0' AND ";
            $sql .= " TAB_1.USER_ID = {$userID}";
+           $sql .= " ORDER BY ROLE_ID ";
            $objQuery = $this->objDBCA->sqlPrepare($sql);
            if($objQuery->getStatus()===false){
                $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
@@ -1637,6 +1638,7 @@ class RoleBasedAccessControl {
            $sql .= " TAB_1.DISUSE_FLAG='0' AND ";
            $sql .= " TAB_2.DISUSE_FLAG='0' AND ";
            $sql .= " TAB_1.USER_ID = {$userID}";
+           $sql .= " ORDER bY ROLE_ID ";
            $objQuery = $this->objDBCA->sqlPrepare($sql);
            if($objQuery->getStatus()===false){
                $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
