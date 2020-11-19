@@ -1553,6 +1553,10 @@ html.ita-fixed-layout #FOOTER {
 .heading-status-button {
   background-position: -132px -88px;
 }
+.heading-status-button.heading-status-button-wait {
+opacity: .2;
+pointer-events: none;
+}
 .footer-menu-button:focus {
 box-shadow: 0 0 0 1px rgba( 255,255,255,.5 );
 }
