@@ -968,20 +968,20 @@ font-size: 20px;
 }
 
 /* Ansible-Legacy */
-.circle-ansible-legacy { stroke: #f00f1e; }
-.movement-ansible-legacy { background-color: #f00f1e; }
+.circle-ansible-legacy { stroke: #F0891D; }
+.movement-ansible-legacy { background-color: #F0891D; }
 /* Ansible-Pioneer */
-.circle-ansible-pioneer { stroke: #f56e8c; }
-.movement-ansible-pioneer { background-color: #f56e8c; }
+.circle-ansible-pioneer { stroke: #009768; }
+.movement-ansible-pioneer { background-color: #009768; }
 /* Ansible-LegacyRole */
-.circle-ansible-legacy-role { stroke: #fab7bb; }
-.movement-ansible-legacy-role { background-color: #fab7bb; }
+.circle-ansible-legacy-role { stroke: #684915; }
+.movement-ansible-legacy-role { background-color: #684915; }
 /* OpenStack */
-.circle-openstack { stroke: #fb8c37; }
-.movement-openstack { background-color: #fb8c37; }
+.circle-openstack { stroke: #E75269; }
+.movement-openstack { background-color: #E75269; }
 /* Terraform */
-.circle-terraform { stroke: #6c60e8; }
-.movement-terraform { background-color: #6c60e8; }
+.circle-terraform { stroke: #6C60E8; }
+.movement-terraform { background-color: #6C60E8; }
 /* 実行中 */
 .circle-runing { stroke: #002B62; }
 .status-runing { background-color: #002B62; }
