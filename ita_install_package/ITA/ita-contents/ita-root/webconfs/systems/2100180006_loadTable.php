@@ -65,9 +65,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
     //リンクボタン----
 
-    $c = new IDColumn('I_CONDUCTOR_CLASS_NO',$g['objMTS']->getSomeMessage("ITABASEH-MNU-306050"),'C_CONDUCTOR_CLASS_MNG','CONDUCTOR_CLASS_NO','CONDUCTOR_NAME','');
-    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-306060"));//エクセル・ヘッダでの説明
-    $c->setSubtotalFlag(false);
+    $objVldt = new SingleTextValidator(1,256,false);
+    $c = new TextColumn('I_CONDUCTOR_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-306050"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-202080"));//エクセル・ヘッダでの説明
+    $c->setValidator($objVldt);
     $table->addColumn($c);
 
     $c = new IDColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITABASEH-MNU-202050"),'C_OPERATION_LIST','OPERATION_NO_UAPK','OPERATION_NAME','');

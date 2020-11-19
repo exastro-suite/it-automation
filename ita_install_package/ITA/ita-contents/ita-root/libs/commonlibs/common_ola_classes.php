@@ -3185,7 +3185,7 @@ class OrchestratorLinkAgent {
                     $tmpStrInterVal = $row['CONDUCTOR_REFRESH_INTERVAL'];
                     // データリレイストレージのパスを確認
                     if( !is_dir( $row['CONDUCTOR_STORAGE_PATH_ITA'] ) ) {
-                        $IF_Errormsg = $objMTS->getSomeMessage("ITABASEH-ERR-170015");
+                        $IF_Errormsg = $objMTS->getSomeMessage("ITABASEH-ERR-170018");
                     }
                 } else {
                     // 複数登録
