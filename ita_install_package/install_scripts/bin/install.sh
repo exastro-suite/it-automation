@@ -712,6 +712,7 @@ else
     CERTIFICATE_FILE="$ITA_DOMAIN.crt"
     PRIVATE_KEY_FILE="$ITA_DOMAIN.key"
     CSR_FILE="$ITA_DOMAIN.csr"
+    echo "subjectAltName=DNS:$ITA_DOMAIN" > /tmp/san.txt
 fi
 
 PROCCESS_TOTAL_CNT=`func_set_total_cnt`
@@ -822,9 +823,10 @@ if [ "$BASE_FLG" -eq 1 ]; then
         interact
         " >> "$LOG_FILE" 2>&1
         # サーバ証明書を生成
-        openssl x509 -days 3650 -req -signkey /tmp/"$PRIVATE_KEY_FILE" < /tmp/"$CSR_FILE" > /tmp/"$CERTIFICATE_FILE" 2>> "$LOG_FILE"
+        openssl x509 -days 3650 -req -signkey /tmp/"$PRIVATE_KEY_FILE" -extfile /tmp/san.txt < /tmp/"$CSR_FILE" > /tmp/"$CERTIFICATE_FILE" 2>> "$LOG_FILE"
         # 作成した証明書署名要求を削除
         rm -f /tmp/"$CSR_FILE" 2>> "$LOG_FILE"
+        rm -f /tmp/san.txt 2>> "$LOG_FILE"
         # 作成した秘密鍵とサーバ証明書を/etc/pki/tls/certs/へ移動
         mv /tmp/"$PRIVATE_KEY_FILE" /etc/pki/tls/certs/ 2>> "$LOG_FILE"
         mv /tmp/"$CERTIFICATE_FILE" /etc/pki/tls/certs/ 2>> "$LOG_FILE"

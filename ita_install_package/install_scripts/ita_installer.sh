@@ -40,11 +40,12 @@ func_exit_and_delete_file() {
     if test -e /tmp/ita_answers.txt ; then
         rm -rf /tmp/ita_answers.txt
     fi
-
     if test -e /tmp/ita_repolist.txt ; then
         rm -rf /tmp/ita_repolist.txt
     fi
-
+    if test -e /tmp/san.txt ; then
+        rm -rf /tmp/san.txt
+    fi
     if [ -e /tmp/pear ]; then
         rm -rf /tmp/pear >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
