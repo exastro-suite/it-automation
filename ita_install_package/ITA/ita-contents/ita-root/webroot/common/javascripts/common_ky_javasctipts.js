@@ -1293,12 +1293,8 @@ function relayout() {
     $('#MENU').css('height', window_h - heaer_h - footer_h - menu_header_h -10 + 'px');
     $('#MENU').css({overflow:'auto'});
 
-    
     // 読み込み完了1秒後に開閉速度を変える
-    if ( slideOpenSpeed == 0 ) setTimeout( function(){
-      slideOpenSpeed = 500;
-      $('#KIZI').find('.text').removeAttr('data-init-close');
-    }, 1000 );
+    if ( slideOpenSpeed == 0 ) setTimeout( function(){ slideOpenSpeed = 500; }, 1000 );
     
     //#KIZIの高さを指定することでFOOTER位置と同時に配色も整える
     if (wh < mh)//KIZIのheightをMENUより小さくしない
