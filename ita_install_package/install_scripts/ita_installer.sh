@@ -47,7 +47,7 @@ func_exit_and_delete_file() {
         rm -rf /tmp/san.txt
     fi
     if [ -e /tmp/pear ]; then
-        rm -rf /tmp/pear >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        rm -rf /tmp/pear
     fi
 
     if [ "$ERR_FLG" = "true" ]; then
