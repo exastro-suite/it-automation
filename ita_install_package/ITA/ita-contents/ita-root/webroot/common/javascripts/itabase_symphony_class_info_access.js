@@ -1413,7 +1413,11 @@ function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symph
         
         // 権限ロール
         if ( objSymphonyRoleArea !== null ) {
-          objSymphonyRoleArea.innerHTML = getRoleListIdToName( symphony_role );
+          var objHtmlRoleSpan = document.createElement("span");
+          objHtmlRoleSpan.className = "role_number";
+          objHtmlRoleSpan.innerHTML = getRoleListIdToName( symphony_role );
+          objSymphonyRoleArea.innerHTML = '';
+          objSymphonyRoleArea.appendChild( objHtmlRoleSpan );
         }
     }
     
@@ -1461,20 +1465,22 @@ const listIdName = function( type, id ) {
     }
 };
 const getRoleListIdToName = function( roleListText ) {
-
-  const roleList = roleListText.split(','),
-        roleListLength = roleList.length,
-        roleNameList = new Array;
-  
-  for ( let i = 0; i < roleListLength; i++ ) {
-    const roleName = listIdName('role', roleList[i]);
-    if ( roleName !== undefined ) {
-      roleNameList.push( roleName );
+    if ( roleListText !== undefined && roleListText !== '' ) {
+        const roleList = roleListText.split(','),
+              roleListLength = roleList.length,
+              roleNameList = new Array;
+        for ( let i = 0; i < roleListLength; i++ ) {
+            const roleName = listIdName('role', roleList[i]);
+            if ( roleName !== undefined ) {
+                roleNameList.push( roleName );
+            } else {
+                roleNameList.push( getSomeMessage("ITAWDCC92007") + '(' + roleList[i] + ')');
+            }
+        }
+        return roleNameList.join(', ');
+    } else {
+        return '';
     }
-  }
-  
-  return roleNameList.join(', ');
-
 };
 
 //------------------------------------------------//

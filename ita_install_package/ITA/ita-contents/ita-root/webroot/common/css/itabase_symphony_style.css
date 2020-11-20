@@ -857,7 +857,11 @@ display: table;
 clear: both;
 }
 #print_symphony_role .role_number {
+float: left;
+overflow: auto;
+max-height: 96px;
 white-space: normal;
+word-break: break-all;
 }
 #print_symphony_role .role_select_button {
 float: right;
