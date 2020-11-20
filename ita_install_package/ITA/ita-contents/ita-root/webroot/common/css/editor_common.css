@@ -681,6 +681,9 @@ font-size: 11px;
 font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
 color: #EEE;
 }
+.modal-table td {
+word-break: break-all;
+}
 .modal-table thead th {
 position: sticky;
 top: 1px;
