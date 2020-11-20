@@ -471,7 +471,7 @@ fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material3" ; then
     MATERIAL3_FLG=1
 fi
-if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material4" ; then
+if [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material" ] && [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_terraform-driver" ] ; then
     MATERIAL4_FLG=1
 fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_createparam" ; then
@@ -650,7 +650,7 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
                 sed -i -e "s:%%%%%ITA_DIRECTORY%%%%%:${ITA_DIRECTORY}:g" ${SQL_REPLACE}
 
                 #SQLの実行
-                env MYSQL_PWD=${DB_PASSWORD} mysql -u${DB_USERNAME} --show-warnings ${DB_NAME} -h ${DB_HOST} < "$SQL_REPLACE" 1>${SQL_LOGFILE} 2>&1
+                env MYSQL_PWD=${DB_PASSWORD} mysql -u${DB_USERNAME} ${DB_NAME} -h ${DB_HOST} < "$SQL_REPLACE" 1>${SQL_LOGFILE} 2>&1
 
                 rm -rf ${SQL_REPLACE}
 
@@ -703,7 +703,7 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
     fi
 
     #ディレクトリ、ファイルの権限を777に変更する
-    MOD_777_FILE="${VERSION_UP_DIR}/${LIST_VERSION}/777_list.txt"
+    MOD_777_FILE="${LIST_DIR}/777_list.txt"
     if test -e ${MOD_777_FILE} ; then
         while read LINE; do
             chmod -- 777 "${ITA_DIRECTORY}/${LINE}"
@@ -711,7 +711,7 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
     fi
 
     #ディレクトリ、ファイルの権限を755に変更する
-    MOD_755_FILE="${VERSION_UP_DIR}/${LIST_VERSION}/755_list.txt"
+    MOD_755_FILE="${LIST_DIR}/755_list.txt"
     if test -e ${MOD_755_FILE} ; then
         while read LINE; do
             chmod -- 755 "${ITA_DIRECTORY}/${LINE}"
