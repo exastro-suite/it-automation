@@ -1,0 +1,4 @@
+/ita-root/logs/terraform_out_logs
+/ita-root/temp/data_download
+/ita-root/temp/terraform_download_temp
+/ita-root/temp/terraform_module_temp
