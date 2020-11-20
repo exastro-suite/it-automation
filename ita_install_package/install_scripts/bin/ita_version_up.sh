@@ -702,22 +702,6 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
         done < ${CREATE_DIR_FILE}
     fi
 
-    #ディレクトリ、ファイルの権限を777に変更する
-    MOD_777_FILE="${LIST_DIR}/777_list.txt"
-    if test -e ${MOD_777_FILE} ; then
-        while read LINE; do
-            chmod -- 777 "${ITA_DIRECTORY}/${LINE}"
-        done < ${MOD_777_FILE}
-    fi
-
-    #ディレクトリ、ファイルの権限を755に変更する
-    MOD_755_FILE="${LIST_DIR}/755_list.txt"
-    if test -e ${MOD_755_FILE} ; then
-        while read LINE; do
-            chmod -- 755 "${ITA_DIRECTORY}/${LINE}"
-        done < ${MOD_755_FILE}
-    fi
-
     #インストール済みのドライバごとの処理を行う
     for VAL in ${INSTALLED_FLG_LIST[@]}; do
         if [ ${!VAL} -eq 1 ] ; then
@@ -741,6 +725,22 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
     fi
 
 done < ${VERSION_UP_LIST_FILE}
+
+#ディレクトリ、ファイルの権限を777に変更する
+MOD_777_FILE="${LIST_DIR}/777_list.txt"
+if test -e ${MOD_777_FILE} ; then
+    while read LINE; do
+        chmod -- 777 "${ITA_DIRECTORY}/${LINE}"
+    done < ${MOD_777_FILE}
+fi
+
+#ディレクトリ、ファイルの権限を755に変更する
+MOD_755_FILE="${LIST_DIR}/755_list.txt"
+if test -e ${MOD_755_FILE} ; then
+    while read LINE; do
+        chmod -- 755 "${ITA_DIRECTORY}/${LINE}"
+    done < ${MOD_755_FILE}
+fi
 
 #リリースファイルを変更する
 for VAL in ${RELEASE_PLASE[@]}; do
