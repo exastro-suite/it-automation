@@ -3963,15 +3963,16 @@ const updateConductorData = function() {
 
 // カンマ区切りロールIDリストからロールNAMEリストを返す
 const getRoleListIdToName = function( roleListText ) {
-  if ( roleListText !== undefined ) {
+  if ( roleListText !== undefined && roleListText !== '' ) {
     const roleList = roleListText.split(','),
           roleListLength = roleList.length,
           roleNameList = new Array;
-
     for ( let i = 0; i < roleListLength; i++ ) {
       const roleName = listIdName('role', roleList[i]);
       if ( roleName !== undefined ) {
         roleNameList.push( roleName );
+      } else {
+        roleNameList.push( getSomeMessage("ITAWDCC92007") + '(' + roleList[i] + ')');
       }
     }
 

@@ -74,6 +74,7 @@ $ary["ITAWDCC-92003"] = "Close";
 $ary["ITAWDCC-92004"] = "Submenu initial state setting";
 $ary["ITAWDCC-92005"] = "Open";
 $ary["ITAWDCC-92006"] = "Submenu name";
+$ary["ITAWDCC-92007"] = "Exchange ID has failed";
 $ary["ITAWDCC-92101"] = "Do you want to delete it?";
 $ary["ITAWDCC-92102"] = "Menu group cannot be deleted.";
 $ary["ITAWDCC-92103"] = "Name";
