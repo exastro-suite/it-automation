@@ -55,8 +55,57 @@ function syncDefaultMaxMemberCol() {
             'VARS_NAME_ID' => "",
             'ARRAY_MEMBER_ID' => "",
             'MAX_COL_SEQ' => "",
+            'ACCESS_AUTH' => "",
         );
 
+
+        ////////////////////////////////
+        // ロールパッケージ管理のアクセス権取得
+        ////////////////////////////////
+        $sql = " SELECT DISTINCT             \n"     
+             . "   TAB_A.MAX_COL_SEQ_ID,     \n"               
+             . "   TAB_A.VARS_NAME_ID,       \n"
+             . "   TAB_B.VARS_NAME,          \n"
+             . "   TAB_D.ROLE_PACKAGE_NAME,  \n"
+             . "   TAB_D.ACCESS_AUTH         \n"
+             . " FROM                        \n"
+             . "   B_ANS_LRL_MAX_MEMBER_COL              TAB_A                                                     \n"
+             . "   LEFT JOIN B_ANSIBLE_LRL_VARS_MASTER   TAB_B ON (TAB_A.VARS_NAME_ID    = TAB_B.VARS_NAME_ID)     \n"
+             . "   LEFT JOIN B_ANSIBLE_LRL_ROLE_VARS     TAB_C ON (TAB_B.VARS_NAME       = TAB_C.VARS_NAME)        \n"
+             . "   LEFT JOIN B_ANSIBLE_LRL_ROLE_PACKAGE  TAB_D ON (TAB_C.ROLE_PACKAGE_ID = TAB_D.ROLE_PACKAGE_ID)  \n"
+             . " WHERE                           \n"
+             . "   TAB_A.DISUSE_FLAG = '0' &&    \n"
+             . "   TAB_B.DISUSE_FLAG = '0' &&    \n"
+             . "   TAB_C.DISUSE_FLAG = '0' &&    \n"
+             . "   TAB_D.DISUSE_FLAG = '0';      \n";
+
+        $RolePkgAccessAuthAry = array();
+        if(dbaccessSelect($sql, null, $RolePkgAccessAuthAry) === false) {
+            return false;
+        }
+        // 変数に紐づいているロールパッケージのアクセス権ロールを取得
+        $keyid = 'VARS_NAME_ID';
+        $VarAccessAuthAry = array();
+        foreach($RolePkgAccessAuthAry as $row) {
+            $RoleIDList = explode(',',$row['ACCESS_AUTH']);
+            foreach($RoleIDList as $RoleID) {
+                if(@count($VarAccessAuthAry[$row[$keyid]][$RoleID])==0) {
+                   $VarAccessAuthAry[$row[$keyid]][] = $RoleID;
+                }
+            }
+        }
+        
+        // 変数に紐づいているロールパッケージのアクセス権ロールをCSV文字列に変換
+        $VarAccessAuthStrList = array();
+        foreach($VarAccessAuthAry as $keyid=>$RoleIDList) {
+            // 重複しているロールを取り除く
+            $uniqueRoleIDList = array_unique($RoleIDList);
+            // ID順でソート
+            $VarAccessAuthStrList[$keyid] = RoleIDSort(implode(',',$uniqueRoleIDList));
+        }
+
+        unset($varAccessAuthAry);
+        unset($RolePkgAccessAuthaAry);
         ////////////////////////////////
         // 対象変数絞込み           //
         ////////////////////////////////
@@ -85,7 +134,6 @@ function syncDefaultMaxMemberCol() {
                 }
                 continue;
             }
-
             if($master['DISUSE_FLAG'] == "0") {
                 $varsNameIdAlive[] = $master['VARS_NAME_ID'];
             }
@@ -94,7 +142,7 @@ function syncDefaultMaxMemberCol() {
         }
 
         ////////////////////////////////
-        // レコード準備       //
+        // レコード準備               //
         ////////////////////////////////
 
         // 多次元変数メンバー管理TBLから繰返しを示す VARS_NAME = '0' の要素を取得
@@ -105,6 +153,7 @@ function syncDefaultMaxMemberCol() {
                 . "    VARS_NAME_ID \n"
                 . "   ,ARRAY_MEMBER_ID \n"
                 . "   ,MAX_COL_SEQ \n"
+                . "   ,ACCESS_AUTH \n"
                 . "FROM B_ANS_LRL_ARRAY_MEMBER \n"
                 . "WHERE VARS_NAME_ID IN (" . implode(", ", $varsNameIdAlive) . ") \n" //   最終更新者が自分であり、廃止ではない変数だけ
                 . "AND VARS_NAME = '0' \n"
@@ -132,9 +181,22 @@ function syncDefaultMaxMemberCol() {
         ////////////////////////////////
         // DB操作（新規／更新／廃止） //
         ////////////////////////////////
+        // アクセス権が変更になっている (nominateに有り:廃止レコードなし、currentに有り:廃止レコードあり)
+        $updateRecordsRevive = AccessAuthUpdateRecords($nominateMaxMemberCol, $currentMaxMemberCol,$VarAccessAuthStrList);
 
-        // 新規 (nominateに有り、currentに無し)
+        if(count($updateRecordsRevive ) > 0 &&
+           dbaccessUpdateRevive($ansibleRole_maxMemberCol_tblName, $ansibleRole_maxMemberCol_pkName, $ansibleRole_maxMemberCol_columns, $updateRecordsRevive) === false) {
+               // 念のためロールバック
+               rollbackTransaction();
+               return false;
+        }
+
+        // 新規 (nominateに有り:廃止レコードなし、currentに無し:廃止レコードあり)
         $insertRecords = specificArrayDiff_maxMemberCol($nominateMaxMemberCol, $currentMaxMemberCol);
+
+        // ロールパッケージ管理のアクセス権ロールを設定
+        AccessAuthUpdate($insertRecords,$VarAccessAuthStrList);
+
         if(count($insertRecords) > 0 &&
             dbaccessInsert($ansibleRole_maxMemberCol_tblName, $ansibleRole_maxMemberCol_pkName, $ansibleRole_maxMemberCol_columns, $insertRecords) === false) {
             // 念のためロールバック
@@ -142,9 +204,12 @@ function syncDefaultMaxMemberCol() {
             return false;
         }
 
-        // 復活 (nominateに有り、currentで "廃止")
+        // 復活 (nominateに有り:廃止レコードなし、currentで "廃止")
         $currentMaxMemberCol_disuse = extractRecords($currentMaxMemberCol, array('DISUSE_FLAG' => '1'));
         $updateRecordsRevive = specificArrayMatch_maxMemberCol($currentMaxMemberCol_disuse, $nominateMaxMemberCol);
+        // ロールパッケージ管理のアクセス権ロールを設定
+        AccessAuthUpdate($updateRecordsRevive,$VarAccessAuthStrList);
+
         if(count($updateRecordsRevive) > 0 &&
             dbaccessUpdateRevive($ansibleRole_maxMemberCol_tblName, $ansibleRole_maxMemberCol_pkName, $ansibleRole_maxMemberCol_columns, $updateRecordsRevive) === false) {
             // 念のためロールバック
@@ -152,9 +217,11 @@ function syncDefaultMaxMemberCol() {
             return false;
         }
 
-        // 廃止 (currentに有り、nominateに無し)
+        // 廃止 (currentに有り、nominateに無し:廃止レコードなし)
         $currentMaxMemberCol_alive = extractRecords($currentMaxMemberCol, array('DISUSE_FLAG' => '0'));
         $updateRecordsDisuse = specificArrayDiff_maxMemberCol($currentMaxMemberCol_alive, $nominateMaxMemberCol);
+        // 廃止にする場合はロールパッケージ管理のアクセス権ロールを設定しない
+
         if(count($updateRecordsDisuse) > 0 &&
             dbaccessUpdateDisuse($ansibleRole_maxMemberCol_tblName, $ansibleRole_maxMemberCol_pkName, $ansibleRole_maxMemberCol_columns, $updateRecordsDisuse) === false) {
             // 念のためロールバック
@@ -162,10 +229,35 @@ function syncDefaultMaxMemberCol() {
             return false;
         }
 
+    unset($VarAccessAuthStrList);
+
     return true;
 
 } //----ここまで多次元変数メンバー管理との同期処理
 
+function AccessAuthUpdateRecords($sourceArray, $targetArray,$VarAccessAuthStrList) {
+    $result = array();
+    // アクセス権ロールの更新が必要なレコードかを判定
+    // $sourceArray:廃止レコードは含まれていない $targetArray:廃止レコードが含まれている
+    foreach($sourceArray as $sourceRecord) {
+        foreach($targetArray as $targetRecord) {
+            // 有効レコードの場合のみアクセス権ロールが必要なレコードとする。
+            if($targetRecord['DISUSE_FLAG'] == '0') {
+                if($sourceRecord['VARS_NAME_ID']    == $targetRecord['VARS_NAME_ID'] &&
+                   $sourceRecord['ARRAY_MEMBER_ID'] == $targetRecord['ARRAY_MEMBER_ID']) {
+                    // ロールパッケージ管理のアクセス権ロールと比較
+                    $nowAccessAuth = $VarAccessAuthStrList[$targetRecord['VARS_NAME_ID']];
+                    if($targetRecord['ACCESS_AUTH'] != $nowAccessAuth) {
+                        // アクセス権ロール更新
+                        $targetRecord['ACCESS_AUTH'] = $nowAccessAuth;
+                        $result[] = $targetRecord;
+                    }
+                }
+            }
+        }
+    }
+    return $result;
+}
 /**
  * 配列差分レコード取得
  */
@@ -234,4 +326,29 @@ function isContained_maxMemberCol($source, $targetArray) {
     }
     return false;
 }
+
+function AccessAuthUpdate(&$targetArray,$VarAccessAuthStrList) {
+    foreach($targetArray as $targetRecord) {
+        // ロールパッケージ管理のアクセス権ロールと比較
+        if(array_key_exists($targetRecord['VARS_NAME_ID'],$VarAccessAuthStrList)) {
+            $nowAccessAuth = $VarAccessAuthStrList[$targetRecord['VARS_NAME_ID']];
+            // アクセス権ロールに差異がある
+            if($targetRecord['ACCESS_AUTH'] != $nowAccessAuth) {
+                $targetRecord['ACCESS_AUTH'] = $nowAccessAuth;
+            }
+        }
+    }
+}
+
+function RoleIDSort($RoleIDStr) {
+    if($RoleIDStr == "") {
+        $SortRoleIDStr = "";
+    } else {
+        $RoleIDAry = explode(',',$RoleIDStr);
+        // ID順でソート
+        asort($RoleIDAry);
+        $SortRoleIDStr = implode(',',$RoleIDAry);
+    }
+    return $SortRoleIDStr;
+}    
 ?>
