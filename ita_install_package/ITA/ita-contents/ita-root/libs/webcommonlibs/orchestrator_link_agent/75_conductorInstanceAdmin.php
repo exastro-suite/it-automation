@@ -1942,6 +1942,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             $aryInstanceItems = array();
             $aryInstanceItems['NODE_NAME']  = $aryClassItems['NODE_NAME'];
             $aryInstanceItems['NODE_INSTANCE_NO']                 = $row['NODE_INSTANCE_NO'];
+            $aryInstanceItems['NODE_TYPE_ID']                 = $row['I_NODE_TYPE_ID'];
             $aryInstanceItems['STATUS']                 = $row['STATUS_ID'];
             $aryInstanceItems['SKIP']                 = $row['EXE_SKIP_FLAG'];
             //ステータス----
