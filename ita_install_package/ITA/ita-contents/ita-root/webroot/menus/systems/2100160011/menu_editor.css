@@ -1131,6 +1131,7 @@ white-space: nowrap;
 #menu-group-list tbody .id {
 width: 16px;
 text-align: right;
+white-space: nowrap;
 }
 #menu-group-list .unselected {
 text-align: center;
