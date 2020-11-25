@@ -1,0 +1,2 @@
+/ita-root/backyards/ita_base/ky_std_synchronize-Conductor
+/ita-root/backyards/ita_base/ky_std_synchronize-regularly2
