@@ -188,4 +188,14 @@ $ary[70053] = "[Process] Since there is no change in the related database, proce
 $ary[70054] = "[Process] Registration completion of related database update is registered.";
 $ary[70055] = "[Process] Registration of backyard processing (valautostup-workflow) is registered as updating related database";
 $ary[70056] = "[Process] Registration of backyard processing (varsautolistup-workflow) is registered as updating related database";
+$ary[70057] = "Update not required target host. (PHO_LINK_ID:{} OPERATION_ID:{} PATTERN_ID:{} SYSTEM_ID:{})";
+$ary[70058] = "Update target host. (PHO_LINK_ID:{} OPERATION_ID:{} PATTERN_ID:{} SYSTEM_ID:{})";
+$ary[80000] = "[Process]  API call connection information is incorrect.";
+$ary[80001] = "Collect START (host name: {} file name: {})";
+$ary[80002] = "[Process] REST API access failed.";
+$ary[80003] = "[Process] Failed to register or update data in CMDB. ({})";
+$ary[80004] = "[Process] The registration / update process is skipped because the target device has not been registered or has been abolished (host name: {}).";
+$ary[80005] = "Collect END (host name: {} file name: {}) ";
+$ary[80006] = "[Process] Operation is abolished, so registration and update processing is skipped (Operation No: {})";
+$ary[80007] = "REST DATA (host name: {} menu ID: {} operation NO: {})";
 ?>

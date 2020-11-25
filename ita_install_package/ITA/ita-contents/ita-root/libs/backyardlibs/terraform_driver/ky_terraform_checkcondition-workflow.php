@@ -40,13 +40,10 @@
     $db_access_user_id                = -101801; // Terraform状態確認プロシージャ
     $tgt_execution_no_array           = array();    // 処理対象のEXECUTION_NOのリストを格納
     $tgt_execution_no_array_without_2 = array();    // 処理対象から準備中を除くEXECUTION_NOのリストを格納
-    //$tgt_run_mode_array               = array();    // 処理対象のドライランモードのリストを格納
-    //$tgt_run_mode_no_array_without_2  = array();    // 処理対象から準備中を除くドライランモードのリストを格納
     $tgt_exec_count_array             = array();    // 処理対象の並列実行数のリストを格納
     $tgt_exec_count_array_without_2   = array();    // 処理対象から準備中を除く並列実行数のリストを格納
     $tgt_operation_id_array           = array();    // 処理対象のOPERATION_NO_UAPKのリストを格納
-    $tgt_row_array                    = array();    // 処理対象のレコードまるごと格納
-    $tgt_row_array_without_2          = array();    // 処理対象から準備中を除くレコードまるごと格納
+    $tgt_row_array                    = array();    // 処理対象からステータス(3:実行中)か(4:実行中(遅延))のものを格納
     $num_of_tgt_execution_no          = 0;          // 処理対象のEXECUTION_NOの個数を格納
     $tgt_config_dir                   = "";          // 処理対象のEXECUTION_NOの個数を格納
     $tgt_Contents                     = array();    // REST API Contents領域
@@ -191,8 +188,7 @@
         $temp_array = array('WHERE'=>"DISUSE_FLAG = '0' AND
                                       (
                                        ( STATUS_ID = 3 ) OR
-                                       ( STATUS_ID = 4 ) OR
-                                       ( TIME_BOOK <= :KY_DB_DATETIME(6): AND STATUS_ID = 9 )
+                                       ( STATUS_ID = 4 )
                                       )");
 
         //----------------------------------------------
@@ -293,13 +289,6 @@
             require ($root_dir_path . $log_output_php );
         }
 
-        //----------------------------------------------
-        // ローカル変数(ループ)宣言
-        //----------------------------------------------
-        $tgt_execution_row           = array();  // 単一行SELECTの結果を格納
-        $lv_terraform_pattern_link   = array();  // 単一行SELECTの結果を格納
-        $RequestContents             = array();  // REST API向けのリクエストコンテンツ(JSON)を格納
-
         //ログおよびstateファイル取得用のHTTPコンテキスト作成
         $Header = array( "Authorization: Bearer ". $lv_terraform_token,
                          "Content-Type: application/vnd.api+json");
@@ -322,12 +311,6 @@
         //----------------------------------------------
         foreach($tgt_row_array as $tgt_row){
             $tgt_execution_no = $tgt_row['EXECUTION_NO'];
-            unset($tgt_execution_row);
-            $tgt_execution_row = array();
-            unset($lv_terraform_pattern_link);
-            $lv_terraform_pattern_link = array();
-            unset($RequestContents);
-            $RequestContents = array();
             $organization_name = "";
             $workspace_name = "";
             $ary_tfe_plan_data = array();
@@ -340,23 +323,24 @@
             $make_zip_flag = false;
             $status_update_flag = false;
             $time_limit_check_flag = false;
+            $plan_complete_flag = false;
+            $policy_check_start_flag = false;
             $policy_check_failed_flag = false;
             $error_log_flag = false;
             $in_zip_file_name = "";
-            $plan_log_msg = "";
-            $policy_check_log_msg = "";
-            $apply_log_msg = "";
-            $exec_msg = "";
             $error_msg = "";
-            $plan_log_bar = "------------------------PLAN LOG----------------------". "\n";
-            $apply_log_bar = "------------------------APPLY LOG----------------------". "\n";
-            $policy_check_log_bar = "------------------------POLICYCHECK LOG----------------------". "\n";
+            $plan_msg = "";
+            $policyCheck_msg = "";
+            $apply_msg = "";
+            $is_confirmable = false;
+            $is_discardable = false;
 
+            //RUN_MODEを格納
+            $run_mode = $tgt_row['RUN_MODE']; //1:通常 / 2:Plan確認
             //workspaceIDを格納
             $workspace_id = $tgt_row['I_TERRAFORM_WORKSPACE_ID'];
             //RUN_IDを格納
             $tfe_run_id = $tgt_row['I_TERRAFORM_RUN_ID'];
-
 
             //----------------------------------------------
             // logファイルを生成
@@ -365,7 +349,9 @@
             $data_type = "out";
             $log_path = $log_save_dir . "/" . $tgt_execution_no_str_pad . "/" . $data_type;
             $error_log = $log_path . "/error.log";
-            $exec_log = $log_path . "/exec.log";
+            $plan_log = $log_path . "/plan.log";
+            $policyCheck_log = $log_path . "/policyCheck.log";
+            $apply_log = $log_path . "/apply.log";
 
             //log格納ディレクトリを作成
             if(!file_exists($log_path)){
@@ -400,15 +386,15 @@
                 }
             }
 
-            //exec_logファイルを作成
-            if(!file_exists($exec_log)){
-                if(!touch($exec_log)){
+            //plan_logファイルを作成
+            if(!file_exists($plan_log)){
+                if(!touch($plan_log)){
                     // 警告フラグON
                     $warning_flag = 1;
                     // 例外処理へ
                     throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
                 }else{
-                    if(!chmod($exec_log, 0777)){
+                    if(!chmod($plan_log, 0777)){
                         // 警告フラグON
                         $warning_flag = 1;
                         // 例外処理へ
@@ -416,6 +402,41 @@
                     }
                 }
             }
+
+            //policyCheck_logファイルを作成
+            if(!file_exists($policyCheck_log)){
+                if(!touch($policyCheck_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
+                }else{
+                    if(!chmod($policyCheck_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
+                        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
+                    }
+                }
+            }
+
+            //apply_logファイルを作成
+            if(!file_exists($apply_log)){
+                if(!touch($apply_log)){
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
+                }else{
+                    if(!chmod($apply_log, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
+                        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
+                    }
+                }
+            }
+
 
             //----------------------------------------------
             // OrganizationNAMEとWorkspaceNAMEを取得
@@ -510,6 +531,10 @@
             //applyの実行IDを格納
             $tfe_apply_id = $responsContents['data']['relationships']['apply']['data']['id'];
 
+            //applyの実行/中止可能フラグを格納
+            $is_confirmable = $responsContents['data']['attributes']['actions']['is-confirmable'];
+            $is_discardable = $responsContents['data']['attributes']['actions']['is-discardable'];
+
 
             //----------------------------------------------
             // planの詳細データを取得(API)
@@ -547,31 +572,43 @@
             $tfe_plan_log_read_url = $responsContents['data']['attributes']['log-read-url'];
 
             //----------------------------------------------
-            // planの結果判定
+            // planの結果判定スタート
             //----------------------------------------------
+            //planのlogファイルを追記
+            $tfe_plan_log = file_get_contents($tfe_plan_log_read_url, false, stream_context_create($HttpContext));
+            $plan_msg = $plan_msg . $tfe_plan_log . "\n";
+            file_put_contents($plan_log, $plan_msg);
+
             //失敗
             if($tfe_plan_status == "errored"){
                 $status_id = 6; //完了(異常)ステータス(6)設定
-                $make_zip_flag = true;
-                $status_update_flag = true;
-                $error_log_flag = true;
-
-                //----------------------------------------------
-                // planのlogファイル(error)を追記
-                //----------------------------------------------
-                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url, false, stream_context_create($HttpContext));
-                $error_msg = $error_msg . $plan_log_bar . $tfe_plan_log . "\n";
-                file_put_contents($error_log, $error_msg);
+                $make_zip_flag = true; //ZIPファイル作成フラグをtrue
+                $status_update_flag = true; //ステータス更新フラグをtrue
 
             //成功
             }elseif($tfe_plan_status == "finished"){
-                //----------------------------------------------
-                // planのlogファイル(exec)を追記
-                //----------------------------------------------
-                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url, false, stream_context_create($HttpContext));
-                $exec_msg = $exec_msg . $plan_log_bar . $tfe_plan_log . "\n";
-                file_put_contents($exec_log, $exec_msg);
+                $policy_check_start_flag = true; //policy-checkのデータ取得開始フラグをtrue
+                $plan_complete_flag = true; //plan完了フラグをtrue
 
+            //緊急停止
+            }elseif($tfe_run_status == "canceled" || $tfe_plan_status == "canceled"){
+                $status_id = 8; //緊急停止ステータス(8)設定
+                $make_zip_flag = true; //ZIPファイル作成フラグをtrue
+                $status_update_flag = true; //ステータス更新フラグをtrue
+
+            //進行中
+            }elseif($tfe_plan_status == "running"){
+                $time_limit_check_flag = true; //plan実行中の場合、遅延タイマーチェックフラグをtrueにする
+
+            //待機中(queued)
+            }else{
+                //処理を実行しない
+            }
+
+            //----------------------------------------------
+            // policy-checkの結果判定スタート
+            //----------------------------------------------
+            if($plan_complete_flag == true || $policy_check_start_flag == true){
                 //----------------------------------------------
                 // RUN_IDから、policy-checkのデータを取得(API)
                 //----------------------------------------------
@@ -608,62 +645,145 @@
                     //対象policyCheckデータを取得
                     $policy_check_status = $responsContents['data'][0]['attributes']['status'];
                     $policyResult = $responsContents['data'][0]['attributes']['result'];
-                    $output = $responsContents['data'][0]['links']['output'];
-                    $output_url = "https://".$lv_terraform_hostname.$output."/";
 
-                    //----------------------------------------------
-                    // policyCheckの緊急停止判定
-                    //----------------------------------------------
-                    if($tfe_run_status == 'canceled' && $policy_check_status == 'canceled'){
-                        $status_id = 8; //緊急停止ステータス(8)設定
-                        $make_zip_flag = true;
-                        $status_update_flag = true;
-                        $policy_check_failed_flag = true;
+                    if(!empty($responsContents['data'][0]['links']['output'])){
+                        $output = $responsContents['data'][0]['links']['output'];
+                        $output_url = "https://".$lv_terraform_hostname.$output."/";
 
                         //----------------------------------------------
                         // policyCheckのlogファイル(exex)を追記
                         //----------------------------------------------
                         $tfe_policy_log = file_get_contents($output_url, false, stream_context_create($HttpContext));
-                        $exec_msg = $exec_msg . $policy_check_log_bar . $tfe_policy_log . "\n";
-                        file_put_contents($exec_log, $exec_msg);
+                        $policyCheck_msg = $policyCheck_msg . $tfe_policy_log . "\n";
+                        file_put_contents($policyCheck_log, $policyCheck_msg);
 
-                    }else{
                         //----------------------------------------------
-                        // policyCheckの結果判定
+                        // policyCheckの緊急停止判定
                         //----------------------------------------------
-                        //失敗
-                        if($policyResult['result'] == false){
-                            $status_id = 6; //完了(異常)ステータス(6)設定
-                            $make_zip_flag = true;
-                            $status_update_flag = true;
-                            $error_log_flag = true;
-                            $policy_check_failed_flag = true;
+                        if($tfe_run_status == 'canceled' && $policy_check_status == 'canceled'){
+                            $status_id = 8; //緊急停止ステータス(8)設定
+                            $make_zip_flag = true; //ZIPファイル作成フラグをtrue
+                            $status_update_flag = true; //ステータス更新フラグをtrue
+                            $policy_check_failed_flag = true; //policy-check失敗フラグをtrue
 
-                            //----------------------------------------------
-                            // policyCheckのlogファイル(error)を追記
-                            //----------------------------------------------
-                            $tfe_policy_log = file_get_contents($output_url, false, stream_context_create($HttpContext));
-                            $error_msg = $error_msg . $policy_check_log_bar . $tfe_policy_log . "\n";
-                            file_put_contents($error_log, $error_msg);
-
-                        //成功
                         }else{
-                            $policy_check_failed_flag = false;
                             //----------------------------------------------
-                            // policyCheckのlogファイル(exec)を追記
+                            // policyCheckの結果判定
                             //----------------------------------------------
-                            $tfe_policy_log = file_get_contents($output_url, false, stream_context_create($HttpContext));
-                            $exec_msg = $exec_msg . $policy_check_log_bar . $tfe_policy_log . "\n";
-                            file_put_contents($exec_log, $exec_msg);
+                            //失敗
+                            if($policyResult['result'] == false){
+                                $status_id = 6; //完了(異常)ステータス(6)設定
+                                $make_zip_flag = true; //ZIPファイル作成フラグをtrue
+                                $status_update_flag = true; //ステータス更新フラグをtrue
+                                $policy_check_failed_flag = true; //policy-check失敗フラグをtrue
+
+                            //成功
+                            }else{
+                                $policy_check_failed_flag = false; //policy-check失敗フラグをfalse(デフォルト)
+
+                            }
                         }
                     }
-
                 }
+            }
+ 
+            //----------------------------------------------
+            //applyの結果判定スタート
+            //----------------------------------------------
+            if($plan_complete_flag == true && $policy_check_failed_flag == false){
+                //----------------------------------------------
+                //apply実行保留判定
+                //----------------------------------------------
+                //apply実行を実施していない場合
+                if($is_confirmable == true && $is_discardable == true){
+                    //RUN_MODEによりApplyの実行か破棄かを分岐
+                    if($run_mode == 2){
+                        //2:Plan確認の場合
 
-                //----------------------------------------------
-                //policyCheckをクリアおよびPolicyCheckがなかった場合
-                //----------------------------------------------
-                if($policy_check_failed_flag == false){
+                        // トレースメッセージ
+                        if ( $log_level === 'DEBUG' ){
+                            // Plan確認のためApplyを実行せず終了します。(作業No.:{})
+                            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-80011", $tgt_execution_no);
+                            require ($root_dir_path . $log_output_php );
+                        }
+
+                        //----------------------------------------------
+                        // RUN_IDに対してApplyを中止
+                        //----------------------------------------------
+                        $statusCode = 0;
+                        $count = 0;
+                        while ($statusCode != 202 && $count < $apiRetryCount){
+                            $apiResponse = apply_discard($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id);
+                            $statusCode = $apiResponse['StatusCode'];
+                            if($statusCode == 202){
+                                //返却StatusCodeが正常なので終了
+                                break;
+                            }else{
+                                //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                sleep(3);
+                                $count++;
+                            }
+                        }
+
+                        //API結果を判定
+                        if($statusCode != 202){
+                            //error_logにメッセージを追記
+                            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141260"); //[API Error]policy-check詳細情報の取得に失敗しました。
+                            LocalLogPrint($error_log, $message);
+
+                        }else{
+                            $responsContents = $apiResponse['ResponsContents'];
+
+                            //ステータスIDをセット
+                            $status_id = 5; //ステータス：完了
+                            $make_zip_flag = true; //ZIPファイル作成フラグをtrue
+                            $status_update_flag = true; //ステータス更新フラグをtrue
+
+                            //apply_logにメッセージを追記
+                            $message = "Plan確認のため、Applyは実行されませんでした。";
+                            LocalLogPrint($apply_log, $message);
+                        }
+
+                    }else{
+                        //1:通常(2以外)の場合
+
+                        // トレースメッセージ
+                        if ( $log_level === 'DEBUG' ){
+                            // Applyを実行します。(作業No.:{})
+                            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-80012", $tgt_execution_no);
+                            require ($root_dir_path . $log_output_php );
+                        }
+
+                        //----------------------------------------------
+                        // RUN_IDに対してApplyを実行
+                        //----------------------------------------------
+                        $statusCode = 0;
+                        $count = 0;
+                        while ($statusCode != 202 && $count < $apiRetryCount){
+                            $apiResponse = apply_execution($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id);
+                            $statusCode = $apiResponse['StatusCode'];
+                            if($statusCode == 202){
+                                //返却StatusCodeが正常なので終了
+                                break;
+                            }else{
+                                //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                sleep(3);
+                                $count++;
+                            }
+                        }
+                        //API結果を判定
+                        if($statusCode != 202){
+                            //error_logにメッセージを追記
+                            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141261"); //[API Error]policy-check詳細情報の取得に失敗しました。
+                            LocalLogPrint($error_log, $message);
+                        }
+                        $responsContents = $apiResponse['ResponsContents'];
+
+                    }
+
+                //apply実行を実施している場合
+                }else{
+                    //apply実行を実施している場合
                     //----------------------------------------------
                     // applyの詳細データを取得(API)
                     //----------------------------------------------
@@ -700,35 +820,26 @@
                     $tfe_apply_log_read_url = $responsContents['data']['attributes']['log-read-url'];
 
                     //----------------------------------------------
+                    // applyのlogファイルを追記
+                    //----------------------------------------------
+                    $tfe_apply_log = file_get_contents($tfe_apply_log_read_url, false, stream_context_create($HttpContext));
+                    $apply_msg = $apply_msg . $tfe_apply_log . "\n";
+                    file_put_contents($apply_log, $apply_msg);
+
+                    //----------------------------------------------
                     // applyの結果判定
                     //----------------------------------------------
                     //失敗
                     if($tfe_apply_status == "errored"){
                         $status_id = 6; //完了(異常)ステータス(6)設定
-                        $make_zip_flag = true;
-                        $status_update_flag = true;
-                        $error_log_flag = true;
-
-                        //----------------------------------------------
-                        // applyのlogファイル(error)を追記
-                        //----------------------------------------------
-                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url, false, stream_context_create($HttpContext));
-                        $error_msg = $error_msg . $apply_log_bar . $tfe_apply_log . "\n";
-                        file_put_contents($error_log, $error_msg);
+                        $make_zip_flag = true; //ZIPファイル作成フラグをtrue
+                        $status_update_flag = true; //ステータス更新フラグをtrue
 
                     //成功
                     }elseif($tfe_apply_status == "finished"){
                         $status_id = 5; //完了ステータス(5)設定
-                        $make_zip_flag = true;
-                        $status_update_flag = true;
-
-                        //----------------------------------------------
-                        // applyのlogファイル(exec)を追記
-                        //----------------------------------------------
-                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url, false, stream_context_create($HttpContext));
-                        $exec_msg = $exec_msg . $apply_log_bar . $tfe_apply_log . "\n";
-                        file_put_contents($exec_log, $exec_msg);
-
+                        $make_zip_flag = true; //ZIPファイル作成フラグをtrue
+                        $status_update_flag = true; //ステータス更新フラグをtrue
 
                         //----------------------------------------------
                         // Stateファイルを取得し格納
@@ -800,6 +911,7 @@
 
                             //ファイルに中身を追記
                             file_put_contents($state_file, $state_file_content, FILE_APPEND);
+
                         }else{
                             //stateファイルの取得に失敗。(作業No:{} FILE:{} LINE:{})
                             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-121050",array($tgt_execution_no, __FILE__ , __LINE__));
@@ -807,64 +919,29 @@
                             $warning_flag = 1;
                         }
 
-
                     //緊急停止
                     }elseif($tfe_run_status == 'canceled' || $tfe_apply_status == "canceled"){
                         $status_id = 8; //緊急停止ステータス(8)設定
                         $make_zip_flag = true;
                         $status_update_flag = true;
 
-                        //----------------------------------------------
-                        // applyのlogファイル(exec)を追記
-                        //----------------------------------------------
-                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url, false, stream_context_create($HttpContext));
-                        $exec_msg = $exec_msg . $apply_log_bar . $tfe_apply_log . "\n";
-                        file_put_contents($exec_log, $exec_msg);
 
-                    //到達不可(plan結果、applyを実行しないと判断された場合)
+                    //到達不可(plan/policy-checkの結果、applyを実行しないと判断された場合)
                     }elseif($tfe_apply_status == "unreachable"){
                         $status_id = 5; //完了ステータス(5)設定
                         $make_zip_flag = true;
                         $status_update_flag = true;
 
                     //進行中
-                    }else{
-                        //----------------------------------------------
-                        // applyのlogファイル(exec)を追記
-                        //----------------------------------------------
-                        $tfe_apply_log = file_get_contents($tfe_apply_log_read_url, false, stream_context_create($HttpContext));
-                        $exec_msg = $exec_msg . $apply_log_bar . $tfe_apply_log . "\n";
-                        file_put_contents($exec_log, $exec_msg);
+                    }elseif($tfe_apply_status == "running"){
+                        $time_limit_check_flag = true; //apply実行中の場合、遅延タイマーチェックフラグをtrueにする
 
-                        //apply実行中の場合、遅延タイマーチェックフラグをtrueにする
-                        $time_limit_check_flag = true;
+                    //待機中(pending)
+                    }else{
+                        //処理を実行しない
                     }
                 }
 
-            //緊急停止
-            }elseif($tfe_run_status == "canceled" || $tfe_plan_status == "canceled"){
-                $status_id = 8; //緊急停止ステータス(8)設定
-                $make_zip_flag = true;
-                $status_update_flag = true;
-
-                //----------------------------------------------
-                // planのlogファイル(exex)を追記
-                //----------------------------------------------
-                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url, false, stream_context_create($HttpContext));
-                $exec_msg = $exec_msg . $plan_log_bar . $tfe_plan_log . "\n";
-                file_put_contents($exec_log, $exec_msg);
-
-            //進行中
-            }else{
-                //----------------------------------------------
-                // planのlogファイル(exec)を追記
-                //----------------------------------------------
-                $tfe_plan_log = file_get_contents($tfe_plan_log_read_url, false, stream_context_create($HttpContext));
-                $exec_msg = $exec_msg . $plan_log_bar . $tfe_plan_log . "\n";
-                file_put_contents($exec_log, $exec_msg);
-
-                //plan実行中の場合、遅延タイマーチェックフラグをtrueにする
-                $time_limit_check_flag = true;
             }
 
             //----------------------------------------------
@@ -872,9 +949,9 @@
             //----------------------------------------------
             if($time_limit_check_flag == true && $status_update_flag == false){
                 $time_limit = $tgt_row['I_TIME_LIMIT'];
-                $now_status = $tgt_row['STATUS_ID'];
+                $current_status = $tgt_row['STATUS_ID'];
                 //ステータスが「実行中」かつ遅延タイマーが設定されているかをチェック
-                if($now_status == 3 && $time_limit != NULL){
+                if($current_status == 3 && $time_limit != NULL){
                     // 開始時刻(「UNIXタイム.マイクロ秒」)を生成
                     $varTimeDotMirco = convFromStrDateToUnixtime($tgt_row['TIME_START'], true );
                     // 開始時刻(マイクロ秒)＋制限時間(分→秒)＝制限時刻(マイクロ秒)
@@ -991,11 +1068,11 @@
                     throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00001000")) );
                 }
 
-                //ステータスが「実行中」「実行中(遅延)」以外の場合のみ終了日時を追加
-                if($status_id == 3 || $status_id == 4){
-                    $time_end = "";
-                }else{
+                //ステータスが「完了」「完了(以上)」の場合のみ終了日時を追加
+                if($status_id == 5 || $status_id == 6){
                     $time_end = "DATETIMEAUTO(6)";
+                }else{
+                    $time_end = "";
                 }
 
                 $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
@@ -1399,6 +1476,7 @@
             fclose($filepointer);
         }
     }
+
 
 
 ?>

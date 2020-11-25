@@ -20,4 +20,5 @@ $ary[10003] = "[{}] END(ERROR)";
 $ary[10004] = "No target record";
 $ary[50001] = "For Host";
 $ary[50002] = "For HostGroup";
+$ary[50003] = "for the history table.";
 ?>

@@ -61,9 +61,7 @@ TERRAFORMインタフェース情報
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102040'));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     //************************************************************************************
@@ -112,6 +110,15 @@ TERRAFORMインタフェース情報
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
+    //************************************************************************************
+    //----パラメータシートの具体値がNULLでも代入値管理に登録するかのフラグ
+    //************************************************************************************
+    $c = new IDColumn('NULL_DATA_HANDLING_FLG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102130"),'B_VALID_INVALID_MASTER','FLAG_ID','FLAG_NAME','', array('OrderByThirdColumn'=>'FLAG_ID'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102140"));
+    $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)
+    $c->setRequired(true);//登録/更新時には、入力必須
+    $table->addColumn($c);
+    //パラメータシートの具体値がNULLでも代入値管理に登録するかのフラグ----
 
 
     $table->fixColumn();

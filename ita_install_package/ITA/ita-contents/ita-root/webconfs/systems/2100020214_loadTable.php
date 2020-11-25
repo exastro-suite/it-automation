@@ -69,9 +69,8 @@ Ansible（Pioneer）代入値自動登録設定
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902003"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     ////////////////////////////////////////////////////////////
     // ColumnGroup:パラメータシート 開始
@@ -249,7 +248,12 @@ Ansible（Pioneer）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902100"),'D_ANS_PNS_CMDB_MENU_LIST','MENU_ID','MENU_PULLDOWN','',array('OrderByThirdColumn'=>'MENU_ID'));
+        $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902100"),
+        'D_CMDB_MENU_LIST_SHEET_TYPE_1_PIONEER',
+        'MENU_ID',
+        'MENU_PULLDOWN',
+        '',
+        array('OrderByThirdColumn'=>'MENU_ID'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902101"));
 
         $c->setHiddenMainTableColumn(true); //更新対象カラム
@@ -268,7 +272,7 @@ Ansible（Pioneer）代入値自動登録設定
         $c->setEvent('update_table', 'onchange', 'menu_upd');
         $c->setEvent('register_table', 'onchange', 'menu_reg');
 
-        $c->setJournalTableOfMaster('D_ANS_PNS_CMDB_MENU_LIST_JNL');
+        $c->setJournalTableOfMaster('D_CMDB_MENU_LIST_SHEET_TYPE_1_PIONEER_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('MENU_ID');
@@ -305,7 +309,12 @@ Ansible（Pioneer）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902120"),'D_ANS_PNS_CMDB_MENU_COLUMN','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
+        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902120"),
+        'D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER',
+        'COLUMN_LIST_ID',
+        'COL_TITLE',
+        '',
+        array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902121"));
 
@@ -332,8 +341,9 @@ Ansible（Pioneer）代入値自動登録設定
             $strQuery = "SELECT "
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
+                       .",TAB_1.ACCESS_AUTH    "
                        ."FROM "
-                       ." D_ANS_PNS_CMDB_MENU_COLUMN TAB_1 "
+                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -342,17 +352,35 @@ Ansible（Pioneer）代入値自動登録設定
             $aryForBind['MENU_ID'] = $strMenuIDNumeric;
 
             if( 0 < strlen($strMenuIDNumeric) ){
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
+
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
-                        $aryDataSet[]= $row;
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[]= $row;
+                            }
+                        }
                     }
                     unset($objQuery);
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
             $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -376,8 +404,9 @@ Ansible（Pioneer）代入値自動登録設定
             $strQuery = "SELECT "
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
+                       .",TAB_1.ACCESS_AUTH    "
                        ."FROM "
-                       ." D_ANS_PNS_CMDB_MENU_COLUMN TAB_1 "
+                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -386,17 +415,35 @@ Ansible（Pioneer）代入値自動登録設定
             $aryForBind['MENU_ID'] = $strMenuIDNumeric;
 
             if( 0 < strlen($strMenuIDNumeric) ){
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
+    
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
-                        $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                            }
+                        }
                     }
                     unset($objQuery);
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
             $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -422,7 +469,7 @@ Ansible（Pioneer）代入値自動登録設定
         $c->setOutputType('update_table',$objOTForUpd);
         $c->setOutputType('register_table',$objOTForReg);
 
-        $c->setJournalTableOfMaster('D_ANS_PNS_CMDB_MENU_COLUMN_JNL');
+        $c->setJournalTableOfMaster('D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
@@ -443,10 +490,15 @@ Ansible（Pioneer）代入値自動登録設定
         ////////////////////////////////////////////////////////////
         // Excel/CSV/RestAPI 用カラムタイトル名
 
-        $c = new IDColumn('REST_COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902125"),'D_ANS_PNS_CMDB_MG_MU_COL_LIST','COLUMN_LIST_ID','MENU_COL_TITLE_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MENU_ID','COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1,ADD_SELECT_2') );
+        $c = new IDColumn('REST_COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902125"),
+        'D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_1_PIONEER',
+        'COLUMN_LIST_ID',
+        'MENU_COL_TITLE_PULLDOWN',
+        '',
+        array('SELECT_ADD_FOR_ORDER'=>array('MENU_ID','COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1,ADD_SELECT_2') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902126"));
-        $c->setJournalTableOfMaster('D_ANS_PNS_CMDB_MG_MU_COL_LIST_JNL');
+        $c->setJournalTableOfMaster('D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_1_PIONEER_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
@@ -682,6 +734,7 @@ Ansible（Pioneer）代入値自動登録設定
             $strQuery = "SELECT "
                        ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                        .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                       .",TAB_1.ACCESS_AUTH   "
                        ."FROM "
                        ." D_ANS_PNS_PTN_VARS_LINK_VFP TAB_1 "
                        ."WHERE "
@@ -692,17 +745,35 @@ Ansible（Pioneer）代入値自動登録設定
             $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
             if( 0 < strlen($strPatternIdNumeric) ){
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
+
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
-                        $aryDataSet[]= $row;
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[]= $row;
+                            }
+                        }
                     }
                     unset($objQuery);
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
             $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -727,6 +798,7 @@ Ansible（Pioneer）代入値自動登録設定
             $strQuery = "SELECT "
                        ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                        .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                       .",TAB_1.ACCESS_AUTH   "
                        ."FROM "
                        ." D_ANS_PNS_PTN_VARS_LINK_VFP TAB_1 "
                        ."WHERE "
@@ -737,17 +809,35 @@ Ansible（Pioneer）代入値自動登録設定
             $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
             if( 0 < strlen($strPatternIdNumeric) ){
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
+
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
-                        $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                            }
+                        }
                     }
                     unset($objQuery);
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
             $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -884,6 +974,7 @@ Ansible（Pioneer）代入値自動登録設定
             $strQuery = "SELECT "
                        ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                        .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                       .",TAB_1.ACCESS_AUTH "
                        ."FROM "
                        ." D_ANS_PNS_PTN_VARS_LINK_VFP TAB_1 "
                        ."WHERE "
@@ -894,17 +985,35 @@ Ansible（Pioneer）代入値自動登録設定
             $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
             if( 0 < strlen($strPatternIdNumeric) ){
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
+    
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
-                        $aryDataSet[]= $row;
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[]= $row;
+                            }
+                        }
                     }
                     unset($objQuery);
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
             $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -929,6 +1038,7 @@ Ansible（Pioneer）代入値自動登録設定
             $strQuery = "SELECT "
                        ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                        .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                       .",TAB_1.ACCESS_AUTH "
                        ."FROM "
                        ." D_ANS_PNS_PTN_VARS_LINK_VFP TAB_1 "
                        ."WHERE "
@@ -939,17 +1049,35 @@ Ansible（Pioneer）代入値自動登録設定
             $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
             if( 0 < strlen($strPatternIdNumeric) ){
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    $intErrorType = 500;
+                    $retBool = false;
+                }
+    
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
-                        $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        // レコード毎のアクセス権を判定
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                            break;
+                        }else{
+                            if($permission === true){
+                                $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                            }
+                        }
                     }
                     unset($objQuery);
                     $retBool = true;
                 }else{
                     $intErrorType = 500;
-                    $intRowLength = -1;
+                    $retBool = false;
                 }
             }
             $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -1219,13 +1347,13 @@ Ansible（Pioneer）代入値自動登録設定
                          ."    SELECT                                         "
                          ."      COUNT(*)                                     "
                          ."    FROM                                           "
-                         ."      D_ANS_PNS_CMDB_MENU_LIST TBL_B               "
+                         ."      D_CMDB_MENU_LIST_SHEET_TYPE_1_PIONEER TBL_B               "
                          ."    WHERE                                          "
                          ."      TBL_B.MENU_ID      = TBL_A.MENU_ID AND       "
                          ."      TBL_B.DISUSE_FLAG  = '0'                     "
                          ."  ) AS MENU_CNT                                    "
                          ."FROM                                               "
-                         ."  D_ANS_PNS_CMDB_MENU_COLUMN TBL_A                 "
+                         ."  D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER TBL_A                 "
                          ."WHERE                                              "
                          ."  TBL_A.COLUMN_LIST_ID  = :COLUMN_LIST_ID   AND    "
                          ."  TBL_A.DISUSE_FLAG     = '0'                      ";
@@ -1440,14 +1568,14 @@ Ansible（Pioneer）代入値自動登録設定
                      ."     SELECT  "
                      ."       COUNT(*) "
                      ."     FROM "
-                     ."       D_ANS_PNS_CMDB_MENU_COLUMN TBL_B "
+                     ."       D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER TBL_B "
                      ."     WHERE "
                      ."       TBL_B.MENU_ID        = :MENU_ID          AND "
                      ."       TBL_B.COLUMN_LIST_ID = :COLUMN_LIST_ID   AND "
                      ."       TBL_B.DISUSE_FLAG  = '0' "
                      ."   ) AS COLUMN_CNT "
                      ." FROM "
-                     ."   D_ANS_PNS_CMDB_MENU_LIST TBL_A "
+                     ."   D_CMDB_MENU_LIST_SHEET_TYPE_1_PIONEER TBL_A "
                      ." WHERE "
                      ."   TBL_A.MENU_ID      = :MENU_ID   AND "
                      ."   TBL_A.DISUSE_FLAG  = '0' ";

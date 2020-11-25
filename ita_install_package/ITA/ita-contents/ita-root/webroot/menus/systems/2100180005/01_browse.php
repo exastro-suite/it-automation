@@ -38,7 +38,61 @@
         
         // browse系共通ロジックパーツ01
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_browse_01.php");
-        
+
+        //アクセス権を判定
+        if( array_key_exists( "conductor_instance_id", $_GET ) === true ){
+            // クエリからconductor_instance_idを取得
+            $conductor_instance_id = $_GET["conductor_instance_id"];
+            
+            // 整数の場合のみ判定
+            $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
+            if( $objIntNumVali->isValid($conductor_instance_id) === true ){
+                // SQL生成
+                $sql = "SELECT  ACCESS_AUTH
+                        FROM    C_CONDUCTOR_INSTANCE_MNG
+                        WHERE   DISUSE_FLAG = '0'
+                        AND     CONDUCTOR_INSTANCE_NO = :CONDUCTOR_INSTANCE_NO_BV ";
+                
+                $objQuery = $g['objDBCA']->sqlPrepare($sql);
+                
+                if($objQuery->getStatus()===false){
+                    // 例外処理へ
+                    throw new Exception();
+                }
+                
+                $objQuery->sqlBind( array( 'CONDUCTOR_INSTANCE_NO_BV'=>$conductor_instance_id ) );
+                
+                $r = $objQuery->sqlExecute();
+                
+                if (!$r){
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $obj->getAccountInfo($g['login_id']);
+                if($ret === false) {
+                    // 例外処理へ
+                    throw new Exception();
+                }
+
+                while ( $row = $objQuery->resultFetch() ){
+                    // アクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        // 例外処理へ
+                        throw new Exception();
+                    } else {
+                        if($permission === false) {
+                            //アクセス権が無いため、例外処理へ
+                            throw new Exception();
+                        }
+                    }
+                }
+            }
+        }
+
     }
     catch (Exception $e){
         // DBアクセス例外処理パーツ
@@ -52,9 +106,7 @@
     $strCmdWordAreaClose = $objMTS->getSomeMessage("ITAWDCH-STD-252");
     
     // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
-    $timeStamp_editor_common_style_css=filemtime("$root_dir_path/webroot/common/css/editor_common.css");
     $timeStamp_editor_conductor_style_css=filemtime("$root_dir_path/webroot/common/css/editor_conductor.css");
-    $timeStamp_editor_common_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_common.js");
     $timeStamp_editor_conductor_js=filemtime("$root_dir_path/webroot/common/javascripts/editor_conductor.js");
     $timeStamp_00_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/00_javascript.js");
 
@@ -62,11 +114,9 @@ print <<< EOD
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
     
-    <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_common.js?{$timeStamp_editor_common_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_conductor.js?{$timeStamp_editor_conductor_js}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/00_javascript.js?{$timeStamp_00_javascript_js}"></script>
 
-    <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_common.css?{$timeStamp_editor_common_style_css}">
     <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/editor_conductor.css?{$timeStamp_editor_conductor_style_css}">
     <style>
       #conductor-parameter { height: 70%; }
@@ -209,7 +259,7 @@ EOD;
             
               <div class="editor-tab-menu">
                 <ul class="editor-tab-menu-list">
-                  <li class="editor-tab-menu-item" data-tab="conductor">Conductor</li>
+                  <li class="editor-tab-menu-item" data-tab="conductor">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309027")}</li>
                   <li class="editor-tab-menu-item" data-tab="node">Node</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
@@ -224,10 +274,6 @@ EOD;
                         <tr>
                           <th class="panel-th">Conductor instance ID :</th>
                           <td class="panel-td"><span id="conductor-instance-id" class="panel-span"></span></td>
-                        </tr>
-                        <tr>
-                          <th class="panel-th">Conductor ID :</th>
-                          <td class="panel-td"><span id="conductor-class-id" class="panel-span"></span></td>
                         </tr>
                         <tr>
                           <th class="panel-th">Conductor name :</th>

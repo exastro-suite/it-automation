@@ -189,7 +189,32 @@
                     $boolZenHanDistinct = $objTable->getFormatter($strFormatterId)->getGeneValue("zenHanDistinct");
                     if($ordMode == 0){
                         //[ブラウザ]
+                        //カラム名がCOL_IDSOP_xからDBのカラム名に置換される
                         hiddenColumnIdDecode($objTable,$reqUpdateData);
+                        // ---- RBAC対応
+                        if($objTable->getAccessAuth() === true) {
+                            $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                            if(array_key_exists($AccessAuthColumnName,$reqUpdateData)) {
+                                $RoleNameString   = $reqUpdateData[$AccessAuthColumnName];
+                                $RoleIDString = "";
+                                if(strlen($RoleNameString) != 0) {
+                                    // ロールID文字列のアクセス権をロール名称の文字列に変換
+                                    // 廃止ロールはカットする。
+                                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                    $RoleIDString = $obj->getRoleNameStringToRoleIDString($g['login_id'],$RoleNameString,false);  // 廃止を除く
+                                    unset($obj);
+                                }
+                                if($RoleIDString === false) {
+                                    $message = sprintf("[%s:%s]getRoleNameStringToRoleIDString Failed.",basename(__FILE__),__LINE__);
+                                    web_log($message);
+                                    $intErrorType = 500;
+                                    throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                }
+                                // 登録するアクセス権をロール名称の文字列に設定
+                                $reqUpdateData[$AccessAuthColumnName] = $RoleIDString;
+                            }
+                        }
+                        // RBAC対応 ----
                         $varCommitSpan = 1;
                     }else if( $ordMode == 1 || $ordMode == 2 || $ordMode == 3 ){
                         //[EXCEL/CSV/JSON]

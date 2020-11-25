@@ -193,7 +193,7 @@ function printConductorInfoRegConductor($fxVarsIntConductorClassId){
         require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
         $objOLA = new OrchestratorLinkAgent($g['objMTS'],$g['objDBCA']);
 
-        $aryRetBody = $objOLA->convertConductorClassJson($fxVarsIntConductorClassId);
+        $aryRetBody = $objOLA->convertConductorClassJson($fxVarsIntConductorClassId,1);
         
         if( $aryRetBody[1]!==null ){
             // 例外処理へ
@@ -305,4 +305,82 @@ function printConductorListInfoRegConductor(){
     return $arrayResult;
 }
 
+
+//CALLノード用のSymphonyリスト用の取得
+function printConductorListInfoRegSymphony(){
+    global $g;
+
+    // 各種ローカル定数を定義
+    $intControlDebugLevel01 = 250;
+    
+    $arrayResult = array();
+    $strResultCode = "";
+    $strDetailCode = "";
+    $intOperationNo = "";
+    $strStreamOfOperation = "";
+    $strExpectedErrMsgBodyForUI = "";
+    
+    //----オーケストレータ別の設定記述
+    //オーケストレータ別の設定記述----
+    
+    // 各種ローカル変数を定義
+    
+    $intErrorType = null;
+    $intDetailType = null;
+    
+    $strSysErrMsgBody = "";
+    $strErrStepIdInFx = "";
+    
+    $strExpectedErrMsgBodyForUI = "";
+    
+    $strFxName = __FUNCTION__;
+    dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-1",__FILE__),$intControlDebugLevel01);
+    
+    // 処理開始
+    try{
+        require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
+        $objOLA = new OrchestratorLinkAgent($g['objMTS'],$g['objDBCA']);
+
+        $aryRetBody = $objOLA->getInfoOfSymphonyList();
+        
+        if( $aryRetBody[1]!==null ){
+            // 例外処理へ
+            $strErrStepIdInFx="00001000";
+            $intErrorType = $aryRetBody[1];
+            if( $intErrorType == 2 || $intErrorType == 3 ){
+                $strExpectedErrMsgBodyForUI = $aryRetBody[5];
+            }
+            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
+        $aryRowOfConductorTable=array();
+        foreach ($aryRetBody[4] as $key => $value) {
+            $aryRowOfConductorTable[]=array(
+                'SYMPHONY_CLASS_NO' =>  htmlspecialchars($value['SYMPHONY_CLASS_NO'])
+                ,'SYMPHONY_NAME'   =>  htmlspecialchars($value['SYMPHONY_NAME'])
+
+            );
+            
+        }
+        $strStreamOfConductor = json_encode($aryRowOfConductorTable,JSON_UNESCAPED_UNICODE);
+
+    }
+    catch (Exception $e){
+        // エラーフラグをON
+        if( $intErrorType===null ) $intErrorType = 500;
+        
+        $tmpErrMsgBody = $e->getMessage();
+        if( 500 <= $intErrorType ) $strSysErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
+    }
+    $strResultCode = sprintf("%03d", $intErrorType);
+    $strDetailCode = sprintf("%03d", $intDetailType);
+    $arrayResult = array($strResultCode,
+                         $strDetailCode,
+                         $strStreamOfConductor,
+                         $strExpectedErrMsgBodyForUI
+                         );
+    dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+    return $arrayResult;
+}
 ?>

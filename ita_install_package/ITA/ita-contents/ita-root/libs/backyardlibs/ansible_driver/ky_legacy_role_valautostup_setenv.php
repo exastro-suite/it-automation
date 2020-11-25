@@ -88,6 +88,7 @@
         "KEY_VARS_LINK_ID"=>""            ,
         "KEY_COL_SEQ_COMBINATION_ID"=>""  ,
         "KEY_ASSIGN_SEQ"=>""              ,
+        "ACCESS_AUTH"=>""                 , // RBAC
         "DISP_SEQ"=>""                    ,
         "DISUSE_FLAG"=>""                 ,
         "NOTE"=>""                        ,
@@ -156,8 +157,10 @@
         "VARS_LINK_ID"=>""            ,
         "COL_SEQ_COMBINATION_ID"=>""  ,
         "VARS_ENTRY"=>""              ,
+        "SENSITIVE_FLAG"=>""          ,
         "VARS_ENTRY_USE_TPFVARS"=>""  ,
         "ASSIGN_SEQ"=>""              ,
+        "ACCESS_AUTH"=>""                 , // RBAC
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
         "NOTE"=>""                    ,
@@ -183,6 +186,7 @@
         "PATTERN_ID"=>""              ,
         "SYSTEM_ID"=>""               ,
         "DISP_SEQ"=>""                ,
+        "ACCESS_AUTH"=>""                 , // RBAC
         "DISUSE_FLAG"=>""             ,
         "NOTE"=>""                    ,
         "LAST_UPDATE_TIMESTAMP"=>""   ,

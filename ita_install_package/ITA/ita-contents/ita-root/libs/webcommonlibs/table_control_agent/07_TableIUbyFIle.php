@@ -1259,21 +1259,23 @@
                     //JSONモード時
                     if( $intModeFileCh == 2 ){                        
                         foreach ($tmparrRetResults as $tmpRetResult) {
-                            $exeRegisterData=$tmpRetResult[99]['exeData'];
-                            $reqRegisterData=$tmpRetResult[99]['reqData'];
-                            $aryVariant=$tmpRetResult[99]['aryVariant'];
-                            $arrayObjColumn = $tmpRetResult[99]['arrayObjColumn'];
-                            unset($tmpRetResult[99]);
+                            if( isset( $tmpRetResult[99] ) ){
+                                $exeRegisterData=$tmpRetResult[99]['exeData'];
+                                $reqRegisterData=$tmpRetResult[99]['reqData'];
+                                $aryVariant=$tmpRetResult[99]['aryVariant'];
+                                $arrayObjColumn = $tmpRetResult[99]['arrayObjColumn'];
+                                unset($tmpRetResult[99]);
 
-                            //DB更新後処理
-                            foreach($arrayObjColumn as $objColumn){
-                                $arrayTmp = $objColumn->afterTableIUDAction($exeRegisterData, $reqRegisterData, $aryVariant);
-                                if($arrayTmp[0]===false){
-                                    $intErrorType = $arrayTmp[1];
-                                    $error_str = $arrayTmp[3];
-                                    $strErrorBuf = $arrayTmp[4];
-                                    throw new Exception( '00001900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                                }  
+                                //DB更新後処理
+                                foreach($arrayObjColumn as $objColumn){
+                                    $arrayTmp = $objColumn->afterTableIUDAction($exeRegisterData, $reqRegisterData, $aryVariant);
+                                    if($arrayTmp[0]===false){
+                                        $intErrorType = $arrayTmp[1];
+                                        $error_str = $arrayTmp[3];
+                                        $strErrorBuf = $arrayTmp[4];
+                                        throw new Exception( '00001900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    }  
+                                }                                
                             }
                         }                   
                     }

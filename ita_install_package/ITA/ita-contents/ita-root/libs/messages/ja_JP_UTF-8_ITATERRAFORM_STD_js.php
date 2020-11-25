@@ -39,4 +39,13 @@ $ary["ITATERRAFORM-100019"] = "Terraform Enterpriseからの削除に失敗し�
 $ary["ITATERRAFORM-110001"] = "緊急停止してよろしいですか？";
 $ary["ITATERRAFORM-110002"] = "予約を取り消してよろしいですか？";
 $ary["ITATERRAFORM-110003"] = "作業管理リストから作業No.を選択して下さい。";
+$ary["ITATERRAFORM-100021"] = "Terraform Enterpriseから{}を削除しました。";
+$ary["ITATERRAFORM-100022"] = "Terraform Enterpriseから{}を削除できませんでした。";
+$ary["ITATERRAFORM-100023"] = "{}を{}から切り離しました。";
+$ary["ITATERRAFORM-100024"] = "{}を{}からの切り離しに失敗しました。";
+$ary["ITATERRAFORM-100025"] = "{}をTerraform Enterpriseから削除します。削除されたOrganizationは元に戻せません。";
+$ary["ITATERRAFORM-100026"] = "{}をTerraform Enterpriseから削除します。削除されたWorkspaceは元に戻せません。";
+$ary["ITATERRAFORM-100027"] = "{}をTerraform Enterpriseから削除します。削除されたPolicyは元に戻せません。";
+$ary["ITATERRAFORM-100028"] = "{}をTerraform Enterpriseから削除します。削除されたPolicySetは元に戻せません。";
+$ary["ITATERRAFORM-100029"] = "{}を{}から切り離します。";
 ?>

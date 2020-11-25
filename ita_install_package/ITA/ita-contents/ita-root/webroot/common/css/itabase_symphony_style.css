@@ -806,8 +806,11 @@ border-top: none;border-radius: 0 0 4px 4px;
 	width: 64px;
 	text-align: center;
 }
+#symphony_header .sub1 .heightAndWidthFixed01 {
+  margin-top: 8px;
+}
 #symphony_header .sub1 .heightAndWidthFixed01:first-child {
-	margin-bottom: 8px;
+	margin-top: 0;
 	line-height: 24px;
 }
 #symphony_header .sub1 .heightAndWidthFixed01 label,
@@ -830,7 +833,7 @@ border-top: none;border-radius: 0 0 4px 4px;
 #symphony_header .sub3 label {
 	width: 100%;
 }
-#symphony_header .sub1 .heightAndWidthFixed01 span {
+#symphony_header .sub1 .heightAndWidthFixed01 > span {
 	display: inline-block;
 	vertical-align: bottom;
 	width: calc( 100% - 165px );
@@ -841,12 +844,52 @@ border-top: none;border-radius: 0 0 4px 4px;
 	font-size: 12px;
 	line-height: 24px;
 }
-#symphony_header .sub1 .heightAndWidthFixed01 span input {
+#symphony_header .sub1 .heightAndWidthFixed01 > span input {
 	width: 100%;
     height: 24px;
     padding: 0 0.5em;
     border-radius: 2px;
     border: 1px solid #AAA;
+}
+#print_symphony_role::after {
+content: '';
+display: table;
+clear: both;
+}
+#print_symphony_role .role_number {
+float: left;
+overflow: auto;
+max-height: 96px;
+white-space: normal;
+word-break: break-all;
+}
+#print_symphony_role .role_select_button {
+float: right;
+min-width: auto;
+height: 24px; min-height: auto;
+margin: 0; padding: 0 0 2px;
+border: none;
+outline: none;
+cursor: pointer;
+}
+#print_symphony_role .role_select_button > span {
+display: block;
+height: 22px;
+padding: 0 8px;
+background-color: #FF821E;
+border-radius: 4px;
+box-shadow: 0 2px 0 #B25B15;
+line-height: 22px;
+color: #FFFFFF;
+}
+#print_symphony_role .role_select_button:hover > span {
+transform: translateY(1px);
+background-color: #FF640A;
+box-shadow: 0 1px 0 #B24607;
+}
+#print_symphony_role .role_select_button:active > span {
+transform: translateY(2px);
+box-shadow: none;
 }
 
 #print_symphony_id {

@@ -36,6 +36,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102704"));
 
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     // メニューグループ
     $c = new IDColumn('MENU_GROUP_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102705"),'A_MENU_GROUP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME','');

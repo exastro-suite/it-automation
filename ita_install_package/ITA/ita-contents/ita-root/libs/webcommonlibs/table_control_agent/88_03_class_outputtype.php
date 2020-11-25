@@ -321,6 +321,8 @@ class OutputType {
 	}
 
 	//NEW[34]
+        //表示ファイルのプルダウンに表示するデータを取得
+	// OutputType Class
 	public function getFADSelectList(&$aryVariant=array(), &$arySetting=array(), $aryOverride=array()){
 		$retBool = false;
 		$intErrorType = null;
@@ -340,7 +342,14 @@ class OutputType {
 
 				$objColumn = $this->objColumn;
 				$objTable = $this->objColumn->getTable();
-
+                                // ---- RBAC対応
+                                $AccessAuthColumn_flag = false;
+                                if($objColumn->getID() == $objTable->getAccessAuthColumnName()) {
+                                    if($objTable->getAccessAuth() === true) {
+                                        $AccessAuthColumn_flag = true;
+                                    }
+                                }
+                                // RBAC対応 ----
 				$objFocusCF = $this->getBody();
 				$strFADMaxWidthOfSelectTag = $objFocusCF->getFADMaxWidthOfSelectTag();
 				$strFADClassOfSelectTag = $objFocusCF->getFADClassOfSelectTag();
@@ -351,7 +360,7 @@ class OutputType {
 				$strTableBody = $objTable->getDBMainTableBody();
 
 				if( $boolExecute===true ){
-					$aryRetBody = $objColumn->getAddSelectTagQuery($strTableBody, $strWhereAddBody);
+					$aryRetBody = $objColumn->getAddSelectTagQuery($objTable, $strTableBody, $strWhereAddBody);
 					if( $aryRetBody[1]!==null ){
 						$boolExecute = false;
 						$intErrorType = $aryRetBody[1];
@@ -392,15 +401,34 @@ class OutputType {
 				if( $boolExecute===true ){
 					$arraySelect = array();
 					$dlcCounter1 = 0;
-					//
+					$chkobj = null; // RBAC対応
 					if( $selectPrintType===1 ){
 						//----DB内値と表示値が食い違う場合
 						
 						//----最終更新日時
 						while ( $row = $objQuery->resultFetch() ){
+							// ---- RBAC対応
+			                                // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
+							list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+							if($ret === false) {
+								$retBool = false;
+								$intErrorType = 501;
+								$message = sprintf("[%s:%s]chkTargetRecodePermission is failed.",basename(__FILE__),__LINE__);
+								web_log($message);
+								throw new Exception( '00010800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+							}
+							if($permission === false) {
+								// アクセス権がないので処理対象から外す
+								continue;
+contionue;
+							}
+			                                // 対象レコードのACCESS_AUTHカラムでアクセス権を判定 ----
+							//  RBAC対応 ----
+
 							// ----ここから結果データ作成
 							$dlcCounter1 += 1;
 							
+
 							$tempValue1 = $row['KEY_COLUMN'];
 							
 							if(0 < strlen($tempValue1)){
@@ -409,16 +437,17 @@ class OutputType {
 								
 								$valueDispBody = $row['DISP_COLUMN'];
 								
-                                //----date型の型変換
-                                if("IDColumn" === get_class($objColumn) && $objColumn->getDateFormat() !== null){
-                                    $valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
-                                }
-                                //date型の型変換----
+								//----date型の型変換
+								if("IDColumn" === get_class($objColumn) && $objColumn->getDateFormat() !== null){
+									$valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
+								}
+								//date型の型変換----
 
 								$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody);
 							}
 							// ここまで結果データ作成----
 						}
+						// RBAC対応 ----
 						
 						//最終更新日時----
 						
@@ -429,10 +458,47 @@ class OutputType {
 						//----その他一般[IDcolumnを想定しない。TextColumnが基本的な処理対象]
 						//
 						while ( $row = $objQuery->resultFetch() ){
+							// ---- RBAC対応
+			                                // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
+							list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+							if($ret === false) {
+								$retBool = false;
+								$intErrorType = 501;
+								$message = sprintf("[%s:%s]chkTargetRecodePermission is faile",basename(__FILE__),__LINE__);
+								web_log($message);
+								throw new Exception( '00010800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+							}
+							if($permission === false) {
+								// アクセス権がないので処理対象から外す
+								continue;
+							}
+			                                // 対象レコードのACCESS_AUTHカラムでアクセス権を判定 ----
+							//  RBAC対応 ----
+
 							// ----ここから結果データ作成
 							
 							$dlcCounter1 += 1;
 							
+							// ---- RBAC対応
+                                                        if($AccessAuthColumn_flag === true) {
+                                                            // ---- アクセス権カラムの場合にロールIDからRole名称に変更
+                                                            // 廃止されているロールはID変換失敗で表示
+                                                            global $g;
+                                                            $obj = new RoleBasedAccessControl($g['objDBCA']); 
+                                                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$row['KEY_COLUMN'],true);  // 廃止を含む
+                                                            unset($obj);
+                                                            if($RoleNameString === false) {
+								$retBool = false;
+								$intErrorType = 501;
+								$message = sprintf("[%s:%s]getRoleIDStringToRoleNameString is failed.",basename(__FILE__),__LINE__);
+								web_log($message);
+								throw new Exception( '00010800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                                            }
+                                                            $row['KEY_COLUMN'] = $RoleNameString;
+                                                            // アクセス権カラムの場合にロールIDからRole名称に変更 ----
+                                                        }
+							// RBAC対応 ----
+
 							$tempValue1 = $row['KEY_COLUMN'];
 							
 							if(0 < strlen($tempValue1)){
@@ -536,6 +602,8 @@ class VariantOutputType extends OutputType {
 		return $strSetValue;
 	}
 
+        // 表示ファイルのプルダウンに表示するデータを取得
+	// VariantOutputType class
 	function getFADSelectList(&$aryVariant=array(), &$arySetting=array(), $aryOverride=array()){
 		$objFunction = $this->getFunctionForGetFADSelectList();
 		if( is_callable($objFunction) ){

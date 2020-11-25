@@ -847,10 +847,21 @@ EOD;
         $checkFormatterId = $aryRetBody[1];
         $objListFormatter = $aryRetBody[2];
 
-        $query = generateSelectSql2(1, $objTable);
+
+        // RBAC対応 ----
+        // ACCESS_AUTHカラムの有無を判定----
+        if($objTable->getAccessAuth()) {
+            $sql_type = 3;   // ACCESS_AUTHカラムあり
+        } else {
+            $sql_type = 1;   // ACCESS_AUTHカラムなし
+        }
+        // ----ACCESS_AUTHカラムの有無を判定
+        $query = generateSelectSql2($sql_type, $objTable); 
+        // ----RBAC対応
+        
         $aryForBind = $objTable->getFilterArray(true);
         
-        $arySettingOnLF = $objListFormatter->getGeneValue("countTableRowLength");
+        $arySettingOnLF = $objListFormatter->getGeneValue("countTableRowLength"); /* #28　OK */
         
         if( array_key_exists("countTableRowLength",$arySetting)===true ){
             $tmpArray = $arySettingOnLF["countTableRowLength"];
@@ -872,13 +883,21 @@ EOD;
         $aryRetBody = singleSQLExecuteAgent($query, $aryForBind, $strFxName);
         if( $aryRetBody[0] === true ){
             $objQuery = $aryRetBody[1];
-            $row = $objQuery->resultFetch();
+            // RBAC対応 ----
+            // ACCESS_AUTHカラムの有無を判定し対象レコードをカウント
+            $ret = getTargetRecodeCount($objTable,$objQuery,$intRowLength);
             unset($objQuery);
-            $intRowLength = $row['REC_CNT'];
+            if($ret === false) {
+                $intErrorType = 500;
+                $intRowLength = -1;
+                web_log( '00010701-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            // ----RBAC対応
         }
         else{
             $intErrorType = 500;
             $intRowLength = -1;
+            web_log( '00010701-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
         
 
@@ -1321,22 +1340,35 @@ EOD;
     }
 
     /* ----クラスIDColumn用：登録および更新「参照先テーブル($masterTableBody)から、IDと$columnName列の項目のペアを配列で返す」*/
-    function createMasterTableArrayForInput($masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseFlagColumnOfMasterTable, $aryEtcetera=array()){
+    function createMasterTableArrayForInput($masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseFlagColumnOfMasterTable, $aryEtcetera=array(), $CheckAccessAuth){    // RBAC対応
         global $g;
         
         $intControlDebugLevel01=250;
         $strFxName = __FUNCTION__;
         
-        $query = genSQLforGetMasValsForInput($masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseFlagColumnOfMasterTable, $aryEtcetera);
+        $query = genSQLforGetMasValsForInput($masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseFlagColumnOfMasterTable, $aryEtcetera, $CheckAccessAuth);   // RBAC対応
         
         $data = array();
         
         $retArray = singleSQLExecuteAgent($query, array(), $strFxName);
         if( $retArray[0] === true ){
             $objQuery = $retArray[1];
+	    // RBAC対応 ----
+	    $chkobj   = null;
+	    // プルダウン(IDColumn)に表示するデータをACCESS_AUTHで絞り込む
             while( $row = $objQuery->resultFetch() ){
-                $data[$row['C1']] = $row['C2'];
+                //  対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                list($ret,$permission) = chkTargetRecodePermission($CheckAccessAuth,$chkobj,$row);
+                if($ret === false) {
+                    $intErrorType = 501;
+                    throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                }
+                if($permission === true) {
+                    $data[$row['C1']] = $row['C2'];
+                } else {
+                }
             }
+            // ---- RBAC対応
             unset($objQuery);
         }
         else{
@@ -1347,32 +1379,51 @@ EOD;
 
     /* ----クラスIDColumn用：検索用（検索SELECT-TAG生成用）「参照先テーブル($masterTableBody)から、読書対象テーブル($mainTableBody)に使われているIDのみの配列を返す。*/
     function createMasterTableDistinctArray(
-        $mainTableBody, $keyColumnOfMainTable, $disuseColumnOfMainTable
+          $mainTableBody, $keyColumnOfMainTable, $disuseColumnOfMainTable
         , $masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseColumnOfMasterTable
-        , $aryEtcetera=array()){
+        , $aryEtcetera=array(), $AccessAuthColumUse, $AccessAuthColumName){  // RBAC対応----
         global $g;
         
         $intControlDebugLevel01=250;
         $strFxName = __FUNCTION__;
         
-        $query = genSQLforGetMasValsInMainTbl($mainTableBody, $keyColumnOfMainTable, $disuseColumnOfMainTable
-                                              ,$masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseColumnOfMasterTable
-                                              , $aryEtcetera);
+        $query = genSQLforGetMasValsInMainTbl($mainTableBody,
+                                              $keyColumnOfMainTable, 
+                                              $disuseColumnOfMainTable,
+                                              $masterTableBody, 
+                                              $keyColumnOfMasterTable, 
+                                              $dispColumnOfMasterTable,
+                                              $disuseColumnOfMasterTable, 
+                                              $AccessAuthColumUse,
+                                              $AccessAuthColumName,
+                                              $aryEtcetera); // RBAC対応----
         
         $data = array();
         
         $retArray = singleSQLExecuteAgent($query, array(), $strFxName);
         if( $retArray[0] === true ){
             $objQuery = $retArray[1];
+            // RBAC対応 ----
+            $chkobj   = null;
+            // 検索用データをACCESS_AUTHで絞り込む
             while( $row = $objQuery->resultFetch() ){
-                $data[$row['C1']] = $row['C2'];
+                //  対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                list($ret,$permission) = chkTargetRecodePermission($AccessAuthColumUse,$chkobj,$row);
+                if($ret === false) {
+                    $intErrorType = 501;
+                    throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                }
+                if($permission === true) {
+                    $data[$row['C1']] = $row['C2'];
+                } else {
+                }
             }
             unset($objQuery);
+            // ---- RBAC対応
         }
         else{
             $data = null;
         }
-        unset($objQuery);
 
         return $data;
     }
@@ -1902,6 +1953,42 @@ EOD;
     }
     //UTN[登録]----
 
+    //----UTN[RBAC対応の登録]
+    function generateRegisterSQLforRBAC(
+        $excRegDataArray
+        ,$arrayObjColumn
+        ,$strInsertTargetTableId
+        ,$strDBMainTableHiddenId){
+        //----この中で更新対象追加は、自動のもの、のみ、とすること。
+        global $g;
+
+        if( 0 < strlen($strDBMainTableHiddenId) ){
+            $strInsertTargetTableId = $strDBMainTableHiddenId;
+        }
+
+        $arrayInsColId = array();
+        $arrayInsValue = array();
+
+        foreach($excRegDataArray as $key => $value){
+            if( is_array($value) === true ){
+                continue;
+            }
+            $objColumn = $arrayObjColumn[$key];
+
+            $arrayInsColId[] = "{$key}";
+            $arrayInsValue[] = $objColumn->getRowRegisterQuery($excRegDataArray);
+        }
+
+        $strColIdStream = "(".implode(",", $arrayInsColId).")";
+        $strValueStream = "VALUES(".implode(",", $arrayInsValue).")";
+
+        // ---- RBAC対応
+        // RBAC対応 ----
+        $query = "INSERT INTO {$strInsertTargetTableId} {$strColIdStream} {$strValueStream}";
+        return array($query,$excRegDataArray);
+    }
+    //UTN[RBAC対応の登録]----
+
     //----UTN[更新]
     function generateUpdateSQL(
         $exeUpdateDataArray
@@ -2046,7 +2133,13 @@ EOD;
                 }
             }
             $strColStream = implode(",",$arraySqlSelectCols);
+        // RBAC対応
+        } else if($mode == 3){
+            // ACCESS_AUTHカラムが有る場合のSELECT項目を調整
+            $objRIColumn = $arrayObjColumn[$objTable->getRowIdentifyColumnID()];
+            $strColStream = "{$dbQM}{$objTable->getShareTableAlias()}{$dbQM}.{$dbQM}{$objTable->getAccessAuthColumnName()}{$dbQM} {$objTable->getAccessAuthColumnName()}";
         }
+        // ---- RBAC対応
 
         $strWhereEle = $objTable->getFilterQuery($boolSchZenHanDistinct);
         if(0<strlen($strWhereEle)){
@@ -2276,11 +2369,17 @@ EOD;
     //----ここからTableクラス・インスタンスを必要としない
 
     //----[NoTable-0001]フィルター・検出条件表示用
-    function genSQLforGetMasValsInMainTbl(
-        $mainTableBody, $keyColumnOfMainTable, $disuseColumnOfMainTable
-        , $masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseColumnOfMasterTable
-        , $aryEtcetera=array()
-        , $strWhereAddBody="", $strGetColIdOfKey="C1", $strGetColIdOfDisp="C2"){
+    function genSQLforGetMasValsInMainTbl( $mainTableBody,
+                                           $keyColumnOfMainTable, 
+                                           $disuseColumnOfMainTable,
+                                           $masterTableBody, 
+                                           $keyColumnOfMasterTable, 
+                                           $dispColumnOfMasterTable,
+                                           $disuseColumnOfMasterTable, 
+                                           $AccessAuthColumUse = false, 
+                                           $AccessAuthColumName = "ACCESS_AUTH",
+                                           $aryEtcetera=array(), $strWhereAddBody="", $strGetColIdOfKey="C1", $strGetColIdOfDisp="C2") { // RBAC対応
+        // ---- RBAC対応
         global $g;
         if(isset($aryEtcetera['OrderSortSeqType'])){
             $sortSeqType=$aryEtcetera['OrderSortSeqType'];
@@ -2301,13 +2400,22 @@ EOD;
             }
             $queryPartOrd = isset($aryEtcetera['ORDER'])?$aryEtcetera['ORDER']:"ORDER BY {$strGetColIdOfDisp} {$sortSeqType}";
         }
+        // RBAC対応 ----
+        // SELECT文に埋め込むアクセス権カラムの文字列生成
+        $mainQueryAddstring = "";
+        $SubQueryAddstring  = "";
+        if($AccessAuthColumUse === true) {
+            $mainQueryAddstring = sprintf(", MT1.%s ",$AccessAuthColumName);
+            $SubQueryAddstring = sprintf(", %s ",$AccessAuthColumName);
+        }
+        // ---- RBAC対応
         $query = "SELECT "
-                ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} "
+                ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} {$mainQueryAddstring} "
                 ."FROM "
                 ."    (SELECT "
-                ."         DISTINCT {$keyColumnOfMainTable} "
+                ."         {$keyColumnOfMainTable} {$SubQueryAddstring} "
                 ."     FROM "
-                ."         {$mainTableBody} "
+                ."         {$mainTableBody}"
                 ."     WHERE "
                 ."         {$disuseColumnOfMainTable} IN ('0','1') "
                 ."         {$strWhereAddBody} "
@@ -2322,6 +2430,7 @@ EOD;
                 ."    ) JM1 "
                 ."    ON MT1.{$keyColumnOfMainTable} = JM1.IDCOLUMN "
                 ."{$queryPartOrd}";
+	    // ---- RBAC対応
         return $query;
     }
     //[NoTable-0001]フィルター・検出条件表示用----
@@ -2342,10 +2451,16 @@ EOD;
     //[NoTable-0002]フィルター結果、その他マスターの通常利用----
 
     //----[NoTable-0003]新規登録、更新用・マスター利用
-    function genSQLforGetMasValsForInput(
-        $masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $masterDisuseFlagColumnId
-        , $aryEtcetera=array()){
+    function genSQLforGetMasValsForInput( $masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $masterDisuseFlagColumnId, $aryEtcetera=array(), $CheckAccessAuth){  // RBAC対応
         global $g;
+
+        // ---- RBAC対応 
+        $AccessAuthColumnName  = "";
+        if($CheckAccessAuth === true) {
+            $AccessAuthColumnName = $g['global_getAccessAuthColumnName'] . ", ";;
+        }
+        // RBAC対応 ---- 
+
         if(isset($aryEtcetera['OrderSortSeqType'])){
             $sortSeqType=$aryEtcetera['OrderSortSeqType'];
         }else{
@@ -2366,7 +2481,9 @@ EOD;
             $queryPartOrd = isset($aryEtcetera['ORDER'])?$aryEtcetera['ORDER']:"ORDER BY C2 {$sortSeqType}";
         }
         $query = "SELECT "
-                ."    {$keyColumnOfMasterTable} C1, {$dispColumnOfMasterTable} C2 {$queryPartSelectAdd} "
+            // RBAC対応 ----
+                ."    {$AccessAuthColumnName} {$keyColumnOfMasterTable} C1, {$dispColumnOfMasterTable} C2 {$queryPartSelectAdd} "
+            // ---- RBAC対応
                 ."FROM "
                 ."    {$masterTableBody} "
                 ."WHERE "
@@ -2433,5 +2550,4 @@ EOD;
         $retArray[2] = $retStrLastErrMsg;
         return $retArray;
     }
-    
 ?>

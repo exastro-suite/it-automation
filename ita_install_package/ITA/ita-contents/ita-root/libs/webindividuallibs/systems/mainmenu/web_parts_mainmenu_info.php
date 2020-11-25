@@ -29,6 +29,11 @@
             $ACRCM_id = "";
             $ACRCM_login_nf = "1";
         }
+        else if(!isset($_GET['grp']) && !isset($_GET['no'])) {
+            $ACRCM_group_id = "";
+            $ACRCM_id = "";
+            $ACRCM_login_nf = "1";
+        }
         else{
             //----メニューの情報取得
             $tmpAryRetBody = getMenuInfo(intval($_GET['no']), $objDBCA);
@@ -62,23 +67,31 @@
 
         //----メニューグループ名取得
         //----■テーブル【メニューグループリスト】から、リクエストされたPHPが所属するメニューの、メニューグループ名を取得する。
-        $tmpAryRetBody = getMenuGroupNameByMenuGroupID(intval($ACRCM_group_id), $objDBCA);
-        if( $tmpAryRetBody[1] !== null ){
-            //----取得できなかった
-            if( $tmpAryRetBody[1] == 502 ){
-                // アクセスログ出力(想定外エラー)
-                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-41"));
+        if (!empty($ACRCM_group_id)) {
+            $tmpAryRetBody = getMenuGroupNameByMenuGroupID(intval($ACRCM_group_id), $objDBCA);
+            if( $tmpAryRetBody[1] !== null ){
+                //----取得できなかった
+                if( $tmpAryRetBody[1] == 502 ){
+                    // アクセスログ出力(想定外エラー)
+                    web_log($objMTS->getSomeMessage("ITAWDCH-ERR-41"));
 
-                // 想定外エラー通知画面にリダイレクト
-                webRequestForceQuitFromEveryWhere(500,10510102);
-                exit();
+                    // 想定外エラー通知画面にリダイレクト
+                    webRequestForceQuitFromEveryWhere(500,10510102);
+                    exit();
+                }
+                throw new Exception( $tmpAryRetBody[3] );
+                // 取得できなかった----
             }
-            throw new Exception( $tmpAryRetBody[3] );
-            // 取得できなかった----
+            $ACRCM_group_name = $tmpAryRetBody[0]['MenuGroupName'];
+        } else {
+            $ACRCM_group_name = "";
         }
-        $ACRCM_group_name = $tmpAryRetBody[0]['MenuGroupName'];
 
-        $ACRCM_representative_file_name = "/default/mainmenu/01_browse.php?grp=" . $_GET['grp'];
+        if (isset($_GET['grp']) && !empty($_GET['grp'])) {
+            $ACRCM_representative_file_name = "/default/mainmenu/01_browse.php?grp=" . $_GET['grp'];
+        } else {
+            $ACRCM_representative_file_name = "/default/mainmenu/01_browse.php";
+        }
 
         unset($tmpAryRetBody);
     }

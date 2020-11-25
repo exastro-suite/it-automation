@@ -237,11 +237,48 @@ try{
                                                                        )
                                          )
                  );
+    }
 
-        if(true === $errorFlg){
+    if(true === $errorFlg){
+         throw new Exception();
+    }
+
+    // データベースを更新した事をマークする
+    $updateKey = "";
+    if($ansTemplateCnt > 0){
+        $updateKey .= "2100020001,2100020003,2100020005";
+    }
+    else{
+        if($ansPlaybookCnt > 0){
+            $updateKey .= ($updateKey == "") ? "2100020001" : ",2100020001";
+        }
+        if($ansibleDialogCnt > 0){
+            $updateKey .= ($updateKey == "") ? "2100020003" : ",2100020003";
+        }
+        if($ansibleRoleCnt > 0){
+            $updateKey .= ($updateKey == "") ? "2100020005" : ",2100020005";
+        }
+    }
+
+    if($updateKey != ""){
+
+        $baseTable = new BaseTable($objDBCA, $db_model_ch);
+
+        $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                   ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                   ."WHERE ROW_ID IN (${updateKey}) ";
+
+        $aryForBind = array();
+
+        $result = $baseTable->execQuery($strQuery, $aryForBind, $objQuery);
+
+        if( $result !== true ){
+            outputLog($result);
             throw new Exception();
         }
+    }
 
+    if(LOG_LEVEL === 'DEBUG'){
         // 終了ログ出力
         outputLog($objMTS->getSomeMessage('ITAMATERIAL-STD-10002', basename( __FILE__, '.php' )));
     }
@@ -305,8 +342,8 @@ function linkAnsContentsFile($materialLinkageData, $fileName, $base64File) {
         if(true === $matchFlg) {
 
             $updateFlg = true;
-            // 資材が一致した場合
-            if($fileName == $updateData['CONTENTS_FILE']){
+            // 資材とアクセス設定ロールが一致した場合
+            if($fileName == $updateData['CONTENTS_FILE'] && $updateData['ACCESS_AUTH'] == $materialLinkageData['ACCESS_AUTH']){
                 $materialPath = ANS_FILE_PATH . sprintf("%010d", $updateData['CONTENTS_FILE_ID']) . "/" . $updateData['CONTENTS_FILE'];
                 if(file_exists($materialPath)){
                     // 資材に変更がない場合は更新しない
@@ -320,8 +357,9 @@ function linkAnsContentsFile($materialLinkageData, $fileName, $base64File) {
             if(true === $updateFlg){
                 $cntFlg = true;
                 // 更新する
-                $updateData['CONTENTS_FILE']    = $fileName;                // ファイル素材
-                $updateData['LAST_UPDATE_USER'] = USER_ID_MATERIAL_LINKAGE; // 最終更新者
+                $updateData['CONTENTS_FILE']    = $fileName;                            // ファイル素材
+                $updateData['ACCESS_AUTH']      = $materialLinkageData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['LAST_UPDATE_USER'] = USER_ID_MATERIAL_LINKAGE;             // 最終更新者
 
                 //////////////////////////
                 // ファイル管理テーブルを更新
@@ -352,6 +390,7 @@ function linkAnsContentsFile($materialLinkageData, $fileName, $base64File) {
             $insertData = array();
             $insertData['CONTENTS_FILE_VARS_NAME']  = $materialLinkageData['MATERIAL_LINK_NAME'];   // ファイル埋込変数名
             $insertData['CONTENTS_FILE']            = $fileName;                                    // ファイル素材
+            $insertData['ACCESS_AUTH']              = $materialLinkageData['ACCESS_AUTH'];          // アクセス許可ロール
             $insertData['DISUSE_FLAG']              = "0";                                          // 廃止フラグ
             $insertData['LAST_UPDATE_USER']         = USER_ID_MATERIAL_LINKAGE;                     // 最終更新者
 
@@ -453,8 +492,8 @@ function linkAnsTemplate($materialLinkageData, $fileName, $base64File) {
         if(true === $matchFlg) {
 
             $updateFlg = true;
-            // 資材が一致した場合
-            if($fileName == $updateData['ANS_TEMPLATE_FILE']){
+            // 資材とアクセス設定ロールが一致した場合
+            if($fileName == $updateData['ANS_TEMPLATE_FILE'] && $updateData['ACCESS_AUTH'] == $materialLinkageData['ACCESS_AUTH']){
                 $materialPath = ANS_TEMPLATE_PATH . sprintf("%010d", $updateData['ANS_TEMPLATE_ID']) . "/" . $updateData['ANS_TEMPLATE_FILE'];
                 if(file_exists($materialPath)){
                     // 資材に変更がない場合は更新しない
@@ -468,8 +507,9 @@ function linkAnsTemplate($materialLinkageData, $fileName, $base64File) {
             if(true === $updateFlg){
                 $cntFlg = true;
                 // 更新する
-                $updateData['ANS_TEMPLATE_FILE']    = $fileName;                // テンプレート素材
-                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE; // 最終更新者
+                $updateData['ANS_TEMPLATE_FILE']    = $fileName;                            // テンプレート素材
+                $updateData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;             // 最終更新者
 
                 //////////////////////////
                 // テンプレート管理テーブルを更新
@@ -501,6 +541,7 @@ function linkAnsTemplate($materialLinkageData, $fileName, $base64File) {
             $insertData = array();
             $insertData['ANS_TEMPLATE_VARS_NAME']   = $materialLinkageData['MATERIAL_LINK_NAME'];   // テンプレート埋込変数名
             $insertData['ANS_TEMPLATE_FILE']        = $fileName;                                    // テンプレート素材
+            $insertData['ACCESS_AUTH']              = $materialLinkageData['ACCESS_AUTH'];          // アクセス許可ロール
             $insertData['DISUSE_FLAG']              = "0";                                          // 廃止フラグ
             $insertData['LAST_UPDATE_USER']         = USER_ID_MATERIAL_LINKAGE;                     // 最終更新者
 
@@ -603,7 +644,7 @@ function linkAnsPlaybook($materialLinkageData, $fileName, $base64File) {
 
             $updateFlg = true;
             // 資材が一致した場合
-            if($fileName == $updateData['PLAYBOOK_MATTER_FILE']){
+            if($fileName == $updateData['PLAYBOOK_MATTER_FILE'] && $updateData['ACCESS_AUTH'] == $materialLinkageData['ACCESS_AUTH']){
                 $materialPath = ANS_PLAYBOOK_PATH . sprintf("%010d", $updateData['PLAYBOOK_MATTER_ID']) . "/" . $updateData['PLAYBOOK_MATTER_FILE'];
                 if(file_exists($materialPath)){
                     // 資材に変更がない場合は更新しない
@@ -617,8 +658,9 @@ function linkAnsPlaybook($materialLinkageData, $fileName, $base64File) {
             if(true === $updateFlg){
                 $cntFlg = true;
                 // 更新する
-                $updateData['PLAYBOOK_MATTER_FILE'] = $fileName;                // プレイブック素材
-                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE; // 最終更新者
+                $updateData['PLAYBOOK_MATTER_FILE'] = $fileName;                            // プレイブック素材
+                $updateData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;             // 最終更新者
 
                 //////////////////////////
                 // プレイブック素材集テーブルを更新
@@ -649,6 +691,7 @@ function linkAnsPlaybook($materialLinkageData, $fileName, $base64File) {
             $insertData = array();
             $insertData['PLAYBOOK_MATTER_NAME'] = $materialLinkageData['MATERIAL_LINK_NAME'];   // プレイブック素材名
             $insertData['PLAYBOOK_MATTER_FILE'] = $fileName;                                    // プレイブック素材
+            $insertData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];          // アクセス許可ロール
             $insertData['DISUSE_FLAG']          = "0";                                          // 廃止フラグ
             $insertData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;                     // 最終更新者
 
@@ -736,14 +779,37 @@ function linkAnsibleDialog($materialLinkageData, $fileName, $base64File) {
 
         $matchFlg = false;
 
-        // ファイル管理メニューの件数分ループ
+        // 対話種別リストテーブルの件数分ループ
         foreach($dialogMasterArray as $key => $dialogMaster) {
 
             // 資材名が一致するデータを検索
             if($materialLinkageData['MATERIAL_LINK_NAME'] == $dialogMaster['DIALOG_TYPE_NAME']) {
                 $dialogTypeId = $dialogMaster['DIALOG_TYPE_ID'];
+                $updateData = $dialogMaster;
                 $matchFlg = true;
                 break;
+            }
+        }
+
+        // 資材名が一致するデータがあった場合
+        if(true === $matchFlg) {
+
+            // アクセス設定ロールが一致しなかった場合
+            if($updateData['ACCESS_AUTH'] != $materialLinkageData['ACCESS_AUTH']){
+
+                // 更新する
+                $updateData['ACCESS_AUTH']      = $materialLinkageData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['LAST_UPDATE_USER'] = USER_ID_MATERIAL_LINKAGE;             // 最終更新者
+
+                //////////////////////////
+                // 対話種別リストテーブルを更新
+                //////////////////////////
+                $result = $ansiblePnsDialogTypeTable->updateTable($updateData, $jnlSeqNo);
+                if(true !== $result){
+                    $msg = $objMTS->getSomeMessage('ITAMATERIAL-ERR-5001', $result);
+                    outputLog($msg);
+                    throw new Exception();
+                }
             }
         }
 
@@ -753,6 +819,7 @@ function linkAnsibleDialog($materialLinkageData, $fileName, $base64File) {
             // 登録する
             $insertData = array();
             $insertData['DIALOG_TYPE_NAME']  =      $materialLinkageData['MATERIAL_LINK_NAME']; // 対話種別名
+            $insertData['ACCESS_AUTH']              = $materialLinkageData['ACCESS_AUTH'];      // アクセス許可ロール
             $insertData['DISUSE_FLAG']              = "0";                                      // 廃止フラグ
             $insertData['LAST_UPDATE_USER']         = USER_ID_MATERIAL_LINKAGE;                 // 最終更新者
 
@@ -800,8 +867,8 @@ function linkAnsibleDialog($materialLinkageData, $fileName, $base64File) {
         if(true === $matchFlg) {
 
             $updateFlg = true;
-            // 資材が一致した場合
-            if($fileName == $updateData['DIALOG_MATTER_FILE']){
+            // 資材とアクセス設定ロールが一致した場合
+            if($fileName == $updateData['DIALOG_MATTER_FILE'] && $updateData['ACCESS_AUTH'] == $materialLinkageData['ACCESS_AUTH']){
                 $materialPath = ANS_DIALOG_PATH . sprintf("%010d", $updateData['DIALOG_MATTER_ID']) . "/" . $updateData['DIALOG_MATTER_FILE'];
                 if(file_exists($materialPath)){
                     // 資材に変更がない場合は更新しない
@@ -815,8 +882,9 @@ function linkAnsibleDialog($materialLinkageData, $fileName, $base64File) {
             if(true === $updateFlg){
                 $cntFlg = true;
                 // 更新する
-                $updateData['DIALOG_MATTER_FILE']   = $fileName;                // 対話ファイル素材
-                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE; // 最終更新者
+                $updateData['DIALOG_MATTER_FILE']   = $fileName;                            // 対話ファイル素材
+                $updateData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;             // 最終更新者
 
                 //////////////////////////
                 // 対話ファイル素材集テーブルを更新
@@ -849,6 +917,7 @@ function linkAnsibleDialog($materialLinkageData, $fileName, $base64File) {
             $insertData['DIALOG_TYPE_ID']       = $dialogTypeId;                        // 対話種別
             $insertData['OS_TYPE_ID']           = $materialLinkageData['OS_TYPE_ID'];   // OS種別
             $insertData['DIALOG_MATTER_FILE']   = $fileName;                            // 対話ファイル素材
+            $insertData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];  // アクセス許可ロール
             $insertData['DISUSE_FLAG']          = "0";                                  // 廃止フラグ
             $insertData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;             // 最終更新者
 
@@ -950,8 +1019,8 @@ function linkAnsibleRole($materialLinkageData, $fileName, $base64File) {
         if(true === $matchFlg) {
 
             $updateFlg = true;
-            // 資材が一致した場合
-            if($fileName == $updateData['ROLE_PACKAGE_FILE']){
+            // 資材とアクセス設定ロールが一致した場合
+            if($fileName == $updateData['ROLE_PACKAGE_FILE'] && $updateData['ACCESS_AUTH'] == $materialLinkageData['ACCESS_AUTH']){
                 $materialPath = ANS_ROLE_PATH . sprintf("%010d", $updateData['ROLE_PACKAGE_ID']) . "/" . $updateData['ROLE_PACKAGE_FILE'];
                 if(file_exists($materialPath)){
                     // 資材に変更がない場合は更新しない
@@ -965,8 +1034,9 @@ function linkAnsibleRole($materialLinkageData, $fileName, $base64File) {
             if(true === $updateFlg){
                 $cntFlg = true;
                 // 更新する
-                $updateData['ROLE_PACKAGE_FILE']    = $fileName;                // ロールパッケージファイル
-                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE; // 最終更新者
+                $updateData['ROLE_PACKAGE_FILE']    = $fileName;                            // ロールパッケージファイル
+                $updateData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];  // アクセス許可ロール
+                $updateData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;             // 最終更新者
 
                 //////////////////////////
                 // ロールパッケージ管理テーブルを更新
@@ -998,6 +1068,7 @@ function linkAnsibleRole($materialLinkageData, $fileName, $base64File) {
             $insertData = array();
             $insertData['ROLE_PACKAGE_NAME']    = $materialLinkageData['MATERIAL_LINK_NAME'];   // ロールパッケージファイル名
             $insertData['ROLE_PACKAGE_FILE']    = $fileName;                                    // ロールパッケージファイル
+            $insertData['ACCESS_AUTH']          = $materialLinkageData['ACCESS_AUTH'];          // アクセス許可ロール
             $insertData['DISUSE_FLAG']          = "0";                                          // 廃止フラグ
             $insertData['LAST_UPDATE_USER']     = USER_ID_MATERIAL_LINKAGE;                     // 最終更新者
 

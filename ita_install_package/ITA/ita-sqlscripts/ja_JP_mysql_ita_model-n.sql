@@ -10,6 +10,7 @@ HOSTGROUP_NAME                     VARCHAR (256)                    ,
 STRENGTH                           INT                             ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -30,6 +31,7 @@ HOSTGROUP_NAME                     VARCHAR (256)                    ,
 STRENGTH                           INT                             ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -46,6 +48,7 @@ PA_HOSTGROUP                       INT                             ,
 CH_HOSTGROUP                       INT                             ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -68,6 +71,7 @@ PA_HOSTGROUP                       INT                             ,
 CH_HOSTGROUP                       INT                             ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -85,6 +89,7 @@ OPERATION_ID                       INT                             ,
 HOSTNAME                           INT                             ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -107,6 +112,7 @@ OPERATION_ID                       INT                             ,
 HOSTNAME                           INT                             ,
 
 DISP_SEQ                           INT                             , -- 表示順序
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -123,6 +129,7 @@ INPUT_MENU_ID                      INT                             ,
 OUTPUT_MENU_ID                     INT                             ,
 DIVIDED_FLG                        VARCHAR  (1)                    ,
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -144,6 +151,7 @@ INPUT_MENU_ID                      INT                             ,
 OUTPUT_MENU_ID                     INT                             ,
 DIVIDED_FLG                        VARCHAR  (1)                    ,
 
+ACCESS_AUTH                        TEXT                            ,
 NOTE                               VARCHAR (4000)                  , -- 備考
 DISUSE_FLAG                        VARCHAR (1)                     , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP              DATETIME(6)                     , -- 最終更新日時
@@ -170,6 +178,7 @@ SELECT TAB_A.ROW_ID                 ,
        TAB_D.MENU_NAME              OUTPUT_MENU_NAME,
        TAB_A.OUTPUT_MENU_ID         OUTPUT_MENU_ID_CLONE,
        TAB_A.DIVIDED_FLG,
+       TAB_A.ACCESS_AUTH            ,
        TAB_A.NOTE                   ,
        TAB_A.DISUSE_FLAG            ,
        TAB_A.LAST_UPDATE_TIMESTAMP  ,
@@ -197,6 +206,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO         ,
        TAB_D.MENU_NAME              OUTPUT_MENU_NAME,
        TAB_A.OUTPUT_MENU_ID         OUTPUT_MENU_ID_CLONE,
        TAB_A.DIVIDED_FLG,
+       TAB_A.ACCESS_AUTH            ,
        TAB_A.NOTE                   ,
        TAB_A.DISUSE_FLAG            ,
        TAB_A.LAST_UPDATE_TIMESTAMP  ,
@@ -213,6 +223,7 @@ SELECT SYSTEM_ID                                                    AS KY_KEY   
        CONCAT('[H]',HOSTNAME) AS KY_VALUE ,
        0                                                            AS KY_SOURCE,
        9223372036854775807                                          AS STRENGTH ,
+       ACCESS_AUTH                                                  AS ACCESS_AUTH,
        DISUSE_FLAG                                                              ,
        LAST_UPDATE_TIMESTAMP                                                    ,
        LAST_UPDATE_USER
@@ -223,6 +234,7 @@ SELECT ROW_ID + 10000                                                       AS K
        CONCAT('[HG]',HOSTGROUP_NAME)  AS KY_VALUE ,
        1                                                                    AS KY_SOURCE,
        STRENGTH                                                             AS STRENGTH ,
+       ACCESS_AUTH                                                          AS ACCESS_AUTH,
        DISUSE_FLAG                                                                      ,
        LAST_UPDATE_TIMESTAMP                                                            ,
        LAST_UPDATE_USER
@@ -233,27 +245,28 @@ WHERE  DISUSE_FLAG = '0'
 CREATE VIEW G_FLAG_MASTER AS
 SELECT 1      AS FLAG_ID                ,
        '●'   AS FLAG_NAME              ,
+       ''     AS ACCESS_AUTH            ,
        NULL   AS NOTE                   ,
        '0'    AS DISUSE_FLAG            ,
        NOW(6) AS LAST_UPDATE_TIMESTAMP  ,
        1      AS LAST_UPDATE_USER
 ;
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_HOSTGROUP_LIST_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_HOSTGROUP_LIST_RIC',1,'2100170001',2100710001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_HOSTGROUP_LIST_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_HOSTGROUP_LIST_JSQ',1,'2100170001',2100710002,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_HOST_LINK_LIST_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_HOST_LINK_LIST_RIC',1,'2100170002',2100710003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_HOST_LINK_LIST_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_HOST_LINK_LIST_JSQ',1,'2100170002',2100710004,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_HOST_LINK_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_HOST_LINK_RIC',1,'2100170003',2100710005,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_HOST_LINK_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_HOST_LINK_JSQ',1,'2100170003',2100710006,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_SPLIT_TARGET_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_SPLIT_TARGET_RIC',1,'2100170004',2100710007,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('F_SPLIT_TARGET_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_SPLIT_TARGET_JSQ',1,'2100170004',2100710008,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
 
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011701,'ホストグループ管理','host_group.png',60,'ホストグループ管理','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

@@ -240,7 +240,7 @@ callback.prototype = {
                                     webStdTableWidth );
                     
                     linkDateInputHelper(strMixOuterFrameName);
-                    textPrintToBoxes('11','Mix1_1_7');
+                    textPrintToBoxes('11','Mix1_1_8');
             }
         }else if( ary_result[0] == "002" ){
             window.alert(getSomeMessage("ITAWDCC90102"));
@@ -343,7 +343,7 @@ callback.prototype = {
                                     webStdTableHeight,
                                     webStdTableWidth );
                     linkDateInputHelper(strMixOuterFrameName);
-                    textPrintToBoxes('10','Mix2_1_7');
+                    textPrintToBoxes('10','Mix2_1_8');
             }
         }else if( ary_result[0] == "002" ){
             window.alert(getSomeMessage("ITAWDCC90102"));
@@ -576,10 +576,10 @@ callback.prototype = {
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
 
             if( ary_result01[2] == "NORMAL_VAR_1"){
-                textPrintToBoxes('2','Mix1_1_7');
+                textPrintToBoxes('2','Mix1_1_8');
             }
             else{
-                textPrintToBoxes('1','Mix1_1_7');
+                textPrintToBoxes('1','Mix1_1_8');
             }
 
         }else{
@@ -614,10 +614,10 @@ callback.prototype = {
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
 
             if( ary_result01[2] == "NORMAL_VAR_1"){
-                textPrintToBoxes('2','Mix2_1_7');
+                textPrintToBoxes('2','Mix2_1_8');
             }
             else{
-                textPrintToBoxes('1','Mix2_1_7');
+                textPrintToBoxes('1','Mix2_1_8');
             }
 
         }else{
@@ -651,10 +651,10 @@ callback.prototype = {
             var resultContentTag = ary_result01[1];
 
             if( ary_result01[2] == "MEMBER_VAR_0" ){
-                textPrintToBoxes('1','Mix1_1_7');
+                textPrintToBoxes('1','Mix1_1_8');
             }
             else if( ary_result01[2] == "MEMBER_VAR_1"){
-                textPrintToBoxes('2','Mix1_1_7');
+                textPrintToBoxes('2','Mix1_1_8');
             }
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
@@ -685,10 +685,10 @@ callback.prototype = {
             var resultSetTargetSeq = ary_result01[0];
             var resultContentTag = ary_result01[1];
             if( ary_result01[2] == "MEMBER_VAR_0" ){
-                textPrintToBoxes('1','Mix2_1_7');
+                textPrintToBoxes('1','Mix2_1_8');
             }
             else if( ary_result01[2] == "MEMBER_VAR_1"){
-                textPrintToBoxes('2','Mix2_1_7');
+                textPrintToBoxes('2','Mix2_1_8');
             }
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
@@ -1212,7 +1212,7 @@ function Mix1_1_operation_upd(){
     proxy.Mix1_1_pattern_upd('', '');
 
     proxy.Mix1_1_vars_upd('');
-    textPrintToBoxes('10','Mix1_1_7');
+    textPrintToBoxes('10','Mix1_1_8');
     var rangeId = 'Mix1_1';
     
     var objOpe = document.getElementById('Mix1_1_1');
@@ -1223,7 +1223,7 @@ function Mix2_1_operation_reg(){
     proxy.Mix2_1_pattern_reg('', '');
 
     proxy.Mix2_1_vars_reg('');
-    textPrintToBoxes('10','Mix2_1_7');
+    textPrintToBoxes('10','Mix2_1_8');
     var rangeId = 'Mix2_1';
     
     var objOpe = document.getElementById('Mix2_1_1');
@@ -1233,7 +1233,7 @@ function Mix2_1_operation_reg(){
 function Mix1_1_pattern_upd(){
     // すべての後選択関連カラムを消す
     proxy.Mix1_1_vars_upd('');
-    textPrintToBoxes('10','Mix1_1_7');
+    textPrintToBoxes('10','Mix1_1_8');
     var rangeId = 'Mix1_1';
     
     var objOpe = document.getElementById('Mix1_1_1');
@@ -1246,7 +1246,7 @@ function Mix1_1_pattern_upd(){
 function Mix2_1_pattern_reg(){
     // すべての後選択関連カラムを消す
     proxy.Mix2_1_vars_reg('');
-    textPrintToBoxes('10','Mix2_1_7');
+    textPrintToBoxes('10','Mix2_1_8');
     var rangeId = 'Mix2_1';
     
     var objOpe = document.getElementById('Mix2_1_1');
@@ -1280,7 +1280,7 @@ function Mix1_1_view_val_upd(){
         objChlVar_val = objChlVar.value;
     }
 
-    var objAssSeq = document.getElementById('Mix1_1_7'); //代入順序
+    var objAssSeq = document.getElementById('Mix1_1_8'); //代入順序
     var objAssSeq_val = '';
     if( objAssSeq ){
         objAssSeq_val = objAssSeq.value;
@@ -1310,7 +1310,7 @@ function Mix2_1_view_val_reg(){
         objChlVar_val = objChlVar.value;
     }
 
-    var objAssSeq = document.getElementById('Mix2_1_7'); //代入順序
+    var objAssSeq = document.getElementById('Mix2_1_8'); //代入順序
     var objAssSeq_val = '';
     if( objAssSeq ){
         objAssSeq_val = objAssSeq.value;

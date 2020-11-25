@@ -55,6 +55,7 @@ function CreateExecInstMngArray(&$ary) {
     $ary["CONDUCTOR_NAME"]               = "";
     $ary["CONDUCTOR_INSTANCE_NO"]        = "";
     $ary["DISP_SEQ"]                     = "";
+    $ary["ACCESS_AUTH"]                  = "";
     $ary["NOTE"]                         = "";
     $ary["DISUSE_FLAG"]                  = "";
     $ary["LAST_UPDATE_TIMESTAMP"]        = "";
@@ -79,4 +80,3 @@ function SetExecInstMngColumnType(&$ary) {
 }
 
 ?>
-

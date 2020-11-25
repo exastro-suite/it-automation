@@ -26,13 +26,25 @@ function initProcess(pageMode){
     
     switch(pageMode){
         case "classEdit":
+            
+            // URLクエリからIDを取得
             var varRequestTarget = getRequestTargetFromQuery("symphony_class_id");
+            
+            // IDが無ければ新規作成
             if( varRequestTarget===null ){
                 // ボタン「登録」を配置する
                 drawCommandButtons(0);
                 
+                // ロールリストから初期値を取得する
+                var checkedRoleNumber = new Array;
+                for ( var i = 0; i < gRoleList.length; i++ ) {
+                  if ( gRoleList[i]['DEFAULT'] === 'checked' ) {
+                    checkedRoleNumber.push(  gRoleList[i]['ROLE_ID'] );
+                  }
+                }
+                
                 // シンフォニー№に自動採番を表示する
-                printSymphonyInfoArea("10",getSomeMessage("ITABASEC010107"));
+                printSymphonyInfoArea("10",getSomeMessage("ITABASEC010107"),"","","", checkedRoleNumber.join(',') );
                 
                 // 新規登録モードで、編集を可能状態にする
                 editPrepare();
@@ -611,16 +623,17 @@ function printSymphonyClass(boolCallProxy, symphony_class_id, strModeNumeric, st
         }
         if( strModeNumeric == "10" || strModeNumeric == "11" || strModeNumeric == "20" ){
             var arySymInfo = getArrayBySafeSeparator(strStreamOfSymphonyInfos);
-            printSymphonyInfoArea(strModeNumeric, symphony_class_id, arySymInfo[0], arySymInfo[1], arySymInfo[2]);
+            printSymphonyInfoArea(strModeNumeric, symphony_class_id, arySymInfo[0], arySymInfo[1], arySymInfo[2],arySymInfo[3]);
         }
         // 流用新規
         else if( strModeNumeric == "12" ){
+            var arySymInfo = getArrayBySafeSeparator(strStreamOfSymphonyInfos);
             //----編集可能状態
             editPrepare();
             deleteButtonFunctionOn();
             //編集可能状態----
             // シンフォニー№に自動採番を表示する
-            printSymphonyInfoArea("10",getSomeMessage("ITABASEC010107"));
+            printSymphonyInfoArea("10",getSomeMessage("ITABASEC010107"),"","","",arySymInfo[3]);
             // ボタン「登録」を配置する
             drawCommandButtons(0);
         }
@@ -1287,7 +1300,7 @@ function addOvrdOpeInputBoxEditOnly(objAddTgt,intMode, strOverOpeNoIDBH){
 }
 
 //----ムーブメントを除去した、シンフォニー情報の表示
-function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symphony_tips, symphony_lt4u){
+function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symphony_tips, symphony_lt4u, symphony_role ){
     var arySymphonyInfo;
     var objSymphonyNoText;
     //
@@ -1296,6 +1309,7 @@ function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symph
     var objSymphonyTipsArea = document.getElementById('print_shyphony_tips');
     var objSymphonyLT4UArea = document.getElementById('print_symphony_lt4u');
     var objSymphonyInfoArea = document.getElementById('symphony_header');
+    var objSymphonyRoleArea = document.getElementById('print_symphony_role');
     //
     //----シンフォニーNo.を出力
     if( typeof symphony_id==="undefined" ){
@@ -1316,6 +1330,9 @@ function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symph
     if( typeof symphony_lt4u==="undefined" ){
         symphony_lt4u = '';
     }
+    if( typeof symphony_role==="undefined" ){
+        symphony_role = '';
+    }
     
     if( strModeNumeric == "10" ){
         // 更新作業用のモード
@@ -1331,7 +1348,53 @@ function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symph
         objHtmlSubElement1_2.innerHTML = symphony_tips;
         objSymphonyTipsArea.insertBefore(objHtmlSubElement1_2, null);
         
+        // タイムスタンプ
         objSymphonyLT4UArea.innerHTML = symphony_lt4u;
+        
+        // 権限ロール
+        if ( objSymphonyRoleArea !== null ) {
+          var objHtmlRoleSelectButton = document.createElement("button");
+          var objHtmlRoleSelectButtonText = document.createElement("span");
+          var objHtmlRoleSpan = document.createElement("span");
+          var objHtmlRole = document.createElement("input");
+
+          objHtmlRoleSpan.className = "role_number";
+          objHtmlRoleSpan.innerHTML = getRoleListIdToName( symphony_role );
+          
+          objHtmlRoleSelectButton.className = "role_select_button"
+          objHtmlRoleSelectButtonText.innerHTML = getSomeMessage("ITABASEC010413");
+          objHtmlRoleSelectButton.appendChild( objHtmlRoleSelectButtonText );
+
+          objHtmlRole.type = "hidden";
+          objHtmlRole.className ="role_number_input";
+          objHtmlRole.name ="ACCESS_AUTH";
+          objHtmlRole.value = symphony_role;
+          
+          objSymphonyRoleArea.innerHTML = '';
+          objSymphonyRoleArea.appendChild( objHtmlRole );
+          objSymphonyRoleArea.appendChild( objHtmlRoleSpan );
+          objSymphonyRoleArea.appendChild( objHtmlRoleSelectButton );   
+          
+          // Modal表示
+          var editor = new itaEditorFunctions;
+          var roleModal = function() {
+              const accessAuth = objHtmlRole.value;
+              // 決定時の処理    
+              const okEvent = function( newRoleList ) {
+                objHtmlRole.value = newRoleList;
+                objHtmlRoleSpan.innerHTML = getRoleListIdToName( newRoleList );
+                editor.modalClose();
+              };
+              // キャンセル時の処理    
+              const cancelEvent = function( newRoleList ) {
+                editor.modalClose();
+              };
+              setRoleSelectModalBody( gRoleList, accessAuth, okEvent, cancelEvent );
+          };
+          objHtmlRoleSelectButton.addEventListener("click", function(){
+            editor.modalOpen('Permission role select', roleModal, 'role_select_modal');
+          }, false );
+        }
     }
     else{
         // 閲覧用のモード
@@ -1347,6 +1410,15 @@ function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symph
         objHtmlSubElement1_2.disabled = true;
         objSymphonyTipsArea.insertBefore(objHtmlSubElement1_2, null);
         //alert(symphony_lt4u); //T-Stamp
+        
+        // 権限ロール
+        if ( objSymphonyRoleArea !== null ) {
+          var objHtmlRoleSpan = document.createElement("span");
+          objHtmlRoleSpan.className = "role_number";
+          objHtmlRoleSpan.innerHTML = getRoleListIdToName( symphony_role );
+          objSymphonyRoleArea.innerHTML = '';
+          objSymphonyRoleArea.appendChild( objHtmlRoleSpan );
+        }
     }
     
     //その他項目----
@@ -1374,6 +1446,42 @@ function getRequestTargetFromQuery(checkRequestKey,boolGenericMode){
     return retValue;
 }
 //クエリから編集するターゲットのシンフォニー№を取得する----
+
+
+// カンマ区切りロールIDリストからロールNAMEリストを返す
+const listIdName = function( type, id ) {
+    if ( id !== undefined ) {
+        const idKey = 'ROLE_ID',
+              nameKey = 'ROLE_NAME',
+              listLength = gRoleList.length;
+        for ( let i = 0; i < listLength; i++ ) {
+            if ( Number( gRoleList[i][idKey] ) === Number( id ) ) {
+                return gRoleList[i][nameKey];
+            }
+        }
+        return undefined;  
+    } else {
+        return undefined;  
+    }
+};
+const getRoleListIdToName = function( roleListText ) {
+    if ( roleListText !== undefined && roleListText !== '' ) {
+        const roleList = roleListText.split(','),
+              roleListLength = roleList.length,
+              roleNameList = new Array;
+        for ( let i = 0; i < roleListLength; i++ ) {
+            const roleName = listIdName('role', roleList[i]);
+            if ( roleName !== undefined ) {
+                roleNameList.push( roleName );
+            } else {
+                roleNameList.push( getSomeMessage("ITAWDCC92007") + '(' + roleList[i] + ')');
+            }
+        }
+        return roleNameList.join(', ');
+    } else {
+        return '';
+    }
+};
 
 //------------------------------------------------//
 //------------------------------------------------//

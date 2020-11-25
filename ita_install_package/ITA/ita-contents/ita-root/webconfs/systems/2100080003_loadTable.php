@@ -55,9 +55,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102440'));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     //Organization ID
     $c = new IDColumn('ORGANIZATION_ID', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102450'), 'B_TERRAFORM_ORGANIZATIONS', 'ORGANIZATION_ID', 'ORGANIZATION_NAME', '');
@@ -77,18 +76,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new TextValidator(1, 90, false, '/^[a-zA-Z0-9_-]+$/', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102485")));
     $table->addColumn($c);
 
-    //Apply Method
-    /* //Auto Applyの設定値で固定化する（レコード自体はNULL）。
-    $c = new IDColumn('APPLY_METHOD', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102490'), 'B_TERRAFORM_WORKSPACE_APPLY_METHOD', 'WORKSPACE_OPTION_ID', 'WORKSPACE_OPTION_NAME', '', array('SELECT_ADD_FOR_ORDER'=>array('WORKSPACE_OPTION_ID'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
-    $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102500')); //エクセル・ヘッダでの説明
-    $c->setJournalTableOfMaster('B_TERRAFORM_WORKSPACE_EXECUTION_MODE_JNL');
-    //$c->setRequired(true); //登録/更新時には、入力必須
-    $table->addColumn($c);
-    */
-
     //Terraform Version
     $c = new TextColumn('TERRAFORM_VERSION', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102510'));
     $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102520'));//エクセル・ヘッダでの説明
+    $c->setValidator(new TextValidator(0, 32, false, '/^(|[0-9.]+)$/', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102525")));
     $table->addColumn($c);
 
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102530"));

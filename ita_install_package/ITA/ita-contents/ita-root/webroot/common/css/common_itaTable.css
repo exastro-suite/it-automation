@@ -773,15 +773,21 @@ background-color: #765FAB;
 [data-select-type="data"] .itaTable tr.defaultExplainRow th {
 background-color: #866CC2;
 }
+[data-select-type="paraope"] .itaTable.tableSticky tr.defaultExplainRow th.thSticky,
 [data-select-type="param"] .itaTable.tableSticky tr.defaultExplainRow th.thSticky {
 background-color: #007779;
 }
-[data-select-type="param"] .itaTable tr.defaultExplainRow th {
+[data-select-type="paraope"] .itaTable tr.defaultExplainRow th,
+[data-select-type="param"] .itaTable tr.defaultExplainRow th{
 background-color: #00878A;
 }
 #KIZI [data-select-type="data"] .tableSettingBody li.level1.param,
-#KIZI [data-select-type="param"] .tableSettingBody li.level1.data {
+#KIZI [data-select-type="paraope"] .tableSettingBody li.level1.param {
 pointer-events: none;
 opacity: 0.5;
 }
-
+#KIZI [data-select-type="data"] .tableSettingBody li.level1.data,
+#KIZI [data-select-type="paraope"] .tableSettingBody li.level1.paraope {
+pointer-events: auto;
+opacity: 1;
+}

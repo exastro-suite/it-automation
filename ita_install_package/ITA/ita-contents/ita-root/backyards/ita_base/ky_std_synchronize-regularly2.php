@@ -428,8 +428,34 @@
             $now = date("Y/m/d H:i");
             if(strtotime($nextExecutionDate) >= strtotime($now)){
                 //symphonyとoperationを取り出す
-                $symphonyClassNo = $rowOfReguralyList['CONDUCTOR_CLASS_NO'];
+                $tmpsymphonyClassNo = $rowOfReguralyList['CONDUCTOR_CLASS_NO'];
                 $opertionNoIdbh = $rowOfReguralyList['OPERATION_NO_IDBH'];
+
+                //--- Conductorクラス状態保存 
+                $arrayResult = $objOLA->convertConductorClassJson($tmpsymphonyClassNo,1);
+
+                // JSON形式の変換、不要項目の削除
+                $tmpReceptData = $arrayResult[4];
+                $arrayReceptData=$tmpReceptData['conductor'];
+                $strSortedData=$tmpReceptData;
+                unset($strSortedData['conductor']);
+                foreach ($strSortedData as $key => $value) {
+                    if( preg_match('/line-/',$key) ){
+                        unset($strSortedData[$key]);
+                    }
+                }
+                unset($strSortedData['conductor']);
+                unset($strSortedData['config']); 
+
+                $arrayResult = $objOLA->conductorClassRegister(null, $arrayReceptData, $strSortedData, null);
+
+                if( $arrayResult[0] == "000" ){
+                    $symphonyClassNo = $arrayResult[2];
+                }else{
+                    $symphonyClassNo="";
+                }
+                // Conductorクラス状態保存 ---
+
 
                 //シンフォニーインスタンスを新規登録処理
                 $aryOptionOrder = null;

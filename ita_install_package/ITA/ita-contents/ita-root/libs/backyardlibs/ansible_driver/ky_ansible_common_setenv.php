@@ -67,6 +67,16 @@
         define('DF_DEF_VARS','DEFAULT_VARS');        // role　default変数定義
         define('DF_TEMP_VARS','TEMPLART_VARS');      // テンプレート管理　変数定義
         define('DF_README_VARS','ITAREADME_VARS');   // ITA_readme
+
+        // 変数タイプ
+        define("DF_VAR_TYPE_VAR"               ,"VAR");
+        define("DF_VAR_TYPE_LCA"               ,"LCA");
+        define("DF_VAR_TYPE_GBL"               ,"GBL");
+        define("DF_VAR_TYPE_USER"              ,"USER");
+
+        // 具体値 SENSITIVE設定値
+        define("DF_SENSITIVE_OFF"              ,"1");  //OFF
+        define("DF_SENSITIVE_ON"               ,"2");  //ON
     }
 
     // ITA側で管理している legacy用 子playbookファイル格納先ディレクトリ
@@ -79,18 +89,15 @@
     // ITA側で管理している テンプレートファイル格納先ディレクトリ
     $vg_template_contents_dir = $root_dir_path . "/uploadfiles/2100040704/ANS_TEMPLATE_FILE";
     
-    // 変数名定義の正規表記
-    // 許容文字は、英数字と!#$%&()*+,-/;<=>?@^_`{|}~
-    // 許容しない記号  " . [ ] ' \ : 半角スペース 合計8文字
     // 正規表記でエスケープが必要な文字 $ ( ) * + - / ? ^ { | }
-    $vg_VarName_var_parent = 'VAR_[0-9a-zA-Z_]*(\s*)';
-    $vg_VarName_lca_parent = 'LCA_[0-9a-zA-Z_]*(\s*)';
-    $vg_VarName_gbl_parent = 'GBL_[0-9a-zA-Z_]*(\s*)';
-    $vg_VarName_user_parent = '[0-9a-zA-Z_]*(\s*)';
-    $vg_VarName_member1 =     '[0-9a-zA-Z!#\$%&\(\)\*\+,\-\/;<=>\?@\^_`\{\|\}~]*(\s*)';
-    $vg_VarName_member2 = '[\'][0-9a-zA-Z!#\$%&\(\)\*\+,\-\/;<=>\?@\^_`\{\|\}~]*[\'](\s*)';
-    $vg_VarName_member3 =  '["][0-9a-zA-Z!#\$%&\(\)\*\+,\-\/;<=>\?@\^_`\{\|\}~]*["](\s*)';
-
+    // 親変数で許容する文字: xxx_[0-9a-zA-Z_]　  xxx:VAR/LCA/GBL
+    $VAR_parent_VarName  = "/^(\s*)VAR_[0-9a-zA-Z_]*(\s*)$/";  /* 通常の変数     */
+    $LCA_parent_VarName  = "/^(\s*)LCA_[0-9a-zA-Z_]*(\s*)$/";  /* 読替変数       */
+    $GBL_parent_VarName  = "/^(\s*)GBL_[0-9a-zA-Z_]*(\s*)$/";  /* グローバル変数 */
+    $USER_parent_VarName = "/^(\s*)[0-9a-zA-Z_]*(\s*)$/";
+    // メンバー変数名定義の正規表記
+    // 許容文字は、英数字と!#$%&()*+,-/;<=>?@^_`{|}~ "':\
+    // 許容しない記号   . [ ] 合計3文字
     ////////////////////////////////////////////////////////////
     // 変数定義の変数名定義判定配列
     //'parant':親変数名として利用可否
@@ -102,33 +109,24 @@
     // pattern:親変数名として許可する正規表記
     ////////////////////////////////////////////////////////////
     // default変数定義ファイル変数定義用
-    $vg_pattenAry = array();
-    $vg_pattenAry[DF_DEF_VARS]   = array();
-    $vg_pattenAry[DF_TEMP_VARS]   = array();
-    $vg_pattenAry[DF_README_VARS]   = array();
-    $vg_pattenAry[DF_DEF_VARS][]    = array('parent'=>true, 'member'=>true, 'pattern'=>$vg_VarName_var_parent);
-    $vg_pattenAry[DF_DEF_VARS][]    = array('parent'=>true, 'member'=>true, 'pattern'=>$vg_VarName_lca_parent);
-    $vg_pattenAry[DF_DEF_VARS][]    = array('parent'=>true, 'member'=>true, 'pattern'=>$vg_VarName_gbl_parent);
-    $vg_pattenAry[DF_DEF_VARS][]    = array('parent'=>true, 'member'=>true, 'pattern'=>$vg_VarName_user_parent);
-    $vg_pattenAry[DF_DEF_VARS][]    = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member1);
-    $vg_pattenAry[DF_DEF_VARS][]    = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member2);
-    $vg_pattenAry[DF_DEF_VARS][]    = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member3);
+    $VarName_pattenAry = array();
+    $VarName_pattenAry[DF_DEF_VARS]      = array();
+    $VarName_pattenAry[DF_TEMP_VARS]     = array();
+    $VarName_pattenAry[DF_README_VARS]   = array();
+    $VarName_pattenAry[DF_DEF_VARS][]    = array('parent'=>true,  'type'=>DF_VAR_TYPE_VAR,  'pattern'=>$VAR_parent_VarName);
+    $VarName_pattenAry[DF_DEF_VARS][]    = array('parent'=>false,  'type'=>DF_VAR_TYPE_LCA,  'pattern'=>$LCA_parent_VarName);
+    $VarName_pattenAry[DF_DEF_VARS][]    = array('parent'=>false, 'type'=>DF_VAR_TYPE_GBL,  'pattern'=>$GBL_parent_VarName);
+    $VarName_pattenAry[DF_DEF_VARS][]    = array('parent'=>true,  'type'=>DF_VAR_TYPE_USER, 'pattern'=>$USER_parent_VarName);
     // テンプレート管理変数定義用
-    $vg_pattenAry[DF_TEMP_VARS][]   = array('parent'=>true, 'member'=>true, 'pattern'=>$vg_VarName_var_parent);
-    $vg_pattenAry[DF_TEMP_VARS][]   = array('parent'=>true, 'member'=>true, 'pattern'=>$vg_VarName_lca_parent);
-    $vg_pattenAry[DF_TEMP_VARS][]   = array('parent'=>true, 'member'=>true, 'pattern'=>$vg_VarName_gbl_parent);
-    $vg_pattenAry[DF_TEMP_VARS][]   = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_user_parent);
-    $vg_pattenAry[DF_TEMP_VARS][]   = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member1);
-    $vg_pattenAry[DF_TEMP_VARS][]   = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member2);
-    $vg_pattenAry[DF_TEMP_VARS][]   = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member3);
+    $VarName_pattenAry[DF_TEMP_VARS][]   = array('parent'=>true,  'type'=>DF_VAR_TYPE_VAR,  'pattern'=>$VAR_parent_VarName);
+    $VarName_pattenAry[DF_TEMP_VARS][]   = array('parent'=>true,  'type'=>DF_VAR_TYPE_LCA,  'pattern'=>$LCA_parent_VarName);
+    $VarName_pattenAry[DF_TEMP_VARS][]   = array('parent'=>true,  'type'=>DF_VAR_TYPE_GBL,  'pattern'=>$GBL_parent_VarName);
+    $VarName_pattenAry[DF_TEMP_VARS][]   = array('parent'=>false, 'type'=>DF_VAR_TYPE_USER, 'pattern'=>$USER_parent_VarName);
     // ITA-Readme変数定義用
-    $vg_pattenAry[DF_README_VARS][] = array('parent'=>true, 'member'=>false,'pattern'=>$vg_VarName_var_parent);
-    $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>false,'pattern'=>$vg_VarName_lca_parent);
-    $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>false,'pattern'=>$vg_VarName_gbl_parent);
-    $vg_pattenAry[DF_README_VARS][] = array('parent'=>true,'member'=>true, 'pattern'=>$vg_VarName_user_parent);
-    $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member1);
-    $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member2);
-    $vg_pattenAry[DF_README_VARS][] = array('parent'=>false,'member'=>true, 'pattern'=>$vg_VarName_member3);
+    $VarName_pattenAry[DF_README_VARS][] = array('parent'=>true,  'type'=>DF_VAR_TYPE_VAR,  'pattern'=>$VAR_parent_VarName);
+    $VarName_pattenAry[DF_README_VARS][] = array('parent'=>false, 'type'=>DF_VAR_TYPE_LCA,  'pattern'=>$LCA_parent_VarName);
+    $VarName_pattenAry[DF_README_VARS][] = array('parent'=>false, 'type'=>DF_VAR_TYPE_GBL,  'pattern'=>$GBL_parent_VarName);
+    $VarName_pattenAry[DF_README_VARS][] = array('parent'=>true,  'type'=>DF_VAR_TYPE_USER, 'pattern'=>$USER_parent_VarName);
 
 
 ?>

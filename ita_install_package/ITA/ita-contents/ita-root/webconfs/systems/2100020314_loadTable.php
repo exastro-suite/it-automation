@@ -55,10 +55,7 @@ Ansible(Legacy)作業管理
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1108050"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     $table->setDBSortKey(array("EXECUTION_NO"=>"DESC"));
@@ -260,6 +257,24 @@ Ansible(Legacy)作業管理
     $cg->addColumn($c);
     $table->addColumn($cg);
 
+
+    //収集状況
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207100"));
+    //ステータス
+    $c = new IDColumn('COLLECT_STATUS',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207101"),'B_COLLECT_STATUS','COLLECT_STATUS_ID','COLLECT_STATUS_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207102"));//エクセル・ヘッダでの説明
+    $cg->addColumn($c);
+
+    //収集ログ
+    $c = new FileUploadColumn( 'COLLECT_LOG', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207103"), "{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$strLrWebRootToThisPageDir}");
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207104"));
+    $c->setMaxFileSize(4*1024*1024*1024);
+    $c->setFileHideMode(true);
+    $c->setHiddenMainTableColumn(true);
+    $cg->addColumn($c);
+    $table->addColumn($cg);
+    
+    
 
     $table->fixColumn();
 

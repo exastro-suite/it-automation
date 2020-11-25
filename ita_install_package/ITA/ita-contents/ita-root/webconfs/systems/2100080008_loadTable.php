@@ -63,10 +63,7 @@ Terraform代入値管理
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103640"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     //************************************************************************************
@@ -196,6 +193,7 @@ Terraform代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.MODULE_VARS_LINK_ID KEY_COLUMN "
                    .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
                    ."WHERE "
@@ -206,11 +204,28 @@ Terraform代入値管理
         $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
         if( 0 < strlen($strPatternIdNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
@@ -238,6 +253,7 @@ Terraform代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.MODULE_VARS_LINK_ID KEY_COLUMN "
                    .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
                    ."WHERE "
@@ -248,11 +264,28 @@ Terraform代入値管理
         $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
         if( 0 < strlen($strPatternIdNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
@@ -280,6 +313,7 @@ Terraform代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.MODULE_VARS_LINK_ID KEY_COLUMN "
                    .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
                    ."WHERE "
@@ -290,11 +324,28 @@ Terraform代入値管理
         $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
         if( 0 < strlen($strPatternIdNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
@@ -376,11 +427,25 @@ Terraform代入値管理
     //変数名----
 
     //************************************************************************************
+    //----HCL設定
+    //************************************************************************************
+    $c = new IDColumn('HCL_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103780"), 'B_TERRAFORM_HCL_FLAG', 'HCL_FLAG', 'HCL_FLAG_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('HCL_FLAG'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103790")); //エクセル・ヘッダでの説明
+    $c->setJournalTableOfMaster('B_TERRAFORM_HCL_FLAG_JNL');
+    $c->setDefaultValue("register_table", 1); //デフォルト値で1(OFF)
+    $c->setRequired(true); //登録/更新時には、入力必須
+    //コンテンツのソースがヴューの場合、登録/更新の対象とする
+    $c->setHiddenMainTableColumn(true);
+
+    $table->addColumn($c);
+
+    //************************************************************************************
     //----Sensitive設定
     //************************************************************************************
-    $c = new IDColumn('SENSITIVE_FLAG','Sensitive設定', 'B_TERRAFORM_VARS_SENSITIVE', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
-    $c->setDescription('Sensitive設定'); //エクセル・ヘッダでの説明
-    $c->setJournalTableOfMaster('B_TERRAFORM_VARS_SENSITIVE_JNL');
+    $c = new IDColumn('SENSITIVE_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103760"), 'B_SENSITIVE_FLAG', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103770")); //エクセル・ヘッダでの説明
+    $c->setJournalTableOfMaster('B_SENSITIVE_FLAG_JNL');
+    $c->setDefaultValue("register_table", 1); //デフォルト値で1(OFF)
     $c->setRequired(true); //登録/更新時には、入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
@@ -390,14 +455,53 @@ Terraform代入値管理
     //************************************************************************************
     //----具体値
     //************************************************************************************
-    $objVldt = new SingleTextValidator(0,8192,false);
-    $c = new TextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103740"));
+    $objVldt = new MultiTextValidator(0,8192,false);
+    $c = new SensitiveMultiTextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103740"), 'SENSITIVE_FLAG');
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103750"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
-    $c->setRequired(true);     //登録/更新時には、任意入力
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
+
     $table->addColumn($c);
+
+
+    // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+        $strFxName = "";
+
+        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+            if( $modeValue=="DTUP_singleRecDelete" ){
+                // 廃止の場合のみ
+                $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
+                if( $modeValue_sub == "on" ){
+
+                    $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                               ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                               ."WHERE ROW_ID IN (2100080002) ";
+
+                    $aryForBind = array();
+
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+                    if( $aryRetBody[0] !== true ){
+                        $boolRet = false;
+                        $strErrMsg = $aryRetBody[2];
+                        $intErrorType = 500;
+                    }
+                }
+            }
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['ASSIGN_ID']->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
 
 //----head of setting [multi-set-unique]

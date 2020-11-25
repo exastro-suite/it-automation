@@ -126,7 +126,9 @@ editorFunction.modalOpen = function( headerTitle, bodyFunc, modalType ) {
 
     // 初期値
     if ( headerTitle === undefined ) headerTitle = 'Undefined title';
-    if ( modalType === undefined ) modalType = 'default';       
+    if ( modalType === undefined ) modalType = 'default';
+    
+    $body.addClass('modal-open');
     
     let modalHTML = ''
       + '<div id="editor-modal" class="' + modalType + '">'
@@ -140,8 +142,8 @@ editorFunction.modalOpen = function( headerTitle, bodyFunc, modalType ) {
           + '</div>'
           + '<div class="editor-modal-footer">'
             + '<ul class="editor-modal-footer-menu">'
-              + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button positive" data-button-type="ok" disabled>決定</li>'
-              + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="cancel" disabled>取消</li>'
+              + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button positive" data-button-type="ok" disabled>' + getSomeMessage("ITAWDCC92001") + '</li>'
+              + '<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="cancel" disabled>' + getSomeMessage("ITAWDCC92002") + '</li>'
             + '</ul>'
           + '</div>'
         + '</div>'
@@ -152,7 +154,6 @@ editorFunction.modalOpen = function( headerTitle, bodyFunc, modalType ) {
           $lastFocus = $editorModal.find('.editor-modal-footer-menu-button[data-button-type="cancel"]');
 
     $body.append( $editorModal );
-    $container.css('filter','blur(2px)');
     $firstFocus.focus();
     
     $window.on('keydown.modal', function( e ) {
@@ -187,14 +188,14 @@ editorFunction.modalOpen = function( headerTitle, bodyFunc, modalType ) {
 // モーダルを閉じる
 editorFunction.modalClose = function() {
 
-  const $window = $( window ),
-        $container = $('.wholecontainer'),
+  const $container = $('.wholecontainer'),
         $editorModal = $('#editor-modal');
   
   if ( $editorModal.length ) {
     $window.off('keyup.modal');
     $editorModal.remove();
     $container.css('filter','none');
+    $body.removeClass('modal-open');
   }
 
 }
@@ -433,10 +434,12 @@ const storageAvailable = function( type ) {
       storage.length !== 0;
     }
 }
-const localStrageFlag = storageAvailable('localStorage');
+editorFunction.localStrageFlag = storageAvailable('localStorage');
+editorFunction.sessionStrageFlag = storageAvailable('sessionStorage');
 
+// Local storage
 editorFunction.setLocalStorage = function( key, value ) {
-    if( localStrageFlag ) {
+    if( editorFunction.localStrageFlag ) {
       try {
         localStorage.setItem( key, JSON.stringify( value ) );
       } catch( e ) {
@@ -448,26 +451,57 @@ editorFunction.setLocalStorage = function( key, value ) {
       return false;
     }
 }
-
 editorFunction.getLocalStorage = function( key ) {
-    if( localStrageFlag && localStorage.getItem( key ) !== null ) {
+    if( editorFunction.localStrageFlag && localStorage.getItem( key ) !== null ) {
       return JSON.parse( localStorage.getItem( key ) );
     } else {
       return false;
     }
 }
-
 editorFunction.keyCheckLocalStorage = function( key ) {
-    if( localStrageFlag && localStorage.getItem( key ) !== null ) {
+    if( editorFunction.localStrageFlag && localStorage.getItem( key ) !== null ) {
       return true;
     } else {
       return false;
     }
 }
-
 editorFunction.keyRemoveLocalStorage = function( key ) {
-    if( localStrageFlag ) {
+    if( editorFunction.localStrageFlag ) {
       localStorage.removeItem( key )
+    }
+}
+
+// Session storage
+editorFunction.setSessionStorage = function( key, value ) {
+    if( editorFunction.sessionStrageFlag ) {
+      try {
+        sessionStorage.setItem( key, JSON.stringify( value ) );
+      } catch( e ) {
+        // Errorで書き込めなかった場合削除する
+        window.console.error('sessionStorage.setItem( ' + key + ' ) : ' + e.message );
+        sessionStorage.removeItem( key );
+      }
+    } else {
+      return false;
+    }
+}
+editorFunction.getSessionStorage = function( key ) {
+    if( editorFunction.sessionStrageFlag && sessionStorage.getItem( key ) !== null ) {
+      return JSON.parse( sessionStorage.getItem( key ) );
+    } else {
+      return false;
+    }
+}
+editorFunction.keyCheckSessionStorage = function( key ) {
+    if( editorFunction.sessionStrageFlag && sessionStorage.getItem( key ) !== null ) {
+      return true;
+    } else {
+      return false;
+    }
+}
+editorFunction.keyRemoveSessionStorage = function( key ) {
+    if( editorFunction.sessionStrageFlag ) {
+      sessionStorage.removeItem( key )
     }
 }
 
@@ -518,15 +552,17 @@ editorFunction.downloadText = function( text, extension, fileName ) {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const inputFile = '<div id="read-file"><input id="read-file-input" type="file"></div>';
-$body.append( inputFile );
-
-const $readInputFile = $('#read-file-input');
 editorFunction.readText = {
+  'set': function() {
+    const inputFile = '<div id="read-file"><input id="read-file-input" type="file"></div>';
+    $body.append( inputFile );
+  },
   'open': function() {
+    const $readInputFile = $('#read-file-input');
     $readInputFile.val('').click();
   },
   'setInput': function( extension, readFunction ) {
+    const $readInputFile = $('#read-file-input');
     $readInputFile.attr('accept', extension ).on('change', function( e ) {
       const readFile = e.target.files[0];
       if ( readFile ) {
@@ -540,5 +576,69 @@ editorFunction.readText = {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   入力チェック
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+editorFunction.inputTextValidation = function( parent, target ) {
+  
+  $( parent ).on({
+    'focus input': function() {
+      const $input = $( this );
+      if ( !$input.is('.input-check-target') ) {
+        $input.addClass('input-check-target')
+          .wrap('<div class="input-check-wrap"/>').after('<span class="input-check-length"/>').focus();
+      }
+      const value = $input.val(),
+            maxLength = $input.attr('data-max-length');
+      let inputLength = value.length;
+      if ( inputLength > maxLength ) {
+        $input.next('.input-check-length').addClass('input-check-over');
+      } else {
+        $input.next('.input-check-length').removeClass('input-check-over');
+      }
+      $input.next('.input-check-length').text( inputLength + ' / ' + maxLength );
+    },
+    'blur': function() {
+      const $input = $( this ),
+            value = $input.val(),
+            maxLength = $input.attr('data-max-length'),
+            inputLength = value.length;
+      $input.next('.input-check-length').text('').removeClass('input-check-over');
+      if ( inputLength > maxLength ) {
+        $input.val( value.slice( 0, maxLength ) );
+      }
+    }
+  }, target );
+};
+
+editorFunction.inputNumberValidation = function( parent, target ) {
+  
+  $( parent ).on({
+    'focus': function() {
+      const $input = $( this );
+      if ( !$input.is('.input-check-target') ) {
+        $input.addClass('input-check-target')
+          .wrap('<div class="input-check-wrap"/>').after('<span class="input-check-length"/>').focus();
+      }
+      const min = Number( $input.attr('data-min') ),
+            max = Number( $input.attr('data-max') );
+      $input.next('.input-check-length').text( min + ' - ' + max );
+    },
+    'blur': function() {
+      const $input = $( this ),
+            value = $( this ).val(),
+            min = Number( $input.attr('data-min') ),
+            max = Number( $input.attr('data-max') );
+      if ( value === '' || value < min ) {
+        $input.val( min );      
+      } else if ( value > max ) {
+        $input.val( max );
+      }
+    }
+  }, target );
+};
 
 }

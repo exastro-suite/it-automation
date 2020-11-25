@@ -445,6 +445,7 @@ class MaterialIfInfoTable extends BaseTable {
                                     'BRANCH',
                                     'CLONE_REPO_DIR',
                                     'PASSWORD',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -488,6 +489,7 @@ class FileManagementTable extends BaseTable {
                                     'CLOSE_DATE',
                                     'CLOSE_USER_ID',
                                     'CLOSE_REVISION',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -531,6 +533,7 @@ class FileManagementInitialTable extends BaseTable {
                                     'CLOSE_DATE',
                                     'CLOSE_USER_ID',
                                     'CLOSE_REVISION',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -561,6 +564,7 @@ class DirMasterTable extends BaseTable {
                                     'GROUP_AUTH',
                                     'USER_AUTH',
                                     'DIR_USAGE',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -591,6 +595,7 @@ class FileMasterTable extends BaseTable {
                                     'GROUP_AUTH',
                                     'USER_AUTH',
                                     'DIR_USAGE',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -622,6 +627,7 @@ class FileMasterView extends BaseTable {
                                     'GROUP_AUTH',
                                     'USER_AUTH',
                                     'DIR_USAGE',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -651,6 +657,7 @@ class FileManegementNewestView extends BaseTable {
                                     'CLOSE_DATE',
                                     'RETURN_USER_ID',
                                     'CLOSE_REVISION',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -684,6 +691,7 @@ class MaterialLinkageAnsTable extends BaseTable {
                                     'OS_TYPE_ID',
                                     'ANSIBLE_DIALOG_CHK',
                                     'ANSIBLE_ROLE_CHK',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -710,6 +718,7 @@ class AnsCommonContentsFileTable extends BaseTable {
                                     'CONTENTS_FILE_VARS_NAME',
                                     'CONTENTS_FILE',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -736,6 +745,7 @@ class AnsibleCommonTemplateTable extends BaseTable {
                                     'ANS_TEMPLATE_VARS_NAME',
                                     'ANS_TEMPLATE_FILE',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -762,6 +772,7 @@ class AnsibleCommonPlaybookTable extends BaseTable {
                                     'PLAYBOOK_MATTER_NAME',
                                     'PLAYBOOK_MATTER_FILE',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -787,6 +798,7 @@ class AnsiblePnsDialogTypeTable extends BaseTable {
         $this->columnNames  = array('DIALOG_TYPE_ID',
                                     'DIALOG_TYPE_NAME',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -814,6 +826,7 @@ class AnsiblePnsDialogTable extends BaseTable {
                                     'OS_TYPE_ID',
                                     'DIALOG_MATTER_FILE',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -840,6 +853,7 @@ class AnsibleLrlRolePackageTable extends BaseTable {
                                     'ROLE_PACKAGE_NAME',
                                     'ROLE_PACKAGE_FILE',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -868,6 +882,7 @@ class MaterialLinkageOpenStackTable extends BaseTable {
                                     'CLOSE_REVISION_ID',
                                     'OPENST_TEMPLATE_CHK',
                                     'OPENST_ENVIRONMENT_CHK',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -902,6 +917,7 @@ class PatternPerOrchTable extends BaseTable {
                                     'OPENST_TEMPLATE',
                                     'OPENST_ENVIRONMENT',
                                     'DISP_SEQ',
+                                    'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
@@ -910,3 +926,85 @@ class PatternPerOrchTable extends BaseTable {
     }
 }
 
+/**
+ * 資材管理紐付(Terraform)テーブルクラス
+ */
+class MaterialLinkageTerraformTable extends BaseTable {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'F_MATERIAL_LINKAGE_TERRAFORM';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('ROW_ID',
+                                    'MATERIAL_LINK_NAME',
+                                    'FILE_ID',
+                                    'CLOSE_REVISION_ID',
+                                    'TERRAFORM_MODULE_CHK',
+                                    'TERRAFORM_POLICY_CHK',
+                                    'ACCESS_AUTH',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * Module素材管理テーブルクラス
+ */
+class TerraformCommonModuleFileTable extends BaseTable {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'B_TERRAFORM_MODULE';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('MODULE_MATTER_ID',
+                                    'MODULE_MATTER_NAME',
+                                    'MODULE_MATTER_FILE',
+                                    'DISP_SEQ',
+                                    'ACCESS_AUTH',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * Policy素材管理テーブルクラス
+ */
+class TerraformCommonPolicyFileTable extends BaseTable {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'B_TERRAFORM_POLICY';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('POLICY_ID',
+                                    'POLICY_NAME',
+                                    'POLICY_MATTER_FILE',
+                                    'DISP_SEQ',
+                                    'ACCESS_AUTH',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}

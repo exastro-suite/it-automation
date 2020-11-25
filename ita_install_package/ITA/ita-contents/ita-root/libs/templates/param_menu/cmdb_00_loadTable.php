@@ -52,16 +52,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', '★★★MENU★★★');
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
-    //$cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102612"));
 
 ★★★ITEM★★★
-
-    //$table->addColumn($cg);
-    //$table->addColumn($cg1);
 
     //----隠し保存テーブルがある場合の、カウント高速化
    $objFxCountTableRowLengthAgent = function($objTable, $aryVariant, $arySetting, $strFormatterId)
@@ -75,15 +69,21 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
        $intErrorType = null;
        $aryErrorMsgBody = array();
        $strFxName = "NONAME(countTableRowLengthAgent)";
-       $query = "SELECT COUNT(*) AS REC_CNT FROM " . $objTable->getDBMainTableHiddenID() . " T1 WHERE T1.".$objTable->getRequiredDisuseColumnID() ." IN ('0','1') ";
+       // RBAC対応
+       $query = "SELECT ACCESS_AUTH FROM " . $objTable->getDBMainTableHiddenID() . " T1 WHERE T1.".$objTable->getRequiredDisuseColumnID() ." IN ('0','1') ";
        $aryForBind = array();
        $aryRetBody = singleSQLExecuteAgent($query, $aryForBind, $strFxName);
        
        if( $aryRetBody[0] === true ){
            $objQuery = $aryRetBody[1];
-           $row = $objQuery->resultFetch();
+           // RBAC対応
+           $intRowLength = 0;
+           $ret = getTargetRecodeCount($objTable,$objQuery,$ntRowLength);
+           if($ret === false) {
+               $intErrorType = 500;
+               $intRowLength = -1;
+           }
            unset($objQuery);
-           $intRowLength = $row['REC_CNT'];
        }
        else{
            $intErrorType = 500;
@@ -97,42 +97,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
    //隠し保存テーブルがある場合の、カウント高速化----
 
     $table->fixColumn();
-
-    // 登録/更新/廃止/復活があった場合、代入値自動登録設定のbackyard処理の処理済みフラグをOFFにする
-    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
-        global $g;
-        $boolRet = true;
-        $intErrorType = null;
-        $aryErrMsgBody = array();
-        $strErrMsg = "";
-        $strErrorBuf = "";
-        $strFxName = "";
-
-        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
-        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
-
-            if(file_exists($g['root_dir_path'] . "/libs/release/ita_ansible-driver")){
-
-                $strQuery = "UPDATE A_PROC_LOADED_LIST "
-                           ."SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
-                           ."WHERE ROW_ID IN (2100020002, 2100020004, 2100020006)";
-
-                $g['objDBCA']->setQueryTime();
-                $aryForBind = array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP' => $g['objDBCA']->getQueryTime());
-
-                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-                if( $aryRetBody[0] !== true ){
-                    $boolRet = $aryRetBody[0];
-                    $strErrMsg = $aryRetBody[2];
-                    $intErrorType = 500;
-                }
-            }
-        }
-        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
-        return $retArray;
-    };
-    $tmpAryColumn = $table->getColumns();
-    $tmpAryColumn[$table->getDBTablePK()]->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
     $table->setGeneObject('webSetting', $arrayWebSetting);
     return $table;

@@ -159,7 +159,6 @@
                 // 0は権限がないので出力しない----
             }
             //権限の取得/判定----
-
             $arrayObjColumn = $objTable->getColumns();
 
             // ----モードによって処理分岐
@@ -175,7 +174,7 @@
                     // 初期画面(mode=0)----
                 case 1 :
                     // ----登録フォーム画面(mode=1)
-                    
+                    // TableFormatter::bodyFormatでアクセス権の初期値の設定 
                     $strOutputStr = $objListFormatter->printWebUIEditForm($arySetting,$objTable,$aryVariant,$strFormatterId);
                     
                     break;
@@ -187,10 +186,54 @@
                     $boolZenHanDistinct = $objTable->getFormatter($strFormatterId)->getGeneValue("zenHanDistinct");
                     if( $ordMode == 0 ){
                         //[ブラウザ]
+                        //カラム名がCOL_IDSOP_xからDBのカラム名に置換される
                         hiddenColumnIdDecode($objTable,$reqRegisterData);
+                        // ---- RBAC対応
+                        if($objTable->getAccessAuth() === true) {
+                            $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                            if(array_key_exists($AccessAuthColumnName,$reqRegisterData)) {
+                                $RoleNameString   = $reqRegisterData[$AccessAuthColumnName];
+                                $RoleIDString = "";
+                                if(strlen($RoleNameString) != 0) {
+                                    // ロールID文字列のアクセス権をロール名称の文字列に変換
+                                    // 廃止されているロールはカットされる
+                                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                    $RoleIDString = $obj->getRoleNameStringToRoleIDString($g['login_id'],$RoleNameString,false);  // 廃止は除く
+                                    unset($obj);
+                                }
+                                if($RoleIDString === false) {
+                                    $message = sprintf("[%s:%s]getRoleNameStringToRoleIDString Failed.",basename(__FILE__),__LINE__);
+                                    web_log($message);
+                                    $intErrorType = 500;
+                                    throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                }
+                                // 登録するアクセス権をロール名称の文字列に設定
+                                $reqRegisterData[$AccessAuthColumnName] = $RoleIDString;
+                            }
+                        }
+                        // RBAC対応 ----
                         $varCommitSpan = 1;
                     }else if( $ordMode == 1 || $ordMode == 2 || $ordMode == 3 ){
                         //[EXCEL/CSV/JSON]
+                        // ---- RBAC対応
+                        // Web以外からの場合、ログインユーザーのデフォルトアクセス権ロールに設定
+                        $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                        if($objTable->getAccessAuth()) {
+                            $obj = new RoleBasedAccessControl($g['objDBCA']);
+                            // ログインユーザーのデフォルトアクセス権ロールIDを取得
+                            // 廃止されているロールは除外
+                            $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'ID',false);  // 廃止は除外
+                            unset($obj);
+                            if($DefaultAccessRoleString === false) {
+                                $message = sprintf("[%s:%s]Failed get Role information.",basename(__FILE__),__LINE__);
+                                web_log($message);
+                                $intErrorType = 500;
+                                throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            }
+                            // アクセス権のデフォルト値を設定
+                            $reqRegisterData[$AccessAuthColumnName] = $DefaultAccessRoleString;
+                        }
+                        // RBAC対応 ----
                         $varCommitSpan = $objTable->getCommitSpanOnTableIUDByFile();
                     }else if( $ordMode == 4 ){
                         //[ブラウザ(SQLトランザクション無し)]
@@ -394,7 +437,6 @@
                             throw new Exception( '00001500-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
                     }
-
                     // ----UPDATE命令を組み立てる
                     list($sql,$aryDataForBind)=generateRegisterSQL($exeRegisterData, $arrayObjColumn, $objTable->getDBMainTableID(), $objTable->getDBMainTableHiddenID());
                     // UPDATE命令を組み立てる----
