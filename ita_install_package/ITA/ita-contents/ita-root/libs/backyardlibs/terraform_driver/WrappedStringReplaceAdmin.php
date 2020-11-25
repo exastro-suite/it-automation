@@ -19,7 +19,7 @@ class WrappedStringReplaceAdmin{
     protected $aryFixedElementFromSourceString;
     protected $aryReplaceElementFromSourceString;
     //解析結果を保存する配列----
-    function __construct($in_var_heder_id,
+    function __construct($in_var_heder,
                          $strSourceString,
                    $arrylocalvars=array()){
 
@@ -28,7 +28,7 @@ class WrappedStringReplaceAdmin{
         $this->aryReplaceElementFromSourceString = array();
         //配列を初期化----
 
-        $this->parseWrappedString($in_var_heder_id,$strSourceString,$arrylocalvars);
+        $this->parseWrappedString($in_var_heder,$strSourceString,$arrylocalvars);
     }
     //*******************************************************************************************
     //----解析結果を取得するプロパティ
@@ -50,45 +50,61 @@ class WrappedStringReplaceAdmin{
         // 入力データを行単位に分解
         $arry_list = explode("\n",$in_strSourceString);
         foreach($arry_list as $strSourceString){
+            $defaultStrSourceString = $strSourceString;
             $strSourceString = $strSourceString . "\n";
             // コメント行は読み飛ばす
-            if(mb_strpos($strSourceString,"#",0,"UTF-8") === 0){
+            if(mb_strpos($strSourceString,"#",0,"UTF-8") === 0 || mb_strpos($strSourceString,"//",0,"UTF-8") === 0){
                 $this->aryFixedElementFromSourceString[] = $strSourceString;
                 continue;
             }
 
-            $wstr = $strSourceString;
             // コメント(#)マーク以降の文字列を削除する。
+            $wstr = $strSourceString;
             $wspstr = explode("#",$wstr);
             $strSourceString = $wspstr[0];
+
+            // コメント(//)マーク以降の文字列を削除する。
+            $wstr2 = $strSourceString;
+            $wspstr2 = explode("//",$wstr2);
+            $strSourceString = $wspstr2[0];
+
             if( is_string($strSourceString)===true ){
                 $boolRet = true;
-                $strRemainString = $strSourceString;
 
-                //文字列をスペース区切りで配列に格納
-                $aryStrSpaceBreak = explode(" ", $strRemainString);
-                foreach($aryStrSpaceBreak as $strSpaceBreak){
-                    //対象文字列から始まる文字数を取得
-                    $numResultOfSearchHead = mb_strpos($strSpaceBreak, $in_var_heder);
-                    //対象文字列が無い場合は次へ
-                    if($numResultOfSearchHead === false){
-                        $this->aryFixedElementFromSourceString[] = $strSpaceBreak;
-                        continue;
-                    }
+                //対象文字列から始まる文字数を取得
+                $numResultOfSearchHead = mb_strpos($strSourceString, $in_var_heder);
 
-                    //対象文字列の文字数から末尾までを取得
-                    $strWrappedString = mb_substr($strSpaceBreak, $numResultOfSearchHead, null, "UTF-8");
-                    //スペースを削除
-                    $strWrappedString = trim($strWrappedString);
-                    //${var.xxx}のパターンを考慮し、「 } 」より前の文字列のみを抽出
-                    $strWrappedString = substr($strWrappedString, 0, strcspn($strWrappedString,'}'));
-
-                    //変数名を退避する
-                    $this->aryReplaceElementFromSourceString[] = $strWrappedString;
-
+                //行の中に対象文字列が無い場合は次へ
+                if($numResultOfSearchHead === false){
+                    $this->aryFixedElementFromSourceString[] = $defaultStrSourceString;
+                    continue;
                 }
+
+                //対象文字列から先頭文字列より前にある文字列を削除
+                $strCutBeforeString = strstr($strSourceString, $in_var_heder);
+
+                //対象文字列から先頭文字列を削除
+                $strCutHeadString = str_replace($in_var_heder, '', $strCutBeforeString);
+
+                //文字列を『"』で区切りった最初の文字列を抽出
+                $wspstr3 = explode('"', $strCutHeadString);
+                $strWrappedString = $wspstr3[0];
+
+                //スペースを削除
+                $strWrappedString = trim($strWrappedString);
+
+                //対象文字列に空文字が入った場合は次へ
+                if($strWrappedString == ""){
+                    $this->aryFixedElementFromSourceString[] = $defaultStrSourceString;
+                    continue;
+                }
+
+                //変数名を退避する
+                $this->aryReplaceElementFromSourceString[] = $strWrappedString;
+
             }
         }
+
         return $boolRet;
     }
 

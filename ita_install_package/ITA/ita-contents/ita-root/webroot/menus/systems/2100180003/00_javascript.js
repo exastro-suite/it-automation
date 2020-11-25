@@ -168,14 +168,8 @@ callback.prototype = {
     //----Callリスト用-----//
     printConductorList : function( result ){
         conductorUseList.conductorCallList = JSON.parse( result );
-        // Editor起動時
         if ( conductorGetMode === 'starting') {
-          if ( conductorClassID !== null ) {
-             proxy.printconductorClass( Number( conductorClassID ) );
-          } else {
-            conductorUseList.conductorData = null;
-            initEditor('edit');
-          }
+          getRoleList();
         }
     }
     ,
@@ -186,10 +180,41 @@ callback.prototype = {
     //----Conductor登録----//
     register_execute : function( result ){
         conductorResultMessage('conductorRegister', result );
-    }
+    },
+    printSymphonyList : function( result ){
+        conductorUseList.symphonyCallList = JSON.parse( result );
+        // Editor起動時
+        if ( conductorGetMode === 'starting') {
+          if ( conductorClassID !== null ) {
+             proxy.printconductorClass( Number( conductorClassID ) );
+          } else {
+            conductorUseList.conductorData = null;
+            initEditor('edit');
+          }
+        }
+    },
     //Conductor系メソッド----
     
 }
+
+// ロール一覧を取得する
+function getRoleList() {
+    const printRoleListURL = '/common/common_printRoleList.php?user_id=' + gLoginUserID;
+    $.ajax({
+      type: 'get',
+      url: printRoleListURL,
+      dataType: 'text'
+    }).done( function( result ) {
+        conductorUseList.roleList = JSON.parse( result );
+        if ( conductorGetMode === 'starting') {
+          proxy.printSymphonyList();
+        }
+    }).fail( function( result ) {
+    });
+}
+
+
+
 
 /* 登録・更新処理結果 */
 function conductorResultMessage( type, result ) {
@@ -319,6 +344,15 @@ function printconductorClass(boolCallProxy,aryResultOfCalledProxy){
         proxy.printconductorClass(intConductorClassId);
     }else{
 
+    }
+}
+//----コールバック相互呼出系 Call一覧の展開
+function printSymphonyList(boolCallProxy,aryResultOfCalledProxy){
+    console.log("printSymphonyList");
+    if( boolCallProxy===true ){
+        proxy.printSymphonyList();
+    }else{
+        console.log(aryResultOfCalledProxy);
     }
 }
 

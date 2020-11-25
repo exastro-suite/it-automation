@@ -52,6 +52,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITABASEH-MNU-301040"));
 
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
     $c = new TextColumn('AD_GROUP_SID', $g['objMTS']->getSomeMessage("ITABASEH-MNU-301050"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-301060"));//エクセル・ヘッダでの説明
     $table->addColumn($c);

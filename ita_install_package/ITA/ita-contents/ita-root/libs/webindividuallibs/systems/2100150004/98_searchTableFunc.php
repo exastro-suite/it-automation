@@ -204,11 +204,30 @@ function searchFunc($aryVariant, &$resultArray, &$strErrMsgBodyToHtmlUI){
             $objQuery =& $retArray[1];
             $intFetchCount = 0;
 
-            while($row = $objQuery->resultFetch()){
-                $intFetchCount += 1;
-                $resultArray[] = $row;
+            // ---- RBAC対応
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 104;
+                throw new Exception("");
             }
+
+            while($row = $objQuery->resultFetch()){
+                // レコード毎のアクセス権を判定
+                list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                if($ret === false) {
+                    $intErrorType = 105;
+                    throw new Exception("");
+                }else{
+                    if($permission === true){
+                        $intFetchCount += 1;
+                        $resultArray[] = $row;
+                    }
+                }
+            }
+            unset($obj);
             unset($objQuery);
+            // RBAC対応 ----
         }
         else{
             $intErrorType = 103;

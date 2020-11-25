@@ -65,10 +65,7 @@ Ansible（Pioneer）代入値管理
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-502040"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     //----オペレーション
@@ -171,6 +168,7 @@ Ansible（Pioneer）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
                    .",TAB_2.PATTERN    DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_PNS_PHO_LINK          TAB_1 "
                    ." LEFT JOIN E_ANSIBLE_PNS_PATTERN TAB_2 ON (TAB_1.PATTERN_ID = TAB_2.PATTERN_ID) "
@@ -183,17 +181,35 @@ Ansible（Pioneer）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                        break;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
             }else{
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
             }
         }
         $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -215,6 +231,7 @@ Ansible（Pioneer）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
                    .",TAB_2.PATTERN    DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_PNS_PHO_LINK          TAB_1 "
                    ." LEFT JOIN E_ANSIBLE_PNS_PATTERN TAB_2 ON (TAB_1.PATTERN_ID = TAB_2.PATTERN_ID) "
@@ -227,17 +244,35 @@ Ansible（Pioneer）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
         
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                        break;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
             }else{
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
             }
         }
         $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -259,6 +294,7 @@ Ansible（Pioneer）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
                    .",TAB_2.PATTERN    DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_PNS_PHO_LINK          TAB_1 "
                    ." LEFT JOIN E_ANSIBLE_PNS_PATTERN TAB_2 ON (TAB_1.PATTERN_ID = TAB_2.PATTERN_ID) "
@@ -271,17 +307,35 @@ Ansible（Pioneer）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                        break;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
             }else{
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
             }
         }
         $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -377,6 +431,7 @@ Ansible（Pioneer）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
                    .",TAB_2.HOST_PULLDOWN DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_PNS_PHO_LINK TAB_1 "
                    ." LEFT JOIN E_STM_LIST   TAB_2 ON (TAB_1.SYSTEM_ID = TAB_2.SYSTEM_ID) "
@@ -389,17 +444,35 @@ Ansible（Pioneer）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                        break;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
             }else{
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
             }
         }
         $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -421,6 +494,7 @@ Ansible（Pioneer）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
                    .",TAB_2.HOST_PULLDOWN DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_PNS_PHO_LINK TAB_1 "
                    ." LEFT JOIN E_STM_LIST   TAB_2 ON (TAB_1.SYSTEM_ID = TAB_2.SYSTEM_ID) "
@@ -433,17 +507,35 @@ Ansible（Pioneer）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                        break;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
             }else{
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
             }
         }
         $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -465,6 +557,7 @@ Ansible（Pioneer）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
                    .",TAB_2.HOST_PULLDOWN DISP_COLUMN "
+                   .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    ."FROM "
                    ." B_ANSIBLE_PNS_PHO_LINK TAB_1 "
                    ." LEFT JOIN E_STM_LIST   TAB_2 ON (TAB_1.SYSTEM_ID = TAB_2.SYSTEM_ID) "
@@ -477,17 +570,35 @@ Ansible（Pioneer）代入値管理
         $aryForBind['OPERATION_NO_UAPK'] = $strOperationNumeric;
 
         if( 0 < strlen($strOperationNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                        break;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
             }else{
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
             }
         }
         $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -583,6 +694,7 @@ Ansible（Pioneer）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                    .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH     "
                    ."FROM "
                    ." D_ANS_PNS_PTN_VARS_LINK_VFP TAB_1 "
                    ."WHERE "
@@ -593,17 +705,35 @@ Ansible（Pioneer）代入値管理
         $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
         if( 0 < strlen($strPatternIdNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                        break;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
             }else{
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
             }
         }
         $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -625,6 +755,7 @@ Ansible（Pioneer）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                    .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH     "
                    ."FROM "
                    ." D_ANS_PNS_PTN_VARS_LINK_VFP TAB_1 "
                    ."WHERE "
@@ -635,17 +766,36 @@ Ansible（Pioneer）代入値管理
         $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
         if( 0 < strlen($strPatternIdNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[]= $row;
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                        break;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[]= $row;
+                            $aryDataSet[]= $row;
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
             }else{
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
             }
         }
         $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
@@ -667,6 +817,7 @@ Ansible（Pioneer）代入値管理
         $strQuery = "SELECT "
                    ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                    .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
+                   .",TAB_1.ACCESS_AUTH     "
                    ."FROM "
                    ." D_ANS_PNS_PTN_VARS_LINK_VFP TAB_1 "
                    ."WHERE "
@@ -677,17 +828,35 @@ Ansible（Pioneer）代入値管理
         $aryForBind['PATTERN_ID']        = $strPatternIdNumeric;
 
         if( 0 < strlen($strPatternIdNumeric) ){
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                $intErrorType = 500;
+                $retBool = false;
+            }
+
             $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
             if( $aryRetBody[0] === true ){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
-                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                    // レコード毎のアクセス権を判定
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                        break;
+                    }else{
+                        if($permission === true){
+                            $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                        }
+                    }
                 }
                 unset($objQuery);
                 $retBool = true;
             }else{
                 $intErrorType = 500;
-                $intRowLength = -1;
+                $retBool = false;
             }
         }
         $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
@@ -761,11 +930,20 @@ Ansible（Pioneer）代入値管理
     $table->addColumn($c);
     //変数名----
 
+    //----Sensitive設定
+    $c = new IDColumn('SENSITIVE_FLAG',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010002000"), 'B_SENSITIVE_FLAG', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010002010")); //エクセル・ヘッダでの説明
+    $c->setJournalTableOfMaster('B_SENSITIVE_FLAG_JNL');
+    $c->setRequired(true); //登録/更新時には、入力必須
+    //コンテンツのソースがヴューの場合、登録/更新の対象とする
+    $c->setHiddenMainTableColumn(true);
+    $c->setDefaultValue("register_table", 1);
+
+    $table->addColumn($c);
 
     //----具体値
     $objVldt = new SingleTextValidator(0,8192,false);
-
-    $c = new TextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-503050"));
+    $c = new SensitiveSingleTextColumn('VARS_ENTRY',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-503050"),'SENSITIVE_FLAG');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-503060"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
 

@@ -25,6 +25,7 @@ $ary[10008] = "Number of processes: Config files=[{}]";
 $ary[10009] = "Number of processes: Scenario files=[{}]";
 $ary[10010] = "Number of processes: SG files=[{}]";
 $ary[10011] = "Number of processes: Script files=[{}], CSV files=[{}], SG files=[{}]";
+$ary[10012] = "Number of processes: Delete=[{}], Module files=[{}], Policy file=[{}]";
 $ary[50001] = "Create New";
 $ary[50002] = "Check-in request returned because the file name was different.";
 $ary[50003] = "Check-in request returned because the revision at check-out is different to that currently in Git.\nCheck Git.";

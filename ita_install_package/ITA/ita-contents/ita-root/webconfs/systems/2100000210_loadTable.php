@@ -31,7 +31,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090002"));
     $table->getFormatter("excel")->setGeneValue("sheetNameForEditByFile",$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090003"));
     
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
+    $table->setAccessAuth(true);    // データごとのRBAC設定
     
     $table->setGeneObject("webSetting", $arrayWebSetting);
 
@@ -170,6 +170,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType("print_journal_table")->setVisible(false);
     $c->setHiddenMainTableColumn(true);
     $c->setRequired(true);    
+    $table->addColumn($c);
+
+    $c = new IDColumn('DEF_ACCESS_AUTH_FLAG',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090603"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090604"));//エクセル・ヘッダでの説明
+    $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
 
     $table->fixColumn();

@@ -25,6 +25,7 @@
     function deleteTableMain($intBaseMode, $strNumberForRI, $reqDeleteData=null, $strTCASRKey=null, $ordMode=0, &$aryVariant=array(), &$arySetting=array()){
         global $g;
         require_once ( "{$g['root_dir_path']}/libs/webcommonlibs/table_control_agent/99_functions2.php");
+
         
         //----$ordMode=0[ブラウザからの廃止/復活]
         //----$ordMode=1[EXCEL]からの廃止/復活
@@ -178,6 +179,32 @@
                     $selectRowLength = $arrayResult[0];
                     $editTgtRow = $arrayResult[1];
                     $intErrorType = $arrayResult[2];
+
+                    // ---- RBAC対応
+                    if($objTable->getAccessAuth() === true) {
+                        $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                        if(array_key_exists($AccessAuthColumnName,$editTgtRow)) {
+                            $RoleIDString   = $editTgtRow[$AccessAuthColumnName];
+                            $RoleNameString = "";
+                            if(strlen($RoleIDString) != 0) {
+                                // ロールID文字列のアクセス権をロール名称の文字列に変換
+                                // 廃止されているロールはID変換失敗で表示
+                                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);  // 廃止も含む
+                                unset($obj);
+                            }
+                            if($RoleIDString === false) {
+                                $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Failed.",basename(__FILE__),__LINE__);
+                                web_log($message);
+                                $intErrorType = 500;
+                                throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            }
+                            // 登録されているアクセス権をロール名称の文字列に設定
+                            $editTgtRow[$AccessAuthColumnName] = $RoleNameString;
+                        }
+                    }
+                    // RBAC対応 ----
+
                     // 更新対象レコードをSELECT----
                     //
                     if($selectRowLength == 1){

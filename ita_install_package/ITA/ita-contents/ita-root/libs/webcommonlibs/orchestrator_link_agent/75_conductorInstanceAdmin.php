@@ -90,7 +90,76 @@ function conductorInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $st
             unset($tmpAryRetBody);
         }
         //$strPreserveDatetimeの形式チェック----
-       
+        
+        // ---ConductorクラスIDの廃止チェック
+        $aryRetBody = $objOLA->getInfoFromOneOfConductorClass($intShmphonyClassId, 0,0,0,1);
+
+        $disuseFlg = '';
+        if( isset( $aryRetBody[4]['DISUSE_FLAG'] ) === true ) $disuseFlg = $aryRetBody[4]['DISUSE_FLAG'];
+
+        if( $disuseFlg != 0 ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000600";
+
+            //----該当のConductorClassIDが１行も発見できなかった場合
+            $intErrorType = 2;
+            //$strExpectedErrMsgBodyForUI = "ConductorクラスID：存在している必要があります。";
+            $strErrMsg = $aryRetBody[3];
+            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170008");
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            //該当のConductorClassIDが１行も発見できなかった場合----
+
+        }
+        //ConductorクラスIDの廃止チェック ---
+
+        // ----オペレーションNO廃止チェック
+        $arrayRetBody = $objOLA->getInfoOfOneOperation($intOperationNoUAPK);
+        if( $arrayRetBody[1] !== null ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000700";
+            if( $arrayRetBody[1] === 101 ){
+                $intErrorType = 2;
+                //$strExpectedErrMsgBodyForUI = "オペレーションNO：存在している必要があります。";
+                $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733108");
+            }
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        // オペレーションNO廃止チェック----
+
+        //--- Conductorクラス状態保存 
+        $arrayResult = $objOLA->convertConductorClassJson($intShmphonyClassId,1);
+
+        // JSON形式の変換、不要項目の削除
+        $tmpReceptData = $arrayResult[4];
+        $arrayReceptData=$tmpReceptData['conductor'];
+        $strSortedData=$tmpReceptData;
+        unset($strSortedData['conductor']);
+        foreach ($strSortedData as $key => $value) {
+            if( preg_match('/line-/',$key) ){
+                unset($strSortedData[$key]);
+            }
+        }
+        unset($strSortedData['conductor']);
+        unset($strSortedData['config']);
+        
+        $arrayResult = conductorClassRegisterExecute(null, $arrayReceptData, $strSortedData, null);
+
+        if( $arrayResult[0] == "000" ){
+            $intShmphonyClassId = $arrayResult[2];
+        }else{
+            $intErrorType = $arrayResult[0];
+            $aryErrMsgBody=$arrayResult[2];
+            $strErrMsg="";
+            $intSymphonyInstanceId="";
+            $strExpectedErrMsgBodyForUI = $arrayResult[3];
+
+            $strErrStepIdInFx="00000500";
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        // Conductorクラス状態保存 ---
+
         $retArray = $objOLA->registerConductorInstance($intShmphonyClassId, $intOperationNoUAPK, $strPreserveDatetime, "", $aryOptionOrderOverride, $g['login_id'], $g['login_name_jp']);
 
         if($retArray[0] == false){
@@ -1642,7 +1711,7 @@ function getSingleConductorInfoFromNodeInstances($intConductorInstanceId, $intMo
 //Noder(インスタンス)管理テーブルから、ある１のConductorに紐づくNode情報を取得する----
 
 //----ある１のシConductorのインスタンス状態を表示する
-function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0){
+function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""){
     // グローバル変数宣言
     global $g;
     //----RETSET[-PER-FX]
@@ -1799,7 +1868,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0){
         //Conductor(インスタンス)情報を固める----
 
 
-        $aryRetBody = $objOLA->convertConductorClassJson($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO']);
+        $aryRetBody = $objOLA->convertConductorClassJson($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO'],$getmode);
         if( $aryRetBody[1] !== null ){
             // 例外処理へ
             $strErrStepIdInFx="00001000";
@@ -1807,7 +1876,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0){
         }
         $aryConductorData=$aryRetBody;
 
-        $aryRetBody = $objOLA->getInfoOfOneNodeTerminal($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO'], 2, 0,0);
+        $aryRetBody = $objOLA->getInfoOfOneNodeTerminal($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO'], 2, 0,0,0,$getmode);
         if( $aryRetBody[1] !== null ){
             // 例外処理へ
             $strErrStepIdInFx="00001000";
@@ -1873,6 +1942,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0){
             $aryInstanceItems = array();
             $aryInstanceItems['NODE_NAME']  = $aryClassItems['NODE_NAME'];
             $aryInstanceItems['NODE_INSTANCE_NO']                 = $row['NODE_INSTANCE_NO'];
+            $aryInstanceItems['NODE_TYPE_ID']                 = $row['I_NODE_TYPE_ID'];
             $aryInstanceItems['STATUS']                 = $row['STATUS_ID'];
             $aryInstanceItems['SKIP']                 = $row['EXE_SKIP_FLAG'];
             //ステータス----
@@ -1914,9 +1984,14 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0){
 
             }
 
-            if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" ){
+            if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" && $row['I_NODE_TYPE_ID'] == 4  ){
                 //----ジャンプ用(ITA-ROOTからの)相対URL
                 $aryInstanceItems['JUMP']             = $g['scheme_n_authority']."/default/menu/01_browse.php?no=2100180005&conductor_instance_id=".$row['CONDUCTOR_INSTANCE_CALL_NO'];
+                //----ジャンプ用(ITA-ROOTからの)相対URL
+            }
+            if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" && $row['I_NODE_TYPE_ID'] == 10 ){
+                //----ジャンプ用(ITA-ROOTからの)相対URL
+                $aryInstanceItems['JUMP']             = $g['scheme_n_authority']."/default/menu/01_browse.php?no=2100000309&symphony_instance_id=".$row['CONDUCTOR_INSTANCE_CALL_NO'];
                 //----ジャンプ用(ITA-ROOTからの)相対URL
             }
 

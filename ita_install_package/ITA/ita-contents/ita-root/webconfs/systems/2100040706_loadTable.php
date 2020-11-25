@@ -52,11 +52,11 @@ Ansible 共通 グローバル変数管理
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1940003"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
+
 
     $objVldt = new TextValidator(1, 128, false, '/^GBL_[_a-zA-Z0-9]+$/', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1940011"));
+    $objVldt->setRegexp("/^[^\r\n]*$/s","DTiS_filterDefault");
     $c = new TextColumn('VARS_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1940010"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1940011"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);

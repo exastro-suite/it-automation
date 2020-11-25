@@ -237,7 +237,7 @@
             unset($strSortedData['config']);
 
             require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/74_conductorClassAdmin.php");
-            $arrayResult = conductorClassRegisterExecute(null, $arrayReceptData, $strSortedData, null);
+            $arrayResult = conductorClassRegisterExecute(null, $arrayReceptData, $strSortedData, null,1);
 
             // 結果判定
             if($arrayResult[0]=="000"){
@@ -274,7 +274,7 @@
 
             require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/74_conductorClassAdmin.php");
 
-            $arrayResult = conductorClassRegisterExecute($intShmphonyClassId, $arrayReceptData, $strSortedData, $strLT4UBody);
+            $arrayResult = conductorClassRegisterExecute($intShmphonyClassId, $arrayReceptData, $strSortedData, $strLT4UBody,1);
 
             // 結果判定
             if($arrayResult[0]=="000"){
@@ -286,9 +286,37 @@
             }
             return $arrayResult;
         }
+        ////////////////////////////////
+        //  Symphony一覧の表示  //
+        ////////////////////////////////
 
+        function printSymphonyList(){
+            // グローバル変数宣言
+            global $g;
+            
+            // ローカル変数宣言
+            $arrayResult = array();
+            
+            $ola_common_lib_dir = "libs/webcommonlibs/orchestrator_link_agent";
+            require_once($g['root_dir_path']."/".$ola_common_lib_dir."/71_basic_common_lib.php");
+            #require_once($g['root_dir_path']."/libs/webindividuallibs/systems/".$g['page_dir']."/81_print_operation_info.php");
+            require_once($g['root_dir_path']."/libs/webindividuallibs/systems/".$g['page_dir']."/81_print_conductor_info.php");
+        
+            $arrayResult =  printConductorListInfoRegSymphony();
+
+            // 結果判定
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return $arrayResult[2];
+        }
     }
-    
+
+
     class Db_Access extends Db_Access_Core {
     
     }

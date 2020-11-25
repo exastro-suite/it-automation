@@ -17,14 +17,29 @@
     try{
         require_once ($root_dir_path . "/libs/webcommonlibs/web_functions_for_menu_info.php");
 
-        if(array_key_exists('grp', $_GET) && "" != $_GET['grp']){
+        if( array_key_exists('grp', $_GET) && "" != $_GET['grp'] ){
             $ACRCM_group_id = sprintf("%010d", $_GET['grp']);
+            $ACRCM_id = "";
+            $ACRCM_login_nf = "1";
+        }
+        else if( $_SERVER['REQUEST_URI'] === "/default/mainmenu/01_browse.php" ){
+            $ACRCM_group_id = "";
+            $ACRCM_id = "";
+            $ACRCM_login_nf = "1";
+        }
+        else if( isset($_GET['no']) && $_GET['no'] == "" ){
+            $ACRCM_group_id = "";
             $ACRCM_id = "";
             $ACRCM_login_nf = "1";
         }
         else{
             //----メニューの情報取得
-            $tmpAryRetBody = getMenuInfo(intval($_GET['no']), $objDBCA);
+            if ( isset($_GET['no']) && !empty($_GET['no']) ) {
+                $no = $_GET['no'];
+            } else {
+                $no = "";
+            }
+            $tmpAryRetBody = getMenuInfo(intval($no), $objDBCA);
 
             if( $tmpAryRetBody[1] !== null ){
                 if( $tmpAryRetBody[1] == 502 ){
@@ -55,22 +70,27 @@
 
         //----メニューグループ名取得
         //----■テーブル【メニューグループリスト】から、リクエストされたPHPが所属するメニューの、メニューグループ名を取得する。
-        $tmpAryRetBody = getMenuGroupNameByMenuGroupID(intval($ACRCM_group_id), $objDBCA);
-        if( $tmpAryRetBody[1] !== null ){
-            //----取得できなかった
-            if( $tmpAryRetBody[1] == 502 ){
-                // アクセスログ出力(想定外エラー)
-                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-41"));
+        if($ACRCM_group_id === "" || $ACRCM_group_id === "0000000000"){
+            $title_name = "Exastro-IT-Automation";
+            $ACRCM_group_name = "";
+        } else {
+            $tmpAryRetBody = getMenuGroupNameByMenuGroupID(intval($ACRCM_group_id), $objDBCA);
+            if( $tmpAryRetBody[1] !== null ){
+                //----取得できなかった
+                if( $tmpAryRetBody[1] == 502 ){
+                    // アクセスログ出力(想定外エラー)
+                    web_log($objMTS->getSomeMessage("ITAWDCH-ERR-41"));
 
-                // 想定外エラー通知画面にリダイレクト
-                webRequestForceQuitFromEveryWhere(500,10510102);
-                exit();
+                    // 想定外エラー通知画面にリダイレクト
+                    webRequestForceQuitFromEveryWhere(500,10510102);
+                    exit();
+                }
+                throw new Exception( $tmpAryRetBody[3] );
+                // 取得できなかった----
             }
-            throw new Exception( $tmpAryRetBody[3] );
-            // 取得できなかった----
+            $ACRCM_group_name = $tmpAryRetBody[0]['MenuGroupName'];
+            unset($tmpAryRetBody);
         }
-        $ACRCM_group_name = $tmpAryRetBody[0]['MenuGroupName'];
-        unset($tmpAryRetBody);
     }
     catch (Exception $e){
         $tmpErrMsgBody = $e->getMessage();
@@ -85,7 +105,9 @@
     }
 
     // 後続のヒアドキュメント内で使用する置換文字列を準備
-    $title_name = $ACRCM_group_name;
+    if ( !isset($title_name) || empty($title_name) ) {
+        $title_name = $ACRCM_group_name;
+    }
     $site_name  = $ACRCM_group_name;
     $admin_addr = file_get_contents( $root_dir_path . "/confs/webconfs/admin_mail_addr.txt");
 ?>

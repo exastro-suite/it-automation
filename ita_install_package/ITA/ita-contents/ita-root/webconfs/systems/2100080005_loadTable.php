@@ -53,10 +53,7 @@ Module素材集
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102940"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     //************************************************************************************
@@ -82,7 +79,37 @@ Module素材集
     $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $table->addColumn($c);
 
+    // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+        $strFxName = "";
 
+        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+
+            $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                       ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                       ."WHERE ROW_ID in (2100080001) ";
+
+            $aryForBind = array();
+
+            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+            if( $aryRetBody[0] !== true ){
+                $boolRet = false;
+                $strErrMsg = $aryRetBody[2];
+                $intErrorType = 500;
+            }
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['MODULE_MATTER_ID']->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
     $table->fixColumn();
 

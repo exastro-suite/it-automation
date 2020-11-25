@@ -55,9 +55,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101403"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     $c = new IDColumn('FILE_STATUS_ID',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101302"),'F_MM_STATUS_MASTER','FILE_STATUS_ID','FILE_STATUS_NAME','G_FILE_STATUS_MASTER_1',array('OrderByThirdColumn'=>'FILE_STATUS_ID'));

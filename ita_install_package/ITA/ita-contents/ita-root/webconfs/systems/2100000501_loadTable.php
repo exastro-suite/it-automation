@@ -56,9 +56,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITABASEH-MNU-211003"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     // カラムグループ メニューグループ(一覧のみ表示)
@@ -201,7 +199,17 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
+    
+    $c = new IDColumn('SHEET_TYPE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-211015"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME','',array('OrderByThirdColumn'=>'DISP_SEQ'));
+    $c->setDescription('');//エクセル・ヘッダでの説明
+    $c->setHiddenMainTableColumn(true); 
+    $c->setRequired(true);//登録/更新時には、入力必須
+    $table->addColumn($c);
 
+    $c = new IDColumn('ACCESS_AUTH_FLG',$g['objMTS']->getSomeMessage("ITABASEH-MNU-211016"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    $c->setDescription('');//エクセル・ヘッダでの説明
+    $c->setHiddenMainTableColumn(true); 
+    $table->addColumn($c);
 
     $table->fixColumn();
 

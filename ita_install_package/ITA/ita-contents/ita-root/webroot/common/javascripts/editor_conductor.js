@@ -88,6 +88,9 @@ function conductorEditor() {
 // 言語
 const language = editor.getLang();
 
+// 読み込み用input set
+editor.readText.set();
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   コンダクターエディタ初期設定
@@ -110,20 +113,30 @@ const listIdName = function( type, id ) {
       list = conductorUseList.movementList;
       idKey = 'PATTERN_ID';
       nameKey = 'PATTERN_NAME';
+    } else if ( type === 'symphony') {
+      list = conductorUseList.symphonyCallList;
+      idKey = 'SYMPHONY_CLASS_NO';
+      nameKey = 'SYMPHONY_NAME';
+    } else if ( type === 'role') {
+      list = conductorUseList.roleList;
+      idKey = 'ROLE_ID';
+      nameKey = 'ROLE_NAME';
     }
-
-    const listLength = list.length;
-    for ( let i = 0; i < listLength; i++ ) {
-      if ( Number( list[i][idKey] ) === Number( id ) ) {
-        if ( type === 'movement') {
-          name = [ list[i][nameKey], list[i]['ORCHESTRATOR_ID'] ];
-        } else {
-          name = list[i][nameKey];
+    
+    if ( list !== undefined ) {
+      const listLength = list.length;
+      for ( let i = 0; i < listLength; i++ ) {
+        if ( Number( list[i][idKey] ) === Number( id ) ) {
+          if ( type === 'movement') {
+            name = [ list[i][nameKey], list[i]['ORCHESTRATOR_ID'] ];
+          } else {
+            name = list[i][nameKey];
+          }
+          return name;
         }
-        return name;
       }
+      return undefined; 
     }
-    return undefined;  
   } else {
     return undefined;  
   }
@@ -307,6 +320,17 @@ const setInitialConductorData = function() {
     'note': null,
     'LUT4U': null
   };
+  // ACCESS_AUTHの初期値を入れる
+  if ( conductorUseList.roleList !== undefined ) {
+    const roleDefault = new Array,
+          roleLength = conductorUseList.roleList.length;
+    for ( let i = 0; i < roleLength; i++ ) {
+      if ( conductorUseList.roleList[i]['DEFAULT'] === 'checked') {
+        roleDefault.push( conductorUseList.roleList[i]['ROLE_ID'] );
+      } 
+    }
+    conductorData['conductor']['ACCESS_AUTH'] = roleDefault.join(',');
+  }
 }
 setInitialConductorData();
 
@@ -1185,7 +1209,8 @@ const createNodeHTML = function( nodeID ) {
       'start' : ['S', 'Conductor', 'Start', 'conductor-start'],
       'end' : ['E', 'Conductor', 'End', 'conductor-end'],
       'pause' : ['', '', 'Pause', 'function function-pause'],
-      'call' : ['C', 'Conductor call', 'Not selected', 'conductor-call'],
+      'call' : ['Cc', 'Conductor call', 'Not selected', 'conductor-call'],
+      'call_s' : ['Sc', 'Symphony call', 'Not selected', 'symphony-call'],
       'conditional-branch' : ['', '', '', 'function function-conditional'],
       'parallel-branch' : ['', '', '', 'function function-parallel'],
       'merge' : ['', '', '', 'function function-merge']
@@ -1255,7 +1280,7 @@ const createNodeHTML = function( nodeID ) {
     }
 
     // Node circle & Node type
-    typeCheck = ['start', 'end', 'movement', 'call'];
+    typeCheck = ['start', 'end', 'movement', 'call', 'call_s'];
     if ( typeCheck.indexOf( nodeData.type ) !== -1 ) {
       nodeHTML += ''
       + '<div class="node-circle">'
@@ -1276,6 +1301,13 @@ const createNodeHTML = function( nodeID ) {
         nodeName = '[' + nodeData['CALL_CONDUCTOR_ID'] + ']:' + listIdName('conductor', nodeData['CALL_CONDUCTOR_ID'] );
       }
       nodeHTML += '<div class="node-name"><span class="select-conductor-name"><span class="select-conductor-name-inner">' + nodeName + '</span></span></span></div>';
+    }
+    if ( nodeData.type === 'call_s' ) {
+      if ( editor.checkValue( nodeData['CALL_SYMPHONY_ID'] ) ) {
+        nodeClass.push('call-select');
+        nodeName = '[' + nodeData['CALL_SYMPHONY_ID'] + ']:' + listIdName('symphony', nodeData['CALL_SYMPHONY_ID'] );
+      }
+      nodeHTML += '<div class="node-name"><span class="select-symphony-name"><span class="select-symphony-name-inner">' + nodeName + '</span></span></span></div>';
     }
     // Pause
     if ( nodeData.type === 'pause' ) {
@@ -1344,7 +1376,7 @@ const createNodeHTML = function( nodeID ) {
     }
 
     // Skip, Status, Operation
-    typeCheck = ['movement', 'call'];
+    typeCheck = ['movement', 'call', 'call_s'];
     if ( typeCheck.indexOf( nodeData.type ) !== -1 ) {
       // Default skip
       let nodeCheckedType = '',
@@ -1464,6 +1496,12 @@ const initialNode = function( nodeType, movementID ){
     if ( nodeType === 'call' ) {
       conductorData[ nodeID ]['SKIP_FLAG'] = 0;
       conductorData[ nodeID ]['CALL_CONDUCTOR_ID'] = null;
+      conductorData[ nodeID ]['OPERATION_NO_IDBH'] = null;
+    }
+    
+    if ( nodeType === 'call_s' ) {
+      conductorData[ nodeID ]['SKIP_FLAG'] = 0;
+      conductorData[ nodeID ]['CALL_SYMPHONY_ID'] = null;
       conductorData[ nodeID ]['OPERATION_NO_IDBH'] = null;
     }
 
@@ -3018,6 +3056,7 @@ const panelChange = function( nodeID ) {
         case 'parallel-branch':
         case 'merge':
         case 'call':
+        case 'call_s':
           panelType = nodeType;
           break;
         case 'start':
@@ -3087,6 +3126,21 @@ const panelChange = function( nodeID ) {
           $('#conductor-call-default-skip').prop('checked', nodeChecked );
         }
         break;
+      case 'call_s': {
+          let callSymphony = conductorData[ nodeID ].CALL_SYMPHONY_ID;
+          if ( editor.checkValue( callSymphony ) ) {
+            const symphonyName = listIdName('symphony',callSymphony );
+            callSymphony = '[' + callSymphony + ']:' + symphonyName;
+          } else {
+            callSymphony = '';
+          }
+          $('#symphony-call-name').text( callSymphony );
+          panelOperation('#symphony-call-operation');
+          // Skip
+          const nodeChecked = ( Number( conductorData[ nodeID ].SKIP_FLAG ) === 1 ) ? true : false;
+          $('#symphony-call-default-skip').prop('checked', nodeChecked );
+        }
+        break;
       case 'function':
         $('#function-type').text( conductorData[ nodeID ].type );
         break;
@@ -3149,7 +3203,7 @@ const panelChange = function( nodeID ) {
         // Jump
         if ( 'JUMP' in nodeInfo ) {
           const jumpURL = nodeInfo.JUMP;
-          $('#node-Jump').html('<a href="' + jumpURL + '" target="_blank">' + jumpURL + '</a>');
+          $('#node-Jump').html('<a href="' + jumpURL + '" target="_blank">' + getSomeMessage("ITABASEC020123") + '</a>');
         } else {
           $('#node-Jump').empty();
         }
@@ -3277,6 +3331,21 @@ const callConductorUpdate = function( nodeID, id, name ) {
   panelChange( nodeID );
 };
 
+// Callコンダクターセレクト
+const callSymphonyUpdate = function( nodeID, id, name ) {
+  const $node = $('#' + nodeID );
+  if ( id !== 0 ) { 
+    conductorData[ nodeID ].CALL_SYMPHONY_ID = id;
+    $node.addClass('call-select').find('.select-symphony-name-inner').text('[' + id + ']:' + name );
+  } else {
+    conductorData[ nodeID ].CALL_SYMPHONY_ID = null;
+    $node.removeClass('call-select').find('.select-symphony-name-inner').text('Not selected');
+  }
+  nodeSet( $('#' + nodeID ) );
+  connectEdgeUpdate( nodeID );
+  panelChange( nodeID );
+};
+
 const modalSelectList = function( type ) {
   const $modalBody = $('.editor-modal-body');
   let operationListHTML = ''
@@ -3291,6 +3360,8 @@ const modalSelectList = function( type ) {
     operationListHTML += modalTr( conductorUseList.operationList, 'OPERATION_NO_IDBH','OPERATION_NAME')
   } else if ( type === 'conductor') {
     operationListHTML += modalTr( conductorUseList.conductorCallList, 'CONDUCTOR_CLASS_NO','CONDUCTOR_NAME')
+  } else if ( type === 'symphony') {
+    operationListHTML += modalTr( conductorUseList.symphonyCallList, 'SYMPHONY_CLASS_NO','SYMPHONY_NAME')
   }
   operationListHTML += ''
       + '</tbody>'
@@ -3323,6 +3394,8 @@ const modalSelectList = function( type ) {
           operationUpdate( nodeID, dataID, dataName );
         } else if ( type === 'conductor') {
           callConductorUpdate( nodeID, dataID, dataName );
+        } else if ( type === 'symphony') {
+          callSymphonyUpdate( nodeID, dataID, dataName );
         }
         editor.modalClose();
         break;
@@ -3333,21 +3406,60 @@ const modalSelectList = function( type ) {
   });
   
 };
-$('#conductor-call-operation-select, #movement-operation-select').on('click', function(){
+
+const modalRoleList = function() {
+
+  const initRoleList = conductorData['conductor']['ACCESS_AUTH'];
+  // 決定時の処理    
+  const okEvent = function( newRoleList ) {
+    conductorData['conductor']['ACCESS_AUTH'] = newRoleList;
+    $('#conductor-edit-role').text(　getRoleListIdToName( newRoleList ) );
+    editor.modalClose();
+  };
+  // キャンセル時の処理    
+  const cancelEvent = function( newRoleList ) {
+    editor.modalClose();
+  };
+  
+  setRoleSelectModalBody( conductorUseList.roleList, initRoleList, okEvent, cancelEvent );
+  
+};
+
+// Role select
+$('#conductor-role-select').on('click', function(){
+  editor.modalOpen('Permission role select', modalRoleList, 'role' );
+});
+// Movement operation select
+$('#movement-operation-select').on('click', function(){
+  editor.modalOpen('Select movement operation', modalSelectList, 'operation' );
+});
+// Call conductor operation select
+$('#conductor-call-operation-select').on('click', function(){
   editor.modalOpen('Select call conductor operation', modalSelectList, 'operation' );
 });
-// Callコンダクターセレクト
+// Call symphony operation select
+$('#symphony-call-operation-select').on('click', function(){
+  editor.modalOpen('Select call symphony operation', modalSelectList, 'operation' );
+});
+// Call conductor select
 $('#conductor-call-select').on('click', function(){
   editor.modalOpen('Select call conductor', modalSelectList, 'conductor' );
 });
-
-// オペレーションクリア
-$('#conductor-call-operation-clear, #movement-operation-clear').on('click', function(){
+// Call symphony select
+$('#symphony-call-select').on('click', function(){
+  editor.modalOpen('Select call symphony', modalSelectList, 'symphony' );
+});
+// Call conductor operation clear
+$('#conductor-call-operation-clear, #movement-operation-clear, #symphony-call-operation-clear').on('click', function(){
   operationUpdate( g_selectedNodeID[0], 0 );
 });
-// Callコンダクタークリア
+// Call conductor clear
 $('#conductor-call-clear').on('click', function(){
  callConductorUpdate( g_selectedNodeID[0], 0 );
+});
+// Call symphony clear
+$('#symphony-call-clear').on('click', function(){
+ callSymphonyUpdate( g_selectedNodeID[0], 0 );
 });
 
 
@@ -3849,23 +3961,40 @@ const updateConductorData = function() {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// カンマ区切りロールIDリストからロールNAMEリストを返す
+const getRoleListIdToName = function( roleListText ) {
+  if ( roleListText !== undefined && roleListText !== '' ) {
+    const roleList = roleListText.split(','),
+          roleListLength = roleList.length,
+          roleNameList = new Array;
+    for ( let i = 0; i < roleListLength; i++ ) {
+      const roleName = listIdName('role', roleList[i]);
+      if ( roleName !== undefined ) {
+        roleNameList.push( roleName );
+      } else {
+        roleNameList.push( getSomeMessage("ITAWDCC92007") + '(' + roleList[i] + ')');
+      }
+    }
+
+    return roleNameList.join(', ');
+  }
+};
+
 const panelConductorReset = function() {
   $('#conductor-class-id').text('');
   if ( conductorEditorMode === 'edit' || conductorEditorMode === 'view') {
     $('#conductor-class-name').val('');
     $('#conductor-class-note').val('');
+    $('#conductor-edit-role').text( getRoleListIdToName( conductorData['conductor']['ACCESS_AUTH'] ) );
   }
   $('#conductor-class-name-view').text('');
-  $('#conductor-class-note-view').text('');
+  $('#conductor-view-role').text( getRoleListIdToName( conductorData['conductor']['ACCESS_AUTH'] ) );
 };
 
 // リセット
 const clearConductor = function() {
     // 選択を解除
     nodeDeselect();
-    // パネル情報
-    panelChange();
-    panelConductorReset();
     // 全て消す
     $svgArea.empty();
     $artBoard.find('.node').remove()
@@ -3883,6 +4012,9 @@ const clearConductor = function() {
     // 初期値
     setInitialConductorData();
     canvasPositionReset(0);
+    // パネル情報
+    panelChange();
+    panelConductorReset();
 }
 // ローカルストレージに保存する
 const saveConductor = function( saveConductorData ) {
@@ -4026,9 +4158,11 @@ const loadConductor = function( loadConductorData, mode ) {
       if ( conductorEditorMode === 'edit' || conductorEditorMode === 'view' ) {
         $('#conductor-class-name').val( conductorData['conductor'].conductor_name );
         $('#conductor-class-note').val( conductorNoteText );
+        $('#conductor-edit-role').text( getRoleListIdToName( conductorData['conductor'].ACCESS_AUTH ) );
       }
       $('#conductor-class-name-view').text( conductorData['conductor'].conductor_name );
       $('#conductor-class-note-view').text( conductorNoteText );
+      $('#conductor-view-role').text( getRoleListIdToName( conductorData['conductor'].ACCESS_AUTH ) );
 
       nodeReSet( conductorData );
       nodeViewAll( 0 );
@@ -4039,6 +4173,11 @@ const loadConductor = function( loadConductorData, mode ) {
       $editor.removeClass('load-conductor');
       clearConductor();
       message('1001');
+       
+      alert( getSomeMessage("ITABASEC020008") );
+      var url = '/default/menu/01_browse.php?no=2100180002';
+      location.href = url;
+
     }
     
 };
@@ -4303,6 +4442,7 @@ const conductorStatusUpdate = function( exeNumber ) {
             break;
           case 'movement':
           case 'call':
+          case 'call_s':
           case 'end':
             movementCheck( nodeID );
             break;
@@ -4375,6 +4515,7 @@ const InitialSetNode = function() {
 
   newNode('start', 'left', 'center');
   newNode('end', 'right', 'center');
+  panelConductorReset();
   $('#conductor-class-id').text('Auto numbering');
   
 };

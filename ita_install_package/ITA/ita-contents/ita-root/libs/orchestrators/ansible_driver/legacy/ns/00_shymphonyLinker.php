@@ -165,6 +165,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
     /////////////////////////////////////////////////////////
     //  作業№を登録する                                   //
     /////////////////////////////////////////////////////////
+    global $g;
 
     // 各種ローカル定数を定義
     $intControlDebugLevel01 = 250;
@@ -237,6 +238,14 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         $conductor_instance_no = "";
         list($strTmpRunMode,$boolKeyExists) = isSetInArrayNestThenAssign($aryProperParameter,array('RUN_MODE'),"");
         if( $boolKeyExists === false ){
+            // ---- RBAC対応
+            // 上位でアクセス権が設定されているか判定
+            if(array_key_exists('__TOP_ACCESS_AUTH__',$g) === false) {
+                $strErrStepIdInFx="00000001";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            // RBAC対応 ----
+
             //----シンフォニーから呼ばれる場合を想定
             $strRunMode = 1;
 
@@ -325,6 +334,28 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
 
         }
         else{
+            // ---- RBAC対応
+            // Movement一覧のアクセス権を取得　
+            $sql = "SELECT ACCESS_AUTH FROM C_PATTERN_PER_ORCH WHERE PATTERN_ID=$intPatternId";
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            if( $objQuery->getStatus()===false ){
+                $strErrStepIdInFx="00000001";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $r = $objQuery->sqlExecute();
+    
+            if (!$r){
+                unset($objQuery);
+                $strErrStepIdInFx="00000001";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            while ( $row = $objQuery->resultFetch() ){
+                // アクセス権退避
+                $g['__TOP_ACCESS_AUTH__'] = $row['ACCESS_AUTH'];
+            }
+            // DBアクセス事後処理
+            unset($objQuery);
+            // RBAC対応 ----
             //----各オーケストレータ個別で呼ばれる場合を想定
             if( $strTmpRunMode == '1' || $strTmpRunMode == '2' ){
                 // 1:通常実行/2:ドライラン
@@ -468,7 +499,6 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "TIME_START"=>"",
         "TIME_END"=>"",
         "RUN_MODE"=>$strRunMode,
-
         "I_ANS_PLAYBOOK_HED_DEF"=>$arySinglePatternSource["ANS_PLAYBOOK_HED_DEF"],
         "I_ANS_EXEC_OPTIONS"=>$exec_opt . ' ' . $arySinglePatternSource["ANS_EXEC_OPTIONS"],
         "I_VIRTUALENV_NAME"=>$virtualenv_name,
@@ -476,6 +506,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "CONDUCTOR_NAME"=>$conductor_name,
         "CONDUCTOR_INSTANCE_NO"=>$conductor_instance_no,
         "DISUSE_FLAG"=>"0",
+        "ACCESS_AUTH"=>$g['__TOP_ACCESS_AUTH__'],
         "NOTE"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
         "LAST_UPDATE_USER"=>$update_user_id

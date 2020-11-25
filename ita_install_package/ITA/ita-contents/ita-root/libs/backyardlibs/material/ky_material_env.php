@@ -36,6 +36,9 @@ define('OPENST_ENVIRONMENT_PATH',         ROOT_DIR_PATH . '/uploadfiles/21000700
 
 define('OPENSF_CONFIG_FILE_PATH',         ROOT_DIR_PATH . '/uploadfiles/2100120003/CONFIG_FILE/');              // アップロードファイルパス：OpenShift ：コンフィグファイル
 
+define('TERRAFORM_MODULE_PATH',           ROOT_DIR_PATH . '/uploadfiles/2100080005/MODULE_MATTER_FILE/');       // アップロードファイルパス：Terraform   ：Module素材
+define('TERRAFORM_POLICY_PATH',           ROOT_DIR_PATH . '/uploadfiles/2100080006/POLICY_MATTER_FILE/');       // アップロードファイルパス：Terraform   ：Policy素材
+
 define('DSC_RESOURCE_PATH',               ROOT_DIR_PATH . '/uploadfiles/2100060003/RESOURCE_MATTER_FILE/');     // アップロードファイルパス：DSC       ：コンフィグ素材
 
 define('TP_RESOURCE_PATH',                ROOT_DIR_PATH . '/uploadfiles/2100130103/SCENARIO_FILE/');            // アップロードファイルパス：TestPlayer：シナリオ素材集

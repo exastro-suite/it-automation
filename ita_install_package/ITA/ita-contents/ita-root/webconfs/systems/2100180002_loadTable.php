@@ -41,10 +41,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
     );
 
-    $table = new TableControlAgent('C_CONDUCTOR_CLASS_MNG','CONDUCTOR_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-305040"), 'C_CONDUCTOR_CLASS_MNG_JNL', $tmpAry);
+    $table = new TableControlAgent('C_CONDUCTOR_EDIT_CLASS_MNG','CONDUCTOR_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-305040"), 'C_CONDUCTOR_EDIT_CLASS_MNG_JNL', $tmpAry);
     $tmpAryColumn = $table->getColumns();
-    $tmpAryColumn['CONDUCTOR_CLASS_NO']->setSequenceID('C_CONDUCTOR_CLASS_MNG_RIC');
-    $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('C_CONDUCTOR_CLASS_MNG_JSQ');
+    $tmpAryColumn['CONDUCTOR_CLASS_NO']->setSequenceID('C_CONDUCTOR_EDIT_CLASS_MNG_RIC');
+    $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('C_CONDUCTOR_EDIT_CLASS_MNG_JSQ');
     unset($tmpAryColumn);
     $table->setJsEventNamePrefix(true);
     
@@ -53,10 +53,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITABASEH-MNU-305060"));
 
-    //---- 検索機能の制御
-    $table->setGeneObject('AutoSearchStart',true);  //('',true,false)
-    // 検索機能の制御----
-
+    $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
     //----リンクボタン
@@ -73,7 +70,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $db_connect_php = '/libs/commonlibs/common_db_connect.php';
                 require ($g['root_dir_path'] . $db_connect_php );
 
-                $sql = "SELECT DISUSE_FLAG FROM C_CONDUCTOR_CLASS_MNG WHERE (CONDUCTOR_CLASS_NO = :CONDUCTOR_CLASS_NO)";
+                $sql = "SELECT DISUSE_FLAG FROM C_CONDUCTOR_EDIT_CLASS_MNG WHERE (CONDUCTOR_CLASS_NO = :CONDUCTOR_CLASS_NO)";
 
                 // SQLパース
                 $objQuery = $objDBCA->sqlPrepare($sql);

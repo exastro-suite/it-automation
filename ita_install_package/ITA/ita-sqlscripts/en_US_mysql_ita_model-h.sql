@@ -8,6 +8,7 @@ STATUS_ID                         INT                              ,
 STATUS_NAME                       VARCHAR (32)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -25,6 +26,7 @@ STATUS_ID                         INT                              ,
 STATUS_NAME                       VARCHAR (32)                     ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -44,6 +46,7 @@ OPENST_PASSWORD                   VARCHAR (30)                     ,
 OPENST_REFRESH_INTERVAL           INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -66,6 +69,7 @@ OPENST_PASSWORD                   VARCHAR (30)                     ,
 OPENST_REFRESH_INTERVAL           INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -92,6 +96,7 @@ OPENST_PROJECT_ID                 VARCHAR (128)                    ,
 OPENST_PROJECT_NAME               VARCHAR (256)                    ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -171,6 +176,7 @@ VARS_ENTRY                        VARCHAR (4000)                   ,
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -192,6 +198,7 @@ VARS_ENTRY                        VARCHAR (4000)                   ,
 ASSIGN_SEQ                        INT                              ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -216,6 +223,7 @@ TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -243,6 +251,7 @@ TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -273,6 +282,7 @@ CONDUCTOR_NAME                    VARCHAR (256)                    , -- コン�
 CONDUCTOR_INSTANCE_NO             INT                              , -- コンダクタ インスタンスID
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -306,6 +316,7 @@ CONDUCTOR_NAME                    VARCHAR (256)                    , -- コン�
 CONDUCTOR_INSTANCE_NO             INT                              , -- コンダクタ インスタンスID
 
 DISP_SEQ                          INT                              , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
@@ -324,6 +335,7 @@ SELECT
         OPENST_PASSWORD          ,
         OPENST_REFRESH_INTERVAL  ,
         DISP_SEQ                 ,
+        ACCESS_AUTH              ,
         NOTE                     ,
         DISUSE_FLAG              ,
         LAST_UPDATE_TIMESTAMP    ,
@@ -344,6 +356,7 @@ SELECT
         OPENST_PASSWORD          ,
         OPENST_REFRESH_INTERVAL  ,
         DISP_SEQ                 ,
+        ACCESS_AUTH              ,
         NOTE                     ,
         DISUSE_FLAG              ,
         LAST_UPDATE_TIMESTAMP    ,
@@ -418,6 +431,7 @@ SELECT
         OPENST_TEMPLATE              ,
         OPENST_ENVIRONMENT           ,
         DISP_SEQ                     ,
+        ACCESS_AUTH                  ,
         NOTE                         ,
         DISUSE_FLAG                  ,
         LAST_UPDATE_TIMESTAMP        ,
@@ -442,6 +456,7 @@ SELECT
         OPENST_TEMPLATE              ,
         OPENST_ENVIRONMENT           ,
         DISP_SEQ                     ,
+        ACCESS_AUTH                  ,
         NOTE                         ,
         DISUSE_FLAG                  ,
         LAST_UPDATE_TIMESTAMP        ,
@@ -473,6 +488,7 @@ SELECT
         TAB_A.CONDUCTOR_NAME         ,
         TAB_A.CONDUCTOR_INSTANCE_NO  ,
         TAB_A.DISP_SEQ               ,
+        TAB_A.ACCESS_AUTH            ,
         TAB_A.NOTE                   ,
         TAB_A.DISUSE_FLAG            ,
         TAB_A.LAST_UPDATE_TIMESTAMP  ,
@@ -509,6 +525,7 @@ SELECT
         TAB_A.CONDUCTOR_NAME         ,
         TAB_A.CONDUCTOR_INSTANCE_NO  ,
         TAB_A.DISP_SEQ               ,
+        TAB_A.ACCESS_AUTH            ,
         TAB_A.NOTE                   ,
         TAB_A.DISUSE_FLAG            ,
         TAB_A.LAST_UPDATE_TIMESTAMP  ,
@@ -519,33 +536,33 @@ LEFT JOIN D_OPENST_STATUS TAB_C ON (TAB_A.STATUS_ID = TAB_C.STATUS_ID)
 LEFT JOIN D_OPENST_LNS_INS_RUN_MODE TAB_D ON (TAB_A.RUN_MODE = TAB_D.RUN_MODE_ID)
 ;
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_DETAIL_STATUS_RIC',6);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_IF_INFO_RIC',2,'2100070001',2100410001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_DETAIL_STATUS_JSQ',6);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_IF_INFO_JSQ',2,'2100070001',2100410002,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_IF_INFO_RIC',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_VARS_ASSIGN_RIC',1,'2100070003',2100410003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_IF_INFO_JSQ',2);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_VARS_ASSIGN_JSQ',1,'2100070003',2100410004,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_RUN_MODE_RIC',3);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_OPENST_RESULT_DETAIL_RIC',1,'2100070007',2100410005,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_RUN_MODE_JSQ',3);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_OPENST_RESULT_DETAIL_JSQ',1,'2100070007',2100410006,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_STATUS_RIC',11);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_OPENST_RESULT_MNG_RIC',1,'2100070006',2100410007,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_STATUS_JSQ',11);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_OPENST_RESULT_MNG_JSQ',1,'2100070006',2100410008,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_VARS_ASSIGN_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_DETAIL_STATUS_RIC',6,NULL,2100490001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('B_OPENST_VARS_ASSIGN_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_DETAIL_STATUS_JSQ',6,NULL,2100490002,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_OPENST_RESULT_DETAIL_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_RUN_MODE_RIC',3,NULL,2100490003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_OPENST_RESULT_DETAIL_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_RUN_MODE_JSQ',3,NULL,2100490004,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_OPENST_RESULT_MNG_RIC',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_STATUS_RIC',11,NULL,2100490005,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
-INSERT INTO A_SEQUENCE (NAME,VALUE) VALUES('C_OPENST_RESULT_MNG_JSQ',1);
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_OPENST_STATUS_JSQ',11,NULL,2100490006,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
 
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100070001,'OpenStack','openstack.png',150,'OpenStack','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

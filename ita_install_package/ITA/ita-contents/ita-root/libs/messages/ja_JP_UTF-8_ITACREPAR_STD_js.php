@@ -53,4 +53,16 @@ $ary["ITACREPAR_1233"] = "オペレーション";
 $ary["ITACREPAR_1234"] = "システム管理者";
 $ary["ITACREPAR_1235"] = "メニューグループ選択";
 $ary["ITACREPAR_1236"] = "メニュー作成を受付ました。\nメニュー作成履歴ボタンを押して、メニュー作成状況を確認してください。\n項番：";
+$ary["ITACREPAR_1237"] = "パスワード";
+$ary["ITACREPAR_1238"] = "リピートが解除されます。";
+$ary["ITACREPAR_1239"] = "リピートを含む項目はコピーできません。";
+$ary["ITACREPAR_1240"] = "入力用";
+$ary["ITACREPAR_1241"] = "代入値<br>自動登録用";
+$ary["ITACREPAR_1242"] = "参照用";
+$ary["ITACREPAR_1243"] = "メニューグループ名称";
+$ary["ITACREPAR_1244"] = "縦メニューについて";
+$ary["ITACREPAR_1245"] = "利用する";
+$ary["ITACREPAR_1246"] = "ファイル最大バイト数";
+$ary["ITACREPAR_1247"] = "ファイル";
+$ary["ITACREPAR_1248"] = "リンク";
 ?>

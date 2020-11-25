@@ -52,4 +52,16 @@ $ary["ITACREPAR_1233"] = "Operation";
 $ary["ITACREPAR_1234"] = "System Administrator";
 $ary["ITACREPAR_1235"] = "Target menu group";
 $ary["ITACREPAR_1236"] = "Menu creation was accepted.\nPlease click the Menu creation history button and check the creation status.\nId:";
+$ary["ITACREPAR_1237"] = "Password";
+$ary["ITACREPAR_1238"] = "Repeat item will be canceled.";
+$ary["ITACREPAR_1239"] = "Items containing repeats cannot be copied.";
+$ary["ITACREPAR_1240"] = "Input";
+$ary["ITACREPAR_1241"] = "Substitution<br>value";
+$ary["ITACREPAR_1242"] = "Reference";
+$ary["ITACREPAR_1243"] = "Menu group name";
+$ary["ITACREPAR_1244"] = "About vertical menu";
+$ary["ITACREPAR_1245"] = "Yes";
+$ary["ITACREPAR_1246"] = "Maximum number of<br>bytes in the file";
+$ary["ITACREPAR_1247"] = "File";
+$ary["ITACREPAR_1248"] = "Link";
 ?>

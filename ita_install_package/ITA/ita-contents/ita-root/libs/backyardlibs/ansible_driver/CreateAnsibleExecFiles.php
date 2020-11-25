@@ -28,6 +28,7 @@
 //  F0004-2 CreateHostvarsfiles
 //  F0005-1 CreateRoleHostvarsfile
 //  F0005-2 CreateHostvarsfile
+//  F0005-3 CreateVaultHostvarsfiles
 //  F0006 CreatePlaybookfile
 //  F0007 CreateLegacyPlaybookfiles
 //  F0008 CreateChildPlaybookfiles
@@ -116,6 +117,8 @@ class CreateAnsibleExecFiles {
     const LC_ANS_ORG_DIALOG_FILES_DIR        = "original_dialog_files";
     const LC_ANS_ORG_HOST_VARS_DIR           = "original_host_vars";
 
+    const LC_ANS_VAULT_HOST_VARS_DIR         = "vault_host_vars";
+
     // テンプレートファイル格納ディレクトリ名
     const LC_ANS_TEMPLATE_FILES_DIR          = "template_files";
 
@@ -160,6 +163,7 @@ class CreateAnsibleExecFiles {
     const LC_ANS_ORG_DIALOG_FILE_HOST_DIR_MK = "%s/%s";
     const LC_ANS_ORG_DIALOG_FILE_MK          = "%s/%s/%s-%s";
     const LC_ANS_ORG_HOST_VAR_FILE_MK        = "%s/%s";
+    const LC_ANS_VAULT_HOST_VAR_FILE_MK      = "%s/%s";
 
     //ITA 子PlayBookファイル格納ディレクトリ
     const LC_ITA_CHILD_PLAYBOOKS_DIR_MK      = "%s/%s/%s";
@@ -207,9 +211,9 @@ class CreateAnsibleExecFiles {
     private $lv_Ansible_out_Dir;                   //outディレクトリ
     private $lv_Ansible_tmp_Dir;                   //tmpディレクトリ
     private $lv_Ansible_original_dialog_files_Dir; //original_dialog_filesディレクトリ
-    private $lv_Ansible_original_hosts_vars_Dir;   //original_hosts_varsディレクトリ
+    private $lv_Ansible_original_hosts_vars_Dir;   //original_host_varsディレクトリ
     private $lv_Ansible_template_files_Dir;        //template_filesディレクトリ
-
+    private $lv_Ansible_vault_hosts_vars_Dir;      //vault_host_varsディレクトリ
     private $lv_Ansible_in_original_dialog_files_Dir; //in/original_dialog_filesディレクトリ
 
     //親PlayBook内各ディレクトリ変数
@@ -328,6 +332,8 @@ class CreateAnsibleExecFiles {
     private  $lv_exec_no;                 // 作業番号
     private  $lv_vault_pass_list;         // ansible-vaultで暗号化したパスワード配列
     private  $lv_vault_pass_update_list;  // ansible-vaultで暗号化したパスワードの更新が済んでいる機器ID配列
+    private  $lv_vault_value_list;        // ansible-vaultで暗号化した具体値配列
+    private  $lv_vault_value_update_list; // ansible-vaultで暗号化した具体値の更新が済んでいる代入値管理のKey配列
 
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
@@ -476,6 +482,8 @@ class CreateAnsibleExecFiles {
 
         $this->lv_vault_pass_list           = array();
         $this->lv_vault_pass_update_list    = array();
+        $this->lv_vault_value_list          = array();
+        $this->lv_vault_value_update_list   = array();
 
     }
 
@@ -920,6 +928,14 @@ class CreateAnsibleExecFiles {
             }
         }
 
+        // グローバル変数管理からグローバル変数の情報を取得
+        $this->lva_global_vars_list = array();
+        $ret = $this->getDBGlobalVarsMaster($this->lva_global_vars_list);
+        if($ret = false){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90235");
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
         // ドライバ区分がLegacy-Roleの場合
         // 作業パターンIDに紐づくパッケージファイルを取得
         // パッケージファイルをZIPファイルをinディレクトリに解凍し
@@ -1063,19 +1079,10 @@ class CreateAnsibleExecFiles {
                     }
                 }
 
-                // グローバル変数管理からグローバル変数の情報を取得
-                $global_vars_list = array();
-                $msgstr = "";
-                $ret = getDBGlobalVarsMaster($global_vars_list,$msgstr);
-                if($ret === false){
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    return(false);
-                }
-
                 $chkObj = new DefaultVarsFileAnalysis($this->lv_objMTS);
                 $msgstr = "";
                 // ロールパッケージ内のPlaybookで定義しているグローバル変数がグローバル変数管理にあるか
-                $ret = $chkObj->chkDefVarsListPlayBookGlobalVarsList($ina_roleglobalvars, $global_vars_list, $msgstr);
+                $ret = $chkObj->chkDefVarsListPlayBookGlobalVarsList($ina_roleglobalvars, $this->lva_global_vars_list, $msgstr);
                 if($ret === false){
                     unset($chkObj);
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -1118,6 +1125,57 @@ class CreateAnsibleExecFiles {
                     unset($objLibs);
                     return false;
                 }
+// #280
+                // テンプレート管理に登録されている変数情報取得
+                $temlate_ctl_gbl_vars_list = array();
+                foreach($this->lva_tpf_vars_list as $rolename=>$tpfinfo_1) {
+                    foreach($tpfinfo_1 as $filename=>$tpfinfo_2) {
+                        foreach($tpfinfo_2 as $line_no=>$tpfinfo_3) {
+                            foreach($tpfinfo_3 as $tpf_var_name=>$tpfinfo_4) {
+                                 if( ! isset($tpfinfo_4['VAR_STRUCT_ANAL_JSON_STRING'])) {
+                                     continue;
+                                 }
+                                 // Jsonでエンコードされている変数情報をデコードする
+                                 $fileObj = new TemplateVarsStructAnalFileAccess($this->lv_objMTS,$this->lv_objDBCA);
+                               
+                                 $Vars_list          = array();
+                                 $Array_vars_list    = array();
+                                 $LCA_vars_use       = array();
+                                 $Array_vars_use     = array();
+                                 $GBL_vars_info      = array();
+                                 $VarVal_list        = array();
+                                 //戻り値なし
+                                 $fileObj->JsonStringTOArray($tpfinfo_4['VAR_STRUCT_ANAL_JSON_STRING'],
+                                                             $Vars_list,
+                                                             $Array_vars_list,
+                                                             $LCA_vars_use,
+                                                             $Array_vars_use,
+                                                             $GBL_vars_info,
+                                                             $VarVal_list);
+
+                                 // ロール内で使用しているTPF変数で、テンプレート管理の変数定義に登録されているグローバル変数を抜き出す。
+                                 foreach($GBL_vars_info as $dummy=>$gblinfo_1) {
+                                     foreach($gblinfo_1 as $gbl_var_name=>$dummy) {
+                                         $temlate_ctl_gbl_vars_list[$rolename][$gbl_var_name] = 0;
+                                         // テンプレート管理の変数定義に登録されているグローバル変数をマーク
+                                         $this->lv_use_gbl_vars_list[$gbl_var_name] = 0;
+                                     }
+                                 }
+                            }
+                        }
+                    }
+                }
+                // ロール内で使用しているTPF変数で、テンプレート管理の変数定義に登録されているグローバル変数がグローバル変数管理に登録されているか判定
+                $chkObj = new DefaultVarsFileAnalysis($this->lv_objMTS);
+                $msgstr = "";
+                $ret = $chkObj->chkDefVarsListPlayBookGlobalVarsList($temlate_ctl_gbl_vars_list, $this->lva_global_vars_list, $msgstr);
+                if($ret === false){
+                    unset($chkObj);
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return(false);
+                }
+                unset($chkObj);
+
                 unset($objLibs);
 
                 // ロール名取得
@@ -1215,6 +1273,21 @@ class CreateAnsibleExecFiles {
             // original_hosts_varsディレクトリ名を記憶
             $this->setAnsible_original_hosts_vars_Dir($c_dirwk);
     
+            // vault_host_varsディレクトリ作成
+            $c_dirwk = $c_tmpdir . "/" . self::LC_ANS_VAULT_HOST_VARS_DIR;
+            if( !mkdir( $c_dirwk, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            if( !chmod( $c_dirwk, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+    
+            // vault_host_varsディレクトリ名を記憶
+            $this->setAnsible_vault_hosts_vars_Dir($c_dirwk);
         }
 
         $this->ansible_vault_password_file_dir = $c_dir;
@@ -1259,6 +1332,12 @@ class CreateAnsibleExecFiles {
     //
     //   $ina_host_vars:        ホスト変数配列
     //                          [ホスト名(IP)][ 変数名 ]=>具体値
+    //
+    //   $vault_vars:           PasswordCoulumn変数一覧(Pioneer用)
+    //                          [ 変数名 ] = << 変数名 >>
+    //
+    //   $ina_vault_host_vars_file_list:  PasswordCoulumn変数のみのホスト変数一覧(Pioneer用)
+    //                          [ホスト名(IP)][ 変数名 ] = 具体値
     //
     //   $ina_child_playbooks:  子PlayBookファイル配列
     //                          [INCLUDE順序][素材管理Pkey]=>素材ファイル
@@ -1317,6 +1396,8 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     function CreateAnsibleWorkingFiles($ina_hosts,
                                        $ina_host_vars,
+                                       $ina_vault_vars,
+                                       $ina_vault_host_vars_file_list,
                                        $ina_child_playbooks,
                                        $ina_dialog_files,
                                        $ina_rolenames,
@@ -1336,17 +1417,6 @@ class CreateAnsibleExecFiles {
     {
 
         $this->lv_hostinfolist = $ina_hostinfolist;
-
-        //////////////////////////////////////
-        // グローバル変数管理よりグローバル変数を取得
-        //////////////////////////////////////
-        $this->lva_global_vars_list = array();
-        $ret = $this->getDBGlobalVarsMaster($this->lva_global_vars_list);
-        if($ret = false){
-            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90235");
-            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-            return false;
-        }
 
         // 作業パターンに紐づいているグローバル変数を退避
         switch($this->getAnsibleDriverID()){
@@ -1460,6 +1530,13 @@ class CreateAnsibleExecFiles {
             break;
 
         case DF_PIONEER_DRIVER_ID:
+            ////////////////////////////////////////////////////////
+            // Pionner 暗号化が必要な変数のホスト変数ファイル作成
+            ////////////////////////////////////////////////////////
+            if ( $this->CreateVaultHostvarsfiles($ina_vault_host_vars_file_list,$ina_host_vars,$ina_hostprotcollist)  === false)
+            {
+                return false;
+            } 
             //////////////////////////////////////
             // Pionner 対話ファイル作成         //
             //////////////////////////////////////
@@ -1487,7 +1564,7 @@ class CreateAnsibleExecFiles {
             // 対話ファイルのフォーマットと変数定義チェック//
             // 変数具体値の置換え　　　　　　　　　　　　  //
             /////////////////////////////////////////////////
-            if ( $this->CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist,false) === false){
+            if ( $this->CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_vault_vars,$ina_dialog_files,$ina_hostprotcollist,false) === false){
                 return false;
             }
             ////////////////////////////////////////////////
@@ -1500,8 +1577,8 @@ class CreateAnsibleExecFiles {
             /////////////////////////////////////////////////
             // 具体値がTPF/CPF変数の場合の具体値の置換え　 //
             /////////////////////////////////////////////////
-            if ( $this->CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist,true) === false){
-                return false;
+            if ( $this->CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_vault_vars,$ina_dialog_files,$ina_hostprotcollist,true) === false){
+                return false; 
             }
             ///////////////////////////////////////////////
             // テンプレート管理を使用している場合、
@@ -2073,11 +2150,15 @@ class CreateAnsibleExecFiles {
                 }
                 $parent_vars_list[$var] = 0;
             
+// 999
                 //ホスト変数ファイルのレコード生成
                 //変数名: 具体値
+                //複数行具体値の場合に複数行の扱い記号を付ける ----
+                $edit_val = $this->makeMultilineValue($val);
+                //-----複数行具体値の場合に複数行の扱い記号を付ける
                 $NumPadding = 2;
-                $edit_val = $this->HostVarEdit($val,$NumPadding);
-                $var_str = $var_str . sprintf("%s: %s\n",$var,$edit_val);
+                $out_val = $this->MultilineValueEdit($edit_val,$NumPadding);
+                $var_str = $var_str . sprintf("%s: %s\n",$var,$out_val);
 
                 //グローバル変数の具体値にコピー変数があるか確認
                 $objLibs = new AnsibleCommonLibs(LC_RUN_MODE_STD);
@@ -2257,13 +2338,14 @@ class CreateAnsibleExecFiles {
                         }
                         $this->lv_parent_vars_list[$in_host_name][$var] = 0;
 
-                        // 複数行具体値のyaml書式対応
-                        $NumPadding = 2;
-                        $val = $this->HostVarEdit($val,$NumPadding);
-
                         //ホスト変数ファイルのレコード生成
                         //変数名: 具体値
-                        $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+                        //複数行具体値の場合に複数行の扱い記号を付ける ----
+                        $edit_val = $this->makeMultilineValue($val);
+                        //-----複数行具体値の場合に複数行の扱い記号を付ける
+                        $NumPadding = 2;
+                        $out_val = $this->MultilineValueEdit($edit_val,$NumPadding);
+                        $var_str = $var_str . sprintf("%s: %s\n",$var,$out_val);
 
                         // playbookのテンプレートモジュールでグローバル変数を使用している場合
                         // テンプレートファイル内の変数具体値登録をチェックする設定にする。
@@ -2335,6 +2417,76 @@ class CreateAnsibleExecFiles {
         return true;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////
+    // F0005-3
+    // 処理内容
+    //   暗号化されている変数のホスト変数ファイルを作成する。
+    //
+    // パラメータ
+    //   $ina_vault_host_vars_file_list:  暗号化されてい変数配列
+    //                                    [ipaddress][ 変数名 ]=> {{ 変数名 }}
+    //   $ina_host_vars:        ホスト変数配列
+    //                          [ipaddress][ 変数名 ]=>具体値
+    //   $ina_hostprotcollist:  ホスト毎プロトコル一覧
+    //                          [ホスト名(IP)][ホスト名][PROTOCOL_NAME][LOGIN_USER]=LOGIN_PASSWD
+    //
+    // 戻り値
+    //   true:   正常
+    //   false:  異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreateVaultHostvarsfiles($ina_vault_host_vars_file_list,$ina_host_vars,$ina_hostprotcollist)
+    {
+        // 作業対象ホスト分繰り返し $ipaddres:IP $hostname:ホスト名
+        foreach($ina_hostprotcollist as $ipaddres=>$host_info) {
+            foreach($host_info as $hostname=>$dummy) {
+                // hostsの記述をホスト名ベースに変更しているので
+                // ホスト変数ファイル名もホスト名にする為、IPアドレスからホスト名を取得
+                $host_vars_file = $hostname;
+                // 暗号化されているホスト変数定義ファイル名を取得
+                $file_name = $this->getAnsible_vault_host_var_file($host_vars_file);
+
+                $var_str = "";
+                //　機器一覧のパスワードを取得
+                if(@count($ina_host_vars[$ipaddres][self::LC_ANS_PASSWD_VAR_NAME]) != 0) {
+                    if($ina_host_vars[$ipaddres][self::LC_ANS_PASSWD_VAR_NAME] != self::LC_ANS_UNDEFINE_NAME) {
+                        $var_str = $var_str . sprintf("%s: %s\n",
+                                                       self::LC_ANS_PASSWD_VAR_NAME,
+                                                       ky_encrypt($ina_host_vars[$ipaddres][self::LC_ANS_PASSWD_VAR_NAME]));
+                    }
+                }
+                // 暗号化している変数の有無判定
+                if(@count($ina_vault_host_vars_file_list[$ipaddres]) != 0) {
+
+                    //該当ホストの変数配列を取得
+                    $vars_list = $ina_vault_host_vars_file_list[$ipaddres];
+
+                    foreach( $vars_list as $var=>$val ){
+                        // 具体値はrot13+base64で暗号化されている
+                        $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+                    }
+                }
+                // 空でも作成
+                $fd = @fopen($file_name, 'w');
+
+                if($fd == null){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55206",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( @fputs($fd, $var_str) === false ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55207",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( @fclose($fd) === false ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55207",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////
     // F0006
@@ -3052,6 +3204,9 @@ class CreateAnsibleExecFiles {
     //   $ina_host_vars:        ホスト変数配列
     //                          [ホスト名(IP)][ 変数名 ]=>具体値
     // 
+    //   $vault_vars:           PasswordCoulumn変数一覧(Pioneer用)
+    //                          [ 変数名 ] = << 変数名 >>
+    //
     //   $ina_dialog_files:     対話ファイル配列
     //                          [ホストIP][INCLUDE順番][素材管理Pkey]=対話ファイル
     // 
@@ -3062,8 +3217,8 @@ class CreateAnsibleExecFiles {
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
-    function CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_dialog_files,$ina_hostprotcollist,$in_SpecialVarValReplace=false){
-        $result_code = true;
+    function CheckPioneerPlaybookfiles($ina_hosts,$ina_host_vars,$ina_vault_vars,$ina_dialog_files,$ina_hostprotcollist,$in_SpecialVarValReplace=false){
+        $result_code = true; 
 
         // 対話ファイル配列よりホストリストを取得
         $host_list = array_keys($ina_dialog_files);
@@ -3206,7 +3361,6 @@ class CreateAnsibleExecFiles {
 
                                 // グローバル変数の具体値を退避
                                 $globalvarSetTo[$var_name] = $this->lva_global_vars_list[$var_name];
-
                                 //複数行具体値判定
                                 $ret = $this->chkMultilineValue($this->lva_global_vars_list[$var_name]);
                                 if($ret === false) {
@@ -3477,10 +3631,14 @@ class CreateAnsibleExecFiles {
                     // 変数具体値がTPF/CPF変数の場合の具体値置換えでない場合
                     if($in_SpecialVarValReplace === false) {
                         if(count($varSetTo) != 0){
-                            // ansible_vaultの対応により、機器一覧のパスワードの具体値を<<>>に置き換える
+                            // ansible_vaultの対応により、機器一覧のパスワードの具体値を<< self::LC_ANS_PASSWD_VAR_NAME >>に置き換える
                             // pioneerモジュール側で置換をする。
                             if(@count($varSetTo[self::LC_ANS_PASSWD_VAR_NAME]) == 1) {
-                                $varSetTo[self::LC_ANS_PASSWD_VAR_NAME] = "<<" . self::LC_ANS_PASSWD_VAR_NAME . ">>";
+                                $varSetTo[self::LC_ANS_PASSWD_VAR_NAME] = sprintf("<< %s >>",self::LC_ANS_PASSWD_VAR_NAME);
+                            }
+                            // 具体値が暗号化されている変数の具体値を変数名{{ 変数名 }}に置き換える
+                            foreach($ina_vault_vars as $var_name=>$var_value) {
+                                $varSetTo[$var_name] = $var_value;
                             }
                             // 変数を具体値で置換える
                             $objWSRA->stringReplace($dataString,$varSetTo);
@@ -3603,7 +3761,11 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function CheckDialogfileFormat($in_file_name,$in_host_name){
-        $ignore_errors_preg_match = "/(\S+):(\s+)(no|yes|(\{\{( ){1}(\S+)( ){1}\}\}))(\s*)$/";
+        $ignore_errors_preg_match_array   = array();
+        $ignore_errors_preg_match_array[] = "/^(\s*)(\S+):( ){1}(\s*)(\")((no)|(yes)|(\{\{( ){1}(\S+)( ){1}\}\}))(\")(\s*)$/";
+        $ignore_errors_preg_match_array[] = "/^(\s*)(\S+):( ){1}(\s*)(\')((no)|(yes)|(\{\{( ){1}(\S+)( ){1}\}\}))(\')(\s*)$/";
+        $ignore_errors_preg_match_array[] = "/^(\s*)(\S+):( ){1}(\s*)(no)|(yes)|(\{\{( ){1}(\S+)( ){1}\}\})(\s*)$/";
+
 
         $result_code = true;
 
@@ -4265,7 +4427,13 @@ class CreateAnsibleExecFiles {
                             break;
                         }
                         // パラメータにyes/noか変数が指定されているか判定
-                        $ret = preg_match("/(\S+):(\s+)(no|yes|(\{\{( ){1}(\S+)( ){1}\}\}))(\s*)$/",$read_line);
+                        $ret = 0;
+                        foreach($ignore_errors_preg_match_array as $ignore_errors_preg_match) {
+                            if(preg_match($ignore_errors_preg_match,$read_line)) {
+                                $ret = 1;
+                            }
+                        }
+
                         if($ret !== 1){
                             $this->errorstateCommand($mysts,$result_code,$state_info,$state_line_no,
                                                      "ITAANSIBLEH-ERR-55247",
@@ -4305,7 +4473,12 @@ class CreateAnsibleExecFiles {
                             break;
                         }
                         // パラメータにyes/noか変数が指定されているか判定
-                        $ret = preg_match($ignore_errors_preg_match,$read_line);
+                        $ret = 0;
+                        foreach($ignore_errors_preg_match_array as $ignore_errors_preg_match) {
+                            if(preg_match($ignore_errors_preg_match,$read_line)) {
+                                $ret = 1;
+                            }
+                        }
                         if($ret !== 1){
                             $this->errorstateCommand($mysts,$result_code,$localaction_info,$localaction_line_no,
                                                      "ITAANSIBLEH-ERR-55282",
@@ -4325,7 +4498,12 @@ class CreateAnsibleExecFiles {
                             break;
                         }
                         // パラメータにyes/noか変数が指定されているか判定
-                        $ret = preg_match($ignore_errors_preg_match,$read_line);
+                        $ret = 0;
+                        foreach($ignore_errors_preg_match_array as $ignore_errors_preg_match) {
+                            if(preg_match($ignore_errors_preg_match,$read_line)) {
+                                $ret = 1;
+                            }
+                        }
                         if($ret !== 1){
                             $this->errorstateCommand($mysts,$result_code,$state_info,$state_line_no,
                                                      "ITAANSIBLEH-ERR-55247",
@@ -5377,6 +5555,31 @@ class CreateAnsibleExecFiles {
     function getAnsible_original_hosts_vars_Dir(){
         return($this->lv_Ansible_original_hosts_vars_Dir);
     }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   vault_host_varsディレクトリ名を記憶
+    //   暗号化された変数のみのホスト変数ファイル
+    // パラメータ
+    //   $in_dir:      vault_hosts_varsディレクトリ
+    // 
+    // 戻り値
+    //   なし
+    ////////////////////////////////////////////////////////////////////////////////
+    function setAnsible_vault_hosts_vars_Dir($in_indir){
+        $this->lv_Ansible_vault_hosts_vars_Dir = $in_indir;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   vault_host_varsディレクトリ名を取得
+    // パラメータ
+    //   なし
+    // 
+    // 戻り値
+    //   vault_host_varsディレクトリ名
+    ////////////////////////////////////////////////////////////////////////////////
+    function getAnsible_vault_hosts_vars_Dir(){
+        return($this->lv_Ansible_vault_hosts_vars_Dir);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
@@ -6056,6 +6259,7 @@ class CreateAnsibleExecFiles {
                "  TBL_1.ASSIGN_ID,                                                                          \n" .
                "  TBL_1.SYSTEM_ID,                                                                          \n" .
                "  TBL_1.VARS_ENTRY,                                                                         \n" .
+               "  TBL_1.SENSITIVE_FLAG,                                                                     \n" .
                "  TBL_1.ASSIGN_SEQ,                                                                         \n" .
                "  TBL_2.VARS_NAME_ID AS VARS_NAME_ID,                                                       \n" .
                "  TBL_1.COL_SEQ_COMBINATION_ID,                                                             \n" .
@@ -6137,6 +6341,7 @@ class CreateAnsibleExecFiles {
                "      TBL.VARS_LINK_ID,                                                                     \n" .
                "      TBL.COL_SEQ_COMBINATION_ID,                                                           \n" .
                "      TBL.VARS_ENTRY,                                                                       \n" .
+               "      TBL.SENSITIVE_FLAG,                                                                   \n" .
                "      TBL.ASSIGN_SEQ                                                                        \n" .
                "    FROM                                                                                    \n" .
                "      B_ANSIBLE_LRL_VARS_ASSIGN TBL                                                         \n" .
@@ -6321,6 +6526,27 @@ class CreateAnsibleExecFiles {
                                              [$row['VARS_NAME']]
                                              [$row['ASSIGN_SEQ']] = $row['ASSIGN_ID'];
 
+                        // 具体値の暗号化が必要か判定 ----
+                        if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
+                            $indento_sp   = "";
+                            $valut_value  = "";
+                            $make_vaultvalue = $this->makeAnsibleVaultValue($this->getAnsibleExecuteUser(),
+                                                                            $row['VARS_ENTRY'],
+                                                                            $valut_value,
+                                                                            $indento_sp,
+                                                                            $row['ASSIGN_ID']);
+                            if($make_vaultvalue === false) {
+                                return false;
+                            }
+                            // 具体値を暗号化した具体値で上書き
+                            $row['VARS_ENTRY'] = $make_vaultvalue; 
+                        } else {
+                            //複数行具体値の場合に複数行の扱い記号を付ける ----
+                            $row['VARS_ENTRY'] = $this->makeMultilineValue($row['VARS_ENTRY']);
+                            //-----複数行具体値の場合に複数行の扱い記号を付ける 
+                        }
+                        // ----具体値の暗号化が必要か判定 
+
                         if($row['VARS_ATTRIBUTE_01'] == self::LC_VARS_ATTR_STD){
                             //ホスト変数配列作成
                             $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]=$row['VARS_ENTRY'];
@@ -6370,6 +6596,10 @@ class CreateAnsibleExecFiles {
     //   $in_operation_id:      オペレーションID
     //   $ina_host_vars:        変数一覧返却配列
     //                          [ホスト名(IP)][ 変数名 ]=>具体値
+    //   $ina_vault_vars:       PasswordCoulumn変数一覧(Pioneer用)
+    //                          [ 変数名 ] = << 変数名 >>
+    //   $ina_vault_host_vars_file_list:  PasswordCoulumn変数のみのホスト変数一覧(Pioneer用)
+    //                          [ホスト名(IP)][ 変数名 ] = 具体値
     //   $ina_child_vars_list:  配列変数一覧返却配列
     //                          [ホスト名(IP)][ 変数名 ][列順序][メンバー変数]=[具体値]
     //   $ina_DB_child_vars_list: 
@@ -6381,7 +6611,8 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function getDBVarList($in_pattern_id,$in_operation_id,&$ina_host_vars,
-                          &$ina_child_vars_list,&$ina_DB_child_vars_list)
+                         &$ina_vault_vars,&$ina_vault_host_vars_file_list,
+                         &$ina_child_vars_list,&$ina_DB_child_vars_list)
     {
         $vars_assign_seq_list = array();
         $child_vars_list = array();
@@ -6438,6 +6669,7 @@ class CreateAnsibleExecFiles {
                "      TBL_6.DISUSE_FLAG       = '0' \n" .
                "  ) AS VARS_NAME_COUNT, \n" .
                "  TBL_1.VARS_ENTRY, \n" .
+               "  TBL_1.SENSITIVE_FLAG, \n" .
                "  TBL_1.ASSIGN_SEQ, \n" .
                "  TBL_2.DISUSE_FLAG, \n" .
                "  '' AS VARS_ATTRIBUTE_01 \n" .
@@ -6448,6 +6680,7 @@ class CreateAnsibleExecFiles {
                "      TBL_3.SYSTEM_ID, \n" .
                "      TBL_3.VARS_LINK_ID, \n" .
                "      TBL_3.VARS_ENTRY, \n" .
+               "      TBL_3.SENSITIVE_FLAG, \n" .
                "      TBL_3.ASSIGN_SEQ \n" .
                "    FROM \n" .
                "      $this->lv_ansible_vars_assignDB TBL_3 \n" .
@@ -6508,6 +6741,7 @@ class CreateAnsibleExecFiles {
                "      TBL_6.DISUSE_FLAG       = '0' \n" .
                "  ) AS VARS_NAME_COUNT, \n" .
                "  TBL_1.VARS_ENTRY, \n" .
+               "  TBL_1.SENSITIVE_FLAG, \n" .
                "  TBL_1.ASSIGN_SEQ, \n" .
                "  TBL_2.DISUSE_FLAG, \n" .
                "  '' AS VARS_ATTRIBUTE_01 \n" .
@@ -6518,6 +6752,7 @@ class CreateAnsibleExecFiles {
                "      TBL_3.SYSTEM_ID, \n" .
                "      TBL_3.VARS_LINK_ID, \n" .
                "      TBL_3.VARS_ENTRY, \n" .
+               "      TBL_3.SENSITIVE_FLAG, \n" .
                "      TBL_3.ASSIGN_SEQ \n" .
                "    FROM \n" .
                "      $this->lv_ansible_vars_assignDB TBL_3 \n" .
@@ -6601,7 +6836,7 @@ class CreateAnsibleExecFiles {
                 }
 
                 //複数行具体値判定
-                $ret = $this->chkMultilineValue($row['VARS_ENTRY']);
+                $ret = $this->chkMultilineValue($row['VARS_ENTRY']); 
                 if($ret === false) {
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90309",
                                                                array($row['VARS_NAME']));
@@ -6659,28 +6894,80 @@ class CreateAnsibleExecFiles {
                                              [$row['ASSIGN_SEQ']] = $row['ASSIGN_ID'];
                         break;
                     }    
+                    // 具体値の暗号化が必要か判定 ----
+                    if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
+                        // Pioneerの場合に暗号化を必要としている変数名リストを生成
+                        if($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) {
+                            //対話ファイルの変数の具体値を変数名にする変数リスト設定
+                            $ina_vault_vars[$row['VARS_NAME']] = sprintf("<< %s >>",$row['VARS_NAME']);
+                        }
+
+                        $indento_sp   = "";
+                        $valut_value  = "";
+                        $make_vaultvalue = $this->makeAnsibleVaultValue($this->getAnsibleExecuteUser(),
+                                                                        $row['VARS_ENTRY'],
+                                                                        $valut_value,
+                                                                        $indento_sp,
+                                                                        $row['ASSIGN_ID']);
+                        if($make_vaultvalue === false) {
+                            return false;
+                        }
+                        // 具体値を暗号化した具体値で上書き
+                        $row['VARS_ENTRY'] = $make_vaultvalue; 
+                    } else {
+                        //複数行具体値の場合に複数行の扱い記号を付ける ----
+                        $row['VARS_ENTRY'] = $this->makeMultilineValue($row['VARS_ENTRY']);
+                        //-----複数行具体値の場合に複数行の扱い記号を付ける
+                    }
+                    // ----具体値の暗号化が必要か判定
 
                     // 複数具体値変数で具体値が1つの場合の不備対応
-                    if(($row['VARS_NAME_COUNT'] == 1) && (@strlen($row['ASSIGN_SEQ']) == 0))
-                    {
+                    if(($row['VARS_NAME_COUNT'] == 1) && (@strlen($row['ASSIGN_SEQ']) == 0)) {
                         //ホスト変数配列作成
-                        $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]=$row['VARS_ENTRY'];
+                        $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= $row['VARS_ENTRY'];
+
+                        switch($this->getAnsibleDriverID()){
+                        case DF_PIONEER_DRIVER_ID:
+                            $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= "\"" . $row['VARS_ENTRY'] . "\"";
+                            // 暗号化されたホスト変数のリスト生成(pioneer用)
+                            if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
+                                $ina_vault_host_vars_file_list[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\"" . $row['VARS_ENTRY'] . "\"";
+                            } 
+                            break;
+                        }
                     }
                     else{
                         if(@count($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
                             $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "";
                         }
-
-                        $var_val = $row['VARS_ENTRY'];
-                        switch($this->getAnsibleDriverID()){
-                        case DF_PIONEER_DRIVER_ID:
-                            // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                            $var_val = "\"" . $row['VARS_ENTRY'] . "\"";
-                            break;
+                        if($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) {
+                            // 202複数具体値変数は対話ファイルの変数の具体値に置換
+                            if(@count($ina_vault_vars[$row['VARS_NAME']]) !== 0) {
+                                unset($ina_vault_vars[$row['VARS_NAME']]);
+                            }
                         }
 
+                        $var_val = $row['VARS_ENTRY'];                                             
+                        switch($this->getAnsibleDriverID()){
+                        case DF_PIONEER_DRIVER_ID:
+                            if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
+                                // 202 複数具体値の通番(0～)を求める
+                                $value_count = $this->getArrayTypeValuecount($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]);
+                                // 複数具体値の場合の変数名を「変数名.x x:0からの通番」設定
+                                $varname = sprintf("%s.%s",$row['VARS_NAME'],$value_count);
+                                // 暗号化されたホスト変数のリスト生成(pioneer用)
+                                $ina_vault_host_vars_file_list[$row['IP_ADDRESS']][$varname] =  "\"" . $row['VARS_ENTRY'] . "\"";
+                                // ホスト変数の具体値を「変数名.x x:0からの通番」設定
+                                $var_val = "\"<< " . $varname . " >>\"";                          
+                            } else {
+                                // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
+                                $var_val = "\"" . $row['VARS_ENTRY'] . "\"";                          
+                            }
+                            break;
+                        }
                         // 複数行具体値をjson形式で収める
-                        $this->ArrayTypeValue_encode($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$var_val);
+                        $value_count = $this->ArrayTypeValue_encode($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$var_val);
+
                     }
                 }
             }
@@ -6753,27 +7040,80 @@ class CreateAnsibleExecFiles {
                         continue;
                     }
 
+                    // 具体値の暗号化が必要か判定 
+                    if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
+                        // Pioneerの場合に暗号化を必要としている変数名リストを生成
+                        if($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) {
+                            //対話ファイルの変数の具体値を変数名にする変数リスト設定
+                            $ina_vault_vars[$row['VARS_NAME']] = sprintf("<< %s >>",$row['VARS_NAME']);
+                        }
+                        $indento_sp   = "";
+                        $valut_value  = "";
+                        $make_vaultvalue = $this->makeAnsibleVaultValue($this->getAnsibleExecuteUser(),
+                                                                        $row['VARS_ENTRY'],
+                                                                        $valut_value,
+                                                                        $indento_sp,
+                                                                        $row['ASSIGN_ID']);
+                        if($make_vaultvalue === false) {
+                            return false;
+                        }
+                        // 具体値を暗号化した具体値で上書き
+                        $row['VARS_ENTRY'] = $make_vaultvalue; 
+                    } else {
+                        //複数行具体値の場合に複数行の扱い記号を付ける 
+                        $row['VARS_ENTRY'] = $this->makeMultilineValue($row['VARS_ENTRY']);
+                        //-----複数行具体値の場合に複数行の扱い記号を付ける 
+                    }
+                    // ----具体値の暗号化が必要か判定 
+
                     // 複数具体値変数で具体値が1つの場合の不備対応
-                    if(($row['VARS_NAME_COUNT'] == 1) && (@strlen($row['ASSIGN_SEQ']) == 0))
-                    {
+                    if(($row['VARS_NAME_COUNT'] == 1) && (@strlen($row['ASSIGN_SEQ']) == 0)) {
                         //ホスト変数配列作成
-                        $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]=$row['VARS_ENTRY'];
+                        $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= $row['VARS_ENTRY'];
+
+                        switch($this->getAnsibleDriverID()){
+                        case DF_PIONEER_DRIVER_ID:
+                            $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= "\"" . $row['VARS_ENTRY'] . "\"";
+                            // 暗号化されたホスト変数のリスト生成(pioneer用)
+                            if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
+                                $ina_vault_host_vars_file_list[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\"" . $row['VARS_ENTRY'] . "\"";
+                            }
+                            break;
+                        }
                     }
                     else{
                         if(@count($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
                             $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "";
                         }
+                        if($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) {
+                            // 202複数具体値変数は対話ファイルの変数の具体値に置換
+                            if(@count($ina_vault_vars[$row['VARS_NAME']]) !== 0) {
+                                unset($ina_vault_vars[$row['VARS_NAME']]);
+                            }
+                        }
 
                         $var_val = $row['VARS_ENTRY'];
                         switch($this->getAnsibleDriverID()){
                         case DF_PIONEER_DRIVER_ID:
-                            // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
-                            $var_val = "\"" . $row['VARS_ENTRY'] . "\"";
+                            if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
+                                // 202 複数具体値の通番(0～)を求める
+                                $value_count = $this->getArrayTypeValuecount($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]);
+                                // 複数具体値の場合の変数名を「変数名.x x:0からの通番」設定
+                                $varname = sprintf("%s.%s",$row['VARS_NAME'],$value_count);
+                                // 暗号化されたホスト変数のリスト生成(pioneer用)
+                                $ina_vault_host_vars_file_list[$row['IP_ADDRESS']][$varname] =  "\"" . $row['VARS_ENTRY'] . "\""
+;
+                                // ホスト変数の具体値を「変数名.x x:0からの通番」設定
+                                $var_val = "\"<< " . $varname . " >>\"";
+                            } else {
+                                // Pioneerドライバの場合、先頭と末尾にダブルクォーテーションを付ける
+                                $var_val = "\"" . $row['VARS_ENTRY'] . "\"";
+                            }
                             break;
                         }
-
                         // 複数行具体値をjson形式で収める
-                        $this->ArrayTypeValue_encode($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$var_val);
+                        $value_count = $this->ArrayTypeValue_encode($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$var_val);
+
                     }
                 }
             }
@@ -6869,6 +7209,26 @@ class CreateAnsibleExecFiles {
         $parent_vars_list = array();
         foreach( $in_tgt_row as $row )
         {
+            // 具体値の暗号化が必要か判定 
+            if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
+                $indento_sp   = "";
+                $valut_value  = "";
+                $make_vaultvalue = $this->makeAnsibleVaultValue($this->getAnsibleExecuteUser(),
+                                                                $row['VARS_ENTRY'],
+                                                                $valut_value,
+                                                                $indento_sp,
+                                                                $row['ASSIGN_ID']);
+                if($make_vaultvalue === false) {
+                    return false;
+                }
+                // 具体値を暗号化した具体値で上書き
+                $row['VARS_ENTRY'] = $make_vaultvalue;
+            } else {
+                //複数行具体値の場合に複数行の扱い記号を付ける 
+                $row['VARS_ENTRY'] = $this->makeMultilineValue($row['VARS_ENTRY']);
+                //-----複数行具体値の場合に複数行の扱い記号を付ける 
+            }
+
             // 多段メンバー変数の廃止レコードを判定
             if($row['MEMBER_COL_COMB_DISUSE_FLAG']!='0'){
                 continue;
@@ -6971,7 +7331,7 @@ class CreateAnsibleExecFiles {
                 // 多次元配列の具体値情報をホスト変数ファイルに戻す為の配列作成
                 $this->makeHostVarsArray($var_path_array,0,
                                          $ina_MultiArray_vars_list[$row['VARS_NAME']][$row['IP_ADDRESS']],
-                                         $var_type,$row['VARS_ENTRY'],$row['ASSIGN_SEQ']);
+                                         $var_type,$row['VARS_ENTRY'],$row['ASSIGN_SEQ']); 
 
 
             }
@@ -9246,7 +9606,7 @@ class CreateAnsibleExecFiles {
     // 戻り値
     //   なし
     ////////////////////////////////////////////////////////////////////////////////
-    function makeHostVarsArray($in_key_array,$in_idx,&$in_out_array,$in_var_type,$in_var_val,$in_ass_no){
+    function makeHostVarsArray($in_key_array,$in_idx,&$in_out_array,$in_var_type,$in_var_val,$in_ass_no){ 
         // 末端の変数に達したか判定
         if(count($in_key_array) <= $in_idx){
             // 末端の変数か判定
@@ -9255,12 +9615,12 @@ class CreateAnsibleExecFiles {
                 if($in_var_type == '1'){
                     // Key-Value変数の場合
                     //$in_out_array = trim($in_var_val);
-                    $in_out_array = $in_var_val;
+                    $in_out_array = $in_var_val;     
                 }
                 else{
                     // 複数具体値の場合
                     //$in_out_array[$in_ass_no] = trim($in_var_val);
-                    $in_out_array[$in_ass_no] = $in_var_val;
+                    $in_out_array[$in_ass_no] = $in_var_val;   
                     // 代入順序で昇順ソートする。
                     ksort($in_out_array);
                 }
@@ -9359,7 +9719,8 @@ class CreateAnsibleExecFiles {
                     // 具体値出力
                     // - xxxxxxx
                     $NumPadding = strlen($indent) + 4;
-                    $edit_str = $this->MultilineValueEdit($val,$NumPadding);
+                    // 多段変数の複数具体値はJSON形式なっていない
+                    $edit_str = $this->MultilineValueEdit($val,$NumPadding);   
 
                     $vars_str = sprintf("%s  - %s\n",$indent,$edit_str);
                     $in_str_hostvars = $in_str_hostvars . $vars_str;
@@ -9398,7 +9759,7 @@ class CreateAnsibleExecFiles {
                             // 変数と具体値出力 配列の先頭変数なので - を付ける
                             // - xxxxx: xxxxxxx
                             $NumPadding = strlen($indent) + 4;
-                            $edit_str = $this->MultilineValueEdit($val,$NumPadding);
+                            $edit_str = $this->MultilineValueEdit($val,$NumPadding);    
                             $vars_str = sprintf("%s- %s: %s\n",$indent,$var,$edit_str);
                             $in_str_hostvars = $in_str_hostvars . $vars_str;
 
@@ -9424,7 +9785,7 @@ class CreateAnsibleExecFiles {
                             //   xxxxx: xxxxxx
                             // インデント位置は加算済み
                             $NumPadding = strlen($indent) + 4;
-                            $edit_str = $this->MultilineValueEdit($val,$NumPadding);
+                            $edit_str = $this->MultilineValueEdit($val,$NumPadding); 
                             $vars_str = sprintf("%s%s: %s\n",$indent,$var,$edit_str);
                             $in_str_hostvars = $in_str_hostvars . $vars_str;
 
@@ -9469,7 +9830,7 @@ class CreateAnsibleExecFiles {
                         // 変数と具体値出力
                         // xxxxx: xxxxxxx
                         $NumPadding = strlen($indent) + 4;
-                        $edit_str = $this->MultilineValueEdit($val,$NumPadding);
+                        $edit_str = $this->MultilineValueEdit($val,$NumPadding); 
                         $vars_str = sprintf("%s%s: %s\n",$indent,$var,$edit_str);
                         $in_str_hostvars = $in_str_hostvars . $vars_str;
 
@@ -9573,7 +9934,7 @@ class CreateAnsibleExecFiles {
         $ina_global_vars_list = array();
 
         while ( $row = $objQuery->resultFetch() ){
-            $ina_global_vars_list[$row['VARS_NAME']] = $row['VARS_ENTRY'];        
+            $ina_global_vars_list[$row['VARS_NAME']] = $row['VARS_ENTRY'];
         }
 
         // DBアクセス事後処理
@@ -11376,7 +11737,8 @@ class CreateAnsibleExecFiles {
 
                 $RequestURI = "/restapi/ansible_driver/vault.php";
                 $Method     = 'GET';
-    
+                // rot13+base64で暗号化
+                $enc_in_pass = ky_encrypt($in_pass); 
                 $RequestContents
                 = array(
                     //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
@@ -11388,7 +11750,7 @@ class CreateAnsibleExecFiles {
                     // ansible-vault 実行ユーザー
                     "EXEC_USER"=>$in_exec_user,
                     // 暗号化する文字列
-                    "TARGET_VALUE"=>$in_pass);
+                    "TARGET_VALUE"=>$enc_in_pass);
 
                 ////////////////////////////////////////////////////////////////
                 // ansible-vault 暗号化 REST APIコール                        //
@@ -11404,15 +11766,17 @@ class CreateAnsibleExecFiles {
                 if( $rest_api_response['StatusCode'] == 200 ){
                     $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
                     if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($out_vaultpass));
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
                         return false;
                     }
                 } else {
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array(''));
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
                     return false;
                 }
                 $this->lv_vault_pass_list[$in_pass] = $out_vaultpass;
@@ -11433,13 +11797,131 @@ class CreateAnsibleExecFiles {
                 $ret = $this->RecordAccess($strQuery,$aryForBind);
   
                 if($ret !== true ){
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array(""));
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     return false;
                 }
                 // 機器一覧の暗号化パスワードを更新済設定
                 $this->lv_vault_pass_update_list[$update_key] = 'update';
             }
+        } else {
+            $out_vaultpass = $in_vaultpass;
+        }
+
+        // ansible-vaultで暗号化された文字列のインデントを調整
+        $out_vaultpass = $vaultobj->setValutPasswdIndento($out_vaultpass,$in_indento);
+
+        unset($vaultobj);
+
+        return $out_vaultpass;
+    }
+
+    function makeAnsibleVaultValue($in_exec_user,$in_pass,$in_vaultpass,$in_indento,$in_assign_id) {
+        $vaultobj = new AnsibleVault();
+        $out_vaultpass = "";
+
+        $update_key = sprintf("key_%s_%s",$in_assign_id,$in_pass);
+
+        // 具体値が暗号化済か判定(今後の拡張対応)
+        if(strlen(trim($in_vaultpass)) == 0) {
+            global      $root_dir_path;
+            global      $vg_OrchestratorSubId;
+
+            // 具体値が暗号化されているか判定
+            if(@count($this->lv_vault_value_list[$in_pass]) != 0) {
+                // 既に暗号化されている場合
+                $out_vaultpass = $this->lv_vault_value_list[$in_pass];
+            } else {
+                // 暗号化されていない
+                switch($this->getAnsibleDriverID()) {
+                case DF_PIONEER_DRIVER_ID:
+                    $out_vaultpass = $in_pass;
+                    break;
+                default:
+                    ////////////////////////////////
+                    // REST API接続function定義   //
+                    ////////////////////////////////
+                    require_once ($root_dir_path . '/libs/commonlibs/common_ansible_restapi.php' );
+
+                    $RequestURI = "/restapi/ansible_driver/vault.php";
+                    $Method     = 'GET';
+                    // $in_passはrot13+base64で暗号化されている 
+                    $enc_in_pass = $in_pass;
+
+                    $RequestContents
+                    = array(
+                        //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
+                        'DATA_RELAY_STORAGE_TRUNK'=>'/tmp',
+                        //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
+                        "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
+                        //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
+                        "EXE_NO"=>"9999999999",
+                        // ansible-vault 実行ユーザー
+                        "EXEC_USER"=>$in_exec_user,
+                        // 暗号化する文字列
+                        "TARGET_VALUE"=>$enc_in_pass);
+
+                    ////////////////////////////////////////////////////////////////
+                    // ansible-vault 暗号化 REST APIコール                        //
+                    ////////////////////////////////////////////////////////////////
+                    $rest_api_response = ansible_restapi_access( $this->lv_ans_if_info['ANSIBLE_PROTOCOL'],
+                                                                 $this->lv_ans_if_info['ANSIBLE_HOSTNAME'],
+                                                                 $this->lv_ans_if_info['ANSIBLE_PORT'],
+                                                                 $this->lv_ans_if_info['ANSIBLE_ACCESS_KEY_ID'],
+                                                                 ky_decrypt( $this->lv_ans_if_info['ANSIBLE_SECRET_ACCESS_KEY'] ),
+                                                                 $RequestURI,
+                                                                 $Method,
+                                                             $RequestContents );
+                    if( $rest_api_response['StatusCode'] == 200 ){
+                        $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
+                        if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($in_assign_id));
+                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                            $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
+                            return false;
+                        }
+                    } else {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($in_assign_id));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
+                        return false;
+                    }
+                    $out_vaultpass = " !vault |\n" . $out_vaultpass;
+                    $this->lv_vault_value_list[$in_pass] = $out_vaultpass;
+                    break;
+                }
+            } 
+
+// 今後の拡張処理----
+unset($Expansion_root);
+if(isset($Expansion_root)) {
+            // 代入値管理の具体値の暗号化を更新済みか判定
+            if(@count($this->lv_vault_value_list[$update_key]) == 0) {
+
+                global $vg_ansible_vars_assignDB;
+                $vault_column = "xxxxxx";
+                // 機器一覧にansible-vaultで暗号化した文字列を登録
+                $strFxName = "";
+
+                $strQuery =   "UPDATE $vg_ansible_vars_assignDB  SET $vault_column= :$vault_column "
+                              . "WHERE ASSIGN_ID = " . $in_assign_id;
+  
+                $aryForBind = array("$vault_column"=>$out_vaultpass);
+  
+                $ret = $this->RecordAccess($strQuery,$aryForBind);
+  
+                if($ret !== true ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($in_assign_id));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                // 機器一覧の暗号化パスワードを更新済設定
+                $this->lv_vault_pass_update_list[$update_key] = 'update';
+            }
+}
+// -----今後の拡張処理
         } else {
             $out_vaultpass = $in_vaultpass;
         }
@@ -11509,10 +11991,10 @@ class CreateAnsibleExecFiles {
         $this->ansible_exec_user = $user_name;
     }
 
-    function HostVarEdit($val,$NumPadding) {
+    function HostVarEdit($val,$NumPadding) { 
         // josn形式(複数具体値)か判定
         if( ! $this->isArrayTypeValue($val)) {
-            $val = $this->MultilineValueEdit($val,$NumPadding);
+            $val = $this->MultilineValueEdit($val,$NumPadding);   
         } else {
             $val = $this->ArrayTypeValue_decode($val,$NumPadding);
         }
@@ -11520,10 +12002,9 @@ class CreateAnsibleExecFiles {
     }
 
     function MultilineValueEdit($val,$NumPadding) {
+        $strpad = str_pad( "", $NumPadding, " ", STR_PAD_LEFT );
         if(count(explode("\n",$val)) > 1) {
-            $strpad = str_pad( "", $NumPadding, " ", STR_PAD_LEFT );
             $val = preg_replace("/\n/","\n$strpad",$val);
-            $val = "|-\n$strpad" . $val;
         }
         return $val;
     }
@@ -11536,7 +12017,17 @@ class CreateAnsibleExecFiles {
         }
         return true;
     }
+    function makeMultilineValue($val) {
+        if(count(explode("\n",$val)) > 1) {
+            $val = "|-\n" . $val;
+        }
+        return  $val;
+    }
 
+    function getArrayTypeValuecount($val) {
+        $ary = json_decode($val,true);
+        return count($ary);
+    }
     function ArrayTypeValue_encode(&$jsonstr,$val) {
         if(strlen($jsonstr) == 0) {
             $ary = array();
@@ -11545,9 +12036,11 @@ class CreateAnsibleExecFiles {
         }
         $ary[] = $val;
         $jsonstr = json_encode($ary);
+        // 具体値の数を返却
+        return count($ary);
     }
 
-    function ArrayTypeValue_decode($jsonstr,$NumPadding) {
+    function ArrayTypeValue_decode($jsonstr,$NumPadding) {   
         $val = "";
         $strpad = str_pad( "", $NumPadding, " ", STR_PAD_LEFT );
         $indstrpad = str_pad( "", $NumPadding + 2, " ", STR_PAD_LEFT );
@@ -11555,7 +12048,7 @@ class CreateAnsibleExecFiles {
         foreach($ary as $line) {
             if(count(explode("\n",$line)) != 1) {;
                 $line = preg_replace("/\n/","\n$indstrpad",$line);
-                $val .= sprintf("\n%s- |-\n%s%s",$strpad,$indstrpad,$line);
+                $val .= sprintf("\n%s- %s",$strpad,$line);
             } else {
                 $val .= sprintf("\n%s- %s",$strpad,$line);
             }
@@ -11567,6 +12060,19 @@ class CreateAnsibleExecFiles {
         return ((is_string($string) &&
                 (is_object(json_decode($string)) ||
                  is_array(json_decode($string))))) ? true : false;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   暗号化されているホスト変数定義ファイル名を取得
+    // パラメータ
+    //   $in_hostname:       ホスト名(IPアドレス)
+    //
+    // 戻り値
+    //   ホスト変数定義ファイル名
+    ////////////////////////////////////////////////////////////////////////////////
+    function getAnsible_vault_host_var_file($in_hostname){
+        $file = sprintf(self::LC_ANS_VAULT_HOST_VAR_FILE_MK,$this->getAnsible_vault_hosts_vars_Dir(),$in_hostname);
+        return($file);
     }
 }
 

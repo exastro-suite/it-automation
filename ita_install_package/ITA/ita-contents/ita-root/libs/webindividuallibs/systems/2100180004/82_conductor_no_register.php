@@ -169,9 +169,8 @@ function conductorNoRegister($intShmphonyClassId, $intOperationNo, $strPreserveD
     // 処理開始
     try{
         require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/71_basic_common_lib.php");
-        require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/72_symphonyClassAdmin.php");
         require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/75_conductorInstanceAdmin.php");
-
+        require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/74_conductorClassAdmin.php");
         $aryRetBody = conductorInstanceConstuct($intShmphonyClassId, $intOperationNo, $strPreserveDatetime,"",$strOptionOrderStream);
 
         if( $aryRetBody[1] !== null ){

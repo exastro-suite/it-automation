@@ -556,7 +556,7 @@ class Column extends ColumnGroup {
 
 	protected $aryAddtionalNestProperty;
 
-    protected $allowUploadColmnSendRestApi;    // as boolean FileUploadColumnクラスのRestAPIからの送信を許すか
+	protected $allowUploadColmnSendRestApi;    // as boolean FileUploadColumnクラスのRestAPIからの送信を許すか
 
 	//----ここから継承メソッドの上書き処理
 
@@ -922,11 +922,35 @@ class Column extends ColumnGroup {
 	function setAddSelectTagPrintType($intValue){
 	}
 	//NEW[43]
-	function getAddSelectTagPrintType(){
+	function getAddSelectTagPrintType(){ 
 		return 0;
 	}
+     
+        // ----RBAC対応
+        // プルダウン(IDColumn)に表示するデータをACCESS_AUTHで絞り込むか判定
+        function chkPullDownListAccessPermissionNeed($MasterTblName) {
+		global $g;
+		// chkPullDownListAccessPermissionNeedを呼び出す場合はtryで囲む
+		// ロードテーブルにACCESS_AUTHカラムの定義があるかを取得
+		$loadtable_accessAuth =  $g['global_getAccessAuth'];
+		// カラムに紐づいているオブジェクトにACCESS_AUTHカラムがあるか判定
+                $loadtable_accessAuthColumnName = $g['global_getAccessAuthColumnName'];
+		$obj = new RoleBasedAccessControl($g['objDBCA']);
+		list($ret,$columntable_accesssAuth) = $obj->chkTableHasAccessPermissionColumDefine($MasterTblName,$loadtable_accessAuthColumnName);
+		if($ret === false) {
+			$message = sprintf("[%s:%s]chkTableHasAccessPermissionColumDefine check faild. (Table:%s)",basename(__FILE__),__LINE__,$MasterTblName);
+			throw new Exception($message);
+		}
+		// プルダウンに表示するデータをACCESS_AUTHで絞り込むか判定
+		$ret = $obj->getPullDownListAccessPermissionNeedCheck($loadtable_accessAuth,$columntable_accesssAuth);
+		unset($obj);
+                return $ret;
+	}
+        // RBAC対応 ----
+
 	//NEW[44]
-	function getAddSelectTagQuery($searchTblName, $strWhereAddBody=""){
+        // Column::getAddSelectTagQuery
+	function getAddSelectTagQuery($objTable, $searchTblName, $strWhereAddBody=""){
 		$retStrQuery = "";
 		$intErrorType = null;
 		$aryErrMsgBody = array();
@@ -942,13 +966,33 @@ class Column extends ColumnGroup {
 
 		$strWpTableName = "{$dbQM}{$searchTblName}{$dbQM}";
 
-		$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} ";
-		$retStrQuery .= "FROM {$strWpTableName} {$strWpTblSelfAlias} ";
-		$retStrQuery .= "WHERE {$strWpTblSelfAlias}.{$strWpColId} IS NOT NULL ";
-		$retStrQuery .= "AND {$strWpDUFColId} IN ('0','1') ";
-		$retStrQuery .= "{$strWhereAddBody} ";
-		$retStrQuery .= "ORDER BY {$strWpTblSelfAlias}.{$strWpColId} ASC";
+ 		try {
+			$strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
+			// RBAC対応 ----
+                	// プルダウンに表示するデータをloadtableに紐づいているオブジェクトのACCESS_AUTHで絞り込むか判定
+			$addStrQuery = "";
+        		$AccessAuthColum   = "{$dbQM}{$objTable->getAccessAuthColumnName()}{$dbQM}";
+			$ret = $objTable->getAccessAuth();
+			if($ret === true) {
+				// SQLに埋め込むアクセス権のカラム名生成
+        			$addStrQuery = sprintf("%s.%s",$strWpTblSelfAlias,$AccessAuthColum);
+			}
+			$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} ";
+			if($addStrQuery != "") {
+				// アクセス権のカラム名をSELECT文に埋め込む
+				$retStrQuery  .= ",".$addStrQuery." ";
+			}
+			// ---- RBAC対応
+			$retStrQuery .= "FROM {$strWpTableName} {$strWpTblSelfAlias} ";
+			$retStrQuery .= "WHERE {$strWpTblSelfAlias}.{$strWpColId} IS NOT NULL ";
+			$retStrQuery .= "AND {$strWpDUFColId} IN ('0','1') ";
+			$retStrQuery .= "{$strWhereAddBody} ";
+			$retStrQuery .= "ORDER BY {$strWpTblSelfAlias}.{$strWpColId} ASC";
 
+		}catch (Exception $e){
+			web_log($e->getMessage());
+			$intErrorType = 500;
+		}
 		$retArray = array($retStrQuery,$intErrorType,$aryErrMsgBody,$strErrMsg,$retArrayForBind);
 		return $retArray;
 	}
@@ -1857,6 +1901,7 @@ class IDColumn extends Column {
 		$this->setJournalLUTSIDOfMaster(null);
 
 		$this->setSelectTagCallerShow(true);
+		// ----変数の初期化
         $this->setDateFormat(null);
 	}
 
@@ -1914,7 +1959,8 @@ class IDColumn extends Column {
 	}
 
 	//OVR[-]::[44]
-	function getAddSelectTagQuery($searchTblId, $strWhereAddBody=""){
+        // IDColumn::getAddSelectTagQuery
+	function getAddSelectTagQuery($objTable, $searchTblId, $strWhereAddBody=""){
 		$retStrQuery = "";
 		$intErrorType = null;
 		$aryErrMsgBody = array();
@@ -1929,13 +1975,35 @@ class IDColumn extends Column {
 		
 		$refMasterKeyColumn = $this->getKeyColumnIDOfMaster();
 		$refMasterDispColumn = $this->getDispColumnIDOfMaster();
+		// IDColumnに紐づけているテーブル名
 		$refMasterTableBody = $this->getMasterTableBodyForFilter();
 		$refMasterDUColumn = $this->getRequiredDisuseColumnID();
 		$aryEtcetera = $this->getEtceteraParameter();
 
-		$retStrQuery = genSQLforGetMasValsInMainTbl($mainTableBody, $strThisIdColumnId, $strDUColumnOfMainTable
-													, $refMasterTableBody, $refMasterKeyColumn, $refMasterDispColumn, $refMasterDUColumn
-													, $aryEtcetera,$strWhereAddBody,"KEY_COLUMN","DISP_COLUMN");
+		// RBAC対応 ----
+		try {
+			// SQLに埋め込むアクセス権のカラム名取得
+                        $AccessAuthColumName = $objTable->getAccessAuthColumnName();
+			$AccessAuthColumUse  = $objTable->getAccessAuth();
+                	// プルダウンに表示するデータをloadtableに紐づいているオブジェクトのACCESS_AUTHで絞り込むか判定
+			$addStrQuery = "";
+
+			$retStrQuery = genSQLforGetMasValsInMainTbl($mainTableBody
+								, $strThisIdColumnId
+								, $strDUColumnOfMainTable
+								, $refMasterTableBody
+								, $refMasterKeyColumn
+								, $refMasterDispColumn
+								, $refMasterDUColumn
+                                                                , $AccessAuthColumUse
+                                                                , $AccessAuthColumName
+								, $aryEtcetera,$strWhereAddBody
+								,"KEY_COLUMN","DISP_COLUMN");
+		}catch (Exception $e){
+			web_log($e->getMessage());
+			$intErrorType = 500;
+		}
+                // ---- RBAC対応
 
 		$retArray = array($retStrQuery,$intErrorType,$aryErrMsgBody,$strErrMsg,$retArrayForBind);
 		return $retArray;
@@ -2410,6 +2478,7 @@ class IDColumn extends Column {
 	}
 	//NEW[38]
 	function getMasterTableArrayFromMainTable(){
+		global $g;    // RBAC対応
 		//(1)IDColumn、がTableにAddされていない場合は「null」を返す。
 		//(2)setMasterTableArrayFromMainTable、で、null、をセットしたとしても、通常は、配列を返す。
 		if($this->arrayMasterSetFromMainTable === null){
@@ -2428,9 +2497,16 @@ class IDColumn extends Column {
 				$refMasterDUColumn = $this->getRequiredDisuseColumnID();
 				$aryEtcetera = $this->getEtceteraParameter();
 
+                                // ---- RBAC対応
+                                // SQLに埋め込むアクセス権のカラム名取得
+                                $AccessAuthColumName    = $g['global_getAccessAuthColumnName'];
+                                // loadtableに紐づいているオブジェクトのACCESS_AUTHカラム定義の有無取得
+                                $AccessAuthColumUse    = $g['global_getAccessAuth'];
+
 				//----マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する
-				$this->arrayMasterSetFromMainTable=createMasterTableDistinctArray($mainTableBody, $strThisIdColumnId, $strDUColumnOfMainTable, $refMasterTableBody, $refMasterKeyColumn, $refMasterDispColumn, $refMasterDUColumn, $aryEtcetera);
+				$this->arrayMasterSetFromMainTable=createMasterTableDistinctArray($mainTableBody, $strThisIdColumnId, $strDUColumnOfMainTable, $refMasterTableBody, $refMasterKeyColumn, $refMasterDispColumn, $refMasterDUColumn, $aryEtcetera, $AccessAuthColumUse, $AccessAuthColumName);
 				//マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する----
+                                // RBAC対応 ----
 
 				if(is_array($this->arrayMasterSetFromMainTable)===true && 0 < count($this->arrayMasterSetFromMainTable)){
 					//----正常に配列を取得できた
@@ -2468,9 +2544,16 @@ class IDColumn extends Column {
 				$refMasterDUColumn = $this->getRequiredDisuseColumnID();
 				$aryEtcetera = $this->getEtceteraParameter();
 
+                                // ---- RBAC対応
+                                // SQLに埋め込むアクセス権のカラム名取得
+                                $AccessAuthColumName    = $g['global_getAccessAuthColumnName'];
+                                // loadtableに紐づいているオブジェクトのACCESS_AUTHカラム定義の有無取得
+                                $AccessAuthColumUse    = $g['global_getAccessAuth'];
+
 				//----マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する
-				$this->arrayMasterSetFromJournalTable=createMasterTableDistinctArray($JournalTableBody, $strThisIdColumnId, $strDUColumnOfMainTable, $refMasterTableBody, $refMasterKeyColumn, $refMasterDispColumn, $refMasterDUColumn, $aryEtcetera);
+				$this->arrayMasterSetFromJournalTable=createMasterTableDistinctArray($JournalTableBody, $strThisIdColumnId, $strDUColumnOfMainTable, $refMasterTableBody, $refMasterKeyColumn, $refMasterDispColumn, $refMasterDUColumn, $aryEtcetera, $AccessAuthColumUse, $AccessAuthColumName);
 				//マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する----
+                                // RBAC対応 ----
 
 				if(is_array($this->arrayMasterSetFromJournalTable)===true && 0 < count($this->arrayMasterSetFromJournalTable)){
 					//----正常に配列を取得できた
@@ -2519,6 +2602,7 @@ class IDColumn extends Column {
 	}
 	//NEW[42]
 	function getMasterTableArrayForInput(){
+                global $g;
 		if($this->arrayMasterSetForInput === null){
 			//----主として、新規登録、既存更新のセレクトタグ用のデフォルト・データセットを作成
 
@@ -2533,22 +2617,34 @@ class IDColumn extends Column {
 			$masterDisuseFlagColumnId = $this->getRequiredDisuseColumnID();
 
 			if( $masterTableBodyForInput !== "" && $strKeyColumnIDOfMaster !== "" && $strDispColumnIdOfMaster !== "" ){
+				// ---- RBAC対応
+                	        // プルダウンに表示するデータをACCESS_AUTHで絞り込むか判定
+				try {
+                	        	$CheckAccessAuth = $this->chkPullDownListAccessPermissionNeed($masterTableBodyForInput);
+				}catch (Exception $e){
+					web_log($e->getMessage());
+					$message = sprintf("[%s:%s]chkPullDownListAccessPermissionNeed check faild.",basename(__FILE__),__LINE__);
+					web_log($message);
+					// 無理やり空リターン
+					throw new Exception($message);
+				}
+				// RBAC対応 ----
 				//----マスターにおいて廃止されている行を除いて、マスターから、他の行の鍵カラムと表示カラムのセットを取得する
-				$this->arrayMasterSetForInput = createMasterTableArrayForInput($masterTableBodyForInput, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $masterDisuseFlagColumnId, $aryEtcetera);
+				$this->arrayMasterSetForInput = createMasterTableArrayForInput($masterTableBodyForInput, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $masterDisuseFlagColumnId, $aryEtcetera, $CheckAccessAuth);   // RBAC対応
 				//マスターにおいて廃止されている行を除いて、マスターから、他の行の鍵カラムと表示カラムのセットを取得する----
 
 				if(is_array($this->arrayMasterSetForInput)===true && 0 < count($this->arrayMasterSetForInput)){
 					//----正常に配列を取得できた
 
-                    //----date型の型変換
-                    $arrayTmp = array();
-                    if($this->getDateFormat() !== null){
-                        foreach($this->arrayMasterSetForInput as $key => $value){
-                            $arrayTmp[$key] = date($this->getDateFormat(), strtotime($value));
-                        }
-                    $this->arrayMasterSetForInput = $arrayTmp;
-                    }
-                    //date型の型変換----
+                    			//----date型の型変換
+                    			$arrayTmp = array();
+                    			if($this->getDateFormat() !== null){
+                        			foreach($this->arrayMasterSetForInput as $key => $value){
+                            				$arrayTmp[$key] = date($this->getDateFormat(), strtotime($value));
+                        			}
+                    				$this->arrayMasterSetForInput = $arrayTmp;
+                    			}
+                    			//date型の型変換----
 
 					//正常に配列を取得できた----
 				}else{
@@ -2815,7 +2911,7 @@ class EditStatusControlIDColumn extends IDColumn {
 
     function inTrzBeforeTableIUDAction(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
 		global $g;
-        $intControlDebugLevel01=250;
+		$intControlDebugLevel01=250;
 
 		$boolRet = true;
 		$intErrorType = null;
@@ -5008,7 +5104,7 @@ class JournalSeqNoColumn extends NumColumn {
 			$exeJournalData = generateElementForJournalReg($exeQueryData,$aryVariant['edit_target_row'],$arrayObjColumn,$objTable->getRequiredUpdateDate4UColumnID(),$objTable->getDBMainTableHiddenID());
 
 			$sqlJnlBody = generateJournalRegisterSQL($exeJournalData,$arrayObjColumn,$objTable->getDBJournalTableID(),$objTable->getDBJournalTableHiddenID() );
-			
+
 			$retSQLResultArray = singleSQLExecuteAgent($sqlJnlBody, $exeJournalData, $strFxName);
 			if( $retSQLResultArray[0]===true ){
 				$objQueryJnl =& $retSQLResultArray[1];
@@ -5478,7 +5574,9 @@ class DateColumn extends Column {
 		return $this->intSelectTagPrintType;
 	}
 
-	function getAddSelectTagQuery($searchTblId, $strWhereAddBody=""){
+        // DateColumn::getAddSelectTagQuery
+	function getAddSelectTagQuery($objTable, $searchTblId, $strWhereAddBody=""){ 
+		// --RBAC未対応--
 		$retStrQuery = "";
 		$intErrorType = null;
 		$aryErrMsgBody = array();
@@ -6017,7 +6115,9 @@ class AutoUpdateTimeColumn extends DateTimeColumn {
 		$this->setValidator($objDTV);
 	}
 
-	function getAddSelectTagQuery($searchTblName, $strWhereAddBody=""){
+        // AutoUpdateTimeColumn::getAddSelectTagQuery
+	function getAddSelectTagQuery($objTable, $searchTblName, $strWhereAddBody=""){
+		// --RBAC未対応--
 		$retStrQuery = "";
 		$intErrorType = null;
 		$aryErrMsgBody = array();
@@ -6045,7 +6145,8 @@ class AutoUpdateTimeColumn extends DateTimeColumn {
 
 			$retArray = array($retStrQuery,$intErrorType,$aryErrMsgBody,$strErrMsg,$retArrayForBind);
 		}else{
-			$retArray = parent::getAddSelectTagQuery($searchTblName, $strWhereAddBody);
+                        //#28 ColumnクラスでTableControlAgentのプロパティが必要なのでTableControlAgentオブジェクト($objTable)をパラメータに追加
+			$retArray = parent::getAddSelectTagQuery($objTable, $searchTblName, $strWhereAddBody);
 		}
 		return $retArray;
 	}
@@ -6439,7 +6540,8 @@ class AutoUpdateUserColumn extends TextColumn {
 		$this->setValidator(new LongUserNameValidator());
 	}
 
-	function getAddSelectTagQuery($searchTblId, $strWhereAddBody=""){
+        // AutoUpdateUserColumn::getAddSelectTagQuery
+	function getAddSelectTagQuery($objTable, $searchTblId, $strWhereAddBody=""){
 		$retStrQuery = "";
 		$intErrorType = null;
 		$aryErrMsgBody = array();
@@ -6447,7 +6549,6 @@ class AutoUpdateUserColumn extends TextColumn {
 		$retArrayForBind = array();
 
 		$dbQM=$this->objTable->getDBQuoteMark();
-
 		$strWpColId = "{$dbQM}{$this->getID()}{$dbQM}";
 		$strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
 
@@ -6461,10 +6562,24 @@ class AutoUpdateUserColumn extends TextColumn {
 
 		$strWpDUFColId = "{$dbQM}{$this->getRequiredDisuseColumnID()}{$dbQM}";
 
+		// RBAC対応 ----
+		// loadtableのACCESS_AUTHカラムの定義有無により表示するデータをACCESS_AUTHで絞り込むか判定
+		$ret = $objTable->getAccessAuth();
+		$addStrQuery = "";
+		if($ret === true) {
+			$addStrQuery = sprintf(", %s.%s%s%s ",
+			                       $strWpTblSelfAlias,
+			                       $dbQM,
+			                       $objTable->getAccessAuthColumnName(),
+			                       $dbQM);
+		}
+		// ---- RBAC対応
+
 		$strBodyFrom  = "{$strWpTableId} {$strWpTblSelfAlias} LEFT JOIN {$strTableJoin} {$strTblJoinAlias} ";
 		$strBodyFrom .= "ON ( {$strWpTblSelfAlias}.{$strWpColId} = {$strTblJoinAlias}.{$strJoinColKey} ) ";
 
 		$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM} ";
+		$retStrQuery .= $addStrQuery;  // RBAC対応
 		$retStrQuery .= "FROM {$strBodyFrom} ";
 		$retStrQuery .= "WHERE {$strWpTblSelfAlias}.{$strWpColId} IS NOT NULL ";
 		$retStrQuery .= "AND {$strWpTblSelfAlias}.{$strWpDUFColId} IN ('0','1') ";
@@ -7226,7 +7341,9 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 		return $retStrQuery;
 	}
 
-	function getAddSelectTagQuery($searchTblId, $strWhereAddBody=""){
+        // IDRelaySearchColumn::getAddSelectTagQuery
+	function getAddSelectTagQuery($objTable, $searchTblId, $strWhereAddBody=""){
+		// --RBAC未対応--
 		//strWhereAddBody・・基本サポートしていないパラメータ
 		global $g;
 		$intControlDebugLevel01 = 50;
@@ -7908,6 +8025,273 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 	}
 
 }
+
+class SensitiveSingleTextColumn extends passwordColumn {
+
+	protected $strSensitiveFlagColumn;
+
+	//----ここから継承メソッドの上書き処理
+	function __construct($strColId, $strColLabel, $sensitiveFlagColumn, $aryEtcetera=array()){
+		parent::__construct($strColId, $strColLabel);
+
+			$this->setSensitiveColumn($sensitiveFlagColumn);
+
+			$outputType = new OutputType(new SortedTabHFmt(), new SensitiveTextTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("print_table", $outputType);
+
+			$outputType = new OutputType(new TabHFmt(), new SensitiveTextTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("print_journal_table", $outputType);
+
+			$outputType = new OutputType(new TabHFmt(), new SensitiveTextTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("delete_table", $outputType);
+
+			$outputType = new OutputType(new FilterTabHFmt(), new TextFilterTabBFmt());
+			$this->setOutputType("filter_table", $outputType);
+			$this->setEvent("filter_table", "onkeydown", "pre_search_async", array('event.keyCode'));
+
+			$outputType = new OutputType(new ReqTabHFmt(), new SensitiveTextInputTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("update_table", $outputType);
+
+			$outputType = new OutputType(new ReqTabHFmt(), new TextInputTabBFmt());
+			$this->setOutputType("register_table", $outputType);
+
+			$outputType = new OutputType(new ExcelHFmt(), new SensitiveExcelBFmt($sensitiveFlagColumn));
+			$this->setOutputType("excel", $outputType);
+
+			$outputType = new OutputType(new CSVHFmt(), new SensitiveCSVBFmt($sensitiveFlagColumn));
+			$this->setOutputType("csv", $outputType);
+
+			$outputType = new OutputType(new ExcelHFmt(), new SensitiveExcelBFmt($sensitiveFlagColumn));
+			$this->setOutputType("json", $outputType);
+
+			$this->setEncodeFunctionName("ky_encrypt");
+
+			//バリデーションチェック用function
+			$objFunction = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+				$boolRet = true;
+				$intErrorType = null;
+				$aryErrMsgBody = array();
+				$strErrMsg = "";
+				$strErrorBuf = "";
+				$sensitiveFlagColumn = $this->getSensitiveColumn();
+				$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+
+				//更新の場合
+				if( $modeValue=="DTUP_singleRecUpdate" ){
+					if(!empty($aryVariant['edit_target_row'])){
+						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+						//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
+						if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
+							$this->setUpdateRequireExcept(false);
+						}else{
+							$this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
+						}
+					}
+				}
+
+				//廃止/復活時に、入力データを補完する
+				if( $modeValue=="DTUP_singleRecDelete" ){
+					if( array_key_exists($this->getID(),$reqOrgData)===false ){
+						//----送信されてこなかった
+						list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($aryVariant,array("edit_target_row",$this->getID()),null);
+						if( $tmpBoolKeyExist===true ){
+							$reqOrgData[$this->getID()] = $varValue;
+						}
+						//送信されてこなかった----
+					}
+				}
+
+				$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+				return $retArray;
+			};
+			$this->setFunctionForEvent('beforeIUDValidateCheck',$objFunction);
+
+			//登録・更新用function
+			$objFunction2 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+				$boolRet = true;
+				$intErrorType = null;
+				$aryErrMsgBody = array();
+				$strErrMsg = "";
+				$strErrorBuf = "";
+				$sensitiveFlagColumn = $this->getSensitiveColumn();
+
+				if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
+					$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+					//登録か更新の場合
+					if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+						if( $exeQueryData[$objColumn->getID()] != "" ){
+							$strEncodeFunctionName = $objColumn->getEncodeFunctionName();
+							if( $strEncodeFunctionName != "" ){
+								$strEncodedValue = $strEncodeFunctionName($exeQueryData[$objColumn->getID()]);
+							}else{
+								$strEncodedValue = $exeQueryData[$objColumn->getID()];
+							}
+
+							//SENSITIVE_FLAGがON(2)の場合のみエンコードした値を入れる
+							if($exeQueryData[$sensitiveFlagColumn] == 2){
+								$exeQueryData[$objColumn->getID()] = $strEncodedValue;
+							}
+
+						}
+					}
+				}
+
+				$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+				return $retArray;
+			};
+			$this->setFunctionForEvent('beforeTableIUDAction',$objFunction2);
+
+	}
+
+	function getSensitiveColumn(){
+		return $this->strSensitiveFlagColumn;
+	}
+
+	function setSensitiveColumn($sensitiveFlagColumn){
+		$this->strSensitiveFlagColumn = $sensitiveFlagColumn;
+	}
+	//ここまで継承メソッドの上書き処理----
+}
+
+class SensitiveMultiTextColumn extends SensitiveSingleTextColumn {
+
+	protected $intParaGpaphMode; //----1はLf統一
+
+	//----ここから継承メソッドの上書き処理
+
+	function __construct($strColId, $strColLabel, $sensitiveFlagColumn, $aryEtcetera=array()){
+		parent::__construct($strColId, $strColLabel, $sensitiveFlagColumn);
+
+			$outputType = new OutputType(new ReqTabHFmt(), new SensitiveTextAreaTabBFmt($sensitiveFlagColumn));
+			$this->setOutputType("update_table", $outputType);
+
+			$outputType = new OutputType(new ReqTabHFmt(), new TextAreaTabBFmt());
+			$this->setOutputType("register_table", $outputType);
+
+			$this->setParaGpaphMode(1);
+
+			//バリデーションチェック用function
+			$objFunction = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+				$boolRet = true;
+				$intErrorType = null;
+				$aryErrMsgBody = array();
+				$strErrMsg = "";
+				$strErrorBuf = "";
+				$sensitiveFlagColumn = $this->getSensitiveColumn();
+				$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+				//更新の場合
+				if( $modeValue=="DTUP_singleRecUpdate" ){
+					if(!empty($aryVariant['edit_target_row'])){
+						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+						//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
+						if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
+							$this->setUpdateRequireExcept(false);
+						}else{
+							$this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
+						}
+					}
+				}
+
+				//廃止/復活時に、入力データを補完する
+				if( $modeValue=="DTUP_singleRecDelete" ){
+					if( array_key_exists($this->getID(),$reqOrgData)===false ){
+						//----送信されてこなかった
+						list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($aryVariant,array("edit_target_row",$this->getID()),null);
+						if( $tmpBoolKeyExist===true ){
+							$reqOrgData[$this->getID()] = $varValue;
+						}
+						//送信されてこなかった----
+					}
+				}
+
+				$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+				return $retArray;
+			};
+			$this->setFunctionForEvent('beforeIUDValidateCheck',$objFunction);
+
+			//登録・更新用function
+			$objFunction2 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+				$boolRet = true;
+				$intErrorType = null;
+				$aryErrMsgBody = array();
+				$strErrMsg = "";
+				$strErrorBuf = "";
+				$sensitiveFlagColumn = $this->getSensitiveColumn();
+				if( $this->getParaGpaphMode()===1 ){
+					//----CrLfがあったらLfへ統一するモードweb_log("CrLfがあったらLfへ統一するモードが走った");
+					$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+					//登録の場合
+					if( $modeValue=="DTUP_singleRecRegister" ){
+						list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($reqOrgData,array($this->getID()),null);
+						if( $tmpBoolKeyExist===true ){
+							$strConvedValue = str_replace(array("\r\n","\r"),"\n",$varValue);
+							$reqOrgData[$this->getID()] = $strConvedValue;
+							$exeQueryData[$this->getID()] = $strConvedValue;
+						}
+					}
+
+					//更新の場合
+					if( $modeValue=="DTUP_singleRecUpdate" ){
+						if(!empty($aryVariant['edit_target_row'])){
+							$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+							$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+							//sensitiveFlagが2(ON)から2(ON)の以外の場合のみ実行
+							if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
+								list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($reqOrgData,array($this->getID()),null);
+								if( $tmpBoolKeyExist===true ){
+									$strConvedValue = str_replace(array("\r\n","\r"),"\n",$varValue);
+									$reqOrgData[$this->getID()] = $strConvedValue;
+									$exeQueryData[$this->getID()] = $strConvedValue;
+								}
+							}
+						}
+					}
+					//CrLfがあったらLfへ統一するモード----
+				}
+
+				if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
+					$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+					//登録か更新の場合
+					if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+						if( $exeQueryData[$objColumn->getID()] != "" ){
+							$strEncodeFunctionName = $objColumn->getEncodeFunctionName();
+							if( $strEncodeFunctionName != "" ){
+								$strEncodedValue = $strEncodeFunctionName($exeQueryData[$objColumn->getID()]);
+							}else{
+								$strEncodedValue = $exeQueryData[$objColumn->getID()];
+							}
+
+							//SENSITIVE_FLAGがON(2)の場合のみエンコードした値を入れる
+							if($exeQueryData[$sensitiveFlagColumn] == 2){
+								$exeQueryData[$objColumn->getID()] = $strEncodedValue;
+							}
+
+						}
+					}
+				}
+
+				$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+				return $retArray;
+			};
+			$this->setFunctionForEvent('beforeTableIUDAction',$objFunction2);
+
+	}
+	//ここまで継承メソッドの上書き処理----
+
+	//----ここから新規メソッドの定義宣言処理
+	function setParaGpaphMode($intParaGpaphMode){
+		$intParaGpaphMode = ($intParaGpaphMode===1)?1:0;
+		$this->intParaGpaphMode = $intParaGpaphMode;
+	}
+	function getParaGpaphMode(){
+		return $this->intParaGpaphMode;
+	}
+	//ここまで新規メソッドの定義宣言処理----
+
+}
+
 
 //----ここからColumn直継承クラス（孫継承なし）
 class RowEditByFileColumn extends Column{
@@ -9218,20 +9602,22 @@ class FileUploadColumn extends Column{
 						}
 					}
 
-					$boolMkDir = @mkdir($LAPathToDstJnlJsn);
-					if($boolMkDir===true){
-						$boolChmod = @chmod($LAPathToDstJnlJsn,0777);
-						if( $boolChmod === false ){
-							$intErrorType = 9;
-							$aryTempForMsg[] = $LAPathToDstJnlJsn;
-							throw new Exception( '00000900-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
-						}
-					}
-					else{
-						$intErrorType = 10;
-						$aryTempForMsg[] = $LAPathToDstJnlJsn;
-						throw new Exception( '00001000-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
-					}
+					if( is_dir($LAPathToDstJnlJsn) !== true ){
+    					$boolMkDir = @mkdir($LAPathToDstJnlJsn);
+    					if($boolMkDir===true){
+    						$boolChmod = @chmod($LAPathToDstJnlJsn,0777);
+    						if( $boolChmod === false ){
+    							$intErrorType = 9;
+    							$aryTempForMsg[] = $LAPathToDstJnlJsn;
+    							throw new Exception( '00000900-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+    						}
+    					}
+    					else{
+    						$intErrorType = 10;
+    						$aryTempForMsg[] = $LAPathToDstJnlJsn;
+    						throw new Exception( '00001000-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+    					}
+                    }
 
 					$boolRename = @rename($srcPath, $LAPathToDstJnlJsnFile);
 					if( $boolRename === true ){

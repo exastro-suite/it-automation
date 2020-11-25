@@ -38,7 +38,7 @@
         // 想定外エラー通知画面にリダイレクト
         webRequestForceQuitFromEveryWhere(400,11110101);
     }
-    if(count($tmpAryRetBody[0]['MenuNames']) < 1){
+    if(count($tmpAryRetBody[0]['MenuNames']) < 1 && $_SERVER['REQUEST_URI'] != "/default/mainmenu/01_browse.php"){
         // アクセスログ出力(不正アクセス操作)
         web_log($objMTS->getSomeMessage("ITAWDCH-ERR-47"));
 
@@ -63,7 +63,13 @@
     else{
         $menus .= "<li id=\"MENU00\" class=\"menu-on\">";
     }
-    $menus .= "<a href=\"/default/mainmenu/01_browse.php?grp=" . $ACRCM_group_id . "\">" . trim($objMTS->getSomeMessage("ITAWDCH-MNU-1100001")) . "</a></li>\n";
+    if ( isset($ACRCM_group_id) && !empty($ACRCM_group_id) ) {
+        $dashboard_link = "<a href=\"/default/mainmenu/01_browse.php?grp=" . $ACRCM_group_id . "\">";
+    }
+    else {
+        $dashboard_link = "<a href=\"/default/mainmenu/01_browse.php\">";
+    }
+    $menus .= $dashboard_link . trim($objMTS->getSomeMessage("ITAWDCH-MNU-1100001")) . "</a></li>\n";
     foreach($menu_name_array as $menu_name){
         $menu_num_zeropad = sprintf('%02d', $menu_num + 1 );
         if(array_key_exists('no', $_GET) && $_GET['no'] == sprintf("%010d", $menu_id_array[$menu_num])){

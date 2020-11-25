@@ -459,6 +459,8 @@
         $playbooklist     = array();
         $dialogfilelist   = array();
         $host_vars        = array();
+        $vault_vars       = array(); 
+        $vault_host_vars_file_list = array(); 
 
         $host_child_vars      = array();
         $DB_child_vars_master = array();
@@ -613,7 +615,10 @@
             // データベースから変数情報を取得する。
             //   $host_vars:        変数一覧返却配列
             //                      [ホスト名(IP)][ 変数名 ]=>具体値
-            // #1081 2016/11/04 Append strat  
+            //   $vault_vars:       PasswordCoulumn変数一覧(Pioneer用)
+            //                      [ 変数名 ] = {{ 変数名 }} 
+            //   $ina_vault_host_vars_file_list:  PasswordCoulumn変数のみのホスト変数一覧(Pioneer用)
+            //                      [ホスト名(IP)][ 変数名 ] = 具体値
             //   $host_child_vars   配列変数一覧返却配列(変数一覧に配列変数含む)
             //                      [ホスト名(IP)][ 変数名 ][列順序][メンバー変数]=[具体値]
             //   $DB_child_vars_master: 
@@ -624,6 +629,8 @@
             $ret = $in_ansdrv->getDBVarList($in_pattern_id,
                                             $in_operation_id,
                                             $host_vars,
+                                            $vault_vars,
+                                            $vault_host_vars_file_list,
                                             $host_child_vars,
                                             $DB_child_vars_master);
             if($ret <> true){
@@ -661,6 +668,8 @@
         // ansibleで実行するファイル作成
         $ret = $in_ansdrv->CreateAnsibleWorkingFiles($hostlist,
                                                      $host_vars,
+                                                     $vault_vars, 
+                                                     $vault_host_vars_file_list,
                                                      $playbooklist,
                                                      $dialogfilelist,
                                                      // Legacy-Role対応
