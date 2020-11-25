@@ -30,12 +30,6 @@ log() {
     echo "["`date +"%Y-%m-%d %H:%M:%S"`"] $1" | tee -a "$ITA_BUILDER_LOG_FILE"
 }
 
-func_exit() {
-    if [ -e /tmp/pear ]; then
-        rm -rf /tmp/pear >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    fi
-    exit
-}
 
 backup_suffix() {
     echo "."`date +%Y%m%d-%H%M%S.bak`
@@ -112,7 +106,8 @@ yum_install() {
                 yum install -y "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
                 if [ $? != 0 ]; then
                     log "ERROR:Installation failed[$key]"
-                    func_exit
+                    ERR_FLG="false"
+                    func_exit_and_delete_file
                 fi
             done
         fi
@@ -124,10 +119,11 @@ yum_package_check() {
     if [ $# -gt 0 ];then
         for key in $@; do
             echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            yum list installed | grep "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            yum list installed | grep -i "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Package not installed [$key]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
         done
     fi
@@ -153,7 +149,8 @@ download_check() {
     DOWNLOAD_CHK=`echo $?`
     if [ $DOWNLOAD_CHK -ne 0 ]; then
         log "ERROR:Download of file failed"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 }
 
@@ -161,7 +158,8 @@ error_check() {
     DOWNLOAD_CHK=`echo $?`
     if [ $DOWNLOAD_CHK -ne 0 ]; then
         log "ERROR:Stop installation"
-        exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 }
 
@@ -188,7 +186,8 @@ yum_repository() {
             fi
             if [ $? -ne 0 ]; then
                 log "ERROR:Failed to get repository"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
 
             shift
@@ -203,17 +202,32 @@ yum_repository() {
 
             # Check Creating repository
             if [ "${REPOSITORY}" != "yum_all" ]; then
-               case "${linux_os}" in
+               case "${LINUX_OS}" in
                     "CentOS7") create_repo_check remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
-                    "RHEL7") create_repo_check remi-php72 rhel-7-server-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
-                    "RHEL7_AWS") create_repo_check remi-php72 rhui-rhel-7-server-rhui-optional-rpms  >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "RHEL7") 
+                        if [ "${CLOUD_REPO}" == "RHEL7_RHUI2" ]; then
+                            create_repo_check remi-php72 rhui-rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        elif [ "${CLOUD_REPO}" == "RHEL7_RHUI2_AWS" ]; then
+                            create_repo_check remi-php72 rhui-REGION-rhel-server-optional >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        elif [ "${CLOUD_REPO}" == "RHEL7_RHUI3" ]; then
+                            create_repo_check remi-php72 rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        else
+                            create_repo_check remi-php72 rhel-7-server-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        fi
+                    ;;
                     "CentOS8") create_repo_check PowerTools >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
-                    "RHEL8") create_repo_check codeready-builder-for-rhel-8 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
-                    "RHEL8_AWS") create_repo_check codeready-builder-for-rhel-8-rhui-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "RHEL8")
+                        if [ "${CLOUD_REPO}" == "RHEL8_RHUI" ]; then
+                            create_repo_check codeready-builder-for-rhel-8-rhui-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        else
+                            create_repo_check codeready-builder-for-rhel-8 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                        fi
+                    ;;
                 esac 
                 if [ $? -ne 0 ]; then
                    log "ERROR:Failed to get repository"
-                    func_exit
+                   ERR_FLG="false"
+                   func_exit_and_delete_file
                 fi
             fi
             yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -235,7 +249,8 @@ mariadb_repository() {
             create_repo_check mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Failed to get repository"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
 
             yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -254,18 +269,83 @@ cat_tar_gz() {
     fi
 }
 
+setting_file_format_check(){
+    if [ `echo "$line" | LANG=C grep -v '^[[:cntrl:][:print:]]*$'` ];then
+        log "ERROR : Double-byte characters cannot be used in the setting files"
+        log "Applicable line : $line"
+        ERR_FLG="false"
+        func_exit_and_delete_file
+    fi
+}
+
+cloud_repo_setting(){
+    yum repolist all &> /tmp/ita_repolist.txt 
+    if [ -e /tmp/ita_repolist.txt ]; then
+        if [ "${LINUX_OS}" == "RHEL8" ]; then
+            if grep -q codeready-builder-for-rhel-8-rhui-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="RHEL8_RHUI"
+            elif grep -q codeready-builder-for-rhel-8-"${ARCH}"-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="physical"
+            else
+                log "ERROR : The repository required to install ITA cannot be found.
+codeready-builder-for-rhel-8-${ARCH}-rpms
+codeready-builder-for-rhel-8-rhui-rpms"
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+        elif [ "${LINUX_OS}" == "RHEL7" ]; then
+            if grep -q rhui-rhel-7-server-rhui-optional-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="RHEL7_RHUI2"
+            elif grep -q rhui-REGION-rhel-server-optional /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="RHEL7_RHUI2_AWS"
+            elif grep -q rhel-7-server-rhui-optional-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="RHEL7_RHUI3"
+            elif grep -q rhel-7-server-optional-rpms /tmp/ita_repolist.txt ; then
+                CLOUD_REPO="physical"
+            else 
+                log "ERROR : The repository required to install ITA cannot be found.
+rhui-rhel-7-server-rhui-optional-rpms
+rhui-REGION-rhel-server-optional
+rhel-7-server-rhui-optional-rpms
+rhel-7-server-optional-rpms"
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+        fi
+    else
+        log 'ERROR:Failed to create /tmp/ita_repolist.txt.'
+        ERR_FLG="false"
+        func_exit_and_delete_file
+    fi
+}
+
 ################################################################################
 # configuration functions
 
 # read setting file
 read_setting_file() {
     local setting_file=$1
-
-    while read line; do
+    local setting_text=$(cat $setting_file)
+    #IFSバックアップ
+    SRC_IFS="$IFS"
+    IFS="
+"
+    for line in $setting_text;do
         # convert "foo: bar" to "foo=bar", and keep comment 
-        command=`echo $line | sed -E 's/^([^#][^:]*+): *(.*)/\1=\2/'`
-        eval $command
-    done < $setting_file
+        if [ "$(echo "$line"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
+            setting_file_format_check
+            key="$(echo "$line" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
+            val="$(echo "$line" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\2/")"
+            val=$(echo "$val"|sed -E "s/'/'\\\"'\\\"'/g")
+            command="$key='$val'"
+            eval "$command"
+        fi
+    done
+
+    #IFSリストア
+    IFS="$SRC_IFS"
+
+    
 }
 
 
@@ -313,7 +393,8 @@ enabled=0
                 CREATEREPO_CHK=`echo $?`
                 if [ "${CREATEREPO_CHK}" -ne 0 ]; then
                     log "ERROR:Repository creation failure"
-                    func_exit
+                    ERR_FLG="false"
+                    func_exit_and_delete_file
                 fi
             else
                 log "Already exist[/etc/yum.repos.d/ita.repo]"
@@ -378,6 +459,14 @@ configure_mariadb() {
         mkdir -p -m 777 /var/log/mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
+    # mysql_secure_installationへ送信するdb_root_passwordのエスケープをしておく
+    local send_db_root_password="$db_root_password"
+    send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\\/\\\\\\\\/g')
+    send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\$/\\\\\\$/g')
+    send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/"/\\\\\\"/g')
+    send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\[/\\\\\\[/g')
+    send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\t/\\011/g')
+
     if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "CentOS7" ]; then
         #Confirm whether it is installed
         yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -390,7 +479,7 @@ configure_mariadb() {
             error_check
 
             #Confirm whether root password has been changed
-            mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? == 0 ]; then
                 log "Root password of MariaDB is already setting."
             else
@@ -404,9 +493,9 @@ configure_mariadb() {
                     expect -re \"Change the root password\\?.* $\"
                     send \"\\r\"
                     expect \"New password:\"
-                    send \""${db_root_password}\\r"\"
+                    send \""${send_db_root_password}\\r"\"
                     expect \"Re-enter new password:\"
-                    send \""${db_root_password}\\r"\"
+                    send \""${send_db_root_password}\\r"\"
                     expect -re \"Remove anonymous users\\?.* $\"
                     send \"Y\\r\"
                     expect -re \"Disallow root login remotely\\?.* $\"
@@ -427,6 +516,7 @@ configure_mariadb() {
             fi
             
         else
+
             # enable MariaDB repository
             mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
 
@@ -438,7 +528,8 @@ configure_mariadb() {
             #Check installation
             if [ $? != 0 ]; then
                 log "ERROR:Installation failed[MariaDB]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
             
             yum_package_check MariaDB MariaDB-server expect
@@ -460,9 +551,9 @@ configure_mariadb() {
                 expect -re \"Change the root password\\?.* $\"
                 send \"Y\\r\"
                 expect \"New password:\"
-                send \""${db_root_password}\\r"\"
+                send \""${send_db_root_password}\\r"\"
                 expect \"Re-enter new password:\"
-                send \""${db_root_password}\\r"\"
+                send \""${send_db_root_password}\\r"\"
                 expect -re \"Remove anonymous users\\?.* $\"
                 send \"Y\\r\"
                 expect -re \"Disallow root login remotely\\?.* $\"
@@ -496,7 +587,7 @@ configure_mariadb() {
             error_check
 
             #Confirm whether root password has been changed
-            mysql -uroot -p$db_root_password -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? == 0 ]; then
                 log "Root password of MariaDB is already setting."
             else
@@ -505,12 +596,20 @@ configure_mariadb() {
                     spawn mysql_secure_installation
                     expect \"Enter current password for root \\(enter for none\\):\"
                     send \"\\r\"
-                    expect -re \"Set root password\\?.* $\"
-                    send \"Y\\r\"
+                    expect { 
+                        -re \"Switch to unix_socket authentication.* $\" {
+                            send \"n\\r\"
+                            expect -re \"Change the root password\\?.* $\"
+                            send \"Y\\r\"
+                        }
+                        -re \"Set root password\\?.* $\" {
+                            send \"Y\\r\"
+                        }
+                    }
                     expect \"New password:\"
-                    send \""${db_root_password}\\r"\"
+                    send \""${send_db_root_password}\\r"\"
                     expect \"Re-enter new password:\"
-                    send \""${db_root_password}\\r"\"
+                    send \""${send_db_root_password}\\r"\"
                     expect -re \"Remove anonymous users\\?.* $\"
                     send \"Y\\r\"
                     expect -re \"Disallow root login remotely\\?.* $\"
@@ -531,6 +630,7 @@ configure_mariadb() {
             fi
             
         else
+
             # install some packages
             echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             #Installation
@@ -539,7 +639,8 @@ configure_mariadb() {
             #Check installation
             if [ $? != 0 ]; then
                 log "ERROR:Installation failed[MariaDB]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
             
             yum_package_check mariadb mariadb-server expect
@@ -556,12 +657,20 @@ configure_mariadb() {
                 spawn mysql_secure_installation
                 expect \"Enter current password for root \\(enter for none\\):\"
                 send \"\\r\"
-                expect -re \"Set root password\\?.* $\"
-                send \"Y\\r\"
+                expect { 
+                    -re \"Switch to unix_socket authentication.* $\" {
+                        send \"n\\r\"
+                        expect -re \"Change the root password\\?.* $\"
+                        send \"Y\\r\"
+                    }
+                    -re \"Set root password\\?.* $\" {
+                        send \"Y\\r\"
+                    }
+                }
                 expect \"New password:\"
-                send \""${db_root_password}\\r"\"
+                send \""${send_db_root_password}\\r"\"
                 expect \"Re-enter new password:\"
-                send \""${db_root_password}\\r"\"
+                send \""${send_db_root_password}\\r"\"
                 expect -re \"Remove anonymous users\\?.* $\"
                 send \"Y\\r\"
                 expect -re \"Disallow root login remotely\\?.* $\"
@@ -599,9 +708,14 @@ configure_httpd() {
 
 # PHP
 configure_php() {
+    echo "${CLOUD_REPO}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     # enable yum repository
     if [ "${REPOSITORY}" != "yum_all" ]; then
-        yum_repository ${YUM_REPO_PACKAGE["php"]}
+        if [ "${CLOUD_REPO}" != "physical" ]; then
+            yum_repository ${YUM_REPO_PACKAGE["php_cloud"]}
+        else
+            yum_repository ${YUM_REPO_PACKAGE["php"]}
+        fi
     fi
     # Install some packages.
     yum_install ${YUM_PACKAGE["php"]}
@@ -623,7 +737,8 @@ configure_php() {
         echo "Success pear Install" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     else
        log "ERROR:Installation failed[${PEAR_PACKAGE["php"]}]"
-       func_exit
+       ERR_FLG="false"
+       func_exit_and_delete_file
     fi
 
     # WORKAROUND! Symbolic link must exist.
@@ -646,17 +761,19 @@ configure_php() {
     pecl list | grep yaml >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? -ne 0 ]; then
        log "ERROR:Installation failed[php-yaml]"
-       func_exit
+       ERR_FLG="false"
+       func_exit_and_delete_file
     fi
 
     # Install Composer.
     if [ "${exec_mode}" == "3" ]; then
         echo "----------Installation[Composer]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        curl -sS $COMPOSER | php -- --install-dir=/usr/bin --version=1.10.16 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        curl -sS $COMPOSER | php -- --install-dir=/usr/bin --version=1.10.16 >> "$ITA_BUILDER_LOG_FILE" 2>&1       
         # install check Composer.
         if [ ! -e /usr/bin/composer.phar ]; then
             log "ERROR:Installation failed[Composer]"
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     fi
 
@@ -667,7 +784,8 @@ configure_php() {
         # install check PhpSpreadsheet.
         if [ $? -ne 0 ]; then
             log "ERROR:Installation failed[PhpSpreadsheet]"
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi       
         mv vendor /usr/share/php/  >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     else
@@ -676,7 +794,8 @@ configure_php() {
         # install check  PhpSpreadsheet.
         if [ $? -ne 0 ]; then
             log "ERROR:Installation failed[PhpSpreadsheet]"
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi       
     fi
 
@@ -695,7 +814,8 @@ configure_git() {
     yum list installed "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? != 0 ]; then
         log "ERROR:Package not installed [$key]"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
 }
@@ -717,7 +837,8 @@ configure_ansible() {
             pip3 install $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Installation failed[$key]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
         done
     else
@@ -726,7 +847,8 @@ configure_ansible() {
             pip3 install --no-index --find-links=${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]} $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Installation failed pip packages."
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
         done
     fi
@@ -737,7 +859,8 @@ configure_ansible() {
         pip3 list --format=legacy | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Package not installed [$key]"
-                func_exit
+                ERR_FLG="false"
+                func_exit_and_delete_file
             fi
     done
 
@@ -761,11 +884,13 @@ EOS
 
         if [ $daemon_txt -ne 0 ] || [ $apache_txt -ne 0 ]; then
             log 'ERROR:Failed to create configuration text in /etc/sudoers.d/it-automation.'
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     else
         log 'ERROR:Failed to create /etc/sudoers.d/it-automation.'
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
     chmod 440 /etc/sudoers.d/it-automation >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -780,12 +905,13 @@ EOS
         grep '^#' /etc/sudoers | grep -E "^.*Defaults.*requiretty" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         if [ $? -ne 0 ]; then
             log "ERROR:Defaults requiretty is not commented out"
-            func_exit
+            ERR_FLG="false"
+            func_exit_and_delete_file
         fi
     fi
 
     # install ITA
-    source "$ITA_INSTALL_SCRIPTS_DIR/ita_installer.sh"
+    source "$ITA_INSTALL_SCRIPTS_DIR/bin/install.sh"
 
 }
 
@@ -856,9 +982,13 @@ download() {
 
     # Enable all yum repositories(Other than mariadb).
     log "Enable the required yum repositories."
-    for key in ${!YUM_REPO_PACKAGE[@]}; do
-        yum_repository ${YUM_REPO_PACKAGE[$key]} 
-    done
+    yum_repository ${YUM_REPO_PACKAGE["yum-env-enable-repo"]}
+    yum_repository ${YUM_REPO_PACKAGE["yum-env-disable-repo"]}
+    if [ "${CLOUD_REPO}" != "physical" ]; then
+        yum_repository ${YUM_REPO_PACKAGE["php_cloud"]}
+    else
+        yum_repository ${YUM_REPO_PACKAGE["php"]}
+    fi
     # Enable mariadb repositories.
     mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
     
@@ -937,7 +1067,8 @@ download() {
     # install check Composer.
     if [ ! -e ./vendor/composer/composer.phar ]; then
         log "ERROR:Installation failed[Composer]"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
     local download_dir="${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -978,7 +1109,6 @@ ITA_INSTALL_PACKAGE_DIR=$(cd $(dirname $ITA_INSTALL_SCRIPTS_DIR);pwd)
 ITA_PACKAGE_OPEN_DIR=$(cd $(dirname $ITA_INSTALL_PACKAGE_DIR);pwd)
 
 ITA_ANSWER_FILE=$ITA_INSTALL_SCRIPTS_DIR/ita_answers.txt
-ITA_BUILDER_SETTING_FILE=$ITA_INSTALL_SCRIPTS_DIR/ita_builder_setting.txt
 
 if [ ! -e "$ITA_INSTALL_SCRIPTS_DIR""/log/" ]; then
     mkdir -m 755 "$ITA_INSTALL_SCRIPTS_DIR""/log/"
@@ -995,71 +1125,38 @@ log "INFO : Authorization check."
 if [ ${EUID:-${UID}} -ne 0 ]; then
     log 'ERROR : Execute with root authority.'
     log 'INFO : Abort installation.'
-    exit
-fi
-
-#read setting file and answer file
-log "read setting file"
-read_setting_file "$ITA_BUILDER_SETTING_FILE"
-
-#check (ita_builder_setting.txt)
-if [ "${linux_os}" != 'CentOS7' -a "${linux_os}" != 'CentOS8' -a "${linux_os}" != 'RHEL7' -a "${linux_os}" != 'RHEL8' -a "${linux_os}" != 'RHEL7_AWS' -a "${linux_os}" != 'RHEL8_AWS' ]; then
-    log "ERROR:should be set to CentOS7 or CentOS8 or RHEL7 or RHEL8 or RHEL7_AWS or RHEL8_AWS"
-    func_exit
-else
-    LINUX_OS="${linux_os}"
-fi
-
-if [ "${linux_os}" == 'RHEL7_AWS' ]; then
-    LINUX_OS='RHEL7'
-    AWS_FLG='yes'
-elif [ "${linux_os}" == 'RHEL8_AWS' ]; then
-    LINUX_OS='RHEL8'
-    AWS_FLG='yes'
-else
-    AWS_FLG='no'
-fi
-
-if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ] && [ $AWS_FLG == 'no' ]; then
-    if [ ! -n "$redhat_user_name" ]; then
-        log "ERROR:should be set[redhat_user_name]"
-        func_exit
-    fi
-
-    if [ ! -n "$redhat_user_password" ]; then
-        log "ERROR:should be set[redhat_user_password]"
-        func_exit
-    fi
-
-    if [ ! -n "$pool_id" ]; then
-        log "ERROR:should be set[pool_id]"
-        func_exit
-    fi
+    ERR_FLG="false"
+    func_exit_and_delete_file
 fi
 
 #read answer file
+log "read answer file"
+read_setting_file "$ITA_ANSWER_FILE"
+
 if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
-    log "read answer file"
-    read_setting_file "$ITA_ANSWER_FILE"
     #check (ita_answers.txt)-----
     if [ "${material}" != 'yes' -a "${material}" != 'no' ]; then
         log "ERROR:material should be set to yes or no"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
     if [ "${ansible_driver}" != 'yes' -a "${ansible_driver}" != 'no' ]; then
         log "ERROR:ansible_driver should be set to yes or no"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 
     if [ "${cobbler_driver}" != 'yes' -a "${cobbler_driver}" != 'no' ]; then
        log "ERROR:cobbler_driver should be set to yes or no"
-       func_exit
+       ERR_FLG="false"
+       func_exit_and_delete_file
     fi
 
     if [ ! -n "$db_root_password" ]; then
         log "ERROR:should be set[db_root_password]"
-        func_exit
+        ERR_FLG="false"
+        func_exit_and_delete_file
     fi
 fi
 
@@ -1087,48 +1184,13 @@ elif [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
     ITA_EXT_FILE_DIR=$ITA_INSTALL_PACKAGE_DIR/ext_files_for_CentOS7.x
 fi
 
-################################################################################
-# set subscription
-if [ "$exec_mode" != "2" ]; then
-    if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "RHEL7" ] && [ $AWS_FLG == 'no' ]; then
-
-        log "setting subscriction of RHEL"
-
-        #IDPW
-        REDHAT_USER_NAME="${redhat_user_name}"
-        REDHAT_USER_PASSWORD="${redhat_user_password}"
-        POOL_ID="${pool_id}"
-
-        #Subscription registration
-        subscription-manager register --username=${REDHAT_USER_NAME} --password=${REDHAT_USER_PASSWORD} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        REGISTER_CHK=`echo $?`
-        
-        if [ "${REGISTER_CHK}" -ne 0 -a "${REGISTER_CHK}" -ne 64 ]; then
-            log "ERROR:The Red Hat user is not available."
-            func_exit
-        fi
-
-        #Check consumed
-        CONSUMED_POOL_ID=`subscription-manager list --consumed | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
-
-        if [ "${CONSUMED_POOL_ID}" != "" ]; then
-            echo "Subscription is already attached." >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        else
-            #Check available
-            SUBSCRIPTION_POOL_ID=`subscription-manager list --available | grep "$POOL_ID" | sed "s/ //g" | cut -f 2 -d ":"`
-
-            if [ "${SUBSCRIPTION_POOL_ID}" != "" ]; then
-                #Attach
-                subscription-manager attach --pool="${POOL_ID}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                if [ $? -ne 0 ]; then
-                    log "ERROR:Command[subscription-manager attach] is failed."
-                    func_exit
-                fi
-            else
-                log "ERROR:No subscriptions are available from the pool with ID \"${POOL_ID}\"."
-                func_exit
-            fi
-        fi
+#クラウド環境用リポジトリフラグ設定
+ARCH=$(arch)
+CLOUD_REPO="physical"
+# オフラインインストール時以外かつRHEL8、RHEL7の場合は、インストール環境のyum repolist allをgrepする。
+if [ "${exec_mode}" == "1" -o "${exec_mode}" == "3" ]; then
+    if [ "${LINUX_OS}" == "RHEL8" -o "${LINUX_OS}" == "RHEL7" ]; then
+        cloud_repo_setting
     fi
 fi
 
@@ -1189,16 +1251,22 @@ YUM_REPO_PACKAGE_MARIADB=(
 )
 
 # yum repository package (for php)
-ARCH=$(arch)
 declare -A YUM_REPO_PACKAGE_PHP;
 YUM_REPO_PACKAGE_PHP=(
     ["RHEL8"]="--set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms"
     ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-optional-rpms"
-    ["RHEL8_AWS"]="--set-enabled codeready-builder-for-rhel-8-rhui-rpms"
-    ["RHEL7_AWS"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-rhel-7-server-rhui-optional-rpms"
     ["CentOS8"]="--set-enabled PowerTools"
     ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
     ["yum_all"]=""
+)
+
+declare -A YUM_REPO_PACKAGE_PHP_CLOUD;
+YUM_REPO_PACKAGE_PHP_CLOUD=(
+    ["RHEL8_RHUI"]="--set-enabled codeready-builder-for-rhel-8-rhui-rpms"
+    ["RHEL7_RHUI2"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-rhel-7-server-rhui-optional-rpms"
+    ["RHEL7_RHUI2_AWS"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-REGION-rhel-server-optional"
+    ["RHEL7_RHUI3"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-rhui-optional-rpms"
+    ["physical"]=""
 )
 
 # all yum repository packages
@@ -1206,7 +1274,8 @@ declare -A YUM_REPO_PACKAGE;
 YUM_REPO_PACKAGE=(
     ["yum-env-enable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_ENABLE_REPO[${REPOSITORY}]}
     ["yum-env-disable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO[${REPOSITORY}]}
-    ["php"]=${YUM_REPO_PACKAGE_PHP[${linux_os}]}
+    ["php"]=${YUM_REPO_PACKAGE_PHP[${LINUX_OS}]}
+    ["php_cloud"]=${YUM_REPO_PACKAGE_PHP_CLOUD[${CLOUD_REPO}]}
 )
 
 
@@ -1387,6 +1456,4 @@ else
 fi
 
 log "$END_MESSAGE"
-
-func_exit
 
