@@ -247,7 +247,7 @@ outline: none;
 }
 /* Footer */
 #editor-footer .editor-menu-button {
-width: 100px;
+min-width: 100px;
 padding-right: 16px;
 padding-left: 16px;
 text-shadow: 1px 1px 1px rgba( 0,0,0,.5 );
