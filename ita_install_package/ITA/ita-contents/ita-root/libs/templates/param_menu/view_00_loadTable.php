@@ -196,6 +196,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $objTemp00Function;
     $objTemp00Function = function($objTable){
         global $g;
+        $strFxName = "NONAME(objTemp00Function)";
 
         $intErrorType = null;
         $retStrLastErrMsg = null;
@@ -327,7 +328,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     // アクセス権のロールID文字列をロール名称の文字列に変換
                     // 廃止されているロールはID変換失敗で表示
                     $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);
-                    unset($obj);
                 }
                 if($RoleNameString === false) {
                     $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Failed.",basename(__FILE__),__LINE__);
@@ -342,6 +342,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $tempArray[] = $row;
                 $objTable->addData( $row, false);
             }
+            unset($obj);
         }
         catch (Exception $e){
             $intErrorType = 500;
