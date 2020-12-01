@@ -1368,7 +1368,7 @@ function printSymphonyInfoArea(strModeNumeric, symphony_id, symphony_name, symph
           objHtmlRole.type = "hidden";
           objHtmlRole.className ="role_number_input";
           objHtmlRole.name ="ACCESS_AUTH";
-          objHtmlRole.value = symphony_role;
+          objHtmlRole.value = getRoleListValidID( symphony_role );
           
           objSymphonyRoleArea.innerHTML = '';
           objSymphonyRoleArea.appendChild( objHtmlRole );
@@ -1478,6 +1478,23 @@ const getRoleListIdToName = function( roleListText ) {
             }
         }
         return roleNameList.join(', ');
+    } else {
+        return '';
+    }
+};
+
+const getRoleListValidID = function( roleListText ) {
+    if ( roleListText !== undefined && roleListText !== '' ) {
+        const roleList = roleListText.split(','),
+              roleListLength = roleList.length,
+              roleIdList = new Array;
+        for ( let i = 0; i < roleListLength; i++ ) {
+            const roleName = listIdName('role', roleList[i]);
+            if ( roleName !== undefined ) {
+                roleIdList.push( roleList[i] );
+            }
+        }
+        return roleIdList.join(',');
     } else {
         return '';
     }
