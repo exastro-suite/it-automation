@@ -1765,8 +1765,27 @@ const getRoleListIdToName = function( roleListText ) {
         roleNameList.push( getSomeMessage("ITAWDCC92007") + '(' + roleList[i] + ')');
       }
     }
-
     return roleNameList.join(', ');
+  } else {
+    return '';
+  }
+};
+// カンマ区切りロールIDリストからID変換失敗を除いたロールIDを返す
+const getRoleListValidID = function( roleListText ) {
+  if ( roleListText !== undefined && roleListText !== '' ) {
+    const roleList = roleListText.split(','),
+          roleListLength = roleList.length,
+          roleIdList = new Array;
+    for ( let i = 0; i < roleListLength; i++ ) {
+      const roleName = listIdName('role', roleList[i]);console.log(roleName);
+      if ( roleName !== null ) {
+        roleIdList.push( roleList[i] );
+      }
+    }
+    console.log(roleIdList);
+    return roleIdList.join(',');
+  } else {
+    return '';
   }
 };
 // ロールセレクト
@@ -2197,7 +2216,7 @@ const getPanelParameter = function() {
     parameterArray['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] = $('#create-menu-last-modified').attr('data-value'); // 最終更新日時
     parameterArray['LAST_UPDATE_USER'] = $('#create-last-update-user').attr('data-value'); // 最終更新者
     parameterArray['DESCRIPTION'] = $('#create-menu-explanation').val(); // 説明
-    parameterArray['ACCESS_AUTH'] = $('#permission-role-name-list').attr('data-role-id'); // ロール
+    parameterArray['ACCESS_AUTH'] = getRoleListValidID( $('#permission-role-name-list').attr('data-role-id') ); // ロール
     parameterArray['NOTE'] = $('#create-menu-note').val(); // 備考
     
     // 作成対象別項目
