@@ -1315,21 +1315,44 @@ EOD;
     }
 
     /* ----クラスIDColumn用「$masterTableBodyから、IDと$columnName列の項目のペアを配列で返す」(親クラスColumnも利用している)*/
+    // 一覧に表示するIDColumn項目の値と、ここでSELECTされたデータのハッシュデータの名前が結合される
     function createMasterTableArrayForFilter($masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseFlagColumnOfMasterTable, $aryEtcetera=array()){
         global $g;
         
         $intControlDebugLevel01=250;
         $strFxName = __FUNCTION__;
         
-        $query = genSQLforGetMasValsForFilter($masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseFlagColumnOfMasterTable, $aryEtcetera);
+        // ---- RBAC対応
+        $obj = new RoleBasedAccessControl($g['objDBCA']);
+        $ret = $obj->getAccountInfo($g['login_id']);
+        if($ret === false) {
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // SELECT項目になっているACCESS_AUTHカラムを取得
+        $AccessAuthColumnNames = $obj->getAccessAithColumnINIDColumnObject($masterTableBody);
+        if($AccessAuthColumnNames === false) {
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // RBAC対応 ----
+
+        $query = genSQLforGetMasValsForFilter($masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseFlagColumnOfMasterTable, $aryEtcetera,$AccessAuthColumnNames);
         
         $data = array();
-        
+
         $retArray = singleSQLExecuteAgent($query, array(), $strFxName);
         if( $retArray[0] === true ){
             $objQuery = $retArray[1];
             while( $row = $objQuery->resultFetch() ){
-                $data[$row['C1']] = $row['C2'];
+                // ---- RBAC対応
+                // アクセス権を判定
+                list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                if($ret === false) {
+                    throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+                if($permission === true) {
+                    $data[$row['C1']] = $row['C2'];
+                }
+                // RBAC対応 ----
             }
             unset($objQuery);
         }
@@ -1346,7 +1369,20 @@ EOD;
         $intControlDebugLevel01=250;
         $strFxName = __FUNCTION__;
         
-        $query = genSQLforGetMasValsForInput($masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseFlagColumnOfMasterTable, $aryEtcetera, $CheckAccessAuth);   // RBAC対応
+        // ---- RBAC対応
+        $obj = new RoleBasedAccessControl($g['objDBCA']);
+        $ret = $obj->getAccountInfo($g['login_id']);
+        if($ret === false) {
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // SELECT項目になっているACCESS_AUTHカラムを取得
+        $AccessAuthColumnNames = $obj->getAccessAithColumnINIDColumnObject($masterTableBody);
+        if($AccessAuthColumnNames === false) {
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // RBAC対応 ----
+
+        $query = genSQLforGetMasValsForInput($masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseFlagColumnOfMasterTable, $aryEtcetera, $CheckAccessAuth,$AccessAuthColumnNames);   // RBAC対応
         
         $data = array();
         
@@ -1358,7 +1394,7 @@ EOD;
 	    // プルダウン(IDColumn)に表示するデータをACCESS_AUTHで絞り込む
             while( $row = $objQuery->resultFetch() ){
                 //  対象レコードのACCESS_AUTHカラムでアクセス権を判定
-                list($ret,$permission) = chkTargetRecodePermission($CheckAccessAuth,$chkobj,$row);
+                list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                 if($ret === false) {
                     $intErrorType = 501;
                     throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
@@ -1378,14 +1414,29 @@ EOD;
     }
 
     /* ----クラスIDColumn用：検索用（検索SELECT-TAG生成用）「参照先テーブル($masterTableBody)から、読書対象テーブル($mainTableBody)に使われているIDのみの配列を返す。*/
+    // IDColumnのプルダウンの表示内容
     function createMasterTableDistinctArray(
           $mainTableBody, $keyColumnOfMainTable, $disuseColumnOfMainTable
         , $masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $disuseColumnOfMasterTable
         , $aryEtcetera=array(), $AccessAuthColumUse, $AccessAuthColumName){  // RBAC対応----
+
         global $g;
         
         $intControlDebugLevel01=250;
         $strFxName = __FUNCTION__;
+
+        // ---- RBAC対応
+        $obj = new RoleBasedAccessControl($g['objDBCA']);
+        $ret = $obj->getAccountInfo($g['login_id']);
+        if($ret === false) {
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // SELECT項目になっているACCESS_AUTHカラムを取得
+        $AccessAuthColumnNames = $obj->getAccessAithColumnINIDColumnObject($masterTableBody);
+        if($AccessAuthColumnNames === false) {
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // RBAC対応 ----
         
         $query = genSQLforGetMasValsInMainTbl($mainTableBody,
                                               $keyColumnOfMainTable, 
@@ -1395,7 +1446,7 @@ EOD;
                                               $dispColumnOfMasterTable,
                                               $disuseColumnOfMasterTable, 
                                               $AccessAuthColumUse,
-                                              $AccessAuthColumName,
+                                              $AccessAuthColumnNames,
                                               $aryEtcetera); // RBAC対応----
         
         $data = array();
@@ -1408,7 +1459,7 @@ EOD;
             // 検索用データをACCESS_AUTHで絞り込む
             while( $row = $objQuery->resultFetch() ){
                 //  対象レコードのACCESS_AUTHカラムでアクセス権を判定
-                list($ret,$permission) = chkTargetRecodePermission($AccessAuthColumUse,$chkobj,$row);
+                list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                 if($ret === false) {
                     $intErrorType = 501;
                     throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
@@ -1435,15 +1486,39 @@ EOD;
         $intControlDebugLevel01=25;
         $strFxName = __FUNCTION__;
 
+        // ---- RBAC対応
+        $jnlMasterTable = $objIdColumn->getJournalTableOfMaster();
+        $obj = new RoleBasedAccessControl($g['objDBCA']);
+        $ret = $obj->getAccountInfo($g['login_id']);
+        if($ret === false) {
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // SELECT項目になっているACCESS_AUTHカラムを取得
+        $AccessAuthColumnNames = $obj->getAccessAithColumnINIDColumnObject($jnlMasterTable);
+        if($AccessAuthColumnNames === false) {
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // RBAC対応 ----
+
         $data = array();
 
-        $query = generateMasterJournalSelectSQL($objTable, $objIdColumn, $aryEtcetera);
+        $query = generateMasterJournalSelectSQL($objTable, $objIdColumn, $aryEtcetera, $AccessAuthColumnNames);
         $aryForBind = array($objIdColumn->getJournalKeyIDOfMaster()=>$mainColumnValue,$objIdColumn->getJournalLUTSIDOfMaster()=>$mainTimeStampValue);
         $retArray = singleSQLExecuteAgent($query, $aryForBind, $strFxName);
         if( $retArray[0] === true ){
             $objQuery = $retArray[1];
             while( $row = $objQuery->resultFetch() ){
-                $data[$row['C1']] = $row['C2'];
+                // ---- RBAC対応
+                //  対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                if($ret === false) {
+                    $intErrorType = 501;
+                    throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                }
+                if($permission === true) {
+                    $data[$row['C1']] = $row['C2'];
+                }
+                // RBAC対応 ----
             }
             unset($objQuery);
         }
@@ -2248,7 +2323,7 @@ EOD;
     }
     //[5]履歴複数行SELECT用----
 
-    function generateMasterJournalSelectSQL(&$objTable, $objIdColumn, $aryEtcetera=array()){
+    function generateMasterJournalSelectSQL(&$objTable, $objIdColumn, $aryEtcetera=array(), $AccessAuthColumnNames){
         global $g;
         $lc_db_model_ch = $g['objDBCA']->getModelChannel();
 
@@ -2271,11 +2346,23 @@ EOD;
             $strAddWhere = "AND {$objIdColumn->getRequiredDisuseColumnID()} IN ('0','1') AND ";
         }
 
+        // RBAC対応 ----
+        // SELECT文に埋め込むアクセス権カラムの文字列生成
+        // ACCESS_AUTHカラムをSELECT項目に追加する
+        $mainQueryAddstring = "";
+        $SubQueryAddstring = "";
+        if(@count($AccessAuthColumnNames) != 0) {
+            foreach($AccessAuthColumnNames as $AccessAuthColumName) {
+                $mainQueryAddstring .= sprintf(" ,%s ",$AccessAuthColumName);
+            }
+        }
+        // ---- RBAC対応
+
         //----YYYY/MM/DD HH:NN:SS.uuuuuu形式でWhere句用クエリを取得
         $strWherePart = makeConvToDateSQLPartForDateWildColumn($lc_db_model_ch, ":".$strTimeStampColId, "DATETIME", true, false);
 
         $query  = "SELECT "
-                 ."    {$jnlMasterRefKeyId} C1, {$jnlMasterRefDispId} C2 "
+                 ."    {$jnlMasterRefKeyId} C1, {$jnlMasterRefDispId} C2 {$mainQueryAddstring}"
                  ."FROM "
                  ."    {$jnlMasterTable} "
                  ."WHERE "
@@ -2377,7 +2464,7 @@ EOD;
                                            $dispColumnOfMasterTable,
                                            $disuseColumnOfMasterTable, 
                                            $AccessAuthColumUse = false, 
-                                           $AccessAuthColumName = "ACCESS_AUTH",
+                                           $AccessAuthColumnNames = array(),
                                            $aryEtcetera=array(), $strWhereAddBody="", $strGetColIdOfKey="C1", $strGetColIdOfDisp="C2") { // RBAC対応
         // ---- RBAC対応
         global $g;
@@ -2402,13 +2489,17 @@ EOD;
         }
         // RBAC対応 ----
         // SELECT文に埋め込むアクセス権カラムの文字列生成
+        // ACCESS_AUTHカラムをSELECT項目に追加する
         $mainQueryAddstring = "";
-        $SubQueryAddstring  = "";
-        if($AccessAuthColumUse === true) {
-            $mainQueryAddstring = sprintf(", MT1.%s ",$AccessAuthColumName);
-            $SubQueryAddstring = sprintf(", %s ",$AccessAuthColumName);
-        }
+        $SubQueryAddstring = "";
+        if(@count($AccessAuthColumnNames) != 0) {
+            foreach($AccessAuthColumnNames as $AccessAuthColumName) {
+                $mainQueryAddstring .= sprintf(" ,JM1.%s ",$AccessAuthColumName);
+                $SubQueryAddstring  .= sprintf(" ,%s ",$AccessAuthColumName);
+            }
+        } 
         // ---- RBAC対応
+
         $query = "SELECT "
                 ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} {$mainQueryAddstring} "
                 ."FROM "
@@ -2422,7 +2513,7 @@ EOD;
                 ."    ) MT1 "
                 ."    INNER JOIN "
                 ."    (SELECT "
-                ."         {$keyColumnOfMasterTable} IDCOLUMN, {$dispColumnOfMasterTable} DISPCOLUMN {$queryPartSelectAdd} "
+                ."         {$keyColumnOfMasterTable} IDCOLUMN, {$dispColumnOfMasterTable} DISPCOLUMN {$queryPartSelectAdd} {$SubQueryAddstring}"
                 ."     FROM "
                 ."         {$masterTableBody} "
                 ."     WHERE "
@@ -2438,26 +2529,36 @@ EOD;
     //----[NoTable-0002]フィルター結果、その他マスターの通常利用
     function genSQLforGetMasValsForFilter(
         $masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $masterDisuseFlagColumnId
-        , $aryEtcetera=array()){
+        , $aryEtcetera=array(),$AccessAuthColumnNames=array()){
+        // ---- RBAC対応
+        // ACCESS_AUTHカラムをSELECT項目に追加する
+        if(@count($AccessAuthColumnNames) != 0) {
+           $AddColumn = "," . implode(',',$AccessAuthColumnNames);
+        } else {
+           $AddColumn = ""; 
+        }
         $query  = "SELECT "
-                 ."    {$keyColumnOfMasterTable} C1, {$dispColumnOfMasterTable} C2 "
+                 ."    {$keyColumnOfMasterTable} C1, {$dispColumnOfMasterTable} C2 $AddColumn "
                  ."FROM "
                  ."    {$masterTableBody} "
                  ."WHERE "
                  ."    {$masterDisuseFlagColumnId} IN ('0') "
                  ."ORDER BY C2";
         return $query;
+        // RBAC対応 ---
     }
     //[NoTable-0002]フィルター結果、その他マスターの通常利用----
 
     //----[NoTable-0003]新規登録、更新用・マスター利用
-    function genSQLforGetMasValsForInput( $masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $masterDisuseFlagColumnId, $aryEtcetera=array(), $CheckAccessAuth){  // RBAC対応
+    // EXcel出力のマスタ一覧で使用
+    function genSQLforGetMasValsForInput( $masterTableBody, $keyColumnOfMasterTable, $dispColumnOfMasterTable, $masterDisuseFlagColumnId, $aryEtcetera=array(), $CheckAccessAuth, $AccessAuthColumnNames){  // RBAC対応
         global $g;
 
         // ---- RBAC対応 
-        $AccessAuthColumnName  = "";
-        if($CheckAccessAuth === true) {
-            $AccessAuthColumnName = $g['global_getAccessAuthColumnName'] . ", ";;
+        // ACCESS_AUTHカラムをSELECT項目に追加する
+        $AccessAuthColumnName = "";
+        if(@count($AccessAuthColumnNames) != 0) {
+           $AccessAuthColumnName = "," . implode(',',$AccessAuthColumnNames);
         }
         // RBAC対応 ---- 
 
@@ -2482,7 +2583,7 @@ EOD;
         }
         $query = "SELECT "
             // RBAC対応 ----
-                ."    {$AccessAuthColumnName} {$keyColumnOfMasterTable} C1, {$dispColumnOfMasterTable} C2 {$queryPartSelectAdd} "
+                ."    {$keyColumnOfMasterTable} C1, {$dispColumnOfMasterTable} C2 {$queryPartSelectAdd} {$AccessAuthColumnName} "
             // ---- RBAC対応
                 ."FROM "
                 ."    {$masterTableBody} "

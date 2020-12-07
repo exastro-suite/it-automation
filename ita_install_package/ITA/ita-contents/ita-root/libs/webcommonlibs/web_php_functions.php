@@ -1244,8 +1244,7 @@ class RoleBasedAccessControl {
    ///////////////////////////////////////////////////////////////////
    function chkDisUseRoleName($RoleName) {
        global $objMTS;
-       $name = $objMTS->getSomeMessage("ITAWDCH-STD-11101");
-       $DisUseRoleName = sprintf("/^%s\([0-9]+\)$/",$objMTS->getSomeMessage("ITAWDCH-STD-11101"));
+       $DisUseRoleName = sprintf("/^%s\([0-9]+\)$/", preg_quote($objMTS->getSomeMessage("ITAWDCH-STD-11101")));
        // ロール名が廃止ロール名(ID変換失敗)か判定
        if(preg_match($DisUseRoleName,$RoleName) == 1) {
            // 廃止ロール名のIDを取得
@@ -1772,6 +1771,73 @@ class RoleBasedAccessControl {
    }
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
+   //   指定レコードの複数のアクセス権と該当ユーザーのロールけユーザー紐づけに紐づいているロール
+   //   が一致しているか判定(表示対象の有無を判定)
+   //   IDColumn項目の表示リスト用
+   // 【パラメータ】
+   //   $chkRow: $objQuery->sqlExecute()などのselect結果を1レコード毎に指定する。
+   // 【戻り値】
+   //   戻り値1
+   //     true:    正常
+   //     false:   異常
+   //   戻り値2
+   //     true:    表示対象
+   //     false:   異常
+   // 【備考】
+   //   getAccountInfoを呼び出し後に呼び出す。
+   //   webからの場合、戻り値1が異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、戻り値1が異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function chkOneRecodeMultiAccessPermission($chkRow) {
+       $ret = true;
+       try {
+           $AccessAuthColumnName = "ACCESS_AUTH";
+           $matchStr = sprintf("/^((%s)|(%s_[0-9][0-9]))$/",$AccessAuthColumnName,$AccessAuthColumnName);
+           $permission = true;        
+           foreach($chkRow as $Colum=>$Value) {
+               // ACCESS_AUTH/ACCESS_AUTH_99のカラムか判定
+               if( ! preg_match($matchStr, $Colum)) {
+                   continue;
+               } else {
+                   $permission = false;
+                   // アクセス権が空の場合
+                   if(strlen($Value) == 0) {
+                       // アクセス権あり
+                       $permission = true;        
+                   } else {
+                       $access_auth_arry = explode(',', $Value);
+                       foreach($access_auth_arry as $access_role) {
+                           if(array_key_exists($access_role,$this->AccessRoles) === true) {
+                               // アクセス権あり
+                               $permission = true;        
+                               break;
+                           }
+                       }
+                   }
+                   // アクセス権なし
+                   if($permission == false) {
+                       return [$ret, $permission]; 
+                   }
+               }
+           }
+           // アクセス権あり
+           $permission = true;        
+           return [$ret, $permission]; 
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           $ret        = false;
+           $permission = false;
+           return [$ret, $permission]; 
+       }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
    //   指定レコードのアクセス権と該当ユーザーのロールけユーザー紐づけに紐づいているロール
    //   が一致しているか判定(表示対象の有無を判定)
    // 【パラメータ】
@@ -1968,6 +2034,65 @@ class RoleBasedAccessControl {
        $chkarray[false][false] = false;
        return($chkarray[$loadtable_AccessAuth][$AccessAuthColumDefine]);
    }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   IDColumnで指定されたオブジェクトにアクセス権カラムが定義されているかを判定
+   // 【パラメータ】
+   //   $tgt_table: 確認するオブジェクト(テーブル・ビュー)
+   // 【戻り値】
+   //   戻り値1
+   //     他:      定義されているアクセス権カラム名配列
+   //     false:   異常
+   // 【備考】
+   //   webからの場合、戻り値1が異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、戻り値1が異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getAccessAithColumnINIDColumnObject($tgt_table,$chkColumname='ACCESS_AUTH') {
+       try {
+           $error_msg1 = "[%s:%s]:DB Access Error. (Table %s)";
+           $error_msg2 = "[%s:%s]:Object not found. (Table %s)";
+
+           $sql = sprintf("desc %s",$tgt_table);
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if($objQuery->getStatus()===false){
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$tgt_table);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $r = $objQuery->sqlExecute();
+           if(!$r) {
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$tgt_table);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           if($objQuery->effectedRowCount() == 0) {
+               $message = sprintf($error_msg2,basename(__FILE__),__LINE__,$tgt_table);
+               throw new Exception($message);
+           }
+           $AccessAuthColumnAry = array();
+           $matchStr = sprintf("/^((%s)|(%s_[0-9][0-9]))$/",$chkColumname,$chkColumname);
+           while($row = $objQuery->resultFetch()) {
+               if(isset($row["Field"])) {
+                   // ACCESS_AUTHカラムの判定 ACCESS_AUTH/ACCESS_AUTH_99
+                   $matchStr = sprintf("/^((%s)|(%s_[0-9][0-9]))$/",$chkColumname,$chkColumname);
+                   if(preg_match($matchStr, $row["Field"])) {
+                       $AccessAuthColumnAry[] = $row["Field"];
+                   }
+               }
+           }
+           unset($objQuery);
+           return $AccessAuthColumnAry;
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return false;
+       }
+   }
 }
     function getTargetRecodeCount($objTable,$objQuery,&$strRecCnt) {
         // unset($objQuery); $objQueryの開放は呼び元で実施
@@ -2018,6 +2143,51 @@ class RoleBasedAccessControl {
         // ---- ACCESS_AUTHカラムの有無を判定し対象レコードをカウント
         unset($obj);
         return true;
+    }
+    // $chkobjは呼び出し元で初期値をNULL設定
+    function chkTargetRecodeMultiPermission($chkAccessAuth,&$chkobj,$row) {
+
+        global $g;
+        $userID = $g['login_id'];
+
+        // ACCESS_AUTHカラムの有無を判定
+        if($chkAccessAuth === true) {
+            if($chkobj === null) {
+                // ログインユーザーに紐づていてるロールを取得 ----
+                $chkobj  = new RoleBasedAccessControl($g['objDBCA']);
+                $ret  = $chkobj->getAccountInfo($userID);
+                if($ret === false) {
+                    $error_msg = "[%s:%s]:Failed to get user access role. (user ID:%s)";
+                    $message = sprintf($error_msg,basename(__FILE__),__LINE__,$userID);
+                    if(function_exists("web_log")) {
+                        web_log($message);
+                    } else {
+                        error_log($message);
+                    }
+                    return [false,false];
+                }
+                // ログインユーザーに紐づていてるロールを取得 ----
+            }
+            // 対象レコードのACCESS_AUTHカラムでアクセス権を判定 ----
+            list($ret,$permission) = $chkobj->chkOneRecodeMultiAccessPermission($row);
+            if($ret === false) {
+                $error_msg = "[%s:%s]:Access permission check failed. (user ID:%s)";
+                $message = sprintf($error_msg,basename(__FILE__),__LINE__,$userID);
+                if(function_exists("web_log")) {
+                    web_log($message);
+                } else {
+                    error_log($message);
+                }
+                return [false,false];
+            } else {
+                return [true,$permission];
+            }
+            // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
+        } else {
+            // ACCESS_AUTHカラムがない場合 ----
+            return [true,true];
+            // ---- ACCESS_AUTHカラムがない場合
+        }
     }
     // $chkobjは呼び出し元で初期値をNULL設定
     function chkTargetRecodePermission($chkAccessAuth,&$chkobj,$row) {
