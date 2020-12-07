@@ -1982,10 +1982,21 @@ class IDColumn extends Column {
 
 		// RBAC対応 ----
 		try {
-			// SQLに埋め込むアクセス権のカラム名取得
-                        $AccessAuthColumName = $objTable->getAccessAuthColumnName();
+                        // ---- RBAC対応
+                        global $g;
+                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                        $ret = $obj->getAccountInfo($g['login_id']);
+                        if($ret === false) {
+                            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                        }
+                        // SELECT項目になっているACCESS_AUTHカラムを取得
+                        $AccessAuthColumnNames = $obj->getAccessAithColumnINIDColumnObject($refMasterTableBody);
+                        if($AccessAuthColumnNames === false) {
+                            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                        }
 			$AccessAuthColumUse  = $objTable->getAccessAuth();
-                	// プルダウンに表示するデータをloadtableに紐づいているオブジェクトのACCESS_AUTHで絞り込むか判定
+                        // RBAC対応 ----
+
 			$addStrQuery = "";
 
 			$retStrQuery = genSQLforGetMasValsInMainTbl($mainTableBody
@@ -1996,7 +2007,7 @@ class IDColumn extends Column {
 								, $refMasterDispColumn
 								, $refMasterDUColumn
                                                                 , $AccessAuthColumUse
-                                                                , $AccessAuthColumName
+                                                                , $AccessAuthColumnNames
 								, $aryEtcetera,$strWhereAddBody
 								,"KEY_COLUMN","DISP_COLUMN");
 		}catch (Exception $e){
