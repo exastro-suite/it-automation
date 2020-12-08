@@ -409,11 +409,11 @@ class OutputType {
 						while ( $row = $objQuery->resultFetch() ){
 							// ---- RBAC対応
 			                                // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
-							list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+							list($ret,$permission) = chkTargetRecodeMultiPermission($objTable->getAccessAuth(),$chkobj,$row);
 							if($ret === false) {
 								$retBool = false;
 								$intErrorType = 501;
-								$message = sprintf("[%s:%s]chkTargetRecodePermission is failed.",basename(__FILE__),__LINE__);
+								$message = sprintf("[%s:%s]chkTargetRecodeMultiPermission is failed.",basename(__FILE__),__LINE__);
 								web_log($message);
 								throw new Exception( '00010800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
 							}
