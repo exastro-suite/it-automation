@@ -2504,7 +2504,7 @@ EOD;
                 ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} {$mainQueryAddstring} "
                 ."FROM "
                 ."    (SELECT "
-                ."         {$keyColumnOfMainTable} {$SubQueryAddstring} "
+                ."         {$keyColumnOfMainTable} "
                 ."     FROM "
                 ."         {$mainTableBody}"
                 ."     WHERE "
