@@ -22,8 +22,9 @@ $( window ).on({
   'load': function(){
     relayout();
     
-    // サブメニュー初期状態設チェック
+    // Window load後に実行
     setTimeout( function() {
+        // サブメニュー初期状態設チェック
         if ( $('#FOOTER').find('.heading-status').length ) {
         
             $('#FOOTER').find('.heading-status-button').removeClass('heading-status-button-wait');
@@ -57,6 +58,7 @@ $( window ).on({
                 func.setSessionStorage( keyName, JSON.stringify( headingArray ) );
             }
         }
+        set_initial_filter();
       }, 100 );
   }
 });
@@ -130,6 +132,8 @@ $( function() {
     });
     
     set_layout_setting();
+    userNameAllDisplay();
+    
 });
 
 function set_layout_setting() {    
@@ -331,8 +335,73 @@ function set_layout_setting() {
     }
 }
 
+// フィルター初期値設定
+function set_initial_filter(){
+  const $filterArea = $('#filter_area'),
+        $filter2Area = $('#select_area');
+  // フィルターがあるかチェック
+  if ( $filterArea.length || $filter2Area.length ) {
+    // 共通ファンクション呼び出し URLからパラメータ取得
+    const func = new itaEditorFunctions,
+          param = func.getParamAll();
 
+    // フィルターに値をセットしてフィルタボタンをクリック
+    const filterSet = function( $area ) {
+      const filterArea = $area.get(0);
+      // フィルターエリアにフィルターが表示されたら
+      const observer = new MutationObserver( function(){
+        for ( let key in param ) {
+          const $target = $area.find('#' + key );
+          if ( $target.length && $target.is('input[type="text"]') ) {
+            $target.val( param[key] );
+          }
+        }
+        // Filterボタンをクリック
+        $area.closest('.text').find('input[name="display_list_btn"]').click();
+        // 監視を解除
+        observer.disconnect();
+      });
+      // フィルターエリアの監視を開始
+      observer.observe( filterArea, { childList: true });
+    };
 
+    // フィルターフラグをチェック
+    if ( param['filter'] !== undefined && param['filter'] === 'on' ) {
+      filterSet( $filterArea );
+    }
+    if ( param['filter2'] !== undefined && param['filter2'] === 'on' ) {
+      filterSet( $filter2Area );
+    }
+  }
+}
 
-
-
+// ユーザ名があふれている場合ホバーで全表示
+function userNameAllDisplay() {
+  const headerBackColor = $('#HEADER').css('background-color');
+  $('.userDataText').each( function(){
+    const $userName = $( this ),
+          offsetWidth = $userName.get(0).offsetWidth,
+          scrollWidth = $userName.get(0).scrollWidth;
+    // 文字があふれているかチェックする
+    if ( offsetWidth < scrollWidth ) {
+      $userName.after('<div class="userNameFull">' + $userName.text() + '</div>');
+      const $userNameFull = $('.userNameFull'),
+            position = $userName.position().left,
+            padding = 4;
+      $userNameFull.css({
+        'background-color': headerBackColor,
+        'left': position - padding
+      });
+      $userName.on({
+        'mouseenter': function(){
+          $userNameFull.parent('div').css('z-index','100');
+          $userNameFull.show();
+        },
+        'mouseleave': function(){
+          $userNameFull.parent('div').css('z-index','auto');
+          $userNameFull.hide();
+        }
+      });  
+    }
+  });
+}

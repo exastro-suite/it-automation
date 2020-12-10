@@ -36,7 +36,8 @@ html, body,
 .pie-chart-total-number,
 .stacked-graph-vertical-axis-item,
 .stacked-graph-item-title,
-.stacked-graph-popup-date {
+.stacked-graph-popup-date,
+.pie-chart-ratio {
     font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
 }
 
@@ -756,7 +757,8 @@ width: 100%; height: 100%;
 padding-bottom: 100%;
 }
 .pie-chart-svg,
-.pie-chart-total-svg {
+.pie-chart-total-svg,
+.pie-chart-ratio-svg {
 position: absolute;
 left: 0; top: 0;
 width: 100%; height: 100%;
@@ -778,6 +780,37 @@ fill: #999;
 }
 .pie-chart-svg {
 transform: rotate(-90deg);
+}
+.pie-chart-ratio-svg {
+pointer-events: none;
+opacity: 0;
+transition-delay: 1s;
+transition-duration: .3s;
+}
+.pie-chart-ratio {
+stroke-width: 4px;
+stroke: #000;
+stroke-linejoin: round;
+fill: #FFF;
+font-size: 10px;
+paint-order: stroke;
+}
+.pie-chart-ratio.rotate {
+font-size: 6px;
+}
+.pie-chart-ratio.outside {
+font-size: 6px;
+stroke-width: 3px;
+}
+.ratio-space {
+font-size: 50%;
+}
+.ratio-mark {
+font-size: 75%;
+}
+.pie-chart-ratio-line {
+stroke: #333;
+stroke-width: .5px;
 }
 .pie-chart-circle {
 stroke-width: 20;
@@ -888,6 +921,10 @@ position: relative;
 z-index: 1;
 height: 100%;
 min-height: 240px;
+cursor: pointer;
+}
+#dashboard[data-mode="edit"] .stacked-graph-item-inner {
+cursor: default;
 }
 .stacked-graph-item-title {
 box-sizing: border-box;
@@ -943,11 +980,17 @@ width: 50%;
 #KIZI .stacked-graph-item-inner:hover {
 background-color: rgba( 255,255,0,.2 );
 }
+#KIZI #dashboard[data-mode="edit"] .stacked-graph-item-inner:hover {
+background-color: transparent;
+}
 #KIZI .stacked-graph-item-inner:hover .stacked-graph-bar-item {
 width: 80%;
 }
 #KIZI .period-many .stacked-graph-item-inner:hover .stacked-graph-bar-item {
 width: 50%;
+}
+#KIZI #dashboard[data-mode="edit"] .stacked-graph-bar-item {
+width: 60%!important;
 }
 .stacked-graph-popup {
 display: none;
@@ -961,10 +1004,33 @@ box-shadow: 2px 2px 8px rgba( 0,0,0,.3 );
 border-radius: 4px;
 pointer-events: none;
 }
+#dashboard[data-mode="edit"] .stacked-graph-popup {
+display: none!important;
+}
+.stacked-graph-popup.fixed {
+pointer-events: auto;
+}
 .stacked-graph-popup-date {
 padding: 8px 8px 0;
 text-align: center;
 font-size: 20px;
+}
+.stacked-graph-popup-close {
+display: none;
+float: right;
+width: 32px; height: 32px;
+cursor: pointer;
+}
+.stacked-graph-popup-close:hover {
+color: #E00;
+}
+.stacked-graph-popup-close::after {
+content: '×';
+font-size: 24px;
+line-height: 32px;
+}
+.fixed .stacked-graph-popup-close {
+display: block;
 }
 
 /* Ansible-Legacy */
@@ -1002,6 +1068,7 @@ font-size: 20px;
 .result-error { background-color: #E60000; }
 /* 緊急停止 */
 .circle-stop { stroke: #FFDC00; }
+.pie-chart-ratio.circle-stop { fill: #111; }
 .result-stop { background-color: #FFDC00; }
 /* 予約取消 */
 .circle-cancel { stroke: #29ABE2; }

@@ -1957,6 +1957,41 @@ initialSet();
 //   円グラフ作成
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 角度から円周の座標を返す
+function setPiePosition( x1, y1, r, a ) {
+    const x2 = x1 + r * Math.cos( a * ( Math.PI / 180 ) ),
+          y2 = y1 + r * Math.sin( a * ( Math.PI / 180 ) );
+    return [x2,y2];
+}
+
+// 表示テスト用ダミーデータ
+const gWidgetDummyFlag = false;
+function movementDummyData() {
+    return {
+    "Ansible Legacy":["ansible-legacy", 1],
+    "Ansible Pioneer":["ansible-pioneer", 2],
+    "Ansible Legacy Role":["ansible-legacy-role", 200],
+    "Terraform":["terraform", 4],
+    "OpenStack":["openstack", 3],
+    };
+}
+function statusDummyData() {
+    const status = {};
+    status[ getWidgetMessage('22') ] = ["runing",15,10,5];
+    status[ getWidgetMessage('23') ] = ["schedule",18,12,6];
+    status[ getWidgetMessage('38') ] = ["waiting",5,2,3];
+    return status;
+}
+function resultDummyData() {
+    const result = {};
+    result[ getWidgetMessage('17') ] = ["done",850,434,416];
+    result[ getWidgetMessage('18') ] = ["fail",30,15,15];
+    result[ getWidgetMessage('19') ] = ["error",27,13,14];
+    result[ getWidgetMessage('20') ] = ["stop",25,12,13];
+    result[ getWidgetMessage('21') ] = ["cancel",28,13,15];
+    return result;
+}
 function setPieChart( resultData, type ) {
 
   let widgetID, pieChartData, pieChartTitle = '';
@@ -1970,6 +2005,8 @@ function setPieChart( resultData, type ) {
         const className = resultData[key]['name'].replace(/\s/g, '-').toLocaleLowerCase();
         pieChartData[ resultData[key]['name'] ] = [ className, resultData[key]['number'] ];
       }
+      // ダミーデータ読み込み
+      if ( gWidgetDummyFlag === true ) pieChartData = movementDummyData();
       break;
     case 'status':
       widgetID = 5;
@@ -1990,6 +2027,8 @@ function setPieChart( resultData, type ) {
           }
         }
       }
+      // ダミーデータ読み込み
+     if ( gWidgetDummyFlag === true ) pieChartData = statusDummyData();
       break;
     case 'result':
       widgetID = 6;
@@ -2012,6 +2051,8 @@ function setPieChart( resultData, type ) {
           }
         }
       }
+      // ダミーデータ読み込み
+      if ( gWidgetDummyFlag === true ) pieChartData = resultDummyData();
       break;
     default:
       return false;
@@ -2037,6 +2078,9 @@ function setPieChart( resultData, type ) {
   }
   
   // Table
+  const conductorListURL = '/default/menu/01_browse.php?no=2100180006',
+        symphonyListURL = '/default/menu/01_browse.php?no=2100000310',
+        statusInputID = 'Filter1Tbl_4';
   let tableHTML = '<div class="number-table-wrap"><table class="number-table"><thead>';
   // thead
   tableHTML += '<tr><th>' + pieChartTitle + '</th>';
@@ -2053,21 +2097,49 @@ function setPieChart( resultData, type ) {
   for ( let key in pieChartData ) {
     tableHTML += '<tr data-type="' + pieChartData[key][0] + '"><th><span class="pie-chart-usage ' + type + '-' + pieChartData[key][0] + '"></span>' + key + '</th>';
     if ( type !== 'movement') {
-      tableHTML += '<td>' + zeroCheck( pieChartData[key][2] ) + '</td><td>' + zeroCheck( pieChartData[key][3] ) + '</td>'
+      // Conductor
+      if ( pieChartData[key][2] !== 0 ) {
+        tableHTML += '<td><a href="' + conductorListURL + '&filter=on&' + statusInputID + '=' + encodeURIComponent( key ) + '" target="_blank">' + pieChartData[key][2] + '</a></td>';
+      } else {
+        tableHTML += '<td>' + zeroCheck( pieChartData[key][2] ) + '</td>';
+      }
+      // Conductor
+      if ( pieChartData[key][3] !== 0 ) {
+        tableHTML += '<td><a href="' + symphonyListURL + '&filter=on&' + statusInputID + '=' + encodeURIComponent( key ) + '" target="_blank">' + pieChartData[key][3] + '</a></td>';
+      } else {
+        tableHTML += '<td>' + zeroCheck( pieChartData[key][3] ) + '</td>';
+      }
+      // Sum
+      tableHTML += '<td>' + zeroCheck( pieChartData[key][1] ) + '</a></td></tr>';
+    } else {
+      // Movement
+      tableHTML += '<td>' + zeroCheck( pieChartData[key][1] ) + '</td></tr>';
     }
-    tableHTML += '<td>' + zeroCheck( pieChartData[key][1] ) + '</td></tr>';
   }
   tableHTML += '</tbody></table></div>';
   
+  // 割合表示
+  const $pieChartRatioSvg = $( document.createElementNS( xmlns, 'svg') );
+  $pieChartRatioSvg.get(0).setAttribute('viewBox', '0 0 ' + viewBox + ' ' + viewBox );
+  $pieChartRatioSvg.attr('class','pie-chart-ratio-svg');
+  
   // 各項目
-  let serialWidthNumber = 0;
+  const outSideNamber = [];
+  let serialWidthNumber = 0,
+      serialAngleNumber = -90,
+      outsideGroupCheck = 0,
+      outsideGroupNumber = -1,
+      checkGroupText = '';
+
   if ( totalNumber !== 0 ) {
     for ( let key in pieChartData ) {
-      const $pieChartCircle = $( document.createElementNS( xmlns, 'circle') );
+      const $pieChartCircle = $( document.createElementNS( xmlns, 'circle') ),
+            $pieChartText = $( document.createElementNS( xmlns, 'text') );
       // 割合・幅の計算
       const className = 'circle-' + pieChartData[key][0],
             number = pieChartData[key][1],
-            ratio = number / totalNumber;
+            ratio = number / totalNumber,
+            angle = 360 * ratio;
 
       let   ratioWidth = Math.round( circumference * ratio * 1000 ) / 1000;
       if ( serialWidthNumber + ratioWidth > circumference ) ratioWidth = circumference - serialWidthNumber;
@@ -2093,9 +2165,132 @@ function setPieChart( resultData, type ) {
       });
       // 追加
       $pieChartSvg.append( $pieChartCircle );
+      // 割合追加
+      if ( ratio > 0 ) {
+        const textAngle = serialAngleNumber + ( angle / 2 ),
+              centerPosition = setPiePosition( cxcy, cxcy, radius, textAngle );
+        let ratioClass = 'pie-chart-ratio ' + className,
+            x = centerPosition[0],
+            y = centerPosition[1];
+        
+        const displayRatio = Math.round( ratio * 1000 ) / 10;
+        
+        // 特定値以下の場合は表示の調整をする
+        if ( displayRatio < 2.5 ) {
+          if ( outsideGroupCheck === 0 ) {
+            checkGroupText += '@'; // グループフラグ
+            outsideGroupNumber++;
+            outSideNamber[outsideGroupNumber] = new Array();
+          }
+          outsideGroupCheck = 1;
+          outSideNamber[outsideGroupNumber].push( [ratioClass,textAngle,displayRatio] );
+        } else {
+          // 30%以下の場合グループを分けない
+          if ( displayRatio > 30 ) {
+            outsideGroupCheck = 0;
+            checkGroupText += 'X';
+          }
+          if ( displayRatio < 10 ) {
+            ratioClass += ' rotate';
+            let rotateAngle = textAngle;
+            if ( textAngle > 90 ) rotateAngle = rotateAngle + 180;
+            $pieChartText.attr('transform', 'rotate('+rotateAngle+','+x+','+y+')' );
+             y += 1.5; //ベースライン調整
+          } else {
+             y += 2.5;
+          }
+          $pieChartText.html( displayRatio + '<tspan class="ratio-space"> </tspan><tspan class="ratio-mark">%</tspan>' ).attr({
+            'x': x,
+            'y': y,
+            'text-anchor': 'middle',
+            'class': ratioClass
+          });
+          $pieChartRatioSvg.append( $pieChartText );
+        }
+      }
       // スタート幅
       serialWidthNumber += ratioWidth;
+      serialAngleNumber += angle;
       if ( serialWidthNumber > circumference ) serialWidthNumber = circumference;
+    }
+    // 2.5%以下は外側に表示する
+    let outSideGroupLength = outSideNamber.length;
+    if ( outSideNamber.length > 0 ) {
+      // 最初と最後が繋がる場合、最初のグループを最後に結合する
+      if ( checkGroupText.length > 2 && checkGroupText.slice( 0, 1 ) === '@' && checkGroupText.slice( -1 ) === '@' ) {
+        outSideNamber[ outSideGroupLength - 1] = outSideNamber[ outSideGroupLength - 1].concat( outSideNamber[0] );
+        outSideNamber.shift();
+        outSideGroupLength = outSideNamber.length;
+      }
+      for ( let i = 0; i < outSideGroupLength; i++ ) {console.log(outSideNamber[i])
+        const outSideNamberLength = outSideNamber[i].length;
+        if ( outSideNamberLength > 0 ) {
+          const maxOutWidth = 14;
+          // 配列の真ん中から処理する
+          let arrayNumber = Math.floor( ( outSideNamberLength - 1 ) / 2 );
+          for ( let j = 0; j < outSideNamberLength; j++ ) {
+            arrayNumber = ( ( j + 1 ) % 2 !== 0 )? arrayNumber - j: arrayNumber + j; 
+            if ( outSideNamber[i][arrayNumber] !== undefined ) {
+              const $pieChartText = $( document.createElementNS( xmlns, 'text') ),
+                    $pieChartLine = $( document.createElementNS( xmlns, 'line') ),
+                    count = Math.floor( j / 2 ),
+                    position = radius + maxOutWidth;
+              let textAnchor = 'middle',
+                  ratioClass = outSideNamber[i][arrayNumber][0]  + ' outside',
+                  angle = outSideNamber[i][arrayNumber][1],
+                  ratio = outSideNamber[i][arrayNumber][2],
+                  newAngle = angle,
+                  lineStartPositionAngle,
+                  rotetaNumber,
+                  verticalPositionNumber = 0;
+
+              // 横位置調整
+              const setAngle = 16 * count + 8,
+                    setLineAngle = ( Number.isInteger( ratio ) )? 4: 6;
+              if ( ( j + 1 ) % 2 !== 0 ) {
+                newAngle -= setAngle;
+                lineStartPositionAngle = newAngle + setLineAngle;
+              } else {
+                newAngle += setAngle;
+                lineStartPositionAngle = newAngle - setLineAngle;
+              }
+
+              if ( newAngle > 0 && newAngle < 180 ) {
+                verticalPositionNumber = 4;
+                rotetaNumber = newAngle + 270;
+              } else {
+                rotetaNumber = newAngle + 90;
+              }
+
+              const outsidePosition = setPiePosition( cxcy, cxcy, position, newAngle ),
+                    x = outsidePosition[0],
+                    y = outsidePosition[1],
+                    lineStartPosition = setPiePosition( cxcy, cxcy, position, lineStartPositionAngle ),
+                    x1 = lineStartPosition[0],
+                    y1 = lineStartPosition[1],
+                    lineEndPosition = setPiePosition( cxcy, cxcy, radius + strokeWidth / 2 - 2, angle ),
+                    x2 = lineEndPosition[0],
+                    y2 = lineEndPosition[1];
+
+              $pieChartLine.attr({
+                'x1': x1,
+                'y1': y1,
+                'x2': x2,
+                'y2': y2,
+                'class': 'pie-chart-ratio-line'
+              });
+              $pieChartText.html( ratio + '<tspan class="ratio-space"> </tspan><tspan class="ratio-mark">%</tspan>' ).attr({
+                'x': x,
+                'y': y + verticalPositionNumber,
+                'text-anchor': textAnchor,
+                'class': ratioClass,
+                'transform': 'rotate(' + rotetaNumber + ',' + x + ',' +y + ')'
+              });
+              $pieChartRatioSvg.append( $pieChartText, $pieChartLine );
+            }
+          }
+        }
+      }
     }
   } else {
    // 0件の場合
@@ -2126,13 +2321,14 @@ function setPieChart( resultData, type ) {
   $pieChartTotalSvg.append( $pieChartName, $pieChartNumber, $pieChartTotal );
   
   const $pieChartHTML = $('<div class="pie-chart"><div class="pie-chart-inner"></div></div>' + tableHTML );
-  $pieChartHTML.find('.pie-chart-inner').append( $pieChartTotalSvg, $pieChartSvg );  
+  $pieChartHTML.find('.pie-chart-inner').append( $pieChartTotalSvg, $pieChartSvg, $pieChartRatioSvg );
   
   $('.widget-grid[data-widget-id="' + widgetID + '"]').eq(0).find('.widget-body').html( $pieChartHTML );
   
   // 円グラフアニメーション
   $pieChartSvg.ready( function(){
     setTimeout( function() {
+      $pieChartRatioSvg.css('opacity','1');
       $pieChartSvg.find('.pie-chart-circle').each( function(){
         const $circle = $( this );
         if ( $circle.attr('data-style') !== undefined ) {
@@ -2144,7 +2340,7 @@ function setPieChart( resultData, type ) {
                 dataType = $enter.attr('data-type');
           if ( dataType !== undefined ) {
             $enter.closest('.widget-body').find('tr[data-type="' + dataType + '"]').addClass('emphasis');
-            $enter.css('stroke-width','25');          
+            $enter.css('stroke-width','25');
           }
         },
         'mouseleave': function(){
@@ -2167,6 +2363,38 @@ function setPieChart( resultData, type ) {
 //   作業履歴 積み上げグラフ
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+function workHistoryDummyData() {
+return [
+[[30,26,2,0,1,1],[18,16,1,0,0,1],[12,10,1,0,1,0]],
+[[26,24,0,0,1,1],[15,14,0,0,1,0],[11,10,0,0,0,1]],
+[[39,36,1,1,0,1],[17,16,1,0,0,0],[22,20,0,1,0,1]],
+[[34,31,1,0,1,1],[17,16,0,0,0,1],[17,15,1,0,1,0]],
+[[37,36,1,0,0,0],[19,19,0,0,0,0],[18,17,1,0,0,0]],
+[[41,35,1,2,1,2],[18,16,0,1,0,1],[23,19,1,1,1,1]],
+[[37,34,0,2,0,1],[17,16,0,1,0,0],[20,18,0,1,0,1]],
+[[35,29,1,2,1,2],[16,13,0,1,1,1],[19,16,1,1,0,1]],
+[[26,22,0,2,1,1],[14,12,0,1,0,1],[12,10,0,1,1,0]],
+[[42,38,0,1,1,2],[22,19,0,1,1,1],[20,19,0,0,0,1]],
+[[24,23,1,0,0,0],[12,11,1,0,0,0],[12,12,0,0,0,0]],
+[[36,30,2,1,2,1],[18,16,1,0,1,0],[18,14,1,1,1,1]],
+[[31,25,1,2,1,2],[13,10,1,1,0,1],[18,15,0,1,1,1]],
+[[38,36,0,2,0,0],[21,20,0,1,0,0],[17,16,0,1,0,0]],
+[[35,29,1,2,1,2],[20,17,1,1,0,1],[15,12,0,1,1,1]],
+[[32,30,1,0,0,1],[12,12,0,0,0,0],[20,18,1,0,0,1]],
+[[33,30,1,0,1,1],[18,16,1,0,1,0],[15,14,0,0,0,1]],
+[[32,30,1,0,1,0],[20,19,0,0,1,0],[12,11,1,0,0,0]],
+[[36,31,1,1,2,1],[14,11,0,1,1,1],[22,20,1,0,1,0]],
+[[29,27,2,0,0,0],[13,12,1,0,0,0],[16,15,1,0,0,0]],
+[[34,31,1,1,0,1],[22,20,1,1,0,0],[12,11,0,0,0,1]],
+[[24,21,0,2,0,1],[12,11,0,1,0,0],[12,10,0,1,0,1]],
+[[44,38,2,1,2,1],[21,18,1,0,1,1],[23,20,1,1,1,0]],
+[[36,33,2,0,1,0],[19,18,1,0,0,0],[17,15,1,0,1,0]],
+[[39,34,1,1,2,1],[20,16,1,1,1,1],[19,18,0,0,1,0]],
+[[41,34,2,2,2,1],[19,16,1,1,1,0],[22,18,1,1,1,1]],
+[[32,25,2,1,2,2],[18,15,1,0,1,1],[14,10,1,1,1,1]],
+[[37,32,2,1,1,1],[22,19,1,0,1,1],[15,13,1,1,0,0]]
+];
+}
 function workHistory( result ) {
 
 const widgetID = 7,
@@ -2179,8 +2407,7 @@ const widgetID = 7,
         [ getWidgetMessage('20'),'stop'],
         [ getWidgetMessage('21'),'cancel']
       ],
-      histryData = new Array,
-      histryDay = new Array,
+      histryDay = new Array(),
       period = Number( $target.attr('data-period') ),
       date = new Date(),
       year = ('000' + date.getFullYear() ).slice( -4 ),
@@ -2188,11 +2415,13 @@ const widgetID = 7,
       day = ('0' + date.getDate() ).slice( -2 ),
       today = new Date( year +'-'+ month +'-'+ day );
 
+let histryData = new Array();
+
 // 履歴配列初期化
 for ( let i = 0; i < period; i++ ) {
   // histryDay = ["年","月",日"];
   // histryData = ["合計","conductor","symphony"]
-    //["合計","正常終了","異常終了","エラー終了","緊急停止","予約取消"]
+  // ["合計","正常終了","異常終了","エラー終了","緊急停止","予約取消"]
   histryData[ i ] = [[ 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0 ]];
   histryDay[ i ] = [ date.getFullYear(), date.getMonth() + 1, date.getDate() ];
   date.setDate( date.getDate() - 1 );
@@ -2226,6 +2455,9 @@ for ( let type in result ) {
     }
   }
 }
+
+// ダミーデータ入れ替え
+if ( gWidgetDummyFlag === true ) histryData = workHistoryDummyData();
 
 const historyClass = ( period > 99 )? ' period-many': '';
 let historyHTML = '<div class="stacked-graph'+ historyClass + '">';
@@ -2325,56 +2557,101 @@ for ( let i = historyLength - 1; i >= 0; i-- ) {
         const $bar = $( this ),
               $pop = $('.stacked-graph-popup'),
               dataID = $bar.attr('data-id'),
-              resultData = histryData[dataID];
-        // Table
-        let tableHTML = ''
-          + '<div class="stacked-graph-popup-date">' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + histryDay[dataID][2] + '</div>'
-          + '<div class="number-table-wrap"><table class="number-table"><thead>';
-        // thead
-        tableHTML += '<tr><th>Result</th><th>CON</th><th>SYM</th><th>SUM</th></tr></thead><tbody>';
-        // tbody
-        const resultTextLength = resultText.length;
-        for( let i = 1; i < resultTextLength; i++ ) {
-          tableHTML += '<tr><th><span class="pie-chart-usage result-' + resultText[i][1] + '"></span>' + resultText[i][0] + '</th><td>' + zeroCheck( resultData[1][i] ) + '</td><td>' + zeroCheck( resultData[2][i] ) + '</td><td>' + zeroCheck( resultData[0][i] ) + '</td></tr>';
-        }
-        // 計
-        tableHTML += '<tr><th>' + resultText[0][0] + '</th><td>' + zeroCheck( resultData[1][0] ) + '</td><td>' + zeroCheck( resultData[2][0] ) + '</td><td>' + zeroCheck( resultData[0][0] ) + '</td></tr>';
-        tableHTML += '</tbody></table></div>';
-        $pop.html( tableHTML );
+              resultData = histryData[dataID],
+              mode = $('#dashboard').attr('data-mode');
+        
+        if ( mode !== 'view') return false;
+        
+        const conductorListURL = '/default/menu/01_browse.php?no=2100180006',
+              symphonyListURL = '/default/menu/01_browse.php?no=2100000310',
+              statusInputID = 'Filter1Tbl_4',
+              StartDateID = 'Filter1Tbl_12__S',
+              EndDataID = 'Filter1Tbl_12__E';
+        
+        const setResult = function(){
+            // Table
+            let tableHTML = ''
+              + '<div class="stacked-graph-popup-close"></div>'
+              + '<div class="stacked-graph-popup-date">' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + histryDay[dataID][2] + '</div>'
+              + '<div class="number-table-wrap"><table class="number-table"><thead>';
+            // thead
+            tableHTML += '<tr><th>Result</th><th>CON</th><th>SYM</th><th>SUM</th></tr></thead><tbody>';
+            // tbody
+            const resultTextLength = resultText.length;
+            for( let i = 1; i < resultTextLength; i++ ) {
+              const param = '&filter=on&' + statusInputID + '=' + encodeURIComponent( resultText[i][0] )
+                  + '&' + StartDateID + '=' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + histryDay[dataID][2]
+                  + '&' + EndDataID + '=' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + ( histryDay[dataID][2] + 1 );
+              // Status
+              tableHTML += '<tr><th><span class="pie-chart-usage result-' + resultText[i][1] + '"></span>' + resultText[i][0] + '</th>';
+              // Conductor
+              if ( resultData[1][i] !== 0 ) {
+                tableHTML += '<td><a href="' + conductorListURL + param + '" target="_blank">' + resultData[1][i] + '</a></td>';
+              } else {
+                tableHTML += '<td>' + zeroCheck( resultData[1][i] ) + '</td>';
+              }
+              // Conductor
+              if ( resultData[2][i] !== 0 ) {
+                tableHTML += '<td><a href="' + symphonyListURL + param + '" target="_blank">' + resultData[2][i] + '</a></td>';
+              } else {
+                tableHTML += '<td>' + zeroCheck( resultData[2][i] ) + '</td>';
+              }
+              // Sum
+              tableHTML += '<td>' + zeroCheck( resultData[0][i] ) + '</td></tr>';
+            }
+            // 計
+            tableHTML += '<tr><th>' + resultText[0][0] + '</th><td>' + zeroCheck( resultData[1][0] ) + '</td><td>' + zeroCheck( resultData[2][0] ) + '</td><td>' + zeroCheck( resultData[0][0] ) + '</td></tr>';
+            tableHTML += '</tbody></table></div>';
+            $pop.html( tableHTML );
+            $pop.find('.stacked-graph-popup-close').on('click', function(){
+              $pop.removeClass('fixed').html('').hide();
+            });
+        };
+        
+        const setPopPosition = function( pageX, pageY ) {
+            const $window = $( window ),
+                  scrollTop = $window.scrollTop(),
+                  scrollLeft = $window.scrollLeft(),
+                  windowWidth = $window.width(),
+                  popupWidth = $pop.outerWidth();
+
+            let leftPosition = pageX - scrollLeft;
+
+            // 右側チェック
+            if ( leftPosition + ( popupWidth / 2 ) > windowWidth ) {
+              leftPosition = leftPosition - (( leftPosition + ( popupWidth / 2 ) ) - windowWidth );
+            }
+            // 左側チェック
+            if ( leftPosition - ( popupWidth / 2 ) < 0 ) {
+              leftPosition = popupWidth / 2;
+            }
+
+            $pop.show().css({
+              'left': leftPosition,
+              'top': pageY - scrollTop - 16
+            });
+        };
+        
+        $bar.on('click.stackedGraphPopup', function( e ){
+          if ( $pop.is('.fixed') ) {
+            setPopPosition( e.pageX, e.pageY );
+            setResult();
+          }
+          $pop.toggleClass('fixed');
+        });
         
         $( window ).on('mousemove.stackedGraphPopup', function( e ) {
-          const $window = $( this ),
-                scrollTop = $window.scrollTop(),
-                scrollLeft = $window.scrollLeft(),
-                windowWidth = $window.width(),
-                popupWidth = $pop.outerWidth();
-                
-          let leftPosition = e.pageX - scrollLeft;
-          
-          // 右側チェック
-          if ( leftPosition + ( popupWidth / 2 ) > windowWidth ) {
-            leftPosition = leftPosition - (( leftPosition + ( popupWidth / 2 ) ) - windowWidth );
+          if ( !$pop.is('.fixed') ) {
+            setPopPosition( e.pageX, e.pageY );
+            setResult();
           }
-          // 左側チェック
-          if ( leftPosition - ( popupWidth / 2 ) < 0 ) {
-            leftPosition = popupWidth / 2;
-          }
-          
-          $pop.show().css({
-            'left': leftPosition,
-            'top': e.pageY - scrollTop - 16
-          });
         });
       },
       'mouseleave': function() {
-        $('.stacked-graph-popup').html('').hide();
+        $('.stacked-graph-popup').not('.fixed').html('').hide();
+        $( this ).off('click.stackedGraphPopup');
         $( window ).off('mousemove.stackedGraphPopup');
       }
     });
-    
-    
-    
   }, 100 );
-  
-
 }
