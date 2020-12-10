@@ -8314,7 +8314,7 @@ class CreateAnsibleExecFiles {
                 foreach( $ina_hosts as $no=>$host_name ){
                     // 変数配列分繰り返し
                     // $ina_host_vars[ ipaddress ][ 変数名 ]=>具体値
-                    if(@strlen($ina_host_vars[$host_name][$var_name])==0)
+                    if(! array_key_exists($var_name,$ina_host_vars[$host_name]))
                     {
                         if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
                             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55256",
@@ -10659,8 +10659,7 @@ class CreateAnsibleExecFiles {
         }
         // テンプレートに登録されている変数のデータベース登録確認 
         foreach( $file_vars_list as $var_name ){
-            if((@strlen($ina_var_list[$var_name])==0) &&
-               ( ! isset($ina_var_list[$var_name]))) {
+            if(!array_key_exists($var_name,$ina_var_list)) {
                 if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000020",
                                                                 array(basename($templatefile),
