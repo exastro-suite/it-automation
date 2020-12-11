@@ -1076,34 +1076,8 @@ EOD;
     }
 
     function getSchemeNAuthority(){
-        // グローバル変数の利用宣言
-        global $root_dir_path,$g;
-        $retStrValue = "";
-        if ( empty($root_dir_path) ){
-            $root_dir_path = getApplicationRootDirPath();
-        }
-        $strContent = "";
-        if( file_exists($root_dir_path."/confs/webconfs/L7Protocol.txt")===true ){
-            $strContent = @file_get_contents ( $root_dir_path."/confs/webconfs/L7Protocol.txt" );
-        }
-        if( $strContent == "http" || $strContent == "https" ){
-            $retStrValue = $strContent.":/"."/".$_SERVER['HTTP_HOST'];
-        }
-        else if( $strContent != "" ){
-            web_log("Setting of L7Protocol is not collect.");
-            exit();
-        }
-        if( $retStrValue == "" ){
-            $protocol = getRequestProtocol();
-
-            // 起動元がバックヤードかWebを判定
-            $arrayReqInfo = requestTypeAnalyze();
-            if( $arrayReqInfo[0] == "web" )
-                $retStrValue = $protocol . $_SERVER['HTTP_HOST'];
-            else
-                $retStrValue = '';
-        }
-        return $retStrValue;
+        // URI部分を省略するために空を返却
+        return '';
     }
 
     function ky_printHeaderForProvideBinaryStream($strProvideFilename,$strContentType="",$varContentLength=null,$boolFileNameUTF8=true){
