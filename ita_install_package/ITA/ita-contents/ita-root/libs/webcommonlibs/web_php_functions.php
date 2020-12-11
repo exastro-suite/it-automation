@@ -615,14 +615,14 @@
         }
     }
 
-    function webRequestForceQuitFromEveryWhere($intDefaultResutStatusCode=500,$intForceQuitDatailCode=null,$aryAppendix=array()){
+    function webRequestForceQuitFromEveryWhere ($intDefaultResutStatusCode=500, $intForceQuitDatailCode=null, $aryAppendix=array()) {
         // グローバル変数の利用宣言
         global $g;
-        list($aryReqByREST,$tmpBool)=isSetInArrayNestThenAssign($g,array('requestByREST'),null);
-        if( is_array($aryReqByREST) === true ){
+        list($aryReqByREST, $tmpBool) = isSetInArrayNestThenAssign($g, array('requestByREST'), null);
+        if (is_array($aryReqByREST) === true) {
             //----RestAPIからのアクセスの場合
             $strException = 'Generic error';
-            switch($intDefaultResutStatusCode){
+            switch ($intDefaultResutStatusCode) {
                 case 400: // 要求が正しくない
                     $strErrorType = "Bad Request";
                     break;
@@ -652,7 +652,7 @@
                     $strErrorType = "Unexpected error";
                     break;
             }
-            switch($intForceQuitDatailCode){
+            switch ($intForceQuitDatailCode) {
                 case 11410201: // 権限がなかった
                     $strException = "No Privillege Access Error";
                     break;
@@ -679,7 +679,7 @@
                     break;
             }
             list($varStackTrace, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('StackTrace'),false);
-            if( is_array($varStackTrace) === false && is_string($varStackTrace) === false ){
+            if (is_array($varStackTrace) === false && is_string($varStackTrace) === false) {
                 $varStackTrace = 'none';
             }
             $intResultStatusCode = $intDefaultResutStatusCode;
@@ -687,10 +687,10 @@
                                          'Exception'=>$strException,
                                          'StackTrace'=>$varStackTrace);
 
-            list($boolOverrideByGlobalVars, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('OverrideByGlobalVars'),false);
-            if( $boolOverrideByGlobalVars === true ){
+            list($boolOverrideByGlobalVars, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix, array('OverrideByGlobalVars'), false);
+            if ($boolOverrideByGlobalVars === true) {
                 list($intResultStatusCode, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($g,array('requestByREST','resultStatusCode'),$intResultStatusCode);
-                list($aryResponsContents , $tmpBoolKeyExists) = isSetInArrayNestThenAssign($g,array('requestByREST','preResponsContents','errorInfo'),$aryResponsContents);
+                list($aryResponsContents, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($g,array('requestByREST','preResponsContents','errorInfo'),$aryResponsContents);
             }
 
             header('Content-Type: application/json; charset=utf-8', true, $intResultStatusCode);
@@ -699,18 +699,14 @@
             exit($objJSONOfResultData);
 
             //RestAPIからのアクセスの場合----
-        }
-        else{
+        } else {
             //----その他のリクエストの場合
-            switch($intDefaultResutStatusCode){
+            switch ($intDefaultResutStatusCode) {
                 case 400: // 要求が正しくない
                 case 401: // 認証が必要である
                 case 403: // 禁止されている（アクセス権がない、ホストがアクセスすることを拒否された）
                 case 404: // リソースがみつからなかった
                 case 500: // サーバ内部エラー
-                case 501: // 実装されていないメソッド
-                case 502: // 不正なゲートウェイ
-                case 503: // サービス利用不可（過負荷、メンテナンス中による）
                     http_response_code($intDefaultResutStatusCode);
                     break;
             }
@@ -718,15 +714,7 @@
             list($intInsideRedirectMode, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('InsideRedirectMode'),1); // 0
 
             //MDC(NNN)+
-            switch($intForceQuitDatailCode){
-                // 400
-                case 10000400: // 不正なリクエスト
-                    insideRedirectCodePrint("/common/common_bad_request.php",$intInsideRedirectMode);
-                    break;
-                // 401
-                case 10000401: // 未認証アクセス
-                    insideRedirectCodePrint("/common/common_unauthorized.php",$intInsideRedirectMode);
-                    break;
+            switch ($intForceQuitDatailCode) {
                 // 403
                 case 10000403: // 不正操作によるアクセス警告画面にリダイレクト
                 case 10310201: // 不正操作によるアクセス警告画面にリダイレクト
@@ -772,8 +760,28 @@
                 case 10610701: // 開発者によるメンテナンス(中の通知)画面
                     insideRedirectCodePrint("/common/common_dev_maintenace.php",$intInsideRedirectMode);
                     break;
-                default: // システムエラー
-                    insideRedirectCodePrint("/common/common_unexpected_error.php",$intInsideRedirectMode);
+                default: // エラーコード毎のエラーページを表示する
+                    switch ($intDefaultResutStatusCode) {
+                        case 400: // 不正なリクエスト
+                            $err_file_path = "/webroot/common/common_bad_request.php";
+                            break;
+                        case 401: // 未認証アクセス
+                            $err_file_path = "/webroot/common/common_unauthorized.php";
+                            break;
+                        case 403: // 禁止されているアクセス
+                            $err_file_path = "/webroot/common/common_forbidden.php";
+                            break;
+                        case 404: // リソースがみつからなかった
+                            $err_file_path = "/webroot/common/common_not_found.php";
+                            break;
+                        case 500: // サーバ内部エラー
+                            $err_file_path = "/webroot/common/common_internal_server_error.php";
+                            break;
+                        default:
+                            $err_file_path = "/webroot/common/common_internal_server_error.php";
+                            break;
+                    }
+                    include preg_replace('|^(.*/ita-root)/.*$|', '$1', __FILE__).$err_file_path;
                     break;
             }
             //その他のリクエストの場合----

@@ -14,31 +14,30 @@
 //   limitations under the License.
 //
 
+// HTTP Response Code
+http_response_code(404);
+
 // ルートディレクトリを取得
-if ( empty($root_dir_path) ){
-    $root_dir_temp = array();
-    $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
-    $root_dir_path = $root_dir_temp[0] . "ita-root";
+if (empty($root_dir_path)) {
+    $root_dir_temp = [];
+    $root_dir_temp = explode("ita-root",dirname(__FILE__));
+    $root_dir_path = $root_dir_temp[0]."ita-root";
 }
 
-// アクセスログ出力
-$aryOrderToReqGate = array();
+// DBには接続しない
+$aryOrderToReqGate = [];
 $aryOrderToReqGate['DBConnect'] = 'LATE';
-require( $root_dir_path . "/libs/commonlibs/common_php_req_gate.php" );
-web_log("");
- 
+require $root_dir_path."/libs/commonlibs/common_php_req_gate.php";
+
 // 管理者連絡先を読み込み
-$ADMIN_OFFICE = file_get_contents( $root_dir_path . "/confs/webconfs/admin_mail_addr.txt" );
+$ADMIN_OFFICE = file_get_contents($root_dir_path."/confs/webconfs/admin_mail_addr.txt");
 $strMailTag = "";
-if( 0 < strlen($ADMIN_OFFICE) ){
-    $strMailTag = $objMTS->getSomeMessage("ITAWDCH-MNU-5000003",$ADMIN_OFFICE);
+if (!empty($ADMIN_OFFICE)) {
+    $strMailTag = $objMTS->getSomeMessage("ITAWDCH-MNU-4040003",$ADMIN_OFFICE);
 }
-
-// システムエラー(予期されないエラー)
-
 // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
 $timeStamp_favicon_ico=filemtime("$root_dir_path/webroot/common/imgs/favicon.ico");
-  
+$design_type = 'default';
 // ここから本文
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
@@ -49,12 +48,12 @@ $timeStamp_favicon_ico=filemtime("$root_dir_path/webroot/common/imgs/favicon.ico
     <meta http-equiv="Content-Script-Type" content="text/javascript">
     <meta http-equiv="content-style-type" content="text/css">
     <link rel="shortcut icon" href="<?= $scheme_n_authority ?>/common/imgs/favicon.ico?<?= $timeStamp_favicon_ico ?>" type="image/vnd.microsoft.icon">
-    <title><?= $objMTS->getSomeMessage("ITAWDCH-MNU-5000001") ?></title>
+    <title><?= $objMTS->getSomeMessage("ITAWDCH-MNU-4040001") ?></title>
 </head>
 <body>
     <br>
-    <?= $objMTS->getSomeMessage("ITAWDCH-MNU-5000002") ?><br>
+    <?= $objMTS->getSomeMessage("ITAWDCH-MNU-4040002") ?><br>
     <?= $strMailTag ?><br>
-    <a href="/"><?= $objMTS->getSomeMessage("ITAWDCH-MNU-5000004") ?></a><br>
+    <a href="/"><?= $objMTS->getSomeMessage("ITAWDCH-MNU-4040004") ?></a><br>
 </body>
 </html>
