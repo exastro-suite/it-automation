@@ -63,6 +63,17 @@ editorFunction.getParam = function ( name ) {
     return decodeURIComponent( results[2] );
 };
 
+editorFunction.getParamAll = function () {
+    const parameters = window.location.search.substr(1).split('&'),
+          parameterLength = parameters.length,
+          parameterObject = {};
+    for ( let i = 0; i < parameterLength; i++ ) {
+      const keyValue = parameters[i].split('=');
+      parameterObject[ keyValue[0] ] = decodeURIComponent( keyValue[1] );
+    }
+    return parameterObject;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   テキストの無害化
