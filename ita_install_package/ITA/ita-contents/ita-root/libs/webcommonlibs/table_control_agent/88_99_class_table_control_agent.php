@@ -907,18 +907,55 @@ class TableControlAgent {
 
 		    $c = new TextColumn('ACCESS_AUTH',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300002"));
 		    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300003"));//エクセル・ヘッダでの説明
-//                  $c->getOutputType('update_table')->setAttr('upd-access-auth-id', 'access_auth_data');
-//                  $c->getOutputType('update_table')->setAttr('readonly', 'readonly');
-//                  $c->getOutputType('register_table')->setAttr('ins-access-auth-id', 'access_auth_data');
-//                  $c->getOutputType('register_table')->setAttr('readonly', 'readonly');
                     $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt('')));
                     $c->getOutputType('update_table')->setAttr('upd-access-auth-id', 'access_auth_data');
                     $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt('')));
                     $c->getOutputType('register_table')->setAttr('ins-access-auth-id', 'access_auth_data');
 		    $c->setHiddenMainTableColumn(true);
-                    $c->getOutputType('excel')->setVisible(false);
-                    $c->getOutputType('csv')->setVisible(false);
-                    $c->getOutputType('json')->setVisible(false);
+
+		    // ロール名をロールIDに置換。ロール名が不正の場合はエラーとして扱う
+		    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+			global $g;
+			$boolRet = true;
+			$intErrorType = null;
+			$aryErrMsgBody = array();
+			$strErrMsg = "";
+			$strErrorBuf = "";
+			$strFxName = "";
+
+			$objTable =  $objColumn->getTable();
+
+			$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+			// 廃止・復活は更新対象外なのでチェックしない。
+			if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+			    $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+			    if(array_key_exists($AccessAuthColumnName,$exeQueryData)) {
+			        $RoleNameString   = $exeQueryData[$AccessAuthColumnName];
+		    	        $RoleIDString = "";
+		    	        if(strlen($RoleNameString) != 0) {
+		    	              // ロールID文字列のアクセス権をロール名称の文字列に変換
+		    	              // 廃止ロールはカットする。
+		    	              $obj = new RoleBasedAccessControl($g['objDBCA']);
+		    	              $ErrorRoleNameAry = array();
+		    	              $RoleIDString = $obj->getRoleNameStringToRoleIDStringForDBUpdate($g['login_id'],$RoleNameString,$ErrorRoleNameAry);  
+		    	              unset($obj);
+		    	              if($RoleIDString === false) {
+		    	                  $boolRet = false;
+		    	                  $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19021",array(implode(",", $ErrorRoleNameAry))) . "\n";
+		    	                  // intErrorTypeは設定不要
+		    	                  // $intErrorType = 500;
+		    	              }
+		    	          }
+		    	          if($RoleIDString !== false) {
+		    	              // 登録するアクセス権をロール名称の文字列に設定
+		    	              $exeQueryData[$AccessAuthColumnName] = $RoleIDString;
+		    	          }
+		    	     }
+		    	}
+		        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+		        return $retArray;
+		    };
+		    $c->setFunctionForEvent('beforeTableIUDIndividualValidator',$tmpObjFunction);
 
 		    $cg->addColumn($c);
 		    $this->addColumn($cg);
