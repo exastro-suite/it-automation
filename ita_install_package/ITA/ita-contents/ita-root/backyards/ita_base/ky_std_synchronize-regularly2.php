@@ -434,78 +434,90 @@
                 $tmpsymphonyClassNo = $rowOfReguralyList['CONDUCTOR_CLASS_NO'];
                 $opertionNoIdbh = $rowOfReguralyList['OPERATION_NO_IDBH'];
 
-                //--- Conductorクラス状態保存 
-                $arrayResult = $objOLA->convertConductorClassJson($tmpsymphonyClassNo,1);
+                //----Operation、Conductorの共通アクセス権の取得 #519
+                $arrOpeConAccessAuth = $objOLA->getInfoAccessAuthWorkFlowOpe($tmpsymphonyClassNo,$opertionNoIdbh ,"C" );
+                $strOpeConAccessAuth = $arrOpeConAccessAuth[4];
 
-                // JSON形式の変換、不要項目の削除
-                $tmpReceptData = $arrayResult[4];
-                $arrayReceptData=$tmpReceptData['conductor'];
-                $strSortedData=$tmpReceptData;
-                unset($strSortedData['conductor']);
-                foreach ($strSortedData as $key => $value) {
-                    if( preg_match('/line-/',$key) ){
-                        unset($strSortedData[$key]);
-                    }
-                }
-                unset($strSortedData['conductor']);
-                unset($strSortedData['config']); 
-
-                $arrayResult = $objOLA->conductorClassRegister(null, $arrayReceptData, $strSortedData, null);
-
-                if( $arrayResult[0] == "000" ){
-                    $symphonyClassNo = $arrayResult[2];
+                if( $arrOpeConAccessAuth[3] != "" ){
+                    $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160003", array($regularlyId)); //[処理]symphonyINSTANCEの登録に失敗しました(定期実行ID:{})。
+                    require ($root_dir_path . $log_output_php );
+                    $registerFailedSymphonyInstance = true;
                 }else{
-                    $symphonyClassNo="";
-                }
-                // Conductorクラス状態保存 ---
+                    //--- Conductorクラス状態保存 
+                    $arrayResult = $objOLA->convertConductorClassJson($tmpsymphonyClassNo,1);
 
+                    // JSON形式の変換、不要項目の削除
+                    $tmpReceptData = $arrayResult[4];
+                    $arrayReceptData=$tmpReceptData['conductor'];
+                    $strSortedData=$tmpReceptData;
+                    unset($strSortedData['conductor']);
+                    foreach ($strSortedData as $key => $value) {
+                        if( preg_match('/line-/',$key) ){
+                            unset($strSortedData[$key]);
+                        }
+                    }
+                    unset($strSortedData['conductor']);
+                    unset($strSortedData['config']); 
 
-                //シンフォニーインスタンスを新規登録処理
-                $aryOptionOrder = null;
-                $aryOptionOrderOverride = array();
-                $db_access_user_name = $objMTS->getSomeMessage("ITABASEH-STD-160013"); //定期実行管理プロシージャ
-                $retArray = $objOLA->registerConductorInstance($symphonyClassNo, $opertionNoIdbh, $nextExecutionDate, "", $aryOptionOrderOverride, $db_access_user_id, $db_access_user_name);
+                    // アクセス権の上書き#519
+                    $arrayReceptData['ACCESS_AUTH']=$strOpeConAccessAuth; 
 
-                if($retArray[0] !== true){
-                    //エラー情報をセット
-                    $intErrorType = $retArray[1];
-                    $aryErrMsgBody = $retArray[2];
-                    $strSysErrMsgBody = $retArray[4];
-                    $aryFreeErrMsgBody = $retArray[7];
+                    $arrayResult = $objOLA->conductorClassRegister(null, $arrayReceptData, $strSortedData, null);
 
-                    //エラー判定チェック
-                    if($intErrorType === 101){
-                        //symphonyが存在しない（廃止扱い）
-                        $getFailedSymphonyInfo = true;
-                        $regStatusId = STATUS_CONDUCTOR_DISCARD; //ステータス：symphony廃止
-                    }elseif($intErrorType === 102){
-                        //operationが存在しない（廃止扱い）
-                        $getFailedOperationInfo = true;
-                        $regStatusId = STATUS_OPERATION_DISCARD; //ステータス：operation廃止
+                    if( $arrayResult[0] == "000" ){
+                        $symphonyClassNo = $arrayResult[2];
                     }else{
-                        $registerFailedSymphonyInstance = true;
+                        $symphonyClassNo="";
                     }
+                    // Conductorクラス状態保存 ---
 
-                    //ログを出力
-                    if($regCurrentStatusId != STATUS_LINKING_ERROR){
-                        foreach($aryErrMsgBody as $msg){
-                            $FREE_LOG = $msg;
+
+                    //シンフォニーインスタンスを新規登録処理
+                    $aryOptionOrder = null;
+                    $aryOptionOrderOverride = array();
+                    $db_access_user_name = $objMTS->getSomeMessage("ITABASEH-STD-160013"); //定期実行管理プロシージャ
+                    $retArray = $objOLA->registerConductorInstance($symphonyClassNo, $opertionNoIdbh, $nextExecutionDate, "", $aryOptionOrderOverride, $db_access_user_id, $db_access_user_name);
+
+                    if($retArray[0] !== true){
+                        //エラー情報をセット
+                        $intErrorType = $retArray[1];
+                        $aryErrMsgBody = $retArray[2];
+                        $strSysErrMsgBody = $retArray[4];
+                        $aryFreeErrMsgBody = $retArray[7];
+
+                        //エラー判定チェック
+                        if($intErrorType === 101){
+                            //symphonyが存在しない（廃止扱い）
+                            $getFailedSymphonyInfo = true;
+                            $regStatusId = STATUS_CONDUCTOR_DISCARD; //ステータス：symphony廃止
+                        }elseif($intErrorType === 102){
+                            //operationが存在しない（廃止扱い）
+                            $getFailedOperationInfo = true;
+                            $regStatusId = STATUS_OPERATION_DISCARD; //ステータス：operation廃止
+                        }else{
+                            $registerFailedSymphonyInstance = true;
+                        }
+
+                        //ログを出力
+                        if($regCurrentStatusId != STATUS_LINKING_ERROR){
+                            foreach($aryErrMsgBody as $msg){
+                                $FREE_LOG = $msg;
+                                require ($root_dir_path . $log_output_php );
+                            }
+                            foreach($aryFreeErrMsgBody as $msg){
+                                $FREE_LOG = $msg;
+                                require ($root_dir_path . $log_output_php );
+                            }
+                            if( 0 < strlen($strSysErrMsgBody)){
+                                $FREE_LOG = $strSysErrMsgBody;
+                                require ($root_dir_path . $log_output_php );  
+                            }
+
+                            $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160003", array($regularlyId)); //[処理]symphonyINSTANCEの登録に失敗しました(定期実行ID:{})。
                             require ($root_dir_path . $log_output_php );
                         }
-                        foreach($aryFreeErrMsgBody as $msg){
-                            $FREE_LOG = $msg;
-                            require ($root_dir_path . $log_output_php );
-                        }
-                        if( 0 < strlen($strSysErrMsgBody)){
-                            $FREE_LOG = $strSysErrMsgBody;
-                            require ($root_dir_path . $log_output_php );  
-                        }
-
-                        $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160003", array($regularlyId)); //[処理]symphonyINSTANCEの登録に失敗しました(定期実行ID:{})。
-                        require ($root_dir_path . $log_output_php );
                     }
                 }
-
             }else{
                 $passedNextExecutionDate = true;
             }
