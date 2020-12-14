@@ -793,6 +793,7 @@ class OrchestratorLinkAgent {
                 "OPERATION_NAME"=>"",
                 "OPERATION_DATE"=>"DATEDATE",
                 "OPERATION_NO_IDBH"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -808,6 +809,7 @@ class OrchestratorLinkAgent {
                 "OPERATION_NAME"=>"",
                 "OPERATION_DATE"=>"",
                 "OPERATION_NO_IDBH"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -6867,6 +6869,107 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
         return $retArray;
     }
 //ロール一覧を取得する----
+
+
+//---作業実行（Conductor/Symphony、Operation)時のアクセス件設定
+    function getInfoAccessAuthWorkFlowOpe($fxVarsIntClassId, $fxVarsIntOperationNo , $mode="C" ){
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strConAccesAuth = array();
+        $strOpeAccesAuth = array();
+        $strFxName = '([FUNCTION]'.__FUNCTION__.')';
+        $strSysErrMsgBody = "";
+        $strExeAccesAuth = "";
+
+        try{
+            $objDBCA = $this->getDBConnectAgent();
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            $objMTS = $this->getMessageTemplateStorage();
+
+            //Symphony
+            ###if( $mode == "S" ) $aryRetBody = $this->getInfoOfOneSymphony($fxVarsIntClassId);
+            //Conductor
+            if( $mode == "C" ) $aryRetBody = $this->getInfoOfOneConductor($fxVarsIntClassId,0,1);
+
+            if( $aryRetBody[1] !== null ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrMsg = $aryRetBody[4];
+                $strErrStepIdInFx="00000100";
+                if( $aryRetBody[1] === 101 ){
+                    //----１行も発見できなかった場合
+                    $intErrorType = 101;
+                    //１行も発見できなかった場合----
+                }
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $strClassAccesAuth = $aryRetBody[4]['ACCESS_AUTH'];
+
+            $aryRetBody = $this->getInfoOfOneOperation($fxVarsIntOperationNo);
+
+            if( $aryRetBody[1] !== null ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrMsg = $aryRetBody[4];
+                $strErrStepIdInFx="00000100";
+                if( $aryRetBody[1] === 101 ){
+                    //----１行も発見できなかった場合
+                    $intErrorType = 101;
+                    //１行も発見できなかった場合----
+                }
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $strOpeAccesAuth = $aryRetBody[4]['ACCESS_AUTH'];
+
+            //作業実行時のアクセス権
+
+            if( $strClassAccesAuth == "" && $strOpeAccesAuth == "" ){
+                //Conductor/Symphony、Operatuonのアクセス権全公開時
+                $strExeAccesAuth = "";
+            }elseif( $strClassAccesAuth == "" && $strOpeAccesAuth != "" ){
+                //Operationのみアクセス権設定あり
+                $strExeAccesAuth = $strOpeAccesAuth;
+
+            }elseif( $strClassAccesAuth != "" && $strOpeAccesAuth == "" ){
+                //Conductor/Symphonyのみアクセス権設定あり
+                $strExeAccesAuth = $strClassAccesAuth;
+            }else{
+                //Conductor/Symphony、Operatuonのアクセス権設定あり
+                $arrClassAccesAuth = explode(",", $strClassAccesAuth);
+                $arrOpeAccesAuth = explode(",", $strOpeAccesAuth);
+                //共通のアクセス権抽出
+                $strExeAccesAuth = implode(",", array_intersect( $arrClassAccesAuth, $arrOpeAccesAuth ) );
+
+                //共通のアクセス権無しの場合、作業実行不可
+                if( $strExeAccesAuth == "" ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    ###if( $mode == "S" )$workflowName = "Symphony";
+                    if( $mode == "C" )$workflowName = "Conductor";
+                    ###$strErrMsg = "選択した${workflowName}、Operation で設定されているアクセス権では作業実行できません。";
+                    $strErrMsg = $objMTS->getSomeMessage("ITABASEH-ERR-170019",array($workflowName));
+                    $strErrStepIdInFx="00000100";
+                    $intErrorType = 101;
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+            }
+
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType === null ) $intErrorType = 500;
+            $tmpErrMsgBody = $e->getMessage();
+            if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        }
+
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strExeAccesAuth);
+
+        return $retArray;
+    }
+//作業実行（Conductor/Symphony、Operation)時のアクセス件設定----
+
 
 
 //ここまでConductor用----
