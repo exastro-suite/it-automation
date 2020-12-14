@@ -14,8 +14,8 @@
 //   limitations under the License.
 //
 ////en_US_UTF-8_ITACREPAR_MNU
-$ary[102001] = "Maintenance (view/register/update/discard) can be performed on the menu name of the parameter sheet menu or data sheet menu to be created.<br>
-You cannot use \"Main menu\" as the menu name.";
+$ary[102001] = "Maintain Parameter sheets/Data sheets(Refer to/Update/Abolish/Restore).<br>
+The name \"Main Menu\" is unavailable.";
 $ary[102002] = "Id";
 $ary[102003] = "Menu definition information";
 $ary[102004] = "Menu definition information";
