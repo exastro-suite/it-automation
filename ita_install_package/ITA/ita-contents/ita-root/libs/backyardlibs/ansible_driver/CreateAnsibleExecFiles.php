@@ -1418,6 +1418,15 @@ class CreateAnsibleExecFiles {
 
         $this->lv_hostinfolist = $ina_hostinfolist;
 
+        //////////////////////////////////////////////
+        // 収集機能用ディレクトリ生成/ホスト変数生成
+        //////////////////////////////////////////////
+        $ret = $this->CreateDirectoryForCollectionProcess($ina_hostinfolist,$ina_host_vars);
+        if($ret === false) {
+            return false;
+        }
+
+
         // 作業パターンに紐づいているグローバル変数を退避
         switch($this->getAnsibleDriverID()){
         case DF_LEGACY_ROLE_DRIVER_ID:
@@ -12072,6 +12081,93 @@ if(isset($Expansion_root)) {
     function getAnsible_vault_host_var_file($in_hostname){
         $file = sprintf(self::LC_ANS_VAULT_HOST_VAR_FILE_MK,$this->getAnsible_vault_hosts_vars_Dir(),$in_hostname);
         return($file);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   収集機能用ディレクトリ生成
+    // パラメータ
+    //   $ina_hostinfolist:  機器一覧ホスト情報配列
+    //   $ina_host_vars:     ホスト変数定義配列
+    //
+    // 戻り値
+    //   true:  正常
+    //   false: 異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreateDirectoryForCollectionProcess($ina_hostinfolist,&$ina_host_vars) {
+        $drive_list[DF_LEGACY_DRIVER_ID]      = 'legacy/ns';
+        $drive_list[DF_PIONEER_DRIVER_ID]     = 'pioneer/ns';
+        $drive_list[DF_LEGACY_ROLE_DRIVER_ID] = 'legacy/rl';
+
+        // ドライバ種別
+        $driver_id      = $this->getAnsibleDriverID();
+        // 作業番号
+        $execute_no     = sprintf("%010s",$this->lv_exec_no);
+        // データリレイストレージパス(ITA)
+        $ita_base_dir   = $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA');
+        // データリレイストレージパス(ansible)
+        $ans_base_dir   = $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS');
+
+        foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
+            $hostname = $hostinfo['HOSTNAME'];
+
+            $host_var_name  = "parameters_dir_for_epc"; 
+            $mkdir          = sprintf("%s/%s/%s/in/_parameters/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
+            $host_var_vaule = sprintf("%s/%s/%s/in/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            // ディレクトリ存在確認
+            if( ! is_dir($mkdir)) {
+                $ret = mkdir($mkdir,0755,true);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+
+            $host_var_name  = "parameter_dir"; 
+            $mkdir          = sprintf("%s/%s/%s/out/_parameters/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
+            $host_var_vaule = sprintf("%s/%s/%s/out/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            // ディレクトリ存在確認
+            if( ! is_dir($mkdir)) {
+                $ret = mkdir($mkdir,0755,true);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+
+            $host_var_name  = "parameters_file_dir_for_epc"; 
+            $mkdir          = sprintf("%s/%s/%s/in/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
+            $host_var_vaule = sprintf("%s/%s/%s/in/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            // ディレクトリ存在確認
+            if( ! is_dir($mkdir)) {
+                $ret = mkdir($mkdir,0755,true);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+
+            $host_var_name  = "parameters_file_dir"; 
+            $mkdir          = sprintf("%s/%s/%s/out/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
+            $host_var_vaule = sprintf("%s/%s/%s/out/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            // ディレクトリ存在確認
+            if( ! is_dir($mkdir)) {
+                $ret = mkdir($mkdir,0755,true);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+        }
+        return true;
     }
 }
 
