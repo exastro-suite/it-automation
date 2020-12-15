@@ -221,11 +221,9 @@ RELEASE_PLASE=(
     ita_base
     ita_ansible-driver
     ita_cobbler-driver
-    ita_openstack-driver
     ita_terraform-driver
     ita_material
     ita_material2
-    ita_material3
     ita_material4
     ita_createparam
     ita_hostgroup
@@ -744,7 +742,6 @@ fi
 
 #リリースファイルを変更する
 for VAL in ${RELEASE_PLASE[@]}; do
-
     DRIVER=`echo ${VAL} | cut -d "_" -f 2 | sed 's/^ \(.*\) $/\1/'`
     FLG=`echo ${DRIVER^^} | cut -d "-" -f 1 | sed 's/^ \(.*\) $/\1/'`_FLG
     if [ ${!FLG} -eq 1 ] ; then
