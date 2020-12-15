@@ -118,10 +118,6 @@ func_install_messasge() {
         MESSAGE="Cobbler driver"
     fi
 
-    if [ OPENSTACK_FLG = ${1} ]; then
-        MESSAGE="OpenStack driver"
-    fi
-
     if [ TERRAFORM_FLG = ${1} ]; then
         MESSAGE="Terraform driver"
     fi
@@ -132,10 +128,6 @@ func_install_messasge() {
     
     if [ MATERIAL2_FLG = ${1} ]; then
         MESSAGE="Material2"
-    fi
-    
-    if [ MATERIAL3_FLG = ${1} ]; then
-        MESSAGE="Material3"
     fi
     
     if [ MATERIAL4_FLG = ${1} ]; then
@@ -185,11 +177,9 @@ setting_file_format_check() {
 BASE_FLG=0
 ANSIBLE_FLG=0
 COBBLER_FLG=0
-OPENSTACK_FLG=0
 TERRAFORM_FLG=0
 MATERIAL_FLG=0
 MATERIAL2_FLG=0
-MATERIAL3_FLG=0
 MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
@@ -202,11 +192,9 @@ INSTALLED_FLG_LIST=(
     BASE_FLG
     ANSIBLE_FLG
     COBBLER_FLG
-    OPENSTACK_FLG
     TERRAFORM_FLG
     MATERIAL_FLG
     MATERIAL2_FLG
-    MATERIAL3_FLG
     MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
@@ -454,9 +442,6 @@ fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_cobbler-driver" ; then
     COBBLER_FLG=1
 fi
-if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_openstack-driver" ; then
-    OPENSTACK_FLG=1
-fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_terraform-driver" ; then
     TERRAFORM_FLG=1
 fi
@@ -465,9 +450,6 @@ if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material" ; then
 fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material2" ; then
     MATERIAL2_FLG=1
-fi
-if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material3" ; then
-    MATERIAL3_FLG=1
 fi
 if [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material" ] && [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_terraform-driver" ] ; then
     MATERIAL4_FLG=1
