@@ -503,7 +503,7 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setOutputType('register_table',$objOTForReg);
 
 
-        $c->setJournalTableOfMaster('D_CMDB_MENU_COLUMN_SHEET_TYPE_1 _JNL');
+        $c->setJournalTableOfMaster('D_CMDB_MENU_COLUMN_SHEET_TYPE_1_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
