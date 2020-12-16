@@ -604,6 +604,11 @@ border-top: none;border-radius: 0 0 4px 4px;
 }
 /* ------- Terraform */
 
+/* unknown ------- */
+.unknowngray {
+  background: #808080;
+}
+/* ------- unknown */
 
 .ttc_red {
     color: #FF0070;
