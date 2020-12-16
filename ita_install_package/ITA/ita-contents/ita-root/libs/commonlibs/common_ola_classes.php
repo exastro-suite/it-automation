@@ -1427,6 +1427,145 @@ class OrchestratorLinkAgent {
             $aryRowOfMovClassTable = $aryRetBody[5];
             // シンフォニークラスIDからシンフォニー部分、ムーブメント部分の情報を取得する----
 
+            // ----ムーブメントから、廃止されているレコードを除外する
+            $aryMovement = array();
+            foreach($aryRowOfMovClassTable as $aryDataForMovement){
+                if( $aryDataForMovement['DISUSE_FLAG']=='0' ){
+                    $aryMovement[] = $aryDataForMovement;
+                }
+            }
+            // ムーブメントから、廃止されているレコードを除外する----
+
+            // ----SymphonyとOperationと紐づくMovementに対してのアクセス権をチェックする
+            $objRBAC = new RoleBasedAccessControl($objDBCA);
+
+            //Symphonyのアクセス権をチェックする
+            $symphonyClassNo = $aryRowOfSymClassTable['SYMPHONY_CLASS_NO'];
+            $sql =  " SELECT * FROM C_SYMPHONY_CLASS_MNG "
+                   ." WHERE SYMPHONY_CLASS_NO = $symphonyClassNo ";
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            $r = $objQuery->sqlExecute();
+            $targetRow = $objQuery->resultFetch();
+            if($targetRow == false){
+                //例外処理へ
+                $strErrStepIdInFx="00000600";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+
+            $ret  = $objRBAC->getAccountInfo($userId); 
+            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+            if($ret === false) {
+                //例外処理へ
+                $strErrStepIdInFx="00000610";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            } else {
+                if($permission === false) {
+                    $intErrorType = 103; //システムエラー判定
+                    $strErrStepIdInFx="00000620";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+            }
+
+            //Operationのアクセス権をチェック
+            $sql =  " SELECT * FROM C_OPERATION_LIST "
+                   ." WHERE OPERATION_NO_UAPK = $intOperationNoUAPK ";
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            $r = $objQuery->sqlExecute();
+            $targetRow = $objQuery->resultFetch();
+            if($targetRow == false){
+                //例外処理へ
+                $strErrStepIdInFx="00000600";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+
+            $ret  = $objRBAC->getAccountInfo($userId); 
+            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+            if($ret === false) {
+                //例外処理へ
+                $strErrStepIdInFx="00000610";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            } else {
+                if($permission === false) {
+                    $intErrorType = 103; //システムエラー判定
+                    $strErrStepIdInFx="00000620";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+            }
+
+            //Movementのアクセス権をチェックする
+            if(!empty($aryMovement)){
+                $intFocusIndex = 0;
+                foreach($aryMovement as $movementData){
+                    $patternId = $movementData['PATTERN_ID'];
+
+                    //対象MovementをSELECT
+                    $sql =  " SELECT * FROM C_PATTERN_PER_ORCH "
+                           ." WHERE PATTERN_ID = $patternId ";
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                    $targetRow = $objQuery->resultFetch();
+                    if($targetRow == false){
+                        //例外処理へ
+                        $strErrStepIdInFx="00000600";
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+
+                    $ret  = $objRBAC->getAccountInfo($userId); 
+                    list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                    if($ret === false) {
+                        //例外処理へ
+                        $strErrStepIdInFx="00000630";
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    } else {
+                        if($permission === false) {
+                            $intErrorType = 2; //Movementの存在エラー判定
+                            $strErrStepIdInFx="00000640";
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-1990037",array($intFocusIndex + 1));
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+                    }
+                    $intFocusIndex += 1;
+                }
+            }
+
+            //Movementに個別指定したオペレーションのアクセス権をチェックする
+            if(is_array($aryOptionOrder) == true){
+                $intFocusIndex = 0;
+                foreach($aryOptionOrder as $operationOrderData){
+                    $skipFlag = $operationOrderData['EXE_SKIP_FLAG'];
+                    $operationNo = $operationOrderData['OVRD_OPERATION_NO_IDBH'];
+                    if($skipFlag == "" && $operationNo != ""){
+                        $sql =  " SELECT * FROM C_OPERATION_LIST "
+                               ." WHERE OPERATION_NO_UAPK = $operationNo ";
+                        $objQuery = $objDBCA->sqlPrepare($sql);
+                        $r = $objQuery->sqlExecute();
+                        $targetRow = $objQuery->resultFetch();
+                        if($targetRow == false){
+                            //例外処理へ
+                            $strErrStepIdInFx="00000600";
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+
+                        $ret  = $objRBAC->getAccountInfo($userId); 
+                        list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                        if($ret === false) {
+                            //例外処理へ
+                            $strErrStepIdInFx="00000650";
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        } else {
+                            if($permission === false) {
+                                $intErrorType = 2; //バリデーションエラー判定
+                                $strErrStepIdInFx="00000660";
+                                $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733110",array($intFocusIndex + 1));
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                            }
+                        }
+                    }
+                    $intFocusIndex += 1;
+                }
+            }
+            // SymphonyとOperationと紐づくMovementに対してのアクセス権をチェックする----
+
             // ----オペレーションNoからオペレーションの情報を取得する
             $arrayRetBody = $this->getInfoOfOneOperation($intOperationNoUAPK);
             if( $arrayRetBody[1] !== null ){
@@ -1556,15 +1695,6 @@ class OrchestratorLinkAgent {
             /////////////////////////////////////
             // (ここから) ムーブメントインスタンスを登録する//
             /////////////////////////////////////
-            // ----ムーブメントから、廃止されているレコードを除外する
-            $aryMovement = array();
-            foreach($aryRowOfMovClassTable as $aryDataForMovement){
-                if( $aryDataForMovement['DISUSE_FLAG']=='0' ){
-                    $aryMovement[] = $aryDataForMovement;
-                }
-            }
-            // ムーブメントから、廃止されているレコードを除外する----
-
             //----$aryOptionOrderOverrideがnullでない場合、各値をセットする
             //（RESTおよびbackyard処理で登録する場合を想定。）
             if( is_array($aryOptionOrderOverride) === true ){
@@ -2480,7 +2610,6 @@ class OrchestratorLinkAgent {
             }
             $boolInTransactionFlag = true;
             // トランザクション開始----
-
 
             ////////////////////////////////////////////////////////
             // (ここから) ConductorとNodeのCUR/JNLの、シーケンスを取得する//
@@ -4399,7 +4528,13 @@ class OrchestratorLinkAgent {
                         $strConductorName = "";
                         $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
                     }else{
-                        $strConductorName = $aryRetBody[4]['CONDUCTOR_NAME'];    
+                        if($aryRetBody[4]['DISUSE_FLAG'] == 1){
+                            //廃止済みの場合
+                            $strConductorName = "";
+                            $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
+                        }else{
+                            $strConductorName = $aryRetBody[4]['CONDUCTOR_NAME'];
+                        }
                     }
                 }
                 $arr_json[$value['NODE_NAME']]['CONDUCTOR_NAME']=$strConductorName;
@@ -6970,7 +7105,557 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
     }
 //作業実行（Conductor/Symphony、Operation)時のアクセス件設定----
 
+//---- 作業実行時、対象の実行コンダクタIDに紐づくすべてのcallコンダクタ/callシンフォニー/Movementについてのアクセス権をチェックする
+    function checkConductorNodeAccessAuth($fxVarsIntClassId, $fxVarsIntExecuteUserId, $fxVarsaryOptionOrderOverride = array()){
+        $objDBCA = $this->getDBConnectAgent();
+        $objMTS = $this->getMessageTemplateStorage();
+        $objRBAC = new RoleBasedAccessControl($objDBCA);
+        $ret  = $objRBAC->getAccountInfo($fxVarsIntExecuteUserId);
 
+        $strFxName = '([FUNCTION]'.__FUNCTION__.')';
+        $boolRet = false;
+        $intErrorType = null;
+        $strExpectedErrMsgBodyForUI = "";
+        $strSysErrMsgBody = "";
+        $tmpErrMsgBody = "";
+
+        $parentConductorID = $fxVarsIntClassId; //チェック対象コンダクタID（親コンダクタ）
+        $aryTmpConductorList = array(); //親コンダクタから始まる末端のcallされたコンダクタをチェックするための配列
+        $aryCheckConductorList = array(); //すべての対象のコンダクタIDのみを格納するための配列
+        $aryCallConductorList = array(); //親コンダクタおよびcallされたコンダクタのノードを格納するための配列
+        $aryCallSymphonyList = array(); //callされたシンフォニーのノードを格納するための配列
+        $aryMovementList = array(); //単体実行Movementのノードを格納するための配列
+        array_push($aryTmpConductorList, $parentConductorID);
+        array_push($aryCheckConductorList, $parentConductorID);
+
+        try{
+            //親コンダクタから付随するすべての末端のcallコンダクタ/callシンフォニー/Movementノードを取得する
+            while(!empty($aryTmpConductorList)){
+                foreach($aryTmpConductorList as $key => $conductorID){
+                    $conductorNodeList = array();
+                    $getmode = 1;
+                    $retArray = $this->getInfoFromOneOfConductorClass($conductorID, 0,0,0,$getmode);
+                    $conductorNodeList = $retArray[5];
+                    foreach($conductorNodeList as $node){
+                        $callConductorNo = $node['CONDUCTOR_CALL_CLASS_NO'];
+                        $nodeType = $node['NODE_TYPE_ID'];
+                        //CONDUCTOR_CALL_CLASS_NOが存在し、NODE_TYPE_IDが4(call)のものについて、CONDUCTOR_CALL_CLASS_NOを格納する
+                        if(isset($callConductorNo) && $nodeType == 4){
+
+                            $sql = "SELECT *
+                                    FROM C_CONDUCTOR_EDIT_CLASS_MNG
+                                    WHERE CONDUCTOR_CLASS_NO = {$callConductorNo}";
+
+                            //SQL準備
+                            $objQuery = $objDBCA->sqlPrepare($sql);
+                            //SQL発行
+                            $r = $objQuery->sqlExecute();
+                            //廃止フラグOFFの全レコード処理(FETCH)
+                            $disuseFlag = false;
+                            while ( $row = $objQuery->resultFetch() ){
+                                if($row['DISUSE_FLAG'] == 1){
+                                    $disuseFlag = true;
+                                }
+                            }
+
+                            //廃止コンダクタはループ対象に含めない
+                            if($disuseFlag == false){
+                                //callコンダクタの中をチェックするため、$aryTmpConductorListに格納
+                                array_push($aryTmpConductorList, $callConductorNo);
+                                //対象のコンダクタ一覧として、aryCheckConductorListに格納
+                                array_push($aryCheckConductorList, $callConductorNo);
+                            }
+
+                            //CONDUCTOR_CALL_CLASS_NOが存在し、NODE_TYPE_IDが4(call)のものについて、$callConductorNoをkeyとした配列にノード情報を格納する
+                            if(empty($aryCallConductorList[$conductorID])){
+                                $aryCallConductorList[$conductorID] = array();
+                            }
+                            array_push($aryCallConductorList[$conductorID], $node);
+                        }
+
+                        //CONDUCTOR_CALL_CLASS_NOが存在し、NODE_TYPE_IDが10(call_s)のものについて、$conductorIDをkeyとした配列にノード情報を格納する
+                        if(isset($callConductorNo) && $nodeType == 10){
+                            if(empty($aryCallSymphonyList[$conductorID])){
+                                $aryCallSymphonyList[$conductorID] = array();
+                            }
+                            array_push($aryCallSymphonyList[$conductorID], $node);
+                        }
+
+                        //NODE_TYPE_IDが3(Movement)のものについて、$conductorIDをkeyとした配列にノード情報を格納する
+                        if($nodeType == 3){
+                            if(empty($aryMovementList[$conductorID])){
+                                $aryMovementList[$conductorID] = array();
+                            }
+                            array_push($aryMovementList[$conductorID], $node);
+                        }
+                    }
+
+                    //自分自身を$aryTmpConductorListから外す
+                    unset($aryTmpConductorList[$key]);
+
+                    //$aryCheckConductorListに同じIDがある場合、コンダクタがループするためエラー判定
+                    $conductorIdCount = array_count_values($aryCheckConductorList);
+                    $max = max($conductorIdCount);
+                    if($max != 1){
+                        //コンダクタループが発生する
+                        $intErrorType = 2; //バリデーションエラー
+                        $strErrStepIdInFx="00000200";
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170028"); //ConductorCall - 無限ループが発生する為、実行できません。
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+
+                }
+            }
+
+            //対象のコンダクタ一覧をループしそれぞれのノードについてのアクセス権をチェックする
+            foreach($aryCheckConductorList as $conductorID){
+                //callコンダクタチェック
+                if(!empty($aryCallConductorList[$conductorID])){
+                    $aryConductorNodeList = $aryCallConductorList[$conductorID];
+                    foreach($aryConductorNodeList as $node){
+                        $operationId = $node['OPERATION_NO_IDBH'];
+                        $callConductorID = $node['CONDUCTOR_CALL_CLASS_NO'];
+
+                        //$fxVarsaryOptionOrderOverrideがある場合かつ対象が親コンダクタIDの場合、作業実行ページからオペレーションの付け替えを考慮する
+                        if(!empty($fxVarsaryOptionOrderOverride) && $conductorID == $parentConductorID){
+                            $nodeName = $node['NODE_NAME'];
+                            $overrideOperationId = $fxVarsaryOptionOrderOverride[$nodeName]['OPERATION_NO_IDBH'];
+                            if(isset($overrideOperationId)){
+                                $operationId = $overrideOperationId;
+                            }
+                        }
+
+                        //callコンダクタのアクセス権をチェック
+                        $sql = "SELECT *
+                                FROM C_CONDUCTOR_EDIT_CLASS_MNG
+                                WHERE CONDUCTOR_CLASS_NO = {$callConductorID} 
+                                AND DISUSE_FLAG = 0";
+
+                        //SQL準備
+                        $objQuery = $objDBCA->sqlPrepare($sql);
+                        //SQL発行
+                        $r = $objQuery->sqlExecute();
+                        //廃止フラグOFFの全レコード処理(FETCH)
+                        $targetRow = "";
+                        while ( $row = $objQuery->resultFetch() ){
+                            $targetRow = $row;
+                        }
+
+                        //対象レコードが無い場合はcontinue
+                        if($targetRow == ""){
+                            continue;
+                        }
+
+                        //アクセス権チェック
+                        list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                        if($ret === false) {
+                            // 例外処理へ
+                            $strErrStepIdInFx="00000100";
+                            $intErrorType = 1; //システムエラー
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        } else {
+                            if($permission !== true) {
+                                //アクセス権限を持っていない場合
+                                $intErrorType = 2; //バリデーションエラー
+                                $strErrStepIdInFx="00000200";
+                                $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170029",array($conductorID)); //ConductorCall - 指定できないConductorクラスIDが含まれています。（Conductor:{}）
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                            }
+                        }
+
+                        //callコンダクタに指定されたオペレーションのアクセス権をチェック
+                        if($operationId != ""){
+                            $sql = "SELECT *
+                                    FROM C_OPERATION_LIST
+                                    WHERE OPERATION_NO_UAPK = {$operationId} 
+                                    AND DISUSE_FLAG = 0";
+
+                            //SQL準備
+                            $objQuery = $objDBCA->sqlPrepare($sql);
+                            //SQL発行
+                            $r = $objQuery->sqlExecute();
+                            //廃止フラグOFFの全レコード処理(FETCH)
+                            $targetRow = "";
+                            while ( $row = $objQuery->resultFetch() ){
+                                $targetRow = $row;
+                            }
+
+                            //対象レコードが無い場合はcontinue
+                            if($targetRow == ""){
+                                continue;
+                            }
+
+                            //アクセス権チェック
+                            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                            if($ret === false) {
+                                // 例外処理へ
+                                $strErrStepIdInFx="00000100";
+                                $intErrorType = 1; //システムエラー
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                            } else {
+                                if($permission !== true) {
+                                    //アクセス権限を持っていない場合
+                                    $intErrorType = 2; //バリデーションエラー
+                                    $strErrStepIdInFx="00000200";
+                                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170030",array($conductorID)); //ConductorCall - 指定できないオペレーションIDが含まれています。(Conductor:{})
+                                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                                }
+                            }
+                        }
+                    } 
+                }
+
+                //callシンフォニーチェック
+                if(!empty($aryCallSymphonyList[$conductorID])){
+                    $arySymphonyNodeList = $aryCallSymphonyList[$conductorID];
+                    foreach($arySymphonyNodeList as $node){
+                        $callSymphonyID = $node['CONDUCTOR_CALL_CLASS_NO'];
+                        $operationId = $node['OPERATION_NO_IDBH'];
+
+                        //$fxVarsaryOptionOrderOverrideがある場合かつ対象が親コンダクタIDの場合、作業実行ページからオペレーションの付け替えを考慮する
+                        if(!empty($fxVarsaryOptionOrderOverride) && $conductorID == $parentConductorID){
+                            $nodeName = $node['NODE_NAME'];
+                            $overrideOperationId = $fxVarsaryOptionOrderOverride[$nodeName]['OPERATION_NO_IDBH'];
+                            if(isset($overrideOperationId)){
+                                $operationId = $overrideOperationId;
+                            }
+                        }
+
+                        //callシンフォニーおよびシンフォニー内で実行するMovementのアクセス権をチェック
+                        $ret = $this->checkSymphonyAccessAuth($callSymphonyID, $fxVarsIntExecuteUserId, $conductorID);
+                        if($ret[0] == false){  
+                            $strErrStepIdInFx="00000300";
+                            $intErrorType = $ret[1];
+                            $strExpectedErrMsgBodyForUI = $ret[3];
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+
+                        //callシンフォニーに指定されたオペレーションのアクセス権をチェック
+                        if($operationId != ""){
+                            $sql = "SELECT *
+                                    FROM C_OPERATION_LIST
+                                    WHERE OPERATION_NO_UAPK = {$operationId} 
+                                    AND DISUSE_FLAG = 0";
+
+                            //SQL準備
+                            $objQuery = $objDBCA->sqlPrepare($sql);
+                            //SQL発行
+                            $r = $objQuery->sqlExecute();
+                            //廃止フラグOFFの全レコード処理(FETCH)
+                            $targetRow = "";
+                            while ( $row = $objQuery->resultFetch() ){
+                                $targetRow = $row;
+                            }
+
+                            //対象レコードが無い場合はcontinue
+                            if($targetRow == ""){
+                                continue;
+                            }
+
+                            //アクセス権チェック
+                            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                            if($ret === false) {
+                                // 例外処理へ
+                                $strErrStepIdInFx="00000100";
+                                $intErrorType = 1; //システムエラー
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                            } else {
+                                if($permission !== true) {
+                                    //アクセス権限を持っていない場合
+                                    $intErrorType = 2; //バリデーションエラー
+                                    $strErrStepIdInFx="00000200";
+                                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170031",array($conductorID)); //SymphonyCall - 指定できないオペレーションIDが含まれています。(Conductor:{})
+                                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                                }
+                            }
+                        }
+                    } 
+                }
+
+                //単発Movementチェック
+                if(!empty($aryMovementList[$conductorID])){
+                    $aryMovementNodeList = $aryMovementList[$conductorID];
+                    foreach($aryMovementNodeList as $node){
+                        $operationId = $node['OPERATION_NO_IDBH'];
+                        $patternId = $node['PATTERN_ID'];
+
+                        //$fxVarsaryOptionOrderOverrideがある場合かつ対象が親コンダクタIDの場合、作業実行ページからオペレーションの付け替えを考慮する
+                        if(!empty($fxVarsaryOptionOrderOverride) && $conductorID == $parentConductorID){
+                            $nodeName = $node['NODE_NAME'];
+                            $overrideOperationId = $fxVarsaryOptionOrderOverride[$nodeName]['OPERATION_NO_IDBH'];
+                            if(isset($overrideOperationId)){
+                                $operationId = $overrideOperationId;
+                            }
+                        }
+
+                        //Movementのアクセス権をチェック
+                        $sql = "SELECT *
+                                FROM C_PATTERN_PER_ORCH
+                                WHERE PATTERN_ID = {$patternId} 
+                                AND DISUSE_FLAG = 0";
+
+                        //SQL準備
+                        $objQuery = $objDBCA->sqlPrepare($sql);
+                        //SQL発行
+                        $r = $objQuery->sqlExecute();
+                        //廃止フラグOFFの全レコード処理(FETCH)
+                        $targetRow = "";
+                        while ( $row = $objQuery->resultFetch() ){
+                            $targetRow = $row;
+                        }
+
+                        //対象レコードが無い場合はcontinue
+                        if($targetRow == ""){
+                            continue;
+                        }
+
+                        //アクセス権チェック
+                        list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                        if($ret === false) {
+                            // 例外処理へ
+                            $strErrStepIdInFx="00000300";
+                            $intErrorType = 1; //システムエラー
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        } else {
+                            if($permission !== true) {
+                                //アクセス権限を持っていない場合
+                                $intErrorType = 2; //バリデーションエラー
+                                $strErrStepIdInFx="00000400";
+                                $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170032",array($conductorID)); //Movement - 指定できないMovementが含まれています。(Conductor:{})
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                            }
+                        }
+
+                        //Movementに指定されたオペレーションのアクセス権をチェック
+                        if($operationId != ""){
+                            $sql = "SELECT *
+                                    FROM C_OPERATION_LIST
+                                    WHERE OPERATION_NO_UAPK = {$operationId} 
+                                    AND DISUSE_FLAG = 0";
+
+                            //SQL準備
+                            $objQuery = $objDBCA->sqlPrepare($sql);
+                            //SQL発行
+                            $r = $objQuery->sqlExecute();
+                            //廃止フラグOFFの全レコード処理(FETCH)
+                            $targetRow = "";
+                            while ( $row = $objQuery->resultFetch() ){
+                                $targetRow = $row;
+                            }
+
+                            //対象レコードが無い場合はcontinue
+                            if($targetRow == ""){
+                                continue;
+                            }
+
+                            //アクセス権チェック
+                            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                            if($ret === false) {
+                                // 例外処理へ
+                                $strErrStepIdInFx="00000100";
+                                $intErrorType = 1; //システムエラー
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                            } else {
+                                if($permission !== true) {
+                                    //アクセス権限を持っていない場合
+                                    $intErrorType = 2; //バリデーションエラー
+                                    $strErrStepIdInFx="00000200";
+                                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170033",array($conductorID)); //Movement - 指定できないオペレーションIDが含まれています。(Conductor:{})
+                                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                                }
+                            }
+                        }
+                    } 
+                }
+            }
+
+            $boolRet = true;
+
+        }catch(Exception $e){
+            if( $intErrorType === null ) $intErrorType = 500;
+            $tmpErrMsgBody = $e->getMessage();
+            if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        }
+
+        $retArray = array($boolRet, $intErrorType, $tmpErrMsgBody, $strExpectedErrMsgBodyForUI);
+
+        return $retArray;
+    }
+//作業実行時、対象の実行コンダクタIDに紐づくすべてのcallコンダクタ/callシンフォニー/Movementについてのアクセス権をチェックする ----
+
+//---- 作業実行時、対象の実行シンフォニーIDおよびシンフォニーに紐づくMovementについてのアクセス権をチェックする
+    function checkSymphonyAccessAuth($fxVarsIntClassId, $fxVarsIntExecuteUserId, $fxvarsIntConductorClassId){
+        $objDBCA = $this->getDBConnectAgent();
+        $objMTS = $this->getMessageTemplateStorage();
+        $objRBAC = new RoleBasedAccessControl($objDBCA);
+        $ret  = $objRBAC->getAccountInfo($fxVarsIntExecuteUserId);
+
+        $strFxName = '([FUNCTION]'.__FUNCTION__.')';
+        $boolRet = false;
+        $intErrorType = null;
+        $strExpectedErrMsgBodyForUI = "";
+        $strSysErrMsgBody = "";
+        $tmpErrMsgBody = "";
+
+        $parentSymphonyID = $fxVarsIntClassId; //チェック対象シンフォニーID
+        $conductorID = $fxvarsIntConductorClassId;
+
+        try{
+            //シンフォニーのアクセス権をチェック
+            $sql = "SELECT *
+                    FROM C_SYMPHONY_CLASS_MNG
+                    WHERE SYMPHONY_CLASS_NO = {$parentSymphonyID} 
+                    AND DISUSE_FLAG = 0";
+
+            //SQL準備
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            //SQL発行
+            $r = $objQuery->sqlExecute();
+            //廃止フラグOFFの全レコード処理(FETCH)
+            $targetRow = "";
+            while ( $row = $objQuery->resultFetch() ){
+                $targetRow = $row;
+            }
+
+            //対象レコードが無い場合はreturn
+            if($targetRow == ""){
+                $boolRet = true;
+                $intErrorType = 500;
+                $retArray = array($boolRet, $intErrorType, $tmpErrMsgBody, $strExpectedErrMsgBodyForUI);
+                return $retArray;
+            }
+
+            //アクセス権チェック
+            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+            if($ret === false) {
+                // 例外処理へ
+                $strErrStepIdInFx="00000100";
+                $intErrorType = 1; //システムエラー
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            } else {
+                if($permission !== true) {
+                    //アクセス権限を持っていない場合
+                    $intErrorType = 2;
+                    $strErrStepIdInFx="00000200";
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170034",array($conductorID)); //SymphonyCall - 指定できないSymphonyクラスIDが含まれています。(Conductor:{})
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+            }
+
+
+            //シンフォニーに紐づくMovementのアクセス権をチェック
+            $sql = "SELECT *
+                    FROM C_MOVEMENT_CLASS_MNG
+                    WHERE SYMPHONY_CLASS_NO = {$parentSymphonyID} 
+                    AND DISUSE_FLAG = 0";
+
+            //SQL準備
+            $objQuery = $objDBCA->sqlPrepare($sql);
+
+            //SQL発行
+            $r = $objQuery->sqlExecute();
+
+            //廃止フラグOFFの全レコード処理(FETCH)
+            $movClassMngRowList = array();
+            while ( $row = $objQuery->resultFetch() ){
+                array_push($movClassMngRowList, $row);
+            }
+
+            foreach($movClassMngRowList as $movClassMngRow){
+                //対象MovementのIDを取得
+                $patternId = $movClassMngRow['PATTERN_ID'];
+                //対象Movementに指定されたオペレーションIDのアクセス権をチェック
+                $operationId = $movClassMngRow['OPERATION_NO_IDBH'];
+                if($operationId != ""){
+                    $sql = "SELECT *
+                            FROM C_OPERATION_LIST
+                            WHERE OPERATION_NO_UAPK = {$operationId} 
+                            AND DISUSE_FLAG = 0";
+
+                    //SQL準備
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    //SQL発行
+                    $r = $objQuery->sqlExecute();
+                    //廃止フラグOFFの全レコード処理(FETCH)
+                    while ( $row = $objQuery->resultFetch() ){
+                        $targetRow = $row;
+                    }
+
+                    //対象レコードが無い場合はcontinue
+                    if($targetRow == ""){
+                        continue;
+                    }
+
+                    //アクセス権チェック
+                    list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                    if($ret === false) {
+                        // 例外処理へ
+                        $strErrStepIdInFx="00000100";
+                        $intErrorType = 1; //システムエラー
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    } else {
+                        if($permission !== true) {
+                            //アクセス権限を持っていない場合
+                            $intErrorType = 2;
+                            $strErrStepIdInFx="00000200";
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170035",array($conductorID, $parentSymphonyID)); //SymphonyCall - Movementに指定できないオペレーションがIDが含まれています。(Conductor:{} Symphony:{})
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+                    }
+                }
+
+                //対象Movementのアクセス権チェック
+                $sql = "SELECT *
+                        FROM C_PATTERN_PER_ORCH
+                        WHERE PATTERN_ID = {$patternId} 
+                        AND DISUSE_FLAG = 0";
+
+                //SQL準備
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                //SQL発行
+                $r = $objQuery->sqlExecute();
+                //廃止フラグOFFの全レコード処理(FETCH)
+                $targetRow = "";
+                while ( $row = $objQuery->resultFetch() ){
+                    $targetRow = $row;
+                }
+
+                //対象レコードが無い場合はcontinue
+                if($targetRow == ""){
+                    continue;
+                }
+
+                //アクセス権チェック
+                list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                if($ret === false) {
+                    // 例外処理へ
+                    $strErrStepIdInFx="00000300";
+                    $intErrorType = 1; //システムエラー
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                } else {
+                    if($permission !== true) {
+                        //アクセス権限を持っていない場合
+                        $intErrorType = 2;
+                        $strErrStepIdInFx="00000400";
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170036",array($conductorID, $parentSymphonyID)); //SymphonyCall - 指定できないMovementが含まれています。(Conductor:{} Symphony:{})
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                }
+            }
+
+            $boolRet = true;
+
+        }catch(Exception $e){
+            if( $intErrorType === null ) $intErrorType = 500;
+            $tmpErrMsgBody = $e->getMessage();
+            if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        }
+
+        $retArray = array($boolRet, $intErrorType, $tmpErrMsgBody, $strExpectedErrMsgBodyForUI);
+
+        return $retArray;
+    }
+//作業実行時、対象の実行シンフォニーIDおよびシンフォニーに紐づくMovementについてのアクセス権をチェックする ----
 
 //ここまでConductor用----
 

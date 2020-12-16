@@ -232,8 +232,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
 //Conductorのパラメータの整形----
 
 //----ある１のConductorの定義を新規登録（追加）する
-function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryReceptData, $fxVarsStrSortedData, $fxVarsStrLT4UBody,$getmode=""){
-
+function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryReceptData, $fxVarsStrSortedData, $fxVarsStrLT4UBody,$getmode="", $fxVarsaryOptionOrderOverride=array()){
 
     // グローバル変数宣言
     global $g;
@@ -412,6 +411,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
     try{
         require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
         $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA);
+        $objRBAC = new RoleBasedAccessControl($objDBCA);
 
         //----バリデーションチェック(入力形式)
         $objIntNumVali = new IntNumValidator(null,null,"",array("NOT_NULL"=>false));
@@ -643,17 +643,35 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                 $tmpStrOpeNoIDBH = $aryDataForMovement['OPERATION_NO_IDBH'];
                 $tmpStrPatternID = $aryDataForMovement['PATTERN_ID'];
                 $objIntNumVali = new IntNumValidator(null,null,"",array("NOT_NULL"=>true));
+
+                //movement/call/call_sにオペレーション個別指定がある場合は、個別に指定されたオペレーションのIDをチェック対象とする
+                if($aryDataForMovement['type'] == "movement" || $aryDataForMovement['type'] == "call" || $aryDataForMovement['type'] == "call_s"){
+                    $nodeId = $aryDataForMovement['id'];
+                    if(!empty($fxVarsaryOptionOrderOverride)){
+                        $overrideOperationId = $fxVarsaryOptionOrderOverride[$nodeId]['OPERATION_NO_IDBH'];
+                        if(isset($overrideOperationId)){
+                            $tmpStrOpeNoIDBH = $overrideOperationId;
+                        }
+                    }
+                }
+
                 if( $objIntNumVali->isValid($tmpStrOpeNoIDBH) === false ){
                     // エラーフラグをON
                     // 例外処理へ
                     $strErrStepIdInFx="00002600";
                     $intErrorType = 2;
-                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170004",array($tmpStrPatternID,$tmpStrOpeNoIDBH));
-                    //
+                    if($aryDataForMovement['type'] == "call"){
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170020",array($aryDataForMovement['CONDUCTOR_CLASS_NO'],$tmpStrOpeNoIDBH)); //ConductorCall - オペレーションIDの値が不正です。(Conductor:{} オペレーションID:{})
+                    }elseif($aryDataForMovement['type'] == "call_s"){
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170021",array($aryDataForMovement['CONDUCTOR_CLASS_NO'],$tmpStrOpeNoIDBH)); //ConductorCall - オペレーションIDの値が不正です。(Conductor:{} オペレーションID:{})
+                    }else{
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170004",array($tmpStrPatternID,$tmpStrOpeNoIDBH)); //"Movement - オペレーションIDの値が不正です。(MovementID:{} オペレーションID:{})";
+                    }
+
                     throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                 }
                 unset($objIntNumVali);
- 
+
                 $tmpAryRetBody = $objOLA->getInfoOfOneOperation($tmpStrOpeNoIDBH,1);
 
                 if( $tmpAryRetBody[1] !== null ){
@@ -663,12 +681,45 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                     //
                     if( $tmpAryRetBody[1] == 101 ){
                         $intErrorType = 2;
-                        //
-                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170005",array($tmpStrPatternID));
-                        //
+                        if($aryDataForMovement['type'] == "call"){
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170022",array($aryDataForMovement['CONDUCTOR_CLASS_NO'])); //ConductorCall - オペレーションIDが存在している必要があります。(Conductor:{})
+                        }elseif($aryDataForMovement['type'] == "call_s"){
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170023",array($aryDataForMovement['CONDUCTOR_CLASS_NO'])); //SymphonyCall - オペレーションIDが存在している必要があります。(Symphony:{})
+                        }else{
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170005",array($tmpStrPatternID)); //Movement - オペレーションIDが存在している必要があります。(Movement:{})
+                        }
+
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                     }
                 }
+                
+                //オペレーションのアクセス権チェック対応
+                $arrOpList = $tmpAryRetBody[4];
+                $user_id = $g['login_id'];
+                $ret  = $objRBAC->getAccountInfo($user_id);
+                list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($arrOpList);
+                if($ret === false) {
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00000200";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                } else {
+                    if($permission !== true) {
+                        //アクセス権限を持っていない場合
+                        $intErrorType = 2;
+                        $strErrStepIdInFx="00002710";
+                        if($aryDataForMovement['type'] == "call"){
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170024"); //ConductorCall - 指定できないオペレーションIDです。
+                        }elseif($aryDataForMovement['type'] == "call_s"){
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170025"); //SymphonyCall - 指定できないオペレーションIDです。
+                        }else{
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170026"); //Movement - 指定できないオペレーションIDです。
+                        }
+
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                }
+
             }
 
             if( !isset( $aryDataForMovement['CALL_CONDUCTOR_ID'] ) )$aryDataForMovement['CALL_CONDUCTOR_ID']="";
@@ -739,6 +790,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                     if( $fxVarsIntConductorClassId != "" ){
                         $getmode = 1;
                         $retArray = $objOLA->getInfoFromOneOfConductorClass($aryDataForMovement['CALL_CONDUCTOR_ID'], 0,0,0,$getmode);#TERMINALあり
+                        $conductorDataList = $retArray[4];
                         $tmpNodeLists = $retArray[5];
                         foreach ($tmpNodeLists as $key => $value) {
                             if( ( $value["NODE_TYPE_ID"] == 4 ) && ( $fxVarsIntConductorClassId == $value["CONDUCTOR_CALL_CLASS_NO"] ) ){
@@ -748,6 +800,34 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );    
                             }
                         }
+
+                        //廃止済みConductor対応
+                        if($conductorDataList['DISUSE_FLAG'] == 1){
+                            $intErrorType = 2;
+                            $strErrStepIdInFx="00002810";
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170027"); //ConductorCall - 指定できないConductorクラスIDです。
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+
+                        //Conductorアクセス権チェック対応
+                        $user_id = $g['login_id'];
+                        $ret  = $objRBAC->getAccountInfo($user_id);
+                        list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($conductorDataList);
+                        if($ret === false) {
+                            // エラーフラグをON
+                            // 例外処理へ
+                            $strErrStepIdInFx="00000200";
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        } else {
+                            if($permission !== true) {
+                                //アクセス権限を持っていない場合
+                                $intErrorType = 2;
+                                $strErrStepIdInFx="00002820";
+                                $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170027"); //ConductorCall - 指定できないConductorクラスIDです。
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                            }
+                        }
+
                     }
 
                     $arrConductorList = array();
@@ -758,7 +838,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                         $strErrStepIdInFx="00002800";
                         $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170014",array($fxVarsIntConductorClassId));
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                    }        
+                    }
             }
  
             //CALL呼び出し値有無(symphony)
@@ -792,6 +872,42 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                     }
             }
+
+            //symphonyアクセス権チェック対応
+            if( $aryDataForMovement['type'] == "call_s" ){
+                $aryRetBody = $objOLA->getInfoOfOneSymphony($aryDataForMovement['CALL_SYMPHONY_ID'],-1);
+
+                    if( $aryRetBody[1] !== null ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00000200";
+                        $intErrorType = $aryRetBody[1];
+                        //
+                        $aryErrMsgBody = $aryRetBody[2];
+                        //
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                    $arrMVList = $aryRetBody[4];
+                    $user_id = $g['login_id'];
+                    $ret  = $objRBAC->getAccountInfo($user_id);
+                    list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($arrMVList);
+                    if($ret === false) {
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00000200";
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    } else {
+                        if($permission !== true) {
+                            //アクセス権限を持っていない場合
+                            $intErrorType = 2;
+                            $strErrStepIdInFx="00002830";
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170015");
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+                    }
+
+            }
+
         }
          //-バリデーションチェック(NODE毎詳細)---
 
