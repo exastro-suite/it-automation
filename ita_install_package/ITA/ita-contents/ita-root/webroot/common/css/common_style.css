@@ -171,6 +171,7 @@ a:hover, a:active {
 }
 #HEADER .itaLoginUserName,
 #HEADER .itaLoginUserID {
+  position: relative;
   line-height: 1;
   text-align: right;
   white-space: nowrap;
@@ -178,6 +179,31 @@ a:hover, a:active {
 }
 #HEADER .itaLoginUserName {
   margin-bottom: 6px;
+}
+#HEADER .userDataText {
+  display: inline-block;
+  max-width: 480px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+#HEADER .userNameFull {
+  display: none;
+  position: absolute;
+  top: -6px;
+  z-index: 100;
+  width: 488px;
+  padding: 4px;
+  background-color: #000;
+  white-space: normal;
+  word-break: break-all;
+  text-align: left;
+  pointer-events: none;
+  line-height: 1.5;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }
 #HEADER .headerMenu {
   padding-top: 8px;
@@ -822,7 +848,7 @@ input:-webkit-autofill {
 .input_password {
 display: inline-block;
 position: relative;
-z-index: 1;
+z-index: 0;
 width: 100%;
 }
 .itaTable .input_password {

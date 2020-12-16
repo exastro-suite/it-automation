@@ -1321,8 +1321,8 @@ function setSchedule(target_area_id){
 //////// ----Symphony作業一覧へのリンク ////////
 function Mix1_1_jumpToSymphonyIntList(obj){
     var targetRecort = $(obj).parents('tr');
-    var strSymphonyName = targetRecort.find('td').eq(4).html(); //symphony名称
-    var strOperationName = targetRecort.find('td').eq(5).html(); //オペレーション名
+    var strSymphonyName = targetRecort.find('td').eq(4).text(); //symphony名称
+    var strOperationName = targetRecort.find('td').eq(5).text(); //オペレーション名
 
     //実行ユーザ名を取得
     var strUserName = getSomeMessage("ITAWDCC91025"); //定期実行管理プロシージャ
