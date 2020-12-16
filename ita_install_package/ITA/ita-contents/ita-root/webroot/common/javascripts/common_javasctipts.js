@@ -58,13 +58,12 @@ $( window ).on({
                 func.setSessionStorage( keyName, JSON.stringify( headingArray ) );
             }
         }
-        set_initial_filter();
       }, 100 );
   }
 });
 
 $( function() {
-        
+          
     // パスワード入力マスク解除
     $('#KIZI, #gateLoginContainer, #gateChangePw').on({
       'mousedown' : function(){
@@ -131,6 +130,7 @@ $( function() {
       }
     });
     
+    set_initial_filter();
     set_layout_setting();
     userNameAllDisplay();
     
@@ -344,22 +344,28 @@ function set_initial_filter(){
     // 共通ファンクション呼び出し URLからパラメータ取得
     const func = new itaEditorFunctions,
           param = func.getParamAll();
-
+    
+    // パラメータからnoを削除
+    if ( param['no'] !== undefined ) delete param['no'];
+    
     // フィルターに値をセットしてフィルタボタンをクリック
     const filterSet = function( $area ) {
       const filterArea = $area.get(0);
       // フィルターエリアにフィルターが表示されたら
       const observer = new MutationObserver( function(){
-        for ( let key in param ) {
-          const $target = $area.find('#' + key );
-          if ( $target.length && $target.is('input[type="text"]') ) {
-            $target.val( param[key] );
+        // フィルターが表示されているか確認する
+        if ( $area.find('div[class^="fakeContainer_Filter"]').length ) {
+          for ( let key in param ) {
+            const $target = $area.find('#' + key );
+            if ( $target.length && $target.is('input[type="text"]') ) {
+              $target.val( param[key] );
+            }
           }
+          // Filterボタンをクリック
+          $area.closest('.text').find('input[name="display_list_btn"]').click();
+          // 監視を解除
+          observer.disconnect();
         }
-        // Filterボタンをクリック
-        $area.closest('.text').find('input[name="display_list_btn"]').click();
-        // 監視を解除
-        observer.disconnect();
       });
       // フィルターエリアの監視を開始
       observer.observe( filterArea, { childList: true });
@@ -367,9 +373,11 @@ function set_initial_filter(){
 
     // フィルターフラグをチェック
     if ( param['filter'] !== undefined && param['filter'] === 'on' ) {
+      delete param['filter'];
       filterSet( $filterArea );
     }
     if ( param['filter2'] !== undefined && param['filter2'] === 'on' ) {
+      delete param['filter2'];
       filterSet( $filter2Area );
     }
   }
