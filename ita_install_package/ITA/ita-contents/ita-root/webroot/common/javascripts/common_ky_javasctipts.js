@@ -1427,8 +1427,10 @@ function setAccessPermission( inputDataValue ) {
                   // 決定時の処理    
                   const okEvent = function( newRoleList ) {
                     $input.val( newRoleList );
-                    const inputHTML = newRoleList + $input.prop('outerHTML');
-                    $input.closest('td').html( inputHTML );
+                    const $target = $input.closest('.tdInner'),
+                          inputHTML = newRoleList + $input.prop('outerHTML');
+                    $target.html( inputHTML ).trigger('roleChange');
+                    checkOverfrowText( $target );
                     modal.modalClose();
                   };
                   // キャンセル時の処理    
