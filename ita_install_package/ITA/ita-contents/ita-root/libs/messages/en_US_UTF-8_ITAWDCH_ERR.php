@@ -325,6 +325,7 @@ $ary[19008] = "It is an unexpected error. :{}";
 $ary[19009] = "It is an unexpected error. :{}";
 $ary[19010] = "This value cannot be selected. (Item:{})";
 $ary[19020] = "comma cannot be entered in the role name.";
+$ary[19021] = "Make sure that the role set as the Role to allow access is registered in 'Role list' and 'user role user link list. (Role:{})";
 $ary[20001] = "There is no directory to store the file. (Directory:{})";
 $ary[20002] = "An object exists with the same name as the directory that stores the file. (Directory:{})";
 $ary[20003] = "Permission for directory that stores the file is not valid. (Directory: {} Permission: {})";

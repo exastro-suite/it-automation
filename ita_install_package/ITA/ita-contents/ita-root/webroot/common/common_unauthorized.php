@@ -24,11 +24,10 @@ if (empty($root_dir_path)) {
     $root_dir_path = $root_dir_temp[0]."ita-root";
 }
 
-// アクセスログ出力
+// DBには接続しない
 $aryOrderToReqGate = [];
 $aryOrderToReqGate['DBConnect'] = 'LATE';
 require $root_dir_path."/libs/commonlibs/common_php_req_gate.php";
-web_log("");
 
 // 管理者連絡先を読み込み
 $ADMIN_OFFICE = file_get_contents($root_dir_path."/confs/webconfs/admin_mail_addr.txt");
@@ -38,7 +37,6 @@ if (!empty($ADMIN_OFFICE)) {
 }
 // javascript,css更新時自動で読込みなおす為にファイルのタイムスタンプをパラメーターに持つ
 $timeStamp_favicon_ico=filemtime("$root_dir_path/webroot/common/imgs/favicon.ico");
-$title_name = $objMTS->getSomeMessage("ITAWDCH-MNU-1230001");
 $design_type = 'default';
 // ここから本文
 ?>
@@ -56,5 +54,6 @@ $design_type = 'default';
     <br>
     <?= $objMTS->getSomeMessage("ITAWDCH-MNU-4010002") ?><br>
     <?= $strMailTag ?><br>
+    <a href="/"><?= $objMTS->getSomeMessage("ITAWDCH-MNU-4010004") ?></a><br>
 </body>
 </html>

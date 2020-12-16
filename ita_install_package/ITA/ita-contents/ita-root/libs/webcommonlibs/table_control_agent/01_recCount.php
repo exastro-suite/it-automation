@@ -217,7 +217,11 @@
 
             if( $objFunction02ForOverride===null ){
                 $strRecCnt =  0;
-                $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
+		// ---- RBAC対応
+		$rparrayFileterBody = $arrayFileterBody;
+                $ret = AccessAuthColumnFileterDataReplace($g['login_id'],$g['objDBCA'],"ACCESS_AUTH",$rparrayFileterBody);
+		// RBAC対応 ----
+                $retArray = singleSQLExecuteAgent($sql, $rparrayFileterBody, $strFxName);
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
                     // RBAC対応 ----
