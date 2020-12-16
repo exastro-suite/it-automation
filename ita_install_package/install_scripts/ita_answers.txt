@@ -52,7 +52,6 @@ createparam:yes
 hostgroup:yes
 ansible_driver:yes
 cobbler_driver:no
-openstack_driver:no
 terraform_driver:no
 
 # Enter the ita domain name.

@@ -1,3 +1,0 @@
-/ita-root/backyards/openstack_driver/ky_openStack_execute-workflow
-/ita-root/backyards/openstack_driver/ky_openStack_checkcondition-workflow
-/ita-root/backyards/openstack_driver/ky_openStack_masterSync-workflow

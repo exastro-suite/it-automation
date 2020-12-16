@@ -615,14 +615,14 @@
         }
     }
 
-    function webRequestForceQuitFromEveryWhere($intDefaultResutStatusCode=500,$intForceQuitDatailCode=null,$aryAppendix=array()){
+    function webRequestForceQuitFromEveryWhere ($intDefaultResutStatusCode=500, $intForceQuitDatailCode=null, $aryAppendix=array()) {
         // グローバル変数の利用宣言
         global $g;
-        list($aryReqByREST,$tmpBool)=isSetInArrayNestThenAssign($g,array('requestByREST'),null);
-        if( is_array($aryReqByREST) === true ){
+        list($aryReqByREST, $tmpBool) = isSetInArrayNestThenAssign($g, array('requestByREST'), null);
+        if (is_array($aryReqByREST) === true) {
             //----RestAPIからのアクセスの場合
             $strException = 'Generic error';
-            switch($intDefaultResutStatusCode){
+            switch ($intDefaultResutStatusCode) {
                 case 400: // 要求が正しくない
                     $strErrorType = "Bad Request";
                     break;
@@ -652,7 +652,7 @@
                     $strErrorType = "Unexpected error";
                     break;
             }
-            switch($intForceQuitDatailCode){
+            switch ($intForceQuitDatailCode) {
                 case 11410201: // 権限がなかった
                     $strException = "No Privillege Access Error";
                     break;
@@ -679,7 +679,7 @@
                     break;
             }
             list($varStackTrace, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('StackTrace'),false);
-            if( is_array($varStackTrace) === false && is_string($varStackTrace) === false ){
+            if (is_array($varStackTrace) === false && is_string($varStackTrace) === false) {
                 $varStackTrace = 'none';
             }
             $intResultStatusCode = $intDefaultResutStatusCode;
@@ -687,10 +687,10 @@
                                          'Exception'=>$strException,
                                          'StackTrace'=>$varStackTrace);
 
-            list($boolOverrideByGlobalVars, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('OverrideByGlobalVars'),false);
-            if( $boolOverrideByGlobalVars === true ){
+            list($boolOverrideByGlobalVars, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix, array('OverrideByGlobalVars'), false);
+            if ($boolOverrideByGlobalVars === true) {
                 list($intResultStatusCode, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($g,array('requestByREST','resultStatusCode'),$intResultStatusCode);
-                list($aryResponsContents , $tmpBoolKeyExists) = isSetInArrayNestThenAssign($g,array('requestByREST','preResponsContents','errorInfo'),$aryResponsContents);
+                list($aryResponsContents, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($g,array('requestByREST','preResponsContents','errorInfo'),$aryResponsContents);
             }
 
             header('Content-Type: application/json; charset=utf-8', true, $intResultStatusCode);
@@ -699,18 +699,14 @@
             exit($objJSONOfResultData);
 
             //RestAPIからのアクセスの場合----
-        }
-        else{
+        } else {
             //----その他のリクエストの場合
-            switch($intDefaultResutStatusCode){
+            switch ($intDefaultResutStatusCode) {
                 case 400: // 要求が正しくない
                 case 401: // 認証が必要である
                 case 403: // 禁止されている（アクセス権がない、ホストがアクセスすることを拒否された）
                 case 404: // リソースがみつからなかった
                 case 500: // サーバ内部エラー
-                case 501: // 実装されていないメソッド
-                case 502: // 不正なゲートウェイ
-                case 503: // サービス利用不可（過負荷、メンテナンス中による）
                     http_response_code($intDefaultResutStatusCode);
                     break;
             }
@@ -718,15 +714,7 @@
             list($intInsideRedirectMode, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('InsideRedirectMode'),1); // 0
 
             //MDC(NNN)+
-            switch($intForceQuitDatailCode){
-                // 400
-                case 10000400: // 不正なリクエスト
-                    insideRedirectCodePrint("/common/common_bad_request.php",$intInsideRedirectMode);
-                    break;
-                // 401
-                case 10000401: // 未認証アクセス
-                    insideRedirectCodePrint("/common/common_unauthorized.php",$intInsideRedirectMode);
-                    break;
+            switch ($intForceQuitDatailCode) {
                 // 403
                 case 10000403: // 不正操作によるアクセス警告画面にリダイレクト
                 case 10310201: // 不正操作によるアクセス警告画面にリダイレクト
@@ -772,8 +760,28 @@
                 case 10610701: // 開発者によるメンテナンス(中の通知)画面
                     insideRedirectCodePrint("/common/common_dev_maintenace.php",$intInsideRedirectMode);
                     break;
-                default: // システムエラー
-                    insideRedirectCodePrint("/common/common_unexpected_error.php",$intInsideRedirectMode);
+                default: // エラーコード毎のエラーページを表示する
+                    switch ($intDefaultResutStatusCode) {
+                        case 400: // 不正なリクエスト
+                            $err_file_path = "/webroot/common/common_bad_request.php";
+                            break;
+                        case 401: // 未認証アクセス
+                            $err_file_path = "/webroot/common/common_unauthorized.php";
+                            break;
+                        case 403: // 禁止されているアクセス
+                            $err_file_path = "/webroot/common/common_forbidden.php";
+                            break;
+                        case 404: // リソースがみつからなかった
+                            $err_file_path = "/webroot/common/common_not_found.php";
+                            break;
+                        case 500: // サーバ内部エラー
+                            $err_file_path = "/webroot/common/common_internal_server_error.php";
+                            break;
+                        default:
+                            $err_file_path = "/webroot/common/common_internal_server_error.php";
+                            break;
+                    }
+                    include preg_replace('|^(.*/ita-root)/.*$|', '$1', __FILE__).$err_file_path;
                     break;
             }
             //その他のリクエストの場合----
@@ -1337,8 +1345,8 @@ class RoleBasedAccessControl {
    //                     true:ID変換失敗(x)のロール名を有効ロールとして扱う
    //                          ロールIDをxとして扱う
    //                     false:D変換失敗(x)のロール名を無視する
-   //   $Convert_error_char: ロール名からIDに変換できなかった場合のロール名
-   //   
+   //   $Convert_error_char: 表示フィルター検索時に使用
+   //                        ロール名からIDに変換できなかった場合のロール名
    // 【戻り値】
    //   false:   異常
    //   他:      ロールIDのCSV文字列
@@ -1393,6 +1401,58 @@ class RoleBasedAccessControl {
            }
        }
        return $RoleIDString;
+   }
+
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   登録・更新用
+   //   ロール名のCSV文字列をロールIDのCSV文字列に変換
+   //   ID変換失敗ロールは無視
+   // 【パラメータ】
+   //   $userID:          ログインID
+   //   $RoleNameString:  ロール名のCSV文字列
+   //   $ErrorRoleNameAry: 変換できなかったロール名配列
+   // 【戻り値】
+   //   false:   異常
+   //            $ErrorRoleNameAryに変換出来なかったロール名配列が設定される。
+   //   他:      ロールIDのCSV文字列
+   //              
+   // 【備考】
+   ///////////////////////////////////////////////////////////////////
+   function getRoleNameStringToRoleIDStringForDBUpdate($userID,$RoleNameString,&$ErrorRoleNameAry) {
+       $ErrorRoleNameAry = array();
+       $RoleID2Name = array();
+       $RoleName2ID = array();
+       // 廃止されているレコードは除かれる
+       $ret = $this->getRoleSearchHashList($userID,$RoleID2Name,$RoleName2ID);
+       if($ret === false) {
+           return false;
+       }
+       $RoleIDString = "";
+       // ロール名をロールIDに置換
+       if(strlen($RoleNameString) != 0) {
+           $updRoleNamelist = explode(',',$RoleNameString);
+           foreach($updRoleNamelist as $updRoleName) {
+               if(array_key_exists($updRoleName,$RoleName2ID)) {
+                   if($RoleIDString != '') { $RoleIDString .= ',';}
+                   $RoleIDString .= $RoleName2ID[$updRoleName];
+               } else {
+                   // 廃止ロール名か判定
+                   $DisUserRoleIDString = $this->chkDisUseRoleName($updRoleName);
+                   if($DisUserRoleIDString !== false) {
+                       // 廃止ロール名はカット
+                       continue;
+                   } else {
+                       $ErrorRoleNameAry[] = $updRoleName;
+                   }
+               }
+           }
+       }
+       if(count($ErrorRoleNameAry) == 0) {
+           return $RoleIDString;
+       } else {
+           return false;
+       }
    }
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
@@ -2010,6 +2070,64 @@ class RoleBasedAccessControl {
    }
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
+   //   ロール管理を指定されたロール名を曖昧検索する。
+   //   表示フィルターテキスト検索・RestAPI Filterr機能用
+   // 【パラメータ】
+   //   $RoleName: ロール名
+   //              ロール名に %　_ に含まれている場合は # でエスケープされている前提
+   // 【戻り値】
+   //   false:   異常
+   //   他:      ロールIDの配列
+   // 【備考】
+   //   webからの場合、異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function getRoleNameStringToRoleIDStringForFilter($RoleName) {
+       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_LIST ROLE_NAME:%s)";
+       try {
+           $sql  = "SELECT   ";
+           $sql .= " ROLE_ID, ";
+           $sql .= " ROLE_NAME ";
+           $sql .= "FROM ";
+           $sql .= " A_ROLE_LIST ";
+           $sql .= "WHERE ";
+           $sql .= " DISUSE_FLAG='0' AND ";
+           $sql .= " ROLE_NAME COLLATE utf8_unicode_ci LIKE :ROLE_NAME ESCAPE '#' ";
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if($objQuery->getStatus()===false){
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$RoleName);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $objQuery->sqlBind( array('ROLE_NAME'=>$RoleName));
+           $r = $objQuery->sqlExecute();
+           if(!$r) {
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$RoleName);
+               $message .= "\n" . $objQuery->getLastError();
+               throw new Exception($message);
+           }
+           $array = array();
+           if($objQuery->effectedRowCount() != 0) {
+               while($row = $objQuery->resultFetch()) {
+                   $array[]   = $row["ROLE_ID"];
+               }
+           }
+           unset($objQuery);
+           return $array;
+       }catch (Exception $e){
+           // Webかバックヤードかを判定
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return false;
+       }
+   }
+
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
    //   IDColumnで指定されたオブジェクトにアクセス権カラムが定義されているかを判定
    // 【パラメータ】
    //   $tgt_table: 確認するオブジェクト(テーブル・ビュー)
@@ -2209,23 +2327,104 @@ class RoleBasedAccessControl {
         }
     }
     function AccessAuthColumnFileterDataReplace($userID,$objDBCA,$AccessAuthColumnName,&$arrayFileterBody) {
+        $error_role_id = "ErrorID";
+        $LikeSearchStrBase = "(^%s$)|(^%s,)|(,%s,)|(,%s$)";
+        $CompSearchStrBase = "(^%s$)";
+
+        // 検索対象のロール名の数: テキスト検索(曖昧検索)かプルダウン検索(完全一致検索)
+        // RestAPIの場合 NORMAL/RANGE:テキスト検索(曖昧検索) LIST:プルダウン検索(完全一致検索)
         $obj = new RoleBasedAccessControl($objDBCA);
         foreach($arrayFileterBody as $key=>$val) {
+            $SearchStr     = "";
+            $LikeSearchCount   = 0;
+            $CompSearchCount   = 0;
+            // ロール名の両端にある曖昧検索用の文字を取り除く
+            $val = preg_replace("/^%/","",$val);
+            $val = preg_replace("/%$/","",$val);
+            // $val 検索対象のロール名(CSV形式)
+            // 表示フィルターのテキスト検索/RestAPIのNORMAL/RANGE検索(曖昧検索)の場合
+            // 検索文字列(カラム名__[99])
             $LikeFileter = sprintf("/^%s__[0-9]*$/",$AccessAuthColumnName);
             if(preg_match($LikeFileter,$key) == 1) {
-                $val = preg_replace("/^%/","",$val);
-                $val = preg_replace("/%$/","",$val);
-                $val = $obj->getRoleNameStringToRoleIDString($userID,$val,true,"Error"); // 廃止を含む
-                if($val === false) {
-                    return false;
+                // ロール名を分解
+                $RoleNameAry = explode(',', $val);
+                // ロール名が設定されていることの確認
+                foreach($RoleNameAry as $RoleName) {
+                    // ロール名が空の場合は不明なロールIDを設定
+                    if(strlen($RoleName) == 0) {
+                        $val = $error_role_id;
+                        $arrayFileterBody[$key] = $val;
+                        continue 2;
+                    }
                 }
-                $val = "%". $val . "%";
-                $arrayFileterBody[$key] = $val;
+                foreach($RoleNameAry as $RoleName) {
+                    // 指定されたロール名をLike検索しマッチするロールIDを求める
+                    $RoleIDAry = $obj->getRoleNameStringToRoleIDStringForFilter("%$RoleName%");
+
+                    if($RoleIDAry === false) {
+                        $val = $error_role_id;
+                        $arrayFileterBody[$key] = $val;
+                        continue 2;
+                    }
+                    // ロール名が不正の場合
+                    if(count($RoleIDAry) == 0) {
+                        $val = $error_role_id;
+                        $arrayFileterBody[$key] = $val;
+                        continue 2;
+                    }
+                    $compRoleName = true;
+                    // 対象ロール名が完全一致
+                    if(count($RoleIDAry) == 1) {
+                        // 指定されたロール名をLike検索で完全一致するロールIDを求める
+                        $CmpRoleIDAry = $obj->getRoleNameStringToRoleIDStringForFilter($RoleName);
+                        if($CmpRoleIDAry=== false) {
+                            $val = $error_role_id;
+                            $arrayFileterBody[$key] = $val;
+                            continue 2;
+                        }
+                        if(count($CmpRoleIDAry) == 0) {
+                            // 部分一致したロール名
+                            $compRoleName = false;
+                        } else {
+                            // 完全一致検索の条件設定
+                            foreach($RoleIDAry as $RoleID);
+                            if($SearchStr != "")  $SearchStr .= "|"; 
+                            $SearchStr .= sprintf($CompSearchStrBase,$RoleID);
+                            $CompSearchCount++;
+                        }
+                    }
+                    // 対象ロール名が部分一致
+                    if((count($RoleIDAry) > 1) || ($compRoleName === false)) {
+                        //複数の曖昧検索ロール名が指定されている場合はエラー
+                        if($LikeSearchCount != 0) {
+                            $val = $error_role_id;
+                            $arrayFileterBody[$key] = $val;
+                            continue 2;
+                        } else {
+                            foreach($RoleIDAry as $RoleID) {
+                                // 曖昧検索の条件設定
+                                if($SearchStr != "")  $SearchStr .= "|"; 
+                                $SearchStr .= sprintf($LikeSearchStrBase,$RoleID,$RoleID,$RoleID,$RoleID);
+                                $LikeSearchCount++;
+                            }
+                        }
+                    }
+                    // 曖昧検索と還元一致検索が混在している場合はエラー
+                    if(($CompSearchCount != 0) && ($LikeSearchCount != 0)) {
+                        $val = $error_role_id;
+                        $arrayFileterBody[$key] = $val;
+                        continue 2;
+                    }
+                }
+                $arrayFileterBody[$key] = $SearchStr;
             }
+            // 表示フィルターのプルダウン検索(完全一致検索)/RestAPIのLIST検索(完全一致検索)の場合
+            // 検索文字列(カラム名_RF__[99])
             $ListFileter = sprintf("/^%s_RF__[0-9]*$/",$AccessAuthColumnName);
             if(preg_match($ListFileter,$key) == 1) {
                 $val = $obj->getRoleNameStringToRoleIDString($userID,$val,true,"Error");  // 廃止を含む
                 if($val === false) {
+                    $val = $error_role_id;
                     return false;
                 }
                 $arrayFileterBody[$key] = $val;
