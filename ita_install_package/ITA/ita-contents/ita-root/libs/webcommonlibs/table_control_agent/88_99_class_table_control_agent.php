@@ -914,7 +914,13 @@ class TableControlAgent {
 		    $c->setHiddenMainTableColumn(true);
 
 		    // ロール名をロールIDに置換。ロール名が不正の場合はエラーとして扱う
-		    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+		    // 廃止・復活はこのFunctionを組み込んでいない。
+                    // $ordMode=0[ブラウザからの新規登録
+                    // $ordMode=1[EXCEL]からの新規登録
+                    // $ordMode=2[CSV]からの新規登録
+                    // $ordMode=3[JSON]からの新規登録
+                    // $ordMode=4[ブラウザからの新規登録(トランザクション無)
+		    $tmpObjFunction = function($ordMode, $objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
 			global $g;
 			$boolRet = true;
 			$intErrorType = null;
@@ -926,7 +932,6 @@ class TableControlAgent {
 			$objTable =  $objColumn->getTable();
 
 			$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
-			// 廃止・復活は更新対象外なのでチェックしない。
 			if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
 			    $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
 			    if(array_key_exists($AccessAuthColumnName,$exeQueryData)) {
@@ -937,7 +942,7 @@ class TableControlAgent {
 		    	              // 廃止ロールはカットする。
 		    	              $obj = new RoleBasedAccessControl($g['objDBCA']);
 		    	              $ErrorRoleNameAry = array();
-		    	              $RoleIDString = $obj->getRoleNameStringToRoleIDStringForDBUpdate($g['login_id'],$RoleNameString,$ErrorRoleNameAry);  
+		    	              $RoleIDString = $obj->getRoleNameStringToRoleIDStringForDBUpdate($g['login_id'],$ordMode,$RoleNameString,$ErrorRoleNameAry);  
 		    	              unset($obj);
 		    	              if($RoleIDString === false) {
 		    	                  $boolRet = false;

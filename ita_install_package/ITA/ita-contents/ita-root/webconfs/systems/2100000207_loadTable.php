@@ -99,8 +99,24 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             // ロール名にカンマが含まれていないかチェック
             $ret = preg_match("/,/",$RoleName);
             if($ret == 1) {
-            $retBool = false;
-            $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19020");
+                $retBool = false;
+                $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19020");
+            } else {
+                // ロール名が廃止ロール名(ID変換失敗)か判定
+                $DisUseRoleName = sprintf("/^%s/", preg_quote($g['objMTS']->getSomeMessage("ITAWDCH-STD-11101")));
+                $ret = preg_match($DisUseRoleName,$RoleName);
+                if($ret == 1) {
+                    $retBool = false;
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19022",array($RoleName));
+                } else {
+                    $UnAuthRoleName = sprintf("/^%s/", preg_quote($g['objMTS']->getSomeMessage("ITAWDCH-STD-11102")));
+                    // ロール名がユーザーに許可のないロール(********)か判定
+                    $ret = preg_match($UnAuthRoleName,$RoleName);
+                    if($ret == 1) {
+                        $retBool = false;
+                        $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19022",array($RoleName));
+                    }
+                }
             }
         }
         if( $boolSystemErrorFlag === true ){
