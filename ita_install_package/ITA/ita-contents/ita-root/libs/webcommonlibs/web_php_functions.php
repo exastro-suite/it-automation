@@ -1451,6 +1451,82 @@ class RoleBasedAccessControl {
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
    //   登録・更新用
+   //   ロールID(CSV文字列)妥当性をチェックする
+   //   ID変換失敗ロールは無視
+   // 【パラメータ】
+   //   $userID:          ログインID
+   //   $ordMode:          登録種別
+   //                      0:[ブラウザからの新規登録
+   //                      1:[EXCEL]からの新規登録
+   //                      2:[CSV]からの新規登録
+   //                      3:[JSON]からの新規登録
+   //                      4:[ブラウザからの新規登録(トランザクション無)
+   //   $RoleIDString:     ロールIDのCSV文字列
+   //   $ErrorRoleNameAry: 変換できなかったロール名配列
+   //
+   // 【戻り値】
+   //   false:   異常
+   //            $ErrorRoleNameAryに不正なRoleIDがロール名配列が設定される。
+   //   他:      ロールIDのCSV文字列
+   //
+   // 【備考】
+   ///////////////////////////////////////////////////////////////////
+   function chkRoleIDStringForDBUpdate($userID,$ordMode,$RoleIDString,&$ErrorRoleNameAry) {
+       $ErrorRoleNameAry = array();
+       $RoleID2Name = array();
+       $RoleName2ID = array();
+       // 廃止されているレコードは除かれる
+       $ret = $this->getRoleSearchHashList($userID,$RoleID2Name,$RoleName2ID);
+       if($ret === false) {
+           return false;
+       }
+       $AllRoleID2Name = array();
+       $AllRoleName2ID = array();
+       // 廃止されているレコードを含む
+       $ret = $this->getAllRoleSearchHashList($userID,$AllRoleID2Name,$AllRoleName2ID);
+       if($ret === false) {
+           return false;
+       }
+       $makeRoleIDString = "";
+       // ロール名をロールIDに置換
+       if(strlen($RoleIDString) != 0) {
+           $updRoleIDlist = explode(',',$RoleIDString);
+           foreach($updRoleIDlist as $updRoleID) {
+               if(array_key_exists($updRoleID,$RoleID2Name)) {
+                   if($makeRoleIDString != '') { $makeRoleIDString .= ',';}
+                   $makeRoleIDString .= $updRoleID;
+               } else {
+                   // 登録種別がExcel/CSV/Restの場合、ユーザーに紐づいているロール以外はエラーとして扱う
+                   if(($ordMode == '1') || ($ordMode == '2') || ($ordMode == '3')) {
+                       $ErrorRoleNameAry[] = $updRoleID;
+                       continue;
+                   }
+                   // ユーザーに許可のないロール名/廃止ロール名か判定
+                   if(array_key_exists($updRoleID,$AllRoleID2Name)) {
+                       // 廃止されていないロールの場合、ユーザーに許可のないロールとして扱う
+                       if($AllRoleID2Name[$updRoleID]['DISUSE_FLAG'] == '0') {
+                           if($makeRoleIDString != '') { $makeRoleIDString .= ',';}
+                           $makeRoleIDString .= $updRoleID;
+                       } else {
+                           // 廃止ロール名はカット
+                       }
+                       continue;
+                   } else {
+                       $ErrorRoleNameAry[] = $updRoleID;
+                   }
+               }
+           }
+       }
+       if(count($ErrorRoleNameAry) == 0) {
+           return $makeRoleIDString;
+       } else {
+           return false;
+       }
+   }
+
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   登録・更新用
    //   ロール名のCSV文字列をロールIDのCSV文字列に変換
    //   ID変換失敗ロールは無視
    // 【パラメータ】
