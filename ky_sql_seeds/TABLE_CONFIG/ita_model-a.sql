@@ -3244,6 +3244,33 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
        TAB_A.LAST_UPDATE_USER
 FROM A_PROVIDER_ATTRIBUTE_LIST_JNL TAB_A;
 
+CREATE VIEW G_PARAM_TARGET AS 
+SELECT TAB_A.TARGET_ID              ,
+       TAB_A.DISP_SEQ               ,
+       TAB_A.TARGET_NAME            ,
+       TAB_A.ACCESS_AUTH            ,
+       TAB_A.NOTE                   ,
+       TAB_A.DISUSE_FLAG            ,
+       TAB_A.LAST_UPDATE_TIMESTAMP  ,
+       TAB_A.LAST_UPDATE_USER
+FROM F_PARAM_TARGET TAB_A
+WHERE TAB_A.TARGET_ID IN (1,2,3);
+
+CREATE VIEW G_PARAM_TARGET_JNL AS 
+SELECT TAB_A.JOURNAL_SEQ_NO         ,
+       TAB_A.JOURNAL_REG_DATETIME   ,
+       TAB_A.JOURNAL_ACTION_CLASS   ,
+       TAB_A.TARGET_ID              ,
+       TAB_A.DISP_SEQ               ,
+       TAB_A.TARGET_NAME            ,
+       TAB_A.ACCESS_AUTH            ,
+       TAB_A.NOTE                   ,
+       TAB_A.DISUSE_FLAG            ,
+       TAB_A.LAST_UPDATE_TIMESTAMP  ,
+       TAB_A.LAST_UPDATE_USER
+FROM F_PARAM_TARGET_JNL TAB_A
+WHERE TAB_A.TARGET_ID IN (1,2,3);
+
 CREATE VIEW D_SEQUENCE AS 
 SELECT TAB_A.NAME                 ,
        TAB_A.VALUE                ,

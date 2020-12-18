@@ -72,7 +72,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     // 作成対象 
-    $c = new IDColumn('TARGET',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102023"),'F_PARAM_TARGET','TARGET_ID','TARGET_NAME', '',  array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $c = new IDColumn('TARGET',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102023"),'G_PARAM_TARGET','TARGET_ID','TARGET_NAME', '',  array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102026"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
     $objVldt = new SubstitutionValidator($c);
