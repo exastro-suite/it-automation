@@ -1216,6 +1216,30 @@ class RoleBasedAccessControl {
    }
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
+   //   ユーザーに許可されていないロール名か判定しロールIDを取得
+   // 【パラメータ】
+   //   $RoleName: ロール名
+   // 【戻り値】
+   //   false:  ユーザーに許可されていないロール名でない
+   //   他:     ユーザーに許可されていないロールID
+   // 【備考】
+   ///////////////////////////////////////////////////////////////////
+   function chkUnAuthRoleName($RoleName) {
+       global $objMTS;
+       $UnAuthRoleName = sprintf("/^%s\([0-9]+\)$/", preg_quote($objMTS->getSomeMessage("ITAWDCH-STD-11102")));
+       // ロール名がユーザーに許可のないロール(********)か判定
+       if(preg_match($UnAuthRoleName,$RoleName) == 1) {
+           // 廃止ロール名のIDを取得
+           $UnAuthRoleID = str_replace($objMTS->getSomeMessage("ITAWDCH-STD-11102"),'',$RoleName);
+           $UnAuthRoleID = str_replace('(','',$UnAuthRoleID);
+           $UnAuthRoleID = str_replace(')','',$UnAuthRoleID);
+           return $UnAuthRoleID;
+       } else {
+           return false;
+       }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
    //   廃止ロール名か判定しロールIDを取得
    // 【パラメータ】
    //   $RoleName: ロール名
@@ -1250,6 +1274,20 @@ class RoleBasedAccessControl {
    function makeDisUseRoleName($id) {
        global $objMTS;
        $DisUseRoleName = sprintf("%s(%s)",$objMTS->getSomeMessage("ITAWDCH-STD-11101"),$id);
+       return $DisUseRoleName;
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   ユーザーに紐づいていないロール名を取得
+   // 【パラメータ】
+   //   $id:      ロールID
+   // 【戻り値】
+   //   廃止ロール名
+   // 【備考】
+   ///////////////////////////////////////////////////////////////////
+   function makeUnAuthRoleName($id) {
+       global $objMTS;
+       $DisUseRoleName = sprintf("%s(%s)",$objMTS->getSomeMessage("ITAWDCH-STD-11102"),$id);
        return $DisUseRoleName;
    }
    ///////////////////////////////////////////////////////////////////
@@ -1373,27 +1411,34 @@ class RoleBasedAccessControl {
                    if($RoleIDString != '') { $RoleIDString .= ',';}
                    $RoleIDString .= $RoleName2ID[$updRoleName];
                } else {
-                   // ロール名をロールIDに置換した文字列はUI表示用の処理なので
-                   // ロール名が廃止を含めてロール管理に登録されているかは判定はしない。
-                   // 廃止ロール名を扱うか判定
-                   if($disuse_role === true) {
-                       // 廃止ロール名か判定
-                       $DisUserRoleIDString = $this->chkDisUseRoleName($updRoleName);
-                       if($DisUserRoleIDString !== false) {
-                           if($RoleIDString != '') { $RoleIDString .= ',';}
-                           $RoleIDString .= $DisUserRoleIDString;
-                       } else {
-                           // 廃止ロール名が不正の場合
-                           $error_msg1 = "[%s:%s]:Role Name Failed.(Name:%s)";
-                           $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$updRoleName);
-                           if(function_exists("web_log")) {
-                               web_log($message);
-                           } else {
-                               error_log($message);
-                           }
-                           if($Convert_error_char != "") {
+                   // ユーザーに許可のないロール名か判定
+                   $UnAuthRoleIDString = $this->chkUnAuthRoleName($updRoleName);
+                   if($UnAuthRoleIDString !== false) {
+                       if($RoleIDString != '') { $RoleIDString .= ',';}
+                       $RoleIDString .= $UnAuthRoleIDString;
+                   } else { 
+                       // ロール名をロールIDに置換した文字列はUI表示用の処理なので
+                       // ロール名が廃止を含めてロール管理に登録されているかは判定はしない。
+                       // 廃止ロール名を扱うか判定
+                       if($disuse_role === true) {
+                           // 廃止ロール名か判定
+                           $DisUserRoleIDString = $this->chkDisUseRoleName($updRoleName);
+                           if($DisUserRoleIDString !== false) {
                                if($RoleIDString != '') { $RoleIDString .= ',';}
-                               $RoleIDString .= $Convert_error_char;
+                               $RoleIDString .= $DisUserRoleIDString;
+                           } else {
+                               // 廃止ロール名が不正の場合
+                               $error_msg1 = "[%s:%s]:Role Name Failed.(Name:%s)";
+                               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$updRoleName);
+                               if(function_exists("web_log")) {
+                                   web_log($message);
+                               } else {
+                                   error_log($message);
+                               }
+                               if($Convert_error_char != "") {
+                                   if($RoleIDString != '') { $RoleIDString .= ',';}
+                                   $RoleIDString .= $Convert_error_char;
+                               }
                            }
                        }
                    }
@@ -1410,8 +1455,15 @@ class RoleBasedAccessControl {
    //   ID変換失敗ロールは無視
    // 【パラメータ】
    //   $userID:          ログインID
+   //   $ordMode:          登録種別
+   //                      0:[ブラウザからの新規登録
+   //                      1:[EXCEL]からの新規登録
+   //                      2:[CSV]からの新規登録
+   //                      3:[JSON]からの新規登録
+   //                      4:[ブラウザからの新規登録(トランザクション無)
    //   $RoleNameString:  ロール名のCSV文字列
    //   $ErrorRoleNameAry: 変換できなかったロール名配列
+   //
    // 【戻り値】
    //   false:   異常
    //            $ErrorRoleNameAryに変換出来なかったロール名配列が設定される。
@@ -1419,7 +1471,7 @@ class RoleBasedAccessControl {
    //              
    // 【備考】
    ///////////////////////////////////////////////////////////////////
-   function getRoleNameStringToRoleIDStringForDBUpdate($userID,$RoleNameString,&$ErrorRoleNameAry) {
+   function getRoleNameStringToRoleIDStringForDBUpdate($userID,$ordMode,$RoleNameString,&$ErrorRoleNameAry) {
        $ErrorRoleNameAry = array();
        $RoleID2Name = array();
        $RoleName2ID = array();
@@ -1437,6 +1489,18 @@ class RoleBasedAccessControl {
                    if($RoleIDString != '') { $RoleIDString .= ',';}
                    $RoleIDString .= $RoleName2ID[$updRoleName];
                } else {
+                   // 登録種別がExcel/CSV/Restの場合、ユーザーに紐づいているロール以外はエラーとして扱う 
+                   if(($ordMode == '1') || ($ordMode == '2') || ($ordMode == '3')) {
+                       $ErrorRoleNameAry[] = $updRoleName;
+                       continue;
+                   }
+                   // ユーザーに許可のないロール名か判定
+                   $UnAuthRoleIDString = $this->chkUnAuthRoleName($updRoleName);
+                   if($UnAuthRoleIDString !== false) {
+                       if($RoleIDString != '') { $RoleIDString .= ',';}
+                       $RoleIDString .= $UnAuthRoleIDString;
+                       continue;
+                   } 
                    // 廃止ロール名か判定
                    $DisUserRoleIDString = $this->chkDisUseRoleName($updRoleName);
                    if($DisUserRoleIDString !== false) {
@@ -1500,12 +1564,20 @@ class RoleBasedAccessControl {
                    // ロールIDからロール名に置換した文字列がDB登録用になるので
                    // ロールIDが廃止も含めてロール管理にあるか判定
                    if(array_key_exists($updRoleID,$AllRoleID2Name)) {
-                       // 廃止ロールを扱うか判定
-                       if($disuse_role === true) {
-                           $DisUseRoleName = $this->makeDisUseRoleName($updRoleID);
+                       // 廃止されていないロールの場合、ユーザーに許可のないロールとして扱う
+                       if($AllRoleID2Name[$updRoleID]['DISUSE_FLAG'] == '0') {
+                           $UnAuthRoleName = $this->makeUnAuthRoleName($updRoleID);
                            if($RoleNameString != '') { $RoleNameString .= ',';}
-                           $RoleNameString .= $DisUseRoleName;
+                           $RoleNameString .= $UnAuthRoleName;
+                           
+                           continue;
                        }
+                   } 
+                   // 廃止ロールを扱うか判定
+                   if($disuse_role === true) {
+                       $DisUseRoleName = $this->makeDisUseRoleName($updRoleID);
+                       if($RoleNameString != '') { $RoleNameString .= ',';}
+                       $RoleNameString .= $DisUseRoleName;
                    } else {
                        // 不正なロールIDの場合はエラーにする。
                        $error_msg1 = "[%s:%s]:Role ID Failed.(ID:%s)";
@@ -1526,8 +1598,8 @@ class RoleBasedAccessControl {
    //   ロール情報を取得(廃止も含む)
    // 【パラメータ】
    //   $userID:        ユーザーID
-   //   $RoleID2Name:   $RoleID2Name[ロールID] = ロール名称
-   //   $RoleName2ID:   $RoleName2ID[ロール名] = ロールID
+   //   $RoleID2Name:   $RoleID2Name[ロールID] = array('ROLE_ID'=>'' ,'ROLE_NAME'=>'' ,DISUSE_FLAG=>'' )
+   //   $RoleName2ID:   $RoleName2ID[ロール名] = array('ROLE_ID'=>'' ,'ROLE_NAME'=>'' ,DISUSE_FLAG=>'' )
    // 【戻り値】
    //   false:   異常
    //   itrue:   正常
@@ -1538,13 +1610,15 @@ class RoleBasedAccessControl {
    //   error_logの出力先に出力
    ///////////////////////////////////////////////////////////////////
    function getAllRoleSearchHashList($userID,&$RoleID2Name,&$RoleName2ID) {
+       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_LIST user ID:%s)";
        $RoleID2Name = array();
        $RoleName2ID = array();
        try {
            // ロール名やロールIDを取得
            $sql  = "SELECT   ";
            $sql .= " TAB_1.ROLE_ID, ";
-           $sql .= " TAB_1.ROLE_NAME ";
+           $sql .= " TAB_1.ROLE_NAME, ";
+           $sql .= " TAB_1.DISUSE_FLAG ";
            $sql .= "FROM ";
            $sql .= " A_ROLE_LIST TAB_1 ";
            //$sql .= " A_ROLE_ACCOUNT_LINK_LIST TAB_1 ";
@@ -1553,20 +1627,20 @@ class RoleBasedAccessControl {
            //$sql .= " TAB_1.USER_ID = {$userID}";
            $objQuery = $this->objDBCA->sqlPrepare($sql);
            if($objQuery->getStatus()===false){
-               $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
                $message .= "\n" . $objQuery->getLastError();
                throw new Exception($message);
            }
 //           $objQuery->sqlBind( array('USER_ID'=>$userID));
            $r = $objQuery->sqlExecute();
            if(!$r) {
-               $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
                $message .= "\n" . $objQuery->getLastError();
                throw new Exception($message);
            }
            while($row = $objQuery->resultFetch()) {
-               $RoleID2Name[$row['ROLE_ID']]   = $row['ROLE_NAME'];
-               $RoleName2ID[$row['ROLE_NAME']] = $row['ROLE_ID'];
+               $RoleID2Name[$row['ROLE_ID']]   = $row;
+               $RoleName2ID[$row['ROLE_NAME']] = $row;
            }
            unset($objQuery);
            return true;
@@ -1597,6 +1671,7 @@ class RoleBasedAccessControl {
    //   error_logの出力先に出力
    ///////////////////////////////////////////////////////////////////
    function getRoleSearchHashList($userID,&$RoleID2Name,&$RoleName2ID) {
+       $error_msg1 = "[%s:%s]:DB Access Error. (Table:A_ROLE_ACCOUNT_LINK_LIST JOIN A_ROLE_LIST user ID:%s)";
        $RoleID2Name = array();
        $RoleName2ID = array();
        try {
@@ -1614,14 +1689,14 @@ class RoleBasedAccessControl {
            $sql .= " TAB_1.USER_ID = {$userID}";
            $objQuery = $this->objDBCA->sqlPrepare($sql);
            if($objQuery->getStatus()===false){
-               $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
                $message .= "\n" . $objQuery->getLastError();
                throw new Exception($message);
            }
            $objQuery->sqlBind( array('USER_ID'=>$userID));
            $r = $objQuery->sqlExecute();
            if(!$r) {
-               $message = sprintf($error_msg1,basename(__FILE__),__LINE__);
+               $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$userID);
                $message .= "\n" . $objQuery->getLastError();
                throw new Exception($message);
            }
@@ -2329,7 +2404,7 @@ class RoleBasedAccessControl {
     function AccessAuthColumnFileterDataReplace($userID,$objDBCA,$AccessAuthColumnName,&$arrayFileterBody) {
         $error_role_id = "ErrorID";
         $LikeSearchStrBase = "(^%s$)|(^%s,)|(,%s,)|(,%s$)";
-        $CompSearchStrBase = "(^%s$)";
+        $CompSearchStrBase = "%s";
 
         // 検索対象のロール名の数: テキスト検索(曖昧検索)かプルダウン検索(完全一致検索)
         // RestAPIの場合 NORMAL/RANGE:テキスト検索(曖昧検索) LIST:プルダウン検索(完全一致検索)
@@ -2360,7 +2435,6 @@ class RoleBasedAccessControl {
                 foreach($RoleNameAry as $RoleName) {
                     // 指定されたロール名をLike検索しマッチするロールIDを求める
                     $RoleIDAry = $obj->getRoleNameStringToRoleIDStringForFilter("%$RoleName%");
-
                     if($RoleIDAry === false) {
                         $val = $error_role_id;
                         $arrayFileterBody[$key] = $val;
@@ -2388,7 +2462,7 @@ class RoleBasedAccessControl {
                         } else {
                             // 完全一致検索の条件設定
                             foreach($RoleIDAry as $RoleID);
-                            if($SearchStr != "")  $SearchStr .= "|"; 
+                            if($SearchStr != "")  $SearchStr .= ","; 
                             $SearchStr .= sprintf($CompSearchStrBase,$RoleID);
                             $CompSearchCount++;
                         }
@@ -2409,7 +2483,7 @@ class RoleBasedAccessControl {
                             }
                         }
                     }
-                    // 曖昧検索と還元一致検索が混在している場合はエラー
+                    // 曖昧検索と完全一致検索が混在している場合はエラー
                     if(($CompSearchCount != 0) && ($LikeSearchCount != 0)) {
                         $val = $error_role_id;
                         $arrayFileterBody[$key] = $val;
