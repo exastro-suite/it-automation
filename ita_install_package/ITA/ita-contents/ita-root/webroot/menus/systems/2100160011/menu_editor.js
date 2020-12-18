@@ -625,7 +625,8 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
         $addColumnInput = $addColumn.find('.menu-column-title-input');
   
   $target.append( $addColumn );
-
+  // プルダウンにselect2を適用する
+  //$target.find('.config-select').select2();
   
   $addColumn.attr('id', id );
 
@@ -1119,9 +1120,13 @@ $menuEditor.on('click', '.menu-column-copy', function(){
   }
   
   const $clone = $column.clone();
+  //$clone.find('.config-select').removeClass('select2-hidden-accessible').removeAttr('tabindex aria-hidden');
+  //$clone.find('.select2-container').remove();
   
   // クローン追加
   $column.after( $clone );
+  // プルダウンにselect2を適用する
+  //$clone.find('.config-select').select2();
   
   // 追加を待つ
   $clone.ready( function() {
@@ -1760,7 +1765,12 @@ const getRoleListIdToName = function( roleListText ) {
     for ( let i = 0; i < roleListLength; i++ ) {
       const roleName = listIdName('role', roleList[i]);
       if ( roleName !== null ) {
-        roleNameList.push( roleName );
+        const hideRoleName = getSomeMessage("ITAWDCC92008");
+        if ( roleName !== hideRoleName ) {
+          roleNameList.push( roleName );
+        } else {
+          roleNameList.push( roleName + '(' + roleList[i] + ')');
+        }
       } else {
         roleNameList.push( getSomeMessage("ITAWDCC92007") + '(' + roleList[i] + ')');
       }
@@ -1777,12 +1787,11 @@ const getRoleListValidID = function( roleListText ) {
           roleListLength = roleList.length,
           roleIdList = new Array;
     for ( let i = 0; i < roleListLength; i++ ) {
-      const roleName = listIdName('role', roleList[i]);console.log(roleName);
+      const roleName = listIdName('role', roleList[i]);
       if ( roleName !== null ) {
         roleIdList.push( roleList[i] );
       }
     }
-    console.log(roleIdList);
     return roleIdList.join(',');
   } else {
     return '';
