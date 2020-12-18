@@ -1956,14 +1956,19 @@ EOD;
                 $sheetType = null;
                 if("1" == $cmiData['TARGET']){
                     if(false === $onlyUploadFlg){
-                        $sheetType = 3;
+                        $sheetType = 1;
                     }
                     else{
                         $sheetType = 4;
                     }
                 }
                 else if("3" == $cmiData['TARGET']){
-                    $sheetType = 3;
+                    if(false === $onlyUploadFlg){
+                        $sheetType = 3;
+                    }
+                    else{
+                        $noLinkTarget = true;
+                    }
                 }
             }
 
@@ -1991,7 +1996,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューカラム管理更新
             //////////////////////////
-            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData);
+            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData, $noLinkTarget);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -3543,7 +3548,7 @@ function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget, $cmiData)
 /*
  * 紐付対象メニューカラム管理更新
  */
-function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData){
+function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData, $noLinkTarget){
     global $objDBCA, $db_model_ch, $objMTS;
     $otherMenuLinkTable = new OtherMenuLinkTable($objDBCA, $db_model_ch);
     $cmdbMenuColumnTable = new CmdbMenuColumnTable($objDBCA, $db_model_ch);
@@ -3604,6 +3609,9 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 $colClass = "PasswordColumn";
             }
             else if(9 == $itemInfo['INPUT_METHOD_ID']){
+                if(true == $noLinkTarget){
+                    continue;
+                }
                 $colClass = "FileUploadColumn";
             }
             else if(10 == $itemInfo['INPUT_METHOD_ID']){
