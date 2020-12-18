@@ -1587,8 +1587,13 @@ class Column extends ColumnGroup {
     // beforeTableIUDActionと同等のタイミングで呼ばれるFunction
     // beforeTableIUDActionとの差異は、function内でエラー検出した場合
     // beforeTableIUDActionはシステムエラーとして扱われる。
-     // beforeTableIUDIndividualValidatorはWeb等にエラーメッセージを表示する。
-    function beforeTableIUDIndividualValidator(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+    // beforeTableIUDIndividualValidatorはWeb等にエラーメッセージを表示する。
+    //----$ordMode=0[ブラウザからの新規登録
+    //----$ordMode=1[EXCEL]からの新規登録
+    //----$ordMode=2[CSV]からの新規登録
+    //----$ordMode=3[JSON]からの新規登録
+    //----$ordMode=4[ブラウザからの新規登録(トランザクション無)
+    function beforeTableIUDIndividualValidator($ordMode, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
 		$boolRet = true;
 		$intErrorType = null;
 		$aryErrMsgBody = array();
@@ -1600,7 +1605,7 @@ class Column extends ColumnGroup {
 			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
 			if( array_key_exists('beforeTableIUDIndividualValidator',$this->aryFunctionsForEvent)===true ){
 				$objFunction = $this->aryFunctionsForEvent['beforeTableIUDIndividualValidator'];
-				$retArray = $objFunction($this,'beforeTableIUDIndividualValidator',$exeQueryData, $reqOrgData, $aryVariant);
+				$retArray = $objFunction($ordMode, $this,'beforeTableIUDIndividualValidator',$exeQueryData, $reqOrgData, $aryVariant);
 			}
 		}
 		return $retArray;
