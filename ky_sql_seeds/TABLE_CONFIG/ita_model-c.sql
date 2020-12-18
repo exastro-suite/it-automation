@@ -1291,39 +1291,43 @@ WHERE TAB_A.ITA_EXT_STM_ID = 3;
 
 CREATE VIEW D_ANS_LNS_PTN_VARS_LINK AS 
 SELECT 
-        TAB_A.VARS_LINK_ID            ,
-        TAB_A.PATTERN_ID              ,
-        TAB_B.PATTERN_NAME            ,
-        TAB_A.VARS_NAME_ID            ,
-        TAB_C.VARS_NAME               ,
+        TAB_A.VARS_LINK_ID                  ,
+        TAB_A.PATTERN_ID                    ,
+        TAB_B.PATTERN_NAME                  ,
+        TAB_A.VARS_NAME_ID                  ,
+        TAB_C.VARS_NAME                     ,
         [%CONCAT_HEAD/%]TAB_A.VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_A.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_A.DISUSE_FLAG             ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.DISP_SEQ                      ,
+        TAB_A.ACCESS_AUTH                   ,
+        TAB_A.NOTE                          ,
+        TAB_A.DISUSE_FLAG                   ,
+        TAB_A.LAST_UPDATE_TIMESTAMP         ,
+        TAB_A.LAST_UPDATE_USER              ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM B_ANS_LNS_PTN_VARS_LINK     TAB_A
 LEFT JOIN E_ANSIBLE_LNS_PATTERN      TAB_B ON ( TAB_A.PATTERN_ID = TAB_B.PATTERN_ID )
 LEFT JOIN B_ANSIBLE_LNS_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_NAME_ID )
 ;
 CREATE VIEW D_ANS_LNS_PTN_VARS_LINK_JNL AS 
 SELECT 
-        JOURNAL_SEQ_NO                ,
-        JOURNAL_REG_DATETIME          ,
-        JOURNAL_ACTION_CLASS          ,
-        TAB_A.VARS_LINK_ID            ,
-        TAB_A.PATTERN_ID              ,
-        TAB_B.PATTERN_NAME            ,
-        TAB_A.VARS_NAME_ID            ,
-        TAB_C.VARS_NAME               ,
+        JOURNAL_SEQ_NO                      ,
+        JOURNAL_REG_DATETIME                ,
+        JOURNAL_ACTION_CLASS                ,
+        TAB_A.VARS_LINK_ID                  ,
+        TAB_A.PATTERN_ID                    ,
+        TAB_B.PATTERN_NAME                  ,
+        TAB_A.VARS_NAME_ID                  ,
+        TAB_C.VARS_NAME                     ,
         [%CONCAT_HEAD/%]TAB_A.VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_A.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_A.DISUSE_FLAG             ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.DISP_SEQ                      ,
+        TAB_A.ACCESS_AUTH                   ,
+        TAB_A.NOTE                          ,
+        TAB_A.DISUSE_FLAG                   ,
+        TAB_A.LAST_UPDATE_TIMESTAMP         ,
+        TAB_A.LAST_UPDATE_USER              ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM B_ANS_LNS_PTN_VARS_LINK_JNL TAB_A
 LEFT JOIN E_ANSIBLE_LNS_PATTERN      TAB_B ON ( TAB_A.PATTERN_ID = TAB_B.PATTERN_ID )
 LEFT JOIN B_ANSIBLE_LNS_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_NAME_ID )
@@ -1343,7 +1347,9 @@ SELECT
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.LAST_UPDATE_USER        ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM B_ANS_LNS_PTN_VARS_LINK     TAB_A
 LEFT JOIN E_ANSIBLE_LNS_PATTERN      TAB_B ON ( TAB_A.PATTERN_ID = TAB_B.PATTERN_ID )
 LEFT JOIN B_ANSIBLE_LNS_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_NAME_ID )
@@ -2113,18 +2119,20 @@ WHERE TAB_A.ITA_EXT_STM_ID = 4;
 
 CREATE VIEW D_ANS_PNS_PTN_VARS_LINK AS 
 SELECT 
-        TAB_A.VARS_LINK_ID            ,
-        TAB_A.PATTERN_ID              ,
-        TAB_B.PATTERN_NAME            ,
-        TAB_A.VARS_NAME_ID            ,
-        TAB_C.VARS_NAME               ,
+        TAB_A.VARS_LINK_ID                  ,
+        TAB_A.PATTERN_ID                    ,
+        TAB_B.PATTERN_NAME                  ,
+        TAB_A.VARS_NAME_ID                  ,
+        TAB_C.VARS_NAME                     ,
         [%CONCAT_HEAD/%]TAB_A.VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_A.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_A.DISUSE_FLAG             ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.DISP_SEQ                      ,
+        TAB_A.ACCESS_AUTH                   ,
+        TAB_A.NOTE                          ,
+        TAB_A.DISUSE_FLAG                   ,
+        TAB_A.LAST_UPDATE_TIMESTAMP         ,
+        TAB_A.LAST_UPDATE_USER              ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02 
 FROM B_ANS_PNS_PTN_VARS_LINK     TAB_A
 LEFT JOIN E_ANSIBLE_PNS_PATTERN      TAB_B ON ( TAB_A.PATTERN_ID = TAB_B.PATTERN_ID )
 LEFT JOIN B_ANSIBLE_PNS_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_NAME_ID )
@@ -2132,21 +2140,23 @@ LEFT JOIN B_ANSIBLE_PNS_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_
 
 CREATE VIEW D_ANS_PNS_PTN_VARS_LINK_JNL AS 
 SELECT 
-        JOURNAL_SEQ_NO                ,
-        JOURNAL_REG_DATETIME          ,
-        JOURNAL_ACTION_CLASS          ,
-        TAB_A.VARS_LINK_ID            ,
-        TAB_A.PATTERN_ID              ,
-        TAB_B.PATTERN_NAME            ,
-        TAB_A.VARS_NAME_ID            ,
-        TAB_C.VARS_NAME               ,
+        JOURNAL_SEQ_NO                      ,
+        JOURNAL_REG_DATETIME                ,
+        JOURNAL_ACTION_CLASS                ,
+        TAB_A.VARS_LINK_ID                  ,
+        TAB_A.PATTERN_ID                    ,
+        TAB_B.PATTERN_NAME                  ,
+        TAB_A.VARS_NAME_ID                  ,
+        TAB_C.VARS_NAME                     ,
         [%CONCAT_HEAD/%]TAB_A.VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_A.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_A.DISUSE_FLAG             ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.DISP_SEQ                      ,
+        TAB_A.ACCESS_AUTH                   ,
+        TAB_A.NOTE                          ,
+        TAB_A.DISUSE_FLAG                   ,
+        TAB_A.LAST_UPDATE_TIMESTAMP         ,
+        TAB_A.LAST_UPDATE_USER              ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02 
 FROM B_ANS_PNS_PTN_VARS_LINK_JNL TAB_A
 LEFT JOIN E_ANSIBLE_PNS_PATTERN      TAB_B ON ( TAB_A.PATTERN_ID = TAB_B.PATTERN_ID )
 LEFT JOIN B_ANSIBLE_PNS_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_NAME_ID )
@@ -2166,7 +2176,9 @@ SELECT
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.LAST_UPDATE_USER        ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM B_ANS_PNS_PTN_VARS_LINK     TAB_A
 LEFT JOIN E_ANSIBLE_PNS_PATTERN      TAB_B ON ( TAB_A.PATTERN_ID = TAB_B.PATTERN_ID )
 LEFT JOIN B_ANSIBLE_PNS_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_NAME_ID )
@@ -2292,7 +2304,8 @@ SELECT TAB_A.OPERATION_NO_UAPK    ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
        TAB_A.LAST_UPDATE_USER     ,
        TAB_B.PHO_LINK_ID          ,
-       TAB_B.DISUSE_FLAG           DISUSE_FLAG_2
+       TAB_B.DISUSE_FLAG           DISUSE_FLAG_2,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM 
     E_OPERATION_LIST TAB_A
     LEFT JOIN B_ANSIBLE_PNS_PHO_LINK TAB_B ON (TAB_A.OPERATION_NO_UAPK = TAB_B.OPERATION_NO_UAPK)
@@ -3342,7 +3355,8 @@ SELECT
         TAB_A.DISUSE_FLAG   AS PACKAGE_DISUSE_FLAG ,
         TAB_B.DISUSE_FLAG   AS ROLE_DISUSE_FLAG    ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.LAST_UPDATE_USER        ,
+        TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM B_ANSIBLE_LRL_ROLE     TAB_A
 LEFT JOIN B_ANSIBLE_LRL_ROLE_PACKAGE TAB_B ON ( TAB_A.ROLE_PACKAGE_ID = TAB_B.ROLE_PACKAGE_ID )
 ;
@@ -3362,7 +3376,8 @@ SELECT
         TAB_A.DISUSE_FLAG   AS PACKAGE_DISUSE_FLAG ,
         TAB_B.DISUSE_FLAG   AS ROLE_DISUSE_FLAG    ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.LAST_UPDATE_USER        ,
+        TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM B_ANSIBLE_LRL_ROLE_JNL TAB_A
 LEFT JOIN B_ANSIBLE_LRL_ROLE_PACKAGE TAB_B ON ( TAB_A.ROLE_PACKAGE_ID = TAB_B.ROLE_PACKAGE_ID )
 ;
@@ -3388,7 +3403,9 @@ SELECT
         TAB_A.NOTE                    ,
         TAB_A.DISUSE_FLAG             ,
         TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.LAST_UPDATE_USER        ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM B_ANS_LRL_PTN_VARS_LINK     TAB_A
 LEFT JOIN E_ANSIBLE_LRL_PATTERN      TAB_B ON ( TAB_A.PATTERN_ID = TAB_B.PATTERN_ID )
 LEFT JOIN B_ANSIBLE_LRL_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_NAME_ID )
@@ -3403,41 +3420,45 @@ AND TAB_C.DISUSE_FLAG = '0'
 -- -------------------------------------------------------
 CREATE VIEW D_ANS_LRL_PTN_VARS_LINK AS 
 SELECT 
-        TAB_A.VARS_LINK_ID            ,
-        TAB_A.PATTERN_ID              ,
-        TAB_B.PATTERN_NAME            ,
-        TAB_A.VARS_NAME_ID            ,
-        TAB_C.VARS_NAME               ,
-        TAB_C.VARS_ATTRIBUTE_01       ,
+        TAB_A.VARS_LINK_ID                  ,
+        TAB_A.PATTERN_ID                    ,
+        TAB_B.PATTERN_NAME                  ,
+        TAB_A.VARS_NAME_ID                  ,
+        TAB_C.VARS_NAME                     ,
+        TAB_C.VARS_ATTRIBUTE_01             ,
         [%CONCAT_HEAD/%]TAB_A.VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_A.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_A.DISUSE_FLAG             ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.DISP_SEQ                      ,
+        TAB_A.ACCESS_AUTH                   ,
+        TAB_A.NOTE                          ,
+        TAB_A.DISUSE_FLAG                   ,
+        TAB_A.LAST_UPDATE_TIMESTAMP         ,
+        TAB_A.LAST_UPDATE_USER              ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM B_ANS_LRL_PTN_VARS_LINK     TAB_A
 LEFT JOIN E_ANSIBLE_LRL_PATTERN      TAB_B ON ( TAB_A.PATTERN_ID = TAB_B.PATTERN_ID )
 LEFT JOIN B_ANSIBLE_LRL_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_NAME_ID )
 ;
 CREATE VIEW D_ANS_LRL_PTN_VARS_LINK_JNL AS 
 SELECT 
-        JOURNAL_SEQ_NO                ,
-        JOURNAL_REG_DATETIME          ,
-        JOURNAL_ACTION_CLASS          ,
-        TAB_A.VARS_LINK_ID            ,
-        TAB_A.PATTERN_ID              ,
-        TAB_B.PATTERN_NAME            ,
-        TAB_A.VARS_NAME_ID            ,
-        TAB_C.VARS_NAME               ,
-        TAB_C.VARS_ATTRIBUTE_01       ,
+        JOURNAL_SEQ_NO                      ,
+        JOURNAL_REG_DATETIME                ,
+        JOURNAL_ACTION_CLASS                ,
+        TAB_A.VARS_LINK_ID                  ,
+        TAB_A.PATTERN_ID                    ,
+        TAB_B.PATTERN_NAME                  ,
+        TAB_A.VARS_NAME_ID                  ,
+        TAB_C.VARS_NAME                     ,
+        TAB_C.VARS_ATTRIBUTE_01             ,
         [%CONCAT_HEAD/%]TAB_A.VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_A.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_A.DISUSE_FLAG             ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.DISP_SEQ                      ,
+        TAB_A.ACCESS_AUTH                   ,
+        TAB_A.NOTE                          ,
+        TAB_A.DISUSE_FLAG                   ,
+        TAB_A.LAST_UPDATE_TIMESTAMP         ,
+        TAB_A.LAST_UPDATE_USER              ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM B_ANS_LRL_PTN_VARS_LINK_JNL TAB_A
 LEFT JOIN E_ANSIBLE_LRL_PATTERN      TAB_B ON ( TAB_A.PATTERN_ID = TAB_B.PATTERN_ID )
 LEFT JOIN B_ANSIBLE_LRL_VARS_MASTER  TAB_C ON ( TAB_A.VARS_NAME_ID = TAB_C.VARS_NAME_ID )
@@ -3484,19 +3505,21 @@ AND TAB_C.DISUSE_FLAG = '0'
 -- -------------------------------------------------------
 CREATE VIEW D_ANS_LRL_CHILD_VARS AS 
 SELECT 
-        TAB_A.CHILD_VARS_NAME_ID      ,
-        TAB_A.CHILD_VARS_NAME         ,
-        TAB_A.PARENT_VARS_NAME_ID     ,
-        TAB_B.VARS_NAME               ,
-        TAB_B.VARS_ATTRIBUTE_01       ,
-        TAB_C.VARS_LINK_ID            ,
+        TAB_A.CHILD_VARS_NAME_ID            ,
+        TAB_A.CHILD_VARS_NAME               ,
+        TAB_A.PARENT_VARS_NAME_ID           ,
+        TAB_B.VARS_NAME                     ,
+        TAB_B.VARS_ATTRIBUTE_01             ,
+        TAB_C.VARS_LINK_ID                  ,
         [%CONCAT_HEAD/%]TAB_A.CHILD_VARS_NAME_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.CHILD_VARS_NAME[%CONCAT_TAIL/%] CHILD_VARS_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_A.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_A.DISUSE_FLAG             ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.DISP_SEQ                      ,
+        TAB_A.ACCESS_AUTH                   ,
+        TAB_A.NOTE                          ,
+        TAB_A.DISUSE_FLAG                   ,
+        TAB_A.LAST_UPDATE_TIMESTAMP         ,
+        TAB_A.LAST_UPDATE_USER              ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM B_ANSIBLE_LRL_CHILD_VARS         TAB_A
 LEFT JOIN B_ANSIBLE_LRL_VARS_MASTER   TAB_B ON ( TAB_A.PARENT_VARS_NAME_ID = TAB_B.VARS_NAME_ID )
 LEFT JOIN B_ANS_LRL_PTN_VARS_LINK TAB_C ON ( TAB_B.VARS_NAME_ID = TAB_C.VARS_NAME_ID)
@@ -3504,22 +3527,24 @@ WHERE TAB_B.VARS_ATTRIBUTE_01 IN (3)
 ;
 CREATE VIEW D_ANS_LRL_CHILD_VARS_JNL AS 
 SELECT 
-        JOURNAL_SEQ_NO                ,
-        JOURNAL_REG_DATETIME          ,
-        JOURNAL_ACTION_CLASS          ,
-        TAB_A.CHILD_VARS_NAME_ID      ,
-        TAB_A.CHILD_VARS_NAME         ,
-        TAB_A.PARENT_VARS_NAME_ID     ,
-        TAB_B.VARS_NAME               ,
-        TAB_B.VARS_ATTRIBUTE_01       ,
-        TAB_C.VARS_LINK_ID            ,
+        JOURNAL_SEQ_NO                      ,
+        JOURNAL_REG_DATETIME                ,
+        JOURNAL_ACTION_CLASS                ,
+        TAB_A.CHILD_VARS_NAME_ID            ,
+        TAB_A.CHILD_VARS_NAME               ,
+        TAB_A.PARENT_VARS_NAME_ID           ,
+        TAB_B.VARS_NAME                     ,
+        TAB_B.VARS_ATTRIBUTE_01             ,
+        TAB_C.VARS_LINK_ID                  ,
         [%CONCAT_HEAD/%]TAB_A.CHILD_VARS_NAME_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.CHILD_VARS_NAME[%CONCAT_TAIL/%] CHILD_VARS_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_A.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_A.DISUSE_FLAG             ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER
+        TAB_A.DISP_SEQ                      ,
+        TAB_A.ACCESS_AUTH                   ,
+        TAB_A.NOTE                          ,
+        TAB_A.DISUSE_FLAG                   ,
+        TAB_A.LAST_UPDATE_TIMESTAMP         ,
+        TAB_A.LAST_UPDATE_USER              ,
+        TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+        TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM B_ANSIBLE_LRL_CHILD_VARS_JNL     TAB_A
 LEFT JOIN B_ANSIBLE_LRL_VARS_MASTER   TAB_B ON ( TAB_A.PARENT_VARS_NAME_ID = TAB_B.VARS_NAME_ID )
 LEFT JOIN B_ANS_LRL_PTN_VARS_LINK TAB_C ON ( TAB_B.VARS_NAME_ID = TAB_C.VARS_NAME_ID)
@@ -3544,7 +3569,8 @@ SELECT TAB_A.OPERATION_NO_UAPK    ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
        TAB_A.LAST_UPDATE_USER     ,
        TAB_B.PHO_LINK_ID          ,
-       TAB_B.DISUSE_FLAG           DISUSE_FLAG_2
+       TAB_B.DISUSE_FLAG           DISUSE_FLAG_2,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM 
     E_OPERATION_LIST TAB_A
     LEFT JOIN B_ANSIBLE_LRL_PHO_LINK TAB_B ON (TAB_A.OPERATION_NO_UAPK = TAB_B.OPERATION_NO_UAPK)
@@ -4228,15 +4254,17 @@ FROM
 -- -------------------------------------------------------
 CREATE VIEW E_ANS_PNS_PTN_VAR_LIST AS
 SELECT DISTINCT
-  TAB_A.VARS_LINK_ID          ,
-  TAB_A.PATTERN_ID            ,
-  TAB_A.VARS_NAME_ID          ,
-  TAB_A.DISP_SEQ              ,
-  TAB_C.ACCESS_AUTH           ,
-  TAB_A.NOTE                  ,
-  TAB_A.DISUSE_FLAG           ,
-  TAB_A.LAST_UPDATE_TIMESTAMP ,
-  TAB_A.LAST_UPDATE_USER      ,
+  TAB_A.VARS_LINK_ID                  ,
+  TAB_A.PATTERN_ID                    ,
+  TAB_A.VARS_NAME_ID                  ,
+  TAB_A.DISP_SEQ                      ,
+  TAB_C.ACCESS_AUTH                   ,
+  TAB_A.NOTE                          ,
+  TAB_A.DISUSE_FLAG                   ,
+  TAB_A.LAST_UPDATE_TIMESTAMP         ,
+  TAB_A.LAST_UPDATE_USER              ,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_02 ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_PNS_PTN_VARS_LINK             TAB_A
@@ -4250,15 +4278,17 @@ WHERE
 
 CREATE VIEW E_ANS_PNS_PTN_VAR_LIST_JNL AS
 SELECT DISTINCT
-  TAB_A.VARS_LINK_ID          ,
-  TAB_A.PATTERN_ID            ,
-  TAB_A.VARS_NAME_ID          ,
-  TAB_A.DISP_SEQ              ,
-  TAB_C.ACCESS_AUTH           ,
-  TAB_A.NOTE                  ,
-  TAB_A.DISUSE_FLAG           ,
-  TAB_A.LAST_UPDATE_TIMESTAMP ,
-  TAB_A.LAST_UPDATE_USER      ,
+  TAB_A.VARS_LINK_ID                  ,
+  TAB_A.PATTERN_ID                    ,
+  TAB_A.VARS_NAME_ID                  ,
+  TAB_A.DISP_SEQ                      ,
+  TAB_C.ACCESS_AUTH                   ,
+  TAB_A.NOTE                          ,
+  TAB_A.DISUSE_FLAG                   ,
+  TAB_A.LAST_UPDATE_TIMESTAMP         ,
+  TAB_A.LAST_UPDATE_USER              ,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_02 ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_PNS_PTN_VARS_LINK_JNL             TAB_A
@@ -4275,7 +4305,8 @@ WHERE
 -- -------------------------------------------------------
 CREATE VIEW E_ANS_PNS_STM_LIST AS
 SELECT
-  TAB_A.*   ,
+  TAB_A.*                             ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
   [%CONCAT_HEAD/%]TAB_B.SYSTEM_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.HOSTNAME[%CONCAT_TAIL/%] HOST_PULLDOWN
 FROM
   B_ANSIBLE_PNS_PHO_LINK  TAB_A
@@ -4286,7 +4317,8 @@ WHERE
 
 CREATE VIEW E_ANS_PNS_STM_LIST_JNL AS
 SELECT
-  TAB_A.*    ,
+  TAB_A.*                             ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
   [%CONCAT_HEAD/%]TAB_B.SYSTEM_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.HOSTNAME[%CONCAT_TAIL/%] HOST_PULLDOWN
 FROM
   B_ANSIBLE_PNS_PHO_LINK_JNL TAB_A
@@ -4319,15 +4351,17 @@ FROM
 -- -------------------------------------------------------
 CREATE VIEW E_ANS_LNS_PTN_VAR_LIST AS
 SELECT DISTINCT
-  TAB_A.VARS_LINK_ID          ,
-  TAB_A.PATTERN_ID            ,
-  TAB_A.VARS_NAME_ID          ,
-  TAB_A.DISP_SEQ              ,
-  TAB_C.ACCESS_AUTH           ,
-  TAB_A.NOTE                  ,
-  TAB_A.DISUSE_FLAG           ,
-  TAB_A.LAST_UPDATE_TIMESTAMP ,
-  TAB_A.LAST_UPDATE_USER      ,
+  TAB_A.VARS_LINK_ID                  ,
+  TAB_A.PATTERN_ID                    ,
+  TAB_A.VARS_NAME_ID                  ,
+  TAB_A.DISP_SEQ                      ,
+  TAB_C.ACCESS_AUTH                   ,
+  TAB_A.NOTE                          ,
+  TAB_A.DISUSE_FLAG                   ,
+  TAB_A.LAST_UPDATE_TIMESTAMP         ,
+  TAB_A.LAST_UPDATE_USER              ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+  TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02 ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_LNS_PTN_VARS_LINK             TAB_A
@@ -4340,15 +4374,17 @@ WHERE
 
 CREATE VIEW E_ANS_LNS_PTN_VAR_LIST_JNL AS
 SELECT DISTINCT
-  TAB_A.VARS_LINK_ID          ,
-  TAB_A.PATTERN_ID            ,
-  TAB_A.VARS_NAME_ID          ,
-  TAB_A.DISP_SEQ              ,
-  TAB_C.ACCESS_AUTH           ,
-  TAB_A.NOTE                  ,
-  TAB_A.DISUSE_FLAG           ,
-  TAB_A.LAST_UPDATE_TIMESTAMP ,
-  TAB_A.LAST_UPDATE_USER      ,
+  TAB_A.VARS_LINK_ID                  ,
+  TAB_A.PATTERN_ID                    ,
+  TAB_A.VARS_NAME_ID                  ,
+  TAB_A.DISP_SEQ                      ,
+  TAB_C.ACCESS_AUTH                   ,
+  TAB_A.NOTE                          ,
+  TAB_A.DISUSE_FLAG                   ,
+  TAB_A.LAST_UPDATE_TIMESTAMP         ,
+  TAB_A.LAST_UPDATE_USER              ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+  TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02 ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_LNS_PTN_VARS_LINK_JNL             TAB_A
@@ -4365,7 +4401,8 @@ WHERE
 -- -------------------------------------------------------
 CREATE VIEW E_ANS_LNS_STM_LIST AS
 SELECT
-  TAB_A.*    ,
+  TAB_A.*                              ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
   [%CONCAT_HEAD/%]TAB_B.SYSTEM_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.HOSTNAME[%CONCAT_TAIL/%] HOST_PULLDOWN
 FROM
   B_ANSIBLE_LNS_PHO_LINK  TAB_A
@@ -4376,7 +4413,8 @@ WHERE
 
 CREATE VIEW E_ANS_LNS_STM_LIST_JNL AS
 SELECT
-  TAB_A. *   ,
+  TAB_A. *                             ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
   [%CONCAT_HEAD/%]TAB_B.SYSTEM_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.HOSTNAME[%CONCAT_TAIL/%] HOST_PULLDOWN
 FROM
   B_ANSIBLE_LNS_PHO_LINK_JNL TAB_A
@@ -4408,8 +4446,9 @@ FROM
 -- -------------------------------------------------------
 CREATE VIEW E_ANS_LRL_PKG_ROLE_LIST AS
 SELECT
-  TAB_A.*                       ,
-  TAB_B.ROLE_ID                 ,
+  TAB_A.*                             ,
+  TAB_B.ROLE_ID                       ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
   [%CONCAT_HEAD/%]TAB_A.ROLE_PACKAGE_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.ROLE_PACKAGE_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.ROLE_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.ROLE_NAME[%CONCAT_TAIL/%] ROLE_PACKAGE_PULLDOWN
 FROM
   B_ANSIBLE_LRL_ROLE_PACKAGE   TAB_A
@@ -4420,8 +4459,9 @@ WHERE
 
 CREATE VIEW E_ANS_LRL_PKG_ROLE_LIST_JNL AS 
 SELECT
-  TAB_A.*                       ,
-  TAB_B.ROLE_ID                 ,
+  TAB_A.*                             ,
+  TAB_B.ROLE_ID                       ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
   [%CONCAT_HEAD/%]TAB_A.ROLE_PACKAGE_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.ROLE_PACKAGE_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.ROLE_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.ROLE_NAME[%CONCAT_TAIL/%] ROLE_PACKAGE_PULLDOWN
 FROM
   B_ANSIBLE_LRL_ROLE_PACKAGE_JNL   TAB_A
@@ -4458,15 +4498,17 @@ FROM
 -- -------------------------------------------------------
 CREATE VIEW E_ANS_LRL_PTN_VAR_LIST AS
 SELECT DISTINCT
-  TAB_A.VARS_LINK_ID          ,
-  TAB_A.PATTERN_ID            ,
-  TAB_A.VARS_NAME_ID          ,
-  TAB_A.DISP_SEQ              ,
-  TAB_C.ACCESS_AUTH           ,
-  TAB_A.NOTE                  ,
-  TAB_A.DISUSE_FLAG           ,
-  TAB_A.LAST_UPDATE_TIMESTAMP ,
-  TAB_A.LAST_UPDATE_USER      ,
+  TAB_A.VARS_LINK_ID                  ,
+  TAB_A.PATTERN_ID                    ,
+  TAB_A.VARS_NAME_ID                  ,
+  TAB_A.DISP_SEQ                      ,
+  TAB_C.ACCESS_AUTH                   ,
+  TAB_A.NOTE                          ,
+  TAB_A.DISUSE_FLAG                   ,
+  TAB_A.LAST_UPDATE_TIMESTAMP         ,
+  TAB_A.LAST_UPDATE_USER              ,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_02 ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_LRL_PTN_VARS_LINK             TAB_A
@@ -4479,15 +4521,17 @@ WHERE
 
 CREATE VIEW E_ANS_LRL_PTN_VAR_LIST_JNL AS
 SELECT DISTINCT
-  TAB_A.VARS_LINK_ID          ,
-  TAB_A.PATTERN_ID            ,
-  TAB_A.VARS_NAME_ID          ,
-  TAB_A.DISP_SEQ              ,
-  TAB_C.ACCESS_AUTH           ,
-  TAB_A.NOTE                  ,
-  TAB_A.DISUSE_FLAG           ,
-  TAB_A.LAST_UPDATE_TIMESTAMP ,
-  TAB_A.LAST_UPDATE_USER      ,
+  TAB_A.VARS_LINK_ID                  ,
+  TAB_A.PATTERN_ID                    ,
+  TAB_A.VARS_NAME_ID                  ,
+  TAB_A.DISP_SEQ                      ,
+  TAB_C.ACCESS_AUTH                   ,
+  TAB_A.NOTE                          ,
+  TAB_A.DISUSE_FLAG                   ,
+  TAB_A.LAST_UPDATE_TIMESTAMP         ,
+  TAB_A.LAST_UPDATE_USER              ,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01 ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_02 ,
   CONCAT(TAB_A.PATTERN_ID,':',TAB_C.PATTERN_NAME,':',TAB_A.VARS_LINK_ID,':',TAB_B.VARS_NAME) PTN_VAR_PULLDOWN
 FROM
   B_ANS_LRL_PTN_VARS_LINK_JNL             TAB_A
@@ -4505,6 +4549,7 @@ WHERE
 CREATE VIEW E_ANS_LRL_VAR_MEMBER_LIST AS
 SELECT DISTINCT
   TAB_A.*,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
   [%CONCAT_HEAD/%]TAB_B.VARS_NAME[%CONCAT_MID/%]'.'[%CONCAT_MID/%]TAB_A.COL_SEQ_COMBINATION_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.COL_COMBINATION_MEMBER_ALIAS[%CONCAT_TAIL/%] VAR_MEMBER_PULLDOWN
 FROM
   B_ANS_LRL_MEMBER_COL_COMB               TAB_A
@@ -4516,6 +4561,7 @@ WHERE
 CREATE VIEW E_ANS_LRL_VAR_MEMBER_LIST_JNL AS
 SELECT DISTINCT
   TAB_A.*,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
   [%CONCAT_HEAD/%]TAB_B.VARS_NAME[%CONCAT_MID/%]'.'[%CONCAT_MID/%]TAB_A.COL_SEQ_COMBINATION_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.COL_COMBINATION_MEMBER_ALIAS[%CONCAT_TAIL/%] VAR_MEMBER_PULLDOWN
 FROM
   B_ANS_LRL_MEMBER_COL_COMB_JNL           TAB_A
@@ -4532,6 +4578,7 @@ WHERE
 CREATE VIEW E_ANS_LRL_STM_LIST AS
 SELECT
   TAB_A.*  ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
   [%CONCAT_HEAD/%]TAB_B.SYSTEM_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.HOSTNAME[%CONCAT_TAIL/%] HOST_PULLDOWN
 FROM
   B_ANSIBLE_LRL_PHO_LINK  TAB_A
@@ -4542,7 +4589,8 @@ WHERE
 
 CREATE VIEW E_ANS_LRL_STM_LIST_JNL AS
 SELECT
-  TAB_A.*             ,
+  TAB_A.*  ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01 ,
   [%CONCAT_HEAD/%]TAB_B.SYSTEM_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.HOSTNAME[%CONCAT_TAIL/%] HOST_PULLDOWN
 FROM
   B_ANSIBLE_LRL_PHO_LINK_JNL TAB_A

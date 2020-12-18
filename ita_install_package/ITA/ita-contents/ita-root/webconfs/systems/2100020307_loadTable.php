@@ -166,6 +166,7 @@ Ansible（Legacy Role）作業パターン詳細
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH_01     ACCESS_AUTH_01 "
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
@@ -189,7 +190,7 @@ Ansible（Legacy Role）作業パターン詳細
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
@@ -230,6 +231,7 @@ Ansible（Legacy Role）作業パターン詳細
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH_01     ACCESS_AUTH_01 "
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
@@ -253,7 +255,7 @@ Ansible（Legacy Role）作業パターン詳細
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
@@ -293,6 +295,7 @@ Ansible（Legacy Role）作業パターン詳細
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH_01     ACCESS_AUTH_01 "
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
@@ -316,7 +319,7 @@ Ansible（Legacy Role）作業パターン詳細
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
