@@ -215,6 +215,7 @@ Ansible（Legacy Role）代入値管理
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
                    .",TAB_2.PATTERN    DISP_COLUMN "
                    .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH ACCESS_AUTH_01 "
                    ."FROM "
                    ." B_ANSIBLE_LRL_PHO_LINK          TAB_1 "
                    ." LEFT JOIN E_ANSIBLE_LRL_PATTERN TAB_2 ON (TAB_1.PATTERN_ID = TAB_2.PATTERN_ID) "
@@ -240,7 +241,7 @@ Ansible（Legacy Role）代入値管理
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -280,6 +281,7 @@ Ansible（Legacy Role）代入値管理
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
                    .",TAB_2.PATTERN    DISP_COLUMN "
                    .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH ACCESS_AUTH_01 "
                    ."FROM "
                    ." B_ANSIBLE_LRL_PHO_LINK          TAB_1 "
                    ." LEFT JOIN E_ANSIBLE_LRL_PATTERN TAB_2 ON (TAB_1.PATTERN_ID = TAB_2.PATTERN_ID) "
@@ -305,7 +307,7 @@ Ansible（Legacy Role）代入値管理
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -425,6 +427,7 @@ Ansible（Legacy Role）代入値管理
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
                    .",TAB_2.HOST_PULLDOWN DISP_COLUMN "
                    .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH ACCESS_AUTH_01 "
                    ."FROM "
                    ." B_ANSIBLE_LRL_PHO_LINK TAB_1 "
                    ." LEFT JOIN E_STM_LIST   TAB_2 ON (TAB_1.SYSTEM_ID = TAB_2.SYSTEM_ID) "
@@ -452,7 +455,7 @@ Ansible（Legacy Role）代入値管理
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -493,6 +496,7 @@ Ansible（Legacy Role）代入値管理
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
                    .",TAB_2.HOST_PULLDOWN DISP_COLUMN "
                    .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH ACCESS_AUTH_01 "
                    ."FROM "
                    ." B_ANSIBLE_LRL_PHO_LINK TAB_1 "
                    ." LEFT JOIN E_STM_LIST   TAB_2 ON (TAB_1.SYSTEM_ID = TAB_2.SYSTEM_ID) "
@@ -520,7 +524,7 @@ Ansible（Legacy Role）代入値管理
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -634,6 +638,8 @@ Ansible（Legacy Role）代入値管理
                    ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                    .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                   .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                    ."FROM "
                    ." D_ANS_LRL_PTN_VARS_LINK_VFP TAB_1 "
                    ."WHERE "
@@ -656,7 +662,7 @@ Ansible（Legacy Role）代入値管理
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -696,6 +702,8 @@ Ansible（Legacy Role）代入値管理
                    ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                    .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                   .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                    ."FROM "
                    ." D_ANS_LRL_PTN_VARS_LINK_VFP TAB_1 "
                    ."WHERE "
@@ -718,7 +726,7 @@ Ansible（Legacy Role）代入値管理
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -837,6 +845,8 @@ Ansible（Legacy Role）代入値管理
                        ." TAB_1.VARS_LINK_ID "
                        .",TAB_1.VARS_ATTRIBUTE_01 "
                        .",TAB_1.ACCESS_AUTH "
+                       .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                       .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                        ."FROM "
                        ." D_ANS_LRL_PTN_VARS_LINK_VFP TAB_1 "
                        ."WHERE "
@@ -861,7 +871,7 @@ Ansible（Legacy Role）代入値管理
                 $tmpAryRow = array();
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -922,7 +932,7 @@ Ansible（Legacy Role）代入値管理
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
@@ -1010,7 +1020,7 @@ Ansible（Legacy Role）代入値管理
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -1098,6 +1108,8 @@ Ansible（Legacy Role）代入値管理
                        ." TAB_1.VARS_LINK_ID "
                        .",TAB_1.VARS_ATTRIBUTE_01 "
                        .",TAB_1.ACCESS_AUTH "
+                       .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                       .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                        ."FROM "
                        ." D_ANS_LRL_PTN_VARS_LINK_VFP TAB_1 "
                        ."WHERE "
@@ -1121,7 +1133,7 @@ Ansible（Legacy Role）代入値管理
                 $tmpAryRow = array();
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -1297,6 +1309,8 @@ Ansible（Legacy Role）代入値管理
                        ." TAB_1.VARS_LINK_ID "
                        .",TAB_1.VARS_ATTRIBUTE_01 "
                        .",TAB_1.ACCESS_AUTH "
+                       .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                       .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                        ."FROM "
                        ." D_ANS_LRL_PTN_VARS_LINK_VFP TAB_1 "
                        ."WHERE "
@@ -1320,7 +1334,7 @@ Ansible（Legacy Role）代入値管理
                 $tmpAryRow = array();
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
