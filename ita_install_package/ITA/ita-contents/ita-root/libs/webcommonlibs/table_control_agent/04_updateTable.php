@@ -405,7 +405,7 @@
                     // ACCESS_AUTHカラム 汎用個別バリデータ
                     // ロール名をロールIDに置換
                     foreach($arrayObjColumn as $objColumn){
-                        $arrayTmp = $objColumn->beforeTableIUDIndividualValidator($exeUpdateData, $reqUpdateData, $aryVariant);
+                        $arrayTmp = $objColumn->beforeTableIUDIndividualValidator($ordMode, $exeUpdateData, $reqUpdateData, $aryVariant);
                         if($arrayTmp[0]===false){
                             // エラー時は返却さけているメッセージを表示 
                             $error_str .= $arrayTmp[3];
