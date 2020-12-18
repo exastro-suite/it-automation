@@ -1355,13 +1355,17 @@ function setRoleSelectModalBody( roleList, initData, okCallback, cancelCallBack,
       const roleLength = roleList.length;
       for ( let i = 0; i < roleLength; i++ ) {
         const roleName = roleList[i]['ROLE_NAME'],
-              roleID = roleList[i]['ROLE_ID'],
-              checkValue = ( valueType === 'name')? roleName: roleID,
-              checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
-              value = ( valueType === 'name')? roleName: roleID;
-        roleSelectHTML += '<tr>'
-        + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
-        + '<th>' + roleID + '</th><td>' + roleName + '</td></tr>';
+              hideRoleName = getSomeMessage("ITAWDCC92008");
+        // ********は表示しない
+        if ( roleName !== hideRoleName ) {
+          const roleID = roleList[i]['ROLE_ID'],
+                checkValue = ( valueType === 'name')? roleName: roleID,
+                checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
+                value = ( valueType === 'name')? roleName: roleID;
+          roleSelectHTML += '<tr>'
+          + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
+          + '<th>' + roleID + '</th><td>' + roleName + '</td></tr>';
+        }
       }
 
       roleSelectHTML += ''      
