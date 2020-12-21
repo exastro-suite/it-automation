@@ -1,6 +1,6 @@
 <?php
 //   Copyright 2019 NEC Corporation
-//
+//   
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
@@ -956,27 +956,27 @@ class TableControlAgent {
 		    	                 // 登録するアクセス権をロール名称の文字列に設定
 		    	                 $exeQueryData[$AccessAuthColumnName] = $RoleIDString;
 		    	            }
-		    	        }
-		    	    } else {
-			        $RoleIDString   = $exeQueryData[$AccessAuthColumnName];
-		    	        $chkRoleIDString = "";
-		    	        if(strlen($RoleIDString) != 0) {
-		    	            // ロールID文字列のアクセス権をロール名称の文字列に変換
-		    	            // 廃止ロールはカットする。
-		    	            $obj = new RoleBasedAccessControl($g['objDBCA']);
-		    	            $ErrorRoleNameAry = array();
-		    	            $chkRoleIDString = $obj->getRoleNameStringToRoleIDStringForDBUpdate($g['login_id'],$ordMode,$RoleIDString,$ErrorRoleNameAry);  
-		    	            unset($obj);
-		    	            if($chkRoleIDString === false) {
-		    	                $boolRet = false;
-		    	                $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19021",array(implode(",", $ErrorRoleNameAry))) . "\n";
-		    	                // intErrorTypeは設定不要
-		    	                // $intErrorType = 500;
+		    	        } else {
+			            $RoleIDString   = $exeQueryData[$AccessAuthColumnName];
+		    	            $chkRoleIDString = "";
+		    	            if(strlen($RoleIDString) != 0) {
+		    	                // ロールID文字列のアクセス権をロール名称の文字列に変換
+		    	                // 廃止ロールはカットする。
+		    	                $obj = new RoleBasedAccessControl($g['objDBCA']);
+		    	                $ErrorRoleNameAry = array();
+		    	                $chkRoleIDString = $obj->chkRoleIDStringForDBUpdate($g['login_id'],$ordMode,$RoleIDString,$ErrorRoleNameAry);  
+		    	                unset($obj);
+		    	                if($chkRoleIDString === false) {
+		    	                    $boolRet = false;
+		    	                    $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19021",array(implode(",", $ErrorRoleNameAry))) . "\n";
+		    	                    // intErrorTypeは設定不要
+		    	                    // $intErrorType = 500;
+		    	                }
 		    	            }
-		    	        }
-		    	        if($RoleIDString !== false) {
-		    	            // 登録するアクセス権をロール名称の文字列に設定
-		    	            $exeQueryData[$AccessAuthColumnName] = $chkRoleIDString;
+		    	            if($chkRoleIDString !== false) {
+		    	                // 登録するアクセス権をロール名称の文字列に設定
+		    	                $exeQueryData[$AccessAuthColumnName] = $chkRoleIDString;
+		    	            }
 		    	        }
                             }
 		    	}
