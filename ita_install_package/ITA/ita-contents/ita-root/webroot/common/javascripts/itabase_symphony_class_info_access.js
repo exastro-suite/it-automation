@@ -1472,7 +1472,12 @@ const getRoleListIdToName = function( roleListText ) {
         for ( let i = 0; i < roleListLength; i++ ) {
             const roleName = listIdName('role', roleList[i]);
             if ( roleName !== undefined ) {
-                roleNameList.push( roleName );
+                const hideRoleName = getSomeMessage("ITAWDCC92008");
+                if ( roleName !== hideRoleName ) {
+                  roleNameList.push( roleName );
+                } else {
+                  roleNameList.push( roleName + '(' + roleList[i] + ')');
+                }
             } else {
                 roleNameList.push( getSomeMessage("ITAWDCC92007") + '(' + roleList[i] + ')');
             }
