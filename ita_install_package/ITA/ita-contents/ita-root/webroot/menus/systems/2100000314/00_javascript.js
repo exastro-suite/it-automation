@@ -972,7 +972,7 @@ function setSchedule(target_area_id){
     editArea.dialog({
         width:680,
         modal:true,
-        draggable:true,
+        draggable:false,
         resizable: false,
         open: function(){
             //自動フォーカスを外す
