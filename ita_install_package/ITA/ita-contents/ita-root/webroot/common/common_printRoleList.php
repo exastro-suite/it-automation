@@ -80,6 +80,33 @@ try {
         throw new Exception("Failed to get user role information");
     }
 
+    //全ロール取得
+    $RoleID2Name = array();
+    $RoleName2ID = array();
+    $result_role_info_all = $obj->getAllRoleSearchHashList($user_id,$AllRoleID2Name,$AllRoleName2ID);
+    if($result_role_info_all === false) {
+        throw new Exception("Failed to get role information");
+    }
+    $allRolelist = $AllRoleID2Name;
+
+    // 権限無しロールをリストへ追加(ロール名=********)
+    foreach ($allRolelist as $tmpRoleid => $tmpRole) {
+        $invisiflg=0;
+        foreach ($result_role_info as $key => $tmpRoleinfo) {
+            if ( $tmpRoleid == $tmpRoleinfo['ROLE_ID']  ){
+                $invisiflg=1;
+                break;
+            }
+        }
+        if( $invisiflg == 0 && $tmpRole['DISUSE_FLAG'] == 0 ){
+            $result_role_info[] = array( 
+                'ROLE_ID' => $tmpRoleid,
+                'ROLE_NAME' => $objMTS->getSomeMessage("ITAWDCH-STD-11102"),  #"********", 
+                'DEFAULT' => ""
+            );
+        }
+    }
+
     header("Content-Type: text/html; charset=utf-8");
     echo json_encode($result_role_info);
 
