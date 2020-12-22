@@ -437,7 +437,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-STD-50003");
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
-
+        require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
 
         ///////////////////////////////////////////////////////////////////////////
         // 関連データベースが更新されバックヤード処理が必要か判定
@@ -460,6 +460,27 @@
             }
             exit(0);
         }
+
+        require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php");
+
+        // 投入オペレーション・機器一覧・Movement一覧のアクセス許可ロールを取得
+        $lva_OpeAccessAuth_list     = array();
+        $lva_HostAccessAuth_list    = array();
+        $lva_PatternAccessAuth_list = array();
+        $ret = getMasterAccessAuth($lva_OpeAccessAuth_list,$lva_HostAccessAuth_list,$lva_PatternAccessAuth_list);
+        if($ret === false) {
+            $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80007");
+            throw new Exception($errorMsg);
+        }
+        // メニュー紐付けのメニュー・カラム情報取得
+        $lva_CMDBMenuColumn_list = array();
+        $lva_CMDBMenu_list       = array();
+        $ret = getCMDBMenuMaster($lva_CMDBMenuColumn_list,$lva_CMDBMenu_list);
+        if($ret === false) {
+            $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80007");
+            throw new Exception($errorMsg);
+        }
+        $lv_RBAC = new RoleBasedAccessControl($objDBCA);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // インターフェース情報からNULLデータを代入値管理に登録するかのデフォルト値を取得する。
@@ -615,11 +636,53 @@
         ////////////////////////////////////////////////////////////////////////////////
         //  一般変数を紐付けている紐付メニューの具体値を代入値管理に登録
         ////////////////////////////////////////////////////////////////////////////////
+        $lva_ResultAccessAuthAndStr    = array();
         foreach($lva_vars_ass_list as $vars_ass_list){
             // 処理対象外のデータかを判定
             if($vars_ass_list['STATUS'] === false){
                 continue;
             }
+            // 代入値管理・作業対象ホストのアクセス許可ロールは、
+            // オペレーション・機器一覧・Movement一覧のアクセス許可ロールのAND値の設定に変更
+            $ope  = $vars_ass_list['OPERATION_NO_UAPK'];
+            $host = $vars_ass_list['SYSTEM_ID'];
+            $mov  = $vars_ass_list['PATTERN_ID'];
+            if(@count($lva_ResultAccessAuthAndStr[$ope][$host][$mov]) != 0) {
+                $ResultAccessAuthStr = $lva_ResultAccessAuthAndStr[$ope][$host][$mov];
+            } else {
+                $AccessAuthAry   = array();
+                $AccessAuthAry[] = $lva_OpeAccessAuth_list[$ope]['ACCESS_AUTH'];
+                $AccessAuthAry[] = $lva_HostAccessAuth_list[$host]['ACCESS_AUTH'];
+                $AccessAuthAry[] = $lva_PatternAccessAuth_list[$mov]['ACCESS_AUTH'];
+                $ResultAccessAuthStr = "";
+                $ret = $lv_RBAC->AccessAuthExclusiveAND($AccessAuthAry,$ResultAccessAuthStr);
+                if($ret === false) {
+                    $ResultAccessAuthStr  = false;
+                    $lva_ResultAccessAuthAndStr[$ope][$host][$mov]  = false;
+                } else {
+                    $lva_ResultAccessAuthAndStr[$ope][$host][$mov]  = $ResultAccessAuthStr;
+                }
+            }
+            if($ResultAccessAuthStr === false) {
+                if($log_level === "DEBUG") {
+                    $OpeAccessAuthStr     = implode(",", $lva_OpeAccessAuth_list[$ope]['ACCESS_AUTH']);
+                    $HostAccessAuthStr    = implode(",", $lva_HostAccessAuth_list[$host]['ACCESS_AUTH']);
+                    $PatternAccessAuthStr = implode(",", $lva_PatternAccessAuth_list[$mov]['ACCESS_AUTH']);
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80008", 
+                                                         array($lva_CMDBMenu_list[$vars_ass_list['TABLE_NAME']],
+                                                               $lva_CMDBMenuColumn_list[$vars_ass_list['TABLE_NAME']][$vars_ass_list['COL_NAME']],
+                                                               $lva_OpeAccessAuth_list[$ope]['NAME'],
+                                                               $OpeAccessAuthStr,
+                                                               $lva_HostAccessAuth_list[$host]['NAME'],
+                                                               $HostAccessAuthStr,
+                                                               $lva_PatternAccessAuth_list[$mov]['NAME'],
+                                                               $PatternAccessAuthStr));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                }
+                continue;
+            }
+            // 代入値管理に設定するアクセス許可ロールを上書き
+            $vars_ass_list['ACCESS_AUTH'] = $ResultAccessAuthStr;
 
             // 代入値管理に具体値を登録
             $ret = addStg1VarsAssDB($vars_ass_list,$lv_VarsAssignRecodes);
@@ -1097,7 +1160,6 @@
         $lva_var_col_seq_list       = array();
 
         while ( $row = $objQuery->resultFetch() ){
-
             // Value型変数の変数タイプを一般変数に設定
             $val_child_var_type = false;
             // Key型変数の変数タイプを一般変数に設定
@@ -1261,6 +1323,9 @@
             }
             $ina_table_nameTOid_list[$row['TABLE_NAME']]=$row['MENU_ID'];
             $ina_table_colnameTOid_list[$row['TABLE_NAME']][$row['COL_NAME']][]=$row['COLUMN_ID'];
+
+            // 代入値管理・作業対象ホストのアクセス許可ロールは、
+            // オペレーション・機器一覧・Movement一覧のアクセス許可ロールのAND値の設定に変更
             $ina_table_nameTOaccess_auth_flg[$row['TABLE_NAME']]=$row['ACCESS_AUTH_FLG'];
 
             $key_sensitive_flg   = DF_SENSITIVE_OFF;
@@ -1522,6 +1587,8 @@
         foreach($ina_table_colnameTOid_list as $table_name=>$col_list){
             $pkey_name = $ina_table_nameTOPkeyname_list[$table_name];
   
+            // 代入値管理・作業対象ホストのアクセス許可ロールは、
+            // オペレーション・機器一覧・Movement一覧のアクセス許可ロールのAND値の設定に変更
             // 紐付けメニューのアクセス権カラム有無
             $Access_auth_col = $ina_table_nameTOaccess_auth_flg[$table_name];
             if($Access_auth_col == 1) {
@@ -1719,6 +1786,8 @@
                             if( isset($ina_error_column_id_list[$ina_col_list['COLUMN_ID']])){
                                 continue;
                             }
+                            // 代入値管理・作業対象ホストのアクセス許可ロールは、
+                            // オペレーション・機器一覧・Movement一覧のアクセス許可ロールのAND値の設定に変更
                             // 該当レコードのアクセス権退避
                             $access_auth = $row['ACCESS_AUTH'];
 
