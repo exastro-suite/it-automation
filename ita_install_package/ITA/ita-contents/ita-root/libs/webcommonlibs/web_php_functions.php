@@ -1073,14 +1073,40 @@ EOD;
 
     // ----ここから業務色を排除した汎用系関数
 
-    function getRequestProtocol(){
-        if ( isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == 'on' ){
-            $lcStrProtocol = 'https://';
-        }
-        else{
-            $lcStrProtocol = 'http://';
+    function getRequestProtocol() {
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+            // ---- リバースPROXY経由のリクエスト
+            $lcStrProtocol = 'https://';  // defaultはhttpsとみなす
+            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+                if ($_SERVER['HTTP_X_FORWARDED_PROTO'] === 'http' or $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+                    $lcStrProtocol = $_SERVER['HTTP_X_FORWARDED_PROTO'].'://';
+                }
+            }
+            // リバースPROXY経由のリクエスト ----
+        } else {
+            // ---- 直接リクエスト
+            if (isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] === 'on') {
+                $lcStrProtocol = 'https://';
+            } else {
+                $lcStrProtocol = 'http://';
+            }
+            // 直接リクエスト ----
         }
         return $lcStrProtocol;
+    }
+
+    function getRequestHost() {
+        $lcStrHost = '';
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+            // ---- リバースPROXY経由のリクエスト
+              $lcStrHost = $_SERVER['HTTP_X_FORWARDED_HOST'];
+            // リバースPROXY経由のリクエスト ----
+        } else {
+            // ---- 直接リクエスト
+              $lcStrHost = $_SERVER['HTTP_HOST'];
+            // 直接リクエスト ----
+        }
+        return $lcStrHost;
     }
 
     function getSchemeNAuthority(){

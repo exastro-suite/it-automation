@@ -53,10 +53,11 @@ $no = '';
 if (isset($_GET['no'])) {
     $no = $_GET['no'];
 }
-$nextUrl = getSchemeNAuthority();
+$nextUrl = "/";
 if (!empty($grp) || !empty($no)) {
-    $nextUrl .= "/common/common_auth.php?grp={$grp}&no={$no}";
+    $nextUrl = "/common/common_auth.php?grp={$grp}&no={$no}";
 }
+$nextUrl = getRequestProtocol().getRequestHost().$nextUrl;
 // リダイレクト用パラメータ保存----
 
 $strAuthClassName = '';
@@ -66,13 +67,13 @@ if (isset($_GET['oauth2'])) {
 }
 if (!empty($strAuthClassName)) {
     $objAuth = new $strAuthClassName;
-    $objAuth->setSessionName('ITA_SESSION_'.md5($_SERVER['HTTP_HOST']));
+    $objAuth->setSessionName('ITA_SESSION_'.md5(getRequestHost()));
     $objAuth->setConfigFunction('getConfigSsoAuth');
     $objAuth->setFindUserFunction('findUser');
     $objAuth->setRegistFunction('autoRegistUser');
     $objAuth->setRegistFormFunction('registFormFunction');
     $objAuth->setNextUri($nextUrl);
-    $objAuth->setRedirectUri(getSchemeNAuthority()."{$_SERVER['PHP_SELF']}?{$strAuthType}&callback");
+    $objAuth->setRedirectUri(getRequestProtocol().getRequestHost()."{$_SERVER['PHP_SELF']}?{$strAuthType}&callback");
     if (isset($_GET['debug'])) {
         $objAuth->isDebug = true;
     }
