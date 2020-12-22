@@ -348,7 +348,7 @@ Ansible（Legacy Role）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900120"),'D_CMDB_MENU_COLUMN_SHEET_TYPE_1 ','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
+        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900120"),'D_CMDB_MENU_COLUMN_SHEET_TYPE_4 ','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900121"));
 
@@ -380,7 +380,7 @@ Ansible（Legacy Role）代入値自動登録設定
                        .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                        .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
-                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1  TAB_1 "
+                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_4  TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -446,7 +446,7 @@ Ansible（Legacy Role）代入値自動登録設定
                        .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                        .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
-                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1  TAB_1 "
+                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_4  TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -509,7 +509,7 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setOutputType('register_table',$objOTForReg);
 
 
-        $c->setJournalTableOfMaster('D_CMDB_MENU_COLUMN_SHEET_TYPE_1_JNL');
+        $c->setJournalTableOfMaster('D_CMDB_MENU_COLUMN_SHEET_TYPE_4_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
@@ -692,7 +692,7 @@ Ansible（Legacy Role）代入値自動登録設定
                          ."      TBL_B.DISUSE_FLAG  = '0'                     "
                          ."  ) AS MENU_CNT                                    "
                          ."FROM                                               "
-                         ."  D_CMDB_MENU_COLUMN_SHEET_TYPE_1  TBL_A                         "
+                         ."  D_CMDB_MENU_COLUMN_SHEET_TYPE_4  TBL_A                         "
                          ."WHERE                                              "
                          ."  TBL_A.COLUMN_LIST_ID  = :COLUMN_LIST_ID   AND    "
                          ."  TBL_A.DISUSE_FLAG     = '0'                      ";
@@ -753,7 +753,7 @@ Ansible（Legacy Role）代入値自動登録設定
                      ."     SELECT  "
                      ."       COUNT(*) "
                      ."     FROM "
-                     ."       D_CMDB_MENU_COLUMN_SHEET_TYPE_1  TBL_B "
+                     ."       D_CMDB_MENU_COLUMN_SHEET_TYPE_4  TBL_B "
                      ."     WHERE "
                      ."       TBL_B.MENU_ID        = :MENU_ID          AND "
                      ."       TBL_B.COLUMN_LIST_ID = :COLUMN_LIST_ID   AND "
