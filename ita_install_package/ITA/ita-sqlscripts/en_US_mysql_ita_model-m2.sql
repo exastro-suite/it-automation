@@ -176,6 +176,7 @@ SELECT DISTINCT
   TAB_A.COLUMN_LIST_ID AS REST_COLUMN_LIST_ID,
   TAB_D.COL_NAME,
   TAB_D.COL_TITLE,
+  TAB_D.COL_CLASS,
   TAB_E.TABLE_NAME
 FROM (
         (
@@ -198,6 +199,7 @@ SELECT DISTINCT
   TAB_A.COLUMN_LIST_ID AS REST_COLUMN_LIST_ID,
   TAB_D.COL_NAME,
   TAB_D.COL_TITLE,
+  TAB_D.COL_CLASS,
   TAB_E.TABLE_NAME
 FROM (
         (
@@ -210,11 +212,34 @@ FROM (
     )
 ;
 
--- *****************************************************************************
--- ***  Ansible共通　収集項目値管理VIEW                                        ***
--- *****************************************************************************
+-- -------------------------------------------------------
+-- ***  Ansible共通　収集項目値管理の「メニューグループ:メニュー:項目」SHEET_TYPE=4用
+-- -------------------------------------------------------
+CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_4 AS
+SELECT
+  TAB_B.*,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01   ,
+  TAB_A.ACCESS_AUTH_01 AS ACCESS_AUTH_02,
+  TAB_A.ACCESS_AUTH_02 AS ACCESS_AUTH_03
+FROM
+  D_CMDB_MENU_LIST_SHEET_TYPE_1         TAB_A
+  LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+WHERE
+  TAB_B.DISUSE_FLAG = '0'
+;
 
-
+CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_4_JNL AS
+SELECT
+  TAB_B.*,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01   ,
+  TAB_A.ACCESS_AUTH_01 AS ACCESS_AUTH_02,
+  TAB_A.ACCESS_AUTH_02 AS ACCESS_AUTH_03
+FROM
+  D_CMDB_MENU_LIST_SHEET_TYPE_1_JNL         TAB_A
+  LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+WHERE
+  TAB_B.DISUSE_FLAG = '0'
+;
 
 INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_COLLECT_IF_INFO_RIC',2,'2100040709',2100620001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
