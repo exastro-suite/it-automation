@@ -251,6 +251,7 @@
             "VRAS_MEMBER_NAME"=>"",
             "COL_NAME"=>"",
             "COL_TITLE"=>"",
+            "COL_CLASS"=>"",
             "TABLE_NAME"=>"",
             "DISP_SEQ"=>"",
             "NOTE"=>"",
@@ -290,6 +291,7 @@
             "VRAS_MEMBER_NAME"=>"",
             "COL_NAME"=>"",
             "COL_TITLE"=>"",
+            "COL_CLASS"=>"",
             "TABLE_NAME"=>"",
             "DISP_SEQ"=>"",
             "NOTE"=>"",
@@ -415,10 +417,25 @@
         "COLLECT_STATUS"=>"",
         "COLLECT_LOG"=>"",
         "DISP_SEQ"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
         "LAST_UPDATE_USER"=>"",
+    );
+
+    //A_ROLE_LIST
+    $aryConfigForRoleIUD = array(
+        "JOURNAL_SEQ_NO"=>"",
+        "JOURNAL_ACTION_CLASS"=>"",
+        "JOURNAL_REG_DATETIME"=>"",
+        "ROLE_ID"=>"",
+        "ROLE_NAME"=>"",
+        "ACCESS_AUTH"=>"",
+        "NOTE"=>"",
+        "DISUSE_FLAG"=>"",
+        "LAST_UPDATE_TIMESTAMP"=>"",
+        "LAST_UPDATE_USER"=>""
     );
 
     //REST共通項目数
@@ -643,6 +660,7 @@
 
             $arrCollectOrcRPath = array();
             $strCollectTargetDir = "_parameters";
+            $strCollectTargetFilesDir_ = "_parameters_file";
 
             // 更新用のテーブル定義
             $aryConfigForIUD = $aryConfigForCollectIUD;
@@ -752,6 +770,52 @@
 
                 $arrTargetfiles = $aryRetBody;
 
+                //---ファイルアップロードカラム対応 #449 
+                //収取対象ファイルのPATH作成              
+                $strCollectTargetFilesPath = $strCollectBasePath ."/". $arrAllowCollectOrc[$varOrchestratorId] . "/" . sprintf('%010d', $aryMovement['EXECUTION_NO'] ) . "/in/" . $strCollectTargetFilesDir_ ;
+
+                //対象のDIRがある場合
+                $aryRetBody = getTargetPath($strCollectTargetFilesPath);
+
+                //inに無い場合、outを確認
+                if( $aryRetBody == array() ){
+                    $strCollectTargetFilesPath = $strCollectBasePath ."/". $arrAllowCollectOrc[$varOrchestratorId] . "/" . sprintf('%010d', $aryMovement['EXECUTION_NO'] ) . "/out/" . $strCollectTargetFilesDir_ ;
+                    $aryRetBody = getTargetPath($strCollectTargetFilesPath);
+
+                }
+                $arrTargetUploadfiles = $aryRetBody;
+
+                //ファイルアップロードカラム対応 #449 ---
+
+
+                //---ロール情報の取得、確認 #517
+                $strRoleList="";
+                $arrAccessAuth = explode(",", $aryMovement['ACCESS_AUTH']);
+
+                $aryTempForSql = array('WHERE'=>"ROLE_ID = :ROLE_ID AND DISUSE_FLAG IN ('0') ORDER BY ROLE_ID ASC");
+                
+                // 更新用のテーブル定義
+                $aryConfigForIUD = $aryConfigForRoleIUD;
+
+                // BIND用のベースソース
+                $aryBaseSourceForBind = $aryConfigForRoleIUD;
+                $tmpRoleList = array();
+                foreach ($arrAccessAuth as $intAccessAuth) {
+                    $arySqlBind = array( 
+                                        'ROLE_ID' => $intAccessAuth
+                                        );
+
+                    $aryRole =  getRoleInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
+                    
+                    if( $aryRole !== false ){
+                        $tmpRoleList[] = $aryRole['ROLE_NAME'];
+                    }
+
+                   
+                }
+                $strRoleList = implode(",", $tmpRoleList);
+                //ロール情報の取得、確認 #517---
+
                 //---Operationの取得、確認
                 $intOpeNoUAPK = $aryMovement['OPERATION_NO_UAPK'];
                 
@@ -782,6 +846,7 @@
 
                     $resultprm = array();
                     $arrTargetLists = array();
+                    $arrTargetUploadLists = array();
                     $intParseTypeID = 1;    //1:yaml
 
                     //対象のファイル有の場合
@@ -806,6 +871,15 @@
                                     $resultprm[$strTargetHost][$targetFileName] = $tmpresultprm;
                                 }
                             }
+                        }
+
+                        //対象ホスト、ファイルのリスト作成
+                        foreach ($arrTargetUploadfiles as $strTargetUploadfile) {
+                            $targetHosts =  explode( "/", str_replace( $strCollectTargetFilesPath , "" , $strTargetUploadfile ) );
+                            $ext = substr($strTargetUploadfile, strrpos($strTargetUploadfile, '.') + 1);
+                            $targetFileName =  str_replace( ".".$ext , "" ,  basename($strTargetUploadfile) );
+                            //ホスト名、ファイル名、パス
+                            $arrTargetUploadLists[$targetHosts[1]][$targetFileName .".". $ext]=$strTargetUploadfile;
                         }
 
                         //ホスト毎に実施
@@ -836,6 +910,7 @@
                                 $hostid = $aryhostInfo['SYSTEM_ID'];
                                 
                                 $arrSqlinsertParm = array();
+                                $arrFileUploadList = array();
                                 //ソースファイルからパラメータ整形　（ファイル名、メニューID、項目名、値）
                                 foreach ( $parmdata as $filename => $vardata) {
                                     foreach ($vardata as $varname => $varvalue) {
@@ -876,7 +951,9 @@
                                                         }
                                                         $arrSqlinsertParm[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $varmembermembervalue;
                                                         $arrTableForMenuLists[$writemenuid]=$retResult[$tmpkey]['TABLE_NAME'];
-
+                                                        if( $retResult[$tmpkey]['COL_CLASS'] == "FileUploadColumn" ){
+                                                            $arrFileUploadList[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $retResult[$tmpkey]['COL_CLASS'];
+                                                        } 
                                                     }
                                                 }
 
@@ -911,6 +988,9 @@
 
                                                     $arrSqlinsertParm[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $varvalue;
                                                     $arrTableForMenuLists[$writemenuid]=$retResult[$tmpkey]['TABLE_NAME'];
+                                                    if( $retResult[$tmpkey]['COL_CLASS'] == "FileUploadColumn" ){
+                                                        $arrFileUploadList[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $retResult[$tmpkey]['COL_CLASS'];
+                                                    } 
 
                                                 }
                                             }
@@ -965,7 +1045,14 @@
                                             if( $tmpRestInfo[0] == 200 ){
 
                                                 $arrRestInfo =  $tmpRestInfo[1]['CONTENTS']['INFO'];
-        
+
+                                                // #517
+                                                $tmppramGroup = $objMTS->getSomeMessage("ITAWDCH-MNU-1300001");
+                                                $tmppramName = $objMTS->getSomeMessage("ITAWDCH-MNU-1300002");
+                                                ###$numAccessAuth = "アクセス権/アクセス許可ロール"; 
+                                                $numAccessAuth =  "$tmppramGroup/$tmppramName"; 
+                                                $arrRestAUTH =  array_search( $numAccessAuth , $arrRestInfo );
+                                                
                                                 //登録、更新種別判定用データ検索
                                                 $aryConfigForIUD = $tmpConfigForCMDBbaseIUD;
                                                 if( $strMenuType == "Vertical" )$aryConfigForIUD['INPUT_ORDER']= "";
@@ -983,6 +1070,7 @@
                                                 
                                                 $tmpFilter = array();   
                                                 $insertData = array();
+                                                $UpdateFileData = array();
 
                                                 //RESTパラメータ生成（横メニュー）
                                                 if( $strMenuType == "" ){
@@ -990,9 +1078,25 @@
                                                     foreach ( $arrRestInfo as $parmNO => $pramName ) {
                                                         if( isset($tgtSource_row[$pramName]) ){
                                                             $insertData[$parmNO]=$tgtSource_row[$pramName];
+
+                                                            // #449 ファイルアップロードカラム対応
+                                                            if(isset($arrFileUploadList[$filename][$menuid]) == true ){
+                                                                if( array_key_exists($pramName, $arrFileUploadList[$filename][$menuid] ) ){
+                                                                    if( isset($arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]] ) == true ){
+                                                                        $upload_filepath = $arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]];
+                                                                        if( is_file( $upload_filepath ) == true ){
+                                                                            $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                        }
+                                                                    }else{
+                                                                        $insertData[$parmNO]="";
+                                                                        $UpdateFileData[$parmNO] ="";
+                                                                    }
+                                                                }                                                                
+                                                            }
+
                                                         }else{
                                                             $insertData[$parmNO]="";
-                                                        } 
+                                                        }
                                                     }
 
                                                     if( $tmpResult == array() ){
@@ -1008,8 +1112,19 @@
                                                     $insertData[3] = $hostname;
                                                     $insertData[9] = $strOpeInfo;
 
+                                                    if( $arrRestAUTH != "" ){
+                                                        $insertData[$arrRestAUTH] = $strRoleList;
+                                                    }
+
                                                     ksort($insertData);
                                                     $tmpFilter[] = $insertData;
+
+                                                    // #449 ファイルアップロードカラム対応
+                                                    if( $UpdateFileData != array() ){
+                                                        #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
+                                                        $tmpFilter['UPLOAD_FILE'][] = $UpdateFileData;
+
+                                                    }
 
                                                 }else{
                                                     //RESTパラメータ生成（縦メニュー）
@@ -1039,11 +1154,30 @@
                                                                 $insertData[$parmNO]=$value;
                                                             //項目名：リピート部分[X]
                                                             }elseif(mb_strpos($tgtSource_key,$pramName) !== false){
-                                                                $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
-                                                                $insertData[$parmNO]=$value;
+
+                                                                $tmpColname =preg_replace('/\[[0-9]+?\]/u',"",$tgtSource_key);
+                                                                if( $tmpColname == $pramName ){
+                                                                    $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
+                                                                    $insertData[$parmNO]=$value;
+                                                                }
                                                             //その他
                                                             }else{
-                                                                $insertData[$parmNO]="";
+                                                                if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]="";
+                                                            }
+
+                                                            // #449 ファイルアップロードカラム対応
+                                                            if(isset($arrFileUploadList[$filename][$menuid]) == true ){
+                                                                if( array_key_exists($pramName, $arrFileUploadList[$filename][$menuid] ) ){
+                                                                    if( isset($arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]] ) == true ){
+                                                                        $upload_filepath = $arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]];
+                                                                        if( is_file( $upload_filepath ) == true ){
+                                                                            $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                        }
+                                                                    }else{
+                                                                        $insertData[$parmNO]="";
+                                                                        $UpdateFileData[$parmNO] ="";
+                                                                    }
+                                                                }                                                                
                                                             }
 
                                                             if(  ( count($arrRestInfo)  ==  count($insertData) ) ){
@@ -1064,19 +1198,31 @@
                                                                     //同一代入順序、パラメータ結合
                                                                     $inputorderwflg=0;
                                                                     foreach ( $tmpFilter as $insertDataNO => $tmpinsertData) {
-                                                                        if( $tmpinsertData[10] == $insertData[10] ){
-                                                                            foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
-                                                                                if( $tmpinsertDatavalue == "") {
-                                                                                    $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
-                                                                                    $inputorderwflg =1;
+
+                                                                        if ( isset( $tmpinsertData[10] ) ){
+                                                                            if( $tmpinsertData[10] == $insertData[10] ){
+                                                                                foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
+                                                                                    if( $tmpinsertDatavalue == "") {
+                                                                                        $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                        $inputorderwflg =1;
+                                                                                    }
                                                                                 }
                                                                             }
                                                                         }
                                                                     }
 
                                                                     if( $inputorderwflg == 0 ){
+                                                                        if( $arrRestAUTH != "" ){
+                                                                            $insertData[$arrRestAUTH] = $strRoleList;
+                                                                        }
+
                                                                         $tmpFilter[] = $insertData;
-                                                                         $intColmun++;    
+                                                                         $intColmun++;
+                                                                        // #449 ファイルアップロードカラム対応
+                                                                        if( $UpdateFileData != array() ){
+                                                                            #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
+                                                                            $tmpFilter['UPLOAD_FILE'][] = $UpdateFileData;
+                                                                        } 
                                                                     }
 
                                                                     $insertData=array();
@@ -1085,7 +1231,7 @@
                                                         }
                                                     }
                                                 }
-                                                
+
                                                 //登録、更新（EDIT）
                                                 $tmpParm = $aryParm;
                                                 $tmpParm['requestURI'] = $tmpParm['requestURI'] .  $strmenuid ; 
@@ -1150,12 +1296,14 @@
                 }
 
                 $tmpMovement = $aryMovement ;
-                $tmpMovement['COLLECT_STATUS'] ="1";
 
                 if( file_exists($strCollectlogPath) ){
                     $tmpMovement['COLLECT_LOG'] = $tmpCollectlogfile;
+                    $tmpMovement['COLLECT_STATUS'] ="1";
+                    
                 }else{
                     $tmpMovement['COLLECT_LOG'] = "";
+                    #$tmpMovement['COLLECT_STATUS'] ="99";
                 }
                 $tmpMovement['LAST_UPDATE_USER'] = $db_access_user_id;
 
@@ -1994,5 +2142,54 @@ function outputLog($logPath,$subject="",$messages=""){
 }
 
 
+//ロール情報の取得
+function getRoleInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName){
+
+    $aryRetBody = makeSQLForUtnTableUpdate($db_model_ch
+                                          ,"SELECT"
+                                          ,"ROLE_ID"
+                                          ,"A_ROLE_LIST"
+                                          ,"A_ROLE_LIST_JNL"
+                                          ,$aryConfigForIUD
+                                          ,$aryBaseSourceForBind
+                                          ,$aryTempForSql);
+    
+    if( $aryRetBody[0] === false ){
+        // 例外処理へ
+        $strErrStepIdInFx="00003009";
+        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+    }
+
+    $strSqlUtnBody = $aryRetBody[1];
+    $aryUtnSqlBind = $aryRetBody[2];
+    unset($aryRetBody);
+
+    foreach ($arySqlBind as $key => $value) {
+        $aryUtnSqlBind[$key] = $value;
+    }
+
+    $aryRetBody = singleSQLCoreExecute($objDBCA, $strSqlUtnBody, $aryUtnSqlBind, $strFxName);
+
+    if( $aryRetBody[0] !== true ){
+        // 例外処理へ
+        $strErrStepIdInFx="00003010";
+        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+    }
+    $objQueryUtn =& $aryRetBody[3];
+    
+    //----発見行だけループ
+    $aryTargetRole = array();
+    while ( $row = $objQueryUtn->resultFetch() ){
+        $aryTargetRole[] = $row;
+    }
+
+    if( count($aryTargetRole) == 0 ){
+        return false;
+    }
+
+    //発見行だけループ----
+    return $aryTargetRole[0];
+
+}
 
 ?>
