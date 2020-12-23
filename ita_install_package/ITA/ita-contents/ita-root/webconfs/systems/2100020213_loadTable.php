@@ -268,6 +268,16 @@ Ansible(Pioneer)作業管理
 
     $table->fixColumn();
 
+    $tmpAryColumn = $table->getColumns();
+    // ----非表示項目設定
+    // 備考
+    $tmpAryColumn['NOTE']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['NOTE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['NOTE']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['NOTE']->getOutputType('print_journal_table')->setVisible(false);
+    // ----非表示項目設定
+    unset($tmpAryColumn);
+
     $table->setGeneObject('webSetting', $arrayWebSetting);
     return $table;
 };
