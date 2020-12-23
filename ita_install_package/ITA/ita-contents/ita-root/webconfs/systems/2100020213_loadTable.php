@@ -268,6 +268,11 @@ Ansible(Pioneer)作業管理
 
     $table->fixColumn();
 
+    // 廃止・更新ボタンを隠す
+    $tmpAryColumn= $table->getColumns();
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_UPDATE']->getOutputType('print_table')->setVisible(false);
+
     $table->setGeneObject('webSetting', $arrayWebSetting);
     return $table;
 };
