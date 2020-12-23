@@ -2334,6 +2334,83 @@ class RoleBasedAccessControl {
                error_log($e->getMessage());
            }
            return false;
+        }
+   }
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
+   //   指定されたアクセス許可ロール配列で、重なっているロールが
+   //   あるかを判定する
+   //   
+   // 【パラメータ】
+   //   $AccessAuthRoleAry:   アクセス許可ロール配列の配列
+   //   $ResultAccessAuthStr: 重なっているロールIDのCSV文字列
+   // 【戻り値】
+   //   戻り値1
+   //     true:    重なっているロールがあった
+   //     false:   重なっているロールIDはなかった。
+   // 【備考】
+   //   webからの場合、戻り値1が異常の場合など、エラーログをweb_logに出力
+   //   パックヤードからの場合、戻り値1が異常の場合など、エラーログをphpの
+   //   error_logの出力先に出力
+   ///////////////////////////////////////////////////////////////////
+   function AccessAuthExclusiveAND($AccessAuthRoleAry,&$ResultAccessAuthStr) {
+       $ResultAccessAuthStr = "";
+       $MaxRoleCount = 0;
+       $DefAccessAuthRole = array();
+       // ロール管理に登録されていないロール又は廃止ロールを除外する。
+       $userID = 0;  // getAllRoleSearchHashListで$userIDは未使用
+       $ret = $this->getAllRoleSearchHashList($userID,$AllRoleID2Name,$AllRoleName2ID);
+       if($ret === false) {
+           return false;
+       }
+       $UpdAccessAuthRoleAry = array();
+       foreach($AccessAuthRoleAry as $AccessAuthRole) {
+           foreach($AccessAuthRole as $no=>$RoleID) {
+               $UseRole = false;
+               if(array_key_exists($RoleID,$AllRoleID2Name)) {
+                   if($AllRoleID2Name[$RoleID]['DISUSE_FLAG'] == '0') {
+                       $UseRole = true;
+                   }
+               }
+               if($UseRole == false) {
+                   unset($AccessAuthRole[$no]);
+               }
+           }
+           $UpdAccessAuthRoleAry[] = $AccessAuthRole;
+       }
+       $AccessAuthRoleAry = $UpdAccessAuthRoleAry;
+       $AryCount = count($AccessAuthRoleAry);
+       if($AryCount < 2) {
+           return false;
+       }
+       foreach($AccessAuthRoleAry as $AccessAuthRole) {
+           $RoleCount = count($AccessAuthRole);
+           if($MaxRoleCount < $RoleCount) {
+               $MaxRoleCount = $RoleCount;
+               $DefAccessAuthRole = $AccessAuthRole;
+           }
+       }
+       // アクセス許可ロールが空の場合
+       if($MaxRoleCount === 0) {
+           // アクセス許可ロールを空に設定
+           $ResultAccessAuthStr = "";
+           return true;
+       }
+       for($idx=0;$idx<$AryCount;$idx++) {
+           if(count($AccessAuthRoleAry[$idx]) == 0) {
+               $AccessAuthRoleAry[$idx] = $DefAccessAuthRole;
+           }
+       }
+       $AndAry = array_intersect($AccessAuthRoleAry[0],$AccessAuthRoleAry[1]);
+       for($idx=2;$idx<$AryCount;$idx++) {
+           $AndAry = array_intersect($AccessAuthRoleAry[$idx],$AndAry);
+       }
+
+       $ResultAccessAuthStr = implode(",", $AndAry);
+       if($ResultAccessAuthStr != "") {
+           return true;
+       } else {
+           return false;
        }
    }
 }
