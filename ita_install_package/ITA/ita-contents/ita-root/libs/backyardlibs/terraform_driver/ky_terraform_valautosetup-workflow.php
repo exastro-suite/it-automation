@@ -284,6 +284,8 @@
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
 
+        require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
+
         ///////////////////////////////////////////////////////////////////////////
         // 関連データベースが更新されバックヤード処理が必要か判定
         ///////////////////////////////////////////////////////////////////////////
@@ -314,6 +316,26 @@
             }
             exit(0);
         }
+
+        // 投入オペレーション・Movement一覧のアクセス許可ロールを取得
+        $lva_OpeAccessAuth_list     = array();
+        $lva_PatternAccessAuth_list = array();
+        $ret = getMasterAccessAuth($lva_OpeAccessAuth_list,$lva_PatternAccessAuth_list);
+        if($ret === false) {
+            $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171310"); //マスタデータのアクセス許可ロールの取得に失敗しました。
+            throw new Exception($errorMsg);
+        }
+
+        // メニュー紐付けのメニュー・カラム情報取得
+        $lva_CMDBMenuColumn_list = array();
+        $lva_CMDBMenu_list       = array();
+        $ret = getCMDBMenuMaster($lva_CMDBMenuColumn_list,$lva_CMDBMenu_list);
+        if($ret === false) {
+            $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171310"); //マスタデータのアクセス許可ロールの取得に失敗しました。
+            throw new Exception($errorMsg);
+        }
+
+        $lv_RBAC = new RoleBasedAccessControl($objDBCA);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // インターフェース情報からNULLデータを代入値管理に登録するかのデフォルト値を取得する。
@@ -460,11 +482,51 @@
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
 
+        $lva_ResultAccessAuthAndStr    = array();
         foreach($lva_vars_ass_list as $vars_ass_list){
             // 処理対象外のデータかを判定
             if($vars_ass_list['STATUS'] === false){
                 continue;
             }
+
+            // 代入値管理・作業対象ホストのアクセス許可ロールは、
+            // オペレーション・機器一覧・Movement一覧のアクセス許可ロールのAND値の設定に変更
+            $ope  = $vars_ass_list['OPERATION_NO_UAPK'];
+            $mov  = $vars_ass_list['PATTERN_ID'];
+
+            if(@count($lva_ResultAccessAuthAndStr[$ope][$mov]) != 0) {
+                $ResultAccessAuthStr = $lva_ResultAccessAuthAndStr[$ope][$mov];
+            } else {
+                $AccessAuthAry   = array();
+                $AccessAuthAry[] = $lva_OpeAccessAuth_list[$ope]['ACCESS_AUTH'];
+                $AccessAuthAry[] = $lva_PatternAccessAuth_list[$mov]['ACCESS_AUTH'];
+                $ResultAccessAuthStr = "";
+                $ret = $lv_RBAC->AccessAuthExclusiveAND($AccessAuthAry,$ResultAccessAuthStr);
+                if($ret === false) {
+                    $ResultAccessAuthStr  = false;
+                    $lva_ResultAccessAuthAndStr[$ope][$mov]  = false;
+                } else {
+                    $lva_ResultAccessAuthAndStr[$ope][$mov]  = $ResultAccessAuthStr;
+                }
+            }
+            if($ResultAccessAuthStr === false) {
+                if($log_level === "DEBUG") {
+                    $OpeAccessAuthStr     = implode(",", $lva_OpeAccessAuth_list[$ope]['ACCESS_AUTH']);
+                    $PatternAccessAuthStr = implode(",", $lva_PatternAccessAuth_list[$mov]['ACCESS_AUTH']);
+                    $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171320", 
+                                                         array($lva_CMDBMenu_list[$vars_ass_list['TABLE_NAME']],
+                                                               $lva_CMDBMenuColumn_list[$vars_ass_list['TABLE_NAME']][$vars_ass_list['COL_NAME']],
+                                                               $lva_OpeAccessAuth_list[$ope]['NAME'],
+                                                               $OpeAccessAuthStr,
+                                                               $lva_PatternAccessAuth_list[$mov]['NAME'],
+                                                               $PatternAccessAuthStr));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                }
+                continue;
+            }
+
+            // 代入値管理に設定するアクセス許可ロールを上書き
+            $vars_ass_list['ACCESS_AUTH'] = $ResultAccessAuthStr;
 
             // 代入値管理に具体値を登録
             $ret = addStg1VarsAssDB($vars_ass_list,$lv_VarsAssignRecodes);
@@ -1300,12 +1362,9 @@
                     }
                     $operation_id = $row['OPERATION_ID'];
 
-                    //ACCESS_AUTHが存在しない（v1.5以前のパラメータシートでACCESS_AUTHがない）場合は空を入れる
-                    if(isset($row['ACCESS_AUTH'])){
-                        $access_auth = $row['ACCESS_AUTH'];
-                    }else{
-                        $access_auth = "";
-                    }
+                    // 代入値管理・作業対象ホストのアクセス許可ロールは、
+                    // オペレーション・機器一覧・Movement一覧のアクセス許可ロールのAND値の設定に変更
+                    $access_auth = $row['ACCESS_AUTH'];
 
                     // 代入値紐付に登録されている変数に対応する具体値を取得する。
                     foreach($row as $col_name=>$col_val){
@@ -2788,6 +2847,115 @@
         $beforeTime  = $unixtime;
         LocalLogPrint("","","$strtime,$difftime," . $logdata);
         return array($strtime,$unixtime);
+    }
+
+    function getMasterAccessAuth(&$lva_OpeAccessAuth_list,&$lva_PatternAccessAuth_list) {
+        global    $db_model_ch;
+        global    $objMTS;
+        global    $objDBCA;
+        global    $log_level;
+        $sqlAry          = array();
+        $sqlKeyName      = array();
+        $resultDataAry   = array();
+        $sqlAry[] = "SELECT %s,%s,ACCESS_AUTH  FROM C_OPERATION_LIST";
+        $sqlAry[] = "SELECT %s,%s,ACCESS_AUTH  FROM C_PATTERN_PER_ORCH";
+        $sqlKeyName[] = "OPERATION_NAME";
+        $sqlKeyName[] = "PATTERN_NAME";
+        $sqlKeyId[] = "OPERATION_NO_UAPK";
+        $sqlKeyId[] = "PATTERN_ID";
+        $lva_OpeAccessAuth_list     = array();
+        $lva_PatternAccessAuth_list = array();
+        $resultDataAry[] = &$lva_OpeAccessAuth_list;
+        $resultDataAry[] = &$lva_PatternAccessAuth_list;
+
+        foreach($sqlAry as $no=>$sql) {
+
+            // SQL準備
+            $sql = sprintf($sql,$sqlKeyId[$no],$sqlKeyName[$no]);
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            if( $objQuery->getStatus()===false ){
+                $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__)); //DBアクセス異常が発生しました。(file:{}line:{})
+                $in_error_msg  = $msgstr;
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+                return false;
+            }
+
+            // SQL発行
+            $r = $objQuery->sqlExecute();
+            if (!$r){
+                $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__)); //DBアクセス異常が発生しました。(file:{}line:{})
+                $in_error_msg  = $msgstr;
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+                unset($objQuery);
+                return false;
+            }
+
+            // レコードFETCH
+            while ( $row = $objQuery->resultFetch() ){
+                $AccessAuthAry = array();
+                if($row["ACCESS_AUTH"] != "") {
+                    $AccessAuthAry = explode(",",$row["ACCESS_AUTH"]);
+                }
+                $resultDataAry[$no][$row[$sqlKeyId[$no]]] = array("NAME"=>$row[$sqlKeyName[$no]],
+                                                                  "ACCESS_AUTH"=>$AccessAuthAry);
+            }
+        }
+        return true;
+    }
+
+    function getCMDBMenuMaster(&$lva_CMDBMenuColumn_list,&$lva_CMDBMenu_list) {
+        global    $db_model_ch;
+        global    $objMTS;
+        global    $objDBCA;
+        global    $log_level;
+        $lva_CMDBMenuColumn_list    = array();
+        $lva_CMDBMenu_list          = array();
+        // SQL準備
+        $sql = " SELECT TAB_D.TABLE_NAME, "
+             . "        TAB_E.COL_NAME,   "
+             . "        TAB_E.COL_TITLE,  "
+             . "        CONCAT(TAB_C.MENU_GROUP_NAME,':',TAB_B.MENU_NAME) MENU_NAME "
+             . " FROM B_CMDB_MENU_LIST TAB_A "
+             . " LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID) "
+             . " LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID) "
+             . " LEFT JOIN B_CMDB_MENU_TABLE TAB_D ON (TAB_A.MENU_ID = TAB_D.MENU_ID) "
+             . " LEFT JOIN B_CMDB_MENU_COLUMN TAB_E ON (TAB_A.MENU_ID = TAB_E.MENU_ID) ";
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if( $objQuery->getStatus()===false ){
+            $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__)); //DBアクセス異常が発生しました。(file:{}line:{})
+            $in_error_msg  = $msgstr;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+            return false;
+        }
+
+        // SQL発行
+        $r = $objQuery->sqlExecute();
+        if (!$r){
+            $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__)); //DBアクセス異常が発生しました。(file:{}line:{})
+            $in_error_msg  = $msgstr;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+            unset($objQuery);
+            return false;
+        }
+
+        // レコードFETCH
+        while ( $row = $objQuery->resultFetch() ){
+            $lva_CMDBMenuColumn_list[$row['TABLE_NAME']][$row['COL_NAME']] = $row['COL_TITLE'];
+            $lva_CMDBMenu_list[$row['TABLE_NAME']] = $row['MENU_NAME'];
+        }
+        return true;
     }
 
 ?>
