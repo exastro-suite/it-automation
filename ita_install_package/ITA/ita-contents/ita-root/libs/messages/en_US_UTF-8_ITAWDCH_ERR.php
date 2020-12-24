@@ -194,6 +194,7 @@ $ary[1114] = " File(s) exceeding the size limit for uploading of the JSON file w
 $ary[1115] = "It does not match the format. Use the latest version of JSON file.";
 $ary[1116] = "It is an invalid format.";
 $ary[1117] = "You do not have permission for maintenance.";
+$ary[1118] = "The selected operation and the Movement permission role do not match.";
 $ary[2001] = "RESULT:UNEXPECTED_ERROR({})";
 $ary[2002] = "FUNCTION:{},RESULT:UNEXPECTED_ERROR({})";
 $ary[3001] = "System error has occurred.";
