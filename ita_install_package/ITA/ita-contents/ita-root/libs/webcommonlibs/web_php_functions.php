@@ -1074,9 +1074,9 @@ EOD;
     // ----ここから業務色を排除した汎用系関数
 
     function getRequestProtocol() {
-        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST']) or isset($_SERVER['HTTP_X_FORWARDED_PROTO']) or isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             // ---- リバースPROXY経由のリクエスト
-            $lcStrProtocol = 'https://';  // defaultはhttpsとみなす
+            $lcStrProtocol = 'https://';  // defaultはhttpsとする
             if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
                 if ($_SERVER['HTTP_X_FORWARDED_PROTO'] === 'http' or $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
                     $lcStrProtocol = $_SERVER['HTTP_X_FORWARDED_PROTO'].'://';
@@ -1099,11 +1099,11 @@ EOD;
         $lcStrHost = '';
         if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
             // ---- リバースPROXY経由のリクエスト
-              $lcStrHost = $_SERVER['HTTP_X_FORWARDED_HOST'];
+            $lcStrHost = $_SERVER['HTTP_X_FORWARDED_HOST'];
             // リバースPROXY経由のリクエスト ----
         } else {
             // ---- 直接リクエスト
-              $lcStrHost = $_SERVER['HTTP_HOST'];
+            $lcStrHost = $_SERVER['HTTP_HOST'];
             // 直接リクエスト ----
         }
         return $lcStrHost;
