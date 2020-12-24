@@ -384,7 +384,7 @@ const getWidgetShortcutHTML = function( shortcutList ) {
     let shortcutHTML = '<ul class="shortcut-list">';
     for ( let i = 0; i < shortcutLength; i++ ) {
       shortcutHTML += '<li class="shortcut-item" data-link-id="' + shortcutCount + '">'
-        + '<a class="shortcut-link" href="' + encodeURI( shortcutList[i]['url'] ) + '" target="' + encodeURI( shortcutList[i]['target'] ) + '">' + shortcutList[i]['name'] + '</a>'
+        + '<a class="shortcut-link" href="' + encodeURI( shortcutList[i]['url'] ) + '" target="' + editor.textEntities( shortcutList[i]['target'] ) + '">' + editor.textEntities( shortcutList[i]['name'] ) + '</a>'
         + '</li>';
       shortcutCount++;
     }
@@ -440,7 +440,7 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
       case '9':
         contentHTML = '<img src="' + encodeURI( widgetData['data']['image'] ) + '" class="widget-image">';
         if ( widgetData['data']['link'] !== '') {
-          contentHTML = '<a class="widget-image-link" href="' + encodeURI( widgetData['data']['link'] ) + '" target="' + widgetData['data']['target'] + '">' + contentHTML + '</a>'
+          contentHTML = '<a class="widget-image-link" href="' + encodeURI( widgetData['data']['link'] ) + '" target="' + editor.textEntities( widgetData['data']['target'] ) + '">' + contentHTML + '</a>'
         }
         break;
       default:
@@ -460,7 +460,7 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
       + '<div class="widget">'
         + '<div class="widget-header">'
           + '<div class="widget-move-knob"></div>'
-          + '<div class="widget-name"><span class="widget-name-inner">' + widgetData['display_name'] + '</span>'
+          + '<div class="widget-name"><span class="widget-name-inner">' + editor.textEntities( widgetData['display_name'] ) + '</span>'
             + '<div class="widget-edit-menu">'
               + '<ul class="widget-edit-menu-list">'
                 + '<li class="widget-edit-menu-item"><button class="widget-edit-button widget-edit" data-type="edit"></button></li>'
@@ -679,7 +679,7 @@ const getWidgetData = function( setID ) {
             const $link = $( this );
             newWidgetInfo['data']['list'][i] = {
               'name': $link.text(),
-              'url': $link.attr('href'),
+              'url': decodeURI( $link.attr('href') ),
               'target': $link.attr('target')
             }
           });
@@ -692,9 +692,9 @@ const getWidgetData = function( setID ) {
           newWidgetInfo['data']['html'] = widgetTemp[ setID ]['html'];
           break;
         case '9': {
-          const link = $widget.find('.widget-image-link').attr('href'),
+          const link = decodeURI( $widget.find('.widget-image-link').attr('href') ),
                 target = $widget.find('.widget-image-link').attr('target')
-          newWidgetInfo['data']['image'] = $widget.find('.widget-image').attr('src');
+          newWidgetInfo['data']['image'] = decodeURI( $widget.find('.widget-image').attr('src') );
           newWidgetInfo['data']['link'] = ( link === undefined )? '': link;
           newWidgetInfo['data']['target'] = ( target === undefined )? '': target;
           } break;
@@ -996,7 +996,7 @@ const editWidget = function( setID ) {
   
   // 基本設定
   widgetEditHTML += ''
-    + getRowHTML( getWidgetMessage('3'), '<input data-max-length="32" class="edit-input-text edit-display-name" type="text" value="' + widgetData['display_name'] + '">')
+    + getRowHTML( getWidgetMessage('3'), '<input data-max-length="32" class="edit-input-text edit-display-name" type="text" value="' + editor.textEntities( widgetData['display_name'] ) + '">')
     + getRowHTML( getWidgetMessage('4'), getRadioHTML('colspan',[[1,1],[2,2],[3,3]], Number( widgetData['colspan'] ) ) )
     + getRowHTML( getWidgetMessage('5'), getRadioHTML('rowspan',[[1,1],[2,2],[3,3],[4,4],[5,5]], Number(widgetData['rowspan'] ) ) )
     + getRowHTML( getWidgetMessage('32'), getRadioHTML('title',[[getWidgetMessage('34'),1],[getWidgetMessage('35'),0]], Number(widgetData['title'] ) ) )
@@ -1011,9 +1011,9 @@ const editWidget = function( setID ) {
     case '3': {
       const getShortcutInputRow = function( name, url, target ) {
         return '<tr class="edit-shortcut-row">'
-          + '<td class="edit-shortcut-cell edit-shortcut-name"><input data-max-length="32" class="edit-shortcut-input edit-shortcut-input-name" type="text" value="' + name + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-url"><input data-max-length="256" class="edit-shortcut-input edit-shortcut-input-url" type="text" value="' + url + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-target"><input data-max-length="16" class="edit-shortcut-input edit-shortcut-input-target" type="text" value="' + target + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-name"><input data-max-length="32" class="edit-shortcut-input edit-shortcut-input-name" type="text" value="' + editor.textEntities( name ) + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-url"><input data-max-length="256" class="edit-shortcut-input edit-shortcut-input-url" type="text" value="' + editor.textEntities( url ) + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-target"><input data-max-length="16" class="edit-shortcut-input edit-shortcut-input-target" type="text" value="' + editor.textEntities( target ) + '"></td>'
           + '<td class="edit-shortcut-cell edit-shortcut-remove"><button class="edit-shortcut-remove-button"><span class="cross-mark"></span></button></td>'
         + '</tr>';
       };
@@ -1054,12 +1054,12 @@ const editWidget = function( setID ) {
       widgetEditHTML += getRowHTML( getWidgetMessage('29'), '<input data-min="1" data-max="365" class="edit-input-number edit-period-number" type="number" value="' + widgetData['data']['period'] + '">');
       break;
     case '8':
-      widgetEditHTML += getRowHTML('HTML', '<textarea class="widget-edit-textarea" id="edit-html">' + widgetTemp[setID]['html'] + '</textarea>');
+      widgetEditHTML += getRowHTML('HTML', '<textarea class="widget-edit-textarea" id="edit-html">' + editor.textEntities( widgetTemp[setID]['html'] ) + '</textarea>');
       break;
     case '9':
-      widgetEditHTML += getRowHTML( getWidgetMessage('36'), '<input data-max-length="256" class="edit-input-text edit-image-url" type="text" value="' + widgetData['data']['image'] + '">');
-      widgetEditHTML += getRowHTML('Link URL', '<input data-max-length="256" class="edit-input-text edit-image-link" type="text" value="' + widgetData['data']['link'] + '">');
-      widgetEditHTML += getRowHTML('Link target', '<input data-max-length="16" class="edit-input-text edit-image-target" type="text" value="' + widgetData['data']['target'] + '">');
+      widgetEditHTML += getRowHTML( getWidgetMessage('36'), '<input data-max-length="256" class="edit-input-text edit-image-url" type="text" value="' + editor.textEntities(  widgetData['data']['image'] ) + '">');
+      widgetEditHTML += getRowHTML('Link URL', '<input data-max-length="256" class="edit-input-text edit-image-link" type="text" value="' + editor.textEntities(  widgetData['data']['link'] ) + '">');
+      widgetEditHTML += getRowHTML('Link target', '<input data-max-length="16" class="edit-input-text edit-image-target" type="text" value="' + editor.textEntities( widgetData['data']['target'] ) + '">');
       break;
   }
  
@@ -1150,7 +1150,7 @@ const editWidget = function( setID ) {
                   target = $modalBody.find('.edit-image-target').val();
             let contentHTML = '<img src="' + encodeURI( image ) + '" class="widget-image">';
             if ( link !== '') {
-              contentHTML = '<a class="widget-image-link" href="' + encodeURI( link ) + '" target="' + encodeURI( target ) + '">' + contentHTML + '</a>'
+              contentHTML = '<a class="widget-image-link" href="' + encodeURI( link ) + '" target="' + editor.textEntities( target ) + '">' + contentHTML + '</a>'
             }
             $widget.find('.widget-body').html( contentHTML );
             } break;
