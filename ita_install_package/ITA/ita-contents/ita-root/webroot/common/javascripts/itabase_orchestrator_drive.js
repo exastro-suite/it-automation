@@ -107,6 +107,21 @@ function printPetternInfo(boolCallProxy, pettern_id, pettern_name, timer_length)
 }
 //作業パターンの表示----
 
+var gchkAccessAuth;
+function chkAccessAuth(operation_no,pattern_id) {
+    const chkAccessAuthURL = '/common/common_chkAccessAuth.php?OperationNoUAPK=' + operation_no + '&PatternId=' + pattern_id;
+    console.log("start");
+    $.ajax({
+      type: 'get',
+      url: chkAccessAuthURL,
+      dataType: 'text',
+      async : false
+    }).done( function( result ) {
+        gchkAccessAuth = JSON.parse( result );
+    }).fail( function( result ) {
+    });
+}
+// オペレーションとMovementのアクセス許可ロールの適合判定結果
 function constructExecutionNo(boolCallProxy, execution_no, ary_vars, menu_id){
     if( boolCallProxy===true ){
         var strAnsiblePatternNoArea = 'print_pattern_id';
@@ -159,8 +174,14 @@ function constructExecutionNo(boolCallProxy, execution_no, ary_vars, menu_id){
         }
         
         if( confirm_flag === true ){
-            if( window.confirm( str_confirm_message ) ){
-                exec_flag = true;
+            // オペレーションとMovementのアクセス許可ロールの適合を判定
+            chkAccessAuth(operation_no,pattern_id);
+            if(gchkAccessAuth["STATUS"]  == "OK") {
+                if( window.confirm( str_confirm_message ) ){
+                    exec_flag = true;
+                }
+            }else{
+                window.alert(gchkAccessAuth["ERROR_MSG"]);
             }
         }
         //
