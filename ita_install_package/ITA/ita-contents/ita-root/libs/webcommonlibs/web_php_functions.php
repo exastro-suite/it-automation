@@ -2439,6 +2439,88 @@ class RoleBasedAccessControl {
            return false;
        }
    }
+   function getOperationAccessAuth($OperationNoUAPK,&$OpeAccessAuthStr) {
+
+       $strFxName = __FUNCTION__;
+       $ErrorMsgBase = "%s([FILE]%s[LINE]%s)%s";
+       try {
+           $sql = "SELECT * FROM C_OPERATION_LIST   WHERE OPERATION_NO_UAPK = :OPERATION_NO_UAPK";
+           $AddMsg = sprintf("%s","Input operation list access error.");
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if( $objQuery->getStatus()===false ){
+               $ErrorMsg = sprintf($ErrorMsgBase,$strFxName,__FILE__,__LINE__,$AddMsg);
+               $ErrorMsg .= "\n" . $objQuery->getLastError();
+               throw new Exception($ErrorMsg);
+           }
+           // SQL発行
+           $aryForBind = array("OPERATION_NO_UAPK"=>$OperationNoUAPK);
+           $objQuery->sqlBind($aryForBind);
+           $r = $objQuery->sqlExecute();
+           if (!$r){
+               $ErrorMsg = sprintf($ErrorMsgBase,$strFxName,__FILE__,__LINE__,$AddMsg);
+               $ErrorMsg .= "\n" . $objQuery->getLastError();
+               throw new Exception($ErrorMsg);
+           }
+           // レコードFETCH
+           $fetch_counter = $objQuery->effectedRowCount();
+           if ($fetch_counter < 1){
+               return 100;
+           }
+           while ( $row = $objQuery->resultFetch() ){
+               $OpeAccessAuthStr = $row['ACCESS_AUTH'];
+           }
+           unset($objQuery);
+           return true;
+       }catch (Exception $e){
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return false;
+       }
+   }
+   function getMovementAccessAuth($PatternID,&$MovementAccessAuthStr) {
+
+       $strFxName = __FUNCTION__;
+       $ErrorMsgBase = "%s([FILE]%s[LINE]%s)%s";
+       try {
+           $sql = "SELECT * FROM C_PATTERN_PER_ORCH   WHERE PATTERN_ID = :PATTERN_ID";
+           $AddMsg = sprintf("%s","Movement list access error.");
+           $objQuery = $this->objDBCA->sqlPrepare($sql);
+           if( $objQuery->getStatus()===false ){
+               $ErrorMsg = sprintf($ErrorMsgBase,$strFxName,__FILE__,__LINE__,$AddMsg);
+               $ErrorMsg .= "\n" . $objQuery->getLastError();
+               throw new Exception($ErrorMsg);
+           }
+           // SQL発行
+           $aryForBind = array("PATTERN_ID"=>$PatternID);
+           $objQuery->sqlBind($aryForBind);
+           $r = $objQuery->sqlExecute();
+           if (!$r){
+               $ErrorMsg = sprintf($ErrorMsgBase,$strFxName,__FILE__,__LINE__,$AddMsg);
+               $ErrorMsg .= "\n" . $objQuery->getLastError();
+               throw new Exception($ErrorMsg);
+           }
+           // レコードFETCH
+           $fetch_counter = $objQuery->effectedRowCount();
+           if ($fetch_counter < 1){
+               return 100;
+           }
+           while ( $row = $objQuery->resultFetch() ){
+               $MovementAccessAuthStr = $row['ACCESS_AUTH'];
+           }
+           unset($objQuery);
+           return true;
+       }catch (Exception $e){
+           if(function_exists("web_log")) {
+               web_log($e->getMessage());
+           } else {
+               error_log($e->getMessage());
+           }
+           return false;
+       }
+   }
 }
     function getTargetRecodeCount($objTable,$objQuery,&$strRecCnt) {
         // unset($objQuery); $objQueryの開放は呼び元で実施

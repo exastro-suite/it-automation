@@ -161,7 +161,6 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
 $tmpAryFx['getMovementStatusFromOrchestrator'] = $tmpFx;
 
 $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDatetime, $boolTrzAlreadyStarted, $aryProperParameter=array()){
-
     /////////////////////////////////////////////////////////
     //  作業№を登録する                                   //
     /////////////////////////////////////////////////////////
@@ -327,7 +326,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
                     $user_name = $row['EXECUTION_USER'];
                     $conductor_name = $row['I_CONDUCTOR_NAME'];
                 }
-                // DBアクセス事後処理
+                // DBアクセス事後処
                 unset($objQuery);
             }
             //conductorから呼ばれる場合を想定-----
@@ -335,6 +334,38 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         }
         else{
             // ---- RBAC対応
+            // オペレーションとMovementのアクセス許可ロールをANDし作業イスタンスに設定するアクセス許可ロールを求める。
+            //require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
+            $RBACobj = new RoleBasedAccessControl($objDBCA);
+
+            $OpeAccessAuthStr = "";
+            $ret = $RBACobj->getOperationAccessAuth($intOperationNoUAPK,$OpeAccessAuthStr);
+            if($ret !== true) {
+                // 例外処理へ
+                $strErrStepIdInFx="00000008";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            $MovementAccessAuthStr = "";
+            $ret = $RBACobj->getMovementAccessAuth($intPatternId,$MovementAccessAuthStr);
+            if($ret !== true) {
+                $strErrStepIdInFx="00000008";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            $AccessAuthAry   = array();
+            $AccessAuthAry[] = explode(",",$OpeAccessAuthStr);
+            $AccessAuthAry[] = explode(",",$MovementAccessAuthStr);
+            $ResultAccessAuthStr = "";
+            $ret = $RBACobj->AccessAuthExclusiveAND($AccessAuthAry,$ResultAccessAuthStr);
+            if($ret === false) {
+                $strErrStepIdInFx="00000008";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            } else {
+                // 作業インスタンスに設定するアクセス許可ロールを退避
+                $g['__TOP_ACCESS_AUTH__'] = $ResultAccessAuthStr;
+            }
+        
             // Movement一覧のアクセス権を取得　
             $sql = "SELECT ACCESS_AUTH FROM C_PATTERN_PER_ORCH WHERE PATTERN_ID=$intPatternId";
             $objQuery = $objDBCA->sqlPrepare($sql);
