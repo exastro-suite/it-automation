@@ -342,9 +342,6 @@ Ansible（Legacy）代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        .",TAB_1.ACCESS_AUTH                 "
-                       .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
-                       .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
-                       .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
                        ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1 TAB_1 "   
                        ."WHERE "
@@ -368,7 +365,7 @@ Ansible（Legacy）代入値自動登録設定
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
@@ -408,9 +405,6 @@ Ansible（Legacy）代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        .",TAB_1.ACCESS_AUTH                 "
-                       .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
-                       .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
-                       .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
                        ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1 TAB_1 " 
                        ."WHERE "
@@ -434,7 +428,7 @@ Ansible（Legacy）代入値自動登録設定
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
@@ -674,8 +668,6 @@ Ansible（Legacy）代入値自動登録設定
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                            .",TAB_1.ACCESS_AUTH    "
-                           .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
-                           .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                            ."FROM "
                            ." D_ANS_LNS_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -699,7 +691,7 @@ Ansible（Legacy）代入値自動登録設定
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
                             // レコード毎のアクセス権を判定
-                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
                             if($ret === false) {
                                 $intErrorType = 500;
                                 $retBool = false;
@@ -740,8 +732,6 @@ Ansible（Legacy）代入値自動登録設定
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                            .",TAB_1.ACCESS_AUTH    "
-                           .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
-                           .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                            ."FROM "
                            ." D_ANS_LNS_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -765,7 +755,7 @@ Ansible（Legacy）代入値自動登録設定
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
                             // レコード毎のアクセス権を判定
-                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
                             if($ret === false) {
                                 $intErrorType = 500;
                                 $retBool = false;
@@ -955,8 +945,6 @@ Ansible（Legacy）代入値自動登録設定
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                            .",TAB_1.ACCESS_AUTH     "
-                           .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
-                           .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                            ."FROM "
                            ." D_ANS_LNS_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -980,7 +968,7 @@ Ansible（Legacy）代入値自動登録設定
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
                             // レコード毎のアクセス権を判定
-                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
                             if($ret === false) {
                                 $intErrorType = 500;
                                 $retBool = false;
@@ -1021,8 +1009,6 @@ Ansible（Legacy）代入値自動登録設定
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                            .",TAB_1.ACCESS_AUTH     "
-                           .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
-                           .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                            ."FROM "
                            ." D_ANS_LNS_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -1045,7 +1031,7 @@ Ansible（Legacy）代入値自動登録設定
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
                             // レコード毎のアクセス権を判定
-                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
                             if($ret === false) {
                                 $intErrorType = 500;
                                 $retBool = false;
