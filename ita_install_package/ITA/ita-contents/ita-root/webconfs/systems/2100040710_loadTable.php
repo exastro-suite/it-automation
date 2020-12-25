@@ -348,7 +348,7 @@ Ansible（Legacy Role）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900120"),'D_CMDB_MENU_COLUMN_SHEET_TYPE_1 ','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
+        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900120"),'D_CMDB_MENU_COLUMN_SHEET_TYPE_4 ','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900121"));
 
