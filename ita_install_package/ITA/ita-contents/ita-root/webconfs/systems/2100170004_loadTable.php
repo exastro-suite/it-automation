@@ -45,7 +45,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         // ----カラムグループ（メニューグループ）
         $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100706"));
 
-            $c = new IDColumn('INPUT_MENU_GROUP_ID', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100707"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_ID', '', array('OrderByThirdColumn'=>'MENU_GROUP_ID'));
+            $c = new IDColumn('INPUT_MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100707"), 'D_MENU_LIST', 'MENU_ID', 'MENU_GROUP_ID');
             $c->addClass("number");
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
@@ -57,7 +57,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $c->setMasterDisplayColumnType(0);
             $cg->addColumn($c);
 
-            $c = new TextColumn('INPUT_MENU_GROUP_NAME', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100709"));
+            $c = new IDColumn('INPUT_MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100709"), 'D_MENU_LIST', 'MENU_ID', 'MENU_GROUP_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100710"));
@@ -74,7 +74,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100711"));
 
             // ID
-            $c = new IDColumn('INPUT_MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100712"), 'D_MENU_LIST', 'MENU_ID', 'MENU_ID', '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $c = new IDColumn('INPUT_MENU_ID_CLONE_03', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100712"), 'D_MENU_LIST', 'MENU_ID', 'MENU_ID');
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100713"));
 
@@ -90,7 +90,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $cg->addColumn($c);
 
             // 名称
-            $c = new TextColumn('INPUT_MENU_NAME', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100714"));
+            $c = new IDColumn('INPUT_MENU_ID_CLONE_04', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100714"), 'D_MENU_LIST', 'MENU_ID', 'MENU_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100715"));
@@ -126,7 +126,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         // ----カラムグループ（メニューグループ）
         $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100719"));
 
-            $c = new IDColumn('OUTPUT_MENU_GROUP_ID', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100720"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_ID', '', array('OrderByThirdColumn'=>'MENU_GROUP_ID'));
+            $c = new IDColumn('OUTPUT_MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100720"), 'D_MENU_LIST', 'MENU_ID', 'MENU_GROUP_ID');
             $c->addClass("number");
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
@@ -138,7 +138,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $c->setMasterDisplayColumnType(0);
             $cg->addColumn($c);
 
-            $c = new TextColumn('OUTPUT_MENU_GROUP_NAME', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100722"));
+            $c = new IDColumn('OUTPUT_MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100722"), 'D_MENU_LIST', 'MENU_ID', 'MENU_GROUP_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100723"));
@@ -155,7 +155,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100724"));
 
             // ID
-            $c = new IDColumn('OUTPUT_MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100725"), 'D_MENU_LIST', 'MENU_ID', 'MENU_ID', '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $c = new IDColumn('OUTPUT_MENU_ID_CLONE_03', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100725"), 'D_MENU_LIST', 'MENU_ID', 'MENU_ID');
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100726"));
 
@@ -171,7 +171,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $cg->addColumn($c);
 
             // 名称
-            $c = new TextColumn('OUTPUT_MENU_NAME', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100727"));
+            $c = new IDColumn('OUTPUT_MENU_ID_CLONE_04', $g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100727"), 'D_MENU_LIST', 'MENU_ID', 'MENU_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100728"));
