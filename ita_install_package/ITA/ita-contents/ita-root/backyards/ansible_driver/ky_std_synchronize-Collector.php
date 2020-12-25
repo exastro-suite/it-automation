@@ -489,6 +489,8 @@
 
     $devmode = 0;
 
+    $NOTICE_FLG = 0;
+
     ////////////////////////////////
     // グローバル変数宣言         //
     ////////////////////////////////
@@ -1253,6 +1255,8 @@
                                                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80003",array( $arrRestInfo[1]['LIST']['NORMAL']['error']['ct'] ."/". count($tmpFilter) ) );
                                                         outputLog($strCollectlogPath,$FREE_LOG);
                                                         require ($root_dir_path . $log_output_php );
+
+                                                        $NOTICE_FLG = 1;
                                                     }
  
                                                 }else{
@@ -1261,6 +1265,7 @@
                                                     outputLog($strCollectlogPath,$FREE_LOG, array($arrRestInfo[2],$arrRestInfo[3],$arrRestInfo[4]  ) );
                                                     require ($root_dir_path . $log_output_php );
                                                     #break;
+                                                    $NOTICE_FLG = 1;
 
                                                 }
                                             }else{
@@ -1269,7 +1274,8 @@
                                                 outputLog($strCollectlogPath,$FREE_LOG);
 
                                                 require ($root_dir_path . $log_output_php );
-                                                #break;                                                
+                                                #break;
+                                                $NOTICE_FLG = 1;                                             
                                             }
                                         }
                                         #$FREE_LOG=" Collect END ( HOSTNAME:$hostname TARGETFILE:$filename )";
@@ -1283,6 +1289,7 @@
                                 $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80004",array( $hostname ));
                                 outputLog($strCollectlogPath,$FREE_LOG);
                                 require ($root_dir_path . $log_output_php );
+                                $NOTICE_FLG = 1;
                             }
                         }
                     }
@@ -1293,6 +1300,7 @@
                     outputLog($strCollectlogPath,$FREE_LOG);
 
                     require ($root_dir_path . $log_output_php );
+                    $NOTICE_FLG = 1;
                 }
 
                 $tmpMovement = $aryMovement ;
@@ -1300,11 +1308,17 @@
                 if( file_exists($strCollectlogPath) ){
                     $tmpMovement['COLLECT_LOG'] = $tmpCollectlogfile;
                     $tmpMovement['COLLECT_STATUS'] ="1";
-                    
+                    if( $NOTICE_FLG != 0 ){
+                        $tmpMovement['COLLECT_STATUS'] ="2";
+                    }                    
                 }else{
                     $tmpMovement['COLLECT_LOG'] = "";
-                    #$tmpMovement['COLLECT_STATUS'] ="99";
+                    $tmpMovement['COLLECT_STATUS'] ="3";
                 }
+
+                $FREE_LOG ="";
+                $NOTICE_FLG="";
+
                 $tmpMovement['LAST_UPDATE_USER'] = $db_access_user_id;
 
                 $aryRetBody = updateMovmentInstance($objDBCA,$db_model_ch,$tmpConfigForMovementIUD,$db_access_user_id,$tmpMovement,$strCollectOrcTablename,$strMovKeyname,$aryBaseSourceForBind,$strFxName);
