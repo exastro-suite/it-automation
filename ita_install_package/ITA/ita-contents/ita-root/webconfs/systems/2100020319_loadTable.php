@@ -139,7 +139,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     /////////////////////////////////////////////////////
     // 変数名(更新メニュー用)
     /////////////////////////////////////////////////////
-    $c = new IDColumn('DISP_VARS_NAME_ID', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705050"), 'D_ANS_LRL_ARRAY_MEMBER', 'ARRAY_MEMBER_ID', 'DISP_VARS_NAME');
+    $c = new IDColumn('DISP_VARS_NAME_ID', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705050"), 'B_ANSIBLE_LRL_VARS_MASTER', 'VARS_NAME_ID', 'DISP_VARS_NAME');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705060"));//エクセル・ヘッダでの説明
 
     //更新対象外カラム
@@ -163,7 +163,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     /////////////////////////////////////////////////////
     // メンバー変数名(更新メニュー用)
     /////////////////////////////////////////////////////
-    $c = new IDColumn('DISP_VARS_NAME_ID_02', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705070"), 'D_ANS_LRL_ARRAY_MEMBER', 'ARRAY_MEMBER_ID', 'DISP_VRAS_NAME_ALIAS');
+    $c = new IDColumn('ARRAY_MEMBER_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705070"), 'D_ANS_LRL_ARRAY_MEMBER', 'ARRAY_MEMBER_ID', 'DISP_VRAS_NAME_ALIAS');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705080"));//エクセル・ヘッダでの説明
 
     //更新対象外カラム
