@@ -81,7 +81,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
 
     /////////////////////////////////////////////////////
-    // 変数名(エクセル/CSVからのアップロード用)
+    // 変数名
     /////////////////////////////////////////////////////
     $c = new IDColumn('VARS_NAME_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705050"),'B_ANSIBLE_LRL_VARS_MASTER','VARS_NAME_ID','VARS_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705060"));//エクセル・ヘッダでの説明
@@ -106,10 +106,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('csv')->setVisible(true);
     $c->getOutputType('json')->setVisible(true);
 
+    // 入力禁止設定
+    $c->setOutputType('update_table'  , new IDOutputType(new ReqTabHFmt(), new TextTabBFmt()));
+
     $table->addColumn($c);
 
     /////////////////////////////////////////////////////
-    // メンバー変数名(エクセル/CSVからのアップロード用)
+    // メンバー変数名
     /////////////////////////////////////////////////////
     $c = new IDColumn('ARRAY_MEMBER_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705070"),'D_ANS_LRL_ARRAY_MEMBER','ARRAY_MEMBER_ID','VRAS_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705080"));//エクセル・ヘッダでの説明
@@ -134,55 +137,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('csv')->setVisible(true);
     $c->getOutputType('json')->setVisible(true);
 
-    $table->addColumn($c);
-
-    /////////////////////////////////////////////////////
-    // 変数名(更新メニュー用)
-    /////////////////////////////////////////////////////
-    $c = new TextColumn('DISP_VARS_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705050"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705060"));//エクセル・ヘッダでの説明
-
-    //更新対象外カラム
-    $c->setHiddenMainTableColumn(false); 
-
-    $c->getOutputType('filter_table')->setVisible(false);
-    $c->getOutputType('print_table')->setVisible(false);
-    $c->getOutputType('update_table')->setVisible(true);
-    $c->getOutputType('register_table')->setVisible(false);
-    $c->getOutputType('delete_table')->setVisible(false);
-    $c->getOutputType('print_journal_table')->setVisible(false);
-    $c->getOutputType('excel')->setVisible(false);
-    $c->getOutputType('csv')->setVisible(false);
-    $c->getOutputType('json')->setVisible(false);
-
     // 入力禁止設定
-    $c->setOutputType('update_table'  , new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt('',true)));
+    $c->setOutputType('update_table'  , new IDOutputType(new ReqTabHFmt(), new TextTabBFmt()));
+
     $table->addColumn($c);
-
-
-    /////////////////////////////////////////////////////
-    // メンバー変数名(更新メニュー用)
-    /////////////////////////////////////////////////////
-    $c = new TextColumn('DISP_VRAS_NAME_ALIAS',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705070"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705080"));//エクセル・ヘッダでの説明
-
-    //更新対象外カラム
-    $c->setHiddenMainTableColumn(false);
-
-    $c->getOutputType('filter_table')->setVisible(false);
-    $c->getOutputType('print_table')->setVisible(false);
-    $c->getOutputType('update_table')->setVisible(true);
-    $c->getOutputType('register_table')->setVisible(false);
-    $c->getOutputType('delete_table')->setVisible(false);
-    $c->getOutputType('print_journal_table')->setVisible(false);
-    $c->getOutputType('excel')->setVisible(false);
-    $c->getOutputType('csv')->setVisible(false);
-    $c->getOutputType('json')->setVisible(false);
-
-    // 入力禁止設定
-    $c->setOutputType('update_table'  , new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt('',true)));
-    $table->addColumn($c);
-
 
     /////////////////////////////////////////////////////
     // 繰返最大数
