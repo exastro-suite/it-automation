@@ -565,7 +565,6 @@ Ansible（Pioneer）代入値管理
                    .",TAB_2.ACCESS_AUTH ACCESS_AUTH "
                    .",TAB_1.ACCESS_AUTH ACCESS_AUTH_01 "
                    ."FROM "
-                   ."FROM "
                    ." B_ANSIBLE_PNS_PHO_LINK TAB_1 "
                    ." LEFT JOIN E_STM_LIST   TAB_2 ON (TAB_1.SYSTEM_ID = TAB_2.SYSTEM_ID) "
                    ."WHERE "
