@@ -161,7 +161,7 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューグループ名
             ////////////////////////////////////////////////////////////
-            $c = new TextColumn('MENU_GROUP_NAME', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"));
+            $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900008"));
@@ -248,7 +248,7 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニュー名
             ////////////////////////////////////////////////////////////
-            $c = new TextColumn('MENU_NAME', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900012"));
+            $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900012"), 'D_MENU_LIST', 'MENU_ID', 'MENU_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900013"));
