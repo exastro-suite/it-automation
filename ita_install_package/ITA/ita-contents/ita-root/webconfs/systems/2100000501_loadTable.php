@@ -131,7 +131,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // カラムグループ メニュー(一覧のみ表示)
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-211009"));
         // メニューID
-        $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITABASEH-MNU-211010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+        $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITABASEH-MNU-211010"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
         $c->addClass("number");
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-211011"));
         $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
