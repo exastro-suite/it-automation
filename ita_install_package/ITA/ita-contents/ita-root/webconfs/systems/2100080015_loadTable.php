@@ -164,7 +164,7 @@ Terrraform 代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューID
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104920"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104920"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104930"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');

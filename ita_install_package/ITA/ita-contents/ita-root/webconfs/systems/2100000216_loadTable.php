@@ -57,7 +57,7 @@ $tmpFx = function (&$aryVariant=[], &$arySetting=[]) {
     $c->setRequired(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230032"));
     $c->setHiddenMainTableColumn(false);
-    $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt("",true))); // 更新FORMでREADONLY状態にする
+    $c->setOutputType('update_table'  , new IDOutputType(new ReqTabHFmt(), new TextTabBFmt()));
     $table->addColumn($c);
 
     // MENU
@@ -65,7 +65,7 @@ $tmpFx = function (&$aryVariant=[], &$arySetting=[]) {
     $c->setRequired(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230042"));
     $c->setHiddenMainTableColumn(false);
-    $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt("",true))); // 更新FORMでREADONLY状態にする
+    $c->setOutputType('update_table'  , new IDOutputType(new ReqTabHFmt(), new TextTabBFmt()));
     $table->addColumn($c);
 
     // 表示順序
