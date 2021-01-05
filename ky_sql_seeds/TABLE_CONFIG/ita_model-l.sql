@@ -406,6 +406,7 @@ AND    FILE_STATUS_ID IN ( 9 );
 
 CREATE OR REPLACE VIEW G_FILE_MASTER AS 
 SELECT TAB_A.FILE_ID                                                             ,
+       TAB_A.FILE_ID AS FILE_ID_CLONE                                            ,
        TAB_A.FILE_NAME                                                           ,
        TAB_A.DIR_ID                                                              ,
        [%CONCAT_HEAD/%]TAB_B.DIR_NAME_FULLPATH[%CONCAT_MID/%]TAB_A.FILE_NAME[%CONCAT_TAIL/%] AS FILE_NAME_FULLPATH                                                 ,
@@ -429,6 +430,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                                                     
        TAB_A.JOURNAL_REG_DATETIME                                                ,
        TAB_A.JOURNAL_ACTION_CLASS                                                ,
        TAB_A.FILE_ID                                                             ,
+       TAB_A.FILE_ID AS FILE_ID_CLONE                                        ,       
        TAB_A.FILE_NAME                                                           ,
        TAB_A.DIR_ID                                                              ,
        [%CONCAT_HEAD/%]TAB_B.DIR_NAME_FULLPATH[%CONCAT_MID/%]TAB_A.FILE_NAME[%CONCAT_TAIL/%] AS FILE_NAME_FULLPATH                                                 ,
@@ -525,6 +527,7 @@ CREATE OR REPLACE VIEW G_FILE_MANAGEMENT_3 AS
 SELECT TAB_A.FILE_M_ID             ,
        TAB_A.FILE_STATUS_ID        ,
        TAB_A.FILE_ID               ,
+       TAB_A.FILE_ID AS FILE_ID_CLONE,
        TAB_B.FILE_NAME_FULLPATH    ,
        TAB_A.REQUIRE_DATE          ,
        TAB_A.REQUIRE_USER_ID       ,
@@ -677,6 +680,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO        ,
        TAB_A.FILE_M_ID             ,
        TAB_A.FILE_STATUS_ID        ,
        TAB_A.FILE_ID               ,
+       TAB_A.FILE_ID               FILE_ID_CLONE,
        TAB_B.FILE_NAME_FULLPATH    ,
        TAB_A.REQUIRE_DATE          ,
        TAB_A.REQUIRE_USER_ID       ,
@@ -743,6 +747,7 @@ FROM F_FILE_MANAGEMENT_INITIAL TAB_B
 
 CREATE OR REPLACE VIEW G_FILE_MANAGEMENT_NEWEST AS 
 SELECT TAB_A.FILE_M_ID             ,
+       TAB_A.FILE_M_ID AS FILE_M_ID_CLONE,
        TAB_A.FILE_ID               ,
        TAB_A.RETURN_FILE           ,
        TAB_C.FILE_NAME_FULLPATH    ,
