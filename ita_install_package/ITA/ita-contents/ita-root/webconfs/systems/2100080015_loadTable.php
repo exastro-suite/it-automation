@@ -117,7 +117,7 @@ Terrraform 代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューグループ名
             ////////////////////////////////////////////////////////////
-            $c = new TextColumn('MENU_GROUP_NAME', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104890"));
+            $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104890"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104900"));
@@ -204,7 +204,7 @@ Terrraform 代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニュー名
             ////////////////////////////////////////////////////////////
-            $c = new TextColumn('MENU_NAME', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104940"));
+            $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104940"), 'A_MENU_LIST', 'MENU_ID', 'MENU_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104950"));
