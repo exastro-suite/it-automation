@@ -86,7 +86,7 @@ $c = new IDColumn('DIR_ID',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100905"
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-    $c = new TextColumn('FILE_NAME_FULLPATH',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100907"));
+    $c = new IDColumn('FILE_ID_CLONE',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100907"), 'G_FILE_MASTER', 'FILE_ID', 'FILE_NAME_FULLPATH');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100908"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);

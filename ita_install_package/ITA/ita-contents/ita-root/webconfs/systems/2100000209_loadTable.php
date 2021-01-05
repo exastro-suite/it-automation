@@ -78,7 +78,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg->addColumn($c);
 
 	    // ロール名称
-	    $c = new TextColumn('ROLE_NAME', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1081201"));
+	    $c = new IDColumn('ROLE_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1081201"), 'A_ROLE_LIST', 'ROLE_ID', 'ROLE_NAME');
 	    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1081202"));
 	    $c->getOutputType("update_table")->setVisible(false);
 	    $c->getOutputType("register_table")->setVisible(false);
@@ -144,7 +144,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setMasterDisplayColumnType(0);
     $cg->addColumn($c);
 
-    $c = new TextColumn('MENU_GROUP_NAME', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1081001"));
+    $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1081001"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
     $c->setHiddenMainTableColumn(false);
     $c->setAllowSendFromFile(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1081002"));
@@ -185,7 +185,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1080301"));
 
     // ID
-    $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1080401"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+    $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1080401"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
     $c->addClass("number");
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1080402"));
     $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
@@ -221,7 +221,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg->addColumn($c);
 
     // 名称
-    $c = new TextColumn('MENU_NAME', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1080501"));
+    $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1080501"), 'A_MENU_LIST', 'MENU_ID', 'MENU_NAME');
     $c->setHiddenMainTableColumn(false);
     $c->setAllowSendFromFile(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1080502"));

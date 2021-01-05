@@ -82,7 +82,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg->addColumn($c);
 
     // 名称
-    $c = new TextColumn('MENU_GROUP_NAME', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040401"));
+    $c = new IDColumn('MENU_GROUP_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040401"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
     $c->setAllowSendFromFile(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040402"));
     $c->setOutputType('update_table',new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt('<div id="sel_menu_group_name_chg" style="width: 200px; word-wrap:break-word; white-space:pre-wrap;" ></div>')));
