@@ -166,7 +166,7 @@ Ansible（Pioneer）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューID
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902010"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902011"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
@@ -207,7 +207,7 @@ Ansible（Pioneer）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニュー名
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902012"), 'D_MENU_LIST', 'MENU_ID', 'MENU_NAME');
+            $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902012"), 'A_MENU_LIST', 'MENU_ID', 'MENU_NAME');
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902013"));
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
