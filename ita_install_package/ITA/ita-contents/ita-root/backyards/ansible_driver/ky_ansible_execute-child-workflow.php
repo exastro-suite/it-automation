@@ -481,6 +481,7 @@
 
         $ret = $in_ansdrv->CreateAnsibleWorkingDir($in_OrchestratorSubId_dir,
                                                    $in_execution_no,
+                                                   $in_operation_id,
                                                    $in_hostaddres_type,
                                                    // 対象ホストがwindowsかを判別する項目追加
                                                    $in_winrm_id,
