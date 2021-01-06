@@ -760,17 +760,36 @@ class TraceOutputType extends OutputType {
 	}
 	//NEW[5]
 	function getValueByTracing($arySingleTraceQuery,$aryForBind){
+	    global $g;
 	    $intControlDebugLevel01=25;
 	    $strFxName = __FUNCTION__;
 
 	    $data = array();
 
-	    $query = generateSelectSQLForTrace($arySingleTraceQuery);
+	    // RBAC対応 ----
+	    $RBAC_obj = new RoleBasedAccessControl($g['objDBCA']);
+	    $ret = $RBAC_obj->getAccountInfo($g['login_id']);
+	    if($ret === false) {
+			throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+	    }
+	    // ---- RBAC対応
+
+	    $query = generateSelectSQLForTrace($arySingleTraceQuery,$RBAC_obj);
 	    $retArray = singleSQLExecuteAgent($query, $aryForBind, $strFxName);
 	    if( $retArray[0] === true ){
 	        $objQuery =& $retArray[1];
 	        while( $row = $objQuery->resultFetch() ){
-	            $data[$row['C1']] = $row['C2'];
+	            // RBAC対応 ----
+	            //  対象レコードのACCESS_AUTHカラムでアクセス権を判定
+	            list($ret,$permission) = $RBAC_obj->chkOneRecodeMultiAccessPermission($row);
+	            if($ret === false) {
+	                $intErrorType = 501;
+	                throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+	            }
+	            if($permission === true) {
+	                $data[$row['C1']] = $row['C2'];
+	            }
+	            // ---- RBAC対応
 	        }
 	        unset($objQuery);
 	    }
