@@ -1611,7 +1611,8 @@ TASK_ID                           INT                               , -- タス�
 
 TASK_STATUS                       INT                               , -- ステータス
 DP_TYPE                           INT                               , -- 処理種別
-IMPORT_TYPE                       INT                               , -- インポート種別
+DP_MODE                           INT                               , -- 処理モード
+ABOLISHED_TYPE                    INT                               , -- 廃止情報
 FILE_NAME                         VARCHAR (64)                      , -- ファイル名
 DISP_SEQ                          INT                               , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
@@ -1631,7 +1632,8 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                       , -- 履歴�
 TASK_ID                           INT                               , -- 識別シーケンス
 TASK_STATUS                       INT                               , -- ステータス
 DP_TYPE                           INT                               , -- 処理種別
-IMPORT_TYPE                       INT                               , -- インポート種別
+DP_MODE                           INT                               , -- 処理モード
+ABOLISHED_TYPE                    INT                               , -- 廃止情報
 FILE_NAME                         VARCHAR (64)                      , -- ファイル名
 DISP_SEQ                          INT                               , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
@@ -1641,6 +1643,30 @@ LAST_UPDATE_TIMESTAMP             DATETIME(6)                       , -- 最終�
 LAST_UPDATE_USER                  INT                               , -- 最終更新ユーザ
 PRIMARY KEY (JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE B_DP_MODE
+(
+ROW_ID                            INT                               , -- 識別シーケンス
+DP_MODE                           VARCHAR (100)                     , -- モード
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              VARCHAR (4000)                    , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                  INT                               , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE B_DP_ABOLISHED_TYPE
+(
+ROW_ID                            INT                               , -- 識別シーケンス
+ABOLISHED_TYPE                    VARCHAR (100)                     , -- 廃止情報
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              VARCHAR (4000)                    , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                  INT                               , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8
 
 CREATE TABLE B_DP_STATUS_MASTER
 (
@@ -5063,6 +5089,16 @@ INSERT INTO B_DP_IMPORT_TYPE (ROW_ID,IMPORT_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TI
 INSERT INTO B_DP_IMPORT_TYPE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,IMPORT_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Normal',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_DP_IMPORT_TYPE (ROW_ID,IMPORT_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Without disuse data',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_DP_IMPORT_TYPE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,IMPORT_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'Without disuse data',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO B_DP_MODE (ROW_ID,DP_MODE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Override',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO B_DP_MODE (ROW_ID,DP_MODE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Add',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+
+INSERT INTO B_DP_ABOLISHED_TYPE (ROW_ID,ABOLISHED_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Normal',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO B_DP_ABOLISHED_TYPE (ROW_ID,ABOLISHED_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Without disuse data',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
 
 INSERT INTO B_SYMPHONY_EXPORT_LINK (ROW_ID,HIERARCHY,SRC_ROW_ID,SRC_ITEM,DEST_MENU_ID,DEST_ITEM,OTHER_CONDITION,SPECIAL_SELECT_FUNC) VALUES('2100000001','1',NULL,NULL,'2100000307','SYMPHONY_CLASS_NO',NULL,NULL);
 

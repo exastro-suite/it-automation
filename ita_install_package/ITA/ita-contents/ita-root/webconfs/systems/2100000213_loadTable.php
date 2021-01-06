@@ -56,9 +56,14 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-    // インポート種別
-    $c = new IDColumn('IMPORT_TYPE',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900020'),'B_DP_IMPORT_TYPE','ROW_ID','IMPORT_TYPE','');
-    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900021'));//エクセル・ヘッダでの説明
+    // モード
+    $c = new IDColumn('DP_MODE',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900025'),'B_DP_MODE','ROW_ID','DP_MODE','');
+    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900031'));//エクセル・ヘッダでの説明
+    $table->addColumn($c);
+
+    // 廃止情報
+    $c = new IDColumn('ABOLISHED_TYPE',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900028'),'B_DP_ABOLISHED_TYPE','ROW_ID','ABOLISHED_TYPE','');
+    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
     //ファイル名

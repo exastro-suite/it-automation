@@ -23,7 +23,9 @@ $(function(){
             return false;
         }
 
-        if(!confirm(getSomeMessage('ITABASEC090002'))) {
+        var confirm_text = `${getSomeMessage('ITABASEC090013')}
+${$('[name="dp_mode"]:checked').next().text()}/${$('[name="abolished_type"]:checked').next().text()}`;
+        if(!confirm(confirm_text)) {
             $('#exportMsg').text('');
             return false;
         }
