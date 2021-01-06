@@ -3337,52 +3337,39 @@ LEFT JOIN B_ANSIBLE_EXEC_MODE        TAB_G ON ( TAB_A.EXEC_MODE = TAB_G.ID )
 -- END----------------------------------------------------
 
 -- -------------------------------------------------------
--- V-0005 ロール一覧
+-- V-0005-1 ロールパッケージ一覧
 -- -------------------------------------------------------
-CREATE VIEW D_ANSIBLE_LRL_ROLE_LIST AS 
+CREATE VIEW D_ANSIBLE_LRL_ROLE_PKG_LIST AS 
 SELECT 
-        TAB_A.ROLE_ID                 ,
-        TAB_A.ROLE_NAME               ,
-        TAB_A.ROLE_PACKAGE_ID         ,
-        TAB_B.ROLE_PACKAGE_NAME       ,
-        TAB_B.ROLE_PACKAGE_FILE       ,
-        CONCAT(TAB_B.ROLE_PACKAGE_ID,':',TAB_B.ROLE_PACKAGE_NAME) ROLE_PACKAGE_NAME_PULLDOWN,
-        CONCAT(TAB_A.ROLE_ID,':',TAB_A.ROLE_NAME) ROLE_NAME_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_B.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_B.DISUSE_FLAG             ,
-        TAB_A.DISUSE_FLAG   AS PACKAGE_DISUSE_FLAG ,
-        TAB_B.DISUSE_FLAG   AS ROLE_DISUSE_FLAG    ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER        ,
-        TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01
-FROM B_ANSIBLE_LRL_ROLE     TAB_A
-LEFT JOIN B_ANSIBLE_LRL_ROLE_PACKAGE TAB_B ON ( TAB_A.ROLE_PACKAGE_ID = TAB_B.ROLE_PACKAGE_ID )
+        TAB_A.*                       ,
+        CONCAT(TAB_A.ROLE_PACKAGE_ID,':',TAB_A.ROLE_PACKAGE_NAME) ROLE_PACKAGE_NAME_PULLDOWN
+FROM B_ANSIBLE_LRL_ROLE_PACKAGE TAB_A
 ;
 CREATE VIEW D_ANSIBLE_LRL_ROLE_LIST_JNL AS 
 SELECT 
-        TAB_A.ROLE_ID                 ,
-        TAB_A.ROLE_NAME               ,
-        TAB_A.ROLE_PACKAGE_ID         ,
-        TAB_B.ROLE_PACKAGE_NAME       ,
-        TAB_B.ROLE_PACKAGE_FILE       ,
-        CONCAT(TAB_B.ROLE_PACKAGE_ID,':',TAB_B.ROLE_PACKAGE_NAME) ROLE_PACKAGE_NAME_PULLDOWN,
-        CONCAT(TAB_A.ROLE_ID,':',TAB_A.ROLE_NAME) ROLE_NAME_PULLDOWN,
-        TAB_A.DISP_SEQ                ,
-        TAB_B.ACCESS_AUTH             ,
-        TAB_A.NOTE                    ,
-        TAB_B.DISUSE_FLAG             ,
-        TAB_A.DISUSE_FLAG   AS PACKAGE_DISUSE_FLAG ,
-        TAB_B.DISUSE_FLAG   AS ROLE_DISUSE_FLAG    ,
-        TAB_A.LAST_UPDATE_TIMESTAMP   ,
-        TAB_A.LAST_UPDATE_USER        ,
-        TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01
-FROM B_ANSIBLE_LRL_ROLE_JNL TAB_A
-LEFT JOIN B_ANSIBLE_LRL_ROLE_PACKAGE TAB_B ON ( TAB_A.ROLE_PACKAGE_ID = TAB_B.ROLE_PACKAGE_ID )
+        TAB_A.*                       ,
+        CONCAT(TAB_A.ROLE_PACKAGE_ID,':',TAB_A.ROLE_PACKAGE_NAME) ROLE_PACKAGE_NAME_PULLDOWN
+FROM B_ANSIBLE_LRL_ROLE_PACKAGE_JNL TAB_A
 ;
 -- END----------------------------------------------------
 
+-- -------------------------------------------------------
+-- V-0005-2 ロール一覧
+-- -------------------------------------------------------
+CREATE VIEW D_ANSIBLE_LRL_ROLE_LIST AS 
+SELECT 
+        TAB_A.*                       ,
+        CONCAT(TAB_A.ROLE_ID,':',TAB_A.ROLE_NAME) ROLE_NAME_PULLDOWN
+FROM B_ANSIBLE_LRL_ROLE     TAB_A
+;
+
+CREATE VIEW D_ANSIBLE_LRL_ROLE_LIST_JNL AS 
+SELECT 
+        TAB_A.*                       ,
+        CONCAT(TAB_A.ROLE_ID,':',TAB_A.ROLE_NAME) ROLE_NAME_PULLDOWN
+FROM B_ANSIBLE_LRL_ROLE_JNL TAB_A
+;
+-- END----------------------------------------------------
 
 -- -------------------------------------------------------
 -- V-0006 代入値管理コンボ間リンク
