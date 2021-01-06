@@ -25,6 +25,7 @@ if ( empty($root_dir_path) ){
     $root_dir_path = $root_dir_temp[0] . 'ita-root';
 }
 
+
 define('ROOT_DIR_PATH',        $root_dir_path);
 define('EXPORT_PATH',          ROOT_DIR_PATH . '/temp/data_export/');
 define('IMPORT_PATH',          ROOT_DIR_PATH . '/temp/data_import/import/');
@@ -181,13 +182,18 @@ try {
             }
 
             // ファイルをバックアップする
-            $res = fileBackup($taskId);
-            if ($res === false) {
+            $dirAry = fileBackup($taskId);
+            if ($dirAry === false) {
                 restoreTables();
                 setStatus($record['TASK_ID'], STATUS_FAILURE);
                 // サービスを開始する
                 startService();
                 continue;
+            }
+            if ( $record['DP_MODE'] == 1) {
+                foreach ($dirAry as $dir) {
+                    removeFiles(ROOT_DIR_PATH . "/" . $dir);
+                }
             }
 
             // ファイルをコピーする
@@ -305,7 +311,7 @@ try {
  * データをインポートする
  */
 function registData($record, &$importedTableAry){
-    global $objMTS;
+    global $objDBCA, $objMTS;
 
     if (LOG_LEVEL === 'DEBUG') {
         outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-STD-900008',
@@ -315,6 +321,7 @@ function registData($record, &$importedTableAry){
     $taskId = $record['TASK_ID'];
     $importPath = IMPORT_PATH . $taskId;
     $tmpTableAry = getMenuIdTableList($importPath);
+    $dpMode = $record['DP_MODE'];
 
     $ricJson = file_get_contents($importPath . '/RIC_LIST');
     $ricAry = json_decode($ricJson, true);
@@ -366,33 +373,138 @@ function registData($record, &$importedTableAry){
     foreach($tableAry as $key => $table) {
 
         // シーケンス番号の更新
+        if ( $dpMode == 1 ) {
+        } else if ( $dpMode == 2 ) {
+        } else {
+            return false;
+        }
+        // 更新系シーケンス番号取得
         $seqValue = $ricAry[$table['SEQUENCE_RIC']];
-        $res = updateSequence(array('name' => $table['SEQUENCE_RIC'], 'value' => $seqValue));
-        if ($res === false) {
+        if ( $dpMode == 1 ) {
+            $res = updateSequence(array('name' => $table['SEQUENCE_RIC'], 'value' => $seqValue));
+            if ($res === false) {
+                return false;
+            }
+        } else if ( $dpMode == 2 ) {
+            if ( array_key_exists($table['SEQUENCE_RIC'], $ricAry) ) {
+                // 既存のシーケンス番号の取得
+                $sql  = 'SELECT VALUE FROM A_SEQUENCE';
+                $sql .= " WHERE NAME = '" . $table['SEQUENCE_RIC'] . "'";
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                if ($objQuery->getStatus() === false) {
+                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
+                    outputLog(LOG_PREFIX, "SQL=[$sql].");
+                    outputLog(LOG_PREFIX, $objQuery->getLastError());
+                    return false;
+                }
+                $res = $objQuery->sqlExecute();
+                if ($res === false) {
+                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
+                    outputLog(LOG_PREFIX, "SQL=[$sql].");
+                    outputLog(LOG_PREFIX, $objQuery->getLastError());
+                    return false;
+                }
+                while ($row = $objQuery->resultFetch()) {
+                    $ExistingseqValue = $row['VALUE'];
+                }
+
+                if ( isset($ExistingseqValue) && $seqValue > $ExistingseqValue ) {
+                    $res = updateSequence(array('name' => $table['SEQUENCE_RIC'], 'value' => $seqValue));
+                    if ($res === false) {
+                        return false;
+                    }
+                }
+            }
+        } else {
             return false;
         }
 
+        // 履歴系シーケンス番号取得
         $seqValue = $jsqAry[$table['SEQUENCE_JSQ']];
-        $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
-        if ($res === false) {
+        if ( $dpMode == 1 ) {
+            $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
+            if ($res === false) {
+                return false;
+            }
+        } else if ( $dpMode == 2 ) {
+            if ( array_key_exists($table['SEQUENCE_JSQ'], $jsqAry) ) {
+                // 既存のシーケンス番号の取得
+                $sql  = 'SELECT VALUE FROM A_SEQUENCE';
+                $sql .= " WHERE NAME = '" . $value['SEQUENCE_JSQ'] . "'";
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                if ($objQuery->getStatus() === false) {
+                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
+                    outputLog(LOG_PREFIX, "SQL=[$sql].");
+                    outputLog(LOG_PREFIX, $objQuery->getLastError());
+                    return false;
+                }
+                $res = $objQuery->sqlExecute();
+                if ($res === false) {
+                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
+                    outputLog(LOG_PREFIX, "SQL=[$sql].");
+                    outputLog(LOG_PREFIX, $objQuery->getLastError());
+                    return false;
+                }
+                while ($row = $objQuery->resultFetch()) {
+                    $ExistingseqValue = $row['VALUE'];
+                }
+                if ( isset($ExistingseqValue) && $seqValue > $ExistingseqValue ) {
+                    $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
+                    if ($res === false) {
+                        return false;
+                    }
+                }
+            }
+        } else {
             return false;
         }
 
         if(array_key_exists('SEQUENCE_OTHER', $table) && 0 < count($table['SEQUENCE_OTHER'])){
-            foreach($table['SEQUENCE_OTHER'] as $seqName){
-                $seqValue = $otherSeqAry[$seqName];
+            $seqValue = $otherSeqAry[$seqName];
+            if ( $dpMode == 1 ) {
                 $res = updateSequence(array('name' => $seqName, 'value' => $seqValue));
                 if ($res === false) {
                     return false;
                 }
+            } else if ( $dpMode == 2 ) {
+                // 既存のシーケンス番号の取得
+                foreach($table['SEQUENCE_OTHER'] as $seqName){
+                    $sql  = 'SELECT VALUE FROM A_SEQUENCE';
+                    $sql .= " WHERE NAME = '" . $seqName . "'";
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    if ($objQuery->getStatus() === false) {
+                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
+                        outputLog(LOG_PREFIX, "SQL=[$sql].");
+                        outputLog(LOG_PREFIX, $objQuery->getLastError());
+                        return false;
+                    }
+                    $res = $objQuery->sqlExecute();
+                    if ($res === false) {
+                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
+                        outputLog(LOG_PREFIX, "SQL=[$sql].");
+                        outputLog(LOG_PREFIX, $objQuery->getLastError());
+                        return false;
+                    }
+                    while ($row = $objQuery->resultFetch()) {
+                        $ExistingseqValue = $row['VALUE'];
+                    }
+                    if ( isset($ExistingseqValue) && $seqValue > $ExistingseqValue ) {
+                        $res = updateSequence(array('name' => $seqName, 'value' => $seqValue));
+                        if ($res === false) {
+                            return false;
+                        }
+                    }
+                }
+            } else {
+                return false;
             }
         }
 
         // 更新系テーブルinsert
         $tblAry = array();
         foreach($tmpTblAry as $tbl) {
-            if (strpos($tbl, $key . '_' . $table['TABLE_NAME'] . '_' . $record['IMPORT_TYPE']) !== false && 
-                strpos($tbl, $key . '_' . $table['JNL_TABLE_NAME'] . '_' . $record['IMPORT_TYPE']) === false) {
+            if (strpos($tbl, $key . '_' . $table['TABLE_NAME']) !== false && 
+                strpos($tbl, $key . '_' . $table['JNL_TABLE_NAME']) === false) {
                 $tblAry[] = $tbl;
             }
         }
@@ -417,7 +529,7 @@ function registData($record, &$importedTableAry){
         // 履歴系テーブルinsert
         $tblAry = array();
         foreach($tmpTblAry as $tbl) {
-            if (strpos($tbl, $key . '_' . $table['JNL_TABLE_NAME'] . '_' . $record['IMPORT_TYPE']) !== false ) {
+            if (strpos($tbl, $key . '_' . $table['JNL_TABLE_NAME']) !== false ) {
                 $tblAry[] = $tbl;
             }
         }
@@ -468,7 +580,6 @@ function registData($record, &$importedTableAry){
             }
         }
     }
-
     return $taskId;
 }
 
@@ -483,7 +594,7 @@ function getUnexecutedRecord(){
                                           array(basename(__FILE__), __LINE__)));
     }
 
-    $sql  = 'SELECT TASK_ID, DP_TYPE, IMPORT_TYPE, FILE_NAME, NOTE';
+    $sql  = 'SELECT TASK_ID, DP_TYPE, DP_MODE, ABOLISHED_TYPE, FILE_NAME, NOTE';
     $sql .= ' FROM B_DP_STATUS';
     $sql .= ' WHERE TASK_STATUS = 1';
     $sql .= " AND DISUSE_FLAG = '0'";
@@ -885,6 +996,7 @@ function insertView($filePath){
     return true;
 }
 
+
 /**
  * ファイルをバックアップする
  */
@@ -953,12 +1065,13 @@ function fileBackup($taskId){
                 }
             }
 
-            removeFiles(ROOT_DIR_PATH . "/" . $dir);
+            // removeFiles(ROOT_DIR_PATH . "/" . $dir);
         }
     }
 
-    return true;
+    return $dirAry;
 }
+
 
 /**
  * 指定したディレクトリ内のディレクトリとファイル一覧を取得する
@@ -1026,7 +1139,7 @@ function fileImport($taskId){
     foreach ($dirAry as $dir) {
 
         $output = NULL;
-        $cmd = "cd " . IMPORT_PATH . $taskId . ";cp -rp --parents .$dir " . ROOT_DIR_PATH . " 2>&1";
+        $cmd = "cd " . IMPORT_PATH . $taskId . ";cp -rpn --parents .$dir " . ROOT_DIR_PATH . " 2>&1";
 
         exec($cmd, $output, $return_var);
 
@@ -1077,7 +1190,6 @@ function restoreFiles($taskId){
 
     $dirAry = array_unique($dirAry);
     foreach ($dirAry as $dir) {
-
         if(is_dir(ROOT_DIR_PATH . "/" . $dir)){
             removeFiles(ROOT_DIR_PATH . "/" . $dir, true);
         }
@@ -1285,7 +1397,8 @@ function setStatus($taskId, $status, $uploadFile=NULL){
         'TASK_ID' => '',
         'TASK_STATUS' => '',
         'DP_TYPE' => '',
-        'IMPORT_TYPE' => '',
+        'DP_MODE' => '',
+        'ABOLISHED_TYPE' => '',
         'FILE_NAME' => '',
         'DISP_SEQ' => '',
         'NOTE' => '',
@@ -1308,7 +1421,8 @@ function setStatus($taskId, $status, $uploadFile=NULL){
         'TASK_ID' => $resAry[0]['TASK_ID'],
         'TASK_STATUS' => $status,
         'DP_TYPE' => $resAry[0]['DP_TYPE'],
-        'IMPORT_TYPE' => $resAry[0]['IMPORT_TYPE'],
+        'DP_MODE' => $resAry[0]['DP_MODE'],
+        'ABOLISHED_TYPE' => $resAry[0]['ABOLISHED_TYPE'],
         'FILE_NAME' => $fileName,
         'DISP_SEQ' => $resAry[0]['DISP_SEQ'],
         'NOTE' => $resAry[0]['NOTE'],
@@ -1411,7 +1525,7 @@ function getRecordById($id){
     global $objDBCA, $objMTS;
 
     $errFlg = 0;
-    $sql  = 'SELECT TASK_ID, TASK_STATUS, DP_TYPE, IMPORT_TYPE, FILE_NAME, DISP_SEQ, NOTE, DISUSE_FLAG,';
+    $sql  = 'SELECT TASK_ID, TASK_STATUS, DP_TYPE, DP_MODE, ABOLISHED_TYPE, FILE_NAME, DISP_SEQ, NOTE, DISUSE_FLAG,';
     $sql .= ' LAST_UPDATE_TIMESTAMP, LAST_UPDATE_USER';
     $sql .= ' FROM B_DP_STATUS';
     $sql .= ' WHERE DISUSE_FLAG="0" AND TASK_ID = :TASK_ID';
@@ -1574,6 +1688,8 @@ function exportData($record){
     global $objDBCA, $objMTS;
 
     $taskId = $record['TASK_ID'];
+    $dpMode = $record['DP_MODE'];
+    $abolishedType = $record['ABOLISHED_TYPE'];
     $exportPath = EXPORT_PATH . $taskId;
 
     if(!is_dir($exportPath)){
@@ -1590,8 +1706,8 @@ function exportData($record){
     $uploadAry = $tmpAry[1];
     $json = json_encode($resAry);
     $fileputflg = file_put_contents($exportPath . '/MENU_ID_TABLE_LIST', $json);
-    // export先ディレクトリ書き込みエラー
 
+    // export先ディレクトリ書き込みエラー
     if ($fileputflg === false ){
         outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $exportPath . '/MENU_ID_TABLE_LIST' . "],Value={$json}");
         return false;
@@ -1604,33 +1720,47 @@ function exportData($record){
     foreach ($resAry as $key => $value) {
 
         // 更新系テーブル取得
+        $filePath = "{$exportPath}/{$key}_" . $value['TABLE_NAME'];
+        if ( $dpMode == 1 && $abolishedType == 1 ) {
+            // 上書き/廃止を含む
+            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+            $cmd .= ' -h' . DB_HOST;
+            $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'];
+            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+            $cmd .= ' 2>&1 > ' . $filePath;
+        } elseif ( $dpMode == 1 && $abolishedType == 2 ) {
+            // 上書き/廃止を含まない
+            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+            $cmd .= ' -h' . DB_HOST;
+            $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'];
+            $cmd .= ' --where \'DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000)\'';
+            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+            $cmd .= ' 2>&1 > ' . $filePath;
 
-        // dump取得
-        $filePath = "{$exportPath}/{$key}_" . $value['TABLE_NAME'] . "_1";
-        $cmd  = 'mysqldump --single-transaction --opt';
-        $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
-        $cmd .= ' -h' . DB_HOST;
-        $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'];
-        $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
-        $cmd .= ' 2>&1 > ' . $filePath;
-
-        $output = NULL;
-        exec($cmd, $output, $return_var);
-
-        if(0 != $return_var){
-            outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
+        } elseif ( $dpMode == 2 && $abolishedType == 1 ) {
+            // 追加/廃止を含む
+            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+            $cmd .= ' -h' . DB_HOST;
+            $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'] . " --skip-add-drop-table --insert-ignore";
+            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+            $cmd .= " | sed -e 's/CREATE TABLE/CREATE TABLE IF NOT EXISTS/g' ";
+            $cmd .= ' 2>&1 > ' . $filePath;
+        } elseif ( $dpMode == 2 && $abolishedType == 2 ) {
+            // 追加/廃止を含まない
+            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+            $cmd .= ' -h' . DB_HOST;
+            $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'] . " --skip-add-drop-table --insert-ignore";
+            $cmd .= ' --where \'DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000)\'';
+            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+            $cmd .= " | sed -e 's/CREATE TABLE/CREATE TABLE IF NOT EXISTS/g' ";
+            $cmd .= ' 2>&1 > ' . $filePath;
+        } else {
             return false;
         }
-
-        // dump取得（廃止除く）
-        $filePath = "{$exportPath}/{$key}_" . $value['TABLE_NAME'] . "_2";
-        $cmd  = 'mysqldump --single-transaction --opt';
-        $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
-        $cmd .= ' -h' . DB_HOST;
-        $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'];
-        $cmd .= ' --where \'DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000)\'';
-        $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
-        $cmd .= ' 2>&1 > ' . $filePath;
 
         $output = NULL;
         exec($cmd, $output, $return_var);
@@ -1642,6 +1772,7 @@ function exportData($record){
 
         // dump取得（VIEW）
         if("" != $value['VIEW_NAME']){
+
             $filePath = "{$exportPath}/{$key}_" . $value['VIEW_NAME'];
             $cmd  = 'mysqldump --single-transaction --opt';
             $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
@@ -1654,37 +1785,53 @@ function exportData($record){
             exec($cmd, $output, $return_var);
 
             if(0 != $return_var){
-            outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
-            return false;
+                outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
+                return false;
             }
         }
 
-        // JNLのdump取得
-        $filePath = "{$exportPath}/{$key}_" . $value['JNL_TABLE_NAME'] . "_1";
-        $cmd  = 'mysqldump --single-transaction --opt';
-        $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
-        $cmd .= ' -h' . DB_HOST;
-        $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
-        $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
-        $cmd .= ' 2>&1 > ' . $filePath;
 
-        $output = NULL;
-        exec($cmd, $output, $return_var);
 
-        if(0 != $return_var){
-            outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
+        $filePath = "{$exportPath}/{$key}_" . $value['JNL_TABLE_NAME'];
+        if ( $dpMode == 1 && $abolishedType == 1 ) {
+            // 上書き/廃止を含む
+            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+            $cmd .= ' -h' . DB_HOST;
+            $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
+            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+            $cmd .= ' 2>&1 > ' . $filePath;
+        } elseif ( $dpMode == 1 && $abolishedType == 2 ) {
+            // 上書き/廃止を含まない
+            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+            $cmd .= ' -h' . DB_HOST;
+            $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
+            $cmd .= ' --where \'' . $value['PRIMARY_KEY'] . ' IN (SELECT ' . $value['PRIMARY_KEY'] . ' FROM ' . $value['TABLE_NAME'] . ' WHERE DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000))\'';
+            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+            $cmd .= ' 2>&1 > ' . $filePath;
+        } elseif ( $dpMode == 2 && $abolishedType == 1 ) {
+            // 追加/廃止を含む
+            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+            $cmd .= ' -h' . DB_HOST;
+            $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'] . " --skip-add-drop-table --insert-ignore";
+            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+            $cmd .= " | sed -e 's/CREATE TABLE/CREATE TABLE IF NOT EXISTS/g' ";
+            $cmd .= ' 2>&1 > ' . $filePath;
+        } elseif ( $dpMode == 2 && $abolishedType == 2 ) {
+            // 追加/廃止を含まない
+            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+            $cmd .= ' -h' . DB_HOST;
+            $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME']. " --skip-add-drop-table --insert-ignore";;
+            $cmd .= ' --where \'' . $value['PRIMARY_KEY'] . ' IN (SELECT ' . $value['PRIMARY_KEY'] . ' FROM ' . $value['TABLE_NAME'] . ' WHERE DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000))\'';
+            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+            $cmd .= " | sed -e 's/CREATE TABLE/CREATE TABLE IF NOT EXISTS/g' ";
+            $cmd .= ' 2>&1 > ' . $filePath;
+        } else {
             return false;
         }
-
-        // JNLのdump取得（廃止除く）
-        $filePath = "{$exportPath}/{$key}_" . $value['JNL_TABLE_NAME'] . "_2";
-        $cmd  = 'mysqldump --single-transaction --opt';
-        $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
-        $cmd .= ' -h' . DB_HOST;
-        $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
-        $cmd .= ' --where \'' . $value['PRIMARY_KEY'] . ' IN (SELECT ' . $value['PRIMARY_KEY'] . ' FROM ' . $value['TABLE_NAME'] . ' WHERE DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000))\'';
-        $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
-        $cmd .= ' 2>&1 > ' . $filePath;
 
         $output = NULL;
         exec($cmd, $output, $return_var);
@@ -1880,6 +2027,17 @@ function exportData($record){
 
     $json = json_encode($uploadAry);
     $res = file_put_contents($exportPath . '/COPY_DIR_FILE_LIST', $json);
+    if ($res === false) {
+        outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $exportPath . '/COPY_DIR_FILE_LIST' . "],Value={$json}");
+        return false;
+    }
+
+    $dp_info = array(
+        "DP_MODE" => $dpMode,
+        "ABOLISHED_TYPE" => $abolishedType
+    );
+    $json = json_encode($dp_info);
+    $res = file_put_contents($exportPath . '/DP_INFO', $json);
     if ($res === false) {
         outputLog(LOG_PREFIX, "Function[file_put_contents] is error. File=[" . $exportPath . '/COPY_DIR_FILE_LIST' . "],Value={$json}");
         return false;
