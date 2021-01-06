@@ -2382,11 +2382,26 @@ EOD;
         return $query;
     }
 
-    function generateSelectSQLForTrace($arySingleTraceQuery){
+    function generateSelectSQLForTrace($arySingleTraceQuery,$RBAC_obj){
         global $g;
         $lc_db_model_ch = $g['objDBCA']->getModelChannel();
 
         $strSearchTableBody = $arySingleTraceQuery['TRACE_TARGET_TABLE'];
+
+        // ---- RBAC対応
+        // SELECT項目になっているACCESS_AUTHカラムを取得
+        $AccessAuthColumnNames = $RBAC_obj->getAccessAithColumnINIDColumnObject($strSearchTableBody);
+        if($AccessAuthColumnNames === false) {
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // SELECT項目に追加するACCESS_AUTHカラム
+        if(@count($AccessAuthColumnNames) != 0) {
+           $AddColumn = "," . implode(',',$AccessAuthColumnNames);
+        } else {
+           $AddColumn = "";
+        }
+        // RBAC対応 ----
+
         $strJnlSeqNoColId = isset($arySingleTraceQuery['TTT_JOURNAL_SEQ_NO'])?$arySingleTraceQuery['TTT_JOURNAL_SEQ_NO']:"JOURNAL_SEQ_NO";
         $strTimeStampColId = isset($arySingleTraceQuery['TTT_TIMESTAMP_COLUMN_ID'])?$arySingleTraceQuery['TTT_TIMESTAMP_COLUMN_ID']:"LAST_UPDATE_TIMESTAMP";
         $strDisuseFlagColId = isset($arySingleTraceQuery['TTT_DISUSE_FLAG_COLUMN_ID'])?$arySingleTraceQuery['TTT_DISUSE_FLAG_COLUMN_ID']:"DISUSE_FLAG";
@@ -2398,7 +2413,7 @@ EOD;
         $strWherePart = makeConvToDateSQLPartForDateWildColumn($lc_db_model_ch, ":".$strTimeStampColId, "DATETIME", true, false);
 
         $query  = "SELECT "
-                 ."    {$strSearchKeyColId} C1, {$strSelectColId} C2 "
+                 ."    {$strSearchKeyColId} C1, {$strSelectColId} C2 {$AddColumn} "
                  ."FROM "
                  ."    {$strSearchTableBody} "
                  ."WHERE "

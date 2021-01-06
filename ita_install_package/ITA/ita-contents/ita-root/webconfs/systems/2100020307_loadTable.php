@@ -95,7 +95,7 @@ Ansible（Legacy Role）作業パターン詳細
     };
 
     $c = new IDColumn('ROLE_PACKAGE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208045"),
-             'D_ANSIBLE_LRL_ROLE_LIST',
+             'D_ANSIBLE_LRL_ROLE_PKG_LIST',
              'ROLE_PACKAGE_ID',
              'ROLE_PACKAGE_NAME_PULLDOWN','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208046"));//エクセル・ヘッダでの説明
@@ -166,13 +166,11 @@ Ansible（Legacy Role）作業パターン詳細
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
-                   .",TAB_1.ACCESS_AUTH_01     ACCESS_AUTH_01 "
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
-                   ."     TAB_1.PACKAGE_DISUSE_FLAG  = '0' "
-                   ." AND TAB_1.ROLE_DISUSE_FLAG     = '0' "
-                   ." AND TAB_1.ROLE_PACKAGE_ID      = :ROLE_PACKAGE_ID "
+                   ."     TAB_1.DISUSE_FLAG     = '0' "
+                   ." AND TAB_1.ROLE_PACKAGE_ID = :ROLE_PACKAGE_ID "
                    ."ORDER BY KEY_COLUMN ";
                    
         $aryForBind['ROLE_PACKAGE_ID']        = $strPackageIdNumeric;
@@ -231,13 +229,11 @@ Ansible（Legacy Role）作業パターン詳細
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
-                   .",TAB_1.ACCESS_AUTH_01     ACCESS_AUTH_01 "
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
-                   ."     TAB_1.PACKAGE_DISUSE_FLAG  = '0' "
-                   ." AND TAB_1.ROLE_DISUSE_FLAG     = '0' "
-                   ." AND TAB_1.ROLE_PACKAGE_ID      = :ROLE_PACKAGE_ID "
+                   ."     TAB_1.DISUSE_FLAG     = '0' "
+                   ." AND TAB_1.ROLE_PACKAGE_ID = :ROLE_PACKAGE_ID "
                    ."ORDER BY KEY_COLUMN ";
 
         $aryForBind['ROLE_PACKAGE_ID']        = $strPackageIdNumeric;
@@ -295,12 +291,10 @@ Ansible（Legacy Role）作業パターン詳細
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
-                   .",TAB_1.ACCESS_AUTH_01     ACCESS_AUTH_01 "
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
-                   ."     TAB_1.PACKAGE_DISUSE_FLAG  = '0' "
-                   ." AND TAB_1.ROLE_DISUSE_FLAG     = '0' "
+                   ."     TAB_1.ROLE_DISUSE_FLAG     = '0' "
                    ." AND TAB_1.ROLE_PACKAGE_ID      = :ROLE_PACKAGE_ID "
                    ."ORDER BY KEY_COLUMN ";
 
