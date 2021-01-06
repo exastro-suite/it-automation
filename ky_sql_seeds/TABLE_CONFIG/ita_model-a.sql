@@ -1611,7 +1611,8 @@ TASK_ID                           %INT%                             , -- タス�
 
 TASK_STATUS                       %INT%                             , -- ステータス
 DP_TYPE                           %INT%                             , -- 処理種別
-IMPORT_TYPE                       %INT%                             , -- インポート種別
+DP_MODE                           %INT%                             , -- 処理モード
+ABOLISHED_TYPE                    %INT%                             , -- 廃止情報
 FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
 DISP_SEQ                          %INT%                             , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
@@ -1631,7 +1632,8 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴�
 TASK_ID                           %INT%                             , -- 識別シーケンス
 TASK_STATUS                       %INT%                             , -- ステータス
 DP_TYPE                           %INT%                             , -- 処理種別
-IMPORT_TYPE                       %INT%                             , -- インポート種別
+DP_MODE                           %INT%                             , -- 処理モード
+ABOLISHED_TYPE                    %INT%                             , -- 廃止情報
 FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
 DISP_SEQ                          %INT%                             , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
@@ -1641,6 +1643,30 @@ LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終�
 LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
 PRIMARY KEY (JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_DP_MODE
+(
+ROW_ID                            %INT%                             , -- 識別シーケンス
+DP_MODE                           %VARCHR%(100)                     , -- モード
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_DP_ABOLISHED_TYPE
+(
+ROW_ID                            %INT%                             , -- 識別シーケンス
+ABOLISHED_TYPE                    %VARCHR%(100)                     , -- 廃止情報
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%
 
 CREATE TABLE B_DP_STATUS_MASTER
 (

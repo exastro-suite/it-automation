@@ -110,13 +110,7 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
     echo "<div id='Mix2_Midashi'></div>";
     
             $uploadId = $_SESSION['upload_id'];
-
-            if(isset($_REQUEST['importButton'])){
-                $importType = 1;
-            }
-            else{
-                $importType = 2;
-            }
+            $dp_info = $_SESSION['dp_info'];
 
             // 入力値チェック
             checkInputFormat();
@@ -125,7 +119,7 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
             makeImportMenuIdList();
 
             // データ登録
-            $taskNo = insertTask($importType);
+            $taskNo = insertTask($dp_info);
             $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900009', array($taskNo));
             $_SESSION['data_import_task_no'] = $taskNo;
 
@@ -140,6 +134,7 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
             if (file_exists($filePath) === true) {
                 unlink($filePath);
             }
+
         }
 
         $resultFlg = true;
