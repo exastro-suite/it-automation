@@ -35,6 +35,7 @@ $(function() {
             $('#export_whole').prop('checked', false);
         }
     });
+
 <?php foreach($retExportAry as $key => $value): ?>
     $('#export_all_<?php echo $key; ?>').change(function() {
         $('.export_<?php echo $key; ?>').prop('checked', this.checked);
@@ -56,6 +57,12 @@ $(function() {
 <?php endforeach; ?> 
 });
 </script>
+<?php
+$timeStamp_style_css = filemtime("$root_dir_path/webroot/menus/systems/2100000211/style.css");
+print <<< EOD
+    <link rel="stylesheet" type="text/css" href="{$scheme_n_authority}/menus/systems/2100000211/style.css?{$timeStamp_style_css}">
+EOD;
+?>
 
 <!-------------------------------- ユーザ・コンテンツ情報 -------------------------------->
 <div id="sysJSCmdText01" style="display:none" class="text"><?php echo $strCmdWordAreaOpen; ?></div>
@@ -95,12 +102,55 @@ $(function() {
         </tr>
     </table>
 </h2>
+
+<?php if (strlen($resultMsg) > 0):?>
 <div id="Mix1_Nakami" style="display:block" class="text">
     <div style="margin-left:20px;">
-<?php if (strlen($resultMsg) > 0):?>
         <p><?php echo $resultMsg;?></p>
+    </div>
+</div>
 <?php else:?>
-        <form method="post" action="/menus/systems/<?php echo $g['page_dir']; ?>/03_data_export.php?no=<?php echo $g['page_dir']; ?>" id="export_form">
+<form method="post" action="/menus/systems/<?php echo $g['page_dir']; ?>/03_data_export.php?no=<?php echo $g['page_dir']; ?>" id="export_form">
+    <div id="Mix2_Nakami" style="display:block" class="text">
+        <div style="margin-left:20px;">
+            <div>
+                <div class="export_choose_title"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900025');?></div>
+                <div>
+                    <p class="export_radio_label_block">
+                        <label id="export_radio1" class="export_label">
+                            <input type="radio" class="export_radio" value="1" name="dp_mode" for="export_radio1" checked="true">
+                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900026');?></span>
+                        </label>
+                    </p>
+                    <p class="export_radio_label_block">
+                        <label id="export_radio2" class="export_label">
+                            <input type="radio" class="export_radio" value="2" name="dp_mode" for="export_radio2">
+                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900027');?></span>
+                        </label>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="export_choose_title"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900028');?></div>
+                <div>
+                    <p class="export_radio_label_block">
+                        <label id="export_radio3" class="export_label">
+                            <input type="radio" class="export_radio" value="1" name="abolished_type" for="export_radio3" checked="true">
+                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900029');?></span>
+                        </label>
+                    </p>
+                    <p class="export_radio_label_block">
+                        <label id="export_radio4" class="export_label">
+                            <input type="radio" class="export_radio" value="2" name="abolished_type" for="export_radio3">
+                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900030');?></span>
+                        </label>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="Mix1_Nakami" style="display:block" class="text">
+        <div style="margin-left:20px;">
             <p><label><input type="checkbox" value="" id="export_whole"><strong><font size="4"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900018');?></font></strong></label></p>
             <p style="margin-bottom: 10px;"></p>
 <?php foreach($retExportAry as $key => $value): ?>
@@ -118,10 +168,10 @@ $(function() {
             <input type="submit" value="<?php echo $exportLabel1; ?>">
             <input type="hidden" name="zip" value="export">
             <input type="hidden" name="menu_on" value="" class="menu_on">
-        </form>
-<?php endif;?>
+        </div>
     </div>
-</div>
+</form>
+<?php endif;?>
 <!-------------------------------- エクスポート -------------------------------->
 
 <?php
