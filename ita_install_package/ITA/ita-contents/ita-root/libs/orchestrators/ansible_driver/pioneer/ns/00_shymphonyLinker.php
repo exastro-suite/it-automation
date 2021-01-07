@@ -333,36 +333,15 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         else{
             // ---- RBAC対応
             // オペレーションとMovementのアクセス許可ロールをANDし作業イスタンスに設定するアクセス許可ロールを求める。
-            //require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
-            $RBACobj = new RoleBasedAccessControl($objDBCA);
-
-            $OpeAccessAuthStr = "";
-            $ret = $RBACobj->getOperationAccessAuth($intOperationNoUAPK,$OpeAccessAuthStr);
-            if($ret !== true) {
-                // 例外処理へ
+            $restAPI=false;
+            $login_id=0;
+            $retAry = chkMovementAccessAuth($intOperationNoUAPK,$intPatternId,$objDBCA,$objMTS,$restAPI,$login_id);
+            if($retAry['STATUS'] != 'OK') {
                 $strErrStepIdInFx="00000008";
-                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ':' . $retAry['ERROR_MSG'] . ')' );
             }
-
-            $MovementAccessAuthStr = "";
-            $ret = $RBACobj->getMovementAccessAuth($intPatternId,$MovementAccessAuthStr);
-            if($ret !== true) {
-                $strErrStepIdInFx="00000008";
-                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-            }
-
-            $AccessAuthAry   = array();
-            $AccessAuthAry[] = explode(",",$OpeAccessAuthStr);
-            $AccessAuthAry[] = explode(",",$MovementAccessAuthStr);
-            $ResultAccessAuthStr = "";
-            $ret = $RBACobj->AccessAuthExclusiveAND($AccessAuthAry,$ResultAccessAuthStr);
-            if($ret === false) {
-                $strErrStepIdInFx="00000008";
-                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-            } else {
-                // 作業インスタンスに設定するアクセス許可ロールを退避
-                $g['__TOP_ACCESS_AUTH__'] = $ResultAccessAuthStr;
-            }
+            // 作業インスタンスに設定するアクセス許可ロールを退避
+            $g['__TOP_ACCESS_AUTH__'] = $retAry['ACCESS_AUTH'];
             // RBAC対応 ----
 
             //----各オーケストレータ個別で呼ばれる場合を想定
