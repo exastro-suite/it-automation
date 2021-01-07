@@ -1666,7 +1666,7 @@ DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止�
 LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
 LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
 PRIMARY KEY (ROW_ID)
-)%%TABLE_CREATE_OUT_TAIL%%
+)%%TABLE_CREATE_OUT_TAIL%%;
 
 CREATE TABLE B_DP_STATUS_MASTER
 (
