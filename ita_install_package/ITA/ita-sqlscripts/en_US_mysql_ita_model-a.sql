@@ -3551,6 +3551,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.MENU_LIST_ID                   , -- 識別シーケンス
        TAB_A.MENU_ID                        , -- メニューID
        TAB_B.MENU_GROUP_ID                  ,
+       TAB_B.MENU_GROUP_ID     MENU_GROUP_ID_CLONE,
        TAB_C.MENU_GROUP_NAME                ,
        TAB_A.MENU_ID           MENU_ID_CLONE,
        TAB_A.MENU_ID           MENU_ID_CLONE_02,
