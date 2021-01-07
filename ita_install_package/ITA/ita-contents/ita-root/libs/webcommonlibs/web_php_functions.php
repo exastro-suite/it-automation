@@ -2767,6 +2767,127 @@ class RoleBasedAccessControl {
         }
         return true;
     }
+    function chkMovementAccessAuth($OperationNoUAPK,$PatternId,$objDBCA,$objMTS,$restAPI=false,$login_id=0) {
+        ////////////////////////////////
+        // ルートディレクトリを取得   //
+        ////////////////////////////////
+        if ( empty($root_dir_path) ){
+            $root_dir_temp = array();
+            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+            $root_dir_path = $root_dir_temp[0] . "ita-root";
+        }
+
+        $ErrorMsgBase = "([FILE]%s[LINE]%s)%s";
+
+        try {
+
+            $RBACobj = new RoleBasedAccessControl($objDBCA);
+
+            if($restAPI === true) {
+                $ret = $RBACobj->getAccountInfo($login_id);
+            }
+
+            ///////////////////////////////////////////////////
+            // 投入オペレーション アクセス許可ロール取得
+            ///////////////////////////////////////////////////
+            $OpeAccessAuthStr = "";
+            $ret = $RBACobj->getOperationAccessAuth($OperationNoUAPK,$OpeAccessAuthStr);
+            if($ret !== true) {
+                // オペレーションの登録確認は事前に行われている前提
+                if($ret === false) {
+                    $AddMsg = "Input operation list access error.";
+                } else {
+                    $AddMsg = "OperationID not found.";
+                }
+                $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+                $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+                throw new Exception(json_encode($Exception));
+            }
+    
+            if($restAPI === true) {
+                ///////////////////////////////////////////////////
+                // 投入オペレーション アクセス許可ロール判定
+                ///////////////////////////////////////////////////
+                $row = array();
+                $row['ACCESS_AUTH'] = $OpeAccessAuthStr;
+                list($ret,$permission) = $RBACobj->chkOneRecodeAccessPermission($row);
+                if($ret === false) {
+                    $AddMsg = "chkOneRecodeAccessPermission error.";
+                    $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+                    $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+                    throw new Exception(json_encode($Exception));
+                }
+                if($permission === false) {
+                    $ErrorMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-1119"); // オペレーションとログインユーザーのアクセス許可ロール不適合
+                    return chkMovementAccessAuthResultArry("NG","",$ErrorMsg);
+                }
+            } 
+            ///////////////////////////////////////////////////
+            // Movement アクセス許可ロール取得
+            ///////////////////////////////////////////////////
+            $MovementAccessAuthStr = "";
+            $ret = $RBACobj->getMovementAccessAuth($PatternId,$MovementAccessAuthStr);
+            if($ret !== true) {
+                // Movementの登録確認は事前に行われている前提
+                if($ret === false) {
+                    $AddMsg = "Movement list access error.";
+                } else {
+                    $AddMsg = "MovementID not found.";
+                }
+                $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+                $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+                throw new Exception(json_encode($Exception));
+            }
+    
+            if($restAPI === true) {
+                ///////////////////////////////////////////////////
+                // Movement アクセス許可ロール判定
+                ///////////////////////////////////////////////////
+                $row = array();
+                $row['ACCESS_AUTH'] = $MovementAccessAuthStr;
+                list($ret,$permission) = $RBACobj->chkOneRecodeAccessPermission($row);
+                if($ret === false) {
+                    $AddMsg = "chkOneRecodeAccessPermission error.";
+                    $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+                    $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+                    throw new Exception(json_encode($Exception));
+                }
+                if($permission === false) {
+                    $ErrorMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-1120"); // Movementとログインユーザーのアクセス許可ロール不適合
+                    return chkMovementAccessAuthResultArry("NG","",$ErrorMsg);
+                }
+            } 
+    
+            ///////////////////////////////////////////////////
+            // 投入オペレーションとMovementのアクセス許可ロールの適合判定
+            ///////////////////////////////////////////////////
+            $AccessAuthAry   = array();
+            $AccessAuthAry[] = explode(",",$OpeAccessAuthStr);
+            $AccessAuthAry[] = explode(",",$MovementAccessAuthStr);
+            $ResultAccessAuthStr = "";
+            $ret = $RBACobj->AccessAuthExclusiveAND($AccessAuthAry,$ResultAccessAuthStr);
+            if($ret === false) {
+                $ErrorMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-1118"); // アクセス許可ロール不適合
+                return chkMovementAccessAuthResultArry("NG","",$ErrorMsg);
+            } else {
+                return chkMovementAccessAuthResultArry("OK",$ResultAccessAuthStr,"");
+            }
+        }catch (Exception $e){
+            $Exception = json_decode($e->getMessage(),true);
+            if($Exception['ERROR_LOG'] != "") {
+                if(function_exists("web_log")) {
+                    web_log($Exception['ERROR_LOG']);
+                } else {
+                    error_log($Exception['ERROR_LOG']);
+                }
+            }
+            $ErrorMsg = $Exception['RESPONS_MSG'];
+            return chkMovementAccessAuthResultArry("ER","",$Exception['RESPONS_MSG']);
+        }
+    }
+    function chkMovementAccessAuthResultArry($Status,$AccessAuth,$ErrorMsg) {
+        return array("STATUS"=>$Status,"ACCESS_AUTH"=>$AccessAuth,"ERROR_MSG"=>$ErrorMsg);
+    }
     // RBAC対応 ----
     function ky_debug($file,$func,$line,$title,$data) {
        return;
