@@ -1666,7 +1666,7 @@ DISUSE_FLAG                       VARCHAR (1)                       , -- 廃止�
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                       , -- 最終更新日時
 LAST_UPDATE_USER                  INT                               , -- 最終更新ユーザ
 PRIMARY KEY (ROW_ID)
-)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 CREATE TABLE B_DP_STATUS_MASTER
 (
