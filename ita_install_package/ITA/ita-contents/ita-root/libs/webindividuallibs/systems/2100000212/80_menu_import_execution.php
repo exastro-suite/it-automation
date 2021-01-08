@@ -302,6 +302,13 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
 
     $arrayResult["upload_id"] = $g['upload_id'];
     $arrayResult["data_portability_upload_file_name"] = $objJSONOfReceptedData['zipfile']['name'];
+    
+    #270 対応
+    if( isset( $_SESSION['dp_info'] ) ){
+        $arrayResult["dp_mode"] = $_SESSION['dp_info']['DP_MODE']['ID'];
+        $arrayResult["abolished_type"] = $_SESSION['dp_info']['ABOLISHED_TYPE']['ID'];        
+    }
+
     if( $intResultCode == "000" )$arrayResult["IMPORT_LIST"] = $retImportAry;
     $arrayResult["RESULTCODE"] = $intResultCode;
     $arrayResult['RESULTINFO'] = strip_tags(trim($resultMsg));
