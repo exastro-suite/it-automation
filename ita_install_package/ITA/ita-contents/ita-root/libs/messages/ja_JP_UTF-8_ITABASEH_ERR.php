@@ -267,4 +267,5 @@ $ary[170034] = "SymphonyCall - 指定できないSymphonyクラスIDが含まれ
 $ary[170035] = "SymphonyCall - Movementに指定できないオペレーションがIDが含まれています。(Conductor:{} Symphony:{})";
 $ary[170036] = "SymphonyCall - 指定できないMovementが含まれています。(Conductor:{} Symphony:{})";
 $ary[170037] = "コンダクタ内にアクセス権限がないノードが含まれています(定期実行ID:{})。";
+$ary[900077] = "エクスポートのタスク登録に失敗しました。パラメータが不正です。";
 ?>

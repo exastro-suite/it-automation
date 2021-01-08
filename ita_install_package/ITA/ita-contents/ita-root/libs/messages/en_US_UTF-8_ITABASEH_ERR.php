@@ -268,4 +268,5 @@ $ary[170034] = "SymphonyCall - Contains a Symphony Class ID that cannot be speci
 $ary[170035] = "SymphonyCall - Contains an operation ID that cannot be specified for Movement.(Conductor:{} Symphony:{})";
 $ary[170036] = "SymphonyCall - Contains a Movement that cannot be specified.(Conductor:{} Symphony:{})";
 $ary[170037] = "Conductor contains a node for which you do not have access rights. (regularlyId:{}).";
+$ary[900077] = "Failed to register the export task. The parameter is invalid.";
 ?>

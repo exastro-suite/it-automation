@@ -71,6 +71,12 @@ function menuImportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
                 $dirName = str_replace( "A_", "", $objJSONOfReceptedData['upload_id'] );// . '_ita_data.tar.gz';
                 $importPath = $g['root_dir_path'] . '/temp/data_import/import/' . $dirName;   
 
+                // DP_INFO 取得 #270 対応
+                $dpinfoPath = $g['root_dir_path'] . '/temp/data_import/import/' . $dirName; 
+                $json = file_get_contents($dpinfoPath .'/DP_INFO');
+                $dp_info = json_decode(json_decode(json_encode($json), true), true);
+                $_SESSION["dp_info"] = check_dp_info($dp_info);
+
                 if( file_exists($importPath) ){
                     $aryRetBody = menuImportExecutionFromRest($objJSONOfReceptedData);                
                 }else{
@@ -195,13 +201,9 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
     try {
             $uploadId = $_SESSION['upload_id'];
 
-            if(isset($_POST['importButton'])){
-                $importType = 1;
-            }
-            else{
-                $importType = 2;
-            }
-
+            // DP_INFO 取得 #270 対応
+            $dp_info  = $_SESSION['dp_info'];
+            
             // 入力値チェック
             $requestAry = $_POST;
             //メニューグループ、IDチェック
@@ -222,7 +224,8 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
             makeImportMenuIdList();
 
             // データ登録
-            $taskNo = insertTask($importType);
+            $taskNo = insertTask($dp_info); #270 対応
+
             $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900009', array($taskNo));
 
             renameImportFiles($taskNo);
