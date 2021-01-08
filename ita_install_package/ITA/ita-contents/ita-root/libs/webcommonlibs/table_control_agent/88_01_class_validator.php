@@ -707,7 +707,7 @@ class SingleTextValidator extends TextValidator {
 }
 
 class LongUserNameValidator extends TextValidator {
-	function __construct($min=0, $max=64, $boolCheckByMbFlag=false){
+	function __construct($min=0, $max=270, $boolCheckByMbFlag=false){
 		parent::__construct($min, $max, $boolCheckByMbFlag=false);
 	}
 }
