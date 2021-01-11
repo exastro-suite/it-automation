@@ -138,10 +138,6 @@ function checkZipFile(){
         }
     }
 
-    $json = file_get_contents($uploadPath . $uploadId .'/DP_INFO');
-    $dp_info = json_decode(json_decode(json_encode($json), true), true);
-    $_SESSION["dp_info"] = check_dp_info($dp_info);
-
     if ($errCnt > 0) {
         if (file_exists($uploadPath . $fileName) === true) {
             unlink($uploadPath . $fileName);
@@ -188,6 +184,10 @@ function checkZipFile(){
         web_log("File[{$releaseFile}] does not exists.");
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
+
+    $json = file_get_contents($uploadPath . $uploadId .'/DP_INFO');
+    $dp_info = json_decode(json_decode(json_encode($json), true), true);
+    $_SESSION["dp_info"] = check_dp_info($dp_info);
 
     // ファイル移動
     $res = copy($uploadPath . '/' . $fileName, $importPath . '/' . $fileName);
