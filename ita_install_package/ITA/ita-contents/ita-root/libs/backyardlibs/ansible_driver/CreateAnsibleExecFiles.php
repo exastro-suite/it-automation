@@ -12123,7 +12123,7 @@ if(isset($Expansion_root)) {
         foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
             $hostname = $hostinfo['HOSTNAME'];
 
-            $host_var_name  = "parameters_dir_for_epc"; 
+            $host_var_name  = "__parameters_dir_for_epc__"; 
             $mkdir          = sprintf("%s/%s/%s/in/_parameters/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
             $host_var_vaule = sprintf("%s/%s/%s/in/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
             // ディレクトリ存在確認
@@ -12137,7 +12137,7 @@ if(isset($Expansion_root)) {
             }
             $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
 
-            $host_var_name  = "parameter_dir"; 
+            $host_var_name  = "__parameter_dir__"; 
             $mkdir          = sprintf("%s/%s/%s/out/_parameters/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
             $host_var_vaule = sprintf("%s/%s/%s/out/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
             // ディレクトリ存在確認
@@ -12151,7 +12151,7 @@ if(isset($Expansion_root)) {
             }
             $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
 
-            $host_var_name  = "parameters_file_dir_for_epc"; 
+            $host_var_name  = "__parameters_file_dir_for_epc__"; 
             $mkdir          = sprintf("%s/%s/%s/in/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
             $host_var_vaule = sprintf("%s/%s/%s/in/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
             // ディレクトリ存在確認
@@ -12165,7 +12165,7 @@ if(isset($Expansion_root)) {
             }
             $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
 
-            $host_var_name  = "parameters_file_dir"; 
+            $host_var_name  = "__parameters_file_dir__"; 
             $mkdir          = sprintf("%s/%s/%s/out/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
             $host_var_vaule = sprintf("%s/%s/%s/out/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
             // ディレクトリ存在確認
