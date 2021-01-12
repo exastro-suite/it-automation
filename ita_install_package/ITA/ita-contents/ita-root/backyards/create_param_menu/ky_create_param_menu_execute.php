@@ -2837,7 +2837,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
         }
 
         // 登録するメニューID、テーブル名を決定する
-        if("" != $hgMenuId){
+        if("" != $hgMenuId && "" == $convMenuId){
             $insertMenuId = $hgMenuId;
             $insertTableName = "F_" . $menuTableName . "_HG";
         }
