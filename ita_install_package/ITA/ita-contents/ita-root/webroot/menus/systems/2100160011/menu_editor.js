@@ -807,6 +807,10 @@ $menuEditor.on('change', '.config-number, .menu-column-repeat-number-input', fun
         max = Number( $input.attr('data-max') );
   let value = $input.val();
   
+  // 桁数が未入力の場合、最大値を入れる
+  if ( $input.is('.digit-number') && value === '') {
+    value = max;
+  }
   if ( min !== undefined && value < min ) value = min;
   if ( max !== undefined && value > max ) value = max;
   
