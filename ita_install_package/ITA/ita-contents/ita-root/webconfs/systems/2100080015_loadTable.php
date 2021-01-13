@@ -117,7 +117,7 @@ Terrraform 代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューグループ名
             ////////////////////////////////////////////////////////////
-            $c = new TextColumn('MENU_GROUP_NAME', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104890"));
+            $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104890"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104900"));
@@ -164,7 +164,7 @@ Terrraform 代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューID
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104920"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104920"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104930"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
@@ -204,7 +204,7 @@ Terrraform 代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニュー名
             ////////////////////////////////////////////////////////////
-            $c = new TextColumn('MENU_NAME', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104940"));
+            $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104940"), 'A_MENU_LIST', 'MENU_ID', 'MENU_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104950"));
@@ -331,6 +331,9 @@ Terrraform 代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                       .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                       .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
+                       .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
                        ." D_CMDB_MENU_COLUMN_SHEET_TYPE_3 TAB_1 "
                        ."WHERE "
@@ -354,7 +357,7 @@ Terrraform 代入値自動登録設定
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
@@ -393,6 +396,9 @@ Terrraform 代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                       .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                       .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
+                       .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
                        ." D_CMDB_MENU_COLUMN_SHEET_TYPE_3 TAB_1 "
                        ."WHERE "
@@ -416,7 +422,7 @@ Terrraform 代入値自動登録設定
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
@@ -649,6 +655,8 @@ Terrraform 代入値自動登録設定
                            ." TAB_1.MODULE_VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                            .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                           .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                           .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                            ."FROM "
                            ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -672,7 +680,7 @@ Terrraform 代入値自動登録設定
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
                             // レコード毎のアクセス権を判定
-                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                             if($ret === false) {
                                 $intErrorType = 500;
                                 $retBool = false;
@@ -710,6 +718,8 @@ Terrraform 代入値自動登録設定
                            ." TAB_1.MODULE_VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                            .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                           .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                           .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                            ."FROM "
                            ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -733,7 +743,7 @@ Terrraform 代入値自動登録設定
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
                             // レコード毎のアクセス権を判定
-                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                             if($ret === false) {
                                 $intErrorType = 500;
                                 $retBool = false;
@@ -770,6 +780,8 @@ Terrraform 代入値自動登録設定
                            ." TAB_1.MODULE_VARS_LINK_ID       KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                            .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                           .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                           .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                            ."FROM "
                            ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -793,7 +805,7 @@ Terrraform 代入値自動登録設定
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
                             // レコード毎のアクセス権を判定
-                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                             if($ret === false) {
                                 $intErrorType = 500;
                                 $retBool = false;
@@ -969,6 +981,8 @@ Terrraform 代入値自動登録設定
                            ." TAB_1.MODULE_VARS_LINK_ID KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                            .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                           .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                           .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                            ."FROM "
                            ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -992,7 +1006,7 @@ Terrraform 代入値自動登録設定
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
                             // レコード毎のアクセス権を判定
-                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                             if($ret === false) {
                                 $intErrorType = 500;
                                 $retBool = false;
@@ -1032,6 +1046,8 @@ Terrraform 代入値自動登録設定
                            ." TAB_1.MODULE_VARS_LINK_ID KEY_COLUMN "
                            .",TAB_1.VARS_LINK_PULLDOWN DISP_COLUMN "
                            .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                           .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                           .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                            ."FROM "
                            ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
                            ."WHERE "
@@ -1055,7 +1071,7 @@ Terrraform 代入値自動登録設定
                         $objQuery = $aryRetBody[1];
                         while($row = $objQuery->resultFetch() ){
                             // レコード毎のアクセス権を判定
-                            list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                             if($ret === false) {
                                 $intErrorType = 500;
                                 $retBool = false;

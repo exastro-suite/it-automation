@@ -14,8 +14,8 @@
 //   limitations under the License.
 //
 ////en_US_UTF-8_ITACREPAR_MNU
-$ary[102001] = "Maintenance (view/register/update/discard) can be performed on the menu name of the parameter sheet menu or data sheet menu to be created.<br>
-You cannot use \"Main menu\" as the menu name.";
+$ary[102001] = "Maintain Parameter sheets/Data sheets(Refer to/Update/Abolish/Restore).<br>
+The name \"Main Menu\" is unavailable.";
 $ary[102002] = "Id";
 $ary[102003] = "Menu definition information";
 $ary[102004] = "Menu definition information";
@@ -116,7 +116,7 @@ $ary[102409] = "Menu file";
 $ary[102410] = "PHP file and SQL file used in the menu.";
 $ary[102411] = "Created menu";
 $ary[102412] = "Created menu";
-$ary[102501] = "A menu can be created in the menu group specified in \"Menu creation information\".<br/>* If a menu with the same menu name or menu with the same \"Menu definition information\" ID already exists, the existing data will be deleted and overwritten by the new menu.<br/>If you need to retain the existing data, select \"Cancel\" and perform a backup.";
+$ary[102501] = "A menu can be created in the menu group specified in \"Menu definition information\".<br/>* If a menu with the same menu name or menu with the same \"Menu definition information\" ID already exists, the existing data will be deleted and overwritten by the new menu.<br/>If you need to retain the existing data, select \"Cancel\" and perform a backup.";
 $ary[102502] = "Create Menu";
 $ary[102503] = "Start Menu creation";
 $ary[102504] = "There is no target to create.";

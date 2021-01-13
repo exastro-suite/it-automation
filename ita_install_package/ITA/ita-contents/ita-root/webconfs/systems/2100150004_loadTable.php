@@ -103,7 +103,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 	$c->setValidator($objVldt);
     $table->addColumn($c);
 
-    $c = new TextColumn('NEWEST_FLAG',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101015"));
+    $c = new IDColumn('FILE_M_ID_CLONE',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101015"), 'G_FILE_MANAGEMENT_NEWEST', 'FILE_M_ID', 'NEWEST_FLAG');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101016"));//エクセル・ヘッダでの説明
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
     $c->setDBColumn(true);

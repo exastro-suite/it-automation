@@ -278,6 +278,23 @@ Ansible(Legacy)作業管理
 
     $table->fixColumn();
 
+    // 廃止・更新ボタンを隠す
+    $tmpAryColumn= $table->getColumns();
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_UPDATE']->getOutputType('print_table')->setVisible(false);
+
+    // ----非表示項目設定
+    // 備考
+    $tmpAryColumn['NOTE']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['NOTE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['NOTE']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['NOTE']->getOutputType('print_journal_table')->setVisible(false);
+    $tmpAryColumn['NOTE']->getOutputType('delete_table')->setVisible(false);
+    $tmpAryColumn['NOTE']->getOutputType('csv')->setVisible(false);
+    $tmpAryColumn['NOTE']->getOutputType('json')->setVisible(false);
+    // ----非表示項目設定
+    unset($tmpAryColumn);
+
     $table->setGeneObject('webSetting', $arrayWebSetting);
     return $table;
 };

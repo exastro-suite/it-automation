@@ -1611,7 +1611,8 @@ TASK_ID                           INT                               , -- タス�
 
 TASK_STATUS                       INT                               , -- ステータス
 DP_TYPE                           INT                               , -- 処理種別
-IMPORT_TYPE                       INT                               , -- インポート種別
+DP_MODE                           INT                               , -- 処理モード
+ABOLISHED_TYPE                    INT                               , -- 廃止情報
 FILE_NAME                         VARCHAR (64)                      , -- ファイル名
 DISP_SEQ                          INT                               , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
@@ -1631,7 +1632,8 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                       , -- 履歴�
 TASK_ID                           INT                               , -- 識別シーケンス
 TASK_STATUS                       INT                               , -- ステータス
 DP_TYPE                           INT                               , -- 処理種別
-IMPORT_TYPE                       INT                               , -- インポート種別
+DP_MODE                           INT                               , -- 処理モード
+ABOLISHED_TYPE                    INT                               , -- 廃止情報
 FILE_NAME                         VARCHAR (64)                      , -- ファイル名
 DISP_SEQ                          INT                               , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
@@ -1640,6 +1642,30 @@ DISUSE_FLAG                       VARCHAR (1)                       , -- 廃止�
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                       , -- 最終更新日時
 LAST_UPDATE_USER                  INT                               , -- 最終更新ユーザ
 PRIMARY KEY (JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE B_DP_MODE
+(
+ROW_ID                            INT                               , -- 識別シーケンス
+DP_MODE                           VARCHAR (100)                     , -- モード
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              VARCHAR (4000)                    , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                  INT                               , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE B_DP_ABOLISHED_TYPE
+(
+ROW_ID                            INT                               , -- 識別シーケンス
+ABOLISHED_TYPE                    VARCHAR (100)                     , -- 廃止情報
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              VARCHAR (4000)                    , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                  INT                               , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 CREATE TABLE B_DP_STATUS_MASTER
@@ -1999,6 +2025,7 @@ PATTERN_TIME                      VARCHAR (5)                  ,
 PATTERN_DAY                       INT                          ,
 PATTERN_DAY_OF_WEEK               INT                          ,
 PATTERN_WEEK_NUMBER               INT                          ,
+EXECUTION_USER_ID                 INT                          ,
 DISP_SEQ                          INT                          ,
 ACCESS_AUTH                       TEXT                         ,
 NOTE                              VARCHAR (4000)               ,
@@ -2033,6 +2060,7 @@ PATTERN_TIME                      VARCHAR (5)                  ,
 PATTERN_DAY                       INT                          ,
 PATTERN_DAY_OF_WEEK               INT                          ,
 PATTERN_WEEK_NUMBER               INT                          ,
+EXECUTION_USER_ID                 INT                          ,
 DISP_SEQ                          INT                          ,
 ACCESS_AUTH                       TEXT                         ,
 NOTE                              VARCHAR (4000)               ,
@@ -2820,6 +2848,7 @@ PATTERN_TIME                      VARCHAR (5)                  ,
 PATTERN_DAY                       INT                          ,
 PATTERN_DAY_OF_WEEK               INT                          ,
 PATTERN_WEEK_NUMBER               INT                          ,
+EXECUTION_USER_ID                 INT                          ,
 DISP_SEQ                          INT                          ,
 ACCESS_AUTH                       TEXT                         ,
 NOTE                              VARCHAR (4000)               ,
@@ -2852,6 +2881,7 @@ PATTERN_TIME                      VARCHAR (5)                  ,
 PATTERN_DAY                       INT                          ,
 PATTERN_DAY_OF_WEEK               INT                          ,
 PATTERN_WEEK_NUMBER               INT                          ,
+EXECUTION_USER_ID                 INT                          ,
 DISP_SEQ                          INT                          ,
 ACCESS_AUTH                       TEXT                         ,
 NOTE                              VARCHAR (4000)               ,
@@ -2942,6 +2972,7 @@ SELECT TAB_A.USER_ID              ,
        TAB_A.PROVIDER_ID          ,
        TAB_A.PROVIDER_USER_ID     ,
        TAB_A.ACCESS_AUTH          ,
+       TAB_C.ACCESS_AUTH AS ACCESS_AUTH_01,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -2971,6 +3002,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        TAB_A.PROVIDER_ID          ,
        TAB_A.PROVIDER_USER_ID     ,
        TAB_A.ACCESS_AUTH          ,
+       TAB_C.ACCESS_AUTH AS ACCESS_AUTH_01,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
@@ -3018,7 +3050,8 @@ SELECT TAB_A.ROLE_ID              ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
-       TAB_A.LAST_UPDATE_USER      
+       TAB_A.LAST_UPDATE_USER     ,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01   
 FROM   A_ROLE_LIST TAB_A
 LEFT JOIN A_AD_GROUP_JUDGEMENT TAB_B ON (TAB_A.ROLE_ID = TAB_B.ITA_ROLE_ID);
 
@@ -3036,7 +3069,8 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
-       TAB_A.LAST_UPDATE_USER      
+       TAB_A.LAST_UPDATE_USER     ,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01   
 FROM   A_ROLE_LIST_JNL TAB_A
 LEFT JOIN A_AD_GROUP_JUDGEMENT TAB_B ON (TAB_A.ROLE_ID = TAB_B.ITA_ROLE_ID);
 
@@ -3046,6 +3080,7 @@ SELECT TAB_A.MENU_ID              ,
        TAB_A.MENU_GROUP_ID        ,
        TAB_B.MENU_GROUP_NAME      ,
        TAB_A.MENU_GROUP_ID          MENU_GROUP_ID_CLONE,
+       TAB_A.MENU_GROUP_ID          MENU_GROUP_ID_CLONE_02,
        TAB_A.MENU_NAME            ,
        CONCAT(TAB_A.MENU_GROUP_ID,':',TAB_B.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_A.MENU_NAME) MENU_PULLDOWN,
        TAB_A.LOGIN_NECESSITY      ,
@@ -3060,7 +3095,8 @@ SELECT TAB_A.MENU_ID              ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
-       TAB_A.LAST_UPDATE_USER
+       TAB_A.LAST_UPDATE_USER     ,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM   A_MENU_LIST TAB_A
 LEFT JOIN A_MENU_GROUP_LIST TAB_B ON (TAB_A.MENU_GROUP_ID = TAB_B.MENU_GROUP_ID);
 -- 紐づいたメニューグループが廃止されているメニューも選択できるようにするため、WHERE句で活性済レコードのみ、と絞り込まない。
@@ -3074,6 +3110,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        TAB_A.MENU_GROUP_ID        ,
        TAB_B.MENU_GROUP_NAME      ,
        TAB_A.MENU_GROUP_ID          MENU_GROUP_ID_CLONE,
+       TAB_A.MENU_GROUP_ID          MENU_GROUP_ID_CLONE_02,
        TAB_A.MENU_NAME            ,
        CONCAT(TAB_A.MENU_GROUP_ID,':',TAB_B.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_A.MENU_NAME) MENU_PULLDOWN,
        TAB_A.LOGIN_NECESSITY      ,
@@ -3088,7 +3125,8 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        TAB_A.NOTE                 ,
        TAB_A.DISUSE_FLAG          ,
        TAB_A.LAST_UPDATE_TIMESTAMP,
-       TAB_A.LAST_UPDATE_USER
+       TAB_A.LAST_UPDATE_USER     ,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM   A_MENU_LIST_JNL TAB_A
 LEFT JOIN A_MENU_GROUP_LIST TAB_B ON (TAB_A.MENU_GROUP_ID = TAB_B.MENU_GROUP_ID);
 
@@ -3097,11 +3135,14 @@ SELECT TAB_A.LINK_ID              ,
        TAB_A.ROLE_ID              ,
        TAB_D.ROLE_NAME            ,
        TAB_A.ROLE_ID                ROLE_ID_CLONE,
+       TAB_A.ROLE_ID                ROLE_ID_CLONE_02,
        TAB_B.MENU_GROUP_ID        ,
+       TAB_B.MENU_GROUP_ID          MENU_GROUP_ID_CLONE,
        TAB_C.MENU_GROUP_NAME      ,
        TAB_A.MENU_ID              ,
        TAB_B.MENU_NAME            ,
        TAB_A.MENU_ID                MENU_ID_CLONE,
+       TAB_A.MENU_ID                MENU_ID_CLONE_02,
        TAB_A.PRIVILEGE            ,
        TAB_A.ACCESS_AUTH          ,
        TAB_A.NOTE                 ,
@@ -3121,11 +3162,14 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        TAB_A.ROLE_ID              ,
        TAB_D.ROLE_NAME            ,
        TAB_A.ROLE_ID                ROLE_ID_CLONE,
+       TAB_A.ROLE_ID                ROLE_ID_CLONE_02,
        TAB_B.MENU_GROUP_ID        ,
+       TAB_B.MENU_GROUP_ID          MENU_GROUP_ID_CLONE,
        TAB_C.MENU_GROUP_NAME      ,
        TAB_A.MENU_ID              ,
        TAB_B.MENU_NAME            ,
        TAB_A.MENU_ID                MENU_ID_CLONE,
+       TAB_A.MENU_ID                MENU_ID_CLONE_02,
        TAB_A.PRIVILEGE            ,
        TAB_A.ACCESS_AUTH          ,
        TAB_A.NOTE                 ,
@@ -3142,9 +3186,11 @@ SELECT TAB_A.LINK_ID              ,
        TAB_A.ROLE_ID              ,
        TAB_C.ROLE_NAME            ,
        TAB_A.ROLE_ID                ROLE_ID_CLONE,
+       TAB_A.ROLE_ID                ROLE_ID_CLONE_02,
        TAB_A.USER_ID              ,
        TAB_B.USERNAME             ,
        TAB_A.USER_ID                USER_ID_CLONE,
+       TAB_A.USER_ID                USER_ID_CLONE_02,
        TAB_A.DEF_ACCESS_AUTH_FLAG ,
        TAB_A.ACCESS_AUTH          ,
        TAB_A.NOTE                 ,
@@ -3164,9 +3210,11 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        TAB_A.ROLE_ID              ,
        TAB_C.ROLE_NAME            ,
        TAB_A.ROLE_ID                ROLE_ID_CLONE,
+       TAB_A.ROLE_ID                ROLE_ID_CLONE_02,
        TAB_A.USER_ID              ,
        TAB_B.USERNAME             ,
        TAB_A.USER_ID                USER_ID_CLONE,
+       TAB_A.USER_ID                USER_ID_CLONE_02,
        TAB_A.DEF_ACCESS_AUTH_FLAG ,
        TAB_A.ACCESS_AUTH          ,
        TAB_A.NOTE                 ,
@@ -3234,9 +3282,38 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
        TAB_A.LAST_UPDATE_USER
 FROM A_PROVIDER_ATTRIBUTE_LIST_JNL TAB_A;
 
+CREATE VIEW G_PARAM_TARGET AS 
+SELECT TAB_A.TARGET_ID              ,
+       TAB_A.DISP_SEQ               ,
+       TAB_A.TARGET_NAME            ,
+       TAB_A.ACCESS_AUTH            ,
+       TAB_A.NOTE                   ,
+       TAB_A.DISUSE_FLAG            ,
+       TAB_A.LAST_UPDATE_TIMESTAMP  ,
+       TAB_A.LAST_UPDATE_USER
+FROM F_PARAM_TARGET TAB_A
+WHERE TAB_A.TARGET_ID IN (1,2,3);
+
+CREATE VIEW G_PARAM_TARGET_JNL AS 
+SELECT TAB_A.JOURNAL_SEQ_NO         ,
+       TAB_A.JOURNAL_REG_DATETIME   ,
+       TAB_A.JOURNAL_ACTION_CLASS   ,
+       TAB_A.TARGET_ID              ,
+       TAB_A.DISP_SEQ               ,
+       TAB_A.TARGET_NAME            ,
+       TAB_A.ACCESS_AUTH            ,
+       TAB_A.NOTE                   ,
+       TAB_A.DISUSE_FLAG            ,
+       TAB_A.LAST_UPDATE_TIMESTAMP  ,
+       TAB_A.LAST_UPDATE_USER
+FROM F_PARAM_TARGET_JNL TAB_A
+WHERE TAB_A.TARGET_ID IN (1,2,3);
+
 CREATE VIEW D_SEQUENCE AS 
 SELECT TAB_A.NAME                 ,
        TAB_A.VALUE                ,
+       TAB_A.MENU_ID              ,
+       TAB_B.MENU_GROUP_ID        ,
        TAB_B.MENU_NAME            ,
        TAB_B.MENU_GROUP_NAME      ,
        TAB_A.DISP_SEQ             ,
@@ -3445,8 +3522,10 @@ SELECT
        TAB_A.MENU_LIST_ID                   , -- 識別シーケンス
        TAB_A.MENU_ID                        , -- メニューID
        TAB_B.MENU_GROUP_ID                  ,
+       TAB_B.MENU_GROUP_ID     MENU_GROUP_ID_CLONE,
        TAB_C.MENU_GROUP_NAME                ,
        TAB_A.MENU_ID           MENU_ID_CLONE,
+       TAB_A.MENU_ID           MENU_ID_CLONE_02,
        TAB_B.MENU_NAME                      ,
        CONCAT(TAB_B.MENU_GROUP_ID,':',TAB_C.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_B.MENU_NAME) MENU_PULLDOWN,
        TAB_A.SHEET_TYPE                     ,
@@ -3456,7 +3535,9 @@ SELECT
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
        TAB_A.LAST_UPDATE_TIMESTAMP          ,
-       TAB_A.LAST_UPDATE_USER 
+       TAB_A.LAST_UPDATE_USER               ,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+       TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02 
 FROM B_CMDB_MENU_LIST TAB_A
 LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID)
@@ -3470,8 +3551,10 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.MENU_LIST_ID                   , -- 識別シーケンス
        TAB_A.MENU_ID                        , -- メニューID
        TAB_B.MENU_GROUP_ID                  ,
+       TAB_B.MENU_GROUP_ID     MENU_GROUP_ID_CLONE,
        TAB_C.MENU_GROUP_NAME                ,
        TAB_A.MENU_ID           MENU_ID_CLONE,
+       TAB_A.MENU_ID           MENU_ID_CLONE_02,
        TAB_B.MENU_NAME                      ,
        CONCAT(TAB_B.MENU_GROUP_ID,':',TAB_C.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_B.MENU_NAME) MENU_PULLDOWN,
        TAB_A.SHEET_TYPE                     ,
@@ -3481,7 +3564,9 @@ SELECT TAB_A.JOURNAL_SEQ_NO                 ,
        TAB_A.NOTE                           ,
        TAB_A.DISUSE_FLAG                    ,
        TAB_A.LAST_UPDATE_TIMESTAMP          ,
-       TAB_A.LAST_UPDATE_USER 
+       TAB_A.LAST_UPDATE_USER               ,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+       TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02 
 FROM B_CMDB_MENU_LIST_JNL TAB_A
 LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID)
@@ -3674,7 +3759,8 @@ SELECT
   TAB_B.MENU_GROUP_NAME,
   CONCAT(TAB_B.MENU_GROUP_ID,':',TAB_B.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_A.MENU_NAME) MENU_PULLDOWN,
   TAB_A.DISUSE_FLAG,
-  TAB_A.ACCESS_AUTH
+  TAB_A.ACCESS_AUTH,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM 
   ( A_MENU_LIST TAB_A
     INNER JOIN A_MENU_GROUP_LIST TAB_B ON TAB_B.MENU_GROUP_ID = TAB_A.MENU_GROUP_ID )
@@ -3692,7 +3778,8 @@ SELECT
   TAB_B.MENU_GROUP_NAME,
   CONCAT(TAB_B.MENU_GROUP_ID,':',TAB_B.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_A.MENU_NAME) MENU_PULLDOWN,
   TAB_A.DISUSE_FLAG,
-  TAB_A.ACCESS_AUTH
+  TAB_A.ACCESS_AUTH,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM 
   ( A_MENU_LIST_JNL TAB_A
     INNER JOIN A_MENU_GROUP_LIST TAB_B ON TAB_B.MENU_GROUP_ID = TAB_A.MENU_GROUP_ID )
@@ -3717,7 +3804,10 @@ SELECT
   TAB_A.NOTE                           ,
   TAB_A.DISUSE_FLAG                    ,
   TAB_A.LAST_UPDATE_TIMESTAMP          ,
-  TAB_A.LAST_UPDATE_USER 
+  TAB_A.LAST_UPDATE_USER               ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+  TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02  ,
+  TAB_D.ACCESS_AUTH AS ACCESS_AUTH_03
 FROM        B_CMDB_MENU_COLUMN TAB_A
   LEFT JOIN B_CMDB_MENU_LIST       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
   LEFT JOIN A_MENU_LIST            TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
@@ -3740,7 +3830,10 @@ SELECT
   TAB_A.NOTE                           ,
   TAB_A.DISUSE_FLAG                    ,
   TAB_A.LAST_UPDATE_TIMESTAMP          ,
-  TAB_A.LAST_UPDATE_USER 
+  TAB_A.LAST_UPDATE_USER               ,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+  TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02  ,
+  TAB_D.ACCESS_AUTH AS ACCESS_AUTH_03
 FROM        B_CMDB_MENU_COLUMN_JNL TAB_A
   LEFT JOIN B_CMDB_MENU_LIST           TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
   LEFT JOIN A_MENU_LIST                TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
@@ -3784,43 +3877,59 @@ WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
 
 CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_1 AS
 SELECT
-  TAB_B.*
+  TAB_B.*,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01   ,
+  TAB_A.ACCESS_AUTH_01 AS ACCESS_AUTH_02,
+  TAB_A.ACCESS_AUTH_02 AS ACCESS_AUTH_03
 FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_1         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
+  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
 CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_1_JNL AS
 SELECT
-  TAB_B.*
+  TAB_B.*,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01   ,
+  TAB_A.ACCESS_AUTH_01 AS ACCESS_AUTH_02,
+  TAB_A.ACCESS_AUTH_02 AS ACCESS_AUTH_03
 FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_1_JNL         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
+  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
 CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER AS
 SELECT
-  TAB_B.*
+  TAB_B.*,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01,
+  TAB_A.ACCESS_AUTH_01 AS ACCESS_AUTH_02,
+  TAB_A.ACCESS_AUTH_02 AS ACCESS_AUTH_03
 FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_1         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
   TAB_B.COL_CLASS   <>  'MultiTextColumn' AND
+  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
 CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER_JNL AS
 SELECT
-  TAB_B.*
+  TAB_B.*,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01,
+  TAB_A.ACCESS_AUTH_01 AS ACCESS_AUTH_02,
+  TAB_A.ACCESS_AUTH_02 AS ACCESS_AUTH_03
 FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_1_JNL         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
   TAB_B.COL_CLASS   <>  'MultiTextColumn' AND
+  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
@@ -3837,6 +3946,7 @@ WHERE
    WHERE
      TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
      TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
+     TBL_B.COL_CLASS   <>  'FileUploadColumn' AND
      TBL_B.DISUSE_FLAG =   '0'
   ) <> 0 
 ;
@@ -3854,6 +3964,7 @@ WHERE
    WHERE
      TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
      TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
+     TBL_B.COL_CLASS   <>  'FileUploadColumn' AND
      TBL_B.DISUSE_FLAG =   '0'
   ) <> 0
 ;
@@ -3869,7 +3980,9 @@ SELECT
   TAB_A.NOTE                           ,
   TAB_A.DISUSE_FLAG                    ,
   TAB_A.LAST_UPDATE_TIMESTAMP          ,
-  TAB_A.LAST_UPDATE_USER
+  TAB_A.LAST_UPDATE_USER               ,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+  TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM        D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER    TAB_A
   LEFT JOIN D_CMDB_MENU_LIST_SHEET_TYPE_1_PIONEER      TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
   LEFT JOIN A_MENU_LIST                                TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
@@ -3892,7 +4005,9 @@ SELECT
   TAB_A.NOTE                           ,
   TAB_A.DISUSE_FLAG                    ,
   TAB_A.LAST_UPDATE_TIMESTAMP          ,
-  TAB_A.LAST_UPDATE_USER
+  TAB_A.LAST_UPDATE_USER               ,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+  TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
 FROM        D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER_JNL TAB_A
   LEFT JOIN D_CMDB_MENU_LIST_SHEET_TYPE_1_PIONEER       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
   LEFT JOIN A_MENU_LIST                                 TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
@@ -3937,21 +4052,29 @@ WHERE SHEET_TYPE = 3
 
 CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_3 AS
 SELECT
-  TAB_B.*
+  TAB_B.*,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01   ,
+  TAB_A.ACCESS_AUTH_01 AS ACCESS_AUTH_02,
+  TAB_A.ACCESS_AUTH_02 AS ACCESS_AUTH_03
 FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_3         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
+  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
 CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_3_JNL AS
 SELECT
-  TAB_B.*
+  TAB_B.*,
+  TAB_A.ACCESS_AUTH AS ACCESS_AUTH_01   ,
+  TAB_A.ACCESS_AUTH_01 AS ACCESS_AUTH_02,
+  TAB_A.ACCESS_AUTH_02 AS ACCESS_AUTH_03
 FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_3_JNL         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
+  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
@@ -4968,6 +5091,16 @@ INSERT INTO B_DP_IMPORT_TYPE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_AC
 INSERT INTO B_DP_IMPORT_TYPE (ROW_ID,IMPORT_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Without disuse data',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_DP_IMPORT_TYPE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROW_ID,IMPORT_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'Without disuse data',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
+INSERT INTO B_DP_MODE (ROW_ID,DP_MODE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Override',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO B_DP_MODE (ROW_ID,DP_MODE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Add',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+
+INSERT INTO B_DP_ABOLISHED_TYPE (ROW_ID,ABOLISHED_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Normal',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO B_DP_ABOLISHED_TYPE (ROW_ID,ABOLISHED_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Without disuse data',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+
 INSERT INTO B_SYMPHONY_EXPORT_LINK (ROW_ID,HIERARCHY,SRC_ROW_ID,SRC_ITEM,DEST_MENU_ID,DEST_ITEM,OTHER_CONDITION,SPECIAL_SELECT_FUNC) VALUES('2100000001','1',NULL,NULL,'2100000307','SYMPHONY_CLASS_NO',NULL,NULL);
 
 INSERT INTO B_SYMPHONY_EXPORT_LINK (ROW_ID,HIERARCHY,SRC_ROW_ID,SRC_ITEM,DEST_MENU_ID,DEST_ITEM,OTHER_CONDITION,SPECIAL_SELECT_FUNC) VALUES('2100000002','2','2100000001','SYMPHONY_CLASS_NO','2100000311','SYMPHONY_CLASS_NO',NULL,NULL);
@@ -5070,6 +5203,8 @@ INSERT INTO F_PARAM_TARGET (TARGET_ID,DISP_SEQ,TARGET_NAME,NOTE,DISUSE_FLAG,LAST
 INSERT INTO F_PARAM_TARGET_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,TARGET_ID,DISP_SEQ,TARGET_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,3,'Data Sheet',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_PARAM_TARGET (TARGET_ID,DISP_SEQ,TARGET_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,2,'Parameter Sheet(Operation)',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_PARAM_TARGET_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,TARGET_ID,DISP_SEQ,TARGET_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',3,2,'Parameter Sheet(Operation)',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_PARAM_TARGET (TARGET_ID,DISP_SEQ,TARGET_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(4,4,'Parameter Sheet(File Upload)',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_PARAM_TARGET_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,TARGET_ID,DISP_SEQ,TARGET_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(4,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',4,4,'Parameter Sheet(File Upload)',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO B_REGULARLY_STATUS (REGULARLY_STATUS_ID,REGULARLY_STATUS_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'In preparation',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_REGULARLY_STATUS_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,REGULARLY_STATUS_ID,REGULARLY_STATUS_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'In preparation',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

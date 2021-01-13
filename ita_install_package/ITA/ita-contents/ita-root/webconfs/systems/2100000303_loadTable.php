@@ -133,8 +133,63 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // ログイン
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-102061"));
 
+        //----ログインパスワード/管理のバリデーター定義
+        $objFunction01 = function($objClientValidator, $value, $strNumberForRI, $arrayRegData, $arrayVariant){
+            global $g;
+            $retBool = true;
+            $retStrBody = '';
+            $strModeId = "";
+
+            if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+                if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+                    $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                    $strModeId = $aryTcaAction["ACTION_MODE"];
+                }
+            }
+
+            // パスワードの取得
+            $strLoginPw = "";
+            if($strModeId == "DTUP_singleRecRegister"){
+                list($strLoginPw ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW') , "");
+            }
+            else if( $strModeId == "DTUP_singleRecUpdate"){
+                list($strLoginPw ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW') , "");
+                if(strlen($strLoginPw) === 0){
+                    list($strLoginPw ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayVariant,array('edit_target_row','LOGIN_PW') ,"");
+                }
+            }
+            else if($strModeId == "DTUP_singleRecDelete"){
+                list($strLoginPw   ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayVariant,array('edit_target_row','LOGIN_PW')          ,"");
+            }
+            
+            if( $strModeId == "DTUP_singleRecDelete" || $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
+                if($value == 1){
+                    if(strlen($strLoginPw) === 0){
+                        $retBool = false;
+                        $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102071");
+                    }
+                }
+                else if(strlen($value) === 0){
+                    // 何もしない
+                }
+                else{
+                    //----想定外の値の場合
+                    $retBool = false;
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-11404");
+                    //想定外の値の場合----
+                }
+            }
+            $objClientValidator->setValidRule($retStrBody);
+            return $retBool;
+        };
+        //ログインパスワード/管理のバリデーター定義----
+
+        $objVarVali = new VariableValidator();
+        $objVarVali->setFunctionForIsValid($objFunction01);
+
         $c = new IDColumn('LOGIN_PW_HOLD_FLAG',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102062"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102063"));//エクセル・ヘッダでの説明
+        $c->addValidator($objVarVali);
         $cg->addColumn($c);
 
         $objFunction03 = function($objOutputType, $rowData, $aryVariant, $objColumn){
@@ -371,13 +426,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                                 //更新の場合（敗者復活的なチェック）----
                                 
                                 //ログインパスワードが必須入力の場合----
-                            }else{
-                                //----ログインパスワードが入力禁止の場合
-                                if( 0 < strlen($strLoginPw) ){
-                                    $retBool = false;
-                                    $retStrBody = $strErrorMsgPreBody;
-                                }
-                                //ログインパスワードが入力禁止の場合----
+                            }
+                            else{
+                                //----ログインパスワードが必須入力ではない場合
+                                // 何もしない
+                                //ログインパスワードが必須入力ではない場合----
                             }
                         }
                     }

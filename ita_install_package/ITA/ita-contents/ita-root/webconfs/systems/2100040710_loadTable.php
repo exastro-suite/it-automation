@@ -161,7 +161,7 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューグループ名
             ////////////////////////////////////////////////////////////
-            $c = new TextColumn('MENU_GROUP_NAME', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"));
+            $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900008"));
@@ -248,7 +248,7 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニュー名
             ////////////////////////////////////////////////////////////
-            $c = new TextColumn('MENU_NAME', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900012"));
+            $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900012"), 'D_MENU_LIST', 'MENU_ID', 'MENU_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900013"));
@@ -348,7 +348,7 @@ Ansible（Legacy Role）代入値自動登録設定
                     return $retArray;
         };
 
-        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900120"),'B_CMDB_MENU_COLUMN','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
+        $c = new IDColumn('COLUMN_LIST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900120"),'D_CMDB_MENU_COLUMN_SHEET_TYPE_4 ','COLUMN_LIST_ID','COL_TITLE','',array('SELECT_ADD_FOR_ORDER'=>array('COL_TITLE_DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
 
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900121"));
 
@@ -376,8 +376,11 @@ Ansible（Legacy Role）代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                       .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                       .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
+                       .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
-                       ." B_CMDB_MENU_COLUMN TAB_1 "
+                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_4  TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -385,24 +388,25 @@ Ansible（Legacy Role）代入値自動登録設定
 
             $aryForBind['MENU_ID'] = $strMenuIDNumeric;
 
-            if( 0 < strlen($strMenuIDNumeric) ){
-                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
-                $obj = new RoleBasedAccessControl($g['objDBCA']);
-                $ret  = $obj->getAccountInfo($g['login_id']);
-                if($ret === false) {
-                    $intErrorType = 500;
-                    $retBool = false;
-                }
 
+            if( 0 < strlen($strMenuIDNumeric) ){
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
+                            break;
                         }else{
                             if($permission === true){
                                 $aryDataSet[]= $row;
@@ -438,8 +442,11 @@ Ansible（Legacy Role）代入値自動登録設定
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
                        .",TAB_1.COL_TITLE       DISP_COLUMN "
                        .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                       .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
+                       .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
+                       .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
-                       ." B_CMDB_MENU_COLUMN TAB_1 "
+                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_4  TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -448,23 +455,23 @@ Ansible（Legacy Role）代入値自動登録設定
             $aryForBind['MENU_ID'] = $strMenuIDNumeric;
 
             if( 0 < strlen($strMenuIDNumeric) ){
-                // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
-                $obj = new RoleBasedAccessControl($g['objDBCA']);
-                $ret  = $obj->getAccountInfo($g['login_id']);
-                if($ret === false) {
-                    $intErrorType = 500;
-                    $retBool = false;
-                }
-
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
+                            break;
                         }else{
                             if($permission === true){
                                 $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
@@ -502,7 +509,7 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setOutputType('register_table',$objOTForReg);
 
 
-        $c->setJournalTableOfMaster('B_CMDB_MENU_COLUMN_JNL');
+        $c->setJournalTableOfMaster('D_CMDB_MENU_COLUMN_SHEET_TYPE_4_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
@@ -679,13 +686,13 @@ Ansible（Legacy Role）代入値自動登録設定
                          ."    SELECT                                         "
                          ."      COUNT(*)                                     "
                          ."    FROM                                           "
-                         ."      B_CMDB_MENU_LIST TBL_B                       "
+                         ."      D_CMDB_MENU_LIST_SHEET_TYPE_1 TBL_B                       "
                          ."    WHERE                                          "
                          ."      TBL_B.MENU_ID      = TBL_A.MENU_ID AND       "
                          ."      TBL_B.DISUSE_FLAG  = '0'                     "
                          ."  ) AS MENU_CNT                                    "
                          ."FROM                                               "
-                         ."  B_CMDB_MENU_COLUMN TBL_A                         "
+                         ."  D_CMDB_MENU_COLUMN_SHEET_TYPE_4  TBL_A                         "
                          ."WHERE                                              "
                          ."  TBL_A.COLUMN_LIST_ID  = :COLUMN_LIST_ID   AND    "
                          ."  TBL_A.DISUSE_FLAG     = '0'                      ";
@@ -746,14 +753,14 @@ Ansible（Legacy Role）代入値自動登録設定
                      ."     SELECT  "
                      ."       COUNT(*) "
                      ."     FROM "
-                     ."       B_CMDB_MENU_COLUMN TBL_B "
+                     ."       D_CMDB_MENU_COLUMN_SHEET_TYPE_4  TBL_B "
                      ."     WHERE "
                      ."       TBL_B.MENU_ID        = :MENU_ID          AND "
                      ."       TBL_B.COLUMN_LIST_ID = :COLUMN_LIST_ID   AND "
                      ."       TBL_B.DISUSE_FLAG  = '0' "
                      ."   ) AS COLUMN_CNT "
                      ." FROM "
-                     ."   B_CMDB_MENU_LIST TBL_A  "
+                     ."   D_CMDB_MENU_LIST_SHEET_TYPE_1 TBL_A  "
                      ." WHERE "
                      ."   TBL_A.MENU_ID      = :MENU_ID   AND "
                      ."   TBL_A.DISUSE_FLAG  = '0' ";

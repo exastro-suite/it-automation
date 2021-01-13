@@ -128,6 +128,33 @@ function conductorInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $st
         }
         // オペレーションNO廃止チェック----
 
+        // ----実行するConductorクラスIDに紐づくすべてのノードのアクセス権チェック
+        $arrayRetBody = $objOLA->checkConductorNodeAccessAuth($intShmphonyClassId, $g['login_id'], $aryOptionOrderOverride);
+        if($arrayRetBody[0] == false){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000700";
+            $intErrorType = $arrayRetBody[1];
+            $strExpectedErrMsgBodyForUI = $arrayRetBody[3];
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        // ----実行するConductorクラスIDに紐づくすべてのノードのアクセス権チェック
+
+        //----Operation、Conductorの共通アクセス権の取得 #519
+        $arrOpeConAccessAuth = $objOLA->getInfoAccessAuthWorkFlowOpe($intShmphonyClassId,$intOperationNoUAPK ,"C" );
+
+        if( $arrOpeConAccessAuth[3] != "" ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000300";
+            $intErrorType = 2;
+            $strExpectedErrMsgBodyForUI =  $arrOpeConAccessAuth[3];
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+
+        $strOpeConAccessAuth = $arrOpeConAccessAuth[4];
+        // Operation、Conductorの共通アクセス権の取得 #519----
+
         //--- Conductorクラス状態保存 
         $arrayResult = $objOLA->convertConductorClassJson($intShmphonyClassId,1);
 
@@ -143,8 +170,11 @@ function conductorInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $st
         }
         unset($strSortedData['conductor']);
         unset($strSortedData['config']);
-        
-        $arrayResult = conductorClassRegisterExecute(null, $arrayReceptData, $strSortedData, null);
+
+        // アクセス権の上書き #519
+        $arrayReceptData['ACCESS_AUTH']=$strOpeConAccessAuth; 
+
+        $arrayResult = conductorClassRegisterExecute(null, $arrayReceptData, $strSortedData, null, "", $aryOptionOrderOverride);
 
         if( $arrayResult[0] == "000" ){
             $intShmphonyClassId = $arrayResult[2];

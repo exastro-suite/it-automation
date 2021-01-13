@@ -563,6 +563,7 @@ class CSVFormatter extends ListFormatter {
         return $recRow;
     }
 
+    // class CSVFormatter  writeToFile (selectResultFetch相当)
     function writeToFile($sql, $arrayFileterBody, $objTable, $objFunction01ForOverride, $strFormatterId, $filterData, $aryVariant, &$arySetting){
         global $g;
         $intControlDebugLevel01=250;
@@ -590,8 +591,19 @@ class CSVFormatter extends ListFormatter {
                     throw new Exception( '00000100-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
                 }
 
+                // ---- RBAC対応
                 $objQuery =& $retArray[1];
+                $chkobj = null;
                 while ( $row = $objQuery->resultFetch() ){
+                    // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                    list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                    if($ret === false) {
+                        $intErrorType = 501;
+                        throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                    }
+                    if($permission === false) {
+                        continue;
+                    }
                     $intFetchCount += 1;
                     $objTable->addData($row, false);
                     if( ($intFetchCount % 10000) === 0){
@@ -607,6 +619,7 @@ class CSVFormatter extends ListFormatter {
                         //10000行ずつファイルへ書き込み----
                     }
                 }
+                // RBAC対応 ----
 
                 if( ($intFetchCount % 10000) !== 0 ){
                     $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
@@ -705,6 +718,7 @@ class JSONFormatter extends ListFormatter {
     //RestAPI(Gate)で公開されている、カラム情報を出力する----
 
     function format($tableTagId = null){
+        global $g;
         $aryObjColumn = $this->objTable->getColumns();
 
         foreach($aryObjColumn as $objColumn){
@@ -736,8 +750,26 @@ class JSONFormatter extends ListFormatter {
             foreach($aryObjColumn as $objColumn){
                 $focusObjOT = $objColumn->getOutputType($this->strFormatterId);
                 $intPrinteSeq = $focusObjOT->getPrintSeq();
+
                 if( $intPrinteSeq !== null ){
                     $arrayFocusRow[$intPrinteSeq] = $objColumn->getOutputBody($this->strFormatterId,$objRow->getRowData());
+
+                    // ---- RBAC対応
+                    // アクセス許可ロールカラムの場合にロールIDからロール名称に変換
+                    $AccessAuthColumnName = $g['global_getAccessAuthColumnName'];
+                    if($objColumn->getID() == $AccessAuthColumnName) {
+                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                        $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$arrayFocusRow[$intPrinteSeq],true);   // 廃止を含む
+                        unset($obj);
+                        if($RoleNameString === false) {
+                            $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString is failed.",basename(__FILE__),__LINE__);
+                            web_log($message);
+                            throw new Exception( '00000300-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                        }
+                        $arrayFocusRow[$intPrinteSeq] = $RoleNameString;
+
+                    }
+                    // RBAC対応 ----
 
                     // アップロードファイルがある場合、中身を復号化する
                     if("FileUploadColumn" === get_class($objColumn)){
@@ -763,6 +795,7 @@ class JSONFormatter extends ListFormatter {
         return array($aryRowsOfData, $aryUploadFile);
     }
 
+    // class JSONFormatter
     function selectResultFetch($sql, $arrayFileterBody, $objTable, $intJsonLimit, $objFunction01ForOverride, $strFormatterId, $filterData, $aryVariant, &$arySetting){
         global $g;
         $intControlDebugLevel01=250;
@@ -1801,15 +1834,39 @@ class ExcelFormatter extends ListFormatter {
         $strFormula1FilterID = "";             // マスターテーブルのID用変数 setFormula1用の結合文字列に利用
         $aryValidationCellPropaties = array();
 
+        // ---- RBAC対応
+        $RoleList = array();
+        $obj = new RoleBasedAccessControl($g['objDBCA']);
+        // デフォルトアクセス権のあるロール名リストを取得
+        $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'NAME',true);  // 廃止を含む
+        unset($obj);
+        if($DefaultAccessRoleString === false) {
+            $message = sprintf("[%s:%s]Failed get Role information.",basename(__FILE__),__LINE__);
+            web_log($message);
+            throw new Exception($message);
+        }
+        // RBAC対応 ----
+
         $i_col = 0;
+        $AccessAuthColumn_idx = -1;
         foreach($aryObjColumn as $objColumn){
             if( $objColumn->getID() == $lcRequiredRowEditByFileColumnId ){
                 continue;
+            // Excel出力の対象カラムか判定
             }else if( $objColumn->getOutputType($this->strPrintTargetListFormatterId)->isVisible() === false ){
                 if( $varMinorPrintTypeMode!="forDeveloper"){
                     continue;
                 }
             }
+            // ---- RBAC対応 
+            // アクセス権カラムの判定
+            if($this->objTable->getAccessAuth() === true) {
+                if($objColumn->getID() == $this->objTable->getAccessAuthColumnName()) {
+                    // アクセス権カラムの位置を退避
+                    $AccessAuthColumn_idx = $i_col;
+                }
+            }
+            // RBAC対応 ----
             if( is_a($objColumn, "IDColumn") === true ){
                 //----IDColumnは文字をマスタテーブルのIDに置き換える。
                 if($varMinorPrintTypeMode == ""){
@@ -1882,6 +1939,13 @@ class ExcelFormatter extends ListFormatter {
         }
 
         $description_array = $this->aryEditSheetDescription;
+
+        // RBAC対応 ----
+        $AccessAuthColumn_idx += self::DATA_START_COL;
+        for($i_row = $intThisStartRow; $i_row <= $intThisStartRow+self::WHITE_ROWS; ++$i_row){
+            $sheet->setCellValueExplicitByColumnAndRow($AccessAuthColumn_idx, $i_row ,$DefaultAccessRoleString, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+        }
+        // ---- RBAC対応
 
         $sheet->fromArray($description_array, "null", self::cr2s(self::DATA_START_COL, $this->bodyTopRow-2));
         $sheet->freezePane(self::cr2s(self::DATA_START_COL, $this->bodyTopRow));
@@ -2013,6 +2077,7 @@ class ExcelFormatter extends ListFormatter {
         return $strSheetName;
     }
 
+    // class ExcelFormatter selectResultFetch
     function selectResultFetch($sql, $arrayFileterBody, $objTable, $intXlsLimit, $objFunction01ForOverride, $strFormatterId, $filterData, $aryVariant, &$arySetting){
         global $g;
         $intControlDebugLevel01=250;
@@ -2033,17 +2098,7 @@ class ExcelFormatter extends ListFormatter {
                 $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
-// #28 update start
-//                    while ( $row = $objQuery->resultFetch() ){
-//                        $intFetchCount += 1;
-//                        if( $intXlsLimit === null || $intFetchCount <= $intXlsLimit ){
-//                            $objTable->addData($row, false);
-//                            //----注意ポイント（エクセルフォーマッタへデータ転写）
-//                            $this->editWorkSheetRecordAdd();
-//                            //注意ポイント（エクセルフォーマッタへデータ転写）----
-//                            $objTable->setData(array());
-//                        }
-//                    }
+                    // ---- RBAC対応
                     $chkobj = null;
                     while ( $row = $objQuery->resultFetch() ){
                         // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
@@ -2053,6 +2108,29 @@ class ExcelFormatter extends ListFormatter {
                             throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
                         }
                         if($permission === true) {
+                            if($objTable->getAccessAuth() === true) {
+                                $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                                if(array_key_exists($AccessAuthColumnName,$row)) {
+                                    $RoleIDString   = $row[$AccessAuthColumnName];
+                                    $RoleNameString = "";
+                                    if(strlen($RoleIDString) != 0) {
+                                        // ロールID文字列のアクセス権をロール名称の文字列に変換
+                                        // 廃止されているロールはID変換失敗で表示
+                                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                        $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);  // 廃止を含む
+                                        unset($obj);
+                                    }
+                                    if($RoleNameString === false) {
+                                        $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Failed.",basename(__FILE__),__LINE__);
+                                        web_log($message);
+                                        $intErrorType = 500;
+                                        throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    }
+                                    // 登録するアクセス権をロール名称の文字列に設定
+                                    $row[$AccessAuthColumnName] = $RoleNameString;
+                                } else {
+                                }
+                            }
                             $intFetchCount += 1;
                             if( $intXlsLimit === null || $intFetchCount <= $intXlsLimit ){
                                 $objTable->addData($row, false);
@@ -2064,7 +2142,7 @@ class ExcelFormatter extends ListFormatter {
                         } else {
                         }
                     }
-// #28 update end
+                    // RBAC対応 ----
 
                     // ----取得したレコード数を取得
                     $intRowLength = $intFetchCount;
@@ -2200,6 +2278,7 @@ class TableFormatter extends ListFormatter {
 
         $aryObjColumn = $this->objTable->getColumns();
         foreach($aryObjColumn as $objColumn){
+            // 自身のクラスオブジェクトを退避
             $objColumn->setFormatterRef($this);
         }
 

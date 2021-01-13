@@ -250,6 +250,18 @@ $arrayTargetClassList = array(
     "MultiTextColumn",
     "PasswordColumn",
     "HostInsideLinkTextColumn",
+    "FileUploadColumn",
+);
+
+////////////////////////////////
+// 代入値自動登録設定の項目表示対象のクラス(IDColumnの紐付先)
+////////////////////////////////
+$arrayTargetIDColumnClassList = array(
+    "TextColumn",
+    "NumColumn",
+    "MaskColumn",
+    "MultiTextColumn",
+    "HostInsideLinkTextColumn",
 );
 
 ////////////////////////////////
@@ -601,7 +613,7 @@ try{
                     continue;
                 }
                 // 対象クラス確認
-                if(!in_array($clomn_class, $arrayTargetClassList)){
+                if(!in_array($clomn_class, $arrayTargetIDColumnClassList)){
                     continue;
                 }
             } else {

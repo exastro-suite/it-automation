@@ -190,6 +190,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $objTemp00Function;
     $objTemp00Function = function($objTable){
         global $g;
+        $strFxName = "NONAME(objTemp00Function)";
 
         $intErrorType = null;
         $retStrLastErrMsg = null;
@@ -236,7 +237,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $strSql .= "      `T1`.`BASE_TIMESTAMP` = (SELECT MAX(BASE_TIMESTAMP)          ";
             $strSql .= "                                   FROM {$objTable->getDBMainTableBody()} AS TAB_D      ";
             $strSql .= "                                   WHERE DISUSE_FLAG='0'                    ";
-            //$strSql .= "                                         AND `T1`.`HOST_ID`=TAB_D.HOST_ID    ";
             if(NULL !== $baseTimeStamp){
                 $strSql .= "                                     AND TAB_D.BASE_TIMESTAMP <= '" . $baseTimeStamp . "' ";
             }
@@ -290,7 +290,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     // アクセス権のロールID文字列をロール名称の文字列に変換
                     // 廃止されているロールはID変換失敗で表示
                     $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);
-                    unset($obj);
                 }
                 if($RoleNameString === false) {
                     $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Failed.",basename(__FILE__),__LINE__);
@@ -305,6 +304,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $tempArray[] = $row;
                 $objTable->addData( $row, false);
             }
+            unset($obj);
         }
         catch (Exception $e){
             $intErrorType = 500;

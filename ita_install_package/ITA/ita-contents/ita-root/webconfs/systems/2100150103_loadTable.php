@@ -91,7 +91,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //////////////////////////////////////
         // 資材名
         //////////////////////////////////////
-        $c = new TextColumn('FILE_NAME_FULLPATH',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101305"));
+        $c = new IDColumn('FILE_ID_CLONE',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101305"), 'G_FILE_MASTER', 'FILE_ID', 'FILE_NAME_FULLPATH');
         $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101306"));//エクセル・ヘッダでの説明
         $c->setHiddenMainTableColumn(false);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
         $c->setDBColumn(true);

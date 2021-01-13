@@ -1208,7 +1208,15 @@ class Column extends ColumnGroup {
 		$retStrQuery = "";
 		switch($this->getSearchType()){
 			case "like":
-				$retStrQuery = $this->getFilterQueryLikeZone($boolBinaryDistinctOnDTiS);
+				// ---- RBAC対応
+				if($this->getID() != "ACCESS_AUTH") {
+					$retStrQuery = $this->getFilterQueryLikeZone($boolBinaryDistinctOnDTiS);
+				} else {
+                                        // テキスト検索でアクセス許可ロールの場合は正規表記で検索
+					$retStrQuery = " `T1`.`ACCESS_AUTH` REGEXP (:ACCESS_AUTH__0) ";
+					$retStrQuery = $this->getFilterQueryRegexpZone($boolBinaryDistinctOnDTiS);
+				}
+				// RBAC対応 ----
 				break;
 			case "in":
 				$retStrQuery = $this->getFilterQueryInZone($boolBinaryDistinctOnDTiS);
@@ -1218,6 +1226,42 @@ class Column extends ColumnGroup {
 		}
 		return $retStrQuery;
 	}
+	// ---- RBAC対応
+	// アクセス許可ロール用 正規表記検索 SQL生成
+	function getFilterQueryRegexpZone($boolBinaryDistinctOnDTiS){
+		//----クラス（Column）のgetFilterQueryからのみ呼ばれる
+		global $g;
+		$retStrQuery = "";
+
+		$dbQM = $this->objTable->getDBQuoteMark();
+		$strWpColId = "{$dbQM}{$this->getID()}{$dbQM}";
+		$strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
+
+		//[W]rap[F]x[F]or[C]olumn[M]ark
+		$strWFFCMInDBHead = "";
+		$strWFFCMInDBTail = "";
+		$strWFFCMInNeedTipHead = "(";
+		$strWFFCMInNeedTipTail = ")";
+
+		$tmpArray = array();
+		$intFilterCount = 0;
+
+		$arySource = $this->getFilterValuesForDTiS(true,$boolBinaryDistinctOnDTiS);
+		foreach($arySource as $filter){
+			if(0 < strlen($filter)){
+				$tmpStr01  = "{$strWFFCMInDBHead}{$strWpTblSelfAlias}.{$strWpColId}{$strWFFCMInDBTail}";
+				$tmpStr01 .= " REGEXP {$strWFFCMInNeedTipHead}:{$this->getID()}__{$intFilterCount}{$strWFFCMInNeedTipTail} ";
+				$tmpArray[] = $tmpStr01;
+				$intFilterCount++;
+			}
+		}
+		if(0 < count($tmpArray)){
+			$retStrQuery .= "(".implode(" OR ", $tmpArray) . ")";
+		}
+		return $retStrQuery;
+		//クラス（Column）のgetFilterQueryからのみ呼ばれる----
+	}
+	// RBAC対応 ----
 	//NEW[72]
 	function getFilterQueryLikeZone($boolBinaryDistinctOnDTiS){
 		//----クラス（Column）のgetFilterQueryからのみ呼ばれる
@@ -1536,6 +1580,37 @@ class Column extends ColumnGroup {
 		}
 		return $retArray;
 	}
+
+    // ---- RBAC対応
+    // アクセス権ロール名チェック用に追加
+    // 必要最低限のcolumnクラスにfunctionを配置
+    // beforeTableIUDActionと同等のタイミングで呼ばれるFunction
+    // beforeTableIUDActionとの差異は、function内でエラー検出した場合
+    // beforeTableIUDActionはシステムエラーとして扱われる。
+    // beforeTableIUDIndividualValidatorはWeb等にエラーメッセージを表示する。
+    //----$ordMode=0[ブラウザからの新規登録
+    //----$ordMode=1[EXCEL]からの新規登録
+    //----$ordMode=2[CSV]からの新規登録
+    //----$ordMode=3[JSON]からの新規登録
+    //----$ordMode=4[ブラウザからの新規登録(トランザクション無)
+    function beforeTableIUDIndividualValidator($ordMode, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+		$boolRet = true;
+		$intErrorType = null;
+		$aryErrMsgBody = array();
+		$strErrMsg = "";
+		$strErrorBuf = "";
+		if( is_null($this->aryFunctionsForEvent)===true ){
+			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+		}else{
+			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+			if( array_key_exists('beforeTableIUDIndividualValidator',$this->aryFunctionsForEvent)===true ){
+				$objFunction = $this->aryFunctionsForEvent['beforeTableIUDIndividualValidator'];
+				$retArray = $objFunction($ordMode, $this,'beforeTableIUDIndividualValidator',$exeQueryData, $reqOrgData, $aryVariant);
+			}
+		}
+		return $retArray;
+	}
+        // RBAC対応 ----
 	//TableIUDイベント系----
 	
 	//----DTiS系イベント
@@ -1982,10 +2057,21 @@ class IDColumn extends Column {
 
 		// RBAC対応 ----
 		try {
-			// SQLに埋め込むアクセス権のカラム名取得
-                        $AccessAuthColumName = $objTable->getAccessAuthColumnName();
+            // ---- RBAC対応
+            global $g;
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            // SELECT項目になっているACCESS_AUTHカラムを取得
+            $AccessAuthColumnNames = $obj->getAccessAithColumnINIDColumnObject($refMasterTableBody);
+            if($AccessAuthColumnNames === false) {
+                throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
 			$AccessAuthColumUse  = $objTable->getAccessAuth();
-                	// プルダウンに表示するデータをloadtableに紐づいているオブジェクトのACCESS_AUTHで絞り込むか判定
+            // RBAC対応 ----
+
 			$addStrQuery = "";
 
 			$retStrQuery = genSQLforGetMasValsInMainTbl($mainTableBody
@@ -1996,7 +2082,7 @@ class IDColumn extends Column {
 								, $refMasterDispColumn
 								, $refMasterDUColumn
                                                                 , $AccessAuthColumUse
-                                                                , $AccessAuthColumName
+                                                                , $AccessAuthColumnNames
 								, $aryEtcetera,$strWhereAddBody
 								,"KEY_COLUMN","DISP_COLUMN");
 		}catch (Exception $e){

@@ -332,25 +332,16 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         }
         else{
             // ---- RBAC対応
-            // Movement一覧のアクセス権を取得　
-            $sql = "SELECT ACCESS_AUTH FROM C_PATTERN_PER_ORCH WHERE PATTERN_ID=$intPatternId";
-            $objQuery = $objDBCA->sqlPrepare($sql);
-            if( $objQuery->getStatus()===false ){
-                $strErrStepIdInFx="00000001";
-                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            // オペレーションとMovementのアクセス許可ロールをANDし作業イスタンスに設定するアクセス許可ロールを求める。
+            $restAPI=false;
+            $login_id=0;
+            $retAry = chkMovementAccessAuth($intOperationNoUAPK,$intPatternId,$objDBCA,$objMTS,$restAPI,$login_id);
+            if($retAry['STATUS'] != 'OK') {
+                $strErrStepIdInFx="00000008";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ':' . $retAry['ERROR_MSG'] . ')' );
             }
-            $r = $objQuery->sqlExecute();
-
-            if (!$r){
-                unset($objQuery);
-                $strErrStepIdInFx="00000001";
-                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-            }
-            while ( $row = $objQuery->resultFetch() ){
-                // アクセス権退避
-                $g['__TOP_ACCESS_AUTH__'] = $row['ACCESS_AUTH'];
-            }
-            unset($objQuery);
+            // 作業インスタンスに設定するアクセス許可ロールを退避
+            $g['__TOP_ACCESS_AUTH__'] = $retAry['ACCESS_AUTH'];
             // RBAC対応 ----
 
             //----各オーケストレータ個別で呼ばれる場合を想定

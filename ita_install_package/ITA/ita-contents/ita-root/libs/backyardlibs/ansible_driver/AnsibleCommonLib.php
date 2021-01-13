@@ -1160,5 +1160,116 @@ class ValAutoRegInputParameterCheck {
         return $retStrBody;
     }
 }
+    function getMasterAccessAuth(&$lva_OpeAccessAuth_list,&$lva_HostAccessAuth_list,&$lva_PatternAccessAuth_list) {
+        global    $db_model_ch;
+        global    $objMTS;
+        global    $objDBCA;
+        global    $log_level;
+        $sqlAry          = array();
+        $sqlKeyName      = array();
+        $resultDataAry   = array();
+        $sqlAry[] = "SELECT %s,%s,ACCESS_AUTH  FROM C_OPERATION_LIST";
+        $sqlAry[] = "SELECT %s,%s,ACCESS_AUTH  FROM C_STM_LIST";
+        $sqlAry[] = "SELECT %s,%s,ACCESS_AUTH  FROM C_PATTERN_PER_ORCH";
+        $sqlKeyName[] = "OPERATION_NAME";
+        $sqlKeyName[] = "HOSTNAME";
+        $sqlKeyName[] = "PATTERN_NAME";
+        $sqlKeyId[] = "OPERATION_NO_UAPK";
+        $sqlKeyId[] = "SYSTEM_ID";
+        $sqlKeyId[] = "PATTERN_ID";
+        $lva_OpeAccessAuth_list     = array();
+        $lva_HostAccessAuth_list    = array();
+        $lva_PatternAccessAuth_list = array();
+        $resultDataAry[] = &$lva_OpeAccessAuth_list;
+        $resultDataAry[] = &$lva_HostAccessAuth_list;
+        $resultDataAry[] = &$lva_PatternAccessAuth_list;
 
+        foreach($sqlAry as $no=>$sql) {
+
+            // SQL準備
+            $sql = sprintf($sql,$sqlKeyId[$no],$sqlKeyName[$no]);
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            if( $objQuery->getStatus()===false ){
+                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                $in_error_msg  = $msgstr;
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+                return false;
+            }
+
+            // SQL発行
+            $r = $objQuery->sqlExecute();
+            if (!$r){
+                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                $in_error_msg  = $msgstr;
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+                unset($objQuery);
+                return false;
+            }
+
+            // レコードFETCH
+            while ( $row = $objQuery->resultFetch() ){
+                $AccessAuthAry = array();
+                if($row["ACCESS_AUTH"] != "") {
+                    $AccessAuthAry = explode(",",$row["ACCESS_AUTH"]);
+                }
+                $resultDataAry[$no][$row[$sqlKeyId[$no]]] = array("NAME"=>$row[$sqlKeyName[$no]],
+                                                                  "ACCESS_AUTH"=>$AccessAuthAry);
+            }
+        }
+        return true;
+    }
+    function getCMDBMenuMaster(&$lva_CMDBMenuColumn_list,&$lva_CMDBMenu_list) {
+        global    $db_model_ch;
+        global    $objMTS;
+        global    $objDBCA;
+        global    $log_level;
+        $lva_CMDBMenuColumn_list    = array();
+        $lva_CMDBMenu_list          = array();
+        // SQL準備
+        $sql = " SELECT TAB_D.TABLE_NAME, "
+             . "        TAB_E.COL_NAME,   "
+             . "        TAB_E.COL_TITLE,  "
+             . "        CONCAT(TAB_C.MENU_GROUP_NAME,':',TAB_B.MENU_NAME) MENU_NAME "
+             . " FROM B_CMDB_MENU_LIST TAB_A "
+             . " LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID) "
+             . " LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID) "
+             . " LEFT JOIN B_CMDB_MENU_TABLE TAB_D ON (TAB_A.MENU_ID = TAB_D.MENU_ID) "
+             . " LEFT JOIN B_CMDB_MENU_COLUMN TAB_E ON (TAB_A.MENU_ID = TAB_E.MENU_ID) ";
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if( $objQuery->getStatus()===false ){
+            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+            $in_error_msg  = $msgstr;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+            return false;
+        }
+
+        // SQL発行
+        $r = $objQuery->sqlExecute();
+        if (!$r){
+            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+            $in_error_msg  = $msgstr;
+            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+            unset($objQuery);
+            return false;
+        }
+
+        // レコードFETCH
+        while ( $row = $objQuery->resultFetch() ){
+            $lva_CMDBMenuColumn_list[$row['TABLE_NAME']][$row['COL_NAME']] = $row['COL_TITLE'];
+            $lva_CMDBMenu_list[$row['TABLE_NAME']] = $row['MENU_NAME'];
+        }
+        return true;
+    }
 ?>
