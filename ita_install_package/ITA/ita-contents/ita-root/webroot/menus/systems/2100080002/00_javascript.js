@@ -914,7 +914,7 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 //---- ここからカスタマイズした場合の一般メソッド配置域
 //TFEとの状態チェックを実行
 function Mix1_1_checkOrganization(obj, organizationID){
-    var resultAreaID = $(obj).parent().next().attr('id');
+    var resultAreaID = $(obj).closest('td').next().attr('id');
     //エンコード
     organizationID = encodeURIComponent(organizationID);
     var data = {

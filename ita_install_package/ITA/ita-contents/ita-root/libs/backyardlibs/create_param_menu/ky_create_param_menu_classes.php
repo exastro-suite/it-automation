@@ -936,7 +936,7 @@ class ParamTargetTable extends BaseTable_CPM {
     public function __construct($objDBCA, $db_model_ch) {
 
         parent::__construct($objDBCA, $db_model_ch);
-        $this->tableName    = 'F_PARAM_TARGET';
+        $this->tableName    = 'G_PARAM_TARGET';
         $this->seqName      = $this->tableName . '_RIC';
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('TARGET_ID',

@@ -65,12 +65,15 @@ function menuExportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
             case "EXECUTE":
                 //エクスポート対象の確認
                 $chkflg = validateMenuNo($objJSONOfReceptedData);
-                if ( $chkflg == "" ) {
+                $chkflg2 = validateModeid($objJSONOfReceptedData);
+
+                if ( $chkflg == "" && $chkflg2 == "" ) {
                     $aryRetBody = menuExportExecutionFromRest($objJSONOfReceptedData);
                 }else{
                     $aryRetBody['TASK_ID'] = "";
                     $aryRetBody['RESULTCODE'] = "002";
-                    $aryRetBody['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-3820101");
+                    $aryRetBody['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-900077");
+                    
                 }
                 break;
 
@@ -130,6 +133,9 @@ function validateMenuNo($objJSONOfReceptedData){
     $tmpJSONOfReceptedData = $objJSONOfReceptedData;
     unset($tmpJSONOfReceptedData['zip']);
     unset($tmpJSONOfReceptedData['menu_on']);
+    #270 対応
+    unset($tmpJSONOfReceptedData['dp_mode']);
+    unset($tmpJSONOfReceptedData['abolished_type']);
 
     foreach ($tmpJSONOfReceptedData as $key => $value) {
         foreach ($value as $key2 => $value2) {
@@ -157,10 +163,17 @@ function menuExportExecutionFromRest($objJSONOfReceptedData){
 
     $tmparray = array();
 
+    #270 対応
+    $tmparray["dp_mode"]=$objJSONOfReceptedData['dp_mode'];
+    $tmparray["abolished_type"]=$objJSONOfReceptedData['abolished_type'];
+
     //不要な要素の削除
     $tmpJSONOfReceptedData = $objJSONOfReceptedData;
     unset($tmpJSONOfReceptedData['zip']);
     unset($tmpJSONOfReceptedData['menu_on']);
+    #270 対応
+    unset($tmpJSONOfReceptedData['dp_mode']); 
+    unset($tmpJSONOfReceptedData['abolished_type']); 
 
     //メニューidをint型からstring型へ変換
     foreach ($tmpJSONOfReceptedData as $key => $value) {
@@ -212,6 +225,55 @@ function menuExportInfoFromRest(){
         $retExportAry = getExportMenuList($menuGroupAry);
 
         return $retExportAry;
+}
+
+//////////////////////////////////////////
+//  DP_MODE(モード) ABOLISHED_TYPE(廃止情報) チェック #270 対応 //
+//////////////////////////////////////////
+function validateModeid($objJSONOfReceptedData){
+    global $g;
+
+    $chkflag="";
+
+    //チェック用リストと比較
+    $tmpJSONOfReceptedData = $objJSONOfReceptedData;
+
+    $arrChkModeList=array();
+    //チェック対象
+    $arrChkModeList["B_DP_MODE"]           = array( "ROW_ID" => $tmpJSONOfReceptedData['dp_mode'] );
+    $arrChkModeList["B_DP_ABOLISHED_TYPE"] = array( "ROW_ID" => $tmpJSONOfReceptedData['abolished_type'] );
+
+    foreach ($arrChkModeList as $tablename => $colmun) {
+        foreach ($colmun as $key => $value) {
+            
+            $sql  = ' SELECT * FROM ';
+            $sql .= " $tablename ";
+            $sql .= ' WHERE ';
+            $sql .= " $key = $value ";
+            $sql .= " AND DISUSE_FLAG = '0'";
+
+            $objQuery = $g['objDBCA']->sqlPrepare($sql);
+
+            if ($objQuery->getStatus() === false) {
+                web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
+                                                     array(__FILE__, __LINE__)));
+                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+            }
+            $res = $objQuery->sqlExecute();
+            if ($res === false) {
+                web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900054',
+                                                     array(__FILE__, __LINE__)));
+                throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+            }
+            $rows = array();
+            while ($row = $objQuery->resultFetch()){
+                $rows[] = $row;
+            }
+            
+            if( count($rows) != 1 ) return 1;
+        }
+    }
+    return $chkflag;
 }
 
 ?>

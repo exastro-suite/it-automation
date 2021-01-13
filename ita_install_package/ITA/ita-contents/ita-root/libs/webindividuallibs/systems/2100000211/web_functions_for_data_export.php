@@ -154,19 +154,20 @@ function makeExportDataList($dirName){
     }
 
     foreach ($_POST as $key => $value) {
-        // バリデーションチェック
-        foreach ($value as $value2) {
-            if(strlen($value2) > MENU_ID_LENGTH || ctype_digit($value2) === false) {
-                // 不正アクセスで処理終了
-                web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900025'));
-                // 不正操作によるアクセス警告画面にリダイレクト
-                webRequestForceQuitFromEveryWhere(400,10310201);
-                exit;
+        if ( is_int($key) ) {
+            // バリデーションチェック
+            foreach ($value as $value2) {
+                if(strlen($value2) > MENU_ID_LENGTH || ctype_digit($value2) === false) {
+                    // 不正アクセスで処理終了
+                    web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900025'));
+                    // 不正操作によるアクセス警告画面にリダイレクト
+                    webRequestForceQuitFromEveryWhere(400,10310201);
+                    exit;
+                }
             }
+            $menuIdAry = array_merge($menuIdAry, $value);
         }
-        $menuIdAry = array_merge($menuIdAry, $value);
     }
-
     $json = json_encode($menuIdAry);
     $fileputflg = file_put_contents($path . '/MENU_ID_LIST', $json);
 
@@ -256,6 +257,10 @@ function insertTask(){
     }
     $p_execution_jnl_no = $resArray[0];
 
+    // exportの種類
+    $p_dp_mode = $_POST["dp_mode"];
+    $p_abolished_type = $_POST["abolished_type"];
+
     $arrayConfig = array(
         'JOURNAL_SEQ_NO' => '',
         'JOURNAL_ACTION_CLASS' => '',
@@ -263,7 +268,8 @@ function insertTask(){
         'TASK_ID' => '',
         'TASK_STATUS' => '',
         'DP_TYPE' => '',
-        'IMPORT_TYPE' => '',
+        'DP_MODE' => $p_dp_mode,
+        'ABOLISHED_TYPE' => $p_abolished_type,
         'FILE_NAME' => '',
         'DISP_SEQ' => '',
         'NOTE' => '',
@@ -279,7 +285,8 @@ function insertTask(){
         'TASK_ID' => $p_execution_utn_no,
         'TASK_STATUS' => 1,
         'DP_TYPE' => 1,
-        'IMPORT_TYPE' => '',
+        'DP_MODE' => $p_dp_mode,
+        'ABOLISHED_TYPE' => $p_abolished_type,
         'FILE_NAME' => '',
         'DISP_SEQ' => '',
         'NOTE' => '',

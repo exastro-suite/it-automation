@@ -140,6 +140,7 @@ $ary[5010] = "TestPlayer";
 $ary[5011] = "Ansible-Tower/AWX";
 $ary[11001] = "";
 $ary[11101] = "Exchange ID has failed";
+$ary[11102] = "********";
 $ary[11201] = "Remarks";
 $ary[11202] = "Comments section. Can comment when removing or restoring records.";
 $ary[11301] = "History log No.";

@@ -386,9 +386,19 @@
                     }
                     unset($tmpObjFunction02ForOverride);
                 }
+                // ---- RBAC対応
+                // 表示フィルタでアクセス許可ロールの検索条件が設定されている場合
+                // ロール名をロールIDに変換し曖昧検索をする。
+                $reparrayFileterBody = $arrayFileterBody;
+                $ret = AccessAuthColumnFileterDataReplace($g['login_id'],$g['objDBCA'],"ACCESS_AUTH",$reparrayFileterBody);
+                if($ret === false) {
+                    $intErrorPlaceMark = 1501;
+                    throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+                // RBAC対応 ----
 
                 $tmpAryRet = $objJsonFormatter->selectResultFetch($sql,
-                                                                  $arrayFileterBody,
+                                                                  $reparrayFileterBody,
                                                                   $objTable,
                                                                   null,
                                                                   $objFunction02ForOverride,

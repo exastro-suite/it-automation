@@ -94,6 +94,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                    ." TAB_1.FILE_M_ID       KEY_COLUMN "
                    .",TAB_1.CLOSE_REVISION  DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
                    ."FROM "
                    ." G_FILE_MANAGEMENT_NEWEST TAB_1 "
                    ."WHERE "
@@ -117,7 +118,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;
@@ -156,6 +157,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                    ." TAB_1.FILE_M_ID       KEY_COLUMN "
                    .",TAB_1.CLOSE_REVISION  DISP_COLUMN "
                    .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                   .",TAB_1.ACCESS_AUTH_01 ACCESS_AUTH_01 "
                    ."FROM "
                    ." G_FILE_MANAGEMENT_NEWEST TAB_1 "
                    ."WHERE "
@@ -179,7 +181,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $objQuery = $aryRetBody[1];
                 while($row = $objQuery->resultFetch() ){
                     // レコード毎のアクセス権を判定
-                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                    list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                     if($ret === false) {
                         $intErrorType = 500;
                         $retBool = false;

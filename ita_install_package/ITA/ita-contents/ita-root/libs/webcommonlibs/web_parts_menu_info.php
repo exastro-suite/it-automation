@@ -43,11 +43,13 @@
 
             if( $tmpAryRetBody[1] !== null ){
                 if( $tmpAryRetBody[1] == 502 ){
+                    // ----該当メニューIDが1件でない(通常は0件)
                     // アクセスログ出力(想定外エラー)
                     web_log($objMTS->getSomeMessage("ITAWDCH-ERR-40",array($_SERVER["PHP_SELF"],$tmpAryRetBody[0]['rowLength'])));
-                    // 想定外エラー通知画面にリダイレクト
-                    webRequestForceQuitFromEveryWhere(500,10510101);
+                    // 404エラーを表示
+                    webRequestForceQuitFromEveryWhere(404);
                     exit();
+                    // 該当メニューIDが1件でない場合(通常は0件)----
                 }
                 throw new Exception( $tmpAryRetBody[3] );
             }
@@ -78,12 +80,14 @@
             if( $tmpAryRetBody[1] !== null ){
                 //----取得できなかった
                 if( $tmpAryRetBody[1] == 502 ){
+                    // ----該当メニューグループIDが1件でない(通常は0件)
                     // アクセスログ出力(想定外エラー)
                     web_log($objMTS->getSomeMessage("ITAWDCH-ERR-41"));
 
-                    // 想定外エラー通知画面にリダイレクト
-                    webRequestForceQuitFromEveryWhere(500,10510102);
+                    // 404エラーを表示
+                    webRequestForceQuitFromEveryWhere(404);
                     exit();
+                    // 該当メニューグループIDが1件でない(通常は0件)----
                 }
                 throw new Exception( $tmpAryRetBody[3] );
                 // 取得できなかった----

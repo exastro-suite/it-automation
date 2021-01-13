@@ -1908,21 +1908,41 @@ EOD;
             
             // 紐づけ対象だけを確認 (紐づけ対象がないの場合はtrue)
             $noLinkTarget = true;
+            $onlyUploadFlg = true;
             foreach($itemInfoArray as $key => $itemInfo){
-                if(5 != $itemInfo['INPUT_METHOD_ID'] && 6 != $itemInfo['INPUT_METHOD_ID'] && 9 != $itemInfo['INPUT_METHOD_ID']){
-                    // プルダウン選択の中身タイプをチェック
-                    if(7 == $itemInfo['INPUT_METHOD_ID']){
-                        $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
-                        $otherMenuLink = $otherMenuLinkArray[$matchIdx];
-                        if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE'] || 9 == $otherMenuLink['COLUMN_TYPE']){
-                            continue;
-                        } 
-                    }
+                // 文字列(単一行)、文字列(複数行)、整数、小数、パスワード、リンクの場合
+                if(in_array($itemInfo['INPUT_METHOD_ID'], array(1, 2, 3, 4, 8, 10))){
+                    //作成対象
                     $noLinkTarget = false;
-                    break;
+                    $onlyUploadFlg = false;
+                }
+                // 日時、日付の場合
+                else if(in_array($itemInfo['INPUT_METHOD_ID'], array(5, 6))){
+                    // 対象外
+                    continue;
+                }
+                // ファイルアップロードの場合
+                else if(in_array($itemInfo['INPUT_METHOD_ID'], array(9))){
+                    //作成対象
+                    $noLinkTarget = false;
+                }
+                // プルダウン選択の場合、参照元のチェック
+                else if(in_array($itemInfo['INPUT_METHOD_ID'], array(7))){
+                    $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                    $otherMenuLink = $otherMenuLinkArray[$matchIdx];
+                    // 日時、日付、プルダウン選択、パスワード、ファイルアップロードの場合
+                    if(in_array($otherMenuLink['COLUMN_TYPE'], array(5, 6, 7, 8, 9))){
+                        // 対象外
+                        continue;
+                    } 
+                    else{
+                        //作成対象
+                        $noLinkTarget = false;
+                        $onlyUploadFlg = false;
+                    }
                 }
             }
-            
+
             // 紐付対象メニューに登録するメニューIDを特定する
             if("" != $hostSubMenuId){
                 $targetMenuId = $hostSubMenuId;
@@ -1931,10 +1951,31 @@ EOD;
                 $targetMenuId = $hostMenuId;
             }
 
+            if(false === $noLinkTarget){
+                // シートタイプを決定する
+                $sheetType = null;
+                if("1" == $cmiData['TARGET']){
+                    if(false === $onlyUploadFlg){
+                        $sheetType = 1;
+                    }
+                    else{
+                        $sheetType = 4;
+                    }
+                }
+                else if("3" == $cmiData['TARGET']){
+                    if(false === $onlyUploadFlg){
+                        $sheetType = 3;
+                    }
+                    else{
+                        $noLinkTarget = true;
+                    }
+                }
+            }
+
             //////////////////////////
             // 紐付対象メニュー更新
             //////////////////////////
-            $result = updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData);
+            $result = updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData, $sheetType);
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
                 updateMenuStatus($targetData, "4", $result, true, true);
@@ -1955,7 +1996,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューカラム管理更新
             //////////////////////////
-            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData);
+            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData, $noLinkTarget);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -2796,7 +2837,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
         }
 
         // 登録するメニューID、テーブル名を決定する
-        if("" != $hgMenuId){
+        if("" != $hgMenuId && "" == $convMenuId){
             $insertMenuId = $hgMenuId;
             $insertTableName = "F_" . $menuTableName . "_HG";
         }
@@ -2807,7 +2848,7 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
 
         // 登録する
         foreach($itemInfoArray as $itemInfo){
-            // プルダウン選択は対象外のため、スキップする
+            // プルダウン選択、パスワード、ファイルアップロードは対象外のため、スキップする
             if(7 == $itemInfo['INPUT_METHOD_ID'] || 8 == $itemInfo['INPUT_METHOD_ID'] || 9 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
@@ -3307,7 +3348,7 @@ function updateRoleMenuLinkList($targetData, $hgMenuId, $hostMenuId, $hostSubMen
 /*
  * 紐付対象メニュー更新
  */
-function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData){
+function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData, $sheetType){
     global $objDBCA, $db_model_ch, $objMTS;
     $matchFlg = false;
     $cmdbMenuListTable = new CmdbMenuListTable($objDBCA, $db_model_ch);
@@ -3337,7 +3378,7 @@ function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData){
                 if($cmdbMenuList['DISUSE_FLAG'] == "1" && $noLinkTarget == false){
 
                     // 復活する
-                    $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['SHEET_TYPE']       = $sheetType;               // シートタイプ
                     $updateData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
                     $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
                     $updateData['NOTE']             = "";                       // 備考
@@ -3348,14 +3389,14 @@ function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData){
                 else if($cmdbMenuList['DISUSE_FLAG'] == "0" && $noLinkTarget == true){
 
                     // 廃止する
-                    $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                    $updateData['SHEET_TYPE']       = $sheetType;               // シートタイプ
                     $updateData['NOTE']             = "";                       // 備考
                     $updateData['DISUSE_FLAG']      = "1";                      // 廃止フラグ
                     $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
                 }
                 // 値が更新されている場合
-                else if(($updateData['SHEET_TYPE'] != $cmiData['TARGET'] || $updateData['ACCESS_AUTH_FLG'] != 1 || $updateData['ACCESS_AUTH'] != $cmiData['ACCESS_AUTH']) &&  $noLinkTarget == false){
-                    $updateData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+                else if(($updateData['SHEET_TYPE'] != $sheetType || $updateData['ACCESS_AUTH_FLG'] != 1 || $updateData['ACCESS_AUTH'] != $cmiData['ACCESS_AUTH']) &&  $noLinkTarget == false){
+                    $updateData['SHEET_TYPE']       = $sheetType;               // シートタイプ
                     $updateData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
                     $updateData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
                     $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;     // 最終更新者
@@ -3383,7 +3424,7 @@ function updateLinkTargetMenu($targetMenuId, $noLinkTarget, $cmiData){
             // 登録する
             $insertData = array();
             $insertData['MENU_ID']          = $targetMenuId;            // メニュー
-            $insertData['SHEET_TYPE']       = $cmiData['TARGET'];       // シートタイプ
+            $insertData['SHEET_TYPE']       = $sheetType;               // シートタイプ
             $insertData['ACCESS_AUTH_FLG']  = 1;                        // アクセス許可ロール有無
             $insertData['ACCESS_AUTH']      = $cmiData['ACCESS_AUTH'];  // アクセス許可ロール
             $insertData['DISUSE_FLAG']      = "0";                      // 廃止フラグ
@@ -3507,7 +3548,7 @@ function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget, $cmiData)
 /*
  * 紐付対象メニューカラム管理更新
  */
-function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData){
+function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData, $noLinkTarget){
     global $objDBCA, $db_model_ch, $objMTS;
     $otherMenuLinkTable = new OtherMenuLinkTable($objDBCA, $db_model_ch);
     $cmdbMenuColumnTable = new CmdbMenuColumnTable($objDBCA, $db_model_ch);
@@ -3533,7 +3574,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
         $columnInfoArray = array();
 
         foreach($itemInfoArray as $key => $itemInfo){
-            if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID'] || 9 == $itemInfo['INPUT_METHOD_ID']){
+            if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
             if(7 == $itemInfo['INPUT_METHOD_ID']){
@@ -3566,6 +3607,12 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             }
             else if(8 == $itemInfo['INPUT_METHOD_ID']){
                 $colClass = "PasswordColumn";
+            }
+            else if(9 == $itemInfo['INPUT_METHOD_ID']){
+                if(true == $noLinkTarget){
+                    continue;
+                }
+                $colClass = "FileUploadColumn";
             }
             else if(10 == $itemInfo['INPUT_METHOD_ID']){
                 $colClass = "HostInsideLinkTextColumn";

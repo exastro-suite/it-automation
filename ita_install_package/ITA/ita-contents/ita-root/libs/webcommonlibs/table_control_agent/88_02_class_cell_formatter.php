@@ -1471,13 +1471,13 @@ class TabBFmt extends BFmt {
 		}
 
 		$strTagClasses .= "\"";
-		return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}>";
+		return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\">";
 		//タグの種類の分岐----
 	}
 
 	public function getETag(){
 		//----タグの種類の分岐
-		return "</td>\n";
+		return "</div></td>\n";
 		//タグの種類の分岐----
 	}
 
