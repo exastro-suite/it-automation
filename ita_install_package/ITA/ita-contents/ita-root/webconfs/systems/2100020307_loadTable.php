@@ -95,7 +95,7 @@ Ansible（Legacy Role）作業パターン詳細
     };
 
     $c = new IDColumn('ROLE_PACKAGE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208045"),
-             'D_ANSIBLE_LRL_ROLE_LIST',
+             'D_ANSIBLE_LRL_ROLE_PKG_LIST',
              'ROLE_PACKAGE_ID',
              'ROLE_PACKAGE_NAME_PULLDOWN','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208046"));//エクセル・ヘッダでの説明
@@ -169,9 +169,8 @@ Ansible（Legacy Role）作業パターン詳細
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
-                   ."     TAB_1.PACKAGE_DISUSE_FLAG  = '0' "
-                   ." AND TAB_1.ROLE_DISUSE_FLAG     = '0' "
-                   ." AND TAB_1.ROLE_PACKAGE_ID      = :ROLE_PACKAGE_ID "
+                   ."     TAB_1.DISUSE_FLAG     = '0' "
+                   ." AND TAB_1.ROLE_PACKAGE_ID = :ROLE_PACKAGE_ID "
                    ."ORDER BY KEY_COLUMN ";
                    
         $aryForBind['ROLE_PACKAGE_ID']        = $strPackageIdNumeric;
@@ -189,7 +188,7 @@ Ansible（Legacy Role）作業パターン詳細
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
@@ -233,9 +232,8 @@ Ansible（Legacy Role）作業パターン詳細
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
-                   ."     TAB_1.PACKAGE_DISUSE_FLAG  = '0' "
-                   ." AND TAB_1.ROLE_DISUSE_FLAG     = '0' "
-                   ." AND TAB_1.ROLE_PACKAGE_ID      = :ROLE_PACKAGE_ID "
+                   ."     TAB_1.DISUSE_FLAG     = '0' "
+                   ." AND TAB_1.ROLE_PACKAGE_ID = :ROLE_PACKAGE_ID "
                    ."ORDER BY KEY_COLUMN ";
 
         $aryForBind['ROLE_PACKAGE_ID']        = $strPackageIdNumeric;
@@ -253,7 +251,7 @@ Ansible（Legacy Role）作業パターン詳細
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;
@@ -296,8 +294,7 @@ Ansible（Legacy Role）作業パターン詳細
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
-                   ."     TAB_1.PACKAGE_DISUSE_FLAG  = '0' "
-                   ." AND TAB_1.ROLE_DISUSE_FLAG     = '0' "
+                   ."     TAB_1.ROLE_DISUSE_FLAG     = '0' "
                    ." AND TAB_1.ROLE_PACKAGE_ID      = :ROLE_PACKAGE_ID "
                    ."ORDER BY KEY_COLUMN ";
 
@@ -316,7 +313,7 @@ Ansible（Legacy Role）作業パターン詳細
                     $objQuery = $aryRetBody[1];
                     while($row = $objQuery->resultFetch() ){
                         // レコード毎のアクセス権を判定
-                        list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+                        list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
                         if($ret === false) {
                             $intErrorType = 500;
                             $retBool = false;

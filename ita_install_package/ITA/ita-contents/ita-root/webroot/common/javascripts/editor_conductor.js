@@ -3970,13 +3970,37 @@ const getRoleListIdToName = function( roleListText ) {
     for ( let i = 0; i < roleListLength; i++ ) {
       const roleName = listIdName('role', roleList[i]);
       if ( roleName !== undefined ) {
-        roleNameList.push( roleName );
+        const hideRoleName = getSomeMessage("ITAWDCC92008");
+        if ( roleName !== hideRoleName ) {
+          roleNameList.push( roleName );
+        } else {
+          roleNameList.push( roleName + '(' + roleList[i] + ')');
+        }
       } else {
+        // ID変換失敗
         roleNameList.push( getSomeMessage("ITAWDCC92007") + '(' + roleList[i] + ')');
       }
     }
-
     return roleNameList.join(', ');
+  } else {
+    return '';
+  }
+};
+// カンマ区切りロールIDリストからID変換失敗を除いたロールIDを返す
+const getRoleListValidID = function( roleListText ) {
+  if ( roleListText !== undefined && roleListText !== '' ) {
+    const roleList = roleListText.split(','),
+          roleListLength = roleList.length,
+          roleIdList = new Array;
+    for ( let i = 0; i < roleListLength; i++ ) {
+      const roleName = listIdName('role', roleList[i]);
+      if ( roleName !== undefined ) {
+        roleIdList.push( roleList[i] );
+      }
+    }
+    return roleIdList.join(',');
+  } else {
+    return '';
   }
 };
 
@@ -4587,6 +4611,9 @@ $('#editor-footer').on('click', '.editor-menu-button ', function(){
         // 更新しますか？
         if ( window.confirm(getSomeMessage("ITAWDCC20102") )  ) {
           conductorFooterButtonDisabled( true );
+          // ID変換失敗したIDを除く
+          conductorData['conductor']['ACCESS_AUTH'] = getRoleListValidID( conductorData['conductor']['ACCESS_AUTH'] );         
+          // 更新する
           proxy.update_execute( conductorData['conductor'].id, JSON.stringify( conductorData ), conductorData['conductor'].LUT4U );
         }
         break;

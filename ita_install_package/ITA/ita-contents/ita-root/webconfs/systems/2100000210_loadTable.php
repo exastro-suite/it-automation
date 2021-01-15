@@ -79,7 +79,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg->addColumn($c);
 
 	    // ロール名称
-	    $c = new TextColumn('ROLE_NAME', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090801"));
+	    $c = new IDColumn('ROLE_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090801"), 'A_ROLE_LIST', 'ROLE_ID', 'ROLE_NAME');
 	    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090802"));
 	    $c->getOutputType("update_table")->setVisible(false);
 	    $c->getOutputType("register_table")->setVisible(false);
@@ -149,7 +149,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg->addColumn($c);
 
     // ログインID
-    $c = new TextColumn('USERNAME', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090501"));
+    $c = new IDColumn('USER_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090501"), 'A_ACCOUNT_LIST', 'USER_ID', 'USERNAME');
     $c->setHiddenMainTableColumn(false);
     $c->setAllowSendFromFile(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090502"));

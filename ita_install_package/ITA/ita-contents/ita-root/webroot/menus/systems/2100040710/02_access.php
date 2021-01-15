@@ -47,7 +47,7 @@
             $aryVariant = array('MENU_ID'=>$strMenuNumeric);
 
             //カラムタイトル
-            $int_seq_no = 2;
+            $int_seq_no = 6;
             require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
             $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
 

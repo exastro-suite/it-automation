@@ -549,7 +549,7 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
         $dataPartsArray[$fromDataCol] = $workArray[0][$fromDataCol];
         // アップロードファイルの確認
         $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $fromMenuId) . "/" . $fromDataCol . "/" . sprintf("%010d", $workArray[0]['ROW_ID']) . "/" . $workArray[0][$fromDataCol];
-        if(file_exists($inputUploadFile)){
+        if("" != $workArray[0][$fromDataCol] && file_exists($inputUploadFile)){
             $fromUploadFilesArray[] = array('FROM_COL' => $fromDataCol, 'TO_COL' => $fromDataCol, 'UPLOAD_FILE' => $inputUploadFile);
         }
     }
@@ -565,7 +565,7 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
                 $dataPartsArray[$toDataColList[$beforeCnt + $i * $targetColCnt + $j]] = $workArray[$workKey][$fromDataColList[$beforeCnt + $j]];
                 // アップロードファイルの確認
                 $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $fromMenuId) . "/" . $fromDataColList[$beforeCnt + $j] . "/" . sprintf("%010d", $workArray[$workKey]['ROW_ID']) . "/" . $workArray[$workKey][$fromDataColList[$beforeCnt + $j]];
-                if(file_exists($inputUploadFile)){
+                if("" != $workArray[$workKey][$fromDataColList[$beforeCnt + $j]] && file_exists($inputUploadFile)){
                 $fromUploadFilesArray[] = array('FROM_COL' => $fromDataColList[$beforeCnt + $j], 'TO_COL' => $toDataColList[$beforeCnt + $i * $targetColCnt + $j], 'UPLOAD_FILE' => $inputUploadFile);
                 }
             }
@@ -580,7 +580,7 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
         $dataPartsArray[$toDataColList[$beforeCnt + $repeatCnt * $targetColCnt + $k]] = $workArray[0][$fromDataColList[$beforeCnt + $targetColCnt + $k]];
         // アップロードファイルの確認
         $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $fromMenuId) . "/" . $fromDataColList[$beforeCnt + $targetColCnt + $k] . "/" . sprintf("%010d", $workArray[0]['ROW_ID']) . "/" . $workArray[0][$fromDataColList[$beforeCnt + $targetColCnt + $k]];
-        if(file_exists($inputUploadFile)){
+        if("" != $workArray[0][$fromDataColList[$beforeCnt + $targetColCnt + $k]] && file_exists($inputUploadFile)){
             $fromUploadFilesArray[] = array('FROM_COL' => $fromDataColList[$beforeCnt + $targetColCnt + $k], 'TO_COL' => $toDataColList[$beforeCnt + $repeatCnt * $targetColCnt + $k], 'UPLOAD_FILE' => $inputUploadFile);
         }
     }

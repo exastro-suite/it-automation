@@ -13,6 +13,115 @@
 //   limitations under the License.
 //
 
+// テキストオーバー用スクロールイベント
+function setTextOverfrowScrollEvent( $target ) {
+    if ( $target.is('.textOverfrow') ) {
+        const $itaTable = $target.closest('table');
+        $target.on({
+          'mouseenter.textOverfrow': function(){console.log('!');
+              const $td = $( this ),
+                    tdWidth = $td.find('.tdInner').width(),
+                    offsetWidth = $td.find('.tdInner').get(0).offsetWidth,
+                    scrollWidth = $td.find('.tdInner').get(0).scrollWidth,
+                    knobWidth = tdWidth * ( offsetWidth / scrollWidth );
+              $td.addClass('mouseenter').find('.tofb').css({
+                'width': knobWidth,
+                'opacity': 1
+              });
+          },
+          'mouseleave.textOverfrow': function(){
+              const $td = $( this );
+              $td.removeClass('mouseenter');
+              if ( !$td.find('.tof').is('.scrollKnobMove') ) {
+                  $td.find('.tofb').css({
+                    'width': 0,
+                    'opacity': 0
+                  });
+              }
+          }
+        });
+        $target.find('.tof').on({
+          'mousedown': function( e ){
+            // 選択状態を解除する
+            getSelection().removeAllRanges();
+
+            $itaTable.addClass('overfrowScroll');
+            const $window = $( window ),
+                  $scrollBar = $( this ),
+                  $tdInner = $scrollBar.prev('.tdInner'),
+                  $scrollKnob = $scrollBar.find('.tofb'),
+                  maxScrollX = $tdInner.get(0).scrollWidth - $tdInner.get(0).offsetWidth,
+                  barWidth = $scrollBar.width(),
+                  maxMoveX = barWidth - $scrollKnob.width(),
+                  pxPerScroll = maxScrollX / maxMoveX,
+                  mouseDownX = e.pageX;
+            let   defaultX = Number( $scrollKnob.attr('data-scroll-x') );
+            if ( isNaN( defaultX ) ) defaultX = 0;
+            $scrollBar.addClass('scrollKnobMove');
+
+            // マウスダウンがノブの上じゃない場合
+            if ( !$( e.target ).is('.tofb') ) {
+              const mouseDownPer =  ( mouseDownX - $scrollBar.offset().left ) / barWidth;
+              $tdInner.scrollLeft( maxScrollX * mouseDownPer );
+              defaultX = maxMoveX * mouseDownPer;
+            }
+
+            $window.on({
+              'mousemove.scrollBar': function( moveE ){
+                let mouseMoveX = moveE.pageX - mouseDownX + defaultX;
+                if ( mouseMoveX < 0 ) mouseMoveX = 0;
+                if ( mouseMoveX > maxMoveX ) mouseMoveX = maxMoveX;
+                $tdInner.scrollLeft( mouseMoveX * pxPerScroll );
+              },
+              'mouseup.scrollBar': function(){
+                $itaTable.removeClass('overfrowScroll');
+                $scrollBar.removeClass('scrollKnobMove');
+                $window.off('mousemove.scrollBar mouseup.scrollBar');
+                if ( !$tdInner.closest('td').is('.mouseenter') ) {
+                  $scrollKnob.css({
+                    'width': 0,
+                    'opacity': 0
+                  });
+                }
+              }
+            });
+          }
+        });
+        // スクロールしたらスクロールバーに反映させる
+        $target.find('.tdInner').on({
+          'scroll': function(){
+            const $scrollArea = $( this ),
+                  $scrollBar = $scrollArea.next('.tof'),
+                  $scrollKnob = $scrollBar.find('.tofb'),
+                  maxScrollX = $scrollArea.get(0).scrollWidth - $scrollArea.get(0).offsetWidth,
+                  maxMoveX = $scrollBar.width() - $scrollKnob.width(),
+                  pxPerScroll = maxScrollX / maxMoveX,
+                  scrollLeft = $scrollArea.scrollLeft() / pxPerScroll;
+            $scrollKnob.css('transform','translateX('+scrollLeft +'px)').attr('data-scroll-x', scrollLeft );
+          }
+        });
+    }
+}
+
+// 文字があふれているかチェックする
+function checkOverfrowText( $target ) {
+  const $td = $target.closest('td'),
+        offsetWidth = $target.get(0).offsetWidth,
+        scrollWidth = $target.get(0).scrollWidth;
+  if ( scrollWidth - offsetWidth > 1 ) {
+    if ( !$td.is('.textOverfrow') ) {
+      $td.addClass('textOverfrow');
+      $target.after('<div class="tof"><div class="tofb"></div></div>');
+      setTextOverfrowScrollEvent( $td );
+    }
+  } else {
+    if ( $td.is('.textOverfrow') ) {
+      $td.removeClass('textOverfrow').off('mouseenter.textOverfrow mouseleave.textOverfrow');
+      $target.next('.tof').remove();
+    }
+  }
+}
+
 function itaTable( tableID, $tBodyTr ){
 
 //////////////////////////////////////////////////
@@ -189,6 +298,21 @@ log(
 
 //////////////////////////////////////////////////
 //
+//   文字が溢れているかチェックする
+//
+$itaTable.find('.tdInner').filter( function(){
+  const offsetWidth = this.offsetWidth,
+        scrollWidth = this.scrollWidth;
+  if ( scrollWidth - offsetWidth > 1 ) {
+    return true;
+  } else {
+    return false;
+  }
+}).after('<div class="tof"><div class="tofb"></div></div>').closest('td').addClass('textOverfrow');
+setTextOverfrowScrollEvent( $itaTable.find('.textOverfrow') );
+
+//////////////////////////////////////////////////
+//
 //   見出しを固定する（ "position:sticky;" を追加）
 //
 var fixedTableHeadCounter = 0; // Tableヘッダー行数
@@ -295,6 +419,7 @@ var fixedBorderUpdate = function(){
 
     var tableScrollElement = $tableScroll.get(0);
     var scrollWidth = tableScrollElement.offsetWidth - tableScrollElement.clientWidth; // スクロールバーのサイズ
+    var scrollHeight = tableScrollElement.offsetHeight - tableScrollElement.clientHeight; // スクロールバーのサイズ
     var tableScrollHeight = tableScrollElement.clientHeight; // Table表示部分の高さ
     var tableWidth = Math.ceil( $itaTable.get(0).getBoundingClientRect().width + scrollWidth );
 
@@ -304,11 +429,11 @@ var fixedBorderUpdate = function(){
     });
     $fixedLeftBorder.css({ 
       'left' : fixedBorderLeftPosition,
-      'height' : tableScrollHeight
+      'height' :  'calc( 100% - ' + scrollHeight + 'px )'
     });
     $fixedRightBorder.css({
       'right' : fixedBorderRightPosition + scrollWidth,
-      'height' : tableScrollHeight
+      'height' : 'calc( 100% - ' + scrollHeight + 'px )'
     });
     $itaTableBody.css('width', tableWidth );
 
@@ -1083,19 +1208,33 @@ var loadCheckStatus = function( key ) {
 }
 loadCheckStatus( tableKey );
 
-
-
 //////////////////////////////////////////////////
 //
 //   その他
 //
 
-// テーブル内のselectが変更された時にテーブルのサイズを更新する
-$itaTable.find('select').on('change', function(){
+const tableUpdate = function() {
     setTimeout( function(){
       fixedBorderUpdate();
       scrollCheck( $tableScroll );
     }, 1 );
+}
+
+// 要素の変更でテーブルの幅が変わる場合調整しなおす
+$itaTable.on('roleChange', '.tdInner', tableUpdate );
+$itaTable.find('select').on('change', tableUpdate );
+
+// フィルタプルダウンがクリックされたら調整しなおす
+$itaTable.find('.richFilterSelectListCaller').on('click', function(){
+  const target = $( this ).closest('.richFilterSelectListWrapper').get(0);
+  const observer = new MutationObserver( function(){
+    fixedBorderUpdate();
+    scrollCheck( $tableScroll );
+    // 監視を解除
+    observer.disconnect();
+  });
+  // 監視を開始
+  observer.observe( target, { childList: true });
 });
 
 $itaTableHeading.on('click', function(){

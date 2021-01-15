@@ -85,10 +85,6 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+5))
     fi
 
-    if [ "$OPENSTACK_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-
     if [ "$TERRAFORM_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
@@ -101,10 +97,6 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
     
-    if [ "$MATERIAL3_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-
     if [ "$MATERIAL4_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
@@ -150,10 +142,6 @@ func_install_messasge() {
         MESSAGE="Cobbler driver"
     fi
 
-    if [ OPENSTACK_FLG = ${1} ]; then
-        MESSAGE="OpenStack driver"
-    fi
-
     if [ TERRAFORM_FLG = ${1} ]; then
         MESSAGE="Terraform driver"
     fi
@@ -164,10 +152,6 @@ func_install_messasge() {
     
     if [ MATERIAL2_FLG = ${1} ]; then
         MESSAGE="Material2"
-    fi
-    
-    if [ MATERIAL3_FLG = ${1} ]; then
-        MESSAGE="Material3"
     fi
     
     if [ MATERIAL4_FLG = ${1} ]; then
@@ -375,11 +359,9 @@ CREATE_DATARELAYSTORAGE=(
 CREATE_TABLES=(
     ANSIBLE_FLG
     COBBLER_FLG
-    OPENSTACK_FLG
     TERRAFORM_FLG
     MATERIAL_FLG
     MATERIAL2_FLG
-    MATERIAL3_FLG
     MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
@@ -393,11 +375,9 @@ CREATE_TABLES=(
 RELEASE_PLASE=(
     ita_ansible-driver
     ita_cobbler-driver
-    ita_openstack-driver
     ita_terraform-driver
     ita_material
     ita_material2
-    ita_material3
     ita_material4
     ita_createparam
     ita_hostgroup
@@ -417,11 +397,9 @@ CONFIG_PLACE=(
 SERVICES_SET=(
     ANSIBLE_FLG
     COBBLER_FLG
-    OPENSTACK_FLG
     TERRAFORM_FLG
     MATERIAL_FLG
     MATERIAL2_FLG
-    MATERIAL3_FLG
     MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
@@ -447,11 +425,9 @@ log 'INFO : -----MODE[INSTALL] START-----'
 BASE_FLG=0
 ANSIBLE_FLG=0
 COBBLER_FLG=0
-OPENSTACK_FLG=0
 TERRAFORM_FLG=0
 MATERIAL_FLG=0
 MATERIAL2_FLG=0
-MATERIAL3_FLG=0
 MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
@@ -469,7 +445,7 @@ REPLACE_CHAR=(
 
 DRIVER_CNT=0
 ANSWER_DRIVER_CNT=0
-ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'openstack_driver' 'terraform_driver' 'material'  'createparam'  'hostgroup')
+ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'terraform_driver' 'material' 'createparam' 'hostgroup')
 
 CERTIFICATE_FILE=''
 PRIVATE_KEY_FILE=''
@@ -518,11 +494,6 @@ while read LINE; do
             func_answer_format_check
             if [ "$val" = 'yes' ]; then
                 COBBLER_FLG=1
-            fi
-        elif [ "$key" = 'openstack_driver' ]; then
-            func_answer_format_check
-            if [ "$val" = 'yes' ]; then
-                OPENSTACK_FLG=1
             fi
         elif [ "$key" = 'terraform_driver' ]; then
             func_answer_format_check
@@ -581,9 +552,6 @@ fi
 if [ $COBBLER_FLG -eq 1 ]; then
     log "INFO : Installation target : cobbler_driver"
 fi
-if [ $OPENSTACK_FLG -eq 1 ]; then
-    log "INFO : Installation target : openstack_driver"
-fi
 if [ $TERRAFORM_FLG -eq 1 ]; then
     log "INFO : Installation target : terraform_driver"
 fi
@@ -613,13 +581,6 @@ if [ "$COBBLER_FLG" -eq 1 ]; then
     fi
 fi
 
-if [ "$OPENSTACK_FLG" -eq 1 ]; then
-    if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_openstack-driver ; then
-        log 'WARNING : OpenStack driver has already been installed.'
-        OPENSTACK_FLG=0
-    fi
-fi
-
 if [ "$TERRAFORM_FLG" -eq 1 ]; then
     if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_terraform-driver ; then
         log 'WARNING : Terraform driver has already been installed.'
@@ -642,16 +603,6 @@ elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$ANSIBLE_F
     MATERIAL2_FLG=1
 elif [ "$ANSIBLE_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
     MATERIAL2_FLG=1
-fi
-
-if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material3 ; then
-    MATERIAL3_FLG=0
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_openstack-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL3_FLG=1
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$OPENSTACK_FLG" -eq 1 ] ; then
-    MATERIAL3_FLG=1
-elif [ "$OPENSTACK_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL3_FLG=1
 fi
 
 if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material4 ; then

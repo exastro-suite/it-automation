@@ -755,7 +755,7 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                     // アップロードファイルがあるか確認
                     for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 1; $i++) {
                         $uploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $inputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $sameIdData['ROW_ID']) . "/" . $sameIdData[$outputTable->columnNames[$i]];
-                        if(file_exists($uploadFile)){
+                        if("" != $sameIdData[$outputTable->columnNames[$i]] && file_exists($uploadFile)){
                             $treeData['UPLOAD_FILES'][$outputTable->columnNames[$i]] = $uploadFile;
                         }
                     }
@@ -817,7 +817,7 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                     // アップロードファイルの比較
                     $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $inputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $aloneData['ROW_ID']) . "/" . $aloneData[$outputTable->columnNames[$i]];
                     $outputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $outputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $outputData['ROW_ID']) . "/" . $aloneData[$outputTable->columnNames[$i]];
-                    if(file_exists($inputUploadFile)){
+                    if("" != $aloneData[$outputTable->columnNames[$i]] && file_exists($inputUploadFile)){
                         if(file_exists($outputUploadFile)){
                             if($aloneData[$outputTable->columnNames[$i]] != $outputData[$outputTable->columnNames[$i]] ||
                                (binary)file_get_contents($inputUploadFile, FILE_BINARY) != (binary)file_get_contents($outputUploadFile, FILE_BINARY)){
@@ -889,7 +889,7 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
                 for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 2; $i++) {
                     $inputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $inputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $aloneData['ROW_ID']) . "/" . $aloneData[$outputTable->columnNames[$i]];
                     $outputUploadFile = ROOT_DIR_PATH . "/uploadfiles/" . sprintf("%010d", $outputMenuId) . "/" . $outputTable->columnNames[$i] . "/" . sprintf("%010d", $seqNo) . "/" . $aloneData[$outputTable->columnNames[$i]];
-                    if(file_exists($inputUploadFile)){
+                    if("" != $aloneData[$outputTable->columnNames[$i]] && file_exists($inputUploadFile)){
                         $copyFileArray[] = array('INPUT_FILE' => $inputUploadFile, 'OUTPUT_FILE' => $outputUploadFile, 'JOURNAL_SEQ_NO' => $jnlSeqNo); 
                     }
                 }

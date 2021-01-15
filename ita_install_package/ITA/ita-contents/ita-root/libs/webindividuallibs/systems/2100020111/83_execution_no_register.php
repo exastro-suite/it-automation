@@ -37,6 +37,7 @@
         //オーケストレータ別の設定記述----
         
         // 各種ローカル変数を定義
+
         
         $intErrorType = null;
         $intDetailType = null;
@@ -84,6 +85,37 @@
                 }
                 throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
+
+            // RBAC対応 ----
+            if ( empty($root_dir_path) ){
+                $root_dir_temp = array();
+                $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+                $root_dir_path = $root_dir_temp[0] . "ita-root";
+            }
+
+            require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
+            $restAPI  = true;
+            $login_id = $g['login_id'];
+            $retAry = chkMovementAccessAuth($fxVarsIntOperationNoUAPK,$fxVarsIntPatternNo,$g['objDBCA'],$g['objMTS'],$restAPI,$login_id);
+            switch($retAry['STATUS']) {
+            case 'OK':
+                break;
+            case 'ER':
+                // 例外処理へ
+                $strErrStepIdInFx="00002001";
+                $intErrorType = 500;
+                $strExpectedErrMsgBodyForUI = $retAry['ERROR_MSG'];
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                break;
+            case 'NG':
+                // 例外処理へ
+                $strErrStepIdInFx="00002002";
+                $intErrorType = 2;
+                $strExpectedErrMsgBodyForUI = $retAry['ERROR_MSG'];
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                break;
+            }
+            // ---- RBAC対応
             
             require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
             $objOLA = new OrchestratorLinkAgent($g['objMTS'],$g['objDBCA'],$g);

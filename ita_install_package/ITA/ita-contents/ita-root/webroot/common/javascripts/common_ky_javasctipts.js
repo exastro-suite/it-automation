@@ -1355,13 +1355,17 @@ function setRoleSelectModalBody( roleList, initData, okCallback, cancelCallBack,
       const roleLength = roleList.length;
       for ( let i = 0; i < roleLength; i++ ) {
         const roleName = roleList[i]['ROLE_NAME'],
-              roleID = roleList[i]['ROLE_ID'],
-              checkValue = ( valueType === 'name')? roleName: roleID,
-              checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
-              value = ( valueType === 'name')? roleName: roleID;
-        roleSelectHTML += '<tr>'
-        + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
-        + '<th>' + roleID + '</th><td>' + roleName + '</td></tr>';
+              hideRoleName = getSomeMessage("ITAWDCC92008");
+        // ********は表示しない
+        if ( roleName !== hideRoleName ) {
+          const roleID = roleList[i]['ROLE_ID'],
+                checkValue = ( valueType === 'name')? roleName: roleID,
+                checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
+                value = ( valueType === 'name')? roleName: roleID;
+          roleSelectHTML += '<tr>'
+          + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
+          + '<th>' + roleID + '</th><td>' + roleName + '</td></tr>';
+        }
       }
 
       roleSelectHTML += ''      
@@ -1427,8 +1431,10 @@ function setAccessPermission( inputDataValue ) {
                   // 決定時の処理    
                   const okEvent = function( newRoleList ) {
                     $input.val( newRoleList );
-                    const inputHTML = newRoleList + $input.prop('outerHTML');
-                    $input.closest('td').html( inputHTML );
+                    const $target = $input.closest('.tdInner'),
+                          inputHTML = newRoleList + $input.prop('outerHTML');
+                    $target.html( inputHTML ).trigger('roleChange');
+                    checkOverfrowText( $target );
                     modal.modalClose();
                   };
                   // キャンセル時の処理    

@@ -398,6 +398,7 @@
                             list($boolRequiredColCheckSkip,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($aryVariant,array("action_check_order","requiredColumnCheckSkip"),false);
                         }
                     }
+
                     if($boolRequiredColCheckSkip!==true){
                         //----入力必須カラムの判定
                         foreach($arrayObjColumn as $objColumn){
@@ -841,6 +842,21 @@
                     continue;
                 }
             }
+            // ---- RBAC対応
+            // webからの廃止・復活の場合、ACCESS_AUTHカラムの通知がない
+            if($objColumn->getID() == $g['global_getAccessAuthColumnName']) {
+                // アクセス許可ロールは、DBにはID、ExcelやRestからの通知はロール名でくるので
+                // ExcelやRestからの通知されるアクセス許可ロールをDBのIDで上書きする。
+                // $objColumn->compareRowでDBとExcelやRestからの通知されるアクセス許可ロール不一致のエラーをガードする。
+                if(array_key_exists('edit_target_row',$aryVariant) === true) {
+                    if((array_key_exists($g['global_getAccessAuthColumnName'],$aryVariant['edit_target_row'])===true) ||
+                       (array_key_exists($g['global_getAccessAuthColumnName'],$reqOrgData)===true)) {
+                        $reqOrgData[$g['global_getAccessAuthColumnName']] = $aryVariant['edit_target_row'][$g['global_getAccessAuthColumnName']];
+                    }
+                }
+            }
+            // RBAC対応 ----
+
             $boolValue = $objColumn->compareRow($exeQueryData, $reqOrgData, $aryVariant);
             if( $boolValue===false ){
                 $errorColumnName[] = "[".str_replace(array("<br>","<br/>","<br />"),"・",$objColumn->getColLabel(true))."]";

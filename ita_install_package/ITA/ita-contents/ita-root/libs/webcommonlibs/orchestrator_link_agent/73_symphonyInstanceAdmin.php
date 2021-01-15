@@ -1060,6 +1060,7 @@ function symphonyInstancePrint($fxVarsIntSymphonyInstanceId){
         
         require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
         $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA,$g);
+        $objRBAC = new RoleBasedAccessControl($objDBCA);
         
         //----シンフォニーが存在するか？
         
@@ -1185,9 +1186,33 @@ function symphonyInstancePrint($fxVarsIntSymphonyInstanceId){
         $aryMovementInsData = array();
         $intCount = 0;
         foreach( $aryRowOfMovInstanceTable as $row ){
+            //対象のMovementのアクセス権をチェック
+            $movAccessAuth = false;
+            $intPatternId = $row['I_PATTERN_ID'];
+            //対象MovementをSELECT
+            $sql =  " SELECT * FROM C_PATTERN_PER_ORCH "
+                   ." WHERE PATTERN_ID = $intPatternId ";
+
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            $r = $objQuery->sqlExecute();
+            $targetRow = $objQuery->resultFetch();
+
+            $user_id = $g['login_id'];
+            $ret  = $objRBAC->getAccountInfo($user_id); 
+            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+            if($ret === false) {
+                //例外処理へ
+                $strErrStepIdInFx="00000700";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            } else {
+                if($permission === true) {
+                    $movAccessAuth = true;
+                }
+            }
+
             $aryClassItems = array();
             $varOrcIdFromMovInstanceTable     = $row['I_ORCHESTRATOR_ID'];
-            $varPatternIdFromMovInstanceTable = $row['I_PATTERN_ID'];
+            $varPatternIdFromMovInstanceTable = $intPatternId;
             
             //----ここからクラスと同じ情報項目
             
@@ -1203,7 +1228,9 @@ function symphonyInstancePrint($fxVarsIntSymphonyInstanceId){
                 //----作業パターンが存在している
                 if( $aryPatternList[$varPatternIdFromMovInstanceTable]['ITA_EXT_STM_ID']==$varOrcIdFromMovInstanceTable ){
                     //----オーケストレータも同じ
-                    $strPatternName = $aryPatternList[$varPatternIdFromMovInstanceTable]['PATTERN_NAME'];
+                    if($movAccessAuth == true){
+                        $strPatternName = $aryPatternList[$varPatternIdFromMovInstanceTable]['PATTERN_NAME'];
+                    }
                     //オーケストレータも同じ----
                 }
                 //作業パターンが存在している----
@@ -1211,16 +1238,20 @@ function symphonyInstancePrint($fxVarsIntSymphonyInstanceId){
             if( $strPatternName=="" ){
                 $strPatternName = $objMTS->getSomeMessage("ITABASEH-ERR-5730404",array($row['I_MOVEMENT_CLASS_NO']));
             }
-            $aryClassItems['PATTERN_NAME']              = $strPatternName; //htmlspecialchars
+            $aryClassItems['PATTERN_NAME'] = $strPatternName; //htmlspecialchars
             
             // テーマカラー
             $aryClassItems['THEME_COLOR'] = $aryPatternListPerOrc[$varOrcIdFromMovInstanceTable]['ThemeColor'];
             
             // 楽章番号
-            $aryClassItems['MOVEMENT_SEQ']              = $row['I_MOVEMENT_SEQ'];
+            $aryClassItems['MOVEMENT_SEQ'] = $row['I_MOVEMENT_SEQ'];
             
             // 説明
-            $aryClassItems['DESCRIPTION']               = $row['I_DESCRIPTION']; //htmlspecialchars
+            $description = "";
+            if($movAccessAuth == true){
+                $description = $row['I_DESCRIPTION']; //htmlspecialchars
+            }
+            $aryClassItems['DESCRIPTION'] = $description;
             
             //----保留ポイントの有無
             if( $row['I_NEXT_PENDING_FLAG'] == '1' ){

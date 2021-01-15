@@ -45,6 +45,7 @@
     $php_req_gate_php   = '/libs/commonlibs/common_php_req_gate.php';
     $db_connect_php     = '/libs/commonlibs/common_db_connect.php';
     $ola_lib_agent_php  = '/libs/commonlibs/common_ola_classes.php';
+    $web_php_function_php = '/libs/webcommonlibs/web_php_functions.php';
     $db_access_user_id  = -5; //定期実行管理プロシージャのユーザID
     $strFxName          = "proc({$log_file_prefix})";
     $strIntervalTime    = "3 MINUTE"; //Symphony作業一覧に実行するどれくらい前に登録をするか
@@ -80,6 +81,8 @@
         "PATTERN_DAY"=>"",
         "PATTERN_DAY_OF_WEEK"=>"",
         "PATTERN_WEEK_NUMBER"=>"",
+        "EXECUTION_USER_ID"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -103,6 +106,7 @@
         "TIME_BOOK"=>"",
         "TIME_START"=>"",
         "TIME_END"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -134,6 +138,7 @@
         "TIME_START"=>"",
         "TIME_END"=>"",
         "RELEASED_FLAG"=>"",
+        "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
@@ -354,6 +359,9 @@
                            ,'root_dir_path'=>$root_dir_path);
         $objOLA = new OrchestratorLinkAgent($objMTS, $objDBCA,$aryVariant);
 
+        //コンダクター登録時にアクセス権チェック処理を実行可能に
+        require ($root_dir_path . $web_php_function_php);
+
         // 更新用のテーブル定義
         $aryConfigForIUD = $aryConfigForRegListIUD;
 
@@ -422,6 +430,46 @@
             $registerFailedSymphonyInstance = false;
             //次回実行日付が過ぎた場合のフラグ(初期値はfalse)
             $passedNextExecutionDate = false;
+            //インスタンス実行前エラーフラグ
+            $beforeExecuteCheckFlag = false;
+            //実行ユーザの廃止フラグ
+            $userAbolishedFlag = false;
+            //末端のコンダクタまでの各ノードのアクセス権限フラグ
+            $noAccessAuthFlag = false;
+            //実行ユーザID
+            $executionUserId = $rowOfReguralyList['EXECUTION_USER_ID'];
+
+            //実行ユーザIDから実行ユーザ名を取得
+            $strSqlUtnBody = "SELECT * FROM D_ACCOUNT_LIST WHERE USER_ID = :USER_ID";
+            $aryUtnSqlBind = array('USER_ID'=>$executionUserId);
+            $aryRetBody = singleSQLCoreExecute($objDBCA, $strSqlUtnBody, $aryUtnSqlBind, $strFxName);
+            if( $aryRetBody[0] !== true ){
+                // 例外処理へ
+                $strErrStepIdInFx="00001210";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $objQueryUtn =& $aryRetBody[3];
+
+            //取得したレコードがある場合に配列にセットする
+            $executionUserName = "";
+            if($objQueryUtn->effectedRowCount() != 0){
+                //----発見行だけループ
+                while ($row = $objQueryUtn->resultFetch()){
+                    $executionUserName = $row['USERNAME_JP'];
+                    //実行ユーザの廃止状態をチェック
+                    if($row['DISUSE_FLAG'] == 1){
+                        $userAbolishedFlag = true;
+                        $beforeExecuteCheckFlag = true;
+                    }
+                }
+                //発見行だけループ----
+            }
+
+            if($executionUserName == ""){
+                // 例外処理へ
+                $strErrStepIdInFx="00001220";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
 
             //次回実行日付がNOWを過ぎていた場合、ステータスと次回実行日付をnullにして更新を実施する。
             $nextExecutionDate = date('Y/m/d H:i', strtotime($rowOfReguralyList['NEXT_EXECUTION_DATE']));
@@ -431,78 +479,107 @@
                 $tmpsymphonyClassNo = $rowOfReguralyList['CONDUCTOR_CLASS_NO'];
                 $opertionNoIdbh = $rowOfReguralyList['OPERATION_NO_IDBH'];
 
-                //--- Conductorクラス状態保存 
-                $arrayResult = $objOLA->convertConductorClassJson($tmpsymphonyClassNo,1);
+                //----Operation、Conductorの共通アクセス権の取得 #519
+                $arrOpeConAccessAuth = $objOLA->getInfoAccessAuthWorkFlowOpe($tmpsymphonyClassNo,$opertionNoIdbh ,"C" );
+                $strOpeConAccessAuth = $arrOpeConAccessAuth[4];
 
-                // JSON形式の変換、不要項目の削除
-                $tmpReceptData = $arrayResult[4];
-                $arrayReceptData=$tmpReceptData['conductor'];
-                $strSortedData=$tmpReceptData;
-                unset($strSortedData['conductor']);
-                foreach ($strSortedData as $key => $value) {
-                    if( preg_match('/line-/',$key) ){
-                        unset($strSortedData[$key]);
-                    }
-                }
-                unset($strSortedData['conductor']);
-                unset($strSortedData['config']); 
-
-                $arrayResult = $objOLA->conductorClassRegister(null, $arrayReceptData, $strSortedData, null);
-
-                if( $arrayResult[0] == "000" ){
-                    $symphonyClassNo = $arrayResult[2];
+                if( $arrOpeConAccessAuth[3] != "" ){
+                    $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160003", array($regularlyId)); //[処理]symphonyINSTANCEの登録に失敗しました(定期実行ID:{})。
+                    require ($root_dir_path . $log_output_php );
+                    $registerFailedSymphonyInstance = true;
                 }else{
-                    $symphonyClassNo="";
-                }
-                // Conductorクラス状態保存 ---
 
+                    if($beforeExecuteCheckFlag == false){
+                        // ----実行するConductorクラスIDに紐づくすべてのノードのアクセス権チェック
+                        $arrayRetBody = $objOLA->checkConductorNodeAccessAuth($tmpsymphonyClassNo, $executionUserId);
+                        if($arrayRetBody[0] == false){
+                            //アクセス権限がないフラグをたてる
+                            $noAccessAuthFlag = true;
+                            $beforeExecuteCheckFlag = true;
 
-                //シンフォニーインスタンスを新規登録処理
-                $aryOptionOrder = null;
-                $aryOptionOrderOverride = array();
-                $db_access_user_name = $objMTS->getSomeMessage("ITABASEH-STD-160013"); //定期実行管理プロシージャ
-                $retArray = $objOLA->registerConductorInstance($symphonyClassNo, $opertionNoIdbh, $nextExecutionDate, "", $aryOptionOrderOverride, $db_access_user_id, $db_access_user_name);
-
-                if($retArray[0] !== true){
-                    //エラー情報をセット
-                    $intErrorType = $retArray[1];
-                    $aryErrMsgBody = $retArray[2];
-                    $strSysErrMsgBody = $retArray[4];
-                    $aryFreeErrMsgBody = $retArray[7];
-
-                    //エラー判定チェック
-                    if($intErrorType === 101){
-                        //symphonyが存在しない（廃止扱い）
-                        $getFailedSymphonyInfo = true;
-                        $regStatusId = STATUS_CONDUCTOR_DISCARD; //ステータス：symphony廃止
-                    }elseif($intErrorType === 102){
-                        //operationが存在しない（廃止扱い）
-                        $getFailedOperationInfo = true;
-                        $regStatusId = STATUS_OPERATION_DISCARD; //ステータス：operation廃止
-                    }else{
-                        $registerFailedSymphonyInstance = true;
-                    }
-
-                    //ログを出力
-                    if($regCurrentStatusId != STATUS_LINKING_ERROR){
-                        foreach($aryErrMsgBody as $msg){
-                            $FREE_LOG = $msg;
+                            //ログを出力
+                            $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-170037", array($regularlyId)); //コンダクタ内にアクセス権限がないノードが含まれています(定期実行ID:{})。
                             require ($root_dir_path . $log_output_php );
                         }
-                        foreach($aryFreeErrMsgBody as $msg){
-                            $FREE_LOG = $msg;
-                            require ($root_dir_path . $log_output_php );
-                        }
-                        if( 0 < strlen($strSysErrMsgBody)){
-                            $FREE_LOG = $strSysErrMsgBody;
-                            require ($root_dir_path . $log_output_php );  
-                        }
+                        // ----実行するConductorクラスIDに紐づくすべてのノードのアクセス権チェック
+                    }
 
-                        $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160003", array($regularlyId)); //[処理]symphonyINSTANCEの登録に失敗しました(定期実行ID:{})。
-                        require ($root_dir_path . $log_output_php );
+                    if($beforeExecuteCheckFlag == false){
+                        //--- Conductorクラス状態保存 
+                        $arrayResult = $objOLA->convertConductorClassJson($tmpsymphonyClassNo,1);
+
+                        // JSON形式の変換、不要項目の削除
+                        $tmpReceptData = $arrayResult[4];
+                        $arrayReceptData=$tmpReceptData['conductor'];
+                        $strSortedData=$tmpReceptData;
+                        unset($strSortedData['conductor']);
+                        foreach ($strSortedData as $key => $value) {
+                            if( preg_match('/line-/',$key) ){
+                                unset($strSortedData[$key]);
+                            }
+                        }
+                        unset($strSortedData['conductor']);
+                        unset($strSortedData['config']); 
+
+                        // アクセス権の上書き#519
+                        $arrayReceptData['ACCESS_AUTH']=$strOpeConAccessAuth; 
+
+                        $arrayResult = $objOLA->conductorClassRegister(null, $arrayReceptData, $strSortedData, null);
+
+                        if( $arrayResult[0] == "000" ){
+                            $symphonyClassNo = $arrayResult[2];
+                        }else{
+                            $symphonyClassNo="";
+                        }
+                        // Conductorクラス状態保存 ---
+
+
+                        //シンフォニーインスタンスを新規登録処理
+                        $aryOptionOrder = null;
+                        $aryOptionOrderOverride = array();
+                        $retArray = $objOLA->registerConductorInstance($symphonyClassNo, $opertionNoIdbh, $nextExecutionDate, "", $aryOptionOrderOverride, $executionUserId, $executionUserName);
+
+                        if($retArray[0] !== true){
+                            //エラー情報をセット
+                            $intErrorType = $retArray[1];
+                            $aryErrMsgBody = $retArray[2];
+                            $strSysErrMsgBody = $retArray[4];
+                            $aryFreeErrMsgBody = $retArray[7];
+
+                            //エラー判定チェック
+                            if($intErrorType === 101){
+                                //symphonyが存在しない（廃止扱い）
+                                $getFailedSymphonyInfo = true;
+                                $regStatusId = STATUS_CONDUCTOR_DISCARD; //ステータス：symphony廃止
+                            }elseif($intErrorType === 102){
+                                //operationが存在しない（廃止扱い）
+                                $getFailedOperationInfo = true;
+                                $regStatusId = STATUS_OPERATION_DISCARD; //ステータス：operation廃止
+                            }else{
+                                $registerFailedSymphonyInstance = true;
+                            }
+
+                            //ログを出力
+                            if($regCurrentStatusId != STATUS_LINKING_ERROR){
+                                foreach($aryErrMsgBody as $msg){
+                                    $FREE_LOG = $msg;
+                                    require ($root_dir_path . $log_output_php );
+                                }
+                                foreach($aryFreeErrMsgBody as $msg){
+                                    $FREE_LOG = $msg;
+                                    require ($root_dir_path . $log_output_php );
+                                }
+                                if( 0 < strlen($strSysErrMsgBody)){
+                                    $FREE_LOG = $strSysErrMsgBody;
+                                    require ($root_dir_path . $log_output_php );  
+                                }
+
+                                $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160003", array($regularlyId)); //[処理]symphonyINSTANCEの登録に失敗しました(定期実行ID:{})。
+                                require ($root_dir_path . $log_output_php );
+                            }
+                        }
                     }
                 }
-
             }else{
                 $passedNextExecutionDate = true;
             }
@@ -525,6 +602,16 @@
                 $aryNextExecutionDateAndStatus = getNextExecutionDate($rowOfReguralyList);
                 $regStatusId = $aryNextExecutionDateAndStatus['statusId'];
                 $nextExecutionDate = $aryNextExecutionDateAndStatus['nextExecutionDate'];
+
+                //実行ユーザが廃止の場合、ステータスを「紐付けエラー」にする
+                if($userAbolishedFlag == true){
+                    $regStatusId = STATUS_LINKING_ERROR; //ステータス：紐付けエラー
+                }
+
+                //末端コンダクタの各ノードにアクセス権限がないものがあった場合、ステータスを「紐付けエラー」にする
+                if($noAccessAuthFlag == true){
+                    $regStatusId = STATUS_LINKING_ERROR; //ステータス：紐付けエラー
+                }
 
                 //Symphony作業一覧への登録が失敗していた場合、ステータスを「紐付けエラー」にする
                 if($registerFailedSymphonyInstance == true){

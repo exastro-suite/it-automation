@@ -137,6 +137,7 @@ function checkZipFile(){
             $errCnt++;
         }
     }
+
     if ($errCnt > 0) {
         if (file_exists($uploadPath . $fileName) === true) {
             unlink($uploadPath . $fileName);
@@ -183,6 +184,10 @@ function checkZipFile(){
         web_log("File[{$releaseFile}] does not exists.");
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
     }
+
+    $json = file_get_contents($uploadPath . $uploadId .'/DP_INFO');
+    $dp_info = json_decode(json_decode(json_encode($json), true), true);
+    $_SESSION["dp_info"] = check_dp_info($dp_info);
 
     // ファイル移動
     $res = copy($uploadPath . '/' . $fileName, $importPath . '/' . $fileName);
@@ -395,7 +400,7 @@ function moveZipFile($taskNo){
 /**
  * データインポート管理テーブル更新処理
  */
-function insertTask($importType){
+function insertTask($dp_info){
     global $g;
 
     // トランザクション開始
@@ -441,6 +446,9 @@ function insertTask($importType){
 
     $p_execution_utn_no = $seqAry[0]['VALUE'];
 
+    $dp_mode = $dp_info['DP_MODE']['ID'];
+    $abolished_type = $dp_info['ABOLISHED_TYPE']['ID'];
+
     // Jnl№を取得する
     $resArray = array();
     $resArray = getSequenceValueFromTable('B_DP_STATUS_JSQ', 'A_SEQUENCE', FALSE);
@@ -458,7 +466,8 @@ function insertTask($importType){
         'TASK_ID' => '',
         'TASK_STATUS' => '',
         'DP_TYPE' => '',
-        'IMPORT_TYPE' => '',
+        'DP_MODE' => $dp_mode,
+        'ABOLISHED_TYPE' => $abolished_type,
         'FILE_NAME' => '',
         'DISP_SEQ' => '',
         'NOTE' => '',
@@ -476,7 +485,8 @@ function insertTask($importType){
         'TASK_ID' => $p_execution_utn_no,
         'TASK_STATUS' => 1,
         'DP_TYPE' => 2,
-        'IMPORT_TYPE' => $importType,
+        'DP_MODE' => $dp_mode,
+        'ABOLISHED_TYPE' => $abolished_type,
         'FILE_NAME' => $filePath,
         'DISP_SEQ' => '',
         'NOTE' => '',
@@ -651,3 +661,66 @@ function renameImportFiles($taskNo){
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900001'));
     }
 }
+
+
+/**
+ * インポート情報を表示する
+ *
+ * @param    int    $taskNo
+ */
+function check_dp_info($dp_info){
+    global $g;
+    $sql = "SELECT DP_MODE FROM B_DP_MODE WHERE ROW_ID = :ROW_ID";
+    $bindAry = array(
+        "ROW_ID" => $dp_info["DP_MODE"]
+    );
+    $objQuery = $g['objDBCA']->sqlPrepare($sql);
+    if ($objQuery === false) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
+                                             array('A_SEQUENCE', 'B_DP_STATUS_RIC', basename(__FILE__), __LINE__)));
+        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+    }
+    $objQuery->sqlBind($bindAry);
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
+                                             array('A_SEQUENCE', 'B_DP_STATUS_RIC', basename(__FILE__), __LINE__)));
+        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+    }
+    $row = $objQuery->resultFetch();
+    $dp_mode = $row["DP_MODE"];
+
+    $sql = "SELECT ABOLISHED_TYPE FROM B_DP_ABOLISHED_TYPE WHERE ROW_ID = :ROW_ID";
+    $bindAry = array(
+        "ROW_ID" => $dp_info["ABOLISHED_TYPE"]
+    );
+    $objQuery = $g['objDBCA']->sqlPrepare($sql);
+    if ($objQuery === false) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
+                                             array('A_SEQUENCE', 'B_DP_STATUS_RIC', basename(__FILE__), __LINE__)));
+        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+    }
+    $objQuery->sqlBind($bindAry);
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
+                                             array('A_SEQUENCE', 'B_DP_STATUS_RIC', basename(__FILE__), __LINE__)));
+        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+    }
+    $row = $objQuery->resultFetch();
+    $abolished_type = $row["ABOLISHED_TYPE"];
+
+    $result = array(
+        "DP_MODE" => array(
+            "NAME" => $dp_mode,
+            "ID" => $dp_info["DP_MODE"],
+        ),
+        "ABOLISHED_TYPE" => array(
+            "NAME" => $abolished_type,
+            "ID" => $dp_info["ABOLISHED_TYPE"],
+        )
+    );
+
+    return $result;
+}
+

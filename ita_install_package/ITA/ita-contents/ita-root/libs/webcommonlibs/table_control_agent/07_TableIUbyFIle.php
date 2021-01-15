@@ -810,27 +810,6 @@
                     //JSONフォーマッタ系ではなかった----
                 }
 
-                $intTempFilesize = filesize($strIUDSourceFullname);
-                $intMaxFileSize = $objQMFSALFormatter->getGeneValue("linkJSONMaxFileSize",$refRetKeyExists);
-                if( $intMaxFileSize === null && $refRetKeyExists === false ){
-                    $intMaxFileSize = $objTable->getGeneObject("linkJSONMaxFileSize",$refRetKeyExists);
-                }
-                if( $intMaxFileSize === null || is_int($intMaxFileSize) === false ){
-                    $intMaxFileSize = 20*1024*1024;
-                }else{
-                    if( $intMaxFileSize < 0 ){
-                        $intMaxFileSize = 20*1024*1024;
-                    }
-                }
-                
-                if( $intMaxFileSize < $intTempFilesize ){
-                    //----許容されたサイズ以上のファイルがアップロードされた
-                    $intErrorType = 371;
-                    $intErrorPlaceMark = 2700;
-                    throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                    //許容されたサイズ以上のファイルがアップロードされた----
-                }
-
                 // JSON文字列を連想配列に
                 $aryRowFromJson = @json_decode( file_get_contents( $strIUDSourceFullname ), true, 512, JSON_BIGINT_AS_STRING);
 
