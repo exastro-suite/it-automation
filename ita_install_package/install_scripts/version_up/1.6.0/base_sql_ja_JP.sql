@@ -333,6 +333,102 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 -- Nodeクラス(編集用)----
 
+INSERT INTO C_NODE_EDIT_CLASS_MNG(
+NODE_CLASS_NO                   ,
+NODE_NAME                       ,
+NODE_TYPE_ID                    ,
+ORCHESTRATOR_ID                 ,
+PATTERN_ID                      ,
+CONDUCTOR_CALL_CLASS_NO         ,
+DESCRIPTION                     ,
+CONDUCTOR_CLASS_NO              ,
+OPERATION_NO_IDBH               ,
+SKIP_FLAG                       ,
+NEXT_PENDING_FLAG               ,
+POINT_X                         ,
+POINT_Y                         ,
+POINT_W                         ,
+POINT_H                         ,
+DISP_SEQ                        ,
+NOTE                            ,
+DISUSE_FLAG                     ,
+LAST_UPDATE_TIMESTAMP           ,
+LAST_UPDATE_USER
+)
+SELECT
+NODE_CLASS_NO                   ,
+NODE_NAME                       ,
+NODE_TYPE_ID                    ,
+ORCHESTRATOR_ID                 ,
+PATTERN_ID                      ,
+CONDUCTOR_CALL_CLASS_NO         ,
+DESCRIPTION                     ,
+CONDUCTOR_CLASS_NO              ,
+OPERATION_NO_IDBH               ,
+SKIP_FLAG                       ,
+NEXT_PENDING_FLAG               ,
+POINT_X                         ,
+POINT_Y                         ,
+POINT_W                         ,
+POINT_H                         ,
+DISP_SEQ                        ,
+NOTE                            ,
+DISUSE_FLAG                     ,
+LAST_UPDATE_TIMESTAMP           ,
+LAST_UPDATE_USER
+ FROM C_NODE_CLASS_MNG ;
+
+INSERT INTO C_NODE_EDIT_CLASS_MNG_JNL(
+JOURNAL_SEQ_NO                  ,
+JOURNAL_REG_DATETIME            ,
+JOURNAL_ACTION_CLASS            ,
+NODE_CLASS_NO                   ,
+NODE_NAME                       ,
+NODE_TYPE_ID                    ,
+ORCHESTRATOR_ID                 ,
+PATTERN_ID                      ,
+CONDUCTOR_CALL_CLASS_NO         ,
+DESCRIPTION                     ,
+CONDUCTOR_CLASS_NO              ,
+OPERATION_NO_IDBH               ,
+SKIP_FLAG                       ,
+NEXT_PENDING_FLAG               ,
+POINT_X                         ,
+POINT_Y                         ,
+POINT_W                         ,
+POINT_H                         ,
+DISP_SEQ                        ,
+NOTE                            ,
+DISUSE_FLAG                     ,
+LAST_UPDATE_TIMESTAMP           ,
+LAST_UPDATE_USER
+)
+SELECT
+JOURNAL_SEQ_NO                  ,
+JOURNAL_REG_DATETIME            ,
+JOURNAL_ACTION_CLASS            ,
+NODE_CLASS_NO                   ,
+NODE_NAME                       ,
+NODE_TYPE_ID                    ,
+ORCHESTRATOR_ID                 ,
+PATTERN_ID                      ,
+CONDUCTOR_CALL_CLASS_NO         ,
+DESCRIPTION                     ,
+CONDUCTOR_CLASS_NO              ,
+OPERATION_NO_IDBH               ,
+SKIP_FLAG                       ,
+NEXT_PENDING_FLAG               ,
+POINT_X                         ,
+POINT_Y                         ,
+POINT_W                         ,
+POINT_H                         ,
+DISP_SEQ                        ,
+NOTE                            ,
+DISUSE_FLAG                     ,
+LAST_UPDATE_TIMESTAMP           ,
+LAST_UPDATE_USER
+ FROM C_NODE_CLASS_MNG_JNL;
+
 -- ----Terminalクラス(編集用)
 CREATE TABLE C_NODE_TERMINALS_EDIT_CLASS_MNG
 (
@@ -392,6 +488,95 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 -- Terminalクラス(編集用)----
 
+INSERT INTO C_NODE_TERMINALS_EDIT_CLASS_MNG(
+TERMINAL_CLASS_NO               ,
+TERMINAL_CLASS_NAME             ,
+TERMINAL_TYPE_ID                ,
+NODE_CLASS_NO                   ,
+CONDUCTOR_CLASS_NO              ,
+CONNECTED_NODE_NAME             ,
+LINE_NAME                       ,
+TERMINAL_NAME                   ,
+CONDITIONAL_ID                  ,
+CASE_NO                         ,
+DESCRIPTION                     ,
+POINT_X                         ,
+POINT_Y                         ,
+DISP_SEQ                        ,
+NOTE                            ,
+DISUSE_FLAG                     ,
+LAST_UPDATE_TIMESTAMP           ,
+LAST_UPDATE_USER
+)
+SELECT 
+TERMINAL_CLASS_NO               ,
+TERMINAL_CLASS_NAME             ,
+TERMINAL_TYPE_ID                ,
+NODE_CLASS_NO                   ,
+CONDUCTOR_CLASS_NO              ,
+CONNECTED_NODE_NAME             ,
+LINE_NAME                       ,
+TERMINAL_NAME                   ,
+CONDITIONAL_ID                  ,
+CASE_NO                         ,
+DESCRIPTION                     ,
+POINT_X                         ,
+POINT_Y                         ,
+DISP_SEQ                        ,
+NOTE                            ,
+DISUSE_FLAG                     ,
+LAST_UPDATE_TIMESTAMP           ,
+LAST_UPDATE_USER
+ FROM C_NODE_TERMINALS_CLASS_MNG;
+
+INSERT INTO C_NODE_TERMINALS_EDIT_CLASS_MNG_JNL(
+JOURNAL_SEQ_NO                  ,
+JOURNAL_REG_DATETIME            ,
+JOURNAL_ACTION_CLASS            ,
+TERMINAL_CLASS_NO               ,
+TERMINAL_CLASS_NAME             ,
+TERMINAL_TYPE_ID                ,
+NODE_CLASS_NO                   ,
+CONDUCTOR_CLASS_NO              ,
+CONNECTED_NODE_NAME             ,
+LINE_NAME                       ,
+TERMINAL_NAME                   ,
+CONDITIONAL_ID                  ,
+CASE_NO                         ,
+DESCRIPTION                     ,
+POINT_X                         ,
+POINT_Y                         ,
+DISP_SEQ                        ,
+NOTE                            ,
+DISUSE_FLAG                     ,
+LAST_UPDATE_TIMESTAMP           ,
+LAST_UPDATE_USER
+)
+SELECT 
+JOURNAL_SEQ_NO                  ,
+JOURNAL_REG_DATETIME            ,
+JOURNAL_ACTION_CLASS            ,
+TERMINAL_CLASS_NO               ,
+TERMINAL_CLASS_NAME             ,
+TERMINAL_TYPE_ID                ,
+NODE_CLASS_NO                   ,
+CONDUCTOR_CLASS_NO              ,
+CONNECTED_NODE_NAME             ,
+LINE_NAME                       ,
+TERMINAL_NAME                   ,
+CONDITIONAL_ID                  ,
+CASE_NO                         ,
+DESCRIPTION                     ,
+POINT_X                         ,
+POINT_Y                         ,
+DISP_SEQ                        ,
+NOTE                            ,
+DISUSE_FLAG                     ,
+LAST_UPDATE_TIMESTAMP           ,
+LAST_UPDATE_USER
+ FROM C_NODE_TERMINALS_CLASS_MNG_JNL;
+
+
 ALTER TABLE C_CONDUCTOR_CLASS_MNG ADD COLUMN ACCESS_AUTH TEXT AFTER DISP_SEQ;
 
 ALTER TABLE C_CONDUCTOR_CLASS_MNG_JNL ADD COLUMN ACCESS_AUTH TEXT AFTER DISP_SEQ;
@@ -403,6 +588,10 @@ ALTER TABLE C_CONDUCTOR_INSTANCE_MNG_JNL ADD COLUMN ACCESS_AUTH TEXT AFTER DISP_
 ALTER TABLE C_NODE_INSTANCE_MNG ADD COLUMN ACCESS_AUTH TEXT AFTER DISP_SEQ;
 
 ALTER TABLE C_NODE_INSTANCE_MNG_JNL ADD COLUMN ACCESS_AUTH TEXT AFTER DISP_SEQ;
+
+INSERT INTO C_CONDUCTOR_EDIT_CLASS_MNG SELECT * FROM C_CONDUCTOR_CLASS_MNG;
+INSERT INTO C_CONDUCTOR_EDIT_CLASS_MNG_JNL SELECT * FROM C_CONDUCTOR_CLASS_MNG_JNL;
+
 
 -- ----SensitiveFマスタ
 CREATE TABLE B_SENSITIVE_FLAG
@@ -1388,6 +1577,15 @@ UPDATE A_SEQUENCE SET MENU_ID=NULL, DISP_SEQ=2100190041, NOTE=NULL, LAST_UPDATE_
 UPDATE A_SEQUENCE SET MENU_ID=NULL, DISP_SEQ=2100190042, NOTE='履歴テーブル用', LAST_UPDATE_TIMESTAMP=STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f') WHERE NAME='C_NODE_CLASS_MNG_JSQ';
 UPDATE A_SEQUENCE SET MENU_ID=NULL, DISP_SEQ=2100190043, NOTE=NULL, LAST_UPDATE_TIMESTAMP=STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f') WHERE NAME='C_NODE_TERMINALS_CLASS_MNG_RIC';
 UPDATE A_SEQUENCE SET MENU_ID=NULL, DISP_SEQ=2100190044, NOTE='履歴テーブル用', LAST_UPDATE_TIMESTAMP=STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f') WHERE NAME='C_NODE_TERMINALS_CLASS_MNG_JSQ';
+
+UPDATE A_SEQUENCE SET VALUE=(SELECT VALUE FROM A_SEQUENCE WHERE NAME ='C_CONDUCTOR_CLASS_MNG_RIC') WHERE NAME='C_CONDUCTOR_EDIT_CLASS_MNG_RIC';
+UPDATE A_SEQUENCE SET VALUE=(SELECT VALUE FROM A_SEQUENCE WHERE NAME ='C_CONDUCTOR_CLASS_MNG_JSQ') WHERE NAME='C_CONDUCTOR_EDIT_CLASS_MNG_JSQ';
+
+UPDATE A_SEQUENCE SET VALUE=(SELECT VALUE FROM A_SEQUENCE WHERE NAME ='C_NODE_CLASS_MNG_RIC') WHERE NAME='C_NODE_EDIT_CLASS_MNG_RIC';
+UPDATE A_SEQUENCE SET VALUE=(SELECT VALUE FROM A_SEQUENCE WHERE NAME ='C_NODE_CLASS_MNG_JSQ') WHERE NAME='C_NODE_EDIT_CLASS_MNG_JSQ';
+
+UPDATE A_SEQUENCE SET VALUE=(SELECT VALUE FROM A_SEQUENCE WHERE NAME ='C_NODE_TERMINALS_CLASS_MNG_RIC') WHERE NAME='C_NODE_TERMINALS_EDIT_CLASS_MNG_RIC';
+UPDATE A_SEQUENCE SET VALUE=(SELECT VALUE FROM A_SEQUENCE WHERE NAME ='C_NODE_TERMINALS_CLASS_MNG_JSQ') WHERE NAME='C_NODE_TERMINALS_EDIT_CLASS_MNG_JSQ';
 
 
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000216,2100000002,'シーケンス管理',NULL,NULL,NULL,1,0,1,1,16,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
