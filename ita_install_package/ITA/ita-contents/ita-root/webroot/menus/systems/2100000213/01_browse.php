@@ -91,8 +91,8 @@
     </div>
     <!-------------------------------- 絞込み(表示フィルタ) -------------------------------->
 EOD;
-	$listSectionMsg = ($privilege=="1")?$g['objMTS']->getSomeMessage("ITAWDCH-STD-30031"):$g['objMTS']->getSomeMessage("ITAWDCH-STD-30032");
-	print
+    $listSectionMsg = ($privilege=="1")?$g['objMTS']->getSomeMessage("ITAWDCH-STD-30031"):$g['objMTS']->getSomeMessage("ITAWDCH-STD-30032");
+    print
 <<<EOD
     <!-------------------------------- 一覧/更新 -------------------------------->
     <h2>

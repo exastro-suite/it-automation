@@ -625,7 +625,8 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
         $addColumnInput = $addColumn.find('.menu-column-title-input');
   
   $target.append( $addColumn );
-
+  // プルダウンにselect2を適用する
+  //$target.find('.config-select').select2();
   
   $addColumn.attr('id', id );
 
@@ -806,6 +807,10 @@ $menuEditor.on('change', '.config-number, .menu-column-repeat-number-input', fun
         max = Number( $input.attr('data-max') );
   let value = $input.val();
   
+  // 桁数が未入力の場合、最大値を入れる
+  if ( $input.is('.digit-number') && value === '') {
+    value = max;
+  }
   if ( min !== undefined && value < min ) value = min;
   if ( max !== undefined && value > max ) value = max;
   
@@ -1119,9 +1124,13 @@ $menuEditor.on('click', '.menu-column-copy', function(){
   }
   
   const $clone = $column.clone();
+  //$clone.find('.config-select').removeClass('select2-hidden-accessible').removeAttr('tabindex aria-hidden');
+  //$clone.find('.select2-container').remove();
   
   // クローン追加
   $column.after( $clone );
+  // プルダウンにselect2を適用する
+  //$clone.find('.config-select').select2();
   
   // 追加を待つ
   $clone.ready( function() {
@@ -1760,13 +1769,36 @@ const getRoleListIdToName = function( roleListText ) {
     for ( let i = 0; i < roleListLength; i++ ) {
       const roleName = listIdName('role', roleList[i]);
       if ( roleName !== null ) {
-        roleNameList.push( roleName );
+        const hideRoleName = getSomeMessage("ITAWDCC92008");
+        if ( roleName !== hideRoleName ) {
+          roleNameList.push( roleName );
+        } else {
+          roleNameList.push( roleName + '(' + roleList[i] + ')');
+        }
       } else {
         roleNameList.push( getSomeMessage("ITAWDCC92007") + '(' + roleList[i] + ')');
       }
     }
-
     return roleNameList.join(', ');
+  } else {
+    return '';
+  }
+};
+// カンマ区切りロールIDリストからID変換失敗を除いたロールIDを返す
+const getRoleListValidID = function( roleListText ) {
+  if ( roleListText !== undefined && roleListText !== '' ) {
+    const roleList = roleListText.split(','),
+          roleListLength = roleList.length,
+          roleIdList = new Array;
+    for ( let i = 0; i < roleListLength; i++ ) {
+      const roleName = listIdName('role', roleList[i]);
+      if ( roleName !== null ) {
+        roleIdList.push( roleList[i] );
+      }
+    }
+    return roleIdList.join(',');
+  } else {
+    return '';
   }
 };
 // ロールセレクト
@@ -2197,7 +2229,7 @@ const getPanelParameter = function() {
     parameterArray['LAST_UPDATE_TIMESTAMP_FOR_DISPLAY'] = $('#create-menu-last-modified').attr('data-value'); // 最終更新日時
     parameterArray['LAST_UPDATE_USER'] = $('#create-last-update-user').attr('data-value'); // 最終更新者
     parameterArray['DESCRIPTION'] = $('#create-menu-explanation').val(); // 説明
-    parameterArray['ACCESS_AUTH'] = $('#permission-role-name-list').attr('data-role-id'); // ロール
+    parameterArray['ACCESS_AUTH'] = getRoleListValidID( $('#permission-role-name-list').attr('data-role-id') ); // ロール
     parameterArray['NOTE'] = $('#create-menu-note').val(); // 備考
     
     // 作成対象別項目

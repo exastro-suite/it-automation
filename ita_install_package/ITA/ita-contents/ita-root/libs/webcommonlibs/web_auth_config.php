@@ -245,7 +245,7 @@
         $objAuth = new Auth();
         // Authインスタンスの作成----
 
-        $objAuth->setSessionName('ITA_SESSION_'.md5($_SERVER['HTTP_HOST']));
+        $objAuth->setSessionName('ITA_SESSION_'.md5(getRequestHost()));
         $objAuth->setAllowLogin($boolAllowLogin);
         $objAuth->setLoginFunction('saLoginAuthentication');
         $objAuth->setLoginFormFunction('saLoginFunction');

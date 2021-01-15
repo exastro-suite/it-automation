@@ -972,7 +972,7 @@ function setSchedule(target_area_id){
     editArea.dialog({
         width:680,
         modal:true,
-        draggable:true,
+        draggable:false,
         resizable: false,
         open: function(){
             //自動フォーカスを外す
@@ -1321,11 +1321,9 @@ function setSchedule(target_area_id){
 //////// ----Symphony作業一覧へのリンク ////////
 function Mix1_1_jumpToSymphonyIntList(obj){
     var targetRecort = $(obj).parents('tr');
-    var strSymphonyName = targetRecort.find('td').eq(4).html(); //symphony名称
-    var strOperationName = targetRecort.find('td').eq(5).html(); //オペレーション名
-
-    //実行ユーザ名を取得
-    var strUserName = getSomeMessage("ITAWDCC91025"); //定期実行管理プロシージャ
+    var strSymphonyName = targetRecort.find('td').eq(4).text(); //symphony名称
+    var strOperationName = targetRecort.find('td').eq(5).text(); //オペレーション名
+    var strUserName = targetRecort.find('td').eq(7).text(); //実行ユーザ
 
     //エンコード
     strSymphonyName = encodeURIComponent(strSymphonyName);

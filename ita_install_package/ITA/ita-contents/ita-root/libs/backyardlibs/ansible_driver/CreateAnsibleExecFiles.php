@@ -151,6 +151,7 @@ class CreateAnsibleExecFiles {
     // 管理対象システム一覧のログイン・パスワード未登録時の内部変数値
     const LC_ANS_UNDEFINE_NAME               = "__undefinesymbol__";
 
+    const LC_OPERATION_VAR_NAME              = "__operation__";
     // Ansible 作業ファイル名
     const LC_ANS_HOSTS_FILE                  = "hosts";
     const LC_ANS_PLAYBOOK_FILE               = "playbook.yml";
@@ -261,6 +262,7 @@ class CreateAnsibleExecFiles {
     //copyファイル格納ディレクトリ(ITA側)
     private $lv_ita_copy_files_Dir;                
 
+    private $run_operation_id;
     private $run_pattern_id;
 
     private $lv_objMTS;
@@ -572,6 +574,7 @@ class CreateAnsibleExecFiles {
     //                             pioneer:     ns
     //                             legacy-Role: rl
     //   $in_execno              作業実行番号
+    //   $in_operation_id        オペレーションID
     //   $in_hostaddress_type    ホストアドレス方式
     //                           null or 1:IP方式  2:ホスト名方式
     //   $in_winrm_id            対象ホストがwindowsかを判別
@@ -604,6 +607,7 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     function CreateAnsibleWorkingDir($in_oct_id,
                                      $in_execno,
+                                     $in_operation_id,
                                      $in_hostaddress_type,
                                      $in_winrm_id,
                                      $in_zipdir             = "",
@@ -618,6 +622,8 @@ class CreateAnsibleExecFiles {
                                      $in_conductor_instance_no
                                      ){
         global $root_dir_path;
+
+        $this->run_operation_id = $in_operation_id;
 
         $this->run_pattern_id = $in_pattern_id;
 
@@ -1417,6 +1423,21 @@ class CreateAnsibleExecFiles {
     {
 
         $this->lv_hostinfolist = $ina_hostinfolist;
+
+        // 追加された予約変数生成
+        $ret = $this->CreateOperationVariables($this->run_operation_id,$ina_hostinfolist,$ina_host_vars);
+        if($ret === false) {
+            return false;
+        }
+
+        //////////////////////////////////////////////
+        // 収集機能用ディレクトリ生成/ホスト変数生成
+        //////////////////////////////////////////////
+        $ret = $this->CreateDirectoryForCollectionProcess($ina_hostinfolist,$ina_host_vars);
+        if($ret === false) {
+            return false;
+        }
+
 
         // 作業パターンに紐づいているグローバル変数を退避
         switch($this->getAnsibleDriverID()){
@@ -8314,7 +8335,7 @@ class CreateAnsibleExecFiles {
                 foreach( $ina_hosts as $no=>$host_name ){
                     // 変数配列分繰り返し
                     // $ina_host_vars[ ipaddress ][ 変数名 ]=>具体値
-                    if(@strlen($ina_host_vars[$host_name][$var_name])==0)
+                    if(! array_key_exists($var_name,$ina_host_vars[$host_name]))
                     {
                         if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
                             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55256",
@@ -10659,8 +10680,7 @@ class CreateAnsibleExecFiles {
         }
         // テンプレートに登録されている変数のデータベース登録確認 
         foreach( $file_vars_list as $var_name ){
-            if((@strlen($ina_var_list[$var_name])==0) &&
-               ( ! isset($ina_var_list[$var_name]))) {
+            if(!array_key_exists($var_name,$ina_var_list)) {
                 if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000020",
                                                                 array(basename($templatefile),
@@ -12073,6 +12093,166 @@ if(isset($Expansion_root)) {
     function getAnsible_vault_host_var_file($in_hostname){
         $file = sprintf(self::LC_ANS_VAULT_HOST_VAR_FILE_MK,$this->getAnsible_vault_hosts_vars_Dir(),$in_hostname);
         return($file);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   収集機能用ディレクトリ生成
+    // パラメータ
+    //   $ina_hostinfolist:  機器一覧ホスト情報配列
+    //   $ina_host_vars:     ホスト変数定義配列
+    //
+    // 戻り値
+    //   true:  正常
+    //   false: 異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreateDirectoryForCollectionProcess($ina_hostinfolist,&$ina_host_vars) {
+        $drive_list[DF_LEGACY_DRIVER_ID]      = 'legacy/ns';
+        $drive_list[DF_PIONEER_DRIVER_ID]     = 'pioneer/ns';
+        $drive_list[DF_LEGACY_ROLE_DRIVER_ID] = 'legacy/rl';
+
+        // ドライバ種別
+        $driver_id      = $this->getAnsibleDriverID();
+        // 作業番号
+        $execute_no     = sprintf("%010s",$this->lv_exec_no);
+        // データリレイストレージパス(ITA)
+        $ita_base_dir   = $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA');
+        // データリレイストレージパス(ansible)
+        $ans_base_dir   = $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS');
+
+        foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
+            $hostname = $hostinfo['HOSTNAME'];
+
+            $host_var_name  = "__parameters_dir_for_epc__"; 
+            $mkdir          = sprintf("%s/%s/%s/in/_parameters/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
+            $host_var_vaule = sprintf("%s/%s/%s/in/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            // ディレクトリ存在確認
+            if( ! is_dir($mkdir)) {
+                $ret = mkdir($mkdir,0755,true);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+
+            $host_var_name  = "__parameter_dir__"; 
+            $mkdir          = sprintf("%s/%s/%s/out/_parameters/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
+            $host_var_vaule = sprintf("%s/%s/%s/out/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            // ディレクトリ存在確認
+            if( ! is_dir($mkdir)) {
+                $ret = mkdir($mkdir,0755,true);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+
+            $host_var_name  = "__parameters_file_dir_for_epc__"; 
+            $mkdir          = sprintf("%s/%s/%s/in/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
+            $host_var_vaule = sprintf("%s/%s/%s/in/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            // ディレクトリ存在確認
+            if( ! is_dir($mkdir)) {
+                $ret = mkdir($mkdir,0755,true);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+
+            $host_var_name  = "__parameters_file_dir__"; 
+            $mkdir          = sprintf("%s/%s/%s/out/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
+            $host_var_vaule = sprintf("%s/%s/%s/out/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            // ディレクトリ存在確認
+            if( ! is_dir($mkdir)) {
+                $ret = mkdir($mkdir,0755,true);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+            }
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+        }
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   オペレーション用 予約変数設定
+    // パラメータ
+    //   $in_operation_id:   オペレーションID
+    //   $ina_hostinfolist:  機器一覧ホスト情報配列
+    //   $ina_host_vars:     ホスト変数定義配列
+    //
+    // 戻り値
+    //   true:  正常
+    //   false: 異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreateOperationVariables($in_operation_id,$ina_hostinfolist,&$ina_host_vars) {
+        $sql = " SELECT \n"
+             . "   OPERATION_NAME, \n"
+             . "   DATE_FORMAT(OPERATION_DATE, '%Y/%m/%d %H:%i') OPERATION_DATE \n"
+             . " FROM \n"
+             . "   C_OPERATION_LIST \n"
+             . " WHERE \n"
+             . "   OPERATION_NO_UAPK=:OPERATION_NO_UAPK ";
+
+        $objQuery = $this->lv_objDBCA->sqlPrepare($sql);
+        if($objQuery->getStatus()===false){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $this->DebugLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+            return false;
+        }
+        $objQuery->sqlBind( array('OPERATION_NO_UAPK'=>$in_operation_id));
+    
+        $r = $objQuery->sqlExecute();
+        if (!$r){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+
+            $this->DebugLogPrint(basename(__FILE__),__LINE__,$sql);
+            $this->DebugLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+
+            unset($objQuery);
+            return false;
+        }
+
+        $fetch_counter = $objQuery->effectedRowCount();
+        if ($fetch_counter != 1){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+    
+            unset($objQuery);
+            return false;
+        }
+    
+        $operationStr = "";
+        while ( $row = $objQuery->resultFetch() ){
+            $operationStr = sprintf("%s_%s:%s", $row['OPERATION_DATE'],
+                                    $in_operation_id,
+                                    $row['OPERATION_NAME']);
+            break;
+           
+        }
+
+        // DBアクセス事後処理
+        unset($objQuery);
+
+        // オペレーション用の予約変数設定
+        foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
+            $hostname = $hostinfo['HOSTNAME'];
+            $ina_host_vars[$host_ip][self::LC_OPERATION_VAR_NAME] = $operationStr;
+        }
+        return true;
     }
 }
 

@@ -98,6 +98,42 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->fixColumn();
 
+    // 登録/更新/廃止/復活があった場合、代入値自動登録設定のbackyard処理の処理済みフラグをOFFにする
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+        global $g;
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+        $strFxName = "";
+
+        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+
+            if(file_exists($g['root_dir_path'] . "/libs/release/ita_ansible-driver")){
+
+                $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                           ."SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
+                           ."WHERE ROW_ID IN (2100020002, 2100020004, 2100020006, 2100080002)";
+
+                $g['objDBCA']->setQueryTime();
+                $aryForBind = array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP' => $g['objDBCA']->getQueryTime());
+
+                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                if( $aryRetBody[0] !== true ){
+                    $boolRet = $aryRetBody[0];
+                    $strErrMsg = $aryRetBody[2];
+                    $intErrorType = 500;
+                }
+            }
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn[$table->getDBTablePK()]->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
+
     $table->setGeneObject('webSetting', $arrayWebSetting);
     return $table;
 };

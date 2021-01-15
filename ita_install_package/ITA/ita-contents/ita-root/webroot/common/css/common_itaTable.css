@@ -147,6 +147,69 @@ background-image: none;
 background-color: #FFFF8F;
 background-image: none;
 }
+.tdInner {
+max-width: 640px;
+overflow: hidden;
+text-overflow: ellipsis;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+}
+.likeHeader .tdInner {
+max-width: 320px;
+}
+/* デフォルトのスクロールバーを非表示にする */
+    /* Chrome, Safari */
+    .textOverfrow .tdInner::-webkit-scrollbar { display:none; }
+    /* Firefox */
+    .textOverfrow .tdInner { scrollbar-width: none; }
+    /* IE, Edge */
+    .textOverfrow .tdInner { -ms-overflow-style: none; }
+    
+.tof {
+position: relative;
+width: 100%; height: 8px;
+margin-top: 2px;
+background-color: rgba(0,0,0,.05);
+border: 1px solid #CCC;
+border-radius: 4px;
+user-select: none;
+-moz-user-select: none;
+-webkit-user-select: none;
+-ms-user-select: none;
+}
+.tofb {
+position: absolute;
+z-index: 10;
+left: 0; top: 0;
+height: 6px;
+background-color: #BBB;
+border-radius: 3px;
+opacity: 0;
+transition-property: opacity;
+transition-duration: .2s;
+}
+.mouseenter .tof {
+background-color: #FFF;
+border-color: #AAA;
+}
+.mouseenter .tofb {
+background-color: #BBB;
+}
+.tof:hover .tofb {
+background-color: #888;
+}
+
+.textOverfrow .tdInner {
+overflow: auto;
+text-overflow: clip;
+}
+
+.overfrowScroll .tofb {
+visibility: hidden;
+}
+.overfrowScroll .scrollKnobMove .tofb {
+visibility: visible;
+background-color: #888;
+}
 
 /* .tableSticky */
 

@@ -1313,7 +1313,7 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 function Mix1_1_menu_upd(){
     var rangeId = 'Mix1_1';
     
-    var objOpe = document.getElementById('Mix1_1_1');
+    var objOpe = document.getElementById('Mix1_1_5');
     proxy.Mix1_1_menu_upd(objOpe.value);
 }
 function Mix2_1_menu_reg(){
