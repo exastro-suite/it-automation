@@ -63,13 +63,12 @@ function syncDefaultMaxMemberCol() {
         // ロールパッケージ管理のアクセス権取得
         ////////////////////////////////
         $sql = " SELECT DISTINCT             \n"     
-             . "   TAB_A.MAX_COL_SEQ_ID,     \n"               
              . "   TAB_A.VARS_NAME_ID,       \n"
              . "   TAB_B.VARS_NAME,          \n"
              . "   TAB_D.ROLE_PACKAGE_NAME,  \n"
              . "   TAB_D.ACCESS_AUTH         \n"
              . " FROM                        \n"
-             . "   B_ANS_LRL_MAX_MEMBER_COL              TAB_A                                                     \n"
+             . "   B_ANS_LRL_ARRAY_MEMBER                TAB_A                                                     \n"
              . "   LEFT JOIN B_ANSIBLE_LRL_VARS_MASTER   TAB_B ON (TAB_A.VARS_NAME_ID    = TAB_B.VARS_NAME_ID)     \n"
              . "   LEFT JOIN B_ANSIBLE_LRL_ROLE_VARS     TAB_C ON (TAB_B.VARS_NAME       = TAB_C.VARS_NAME)        \n"
              . "   LEFT JOIN B_ANSIBLE_LRL_ROLE_PACKAGE  TAB_D ON (TAB_C.ROLE_PACKAGE_ID = TAB_D.ROLE_PACKAGE_ID)  \n"
@@ -77,7 +76,8 @@ function syncDefaultMaxMemberCol() {
              . "   TAB_A.DISUSE_FLAG = '0' &&    \n"
              . "   TAB_B.DISUSE_FLAG = '0' &&    \n"
              . "   TAB_C.DISUSE_FLAG = '0' &&    \n"
-             . "   TAB_D.DISUSE_FLAG = '0';      \n";
+             . "   TAB_D.DISUSE_FLAG = '0' &&    \n"
+             . "   TAB_A.VARS_NAME   = '0';      \n";
 
         $RolePkgAccessAuthAry = array();
         if(dbaccessSelect($sql, null, $RolePkgAccessAuthAry) === false) {
@@ -87,10 +87,22 @@ function syncDefaultMaxMemberCol() {
         $keyid = 'VARS_NAME_ID';
         $VarAccessAuthAry = array();
         foreach($RolePkgAccessAuthAry as $row) {
-            $RoleIDList = explode(',',$row['ACCESS_AUTH']);
-            foreach($RoleIDList as $RoleID) {
-                if(@count($VarAccessAuthAry[$row[$keyid]][$RoleID])==0) {
-                   $VarAccessAuthAry[$row[$keyid]][] = $RoleID;
+            if($row['ACCESS_AUTH'] == "") {
+                // ロールパッケージ管理のアクセス許可ロールが空白の場合
+                // 多段変数最大繰返数のアクセス許可ロールも空白にする。
+                $VarAccessAuthAry[$row[$keyid]] = array();
+                $VarAccessAuthAry[$row[$keyid]][0] = "";
+            } else {
+                // ロールパッケージ管理のアクセス許可ロールに空白があったか判定
+                if(@count($VarAccessAuthAry[$row[$keyid]]) != 0) {
+                    if($VarAccessAuthAry[$row[$keyid]][0] == "") {
+                        continue;
+                    }
+                }
+                // ロールパッケージ管理のアクセス許可ロールをORする為の配列生成
+                $RoleIDList = explode(',',$row['ACCESS_AUTH']);
+                foreach($RoleIDList as $RoleID) {
+                    $VarAccessAuthAry[$row[$keyid]][] = $RoleID;
                 }
             }
         }
@@ -328,13 +340,14 @@ function isContained_maxMemberCol($source, $targetArray) {
 }
 
 function AccessAuthUpdate(&$targetArray,$VarAccessAuthStrList) {
-    foreach($targetArray as $targetRecord) {
+    foreach($targetArray as $PkeyID=>$targetRecord) {
+        $key = $targetRecord['VARS_NAME_ID'];
         // ロールパッケージ管理のアクセス権ロールと比較
         if(array_key_exists($targetRecord['VARS_NAME_ID'],$VarAccessAuthStrList)) {
             $nowAccessAuth = $VarAccessAuthStrList[$targetRecord['VARS_NAME_ID']];
             // アクセス権ロールに差異がある
             if($targetRecord['ACCESS_AUTH'] != $nowAccessAuth) {
-                $targetRecord['ACCESS_AUTH'] = $nowAccessAuth;
+                $targetArray[$PkeyID]['ACCESS_AUTH'] = $nowAccessAuth;
             }
         }
     }
