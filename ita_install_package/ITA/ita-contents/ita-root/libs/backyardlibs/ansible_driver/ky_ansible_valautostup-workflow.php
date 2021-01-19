@@ -1987,7 +1987,7 @@
         //カラムタイプを判定
         switch($ina_col_list['COL_TYPE']){
         case DF_COL_TYPE_VAL:
-            //具体値が空白または8192バイト以上ないか判定
+            //具体値が空白か判定
             $ret = chkValueTypeColValue($in_col_val,
                                         $in_null_data_handling_flg,
                                         $in_table_name,$in_row_id,$ina_col_list['COL_TITLE']);
@@ -2052,7 +2052,7 @@
                            $in_row_id);
             break;
         case DF_COL_TYPE_KEYVAL:
-            //具体値が空白または8192バイト以上ないか判定
+            //具体値が空白か判定
             $ret = chkValueTypeColValue($in_col_val,
                                         $in_null_data_handling_flg,
                                         $in_table_name,$in_row_id,$ina_col_list['COL_TITLE']);
@@ -3044,17 +3044,6 @@
                  }
                  return false;
             }
-        }
-        //具体値が8192バイト以上の場合
-        if(strlen($in_col_val)>8192){
-            // トレースメッセージ
-            if ( $log_level === 'DEBUG' ){
-                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90057",
-                                     array($lva_table_nameTOid_list[$in_table_name],$in_row_id,$in_menu_title));
-                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-            }
-
-            return false;
         }
         return true;
     }
