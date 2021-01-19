@@ -1015,7 +1015,7 @@
             $fixId_list    = $tmpArrayRet[0]['UsernamePerUserID'];
             unset($tmpArrayRet);
 
-            $aryValiUserId = saLoginTextValidateCheck($strUsername,'/^[a-zA-Z0-9-!"#$%&\'()*+,.\/;<=>?@[\]^\\_`{|}~]+$/',4,30,false);
+            $aryValiUserId = saLoginTextValidateCheck($strUsername,'/^[a-zA-Z0-9-!"#$%&\'()*+,.\/;<=>?@[\]^\\_`{|}~]+$/',4,270,false);
             if( $aryValiUserId[0] === true ){
                 if( array_key_exists($strUsername,$account_list) === true ){
                     // ----レコードが存在している
@@ -1533,7 +1533,7 @@
         try{
             // checkLoginRequestForUserAuth()との差は「:」
             //$aryValiUserId = saLoginTextValidateCheck($strUsername,'/^[a-zA-Z0-9-!"#$%&\'()*+,.\/:;<=>?@[\]^\\_`{|}~]+$/',4,30,false);
-            $aryValiUserId = saLoginTextValidateCheck($strUsername,'/^[a-zA-Z0-9-!"#$%&\'()*+,.\/;<=>?@[\]^\\_`{|}~]+$/',4,30,false);
+            $aryValiUserId = saLoginTextValidateCheck($strUsername,'/^[a-zA-Z0-9-!"#$%&\'()*+,.\/;<=>?@[\]^\\_`{|}~]+$/',4,270,false);
             if( $aryValiUserId[0] === true ){
                 $aryValiUserPw = saLoginTextValidateCheck($strUserPass,'/\S+/',1,30,false);
                 if( $aryValiUserPw[0] === true ){

@@ -1724,7 +1724,7 @@ function makeVarsAssignData($in_table_name,
     if($in_col_list['COL_TYPE'] == DF_COL_TYPE_VAL ||
         $in_col_list['COL_TYPE'] == DF_COL_TYPE_KEYVAL) {
         // Value型カラムの場合
-        //具体値が空白または8192バイト以上ないか判定
+        //具体値が空白か判定
         $ret = validateValueTypeColValue($in_col_val,
                                          $in_null_data_handling_flg,
                                          $in_menu_id,$in_row_id,$in_col_list['COL_TITLE']);
@@ -3071,17 +3071,6 @@ function validateValueTypeColValue($in_col_val,
             }
             return false;
         }
-    }
-    //具体値が8192バイト以上の場合
-    if(strlen($in_col_val) > 8192) {
-        // トレースメッセージ
-        if($log_level === "DEBUG") {
-            $traceMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90057",
-                                 array($in_menu_id,$in_row_id,$in_menu_title));
-            LocalLogPrint(basename(__FILE__),__LINE__,$traceMsg);
-        }
-
-        return false;
     }
     return true;
 }
