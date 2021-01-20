@@ -874,6 +874,8 @@ class TableControlAgent {
 	//----ここからFixColumn系
 	public function beforeFixColumn(&$arrayVariant=array()){
 		global $g;
+		$strFxName = __FUNCTION__;
+
 
                 // ACCESS_AUTHカラムがある場合 ----
                 if($this->getAccessAuth()) {
@@ -906,6 +908,8 @@ class TableControlAgent {
 		    $cg->addColumn($c);
 
 		    $c = new TextColumn('ACCESS_AUTH',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300002"));
+                    $objVldt = new SingleTextValidator(0,8192,false);
+                    $c->setValidator($objVldt);
 		    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300003"));//エクセル・ヘッダでの説明
                     $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt('')));
                     $c->getOutputType('update_table')->setAttr('upd-access-auth-id', 'access_auth_data');
@@ -932,6 +936,43 @@ class TableControlAgent {
 			$objTable =  $objColumn->getTable();
 
 			$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+
+                        if( $modeValue=="DTUP_singleRecDelete") {
+                            $mode      = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];
+                            // 復活の場合
+                            if($mode == 'off') {
+		    	        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                $userID = 0;  //未使用
+                                $ret = $obj->getAllRoleSearchHashList($userID,$RoleID2Name,$RoleName2ID);
+                                if($ret === false) {
+		                    throw new Exception( '00002100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                }
+                                $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                                if(array_key_exists($AccessAuthColumnName,$reqOrgData)) {
+                                    // アクセス許可ロールにID変換失敗のロールが無い事を確認
+			            $RoleIDString   = $reqOrgData[$AccessAuthColumnName];
+		    	            if(strlen($RoleIDString) != 0) {
+                                        $RoleIDlist = explode(',',$RoleIDString);
+                                        foreach($RoleIDlist as $RoleID) {
+                                            $role_reg = false;
+                                            if(array_key_exists($RoleID,$RoleID2Name)) {
+                                                if($RoleID2Name[$RoleID]['DISUSE_FLAG'] == 0) {
+                                                    $role_reg = true;
+                                                }
+                                            }
+                                            if($role_reg === false) {
+	    	                                $boolRet = false;
+                                                $strErrMsg = sprintf("%s:%s",
+                                                             $objColumn->getColLabel(),
+                                                             $g['objMTS']->getSomeMessage("ITAWDCH-ERR-11404"));
+                                                break;
+                            
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
 			if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
 			    $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
 			    if(array_key_exists($AccessAuthColumnName,$exeQueryData)) {
