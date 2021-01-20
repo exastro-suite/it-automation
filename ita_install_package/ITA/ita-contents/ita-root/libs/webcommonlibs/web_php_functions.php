@@ -1582,6 +1582,14 @@ class RoleBasedAccessControl {
        if($ret === false) {
            return false;
        }
+       // 廃止されているレコードを含む
+       $AllRoleID2Name = array();
+       $AllRoleName2ID = array();
+       $dummy_userID = 0;  // getAllRoleSearchHashListで$userIDは未使用
+       $ret = $this->getAllRoleSearchHashList($dummy_userID,$AllRoleID2Name,$AllRoleName2ID);
+       if($ret === false) {
+           return false;
+       }
        $RoleIDString = "";
        // ロール名をロールIDに置換
        if(strlen($RoleNameString) != 0) {
@@ -1591,25 +1599,76 @@ class RoleBasedAccessControl {
                    if($RoleIDString != '') { $RoleIDString .= ',';}
                    $RoleIDString .= $RoleName2ID[$updRoleName];
                } else {
-                   // 登録種別がExcel/CSV/Restの場合、ユーザーに紐づいているロール以外はエラーとして扱う 
-                   if(($ordMode == '1') || ($ordMode == '2') || ($ordMode == '3')) {
-                       $ErrorRoleNameAry[] = $updRoleName;
-                       continue;
-                   }
                    // ユーザーに許可のないロール名か判定
                    $UnAuthRoleIDString = $this->chkUnAuthRoleName($updRoleName);
                    if($UnAuthRoleIDString !== false) {
-                       if($RoleIDString != '') { $RoleIDString .= ',';}
-                       $RoleIDString .= $UnAuthRoleIDString;
-                       continue;
+                       $ErrorRoleName = true;
+                       // 登録種別がExcel/CSV/Restの場合、ロールIDが有効で紐づいていないロールか判定
+                       if(($ordMode == '1') || ($ordMode == '2') || ($ordMode == '3')) {
+                           // ユーザーに紐づいているロールIDか判定
+                           if(array_key_exists($UnAuthRoleIDString,$RoleID2Name)) {
+                               // ユーザーに紐づいているロールIDならエラー
+                               $ErrorRoleName = false;
+                           } else {
+                               if(array_key_exists($UnAuthRoleIDString,$AllRoleID2Name)) {
+                                   // 廃止されてるロールIDか判定
+                                   if($AllRoleID2Name[$UnAuthRoleIDString]['DISUSE_FLAG'] == '1') {
+                                       // 廃止されてるロールIDの場合はエラー
+                                       $ErrorRoleName = false;
+                                   } else {
+                                       // 廃止されていないロールID
+                                   }
+                               } else {
+                                   // 未登録のロールIDの場合、廃止ロールとして扱うのでエラー
+                                   $ErrorRoleName = false;
+                               }
+                           }
+                       }
+                       if($ErrorRoleName === false) {
+                           $ErrorRoleNameAry[] = $updRoleName;
+                           continue;
+                       } else {
+                           if($RoleIDString != '') { $RoleIDString .= ',';}
+                           $RoleIDString .= $UnAuthRoleIDString;
+                           continue;
+                       }
                    } 
                    // 廃止ロール名か判定
+                   $ErrorRoleName = true;
                    $DisUserRoleIDString = $this->chkDisUseRoleName($updRoleName);
                    if($DisUserRoleIDString !== false) {
-                       // 廃止ロール名はカット
+                       // 登録種別がExcel/CSV/Restの場合
+                       if(($ordMode == '1') || ($ordMode == '2') || ($ordMode == '3')) {
+                           // ロール名とロールIDの適合を判定
+                           // ロール名がID変換エラーの場合、ロールIDも廃止か未登録かを判定
+                           // ユーザーに紐づいているロールIDか判定
+                           if(array_key_exists($DisUserRoleIDString,$RoleID2Name)) {
+                               // ユーザーに紐づいているロールIDならエラー
+                               $ErrorRoleName = false;
+                           } else {
+                               if(array_key_exists($DisUserRoleIDString,$AllRoleID2Name)) {
+                                   // 廃止ロールIDか判定
+                                   if($AllRoleID2Name[$DisUserRoleIDString]['DISUSE_FLAG'] == '1') {
+                                       // 廃止されているロールID
+                                   } else {
+                                       // 有効なロールIDなのでロール名エラー
+                                       $ErrorRoleName = false;
+                                   }
+                               } else {
+                                   // 未登録のロールIDの場合、廃止ロールとして扱う
+                               }
+                           }
+                       }
+                   } else {
+                       // ロール名が不正
+                       $ErrorRoleName = false;
+                   }
+                   if($ErrorRoleName === false) {
+                       $ErrorRoleNameAry[] = $updRoleName;
                        continue;
                    } else {
-                       $ErrorRoleNameAry[] = $updRoleName;
+                       // 廃止ロール名はカット
+                       continue;
                    }
                }
            }
