@@ -626,7 +626,7 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
   
   $target.append( $addColumn );
   // プルダウンにselect2を適用する
-  //$target.find('.config-select').select2();
+  $target.find('.config-select').select2();
   
   $addColumn.attr('id', id );
 
@@ -1124,13 +1124,13 @@ $menuEditor.on('click', '.menu-column-copy', function(){
   }
   
   const $clone = $column.clone();
-  //$clone.find('.config-select').removeClass('select2-hidden-accessible').removeAttr('tabindex aria-hidden');
-  //$clone.find('.select2-container').remove();
+  $clone.find('.config-select').removeClass('select2-hidden-accessible').removeAttr('tabindex aria-hidden');
+  $clone.find('.select2-container').remove();
   
   // クローン追加
   $column.after( $clone );
   // プルダウンにselect2を適用する
-  //$clone.find('.config-select').select2();
+  $clone.find('.config-select').select2();
   
   // 追加を待つ
   $clone.ready( function() {
