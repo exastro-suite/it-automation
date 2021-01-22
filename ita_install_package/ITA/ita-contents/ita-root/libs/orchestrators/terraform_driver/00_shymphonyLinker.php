@@ -348,6 +348,20 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
 
         }
         else{
+            // RBAC対応 ----
+            // オペレーションとMovementのアクセス許可ロールをANDし作業イスタンスに設定するアクセス許可ロールを求める。
+            $restAPI=false;
+            $login_id=0;
+            $retAry = chkMovementAccessAuth($intOperationNoUAPK,$intPatternId,$objDBCA,$objMTS,$restAPI,$login_id);
+            if($retAry['STATUS'] != 'OK') {
+                $strErrStepIdInFx="00000008";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ':' . $retAry['ERROR_MSG'] . ')' );
+            }
+            // 作業インスタンスに設定するアクセス許可ロールを退避
+            $g['__TOP_ACCESS_AUTH__'] = $retAry['ACCESS_AUTH'];
+            // ---- RBAC対応
+
+
             //----各オーケストレータ個別で呼ばれる場合を想定
             if( $strTmpRunMode == '1' || $strTmpRunMode == '2' ){
                 // 1:通常実行/2:ドライラン
