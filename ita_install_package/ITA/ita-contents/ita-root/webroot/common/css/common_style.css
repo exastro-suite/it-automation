@@ -1113,7 +1113,7 @@ span.sortMarkWrap > * {
 	height: 96px;
 }
 .richFilterSelectListWrapper {
-	height: 100px;
+	/* height: 100px; */
 }
 .richFilterSelectListCaller {
 	cursor: pointer;
@@ -1615,4 +1615,73 @@ box-shadow: 0 0 0 1px rgba( 255,255,255,.5 );
 }
 .fixed-layout-button.on:hover {
   opacity: .8;
+}
+
+.itaPopup {
+position: fixed;
+transform: translate(-50%,-100%);
+padding: 4px 8px;
+border-radius: 2px;
+background-color: #111;
+color: #FFF;
+pointer-events: none;
+}
+.itaPopup::after {
+content: '';
+display: block;
+position: absolute;
+left: 50%; bottom: -8px;
+transform: translateX(-4px);
+border: 4px solid transparent;
+border-top-color: #111;
+}
+
+
+
+
+/* filter_area select2 */
+
+#filter_area .select2-container--default .select2-selection--multiple .select2-selection__rendered,
+#select_area .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+padding-right: 0;
+padding-bottom: 5px;
+}
+#filter_area .select2-search,
+#select_area .select2-search {
+margin-left: 0!important;
+}
+#filter_area .select2-selection__choice,
+#select_area .select2-selection__choice {
+margin-left: 0!important;
+word-break: break-all;
+white-space: normal;
+}
+#filter_area .select2-container,
+#select_area .select2-container {
+min-width: 100%;
+max-width: 640px;
+margin-top: 4px;
+}
+#filter_area .likeHeader .select2-container,
+#select_area .likeHeader .select2-container {
+max-width: 320px;
+}
+#filter_area .select2-search,
+#select_area .select2-search {
+max-width: 100%;
+margin: 5px 5px 0 0;
+}
+#filter_area .select2-container .select2-search--inline .select2-search__field,
+#select_area .select2-container .select2-search--inline .select2-search__field {
+max-width: 100%;
+margin: 0;
+}
+#filter_area .select2-container .select2-search--inline .select2-search__field::placeholder,
+#select_area .select2-container .select2-search--inline .select2-search__field::placeholder {
+color: #AAA;
+}
+#filter_area .select2-container--default.select2-container--focus .select2-selection--multiple,
+#select_area .select2-container--default.select2-container--focus .select2-selection--multiple {
+border-color: #0070FF;
+background-color: #E5F1FF;
 }
