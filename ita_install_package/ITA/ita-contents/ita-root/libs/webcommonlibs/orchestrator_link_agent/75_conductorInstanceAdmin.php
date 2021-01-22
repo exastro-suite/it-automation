@@ -141,7 +141,7 @@ function conductorInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $st
         // ----実行するConductorクラスIDに紐づくすべてのノードのアクセス権チェック
 
         //----Operation、Conductorの共通アクセス権の取得 #519
-        $arrOpeConAccessAuth = $objOLA->getInfoAccessAuthWorkFlowOpe($intShmphonyClassId,$intOperationNoUAPK ,"C" );
+        $arrOpeConAccessAuth = $objOLA->getInfoAccessAuthWorkFlowOpe($intShmphonyClassId,$intOperationNoUAPK ,"C",$aryOptionOrderOverride );
 
         if( $arrOpeConAccessAuth[3] != "" ){
             // エラーフラグをON
