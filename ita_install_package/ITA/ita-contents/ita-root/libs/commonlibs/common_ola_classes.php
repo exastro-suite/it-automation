@@ -1052,6 +1052,7 @@ class OrchestratorLinkAgent {
                 "DESCRIPTION"=>"",
                 "SYMPHONY_CLASS_NO"=>"",
                 "OPERATION_NO_IDBH"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -1071,6 +1072,7 @@ class OrchestratorLinkAgent {
                 "DESCRIPTION"=>"",
                 "SYMPHONY_CLASS_NO"=>"",
                 "OPERATION_NO_IDBH"=>"",
+                "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
                 "LAST_UPDATE_TIMESTAMP"=>"",
@@ -1586,6 +1588,22 @@ class OrchestratorLinkAgent {
             /////////////////////////////////////////////////////
 
 
+            //----Operation、Conductorの共通アクセス権の取得 #519
+            $arrOpeConAccessAuth = $this->getInfoAccessAuthWorkFlowOpe($intShmphonyClassId,$intOperationNoUAPK ,"S" );
+
+            if( $arrOpeConAccessAuth[3] != "" ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000300";
+                $intErrorType = 2;
+                $strExpectedErrMsgBodyForUI =  $arrOpeConAccessAuth[3];
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+
+            $strOpeConAccessAuth = $arrOpeConAccessAuth[4];
+            // Operation、Conductorの共通アクセス権の取得 #519----
+
+
             /////////////////////////////////////
             // (ここから) シンフォニーインスタンスを登録する//
             /////////////////////////////////////
@@ -1634,6 +1652,8 @@ class OrchestratorLinkAgent {
             //上位アクセス権継承
             if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
                 $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+            }else{
+                $register_tgt_row['ACCESS_AUTH'] = $strOpeConAccessAuth;
             }
 
             $tgtSource_row = $register_tgt_row;
@@ -1929,6 +1949,8 @@ class OrchestratorLinkAgent {
                 //上位アクセス権継承
                 if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
                     $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+                }else{
+                    $register_tgt_row['ACCESS_AUTH'] = $strOpeConAccessAuth;
                 }
 
                 // 各Movementの登録状態を確認する。
@@ -7007,7 +7029,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
 
 
 //---作業実行（Conductor/Symphony、Operation)時のアクセス件設定
-    function getInfoAccessAuthWorkFlowOpe($fxVarsIntClassId, $fxVarsIntOperationNo , $mode="C" ){
+    function getInfoAccessAuthWorkFlowOpe($fxVarsIntClassId, $fxVarsIntOperationNo , $mode="C" ,$aryOptionOverride=null ){
         $boolRet = false;
         $intErrorType = null;
         $aryErrMsgBody = array();
@@ -7018,16 +7040,25 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
         $strSysErrMsgBody = "";
         $strExeAccesAuth = "";
 
+        $strClassAccesAuth = "";
+        $strOpeAccesAuth = "";
+
+        $arrExeNode = array(
+                3 => "movement",
+                4 => "call",
+                10 => "call_s",
+            );
+
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
             $objMTS = $this->getMessageTemplateStorage();
 
             //Symphony
-            ###if( $mode == "S" ) $aryRetBody = $this->getInfoOfOneSymphony($fxVarsIntClassId);
+            if( $mode == "S" ) $aryRetBody = $this->getInfoFromOneOfSymphonyClasses($fxVarsIntClassId);
             //Conductor
-            if( $mode == "C" ) $aryRetBody = $this->getInfoOfOneConductor($fxVarsIntClassId,0,1);
-
+            if( $mode == "C" ) $aryRetBody = $this->getInfoFromOneOfConductorClass($fxVarsIntClassId, 0,0,0,1);
+            
             if( $aryRetBody[1] !== null ){
                 // エラーフラグをON
                 // 例外処理へ
@@ -7041,7 +7072,9 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $strClassAccesAuth = $aryRetBody[4]['ACCESS_AUTH'];
+            $arrClassMovCall = $aryRetBody[5];
 
+            //Operation
             $aryRetBody = $this->getInfoOfOneOperation($fxVarsIntOperationNo);
 
             if( $aryRetBody[1] !== null ){
@@ -7058,7 +7091,70 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             }
             $strOpeAccesAuth = $aryRetBody[4]['ACCESS_AUTH'];
 
-            //作業実行時のアクセス権
+
+            // --- 個別指定のオペレーションIDからアクセス権取得
+            $arrMovSpAccesAuthList=array();
+
+            //個別指定のオペレーションのID取得
+            $arrOverrideOpeAccessAuth=array();
+            //Symphony
+            if( $mode == "S" ){
+                foreach ($aryOptionOverride as $nodename => $nodeinfo) {                
+                    //個別指定のオペレーションのID取得（作業実行時変更分）    
+                    if( $nodeinfo["OVRD_OPERATION_NO_IDBH"] != "" ){
+                        $arrMovSpAccesAuthList[] = $nodeinfo['OVRD_OPERATION_NO_IDBH'];
+                    }   
+                }
+            //Conductor
+            }elseif( $mode == "C" ){
+                //Conductor配下、Call先の個別指定のオペレーションID取
+                foreach ( $arrClassMovCall as $key => $nodeinfo ) {
+                    //ConductorCall
+                    if( $nodeinfo['NODE_TYPE_ID'] == 4 ){
+                        $arrMovSpAccesAuthList = $this->checkCallLoopValidator( $nodeinfo['CONDUCTOR_CALL_CLASS_NO'] ,$arrMovSpAccesAuthList );
+                    //SymphonyCall
+                    }elseif( $nodeinfo['NODE_TYPE_ID'] == 10 ){
+                        $tmpRetBody = $this->getInfoFromOneOfSymphonyClasses( $nodeinfo['CONDUCTOR_CALL_CLASS_NO'] );
+                        $tmpMovLists = $tmpRetBody[5];
+                        foreach ($tmpMovLists as $tmpMovement) {
+                           if( $tmpMovement["OPERATION_NO_IDBH"] != "")$arrMovSpAccesAuthList[]=$tmpMovement["OPERATION_NO_IDBH"];
+                        }
+                    }
+                }
+                //個別指定のオペレーションのID取得（作業実行時変更分）
+                foreach ($aryOptionOverride as $nodename => $nodeinfo) {
+                    if( array_search( $nodeinfo['type'] , $arrExeNode ) == true ){
+                        #作業実行時個別指定変更    
+                        if( $nodeinfo["OPERATION_NO_IDBH"] != "" ){
+                            $arrMovSpAccesAuthList[] = $nodeinfo['OPERATION_NO_IDBH'];
+                        }
+                    }
+                }
+            }
+
+            //個別指定のオペレーションIDリストからオペレーションのアクセス権取得
+            $arrSpOpeAccesAuth=array();
+            foreach ($arrMovSpAccesAuthList as $tmpOperationId ) {
+                //Operation
+                $tmpRetBody = $this->getInfoOfOneOperation($tmpOperationId);
+
+                if( $tmpRetBody[1] !== null ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrMsg = $tmpRetBody[4];
+                    $strErrStepIdInFx="00000100";
+                    if( $tmpRetBody[1] === 101 ){
+                        //----１行も発見できなかった場合
+                        $intErrorType = 101;
+                        //１行も発見できなかった場合----
+                    }
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                $arrSpOpeAccesAuth[] = $tmpRetBody[4]['ACCESS_AUTH'];                
+            }
+            // 個別指定のオペレーションIDからアクセス権取得 --- 
+
+            //作業実行時のアクセス権　（ Symphony/Conductor ∩　Operation ）
 
             if( $strClassAccesAuth == "" && $strOpeAccesAuth == "" ){
                 //Conductor/Symphony、Operatuonのアクセス権全公開時
@@ -7081,13 +7177,47 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 if( $strExeAccesAuth == "" ){
                     // エラーフラグをON
                     // 例外処理へ
-                    ###if( $mode == "S" )$workflowName = "Symphony";
+                    if( $mode == "S" )$workflowName = "Symphony";
                     if( $mode == "C" )$workflowName = "Conductor";
                     ###$strErrMsg = "選択した${workflowName}、Operation で設定されているアクセス権では作業実行できません。";
                     $strErrMsg = $objMTS->getSomeMessage("ITABASEH-ERR-170019",array($workflowName));
                     $strErrStepIdInFx="00000100";
                     $intErrorType = 101;
                     throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+            }
+
+            //　作業実行時のアクセス権（個別）　（ 作業実行時のアクセス権 ∩　個別指定オペレーション ）
+            foreach ($arrSpOpeAccesAuth as $strSpOpeAccesAuth) {
+                if( $strExeAccesAuth == "" && $strSpOpeAccesAuth == "" ){
+                    
+                    $strExeAccesAuth = "";
+                }elseif( $strExeAccesAuth == "" && $strSpOpeAccesAuth != "" ){
+                    
+                    $strExeAccesAuth = $strSpOpeAccesAuth;
+
+                }elseif( $strExeAccesAuth != "" && $strSpOpeAccesAuth == "" ){
+                    
+                    $strExeAccesAuth = $strExeAccesAuth;
+                }else{
+                    $arrExeAccesAuth = explode(",", $strExeAccesAuth);
+                    $tmpSpOpeAccesAuth = explode(",", $strSpOpeAccesAuth);
+
+                    //共通のアクセス権抽出
+                    $strExeAccesAuth = implode(",", array_intersect( $arrExeAccesAuth, $tmpSpOpeAccesAuth ) );
+
+                    //共通のアクセス権無しの場合、作業実行不可
+                    if( $strExeAccesAuth == "" ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        if( $mode == "S" )$workflowName = "Symphony";
+                        if( $mode == "C" )$workflowName = "Conductor";
+                        ###$strErrMsg = "選択した${workflowName}、Operation で設定されているアクセス権では作業実行できません。";
+                        $strErrMsg = $objMTS->getSomeMessage("ITABASEH-ERR-170019",array($workflowName));
+                        $strErrStepIdInFx="00000100";
+                        $intErrorType = 101;
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
                 }
             }
 
@@ -7656,6 +7786,40 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
         return $retArray;
     }
 //作業実行時、対象の実行シンフォニーIDおよびシンフォニーに紐づくMovementについてのアクセス権をチェックする ----
+
+
+//---- 個別指定オペレーションの取得
+function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
+    $getmode = 1;
+    $retArray = $this->getInfoFromOneOfConductorClass($intConductorclass, 0,0,0,$getmode);#TERMINALあり
+    $tmpNodeLists = $retArray[5];
+
+    foreach ($tmpNodeLists as $key => $value) {
+        //Movement
+        if( $value["NODE_TYPE_ID"] == 3 ){
+            if( $value["OPERATION_NO_IDBH"] != "")$arrOperationList[]=$value["OPERATION_NO_IDBH"];
+        }
+        //ConductorCall
+        if( $value["NODE_TYPE_ID"] == 4 ){
+            if( $value["OPERATION_NO_IDBH"] != "")$arrOperationList[]=$value["OPERATION_NO_IDBH"];
+            $arrOperationList = $this->checkCallLoopValidator ( $value["CONDUCTOR_CALL_CLASS_NO"], $arrOperationList );
+        }
+        //SymphonyCall
+        if( $value["NODE_TYPE_ID"] == 10 ){
+            if( $value["OPERATION_NO_IDBH"] != "")$arrOperationList[]=$value["OPERATION_NO_IDBH"];
+            $tmpRetBody = $this->getInfoFromOneOfSymphonyClasses($value["CONDUCTOR_CALL_CLASS_NO"]);
+            $tmpMovLists = $tmpRetBody[5];
+
+            foreach ($tmpMovLists as $tmpMovement) {
+               if( $tmpMovement["OPERATION_NO_IDBH"] != "")$arrOperationList[]=$tmpMovement["OPERATION_NO_IDBH"];
+            }
+        }
+    }
+
+    return $arrOperationList;
+}
+// 個別指定オペレーションの取得 ----     
+
 
 //ここまでConductor用----
 
