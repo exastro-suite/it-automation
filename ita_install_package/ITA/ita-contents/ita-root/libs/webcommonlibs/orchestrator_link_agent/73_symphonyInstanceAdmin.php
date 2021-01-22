@@ -1830,6 +1830,22 @@ function symphonyInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $str
         $aryOptionOrder = $retArray[0];
         //形式的バリデーションチェック----
 
+        //----Operation、Symphonyの共通アクセス権の取得 #521 #524
+        $arrOpeConAccessAuth = $objOLA->getInfoAccessAuthWorkFlowOpe($intShmphonyClassId,$intOperationNoUAPK ,"S" ,$aryOptionOrder);
+
+        if( $arrOpeConAccessAuth[3] != "" ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000300";
+            $intErrorType = 2;
+            $strExpectedErrMsgBodyForUI =  $arrOpeConAccessAuth[3];
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+
+        $strOpeConAccessAuth = $arrOpeConAccessAuth[4];
+        // Operation、、Symphonyの共通アクセス権の取得 #521 #524----
+
+
         // ----シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録
         $retArray = $objOLA->registerSymphonyInstance($intShmphonyClassId, $intOperationNoUAPK, $strPreserveDatetime, $aryOptionOrder, $aryOptionOrderOverride, $g['login_id'], $g['login_name_jp']);
         if($retArray[0] == false){
