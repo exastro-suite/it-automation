@@ -18,7 +18,7 @@ function setTextOverfrowScrollEvent( $target ) {
     if ( $target.is('.textOverfrow') ) {
         const $itaTable = $target.closest('table');
         $target.on({
-          'mouseenter.textOverfrow': function(){console.log('!');
+          'mouseenter.textOverfrow': function(){
               const $td = $( this ),
                     tdWidth = $td.find('.tdInner').width(),
                     offsetWidth = $td.find('.tdInner').get(0).offsetWidth,
@@ -401,7 +401,6 @@ const headingSizeUpdate = function() {
         return false;
       }
   });
-
   $fixedRowTbHeadStyle.html( fixedStyleHTML );
 
 }
@@ -1215,6 +1214,7 @@ loadCheckStatus( tableKey );
 
 const tableUpdate = function() {
     setTimeout( function(){
+      headingSizeUpdate();
       fixedBorderUpdate();
       scrollCheck( $tableScroll );
     }, 1 );
@@ -1226,15 +1226,34 @@ $itaTable.find('select').on('change', tableUpdate );
 
 // フィルタプルダウンがクリックされたら調整しなおす
 $itaTable.find('.richFilterSelectListCaller').on('click', function(){
-  const target = $( this ).closest('.richFilterSelectListWrapper').get(0);
+  const $target = $( this ).closest('.richFilterSelectListWrapper'),
+        targetWidthBefore = $target.outerWidth();
+  
   const observer = new MutationObserver( function(){
+    // select2でplaceholderを設定すると
+    // value=""の{空白}を除外してしまうため一時的に値を入れる
+    const $blank = $target.find('select').find('option').eq(0);
+    $blank.val(' ');
+    setTimeout(function(){$blank.val('');},1);
+    // select2を適用する
+    $target.find('select').select2({placeholder:"Filter"});
+    // 適用後の幅
+    const targetWidthAfter = $target.outerWidth();
+    // select2の項目が縦スクロールバーの分で改行しないように幅を調整する
+    if ( targetWidthBefore < targetWidthAfter ) {
+      $target.find('.select2-container').css('width', targetWidthAfter + 24 );
+    }
+    // table調整
+    headingSizeUpdate();
     fixedBorderUpdate();
     scrollCheck( $tableScroll );
     // 監視を解除
     observer.disconnect();
+    // select2を選択状態にする
+    $target.find('.select2-search__field').click();
   });
   // 監視を開始
-  observer.observe( target, { childList: true });
+  observer.observe( $target.get(0), { childList: true });
 });
 
 $itaTableHeading.on('click', function(){

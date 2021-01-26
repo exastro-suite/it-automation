@@ -657,6 +657,10 @@ line-height: 1;
 #KIZI .menu-column-config-table textarea {
 min-height: 48px;
 }
+.select2-container {
+min-width: 100%;
+width: 160px!important;
+}
 
 #KIZI .menu-column-config-table textarea:focus,
 #KIZI .menu-column-config-table input[type="text"]:focus,

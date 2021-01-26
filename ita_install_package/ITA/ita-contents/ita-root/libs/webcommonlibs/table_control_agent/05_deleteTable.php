@@ -356,6 +356,30 @@
                         $varCheckValue = null;
                         foreach($arrayObjColumn as $objFocusCol){
                             $colKey = $objFocusCol->getID();
+                            // Rest/ExcelとWebでカラムを分けているloadtableがあるので
+                            // リクエスト元により、出力先を特定する。
+                            switch($ordMode) {
+                            case 0: // [ブラウザからの廃止/復活]
+                                $type = "update_table";
+                                break;
+                            case 1: // [EXCEL]からの廃止/復活
+                                $type = "excel";
+                                break;
+                            case 2: // [CSV]からの廃止/復活
+                                $type = "csv";
+                                break;
+                            case 3: // [JSON]からの廃止/復活
+                                $type = "json";
+                                break;
+                            case 4: // [ブラウザからの新規登録(SQLトランザクション無し) メニュー作成からの場合
+                                $type = "update_table";
+                                break;
+                            }
+                            // リクエスト元とカラムの出力先が適合しない場合は、ID変換失敗のチェックはしない。
+                            // 二重チェックを防止
+                            if( ! $objFocusCol->getOutputType($type)->isVisible()) {
+                                continue;
+                            }
                             if( $objFocusCol->isDBColumn()===true && $objFocusCol->getDeleteOffBeforeCheck()!==false ){
                                 //----廃止前・個別チェック
                                 list($varCheckValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($reqDeleteData,array($colKey),null);
