@@ -7029,7 +7029,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
 
 
 //---作業実行（Conductor/Symphony、Operation)時のアクセス件設定
-    function getInfoAccessAuthWorkFlowOpe($fxVarsIntClassId, $fxVarsIntOperationNo , $mode="C" ,$aryOptionOverride=null ){
+    function getInfoAccessAuthWorkFlowOpe($fxVarsIntClassId, $fxVarsIntOperationNo , $mode="C" ,$aryOptionOverride=array() ){
         $boolRet = false;
         $intErrorType = null;
         $aryErrMsgBody = array();
