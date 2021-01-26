@@ -108,7 +108,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
 
     //----リンクボタン
-    $c = new LinkButtonColumn('SYNCHRONIZATION_BUTTON',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100713"), $g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100714"), 'initial_sync',array(':REMORT_REPO_URL', ':BRANCH', ':CLONE_REPO_DIR', ':PASSWORD', 'this')); 
+    $c = new LinkButtonColumn('SYNCHRONIZATION_BUTTON',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100713"), $g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-100714"), 'initial_sync',array(':REMORT_REPO_URL', ':BRANCH', ':CLONE_REPO_DIR', ':PASSWORD', 'this'));
     $table->addColumn($c);
     //リンクボタン----
 
@@ -121,6 +121,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->fixColumn();
 
     $table->setGeneObject('webSetting', $arrayWebSetting);
+
+    // 廃止ボタン
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_journal_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('json')->setVisible(false);
+
     return $table;
 };
 loadTableFunctionAdd($tmpFx,__FILE__);
