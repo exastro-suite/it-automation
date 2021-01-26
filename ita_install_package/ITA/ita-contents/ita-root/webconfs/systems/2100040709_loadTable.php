@@ -16,7 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 //  【処理概要】
-//    ・収集インターフェース情報 
+//    ・収集インターフェース情報
 //
 //////////////////////////////////////////////////////////////////////
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
@@ -78,7 +78,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207209"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
     $table->addColumn($c);
-    
+
     //RESTパスワード
     $objVldt = new SingleTextValidator(0,64,false);
     $c = new PasswordColumn('LOGIN_PW',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207210"));
@@ -88,7 +88,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
     $c->setEncodeFunctionName("ky_encrypt");
     $table->addColumn($c);
-    
+
     //REST方式
     $c = new IDColumn('HOST_DESIGNATE_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207212"),'    B_HOST_DESIGNATE_TYPE_LIST','HOST_DESIGNATE_TYPE_ID','HOST_DESIGNATE_TYPE_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207213"));//エクセル・ヘッダでの説明
@@ -129,9 +129,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             2=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12203")
         )
     );
-    //廃止・復活ボタンを隠す
-    $outputType = new OutputType(new TabHFmt(), new DelTabBFmt());
-    $tmpAryColumn['DISUSE_FLAG']->setOutputType("print_table", $outputType);
+    // 廃止ボタン
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_journal_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('json')->setVisible(false);
 
     return $table;
 };
