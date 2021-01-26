@@ -139,9 +139,13 @@ TERRAFORMインタフェース情報
             2=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12203")
         )
     );
-    //廃止・復活ボタンを隠す
-    $outputType = new OutputType(new TabHFmt(), new DelTabBFmt());
-    $tmpAryColumn['DISUSE_FLAG']->setOutputType("print_table", $outputType);
+    // 廃止ボタン
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_journal_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('json')->setVisible(false);
 
     return $table;
 
