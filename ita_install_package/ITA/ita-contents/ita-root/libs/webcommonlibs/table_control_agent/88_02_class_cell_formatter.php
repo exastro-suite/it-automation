@@ -987,7 +987,9 @@ class ReqTabHFmt extends TabHFmt {
 						if( $this->getUpdateRequiredExcept() !== false ){
 							$star = "";
 						}
-					}
+					}else if( $this->checkListFormatterMode("JournalTableFormatter") === true ){
+						$star = "";
+					} 
 				}
 			}
 		}
