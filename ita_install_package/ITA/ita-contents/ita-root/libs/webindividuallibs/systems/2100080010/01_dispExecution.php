@@ -66,6 +66,7 @@
                         TAB_A.FILE_INPUT,
                         TAB_A.FILE_RESULT,
                         TAB_A.RUN_MODE_NAME,
+                        TAB_A.ACCESS_AUTH,
                         TAB_A.NOTE,
                         {$strSelectLastUpdateTimestamp4} AS LAST_UPDATE_TIMESTAMP,
                         CASE TAB_B.USERNAME_JP WHEN NULL THEN {$strConnectString1}
