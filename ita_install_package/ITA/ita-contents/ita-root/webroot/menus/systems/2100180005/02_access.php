@@ -175,7 +175,7 @@
         ////////////////////////////////
         //  Conductor一覧の表示  //
         ////////////////////////////////
-        function printConductorList(){
+        function printConductorList( $conductorInstanceID ){
             // グローバル変数宣言
             global $g;
             
@@ -197,32 +197,75 @@
             }else{
                 web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
             }
-            return $arrayResult[2];
+            #return $arrayResult[2];
+
+
+            $tmpResult=json_decode($arrayResult[2],true);
+
+            $strResult = "";
+            #$tmpResult=array();
+            require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/75_conductorInstanceAdmin.php");
+            $arrayResult = getInfoFromOneOfConductorInstances($conductorInstanceID,0);
+
+            // 結果判定
+            if($arrayResult[0]=="1"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }
+
+            foreach ($arrayResult[5] as $key => $value) {
+                if( $value["I_NODE_TYPE_ID"] == 4 && $value["CONDUCTOR_INSTANCE_CALL_NO"] !="" ){
+                    $tmparrayResult = getInfoFromOneOfConductorInstances($value["CONDUCTOR_INSTANCE_CALL_NO"],0);
+
+                    $insMov=array();
+                    $insMov['CONDUCTOR_CLASS_NO']  = $value["CONDUCTOR_INSTANCE_CALL_NO"];
+                    $insMov['CONDUCTOR_NAME']  =  $value["I_PATTERN_NAME"];
+                    $tmpResult[]=$insMov;
+                }
+            }
+
+            $strResult = json_encode($tmpResult,JSON_UNESCAPED_UNICODE);
+
+            return $strResult;
+
         }
 
         //////////////////////////////////////////////
         //   Movement一覧の表示  //
         //////////////////////////////////////////////
-        function printMatchedPatternListJson($filterData=""){
+        function printMatchedPatternListJson($conductorInstanceID=""){
             // グローバル変数宣言
             global $g;
-            
+            #648 対応
             // ローカル変数宣言
             $arrayResult = array();
             
-            require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/74_conductorClassAdmin.php");
-            $arrayResult = printPatternListForEditJSON($filterData);
+            $strResult = "";
+            require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/75_conductorInstanceAdmin.php");
+            $arrayResult = getInfoFromOneOfConductorInstances($conductorInstanceID,0);
 
             // 結果判定
-            if($arrayResult[0]=="000"){
+            if($arrayResult[0]=="1"){
                 web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
-            }else if(intval($arrayResult[0])<500){
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
             }else{
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
             }
-            return $arrayResult[2];
-            //オーケストレータ—ごとに作業パターンを収集する----
+
+            $tmpResult = array();
+            foreach ($arrayResult[5] as $key => $value) {
+                if( $value["I_NODE_TYPE_ID"] == 3 ){
+                    $insMov=array();
+                    $insMov['PATTERN_ID']  = $value["I_PATTERN_ID"];
+                    $insMov['ORCHESTRATOR_ID']  = $value["I_ORCHESTRATOR_ID"];
+                    $insMov['PATTERN_NAME']  = $value["I_PATTERN_NAME"];
+                    $tmpResult[]=$insMov;
+                }
+            }
+            $strResult = json_encode($tmpResult,JSON_UNESCAPED_UNICODE);
+
+            return $strResult;
+
         }
 
         ////////////////////////////////////
@@ -255,7 +298,7 @@
         //  Symphony一覧の表示  //
         ////////////////////////////////
 
-        function printSymphonyList(){
+        function printSymphonyList( $conductorInstanceID ){
             // グローバル変数宣言
             global $g;
             
@@ -277,7 +320,40 @@
             }else{
                 web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
             }
-            return $arrayResult[2];
+
+            #return $arrayResult[2];
+            #648 対応
+            $tmpResult=json_decode($arrayResult[2],true);
+
+            $strResult = "";
+            require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/75_conductorInstanceAdmin.php");
+            $arrayResult = getInfoFromOneOfConductorInstances($conductorInstanceID,0);
+
+            // 結果判定
+            if($arrayResult[0]=="1"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }
+
+            require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/73_symphonyInstanceAdmin.php");
+
+            foreach ($arrayResult[5] as $key => $value) {
+                if( $value["I_NODE_TYPE_ID"] == 10 && $value["CONDUCTOR_INSTANCE_CALL_NO"] !="" ){
+                    $tmparrayResult = getSingleSymphonyInfoFromSymphonyInstances($value["CONDUCTOR_INSTANCE_CALL_NO"],0);
+
+                    $insMov=array();
+                    $insMov['SYMPHONY_CLASS_NO']  = $tmparrayResult[4]["SYMPHONY_INSTANCE_NO"];
+                    $insMov['SYMPHONY_NAME']  =  $tmparrayResult[4]["I_SYMPHONY_NAME"];
+                    $tmpResult[]=$insMov;
+                }
+            }
+
+            $strResult = json_encode($tmpResult,JSON_UNESCAPED_UNICODE);
+
+            return $strResult;
+
+
         }
         
     }
