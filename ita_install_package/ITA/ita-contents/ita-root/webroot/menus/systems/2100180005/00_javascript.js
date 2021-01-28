@@ -27,21 +27,21 @@ callback.prototype = {
     printMatchedPatternListJson : function( result ){
         conductorUseList.movementList = JSON.parse( result );
         if ( conductorGetMode === 'starting') {
-          proxy.printConductorList();
+          proxy.printConductorList( conductorInstanceID );
         }
     },
     //----個別オペレーションリスト用-----//
     printOperationList : function( result ){
         conductorUseList.operationList = JSON.parse( result );
         if ( conductorGetMode === 'starting') {
-          proxy.printMatchedPatternListJson();
+          proxy.printMatchedPatternListJson( conductorInstanceID );
         }
     },
     //----Callリスト用-----//
     printConductorList : function( result ){
         conductorUseList.conductorCallList = JSON.parse( result );
         if ( conductorGetMode === 'starting') {
-            proxy.printSymphonyList();
+            proxy.printSymphonyList( conductorInstanceID );
         }
     },
     //---- Symphony Callリスト用-----//

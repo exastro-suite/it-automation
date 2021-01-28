@@ -1299,6 +1299,7 @@ const createNodeHTML = function( nodeID ) {
       if ( editor.checkValue( nodeData['CALL_CONDUCTOR_ID'] ) ) {
         nodeClass.push('call-select');
         nodeName = '[' + nodeData['CALL_CONDUCTOR_ID'] + ']:' + listIdName('conductor', nodeData['CALL_CONDUCTOR_ID'] );
+        if ( conductorEditorMode === 'checking') nodeName = listIdName('conductor', nodeData['CALL_CONDUCTOR_ID'] );
       }
       nodeHTML += '<div class="node-name"><span class="select-conductor-name"><span class="select-conductor-name-inner">' + nodeName + '</span></span></span></div>';
     }
@@ -1306,6 +1307,7 @@ const createNodeHTML = function( nodeID ) {
       if ( editor.checkValue( nodeData['CALL_SYMPHONY_ID'] ) ) {
         nodeClass.push('call-select');
         nodeName = '[' + nodeData['CALL_SYMPHONY_ID'] + ']:' + listIdName('symphony', nodeData['CALL_SYMPHONY_ID'] );
+        if ( conductorEditorMode === 'checking') nodeName = listIdName('symphony', nodeData['CALL_SYMPHONY_ID'] );
       }
       nodeHTML += '<div class="node-name"><span class="select-symphony-name"><span class="select-symphony-name-inner">' + nodeName + '</span></span></span></div>';
     }
@@ -1403,6 +1405,7 @@ const createNodeHTML = function( nodeID ) {
       if ( editor.checkValue( selectOperationID ) ) {
         nodeClass.push('operation');
         nodeOperationData = '[' + selectOperationID + ']:' + selectOperationName;
+        if ( conductorEditorMode === 'checking') nodeOperationData = selectOperationName;
       }
       nodeHTML += ''
       + '<div class="node-skip"><input class="node-skip-checkbox" tabindex="-1" type="checkbox"' + nodeCheckedType + '><label class="node-skip-label">Skip</label></div>'

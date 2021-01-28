@@ -3739,6 +3739,52 @@ class OrchestratorLinkAgent {
                         $register_tgt_row['EXE_SKIP_FLAG']        = 2; //スキップする
                     }
 
+                    $strCallname="";
+                    if( $aryDataForMovement['NODE_TYPE_ID'] == 4 ){
+
+                        $tmpRetBody = $this->getInfoFromOneOfConductorClass($aryDataForMovement['CONDUCTOR_CALL_CLASS_NO'],  0,0,1,1);
+
+                        if( $tmpRetBody[1] !== null ){
+                            // エラーフラグをON
+                            // 例外処理へ
+                            $strErrStepIdInFx="00000600";
+                            if( $tmpRetBody[1] === 101 ){
+                                //----該当のConductorClassIDが１行も発見できなかった場合
+                                $intErrorType = 101;
+                                //$strExpectedErrMsgBodyForUI = "ConductorクラスID：存在している必要があります。";
+                                $strErrMsg = $tmpRetBody[3];
+                                $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170008");
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                                //該当のConductorClassIDが１行も発見できなかった場合----
+                            }
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+                        $strCallname = $tmpRetBody[4]['CONDUCTOR_NAME'];
+
+                    }elseif( $aryDataForMovement['NODE_TYPE_ID'] == 10 ){
+                        
+                        $tmpRetBody = $this->getInfoFromOneOfSymphonyClasses($aryDataForMovement['CONDUCTOR_CALL_CLASS_NO'], 0);
+                        if( $tmpRetBody[1] !== null ){
+                            // エラーフラグをON
+                            // 例外処理へ
+                            $strErrStepIdInFx="00000600";
+                            if( $aryRetBody[1] === 101 ){
+                                //----該当のシンフォニーClassIDが１行も発見できなかった場合
+                                $intErrorType = 101;
+                                //$strExpectedErrMsgBodyForUI = "SymphonyクラスID：存在している必要があります。";
+                                $strErrMsg = $tmpRetBody[3];
+                                $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733107");
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                                //該当のシンフォニーClassIDが１行も発見できなかった場合----
+                            }
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+                        $aryRowOfSymClassTable = $tmpRetBody[4];
+                        $strCallname = $tmpRetBody[4]['SYMPHONY_NAME'];
+                    }
+                    $register_tgt_row['I_PATTERN_NAME'] = $strCallname;  
+
+
                     //実行時、変更(SKIP、オペレーション個別指定)の上書き
                     if( isset( $aryOptionOrderOverride[ $aryDataForMovement['NODE_NAME'] ] ) ){
                         $aryNodesOverride = $aryOptionOrderOverride[ $aryDataForMovement['NODE_NAME'] ];
@@ -4529,10 +4575,17 @@ class OrchestratorLinkAgent {
                     $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
                     $arr_json[$value['NODE_NAME']]['Name']=$aryPatternList[$value['PATTERN_ID']]['PATTERN_NAME'];                    
                 }else{
-                    //廃止済みMovemnt対応
-                    $arr_json[$value['NODE_NAME']]['PATTERN_ID']="-";
-                    $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']="-";
-                    $arr_json[$value['NODE_NAME']]['Name']="-";
+                    if( $getmode == "" ){
+                        $arr_json[$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];
+                        $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
+                        $arr_json[$value['NODE_NAME']]['Name']="";  
+                    }else{
+                        //廃止済みMovemnt対応
+                        $arr_json[$value['NODE_NAME']]['PATTERN_ID']="-";
+                        $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']="-";
+                        $arr_json[$value['NODE_NAME']]['Name']="-";                        
+                    }
+
                 }
             }
 
@@ -4543,7 +4596,7 @@ class OrchestratorLinkAgent {
                 $strConductorName="";
                 if( $value['CONDUCTOR_CALL_CLASS_NO'] != "" ){
                     //Conductorクラス情報取得
-                    $aryRetBody = $this->getInfoFromOneOfConductorClass($value['CONDUCTOR_CALL_CLASS_NO'], 0,0,1,1);#TERMINALあり
+                    $aryRetBody = $this->getInfoFromOneOfConductorClass($value['CONDUCTOR_CALL_CLASS_NO'], 0,0,1,$getmode);#TERMINALあり
 
                     if( $aryRetBody[1] !== null ){
                         //廃止済みの場合
@@ -4583,6 +4636,73 @@ class OrchestratorLinkAgent {
                 }
                 $arr_json[$value['NODE_NAME']]['SYMPHONY_NAME']=$strConductorName;
             }
+
+            //#648 対応
+            $objDBCA = $this->getDBConnectAgent();
+
+            $sql = "SELECT * FROM C_CONDUCTOR_INSTANCE_MNG
+                    WHERE I_CONDUCTOR_CLASS_NO = {$value['CONDUCTOR_CLASS_NO']} 
+                    AND STATUS_ID NOT IN (1,2,3,4)
+                    AND DISUSE_FLAG = 0 
+                    ";
+
+            //SQL準備
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            //SQL発行
+            $r = $objQuery->sqlExecute();
+            $arrEndIns=array();
+            while ( $row = $objQuery->resultFetch() ){
+                $arrEndIns = $row;
+            }
+
+            if( count($arrEndIns) != 0 ){
+                if( $value['NODE_TYPE_ID'] == 4 || $value['NODE_TYPE_ID'] == 10) {
+                    $rows=array();
+
+                    if( $getmode == ""){
+                        if( $value['NODE_TYPE_ID'] == 4  ){
+                            $sql = "SELECT * FROM C_NODE_INSTANCE_MNG TAB_A
+                                    LEFT JOIN C_NODE_CLASS_MNG TAB_B ON TAB_A.I_NODE_CLASS_NO = TAB_B.NODE_CLASS_NO
+                                    LEFT JOIN C_CONDUCTOR_INSTANCE_MNG TAB_C ON TAB_B.CONDUCTOR_CLASS_NO = TAB_C.CONDUCTOR_CALLER_NO
+                                    WHERE TAB_A.CONDUCTOR_INSTANCE_NO IN
+                                    (SELECT CONDUCTOR_INSTANCE_NO FROM C_CONDUCTOR_INSTANCE_MNG WHERE I_CONDUCTOR_CLASS_NO = {$value['CONDUCTOR_CLASS_NO']} )
+                                    AND I_NODE_TYPE_ID IN ( {$value['NODE_TYPE_ID']} ) 
+                                    AND TAB_A.DISUSE_FLAG = 0 
+                                    ";                        
+                        }
+
+                        if( $value['NODE_TYPE_ID'] == 10  ){
+                        $sql = "SELECT * FROM C_NODE_INSTANCE_MNG TAB_A
+                                LEFT JOIN C_NODE_CLASS_MNG TAB_B ON TAB_A.I_NODE_CLASS_NO = TAB_B.NODE_CLASS_NO
+                                LEFT JOIN C_SYMPHONY_INSTANCE_MNG TAB_C ON TAB_A.CONDUCTOR_INSTANCE_CALL_NO = TAB_C.SYMPHONY_INSTANCE_NO
+                                WHERE TAB_A.CONDUCTOR_INSTANCE_NO IN
+                                (SELECT CONDUCTOR_INSTANCE_NO FROM C_CONDUCTOR_INSTANCE_MNG WHERE I_CONDUCTOR_CLASS_NO = {$value['CONDUCTOR_CLASS_NO']} )
+                                AND I_NODE_TYPE_ID IN ( {$value['NODE_TYPE_ID']} ) 
+                                AND TAB_A.DISUSE_FLAG = 0 
+                                ";
+                        }
+
+                        //SQL準備
+                        $objQuery = $objDBCA->sqlPrepare($sql);
+                        //SQL発行
+                        $r = $objQuery->sqlExecute();
+
+                        while ( $row = $objQuery->resultFetch() ){
+                            $rows[$row['NODE_CLASS_NO']] = $row;
+                        }
+
+                        if( $value['NODE_TYPE_ID'] == 4 && isset( $rows[$value['NODE_CLASS_NO']] ) ==  true ){
+                            $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$rows[$value['NODE_CLASS_NO']]['CONDUCTOR_INSTANCE_CALL_NO'];
+                            $arr_json[$value['NODE_NAME']]['CONDUCTOR_NAME']=$rows[$value['NODE_CLASS_NO']]['I_PATTERN_NAME'];
+                        }
+
+                        if( $value['NODE_TYPE_ID'] == 10 && isset( $rows[$value['NODE_CLASS_NO']] ) ==  true ){
+                            $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']=$rows[$value['NODE_CLASS_NO']]['CONDUCTOR_INSTANCE_CALL_NO'];
+                            $arr_json[$value['NODE_NAME']]['SYMPHONY_NAME']=$rows[$value['NODE_CLASS_NO']]['I_PATTERN_NAME'];
+                        }
+                    }
+                }                
+            } 
 
             //Movement,call,call_s共通
             if( $value['NODE_TYPE_ID'] == 3 || $value['NODE_TYPE_ID'] == 4 || $value['NODE_TYPE_ID'] == 10 ) {
