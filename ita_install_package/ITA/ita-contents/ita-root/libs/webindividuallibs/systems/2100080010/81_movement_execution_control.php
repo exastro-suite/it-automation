@@ -21,7 +21,7 @@
 //////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////
-//  Movement作業実行RestAPI [ INFO / CANCEL / SCRAM ] (Ansible-Legacy) //
+//  Movement作業実行RestAPI [ INFO / CANCEL / SCRAM ] (Terraform) //
 ////////////////////////////////////////////////////////////////////////
 function movementExecutionControlFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData){
 
@@ -59,8 +59,6 @@ function movementExecutionControlFromRest($strCalledRestVer,$strCommand,$objJSON
     if ( $g['page_dir'] == "2100020111" || $g['page_dir'] == "2100020112" ) $OrchestratorDB="E_ANSIBLE_LNS_EXE_INS_MNG"; //Ansible-Legacy
     if ( $g['page_dir'] == "2100020211" || $g['page_dir'] == "2100020212" ) $OrchestratorDB="E_ANSIBLE_PNS_EXE_INS_MNG"; //Ansible-Pioneer
     if ( $g['page_dir'] == "2100020312" || $g['page_dir'] == "2100020313" ) $OrchestratorDB="E_ANSIBLE_LRL_EXE_INS_MNG"; //Ansible-LegacyRole
-    if ( $g['page_dir'] == "2100060009" || $g['page_dir'] == "2100060010" ) $OrchestratorDB="E_DSC_EXE_INS_MNG";         //DSC
-    if ( $g['page_dir'] == "2100070004" || $g['page_dir'] == "2100070005" ) $OrchestratorDB="E_OPENST_RESULT_MNG";       //OPENSTACK
     if ( $g['page_dir'] == "2100080009" || $g['page_dir'] == "2100080010" ) $OrchestratorDB="E_TERRAFORM_EXE_INS_MNG";   //Terraform
     $strExeTableIdForSelect = $OrchestratorDB;      
 
@@ -117,10 +115,7 @@ function movementExecutionControlFromRest($strCalledRestVer,$strCommand,$objJSON
                 break;
             case 'SCRAM':
                 //緊急停止可能状態(未実行、準備中、実行中、実行中(遅延))
-                //Ansible,DSCの場合
                 $arrStatusCode = array(1,2,3,4);
-                //OpenStackの場合
-                if ( $g['page_dir'] == "2100070004" || $g['page_dir'] == "2100070005" )$arrStatusCode = array(1,3,4);
                 //ステータスチェック
                 if ( array_key_exists('STATUS_ID', $ExecInsInfo) ) {
                     if ( in_array ( $ExecInsInfo['STATUS_ID'] , $arrStatusCode ) ){
@@ -202,49 +197,6 @@ function getInfoOfOneExeInstance($target_execution_no,$strExeTableIdForSelect){
 
     //----オーケストレータ別の設定記述 
     switch ($strExeTableIdForSelect) {
-        case 'E_DSC_EXE_INS_MNG':
-
-                $sql = "SELECT  TAB_A.EXECUTION_NO,
-                                TAB_A.SYMPHONY_NAME,
-                                TAB_A.EXECUTION_USER,
-                                TAB_A.PATTERN_ID,
-                                TAB_A.I_PATTERN_NAME,
-                                TAB_A.I_TIME_LIMIT,
-                                TAB_A.ANS_HOST_DESIGNATE_TYPE_NAME,
-                                TAB_A.I_ANS_PARALLEL_EXE,
-                                TAB_A.STATUS_ID,
-                                TAB_A.OPERATION_NO_UAPK,
-                                TAB_A.I_OPERATION_NAME,
-                                TAB_A.I_OPERATION_NO_IDBH,
-                                TAB_A.STATUS_NAME,
-                                {$strSelectLastUpdateTimestamp1} AS TIME_BOOK,
-                                {$strSelectLastUpdateTimestamp2} AS TIME_START,
-                                {$strSelectLastUpdateTimestamp3} AS TIME_END,
-                                TAB_A.FILE_INPUT,
-                                TAB_A.FILE_RESULT,
-                                TAB_A.RUN_MODE_NAME,
-                                TAB_A.NOTE,
-                                {$strSelectLastUpdateTimestamp4} AS LAST_UPDATE_TIMESTAMP,
-                                CASE TAB_B.USERNAME_JP WHEN NULL THEN {$strConnectString1}
-                                                           ELSE TAB_B.USERNAME_JP
-                                                           END AS LAST_UPDATE_USER
-                            FROM    {$strExeTableIdForSelect} TAB_A
-                            LEFT JOIN A_ACCOUNT_LIST             TAB_B ON (TAB_A.LAST_UPDATE_USER = TAB_B.USER_ID)
-                            WHERE   TAB_A.DISUSE_FLAG = '0'
-                            AND     TAB_A.EXECUTION_NO = :EXECUTION_NO_BV ";
-            break;
-
-        case 'E_OPENST_RESULT_MNG':
-                $sql = "SELECT   TAB_A.TIME_START,
-                         TAB_A.TIME_END,
-                         TAB_A.I_OPERATION_NAME,
-                         TAB_A.STATUS_ID,TAB_B.STATUS_NAME
-                FROM C_OPENST_RESULT_MNG TAB_A 
-                LEFT OUTER JOIN B_OPENST_STATUS TAB_B ON TAB_A.STATUS_ID =TAB_B.STATUS_ID 
-                WHERE EXECUTION_NO = :EXECUTION_NO_BV";
-
-            break;
-
         case 'E_ANSIBLE_LNS_EXE_INS_MNG':
         case 'E_ANSIBLE_PNS_EXE_INS_MNG':
         case 'E_ANSIBLE_LRL_EXE_INS_MNG':
@@ -273,7 +225,7 @@ function getInfoOfOneExeInstance($target_execution_no,$strExeTableIdForSelect){
                             TAB_A.I_ANS_EXEC_OPTIONS,
                             TAB_A.EXEC_MODE,
                             TAB_A.EXEC_MODE_NAME,
-
+                            TAB_A.ACCESS_AUTH,
                             TAB_A.NOTE,
                             {$strSelectLastUpdateTimestamp4} AS LAST_UPDATE_TIMESTAMP,
                             CASE TAB_B.USERNAME_JP WHEN NULL THEN {$strConnectString1}
@@ -306,6 +258,7 @@ function getInfoOfOneExeInstance($target_execution_no,$strExeTableIdForSelect){
                                 TAB_A.FILE_INPUT,
                                 TAB_A.FILE_RESULT,
                                 TAB_A.RUN_MODE_NAME,
+                                TAB_A.ACCESS_AUTH,
                                 TAB_A.NOTE,
                                 {$strSelectLastUpdateTimestamp4} AS LAST_UPDATE_TIMESTAMP,
                                 CASE TAB_B.USERNAME_JP WHEN NULL THEN {$strConnectString1}
