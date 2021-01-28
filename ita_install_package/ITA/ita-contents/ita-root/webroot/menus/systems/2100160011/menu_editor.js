@@ -570,12 +570,14 @@ const history = {
     $menuTable.html( workHistory[ workCounter ] );
     historyButtonCheck();
     previewTable();
+    resetSelect2( $menuTable );
   },
   'redo' : function() {
     workCounter++;
     $menuTable.html( workHistory[ workCounter ] );
     historyButtonCheck();
     previewTable();
+    resetSelect2( $menuTable );
   },
   'clear' : function() {
     workCounter = 0;
@@ -1114,6 +1116,17 @@ $menuEditor.on('click', '.menu-column-delete', function(){
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// select2を再適用
+const resetSelect2 = function( $target ) {
+    if ( $target.find('.select2-container').length ) {
+      // select2要素を削除
+      $target.find('.config-select').removeClass('select2-hidden-accessible').removeAttr('tabindex aria-hidden');
+      $target.find('.select2-container').remove();
+      // select2を再適用
+      $target.find('.config-select').select2();
+    }
+};
+
 $menuEditor.on('click', '.menu-column-copy', function(){
   const $column = $( this ).closest('.menu-column, .menu-column-group');
   
@@ -1124,25 +1137,15 @@ $menuEditor.on('click', '.menu-column-copy', function(){
   }
   
   const $clone = $column.clone();
-  $clone.find('.config-select').removeClass('select2-hidden-accessible').removeAttr('tabindex aria-hidden');
-  $clone.find('.select2-container').remove();
-  
-  // クローン追加
-  $column.after( $clone );
-  // プルダウンにselect2を適用する
-  $clone.find('.config-select').select2();
+  $column.after( $clone );  
   
   // 追加を待つ
   $clone.ready( function() {
+    
+    resetSelect2( $clone );
+    
     $clone.find('.hover').removeClass('hover');
     
-    // IDをプラス
-    /*
-    $clone.find('.menu-column-repeat').each( function() {
-      const r = repeatCounter++;
-      $( this ).attr('id', 'r' + r );
-    });
-    */
     // IDをプラス・名前にコピー番号を追加
     $clone.find('.menu-column-title-input').each( function() {
       const $input = $( this ),
@@ -1470,6 +1473,8 @@ const repeatRemoveConfirm = function() {
         } else {
           // 中身をリピートと入れ替える
           $repeat.replaceWith( $repeat.children('.menu-column-repeat-body').html() );
+          // select2を再適用する
+          resetSelect2( $menuTable );
         }
         emptyCheck();
         previewTable();
