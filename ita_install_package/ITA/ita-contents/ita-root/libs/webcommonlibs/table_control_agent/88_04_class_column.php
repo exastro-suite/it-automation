@@ -10411,6 +10411,35 @@ class DelBtnColumn extends Column {
 
 }
 
+class JournalBtnColumn extends Column {
+    protected $strCheckDisuseColumnId;
+    //----ここから継承メソッドの上書き処理
+    function __construct($strColId, $strColLabel){
+        parent::__construct($strColId, $strColLabel);
+        $this->setDBColumn(false);
+        $this->setHeader(true);
+        $outputType = new OutputType(new TabHFmt(), new JnlButtonTabBFmt());
+        $this->setOutputType("print_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+        $outputType->setVisible(false);
+        $this->setOutputType("print_journal_table", $outputType);
+        $this->getOutputType("filter_table")->setVisible(false);
+        $this->getOutputType("update_table")->setVisible(false);
+        $this->getOutputType("register_table")->setVisible(false);
+        $this->getOutputType("delete_table")->setVisible(false);
+        $this->getOutputType("excel")->setVisible(false);
+        $this->getOutputType("csv")->setVisible(false);
+        $this->getOutputType("json")->setVisible(false);
+    }
+    //----AddColumnイベント系
+    function initTable($objTable, $colNo=null){
+        parent::initTable($objTable, $colNo);
+        $this->setEvent("print_table", "onclick", "journal_async", array(1, ":".$this->objTable->getRIColumnID()));
+    }
+    //AddColumnイベント系----
+    //ここまで継承メソッドの上書き処理----
+}
+
 class EditStatusControlBtnColumn extends Column {
 
 	protected $strCheckDisuseColumnId;

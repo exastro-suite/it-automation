@@ -63,6 +63,8 @@ class TableControlAgent {
 
 	protected $strNDBLUDate4UColId;	//"UPD_UPDATE_TIMESTAMP"
 
+	protected $strJnlBtnColId;	//"WEB_BUTTON_JOURNAL"
+
 	//----参照
 	protected $objColGroup;  // as ColGroup ヘッダの表示構成をツリー形式で保持
 	protected $aryObjFormatter;  // as array of Formatter
@@ -127,6 +129,8 @@ class TableControlAgent {
 		$strRowEditByFileColId = isset($arrayVariant['TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'])?$arrayVariant['TT_SYS_NDB_ROW_EDIT_BY_FILE_ID']:"ROW_EDIT_BY_FILE";
 		$strUpdateColId = isset($arrayVariant['TT_SYS_NDB_UPDATE_ID'])?$arrayVariant['TT_SYS_NDB_UPDATE_ID']:"UPDATE";
 
+		$strJnlColId = isset($arrayVariant['TT_SYS_07_JOURNAL_ID'])?$arrayVariant['TT_SYS_07_JOURNAL_ID']:"WEB_BUTTON_JOURNAL";
+
 		//----Prepare系・必須カラム名の設定
 		$this->setRowIdentifyColumnID($strRIColumnId);
 		$this->setRequiredJnlSeqNoColumnID($strJnlSeqNoColId);
@@ -136,6 +140,7 @@ class TableControlAgent {
 
 		$this->setRequiredRowEditByFileColumnID($strRowEditByFileColId);
 		$this->setRequiredUpdateButtonColumnID($strUpdateColId);
+		$this->setJnlButtonColumnID($strJnlColId);
 		//Prepare系・必須カラム名の設定----
 
 		$strNoteColId = isset($arrayVariant['TT_SYS_04_NOTE_ID'])?$arrayVariant['TT_SYS_04_NOTE_ID']:"NOTE";
@@ -794,8 +799,17 @@ class TableControlAgent {
 	public function getRequiredUpdateButtonColumnID(){
 		return $this->strNDBUpdateBtnColId;
 	}
+
+	public function getJnlButtonColumnID(){
+		return $this->strJnlBtnColId;
+	}
+
 	public function setRequiredUpdateButtonColumnID($strColIdText){
 		$this->strNDBUpdateBtnColId = $strColIdText;
+	}
+
+	public function setJnlButtonColumnID($strColIdText){
+		$this->strJnlBtnColId = $strColIdText;
 	}
 
 	public function getRequiredDisuseColumnID(){
@@ -844,6 +858,7 @@ class TableControlAgent {
 		//
 		$strRowEditByFileColLabel = isset($arrayVariant['TT_SYS_NDB_ROW_EDIT_BY_FILE_LABEL'])?$arrayVariant['TT_SYS_NDB_ROW_EDIT_BY_FILE_LABEL']:$g['objMTS']->getSomeMessage("ITAWDCH-STD-18007");
 		$strUpdateColLabel = isset($arrayVariant['TT_SYS_NDB_UPDATE_LABEL'])?$arrayVariant['TT_SYS_NDB_UPDATE_LABEL']:$g['objMTS']->getSomeMessage("ITAWDCH-STD-18008");
+		$strJournalColLabel = $g['objMTS']->getSomeMessage("ITAWDCH-STD-19032");
 		//
 		$boolDefaultColumnsSet = isset($arrayVariant['DEFAULT_COLUMNS_SET'])?$arrayVariant['DEFAULT_COLUMNS_SET']:true;
 		//
@@ -863,6 +878,8 @@ class TableControlAgent {
 			$this->addColumn($c);
 			$c = new DelBtnColumn($this->getRequiredDisuseColumnID(), $strDisuseFlagColLabel);
 			$this->addColumn($c);
+			$c = new JournalBtnColumn($this->getJnlButtonColumnID(), $strJournalColLabel);
+            $this->addColumn($c);
 			//
 			$c = new RowIdentifyColumn($this->getRowIdentifyColumnID(), $strRIColumnLabel);
 			$this->addColumn($c);
