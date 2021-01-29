@@ -250,6 +250,7 @@ $ary[19028] = "Authorized approver update date/time";
 $ary[19029] = "Authorized approver name";
 $ary[19030] = "Discard";
 $ary[19031] = "Restore";
+$ary[19032] = "History";
 $ary[20001] = "Are you sure you want to execute?";
 $ary[30011] = "Description";
 $ary[30021] = "Display filter";

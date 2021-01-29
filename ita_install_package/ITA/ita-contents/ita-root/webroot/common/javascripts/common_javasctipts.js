@@ -413,3 +413,27 @@ function userNameAllDisplay() {
     }
   });
 }
+
+//////// ----変更履歴遷移用ファンクション ////////
+function Mix1_1_journal_async( mode, inner_seq ){
+  var ele = document.getElementsByName("COL_IDSOP_7");
+  ele[0].value = inner_seq;
+  Journal1Tbl_search_async();
+  if( document.getElementById("Journal1_Nakami").style.display == "none" ) {
+      show('Journal1_Midashi','Journal1_Nakami');
+  }
+  // Journal1_Midashiのところまでジャンプ
+  jumpToSelfHtml('Journal1_Midashi');
+}
+
+function journal_async( mode, inner_seq ){
+  var ele = document.getElementsByName("COL_IDSOP_7");
+  ele[0].value = inner_seq;
+  Journal1Tbl_search_async();
+  if( document.getElementById("Journal1_Nakami").style.display == "none" ) {
+      show('Journal1_Midashi','Journal1_Nakami');
+  }
+  // Journal1_Midashiのところまでジャンプ
+  jumpToSelfHtml('Journal1_Midashi');
+}
+//////// 変更履歴遷移用ファンクション---- ////////
