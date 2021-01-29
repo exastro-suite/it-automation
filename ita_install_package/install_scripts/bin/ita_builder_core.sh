@@ -134,7 +134,7 @@ create_repo_check(){
     if [ $# -gt 0 ];then
         for key in $@; do
             echo "----------Check Creation repository[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            yum repolist | grep "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            yum repolist | grep -i "$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -eq 0 ]; then
                 echo "Successful repository acquisition" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             else
@@ -196,8 +196,13 @@ yum_repository() {
         if [ $# -gt 0 ]; then
             if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
                 yum-config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            elif [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+            elif [ "${LINUX_OS}" == "RHEL8" ]; then
                 dnf config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            elif [ "${LINUX_OS}" == "CentOS8" ]; then
+                yum repolist all > repolist_all.tmp 2>&1
+                POWERTOOLS_NAME=`grep -i powertools repolist_all.tmp | cut -f 1  --delim=" "`
+                dnf config-manager --set-enabled "${POWERTOOLS_NAME}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                rm -rf repolist_all.tmp
             fi
 
             # Check Creating repository
@@ -215,7 +220,7 @@ yum_repository() {
                             create_repo_check remi-php72 rhel-7-server-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         fi
                     ;;
-                    "CentOS8") create_repo_check PowerTools >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "CentOS8") create_repo_check powertools >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "RHEL8")
                         if [ "${CLOUD_REPO}" == "RHEL8_RHUI" ]; then
                             create_repo_check codeready-builder-for-rhel-8-rhui-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1255,7 +1260,7 @@ declare -A YUM_REPO_PACKAGE_PHP;
 YUM_REPO_PACKAGE_PHP=(
     ["RHEL8"]="--set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms"
     ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-optional-rpms"
-    ["CentOS8"]="--set-enabled PowerTools"
+    ["CentOS8"]="--set-enabled dummy"
     ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
     ["yum_all"]=""
 )
