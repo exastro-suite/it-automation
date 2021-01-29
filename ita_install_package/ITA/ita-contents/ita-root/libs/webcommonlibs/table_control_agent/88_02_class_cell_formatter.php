@@ -2333,6 +2333,26 @@ class DelTabBFmt extends TabBFmt {
 
 }
 
+class JnlButtonTabBFmt extends TabBFmt {
+
+	public function getData($rowData,$aryVariant){
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+		$strRIColId = $this->getRIColumnKey();
+		$strColLabel = $this->getColLabel();
+
+		$jnlable = "";
+		$aryAddOnDefault["class"] = "historyBtnInTbl";
+
+		$aryOverWrite["type"] = "button";
+		$aryOverWrite["value"] = $strColLabel;
+
+		$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$jnlable}>";
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
+}
+
 //----ここから、Write入力系
 
 class InputTabBFmt extends TabBFmt {

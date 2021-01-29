@@ -556,6 +556,11 @@ input.deleteBtnInTbl[type="button"][value="Restore"] {
 	border: 1px solid #0078DC;
 	box-shadow: 0 2px 0 #0050B4;
 }
+input.historyBtnInTbl[type="button"] {
+	background-color: #16A23A;
+	border-color: #16A23A;
+	box-shadow: 0 2px 0 #12822E;
+}
 
 /* default button:hover */
 input[type="button"]:hover, input[type="submit"]:hover {
@@ -574,6 +579,11 @@ input.deleteBtnInTbl[type="button"][value="Restore"]:hover {
 	background: #0064C8;
 	border: 1px solid #0064C8;
 	box-shadow: 0 1px 0 #0030A1;
+}
+input.historyBtnInTbl[type="button"]:hover {
+	background-color: #149234;
+	border-color: #149234;
+	box-shadow: 0 1px 0 #0F7129;
 }
 
 /* default button:active */
@@ -595,7 +605,7 @@ input[type="button"][disabled], input[type="button"][disabled]:hover, input[type
 }
 
 /* buttons for supertable */
-input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl {
+input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl, input.historyBtnInTbl {
 	min-width: 100%;
 	width: 100%;
 	max-width: 300px;
