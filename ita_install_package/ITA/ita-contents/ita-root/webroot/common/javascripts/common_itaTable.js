@@ -14,7 +14,7 @@
 //
 
 // テキストオーバー用スクロールイベント
-function setTextOverfrowScrollEvent( $target ) {console.log($target)
+function setTextOverfrowScrollEvent( $target ) {
     if ( $target.is('.textOverfrow') ) {
         const $itaTable = $target.closest('table');
         $target.on({
@@ -306,16 +306,8 @@ log(
 //
 $itaTable.find('.defaultExplainRow .generalBold').wrap('<div class="tdInner" />');
 
-//////////////////////////////////////////////////
-//
-//   ソートマークがある列
-//
+// 必須・ソートマークチェック
 $itaTable.find('.sortMarkWrap').closest('th').addClass('sortColumn');
-
-//////////////////////////////////////////////////
-//
-//   必須マークがある列
-//
 $itaTable.find('.input_required').closest('th').addClass('requiredColumn');
 
 //////////////////////////////////////////////////
