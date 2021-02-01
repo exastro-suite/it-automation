@@ -237,7 +237,7 @@ Ansible(Pioneer)対話素材集
                 if(strlen($tmpFile) == 0) {
                     $boolExecuteContinue = false;
                     $retBool = false;
-                    $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55210",array($PkeyID,$Playbook_file));
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55212",array($PkeyID,$Playbook_file));
                 } elseif (strlen($tmpFile) != 0) {
                     // FileUpload後に登録・更新でエラーが発生した場合、tmp_file_COL_IDSOP_8が別ファイルになる対応
                     if( ! file_exists($TPFVarListfile)) {
