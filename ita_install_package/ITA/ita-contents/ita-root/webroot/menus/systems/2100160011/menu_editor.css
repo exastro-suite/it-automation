@@ -690,8 +690,9 @@ border-color: #BBB;
 }
 #KIZI .config-checkbox {
 position: absolute;
-left: -9999px; top: 0;
+left: 0; top: 0;
 z-index: 2;
+visibility: hidden;
 }
 #KIZI .config-checkbox + span {
 position: relative;
