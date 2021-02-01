@@ -234,7 +234,7 @@ Ansible(Pioneer)対話素材集
         // 一時ファイルから使用しているテンプレート変数のリストを取得
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
-                if(strlen($tmpFile) == 0) {
+                if(! array_key_exists('tmp_file_COL_IDSOP_10',$arrayRegData)) {
                     $boolExecuteContinue = false;
                     $retBool = false;
                     $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55212",array($PkeyID,$Playbook_file));
