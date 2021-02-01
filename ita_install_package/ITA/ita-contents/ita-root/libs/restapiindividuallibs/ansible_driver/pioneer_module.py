@@ -231,7 +231,8 @@ def main():
     vault_vars_file = module.params['host_vars_file']
     vault_vars_file = vault_vars_file.replace("/original_host_vars/", "/vault_host_vars/")
     vault_vars_def  = yaml.load(open(vault_vars_file).read())
-    for var,value in vault_vars_def.items():
+    if vault_vars_def is not None:
+      for var,value in vault_vars_def.items():
         enc_value = base64.b64decode(codecs.encode(value, "rot-13"))
         enc_value= enc_value.decode('utf-8','replace')
         vault_vars_def[var] = enc_value;
@@ -4222,14 +4223,16 @@ def last_escstr_cut(sometext):
 def password_hide(vault_vars_def,data):
   global output_password
   rep_str = data
-  for var,value in vault_vars_def.items():
-    rep_str = rep_str.replace("<< "+var+" >>",output_password)
+  if vault_vars_def is not None:
+    for var,value in vault_vars_def.items():
+      rep_str = rep_str.replace("<< "+var+" >>",output_password)
   return rep_str 
 
 def password_replace(vault_vars_def,data):
   rep_str = data
-  for var,value in vault_vars_def.items():
-    rep_str = rep_str.replace("<< "+var+" >>",value)
+  if vault_vars_def is not None:
+    for var,value in vault_vars_def.items():
+      rep_str = rep_str.replace("<< "+var+" >>",value)
   return rep_str 
 
 def exec_log_output(log,replace_flg = True):
