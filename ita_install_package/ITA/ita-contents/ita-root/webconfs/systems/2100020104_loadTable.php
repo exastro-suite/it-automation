@@ -216,7 +216,7 @@ Ansible(Legacy(NS))プレイブック素材集
         unset($g['COM_VARS_LIST_VALUE']);
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
-                if(strlen($tmpFile) == 0) {
+                if( ! array_key_exists('tmp_file_COL_IDSOP_9',$arrayRegData)) {
                     $boolExecuteContinue = false;
                     $retBool = false;
                     $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55210",array($PkeyID,$Playbook_file));
