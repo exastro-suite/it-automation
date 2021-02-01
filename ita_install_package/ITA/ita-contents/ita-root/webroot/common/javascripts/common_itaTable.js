@@ -14,7 +14,7 @@
 //
 
 // テキストオーバー用スクロールイベント
-function setTextOverfrowScrollEvent( $target ) {
+function setTextOverfrowScrollEvent( $target ) {console.log($target)
     if ( $target.is('.textOverfrow') ) {
         const $itaTable = $target.closest('table');
         $target.on({
@@ -41,6 +41,10 @@ function setTextOverfrowScrollEvent( $target ) {
           }
         });
         $target.find('.tof').on({
+          'click' : function(e){
+            // クリックイベントは親要素へ伝播しない
+            e.stopPropagation();
+          },
           'mousedown': function( e ){
             // 選択状態を解除する
             getSelection().removeAllRanges();
@@ -77,7 +81,7 @@ function setTextOverfrowScrollEvent( $target ) {
                 $itaTable.removeClass('overfrowScroll');
                 $scrollBar.removeClass('scrollKnobMove');
                 $window.off('mousemove.scrollBar mouseup.scrollBar');
-                if ( !$tdInner.closest('td').is('.mouseenter') ) {
+                if ( !$tdInner.closest('th,td').is('.mouseenter') ) {
                   $scrollKnob.css({
                     'width': 0,
                     'opacity': 0
@@ -105,7 +109,7 @@ function setTextOverfrowScrollEvent( $target ) {
 
 // 文字があふれているかチェックする
 function checkOverfrowText( $target ) {
-  const $td = $target.closest('td'),
+  const $td = $target.closest('th,td'),
         offsetWidth = $target.get(0).offsetWidth,
         scrollWidth = $target.get(0).scrollWidth;
   if ( scrollWidth - offsetWidth > 1 ) {
@@ -298,6 +302,24 @@ log(
 
 //////////////////////////////////////////////////
 //
+//   defaultExplainRow内のセルに.tdInner
+//
+$itaTable.find('.defaultExplainRow .generalBold').wrap('<div class="tdInner" />');
+
+//////////////////////////////////////////////////
+//
+//   ソートマークがある列
+//
+$itaTable.find('.sortMarkWrap').closest('th').addClass('sortColumn');
+
+//////////////////////////////////////////////////
+//
+//   必須マークがある列
+//
+$itaTable.find('.input_required').closest('th').addClass('requiredColumn');
+
+//////////////////////////////////////////////////
+//
 //   文字が溢れているかチェックする
 //
 $itaTable.find('.tdInner').filter( function(){
@@ -308,7 +330,7 @@ $itaTable.find('.tdInner').filter( function(){
   } else {
     return false;
   }
-}).after('<div class="tof"><div class="tofb"></div></div>').closest('td').addClass('textOverfrow');
+}).after('<div class="tof"><div class="tofb"></div></div>').closest('th,td').addClass('textOverfrow');
 setTextOverfrowScrollEvent( $itaTable.find('.textOverfrow') );
 
 //////////////////////////////////////////////////
