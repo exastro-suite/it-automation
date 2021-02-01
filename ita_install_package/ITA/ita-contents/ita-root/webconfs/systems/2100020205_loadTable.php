@@ -223,8 +223,9 @@ Ansible(Pioneer)対話素材集
             } else {
                 $PkeyID = array_key_exists('DIALOG_MATTER_ID',$arrayRegData)?$arrayRegData['DIALOG_MATTER_ID']:null;
             }
-            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_9',$arrayRegData)?
-                               $arrayRegData['tmp_file_COL_IDSOP_9']:null;
+            $Playbook_file = array_key_exists('DIALOG_MATTER_FILE',$arrayRegData)?$arrayRegData['DIALOG_MATTER_FILE']:null;
+            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_10',$arrayRegData)?
+                               $arrayRegData['tmp_file_COL_IDSOP_10']:null;
             $TPFVarListfile = $root_dir_path . "/temp/file_up_column/" . $tmpFile . "_vars_list";
             $tmpfilepath    = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
 
@@ -233,7 +234,11 @@ Ansible(Pioneer)対話素材集
         // 一時ファイルから使用しているテンプレート変数のリストを取得
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
-                if(strlen($tmpFile) != 0) {
+                if(strlen($tmpFile) == 0) {
+                    $boolExecuteContinue = false;
+                    $retBool = false;
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55210",array($PkeyID,$Playbook_file));
+                } elseif (strlen($tmpFile) != 0) {
                     // FileUpload後に登録・更新でエラーが発生した場合、tmp_file_COL_IDSOP_8が別ファイルになる対応
                     if( ! file_exists($TPFVarListfile)) {
                         // 共通変数を抜き出す。
