@@ -631,7 +631,7 @@
 
             // ファイルダウンロード
             $content_length = filesize($strFilePath);
-            header("Content-Disposition: attachment; filename=" . basename($strFilePath));
+            header('Content-Disposition: attachment; filename*=UTF-8\'\''.rawurlencode(basename($strFilePath)));
             header("Content-Length: ".$content_length);
             header("Content-Type: application/octet-stream");
             header('Content-Transfer-Encoding: binary');
