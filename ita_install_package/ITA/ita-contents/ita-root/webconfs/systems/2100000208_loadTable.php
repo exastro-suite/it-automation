@@ -99,6 +99,16 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText,true)));
     $table->addColumn($c);
 
+    // 最終ログイン日時
+    $c = new DateTimeColumn('LAST_LOGIN_TIME',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071401"));
+    $c->setHiddenMainTableColumn(true);
+    $c->setAllowSendFromFile(false);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071402"));
+    $strWebUIText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071403");
+    $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText)));
+    $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText,true)));
+    $table->addColumn($c);
+
     // PWカウンタ
     $c = new NumColumn('MISS_INPUT_COUNTER',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070801"));
     $c->setHiddenMainTableColumn(false);
