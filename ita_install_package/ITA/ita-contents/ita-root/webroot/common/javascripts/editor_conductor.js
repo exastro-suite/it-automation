@@ -40,29 +40,179 @@ function initEditor( mode ) {
     conductorMode( mode );
     
     // Movementリストを作成
-    const movementList = conductorUseList.movementList,
+    const $movementList = $('#movement-list'),
+          $movementListRows = $('#movement-list-rows'),
+          movementList = conductorUseList.movementList,
           movementLength = movementList.length;
-    let movementListHTML = '';
     
+    // Orchestratorリストを作成
+    const orchestratorList = new Array();
     for ( let i = 0; i < movementLength; i++ ) {
-      let orcheName = conductorUseList.orchestratorName[ movementList[i].ORCHESTRATOR_ID ];
-      if ( orcheName === undefined ) orcheName = 'Unknown';
-      const orchestrator = orcheName.toLocaleLowerCase().replace(/\s/g, '-');
-      movementListHTML += ''
-        + '<tr>'
-          + '<th><span class="add-node '+ orchestrator +'" '
-          + 'data-id="' + movementList[i].PATTERN_ID + '"></span></th>'
-          + '<th><div>' + movementList[i].PATTERN_ID + '</div></th>'
-          + '<td><div>' + movementList[i].PATTERN_NAME + '</div></td>'
-        + '</tr>';
+      if ( orchestratorList.indexOf( movementList[i].ORCHESTRATOR_ID ) === -1 ) {
+        orchestratorList.push( movementList[i].ORCHESTRATOR_ID );
+      }
     }
-    const $movementList = $( movementListHTML );
+    const orchestratorLength = orchestratorList.length;
+    let orchestratorListHTML = '',
+        orchestratorListStyle = '';
+    for ( let i = 0; i < orchestratorLength; i++ ) {
+      $movementList.attr('data-orche' + orchestratorList[i], true );
+      orchestratorListHTML += '<li>'
+      + '<label class="property-label">'
+        + '<input type="checkbox" id="orchestrator' + orchestratorList[i] + '" name="filter-orchestrator" checked> '
+        + conductorUseList.orchestratorName[orchestratorList[i]] + '</label></li>';
+      orchestratorListStyle += '#movement-list[data-orche' + orchestratorList[i] + '="false"] .orche' + orchestratorList[i]
+      + ' {display:none!important;}';
+    }
+    $movementList.prepend('<style>' + orchestratorListStyle + '</style>');
+    $('#orchestrator-list').html( orchestratorListHTML );
     
-    $('#movement-list-rows').html( $movementList );
-    $movementList.ready( function(){
-      conductorEditor();
+    // Movementリストをソートする
+    // [0: {PATTERN_ID: "1", ORCHESTRATOR_ID: "3", PATTERN_NAME: "Ansible", ThemeColor: "orange"}]
+    // name（対象）,sort（asc or desc）,type（string or number）
+    const sortMovementList = function( name, sort, type ) {
+      let movementListHTML = '';
+      movementList.sort( function( a, b ){
+        if ( type === 'string') {
+          if ( sort === 'desc') {
+            if( a[ name ] < b [ name ] ) return 1;
+            if( a[ name ] > b [ name ] ) return -1;
+          } else if ( sort === 'asc') {
+            if( a[ name ] > b [ name ] ) return 1;
+            if( a[ name ] < b [ name ] ) return -1;
+          }
+        } else if ( type === 'number') {
+          if ( sort === 'desc') {
+            return Number( b[ name ] ) - Number( a[ name ] );
+          } else if ( sort === 'asc') {
+            return Number( a[ name ] ) - Number( b[ name ] );
+          }
+        }
+      });
+      for ( let i = 0; i < movementLength; i++ ) {
+        let orcheName = conductorUseList.orchestratorName[ movementList[i].ORCHESTRATOR_ID ];
+        if ( orcheName === undefined ) orcheName = 'Unknown';
+        const orchestrator = orcheName.toLocaleLowerCase().replace(/\s/g, '-');
+        movementListHTML += ''
+          + '<tr class="orche' + movementList[i].ORCHESTRATOR_ID + '">'
+            + '<th class="movement-list-orchestrator" title="' + orcheName + '"><span class="add-node '+ orchestrator +'" '
+            + 'data-id="' + movementList[i].PATTERN_ID + '"></span></th>'
+            + '<th class="movement-list-id"><div>' + movementList[i].PATTERN_ID + '</div></th>'
+            + '<td class="movement-list-name"><div>' + movementList[i].PATTERN_NAME + '</div></td>'
+          + '</tr>';
+      }
+      $movementListRows.html( movementListHTML );
+      if ( $movementList.attr('data-filter') === 'name') {
+        $movementFilter.trigger('input');
+      } else {
+        $movementIdFilter.trigger('input');
+      }
+    };
+    
+    // Movement Filter
+    const $movementFilter = $('#movement-filter'),
+          $movementIdFilter = $('#movement-filter-id');
+    const movementFilter = function( inputValue, target ) {
+      // スペースでsplit
+      const valueArray = inputValue.split(/[\x20\u3000]+/),
+            valueArrayLength = valueArray.length;
+    
+      // IDだった場合
+      if ( target === '.movement-list-id') {
+        for ( let i = 0; i < valueArrayLength; i++ ) {
+          // 数値にならない場合消す
+          if ( isNaN ( Number( valueArray[i] ) ) ) {
+             valueArray[i] = '';
+          } else if ( valueArray[i] !== '') {
+            // 完全一致用
+            valueArray[i] = '^' + valueArray[i] + '$';
+          }
+        }
+      }
+      // or結合
+      inputValue = valueArray.filter(function(v){return v !== '';}).join('|');
+
+      const regExp = new RegExp( inputValue, "i");
+
+      if ( inputValue !== '' ) {
+        $movementList.find('.node-table tbody').find('tr').each( function(){
+          const $tr = $( this ),
+                movementName = $tr.find( target ).text();
+          if ( regExp.test( movementName ) ) {
+            $tr.removeClass('filter-hide');
+          } else {
+            $tr.addClass('filter-hide');
+          }
+        });
+      } else {
+        $movementList.find('.filter-hide').removeClass('filter-hide');
+      }
+    };
+    $movementFilter.on('input', function(){
+      movementFilter( $(this).val(), '.movement-list-name');
     });
-  
+    $movementIdFilter.on('input', function(){
+      movementFilter($(this).val(), '.movement-list-id');
+    });
+    
+    // ソート
+    $movementList.find('.movement-list-sort').on('click', function(){
+      const $sort = $( this ),
+            sortTarget = $sort.attr('data-sort'),
+            sortType = $sort.attr('data-sort-type'),
+            sort = $sort.is('.asc')? 'desc': 'asc';
+      $movementList.find('.asc, .desc').removeClass('asc desc');
+      $sort.addClass( sort );
+      sortMovementList( sortTarget, sort, sortType );
+    });
+    
+    // デフォルトはID昇順
+    $movementList.attr('data-filter', 'name');
+    $movementList.find('.movement-list-id .movement-list-sort').addClass('asc');
+    sortMovementList('PATTERN_ID', 'asc', 'number');
+    
+    // Filter Setting画面
+    const $filterSetting = $('#movement-filter-setting');
+    // Filter設定オープン
+    $movementList.find('.filter-setting-btn').on('click', function(){
+      $filterSetting.show();
+      // Text入力欄反映
+      const inputType = $movementList.attr('data-filter');
+      if ( inputType === 'name') {
+        $('#filter-target-name').prop('checked', true );
+      } else if ( inputType === 'id') {
+        $('#filter-target-id').prop('checked', true );
+      }
+      // Orchestratorチェックボックスの反映
+      for ( let i = 0; i < orchestratorLength; i++ ) {
+        const flag = ( $movementList.attr('data-orche' + orchestratorList[i] ) === 'true' )? true: false;
+        $('#orchestrator' + orchestratorList[i] ).prop('checked', flag );
+      }
+    });
+    
+    // Filter設定キャンセル
+    $('#movement-filter-cancel').on('click', function(){
+      $filterSetting.hide();
+    });
+    
+    // Filter設定決定
+    $('#movement-filter-ok').on('click', function(){
+      const inputType = $filterSetting.find('[name="filter-target"]:checked').attr('id');
+      if ( inputType === 'filter-target-name') {
+        $movementList.attr('data-filter', 'name');
+        $movementFilter.trigger('input');
+      } else if ( inputType === 'filter-target-id') {
+        $movementList.attr('data-filter', 'id');
+        $movementIdFilter.trigger('input');
+      }
+      for ( let i = 0; i < orchestratorLength; i++ ) {
+        $movementList.attr('data-orche' + orchestratorList[i], $('#orchestrator' + orchestratorList[i] ).prop('checked') );
+      }
+      $filterSetting.hide();
+    });
+    
+    // Editor実行
+    conductorEditor();  
 }
 
 function conductorFooterButtonDisabled( disabledFlag ) {
@@ -2371,6 +2521,29 @@ const checkConnectType = function( outType, inType ) {
   }
 };
 
+// 作業確認時リザルトマーククリックで作業結果へ
+if ( conductorEditorMode === 'checking') {
+  $canvasVisibleArea.on({
+    'mouseenter': function(){
+      const $result = $( this ),
+            href = $result.attr('data-href');
+      if ( href !== '#') {
+        $result.addClass('mouseenter');
+      }
+    },
+    'mouseleave': function(){
+      $( this ).removeClass('mouseenter');
+    },
+    'click': function(){
+      const $result = $( this ),
+            href = encodeURI( $result.attr('data-href') );
+      if ( href !== '#') {
+        open( href, '_blank') ;
+      }
+    }
+  }, '.node-result');
+}
+
 $canvasVisibleArea.on('mousedown', function( e ){
 
     if ( e.buttons === 1 ) {
@@ -3537,29 +3710,6 @@ $conductorParameter.find('.panel-textarea').on('input', function() {
 
 });
 
-// Movement Filter
-const $movementList = $('#movement-list').find('.node-table');
-$('#movement-filter').on('input', function(){
-  const $movementFilter = $( this ),
-        inputValue = $movementFilter.val(),
-        regExp = new RegExp( inputValue, "i");
-  
-  if ( inputValue !== '' ) {
-  $movementList.find('tbody').find('tr').each( function(){
-    const $tr = $( this ),
-          movementName = $tr.find('td').text();
-    if ( regExp.test( movementName ) ) {
-      $tr.removeClass('filter-hide');
-    } else {
-      $tr.addClass('filter-hide');
-    }
-  });
-  } else {
-    $movementList.find('.filter-hide').removeClass('filter-hide');
-  }
-  
-});
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   取り消し、やり直し
@@ -4217,6 +4367,42 @@ $window.on('conductorReset', function(){
   }
 });
 
+// 作業状態確認ポップアップ（移動拡縮対応）
+const itaPopup = function( $target ) {
+
+  $target.on({
+    'mouseenter': function(){
+      const $this = $( this ),
+            title = $this.attr('title');
+      
+      if ( title === undefined || title === '') return false;
+      // ポップアップ追加
+      const $popup = $('<div/>').addClass('itaPopup').text(title);
+      $this.removeAttr('title').attr('data-title', title );
+      $('body').append( $popup );
+      // 位置更新
+      const updatePosition = function() {
+        const mpx = $this.offset().left + ( ( $this.outerWidth() / 2 ) * editorValue.scaling ),
+              mpy = $this.offset().top - ( 4 * editorValue.scaling )
+        $popup.css({ left: mpx, top: mpy });
+      };
+      updatePosition();
+      // マウスムーブとスクロールでも位置を更新する
+      $this.on('mousemove', updatePosition )
+        .on( mousewheelevent, function(){
+        setTimeout( function(){ updatePosition(); }, 1 );
+      });
+    },
+    'mouseleave': function(){
+      const $this = $( this ),
+            title = $this.attr('data-title');
+      $this.attr('title', title ).removeAttr('data-title').off('mousemove ' + mousewheelevent );
+      $('.itaPopup').remove();
+    }
+  });
+
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -4396,6 +4582,14 @@ const conductorStatusUpdate = function( exeNumber ) {
     $inEdge.attr('data-status', 'running');
     $node.addClass('complete').attr('data-result', nodeInfo.STATUS );
     $node.find('.node-result').attr('data-result-text', endMessage );
+    // 作業結果URLがあれば追加する
+    if ( nodeInfo.JUMP ) {
+      $node.find('.node-result').attr({
+        'title': getSomeMessage("ITABASEC020123"),
+        'data-href': nodeInfo.JUMP
+      });
+      itaPopup( $node.find('.node-result') );
+    }
     conductorData[ nodeID ].endStatus = true;
   };
   

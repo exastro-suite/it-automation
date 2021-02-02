@@ -643,4 +643,6 @@ $ary[309032] = "Result data set (zip)";
 $ary[309033] = "download(.zip)";
 $ary[309034] = "It is populated data set (zip).";
 $ary[309035] = "It is result data set (zip).";
+$ary[309036] = "OK";
+$ary[309037] = "Cancel";
 ?>
