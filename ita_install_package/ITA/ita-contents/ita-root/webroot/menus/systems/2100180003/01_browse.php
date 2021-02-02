@@ -583,9 +583,13 @@ EOD;
                     <div class="movement-filter">
                       <table class="panel-table">
                         <tbody>
-                          <tr>
-                            <th class="panel-th">Filter :</th>
-                            <td class="panel-td"><input id="movement-filter" class="panel-text" type="text"><span id="filter-setting"></span></td>
+                          <tr class="movement-filter-row">
+                            <th class="panel-th">Name Filter :</th>
+                            <td class="panel-td"><input id="movement-filter" class="panel-text" type="text" placeholder="Movement Name"><span class="filter-setting-btn" title="Filter setting"></span></td>
+                          </tr>
+                          <tr class=""movement-filter-id-row">
+                            <th class="panel-th">ID Filter :</th>
+                            <td class="panel-td"><input id="movement-filter-id" class="panel-text" type="text" placeholder="Movement ID"><span class="filter-setting-btn" title="Filter setting"></span></td>
                           </tr>
                         </tbody>
                       </table>
@@ -593,11 +597,39 @@ EOD;
                     <div class="node-table-wrap">
                       <table class="node-table">
                         <thead>
-                          <tr><th><div>+</div></th><th><div>ID</div></th><th><div>Movement name</div></th></tr>
+                          <tr>
+                            <th class="movement-list-orchestrator" title="Orchestrator"><div class="movement-list-sort" data-sort="ORCHESTRATOR_ID" data-sort-type="number">+</div></th>
+                            <th class="movement-list-id" title="Movement ID"><div class="movement-list-sort" data-sort="PATTERN_ID" data-sort-type="number">ID</div></th>
+                            <th class="movement-list-name" title="Movement Name"><div class="movement-list-sort" data-sort="PATTERN_NAME" data-sort-type="string">Movement name</div></th>
+                          </tr>
                         </thead>
                         <tbody id="movement-list-rows">
                         </tbody>
                       </table>
+                    </div>
+                    <div id="movement-filter-setting">
+                      <div class="movement-filter-setting-inner">
+                        <div class="movement-filter-setting-body">
+                          <div class="panel-group">
+                            <div class="panel-group-title">Filter target</div>
+                            <ul class="movement-filter-setting-list">
+                              <li><label class="property-label"><input type="radio" name="filter-target" id="filter-target-id"> Movement ID</label></li>
+                              <li><label class="property-label"><input type="radio" name="filter-target" id="filter-target-name" checked> Movement Name</label></li>
+                            </ul>
+                          </div>
+                          <div class="panel-group">
+                            <div class="panel-group-title">Orchestrator select</div>
+                            <ul id="orchestrator-list" class="movement-filter-setting-list">
+                            </ul>
+                          </div>
+                        </div>
+                        <div class="movement-filter-setting-footer">
+                          <ul class="panel-button-group">
+                            <li class="panel-button-group-item"><button id="movement-filter-ok" class="positive panel-button">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309036")}</button></li>
+                            <li class="panel-button-group-item"><button id="movement-filter-cancel" class="negative panel-button">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309037")}</button></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
