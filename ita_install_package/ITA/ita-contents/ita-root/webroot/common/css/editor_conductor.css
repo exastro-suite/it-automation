@@ -1118,6 +1118,11 @@ animation: completeResult 1s forwards;
   0% { transform: scale(1.5); opacity: 0; }
 100% { transform: scale(1); opacity: 1; }
 }
+.complete .node-result.mouseenter::before {
+transition-duration: .2s;
+box-shadow: 0 0 0 2px #DDD inset, 0 0 8px rgba( 0,0,0,.3 ) inset;
+}
+
 .complete[data-result="6"] .node-result::before,
 .complete[data-result="10"] .node-result::before,
 .complete[data-result="11"] .node-result::before {
@@ -1458,17 +1463,21 @@ border-top: 1px solid #222;
 box-shadow: 0 0 0 1px #555;
 }
 /* Chrome */
+.movement-filter-setting-body::-webkit-scrollbar,
 .node-table-wrap::-webkit-scrollbar {
   width: 8px;
 }
+.movement-filter-setting-body::-webkit-scrollbar-track,
 .node-table-wrap::-webkit-scrollbar-track {
   background: #222;
 }
+.movement-filter-setting-body::-webkit-scrollbar-thumb,
 .node-table-wrap::-webkit-scrollbar-thumb {
   background: #666;
   border-right: 1px solid #111;
 }
 /* Firefox */
+.movement-filter-setting-body,
 .node-table-wrap {
   scrollbar-width: thin;
   scrollbar-color: #666 #222;
@@ -1482,10 +1491,13 @@ box-shadow: 0 0 0 1px #555;
   -webkit-user-select: none;
   -ms-user-select: none;
 }
-
+#movement-list .editor-tab-body-inner {
+position: relative;
+}
 #movement-list .node-table-wrap {
 height: calc( 100% - 32px );
 }
+
 .node-table {
 width: 100%;
 margin-top: -1px;
@@ -1531,18 +1543,139 @@ background-color: #2F3337;
 #editor[data-editor-mode="edit"] .node-table tbody tr:hover td {
 background-color: #3B4045;
 }
-
-
+.movement-list-orchestrator,
+.movement-list-id {
+width: 8px;
+}
+.node-table th .movement-list-sort {
+position: relative;
+z-index: 0;
+padding: 6px 14px 6px 6px;
+cursor: pointer;
+transition-duration: .2s;
+}
+.node-table th .movement-list-sort:hover {
+background-color: rgba(0,0,0,.3);
+}
+.movement-list-sort::before,
+.movement-list-sort::after {
+content: '';
+display: block;
+position: absolute;
+right: 2px;
+width: 8px; height: 8px;
+background-image: url(/common/imgs/ita_icon_sprite.png?v=170);
+background-size: 80px 72px;
+opacity: .5;
+}
+.movement-list-sort::before {
+top: 6px;
+background-position: -64px -32px;
+}
+.movement-list-sort::after {
+bottom: 6px;
+background-position: -72px -32px;
+}
+.movement-list-sort.asc::before {
+background-position: -64px -40px;
+opacity: 1;
+}
+.movement-list-sort.desc::after {
+background-position: -72px -40px;
+opacity: 1;
+}
 
 .movement-filter {
 overflow: hidden;
 height: 32px;
+}
+[data-filter="name"] .movement-filter-id-row { display: none; }
+#movement-list[data-filter="id"] .movement-filter-row { display: none; }
+
+#KIZI #movement-list input[type="text"].panel-text {
+width: calc( 100% - 24px );
+}
+.filter-setting-btn {
+display: inline-block;
+width: 24px; height: 24px;
+transform: scale(.8);
+background-image: url(/common/imgs/ita_icon_sprite.png?v=170);
+background-size: 240px 216px;
+background-position: -168px -96px;
+vertical-align: middle;
+opacity: .5;
+cursor: pointer;
+}
+.filter-setting-btn:hover {
+opacity: .7;
 }
 .movement-filter .panel-table {
 margin-bottom: 0;
 }
 .filter-hide {
 display: none;
+}
+#movement-filter-setting {
+display: none;
+position: absolute;
+left: 0; top: 0;
+z-index: 10;
+width: 100%; height: 100%;
+padding: 6px;
+}
+.movement-filter-setting-inner {
+overflow: hidden;
+position: relative;
+height: 100%;
+background-color: #444;
+border: 1px solid #666;
+border-radius: 4px;
+box-shadow: 0 0 12px rgba( 0,0,0,.9 );
+}
+.movement-filter-setting-body {
+overflow: auto;
+height: calc( 100% - 40px );
+padding: 0 8px;
+border-bottom: 1px solid rgba( 0,0,0,.4 );
+}
+.movement-filter-setting-footer {
+position: absolute;
+bottom: 0; left: 0;
+width: 100%; height: 40px;
+padding: 8px 4px 0;
+background-color: rgba( 0,0,0,.2 );
+border-top: 1px solid rgba( 255,255,255,.1 );
+text-align: center;
+}
+#KIZI .movement-filter-setting-list,
+#KIZI .movement-filter-setting-list li {
+list-style: none;
+margin: 0; padding: 0;
+}
+#KIZI .movement-filter-setting-list li {
+margin-bottom: 4px;
+}
+#KIZI .movement-filter-setting-list .property-label {
+display: block;
+width: 100%;
+padding: 2px 4px;
+background-color: rgba( 0,0,0,.1 );
+border: 1px solid rgba( 0,0,0,.3 );
+cursor: pointer;
+color: #EEE;
+}
+#KIZI #movement-filter-setting .panel-button {
+min-width: 80px;
+color: #EEE;
+}
+#KIZI #movement-filter-setting .positive {
+background-color: #4D9E0A;
+}
+#KIZI #movement-filter-setting .positive:hover {
+background-color: #58B60C;
+}
+#KIZI #movement-filter-setting .positive:active {
+background-color: #49960A;
 }
 
 .add-node {
