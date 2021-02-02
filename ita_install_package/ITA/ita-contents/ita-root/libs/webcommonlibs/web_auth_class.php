@@ -305,6 +305,7 @@ class Auth
             // ----id/pass認証
             if ($this->login()) {
                 // ログイン成功
+                $retResult = $this->setLastLoginTime();
                 return;
             }
             // id/pass認証----
@@ -625,6 +626,17 @@ class Auth
     public function getStatus()
     {
         return $this->status;
+    }
+
+    // 最終ログイン日時設定
+    protected function setLastLoginTime() {
+      $objDBCA = new DBConnectAgent();
+      $tmpResult = $objDBCA->connectOpen();
+      $tmpArrayBind = array('USERNAME'=>$this->session['username'] );
+      $sql = "UPDATE A_ACCOUNT_LIST SET LAST_LOGIN_TIME = SYSDATE() WHERE USERNAME = :USERNAME";
+      $objQuery = $objDBCA->sqlPrepare($sql);
+      $objQuery->sqlBind($tmpArrayBind);
+      $r = $objQuery->sqlExecute();
     }
 }
 

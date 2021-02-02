@@ -442,6 +442,11 @@
             "USERNAME_JP"=>"",
             "MAIL_ADDRESS"=>"",
             "PW_LAST_UPDATE_TIME"=>"DATETIMEAUTO(6)",
+            "LAST_LOGIN_TIME"=>"",
+            "AUTH_TYPE"=>"",
+            "PROVIDER_ID"=>"",
+            "PROVIDER_USER_ID"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -458,6 +463,11 @@
             "USERNAME_JP"=>"",
             "MAIL_ADDRESS"=>"",
             "PW_LAST_UPDATE_TIME"=>"",
+            "LAST_LOGIN_TIME"=>"",
+            "AUTH_TYPE"=>"",
+            "PROVIDER_ID"=>"",
+            "PROVIDER_USER_ID"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -557,7 +567,38 @@
             $arrayValue['LAST_UPDATE_USER']    = $strFixedId;
             $arrayValue['PASSWORD']            = md5($strRawNewPassword);
             $arrayValue['PW_LAST_UPDATE_TIME'] = $strQueryTimeDate;
-            
+
+            // 最終ログイン日時、認証方式
+            $sql = "SELECT LAST_LOGIN_TIME ,"
+                  ."       AUTH_TYPE       ,"
+                  ."       PROVIDER_ID     ,"
+                  ."       PROVIDER_USER_ID,"
+                  ."       ACCESS_AUTH      "
+                  ."FROM   A_ACCOUNT_LIST   "
+                  ."WHERE USER_ID = :USER_ID";
+
+            $tmpArrayBind = array('USER_ID'=>$strFixedId);
+
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            if( $objQuery->getStatus()===false ){
+                throw new Exception( '00000100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            if( $objQuery->sqlBind($tmpArrayBind) != "" ){
+                throw new Exception( '00000200-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $tmpBoolResult = $objQuery->sqlExecute();
+            if($tmpBoolResult!=true){
+                throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            while($row = $objQuery->resultFetch() ){
+              $arrayValue['LAST_LOGIN_TIME'] = $row['LAST_LOGIN_TIME'];
+              $arrayValue['AUTH_TYPE'] = $row['AUTH_TYPE'];
+              $arrayValue['PROVIDER_ID'] = $row['PROVIDER_ID'];
+              $arrayValue['PROVIDER_USER_ID'] = $row['PROVIDER_USER_ID'];
+              $arrayValue['ACCESS_AUTH'] = $row['ACCESS_AUTH'];
+            }
+
             $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                             "UPDATE",
                                             "USER_ID",
