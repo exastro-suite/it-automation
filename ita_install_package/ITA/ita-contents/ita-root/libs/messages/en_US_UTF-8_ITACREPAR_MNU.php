@@ -116,6 +116,11 @@ $ary[102409] = "Menu file";
 $ary[102410] = "PHP file and SQL file used in the menu.";
 $ary[102411] = "Created menu";
 $ary[102412] = "Created menu";
+$ary[102413] = "Menu create type";
+$ary[102414] = "The type of menu creation.
+New: Create new menu
+Initialize: Initialize and recreate an existing menu.
+Edit: Edit the menu while keeping the registered data.";
 $ary[102501] = "A menu can be created in the menu group specified in \"Menu definition information\".<br/>* If a menu with the same menu name or menu with the same \"Menu definition information\" ID already exists, the existing data will be deleted and overwritten by the new menu.<br/>If you need to retain the existing data, select \"Cancel\" and perform a backup.";
 $ary[102502] = "Create Menu";
 $ary[102503] = "Start Menu creation";
@@ -256,4 +261,7 @@ $ary[104251] = "Vertical menu";
 $ary[104252] = "Manu automatically converted from vertical to normal  menu(horizontal)";
 $ary[104253] = "/menus/systems/2100160011/imgs/vertical-menu-help-en.png";
 $ary[104254] = "Normal menu and vertical menu";
+$ary[104255] = "Initialize";
+$ary[104256] = "Create(Edit)";
+$ary[104257] = "Create(Initialize)";
 ?>

@@ -2828,6 +2828,36 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- SensitiveFマスタ----
 
+-- ----メニュー作成タイプマスタ
+CREATE TABLE F_MENU_CREATE_TYPE
+(
+MENU_CREATE_TYPE_ID                 %INT%                           , -- 識別シーケンス項番
+MENU_CREATE_TYPE_NAME               %VARCHR%(64)                    , -- メニュー作成タイプ名
+ACCESS_AUTH                         TEXT                            ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY (MENU_CREATE_TYPE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_MENU_CREATE_TYPE_JNL
+(
+JOURNAL_SEQ_NO                      %INT%                           , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                %DATETIME6%                     , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴用変更種別
+
+MENU_CREATE_TYPE_ID                 %INT%                           , -- 識別シーケンス項番
+MENU_CREATE_TYPE_NAME               %VARCHR%(64)                    , -- メニュー作成タイプ名
+ACCESS_AUTH                         TEXT                            ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- メニュー作成タイプマスタ----
+
 -- -------------------------------------------------------
 -- --定期作業実行用(Conductor)
 -- -------------------------------------------------------

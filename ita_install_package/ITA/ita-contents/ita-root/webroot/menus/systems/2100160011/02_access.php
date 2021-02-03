@@ -267,6 +267,7 @@
                 $insertData = array();
                 $insertData['CREATE_MENU_ID'] = $menuData['menu']['CREATE_MENU_ID'];
                 $insertData['STATUS_ID'] = "1";
+                $insertData['MENU_CREATE_TYPE_ID'] = "1"; //新規作成
                 $insertData['FILE_NAME'] = "";
                 $insertData['ACCESS_AUTH'] = $menuData['menu']['ACCESS_AUTH'];
                 $insertData['NOTE'] = "";
@@ -322,7 +323,7 @@
         function updateTable($menuData){
             // グローバル変数宣言
             global $g;
-            
+
             // ローカル変数宣言
             $arrayResult = array();
             try{
@@ -348,7 +349,7 @@
                 if(!array_key_exists("MENUGROUP_FOR_SUBST",$menuData['menu']))  $menuData['menu']['MENUGROUP_FOR_SUBST'] = "";
                 if(!array_key_exists("MENUGROUP_FOR_VIEW",$menuData['menu']))   $menuData['menu']['MENUGROUP_FOR_VIEW'] = "";
                 if(!array_key_exists("VERTICAL",$menuData['menu']))             $menuData['menu']['VERTICAL'] = "";
-                
+
                 // 縦メニュー利用とリピートのチェック
                 if($menuData['menu']['VERTICAL'] == 1 && !array_key_exists('r1',$menuData['repeat'])){
                     $arrayResult[0] = "002";
@@ -416,13 +417,37 @@
                     throw new Exception();
                 }
                 $convertParamInfoArray = $result;
-                
+
                 //////////////////////////
                 // メニュー作成情報を更新
                 //////////////////////////
                 $arrayUpdateData = NULL;
                 foreach($createMenuInfoArray as $createMenuInfoData){
                     if($createMenuInfoData['CREATE_MENU_ID'] == $menuData['menu']['CREATE_MENU_ID']){
+                         //「編集」の場合は「作業対象」「縦メニュー利用」「ホストグループ利用」に変更がないことをチェック
+                         if($menuData['type'] === 'update'){
+                            if($createMenuInfoData['TARGET'] != $menuData['menu']['TARGET']){
+                                $arrayResult[0] = "002";
+                                $arrayResult[1] = "";
+                                $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1156');
+                                throw new Exception();
+                            }
+
+                            if($createMenuInfoData['VERTICAL'] != $menuData['menu']['VERTICAL']){
+                                $arrayResult[0] = "002";
+                                $arrayResult[1] = "";
+                                $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1157');
+                                throw new Exception();
+                            }
+
+                            if($createMenuInfoData['PURPOSE'] != $menuData['menu']['PURPOSE']){
+                                $arrayResult[0] = "002";
+                                $arrayResult[1] = "";
+                                $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1158');
+                                throw new Exception();
+                            }
+                         }
+
                          $strNumberForRI = $menuData['menu']['CREATE_MENU_ID'];
                          $arrayUpdateData = array("MENU_NAME"               => $menuData['menu']['MENU_NAME'],
                                                   "TARGET"                  => $menuData['menu']['TARGET'],
@@ -509,11 +534,131 @@
                     throw new Exception($msg);
                 }
                 $columnGroupArray = $result;
-                
+
                 // 既存、使えなくなった項目を廃止
                 foreach($createItemInfoArray as $createItemInfoData){
                     if($createItemInfoData['CREATE_MENU_ID'] == $menuData['menu']['CREATE_MENU_ID']){
                         $key = array_search($createItemInfoData['CREATE_ITEM_ID'], array_column($menuData['item'], 'CREATE_ITEM_ID'));
+
+                        //「編集」の場合は既存の項目データに変更がないことをチェック
+                        if($menuData['type'] === 'update'){
+                            if($key !== false){
+                                $changedFlg = false;
+                                foreach($menuData['item'] as &$itemData){
+                                    if($itemData['CREATE_ITEM_ID'] == $createItemInfoData['CREATE_ITEM_ID']){
+                                        //項目
+                                        if($itemData['INPUT_METHOD_ID'] != $createItemInfoData['INPUT_METHOD_ID']){
+                                            $arrayResult[0] = "002";
+                                            $arrayResult[1] = "";
+                                            $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1159', array($createItemInfoData['ITEM_NAME']));
+                                            throw new Exception();
+                                        }
+                                        //必須チェック
+                                        if($itemData['REQUIRED'] != $createItemInfoData['REQUIRED']){
+                                            $changedFlg = true;
+                                        }
+                                        //一意制約チェック
+                                        if($itemData['UNIQUED'] != $createItemInfoData['UNIQUED']){
+                                            $changedFlg = true;
+                                        }
+
+                                        //文字列(単一行)の場合
+                                        if($itemData['INPUT_METHOD_ID'] == 1){
+                                            //最大バイト数
+                                            if($itemData['MAX_LENGTH'] != $createItemInfoData['MAX_LENGTH']){
+                                                $changedFlg = true;
+                                            }
+                                            //正規表現
+                                            if($itemData['PREG_MATCH'] != $createItemInfoData['PREG_MATCH']){
+                                                $changedFlg = true;
+                                            }
+                                        }
+
+                                        //文字列(複数行)の場合
+                                        if($itemData['INPUT_METHOD_ID'] == 2){
+                                            //最大バイト数
+                                            if($itemData['MULTI_MAX_LENGTH'] != $createItemInfoData['MULTI_MAX_LENGTH']){
+                                                $changedFlg = true;
+                                            }
+                                            //正規表現
+                                            if($itemData['MULTI_PREG_MATCH'] != $createItemInfoData['MULTI_PREG_MATCH']){
+                                                $changedFlg = true;
+                                            }
+                                        }
+
+                                        //整数の場合
+                                        if($itemData['INPUT_METHOD_ID'] == 3){
+                                            //最小値
+                                            if($itemData['INT_MIN'] != $createItemInfoData['INT_MIN']){
+                                                $changedFlg = true;
+                                            }
+                                            //最大値
+                                            if($itemData['INT_MAX'] != $createItemInfoData['INT_MAX']){
+                                                $changedFlg = true;
+                                            }
+                                        }
+
+                                        //小数の場合
+                                        if($itemData['INPUT_METHOD_ID'] == 4){
+                                            //最小値
+                                            if($itemData['FLOAT_MIN'] != $createItemInfoData['FLOAT_MIN']){
+                                                $changedFlg = true;
+                                            }
+                                            //最大値
+                                            if($itemData['FLOAT_MAX'] != $createItemInfoData['FLOAT_MAX']){
+                                                $changedFlg = true;
+                                            }
+                                            //桁数
+                                            if($itemData['FLOAT_DIGIT'] != $createItemInfoData['FLOAT_DIGIT']){
+                                                if($itemData['FLOAT_DIGIT'] != 14){
+                                                    $changedFlg = true;
+                                                }
+                                            }
+                                        }
+
+                                        //プルダウン選択の場合
+                                        if($itemData['INPUT_METHOD_ID'] == 7){
+                                            //選択項目
+                                            if($itemData['OTHER_MENU_LINK_ID'] != $createItemInfoData['OTHER_MENU_LINK_ID']){
+                                                $changedFlg = true;
+                                            }
+                                        }
+
+                                        //パスワードの場合
+                                        if($itemData['INPUT_METHOD_ID'] == 8){
+                                            if($itemData['PW_MAX_LENGTH'] != $createItemInfoData['PW_MAX_LENGTH']){
+                                                $changedFlg = true;
+                                            }
+                                        }
+
+                                        //ファイルアップロードの場合
+                                        if($itemData['INPUT_METHOD_ID'] == 9){
+                                            //最大バイト数
+                                            if($itemData['UPLOAD_MAX_SIZE'] != $createItemInfoData['UPLOAD_MAX_SIZE']){
+                                                $changedFlg = true;
+                                            }
+                                        }
+
+                                        //リンクの場合
+                                        if($itemData['INPUT_METHOD_ID'] == 10){
+                                            //最大バイト数
+                                            if($itemData['LINK_LENGTH'] != $createItemInfoData['LINK_LENGTH']){
+                                                $changedFlg = true;
+                                            }
+                                        }
+
+                                        //変更があった場合にバリデーションエラー
+                                        if($changedFlg == true){
+                                            $arrayResult[0] = "002";
+                                            $arrayResult[1] = "";
+                                            $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1159', array($createItemInfoData['ITEM_NAME']));
+                                            throw new Exception();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         if($key === false){
                             $strNumberForRI = $createItemInfoData['CREATE_ITEM_ID'];       // 主キー
                             $reqDeleteData = array("DISUSE_FLAG"          => "0",
@@ -781,6 +926,11 @@
                 $insertData = array();
                 $insertData['CREATE_MENU_ID'] = $menuData['menu']['CREATE_MENU_ID'];
                 $insertData['STATUS_ID'] = "1";
+                if($menuData['type'] === 'update'){
+                    $insertData['MENU_CREATE_TYPE_ID'] = "3"; //編集
+                }else{
+                    $insertData['MENU_CREATE_TYPE_ID'] = "2"; //初期化
+                }
                 $insertData['FILE_NAME'] = "";
                 $insertData['ACCESS_AUTH'] = $menuData['menu']['ACCESS_AUTH'];
                 $insertData['NOTE'] = "";

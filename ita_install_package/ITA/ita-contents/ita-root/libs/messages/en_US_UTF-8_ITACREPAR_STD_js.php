@@ -64,4 +64,6 @@ $ary["ITACREPAR_1245"] = "Yes";
 $ary["ITACREPAR_1246"] = "Maximum number of<br>bytes in the file";
 $ary["ITACREPAR_1247"] = "File";
 $ary["ITACREPAR_1248"] = "Link";
+$ary["ITACREPAR_1249"] = "Do you want to perform an edit of the menu? \n*The data entered in the existing item will remain, but if you had deleted the existing item, the data entered in that item will be deleted. \nAlso, if the newly added item was set as \"Required\", empty data will be entered in the required field, which may cause data inconsistency. \nIf you need to modify the data, please select \"Cancel\".";
+$ary["ITACREPAR_1250"] = "Do you want to perform menu initialization? \n*The data you have already entered in this menu will be deleted. \nIf you need the entered data, please select \"Cancel\" to back up the data.";
 ?>
