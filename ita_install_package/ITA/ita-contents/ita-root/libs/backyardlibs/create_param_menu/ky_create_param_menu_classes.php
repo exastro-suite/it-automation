@@ -443,6 +443,7 @@ class CreateMenuStatusTable extends BaseTable_CPM {
         $this->columnNames  = array('MM_STATUS_ID',
                                     'CREATE_MENU_ID',
                                     'STATUS_ID',
+                                    'MENU_CREATE_TYPE_ID',
                                     'FILE_NAME',
                                     'ACCESS_AUTH',
                                     'NOTE',
