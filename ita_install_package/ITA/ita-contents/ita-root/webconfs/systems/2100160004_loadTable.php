@@ -57,6 +57,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c02->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102408"));//エクセル・ヘッダでの説明
     $c02->setRequired(true);//登録/更新時には、入力必須
 
+    // メニュー作成タイプ
+    $c05 = new IDColumn('MENU_CREATE_TYPE_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102413"),'F_MENU_CREATE_TYPE','MENU_CREATE_TYPE_ID','MENU_CREATE_TYPE_NAME','',array('OrderByThirdColumn'=>'MENU_CREATE_TYPE_ID'));
+    $c05->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102414"));//エクセル・ヘッダでの説明
+    $c05->setRequired(true);//登録/更新時には、入力必須
+
     // メニュー資材
     $c03 = new FileUploadColumn('FILE_NAME',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102409"));
     $c03->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102410"));//エクセル・ヘッダでの説明
@@ -69,6 +74,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c02);
 
     $table->addColumn($c03);
+
+    $table->addColumn($c05);
 
     // 項目作成情報へのリンク
     $c04 = new LinkButtonColumn('detail_show', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102411"), $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102412"), 'jumpToCreateMenu', array(':FILE_NAME')); 

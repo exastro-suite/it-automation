@@ -44,18 +44,25 @@ define('FILE_CONVERT_H_LOADTABLE_VAL',  'convert_host_00_loadTable_value.php'); 
 define('FILE_CONVERT_H_LOADTABLE_ID',   'convert_host_00_loadTable_id.php');        // 縦管理メニュー(ホスト)用の00_loadTable.phpのデータ部テンプレート(ID用)
 
 define('FILE_HG_SQL',                   'hostgroupDB.sql');                         // ホストグループ用のDB作成用のSQLテンプレート
+define('FILE_HG_EDIT_SQL',              'hostgroupDB_edit.sql');                    // ホストグループ用のDB作成用のSQLテンプレート(編集)
 define('FILE_H_SQL',                    'hostDB.sql');                              // ホスト用のDB作成用のSQLテンプレート
+define('FILE_H_EDIT_SQL',               'hostDB_edit.sql');                         // ホスト用のDB作成用のSQLテンプレート(編集)
 define('FILE_CONVERT_SQL',              'convertDB.sql');                           // 縦管理メニュー(ホストグループ)用のDB作成用のSQLテンプレート
+define('FILE_CONVERT_EDIT_SQL',         'convertDB_edit.sql');                      // 縦管理メニュー(ホストグループ)用のDB作成用のSQLテンプレート(編集)
 define('FILE_CONVERT_H_SQL',            'convert_hostDB.sql');                      // 縦管理メニュー(ホスト)用のDB作成用のSQLテンプレート
+define('FILE_CONVERT_H_EDIT_SQL',       'convert_hostDB_edit.sql');                 // 縦管理メニュー(ホスト)用のDB作成用のSQLテンプレート(編集)
 
 define('FILE_CMDB_LOADTABLE',           'cmdb_00_loadTable.php');                   // データシート用の00_loadTable.phpテンプレート
 define('FILE_CMDB_SQL',                 'cmdbDB.sql');                              // データシート用のDB作成用のSQLテンプレート
+define('FILE_CMDB_EDIT_SQL',            'cmdbDB_edit.sql');                         // データシート用のDB作成用のSQLテンプレート(編集)
 
 define('FILE_H_LOADTABLE_OP',           'oponly_host_00_loadTable.php');            // (オペレーションのみ)ホスト用の00_loadTable.phpテンプレート
 define('FILE_VIEW_LOADTABLE_OP',        'oponly_view_00_loadTable.php');            // (オペレーションのみ)最新値参照用の00_loadTable.phpテンプレート
 define('FILE_CONVERT_H_LOADTABLE_OP',   'oponly_convert_host_00_loadTable.php');    // (オペレーションのみ)縦管理メニュー(ホスト)用の00_loadTable.phpテンプレート
 define('FILE_H_OP_SQL',                 'oponly_hostDB.sql');                       // (オペレーションのみ)ホスト用のDB作成用のSQLテンプレート
+define('FILE_H_OP_EDIT_SQL',            'oponly_hostDB_edit.sql');                  // (オペレーションのみ)ホスト用のDB作成用のSQLテンプレート(編集)
 define('FILE_CONVERT_H_OP_SQL',         'oponly_convert_hostDB.sql');               // (オペレーションのみ)縦管理メニュー(ホスト)用のDB作成用のSQLテンプレート
+define('FILE_CONVERT_H_OP_EDIT_SQL',    'oponly_convert_hostDB_edit.sql');          // (オペレーションのみ)縦管理メニュー(ホスト)用のDB作成用のSQLテンプレート(編集)
 
 define('FILE_PARTS_SNG',                'parts_string.php');                        // 00_loadTable.phpのデータ部テンプレート(単一行文字列用)
 define('FILE_PARTS_MUL',                'parts_multiString.php');                   // 00_loadTable.phpのデータ部テンプレート(複数行文字列用)
@@ -95,6 +102,7 @@ define('REPLACE_UNIQUED',               '★★★UNIQUED★★★');
 define('REPLACE_SIZE',                  '★★★SIZE★★★');
 define('REPLACE_COL_TYPE',              '★★★COLUMN_TYPE★★★');
 define('REPLACE_COL',                   '★★★COLUMN★★★');
+define('REPLACE_ALTER_COL',             '★★★ALTER_COLUMN★★★');
 define('REPLACE_ID_TABLE',              '★★★ID_TABLE_NAME★★★');
 define('REPLACE_ID_PRI',                '★★★PRI_KEY_NAME★★★');
 define('REPLACE_ID_COL',                '★★★ID_COL_NAME★★★');

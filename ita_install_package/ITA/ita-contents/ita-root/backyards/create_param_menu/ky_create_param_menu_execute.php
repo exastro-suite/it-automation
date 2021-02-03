@@ -28,12 +28,13 @@ require_once ROOT_DIR_PATH      . '/libs/backyardlibs/create_param_menu/ky_creat
 require_once CPM_LIB_PATH       . 'ky_create_param_menu_classes.php';
 require_once CPM_LIB_PATH       . 'ky_create_param_menu_functions.php';
 require_once COMMONLIBS_PATH    . 'common_php_req_gate.php';
+$logLevel = LOG_LEVEL;
 
 try{
     $logPrefix = basename( __FILE__, '.php' ) . '_';
     $tmpDir = "";
 
-    if(LOG_LEVEL === 'DEBUG'){
+    if($logLevel === 'DEBUG'){
         // 処理開始ログ
         outputLog($objMTS->getSomeMessage('ITACREPAR-STD-10001', basename( __FILE__, '.php' )));
     }
@@ -44,7 +45,7 @@ try{
     $createMenuStatusArray = getUnexecutedRecord();
     
     if(count($createMenuStatusArray) === 0){
-        if(LOG_LEVEL === 'DEBUG'){
+        if($logLevel === 'DEBUG'){
             outputLog($objMTS->getSomeMessage('ITACREPAR-STD-10004'));
             outputLog($objMTS->getSomeMessage('ITACREPAR-STD-10002', basename( __FILE__, '.php' )));
         }
@@ -90,6 +91,13 @@ try{
                               TEMPLATE_PATH . FILE_PARTS_VIEW_PW,
                               TEMPLATE_PATH . FILE_PARTS_VIEW_UPL,
                               TEMPLATE_PATH . FILE_PARTS_VIEW_LNK,
+                              TEMPLATE_PATH . FILE_HG_EDIT_SQL,
+                              TEMPLATE_PATH . FILE_H_EDIT_SQL,
+                              TEMPLATE_PATH . FILE_CONVERT_EDIT_SQL,
+                              TEMPLATE_PATH . FILE_CONVERT_H_EDIT_SQL,
+                              TEMPLATE_PATH . FILE_CMDB_EDIT_SQL,
+                              TEMPLATE_PATH . FILE_H_OP_EDIT_SQL,
+                              TEMPLATE_PATH . FILE_CONVERT_H_OP_EDIT_SQL,
                              );
     $templateArray = array();
     foreach($templatePathArray as $templatePath){
@@ -143,6 +151,14 @@ try{
     $partViewPassword           = $templateArray[33];
     $partViewUpload             = $templateArray[34];
     $partViewLink               = $templateArray[35];
+    $hgEditSqlTmpl              = $templateArray[36];
+    $hostEditSqlTmpl            = $templateArray[37];
+    $convEditSqlTmpl            = $templateArray[38];
+    $convHostEditSqlTmpl        = $templateArray[39];
+    $cmdbEditSqlTmpl            = $templateArray[40];
+    $hostEditSqlOpTmpl          = $templateArray[41];
+    $convHostSqlOpEditTmpl      = $templateArray[42];
+
 
     //////////////////////////
     // パラメータシート作成情報を取得
@@ -253,6 +269,8 @@ try{
     // 処理対象のデータ件数分ループ
     //////////////////////////
     foreach($createMenuStatusArray as $targetData){
+        //作成タイプを取得
+        $menuCreateTypeId = $targetData['MENU_CREATE_TYPE_ID'];
 
         //////////////////////////
         // パラメータシート作成情報を特定する
@@ -512,10 +530,19 @@ try{
         $errFlg = false;
         $itemColumnGrpArrayArray = array();
 
+        //追加するカラム名の一覧
+        $columnNameListArray = array();
+
         // 項目の件数分ループ
         foreach ($itemInfoArray as &$itemInfo){
             // カラム名を決定する
             $itemInfo['COLUMN_NAME'] = COLUMN_PREFIX . sprintf("%04d", $itemInfo['CREATE_ITEM_ID']);
+
+            //$columnNameListArrayにカラム情報を格納
+            $columnNameListArray[$itemInfo['COLUMN_NAME']] = array('COLUMN_NAME'=>$itemInfo['COLUMN_NAME'], 
+                                                                   'INPUT_METHOD_ID'=>$itemInfo['INPUT_METHOD_ID'], 
+                                                                   'CREATE_ITEM_ID'=>$itemInfo['CREATE_ITEM_ID']
+                                                             );
 
             // カラムグループを決定する
             $columnGroupSplit = array();
@@ -1126,6 +1153,9 @@ try{
             $errFlg = false;
             $convItemColumnGrpArrayArray = array();
 
+            //追加するカラム名の一覧
+            $convColumnNameListArray = array();
+
             // 項目の件数分ループ
             foreach ($convertItemInfoArray as &$itemInfo){
                 // カラム名を決定する
@@ -1134,6 +1164,12 @@ try{
                 if($cpiData['CREATE_ITEM_ID'] == $itemInfo['CREATE_ITEM_ID']){
                     $startColName = $itemInfo['COLUMN_NAME'];
                 }
+
+                //$convColumnNameListArrayにカラム情報を格納
+                $convColumnNameListArray[$itemInfo['COLUMN_NAME']] = array('COLUMN_NAME'=>$itemInfo['COLUMN_NAME'], 
+                                                                       'INPUT_METHOD_ID'=>$itemInfo['INPUT_METHOD_ID'], 
+                                                                       'CREATE_ITEM_ID'=>$itemInfo['CREATE_ITEM_ID']
+                                                                     );
 
                 // カラムグループを決定する
                 $columnGroupSplit = array();
@@ -1486,13 +1522,29 @@ try{
             $cmdbLoadTableVal .= $columnGrpParts;
             $work = str_replace(REPLACE_ITEM,   $cmdbLoadTableVal, $work);
             $cmdbLoadTable = $work;
-            
+
             // データシート用のSQL
-            $work = $cmdbSqlTmpl;
-            $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
-            $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
-            $work = str_replace(REPLACE_COL,        $columns,       $work);
-            $cmdbSql = $work;
+            if($menuCreateTypeId == 3){ //編集モードの場合
+                //カラムの追加/削除sqlを作成
+                $alterColumnSql = createAlterColumnSql("cmdb", $menuTableName, $columnNameListArray);
+                if($alterColumnSql === false){
+                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5023');
+                    outputLog($msg);
+                    throw new Exception($msg);
+                }
+                $work = $cmdbEditSqlTmpl;
+                $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
+                $work = str_replace(REPLACE_ALTER_COL,   $alterColumnSql,   $work);
+                $work = str_replace(REPLACE_COL,        $columns,       $work);
+                $cmdbSql = $work;
+
+            }else{ //初期化および新規作成の場合
+                $work = $cmdbSqlTmpl;
+                $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
+                $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
+                $work = str_replace(REPLACE_COL,        $columns,       $work);
+                $cmdbSql = $work;
+            }
         }
         else{
             if("2" == $cmiData['PURPOSE']){
@@ -1598,54 +1650,163 @@ EOD;
             $viewLoadTable = $work;
 
             // ホストグループ用のSQL
-            $work = $hgSqlTmpl;
-            $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
-            $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
-            $work = str_replace(REPLACE_COL,        $columns,       $work);
-            $hgSql = $work;
-            
+            if("2" == $cmiData['PURPOSE']){
+                if($menuCreateTypeId == 3){ //編集モードの場合
+                    //カラムの追加/削除sqlを作成
+                    $alterColumnSql = createAlterColumnSql("hg", $menuTableName, $columnNameListArray);
+                    if($alterColumnSql === false){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5023');
+                        outputLog($msg);
+                        throw new Exception($msg);
+                    }
+                    $work = $hgEditSqlTmpl;
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
+                    $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
+                    $work = str_replace(REPLACE_COL,        $columns,        $work);
+                    $hgSql = $work;
+                }else{ //初期化および新規作成の場合
+                    $work = $hgSqlTmpl;
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
+                    $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
+                    $work = str_replace(REPLACE_COL,        $columns,       $work);
+                    $hgSql = $work;
+                }
+            }
+
             // ホスト用のSQL
             if("1" == $cmiData['TARGET']){
-                $work = $hostSqlTmpl;
+                if($menuCreateTypeId == 3){ //編集モードの場合
+                    //カラムの追加/削除sqlを作成
+                    $alterColumnSql = createAlterColumnSql("host", $menuTableName, $columnNameListArray);
+                    if($alterColumnSql === false){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5023');
+                        outputLog($msg);
+                        throw new Exception($msg);
+                    }
+                    $work = $hostEditSqlTmpl;
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
+                    $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
+                    $work = str_replace(REPLACE_COL,        $columns,        $work);
+                    $hostSql = $work;
+                }else{ //初期化および新規作成の場合
+                    $work = $hostSqlTmpl;
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
+                    $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
+                    $work = str_replace(REPLACE_COL,        $columns,       $work);
+                    $hostSql = $work;
+                }
             }
             // ホスト(オペレーションのみ)用のSQL
             else if("3" == $cmiData['TARGET']){
-                $work = $hostSqlOpTmpl;
+                if($menuCreateTypeId == 3){ //編集モードの場合
+                    //カラムの追加/削除sqlを作成
+                    $alterColumnSql = createAlterColumnSql("host", $menuTableName, $columnNameListArray);
+                    if($alterColumnSql === false){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5023');
+                        outputLog($msg);
+                        throw new Exception($msg);
+                    }
+                    $work = $hostEditSqlOpTmpl;
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
+                    $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
+                    $work = str_replace(REPLACE_COL,        $columns,        $work);
+                    $hostSql = $work;
+                }else{ //初期化および新規作成の場合
+                    $work = $hostSqlOpTmpl;
+                    $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
+                    $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
+                    $work = str_replace(REPLACE_COL,        $columns,       $work);
+                    $hostSql = $work;
+                }
             }
-            $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
-            $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
-            $work = str_replace(REPLACE_COL,        $columns,       $work);
-            $hostSql = $work;
 
             // パラメータシート(縦)を作成する設定の場合
             if(true === $createConvFlg){
 
                 // 縦メニュー用のSQL
                 if("2" == $cmiData['PURPOSE']){
-                    $work = $convSqlTmpl;
-                    $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                    $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
-                    $work = str_replace(REPLACE_COL,        $convColumns,           $work);
-                    $convertSql = $work;
-                    $work = $convHostSqlTmpl;
-                    $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                    $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
-                    $work = str_replace(REPLACE_COL,        $convColumns,           $work);
-                    $convertSql .= $work;
+                    if($menuCreateTypeId == 3){ //編集モードの場合
+                        //カラムの追加/削除sqlを作成
+                        $alterColumnSql = createAlterColumnSql("conv", $menuTableName, $convColumnNameListArray);
+                        if($alterColumnSql === false){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5023');
+                            outputLog($msg);
+                            throw new Exception($msg);
+                        }
+                        $work = $convEditSqlTmpl;
+                        $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
+                        $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
+                        $work = str_replace(REPLACE_COL,        $convColumns,    $work);
+                        $convertSql = $work;
+                        //カラムの追加/削除sqlを作成
+                        $alterColumnSql = createAlterColumnSql("conv_h", $menuTableName, $convColumnNameListArray);
+                        if($alterColumnSql === false){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5023');
+                            outputLog($msg);
+                            throw new Exception($msg);
+                        }
+                        $work = $convHostEditSqlTmpl;
+                        $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
+                        $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
+                        $work = str_replace(REPLACE_COL,        $convColumns,    $work);
+                        $convertSql .= $work;
+                    }else{ //初期化および新規作成の場合
+                        $work = $convSqlTmpl;
+                        $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                        $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
+                        $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                        $convertSql = $work;
+                        $work = $convHostSqlTmpl;
+                        $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                        $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
+                        $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                        $convertSql .= $work;
+                    }
                 }
                 else if("1" == $cmiData['TARGET']){
-                    $work = $convHostSqlTmpl;
-                    $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                    $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
-                    $work = str_replace(REPLACE_COL,        $convColumns,           $work);
-                    $convertSql = $work;
+                    if($menuCreateTypeId == 3){ //編集モードの場合
+                        //カラムの追加/削除sqlを作成
+                        $alterColumnSql = createAlterColumnSql("conv_h", $menuTableName, $convColumnNameListArray);
+                        if($alterColumnSql === false){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5023');
+                            outputLog($msg);
+                            throw new Exception($msg);
+                        }
+                        $work = $convHostEditSqlTmpl;
+                        $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
+                        $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
+                        $work = str_replace(REPLACE_COL,        $convColumns,    $work);
+                        $convertSql = $work;
+                    }else{ //初期化および新規作成の場合
+                        $work = $convHostSqlTmpl;
+                        $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                        $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
+                        $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                        $convertSql = $work;
+                    }
                 }
                 else if("3" == $cmiData['TARGET']){
-                    $work = $convHostSqlOpTmpl;
-                    $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
-                    $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
-                    $work = str_replace(REPLACE_COL,        $convColumns,           $work);
-                    $convertSql = $work;
+                    if($menuCreateTypeId == 3){ //編集モードの場合
+                        //カラムの追加/削除sqlを作成
+                        $alterColumnSql = createAlterColumnSql("conv_h", $menuTableName, $convColumnNameListArray);
+                        if($alterColumnSql === false){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5023');
+                            outputLog($msg);
+                            throw new Exception($msg);
+                        }
+                        $work = $convHostSqlOpEditTmpl;
+                        $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
+                        $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
+                        $work = str_replace(REPLACE_COL,        $convColumns,    $work);
+                        $convertSql = $work;
+                    }else{ //初期化および新規作成の場合
+                        $work = $convHostSqlOpTmpl;
+                        $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                        $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
+                        $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                        $convertSql = $work; 
+                    }
+
                 }
             }  
         }
@@ -2318,7 +2479,7 @@ EOD;
         }
     }
 
-    if(LOG_LEVEL === 'DEBUG'){
+    if($logLevel === 'DEBUG'){
         // 処理終了ログ
         outputLog($objMTS->getSomeMessage('ITACREPAR-STD-10002', basename( __FILE__, '.php' )));
     }
@@ -2330,7 +2491,7 @@ catch(Exception $e){
         $cmd = "rm -rf '" . $tmpDir . "' 2>&1";
         exec($cmd, $output, $return_var);
     }
-    if(LOG_LEVEL === 'DEBUG'){
+    if($logLevel === 'DEBUG'){
         // 処理終了ログ
         outputLog($objMTS->getSomeMessage('ITACREPAR-STD-10003', basename( __FILE__, '.php' )));
     }
@@ -3945,3 +4106,199 @@ function updateColToRowMng($cpiData, $menuId, $toMenuId, $purpose, $startColName
         return $e->getMessage();
     }
 }
+
+/*
+ * 編集時のカラム追加/削除用SQLを作成
+ */
+function createAlterColumnSql($tableType, $menuTableName, $columnNameListArray){
+    global $objDBCA, $db_model_ch, $objMTS;
+
+    $alterColumnSql = "";
+
+    try{
+        //更新対象のテーブル名
+        $targetTable = "";
+        $targetTableJnl = "";
+        $afterColumn = "";
+        switch($tableType){
+            case 'cmdb':
+                $targetTable = "F_" . $menuTableName . "_H";
+                $targetTableJnl = "F_" . $menuTableName . "_H_JNL";
+                $afterColumn = "ROW_ID";
+                break;
+            case 'host':
+                $targetTable = "F_" . $menuTableName . "_H";
+                $targetTableJnl = "F_" . $menuTableName . "_H_JNL";
+                $afterColumn = "OPERATION_ID";
+                break;
+            case 'hg':
+                $targetTable = "F_" . $menuTableName . "_HG";
+                $targetTableJnl = "F_" . $menuTableName . "_HG_JNL";
+                $afterColumn = "OPERATION_ID";
+                break;
+            case 'conv':
+                $targetTable = "F_" . $menuTableName . "_CONV";
+                $targetTableJnl = "F_" . $menuTableName . "_CONV_JNL";
+                $afterColumn = "INPUT_ORDER";
+                break;
+            case 'conv_h':
+                $targetTable = "F_" . $menuTableName . "_CONV_H";
+                $targetTableJnl = "F_" . $menuTableName . "_CONV_H_JNL";
+                $afterColumn = "INPUT_ORDER";
+                break;
+        }
+
+        //$columnNameListArrayからカラム名だけを抽出
+        $newColumnListArray = array();
+        foreach($columnNameListArray as $target){
+            $newColumnListArray[] = $target['COLUMN_NAME'];
+        }
+
+        //作成済みのテーブルからカラムの一覧を取得
+        $baseTable = new BaseTable_CPM($objDBCA, $db_model_ch);
+        $sql = "DESC " . $targetTable;
+        $result = $baseTable->execQuery($sql, NULL, $objQuery);
+        if(true !== $result){
+            outputLog("SQL=$sql");
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+
+        $fieldListArray = array();
+        while ($row = $objQuery->resultFetch()){
+            $fieldListArray[] = $row['Field'];
+        }
+
+        //カラム名"KY_AUTO_COL_XXXX"のものだけ抜出す
+        $existColumnArray = array();
+        foreach($fieldListArray as $column){
+            if(strpos($column,'KY_AUTO_COL_') !== false){
+                $existColumnArray[] = $column;
+            }
+        }
+
+        //作成済みのテーブルにしかないカラム名を抽出(カラム削除の対象)
+        $existOnlyColumnArray = array_diff($existColumnArray, $newColumnListArray);
+
+        //編集後のテーブルにしかないカラム名を抽出(カラム追加の対象)
+        $newOnlyColumnArray = array_diff($newColumnListArray, $existColumnArray);
+
+        //カラムを追加するSQLを作成    
+        foreach($newOnlyColumnArray as $columnName){
+            $inputMethodId = $columnNameListArray[$columnName]['INPUT_METHOD_ID'];
+            switch($inputMethodId){
+                case 1: //文字列(単一行)
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " TEXT;\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " TEXT;\n";
+                    break;
+                case 2: //文字列(複数行)
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " TEXT;\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " TEXT;\n";
+                    break;
+                case 3: //整数
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " INT;\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " INT;\n";
+                    break;
+                case 4: //小数
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " DOUBLE;\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " DOUBLE;\n";
+                    break;
+                case 5: //日時
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " DATETIME(6);\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " DATETIME(6);\n";
+                    break;
+                case 6: //日付
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " DATETIME(6);\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " DATETIME(6);\n";
+                    break;
+                case 7: //プルダウン
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " INT;\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " INT;\n";
+                    break;
+                case 8: //文字列(PW)
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " TEXT;\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " TEXT;\n";
+                    break;
+                case 9: //ファイルアップロード
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " TEXT;\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " TEXT;\n";
+                    break;
+                case 10://リンク
+                    $alterAddSql    = "ALTER TABLE " . $targetTable    . " ADD " . $columnName . " TEXT;\n";
+                    $alterAddSqlJnl = "ALTER TABLE " . $targetTableJnl . " ADD " . $columnName . " TEXT;\n";
+                    break;
+            }
+            $alterColumnSql = $alterColumnSql . $alterAddSql;
+            $alterColumnSql = $alterColumnSql . $alterAddSqlJnl;
+        }
+
+        //カラムを削除するSQLを作成
+        foreach($existOnlyColumnArray as $columnName){
+            $alterDropSql    = "ALTER TABLE " . $targetTable . " DROP " . $columnName . ";\n";
+            $alterDropSqlJnl = "ALTER TABLE " . $targetTableJnl . " DROP " . $columnName . ";\n";
+            $alterColumnSql = $alterColumnSql . $alterDropSql;
+            $alterColumnSql = $alterColumnSql . $alterDropSqlJnl; 
+        }
+
+        //$columnNameListArrayの順番になるようテーブルのカラム順を整列
+        foreach($columnNameListArray as $columnName => $target){
+            $inputMethodId = $target['INPUT_METHOD_ID'];
+
+            switch($inputMethodId){
+                case 1: //文字列(単一行)
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " TEXT AFTER ". $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " TEXT AFTER ". $afterColumn . ";\n";
+                    break;
+                case 2: //文字列(複数行)
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " TEXT AFTER " . $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " TEXT AFTER " . $afterColumn . ";\n";
+                    break;
+                case 3: //整数
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " INT AFTER " . $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " INT AFTER " . $afterColumn . ";\n";
+                    break;
+                case 4: //小数
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " DOUBLE AFTER " . $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " DOUBLE AFTER " . $afterColumn . ";\n";
+                    break;
+                case 5: //日時
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " DATETIME(6) AFTER " . $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " DATETIME(6) AFTER " . $afterColumn . ";\n";
+                    break;
+                case 6: //日付
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " DATETIME(6) AFTER " . $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " DATETIME(6) AFTER " . $afterColumn . ";\n";
+                    break;
+                case 7: //プルダウン
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " INT AFTER " . $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " INT AFTER " . $afterColumn . ";\n";
+                    break;
+                case 8: //文字列(PW)
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " TEXT AFTER " . $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " TEXT AFTER " . $afterColumn . ";\n";
+                    break;
+                case 9: //ファイルアップロード
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " TEXT AFTER " . $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " TEXT AFTER " . $afterColumn . ";\n";
+                    break;
+                case 10://リンク
+                    $alterModifySql    = "ALTER TABLE " . $targetTable    . " MODIFY " . $columnName . " TEXT AFTER " . $afterColumn . ";\n";
+                    $alterModifySqlJnl = "ALTER TABLE " . $targetTableJnl . " MODIFY " . $columnName . " TEXT AFTER " . $afterColumn . ";\n";
+                    break;
+            }
+            $alterColumnSql = $alterColumnSql . $alterModifySql;
+            $alterColumnSql = $alterColumnSql . $alterModifySqlJnl;
+
+            //現在のColumnNameを次の$afterColumnに設定
+            $afterColumn = $columnName;
+        }
+
+        return $alterColumnSql;
+
+    }catch(Exception $e){
+        return false;
+    }
+
+}
+

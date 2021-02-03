@@ -161,6 +161,10 @@ $ary[1152] = "\"Decimal number digit\" can not be set when \"Link\" is set.";
 $ary[1153] = "\"Menu group:Menu:Item\" can not be set when \"Link\" is set.";
 $ary[1154] = "\"Password maximum number of bytes\" can not be set when \"Link\" is set.";
 $ary[1155] = "\"Maximum number of bytes in the file\" can not be set when \"Link\" is set.";
+$ary[1156] = "You cannot change the \"Creation target\" in \"Edit\".";
+$ary[1157] = "You cannot change the \"Create as hostgroup menu\" in \"Edit\".";
+$ary[1158] = "You cannot change the \"Create as vertical menu\" in \"Edit\".";
+$ary[1159] = "You cannot change the Settings of existing items in \"Edit\". (Item:{})";
 $ary[5001] = "File does not exist. File=[{}].";
 $ary[5002] = "Failed to read the file. File=[{}].";
 $ary[5003] = "Failed to execute SQL. SQL error = [{}].";
@@ -183,4 +187,5 @@ $ary[5019] = "Failed to acquire the specified pulldown menu item.ID=[{}]";
 $ary[5020] = "Failed to create directory. directory = [{}].";
 $ary[5021] = "Failed to change permission. target = [{}], permission = [{}].";
 $ary[5022] = "Failed to copy file. src = [{}], destination = [{}].";
+$ary[5023] = "Failed to create the table update SQL for menu editing.";
 ?>

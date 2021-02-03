@@ -393,6 +393,122 @@ EOD;
   </div>
 </div>
 EOD;
+    } elseif($itaEditorMode === 'edit') {
+    print
+<<< EOD
+<div id="panel-container">
+  <div id="property" data-menu-type="1" data-host-type="1" data-vertical-menu="false" class="editor-tab">
+    <div class="editor-tab-menu">
+      <ul class="editor-tab-menu-list">
+        <li class="editor-tab-menu-list-item" data-tab="menu-info">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104209")}</li>
+      </ul>
+    </div>
+    <div class="editor-tab-contents">
+
+      <div id="menu-info" class="editor-tab-body">
+
+          <div class="property-group">
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104210")} :</div>
+            <table class="property-table">
+              <tbody>
+                <tr>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104211")}</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-id" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
+                </tr>
+                <tr>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104212")}<span class="input_required">*</span> :</th>
+                  <td class="property-td" colspan="3"><input id="create-menu-name" class="property-text" type="text"></td>
+                </tr>
+                <tr>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104213")} :</th>
+                  <td class="property-td" colspan="3">
+                    <select id="create-menu-type" class="property-select" disabled>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104214")}<span class="input_required">*</span> :</th>
+                  <td class="property-td" colspan="3"><input id="create-menu-order" class="property-number" type="number" data-min="0" data-max="2147483647"></td>
+                </tr>
+                <tr class="parameter-sheet">
+                  <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104237")} :</th>
+                  <td class="property-td" colspan="2">
+                    <label class="property-label" ><input type="checkbox" id="create-menu-use-host-group" disabled> {$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104242")}</label>
+                  </td>
+                </tr>
+                <tr class="parameter-sheet parameter-operation">
+                  <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104238")} <span id="vertical-menu-help" class="editor-help" title="Help">?</span> :</th>
+                  <td class="property-td" colspan="2">
+                    <label class="property-label" ><input type="checkbox" id="create-menu-use-vertical" disabled> {$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104242")}</label>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104216")} :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-last-modified" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
+                </tr>
+                <tr>
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104217")} :</th>
+                  <td class="property-td" colspan="3"><span id="create-last-update-user" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="menu-group" class="property-group">
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</div>
+            <table class="property-table">
+              <tbody>
+                <tr class="data-sheet parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104239")}<span class="input_required">*</span> :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-for-input" type="text" class="property-span" data-id="" data-value=""></span></td>
+                </tr>
+                <tr class="parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104240")}<span class="input_required">*</span> :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-for-substitution" type="text" class="property-span" data-id="" data-value=""></span></td>
+                </tr>
+                <tr class="parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104241")}<span class="input_required">*</span> :</th>
+                  <td class="property-td" colspan="3"><span id="create-menu-for-reference" type="text" class="property-span" data-id="" data-value=""></span></td>
+                </tr>
+              </tbody>
+            </table>
+            <ul class="property-button-group">
+              <li><button id="create-menu-group-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</button></li>
+            </ul>
+          </div>
+          
+          <div id="permission-role" class="property-group">
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104243")}</div>
+            <table class="property-table">
+              <tbody>
+                <tr class="data-sheet parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104244")} :</th>
+                  <td class="property-td" colspan="3"><span id="permission-role-name-list" type="text" class="property-span"></span></td>
+                </tr>
+              </tbody>
+            </table>
+            <ul class="property-button-group">
+              <li><button id="permission-role-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104245")}</button></li>
+            </ul>
+          </div>
+
+          <div class="property-group">
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104224")}</div>
+            <textarea id="create-menu-explanation" class="property-textarea" spellcheck="false"></textarea>
+          </div>
+
+          <div class="property-group">
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104225")}</div>
+            <textarea id="create-menu-note" class="property-textarea" spellcheck="false"></textarea>
+          </div>
+
+          <p class="note">※<span class="input_required">*</span>{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104235")}</p>
+
+      </div>
+    </div>
+  </div>
+</div>
+EOD;
     } else {
     print
 <<< EOD
@@ -428,7 +544,7 @@ EOD;
                 </tr>
                 <tr>
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104214")}<span class="input_required">*</span> :</th>
-                  <td class="property-td" colspan="3"><input id="create-menu-order" class="property-number" type="number"></td>
+                  <td class="property-td" colspan="3"><input id="create-menu-order" class="property-number" type="number" data-min="0" data-max="2147483647"></td>
                 </tr>
                 <tr class="parameter-sheet">
                   <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104237")} :</th>
@@ -529,6 +645,7 @@ EOD;
 <<< EOD
         <ul class="menu-editor-menu-ul">
           <li class="menu-editor-menu-li"><button class="menu-editor-menu-button positive" data-menu-button="edit">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104227")}</button></li>
+          <li class="menu-editor-menu-li"><button class="menu-editor-menu-button positive" data-menu-button="initialize">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104255")}</button></li>
           <li class="menu-editor-menu-li"><button class="menu-editor-menu-button positive" data-menu-button="diversion">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104228")}</button></li>
 EOD;
       if ( $createManagementMenuID !== '' ) {
@@ -544,11 +661,20 @@ EOD;
         </ul>
 EOD;
       }
-    } else if ( $itaEditorMode === 'edit') {
+    } else if ( $itaEditorMode === 'initialize') {
     print
 <<< EOD
         <ul class="menu-editor-menu-ul">
-          <li class="menu-editor-menu-li"><button class="menu-editor-menu-button positive" data-menu-button="update">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104226")}</button></li>
+          <li class="menu-editor-menu-li"><button class="menu-editor-menu-button positive" data-menu-button="update-initialize">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104257")}</button></li>
+          <li class="menu-editor-menu-li"><button class="menu-editor-menu-button negative" data-menu-button="reload-initialize">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104230")}</button></li>
+          <li class="menu-editor-menu-li"><button class="menu-editor-menu-button negative" data-menu-button="cancel">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104231")}</button></li>
+        </ul>
+EOD;
+    } else if ( $itaEditorMode === 'edit' ) {
+    print
+<<< EOD
+        <ul class="menu-editor-menu-ul">
+          <li class="menu-editor-menu-li"><button class="menu-editor-menu-button positive" data-menu-button="update">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104256")}</button></li>
           <li class="menu-editor-menu-li"><button class="menu-editor-menu-button negative" data-menu-button="reload">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104230")}</button></li>
           <li class="menu-editor-menu-li"><button class="menu-editor-menu-button negative" data-menu-button="cancel">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104231")}</button></li>
         </ul>
