@@ -166,6 +166,7 @@ MM_STATUS_ID                        INT                             , -- 識別�
 
 CREATE_MENU_ID                      INT                             ,
 STATUS_ID                           INT                             ,
+MENU_CREATE_TYPE_ID                 INT                             ,
 FILE_NAME                           VARCHAR (64)                    ,
 ACCESS_AUTH                         TEXT                            ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
@@ -184,6 +185,7 @@ JOURNAL_ACTION_CLASS                VARCHAR  (8)                    , -- 履歴�
 MM_STATUS_ID                        INT                             , -- 識別シーケンス項番
 CREATE_MENU_ID                      INT                             ,
 STATUS_ID                           INT                             ,
+MENU_CREATE_TYPE_ID                 INT                             ,
 FILE_NAME                           VARCHAR (64)                    ,
 ACCESS_AUTH                         TEXT                            ,
 NOTE                                VARCHAR  (4000)                 , -- 備考

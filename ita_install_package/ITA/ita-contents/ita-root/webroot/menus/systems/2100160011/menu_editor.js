@@ -346,6 +346,15 @@ const listIdName = function( type, id ) {
 let modeDisabled = '';
 if ( menuEditorMode === 'view') modeDisabled = ' disabled';
 
+let modeKeepData = '';
+if ( menuEditorMode === 'edit') modeKeepData = ' disabled';
+
+let onHover = ' on-hover';
+if ( menuEditorMode === 'edit') onHover = '';
+
+let disbledCheckbox = '';
+if ( menuEditorMode === 'edit') disbledCheckbox = ' disabled-checkbox';
+
 // HTML
 const columnHeaderHTML = ''
   + '<div class="menu-column-move"></div>'
@@ -419,56 +428,56 @@ const columnHTML = ''
     + '</div>'
     + '<div class="menu-column-body">'
       + '<div class="menu-column-type">'
-        + '<select class="menu-column-type-select"'+modeDisabled+'>' + inputMethodHTML + '</select>'
+        + '<select class="menu-column-type-select"'+modeDisabled+''+modeKeepData+'>' + inputMethodHTML + '</select>'
       + '</div>'
       + '<div class="menu-column-config">'
         + '<table class="menu-column-config-table" date-select-value="1">'
           + '<tr class="multiple single link">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number max-byte" type="number" data-min="2" data-max="8192" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number max-byte" type="number" data-min="2" data-max="8192" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="multiple single">'
             + '<th>' + textCode('0012') + '</th>'
-            + '<td><input class="config-text regex" type="text" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-text regex" type="text" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="number-int">'
             + '<th>' + textCode('0013') + '</th>'
-            + '<td><input class="config-number int-min-number" data-min="-2147483648" data-max="2147483647" type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number int-min-number" data-min="-2147483648" data-max="2147483647" type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="number-int">'
             + '<th>' + textCode('0014') + '</th>'
-            + '<td><input class="config-number int-max-number" data-min="-2147483648" data-max="2147483647"  type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number int-max-number" data-min="-2147483648" data-max="2147483647"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="number-float">'
             + '<th>' + textCode('0013') + '</th>'
-            + '<td><input class="config-number float-min-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number float-min-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="number-float">'
             + '<th>' + textCode('0014') + '</th>'
-            + '<td><input class="config-number float-max-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number float-max-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="number-float">'
             + '<th>' + textCode('0015') + '</th>'
-            + '<td><input class="config-number digit-number" data-min="1" data-max="14" type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number digit-number" data-min="1" data-max="14" type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="select">'
             + '<th>' + textCode('0016') + '<span class="input_required">*</span></th>'
             + '<td>'
-              + '<select class="config-select pulldown-select"'+modeDisabled+'>' + selectPulldownListHTML + '</select>'
+              + '<select class="config-select pulldown-select"'+modeDisabled+''+modeKeepData+'>' + selectPulldownListHTML + '</select>'
             + '</td>'
           + '</tr>'
           + '<tr class="password">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="file">'
             + '<th>' + textCode('0042') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="all">'
             + '<td colspan="2">'
-              + '<label class="required-label on-hover"><input class="config-checkbox required" type="checkbox"'+modeDisabled+'><span></span>' + textCode('0017') + '</label>'
-              + '<label class="unique-label on-hover"><input class="config-checkbox unique" type="checkbox"'+modeDisabled+'><span></span>' + textCode('0018') + '</label>'
+              + '<label class="required-label'+onHover+'"><input class="config-checkbox required'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0017') + '</label>'
+              + '<label class="unique-label'+onHover+'"><input class="config-checkbox unique'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0018') + '</label>'
             + '</td>'
           + '</tr>'
           + '<tr class="all">'
@@ -688,7 +697,30 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
         buttonType = $button.attr('data-menu-button');
   switch ( buttonType ) {
     case 'newColumn':
+      const currentItemCounter = itemCounter;
       addColumn( $menuTable, 'item', itemCounter++ );
+      //editの場合disabledを外す。
+      if(menuEditorMode === 'edit'){
+        const $newColumnTarget = $menuEditor.find('#i'+currentItemCounter);
+        $newColumnTarget.find('.menu-column-type-select').prop('disabled', false); //カラムタイプ
+        $newColumnTarget.find('.config-number'+'.max-byte').prop('disabled', false); //最大バイト数
+        $newColumnTarget.find('.config-text'+'.regex').prop('disabled', false); //正規表現
+        $newColumnTarget.find('.config-number'+'.int-min-number').prop('disabled', false); //整数の最小値
+        $newColumnTarget.find('.config-number'+'.int-max-number').prop('disabled', false); //整数の最大値
+        $newColumnTarget.find('.config-number'+'.float-min-number').prop('disabled', false); //少数の最小値
+        $newColumnTarget.find('.config-number'+'.float-max-number').prop('disabled', false); //少数の最大値
+        $newColumnTarget.find('.config-number'+'.digit-number').prop('disabled', false); //少数の桁数
+        $newColumnTarget.find('.config-select'+'.pulldown-select').prop('disabled', false); //選択項目
+        $newColumnTarget.find('.config-number'+'.password-max-byte').prop('disabled', false); //パスワード最大バイト数
+        $newColumnTarget.find('.config-number'+'.file-max-size').prop('disabled', false); //ファイル最大バイト数
+        $newColumnTarget.find('.config-checkbox'+'.required').prop('disabled', false); //必須
+        $newColumnTarget.find('.config-checkbox'+'.unique').prop('disabled', false); //一意制
+        $newColumnTarget.find('.config-checkbox'+'.required').removeClass('disabled-checkbox'); //必須のチェックボックスの色約
+        $newColumnTarget.find('.config-checkbox'+'.unique').removeClass('disabled-checkbox'); //一意制約のチェックボックスの色
+        $newColumnTarget.find('.required-label').addClass('on-hover'); //必須のカーソル動作
+        $newColumnTarget.find('.unique-label').addClass('on-hover'); //一意制約のカーソル動作
+      }
+
       break;
     case 'newColumnGroup':
       addColumn( $menuTable, 'group', groupCounter++ );
@@ -708,9 +740,18 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
       if ( !window.confirm(getSomeMessage("ITACREPAR_1201") ) ) return false;
       createRegistrationData('registration');
       break;
+    case 'update-initialize':
+      if ( !window.confirm(getSomeMessage("ITACREPAR_1250") ) ) return false;
+      createRegistrationData('update-initialize');
+      break;
     case 'update':
-      if ( !window.confirm(getSomeMessage("ITACREPAR_1201") ) ) return false;
+      if ( !window.confirm(getSomeMessage("ITACREPAR_1249") ) ) return false;
       createRegistrationData('update');
+      break;
+    case 'initialize':
+    case 'reload-initialize':
+      // 初期化モードで開きなおす
+      location.href = '/default/menu/01_browse.php?no=2100160011&create_menu_id=' + menuEditorTargetID + '&mode=initialize';
       break;
     case 'edit':
     case 'reload':
@@ -803,7 +844,7 @@ $menuEditor.on('change', '.config-text', function() {
   previewTable();
   history.add();
 });
-$menuEditor.on('change', '.config-number, .menu-column-repeat-number-input', function() {
+$menuEditor.on('change', '.config-number, .menu-column-repeat-number-input, .property-number', function() {
   const $input = $( this ),
         min = Number( $input.attr('data-min') ),
         max = Number( $input.attr('data-max') );
@@ -1846,7 +1887,8 @@ const createRegistrationData = function( type ){
     'menu' : {},
     'group' : {},
     'item' : {},
-    'repeat' : {}
+    'repeat' : {},
+    'type' : {}
   };
   
   // Order用カウンター
@@ -1854,7 +1896,7 @@ const createRegistrationData = function( type ){
   
   // メニュー作成情報
   createMenuJSON['menu'] = getPanelParameter();
-  if ( menuEditorMode === 'edit' ) {
+  if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit') {
     createMenuJSON['menu']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['menu']['LAST_UPDATE_TIMESTAMP'];
   }
   
@@ -1920,7 +1962,7 @@ const createRegistrationData = function( type ){
                 LAST_UPDATE_TIMESTAMP = null;
 
             if ( CREATE_ITEM_ID === '') CREATE_ITEM_ID = null;
-            if ( menuEditorMode === 'edit' ) {
+            if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit' ) {
               if ( menuEditorArray.selectMenuInfo['item'][key] ) {
                 LAST_UPDATE_TIMESTAMP = menuEditorArray.selectMenuInfo['item'][key]['LAST_UPDATE_TIMESTAMP'];
               }
@@ -1933,7 +1975,7 @@ const createRegistrationData = function( type ){
               key = key + '[' + repeatCount + ']';
 
               // 更新時のリピート項目チェック
-              if ( menuEditorMode === 'edit' ) {
+              if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit' ) {
                 const originalBeforeName = CREATE_ITEM_ID_to_KEY( CREATE_ITEM_ID ),
                       repeatItemData = repeatItemCheckID( originalBeforeName + '[' + repeatCount + ']');
                 CREATE_ITEM_ID = repeatItemData[0];
@@ -2017,7 +2059,7 @@ const createRegistrationData = function( type ){
                   'COLUMNS' : columns,
                   'REPEAT_CNT' : repeatNumber
                 }
-                if ( menuEditorMode === 'edit' ) {
+                if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit' ) {
                   if ( menuEditorArray.selectMenuInfo['repeat']['r1'] && menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'] ) {
                     createMenuJSON['repeat']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'];
                   }
@@ -2040,7 +2082,7 @@ const createRegistrationData = function( type ){
               key = key + '[' + repeatCount + ']';
 
               // 更新時のリピート項目チェック
-              if ( menuEditorMode === 'edit' ) {
+              if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit' ) {
                 const originalBeforeName = COL_GROUP_ID_to_KEY( groupID ),
                       repeatGroupID = repeatGroupCheckID( originalBeforeName + '[' + repeatCount + ']');
                 groupID = repeatGroupID;
@@ -2079,6 +2121,9 @@ const createRegistrationData = function( type ){
   });
   createMenuJSON['menu']['columns'] = topColumns;
 
+  //メニュー作成タイプを格納
+  createMenuJSON['type'] = type;
+
   // 解析スタート
   tableAnalysis ( $menuTable, 0 );
   
@@ -2087,7 +2132,7 @@ const createRegistrationData = function( type ){
 
   if ( type === 'registration' ) {
     registerTable(menuData);
-  } else if ( type === 'update' ) {
+  } else if ( type === 'update-initialize' || type === 'update') {
     updateTable(menuData);
   }
 
