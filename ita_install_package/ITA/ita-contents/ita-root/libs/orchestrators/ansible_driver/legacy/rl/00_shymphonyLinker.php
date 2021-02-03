@@ -1026,7 +1026,7 @@ $tmpFx = function ($objOLA, $strSearchKeyValue="", $boolBinaryDistinctOnDTiS=fal
               ."{$strPatternMasterDispColId} PATTERN_NAME "
               ."FROM   {$strPatternMasterTableId} "
               ."WHERE  {$strWhereZone} "
-              ."ORDER  BY DISP_SEQ ASC";
+              ."ORDER  BY PATTERN_ID ASC";
         
         $retArray = singleSQLCoreExecute($objDBCA, $sql, $tmpAryBind, $strFxName);
         if( $retArray[0]===true ){
