@@ -244,6 +244,11 @@
             }
             if( $tmpAryRetBody[0]['ExpiryOut'] === true ){
                 //----パスワード有効期限切れ
+                // 汎用系メッセージ
+                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-2001",array($tmpStrErrMsgBody)));
+
+                webRequestForceQuitFromEveryWhere(401,11410501);
+                exit();
                 //パスワード有効期限切れ----
             }
             unset($tmpAryRetBody);
