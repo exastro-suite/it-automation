@@ -178,11 +178,38 @@ function insertCMStatus($create_menu_id){
     $now = \DateTime::createFromFormat("U.u", sprintf("%6F", microtime(true)));
     $tsString = date("Y/m/d H:i:s") . "." . $now->format("u");
 
+    //作成対象のテーブルの有無をチェックしてメニュー作成タイプを決定する
+    $checkTableName = "F_KY_AUTO_TABLE_" . sprintf("%04d", $create_menu_id);
+    $checkSql = "SELECT TABLE_NAME FROM F_MENU_TABLE_LINK WHERE TABLE_NAME LIKE '".$checkTableName."%'";
+
+    $objQuery = $g['objDBCA']->sqlPrepare($checkSql);
+    if ($objQuery === false) {
+        web_log($checkSql);
+        web_log($objQuery->getLastError());
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+    }
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        web_log($checkSql);
+        web_log($objQuery->getLastError());
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900066'));
+    }
+    $row = $objQuery->resultFetch();
+
+    if($row == false){
+        //同じIDのメニューが無い場合は新規作成
+        $create_type_id = 1; //新規作成
+    }else{
+        //同じIDのメニューがある場合は初期化
+        $create_type_id = 2; //初期化
+    }
+
 
     $sql  = "INSERT INTO F_CREATE_MENU_STATUS SET ";
     $sql  .= " MM_STATUS_ID =".$seq;
     $sql  .= " ,CREATE_MENU_ID =".$create_menu_id;
     $sql  .= " ,STATUS_ID = 1";
+    $sql  .= " ,MENU_CREATE_TYPE_ID =".$create_type_id;
     $sql  .= " ,DISUSE_FLAG = 0";
     $sql  .= " ,LAST_UPDATE_TIMESTAMP = '". $tsString."'";
     $sql  .= " ,LAST_UPDATE_USER =".$userId;
@@ -195,6 +222,7 @@ function insertCMStatus($create_menu_id){
     $sql_j  .= " ,MM_STATUS_ID =".$seq;
     $sql_j  .= " ,CREATE_MENU_ID =".$create_menu_id;
     $sql_j  .= " ,STATUS_ID = 1";
+    $sql_j  .= " ,MENU_CREATE_TYPE_ID =".$create_type_id;
     $sql_j  .= " ,DISUSE_FLAG = 0";
     $sql_j  .= " ,LAST_UPDATE_TIMESTAMP = '". $tsString."'";
     $sql_j  .= " ,LAST_UPDATE_USER =".$userId;
