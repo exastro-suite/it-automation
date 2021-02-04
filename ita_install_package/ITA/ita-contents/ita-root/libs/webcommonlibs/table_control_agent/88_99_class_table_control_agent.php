@@ -874,12 +874,12 @@ class TableControlAgent {
 			$c = new JournalRegClassColumn($this->getRequiredJnlRegClassColumnID(), $strJnlClassColLabel);
 			$this->addColumn($c);
 			//
+			$c = new JournalBtnColumn($this->getJnlButtonColumnID(), $strJournalColLabel);
+            $this->addColumn($c);
 			$c = new UpdBtnColumn($this->getRequiredUpdateButtonColumnID(), $strUpdateColLabel, $this->getRequiredDisuseColumnID());
 			$this->addColumn($c);
 			$c = new DelBtnColumn($this->getRequiredDisuseColumnID(), $strDisuseFlagColLabel);
 			$this->addColumn($c);
-			$c = new JournalBtnColumn($this->getJnlButtonColumnID(), $strJournalColLabel);
-            $this->addColumn($c);
 			//
 			$c = new RowIdentifyColumn($this->getRowIdentifyColumnID(), $strRIColumnLabel);
 			$this->addColumn($c);
