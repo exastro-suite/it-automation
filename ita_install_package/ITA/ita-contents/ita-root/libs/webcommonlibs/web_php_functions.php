@@ -2585,7 +2585,7 @@ class RoleBasedAccessControl {
         // unset($objQuery); $objQueryの開放は呼び元で実施
         global $g;
         // ACCESS_AUTHカラムの有無を判定し対象レコードをカウント ----
-        if($objTable->getAccessAuth()) {
+        if($objTable->getAccessAuth() && "" != $g['login_id']) {
             // ログインユーザーに紐づていてるロールを取得 ----
             $userID = $g['login_id'];
             $obj  = new RoleBasedAccessControl($g['objDBCA']);
