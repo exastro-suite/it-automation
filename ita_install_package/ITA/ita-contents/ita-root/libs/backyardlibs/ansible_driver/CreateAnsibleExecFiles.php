@@ -6949,7 +6949,6 @@ class CreateAnsibleExecFiles {
 
                         switch($this->getAnsibleDriverID()){
                         case DF_PIONEER_DRIVER_ID:
-                            $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= "\"" . $row['VARS_ENTRY'] . "\"";
                             // 暗号化されたホスト変数のリスト生成(pioneer用)
                             if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
                                 $ina_vault_host_vars_file_list[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\"" . $row['VARS_ENTRY'] . "\"";
@@ -7094,7 +7093,6 @@ class CreateAnsibleExecFiles {
 
                         switch($this->getAnsibleDriverID()){
                         case DF_PIONEER_DRIVER_ID:
-                            $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= "\"" . $row['VARS_ENTRY'] . "\"";
                             // 暗号化されたホスト変数のリスト生成(pioneer用)
                             if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
                                 $ina_vault_host_vars_file_list[$row['IP_ADDRESS']][$row['VARS_NAME']] = "\"" . $row['VARS_ENTRY'] . "\"";
