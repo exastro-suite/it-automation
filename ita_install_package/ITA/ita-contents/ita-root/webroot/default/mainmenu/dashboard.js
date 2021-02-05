@@ -1993,20 +1993,34 @@ function resultDummyData() {
     return result;
 }
 function setPieChart( resultData, type ) {
-
+  
+  // Movement一覧URL
+  const movementListURL = {
+    'ansible-legacy': '/default/menu/01_browse.php?no=2100020103',
+    'ansible-pioneer': '/default/menu/01_browse.php?no=2100020203',
+    'ansible-legacy-role': '/default/menu/01_browse.php?no=2100020306',
+    'terraform': '/default/menu/01_browse.php?no=2100080004'
+  };
+      
   let widgetID, pieChartData, pieChartTitle = '';
 
   switch( type ) {
-    case 'movement':
+    case 'movement': {
       widgetID = 4;
       pieChartData = {};
       pieChartTitle = 'Movement';
       for ( let key in resultData ) {
         const className = resultData[key]['name'].replace(/\s/g, '-').toLocaleLowerCase();
         pieChartData[ resultData[key]['name'] ] = [ className, resultData[key]['number'] ];
+        if ( movementListURL[ className ] !== undefined ) {
+          pieChartData[ resultData[key]['name'] ][2] = movementListURL[ className ];
+        } else {
+          pieChartData[ resultData[key]['name'] ][2] = undefined;
+        }
       }
       // ダミーデータ読み込み
       if ( gWidgetDummyFlag === true ) pieChartData = movementDummyData();
+      }
       break;
     case 'status':
       widgetID = 5;
@@ -2113,7 +2127,11 @@ function setPieChart( resultData, type ) {
       tableHTML += '<td>' + zeroCheck( pieChartData[key][1] ) + '</a></td></tr>';
     } else {
       // Movement
-      tableHTML += '<td>' + zeroCheck( pieChartData[key][1] ) + '</td></tr>';
+      if ( pieChartData[key][2] !== undefined ) {
+        tableHTML += '<td><a href="' + pieChartData[key][2] + '" target="_blank">' + zeroCheck( pieChartData[key][1] ) + '</a></td></tr>';
+      } else {
+        tableHTML += '<td>' + zeroCheck( pieChartData[key][1] ) + '</td></tr>';
+      }
     }
   }
   tableHTML += '</tbody></table></div>';
@@ -2350,6 +2368,13 @@ function setPieChart( resultData, type ) {
             $leave.css('stroke-width','20');
             $leave.closest('.widget-body').find('.emphasis').removeClass('emphasis');
           }
+        },
+        'click': function(){
+          const $click = $( this ),
+                target = $click.attr('data-type');
+          if ( movementListURL[ target ] !== undefined ) {
+            window.open( movementListURL[ target ], 'blank');
+          }
         }
       });
     }, 100 );
@@ -2565,8 +2590,8 @@ for ( let i = historyLength - 1; i >= 0; i-- ) {
         const conductorListURL = '/default/menu/01_browse.php?no=2100180006',
               symphonyListURL = '/default/menu/01_browse.php?no=2100000310',
               statusInputID = 'Filter1Tbl_4',
-              StartDateID = 'Filter1Tbl_12__S',
-              EndDataID = 'Filter1Tbl_12__E';
+              StartDateID = 'Filter1Tbl_11__S',
+              EndDataID = 'Filter1Tbl_11__E';
         
         const setResult = function(){
             // Table
