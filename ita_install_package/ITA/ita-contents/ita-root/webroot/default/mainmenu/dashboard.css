@@ -750,6 +750,9 @@ opacity: .7;
 .pie-chart {
 padding-bottom: 0;
 }
+.pie-chart.start {
+pointer-events: none;
+}
 .pie-chart-inner {
 position: relative;
 z-index: 1;
@@ -820,9 +823,6 @@ transition-duration: 1s;
 transform-origin: center center;
 transition-property: stroke-dasharray;
 }
-.widget-grid[data-widget-id="4"] .pie-chart-circle {
-cursor: pointer;
-}
 .circle-zero {
 stroke: rgba( 0,0,0,.1 );
 stroke-dasharray: 0;
@@ -863,7 +863,7 @@ text-align: right;
 .number-table .emphasis td {
 background-color: rgba( 255,255,0,.2 );
 }
-.zero {
+span.zero {
 color: #DDD!important;
 }
 /* -------------------------------------------------- *

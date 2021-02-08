@@ -2113,13 +2113,15 @@ function setPieChart( resultData, type ) {
     if ( type !== 'movement') {
       // Conductor
       if ( pieChartData[key][2] !== 0 ) {
-        tableHTML += '<td><a href="' + conductorListURL + '&filter=on&' + statusInputID + '=' + encodeURIComponent( key ) + '" target="_blank">' + pieChartData[key][2] + '</a></td>';
+        tableHTML += '<td><a href="' + conductorListURL + '&filter=on&' + statusInputID + '=' + encodeURIComponent( key ) + '" target="_blank" title="' + key + '">'
+        + pieChartData[key][2] + '</a></td>';
       } else {
         tableHTML += '<td>' + zeroCheck( pieChartData[key][2] ) + '</td>';
       }
-      // Conductor
+      // Symphony
       if ( pieChartData[key][3] !== 0 ) {
-        tableHTML += '<td><a href="' + symphonyListURL + '&filter=on&' + statusInputID + '=' + encodeURIComponent( key ) + '" target="_blank">' + pieChartData[key][3] + '</a></td>';
+        tableHTML += '<td><a href="' + symphonyListURL + '&filter=on&' + statusInputID + '=' + encodeURIComponent( key ) + '" target="_blank" title="' + key + '">'
+        + pieChartData[key][3] + '</a></td>';
       } else {
         tableHTML += '<td>' + zeroCheck( pieChartData[key][3] ) + '</td>';
       }
@@ -2128,7 +2130,7 @@ function setPieChart( resultData, type ) {
     } else {
       // Movement
       if ( pieChartData[key][2] !== undefined ) {
-        tableHTML += '<td><a href="' + pieChartData[key][2] + '" target="_blank">' + zeroCheck( pieChartData[key][1] ) + '</a></td></tr>';
+        tableHTML += '<td><a href="' + pieChartData[key][2] + '" target="_blank" title="' + key + '">' + pieChartData[key][1] + '</a></td></tr>';
       } else {
         tableHTML += '<td>' + zeroCheck( pieChartData[key][1] ) + '</td></tr>';
       }
@@ -2183,6 +2185,16 @@ function setPieChart( resultData, type ) {
       });
       // 追加
       $pieChartSvg.append( $pieChartCircle );
+      // Movementの場合リンクを追加する
+      if ( type === 'movement') {
+        const $pieChartLink = $( document.createElementNS( xmlns, 'a') );
+        $pieChartLink.attr({
+          'href': movementListURL[ pieChartData[key][0] ],
+          'xlink:href': movementListURL[ pieChartData[key][0] ],
+          'target': '_blank'
+        });
+        $pieChartCircle.wrap( $pieChartLink );
+      }
       // 割合追加
       if ( ratio > 0 ) {
         const textAngle = serialAngleNumber + ( angle / 2 ),
@@ -2338,7 +2350,7 @@ function setPieChart( resultData, type ) {
   });  
   $pieChartTotalSvg.append( $pieChartName, $pieChartNumber, $pieChartTotal );
   
-  const $pieChartHTML = $('<div class="pie-chart"><div class="pie-chart-inner"></div></div>' + tableHTML );
+  const $pieChartHTML = $('<div class="pie-chart start"><div class="pie-chart-inner"></div></div>' + tableHTML );
   $pieChartHTML.find('.pie-chart-inner').append( $pieChartTotalSvg, $pieChartSvg, $pieChartRatioSvg );
   
   $('.widget-grid[data-widget-id="' + widgetID + '"]').eq(0).find('.widget-body').html( $pieChartHTML );
@@ -2346,37 +2358,43 @@ function setPieChart( resultData, type ) {
   // 円グラフアニメーション
   $pieChartSvg.ready( function(){
     setTimeout( function() {
+      const $circles = $pieChartSvg.find('.pie-chart-circle'),
+            circleLength = $circles.length;
+      let circleAnimationCount = 0;
       $pieChartRatioSvg.css('opacity','1');
-      $pieChartSvg.find('.pie-chart-circle').each( function(){
+      $circles.each( function(){
         const $circle = $( this );
         if ( $circle.attr('data-style') !== undefined ) {
           $circle.attr('style', 'stroke-dasharray:' + $circle.attr('data-style') );
         }
       }).on({
-        'mouseenter': function(){
-          const $enter = $( this ),
-                dataType = $enter.attr('data-type');
-          if ( dataType !== undefined ) {
-            $enter.closest('.widget-body').find('tr[data-type="' + dataType + '"]').addClass('emphasis');
-            $enter.css('stroke-width','25');
-          }
-        },
-        'mouseleave': function(){
-          const $leave = $( this ),
-                dataType = $leave.attr('data-type');
-          if ( dataType !== undefined ) {
-            $leave.css('stroke-width','20');
-            $leave.closest('.widget-body').find('.emphasis').removeClass('emphasis');
-          }
-        },
-        'click': function(){
-          const $click = $( this ),
-                target = $click.attr('data-type');
-          if ( movementListURL[ target ] !== undefined ) {
-            window.open( movementListURL[ target ], 'blank');
-          }
+        'transitionend webkitTransitionEnd': function() {
+          // 全てのアニメーションが終わったら
+          circleAnimationCount++;
+          if ( circleAnimationCount >= circleLength ) {
+            $pieChartHTML.removeClass('start');
+            $circles.on({
+              'mouseenter': function(){
+                const $enter = $( this ),
+                      dataType = $enter.attr('data-type');
+                if ( dataType !== undefined ) {
+                  $enter.closest('.widget-body').find('tr[data-type="' + dataType + '"]').addClass('emphasis');
+                  $enter.css('stroke-width','25');
+                }
+              },
+              'mouseleave': function(){
+                const $leave = $( this ),
+                      dataType = $leave.attr('data-type');
+                if ( dataType !== undefined ) {
+                  $leave.css('stroke-width','20');
+                  $leave.closest('.widget-body').find('.emphasis').removeClass('emphasis');
+                }
+              }
+            });
+          }        
         }
       });
+      
     }, 100 );
   });
   
@@ -2602,22 +2620,26 @@ for ( let i = historyLength - 1; i >= 0; i-- ) {
             // thead
             tableHTML += '<tr><th>Result</th><th>CON</th><th>SYM</th><th>SUM</th></tr></thead><tbody>';
             // tbody
-            const resultTextLength = resultText.length;
-            for( let i = 1; i < resultTextLength; i++ ) {
-              const param = '&filter=on&' + statusInputID + '=' + encodeURIComponent( resultText[i][0] )
+            const resultTextLength = resultText.length,
+                  param = '&filter=on',
+                  paramDate = ''
                   + '&' + StartDateID + '=' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + histryDay[dataID][2]
                   + '&' + EndDataID + '=' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + ( histryDay[dataID][2] + 1 );
+            for( let i = 1; i < resultTextLength; i++ ) {
+              const paramTarget = '&' + statusInputID + '=' + encodeURIComponent( resultText[i][0] );
               // Status
               tableHTML += '<tr><th><span class="pie-chart-usage result-' + resultText[i][1] + '"></span>' + resultText[i][0] + '</th>';
               // Conductor
               if ( resultData[1][i] !== 0 ) {
-                tableHTML += '<td><a href="' + conductorListURL + param + '" target="_blank">' + resultData[1][i] + '</a></td>';
+                tableHTML += '<td><a href="' + conductorListURL + param + paramTarget + paramDate + '" target="_blank" title="' + resultText[i][0] + '">'
+                + resultData[1][i] + '</a></td>';
               } else {
                 tableHTML += '<td>' + zeroCheck( resultData[1][i] ) + '</td>';
               }
-              // Conductor
+              // Symphony
               if ( resultData[2][i] !== 0 ) {
-                tableHTML += '<td><a href="' + symphonyListURL + param + '" target="_blank">' + resultData[2][i] + '</a></td>';
+                tableHTML += '<td><a href="' + symphonyListURL + param + paramTarget + paramDate + '" target="_blank" title="' + resultText[i][0] + '">'
+                + resultData[2][i] + '</a></td>';
               } else {
                 tableHTML += '<td>' + zeroCheck( resultData[2][i] ) + '</td>';
               }
@@ -2625,7 +2647,13 @@ for ( let i = historyLength - 1; i >= 0; i-- ) {
               tableHTML += '<td>' + zeroCheck( resultData[0][i] ) + '</td></tr>';
             }
             // 計
-            tableHTML += '<tr><th>' + resultText[0][0] + '</th><td>' + zeroCheck( resultData[1][0] ) + '</td><td>' + zeroCheck( resultData[2][0] ) + '</td><td>' + zeroCheck( resultData[0][0] ) + '</td></tr>';
+            tableHTML += '<tr>'
+              + '<th>' + resultText[0][0] + '</th>'
+              + '<td><a href="' + conductorListURL + param + paramDate + '" target="_blank" title="' + resultText[0][0] + '">' + resultData[1][0] + '</a></td>'
+              + '<td><a href="' + symphonyListURL + param + paramDate + '" target="_blank" title="' + resultText[0][0] + '">' + resultData[2][0] + '</a></td>'
+              + '<td>' + zeroCheck( resultData[0][0] ) + '</td>'
+              + '</tr>';
+            
             tableHTML += '</tbody></table></div>';
             $pop.html( tableHTML );
             $pop.find('.stacked-graph-popup-close').on('click', function(){
