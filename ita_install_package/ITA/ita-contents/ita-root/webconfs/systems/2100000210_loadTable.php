@@ -159,7 +159,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType("register_table")->setVisible(false);
     $c->getOutputType("excel")->setVisible(false);
     $c->getOutputType("csv")->setVisible(false);
-    $c->getOutputType("print_journal_table")->setVisible(false);
     $cg->addColumn($c);
     $table->addColumn($cg);
 
