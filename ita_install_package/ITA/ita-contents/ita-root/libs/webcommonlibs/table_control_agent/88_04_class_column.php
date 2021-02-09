@@ -82,7 +82,7 @@ class ColumnGroup {
 					//カラムグループの場合のみ、再帰起動----
 				}
 			}
-		}	
+		}
 	}
 
 	//NEW[3]
@@ -179,7 +179,7 @@ class ColumnGroup {
 
 	//NEW[10]
 	public function getStaticRowLevel(){
-		
+
 		if( $this->intStaticRowLevel=== null ){
 			if( $this->boolRoot===true ){
 				$this->intStaticRowLevel = 0;
@@ -197,7 +197,7 @@ class ColumnGroup {
 		$this->getHColCount($strFormatterId,true);
 		//まずカラム数を調べさせる----
 		$this->getHRowCount($strFormatterId,true);
-		
+
 		$this->setColNoRef($strFormatterId, 0);
 	}
 	//NEW[12]
@@ -246,7 +246,7 @@ class ColumnGroup {
 							}
 						}
 						//直接されたColumnGroup系インスタンスの、最大高の要素数を計算する----
-						
+
 						//----直接されたColumnGroup系インスタンスの、最大高の要素数に、自身の1を追加
 						$retIntVal = $intSum + 1;
 						//直接されたColumnGroup系インスタンスの、最大高の要素数に、自身の1を追加----
@@ -355,7 +355,7 @@ class ColumnGroup {
 		//再帰関数----
 	}
 	//フォーマッタごとに計算する必要がある----
-	
+
 	//----フォーマッタごとに異なる
 	//NEW[15]
 	public function setHRowNo($strFormatterId, $intRowNo){
@@ -435,9 +435,9 @@ class ColumnGroup {
 		if($rowspan != 0 && $colspan != 0){
 			if( is_a($this, "Column") === true ){
 				//----カラムグループではなくカラムの場合
-				
+
 				$objOutputType = $this->getOutputType($strFormatterId);
-				
+
 				if( $objOutputType->isVisible() === true ){
 					//----要素行の追加
 					if( array_key_exists($intSelfRowNo, $strAry) === false ){
@@ -449,11 +449,11 @@ class ColumnGroup {
 				}else{
 					//非表示なので何もしない
 				}
-				
+
 				//カラムグループではなくカラムの場合----
 			}else{
 				//----カラムグループの場合
-				
+
 				if( $colspan==0 ){
 					//----直接または間接にADDされたColumnが一つのVisible(true)ではない
 					//直接または間接にADDされたColumnが一つのVisible(true)ではない----
@@ -463,7 +463,7 @@ class ColumnGroup {
 						$strAry[$intSelfRowNo] = array();
 					}
 					//要素行の追加----
-					
+
 					$strAry[$intSelfRowNo][] = "<th colspan=\"{$colspan}\" rowspan=\"{$rowspan}\"><span class=\"generalBold\">".$this->getColGrpLabel()."</span></th>";
 					if( $this->children !== null ){
 						foreach($this->children as $child){
@@ -548,7 +548,7 @@ class Column extends ColumnGroup {
 
 	protected $subtotalFlag; // as boolean subtotalを計算するかどうか
 	protected $subtotalValue;   // as boolean subtotalの値
-	
+
 	protected $classes;  // as array of string ボディに設定するクラス
 	protected $prefix;  // as stirng 表示用のプレフィクス円マークなどに使用
 	protected $postfix;  // as stirng 表示用のポストフィクス
@@ -571,26 +571,26 @@ class Column extends ColumnGroup {
 
 		$this->strColId = $strColId;
 		$this->setColLabel($strColLabel);
-		
+
 		//$this->description = "このColumnの説明";
 		$this->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-STD-11001"));
-		
+
 		//$this->dbSqlFormat = ""; //廃止済
 		$this->setDBColumn(false);
 		$this->setHiddenMainTableColumn(false);
 		//$this->masterTableName = ""; //廃止済
-		
+
 		$this->setUnique(false);
 		$this->setRequired(false);
 		$this->setRegisterRequireExcept(false);
 		$this->setUpdateRequireExcept(false);
-		
+
 		$this->setAllowSendFromFile(true);
-		
+
 		$this->setJournalSearchFilter(false);
-		
+
 		$this->objMultiValidator = new MultiValidator();
-		
+
 		$this->setDeleteOnBeforeCheck(false);
 		$this->setDeleteOffBeforeCheck(false); //復活時は、値のバリデーションチェックを行なわない
 		$this->setDeleteOffBeforeCheck(true); //復活は、値のバリデーションチェックを行う
@@ -743,7 +743,7 @@ class Column extends ColumnGroup {
 					$retStrValue = "".$objColumnGroup->getColGrpLabel()."/".$retStrValue;
 				}
 			} while( $boolLoopFlag === true );
-		
+
 		}else{
 			$retStrValue = $this->strColLabel;
 		}
@@ -757,7 +757,7 @@ class Column extends ColumnGroup {
 	}
 	//廃止予定----
 	//シノニム----
-	//NEW[12]	
+	//NEW[12]
 	function setDescription($description){
 		$this->description = $description;
 	}
@@ -895,12 +895,12 @@ class Column extends ColumnGroup {
 					$boolRet=true;
 				}
 			}
-			
+
 			if($boolRet===false){
 				dev_log($reqOrgData[$this->getID()]."<>".$rowEditTgt[$this->getID()],10);
 				dev_log(strlen($reqOrgData[$this->getID()])."<>".strlen($rowEditTgt[$this->getID()]),10);
 			}
-			
+
 			//送信受けしたデータのキーと同じキーを、比較行がもっている----
 		}
 		//送信受けしたデータにキーがある----
@@ -922,10 +922,10 @@ class Column extends ColumnGroup {
 	function setAddSelectTagPrintType($intValue){
 	}
 	//NEW[43]
-	function getAddSelectTagPrintType(){ 
+	function getAddSelectTagPrintType(){
 		return 0;
 	}
-     
+
         // ----RBAC対応
         // プルダウン(IDColumn)に表示するデータをACCESS_AUTHで絞り込むか判定
         function chkPullDownListAccessPermissionNeed($MasterTblName) {
@@ -1034,7 +1034,7 @@ class Column extends ColumnGroup {
 	function getNullSearchExecute(){
 		return $this->nullSearchExecute;
 	}
-	
+
 	//----UI生値保存用のフィルター操作
 	//NEW[51]
 	//----SELECT-filter要素系
@@ -1071,7 +1071,7 @@ class Column extends ColumnGroup {
 		return $this->aryRichFilterValueRawBase;
 	}
 	//UI生値保存用のフィルター操作----
-	
+
 	//----DTiS用フィルター
 	//----通常フィルタ
 	//NEW[57]
@@ -1181,8 +1181,8 @@ class Column extends ColumnGroup {
 	}
 	//リッチフィルタ----
 	//FilterMatch用フィルター----
-	
-	
+
+
 	//NEW[70]
 	function delFilters(){
 		$this->nullSearchExecute = false;
@@ -1470,7 +1470,7 @@ class Column extends ColumnGroup {
 		return $retArray;
 		//トランザクション内----
 	}
-	
+
 	//NEW[84]
 	function beforeIUDValidateCheck(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
 		$boolRet = true;
@@ -1500,7 +1500,7 @@ class Column extends ColumnGroup {
 		}
 		return $retArray;
 	}
-	
+
 	//NEW[85]
 	function beforeTableIUDAction(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
 		//----ポリシー：原則として、$exeQueryDataにキーを追加、または、削除、のみを行う。返し値は文字列型。
@@ -1612,7 +1612,7 @@ class Column extends ColumnGroup {
 	}
         // RBAC対応 ----
 	//TableIUDイベント系----
-	
+
 	//----DTiS系イベント
 	//NEW[89]
 	function beforeDTiSValidateCheck($strFormatterId, $boolBinaryDistinctOnDTiS, &$aryFilterData=array(), &$aryVariant=array()){
@@ -1860,8 +1860,7 @@ class Column extends ColumnGroup {
 	//ここまで新規メソッドの定義宣言処理
 
 }
-
-class IDColumn extends Column {
+class LinkIDColumn extends Column {
 	/* 入力に制限を加えるため、6つ目の引数に masterTableと同じ定義でフィルタされたViewを指定することができる*/
 
 	protected $arrayMasterSetFromMainTable;
@@ -1898,13 +1897,13 @@ class IDColumn extends Column {
 	//----ここから継承メソッドの上書き処理
 
 	//OVR[ignored]::[1]
-	function __construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $masterTableIdForInput="", $aryEtcetera=array()){
+	function __construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $strLinkUrl, $masterTableIdForInput="", $aryEtcetera=array()){
 		global $g;
 		parent::__construct($strColId, $strColLabel);
 
 		// ----変数の初期化
 		$this->strTempBuf = null;
-		
+
 		$this->arrayMasterSetForFilter = null;
 		$this->arrayMasterSetForInput = null;
 		$this->arrayMasterSetFromMainTable = null;
@@ -1954,7 +1953,7 @@ class IDColumn extends Column {
 
 		$this->setMultiple("filter_table",true);
 
-		$outputType = new IDOutputType(new SortedTabHFmt(), new TextTabBFmt());
+		$outputType = new IDOutputType(new SortedTabHFmt(), new MainLinkTabBFmt($strLinkUrl));
 		$this->setOutputType("print_table", $outputType);
 		$outputType = new IDOutputType(new TabHFmt(), new TextTabBFmt());
 		$this->setOutputType("print_journal_table", $outputType);
@@ -2043,11 +2042,11 @@ class IDColumn extends Column {
 		$retArrayForBind = array();
 
 		$objTable = $this->getTable();
-		
+
 		$mainTableBody = $objTable->getDBMainTableBody();
 		$strThisIdColumnId = $this->getID();
 		$strDUColumnOfMainTable = $objTable->getRequiredDisuseColumnID();
-		
+
 		$refMasterKeyColumn = $this->getKeyColumnIDOfMaster();
 		$refMasterDispColumn = $this->getDispColumnIDOfMaster();
 		// IDColumnに紐づけているテーブル名
@@ -2264,7 +2263,7 @@ class IDColumn extends Column {
 		}
 		return $retStrQuery;
 	}
-	
+
 	//OVR[-]::[75]
 	function getNullSearchQuery(){
 		//----WHERE句[1]
@@ -2293,7 +2292,7 @@ class IDColumn extends Column {
 		return $retStrQuery;
 	}
 
-	
+
 
 	//----FixColumnイベント系
 	//OVR[-]::[81]
@@ -2576,7 +2575,7 @@ class IDColumn extends Column {
 				$mainTableBody = $objTable->getDBMainTableBody();
 				$strThisIdColumnId = $this->getID();
 				$strDUColumnOfMainTable = $objTable->getRequiredDisuseColumnID();
-				
+
 				$refMasterKeyColumn = $this->getKeyColumnIDOfMaster();
 				$refMasterDispColumn = $this->getDispColumnIDOfMaster();
 				$refMasterTableBody = $this->getMasterTableBodyForFilter();
@@ -2623,7 +2622,985 @@ class IDColumn extends Column {
 				$JournalTableBody = $objTable->getDBJournalTableBody();
 				$strThisIdColumnId = $this->getID();
 				$strDUColumnOfMainTable = $objTable->getRequiredDisuseColumnID();
-				
+
+				$refMasterKeyColumn = $this->getKeyColumnIDOfMaster();
+				$refMasterDispColumn = $this->getDispColumnIDOfMaster();
+				$refMasterTableBody = $this->getMasterTableBodyForFilter();
+				$refMasterDUColumn = $this->getRequiredDisuseColumnID();
+				$aryEtcetera = $this->getEtceteraParameter();
+
+                                // ---- RBAC対応
+                                // SQLに埋め込むアクセス権のカラム名取得
+                                $AccessAuthColumName    = $g['global_getAccessAuthColumnName'];
+                                // loadtableに紐づいているオブジェクトのACCESS_AUTHカラム定義の有無取得
+                                $AccessAuthColumUse    = $g['global_getAccessAuth'];
+
+				//----マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する
+				$this->arrayMasterSetFromJournalTable=createMasterTableDistinctArray($JournalTableBody, $strThisIdColumnId, $strDUColumnOfMainTable, $refMasterTableBody, $refMasterKeyColumn, $refMasterDispColumn, $refMasterDUColumn, $aryEtcetera, $AccessAuthColumUse, $AccessAuthColumName);
+				//マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する----
+                                // RBAC対応 ----
+
+				if(is_array($this->arrayMasterSetFromJournalTable)===true && 0 < count($this->arrayMasterSetFromJournalTable)){
+					//----正常に配列を取得できた
+					//正常に配列を取得できた----
+				}else{
+					//$this->arrayMasterSetFromJournalTable = null;
+				}
+				//フィルターテーブル用のデフォルト・データセットを作成----
+			}
+		}
+		return $this->arrayMasterSetFromJournalTable;
+	}
+
+	//NEW[39]
+	function setMasterTableArrayForFilter($arrayData){
+		$this->arrayMasterSetForFilter = $arrayData;
+	}
+	//NEW[40]
+	function getMasterTableArrayForFilter($boolRefreshMode=false){
+		if($this->arrayMasterSetForFilter === null || $boolRefreshMode === true){
+
+			$masterTableBodyForFilter = $this->getMasterTableBodyForFilter();
+
+			$strKeyColumnIDOfMaster = $this->getKeyColumnIDOfMaster();
+			$strDispColumnIdOfMaster = $this->getDispColumnIDOfMaster();
+			$aryEtcetera = $this->aryEtceteraParameter;
+
+			$masterDisuseFlagColumnId = $this->getRequiredDisuseColumnID();
+			if($masterTableBodyForFilter !== "" && $strKeyColumnIDOfMaster !== "" && $strDispColumnIdOfMaster !== ""){
+				//----マスターでの廃止の有無を問わず、すべての行の鍵カラムと表示カラムのセットを取得する
+				$this->arrayMasterSetForFilter = createMasterTableArrayForFilter($masterTableBodyForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $masterDisuseFlagColumnId, $aryEtcetera);
+				//マスターでの廃止の有無を問わず、すべての行の鍵カラムと表示カラムのセットを取得する----
+			}
+		}
+
+		if( $this->arrayMasterSetForFilter === null ){
+			//error_log("Result of Columns[{$this->getID()}]->fx(getMasterTableArrayForFilter()) is null.");
+			web_log("Result of Columns[{$this->getID()}]->fx(getMasterTableArrayForFilter()) is null.");
+		}
+		return $this->arrayMasterSetForFilter;
+	}
+
+	//NEW[41]
+	function setMasterTableArrayForInput($arrayData){
+		$this->arrayMasterSetForInput = $arrayData;
+	}
+	//NEW[42]
+	function getMasterTableArrayForInput(){
+                global $g;
+		if($this->arrayMasterSetForInput === null){
+			//----主として、新規登録、既存更新のセレクトタグ用のデフォルト・データセットを作成
+
+			//----loadTable定義者が空白指定した場合も、通常のマスター名が代入される
+			$masterTableBodyForInput = $this->getMasterTableBodyForInput();
+			//loadTable定義者が空白指定した場合も、通常のマスター名が代入される----
+
+			$strKeyColumnIDOfMaster = $this->getKeyColumnIDOfMaster();
+			$strDispColumnIdOfMaster = $this->getDispColumnIDOfMaster();
+			$aryEtcetera = $this->aryEtceteraParameter;
+
+			$masterDisuseFlagColumnId = $this->getRequiredDisuseColumnID();
+
+			if( $masterTableBodyForInput !== "" && $strKeyColumnIDOfMaster !== "" && $strDispColumnIdOfMaster !== "" ){
+				// ---- RBAC対応
+                	        // プルダウンに表示するデータをACCESS_AUTHで絞り込むか判定
+				try {
+                	        	$CheckAccessAuth = $this->chkPullDownListAccessPermissionNeed($masterTableBodyForInput);
+				}catch (Exception $e){
+					web_log($e->getMessage());
+					$message = sprintf("[%s:%s]chkPullDownListAccessPermissionNeed check faild.",basename(__FILE__),__LINE__);
+					web_log($message);
+					// 無理やり空リターン
+					throw new Exception($message);
+				}
+				// RBAC対応 ----
+				//----マスターにおいて廃止されている行を除いて、マスターから、他の行の鍵カラムと表示カラムのセットを取得する
+				$this->arrayMasterSetForInput = createMasterTableArrayForInput($masterTableBodyForInput, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $masterDisuseFlagColumnId, $aryEtcetera, $CheckAccessAuth);   // RBAC対応
+				//マスターにおいて廃止されている行を除いて、マスターから、他の行の鍵カラムと表示カラムのセットを取得する----
+
+				if(is_array($this->arrayMasterSetForInput)===true && 0 < count($this->arrayMasterSetForInput)){
+					//----正常に配列を取得できた
+
+                    			//----date型の型変換
+                    			$arrayTmp = array();
+                    			if($this->getDateFormat() !== null){
+                        			foreach($this->arrayMasterSetForInput as $key => $value){
+                            				$arrayTmp[$key] = date($this->getDateFormat(), strtotime($value));
+                        			}
+                    				$this->arrayMasterSetForInput = $arrayTmp;
+                    			}
+                    			//date型の型変換----
+
+					//正常に配列を取得できた----
+				}else{
+					//$this->arrayMasterSetForInput = null;
+				}
+			}
+			//主として、新規登録、既存更新のセレクトタグ用のデフォルト・データセットを作成----
+		}
+		return $this->arrayMasterSetForInput;
+	}
+
+	//NEW[43]
+	function valueConvertFromSomeFile(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+
+		$this->setTempBuffer(null);
+
+		if($aryVariant["TABLE_IUD_SOURCE"]=="queryMaterialFile"){
+			//----ファイル（エクセルorCSVでのアップデート受信）
+			if(array_key_exists($this->getID(),$reqOrgData)===true){
+				//----入力審査配列に、鍵が、存在していた場合
+
+				$strRawDispValue = $reqOrgData[$this->getID()];
+				//----バッファーへ生値をコピー
+				$this->setTempBuffer($strRawDispValue);
+				//バッファーへ生値をコピー----
+                $arrayBaseSelect = $this->getMasterTableArrayForFilter();
+
+                //----date型の型変換
+                $arrayTmp = array();
+                if($this->getDateFormat() !== null){
+                    foreach($arrayBaseSelect as $key => $value){
+                        $arrayTmp[$key] = date($this->getDateFormat(), strtotime($value));
+                    }
+                    $arrayBaseSelect = $arrayTmp;
+                }
+                //date型の型変換----
+
+				$keyValue = array_search($strRawDispValue, $arrayBaseSelect);
+				if($keyValue === false){
+					//----マスターDispにない値が入っていた場合
+					$reqOrgData[$this->getID()] = "";
+					//マスターDispにない値が入っていた場合----
+				}else{
+					//----マスターDispにある値が入っていた場合
+					$reqOrgData[$this->getID()] = $keyValue;
+					//マスターDispにある値が入っていた場合----
+				}
+				//----入力審査配列に、鍵が、存在していた場合----
+			}
+			//ファイル（エクセルorCSVでのアップデート受信）----
+		}
+	}
+
+	//----タグ等の表示系制御
+	//NEW[44]
+	function setMultiple($strFormatterId, $boolValue){
+		if( is_bool($boolValue) === true ){
+			$this->aryFormatMultiple[$strFormatterId] = $boolValue;
+		}
+	}
+	//NEW[45]
+	function getMultiple($strFormatterId){
+		$boolValue=null;
+		if( array_key_exists($strFormatterId, $this->aryFormatMultiple) === true ){
+			$boolValue = $this->aryFormatMultiple[$strFormatterId];
+		}
+		return $boolValue;
+	}
+	//NEW[46]
+	function setErrMsgHead($strValue){
+		$this->errMsgHead = $strValue;
+	}
+	//NEW[47]
+	function getErrMsgHead(){
+		return $this->errMsgHead;
+	}
+	//NEW[48]
+	function setErrMsgTail($strValue){
+		$this->errMsgTail = $strValue;
+	}
+	//NEW[49]
+	function getErrMsgTail(){
+		return $this->errMsgTail;
+	}
+	//タグ等の表示系制御----
+
+	//----廃止予定(2以降)
+	//NEW[50]
+	function setJsFunction($jsFunction, $jsFunctionArgs=array()){
+		$this->setEvent("update_table", "onchange", $jsFunction, $jsFunctionArgs);
+		$this->setEvent("register_table", "onchange", $jsFunction, $jsFunctionArgs);
+	}
+	//廃止予定(2以降)----
+
+	//NEW[51]
+	function getDateFormat(){
+		return $this->strDateFormat;
+	}
+	//NEW[52]
+	function setDateFormat($strDateFormat){
+		$this->strDateFormat = $strDateFormat;
+	}
+
+
+	//ここまで新規メソッドの定義宣言処理
+
+}
+
+class IDColumn extends Column {
+	/* 入力に制限を加えるため、6つ目の引数に masterTableと同じ定義でフィルタされたViewを指定することができる*/
+
+	protected $arrayMasterSetFromMainTable;
+
+	protected $strMasterTableIdForFilter;
+	protected $strMasterTableAgentQueryForFilter;
+	protected $arrayMasterSetForFilter;
+
+	protected $strMasterTableIdForInput;
+	protected $strMasterTableAgentQueryForInput;
+	protected $arrayMasterSetForInput;
+
+	protected $strKeyColumnIdOfMaster;
+	protected $strDispColumnIdOfMaster;
+
+	protected $aryFormatMultiple;
+	protected $aryEtceteraParameter;
+
+	protected $errMsgHead;
+	protected $errMsgTail;
+
+	protected $strJournalTableOfMaster;
+	protected $strJournalSeqIdOfMaster;
+	protected $strJournalKeyIdOfMaster;
+	protected $strJournalDispIdOfMaster;
+	protected $strJournalLUTSIdOfMaster;
+
+	protected $strTempBuf;
+
+    protected $strDateFormat;       // as String IDColumnクラスの参照先が日付・日時の場合に指定してフォーマットで表示を変換する。変換無しの場合はnull
+
+	//----「(set/get)SearchType()で制御されてきた。
+
+	//----ここから継承メソッドの上書き処理
+
+	//OVR[ignored]::[1]
+	function __construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $masterTableIdForInput="", $aryEtcetera=array()){
+		global $g;
+		parent::__construct($strColId, $strColLabel);
+
+		// ----変数の初期化
+		$this->strTempBuf = null;
+
+		$this->arrayMasterSetForFilter = null;
+		$this->arrayMasterSetForInput = null;
+		$this->arrayMasterSetFromMainTable = null;
+		$this->arrayMasterSetFromJournalTable = null;
+
+		$this->aryFormatMultiple = array();
+		// 変数の初期化----
+
+		if( array_key_exists("MasterKeyColumnType", $aryEtcetera) === false ){
+			//----キー側は数値
+			$aryEtcetera['MasterKeyColumnType'] = 0;
+		}
+		if( array_key_exists("MasterDisplayColumnType", $aryEtcetera) === false ){
+			//----表示側は文字列
+			$aryEtcetera['MasterDisplayColumnType'] = 1;
+		}
+
+		$this->aryEtceteraParameter = $aryEtcetera;
+
+		$this->setDBColumn(true);
+		$this->setNum(true);
+		$this->setSearchType("like");
+
+
+		$this->setMasterTableIDForFilter($masterTableIdForFilter);
+		if( $masterTableIdForInput == "" ){
+			$this->setMasterTableIDForInput($masterTableIdForFilter);
+		}else{
+			$this->setMasterTableIDForInput($masterTableIdForInput);
+		}
+
+		$this->setKeyColumnIDOfMaster($strKeyColumnIDOfMaster);
+		$this->setDispColumnIDOfMaster($strDispColumnIdOfMaster);
+
+		$outputType = new OutputType(new ReqTabHFmt(), new SelectTabBFmt());
+		$this->setOutputType("register_table", $outputType);
+
+		$outputType = new OutputType(new ReqTabHFmt(), new SelectTabBFmt());
+		$this->setOutputType("update_table", $outputType);
+
+		$outputType = new IDOutputType(new TabHFmt(), new TextTabBFmt());
+		$this->setOutputType("delete_table", $outputType);
+
+		$outputType = new OutputType(new FilterTabHFmt(), new TextFilterTabBFmt());
+		$this->setOutputType("filter_table", $outputType);
+		$this->setEvent("filter_table", "onkeydown", "pre_search_async", array('event.keyCode'));
+
+		$this->setMultiple("filter_table",true);
+
+		$outputType = new IDOutputType(new SortedTabHFmt(), new TextTabBFmt());
+		$this->setOutputType("print_table", $outputType);
+		$outputType = new IDOutputType(new TabHFmt(), new TextTabBFmt());
+		$this->setOutputType("print_journal_table", $outputType);
+
+		$outputType = new IDOutputType(new ExcelHFmt(), new ExcelSelectBFmt());
+		$this->setOutputType("excel", $outputType);
+		$outputType = new IDOutputType(new CSVHFmt(), new CSVSelectBFmt());
+		$this->setOutputType("csv", $outputType);
+		$outputType = new IDOutputType(new JSONHFmt(), new JSONSelectBFmt());
+		$this->setOutputType("json", $outputType);
+		$this->setValidator(new IDValidator($this));
+		$this->setErrMsgHead($g['objMTS']->getSomeMessage("ITAWDCH-STD-11101"));
+		$this->setErrMsgTail("");
+
+		$this->setJournalTableOfMaster(null);
+		$this->setJournalSeqIDOfMaster(null);
+		$this->setJournalKeyIDOfMaster(null);
+		$this->setJournalDispIDOfMaster(null);
+		$this->setJournalLUTSIDOfMaster(null);
+
+		$this->setSelectTagCallerShow(true);
+		// ----変数の初期化
+        $this->setDateFormat(null);
+	}
+
+	//OVR[ignored]::[01]
+	function initTable($objTable, $colNo=null){
+		parent::initTable($objTable, $colNo);
+	}
+
+	//----廃止または復活時等のレコード比較用
+	//OVR[-]::[39]
+	function compareRow(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+		//----送信受けしたデータ[$reqOrgData]に、キーに、$this->getID()があることが前提
+		$boolRet=true;
+		$boolExeContinue=true;
+		$varDataInDBColumn="";
+		$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+		if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+			$boolRet = parent::compareRow($exeQueryData, $reqOrgData, $aryVariant);
+		}else if( $modeValue=="DTUP_singleRecDelete" ){
+			$rowEditTgt = $aryVariant['edit_target_row'];
+			if( array_key_exists($this->getID(),$rowEditTgt) === true ){
+				//----鍵が、DB現在行に、存在していた場合
+				$boolRet=false;
+				//----やや、あいまい、で比較
+				if( $reqOrgData[$this->getID()] == $rowEditTgt[$this->getID()] ){
+					$intLenInTable = strlen($rowEditTgt[$this->getID()]);
+					if( strlen($reqOrgData[$this->getID()]) == $intLenInTable ){
+						$boolRet=true;
+						if( $this->getTempBuffer() === null ){
+							//----ブラウザからの場合
+							//ブラウザからの場合----
+						}else{
+							if( $intLenInTable == 0 && strlen($this->getTempBuffer()) != 0 ){
+								//----DB内の値は文字列長0だが、変換前の審査値は文字列長0ではない
+								$boolRet=false;
+								//DB内の値は文字列長0だが、変換前の審査値は文字列長0ではない----
+							}
+						}
+					}
+				}
+			}
+			//やや、あいまい、で比較----
+			//鍵が、DB現在行に、存在していた場合----
+		}
+
+		//送信受けしたデータ[$reqOrgData]に、キーに、$this->getID()があることが前提----
+		return $boolRet;
+	}
+	//廃止または復活時等のレコード比較用----
+
+	//----PULLDOWN検索系
+	//OVR[-]::[43]
+	function getAddSelectTagPrintType(){
+		return 1;
+	}
+
+	//OVR[-]::[44]
+        // IDColumn::getAddSelectTagQuery
+	function getAddSelectTagQuery($objTable, $searchTblId, $strWhereAddBody=""){
+		$retStrQuery = "";
+		$intErrorType = null;
+		$aryErrMsgBody = array();
+		$strErrMsg = "";
+		$retArrayForBind = array();
+
+		$objTable = $this->getTable();
+
+		$mainTableBody = $objTable->getDBMainTableBody();
+		$strThisIdColumnId = $this->getID();
+		$strDUColumnOfMainTable = $objTable->getRequiredDisuseColumnID();
+
+		$refMasterKeyColumn = $this->getKeyColumnIDOfMaster();
+		$refMasterDispColumn = $this->getDispColumnIDOfMaster();
+		// IDColumnに紐づけているテーブル名
+		$refMasterTableBody = $this->getMasterTableBodyForFilter();
+		$refMasterDUColumn = $this->getRequiredDisuseColumnID();
+		$aryEtcetera = $this->getEtceteraParameter();
+
+		// RBAC対応 ----
+		try {
+            // ---- RBAC対応
+            global $g;
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            // SELECT項目になっているACCESS_AUTHカラムを取得
+            $AccessAuthColumnNames = $obj->getAccessAithColumnINIDColumnObject($refMasterTableBody);
+            if($AccessAuthColumnNames === false) {
+                throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+			$AccessAuthColumUse  = $objTable->getAccessAuth();
+            // RBAC対応 ----
+
+			$addStrQuery = "";
+
+			$retStrQuery = genSQLforGetMasValsInMainTbl($mainTableBody
+								, $strThisIdColumnId
+								, $strDUColumnOfMainTable
+								, $refMasterTableBody
+								, $refMasterKeyColumn
+								, $refMasterDispColumn
+								, $refMasterDUColumn
+                                                                , $AccessAuthColumUse
+                                                                , $AccessAuthColumnNames
+								, $aryEtcetera,$strWhereAddBody
+								,"KEY_COLUMN","DISP_COLUMN");
+		}catch (Exception $e){
+			web_log($e->getMessage());
+			$intErrorType = 500;
+		}
+                // ---- RBAC対応
+
+		$retArray = array($retStrQuery,$intErrorType,$aryErrMsgBody,$strErrMsg,$retArrayForBind);
+		return $retArray;
+	}
+	//PULLDOWN検索系----
+
+	//OVR[-]::[54]
+	function setRichFilterValues($value=array()){
+		$this->aryRichFilterValueRawBase = $value;
+	}
+
+	//OVR[-]::[55]
+	function addRichFilterValue($value, $index = null){
+		//----クラス(Table)のメソッド(addFilter)から呼び出される
+		if($index != null){
+			$this->aryRichFilterValueRawBase[$index] = $value;
+		}else{
+			$this->aryRichFilterValueRawBase[] = $value;
+		}
+	}
+
+	//OVR[-]::[60]
+	function getFilterValuesCoreForDTiS(&$arrayFilterValues,$boolBinaryDistinctOnDTiS){
+		$data = array();
+		foreach($arrayFilterValues as $filter){
+			if(0 < strlen($filter)){
+				if($this->getSearchType() == "like" && $this->getMasterDisplayColumnType()===1 ){
+					//----LIKE検索のときは前後に％をつけ、さらにワイルドカードの％と＿をエスケープする。
+
+					//----エスケープ文字は#で固定
+
+					$filter = where_queryForLike_Wrapper($filter, $boolBinaryDistinctOnDTiS);
+
+					//エスケープ文字は#で固定----
+
+					$data[] = '%'.$filter.'%';
+
+					//LIKE検索のときは前後に％をつけ、さらにワイルドカードの％と＿をエスケープする。----
+				}else{
+					$data[] = $filter;
+				}
+			}
+		}
+		return $data;
+	}
+
+	//OVR[-]::[71]
+	function getFilterQuery($boolBinaryDistinctOnDTiS=true){
+		//----WHERE句[0]
+		//----クラス(Table)のメソッド(getFilterQuery)から呼び出される
+		global $g;
+
+		$retStrQuery = "";
+		switch($this->getSearchType()){
+			case "like":
+				if( $this->getMasterDisplayColumnType()===1 ){
+					$retStrQuery = $this->getFilterQueryLikeZone($boolBinaryDistinctOnDTiS);
+					break;
+				}
+			case "in":
+				$retStrQuery = $this->getFilterQueryInZone($boolBinaryDistinctOnDTiS);
+				break;
+			default:
+				break;
+		}
+		return $retStrQuery;
+	}
+
+	//OVR[-]::[72]
+	function getFilterQueryLikeZone($boolBinaryDistinctOnDTiS){
+		global $g;
+		$retStrQuery = "";
+
+		//----メインテーブル
+		$dbQM = $this->objTable->getDBQuoteMark();
+		$strWpColId = "{$dbQM}{$this->getID()}{$dbQM}";
+		$strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
+		//メインテーブル----
+
+		//----参照先マスタテーブル
+		$strWpColKeyIdOfMaster  = "{$dbQM}{$this->getKeyColumnIDOfMaster()}{$dbQM}";
+		$strWpColDispIdOfMaster = "{$dbQM}{$this->getDispColumnIDOfMaster()}{$dbQM}";
+		$strWpColDisuseFlagIdOfMaster = "{$dbQM}{$this->getRequiredDisuseColumnID()}{$dbQM}";
+		//参照先マスタテーブル----
+
+		//[W]rap[F]x[F]or[C]olumn[M]ark
+		$strWFFCMInDBHead = "";
+		$strWFFCMInDBTail = "";
+		$strWFFCMInNeedTipHead = "";
+		$strWFFCMInNeedTipTail = "";
+		$strCollate="";
+		if($g['db_model_ch'] == 0){
+			if( $boolBinaryDistinctOnDTiS === false ){
+				//[W]rap[F]x[F]or[C]olumn[M]ark
+				$strWFFCMInDBHead = "TO_VALUE_FOR_FAZZY_MATCH(";
+				$strWFFCMInDBTail = ")";
+				$strWFFCMInNeedTipHead = "";
+				$strWFFCMInNeedTipTail = "";
+			}
+		}else if($g['db_model_ch'] == 1){
+			if( $boolBinaryDistinctOnDTiS === false ){
+				$strCollate = "COLLATE utf8_unicode_ci ";
+			}
+		}
+		$tmpArray = array();
+		$intFilterCount = 0;
+
+		$arySource = $this->getFilterValuesForDTiS(true,$boolBinaryDistinctOnDTiS);
+		foreach($arySource as $filter){
+			if(0 < strlen($filter)){
+				$tmpStr01  = "{$strWFFCMInDBHead}{$strWpColDispIdOfMaster}{$strWFFCMInDBTail} ";
+				$tmpStr01 .= " {$strCollate}LIKE {$strWFFCMInNeedTipHead}:{$this->getID()}__{$intFilterCount}{$strWFFCMInNeedTipTail} ESCAPE '#' ";
+				$tmpArray[] = $tmpStr01;
+				$intFilterCount++;
+			}
+		}
+		//表示側が文字列側の場合----
+
+		if(0 < count($tmpArray)){
+			$retStrQuery .= "{$strWpTblSelfAlias}.{$strWpColId} IN (";
+			$retStrQuery .= "SELECT {$strWpColKeyIdOfMaster} ";
+			$retStrQuery .= "FROM {$this->getMasterTableBodyForFilter()} ";
+			$retStrQuery .= "WHERE (".implode(" OR ", $tmpArray) . ") ";
+			$retStrQuery .= "AND {$strWpColDisuseFlagIdOfMaster} IN ('0','1') )";
+		}
+		return $retStrQuery;
+	}
+
+	//OVR[-]::[74]
+	function getRichSearchQuery($boolBinaryDistinctOnDTiS){
+		//----WHERE句[2]
+		global $g;
+		$retStrQuery = "";
+
+		$dbQM = $this->objTable->getDBQuoteMark();
+
+		$strWpColId = "{$dbQM}{$this->getID()}{$dbQM}";
+		$strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
+
+		$tmpArray = array();
+		$intFilterCount = 0;
+
+		$strWrapHead= "";
+		$strWrapTail= "";
+
+		if( $this->getMasterKeyColumnType()===1 ){
+			//----鍵カラムが文字列型の場合
+			if( $g['db_model_ch'] == 0 ){
+				//----バイナリで精密な一致
+				$strWrapHead="NLSSORT(";
+				$strWrapTail=",'NLS_SORT=BINARY')";
+				//バイナリで精密な一致----
+			}else if( $g['db_model_ch'] == 1 ){
+				$strWrapHead= "";
+				$strWrapTail= "";
+			}
+			//鍵カラムが文字列型の場合----
+		}
+
+		$arySource = $this->getRichFilterValuesForDTiS(true);
+		foreach($arySource as $filter){
+			if( 0 < strlen($filter) ){
+				$tmpArray[] = "{$strWrapHead}:{$this->getID()}_RF__{$intFilterCount}{$strWrapTail}";
+				$intFilterCount++;
+			}
+		}
+		if( 0 < count($tmpArray) ){
+			//----IN候補型の検出条件クエリを作成
+			$retStrQuery .= "{$strWrapHead}{$strWpTblSelfAlias}.{$strWpColId}{$strWrapTail}";
+			$retStrQuery .= " IN (".implode(",", $tmpArray) . ")";
+			//IN候補型の検出条件クエリを作成----
+		}
+		return $retStrQuery;
+	}
+
+	//OVR[-]::[75]
+	function getNullSearchQuery(){
+		//----WHERE句[1]
+		global $g;
+		$retStrQuery = "";
+
+		$dbQM=$this->objTable->getDBQuoteMark();
+
+		$strWpColId = "{$dbQM}{$this->getID()}{$dbQM}";
+		$strWpTblSelfAlias = "{$dbQM}{$this->objTable->getShareTableAlias()}{$dbQM}";
+
+		if( $g['db_model_ch'] == 0 ){
+			//----ORACLE
+			$retStrQuery = " {$strWpTblSelfAlias}.{$strWpColId} IS NULL ";
+			//ORACLE----
+		}else if( $g['db_model_ch'] == 1 ){
+			//----mySQL/mariaDB
+			$retStrQuery = " {$strWpTblSelfAlias}.{$strWpColId} IS NULL ";
+			if( $this->getMasterKeyColumnType()===1 ){
+				//----文字列キー型の場合は、空文字も検出する
+				$retStrQuery = " ({$strWpTblSelfAlias}.{$strWpColId} IS NULL OR {$strWpTblSelfAlias}.{$strWpColId} = '') ";
+				//文字列キー型の場合は、空文字も検出する----
+			}
+			//mySQL/mariaDB----
+		}
+		return $retStrQuery;
+	}
+
+
+
+	//----FixColumnイベント系
+	//OVR[-]::[81]
+	function afterFixColumn(){
+		if( $this->getJournalTableOfMaster() !== null ){
+			if( $this->getJournalSeqIDOfMaster() === null ){
+				$this->setJournalSeqIDOfMaster($this->objTable->getRequiredJnlSeqNoColumnID());
+			}
+			if( $this->getJournalLUTSIDOfMaster() === null ){
+				$this->setJournalLUTSIDOfMaster($this->objTable->getRequiredLastUpdateDateColumnID());
+			}
+			if( $this->getJournalKeyIDOfMaster() === null ){
+				$this->setJournalKeyIDOfMaster($this->getKeyColumnIDOfMaster());
+			}
+			if( $this->getJournalDispIDOfMaster() === null ){
+				$this->setJournalDispIDOfMaster($this->getDispColumnIDOfMaster());
+			}
+		}
+	}
+	//FixColumnイベント系----
+
+	//----TableIUDイベント系
+	//OVR[-]::[84]
+	function beforeIUDValidateCheck(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+		$boolRet = true;
+		$intErrorType = null;
+		$aryErrMsgBody = array();
+		$strErrMsg = "";
+		$strErrorBuf = "";
+		$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+		if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+			//----行更新（登録を含む）の場合
+			$this->valueConvertFromSomeFile($exeQueryData, $reqOrgData, $aryVariant);
+			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+			//行更新（登録を含む）の場合----
+		}else if( $modeValue=="DTUP_singleRecDelete" ){
+			//----廃止の場合
+			//----エクセル等からの文字列を変換する特殊な処理
+			$this->valueConvertFromSomeFile($exeQueryData, $reqOrgData, $aryVariant);
+			//エクセル等からの文字列を変換する特殊な処理----
+			//----キーがなかった場合に、値を$reqOrgDataに保管
+			if( array_key_exists($this->getID(),$reqOrgData)===false ){
+				list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($aryVariant,array("edit_target_row",$this->getID()),null);
+				if( $tmpBoolKeyExist===true ){
+					// JOURNAL専用のカラムではないので、$exeQueryData、に直接代入してはならない
+					$reqOrgData[$this->getID()] = $varValue;
+				}
+			}
+			//キーがなかった場合に、値を$reqOrgDataに保管----
+			//廃止の場合----
+			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+		}
+		return $retArray;
+	}
+	//OVR[-]::[87]
+	function inTrzAfterTableIUDAction(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+		$boolRet = true;
+		$intErrorType = null;
+		$aryErrMsgBody = array();
+		$strErrMsg = "";
+		$strErrorBuf = "";
+		$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+		$this->setTempBuffer(null);
+		return $retArray;
+	}
+	//TableIUDイベント系----
+
+	//ここまで継承メソッドの上書き処理----
+
+	//----ここから新規メソッドの定義宣言処理
+
+	//----ここから、実装範囲拡大検討中の各メソッド
+	//NEW[1]
+	function setTempBuffer($strValue){
+		$this->strTempBuf = $strValue;
+	}
+	//NEW[2]
+	function getTempBuffer(){
+		return $this->strTempBuf;
+	}
+	//NEW[3]
+	function setEtceteraParameter($aryEtcetera){
+		$this->aryEtceteraParameter = $aryEtcetera;
+	}
+	//NEW[4]
+	function getEtceteraParameter(){
+		return $this->aryEtceteraParameter;
+	}
+	//NEW[5]
+	function etceteraParameterWrite($etceteraKey, $etceteraVal){
+		$this->aryEtceteraParameter[$etceteraKey] = $etceteraVal;
+	}
+	//NEW[6]
+	function etceteraParameterRead($etceteraKey, &$refRetValue){
+		$keyExists = array_key_exists($etceteraKey, $this->aryEtceteraParameter);
+		if($keyExists===true){
+			$refRetValue = $this->aryEtceteraParameter[$etceteraKey];
+		}else{
+			$refRetValue = null;
+		}
+		return $keyExists;
+	}
+	//ここまで、実装範囲拡大検討中の各メソッド----
+
+	//----鍵カラム
+	//NEW[7]
+	function setKeyColumnIDOfMaster($strColId){
+		$this->strKeyColumnIdOfMaster = $strColId;
+	}
+	//NEW[8]
+	function getKeyColumnIDOfMaster(){
+		return $this->strKeyColumnIdOfMaster;
+	}
+	//----ここから応用メソッド
+	//NEW[9]
+	function setMasterKeyColumnType($value){
+		$this->etceteraParameterWrite("MasterKeyColumnType", $value);
+	}
+	//NEW[10]
+	function getMasterKeyColumnType(&$miRefKeyExists=false){
+		$miRetValBody = "";
+		$miRefKeyExists = $this->etceteraParameterRead("MasterKeyColumnType", $miRetValBody);
+		return $miRetValBody;
+	}
+	//ここまで応用メソッド----
+	//鍵カラム----
+
+	//----表示側カラム
+	//NEW[11]
+	function setDispColumnIDOfMaster($strColId){
+		$this->strDispColumnIdOfMaster = $strColId;
+	}
+	//NEW[12]
+	function getDispColumnIDOfMaster(){
+		return $this->strDispColumnIdOfMaster;
+	}
+	//----ここから応用メソッド
+	//NEW[13]
+	function setMasterDisplayColumnType($value){
+		$this->etceteraParameterWrite("MasterDisplayColumnType", $value);
+	}
+	//NEW[14]
+	function getMasterDisplayColumnType(&$miRefKeyExists=false){
+		$miRetValBody = "";
+		$miRefKeyExists = $this->etceteraParameterRead("MasterDisplayColumnType", $miRetValBody);
+		return $miRetValBody;
+	}
+	//ここまで応用メソッド----
+	//表示側カラム----
+
+	// ----一覧表示用
+	//NEW[15]
+	public function getMasterTableIDForFilter(){
+		return $this->strMasterTableIdForFilter;
+	}
+	//NEW[16]
+	public function setMasterTableIDForFilter($strValue){
+		$this->strMasterTableIdForFilter = $strValue;
+	}
+	//NEW[17]
+	public function getMasterTableAgentQueryForFilter(){
+		return $this->strMasterTableAgentQueryForFilter;
+	}
+	//NEW[18]
+	public function setMasterTableAgentQueryForFilter($strValue){
+		//----括弧はじまり、括弧おわり、で入れること
+		$this->strMasterTableAgentQueryForFilter = $strValue;
+	}
+	//NEW[19]
+	function getMasterTableBodyForFilter(){
+		//----結合クエリまたはDBテーブル名を返す
+		$retStrVal=$this->getMasterTableIDForFilter();
+		if( $this->strMasterTableAgentQueryForFilter !== null ){
+			$retStrVal=$this->strMasterTableAgentQueryForFilter." TABLE_AGENT ";
+		}
+		return $retStrVal;
+	}
+	// ----一覧表示用
+
+	// ----入力表示用
+	//NEW[20]
+	public function getMasterTableIDForInput(){
+		return $this->strMasterTableIdForInput;
+	}
+	//NEW[21]
+	public function setMasterTableIDForInput($strValue){
+		$this->strMasterTableIdForInput = $strValue;
+	}
+	//NEW[22]
+	public function getMasterTableAgentQueryForInput(){
+		return $this->strMasterTableAgentQueryForInput;
+	}
+	//NEW[23]
+	public function setMasterTableAgentQueryForInput($strValue){
+		//----括弧はじまり、括弧おわり、で入れること
+		$this->strMasterTableAgentQueryForInput = $strValue;
+	}
+	//NEW[24]
+	function getMasterTableBodyForInput(){
+		//----結合クエリまたはDBテーブル名を返す
+		$retStrVal=$this->getMasterTableIDForInput();
+		if( $this->strMasterTableAgentQueryForInput !== null ){
+			$retStrVal=$this->strMasterTableAgentQueryForInput." TABLE_AGENT ";
+		}
+		return $retStrVal;
+	}
+	// ----入力表示用
+
+	//----履歴用マスターのジャーナル系
+	//NEW[25]
+	function setJournalTableOfMaster($jouranlTableOfMaster){
+		$this->journalTableOfMaster = $jouranlTableOfMaster;
+	}
+	//NEW[26]
+	function getJournalTableOfMaster(){
+		return $this->journalTableOfMaster;
+	}
+	//NEW[27]
+	function setJournalSeqIDOfMaster($jouranlSeqIdOfMaster){
+		$this->journalSeqIdOfMaster = $jouranlSeqIdOfMaster;
+	}
+	//NEW[28]
+	function getJournalSeqIDOfMaster(){
+		return $this->journalSeqIdOfMaster;
+	}
+	//NEW[29]
+	function setJournalKeyIDOfMaster($jouranlKeyIdOfMaster){
+		$this->journalKeyIdOfMaster = $jouranlKeyIdOfMaster;
+	}
+	//NEW[30]
+	function getJournalKeyIDOfMaster(){
+		return $this->journalKeyIdOfMaster;
+	}
+	//NEW[31]
+	function setJournalDispIDOfMaster($jouranlDispIdOfMaster){
+		$this->journalDispIdOfMaster = $jouranlDispIdOfMaster;
+	}
+	//NEW[32]
+	function getJournalDispIDOfMaster(){
+		return $this->journalDispIdOfMaster;
+	}
+	//NEW[33]
+	function setJournalLUTSIDOfMaster($jouranlLUTSIdOfMaster){
+		$this->journalLUTSIdOfMaster = $jouranlLUTSIdOfMaster;
+	}
+	//NEW[34]
+	function getJournalLUTSIDOfMaster(){
+		return $this->journalLUTSIdOfMaster;
+	}
+	//履歴用マスターのジャーナル系----
+
+	//----ここから応用メソッド
+	//NEW[35]
+	function setArrayMasterTableByFormatName($strFormatterId, $arrayValue){
+		$this->etceteraParameterWrite("ArrayMasterTable_".$strFormatterId, $arrayValue);
+	}
+	//NEW[36]
+	function getArrayMasterTableByFormatName($strFormatterId, &$miRefKeyExists=false){
+		$miRetValBody = null;
+		$miRefKeyExists = $this->etceteraParameterRead("ArrayMasterTable_".$strFormatterId, $miRetValBody);
+		return $miRetValBody;
+	}
+	//ここまで応用メソッド----
+
+	//NEW[37]
+	function setMasterTableArrayFromMainTable($arrayData){
+		$this->arrayMasterSetFromMainTable = $arrayData;
+	}
+	//NEW[38]
+	function getMasterTableArrayFromMainTable(){
+		global $g;    // RBAC対応
+		//(1)IDColumn、がTableにAddされていない場合は「null」を返す。
+		//(2)setMasterTableArrayFromMainTable、で、null、をセットしたとしても、通常は、配列を返す。
+		if($this->arrayMasterSetFromMainTable === null){
+			$objTable = $this->getTable();
+			if( is_null($objTable) === true ){
+				web_log("This column[".$this->getID()."] is not added in Table.");
+			}else{
+				//----フィルターテーブル用のデフォルト・データセットを作成
+				$mainTableBody = $objTable->getDBMainTableBody();
+				$strThisIdColumnId = $this->getID();
+				$strDUColumnOfMainTable = $objTable->getRequiredDisuseColumnID();
+
+				$refMasterKeyColumn = $this->getKeyColumnIDOfMaster();
+				$refMasterDispColumn = $this->getDispColumnIDOfMaster();
+				$refMasterTableBody = $this->getMasterTableBodyForFilter();
+				$refMasterDUColumn = $this->getRequiredDisuseColumnID();
+				$aryEtcetera = $this->getEtceteraParameter();
+
+                                // ---- RBAC対応
+                                // SQLに埋め込むアクセス権のカラム名取得
+                                $AccessAuthColumName    = $g['global_getAccessAuthColumnName'];
+                                // loadtableに紐づいているオブジェクトのACCESS_AUTHカラム定義の有無取得
+                                $AccessAuthColumUse    = $g['global_getAccessAuth'];
+
+				//----マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する
+				$this->arrayMasterSetFromMainTable=createMasterTableDistinctArray($mainTableBody, $strThisIdColumnId, $strDUColumnOfMainTable, $refMasterTableBody, $refMasterKeyColumn, $refMasterDispColumn, $refMasterDUColumn, $aryEtcetera, $AccessAuthColumUse, $AccessAuthColumName);
+				//マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する----
+                                // RBAC対応 ----
+
+				if(is_array($this->arrayMasterSetFromMainTable)===true && 0 < count($this->arrayMasterSetFromMainTable)){
+					//----正常に配列を取得できた
+					//正常に配列を取得できた----
+				}else{
+				}
+				//フィルターテーブル用のデフォルト・データセットを作成----
+			}
+		}
+		return $this->arrayMasterSetFromMainTable;
+	}
+
+	//NEW[37]
+	function setMasterTableArrayFromJournalTable($arrayData){
+		$this->arrayMasterSetFromJournalTable = $arrayData;
+	}
+	//NEW[38]
+	function getMasterTableArrayFromJournalTable(){
+		//(1)IDColumn、がTableにAddされていない場合は「null」を返す。
+		//(2)setMasterTableArrayFromMainTable、で、null、をセットしたとしても、通常は、配列を返す。
+		if($this->arrayMasterSetFromJournalTable === null){
+			$objTable = $this->getTable();
+			if( is_null($objTable) === true ){
+				//error_log("This column".$this->getID()." is not added in Table.");
+				web_log("This column[".$this->getID()."] is not added in Table.");
+			}else{
+				//----フィルターテーブル用のデフォルト・データセットを作成
+				$JournalTableBody = $objTable->getDBJournalTableBody();
+				$strThisIdColumnId = $this->getID();
+				$strDUColumnOfMainTable = $objTable->getRequiredDisuseColumnID();
+
 				$refMasterKeyColumn = $this->getKeyColumnIDOfMaster();
 				$refMasterDispColumn = $this->getDispColumnIDOfMaster();
 				$refMasterTableBody = $this->getMasterTableBodyForFilter();
@@ -2845,7 +3822,7 @@ class EditStatusControlIDColumn extends IDColumn {
     protected $strEditTableLockTgtSeqName;
     protected $strEditTableEditStatusColumnId;
     protected $strEditTableApplyUserColumnId;
-    
+
     protected $strEditJnlTableBody;
 
     protected $strResultTableLockTgtColumnId;
@@ -2868,18 +3845,18 @@ class EditStatusControlIDColumn extends IDColumn {
     function __construct($strColId, $strColLabel){
         $masterTableIdForFilter = 'DUMMY';
         $masterTableIdForInput = null;
-        
+
         $strKeyColumnIDOfMaster ='FLAG';
         $strDispColumnIdOfMaster = 'NAME';
-        
+
         parent::__construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $masterTableIdForInput);
 
         $this->setHiddenMainTableColumn(true);
         $this->setResultTableRowIdentifySequenceID(null);
         $this->setResultJournalTableSequenceID(null);
-        
+
         $this->setAllowSendFromFile(false);
-        
+
         $this->setDeleteOffBeforeCheck(true); //廃止復活時にバリデーションチェック
         $this->varConfirmTableIUCheck = null; //実行用の内部作業用フラグ
     }
@@ -2927,19 +3904,19 @@ class EditStatusControlIDColumn extends IDColumn {
         $this->strResultJnlTableHiddenId      = $this->objTable->getDBResultJournalTableHiddenID();
 
         $this->setValidator(new EditLockValidator($this, $this->objTable));
-        
+
         $this->setMasterTableAgentQueryForFilter($masterTableName);
         $this->setMasterTableAgentQueryForInput($masterTableName);
-        
+
         $this->setOutputType('register_table', new OutputType(new TabHFmt(), new StaticTextTabBFmt($this->objTable->getStatusNameOnEdit())));
         $this->setOutputType('update_table', new IDOutputType(new ReqTabHFmt(), new TextTabBFmt()));
-        
+
         if($pageType=="apply"){
             //----エクセルでのアップロードのために
             $this->setArrayMasterTableByFormatName("register_table",array('1'=>$this->objTable->getStatusNameOnEdit()));
             $this->setArrayMasterTableByFormatName("update_table",array('0'=>$this->objTable->getStatusNameOfWithdrawned(),'1'=>$this->objTable->getStatusNameOnEdit(),'2'=>$this->objTable->getStatusNameOfWaitForAccept()));
             //エクセルでのアップロードのために----
-            
+
         }else if($pageType=="confirm"){
             //----エクセルでのアップロードのために
             $this->setArrayMasterTableByFormatName("register_table",array());
@@ -3032,14 +4009,14 @@ class EditStatusControlIDColumn extends IDColumn {
                 if($this->getPageMode()=="apply"){
                     //----申請者ページの場合
                     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                    
+
                     $rowEditTgt = $aryVariant['edit_target_row'];
-                    
+
                     if($rowEditTgt[$strEditStatusSaveId]==1){
                         //----編集中の場合
-                        
+
                         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                        
+
                         if(array_key_exists($strEditStatusSaveId, $exeQueryData)===true){
                             if($exeQueryData[$strEditStatusSaveId] == 0){
                                 //----申請取下
@@ -3054,9 +4031,9 @@ class EditStatusControlIDColumn extends IDColumn {
                         //編集中の場合----
                     }else if($rowEditTgt[$strEditStatusSaveId] == 2){
                         //----申請中の場合
-                        
+
                         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                        
+
                         if(array_key_exists($strEditStatusSaveId, $exeQueryData)===true){
                             if($exeQueryData[$strEditStatusSaveId] == 0){
                                 //----申請取下
@@ -3095,14 +4072,14 @@ class EditStatusControlIDColumn extends IDColumn {
                 }else if($this->getPageMode()=="confirm"){
                     //----承認者ページの場合
                     $rowEditTgt = $aryVariant['edit_target_row'];
-                    
+
                     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                    
+
                     if($rowEditTgt[$strEditStatusSaveId]==2){
                         //----申請中の場合
-                        
+
                         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                        
+
                         if(array_key_exists($strEditStatusSaveId, $exeQueryData)===true){
                             if($exeQueryData[$strEditStatusSaveId]==1){
                                 //----差戻の場合
@@ -3110,22 +4087,22 @@ class EditStatusControlIDColumn extends IDColumn {
                                 //差戻の場合----
                             }else if($exeQueryData[$strEditStatusSaveId]==3){
                                 //----承認する場合
-                                
+
                                 if($rowEditTgt[$strLockTargetNoId]==""){
                                     //----新規申請だった場合
-                                    
+
                                     $boolSpecialUpdate = true;
-                                    
+
                                     //----指定のシーケンスから、自動採番する
                                     $retArray= getSequenceValue($this->getResultTableRowIdentifySequenceID(),true);
                                     //指定のシーケンスから、自動採番する----
-                                    
+
                                     if( $retArray[1]=== 0 ){
                                         //----シーケンス取得成功
                                         $exeQueryData[$strLockTargetNoId] = $retArray[0];
-                                        
+
                                         $this->varConfirmTableIUCheck = array('toStatus'=>3,'mode'=>'confirmInsert');
-                                        
+
                                         //シーケンス取得成功----
                                     }else{
                                         //----シーケンス取得失敗
@@ -3133,15 +4110,15 @@ class EditStatusControlIDColumn extends IDColumn {
                                         web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5004",$this->getResultTableRowIdentifySequenceID()));
                                         $strErrMsg .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3002",$this->getColLabel(true));
                                     }
-                                    
+
                                     //新規申請だった場合----
                                 }else{
                                     //----更新申請だった場合
                                     $exeQueryData[$strLockTargetNoId] = $rowEditTgt[$strLockTargetNoId];
                                     $boolSpecialUpdate = true;
-                                    
+
                                     $this->varConfirmTableIUCheck = array('toStatus'=>3,'mode'=>'confirmUpdate');
-                                    
+
                                     //更新申請だった場合----
                                 }
                                 //承認する場合----
@@ -3159,7 +4136,7 @@ class EditStatusControlIDColumn extends IDColumn {
                     }
                     //承認者ページの場合----
                 }
-                
+
                 if($boolSpecialUpdate===true){
                     //----特定のカラムを除いて、更新させない
                     foreach($arrayObjColumn as $objColumn){
@@ -3177,14 +4154,14 @@ class EditStatusControlIDColumn extends IDColumn {
                     $remainColKeys[] = $strEditStatusSaveId;
                     $remainColKeys[] = $strLockTargetNoId;
                     $remainColKeys[] = $this->objTable->getRequiredUpdateDate4UColumnID();
-                    
+
                     $remainColKeys[] = $this->objTable->getRequiredJnlSeqNoColumnID();
                     $remainColKeys[] = $this->objTable->getRequiredJnlRegTimeColumnID();
                     $remainColKeys[] = $this->objTable->getRequiredJnlRegClassColumnID();
-                    
+
                     $intDiffColumn = 0;
                     $arrayDiffColumnName = array();
-                    
+
                     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
                     foreach($exeQueryData as $key=>$value){
                         if( in_array($key, $remainColKeys) === true ){
@@ -3206,8 +4183,8 @@ class EditStatusControlIDColumn extends IDColumn {
                         }
                     }
                     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                    
-                    
+
+
                     if(1 <= $intDiffColumn){
                         $intErrorType = 2;
                         $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-14004",$this->getColLabel());
@@ -3233,12 +4210,12 @@ class EditStatusControlIDColumn extends IDColumn {
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
         return $retArray;
     }
-    
+
     function inTrzAfterTableIUDAction(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
         //----トランザクション内
         global $g;
         $intControlDebugLevel01=250;
-        
+
 		$boolRet = true;
 		$intErrorType = null;
 		$aryErrMsgBody = array();
@@ -3285,29 +4262,29 @@ class EditStatusControlIDColumn extends IDColumn {
                     }
                 }else if( $this->varConfirmTableIUCheck['toStatus']===false ){
                     //----廃止/復活で特定条件が満たされた場合は、結果テーブルに反映させる。
-                    
+
                     //----廃止/復活の場合、承認済レコードの場合は、最大の申請番号かどうか、を調べる。
                     $strLockTargetNoId = $this->strEditTableLockTgtColumnId;
-                    
+
                     $varLockTargetNo = $aryVariant['edit_target_row'][$strLockTargetNoId];
                     if( 0 < strlen($varLockTargetNo) ){
                         //----承認番号がある
-                        
+
                         $varApplyNo = $exeQueryData[$this->objTable->getRIColumnID()];
-                        
+
                         //----申請テーブル履歴から、該当の承認番号の、承認済の廃止されていないレコード(1)を抽出する。
                         //----(1)の中で、各申請番号ごとに、最初に承認されたレコード(2)を検出する。
                         //----(2)の中で、更新日時が最後のものが、最新の承認済レコードが、承認された時のレコードである。
-                        
+
                         $arrayObjColumn = $this->objTable->getColumns();
                         $strLUTColumnId = $this->objTable->getRequiredLastUpdateDateColumnID();
-                        
+
                         $strRIColumnId  = $this->objTable->getRIColumnID();
-                        
+
                         $objLUTColumn   = $arrayObjColumn[$strLUTColumnId];
-                        
+
                         $strLUTColumnOfSelectZone = $objLUTColumn->getPartSqlInSelectZone();
-                        
+
                         //----編集テーブル履歴から、廃止されていない、承認済レコードを抽出する
                         $checkSql = "SELECT {$this->objTable->getRequiredJnlSeqNoColumnID()} , {$strRIColumnId}, {$strLUTColumnOfSelectZone} "
                                    ." FROM {$this->strEditJnlTableBody} {$this->objTable->getShareTableAlias()} "
@@ -3323,7 +4300,7 @@ class EditStatusControlIDColumn extends IDColumn {
                             $intErrorType = 500;
                             throw new Exception( '00000200-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
                         }
-                        
+
                         $objQuery =& $retArray[1];
                         $aryFirstRowPerRI = array();
                         //----承認されたレコードから、各申請番号ごとに、もっとも最初のレコードを抽出する
@@ -3397,12 +4374,12 @@ class EditStatusControlIDColumn extends IDColumn {
                         }else{
                             $intErrorType = 500;
                             throw new Exception( '00000500-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
-                        }                                                            
+                        }
                     }else{
                         $intErrorType = 500;
                         throw new Exception( '00000600-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
                     }
-                    
+
                     $exeJournalData = generateElementForJournalReg($toResultExeQueryData
                                                                    ,$aryVariant['edit_target_row']
                                                                    ,$this->objTable->getColumns()
@@ -3410,7 +4387,7 @@ class EditStatusControlIDColumn extends IDColumn {
                                                                    ,$this->strResultTableHiddenId);
 
                     $retArray= getSequenceValue($this->strResultJnlTableJnlSeqId,true);
-                    
+
                     if( $retArray[1] === 0 ){
                         $exeJournalData[$this->objTable->getRequiredJnlSeqNoColumnID()] = $retArray[0];
                         $boolRet = true;
@@ -3423,7 +4400,7 @@ class EditStatusControlIDColumn extends IDColumn {
                                                              ,$this->objTable->getColumns()
                                                              ,$this->strResultJnlTableId
                                                              ,$this->strResultJnlTableHiddenId );
-                
+
                     $retArray = singleSQLExecuteAgent($sqlJnlBody, $exeJournalData, $strFxName);
                     if( $retArray[0] === true ){
                         $objQuery =& $retArray[1];
@@ -3433,7 +4410,7 @@ class EditStatusControlIDColumn extends IDColumn {
                         }else{
                             $intErrorType = 500;
                             throw new Exception( '00000800-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
-                        }                                                            
+                        }
                     }else{
                         $intErrorType = 500;
                         throw new Exception( '00000900-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
@@ -3562,7 +4539,7 @@ class MultiSelectSaveColumn extends IDColumn {
 
 		$strMaxLUSTFUFromLink = null;
 		$this->arrayOtherColumnType = null;
-		
+
 		$this->arrayLinkTableConf = array();
 		$this->arrayLinkTableValue = array();
 	}
@@ -3686,7 +4663,7 @@ class MultiSelectSaveColumn extends IDColumn {
 	function beforeIUDValidateCheck(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
 		global $g;
 		$intControlDebugLevel01=250;
-		
+
 		$boolRet = true;
 		$intErrorType = null;
 		$aryErrMsgBody = array();
@@ -3826,7 +4803,7 @@ class MultiSelectSaveColumn extends IDColumn {
 		//----トランザクション内
 		global $g;
 		$intControlDebugLevel01=250;
-		
+
 		$strFxName = __CLASS__."::".__FUNCTION__;
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
@@ -3905,13 +4882,13 @@ class MultiSelectSaveColumn extends IDColumn {
 
 				$sqlUtnBody = $retArray[1];
 				$arrayUtnBind = $retArray[2];
-				
+
 				$arrayUtnBind[$this->getAnchorColumnIDOfLink()] = $exeQueryData[$this->objTable->getRIColumnID()];
-				
+
 				$retSQLResultArray = singleSQLExecuteAgent($sqlUtnBody, $arrayUtnBind, $strFxName);
 				if( $retSQLResultArray[0] === true ){
 					$objQueryUtn =& $retSQLResultArray[1];
-					
+
 					$arrayRowBody = array();
 					$arrayRowIndex = array();
 					// ----リンクテーブルにある関連行を、格納する。
@@ -3921,9 +4898,9 @@ class MultiSelectSaveColumn extends IDColumn {
 						$arrayRowBody[$strMasterValue] = $row;
 					}
 					// リンクテーブルにある関連行を、格納する。----
-					
+
 					$arrayReqData = $this->aryBufferUIDReq;
-					
+
 					unset($objQueryUtn);
 				}
 				else{
@@ -3938,7 +4915,7 @@ class MultiSelectSaveColumn extends IDColumn {
 					if( array_key_exists($selectedValue, $arrayRowBody) === true ){
 
 						$updateRow = $arrayRowBody[$selectedValue];
-						
+
 						if( $updateRow[$this->getDisuseColumnIDOfLink()] == "0" ){
 							// ----廃止されていないので、なにもしない
 							// 廃止されていないので、なにもしない----
@@ -3966,7 +4943,7 @@ class MultiSelectSaveColumn extends IDColumn {
 								$this->getTableIDOfLinkJnl(),
 								$arrayConfig,
 								$updateRow );
-								
+
 							if($retArray === false){
 								$intErrorType = 500;
 								throw new Exception( '00000400-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
@@ -3987,7 +4964,7 @@ class MultiSelectSaveColumn extends IDColumn {
 								//$strErrMsg = "UTNテーブル更新エラーです";
 								throw new Exception( '00000500-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
 							}
-							
+
 							$retJnlSQLResultArray = singleSQLExecuteAgent($sqlJnlBody, $arrayJnlBind, $strFxName);
 							if( $retJnlSQLResultArray[0] === true ){
 								unset($retJnlSQLResultArray);
@@ -4032,7 +5009,7 @@ class MultiSelectSaveColumn extends IDColumn {
 						$incertRow[$this->getMasterKeyColumnIDOfLink()] = $selectedValue;
 
 						$incertRow[$this->getDisuseColumnIDOfLink()]    = "0";
-						
+
 						$incertRow[$this->getLUUColumnIDOfLink()]       = $g['login_id'];
 
 						$retArray = makeSQLForUtnTableUpdate($db_model_ch,
@@ -4047,7 +5024,7 @@ class MultiSelectSaveColumn extends IDColumn {
 							$intErrorType = 500;
 							throw new Exception( '00000800-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
 						}
-						
+
 						$sqlUtnBody = $retArray[1];
 						$arrayUtnBind = $retArray[2];
 
@@ -4062,7 +5039,7 @@ class MultiSelectSaveColumn extends IDColumn {
 							$intErrorType = 500;
 							throw new Exception( '00000900-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
 						}
-						
+
 						$retJnlSQLResultArray = singleSQLExecuteAgent($sqlJnlBody, $arrayJnlBind, $strFxName);
 						if( $retJnlSQLResultArray[0] === true ){
 							unset($retJnlSQLResultArray);
@@ -4072,7 +5049,7 @@ class MultiSelectSaveColumn extends IDColumn {
 							throw new Exception( '00001000-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
 						}
 						//テーブルにはなかった----
-					} 
+					}
 				}
 				// リストで選ばれたもの----
 
@@ -4084,7 +5061,7 @@ class MultiSelectSaveColumn extends IDColumn {
 						// テーブルにもあり、今回も選ばれたもの----
 					}else{
 						// ---テーブルにはあるが、選ばれれなかったもの
-						
+
 						if( $updateRow[$this->getDisuseColumnIDOfLink()] == "0" ){
 							// ----廃止されていないので、廃止する
 							$retArray = getSequenceValue($this->getSeqIDOfLinkJnl(), true, false );
@@ -4152,7 +5129,7 @@ class MultiSelectSaveColumn extends IDColumn {
 		catch(Exception $e){
 			$tmpErrMsgBody = $e->getMessage();
 			web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5002",array($tmpErrMsgBody,$this->getSelfInfoForLog())));
-		
+
 			$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-15004",$this->getColLabel(true));
 		}
 		//----保存テーブルに書き込む
@@ -4523,7 +5500,7 @@ class PasswordColumn extends TextColumn {
 		}
 		$this->setEncodeFunctionName("md5");
 		$this->setSelectTagCallerShow(false);
-		
+
 		$this->setDeleteOffBeforeCheck(false); //復活は、値のバリデーションチェックを行わない
 
         $this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
@@ -4663,7 +5640,7 @@ class MaskColumn extends TextColumn {
             $this->updateRequireExcept = $updateRequireExcept['updateRequireExcept'];
         }
         $this->setSelectTagCallerShow(false);
-        
+
         $this->setDeleteOffBeforeCheck(false); //復活は、値のバリデーションチェックを行わない
 
         $this->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
@@ -5081,7 +6058,7 @@ class JournalSeqNoColumn extends NumColumn {
 	//FixColumnイベント系----
 
 	//----TableIUDイベント系
-	
+
 	function getSequencesForTrzStart(&$arySequence=array()){
 		//----トランザクション内
 		global $g;
@@ -5118,7 +6095,7 @@ class JournalSeqNoColumn extends NumColumn {
 		return $retArray;
 		//トランザクション内----
 	}
-	
+
 	public function inTrzBeforeTableIUDAction(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
 		global $g;
 
@@ -5158,7 +6135,7 @@ class JournalSeqNoColumn extends NumColumn {
 
 			$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-16001",$this->getColLabel(true));
 		}
-		
+
 		$retArray[0] = $boolRet;
 		$retArray[1] = $intErrorType;
 		$retArray[2] = $strErrMsg;
@@ -5260,7 +6237,7 @@ class AutoNumColumn extends NumColumn {
 	}
 
 	//----TableIUDイベント系
-	
+
 	function getSequencesForTrzStart(&$arySequence=array()){
 		//----トランザクション内
 		global $g;
@@ -5370,7 +6347,7 @@ class AutoNumColumn extends NumColumn {
 class AutoNumRegisterColumn extends AutoNumColumn {
 	function __construct($strColId, $strColLabel, $strSequenceId=null, $uniqueColumns=array()){
 		global $g;
-		
+
 		parent::__construct($strColId, $strColLabel, $strSequenceId);
 
 		$outputType = new OutputType(new ReqTabHFmt(), new TextTabBFmt());
@@ -5418,7 +6395,7 @@ class AutoNumRegisterColumn extends AutoNumColumn {
 					throw new Exception( '00000100-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
 				}
 				//シーケンスが設定されている場合----
-				
+
 			}else if( $modeValue=="DTUP_singleRecUpdate" ){
 				$boolRet = true;
 			}else if( $modeValue=="DTUP_singleRecDelete" ){
@@ -5500,7 +6477,7 @@ class RowIdentifyColumn extends AutoNumColumn {
 
 	function __construct($strColId, $strColLabel, $strSequenceId=null, $uniqueColumns=array()){
 		global $g;
-		
+
 		parent::__construct($strColId, $strColLabel, $strSequenceId);
 		$this->setHiddenMainTableColumn(true);
 		$this->setHeader(true);
@@ -5574,12 +6551,12 @@ class LockTargetColumn extends NumColumn {
     function __construct($strViewTableWkPKId, $strViewTableWkPKName){
         parent::__construct($strViewTableWkPKId, $strViewTableWkPKName);
 		$this->setHiddenMainTableColumn(true);
-		
+
         $this->setOutputType('update_table', new OutputType(new TabHFmt(), new TextTabBFmt()));
         $this->setOutputType('register_table', new OutputType(new TabHFmt(), new LockTargetInputTabBFmt()));
-        
+
         $this->setHeader(true);
-        
+
         $this->setSubtotalFlag(false);
 
 		$this->setValidator(new RowIDNoValidator());
@@ -5608,7 +6585,7 @@ class DateColumn extends Column {
 	protected $strFilterInputType;
 	protected $boolFilterSecondInput;
 	protected $intFilterMinuteScale;
-	
+
 	protected $strIUInputType;
 	protected $boolIUSecondInput;
 	protected $intIUMinuteScale;
@@ -5618,7 +6595,7 @@ class DateColumn extends Column {
 	function __construct($strColId, $strColLabel, $strFilterType="DATE", $strIUInputType="DATE"){
 		parent::__construct($strColId, $strColLabel);
 		$this->setDBColumn(true);
-		
+
 		global $g;
 		if($g['db_model_ch'] === 0){
 			$this->strDateHiddenFormat = "YYYY/MM/DD HH24:MI:SS";
@@ -5649,7 +6626,7 @@ class DateColumn extends Column {
 		$this->setAddSelectTagPrintType(1);
 
 		$this->setSelectTagCallerShow(false);
-		
+
 		$this->setEvent("filter_table", "onclose", "search_async", array("'idcolumn_filter_default'"));
 	}
 
@@ -5661,7 +6638,7 @@ class DateColumn extends Column {
 	}
 
         // DateColumn::getAddSelectTagQuery
-	function getAddSelectTagQuery($objTable, $searchTblId, $strWhereAddBody=""){ 
+	function getAddSelectTagQuery($objTable, $searchTblId, $strWhereAddBody=""){
 		// --RBAC未対応--
 		$retStrQuery = "";
 		$intErrorType = null;
@@ -5778,7 +6755,7 @@ class DateColumn extends Column {
 					}
 				}
 			}
-			
+
 			if( 1 <= $intCount ){
 				$retStrQuery  = "{$strSelfAliasStrConColId} IN (";
 				$retStrQuery .= implode(",",$arrayElement);
@@ -6009,7 +6986,7 @@ class DateTimeColumn extends DateColumn {
 		$this->setOutputType("print_table", $outputType);
 
 		$outputType = new OutputType(new TabHFmt(), new DateTimeTextTabBFmt());
-		
+
 		$this->setOutputType("print_journal_table", $outputType);
 
 		$this->setValidator(new DateTimeValidator());
@@ -6028,7 +7005,7 @@ class DateTimeColumn extends DateColumn {
 		$retStrQuery  = "{$this->strFxNameDateToStr}({$strWpTblSelfAlias}.{$strWpColId}, '{$this->getDataFormat()}') {$strWpColId}";
 		return $retStrQuery;
 	}
-	
+
 	function getFilterQuery($boolBinaryDistinctOnDTiS=true){
 		//----WHERE句[0]
 		//----クラス(Table)のメソッド(getFilterQuery)から呼び出される
@@ -6051,7 +7028,7 @@ class DateTimeColumn extends DateColumn {
 					}
 				}
 			}
-			
+
 			if( 1 <= $intCount ){
 				$retStrQuery  = "{$strSelfAliasStrConColId} IN (";
 				$retStrQuery .= implode(",",$arrayElement);
@@ -6079,7 +7056,7 @@ class DateTimeColumn extends DateColumn {
 			}
 			//range----
 		}
-		
+
 		return $retStrQuery;
 	}
 
@@ -6162,7 +7139,7 @@ class AutoUpdateTimeColumn extends DateTimeColumn {
 		}
 		parent::__construct($strColIdText, $strColExplain, "DATE");
 		$this->setHiddenMainTableColumn(true);
-		
+
 		if($g['db_model_ch'] === 0){
 			$this->strDateFormat = "YYYY/MM/DD HH24:MI:SS";
 		}else if($g['db_model_ch'] === 1){
@@ -6408,7 +7385,7 @@ class JournalRegClassColumn extends TextColumn{
 		$this->getOutputType("delete_table")->setVisible(false);
 		$this->getOutputType("excel")->setVisible(false);
 		$this->getOutputType("csv")->setVisible(false);
-		
+
 		$this->getOutputType("json")->setVisible(false);
 	}
 
@@ -6492,9 +7469,9 @@ class LastUpdateDate4UColumn extends TextColumn {
 		$this->getOutputType("filter_table")->setVisible(false);
 		$this->getOutputType("excel")->setVisible(true);
 		$this->getOutputType("csv")->setVisible(true);
-		
+
 		$this->getOutputType("json")->setVisible(true);
-		
+
 		$this->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-STD-11902"));
 	}
 	function getPartSqlInSelectZone(){
@@ -6577,7 +7554,7 @@ class AutoUpdateUserColumn extends TextColumn {
 		//----エクセルからの抽出はしない
 		$this->setAllowSendFromFile(false);
 		//エクセルからの抽出はしない----
-		
+
 		//$strStaticTextBody = "自動入力";
 		$strStaticTextBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12002");
 
@@ -6716,7 +7693,7 @@ class AutoUpdateUserColumn extends TextColumn {
 
 					$data[] = '%'.$filter.'%';
 				}
-				
+
 			}
 		}
 		return $data;
@@ -6812,7 +7789,7 @@ class AutoUpdateUserColumn extends TextColumn {
 	function getNullSearchQuery(){
 		//----WHERE句[1]
 		global $g;
-		
+
 		$retStrQuery = "";
 
 		$dbQM=$this->objTable->getDBQuoteMark();
@@ -6974,7 +7951,7 @@ class AutoUpdateUserColumn extends TextColumn {
 	function getJournalLUTSIDOfMaster(){
 		return $this->journalLUTSIdOfMaster;
 	}
-	//履歴用マスターのジャーナル系----	
+	//履歴用マスターのジャーナル系----
 	//JNL----
 
 	//NEW[25]
@@ -7043,7 +8020,7 @@ class LastUpdateUserColumn extends AutoUpdateUserColumn {
 
 }
 
-class WhereQueryColumn extends Column { 
+class WhereQueryColumn extends Column {
 
 	//----ここから継承メソッドの上書き処理
 
@@ -7101,7 +8078,7 @@ class RangeInQueryColumn extends WhereQueryColumn {
 	protected $strColIdOfRangeStart;
 	protected $boolStartEqRangeOut; //----スタート値と等しい場合は除外する
 	//開始カラム----
-	
+
 	//----終端カラム
 	protected $strColIdOfRangeEnd;
 	protected $boolEndEqRangeOut; //----エンド値と等しい場合は除外する
@@ -7122,10 +8099,10 @@ class RangeInQueryColumn extends WhereQueryColumn {
 
 		$this->setColIDOfRangeStart($strColIdOfRangeStart);
 		$this->setStartEqualValueRangeOut(false);
-		
+
 		$this->setColIDOfRangeEnd($strColIdOfRangeEnd);
 		$this->setEndEqualValueRangeOut(false);
-		
+
 		$this->setFilterInputType($strFilterType);
 	}
 
@@ -7144,7 +8121,7 @@ class RangeInQueryColumn extends WhereQueryColumn {
 		//----WHERE句[0]
 		//----クラス(Table)のメソッド(getFilterQuery)から呼び出される
 		global $g;
-		
+
 		$retStrQuery = "";
 
 		$dbQM = $this->objTable->getDBQuoteMark();
@@ -7204,7 +8181,7 @@ class RangeInQueryColumn extends WhereQueryColumn {
 		return $this->boolStartEqRangeOut;
 	}
 	//開始定義カラム----
-	
+
 	//----終端定義カラム
 	//NEW[5]
 	function setColIDOfRangeEnd($strColId){
@@ -7334,7 +8311,7 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 		$this->boolNotFoundFlag = false;
 
 		$this->aryPrimeMasterSet = null;
-		
+
 		$this->setValidator(new IDValidator($this));
 	}
 
@@ -7560,7 +8537,7 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 			}
 		}
 		//[2]配列の個数分(最終の直前まで)、SQL発行を繰り返す----
-		
+
 		//----[3]最終的にプルダウン表示させるのに使うマスタ情報からSQL作成
 		if( $boolExecute===true ){
 			$aryPrimeMasterInfo = $this->aryPrimeMasterTableInfo;
@@ -7591,7 +8568,7 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 			  ."ORDER BY DISP_COLUMN ASC";
 			$retArrayForBind = $aryValueForBind;
 			$retVarQuery = $strMidQuery;
-			
+
 			if( $this->getAddSelectTagPrintType()===0 ){
 				//----表示列側での仮想マスタテーブルモードの場合
 				$retVarQuery = null;
@@ -7625,7 +8602,7 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 				}
 				//表示列側での仮想マスタテーブルモードの場合----
 			}
-			
+
 		}
 		//[3]最終的にプルダウン表示させるのに使うマスタ情報からSQL作成----
 
@@ -7732,7 +8709,7 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 						//----原始マスタの表示列が、文字列型だった場合
 						$aryValueForBind = array();
 						$arySource = $this->getFilterValues();
-						
+
 						if( is_array($arySource)===true && 0 < count($arySource) ){
 							$tmpArray = array();
 							$tmpBindKey = '';
@@ -7819,7 +8796,7 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 							}
 							//あいまいモードを一旦OFF----
 						}
-						
+
 						break;
 						//原始マスタの表示列が、文字列型だった場合----
 					}
@@ -8008,7 +8985,7 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 		return $retArray;
 	}
 	//DTiS系イベント----
-	
+
 	//----IDColumnのマスタから、さらにさかのぼって表示に使うマスタまでの情報を格納/取出する関数
 	function setRelayInfoFromMasterToPrime($aryRelayInfoFromMasterToPrime){
 		$this->aryRelayInfoFromMasterToPrime = $aryRelayInfoFromMasterToPrime;
@@ -8385,7 +9362,7 @@ class RowEditByFileColumn extends Column{
 
 	protected $arrayCounter;
 	protected $boolRegisterRestrict;
-	
+
 	protected $arrayCommandArrayForEdit;
 	protected $arrayIgnoreCommandArrayForEdit;
 
@@ -8407,7 +9384,7 @@ class RowEditByFileColumn extends Column{
 
 		$this->setCommandArrayForEdit(null);
 		$this->setIgnoreCommandArrayForEdit(array(1=>"",2=>"-"));
-		
+
 		$this->setResultCount(null);
 
 		$this->setRegisterRestrict(true);
@@ -8416,7 +9393,7 @@ class RowEditByFileColumn extends Column{
 
 	//----FixColumnイベント系
 	function afterFixColumn(){
-		global $g;    
+		global $g;
 		//$strResultType01 = "登録";
 		//$strResultType02 = "更新";
 		//$strResultType03 = "廃止";
@@ -8449,7 +9426,7 @@ class RowEditByFileColumn extends Column{
 			$count['error']['name'] = $strResultType99;
 			$count['error']['ct'] = 0;
 
-			$this->setResultCount($count);    
+			$this->setResultCount($count);
 		}
 
 	}
@@ -8749,7 +9726,7 @@ class RowEditByFileColumn extends Column{
 								 						,'uniqueCheckSkip'=>$boolUniqueCheckSkip
 														);
 				$arrayTempRet = deleteTableMain($mode, $strNumberForRI, $inputArray, null, $dlcOrderMode, $aryVariant);
-				$retRetMsgBody = $arrayTempRet[2]; 
+				$retRetMsgBody = $arrayTempRet[2];
 
 				//----switch
 				switch($arrayTempRet[0]){
@@ -8877,7 +9854,7 @@ class RowEditByFileColumnForReview extends RowEditByFileColumn{
 					18=>$this->objTable->getActionNameOfLogicDeleteOn(),
 					19=>$this->objTable->getActionNameOfLogicDeleteOff()
 				));
-				
+
 				$count['update_Confirm']['name'] = $this->objTable->getActionNameOfConfirmUpdate();
 				$count['update_Confirm']['ct'] = 0;
 				$count['update_Nonsuit']['name'] = $this->objTable->getActionNameOfConfirmNonsuit();
@@ -8886,7 +9863,7 @@ class RowEditByFileColumnForReview extends RowEditByFileColumn{
 				$count['update_Return']['ct'] = 0;
 				$count['update_Accept']['name'] = $this->objTable->getActionNameOfConfirmAccept();
 				$count['update_Accept']['ct'] = 0;
-				
+
 			}else{
 				$this->setCommandArrayForEdit(array(
 					21=>$this->objTable->getActionNameOfApplyRegistrationForUpdate(),
@@ -8940,7 +9917,7 @@ class RowEditByFileColumnForReview extends RowEditByFileColumn{
 				$aryCommand[21] = $this->objTable->getActionNameOfApplyRegistrationForUpdate();
 				//修正申請を追加----
 			}
-			
+
 			$intCmdKey = array_search($editType,$aryCommand);
 			if( $intCmdKey === false ){
 				$intCmdKey = -1;
@@ -9244,7 +10221,7 @@ class RowEditByFileColumnForReview extends RowEditByFileColumn{
 				);
 				$arrayTempRet = deleteTableMain($mode, $strNumberForRI, $inputArray, null, $dlcOrderMode, $aryVariant);
 
-				$retRetMsgBody = $arrayTempRet[2]; 
+				$retRetMsgBody = $arrayTempRet[2];
 
 				//----switch
 				switch($arrayTempRet[0]){
@@ -9537,7 +10514,7 @@ class FileUploadColumn extends Column{
 	public function afterTableIUDAction(&$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
 		global $g;
 		$intControlDebugLevel01 = 50;
-		
+
 		$boolRet = true;
 		$intErrorType = null;
 		$aryErrMsgBody = array();
@@ -9808,7 +10785,7 @@ class FileUploadColumn extends Column{
 	//NEW[7]
 	public function setNRPathAnyToBranchPerFUC($nrPathAnyToBranchPerFUC){
 		//最初にスラッシュがついていることが前提
-		
+
 		//最後がスラッシュなら外す
 		if( checkRiskOfDirTraversal($nrPathAnyToBranchPerFUC)===false ){
 			$strRTrimed = rtrim($nrPathAnyToBranchPerFUC,"/");
@@ -9947,7 +10924,7 @@ class FileUploadColumn extends Column{
 			//----ファイルが隠蔽されている場合
 
 			if( array_key_exists( $strJnlSeqNoColId ,$rowData) === true ){
-				$strMidQuery = "rin={$strNumberForRI}&jsn={$strNumberForJSN}";	
+				$strMidQuery = "rin={$strNumberForRI}&jsn={$strNumberForJSN}";
 			}else{
 				$strMidQuery = "rin={$strNumberForRI}";
 			}
@@ -10142,7 +11119,7 @@ class FileUploadColumn extends Column{
 
 }
 
-class LinkButtonColumn extends Column { 
+class LinkButtonColumn extends Column {
 
 	protected $buttonName;
 	protected $linkable;

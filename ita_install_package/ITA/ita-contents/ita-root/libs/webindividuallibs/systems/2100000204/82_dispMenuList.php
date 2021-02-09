@@ -28,7 +28,7 @@
         if( $objIntNumVali->isValid($p_menu_group_id) === false ){
             throw new Exception( '00000100-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
-        
+
         // メニューグループ一覧(A_MENU_GROUP_LIST)が存在しているかチェック
         $sql = "SELECT DISUSE_FLAG
                 FROM   A_MENU_GROUP_LIST
@@ -83,7 +83,7 @@
         $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
         if( $retArray[0] === true ){
             $objQuery =& $retArray[1];
-            $str_temp = 
+            $str_temp =
 <<< EOD
                 <div class="fakeContainer_Yobi1">
                 <table id="DbTable_Yobi1">
@@ -95,9 +95,9 @@
                         <th scope="col" onClick="tableSort(1, this, 'DbTable_Yobi1_data', 4       );"  class="sort" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040701")}</span></th>
                     </tr>
 EOD;
-            
+
             $output_str .= $str_temp;
-            
+
             $temp_no = 1;
             $num_rows = 0;
             while ( $menu_row =  $objQuery->resultFetch() ){
@@ -108,14 +108,16 @@ EOD;
                 $COLUMN_02 = nl2br(htmlspecialchars($menu_row['MENU_ID']));
                 $COLUMN_03 = nl2br(htmlspecialchars($menu_row['MENU_NAME']));
                 $COLUMN_04 = nl2br(htmlspecialchars($menu_row['LOGIN_NECESSITY_DISP']));
-                
-                $str_temp = 
+                $url = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_1__S=" .$COLUMN_02 ."&Filter1Tbl_1__E=" .$COLUMN_02;
+                $url_02 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_4=" .$COLUMN_03;
+
+                $str_temp =
 <<< EOD
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
                         <td class="number" {$BG_COLOR}>{$COLUMN_01}</td>
-                        <td class="number" {$BG_COLOR}>{$COLUMN_02}</td>
-                        <td{$BG_COLOR}>{$COLUMN_03}</td>
+                        <td class="number" {$BG_COLOR}><a href={$url} target="blank">{$COLUMN_02}</a></td>
+                        <td{$BG_COLOR}><a href={$url_02} target="blank">{$COLUMN_03}</a></td>
                         <td{$BG_COLOR}>{$COLUMN_04}</td>
                     </tr>
 EOD;
@@ -125,7 +127,7 @@ EOD;
             }
             unset($objQuery);
 
-            $str_temp = 
+            $str_temp =
 <<< EOD
                 </table>
                 </div>
@@ -143,13 +145,13 @@ EOD;
     catch (Exception $e){
         // エラーフラグをON
         $error_flag = 1;
-        
+
         $tmpErrMsgBody = $e->getMessage();
         dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-        
+
         // DBアクセス事後処理
         if ( isset($objQuery) )    unset($objQuery);
-        
+
         web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody)));
     }
 
