@@ -74,12 +74,14 @@ function initEditor( mode ) {
       let movementListHTML = '';
       movementList.sort( function( a, b ){
         if ( type === 'string') {
+          const al = a[ name ].toLowerCase(),
+                bl = b[ name ].toLowerCase();
           if ( sort === 'desc') {
-            if( a[ name ] < b [ name ] ) return 1;
-            if( a[ name ] > b [ name ] ) return -1;
+            if( al < bl ) return 1;
+            if( al > bl ) return -1;
           } else if ( sort === 'asc') {
-            if( a[ name ] > b [ name ] ) return 1;
-            if( a[ name ] < b [ name ] ) return -1;
+            if( al > bl ) return 1;
+            if( al < bl ) return -1;
           }
         } else if ( type === 'number') {
           if ( sort === 'desc') {
