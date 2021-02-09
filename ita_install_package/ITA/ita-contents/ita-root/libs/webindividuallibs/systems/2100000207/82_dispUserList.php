@@ -27,11 +27,11 @@
 	    if( $objIntNumVali->isValid($p_role_id) === false ){
 	        throw new Exception( '00000100-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
 	    }
-        
+
         // ロール一覧(A_ROLE_LIST)が存在しているかチェック
         $sql = "SELECT DISUSE_FLAG
                 FROM   A_ROLE_LIST
-                WHERE  ROLE_ID = :ROLE_ID_BV 
+                WHERE  ROLE_ID = :ROLE_ID_BV
                 AND DISUSE_FLAG IN ('0','1')";
 
         $tmpAryBind = array('ROLE_ID_BV'=>$p_role_id);
@@ -67,7 +67,7 @@
         else{
             $BG_COLOR = " class=\"disuse\" ";
         }
-        
+
         // ロールアカウント紐付リスト(A_ROLE_ACCOUNT_LINK_LIST)を検索
         $sql = "SELECT TAB_1.USER_ID,
                         TAB_2.USERNAME,
@@ -83,7 +83,7 @@
         $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
         if( $retArray[0] === true ){
             $objQuery =& $retArray[1];
-            $str_temp = 
+            $str_temp =
 <<< EOD
                 <div class="fakeContainer_Yobi1">
                 <table id="DbTable_Yobi1">
@@ -104,13 +104,14 @@ EOD;
                 $COLUMN_01 = nl2br(htmlspecialchars($user_row['USER_ID']));
                 $COLUMN_02 = nl2br(htmlspecialchars($user_row['USERNAME']));
                 $COLUMN_03 = nl2br(htmlspecialchars($user_row['USERNAME_JP']));
-                
-                $str_temp = 
+                $url = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_2=" .$COLUMN_02;
+
+                $str_temp =
 <<< EOD
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
                         <td class="number" {$BG_COLOR}>{$COLUMN_01}</td>
-                        <td{$BG_COLOR}>{$COLUMN_02}</td>
+                        <td{$BG_COLOR}><a href={$url} target="blank">{$COLUMN_02}</a></td>
                         <td{$BG_COLOR}>{$COLUMN_03}</td>
                     </tr>
 EOD;
@@ -118,8 +119,8 @@ EOD;
                 $temp_no++;
             }
             unset($objQuery);
-            
-            $str_temp = 
+
+            $str_temp =
 <<< EOD
                 </table>
                 </div>
@@ -137,15 +138,15 @@ EOD;
     catch (Exception $e){
         // エラーフラグをON
         $error_flag = 1;
-        
+
         $tmpErrMsgBody = $e->getMessage();
         dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-        
+
         // DBアクセス事後処理
         if ( isset($objQuery) )    unset($objQuery);
-        
+
         web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody)));
     }
-    
+
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-2",__FILE__),$intControlDebugLevel01);
 ?>
