@@ -145,7 +145,7 @@ function set_layout_setting() {
             exclusionPageNo = [
               '2100180003','2100180005',
               '2100160011',
-              '2100000211','2100000212','2100000401','2100000402'
+              '2100000211','2100000212'
             ];
       
       if ( pageNo !== null && grpNo === null && exclusionPageNo.indexOf( pageNo ) === -1 ) {

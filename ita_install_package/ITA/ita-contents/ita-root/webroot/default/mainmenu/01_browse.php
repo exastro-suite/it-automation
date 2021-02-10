@@ -85,8 +85,6 @@ EOD;
         $strMailTag = $objMTS->getSomeMessage("ITAWDCH-MNU-1100004",$admin_addr);
     }
     
-    $manualLink = "/default/menu/01_browse.php?no=2100000401 target = _blank";
-
     //各メニュリンク用
     require_once ( $root_dir_path . "/libs/webcommonlibs/web_php_tag_print_functions.php");
     
