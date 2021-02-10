@@ -261,6 +261,8 @@ Ansible（Legacy Role）代入値自動登録設定
 
         $c->setHiddenMainTableColumn(true); //更新対象カラム
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
 
         $c->getOutputType('filter_table')->setVisible(false);
@@ -324,6 +326,8 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setHiddenMainTableColumn(true); //更新対象カラム
 
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
@@ -522,6 +526,8 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->getOutputType('csv')->setVisible(true);
         $c->getOutputType('json')->setVisible(true);
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setJournalTableOfMaster('D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_1_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
@@ -592,6 +598,7 @@ Ansible（Legacy Role）代入値自動登録設定
 
         // 必須チェックは組合せバリデータで行う。
         $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         //コンテンツのソースがヴューの場合、登録/更新の対象とする
         $c->setHiddenMainTableColumn(true);

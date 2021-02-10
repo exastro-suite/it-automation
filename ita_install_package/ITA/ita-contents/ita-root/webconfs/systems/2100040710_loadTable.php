@@ -317,6 +317,8 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setJournalKeyIDOfMaster('MENU_ID');
         $c->setJournalDispIDOfMaster('MENU_PULLDOWN');
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         $cgg->addColumn($c);
@@ -353,6 +355,8 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900121"));
 
         $c->setHiddenMainTableColumn(true); //更新対象カラム
+
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
 
@@ -548,6 +552,8 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->getOutputType('excel')->setVisible(true);
         $c->getOutputType('csv')->setVisible(true);
         $c->getOutputType('json')->setVisible(true);
+
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $c->setJournalTableOfMaster('D_CMDB_MG_MU_COL_LIST_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');

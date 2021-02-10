@@ -105,6 +105,7 @@ Ansible（Legacy Role）作業パターン詳細
 
     // 必須チェックは組合せバリデータで行う。
     $c->setRequired(false);
+    $c->setRequiredMark(true);//必須マークのみ付与
 
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
@@ -356,6 +357,7 @@ Ansible（Legacy Role）作業パターン詳細
 
     // 必須チェックは組合せバリデータで行う。
     $c->setRequired(false);//登録/更新時には、入力必須
+    $c->setRequiredMark(true);//必須マークのみ付与
 
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
@@ -396,6 +398,7 @@ Ansible（Legacy Role）作業パターン詳細
 
     //登録/更新時には、必須でない
     $c->setRequired(false);
+    $c->setRequiredMark(true);//必須マークのみ付与
 
     $table->addColumn($c);
 
