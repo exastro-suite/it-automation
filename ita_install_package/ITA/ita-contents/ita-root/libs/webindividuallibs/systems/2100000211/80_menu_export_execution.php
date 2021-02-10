@@ -136,6 +136,9 @@ function validateMenuNo($objJSONOfReceptedData){
     #270 対応
     unset($tmpJSONOfReceptedData['dp_mode']);
     unset($tmpJSONOfReceptedData['abolished_type']);
+    if ( isset($tmpJSONOfReceptedData['specified_timestamp']) && !empty($tmpJSONOfReceptedData['specified_timestamp'])) {
+        unset($tmpJSONOfReceptedData['specified_timestamp']);
+    }
 
     foreach ($tmpJSONOfReceptedData as $key => $value) {
         foreach ($value as $key2 => $value2) {
@@ -166,6 +169,9 @@ function menuExportExecutionFromRest($objJSONOfReceptedData){
     #270 対応
     $tmparray["dp_mode"]=$objJSONOfReceptedData['dp_mode'];
     $tmparray["abolished_type"]=$objJSONOfReceptedData['abolished_type'];
+    if ( isset($objJSONOfReceptedData["specified_timestamp"]) && !empty($objJSONOfReceptedData["specified_timestamp"]) ) {
+        $tmparray["specified_timestamp"]=$objJSONOfReceptedData['specified_timestamp'];
+    }
 
     //不要な要素の削除
     $tmpJSONOfReceptedData = $objJSONOfReceptedData;
@@ -173,7 +179,10 @@ function menuExportExecutionFromRest($objJSONOfReceptedData){
     unset($tmpJSONOfReceptedData['menu_on']);
     #270 対応
     unset($tmpJSONOfReceptedData['dp_mode']); 
-    unset($tmpJSONOfReceptedData['abolished_type']); 
+    unset($tmpJSONOfReceptedData['abolished_type']);
+    if ( isset($tmpJSONOfReceptedData['specified_timestamp']) && !empty($tmpJSONOfReceptedData['specified_timestamp']) ) {
+        unset($tmpJSONOfReceptedData['specified_timestamp']); 
+    }
 
     //メニューidをint型からstring型へ変換
     foreach ($tmpJSONOfReceptedData as $key => $value) {
@@ -276,4 +285,12 @@ function validateModeid($objJSONOfReceptedData){
     return $chkflag;
 }
 
+//////////////////////////////////////////
+//  date型のチェック
+//////////////////////////////////////////
+function validateDate($date, $format = 'Y-m-d H:i:s')
+{
+    $d = DateTime::createFromFormat($format, $date);
+    return $d && $d->format($format) == $date;
+}
 ?>
