@@ -278,6 +278,8 @@ Ansible（Pioneer）代入値自動登録設定
         $c->setJournalKeyIDOfMaster('MENU_ID');
         $c->setJournalDispIDOfMaster('MENU_PULLDOWN');
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         $cgg->addColumn($c);
@@ -321,6 +323,8 @@ Ansible（Pioneer）代入値自動登録設定
         $c->setHiddenMainTableColumn(true); //更新対象カラム
 
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
@@ -481,6 +485,8 @@ Ansible（Pioneer）代入値自動登録設定
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
         $c->setJournalDispIDOfMaster('COL_TITLE');
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         $cgg->addColumn($c);
@@ -529,6 +535,7 @@ Ansible（Pioneer）代入値自動登録設定
 
         // 必須チェックは組合せバリデータで行う。
         $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $cgg->addColumn($c);
 
@@ -664,6 +671,7 @@ Ansible（Pioneer）代入値自動登録設定
 
         // 必須チェックは組合せバリデータで行う。
         $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         //コンテンツのソースがヴューの場合、登録/更新の対象とする
         $c->setHiddenMainTableColumn(true);

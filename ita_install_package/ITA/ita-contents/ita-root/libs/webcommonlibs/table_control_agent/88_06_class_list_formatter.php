@@ -1492,6 +1492,10 @@ class ExcelFormatter extends ListFormatter {
                         $reqFlag = $strTextExplain05;
                     }
                     $tmp_array['required2'][] = $reqFlag;
+                }else if($objColumn->isRequiredMark() === true){
+                    $reqFlag = $strTextExplain04;
+                    $tmp_array['required1'][] = $reqFlag;
+                    $tmp_array['required2'][] = $reqFlag;
                 }else{
                     //任意
                     $reqFlag = $strTextExplain05;
