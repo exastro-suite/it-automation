@@ -66,6 +66,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
+    // 指定時刻
+    $c = new DateTimeColumn('SPECIFIED_TIMESTAMP', $g['objMTS']->getSomeMessage("ITABASEH-MNU-900033"),'TIMESTAMP','TIMESTAMP',false);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-900034"));
+    $table->addColumn($c);
+
     //ファイル名
     $c = new FileUploadColumn('FILE_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-900015"));
     $filePath = "uploadfiles/{$g['page_dir']}";
