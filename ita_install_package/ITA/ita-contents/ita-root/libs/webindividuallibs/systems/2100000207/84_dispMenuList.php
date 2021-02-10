@@ -27,7 +27,7 @@
 	    if( $objIntNumVali->isValid($p_role_id) === false ){
 	        throw new Exception( '00000100-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
 	    }
-
+        
         // ロール一覧(A_ROLE_LIST)が存在しているかチェック
         $sql = "SELECT DISUSE_FLAG
                 FROM   A_ROLE_LIST
@@ -57,9 +57,9 @@
         else{
             throw new Exception( '00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
-
+        
         $p_role_list_disuse_flag = $showTgtRow['DISUSE_FLAG'];
-
+        
         // メンテナンスボタンの表示/非表示を切り替え
         if($p_role_list_disuse_flag === '0' ){
             $BG_COLOR = "";
@@ -67,7 +67,7 @@
         else{
             $BG_COLOR = " class=\"disuse\" ";
         }
-
+                
         $sql = "SELECT TAB_2.MENU_GROUP_ID,
                         TAB_3.MENU_GROUP_NAME,
                         TAB_2.DISP_SEQ,
@@ -85,12 +85,12 @@
                 WHERE  TAB_1.DISUSE_FLAG = '0'
                 AND    TAB_1.ROLE_ID     = :ROLE_ID_BV
                 ORDER BY TAB_2.MENU_GROUP_ID, TAB_2.DISP_SEQ ASC";
-
+         
         $tmpAryBind = array('ROLE_ID_BV'=>$p_role_id);
         $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
         if( $retArray[0] === true ){
             $objQuery =& $retArray[1];
-            $str_temp =
+            $str_temp = 
 <<< EOD
                 <div class="fakeContainer_Yobi3">
                 <table id="DbTable_Yobi3">
@@ -117,17 +117,14 @@ EOD;
                 $COLUMN_04 = nl2br(htmlspecialchars($menu_row['MENU_NAME']));
                 $COLUMN_05 = nl2br(htmlspecialchars($menu_row['LOGIN_NECESSITY_DISP']));
                 $COLUMN_06 = nl2br(htmlspecialchars($menu_row['PRIVILEGE_TYPE_DISP']));
-                $url = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_2=" .$COLUMN_01;
-                $url_02 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_1__S=" .$COLUMN_03 ."&Filter1Tbl_1__E=" .$COLUMN_03;
-                $url_03 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_4=" .$COLUMN_04;
-                $str_temp =
+                $str_temp = 
 <<< EOD
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
-                        <td{$BG_COLOR}><a href={$url} target="blank">{$COLUMN_01}</a></td>
+                        <td{$BG_COLOR}>{$COLUMN_01}</td>
                         <td class="number" {$BG_COLOR}>{$COLUMN_02}</td>
-                        <td class="number" {$BG_COLOR}><a href={$url_02} target="blank">{$COLUMN_03}</a></td>
-                        <td{$BG_COLOR}><a href={$url_03} target="blank">{$COLUMN_04}</a></td>
+                        <td class="number" {$BG_COLOR}>{$COLUMN_03}</td>
+                        <td{$BG_COLOR}>{$COLUMN_04}</td>
                         <td{$BG_COLOR}>{$COLUMN_05}</td>
                         <td{$BG_COLOR}>{$COLUMN_06}</td>
                     </tr>
@@ -137,7 +134,7 @@ EOD;
             }
             unset($objQuery);
 
-            $str_temp =
+            $str_temp = 
 <<< EOD
                 </table>
                 </div>
@@ -155,15 +152,15 @@ EOD;
     catch (Exception $e){
         // エラーフラグをON
         $error_flag = 1;
-
+        
         $tmpErrMsgBody = $e->getMessage();
         dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-
+        
         // DBアクセス事後処理
         if ( isset($objQuery) )    unset($objQuery);
-
+        
         web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody)));
     }
-
+    
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-2",__FILE__),$intControlDebugLevel01);
 ?>
