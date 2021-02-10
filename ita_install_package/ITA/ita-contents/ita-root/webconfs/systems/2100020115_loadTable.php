@@ -265,6 +265,8 @@ Ansible（Legacy）代入値自動登録設定
         $c->getOutputType('delete_table')->setVisible(false);
         $c->getOutputType('print_journal_table')->setVisible(false);
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->getOutputType('json')->setVisible(false); // RestAPIでは隠す
@@ -321,6 +323,8 @@ Ansible（Legacy）代入値自動登録設定
         $c->setHiddenMainTableColumn(true); //更新対象カラム
 
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
@@ -530,6 +534,7 @@ Ansible（Legacy）代入値自動登録設定
 
         //登録/更新時には、必須でない
         $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $cgg->addColumn($c);
 
@@ -597,6 +602,7 @@ Ansible（Legacy）代入値自動登録設定
 
         // 必須チェックは組合せバリデータで行う。
         $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         //コンテンツのソースがヴューの場合、登録/更新の対象とする
         $c->setHiddenMainTableColumn(true);

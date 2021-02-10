@@ -510,6 +510,7 @@ class Column extends ColumnGroup {
 	protected $unique;   // as boolean 一意性を要求するか
 
 	protected $required;   // as boolean 必須かどうか
+	protected $requiredMark;
 	protected $registerRequireExcept;
 	protected $updateRequireExcept;
 
@@ -635,7 +636,9 @@ class Column extends ColumnGroup {
 
 		$this->aryAddtionalNestProperty = array();
 
-        $this->allowUploadColmnSendRestApi = false;
+		$this->allowUploadColmnSendRestApi = false;
+		
+		$this->setRequiredMark(false);
 	}
 
 	//----オブジェクト間・値連絡系
@@ -1850,6 +1853,15 @@ class Column extends ColumnGroup {
 	//NEW[119]
 	function isAllowUploadColmnSendRestApi(){
 		return $this->allowUploadColmnSendRestApi;
+	}
+
+	//NEW[120]
+	function setRequiredMark($requiredMark){
+		$this->requiredMark = $requiredMark;
+	}
+	//NEW[121]
+	function isRequiredMark(){
+		return $this->requiredMark;
 	}
 	//FileUploadColumnクラスのRestAPIからの送信を許すか----
 

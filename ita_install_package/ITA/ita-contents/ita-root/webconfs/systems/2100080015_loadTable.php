@@ -272,6 +272,8 @@ Terrraform 代入値自動登録設定
         $c->setJournalKeyIDOfMaster('MENU_ID');
         $c->setJournalDispIDOfMaster('MENU_PULLDOWN');
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         $cgg->addColumn($c);
@@ -469,6 +471,8 @@ Terrraform 代入値自動登録設定
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
         $c->setJournalDispIDOfMaster('COL_TITLE');
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         $cgg->addColumn($c);
@@ -511,6 +515,7 @@ Terrraform 代入値自動登録設定
 
         //登録/更新時には、必須でない
         $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $cgg->addColumn($c);
 
@@ -578,6 +583,7 @@ Terrraform 代入値自動登録設定
 
         // 必須チェックは組合せバリデータで行う。
         $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         //コンテンツのソースがヴューの場合、登録/更新の対象とする
         $c->setHiddenMainTableColumn(true);
