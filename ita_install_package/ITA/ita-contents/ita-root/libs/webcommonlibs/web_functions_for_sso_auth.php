@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-    
+
 ////////////////////////////////////////////////////////////////////////
 
 /**
@@ -55,9 +55,9 @@ function autoRegistUser($auth_session) {
                    .'FROM A_ACCOUNT_LIST '
                    .'WHERE AUTH_TYPE= :AUTH_TYPE AND '
                    .'PROVIDER_ID = :PROVIDER_ID AND '
-                   .'PROVIDER_USER_ID = :PROVIDER_USER_ID', 
+                   .'PROVIDER_USER_ID = :PROVIDER_USER_ID',
                    ['AUTH_TYPE'        => 'sso',
-                    'PROVIDER_ID'      => $auth_session['provider_id'], 
+                    'PROVIDER_ID'      => $auth_session['provider_id'],
                     'PROVIDER_USER_ID' => $auth_session['provider_user_id'],
                    ], true);
     // 登録されているか確認
@@ -74,7 +74,7 @@ function autoRegistUser($auth_session) {
             $strAction = 'L_REVIVE';
         }
         // username_jp,mail_addressが変更されていないか、自動復活でないかチェック
-        if ((empty($auth_session['provider_user_name']) || ($aryUser['USERNAME_JP'] === $auth_session['provider_user_name'])) && 
+        if ((empty($auth_session['provider_user_name']) || ($aryUser['USERNAME_JP'] === $auth_session['provider_user_name'])) &&
             $aryUser['MAIL_ADDRESS'] === $auth_session['provider_user_email'] &&
             $strAction !== 'L_REVIVE') {
             // 変更なし(provider_user_nameが取得できない(=empty)場合は変更なしとみなす)
@@ -149,9 +149,9 @@ function autoRegistUser($auth_session) {
     transactionStart();
     // ----USER追加
     $userId = query('INSERT INTO A_ACCOUNT_LIST '
-                   .'(USER_ID, USERNAME, USERNAME_JP, MAIL_ADDRESS, AUTH_TYPE, PROVIDER_ID, PROVIDER_USER_ID, PASSWORD, DISUSE_FLAG, NOTE, PW_LAST_UPDATE_TIME, LAST_UPDATE_TIMESTAMP, LAST_UPDATE_USER) '
+                   .'(USER_ID, USERNAME, USERNAME_JP, MAIL_ADDRESS, AUTH_TYPE, PROVIDER_ID, PROVIDER_USER_ID, PASSWORD, DISUSE_FLAG, NOTE, LAST_LOGIN_TIME, PW_LAST_UPDATE_TIME, LAST_UPDATE_TIMESTAMP, LAST_UPDATE_USER) '
                    .'VALUES '
-                   .'(:USER_ID, :USERNAME, :USERNAME_JP, :MAIL_ADDRESS, :AUTH_TYPE, :PROVIDER_ID, :PROVIDER_USER_ID, md5(:PASSWORD), :DISUSE_FLAG, :NOTE, :PW_LAST_UPDATE_TIME, :LAST_UPDATE_TIMESTAMP, :LAST_UPDATE_USER)',
+                   .'(:USER_ID, :USERNAME, :USERNAME_JP, :MAIL_ADDRESS, :AUTH_TYPE, :PROVIDER_ID, :PROVIDER_USER_ID, md5(:PASSWORD), :DISUSE_FLAG, :NOTE, SYSDATE(), :PW_LAST_UPDATE_TIME, :LAST_UPDATE_TIMESTAMP, :LAST_UPDATE_USER)',
                     [
                       'USERNAME'            => $username,
                       'USERNAME_JP'         => $username_jp,
@@ -171,9 +171,9 @@ function autoRegistUser($auth_session) {
          .'(LINK_ID, USER_ID, ROLE_ID, DISUSE_FLAG,LAST_UPDATE_USER, LAST_UPDATE_TIMESTAMP) '
          .'VALUES '
          .'(:LINK_ID, :USER_ID, :ROLE_ID, :DISUSE_FLAG, :LAST_UPDATE_USER, :LAST_UPDATE_TIMESTAMP) '
-         ,['USER_ID'          => $userId, 
-           'ROLE_ID'          => $intRoleId, 
-           'DISUSE_FLAG'      => '0', 
+         ,['USER_ID'          => $userId,
+           'ROLE_ID'          => $intRoleId,
+           'DISUSE_FLAG'      => '0',
            'LAST_UPDATE_USER' => $intRegUID,
           ], 'A_ROLE_ACCOUNT_LINK_LIST', 'INSERT');
     // ROLEとUSERの紐づけ----
@@ -195,7 +195,7 @@ function autoRegistUser($auth_session) {
   **/
 function getConfigSsoAuth ($providerId = null) {
     global $scheme_n_authority;
-    
+
     $logoPrefix = '/uploadfiles/2100000231/LOGO';
     $sql = 'SELECT * FROM A_PROVIDER_LIST WHERE DISUSE_FLAG = :DISUSE_FLAG ';
     $bind = ['DISUSE_FLAG' => '0'];
@@ -216,7 +216,7 @@ function getConfigSsoAuth ($providerId = null) {
                   ];
         if ($row['LOGO']) {
             $tmpRow['providerLogo'] = sprintf('%s/%010d/%s', $logoPrefix, $row['PROVIDER_ID'], $row['LOGO']);
-        } 
+        }
         $aryProviderAttr = find('SELECT * FROM A_PROVIDER_ATTRIBUTE_LIST WHERE PROVIDER_ID = :PROVIDER_ID AND DISUSE_FLAG = :DISUSE_FLAG', ['PROVIDER_ID' => $row['PROVIDER_ID'], 'DISUSE_FLAG' => '0']);
         foreach ($aryProviderAttr as $attr_row) {
             $tmpRow += [$attr_row['NAME'] => $attr_row['VALUE']];
@@ -260,7 +260,7 @@ function getConfigSsoAuth ($providerId = null) {
             // ----web_logへのWARNINGは非活性
             // web_log("WARNING:SSO CONFIG IS INVALID(skip) PROVIDER_ID:{$row['PROVIDER_ID']} {$strWarn} on [FILE]".__FILE__.",[FUNCTION]".__FUNCTION__.",[LINE]".__LINE__);
             // web_logへのWARNINGは非活性----
-        } else {    
+        } else {
             $aryConfig[] = $tmpRow;
         }
     }
@@ -270,7 +270,7 @@ function getConfigSsoAuth ($providerId = null) {
     return $aryConfig;
 }
 
-/** 
+/**
   * findUser
   * @param auth_session
   *   @type array ['provider_id' => $provider_id,
@@ -288,7 +288,7 @@ function findUser ($auth_session) {
     return find('SELECT USERNAME FROM A_ACCOUNT_LIST '
                .'WHERE DISUSE_FLAG = :DISUSE_FLAG AND AUTH_TYPE = :AUTH_TYPE AND '
                .'PROVIDER_ID = :PROVIDER_ID AND PROVIDER_USER_ID = :PROVIDER_USER_ID '
-               .'LIMIT 1', 
+               .'LIMIT 1',
                ['DISUSE_FLAG'      => '0',
                 'AUTH_TYPE'        => 'sso',
                 'PROVIDER_ID'      => $auth_session['provider_id'],
@@ -471,7 +471,7 @@ function transactionCommit() {
   * 共通exception
   */
 function exception ($message) {
-    web_log("ERROR:UNEXPECTED {$message}"); 
+    web_log("ERROR:UNEXPECTED {$message}");
 
     // 想定外エラー通知画面にリダイレクト
     webRequestForceQuitFromEveryWhere(500,10210101);
@@ -540,4 +540,3 @@ function error_notice ($strErrorMsg = null) {
 exit;
 }
 // エラーページ表示----
-
