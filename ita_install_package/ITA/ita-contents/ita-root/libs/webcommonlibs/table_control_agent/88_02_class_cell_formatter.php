@@ -50,6 +50,8 @@ class CellFormatter {
 
 	protected $strPrintTableId;
 
+	protected $boolRequiredMark;
+
 	//他のクラスから独立して利用するための設定----
 
 	//----他のクラスと連動して利用するための変数
@@ -99,6 +101,8 @@ class CellFormatter {
 		//他のクラスと連動して利用するための設定----
 		
 		$this->setSafingHtmlBeforePrintAgent(true);
+
+		$this->setRequiredMarkAgent(false);
 	}
 
 	//----「__construct、ではないので注意」
@@ -558,6 +562,21 @@ class CellFormatter {
 	function getFunctionForOverrideValue(){
 		return $this->objFunctionForOverrideValue;
 	}
+
+	//NEW[46]
+	public function setRequiredMarkAgent($boolRequiredMark){
+		$this->boolRequiredMark = $boolRequiredMark;
+	}
+	//NEW[47]
+	public function getRequiredMark(){
+		$retValue = $this->boolRequiredMark;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$retValue = $this->objColumn->isRequiredMark();
+			//カラムがセットされている場合----
+		}
+		return $retValue;
+	}
 	//ここまで新規メソッドの定義宣言処理----
 
 }
@@ -977,7 +996,7 @@ class ReqTabHFmt extends TabHFmt {
 				}
 				//必須備考カラムの場合----
 			}else{
-				if( $this->getRequired() === true ){
+				if( $this->getRequired() === true || $this->getRequiredMark() === true ){
 					$star = '<span class="'.$this->strInputRequredTagClass.'">*</span>';
 					if( $this->checkListFormatterMode("RegisterTableFormatter") === true ){
 						if( $this->getRegisterRequiredExcept() !== false ){
