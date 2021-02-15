@@ -104,14 +104,15 @@ EOD;
                 $COLUMN_01 = nl2br(htmlspecialchars($user_row['USER_ID']));
                 $COLUMN_02 = nl2br(htmlspecialchars($user_row['USERNAME']));
                 $COLUMN_03 = nl2br(htmlspecialchars($user_row['USERNAME_JP']));
-                $url = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_2=" .$COLUMN_02;
+                $url = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_1__S=" .$COLUMN_01 ."&Filter1Tbl_1__E=" .$COLUMN_01;
+                $url_02 = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_2=" .$COLUMN_02;
 
                 $str_temp =
 <<< EOD
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
-                        <td class="number" {$BG_COLOR}>{$COLUMN_01}</td>
-                        <td{$BG_COLOR}><a href={$url} target="blank">{$COLUMN_02}</a></td>
+                        <td class="number" {$BG_COLOR}><a href={$url} target="blank">{$COLUMN_01}</a></td>
+                        <td{$BG_COLOR}><a href={$url_02} target="blank">{$COLUMN_02}</a></td>
                         <td{$BG_COLOR}>{$COLUMN_03}</td>
                     </tr>
 EOD;
