@@ -30,9 +30,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table = new TableControlAgent('D_ROLE_ACCOUNT_LINK_LIST','LINK_ID', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090101"), 'D_ROLE_ACCOUNT_LINK_LIST_JNL');
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090002"));
     $table->getFormatter("excel")->setGeneValue("sheetNameForEditByFile",$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090003"));
-    
+
     $table->setAccessAuth(true);    // データごとのRBAC設定
-    
+
     $table->setGeneObject("webSetting", $arrayWebSetting);
 
     $table->setDBMainTableHiddenID('A_ROLE_ACCOUNT_LINK_LIST');
@@ -51,7 +51,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090701"));
 
 	    // ロールID
-	    $c = new IDColumn('ROLE_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090201"), "D_ROLE_LIST", 'ROLE_ID', "ROLE_ID", '', array('OrderByThirdColumn'=>'ROLE_ID'));
+			$arrUrl = array();
+	    $arrUrl[0] = "01_browse.php?no=2100000207&filter=on&Filter1Tbl_1__S=";
+	    $arrUrl[1] = "&Filter1Tbl_1__E=";
+	    $c = new LinkIDColumn('ROLE_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090201"), "D_ROLE_LIST", 'ROLE_ID', "ROLE_ID", $arrUrl, '', array('OrderByThirdColumn'=>'ROLE_ID'));
 	    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090202"));
 
     	$c->getOutputType("update_table")->setVisible(false);
@@ -79,7 +82,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg->addColumn($c);
 
 	    // ロール名称
-	    $c = new IDColumn('ROLE_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090801"), 'A_ROLE_LIST', 'ROLE_ID', 'ROLE_NAME');
+			$url = "01_browse.php?no=2100000207&filter=on&Filter1Tbl_2=";
+	    $c = new LinkIDColumn('ROLE_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090801"), 'A_ROLE_LIST', 'ROLE_ID', 'ROLE_NAME', $url);
 	    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090802"));
 	    $c->getOutputType("update_table")->setVisible(false);
 	    $c->getOutputType("register_table")->setVisible(false);
@@ -102,11 +106,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg->addColumn($c);
 
     $table->addColumn($cg);
-    
+
     // ロールID:名称
     $c = new IDColumn('ROLE_ID', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090901"), "D_ROLE_LIST", 'ROLE_ID', "ROLE_PULLDOWN", '', array('OrderByThirdColumn'=>'ROLE_ID'));
     $c->setHiddenMainTableColumn(true);
-    $c->setRequired(true);    
+    $c->setRequired(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090902"));
     $c->getOutputType("delete_table")->setVisible(false);
     $c->getOutputType("filter_table")->setVisible(false);
@@ -119,7 +123,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     // ID
     //----チケット953
-    $c = new IDColumn('USER_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090401"), "D_ACCOUNT_LIST", 'USER_ID', 'USER_ID', '', array('OrderByThirdColumn'=>'USER_ID'));
+		$arrUrl[0] = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_1__S=";
+		$arrUrl[1] = "&Filter1Tbl_1__E=";
+    $c = new LinkIDColumn('USER_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090401"), "D_ACCOUNT_LIST", 'USER_ID', 'USER_ID', $arrUrl, '', array('OrderByThirdColumn'=>'USER_ID'));
     $c->addClass("number");
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090402"));
     $c->setHiddenMainTableColumn(false);
@@ -149,7 +155,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg->addColumn($c);
 
     // ログインID
-    $c = new IDColumn('USER_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090501"), 'A_ACCOUNT_LIST', 'USER_ID', 'USERNAME');
+		$url = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('USER_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090501"), 'A_ACCOUNT_LIST', 'USER_ID', 'USERNAME', $url);
     $c->setHiddenMainTableColumn(false);
     $c->setAllowSendFromFile(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090502"));
@@ -157,7 +164,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType("register_table")->setVisible(false);
     $c->getOutputType("excel")->setVisible(false);
     $c->getOutputType("csv")->setVisible(false);
-    $c->getOutputType("print_journal_table")->setVisible(false);
     $cg->addColumn($c);
     $table->addColumn($cg);
 
@@ -169,7 +175,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType("print_table")->setVisible(false);
     $c->getOutputType("print_journal_table")->setVisible(false);
     $c->setHiddenMainTableColumn(true);
-    $c->setRequired(true);    
+    $c->setRequired(true);
     $table->addColumn($c);
 
     $c = new IDColumn('DEF_ACCESS_AUTH_FLAG',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090603"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
