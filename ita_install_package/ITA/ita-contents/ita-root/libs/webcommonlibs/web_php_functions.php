@@ -882,7 +882,6 @@ EOD;
                 'HTTP_HOST'=>0,
                 'PHP_SELF'=>0,
                 'QUERY_STRING'=>0,
-                'HTTP_REFERER'=>0,
                 'APP_LOGIN_ID'=>1,
                 'APP_FREE_LOG'=>1
             );
@@ -1013,7 +1012,6 @@ EOD;
             'HTTP_X_FORWARDED_FOR',
             'HTTP_VIA',
             'HTTP_SP_HOST',
-            'HTTP_FROM',
             'HTTP_FORWARDED',
             'HTTP_X_REAL_IP',
             'REMOTE_ADDR'
