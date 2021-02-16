@@ -30,9 +30,8 @@ $(function(){
         var specified_timestamp_text = $('[name="dp_mode"]:checked').val() == 2 ? ` (${specified_timestamp}) ` : ``;
         // 指定時刻のチェック
         if ( $('[name="dp_mode"]:checked').val() == 2 && !specified_timestamp ) {
-            if( !confirm(getSomeMessage('ITABASEC090015')) ) {
-                return false;
-            }
+            $('#exportMsg').text(getSomeMessage('ITABASEC090015'));
+            return false;
         }
 
         // アラート
