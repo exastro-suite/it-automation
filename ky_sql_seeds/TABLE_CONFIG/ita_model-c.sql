@@ -137,6 +137,7 @@ CREATE TABLE B_ANS_TWR_HOST (
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
   ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
+  ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
 -- 
   DISP_SEQ                        %INT%                             ,
@@ -161,6 +162,7 @@ CREATE TABLE B_ANS_TWR_HOST_JNL (
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
   ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
+  ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
 -- 
   DISP_SEQ                        %INT%                             ,
@@ -771,6 +773,7 @@ SELECT
   TAB_B.ANSTWR_LOGIN_USER,
   TAB_B.ANSTWR_LOGIN_PASSWORD,
   TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE,
+  TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE,
   TAB_B.ANSTWR_ISOLATED_TYPE
 FROM
   B_ANSIBLE_IF_INFO           TAB_A
@@ -788,6 +791,7 @@ SELECT
   TAB_B.ANSTWR_LOGIN_USER,
   TAB_B.ANSTWR_LOGIN_PASSWORD,
   TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE,
+  TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE,
   TAB_B.ANSTWR_ISOLATED_TYPE
 FROM
   B_ANSIBLE_IF_INFO_JNL         TAB_A

@@ -394,6 +394,14 @@
                 require ($root_dir_path . $log_output_php );
                 return false;
             }
+            // 未実行状態で緊急停止出来るようにしているので
+            // 未実行状態かを判定
+            if(($tgt_execution_row["STATUS_ID"] != 1) &&
+               ($tgt_execution_row["STATUS_ID"] != 9)) {
+                $FREE_LOG = "Emergency stop in unexecuted state.(execution_no: $tgt_execution_no)";
+                require ($root_dir_path . $log_output_php );
+                return false;
+            }
     
             ////////////////////////////////////////////////////////////////
             // 処理対象の作業インスタンスのステータスを処理中に設定
