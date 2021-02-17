@@ -126,7 +126,7 @@ EOD;
                         <label id="export_radio2" class="export_label">
                             <input type="radio" class="export_radio" value="2" name="dp_mode" for="export_radio2">
                             <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900027');?></span>
-                            <span class="export_label_input"><input id="bookdatetime" name="specified_timestamp" type="text" maxlength="16"></span>
+                            <span class="export_label_input"><input id="bookdatetime" name="specified_timestamp" type="text" maxlength="16" disabled="disabled"></span>
                         </label>
                     </p>
                 </div>

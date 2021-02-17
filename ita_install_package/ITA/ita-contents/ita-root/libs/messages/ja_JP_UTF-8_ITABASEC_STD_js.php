@@ -96,6 +96,7 @@ $ary["ITABASEC-090012"] = "インポートするSymphony/オペレーション�
 $ary["ITABASEC-090013"] = "以下の内容でエクスポートします。";
 $ary["ITABASEC-090014"] = "以下の内容でインポートします。";
 $ary["ITABASEC-090015"] = "時刻を指定してください。";
+$ary["ITABASEC-090016"] = "有効な指定時刻を指定してください。";
 $ary["ITABASEC-020000"] = "Conductorを流用して新規作成をしてよろしいですか？";
 $ary["ITABASEC-020001"] = "Conductor作業一覧からインスタンスを選択して下さい。";
 $ary["ITABASEC-020002"] = "Conductorの予約を取り消してよろしいですか？(ConductorインスタンスID:{})";
