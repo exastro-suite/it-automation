@@ -96,6 +96,7 @@ $ary["ITABASEC-090012"] = "Select Symphony/Operation to import";
 $ary["ITABASEC-090013"] = "The following contents will be exported.";
 $ary["ITABASEC-090014"] = "The following contents will be imported.";
 $ary["ITABASEC-090015"] = "Specify the time";
+$ary["ITABASEC-090016"] = "Please specify a valid time.";
 $ary["ITABASEC-020000"] = "Are you sure you want to use Conductor and create a new one?";
 $ary["ITABASEC-020001"] = "Select an instance from the Conductor work list.";
 $ary["ITABASEC-020002"] = "Are you sure you want to cancel the Conductor reservation? (Conductor instance ID: {})";
