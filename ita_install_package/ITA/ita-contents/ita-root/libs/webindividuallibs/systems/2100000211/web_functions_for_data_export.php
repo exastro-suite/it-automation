@@ -163,6 +163,11 @@ function makeExportDataList($dirName){
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900078'));
     }
 
+    // モードが時刻指定で、指定時刻がない場合はエラー
+    if ( $_POST["dp_mode"] == "2" && validateDate($_POST["specified_timestamp"] )) {
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900078'));
+    }
+
     foreach ($_POST as $key => $value) {
         if ( is_int($key) ) {
             // バリデーションチェック
@@ -436,4 +441,14 @@ function renameExportDir($dirName, $taskNo){
         web_log($g['objMTS']->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900001'));
     }
+}
+
+/**
+ * 日付時刻の有効性のチェック
+ *
+ */
+function validateDate($date, $format = 'Y-m-d H:i:s')
+{
+    $d = DateTime::createFromFormat($format, $date);
+    return $d && $d->format($format) == $date;
 }
