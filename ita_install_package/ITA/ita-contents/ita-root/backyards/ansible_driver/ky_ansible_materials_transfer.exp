@@ -20,35 +20,34 @@
 ##
 ##  【特記事項】
 ##      <<引数>>
-##      expect ky_ansible_materials_transfer.exp %0 ... %6
-##       %0:   リモートホスト
-##       %1:   認証方式
-##               パスワード認証: pass  
-##               鍵認証:         key
-##               パスワード省略: none  
-##       %2:   ユーザー名
-##       %3:   パスワード
-##       %4:   鍵認証ファイル
-##       %5:   ファイル転送元パス
-##       %6:   ファイル転送先パス
+##      expect ky_ansible_materials_transfer.exp
+##      <<環境変数>>
+##       HOST:            リモートホスト
+##       TYPE:            認証方式
+##                        パスワード認証: pass  
+##                        鍵認証:         key
+##                        パスワード省略: none  
+##       USER:            ユーザー名
+##       PASSWD:          パスワード
+##       KEY_FILE_PATH:   鍵認証ファイル
+##       SRC_PATH:        ファイル転送元パス
+##       DEST_PATH:       ファイル転送先パス
 ##      <<exit code>>
 ##       0:   正常
 ##       他:　異常
 ##
 ######################################################################
-set HOST            [lindex $argv 0]
-set TYPE            [lindex $argv 1]
-set USER            [lindex $argv 2]
-set PASSWD          [lindex $argv 3]
-if { ${TYPE} == "none" } {
-   set KEY_FILE_PATH " "
-} elseif { ${TYPE} == "key" } {
-   set KEY_FILE_PATH  [lindex $argv 4]
+set HOST             $env(HOST)
+set TYPE             $env(TYPE)
+set USER             $env(USER)
+set PASSWD           $env(PASSWD)
+set KEY_FILE_PATH    " "
+set SRC_PATH         $env(SRC_PATH)
+set DEST_PATH        $env(DEST_PATH)
+if { ${TYPE} == "key" } {
+   set KEY_FILE_PATH    $env(KEY_FILE_PATH)
 }
-set SRC_PATH        [lindex $argv 5]
-set DEST_PATH       [lindex $argv 6]
-
-set timeout 10
+set timeout 120
 if { ${TYPE} == "pass" } {
     spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SRC_PATH} ${USER}@${HOST}:${DEST_PATH}
     expect "assword:" {

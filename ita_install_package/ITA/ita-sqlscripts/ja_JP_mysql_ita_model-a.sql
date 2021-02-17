@@ -842,6 +842,7 @@ GATEWAY                           VARCHAR (15)              , -- FOR COBLLER
 STATIC                            VARCHAR (32)              , -- FOR COBLLER
 
 CONN_SSH_KEY_FILE                 VARCHAR (256)             ,
+SSH_KEY_FILE_PASSPHRASE           TEXT                      ,
 
 ANSTWR_INSTANCE_GROUP_NAME        VARCHAR (512)             , -- インスタンスグループ名
 
@@ -894,6 +895,7 @@ GATEWAY                           VARCHAR (15)              , -- FOR COBLLER
 STATIC                            VARCHAR (32)              , -- FOR COBLLER
 
 CONN_SSH_KEY_FILE                 VARCHAR (256)             ,
+SSH_KEY_FILE_PASSPHRASE           TEXT                      ,
 
 ANSTWR_INSTANCE_GROUP_NAME        VARCHAR (512)             , -- インスタンスグループ名
 
@@ -3310,6 +3312,7 @@ SELECT TAB_A.SYSTEM_ID                        SYSTEM_ID                     ,
        TAB_A.STATIC                           STATIC                        ,
 
        TAB_A.CONN_SSH_KEY_FILE                CONN_SSH_KEY_FILE             ,
+       TAB_A.SSH_KEY_FILE_PASSPHRASE          SSH_KEY_FILE_PASSPHRASE       ,
 
        TAB_A.DISP_SEQ                         DISP_SEQ                      ,
        TAB_A.ACCESS_AUTH                      ACCESS_AUTH                   ,
@@ -3350,6 +3353,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                   JOURNAL_SEQ_NO                ,
        TAB_A.STATIC                           STATIC                        ,
 
        TAB_A.CONN_SSH_KEY_FILE                CONN_SSH_KEY_FILE             ,
+       TAB_A.SSH_KEY_FILE_PASSPHRASE          SSH_KEY_FILE_PASSPHRASE       ,
 
        TAB_A.DISP_SEQ                         DISP_SEQ                      ,
        TAB_A.ACCESS_AUTH                      ACCESS_AUTH                   ,
