@@ -294,7 +294,7 @@ Ansible（Legacy Role）作業パターン詳細
                    ."FROM "
                    ." D_ANSIBLE_LRL_ROLE_LIST TAB_1 "
                    ."WHERE "
-                   ."     TAB_1.ROLE_DISUSE_FLAG     = '0' "
+                   ."     TAB_1.DISUSE_FLAG     = '0' "
                    ." AND TAB_1.ROLE_PACKAGE_ID      = :ROLE_PACKAGE_ID "
                    ."ORDER BY KEY_COLUMN ";
 
