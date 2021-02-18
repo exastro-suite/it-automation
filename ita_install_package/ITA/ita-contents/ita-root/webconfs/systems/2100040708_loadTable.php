@@ -82,6 +82,24 @@ Ansible 共通 Ansible Tower インスタンス一覧
     //ログインユーザー----
 
     //----ログインパスワード
+    $objFunctionpssword = function($objOutputType, $rowData, $aryVariant, $objColumn){
+        $strInitedColId = $objColumn->getID();
+        $aryVariant['callerClass'] = get_class($objOutputType);
+        $aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+        list($strSetValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($rowData,array($strInitedColId),null);
+        $strSetValue = (strlen($strSetValue)==0)?"":"********";
+        $rowData[$strInitedColId] = $strSetValue;
+        $objBody = $objOutputType->getBody();
+        return $objBody->getData($rowData,$aryVariant);
+    };
+
+    $outputType01 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
+    $outputType01->setFunctionForGetBodyTag($objFunctionpssword);
+    $outputType02 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
+    $outputType02->setFunctionForGetBodyTag($objFunctionpssword);
+    $outputType03 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
+    $outputType03->setFunctionForGetBodyTag($objFunctionpssword);
+
     $objVldt = new SingleTextValidator(0,30,false);
     $c = new PasswordColumn('ANSTWR_LOGIN_PASSWORD',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001040"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001041"));//エクセル・ヘッダでの説明
@@ -89,18 +107,49 @@ Ansible 共通 Ansible Tower インスタンス一覧
     $c->setRequired(false);        // 必須チャックはDB登録前処理で実施
     $c->setUpdateRequireExcept(1); // 1は空白の場合は維持、それ以外はNULL扱いで更新
     $c->setEncodeFunctionName("ky_encrypt");
+
+    $c->setOutputType("print_table", $outputType01);
+    $c->setOutputType('delete_table', $outputType02);
+    $c->setOutputType('print_journal_table', $outputType03);
+
     $table->addColumn($c);
     //ログインパスワード----
 
-    //----ssh鍵認証ファイル
-    $c = new FileUploadColumn('ANSTWR_LOGIN_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001050"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001051"));
-    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
-    $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
-    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
-    $c->setFileHideMode(true);
-    $table->addColumn($c);
-    //ssh鍵認証ファイル----
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001055"));
+      //----秘密鍵ファイル
+      $c = new FileUploadColumn('ANSTWR_LOGIN_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001050"));
+      $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001051"));
+      $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
+      $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+      $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+      $c->setFileHideMode(true);
+      // CONN_SSH_KEY_FILEをアップロード時に「ky__encrypt」で暗号化する設定
+      $c->setFileEncryptFunctionName("ky_file_encrypt");
+      $cg->addColumn($c);
+      //秘密鍵ファイル----
+
+      //----秘密鍵ファイル パスフレーズ
+      $outputType01 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
+      $outputType01->setFunctionForGetBodyTag($objFunctionpssword);
+      $outputType02 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
+      $outputType02->setFunctionForGetBodyTag($objFunctionpssword);
+      $outputType03 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
+      $outputType03->setFunctionForGetBodyTag($objFunctionpssword);
+ 
+      $objVldt = new SingleTextValidator(0,256,false);
+      $c = new PasswordColumn('ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001052"));
+      $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001053"));
+      $c->setEncodeFunctionName("ky_encrypt");
+
+      $c->setOutputType("print_table", $outputType01);
+      $c->setOutputType('delete_table', $outputType02);
+      $c->setOutputType('print_journal_table', $outputType03);
+
+      $c->setValidator($objVldt);
+
+      $cg->addColumn($c);
+      //秘密鍵ファイル パスフレーズ----
+    $table->addColumn($cg);
 
     //----isolated Tower
     $c = new IDColumn('ANSTWR_ISOLATED_TYPE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001060"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');

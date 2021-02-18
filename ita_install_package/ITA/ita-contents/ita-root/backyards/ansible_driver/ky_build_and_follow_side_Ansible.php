@@ -39,15 +39,23 @@
     $log_file_prefix = basename( __FILE__, '.php' ) . "_";
 
     ////////////////////////////////
-    // $log_levelを取得           //
+    // PHP エラー時のログ出力先   //
     ////////////////////////////////
-    $log_level = getenv('LOG_LEVEL');   // #1061 2016/10/03 本来のコードに戻す
-    
-    // ログディレクトリを明示設定
+    $log_output_dir  = $root_dir_path . '/logs/restapilogs/ansible_driver';
+    $log_file_prefix = basename( __FILE__, '.php' ) . "_";
+
+    $tmpVarTimeStamp = time();
+    $logfile = $log_output_dir . "/" . $log_file_prefix . date("Ymd",$tmpVarTimeStamp) . ".log";
+    // ログ出力フラグ /etc/sysconfig/httpdより取得
+    $log_level = @getenv('ANSIBLE_RESTAPI_LOG_LEVEL');
+
+
     ////////////////////////////////
-    // $log_output_dirを取得      //
+    // PHP エラー時のログ出力を設定
     ////////////////////////////////
-    $log_output_dir = getenv('LOG_DIR');
+    ini_set('display_errors',0);
+    ini_set('log_errors',1);
+    ini_set('error_log',$logfile);
 
     ////////////////////////////////
     // 定数定義                   //
@@ -61,6 +69,13 @@
     $strOutFolderName    = '/out';
     $strTempFolderName   = '/.tmp';
     $strExecshellName    = $strTempFolderName .'/.playbook_execute_shell.sh';
+
+    // 実行shellのテンプレート
+    $strExecshellTemplateName = $root_dir_path . '/backyards/ansible_driver/ky_ansible_playbook_command_shell_template.sh';
+    $strSSHAddShellName       = $root_dir_path . '/backyards/ansible_driver/ky_ansible_ssh_add.exp';
+    $strDecodeSSHAgentconfigFileName    = $strTempFolderName . '/.sshAgentConfig.txt';
+    $strEncodeSSHAgentconfigFileName    = $strTempFolderName . '/.sshAgentConfig.enc';
+    $strLogFileName                     = $strTempFolderName . '/playbook_execute_shell.log';
 
     ////////////////////////////////
     // ローカル変数(全体)宣言     //
@@ -138,7 +153,7 @@
         ////////////////////////////////
         // 共通モジュールの呼び出し   //
         ////////////////////////////////
-        require ($root_dir_path . $ansible_common_php );
+        require_once ($root_dir_path . $ansible_common_php );
 
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
@@ -185,7 +200,31 @@
 
         // 実行shellのパス
         $strExecshellName =  $strDRSRootPlayBookDirPath.$strExecshellName;
+        // ssh-agentへの秘密鍵ファイルのパスフレーズ登録に必要な情報ファイルのパス(暗号化)
+        $strDecodeSSHAgentconfigFileName = $strDRSRootPlayBookDirPath.$strDecodeSSHAgentconfigFileName;
+        // ssh-agentへの秘密鍵ファイルのパスフレーズ登録に必要な情報ファイルのパス(復号化)
+        $strEncodeSSHAgentconfigFileName = $strDRSRootPlayBookDirPath.$strEncodeSSHAgentconfigFileName;
+        // ログファイル
+        $strLogFileName              = $strDRSRootPlayBookDirPath.$strLogFileName;
+        // 作業実行ベースディレクトリ
         $strCurrentPath   =  $strDRSRootPlayBookDirPath.$strInFolderName;
+
+        // ssh-agentへの秘密鍵ファイルのパスフレーズ登録が必要か判定
+        $sshAgentExec = "NONE";
+        if(file_exists($strDecodeSSHAgentconfigFileName)) {
+            if(filesize($strDecodeSSHAgentconfigFileName) != 0) {
+                $sshAgentExec = "RUN";
+                // ssh-agentへの秘密鍵ファイルのパスフレーズ登録に必要な情報ファイルの復号化
+                $ret = ky_file_decrypt($strDecodeSSHAgentconfigFileName,$strEncodeSSHAgentconfigFileName);
+                if($ret === false) {
+                    // 異常フラグON
+                    $error_flag = 1;
+
+                    // 例外処理へ
+                    throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000020");
+                }
+            }
+        }
         // hostsフルパス
         $strhosts = $strDRSRootPlayBookDirPath.$strInFolderName.'/hosts';
         // playbookフルパス
@@ -201,15 +240,28 @@
         $ansible_path = file_get_contents($path);
         $ansible_path = str_replace("\n","",$ansible_path);
 
-        //$strBuildCommand     .= "sudo -u {$strExecUser} -i {$ansible_path}/ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
-
-        // roleでansible.cfgを有効にする為にinをカレントディレクトリにしてAnsible実行するshellを作成
-        $strBuildCommand      = "#!/bin/bash\n";
-        $strBuildCommand     .= "cd {$strCurrentPath}\n";
+        // Ansible実行するshellを作成
         $strBuildCommand     .= "{$ansible_path}/ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
 
+        // sshAgentの設定とPlaybookを実行するshellのテンプレートを読み込み
+        $strShell = file_get_contents($strExecshellTemplateName);
+        if($strShell === false) {
+            // 異常フラグON
+            $error_flag = 1;
+
+            // 例外処理へ
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000020");
+        }
+        // テンプレート内の変数を実値に置き換え
+        $strShell = str_replace('<<sshAgentConfigFile>>'      ,$strEncodeSSHAgentconfigFileName,$strShell);
+        $strShell = str_replace('<<logFile>>'                 ,$strLogFileName                 ,$strShell);
+        $strShell = str_replace('<<ssh_add_script_path>>'     ,$strSSHAddShellName             ,$strShell);
+        $strShell = str_replace('<<in_directory_path>>'       ,$strCurrentPath                 ,$strShell);
+        $strShell = str_replace('<<ansible_playbook_command>>',$strBuildCommand                ,$strShell);
+        $strShell = str_replace('<<sshAgentExec>>'            ,$sshAgentExec                   ,$strShell);
+
         // Ansible実行shell作成
-        $boolFilePut = file_put_contents($strExecshellName, $strBuildCommand);
+        $boolFilePut = file_put_contents($strExecshellName, $strShell);
         if( $boolFilePut===false ){
             // 異常フラグON
             $error_flag = 1;
@@ -230,11 +282,13 @@
 
         $resProcess = proc_open($strBuildCommand, $objDescriptorspec, $aryPipe);
 
+
         // 起動できたかを確認する
         if (is_resource($resProcess)===false ){
 
             // vault パスワードファイル削除
             @unlink($vault_password_file);
+            @unlink($strEncodeSSHAgentconfigFileName);
 
             // 異常フラグON
             $error_flag = 1;
@@ -253,11 +307,9 @@
         $boolTouchResult = touch("{$strDataFollowDirPath}/{$intFollowTargetPid}.pid");
         if ( $boolTouchResult===false ){
 
-            // Ansible実行shellを削除
-            @unlink($strExecshellName);
-
             // vault パスワードファイル削除
             @unlink($vault_password_file);
+            @unlink($strEncodeSSHAgentconfigFileName);
 
             // 異常フラグON
             $error_flag = 1;
@@ -270,11 +322,9 @@
         // ansible-playbookの終了ステータス = $ansible_return
         pcntl_waitpid($intFollowTargetPid, $refIntReturnStatus);
 
-        // Ansible実行shellを削除
-        @unlink($strExecshellName);
-
         // vault パスワードファイル削除
         @unlink($vault_password_file);
+        @unlink($strEncodeSSHAgentconfigFileName);
 
         // プロセスが終了した以降の処理
         if ( pcntl_wifexited($refIntReturnStatus)===true ){
@@ -334,8 +384,7 @@
         }
     }
     catch (Exception $e){
-        if ( $log_level    === 'DEBUG' ||
-            $error_flag   != 0        ||
+        if ( $error_flag   != 0        ||
             $warning_flag != 0        ){
             // メッセージ出力
             $FREE_LOG = $e->getMessage();
@@ -376,5 +425,17 @@
         exit(0);
     }
 
+    function ky_file_decrypt($src_file,$dest_file) {
+        $src_data =  file_get_contents($src_file);
+        if($src_data === false) {
+            return false;
+        }
+        $dec_data = base64_decode(str_rot13($src_data));
+        $ret = file_put_contents($dest_file, $dec_data);
+        if($ret === false) {
+            return false;
+        }
+        return true;
+    }
 
 ?>

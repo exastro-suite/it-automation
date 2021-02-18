@@ -143,7 +143,7 @@ Ansibleインターフェース情報
 
         //----代表ホスト名
         $objVldt = new SingleTextValidator(0,128,false);
-	$c = new IDColumn('ANSTWR_HOST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203041"),'B_ANS_TWR_HOST','ANSTWR_HOST_ID','ANSTWR_HOSTNAME','');
+	$c = new IDColumn('ANSTWR_HOST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203041"),'D_ANS_TWR_HOST','ANSTWR_HOST_ID','ANSTWR_HOSTNAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203042"));//エクセル・ヘッダでの説明
         $c->setValidator($objVldt);
         $c->setRequired(false);//必須チャックはDB登録前処理で実施

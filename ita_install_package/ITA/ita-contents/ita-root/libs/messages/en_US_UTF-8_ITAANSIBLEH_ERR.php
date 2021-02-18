@@ -588,6 +588,7 @@ $ary[6000113] = "An unexpected error occurred in YAML parsing of ITA-readme. (ro
 $ary[6000114] = "An unexpected error occurred in YAML parsing of role package. (role package:{} role:{} file:{})";
 $ary[6000115] = "An unexpected error occurred in YAML parsing of Variable definition. (template variable:{})";
 $ary[6000116] = "Encryption failed in ansible-vault. (device list item no:{})";
+$ary[6000117] = "Failed to decrypt the Ansible Tower private key file. (file:{})";
 $ary[6040001] = "Failed to update SCM operation.";
 $ary[6040002] = "Failed to get the hosts information.";
 $ary[6040003] = "Failed to create project.";
