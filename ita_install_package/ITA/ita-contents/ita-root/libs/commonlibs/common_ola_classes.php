@@ -7443,17 +7443,6 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                     //自分自身を$aryTmpConductorListから外す
                     unset($aryTmpConductorList[$key]);
 
-                    //$aryCheckConductorListに同じIDがある場合、コンダクタがループするためエラー判定
-                    $conductorIdCount = array_count_values($aryCheckConductorList);
-                    $max = max($conductorIdCount);
-                    if($max != 1){
-                        //コンダクタループが発生する
-                        $intErrorType = 2; //バリデーションエラー
-                        $strErrStepIdInFx="00000200";
-                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170028"); //ConductorCall - 無限ループが発生する為、実行できません。
-                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                    }
-
                 }
             }
 
