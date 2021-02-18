@@ -425,33 +425,52 @@ class ExecuteDirector {
         $dest_path = $this->getMaterialsTransferDestinationPath($execution_no);
 
         $tmp_log_file = '/tmp/.ky_ansible_materials_transfer_' . getmypid() . ".log";
+        @unlink($tmp_log_file);
 
         $result_code = true;
         foreach($TowerHostList as $credential) {
+
+            $tmp_TowerInfo_File = '/tmp/.ky_TowerInfoFile_' . getmypid() . ".log";
+            @unlink($tmp_TowerInfo_File);
+
+            $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
+                             $credential['host_name'],
+                             $credential['auth_type'],
+                             $credential['username'],
+                             $credential['password'],
+                             $credential['ssh_key_file'],
+                             $src_path,
+                             $dest_path,
+                             $credential['ssh_key_file_pass'],
+                             $root_dir_path);
        
-            $cmd = sprintf("expect %s/%s %s %s %s %s %s %s %s > %s 2>&1",
-                            $root_dir_path,
-                            "backyards/ansible_driver/ky_ansible_materials_transfer.exp",
-                            $credential['host_name'],
-                            $credential['auth_type'],
-                            $credential['username'],
-                            $credential['password'],
-                            $credential['ssh_key_file'],
-                            $src_path,
-                            $dest_path,
-                            $tmp_log_file);
-            exec($cmd,$arry_out,$return_var);
-            if($return_var !== 0) {
-                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040035",array($credential['host_name']));
+            if(file_put_contents($tmp_TowerInfo_File, $info) === false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000018");
                 $this->errorLogOut($errorMessage);
-
                 $this->logger->error($errorMessage);
-                $log = file_get_contents($tmp_log_file);
-                $this->logger->error($log);
-
                 $result_code = false;
+            } else {
+                $cmd = sprintf("sh %s/%s %s > %s 2>&1",
+                               $root_dir_path,
+                               "backyards/ansible_driver/ky_ansible_materials_transfer.sh",
+                               $tmp_TowerInfo_File,
+                               $tmp_log_file);
+
+                exec($cmd,$arry_out,$return_var);
+                if($return_var !== 0) {
+    
+                    $log = file_get_contents($tmp_log_file);
+                    $this->logger->error($log);
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040035",array($credential['host_name']));
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error($errorMessage);
+    
+                    $result_code = false;
+                }
             }
-            unlink($tmp_log_file);
+
+            @unlink($tmp_log_file);
+            @unlink($tmp_TowerInfo_File);
         }
         return $result_code;
     } 
@@ -469,31 +488,51 @@ class ExecuteDirector {
         $result_code = true;
         foreach($TowerHostList as $credential) {
        
-            $cmd = sprintf("expect %s/%s %s %s %s %s %s %s > %s 2>&1",
-                            $root_dir_path,
-                            "backyards/ansible_driver/ky_ansible_materials_delete.exp",
-                            $credential['host_name'],
-                            $credential['auth_type'],
-                            $credential['username'],
-                            $credential['password'],
-                            $credential['ssh_key_file'],
-                            $dest_path,
-                            $tmp_log_file);
-            exec($cmd,$arry_out,$return_var);
-            if($return_var !== 0) {
-                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040037",array($credential['host_name']));
-                $this->logger->error($errorMessage);
-                $log = file_get_contents($tmp_log_file);
-                $this->logger->error($log);
+            $tmp_TowerInfo_File = '/tmp/.ky_TowerInfoFile_' . getmypid() . ".log";
+            @unlink($tmp_TowerInfo_File);
 
+            $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
+                             $credential['host_name'],
+                             $credential['auth_type'],
+                             $credential['username'],
+                             $credential['password'],
+                             $credential['ssh_key_file'],
+                             $dest_path,
+                             $credential['ssh_key_file_pass'],
+                             $root_dir_path);
+       
+            if(file_put_contents($tmp_TowerInfo_File, $info) === false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000018");
+                $this->errorLogOut($errorMessage);
+                $this->logger->error($errorMessage);
                 $result_code = false;
+            } else {
+                $cmd = sprintf("sh %s/%s %s > %s 2>&1",
+                               $root_dir_path,
+                               "backyards/ansible_driver/ky_ansible_materials_delete.sh",
+                               $tmp_TowerInfo_File,
+                               $tmp_log_file);
+
+                exec($cmd,$arry_out,$return_var);
+                if($return_var !== 0) {
+                    $log = file_get_contents($tmp_log_file);
+                    $this->logger->error($log);
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040037",array($credential['host_name']));
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error($errorMessage);
+
+                    $result_code = false;
+                }
+                @unlink($tmp_log_file);
+                @unlink($tmp_TowerInfo_File);
             }
-            unlink($tmp_log_file);
         }
         return $result_code;
     } // MaterialsDelete
 
     private function getTowerHostInfo($execution_no,$anstwr_host_id,$dataRelayStoragePath,&$TowerHostList) {
+
+
         global $vg_tower_driver_type;
         global $vg_tower_driver_id;
 
@@ -506,6 +545,7 @@ class ExecuteDirector {
         );
 
         $rows = $this->dbAccess->selectRowsUseBind('B_ANS_TWR_HOST', false, $condition);
+
 
         foreach($rows as $row) {
             // isolated node は省く
@@ -534,12 +574,28 @@ class ExecuteDirector {
                     $this->errorLogOut($errorMessage);
                     return false;
                 }
+
+
+                // ky_encryptで中身がスクランブルされているので復元する
+                $ret = ky_file_decrypt($sshKeyFile,$sshKeyFile);
+                if($ret === false) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000117",array());
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+
                 if( !chmod( $sshKeyFile, 0600 ) ){
                     $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
                     $this->errorLogOut($errorMessage);
                     return false;
                 }
             }
+
+            $sshKeyFilePass  = ky_decrypt($row['ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE']);
+            if(strlen(trim($sshKeyFilePass)) == 0) {
+                $sshKeyFilePass = "undefine";
+            }
+
             switch($row['ANSTWR_LOGIN_AUTH_TYPE']) {
             case 1:   // 鍵認証
                 $auth_type   = "key";
@@ -552,13 +608,15 @@ class ExecuteDirector {
                 break;
             }
 
+// 637
             $credential = array(
-                "id"              => $row['ANSTWR_HOST_ID'],
-                "host_name"       => $row['ANSTWR_HOSTNAME'],
-                "auth_type"       => $auth_type,
-                "username"        => $username,
-                "password"        => $password,
-                "ssh_key_file"    => $sshKeyFile,
+                "id"               => $row['ANSTWR_HOST_ID'],
+                "host_name"        => $row['ANSTWR_HOSTNAME'],
+                "auth_type"        => $auth_type,
+                "username"         => $username,
+                "password"         => $password,
+                "ssh_key_file"     => $sshKeyFile,
+                "ssh_key_file_pass"=> $sshKeyFilePass,
             );
 
             $TowerHostList[] = $credential;
@@ -589,6 +647,15 @@ class ExecuteDirector {
             $sshPrivateKey = "";
             if(!empty($hostInfo['CONN_SSH_KEY_FILE'])) {
                 $sshPrivateKey = getSshKeyFileContent($hostInfo['SYSTEM_ID'], $hostInfo['CONN_SSH_KEY_FILE']);
+                // ky_encrptのスクランブルを復号
+                $sshPrivateKey = ky_decrypt($sshPrivateKey);
+            }
+
+            $sshPrivateKeyPass = "";
+            if(!empty($hostInfo['SSH_KEY_FILE_PASSPHRASE'])) {
+                $sshPrivateKeyPass = $hostInfo['SSH_KEY_FILE_PASSPHRASE'];
+                // ky_encrptのスクランブルを復号
+                $sshPrivateKeyPass = ky_decrypt($sshPrivateKeyPass);
             }
 
             $instanceGroupId = null;
@@ -626,17 +693,20 @@ class ExecuteDirector {
                 break;
             case 2:   // パスワード認証
                 $sshPrivateKey = "";
+                $sshPrivateKeyPass = "";
                 break;
             default:  // 認証未指定
                 $password      = "";
                 $sshPrivateKey = "";
+                $sshPrivateKeyPass = "";
                 break;
             }
             $credential = array(
                 "username"        => $username,
                 "password"        => $password,
                 "ssh_private_key" => $sshPrivateKey,
-                "credential_type_id" => $credential_type_id
+                "ssh_private_key_pass" => $sshPrivateKeyPass,
+                "credential_type_id"   => $credential_type_id
             );
 
             $inventory = array();
@@ -756,6 +826,9 @@ class ExecuteDirector {
         }
         if(array_key_exists("credential_type_id", $credential)) {
             $param['credential_type_id'] = $credential['credential_type_id'];
+        }
+        if(array_key_exists("ssh_private_key_pass", $credential)) {
+            $param['ssh_private_key_pass'] = $credential['ssh_private_key_pass'];
         }
 
         $this->logger->trace(var_export($param, true));

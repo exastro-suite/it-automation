@@ -36,7 +36,7 @@ class AnsibleTowerRestApiJobs extends AnsibleTowerRestApiBase {
 
     const API_PATH  = "jobs/";
     const IDENTIFIED_NAME_PREFIX = "ita_executions_job_";
-    const API_SUB_PATH_STDOUT  = "stdout/?format=txt";
+    const API_SUB_PATH_STDOUT  = "stdout/?format=txt_download";
     const API_SUB_PATH_CANCEL  = "cancel/";
 
     // static only
@@ -252,7 +252,6 @@ class AnsibleTowerRestApiJobs extends AnsibleTowerRestApiBase {
         // REST APIアクセス
         $method = "GET";
         $response_array = $RestApiCaller->restCall($method, self::API_PATH . $id . "/" . self::API_SUB_PATH_STDOUT , array(), array(),true);
-
         // REST失敗
         if($response_array['statusCode'] != 200) {
             $response_array['success'] = false;

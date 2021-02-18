@@ -192,7 +192,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->addValidator($objVarVali);
         $cg->addColumn($c);
 
-        $objFunction03 = function($objOutputType, $rowData, $aryVariant, $objColumn){
+        $objFunctionpssword = function($objOutputType, $rowData, $aryVariant, $objColumn){
             $strInitedColId = $objColumn->getID();
             $aryVariant['callerClass'] = get_class($objOutputType);
             $aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
@@ -305,11 +305,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         };
 
         $outputType01 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
-        $outputType01->setFunctionForGetBodyTag($objFunction03);
+        $outputType01->setFunctionForGetBodyTag($objFunctionpssword);
         $outputType02 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
-        $outputType02->setFunctionForGetBodyTag($objFunction03);
+        $outputType02->setFunctionForGetBodyTag($objFunctionpssword);
         $outputType03 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
-        $outputType03->setFunctionForGetBodyTag($objFunction03);
+        $outputType03->setFunctionForGetBodyTag($objFunctionpssword);
 
         $objVldt = new SingleTextValidator(0,30,false);
         $c = new PasswordColumn('LOGIN_PW',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102070"));
@@ -325,13 +325,43 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg->addColumn($c);
     $table->addColumn($cg);
 
-    $c = new FileUploadColumn('CONN_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-109006"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-109007"));
-    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
-    $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
-    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
-    $c->setFileHideMode(true);
-    $table->addColumn($c);
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-109011"));
+        $c = new FileUploadColumn('CONN_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-109006"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-109007"));
+        $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
+        $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+        $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+        $c->setFileHideMode(true);
+
+// #637
+        // CONN_SSH_KEY_FILEをアップロード時に「ky__encrypt」で暗号化する設定
+        $c->setFileEncryptFunctionName("ky_file_encrypt");
+// #637
+
+        $cg->addColumn($c);
+
+// #637
+        $outputType01 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
+        $outputType01->setFunctionForGetBodyTag($objFunctionpssword);
+        $outputType02 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
+        $outputType02->setFunctionForGetBodyTag($objFunctionpssword);
+        $outputType03 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
+        $outputType03->setFunctionForGetBodyTag($objFunctionpssword);
+
+        $objVldt = new SingleTextValidator(0,256,false);
+        $c = new PasswordColumn('SSH_KEY_FILE_PASSPHRASE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-109008"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-109009"));
+        $c->setHiddenMainTableColumn(true);
+        $c->setOutputType("print_table", $outputType01);
+        $c->setOutputType('delete_table', $outputType02);
+        $c->setOutputType('print_journal_table', $outputType03);
+        $c->setValidator($objVldt);
+        $c->setEncodeFunctionName("ky_encrypt");
+
+      $cg->addColumn($c);
+
+    $table->addColumn($cg);
+// #637
 
     $wanted_filename = "ita_ansible-driver";
     if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
@@ -467,7 +497,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
                     $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
                     $c->setFileHideMode(true);
-                    $cg3->addColumn($c);
+
+// #637
+                    // WINRM_SSL_CA_FILEをアップロード時に「ky_encrypt」で暗号化する設定
+                    $c->setFileEncryptFunctionName("ky_file_encrypt");
+// #637
+
+                  $cg3->addColumn($c);
 
                 $cg->addColumn($cg3);
 

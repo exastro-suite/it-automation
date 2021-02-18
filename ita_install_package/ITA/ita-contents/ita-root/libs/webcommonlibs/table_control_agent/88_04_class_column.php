@@ -9471,6 +9471,7 @@ class FileUploadColumn extends Column{
 	protected $strWkPkSprintFormat;
 	protected $arrayCorrectDirPermsOfBase;  //最終保存先のパーミッション
 
+    protected $FileEncryptFunctionName;
 	//----ここから継承メソッドの上書き処理
 
 	function __construct($strColId, $strColLabel, $OAPathToUploadScriptFile="", $nrPathAnyToBranchPerFUC="", $maxFileSize=4*1024*1024*1024, $sprintFormat="%010d", $arrayCorrectDirPerms=array("0777")){
@@ -9512,6 +9513,8 @@ class FileUploadColumn extends Column{
 
 		$this->setFileHideMode(true);
 		$this->setValidator(new FileNameValidator());
+        	// アップロードされたファイルの暗号化タイプ (false:暗号化しない)
+        	$this->setFileEncryptFunctionName(false);
 	}
 
 	function setRichFilterValues($value=array()){
@@ -10269,6 +10272,22 @@ class FileUploadColumn extends Column{
 		}
 		return $retArray;
 		//トランザクション内----
+	}
+	function setFileEncryptFunctionName($strValue) {
+		$aryForCheck = array("ky_file_encrypt"=>0);
+		if($strValue === false) {
+			$this->FileEncryptFunctionName = false;
+		} elseif( array_key_exists($strValue,$aryForCheck) === true ){
+			$this->FileEncryptFunctionName = $strValue;
+     		} else {
+			$this->FileEncryptFunctionName = false;
+			$error = sprint_f("[METHOD]:%s File Encrypt Function Name is Failed.",__METHOD__);
+			web_log($error);
+			throw new Exception( '00000100-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+		}
+	}
+	function getFileEncryptFunctionName() {
+		return($this->FileEncryptFunctionName);
 	}
 	//ここまで新規メソッドの定義宣言処理----
 

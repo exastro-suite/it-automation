@@ -64,6 +64,7 @@ class CStmList extends TableBaseDefinition {
             "GATEWAY"                         => "",
             "STATIC"                          => "",
             "CONN_SSH_KEY_FILE"               => "",
+            "SSH_KEY_FILE_PASSPHRASE"         => "",
             "ANSTWR_INSTANCE_GROUP_NAME"      => "",
         );
 

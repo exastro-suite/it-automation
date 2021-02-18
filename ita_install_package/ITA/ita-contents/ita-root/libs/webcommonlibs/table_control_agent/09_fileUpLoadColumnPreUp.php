@@ -358,6 +358,17 @@
                 $intErrorType = 617;
                 throw new Exception( '00002000-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
+            // ダウンロードしたファイルの暗号化が必要か判定
+            $FileEncryptFunctionName = $objFileUpCol->getFileEncryptFunctionName();
+            if($FileEncryptFunctionName !== false) {
+                // ダウンロードしたファイルの暗号化
+                $ret = $FileEncryptFunctionName($dst_file,$dst_file);
+                if($ret === false) {
+                    $intErrorType = 620;
+                    throw new Exception( '00002000-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+                 
+            }
             
             $boolResultOfChmod = chmod($dst_file, 0644);
             if( $boolResultOfFileMove === false ){
@@ -389,6 +400,8 @@
             // ----一般訪問ユーザに見せてよいメッセージを作成
             
             switch($intErrorType){
+                case 620: $ret_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-519");break;
+
                 case 614: $ret_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-513",$aryErrMsgElement);break;
                 case 610: $ret_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-509",$aryErrMsgElement);break;
                 case 619: $ret_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-518",$aryErrMsgElement);break;

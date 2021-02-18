@@ -161,6 +161,7 @@ $ary[515] = "Failed to change permissions for original file name temporary file.
 $ary[516] = "Failed to move temporary file.";
 $ary[517] = "Failed to change permissions for temporary file.";
 $ary[518] = "Uploading was prohibited for this extension. [{}]";
+$ary[519] = "Failed to encrypt the temporary file.";
 $ary[551] = "File size is exceeding the upper limit of setting value for server.";
 $ary[552] = "File size is exceeding the upper limit of setting value for form.";
 $ary[553] = "File was partially uploaded.";
