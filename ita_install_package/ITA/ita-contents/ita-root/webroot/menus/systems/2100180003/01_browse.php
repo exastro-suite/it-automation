@@ -265,6 +265,7 @@ EOD;
                   <li class="editor-tab-menu-item" data-tab="merge">Merge</li>
                   <li class="editor-tab-menu-item" data-tab="call">Conductor call</li>
                   <li class="editor-tab-menu-item" data-tab="call_s">Symphony call</li>
+                  <li class="editor-tab-menu-item" data-tab="multiple">Node</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
 
@@ -279,9 +280,9 @@ EOD;
                           <th class="panel-th">ID :</th>
                           <td class="panel-td"><span id="conductor-class-id" class="panel-span"></span></td>
                         </tr>
-                        <tr>
+                        <tr title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309048")}">
                           <th class="panel-th">Name :</th>
-                          <td class="panel-td"><input id="conductor-class-name" class="edit panel-text" type="text"><span id="conductor-class-name-view" class="view panel-span"></span></td>
+                          <td class="panel-td"><input maxlength="256" id="conductor-class-name" class="edit panel-text" type="text"><span id="conductor-class-name-view" class="view panel-span"></span></td>
                         </tr>
                         <tr class="view">
                           <th class="panel-th">Role :</th>
@@ -305,7 +306,7 @@ EOD;
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="conductor-class-note" class="edit panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="conductor-class-note" class="edit panel-note panel-textarea" spellcheck="false"></textarea>
                       <span id="conductor-class-note-view" class="view panel-note panel-span"></span>
                     </div>                    
                   </div>
@@ -351,7 +352,7 @@ EOD;
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="movement-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="movement-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -369,7 +370,7 @@ EOD;
                     </table>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="function-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="function-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -408,7 +409,7 @@ EOD;
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="branch-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="branch-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -431,7 +432,7 @@ EOD;
                     </table>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="marge-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="marge-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -454,7 +455,7 @@ EOD;
                     </table>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="merge-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="merge-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -502,7 +503,7 @@ EOD;
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="conductor-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="conductor-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -550,7 +551,31 @@ EOD;
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="symphony-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="symphony-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Node 複数選択 -->
+                <div id="multiple" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <div class="panel-group">
+                      <div class="panel-group-title">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309038")}</div>
+                      <ul id="node-align" class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="node-align-left" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309040")}"><span class="align-icon algin-left"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-vertical" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309041")}"><span class="align-icon algin-vertical"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-right" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309042")}"><span class="align-icon algin-right"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-top" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309043")}"><span class="align-icon algin-top"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-horizonal" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309044")}"><span class="align-icon algin-horizonal"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-bottom" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309045")}"><span class="align-icon algin-bottom"></span></button></li>
+                      </ul>
+                    </div>
+                    <div class="panel-group">
+                      <div class="panel-group-title">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309039")}</div>
+                      <ul id="node-equally-spaced" class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="node-equally-spaced-vertical" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309046")}"><span class="align-icon algin-equally-vertical"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-equally-spaced-horizonal" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309047")}"><span class="align-icon algin-equally-horizonal"></span></button></li>
+                      </ul>
                     </div>
                   </div>
                 </div>

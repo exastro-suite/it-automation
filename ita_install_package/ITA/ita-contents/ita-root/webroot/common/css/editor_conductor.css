@@ -985,6 +985,7 @@ filter: grayscale(1) opacity(0.3);
 #editor[data-editor-mode="checking"] .svg-group {
 opacity: .3;
 }
+#editor[data-editor-mode="checking"] .node.ready,
 #editor[data-editor-mode="checking"] .node.running,
 #editor[data-editor-mode="checking"] .node.complete {
 filter: none;
@@ -992,6 +993,7 @@ filter: none;
 #editor[data-editor-mode="checking"] .svg-group[data-status="running"] {
 opacity: 1;
 }
+.node.ready .node-circle::after,
 .node.running .node-circle::after {
 background-image: linear-gradient( #264F05 2px, #132803 2px );
 background-size: 3px 3px;
@@ -1018,7 +1020,7 @@ animation: runningNodeCircleBack 0.5s linear infinite;
 animation: none;
 background-image: linear-gradient( -45deg, #333, #666 );
 }
-
+.node.ready .node-running,
 .node.running .node-running {
 display: block;
 position: absolute;
@@ -1028,8 +1030,11 @@ width: 78%; height: 78%;
 border: 4px solid transparent;
 border-top-color: #FFF;
 border-radius: 50%;
-animation: runningNodeCircle 3s linear infinite;
 opacity: 0.75;
+}
+.conductor-end.ready .node-running,
+.node.running .node-running {
+animation: runningNodeCircle 3s linear infinite;
 }
 @keyframes runningNodeCircle {
 to { transform: rotate(360deg); }
@@ -1037,6 +1042,8 @@ to { transform: rotate(360deg); }
 .run-complete .node.running .node-running {
 animation: none;
 }
+.node.ready .node-running::before,
+.node.ready .node-running::after,
 .node.running .node-running::before,
 .node.running .node-running::after {
 content: '';
@@ -1047,15 +1054,17 @@ width: calc( 100% + 8px ); height: calc( 100% + 8px );
 border: 4px solid transparent;
 border-radius: 50%;
 }
+.node.ready .node-running::before,
 .node.running .node-running::before {
 transform: rotate(120deg);
 border-top-color: #FFF;
 }
+.node.ready .node-running::after,
 .node.running .node-running::after {
 transform: rotate(240deg);
 border-top-color: #FFF;
 }
-
+.node.ready .node-circle .node-gem,
 .node.running .node-circle .node-gem {
 transform: scale(.75);
 box-shadow: 0 0 16px 2px rgba( 0,0,0,.3 ) inset,
@@ -1118,10 +1127,25 @@ animation: completeResult 1s forwards;
   0% { transform: scale(1.5); opacity: 0; }
 100% { transform: scale(1); opacity: 1; }
 }
-.complete .node-result.mouseenter::before {
+
+.node-jump::after {
+display: none;
+content: '';
+width: 100%; height: 100%;
+border-radius: 50%;
+box-shadow: 0 0 0 1px #111 inset, 0 0 8px rgba( 0,0,0,.6 ) inset;
+}
+.node-jump::after {
+display: block;
+}
+.node-jump.mouseenter::after,
+.node-jump.mouseenter::before {
 transition-duration: .2s;
 box-shadow: 0 0 0 2px #DDD inset, 0 0 8px rgba( 0,0,0,.3 ) inset;
+background-color: rgba( 255,255,255,.2);
 }
+
+
 
 .complete[data-result="6"] .node-result::before,
 .complete[data-result="10"] .node-result::before,
@@ -1564,7 +1588,7 @@ display: block;
 position: absolute;
 right: 2px;
 width: 8px; height: 8px;
-background-image: url(/common/imgs/ita_icon_sprite.png?v=170);
+background-image: url(/common/imgs/ita_icon_sprite.png?v=171);
 background-size: 80px 72px;
 opacity: .5;
 }
@@ -1599,7 +1623,7 @@ width: calc( 100% - 24px );
 display: inline-block;
 width: 24px; height: 24px;
 transform: scale(.8);
-background-image: url(/common/imgs/ita_icon_sprite.png?v=170);
+background-image: url(/common/imgs/ita_icon_sprite.png?v=171);
 background-size: 240px 216px;
 background-position: -168px -96px;
 vertical-align: middle;
@@ -1708,7 +1732,32 @@ transform-origin: center top;
 transform: scale(.8,.6) translateY(1px);
 }
 
-
+#KIZI #node-align .panel-button,
+#KIZI #node-equally-spaced .panel-button {
+height: auto;
+padding: 2px;
+line-height: 24px;
+}
+#KIZI #node-align .panel-button {
+padding: 4px;
+}
+.align-icon {
+display: inline-block;
+width: 24px; height: 24px;
+background-image: url(/common/imgs/ita_icon_sprite.png?v=171);
+background-size: 240px 216px;
+}
+#KIZI #node-align-right {
+margin-right: 16px;
+}
+.algin-left { background-position: 0 -120px; }
+.algin-vertical { background-position: -24px -120px; }
+.algin-right { background-position: -48px -120px; }
+.algin-top { background-position: -72px -120px; }
+.algin-horizonal { background-position: -96px -120px; }
+.algin-bottom { background-position: -120px -120px; }
+.algin-equally-vertical { background-position: -168px -120px; }
+.algin-equally-horizonal { background-position: -144px -120px; }
 
 
 /* パネル モード別 */
