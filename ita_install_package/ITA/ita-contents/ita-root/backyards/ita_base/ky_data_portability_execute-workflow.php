@@ -1963,7 +1963,9 @@ function exportData($record){
             }
             foreach ($tmpUploadDirs as $uploadDir) {
                 foreach ($idList as $id) {
-                    $uploadAry[$menuId][] = "{$uploadDir}/{$id}";
+                    if (file_exists(ROOT_DIR_PATH . "{$uploadDir}/{$id}")) {
+                        $uploadAry[$menuId][] = "{$uploadDir}/{$id}";
+                    }
                 }
             }
         }
