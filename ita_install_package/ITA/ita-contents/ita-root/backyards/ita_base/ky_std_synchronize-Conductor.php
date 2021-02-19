@@ -503,6 +503,23 @@
 
                     break;
                 case "3": //実行中
+                    // conductorインスタンス 共有パス
+                    $CONDUCTOR_instance_Dir = $rowOfConductorInterface['CONDUCTOR_STORAGE_PATH_ITA'] . "/" . sprintf("%010s",$row['CONDUCTOR_INSTANCE_NO']);
+                    // Conductor call　で実行された場合処理 #733
+                    if( is_dir( $CONDUCTOR_instance_Dir) === false  && $row["CONDUCTOR_CALL_FLAG"] == 2 ){
+                        // conductorインスタンス 共有パスを生成
+                        if( !mkdir( $CONDUCTOR_instance_Dir, 0777 ) ){
+                            // 例外処理へ
+                            $strErrStepIdInFx="00000401";
+                            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                        }
+                        if( !chmod( $CONDUCTOR_instance_Dir, 0777 ) ){
+                            // 例外処理へ
+                            $strErrStepIdInFx="00000402";
+                            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                        }
+                    }
+
                 case "4": //実行中(遅延)
                     $aryConductorOnRun[] = $row;
                     break;
@@ -1286,7 +1303,8 @@
                                             $userName = $objMTS->getSomeMessage("ITABASEH-STD-170001");
                                             $intCallNo=$rowOfConductor['CONDUCTOR_INSTANCE_NO'];
 
-                                            $retArray = $objOLA->registerInstanceConductorNode($objDBCA, $lc_db_model_ch, $objMTS, $intShmphonyClassId, $intOperationNoUAPK, "", "", array(), $userId, $userName,$intCallNo);
+                                            // 個別OP対応 #750
+                                            $retArray = $objOLA->registerInstanceConductorNode($objDBCA, $lc_db_model_ch, $objMTS, $intShmphonyClassId, $intOperationNoUAPK, "", "", $strSortedData, $userId, $userName,$intCallNo);
 
                                             if($retArray[0] == false){
                                                 //---CALLノードを異常終了へ
@@ -2145,35 +2163,23 @@
                                             $userId=$db_access_user_id;
                                             $userName = $objMTS->getSomeMessage("ITABASEH-STD-170001");
                                             $intCallNo=$rowOfConductor['CONDUCTOR_INSTANCE_NO'];
-                                            $aryOptionOrder = $aryRetBody[5];
+                                            
+                                            // Movementクラスの不要な項目削除 #750
+                                            $aryOptionOrder=array();
+                                            foreach ($aryRetBody[5] as $tmpkey => $movInfo) {
+                                                $aryOptionOrder[]=array(
+                                                                "MOVEMENT_SEQ" => $movInfo["MOVEMENT_SEQ"],
+                                                                "ORCHESTRATOR_ID" => $movInfo["ORCHESTRATOR_ID"],
+                                                                "PATTERN_ID" => $movInfo["PATTERN_ID"],
+                                                                "EXE_SKIP_FLAG" => "",
+                                                                "OVRD_OPERATION_NO_IDBH" => $movInfo["OPERATION_NO_IDBH"]
+                                                );
+                                            }
 
                                             // ----シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録
                                             $retArray = $objOLA->registerSymphonyInstanceForConductor($intShmphonyClassId, $intOperationNoUAPK,"", $aryOptionOrder, "", $userId, $userName);
-                                            
-                                            #exit;
-                                            if($retArray[0] == false){
-                                                // エラーフラグをON
-                                                // 例外処理へ
-                                                $strErrStepIdInFx="00000500";
-                                                $intErrorType = $retArray[1];
-                                                if( $retArray[1] < 500 ){
-                                                    $aryErrMsgBody = $retArray[2];
-                                                    $strErrMsg = $retArray[3];
-                                                    $strSysErrMsgBody = $retArray[4];
-                                                    $strExpectedErrMsgBodyForUI = $retArray[6];
-                                                }
-                                                //webError出力用メッセージを出力
-                                                $aryFreeErrMsgBody = $retArray[7];
-                                                foreach($aryFreeErrMsgBody as $msg){
-                                                    web_log($msg);
-                                                }
 
-                                                if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
-                                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                                            }
-                                            // シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録----
-
-
+                                            // Symphonyインスタンス生成時のエラー処理　#745
                                             if($retArray[0] == false){
                                                 //---CALLノードを異常終了へ
                                                 $aryMovInsUpdateTgtSource['STATUS_ID'] = 6;     //異常終了
@@ -2182,6 +2188,26 @@
                                                 if( isset( $retArray[5] ) )$intSubSymcallInsNo = $retArray[5];   
                                                 if ( $intSubSymcallInsNo != "")$aryMovInsUpdateTgtSource['CONDUCTOR_INSTANCE_CALL_NO'] =  $intSubSymcallInsNo;
 
+                                                //Symphonyインスタンス生成失敗時の対応
+                                                if( $aryMovInsUpdateTgtSource['CONDUCTOR_INSTANCE_CALL_NO'] == "" ){
+                                                    
+                                                    //Symphonyインスタンス生成失敗
+                                                    $FREE_LOG = str_replace(PHP_EOL, '', $retArray[6]);
+                                                    require ($root_dir_path . $log_output_php );
+                                                    
+                                                    // ロールバック
+                                                    if( $objDBCA->transactionRollBack()=== true ){
+                                                        //[処理]ロールバック
+                                                        $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-STD-50016");
+                                                        require ($root_dir_path . $log_output_php );
+                                                    }
+                                                    else{
+                                                        //ロールバックに失敗しました
+                                                        $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-ERR-50005");
+                                                        require ($root_dir_path . $log_output_php );
+                                                    }            
+                                                }
+    
                                                 // 更新用のテーブル定義
                                                 $aryConfigForIUD = $aryConfigForMovInsIUD;
 
@@ -2189,22 +2215,6 @@
                                                 $aryBaseSourceForBind = $aryMovInsUpdateTgtSource;
                                                 
                                                 $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
-                                                
-                                                //呼び出し先を異常終了へ
-                                                $arySqlBind=array(
-                                                    "CONDUCTOR_INSTANCE_NO" => $retArray['5'],
-                                                    );   
-                                                $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
-                                                $arySymInsCallUpdateTgtSource = $aryRetBody[0];
-
-                                                $arySymInsCallUpdateTgtSource['STATUS_ID'] = 7;     //異常終了
-                                                // 更新用のテーブル定義
-                                                $aryConfigForIUD = $aryConfigForSymInsIUD;
-
-                                                // BIND用のベースソース≒
-                                                $aryBaseSourceForBind = $arySymInsCallUpdateTgtSource;
-                                                
-                                                $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
 
                                                 //次のNode取得
                                                 $arySqlBind=array(
@@ -2243,6 +2253,8 @@
 
                                                 }
                                             }
+                                            // シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録----
+
                                             $intSubSymcallInsNo = $retArray[5];
                                             //---ノードインスタンス取得
                                             $arySqlBind=array(
