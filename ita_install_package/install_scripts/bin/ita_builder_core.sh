@@ -724,6 +724,7 @@ configure_php() {
     fi
     # Install some packages.
     yum_install ${YUM_PACKAGE["php"]}
+    pip3 install --upgrade pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
     # Check installation php packages
     yum_package_check ${YUM_PACKAGE["php"]}
 
@@ -861,7 +862,7 @@ configure_ansible() {
     # Check installation some pip packages.
     for key in ${PIP_PACKAGE_ANSIBLE["remote"]}; do
         echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        pip3 list --format=legacy | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pip3 list --format=columns 2> "$ITA_BUILDER_LOG_FILE" | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Package not installed [$key]"
                 ERR_FLG="false"
@@ -1052,6 +1053,7 @@ download() {
     
     #pip install
     yum_install python3
+    pip3 install --upgrade pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
     
     for key in ${!PIP_PACKAGE[@]}; do
         local download_dir="${DOWNLOAD_DIR["pip"]}/$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
