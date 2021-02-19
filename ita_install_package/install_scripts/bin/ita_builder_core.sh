@@ -850,7 +850,7 @@ configure_ansible() {
     else
         for key in ${PIP_PACKAGE["ansible"]}; do
             echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            pip3 install --no-index --find-links=${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]} $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            pip3 install --ignore-installed --no-index --find-links=${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]} $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Installation failed pip packages."
                 ERR_FLG="false"
