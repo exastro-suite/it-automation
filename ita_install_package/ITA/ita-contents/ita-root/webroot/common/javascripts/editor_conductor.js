@@ -2526,29 +2526,6 @@ const checkConnectType = function( outType, inType ) {
   }
 };
 
-// 作業確認時リザルトマーククリックで作業結果へ
-if ( conductorEditorMode === 'checking') {
-  $canvasVisibleArea.on({
-    'mouseenter': function(){
-      const $result = $( this ),
-            href = $result.attr('data-href');
-      if ( href !== '#') {
-        $result.addClass('mouseenter');
-      }
-    },
-    'mouseleave': function(){
-      $( this ).removeClass('mouseenter');
-    },
-    'click': function(){
-      const $result = $( this ),
-            href = encodeURI( $result.attr('data-href') );
-      if ( href !== '#') {
-        open( href, '_blank') ;
-      }
-    }
-  }, '.node-result');
-}
-
 $canvasVisibleArea.on('mousedown', function( e ){
 
     if ( e.buttons === 1 ) {
@@ -3390,10 +3367,218 @@ const panelChange = function( nodeID ) {
     }
 
   } else {
-    $conductorParameter.find('.panel-tab li, .conductor-panel').hide();
+    // Nodeが複数選択されている場合
+    $conductorParameter.find('.editor-tab').find('li[data-tab="multiple"]').show().click()
+      .siblings().hide();
   }
   
 }
+
+
+// 選択されたノードを整列する
+const numberCompare = function( a, b, mode ) {
+  if ( a === null && b === null ) return false;
+  a = ( a === null )? b: a;
+  b = ( b === null )? a: b;
+  if ( mode === 's') {
+    return ( a < b )? a: b;
+  } else {
+    return ( a < b )? b: a;
+  }
+};
+$conductorParameter.find('#node-align').on('click', '.panel-button', function() {
+  const alignType = $( this ).attr('id').replace('node-align-',''),
+        selectLength = g_selectedNodeID.length;
+  
+  let pointX1 = null,
+      pointY1 = null,
+      pointX2 = null,
+      pointY2 = null;
+  
+  // 取り消し、やり直し用の移動前移動後の座標を入れる
+  const nodePosition = {
+    'before': {},
+    'after': {}
+  };
+
+  // 基準になる位置を求める
+  for ( let i = 0; i < selectLength; i++) {
+    const nodeID = g_selectedNodeID[i],
+          x = conductorData[nodeID].x,
+          y = conductorData[nodeID].y,
+          w = conductorData[nodeID].w,
+          h = conductorData[nodeID].h;
+    nodePosition['before'][nodeID] = {
+      'x': x,
+      'y': y
+    };
+    switch( alignType ) {
+      case 'left':
+        pointX1 = numberCompare( pointX1, x, 's');
+        break;
+      case 'vertical':
+        pointX1 = numberCompare( pointX1, x, 's');
+        pointX2 = numberCompare( pointX2, x + w );
+        break;
+      case 'right':
+        pointX1 = numberCompare( pointX1, x + w );
+        break;
+      case 'top':
+        pointY1 = numberCompare( pointY1, y, 's');
+        break;
+      case 'horizonal':
+        pointY1 = numberCompare( pointY1, y, 's');
+        pointY2 = numberCompare( pointY2, y + h );
+        break;
+      case 'bottom':
+        pointY1 = numberCompare( pointY1, y + h );
+        break;
+    }
+  }
+  
+  // 整列する
+  for ( let i = 0; i < selectLength; i++ ) {
+    const nodeID = g_selectedNodeID[i],
+          x = conductorData[nodeID].x,
+          y = conductorData[nodeID].y,
+          w = conductorData[nodeID].w,
+          h = conductorData[nodeID].h;
+    let nx, ny;
+    switch( alignType ) {
+      case 'left':
+        nx = pointX1;
+        ny = y;
+        break;
+      case 'vertical':
+        nx = pointX1 + (( pointX2 - pointX1 ) / 2 ) - ( w / 2 );
+        ny = y;
+        break;
+      case 'right':
+        nx = pointX1 - w;
+        ny = y;
+        break;
+      case 'top':
+        nx = x;
+        ny = pointY1;
+        break;
+      case 'horizonal':
+        nx = x;
+        ny = pointY1 + (( pointY2 - pointY1 ) / 2 ) - ( h / 2 );
+        break;
+      case 'bottom':
+        nx = x;
+        ny = pointY1 - h;
+        break;
+    }
+    nodeMoveSet( nodeID, nx, ny );
+    nodePosition['after'][nodeID] = {
+      'x': nx,
+      'y': ny
+    }
+  }
+  
+  conductorHistory.align( nodePosition );
+  updateConductorData();
+    
+});
+
+
+// 選択されたノードを等間隔に分布する
+$conductorParameter.find('#node-equally-spaced').on('click', '.panel-button', function() {
+  const alignType = $( this ).attr('id').replace('node-equally-spaced-',''),
+        selectLength = g_selectedNodeID.length;
+
+  // 取り消し、やり直し用の移動前移動後の座標を入れる
+  const nodePosition = {
+    'before': {},
+    'after': {}
+  };
+  
+  // 縦か横か？
+  const dXY = ( alignType === 'vertical')? 'y': 'x',
+        dWH = ( alignType === 'vertical')? 'h': 'w';
+  
+  // 選択されているノードが2以下の場合は何もしない
+  if ( g_selectedNodeID < 3 ) return false;
+  
+  // Node
+  const nodeArray = new Array( selectLength );
+  for ( let i = 0; i < selectLength; i++ ) {
+    const nodeID = g_selectedNodeID[i];
+    nodeArray[i] = {
+      'id': nodeID,
+      'x': conductorData[nodeID].x,
+      'y': conductorData[nodeID].y,
+      'h': conductorData[nodeID].h,
+      'w': conductorData[nodeID].w
+    };
+    nodePosition['before'][nodeID] = {
+      'x': conductorData[nodeID].x,
+      'y': conductorData[nodeID].y
+    };
+  }
+
+  // 一番下のノードを調べる
+  nodeArray.sort( function( a, b ){
+    if ( a[dXY] + a[dWH] < b[dXY] + b[dWH] ) return -1;
+    if ( a[dXY] + a[dWH] > b[dXY] + b[dWH] ) return 1;
+    return 0;
+  });
+  let s2 = nodeArray[ selectLength - 1 ][dXY];
+  
+  // 一番上のノードを調べる
+  nodeArray.sort( function( a, b ){
+    if ( a[dXY] < b[dXY] ) return -1;
+    if ( a[dXY] > b[dXY] ) return 1;
+    return 0;
+  });
+  let s1 = nodeArray[ 0 ][dXY] + nodeArray[ 0 ][dWH];
+  
+  let positionRange = ( s2 - s1 > 0 )? s2 - s1: 0;
+  
+// 分布範囲がノードの大きさより小さいかどうか
+  let nodeWidth = 0;
+  for ( let i = 1; i < selectLength - 1; i++ ) {
+    nodeWidth += conductorData[nodeArray[i].id][dWH];
+  }
+  if ( nodeWidth < positionRange ) {
+    const equallySpaceWidth = Math.round(( positionRange - nodeWidth ) / ( selectLength - 1 ));
+    let equallySpaceSum = s1 + equallySpaceWidth;
+    for ( let i = 1; i < selectLength - 1; i++ ) {
+      const x = ( alignType === 'vertical')? nodeArray[i].x: equallySpaceSum,
+            y = ( alignType === 'vertical')? equallySpaceSum: nodeArray[i].y;
+      nodeMoveSet( nodeArray[i].id, x, y );
+      nodePosition['after'][nodeArray[i].id] = {
+        'x': x,
+        'y': y
+      }
+      equallySpaceSum += nodeArray[i][dWH] + equallySpaceWidth;
+    }
+  } else {
+    // 分布範囲がノードサイズより小さい場合はノードのセンターで分布する
+    s1 = s1 - ( nodeArray[0][dWH] / 2 );
+    s2 = s2 + ( nodeArray[ selectLength - 1 ][dWH] / 2 );
+    positionRange = ( s2 - s1 > 0 )? s2 - s1: 0;
+    const equallySpaceWidth = Math.round( positionRange / ( selectLength - 1 ));
+    let equallySpaceSum = s1 + equallySpaceWidth;
+    for ( let i = 1; i < selectLength - 1; i++ ) {
+      const x = ( alignType === 'vertical')? nodeArray[i].x: equallySpaceSum - ( nodeArray[i].w / 2 ),
+            y = ( alignType === 'vertical')? equallySpaceSum - ( nodeArray[i].h / 2 ): nodeArray[i].y;
+      nodeMoveSet( nodeArray[i].id, x, y );
+      nodePosition['after'][nodeArray[i].id] = {
+        'x': x,
+        'y': y
+      }
+      equallySpaceSum += equallySpaceWidth;
+    }
+  }
+  
+  conductorHistory.align( nodePosition );
+  updateConductorData();
+  
+});
+
+
 
 // Conductor name
 $conductorParameter.find('#conductor-class-name').on('change', function() {
@@ -3813,12 +3998,6 @@ const conductorHistory = {
   },
   // 移動
   'move': function( nodeID, x, y, interruptFlag ) {
-    let nodeIdCopy;
-    if ( Array.isArray( nodeID ) ) {
-      nodeIdCopy = $.extend( true, {}, nodeID );
-    } else {
-      nodeIdCopy = [ nodeID ];
-    }
     if ( interruptFlag === false ) {
       workInterrupt = [];
     }
@@ -3831,6 +4010,16 @@ const conductorHistory = {
         'y': y,
         'interrupt': workInterrupt
       }
+    };
+    historyControl();
+  },
+  // 整列
+  'align': function( position ) {
+    const wc = workCounter++,
+          nodeIdLength = position['before'].length;
+    workHistroy[ wc ] = {
+      'type': 'align',
+      'data': position
     };
     historyControl();
   },
@@ -3946,6 +4135,11 @@ const conductorHistory = {
             edgeConnect( undo['data']['interrupt'][0].id );
           }
           break;
+        case 'align':
+          for ( const id in undo['data']['before'] ) {
+            nodeMoveSet( id, undo['data']['before'][id].x, undo['data']['before'][id].y );
+          }
+          break;
         case 'connect':
           removeEdge( undo['data']['edgeID'], 0 );
           break;
@@ -3995,6 +4189,11 @@ const conductorHistory = {
           nodeMoveSet( redo['data']['nodeID'], redo['data']['x'], redo['data']['y'], 'relative');
           if ( redo['data']['interruptFlag'] === true ) {
             interruptRedo( redo['data']['interrupt'] );
+          }
+          break;
+        case 'align':
+          for ( const id in redo['data']['after'] ) {
+            nodeMoveSet( id, redo['data']['after'][id].x, redo['data']['after'][id].y );
           }
           break;
         case 'connect':
@@ -4294,6 +4493,26 @@ const nodeReSet = function( reSetConductorData ) {
           loadComplete();
         }
       }
+      // 作業確認時リザルトマークにイベントを付ける
+      if ( conductorEditorMode === 'checking') {
+        $canvasVisibleArea.find('.node-result').on({
+          'mouseenter': function(){
+            const $result = $( this ),
+                  href = $result.attr('data-href');
+            $result.addClass('mouseenter');
+          },
+          'mouseleave': function(){
+            $( this ).removeClass('mouseenter');
+          },
+          'click': function(){
+            const $result = $( this ),
+                  href = encodeURI( $result.attr('data-href') );
+            if ( href !== '#') {
+              open( href, '_blank') ;
+            }
+          }
+        });
+      }
     };
     loadComplete();
 }
@@ -4373,38 +4592,60 @@ $window.on('conductorReset', function(){
 });
 
 // 作業状態確認ポップアップ（移動拡縮対応）
-const itaPopup = function( $target ) {
 
-  $target.on({
-    'mouseenter': function(){
-      const $this = $( this ),
-            title = $this.attr('title');
-      
-      if ( title === undefined || title === '') return false;
-      // ポップアップ追加
-      const $popup = $('<div/>').addClass('itaPopup').text(title);
-      $this.removeAttr('title').attr('data-title', title );
-      $('body').append( $popup );
-      // 位置更新
-      const updatePosition = function() {
-        const mpx = $this.offset().left + ( ( $this.outerWidth() / 2 ) * editorValue.scaling ),
-              mpy = $this.offset().top - ( 4 * editorValue.scaling )
-        $popup.css({ left: mpx, top: mpy });
-      };
-      updatePosition();
-      // マウスムーブとスクロールでも位置を更新する
-      $this.on('mousemove', updatePosition )
-        .on( mousewheelevent, function(){
-        setTimeout( function(){ updatePosition(); }, 1 );
-      });
-    },
-    'mouseleave': function(){
-      const $this = $( this ),
-            title = $this.attr('data-title');
-      $this.attr('title', title ).removeAttr('data-title').off('mousemove ' + mousewheelevent );
-      $('.itaPopup').remove();
+
+
+// 作業確認ポップアップイベント
+const itaPopup = function( $target, id ) {
+  
+  const popupID = 'popup-' + id;
+  let $popup;
+  
+  // 各ノード個別の作業状況確認ポップアップ追加
+  if ( $('#' + popupID ).length ) {
+    $popup = $('#' + popupID );
+  } else {
+    $popup = $('<div/>').attr('id', popupID ).addClass('itaPopup')
+      .text( getSomeMessage("ITABASEC020123") ).css('display','none');
+    if ( !$target.is('.resultPopup') ) {
+      $body.append( $popup );
     }
-  });
+  }
+  
+  // ノードの状態で表示・非表示を切り替える
+  if ( $target.is('.node-jump') ) {
+    $popup.css('visibility','visible');
+  } else {
+    $popup.css('visibility','hidden');
+  }
+  
+  if ( !$target.is('.resultPopup') ) {
+    // 画面を移動しても追従するようにする
+    $target.addClass('resultPopup').on({
+      'mouseenter': function(){
+        const $this = $( this );
+        $popup.css('display','block');
+
+        // 位置更新
+        const updatePosition = function() {
+          const mpx = $this.offset().left + ( ( $this.outerWidth() / 2 ) * editorValue.scaling ),
+                mpy = $this.offset().top - ( 4 * editorValue.scaling )
+          $popup.css({ left: mpx, top: mpy });
+        };
+        updatePosition();
+        // マウスムーブとスクロールでも位置を更新する
+        $this.on('mousemove', updatePosition )
+          .on( mousewheelevent, function(){
+          setTimeout( function(){ updatePosition(); }, 1 );
+        });
+      },
+      'mouseleave': function(){
+        const $this = $( this );
+        $popup.css('display','none');
+        $this.off('mousemove ' + mousewheelevent );
+      }
+    });
+  }
 
 };
 
@@ -4445,6 +4686,10 @@ const conductorStatusUpdate = function( exeNumber ) {
     ['#select-operation-id', conductorInfo.OPERATION_NO_IDBH ],
     ['#select-operation-name', conductorInfo.OPERATION_NAME ]
   ];
+  // 選択されている場合はそのノードのパネルを表示する
+  if ( g_selectedNodeID.length >= 1 ) {
+    panelChange( g_selectedNodeID[0] );
+  }
   
   const panelConducotrInfoLength = panelConducotrInfo.length;
   
@@ -4554,15 +4799,36 @@ const conductorStatusUpdate = function( exeNumber ) {
     
     let endMessage = '';
     
+    // 作業結果URLがあれば追加する
+    const nodeJump = function(){
+      if ( nodeInfo.JUMP ) {
+        if ( !$node.find('.node-result').is('.node-jump') ) {
+          $node.find('.node-result').addClass('node-jump').attr({
+            'data-href': nodeInfo.JUMP
+          });
+        }
+      }
+    };
+    
     switch( nodeInfo.STATUS ) {
       case '1':
+        itaPopup( $node.find('.node-result'), $node.attr('id') );
         return false;
         break;
       case '2':
+        // 準備中
+        nodeJump();
+        $node.addClass('ready');
+        itaPopup( $node.find('.node-result'), $node.attr('id') );
+        $inEdge.attr('data-status', 'running');
+        return false;
+        break;
       case '3':
       case '4':
         // 実行中
-        $node.addClass('running');
+        nodeJump();
+        $node.removeClass('ready').addClass('running');
+        itaPopup( $node.find('.node-result'), $node.attr('id') );
         $inEdge.attr('data-status', 'running');
         return false;
         break;
@@ -4584,17 +4850,11 @@ const conductorStatusUpdate = function( exeNumber ) {
         endMessage = 'SKIP';
         break;
     }
+    nodeJump();
     $inEdge.attr('data-status', 'running');
-    $node.addClass('complete').attr('data-result', nodeInfo.STATUS );
+    $node.removeClass('ready').addClass('complete').attr('data-result', nodeInfo.STATUS );
+    itaPopup( $node.find('.node-result'), $node.attr('id') );
     $node.find('.node-result').attr('data-result-text', endMessage );
-    // 作業結果URLがあれば追加する
-    if ( nodeInfo.JUMP ) {
-      $node.find('.node-result').attr({
-        'title': getSomeMessage("ITABASEC020123"),
-        'data-href': nodeInfo.JUMP
-      });
-      itaPopup( $node.find('.node-result') );
-    }
     conductorData[ nodeID ].endStatus = true;
   };
   
