@@ -508,8 +508,10 @@ if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
     yum-config-manager --enable rhui-REGION-rhel-server-optional >> "$LOG_FILE" 2>&1
     yum-config-manager --enable rhel-7-server-rhui-optional-rpms >> "$LOG_FILE" 2>&1
     dnf config-manager --set-enabled PowerTools >> "$LOG_FILE" 2>&1
+    dnf config-manager --set-enabled powertools >> "$LOG_FILE" 2>&1
     dnf config-manager --set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms >> "$LOG_FILE" 2>&1
     dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms >> "$LOG_FILE" 2>&1
+    pip3 install --upgrade pip >> "$LOG_FILE" 2>&1
 
     #バージョンアップリストに記載されているバージョンごとにライブラリのインストールを行う
     EXEC_VERSION=${NOW_VERSION}
@@ -585,7 +587,7 @@ if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
                     #Check installation
                     for key in $PIP3_LIB_LIST; do
                         echo "----------Installation[$key]----------" >> "$LOG_FILE" 2>&1
-                        pip3 list --format=legacy | grep "$key" >> "$LOG_FILE" 2>&1
+                        pip3 list --format=columns 2> "$LOG_FILE" | grep "$key" >> "$LOG_FILE" 2>&1
                         if [ $? != 0 ]; then
                             log "ERROR : Installation failed [$key]"
                             log "INFO : Abort version up."
