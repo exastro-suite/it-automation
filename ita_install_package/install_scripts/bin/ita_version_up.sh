@@ -508,6 +508,7 @@ if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
     yum-config-manager --enable rhui-REGION-rhel-server-optional >> "$LOG_FILE" 2>&1
     yum-config-manager --enable rhel-7-server-rhui-optional-rpms >> "$LOG_FILE" 2>&1
     dnf config-manager --set-enabled PowerTools >> "$LOG_FILE" 2>&1
+    dnf config-manager --set-enabled powertools >> "$LOG_FILE" 2>&1
     dnf config-manager --set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms >> "$LOG_FILE" 2>&1
     dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms >> "$LOG_FILE" 2>&1
 
