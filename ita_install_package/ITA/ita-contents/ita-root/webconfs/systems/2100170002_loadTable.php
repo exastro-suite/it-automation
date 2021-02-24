@@ -96,25 +96,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $strErrMsg = $aryRetBody[2];
                 $intErrorType = 500;
             }
-
-            if($intErrorType === null){
-                // 登録/更新/廃止/復活があった場合、ky_hostgroup_make_varを起動する
-                $strQuery = "UPDATE A_PROC_LOADED_LIST "
-                           ."SET LOADED_FLG= :LOADED_FLG ,LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
-                           ."WHERE ROW_ID IN (2100170005) ";
-
-                $g['objDBCA']->setQueryTime();
-                $aryForBind = array('LOADED_FLG'=>"0", 'LAST_UPDATE_TIMESTAMP'=>$g['objDBCA']->getQueryTime());
-
-                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-
-                if( $aryRetBody[0] !== true ){
-                    $boolRet = false;
-                    $strErrMsg = $aryRetBody[2];
-                    $intErrorType = 500;
-                }
-            }
-
         }
         $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
         return $retArray;
