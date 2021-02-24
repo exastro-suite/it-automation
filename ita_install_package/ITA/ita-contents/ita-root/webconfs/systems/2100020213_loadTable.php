@@ -112,19 +112,13 @@ Ansible(Pioneer)作業管理
     //----作業パターン
     $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309065") );
 
-    $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309070"),'E_ANSIBLE_PNS_PATTERN','PATTERN_ID','PATTERN_ID','');
-    $c->setMasterDisplayColumnType(0);
+    $c = new TextColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309080"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
-    $c->setJournalTableOfMaster('E_ANSIBLE_PNS_PATTERN_JNL');
-    $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
-    $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
-    $c->setJournalKeyIDOfMaster('PATTERN_ID');
-    $c->setJournalDispIDOfMaster('PATTERN_ID');
     $cg->addColumn($c);
 
     $objVldt = new SingleTextValidator(1,256,false);
@@ -166,19 +160,13 @@ Ansible(Pioneer)作業管理
     //----オペレーション
     $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401015") );
 
-    $c = new IDColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401020"),'E_OPERATION_LIST','OPERATION_NO_UAPK','OPERATION_NO_UAPK','');
-    $c->setMasterDisplayColumnType(0);
+    $c = new TextColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401020"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401030"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
-    $c->setJournalTableOfMaster('E_OPERATION_LIST_JNL');
-    $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
-    $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
-    $c->setJournalKeyIDOfMaster('OPERATION_NO_UAPK');
-    $c->setJournalDispIDOfMaster('OPERATION_NO_UAPK');
     $cg->addColumn($c);
 
     $objVldt = new SingleTextValidator(1,256,false);
@@ -188,19 +176,13 @@ Ansible(Pioneer)作業管理
     $c->setRequired(true);//登録/更新時には、入力必須
     $cg->addColumn($c);
 
-    $c = new IDColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401055"),'E_OPERATION_LIST','OPERATION_NO_IDBH','OPERATION_NO_IDBH','');
-    $c->setMasterDisplayColumnType(0);
+    $c = new TextColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401055"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401056"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
-    $c->setJournalTableOfMaster('E_OPERATION_LIST_JNL');
-    $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
-    $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
-    $c->setJournalKeyIDOfMaster('OPERATION_NO_IDBH');
-    $c->setJournalDispIDOfMaster('OPERATION_NO_IDBH');
     $cg->addColumn($c);
 
     $table->addColumn($cg);
