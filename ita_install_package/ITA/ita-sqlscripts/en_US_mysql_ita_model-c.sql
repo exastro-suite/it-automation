@@ -1243,14 +1243,6 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_LNS_PTN_VARS_LINK TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1276,14 +1268,6 @@ SELECT
         ANS_PLAYBOOK_HED_DEF      ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_LNS_PTN_VARS_LINK_JNL TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -2072,14 +2056,6 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_PNS_PTN_VARS_LINK TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2103,14 +2079,6 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_PNS_PTN_VARS_LINK_JNL TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -3182,14 +3150,6 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_LRL_PTN_VARS_LINK TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3215,14 +3175,6 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_LRL_PTN_VARS_LINK_JNL TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
