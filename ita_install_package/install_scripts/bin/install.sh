@@ -113,14 +113,6 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
-    if [ "$HOSTGROUP2_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-
-    if [ "$HOSTGROUP3_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-    
     echo $PROCCESS_TOTAL_CNT
 }
 ############################################################
@@ -170,14 +162,6 @@ func_install_messasge() {
         MESSAGE="Hostgroup"
     fi
 
-    if [ HOSTGROUP2_FLG = ${1} ]; then
-        MESSAGE="Hostgroup2"
-    fi
-
-    if [ HOSTGROUP3_FLG = ${1} ]; then
-        MESSAGE="Hostgroup3"
-    fi    
-    
     echo "$MESSAGE"
 }
 
@@ -366,8 +350,6 @@ CREATE_TABLES=(
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
-    HOSTGROUP2_FLG
-    HOSTGROUP3_FLG
 )
 
 #リリースファイル設置作成関数用配列
@@ -381,8 +363,6 @@ RELEASE_PLASE=(
     ita_material4
     ita_createparam
     ita_hostgroup
-    ita_hostgroup2
-    ita_hostgroup3
 )
 
 #コンフィグファイル設置確認作成関数用配列
@@ -404,8 +384,6 @@ SERVICES_SET=(
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
-    HOSTGROUP2_FLG
-    HOSTGROUP3_FLG
 )
 
 #クーロンタブ設定関数用配列
@@ -432,8 +410,6 @@ MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 HOSTGROUP_FLG=0
-HOSTGROUP2_FLG=0
-HOSTGROUP3_FLG=0
 
 declare -A REPLACE_CHAR;
 REPLACE_CHAR=(
@@ -637,22 +613,6 @@ if [ "$HOSTGROUP_FLG" -eq 1 ]; then
         log 'WARNING : Hostgroup has already been installed.'
         HOSTGROUP_FLG=0
     fi
-fi
-
-if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_hostgroup3 ; then
-    HOSTGROUP3_FLG=0
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] && [ "$HOSTGROUP_FLG" -eq 1 ] ; then
-    HOSTGROUP3_FLG=1
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_hostgroup" ] && [ "$ANSIBLE_FLG" -eq 1 ] ; then
-    HOSTGROUP3_FLG=1
-elif [ "$ANSIBLE_FLG" -eq 1 ] && [ "$HOSTGROUP_FLG" -eq 1 ] ; then
-    HOSTGROUP3_FLG=1
-fi
-
-if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_hostgroup2 ; then
-    HOSTGROUP2_FLG=0
-elif [ "$HOSTGROUP3_FLG" -eq 1 ] ; then
-    HOSTGROUP2_FLG=1
 fi
 
 #秘密鍵と証明書のファイル名を取得（ITA自己証明書を作成する場合は証明書署名要求ファイル名も設定）
