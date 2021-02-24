@@ -1039,7 +1039,8 @@ animation: runningNodeCircle 3s linear infinite;
 @keyframes runningNodeCircle {
 to { transform: rotate(360deg); }
 }
-.run-complete .node.running .node-running {
+.run-complete .node.running .node-running,
+.run-complete .node.ready .node-running {
 animation: none;
 }
 .node.ready .node-running::before,
@@ -1070,6 +1071,7 @@ transform: scale(.75);
 box-shadow: 0 0 16px 2px rgba( 0,0,0,.3 ) inset,
 0 0 8px 2px #264F05;
 }
+.run-complete .node.ready .node-circle .node-gem,
 .run-complete .node.running .node-circle .node-gem {
 transform: scale(1);
 box-shadow: 0 0 16px 2px rgba( 0,0,0,.3 ) inset;
