@@ -191,18 +191,6 @@ Ansible(Legacy)作業パターン
         $table->addColumn($cg);
     }
 
-    $c = new NumColumn('VARS_COUNT',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-207051"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-207052"));//エクセル・ヘッダで>の説明
-    $c->setHiddenMainTableColumn(false);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
-    $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
-    $c->getOutputType('update_table')->setVisible(false);
-    $c->getOutputType('register_table')->setVisible(false);
-    $c->getOutputType('delete_table')->setVisible(false);
-    $c->getOutputType('csv')->setVisible(false);
-    $c->setSubtotalFlag(false);
-
-    $table->addColumn($c);
-
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
     $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
         $boolRet = true;
