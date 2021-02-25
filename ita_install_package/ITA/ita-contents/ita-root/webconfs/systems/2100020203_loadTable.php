@@ -175,18 +175,6 @@ Ansible(Pioneer)作業パターン
         $table->addColumn($cg);
     }
 
-    $c = new NumColumn('VARS_COUNT',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-409053"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-409054"));//エクセル・ヘッダで>の説明
-    $c->setHiddenMainTableColumn(false);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
-    $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
-    $c->getOutputType('update_table')->setVisible(false);
-    $c->getOutputType('register_table')->setVisible(false);
-    $c->getOutputType('delete_table')->setVisible(false);
-    $c->getOutputType('csv')->setVisible(false);
-    $c->setSubtotalFlag(false);
-
-    $table->addColumn($c);
-
     // Movement詳細へのリンクボタン
     $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-405080");
     $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-405090");
