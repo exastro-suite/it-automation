@@ -858,7 +858,7 @@ function conductorInstanceScram($fxVarsIntConductorInstanceId){
                                                 ,$sqlType
                                                 ,"NODE_INSTANCE_NO"
                                                 ,"C_NODE_INSTANCE_MNG"
-                                                ,"C_MOVEMENT_INSTANCE_MNG_JNL"
+                                                ,"C_NODE_INSTANCE_MNG_JNL"
                                                 ,$arrayConfigForIUD
                                                 ,$tgtSource_row);
 
