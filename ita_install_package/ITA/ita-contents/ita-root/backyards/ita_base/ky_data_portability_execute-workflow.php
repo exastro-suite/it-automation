@@ -1660,10 +1660,19 @@ function exportData($record){
 
     $resAry = $tmpAry[0];
 
-    if ( $dpMode == 1 ) {
-        $uploadAry = $tmpAry[1];
-    } elseif ( $dpMode == 2 ) {
-        $uploadAry = array();
+    $uploadAry = $tmpAry[1];
+    if ( $dpMode == 2 ) {
+        // 時刻指定モードではUploadFileを後から指定するためここでは省く
+        foreach ($uploadAry as $menuId => $menuFileAry) {
+            $i = 0;
+            foreach ($menuFileAry as $target) {
+                if( preg_match( '/^\/uploadfiles/', $target) ) {
+                    unset($uploadAry[$menuId][$i]);
+                }
+                $i = $i + 1;
+            }
+            $uploadAry[$menuId] = array_values($uploadAry[$menuId]);
+        }
     }
 
     $json = json_encode($resAry);
