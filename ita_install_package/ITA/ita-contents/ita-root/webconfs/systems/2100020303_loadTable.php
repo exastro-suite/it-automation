@@ -106,6 +106,16 @@ Ansible（Legacy Role）ロールパッケージ一覧
 
     $table->addColumn($c);
 
+    // Movement詳細へのリンクボタン
+    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208010");
+    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208020");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $c->setDBColumn(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':ROLE_PACKAGE_NAME'));
+    $c->getOutputType('print_journal_table')->setVisible(false);
+
+    $table->addColumn($c);
+
 
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
     $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
@@ -224,7 +234,7 @@ Ansible（Legacy Role）ロールパッケージ一覧
         $User2ITA_var_list    = array();
         $save_vars_array      = array();
         $disuse_role_chk      = true;
-        
+
         $global_vars_master_list = array();
         $template_master_list    = array();
         $obj = new VarStructAnalysisFileAccess($g['objMTS'],
@@ -281,7 +291,7 @@ Ansible（Legacy Role）ロールパッケージ一覧
                             {
                                 $retBool    = false;
                                 $retStrBody = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000018');
-                            } 
+                            }
                         }
                         if($retBool === true) {
                             $dbObj = new WebDBAccessClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
@@ -315,7 +325,7 @@ Ansible（Legacy Role）ロールパッケージ一覧
         }
         if($retBool === true) {
             // 登録・更新・復活の場合
-            if( ($strModeId == "DTUP_singleRecUpdate")   || 
+            if( ($strModeId == "DTUP_singleRecUpdate")   ||
                 ($strModeId == "DTUP_singleRecRegister") ||
                (($strModeId == "DTUP_singleRecDelete")   &&
                 ($modeValue_sub == 'off'))) {

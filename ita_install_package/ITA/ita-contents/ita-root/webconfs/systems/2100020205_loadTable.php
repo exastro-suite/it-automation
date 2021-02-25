@@ -67,7 +67,8 @@ Ansible(Pioneer)対話素材集
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
-    $c = new IDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306010"),'D_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME','');
+    $url = "01_browse.php?no=2100020204&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306010"),'D_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME',$url,'','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306020"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_ANSIBLE_PNS_DIALOG_TYPE_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -77,7 +78,8 @@ Ansible(Pioneer)対話素材集
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-    $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306030"),'D_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
+    $url = "01_browse.php?no=2100000302&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306030"),'D_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME',$url,'','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306040"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_OS_TYPE_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -230,7 +232,7 @@ Ansible(Pioneer)対話素材集
             $tmpfilepath    = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
 
         }
-        
+
         // 一時ファイルから使用しているテンプレート変数のリストを取得
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {

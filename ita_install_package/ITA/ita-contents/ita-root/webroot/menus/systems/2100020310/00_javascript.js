@@ -14,7 +14,7 @@
 //
 //////// ----コールバックファンクション ////////
 function callback() {}
-callback.prototype = {  
+callback.prototype = {
     Filter1Tbl_add_selectbox : function( result ){
         var filterAreaWrap = 'Filter1_Nakami';
         var strFilterPrintId = 'Filter1Tbl';
@@ -211,7 +211,7 @@ callback.prototype = {
                                     "fakeContainer_Update1",
                                     webStdTableHeight,
                                     webStdTableWidth );
-                    
+
                     linkDateInputHelper(strMixOuterFrameName);
             }
         }else if( ary_result[0] == "002" ){
@@ -302,12 +302,12 @@ callback.prototype = {
                     break;
                 case "201":
                     // エラーなく登録完了
-                default:                
+                default:
                     objRegiterArea.innerHTML="";
                     $(objRegiterArea).html(resultContentTag);
 
                     objAlertArea.style.display = "none";
-                    
+
                     adjustTableAuto (strMixInnerFramePrefix+'1',
                                     "sDefault",
                                     "fakeContainer_Register2",
@@ -823,7 +823,7 @@ function Journal1Tbl_pre_search_async(inputedCode){
 function Journal1Tbl_search_async(){
     // 履歴検索実施フラグを初期化
     var journal1AreaWrap = 'Journal1_Nakami';
-    
+
     var exec_flag = true;
 
     // 検索実施フラグがtrueの場合は検索実施
@@ -871,5 +871,16 @@ function queryDataToFilter(){
             // フィルタボタンを押下したことにする
             search_async('orderFromFilterCmdBtn');
     }
+}
+function newOpenWindow(current_element){
+  var current_id = current_element.offsetParent.id;
+  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "4";
+  var searchText1 = document.getElementById(target_id).children[0].innerHTML;
+  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "5";
+  var searchText2 = document.getElementById(target_id).children[0].innerText;
+  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "6";
+  var searchText3 = document.getElementById(target_id).children[0].innerHTML;
+  var url = "01_browse.php?no=2100020311&filter=on&Filter1Tbl_2=" + searchText1 + "&Filter1Tbl_3=" + searchText2 + "&Filter1Tbl_4=" + searchText3;
+  window.open(url, '_blank');
 }
 // ここまでカスタマイズした場合の一般メソッド配置域----

@@ -133,6 +133,16 @@ Ansible(Legacy(NS))プレイブック素材集
 
     $table->addColumn($c);
 
+    // Movement詳細へのリンクボタン
+    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208010");
+    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208020");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $c->setDBColumn(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':PLAYBOOK_MATTER_NAME'));
+    $c->getOutputType('print_journal_table')->setVisible(false);
+
+    $table->addColumn($c);
+
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
     $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
         $boolRet = true;
@@ -216,31 +226,7 @@ Ansible(Legacy(NS))プレイブック素材集
         unset($g['COM_VARS_LIST_VALUE']);
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
-                if( ! array_key_exists('tmp_file_COL_IDSOP_9',$arrayRegData)) {
-                    $boolExecuteContinue = false;
-                    $retBool = false;
-                    $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55210",array($PkeyID,$Playbook_file));
-                } elseif(strlen($tmpFile) != 0) {
-                    // FileUpload後に登録・更新でエラーが発生した場合、tmp_file_COL_IDSOP_8が別ファイルになる対応
-                    if( ! file_exists($TPFVarListfile)) {
-                        // 共通変数を抜き出す。
-                        $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);
-                        $retArray = $obj->CommonVarssAanalys($tmpfilepath,$TPFVarListfile);
-                        unset($obj);
-                    }
-                    $json_VarsAry = file_get_contents($TPFVarListfile);
-                    $g['COM_VARS_LIST_VALUE'] = $json_VarsAry;
-                    @unlink($TPFVarListfile);
-                    $VarsAry = json_decode($json_VarsAry,true);
-                    $dbObj = new WebDBAccessClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
-                    $ret = $dbObj->CommnVarsUsedListUpdate($PkeyID,$FileID,$VarsAry);
-                    if($ret === false) {
-                        web_log($dbObj->GetLastErrorMsg());
-                        $retBool = false;
-                        $retStrBody = $dbObj->GetLastErrorMsg();
-                    }
-                    unset($dbObj);
-                }
+                
             }
             elseif($strModeId == "DTUP_singleRecDelete"){
                 switch($modeValue_sub) {
