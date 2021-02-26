@@ -47,7 +47,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('C_SYMPHONY_CLASS_MNG_JSQ');
     unset($tmpAryColumn);
     $table->setJsEventNamePrefix(true);
-    
+
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-109050"));
     // エクセルのシート名
@@ -116,7 +116,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             return $retLinkable;
         };
 
-    $c = new LinkButtonColumn('detail_show',$g['objMTS']->getSomeMessage("ITABASEH-MNU-201010"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-201020"), 'jumpToSymphonyClassEdit', array(':SYMPHONY_CLASS_NO')); 
+    $c = new LinkButtonColumn('detail_show',$g['objMTS']->getSomeMessage("ITABASEH-MNU-201010"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-201020"), 'jumpToSymphonyClassEdit', array(':SYMPHONY_CLASS_NO'));
     $c->setOutputType('print_table', new OutputType(new SortedTabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array(""))));
     $c->setEvent("print_table", "onClick", "jumpToSymphonyClassEdit", array(':SYMPHONY_CLASS_NO'));
     $c->setDBColumn(false);
@@ -145,14 +145,14 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $strResultType04 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12205");   //復活
     $strResultType99 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12206");   //エラー
 
-    $tmpAryColumn['ROW_EDIT_BY_FILE']->setResultCount(array( 
+    $tmpAryColumn['ROW_EDIT_BY_FILE']->setResultCount(array(
         'delete'=>array('name'=>"$strResultType03"  ,'ct'=>0)
         ,'revive'  =>array('name'=>"$strResultType04"  ,'ct'=>0)
         ,'error'  =>array('name'=>"$strResultType99"  ,'ct'=>0)
         )
     );
 
-    $tmpAryColumn['ROW_EDIT_BY_FILE']->setCommandArrayForEdit(array( 
+    $tmpAryColumn['ROW_EDIT_BY_FILE']->setCommandArrayForEdit(array(
        3=>"$strResultType03"
        ,4=>"$strResultType04"
         )
@@ -165,19 +165,19 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         if( $strTmpValue=="insConstruct" ){
             $objRadioColumn = $tmpAryColumn['WEB_BUTTON_UPDATE'];
             $objRadioColumn->setColLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-201050"));
-            
+
             $objFunctionB = function ($objOutputType, $rowData, $aryVariant, $objColumn){
                 $strInitedColId = $objColumn->getID();
-                
+
                 $aryVariant['callerClass'] = get_class($objOutputType);
                 $aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
                 $strRIColId = $objColumn->getTable()->getRIColumnID();
-                
+
                 $rowData[$strInitedColId] = '<input type="radio" name="symNo" onclick="javascript:symphonyLoadForExecute(' . $rowData[$strRIColId] . ')"/>';
-                
+
                 return $objOutputType->getBody()->getData($rowData,$aryVariant);
             };
-            
+
             $objTTBF = new TextTabBFmt();
             $objTTHF = new TabHFmt();//new SortedTabHFmt();
             $objTTBF->setSafingHtmlBeforePrintAgent(false);
@@ -185,7 +185,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $objOutputType->setFunctionForGetBodyTag($objFunctionB);
             $objOutputType->setVisible(true);
             $objRadioColumn->setOutputType("print_table", $objOutputType);
-            
+
             $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true);
             $table->getFormatter('print_table')->setGeneValue("linkCSVFormShow",false);
         }
