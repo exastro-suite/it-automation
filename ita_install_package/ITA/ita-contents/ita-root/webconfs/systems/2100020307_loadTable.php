@@ -16,7 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 //  【処理概要】
-//    ・Ansible（Legacy Role）作業パターン詳細 
+//    ・Ansible（Legacy Role）作業パターン詳細
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -55,7 +55,7 @@ Ansible（Legacy Role）作業パターン詳細
     // VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定----
 
     $table->setJsEventNamePrefix(true);
-    
+
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208010"));
     // エクセルのシート名
@@ -64,7 +64,8 @@ Ansible（Legacy Role）作業パターン詳細
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
-    $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208030"),'E_ANSIBLE_LRL_PATTERN','PATTERN_ID','PATTERN','',array('OrderByThirdColumn'=>'PATTERN_ID'));
+    $url = "01_browse.php?no=2100020306&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208030"),'E_ANSIBLE_LRL_PATTERN','PATTERN_ID','PATTERN',$url,true,false,'',array('OrderByThirdColumn'=>'PATTERN_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208040"));//エクセル・ヘッダでの説明
 
     $c->setRequired(true);//登録/更新時には、入力必須
@@ -94,10 +95,12 @@ Ansible（Legacy Role）作業パターン詳細
                 return $retArray;
     };
 
-    $c = new IDColumn('ROLE_PACKAGE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208045"),
+    $url = "01_browse.php?no=2100020303&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('ROLE_PACKAGE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208045"),
              'D_ANSIBLE_LRL_ROLE_PKG_LIST',
              'ROLE_PACKAGE_ID',
-             'ROLE_PACKAGE_NAME_PULLDOWN','');
+             'ROLE_PACKAGE_NAME_PULLDOWN',
+             $url,true,false,'');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208046"));//エクセル・ヘッダでの説明
 
     $c->setEvent('update_table', 'onchange', 'package_upd');
@@ -149,7 +152,7 @@ Ansible（Legacy Role）作業パターン詳細
              'ROLE_ID',
              'ROLE_NAME_PULLDOWN','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208060"));//エクセル・ヘッダでの説明
-	
+
     $objFunction01 = function($objOutputType, $aryVariant, $arySetting, $aryOverride, $objColumn){
         global $g;
         $retBool = false;
@@ -173,7 +176,7 @@ Ansible（Legacy Role）作業パターン詳細
                    ."     TAB_1.DISUSE_FLAG     = '0' "
                    ." AND TAB_1.ROLE_PACKAGE_ID = :ROLE_PACKAGE_ID "
                    ."ORDER BY KEY_COLUMN ";
-                   
+
         $aryForBind['ROLE_PACKAGE_ID']        = $strPackageIdNumeric;
 
         if( 0 < strlen($strPackageIdNumeric) ){
@@ -183,7 +186,7 @@ Ansible（Legacy Role）作業パターン詳細
             if($ret === false) {
                 $intErrorType = 500;
                 $retBool = false;
-            } else { 
+            } else {
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
@@ -220,7 +223,7 @@ Ansible（Legacy Role）作業パターン詳細
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryDataSet = array();
-        
+
         $strFxName = "";
 
         $strPackageIdNumeric = $aryVariant['ROLE_PACKAGE_ID'];
@@ -246,7 +249,7 @@ Ansible（Legacy Role）作業パターン詳細
             if($ret === false) {
                 $intErrorType = 500;
                 $retBool = false;
-            } else { 
+            } else {
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
@@ -287,7 +290,7 @@ Ansible（Legacy Role）作業パターン詳細
         $strFxName = "";
 
         $strPackageIdNumeric = $rowData['ROLE_PACKAGE_ID'];
-        
+
         $strQuery = "SELECT "
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
                    .",TAB_1.ROLE_NAME_PULLDOWN DISP_COLUMN "
@@ -308,7 +311,7 @@ Ansible（Legacy Role）作業パターン詳細
             if($ret === false) {
                 $intErrorType = 500;
                 $retBool = false;
-            } else { 
+            } else {
                 $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                 if( $aryRetBody[0] === true ){
                     $objQuery = $aryRetBody[1];
@@ -470,7 +473,7 @@ Ansible（Legacy Role）作業パターン詳細
         $boolSystemErrorFlag = false;
 
         $pattan_tbl         = "E_ANSIBLE_LRL_PATTERN";
-        
+
         $aryVariantForIsValid = $objClientValidator->getVariantForIsValid();
 
         if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
@@ -541,7 +544,7 @@ Ansible（Legacy Role）作業パターン詳細
         // ROLE_PACKAGE_ID;未設定 ROLE_ID:未設定 REST_ROLE_ID:設定 => RestAPI/Excel/CSV
         // その他はUI
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
-            if((strlen($rg_role_package_id)  === 0) && 
+            if((strlen($rg_role_package_id)  === 0) &&
                (strlen($rg_role_id)          === 0) &&
                (strlen($rg_rest_role_id)     !== 0)){
                 $query =  "SELECT                                             "
@@ -583,7 +586,7 @@ Ansible（Legacy Role）作業パターン詳細
             }
         }
         //呼出元がUIがRestAPI/Excel/CSVかを判定----
-        
+
         //----必須入力チェック
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( strlen($rg_role_package_id) === 0 || strlen($rg_role_id) === 0 ) {
@@ -595,7 +598,7 @@ Ansible（Legacy Role）作業パターン詳細
                 $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-90130");
                 $boolExecuteContinue = false;
                 $retBool = false;
-            }    
+            }
             else if( strlen($rg_include_seq) === 0) {
                 $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-90069");
                 $boolExecuteContinue = false;

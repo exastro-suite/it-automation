@@ -48,7 +48,7 @@ OS種別マスタ情報
     $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('B_OS_TYPE_JSQ');
     unset($tmpAryColumn);
 
-    
+
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-106040"));
     // エクセルのシート名
@@ -63,9 +63,9 @@ OS種別マスタ情報
     $c->setRequired(true);//登録/更新時には、入力必須
     $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
     $table->addColumn($c);
-    
+
     $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITABASEH-MNU-106075") );
-    
+
         $c = new IDColumn('HARDAWRE_TYPE_SV',$g['objMTS']->getSomeMessage("ITABASEH-MNU-106080"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-106090"));//エクセル・ヘッダでの説明
         $cg->addColumn($c);
@@ -77,9 +77,18 @@ OS種別マスタ情報
         $c = new IDColumn('HARDAWRE_TYPE_ST',$g['objMTS']->getSomeMessage("ITABASEH-MNU-107030"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-107040"));//エクセル・ヘッダでの説明
         $cg->addColumn($c);
-        
+
     $table->addColumn($cg);
-    
+
+    // 対話ファイル素材集へのリンクボタン
+    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305080");
+    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305090");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $c->setDBColumn(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':OS_TYPE_NAME'));
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $table->addColumn($c);
+
 
     $table->fixColumn();
 

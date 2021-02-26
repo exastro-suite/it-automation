@@ -65,7 +65,8 @@ Ansible(Legacy Role)作業対象ホスト管理
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-    $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1205050"),'E_ANSIBLE_LRL_PATTERN','PATTERN_ID','PATTERN','',array('OrderByThirdColumn'=>'PATTERN_ID'));
+    $url = "01_browse.php?no=2100020307&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1205050"),'E_ANSIBLE_LRL_PATTERN','PATTERN_ID','PATTERN',$url,true,false,'',array('OrderByThirdColumn'=>'PATTERN_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1205060"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('E_ANSIBLE_LRL_PATTERN_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -85,6 +86,15 @@ Ansible(Legacy Role)作業対象ホスト管理
     $c->setJournalKeyIDOfMaster('SYSTEM_ID');
     $c->setJournalDispIDOfMaster('HOST_PULLDOWN');
     $c->setRequired(true);//登録/更新時には、入力必須
+    $table->addColumn($c);
+
+    // 代入地管理へのリンクボタン
+    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1302060");
+    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1302070");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $c->setDBColumn(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array('this'), true);
     $table->addColumn($c);
 
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。

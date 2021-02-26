@@ -167,7 +167,8 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューID
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $url = "01_browse.php?no=";
+            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900011"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
@@ -1226,7 +1227,7 @@ Ansible（Legacy Role）代入値自動登録設定
                         $intErrorType = 503;
                     }
                 }
-                //親変数かどうか、を調べる----                
+                //親変数かどうか、を調べる----
 
                 if( $intVarType == 1 ){
                     $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
@@ -1459,7 +1460,7 @@ Ansible（Legacy Role）代入値自動登録設定
                         $intErrorType = 503;
                     }
                 }
-                //親変数かどうか、を調べる---- 
+                //親変数かどうか、を調べる----
                 if( $intVarType === 1 ){
                     //親変数の場合
                 }else{
@@ -2050,7 +2051,7 @@ Ansible（Legacy Role）代入値自動登録設定
                     $strQuery = "SELECT "
                                ." TAB_1.VARS_LINK_ID "
                                .",TAB_1.VARS_ATTRIBUTE_01 "
-                               .",TAB_1.ACCESS_AUTH " 
+                               .",TAB_1.ACCESS_AUTH "
                                .",TAB_1.ACCESS_AUTH_01  ACCESS_AUTH_01 "
                                .",TAB_1.ACCESS_AUTH_02  ACCESS_AUTH_02 "
                                ."FROM "
@@ -2106,7 +2107,7 @@ Ansible（Legacy Role）代入値自動登録設定
                         $intErrorType = 503;
                     }
                 }
-                //親変数かどうか、を調べる----                
+                //親変数かどうか、を調べる----
 
                 if( $intVarType == 1 ){
                     $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
@@ -2318,7 +2319,7 @@ Ansible（Legacy Role）代入値自動登録設定
                                 $intVarType = 1;
                             }
                             else if(3 == $tmpRow['VARS_ATTRIBUTE_01']){
-                                if(0 < strlen($rowData['VAL_ASSIGN_SEQ'])){  
+                                if(0 < strlen($rowData['VAL_ASSIGN_SEQ'])){
                                     $intVarType = 1;
                                 }
                                 else{
@@ -2338,7 +2339,7 @@ Ansible（Legacy Role）代入値自動登録設定
                         $intErrorType = 503;
                     }
                 }
-                //親変数かどうか、を調べる---- 
+                //親変数かどうか、を調べる----
                 if( $intVarType === 1 ){
                     //親変数の場合
                 }else{
@@ -2561,7 +2562,7 @@ Ansible（Legacy Role）代入値自動登録設定
         // MENU_ID;未設定 COLUMN_LIST_ID:未設定 REST_COLUMN_LIST_ID:設定 => RestAPI/Excel/CSV
         // その他はUI
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
-            if((strlen($rg_menu_id)             === 0) && 
+            if((strlen($rg_menu_id)             === 0) &&
                (strlen($rg_column_list_id)      === 0) &&
                (strlen($rg_rest_column_list_id) !== 0)){
                 $query =  "SELECT                                             "
@@ -2719,7 +2720,7 @@ Ansible（Legacy Role）代入値自動登録設定
                 $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-90130");
                 $boolExecuteContinue = false;
                 $retBool = false;
-            }    
+            }
         }
 
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
