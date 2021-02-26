@@ -530,7 +530,8 @@ margin-right: 0;
 /* 05.input button & submit *******************************************/
 /* default button */
 input[type="button"],
-input[type="submit"] {
+input[type="submit"],
+button.linkBtnInTbl {
 	font-size: 12px;
 	color: #FFF;
 	padding: 5px 10px;
@@ -563,7 +564,8 @@ input.historyBtnInTbl[type="button"] {
 }
 
 /* default button:hover */
-input[type="button"]:hover, input[type="submit"]:hover {
+input[type="button"]:hover, input[type="submit"]:hover,
+button.linkBtnInTbl:hover {
 	background: #FF640A;
 	border: 1px solid #FF640A;
 	transform: translateY(-1px);
@@ -587,13 +589,16 @@ input.historyBtnInTbl[type="button"]:hover {
 }
 
 /* default button:active */
-input[type="button"]:active, input[type="submit"]:active {
+input[type="button"]:active, input[type="submit"]:active,
+button.linkBtnInTbl:active {
 	box-shadow: none;
 	transform: translateY( 0 );
 }
 
 /* disabled button */
-input[type="button"][disabled], input[type="button"][disabled]:hover, input[type="button"][disabled]:active, input[type="submit"][disabled], input[type="submit"][disabled]:hover, input[type="submit"][disabled]:active {
+input[type="button"][disabled], input[type="button"][disabled]:hover, input[type="button"][disabled]:active,
+input[type="submit"][disabled], input[type="submit"][disabled]:hover, input[type="submit"][disabled]:active,
+button.linkBtnInTbl[disabled],  button.linkBtnInTbl[disabled]:hover,  button.linkBtnInTbl[disabled]:active {
 	background: #EBEBEB;
 	border: 1px solid #BABABA;
 	cursor: default;
@@ -605,7 +610,8 @@ input[type="button"][disabled], input[type="button"][disabled]:hover, input[type
 }
 
 /* buttons for supertable */
-input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl, input.historyBtnInTbl {
+input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl, input.historyBtnInTbl,
+button.linkBtnInTbl {
 	min-width: 100%;
 	width: 100%;
 	max-width: 300px;
@@ -614,6 +620,14 @@ input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl, input.historyBtn
 	border-radius: 3px;
 	font-size: 90%;
 	height: 20px;
+}
+button.linkBtnInTbl {
+  min-width: 200px; min-height: auto;
+  max-width: none;
+  width: auto;  height: auto;
+  padding: 1px 4px;
+  word-break: break-all;
+  line-height: 1.5;
 }
 
 /* login button */
