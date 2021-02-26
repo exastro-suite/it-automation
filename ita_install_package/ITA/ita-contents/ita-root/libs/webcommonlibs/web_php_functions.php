@@ -745,7 +745,7 @@
                     list($strMenuIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuID'),null);
                     list($aryValueForPost,  $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('ValueForPost'),array());
                     list($strMenuGroupIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuGroupID'),null);
-                    insideRedirectCodePrint("/common/common_auth.php?login&grp={$strMenuGroupIdNumeric}&no={$strMenuIdNumeric}",$intInsideRedirectMode,$aryValueForPost);
+                    insideRedirectCodePrint("/common/common_auth.php?login&grp={$strMenuGroupIdNumeric}&no={$strMenuIdNumeric}",$intInsideRedirectMode,$aryValueForPost, true);
                     break;
                 case 10710501: // パスワード変更画面にリダイレクト
                     list($strMenuIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuID'),null);
@@ -789,7 +789,7 @@
         exit();
     }
 
-    function insideRedirectCodePrint($strUrlOfInside="", $mode=0, $aryPostData=array()){
+    function insideRedirectCodePrint($strUrlOfInside="", $mode=0, $aryPostData=array(), $exeCheckAuth=false){
         // グローバル変数の利用宣言
         global $g;
         // URLのスキーム＆オーソリティを取得
@@ -804,6 +804,21 @@
                     foreach($aryPostData as $key=>$val){
                         $hiddenInputBody .= "<input type=\"hidden\" name=\"{$key}\" value=\"{$val}\">";
                     }
+
+                    // セッションチェック＆アラート表示
+                    if ($exeCheckAuth) {
+                        $auth = null;
+                        global $objDBCA;
+                        $ACRCM_id = $strMenuIdNumeric;
+                        saLoginExecute($auth, $objDBCA, $ACRCM_id, false);
+
+                        if (!$auth->checkAuth()) {
+                            global $objMTS;
+                            $alert = "<script type='text/javascript'>alert('".$objMTS->getSomeMessage("ITAWDCH-MNU-1300006")."');</script>";
+                            echo $alert;
+                        }
+                    }
+
                     print 
 <<<EOD
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
@@ -850,6 +865,8 @@ EOD;
                 $arrayResult[] = $key;
                 $arrayResult[] = $val;
             }
+
+            http_response_code(200);
             print makeAjaxProxyResultStream($arrayResult);
             exit();
             //HTML/AJAX経由の場合----
