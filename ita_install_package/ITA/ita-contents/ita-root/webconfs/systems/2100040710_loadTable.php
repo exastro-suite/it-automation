@@ -127,10 +127,7 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューグループID
             ////////////////////////////////////////////////////////////
-            $arrUrl = array();
-            $arrUrl[0] = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_1__S=";
-            $arrUrl[1] = "&Filter1Tbl_1__E=";
-            $c = new LinkIDColumn('MENU_GROUP_ID', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900005"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_ID', $arrUrl, false, false, '', array('OrderByThirdColumn'=>'MENU_GROUP_ID'));
+            $c = new IDColumn('MENU_GROUP_ID', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900005"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_ID', '', array('OrderByThirdColumn'=>'MENU_GROUP_ID'));
             $c->addClass("number");
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
@@ -164,8 +161,7 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューグループ名
             ////////////////////////////////////////////////////////////
-            $url = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_2=";
-            $c = new LinkIDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME', $url);
+            $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900008"));
@@ -212,7 +208,8 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューID
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $url = "01_browse.php?no=";
+            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900011"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
