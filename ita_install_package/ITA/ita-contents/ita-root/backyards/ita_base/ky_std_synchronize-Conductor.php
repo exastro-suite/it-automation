@@ -804,8 +804,8 @@
                                         );   
                                     $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
                                     $arySymInsCallUpdateTgtSource = $aryRetBody[0];
-
-                                    $arySymInsCallUpdateTgtSource['STATUS_ID'] = 6;     //緊急停止
+                                    
+                                    $arySymInsCallUpdateTgtSource['ABORT_EXECUTE_FLAG'] = '2';
                                     $arySymInsCallUpdateTgtSource['TIME_START'] = str_replace("-","/",$arySymInsCallUpdateTgtSource['TIME_START']) ;
                                     $arySymInsCallUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
                                     // 更新用のテーブル定義

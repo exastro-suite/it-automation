@@ -4880,11 +4880,6 @@ class OrchestratorLinkAgent {
                     //----現在のNodeが、実行中系ではなかった場合
                     if( 0 < $intAbortedMovementLength ){
                         //----中断されていた場合
-                        if( 1 < $intAbortedMovementLength ){
-                            // 例外処理へ
-                            $strErrStepIdInFx="00000300";
-                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                        }
                         $rowOfFocusMovement = $aryAbortedMovement[$intAbortedMovementLength - 1];
                         //中断されていた場合----
                     }
