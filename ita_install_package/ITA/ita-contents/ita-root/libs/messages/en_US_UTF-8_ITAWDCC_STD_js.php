@@ -28,6 +28,7 @@ $ary["ITAWDCC-20202"] = "Registration is in progress. Are you sure you want to a
 $ary["ITAWDCC-20203"] = "Maintenance is in progress. Are you sure you want to abort?";
 $ary["ITAWDCC-20204"] = "Do you want to display again?";
 $ary["ITAWDCC-20205"] = "System error occurred. ";
+$ary["ITAWDCC-20206"] = "Your session has expired. You will now be redirected to the login screen.";
 $ary["ITAWDCC-50101"] = "*Click [Menu information] button on the menu group list to view the menu information associated with Menu group. (cannot perform maintenance)";
 $ary["ITAWDCC-50102"] = "*Click [Roll information] button on the menu list to view and for maintenance of the roll information associated with Menu. Permission is required for maintenance.";
 $ary["ITAWDCC-50103"] = "*Click [Contents file information] button on the menu list to view the contents file associated with Menu. (cannot peform maintenance)";

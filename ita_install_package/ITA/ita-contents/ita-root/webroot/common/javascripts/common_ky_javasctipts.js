@@ -459,6 +459,7 @@ function checkTypicalFlagInHADACResult(ary_result){
         //配列ではなかった----
     }else{
         if( ary_result[0]=='redirectOrderForHADACClient' ){
+            alert(getSomeMessage("ITAWDCC20206"));
             redirectTo(ary_result[1],ary_result[2],ary_result,3);
             exit();
         }
@@ -473,6 +474,7 @@ function checkTypicalFlagInHAGResult(ary_result){
         //配列ではなかった----
     }else{
         if( ary_result[0]=='redirectOrderForHAGClient' ){
+            alert(getSomeMessage("ITAWDCC20206"));
             redirectTo(ary_result[1],ary_result[2],ary_result,3);
             exit();
         }
@@ -614,6 +616,9 @@ function formControlForFUCFileUpLoad(objTrigger,strIdOfForm,strIdOfResultArea,st
         $('#'+strIdOfForm+'').submit(function(){
             $('#'+strIdOfResultArea+'').html(''+strMsg2+'');
             $('#'+strIdOfIframe+'').unbind().bind('load', function(){
+                // セッションチェック
+                checkTypicalFlagInHAGResult(getArrayBySafeSeparator($('#'+strIdOfIframe+'').contents().text()));
+
                 var result = $('#'+strIdOfInputButton+'').contents().text();
                 checkTypicalFlagInHAGResult(getArrayBySafeSeparator(result));
                 var uploadData=$.parseJSON($('#'+strIdOfIframe+'').contents().text());

@@ -221,6 +221,11 @@ function conductorResultMessage( type, result ) {
   var logType = '',
       message = '',
       trigger = '';
+
+  // セッション切れのチェック
+  var ary_result = getArrayBySafeSeparator(result);
+  checkTypicalFlagInHADACResult(ary_result);
+
   switch( result[0] ) {
     case '000': // Done
       logType = 'done';

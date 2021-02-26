@@ -411,6 +411,7 @@ $ary[1300002] = "Role to allow access";
 $ary[1300003] = "The role that allows access to the record. \nIf you want to allow access to multiple roles, separate the roles with comma (,).";
 $ary[1300004] = "Setting";
 $ary[1300005] = "Auto-input";
+$ary[1300006] = "Your session has expired. You will now be redirected to the login screen.";
 $ary[4000001] = "Request Error";
 $ary[4000002] = "Bad Request";
 $ary[4000003] = "Contact <a href={}> administrator </a>.";
