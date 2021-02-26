@@ -55,7 +55,8 @@ Ansible（Pioneer）作業パターン詳細
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
-    $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-406010"),'E_ANSIBLE_PNS_PATTERN','PATTERN_ID','PATTERN','',array('OrderByThirdColumn'=>'PATTERN_ID'));
+    $url = "01_browse.php?no=2100020203&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-406010"),'E_ANSIBLE_PNS_PATTERN','PATTERN_ID','PATTERN',$url,true,'',array('OrderByThirdColumn'=>'PATTERN_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-406020"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('E_ANSIBLE_PNS_PATTERN_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -65,7 +66,8 @@ Ansible（Pioneer）作業パターン詳細
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-    $c = new IDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-406030"),'D_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME','');
+    $url = "01_browse.php?no=2100020204&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-406030"),'D_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME',$url,'');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-406040"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_ANSIBLE_PNS_DIALOG_TYPE_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');

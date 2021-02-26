@@ -165,7 +165,8 @@ Ansible（Legacy）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューID
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1901010"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $url = "01_browse.php?no=";
+            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1901010"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1901011"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
@@ -350,7 +351,7 @@ Ansible（Legacy）代入値自動登録設定
                        .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                        .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
-                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1 TAB_1 "   
+                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1 TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -416,7 +417,7 @@ Ansible（Legacy）代入値自動登録設定
                        .",TAB_1.ACCESS_AUTH_02 ACCESS_AUTH_02 "
                        .",TAB_1.ACCESS_AUTH_03 ACCESS_AUTH_03 "
                        ."FROM "
-                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1 TAB_1 " 
+                       ." D_CMDB_MENU_COLUMN_SHEET_TYPE_1 TAB_1 "
                        ."WHERE "
                        ." TAB_1.DISUSE_FLAG IN ('0') "
                        ." AND TAB_1.MENU_ID = :MENU_ID "
@@ -980,7 +981,7 @@ Ansible（Legacy）代入値自動登録設定
                         $intErrorType = 500;
                         $retBool = false;
                     }
-        
+
                     $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
                     if( $aryRetBody[0] === true ){
                         $objQuery = $aryRetBody[1];
@@ -1360,7 +1361,7 @@ Ansible（Legacy）代入値自動登録設定
         // MENU_ID;未設定 COLUMN_LIST_ID:未設定 MENU_COLUMN_LIST_ID:設定 => RestAPI/Excel/CSV
         // その他はUI
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
-            if((strlen($rg_menu_id)             === 0) && 
+            if((strlen($rg_menu_id)             === 0) &&
                (strlen($rg_column_list_id)      === 0) &&
                (strlen($rg_rest_column_list_id) !== 0)){
                 $query =  "SELECT                                             "
@@ -1371,7 +1372,7 @@ Ansible（Legacy）代入値自動登録設定
                          ."    SELECT                                         "
                          ."      COUNT(*)                                     "
                          ."    FROM                                           "
-                         ."      D_CMDB_MENU_LIST_SHEET_TYPE_1 TBL_B                   " 
+                         ."      D_CMDB_MENU_LIST_SHEET_TYPE_1 TBL_B                   "
                          ."    WHERE                                          "
                          ."      TBL_B.MENU_ID      = TBL_A.MENU_ID AND       "
                          ."      TBL_B.DISUSE_FLAG  = '0'                     "
@@ -1568,7 +1569,7 @@ Ansible（Legacy）代入値自動登録設定
                 $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-90130");
                 $boolExecuteContinue = false;
                 $retBool = false;
-            }    
+            }
         }
 
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){

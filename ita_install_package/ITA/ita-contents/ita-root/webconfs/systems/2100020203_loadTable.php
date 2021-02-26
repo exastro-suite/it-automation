@@ -79,7 +79,7 @@ Ansible(Pioneer)作業パターン
 
     //----作業実行で必要なのでtrueに
     $table->setJsEventNamePrefix(true);
-    
+
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-408050"));
     // エクセルのシート名
@@ -175,6 +175,16 @@ Ansible(Pioneer)作業パターン
         $table->addColumn($cg);
     }
 
+    // Movement詳細へのリンクボタン
+    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-405080");
+    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-405090");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $c->setDBColumn(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':PATTERN_NAME'));
+    $c->getOutputType('print_journal_table')->setVisible(false);
+
+    $table->addColumn($c);
+
     $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
         $boolRet = true;
         $intErrorType = null;
@@ -213,19 +223,19 @@ Ansible(Pioneer)作業パターン
         if( $strTmpValue=="insConstruct" ){
             $objRadioColumn = $tmpAryColumn['WEB_BUTTON_UPDATE'];
             $objRadioColumn->setColLabel($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-409080"));
-            
+
             $objFunctionB = function ($objOutputType, $rowData, $aryVariant, $objColumn){
                 $strInitedColId = $objColumn->getID();
-                
+
                 $aryVariant['callerClass'] = get_class($objOutputType);
                 $aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
                 $strRIColId = $objColumn->getTable()->getRIColumnID();
-                
+
                 $rowData[$strInitedColId] = '<input type="radio" name="patternNo" onclick="javascript:patternLoadForExecute(' . $rowData[$strRIColId] . ')"/>';
-                
+
                 return $objOutputType->getBody()->getData($rowData,$aryVariant);
             };
-            
+
             $objTTBF = new TextTabBFmt();
             $objTTHF = new TabHFmt();//new SortedTabHFmt();
             $objTTBF->setSafingHtmlBeforePrintAgent(false);
@@ -233,7 +243,7 @@ Ansible(Pioneer)作業パターン
             $objOutputType->setFunctionForGetBodyTag($objFunctionB);
             $objOutputType->setVisible(true);
             $objRadioColumn->setOutputType("print_table", $objOutputType);
-            
+
             $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true);
             $table->getFormatter('print_table')->setGeneValue("linkCSVFormShow",false);
         }

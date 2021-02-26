@@ -64,7 +64,23 @@ Ansible（Pioneer）対話種別リスト
     $c->setUnique(true);
     $table->addColumn($c);
 
+    // Movement詳細へのリンクボタン
+    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-405080");
+    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-405090");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $c->setDBColumn(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':DIALOG_TYPE_NAME'));
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $table->addColumn($c);
 
+    // Movement詳細へのリンクボタン
+    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305080");
+    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305090");
+    $c = new LinkButtonColumn('ethWakeOrder2',$strLabelText1, $strLabelText2, 'dummy');
+    $c->setDBColumn(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow2", array(':DIALOG_TYPE_NAME'));
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $table->addColumn($c);
 
     $table->fixColumn();
 
