@@ -16,6 +16,11 @@
 function callback() {}
 callback.prototype = {  
     getOrganizationData : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var organizationAreaWrap = 'Mix1_Nakami';
         var objTableArea = $('#'+organizationAreaWrap+' .table_area').get()[0];
 
@@ -27,6 +32,11 @@ callback.prototype = {
         }
     },
     getWorkspaceData : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var workspaceAreaWrap = 'Mix2_Nakami';
         var objTableArea = $('#'+workspaceAreaWrap+' .table_area').get()[0];
 
@@ -38,6 +48,11 @@ callback.prototype = {
         }
     },
     getPolicyData : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var policyAreaWrap = 'Mix3_Nakami';
         var objTableArea = $('#'+policyAreaWrap+' .table_area').get()[0];
 
@@ -49,6 +64,11 @@ callback.prototype = {
         }
     },
     getPolicySetData : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var policySetAreaWrap = 'Mix4_Nakami';
         var objTableArea = $('#'+policySetAreaWrap+' .table_area').get()[0];
 
@@ -62,6 +82,11 @@ callback.prototype = {
         }
     },
     deleteOrganization : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         if(result['result'] == true){
             //Terraform Enterpriseから{}を削除しました。
             if(window.confirm(getSomeMessage("ITATERRAFORM100021",{0:result['target']}))){
@@ -75,6 +100,11 @@ callback.prototype = {
         }
     },
     deleteWorkspace : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         if(result['result'] == true){
             //Terraform Enterpriseから{}を削除しました。
             if(window.confirm(getSomeMessage("ITATERRAFORM100021",{0:result['target']}))){
@@ -88,6 +118,11 @@ callback.prototype = {
         }
     },
     deletePolicy : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         if(result['result'] == true){
             //Terraform Enterpriseから{}を削除しました。
             if(window.confirm(getSomeMessage("ITATERRAFORM100021",{0:result['target']}))){
@@ -101,6 +136,11 @@ callback.prototype = {
         }
     },
     deletePolicySet : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         if(result['result'] == true){
             //Terraform Enterpriseから{}を削除しました。
             if(window.confirm(getSomeMessage("ITATERRAFORM100021",{0:result['target']}))){
@@ -114,6 +154,11 @@ callback.prototype = {
         }
     },
     deleteRelationshipWorkspace : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         policySetName = result['policySetName'];
         workspaceName = result['workspaceName'];
         if(result['result'] == true){
@@ -129,6 +174,11 @@ callback.prototype = {
         }
     },
     deleteRelationshipPolicy : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         policySetName = result['policySetName'];
         policyName = result['policyName'];
         if(result['result'] == true){
