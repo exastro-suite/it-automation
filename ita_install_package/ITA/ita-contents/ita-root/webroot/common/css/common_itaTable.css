@@ -826,7 +826,6 @@ border-collapse: collapse;
 #ExecutionNakami td {
 padding: 3px 6px;
 border: 1px solid #D4D4D4;
-white-space: pre;
 line-height: 1.5;
 font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
 color: #2B2B2B;
@@ -835,13 +834,17 @@ color: #2B2B2B;
 background-color: #888;
 border-color: #666;
 color: #F2F2F2;
+white-space: pre;
 letter-spacing: 0.05em;
 text-decoration: none;
 }
 #ExecutionNakami td {
+white-space: normal;
+word-break: break-all;
 background-color: #FFF;
 }
 #ExecutionNakami td.likeHeader {
+white-space: pre;
 background-color: #EEE;
 }
 #ExecutionNakami th.noBorderRight {
@@ -854,12 +857,11 @@ border-right: none;
 #ExecutionNakami th.noBorderLeft {
 border-left: none;
 }
-
-
-
-
-
-
+#ExecutionNakami input.linkBtnInTbl {
+min-width: 200px;
+width: auto;
+max-width: none;
+}
 
 
 

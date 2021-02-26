@@ -192,7 +192,7 @@
         // Movement一覧へ遷移するボタン生成
         $caption = $COLUMN_32;
         $url = sprintf("/default/menu/01_browse.php?no=2100020306&movement_id=%s",$movement_param);
-        $COLUMN_40 =  sprintf("<input class=\"linkBtnInTbl\" type=\"button\" value=\"%s\" onClick=\"window.open('%s')\">",$caption,$url);
+        $COLUMN_40 =  sprintf("<button class=\"linkBtnInTbl\" type=\"button\" onClick=\"window.open('%s')\">%s</button>",$url,$caption);
 
         if($showTgtRow['MULTIPLELOG_MODE'] == 1) {
             $hide_COLUMN01   = "on";
