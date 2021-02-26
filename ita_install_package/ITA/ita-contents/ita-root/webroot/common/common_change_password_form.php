@@ -164,11 +164,11 @@ EOD;
             //$FREE_LOG = 'ERROR:UNEXPECTED, DETAIL:CHANGE OTHER USER PASSWORD IS NOT PERMITTED END';
             web_log($objMTS->getSomeMessage("ITAWDCH-MNU-1190096"));
             
-            // 想定外エラー通知画面にリダイレクト
-            webRequestForceQuitFromEveryWhere(400,20410103);
+            // ログイン画面にリダイレクト
+            webRequestForceQuitFromEveryWhere(401,10610401);
             exit();
         }
-        
+
         unset($tmpBoolSpecialSetting);
         
         $strUsernameLineBody = "<input id=\"inputUserId\" class=\"inputUserId\" type=\"text\" name=\"username\" value=\"{$strUsername}\" />";
