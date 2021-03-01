@@ -704,21 +704,7 @@ function drawCommandButtons(minorPhase){
     if( objCommandAreaWrap != null ){
         switch(pageMode){
             case "classEdit":
-                objCommandAreaWrap.innerHTML = '';
-                //----ユニバーサルデザインに沿わせるためボタン位置を移動
-                var objButtonL50 = document.createElement('input');
-                objButtonL50.type = 'button';
-                objButtonL50.className = 'cmdButton disableAfterPush';
-                if( minorPhase==1 ){
-                    //objButtonL50.value = '再読込';
-                    objButtonL50.value = getSomeMessage("ITABASEC010402");
-                    objButtonL50.onclick = new Function( "symphonyReloadForEdit();" );
-                }else{
-                    objButtonL50 = null;
-                }
-                if( objButtonL50 != null ){
-                    objCommandAreaWrap.insertBefore(objButtonL50, null);
-                }
+                objCommandAreaWrap.innerHTML = '';                
                 //ユニバーサルデザインに沿わせるためボタン位置を移動----
                 var objButtonR50 = document.createElement('input');
                 objButtonR50.type = 'button';
@@ -737,6 +723,20 @@ function drawCommandButtons(minorPhase){
                 }
                 if( objButtonR50 != null ){
                     objCommandAreaWrap.insertBefore(objButtonR50, null);
+                }
+                //----ユニバーサルデザインに沿わせるためボタン位置を移動
+                var objButtonL50 = document.createElement('input');
+                objButtonL50.type = 'button';
+                objButtonL50.className = 'cmdButton disableAfterPush';
+                if( minorPhase==1 ){
+                    //objButtonL50.value = '再読込';
+                    objButtonL50.value = getSomeMessage("ITABASEC010402");
+                    objButtonL50.onclick = new Function( "symphonyReloadForEdit();" );
+                }else{
+                    objButtonL50 = null;
+                }
+                if( objButtonL50 != null ){
+                    objCommandAreaWrap.insertBefore(objButtonL50, null);
                 }
                 //キャンセルボタン用
                 var objButtonCancel50 = document.createElement('input');

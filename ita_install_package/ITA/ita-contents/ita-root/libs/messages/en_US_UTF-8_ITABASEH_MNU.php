@@ -70,9 +70,9 @@ $ary[104030] = "Static";
 $ary[104040] = "[Maximum length] 32 bytes";
 $ary[104050] = "Display order";
 $ary[104060] = "To control display order";
-$ary[104070] = "Maintenance (view/register/update/discard) can be performed on the input operation list.";
+$ary[104070] = "Maintenance (view/register/update/discard) can be performed on the operation list.";
 $ary[104080] = "No.";
-$ary[104090] = "Input operation list information";
+$ary[104090] = "Operation list information";
 $ary[104101] = "Dedicated information for SCRAB ";
 $ary[104111] = "Port number";
 $ary[104112] = "For Linux OS type systems, set the port number of ssh.
@@ -93,7 +93,7 @@ For Linux OS type systems, choose an authentication method from the following.
 Password authentication
 ssh key authentication
 ssh config file";
-$ary[104161] = "ssh authentication key file";
+$ary[104161] = "ssh private key file";
 $ary[104162] = "When ssh key authentication is specified as the authentication method, input the path of the authentication key file.
 The authentication key file must be located on a SCRAB server";
 $ary[104171] = "ssh config file";
@@ -143,7 +143,7 @@ $ary[104621] = "Enter additional options in YAML format to set inventory file op
     ansible_network_os: nxos";
 $ary[104630] = "Instance group name";
 $ary[104631] = "Specify the instance group to be set as the inventory of AnsibleTower / AWX.";
-$ary[105010] = "Input operation list information";
+$ary[105010] = "Operation list information";
 $ary[105020] = "Operation name";
 $ary[105030] = "[Maximum length] 256 bytes";
 $ary[105040] = "Scheduled date for execution";
@@ -225,7 +225,7 @@ $ary[202020] = "Details";
 $ary[202030] = "Symphony name";
 $ary[202040] = "[Original data] Symphony class list";
 $ary[202050] = "Operation";
-$ary[202060] = "[Original data] Input operation list";
+$ary[202060] = "[Original data] Operation list";
 $ary[202070] = "Operation Name";
 $ary[202080] = "[Maximum length] 256 bytes";
 $ary[202090] = "Status";
@@ -508,7 +508,7 @@ $ary[920021] = "End";
 $ary[920022] = "Symphony name";
 $ary[920023] = "[Original data] Symphony class list";
 $ary[920024] = "Operation";
-$ary[920025] = "[Original data] Input operation list";
+$ary[920025] = "[Original data] Operation list";
 $ary[920026] = "Auto-input";
 $ary[920027] = "Execution user";
 $ary[920028] = "User to run Symphony (The registered/updated user will be automatically filled in)";
@@ -570,7 +570,7 @@ $ary[307021] = "End";
 $ary[307022] = "Conductor name";
 $ary[307023] = "[Original data]-Conductor list";
 $ary[307024] = "Operation name";
-$ary[307025] = "[Original data] Input operation list";
+$ary[307025] = "[Original data] Operation list";
 $ary[307026] = "Auto-input";
 $ary[307027] = "Execution user";
 $ary[307028] = "User to run Conductor (The registered/updated user will be automatically filled in)";
@@ -649,16 +649,4 @@ $ary[309034] = "It is populated data set (zip).";
 $ary[309035] = "It is result data set (zip).";
 $ary[309036] = "OK";
 $ary[309037] = "Cancel";
-$ary[309038] = "Align";
-$ary[309039] = "Equal space";
-$ary[309040] = "Align horizontally to the left";
-$ary[309041] = "Align horizontally to the center";
-$ary[309042] = "Align horizontally to the right";
-$ary[309043] = "Align vertically to the top";
-$ary[309044] = "Align vertically to the center";
-$ary[309045] = "Align vertically to the bottom";
-$ary[309046] = "Distribute evenly vertically";
-$ary[309047] = "Distribute evenly horizontally";
-$ary[309048] = "Enter Conductor name.(Maximum length) 256 bytes";
-$ary[309049] = "Enter description (Maximum length) 8192 bytes";
 ?>

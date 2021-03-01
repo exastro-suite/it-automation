@@ -1698,10 +1698,12 @@ class MainLinkTabBFmt extends BFmt {
 	protected $strFilterMatchClass;
 
 	protected $strLinkUrl;
+	protected $urlOption;
+	protected $zeroPadding;
 
 	//----ここから継承メソッドの上書き処理
 
-	public function __construct($url=""){
+	public function __construct($url="", $urlOption=false, $zeroPadding=false){
 		parent::__construct();
 		$this->setTableDataLikeHeaderAgent(false);
 		$this->setTagClassesAgent(array());
@@ -1715,6 +1717,8 @@ class MainLinkTabBFmt extends BFmt {
 
 		$this->setFilterMatchClass("filter_match");
 		$this->setLinkUrl($url);
+		$this->urlOption = $urlOption;
+		$this->zeroPadding = $zeroPadding;
 	}
 
 	public function getData($rowData,$aryVariant){
@@ -1753,12 +1757,20 @@ class MainLinkTabBFmt extends BFmt {
 		}
 
 		//リンク先のURL作成
+		if($this->urlOption === true){
+			$param = mb_substr(strstr($strData, ':'), 1);
+		}else{
+			$param = $strData;
+		}
+		if($this->zeroPadding === true){
+			$param = str_pad($param, 10, '0', STR_PAD_LEFT);
+		}
 		if(is_array($this->getLinkUrl())){
 			foreach ($this->getLinkUrl() as $value) {
-				$strLinkUrl .=  str_replace(" ","%20",$value.$strData);
+				$strLinkUrl .=  str_replace(" ","%20",$value.$param);
 			}
 		}else{
-			$strLinkUrl =  str_replace(" ","%20",$this->getLinkUrl().$strData);
+			$strLinkUrl =  str_replace(" ","%20",$this->getLinkUrl().$param);
 		}
 
 		$strTagClasses .= "\"";

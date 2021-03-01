@@ -61,7 +61,7 @@ Ansible（Legacy Role）代入値自動登録設定
     $table->setDBJournalTableHiddenID('B_ANS_CMDB_LINK_JNL');
     // 利用時は、更新対象カラムに、「$c->setHiddenMainTableColumn(true);」を付加すること
     // VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定----
- 
+
     $table->addUniqueColumnSet(array('MENU_ID','COLUMN_LIST_ID','FILE_PREFIX','VARS_NAME','VRAS_MEMBER_NAME'));
 
     //動的プルダウンの作成用
@@ -208,7 +208,8 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューID
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $url = "01_browse.php?no=";
+            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900011"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
@@ -681,7 +682,7 @@ Ansible（Legacy Role）代入値自動登録設定
         // MENU_ID;未設定 COLUMN_LIST_ID:未設定 REST_COLUMN_LIST_ID:設定 => RestAPI/Excel/CSV
         // その他はUI
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
-            if((strlen($rg_menu_id)             === 0) && 
+            if((strlen($rg_menu_id)             === 0) &&
                (strlen($rg_column_list_id)      === 0) &&
                (strlen($rg_rest_column_list_id) !== 0)){
                 $query =  "SELECT                                             "

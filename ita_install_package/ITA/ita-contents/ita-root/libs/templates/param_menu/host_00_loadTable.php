@@ -56,7 +56,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
 
     $c = new IDColumn('HOST_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102601"),'C_STM_LIST','SYSTEM_ID','HOSTNAME','');
-    $c->setDescription('choose host');//エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-104259"));//エクセル・ヘッダでの説明
     $c->setHiddenMainTableColumn(true);
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
