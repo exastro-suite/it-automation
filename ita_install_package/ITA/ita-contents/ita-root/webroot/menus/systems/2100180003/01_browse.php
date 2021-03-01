@@ -301,7 +301,7 @@ EOD;
                         </tbody>
                       </table>
                       <ul class="panel-button-group">
-                        <li class="panel-button-group-item"><button id="conductor-role-select" class="panel-button">Permission role select</button></li>
+                        <li class="panel-button-group-item"><button id="conductor-role-select" class="panel-button">Select</button></li>
                       </ul>                      
                     </div>
                     <div class="panel-group">
