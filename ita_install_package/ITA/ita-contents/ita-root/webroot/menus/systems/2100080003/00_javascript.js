@@ -15,7 +15,7 @@
 
 //////// ----コールバックファンクション ////////
 function callback() {}
-callback.prototype = {  
+callback.prototype = {
     Filter1Tbl_add_selectbox : function( result ){
         // セッションチェック
         if ( typeof result == "string" ) {
@@ -115,7 +115,7 @@ callback.prototype = {
         if ( typeof result == "string" ) {
             checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
         }
-        
+
         var strMixOuterFrameName = 'Mix1_Nakami';
 
         var ary_result = getArrayBySafeSeparator(result);
@@ -159,7 +159,7 @@ callback.prototype = {
         if ( typeof result == "string" ) {
             checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
         }
-        
+
         var strMixOuterFrameName = 'Mix1_Nakami';
         var strMixInnerFramePrefix = 'Mix1_';
 
@@ -233,7 +233,7 @@ callback.prototype = {
                                     "fakeContainer_Update1",
                                     webStdTableHeight,
                                     webStdTableWidth );
-                    
+
                     linkDateInputHelper(strMixOuterFrameName);
             }
         }else if( ary_result[0] == "002" ){
@@ -340,7 +340,7 @@ callback.prototype = {
                     $(objRegiterArea).html(resultContentTag);
 
                     objAlertArea.style.display = "none";
-                    
+
                     adjustTableAuto (strMixInnerFramePrefix+'1',
                                     "sDefault",
                                     "fakeContainer_Register2",
@@ -408,7 +408,7 @@ callback.prototype = {
         if ( typeof result == "string" ) {
             checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
         }
-        
+
         if(result == true){
             //登録成功通知メッセージ
             window.alert(getSomeMessage("ITATERRAFORM100014"));
@@ -426,7 +426,7 @@ callback.prototype = {
         if ( typeof result == "string" ) {
             checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
         }
-        
+
         if(result == true){
             //更新成功通知メッセージ
             window.alert(getSomeMessage("ITATERRAFORM100016"));
@@ -444,7 +444,7 @@ callback.prototype = {
         if ( typeof result == "string" ) {
             checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
         }
-        
+
         var resultAreaID = result[1];
         var resultMessage = result[2];
         var resultArea = $('#'+resultAreaID);
@@ -474,7 +474,7 @@ callback.prototype = {
         if ( typeof result == "string" ) {
             checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
         }
-        
+
         if(result == true){
             //削除成功通知メッセージ
             window.alert(getSomeMessage("ITATERRAFORM100018"));
@@ -943,7 +943,7 @@ function Journal1Tbl_pre_search_async(inputedCode){
 function Journal1Tbl_search_async(){
     // 履歴検索実施フラグを初期化
     var journal1AreaWrap = 'Journal1_Nakami';
-    
+
     var exec_flag = true;
 
     // 検索実施フラグがtrueの場合は検索実施
@@ -1026,5 +1026,13 @@ function Mix1_1_deleteWorkspace(obj, workspaceID){
         proxy.deleteWorkspace(data);
     }
 
+}
+function Mix1_1_newOpenWindow(currentElement,currentText){
+  var searchText = decodeURIComponent(escape(atob(currentText)));;
+  var current_id = currentElement.offsetParent.id;
+  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "4";
+  var searchText1 = document.getElementById(target_id).children[0].innerText;
+  var url = "01_browse.php?no=2100080014&filter=on&Filter1Tbl_3=" + searchText1 + ":" + searchText;
+  window.open(url, '_blank');
 }
 // ここまでカスタマイズした場合の一般メソッド配置域----
