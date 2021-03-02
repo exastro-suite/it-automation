@@ -170,16 +170,16 @@ EOD;
       <div id="editor-mode"></div>
       <div class="editor-header-menu">
         <div class="editor-header-main-menu">
-          <ul class="editor-menu-list edit">
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-new">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309007")}</button></li>
+          <ul class="editor-menu-list conductor-header-menu1">
+            <li class="editor-menu-item edit"><button class="editor-menu-button" data-menu="conductor-new">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309007")}</button></li>
             <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-save">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309008")}</button></li>
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-read">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309009")}</button></li>
+            <li class="editor-menu-item edit"><button class="editor-menu-button" data-menu="conductor-read">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309009")}</button></li>
           </ul>
-          <ul class="editor-menu-list">
+          <ul class="editor-menu-list conductor-header-menu2">
             <li class="editor-menu-item"><button id="button-undo" class="editor-menu-button" data-menu="undo" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309010")}</button></li>
             <li class="editor-menu-item"><button id="button-redo" class="editor-menu-button" data-menu="redo" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309011")}</button></li>
           </ul>
-          <ul class="editor-menu-list">
+          <ul class="editor-menu-list conductor-header-menu3">
             <li class="editor-menu-item"><button id="node-delete-button" class="editor-menu-button" data-menu="node-delete" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309012")}</button></li>
           </ul>
         </div>
