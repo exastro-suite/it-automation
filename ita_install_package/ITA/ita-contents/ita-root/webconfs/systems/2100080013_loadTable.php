@@ -61,7 +61,8 @@ PolicySet-Policy紐付管理ページ
     //************************************************************************************
     //----Policy SetS
     //************************************************************************************
-    $c = new IDColumn('POLICY_SET_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103350"), 'D_TERRAFORM_POLICY_SETS', 'POLICY_SET_ID', 'POLICY_SET', '',array('OrderByThirdColumn'=>'POLICY_SET_ID'));
+    $url = "01_browse.php?no=2100080012&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('POLICY_SET_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103350"), 'D_TERRAFORM_POLICY_SETS', 'POLICY_SET_ID', 'POLICY_SET', $url, true, false, '',array('OrderByThirdColumn'=>'POLICY_SET_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103360")); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_TERRAFORM_POLICY_SETS_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -74,7 +75,8 @@ PolicySet-Policy紐付管理ページ
     //************************************************************************************
     //----Policy
     //************************************************************************************
-    $c = new IDColumn('POLICY_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103370"), 'D_TERRAFORM_POLICY', 'POLICY_ID', 'POLICY', '',array('OrderByThirdColumn'=>'POLICY_ID'));
+    $url = "01_browse.php?no=2100080006&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('POLICY_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103370"), 'D_TERRAFORM_POLICY', 'POLICY_ID', 'POLICY', $url, true, false, '',array('OrderByThirdColumn'=>'POLICY_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103380")); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_TERRAFORM_POLICY_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');

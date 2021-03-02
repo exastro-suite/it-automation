@@ -144,6 +144,14 @@ Organizations管理
 
     $table->addColumn($cg);
 
+    // Workspaces管理へのリンクボタン
+    $strLabelText1 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102430");
+    $strLabelText2 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102440");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $c->setDBColumn(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':ORGANIZATION_NAME'), true);
+    $table->addColumn($c);
 
     $table->fixColumn();
 
