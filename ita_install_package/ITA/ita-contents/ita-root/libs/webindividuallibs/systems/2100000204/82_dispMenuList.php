@@ -116,8 +116,8 @@ EOD;
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
                         <td class="number" {$BG_COLOR}>{$COLUMN_01}</td>
-                        <td class="number" {$BG_COLOR}><a href={$url} target="blank">{$COLUMN_02}</a></td>
-                        <td{$BG_COLOR}><a href={$url_02} target="blank">{$COLUMN_03}</a></td>
+                        <td class="number" {$BG_COLOR}><a href={$url} target="_blank">{$COLUMN_02}</a></td>
+                        <td{$BG_COLOR}><a href={$url_02} target="_blank">{$COLUMN_03}</a></td>
                         <td{$BG_COLOR}>{$COLUMN_04}</td>
                     </tr>
 EOD;
