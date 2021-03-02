@@ -422,7 +422,6 @@ conductorGetMode = '';
 
 // 初期値
 const initialValue = {
-  'version' : '1.0.2',
   'canvasWidth' : 16400,
   'canvasHeight' : 16400,
   'artboradWidth' : 16000,
@@ -461,7 +460,6 @@ let conductorData;
 const setInitialConductorData = function() {
   conductorData = {};
   conductorData['config'] = {
-    'editorVersion' : initialValue.version,
     'nodeNumber' : g_NodeCounter,
     'terminalNumber' : g_TerminalCounter,
     'edgeNumber' : g_EdgeCounter
