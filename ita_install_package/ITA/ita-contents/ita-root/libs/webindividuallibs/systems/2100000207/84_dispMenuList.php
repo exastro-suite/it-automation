@@ -117,9 +117,9 @@ EOD;
                 $COLUMN_04 = nl2br(htmlspecialchars($menu_row['MENU_NAME']));
                 $COLUMN_05 = nl2br(htmlspecialchars($menu_row['LOGIN_NECESSITY_DISP']));
                 $COLUMN_06 = nl2br(htmlspecialchars($menu_row['PRIVILEGE_TYPE_DISP']));
-                $url = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_2=" .$COLUMN_01;
-                $url_02 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_1__S=" .$COLUMN_03 ."&Filter1Tbl_1__E=" .$COLUMN_03;
-                $url_03 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_4=" .$COLUMN_04;
+                $url = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_2=" .str_replace(" ","%20",$COLUMN_01);
+                $url_02 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_03) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_03);
+                $url_03 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_4=" .str_replace(" ","%20",$COLUMN_04);
                 $str_temp =
 <<< EOD
                     <tr valign="top">

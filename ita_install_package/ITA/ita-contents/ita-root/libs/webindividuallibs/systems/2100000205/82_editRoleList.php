@@ -133,8 +133,8 @@ EOD;
                             $COLUMN_01 = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040054");
                         }
                         $COLUMN_02 = nl2br(htmlspecialchars($row['ROLE_NAME']));
-                        $url = "01_browse.php?no=2100000207&filter=on&Filter1Tbl_1__S=" .$COLUMN_00 ."&Filter1Tbl_1__E=" .$COLUMN_00;
-                        $url_02 = "01_browse.php?no=2100000207&filter=on&Filter1Tbl_2=" .$COLUMN_02;
+                        $url = "01_browse.php?no=2100000207&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_00) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_00);
+                        $url_02 = "01_browse.php?no=2100000207&filter=on&Filter1Tbl_2=" .str_replace(" ","%20",$COLUMN_02);
                         $output_str .=
 <<< EOD
                             <tr valign="top">

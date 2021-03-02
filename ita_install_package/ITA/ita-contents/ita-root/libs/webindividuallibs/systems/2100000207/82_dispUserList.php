@@ -104,8 +104,8 @@ EOD;
                 $COLUMN_01 = nl2br(htmlspecialchars($user_row['USER_ID']));
                 $COLUMN_02 = nl2br(htmlspecialchars($user_row['USERNAME']));
                 $COLUMN_03 = nl2br(htmlspecialchars($user_row['USERNAME_JP']));
-                $url = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_1__S=" .$COLUMN_01 ."&Filter1Tbl_1__E=" .$COLUMN_01;
-                $url_02 = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_2=" .$COLUMN_02;
+                $url = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_01) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_01);
+                $url_02 = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_2=" .str_replace(" ","%20",$COLUMN_02);
 
                 $str_temp =
 <<< EOD
