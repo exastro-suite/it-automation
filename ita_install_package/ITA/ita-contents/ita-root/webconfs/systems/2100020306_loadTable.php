@@ -192,9 +192,8 @@ Ansible(Legacy Role)作業パターン
     }
 
     // Movement詳細へのリンクボタン
-    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208010");
-    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208020");
-    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $strLabelText = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207317");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
     $c->setDBColumn(false);
     $c->setEvent("print_table", "onClick", "newOpenWindow", array(':PATTERN_NAME'));
     $c->getOutputType('print_journal_table')->setVisible(false);

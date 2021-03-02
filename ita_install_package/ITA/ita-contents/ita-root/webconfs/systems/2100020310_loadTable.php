@@ -89,9 +89,8 @@ Ansible(Legacy Role)作業対象ホスト管理
     $table->addColumn($c);
 
     // 代入地管理へのリンクボタン
-    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1302060");
-    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1302070");
-    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $strLabelText = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207318");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
     $c->setDBColumn(false);
     $c->getOutputType('print_journal_table')->setVisible(false);
     $c->setEvent("print_table", "onClick", "newOpenWindow", array('this'), true);

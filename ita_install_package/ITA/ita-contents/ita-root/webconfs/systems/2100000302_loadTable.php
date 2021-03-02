@@ -81,9 +81,8 @@ OS種別マスタ情報
     $table->addColumn($cg);
 
     // 対話ファイル素材集へのリンクボタン
-    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305080");
-    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-305090");
-    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $strLabelText = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207316");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
     $c->setDBColumn(false);
     $c->setEvent("print_table", "onClick", "newOpenWindow", array(':OS_TYPE_NAME'));
     $c->getOutputType('print_journal_table')->setVisible(false);
