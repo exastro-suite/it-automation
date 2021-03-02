@@ -138,9 +138,9 @@ EOD;
                         $output_str .=
 <<< EOD
                             <tr valign="top">
-                                <td class="likeHeader number" scope="row" ><a href={$url} target="blank">{$COLUMN_00}</a></td>
+                                <td class="likeHeader number" scope="row" ><a href={$url} target="_blank">{$COLUMN_00}</a></td>
                                 <td{$BG_COLOR}>{$COLUMN_01}</td>
-                                <td{$BG_COLOR}><a href={$url_02} target="blank">{$COLUMN_02}</a></td>
+                                <td{$BG_COLOR}><a href={$url_02} target="_blank">{$COLUMN_02}</a></td>
                             </tr>
 EOD;
                     }

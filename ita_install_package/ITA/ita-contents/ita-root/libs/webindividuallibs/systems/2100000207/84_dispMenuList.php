@@ -124,10 +124,10 @@ EOD;
 <<< EOD
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
-                        <td{$BG_COLOR}><a href={$url} target="blank">{$COLUMN_01}</a></td>
+                        <td{$BG_COLOR}><a href={$url} target="_blank">{$COLUMN_01}</a></td>
                         <td class="number" {$BG_COLOR}>{$COLUMN_02}</td>
-                        <td class="number" {$BG_COLOR}><a href={$url_02} target="blank">{$COLUMN_03}</a></td>
-                        <td{$BG_COLOR}><a href={$url_03} target="blank">{$COLUMN_04}</a></td>
+                        <td class="number" {$BG_COLOR}><a href={$url_02} target="_blank">{$COLUMN_03}</a></td>
+                        <td{$BG_COLOR}><a href={$url_03} target="_blank">{$COLUMN_04}</a></td>
                         <td{$BG_COLOR}>{$COLUMN_05}</td>
                         <td{$BG_COLOR}>{$COLUMN_06}</td>
                     </tr>
