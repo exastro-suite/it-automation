@@ -1766,13 +1766,21 @@ margin-right: 16px;
 #editor[data-editor-mode="edit"] #conductor .view,
 #editor[data-editor-mode="view"] #conductor .edit { display: none; }
 
-/* メニュー モード別 */
-#editor #editor-footer .editor-menu-list,
-#editor .editor-header-main-menu,
-#editor[data-editor-mode="edit"][data-editor-config="update"] .editor-menu-list.edit,
-#editor[data-editor-mode="edit"][data-editor-config="update"] #editor-footer .editor-menu-list.edit { display: none; }
+/* Conductor Hooterメニュー切替 */
+#editor #editor-header .editor-menu-list,
+#editor[data-editor-mode="view"] #editor-header .edit,
+#editor[data-editor-mode="edit"][data-editor-config="update"] #editor-header .edit { display: none; }
 
-#editor[data-editor-mode="edit"] .editor-header-main-menu { display: table-cell; }
+#editor[data-editor-mode="view"] #editor-header .conductor-header-menu1 { border: none; }
+#editor[data-editor-mode="view"] .conductor-header-menu1 .editor-menu-item,
+#editor[data-editor-mode="edit"][data-editor-config="update"] .conductor-header-menu1 .editor-menu-item { margin: 0; }
+
+#editor[data-editor-mode="edit"] #editor-header .editor-menu-list,
+#editor[data-editor-mode="edit"][data-editor-config="update"] #editor-header .editor-menu-list,
+#editor[data-editor-mode="view"] #editor-header .conductor-header-menu1 { display: inline-block; }
+
+/* Conductor Footerメニュー切替 */
+#editor #editor-footer .editor-menu-list { display: none; }
 
 #editor[data-editor-mode="edit"] #editor-footer .editor-menu-list.edit,
 #editor[data-editor-mode="view"] #editor-footer .editor-menu-list.view,
