@@ -1739,6 +1739,7 @@ class MainLinkTabBFmt extends BFmt {
 	}
 
 	public function getSTag($rowData,$strData){
+		global $objMTS;
 		$strIdOfHtmlTag = $this->getTagIDForHandle($rowData);
 		$strTagClasses = "";
 		$strScopeAttBody = "";
@@ -1774,12 +1775,20 @@ class MainLinkTabBFmt extends BFmt {
 		}
 
 		$strTagClasses .= "\"";
-		web_log("disuse_flg:" .$rowData["DISUSE_FLAG"]);
-		if($rowData["DISUSE_FLAG"] == "1"){
-			return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\">";
-		}else{
-			return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\"><a href={$strLinkUrl} target=\"blank\">";
-		}
+
+			if($rowData["DISUSE_FLAG"] == "1"){
+				return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\">";
+			}else{
+				// 廃止ロールか判定
+				$DisUseRoleName = sprintf("/^%s\([0-9]+\)$/", preg_quote($objMTS->getSomeMessage("ITAWDCH-STD-11101")));
+				web_log("DisUseRoleName:" .$DisUseRoleName);
+				web_log("strData:" .$strData);
+				if(preg_match($DisUseRoleName,$strData) == 1) {
+				  return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\">";
+				}else{
+					return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\"><a href={$strLinkUrl} target=\"_blank\">";
+				}
+			}
 		//タグの種類の分岐----
 	}
 

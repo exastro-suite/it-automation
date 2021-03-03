@@ -176,9 +176,8 @@ Ansible(Pioneer)作業パターン
     }
 
     // Movement詳細へのリンクボタン
-    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-405080");
-    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-405090");
-    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $strLabelText = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207315");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
     $c->setDBColumn(false);
     $c->setEvent("print_table", "onClick", "newOpenWindow", array(':PATTERN_NAME'));
     $c->getOutputType('print_journal_table')->setVisible(false);
