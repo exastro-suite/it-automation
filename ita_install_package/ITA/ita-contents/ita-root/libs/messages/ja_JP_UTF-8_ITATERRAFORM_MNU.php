@@ -352,4 +352,9 @@ $ary[106330] = "ダウンロード";
 $ary[106340] = "登録済み";
 $ary[106350] = "廃止済み";
 $ary[106360] = "未登録";
+$ary[107010] = "Movement一覧";
+$ary[107020] = "Workspaces管理";
+$ary[107030] = "Movement-Module紐付";
+$ary[107040] = "PolicySet-Policy紐付管理";
+$ary[107050] = "PolicySet-Workspace紐付管理";
 ?>
