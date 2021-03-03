@@ -134,9 +134,8 @@ Ansible(Legacy(NS))プレイブック素材集
     $table->addColumn($c);
 
     // Movement詳細へのリンクボタン
-    $strLabelText1 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208010");
-    $strLabelText2 = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208020");
-    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $strLabelText = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207314");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
     $c->setDBColumn(false);
     $c->setEvent("print_table", "onClick", "newOpenWindow", array(':PLAYBOOK_MATTER_NAME'));
     $c->getOutputType('print_journal_table')->setVisible(false);

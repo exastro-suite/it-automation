@@ -108,16 +108,16 @@ EOD;
                 $COLUMN_02 = nl2br(htmlspecialchars($menu_row['MENU_ID']));
                 $COLUMN_03 = nl2br(htmlspecialchars($menu_row['MENU_NAME']));
                 $COLUMN_04 = nl2br(htmlspecialchars($menu_row['LOGIN_NECESSITY_DISP']));
-                $url = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_1__S=" .$COLUMN_02 ."&Filter1Tbl_1__E=" .$COLUMN_02;
-                $url_02 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_4=" .$COLUMN_03;
+                $url = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_02) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_02);
+                $url_02 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_4=" .str_replace(" ","%20",$COLUMN_03);
 
                 $str_temp =
 <<< EOD
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
                         <td class="number" {$BG_COLOR}>{$COLUMN_01}</td>
-                        <td class="number" {$BG_COLOR}><a href={$url} target="blank">{$COLUMN_02}</a></td>
-                        <td{$BG_COLOR}><a href={$url_02} target="blank">{$COLUMN_03}</a></td>
+                        <td class="number" {$BG_COLOR}><a href={$url} target="_blank">{$COLUMN_02}</a></td>
+                        <td{$BG_COLOR}><a href={$url_02} target="_blank">{$COLUMN_03}</a></td>
                         <td{$BG_COLOR}>{$COLUMN_04}</td>
                     </tr>
 EOD;
