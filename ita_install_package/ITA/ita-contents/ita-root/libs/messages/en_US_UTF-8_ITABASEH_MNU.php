@@ -649,4 +649,16 @@ $ary[309034] = "It is populated data set (zip).";
 $ary[309035] = "It is result data set (zip).";
 $ary[309036] = "OK";
 $ary[309037] = "Cancel";
+$ary[309038] = "Align";
+$ary[309039] = "Equal space";
+$ary[309040] = "Align horizontally to the left";
+$ary[309041] = "Align horizontally to the center";
+$ary[309042] = "Align horizontally to the right";
+$ary[309043] = "Align vertically to the top";
+$ary[309044] = "Align vertically to the center";
+$ary[309045] = "Align vertically to the bottom";
+$ary[309046] = "Distribute evenly vertically";
+$ary[309047] = "Distribute evenly horizontally";
+$ary[309048] = "Enter Conductor name.(Maximum length) 256 bytes";
+$ary[309049] = "Enter description (Maximum length) 8192 bytes";
 ?>
