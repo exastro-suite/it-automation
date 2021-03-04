@@ -42,7 +42,7 @@
                         TAB_1.NOTE,
                         {$strSelectLastUpdateTimestamp}  AS LAST_UPDATE_TIMESTAMP,
                         TAB_1.LAST_UPDATE_USER           AS LAST_UPDATE_USER_RAW,
-                        TAB_2.USERNAME_JP                AS LAST_UPDATE_USER_JP 
+                        TAB_2.USERNAME_JP                AS LAST_UPDATE_USER_JP
                 FROM   A_MENU_LIST                       TAB_1
                         LEFT JOIN A_ACCOUNT_LIST         TAB_2 ON (TAB_1.LAST_UPDATE_USER = TAB_2.USER_ID)
                         LEFT JOIN A_MENU_GROUP_LIST      TAB_3 ON (TAB_1.MENU_GROUP_ID = TAB_3.MENU_GROUP_ID)
@@ -104,19 +104,23 @@
             else{
                 $strDispLastUpdateUser = $showTgtRow['LAST_UPDATE_USER_JP'];
             }
-            
+
             $COLUMN_00 = nl2br($strDisuseFlagShow);
             $COLUMN_01 = nl2br(htmlspecialchars($showTgtRow['MENU_ID']));
             $COLUMN_02 = nl2br(htmlspecialchars($showTgtRow['MENU_GROUP_ID']));
             $COLUMN_03 = nl2br(htmlspecialchars($showTgtRow['MENU_GROUP_NAME']));
+            if( $showTgtRow['MG_DISUSE_FLAG'] == '1' ){
+              $COLUMN_02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . $COLUMN_02 . ')';
+              $COLUMN_03 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . $COLUMN_02 . ')';
+            }
             $COLUMN_04 = nl2br(htmlspecialchars($showTgtRow['MENU_NAME']));
             $COLUMN_05 = nl2br(htmlspecialchars($showTgtRow['LOGIN_NECESSITY_DISP']));
             $COLUMN_06 = nl2br(htmlspecialchars($showTgtRow['DISP_SEQ']));
             $COLUMN_07 = nl2br(htmlspecialchars($showTgtRow['NOTE']));
             $COLUMN_08 = nl2br(htmlspecialchars($showTgtRow['LAST_UPDATE_TIMESTAMP']));
             $COLUMN_09 = nl2br(htmlspecialchars($strDispLastUpdateUser));
-            
-            $output_str .= 
+
+            $output_str .=
 <<< EOD
             <div class="fakeContainer_Yobi0">
             <table id="DbTable_Yobi0">
@@ -156,13 +160,13 @@ EOD;
     catch (Exception $e){
         // エラーフラグをON
         $error_flag = 1;
-        
+
         $tmpErrMsgBody = $e->getMessage();
         dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-        
+
         // DBアクセス事後処理
         if ( isset($objQuery) )    unset($objQuery);
-        
+
         web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody)));
     }
 

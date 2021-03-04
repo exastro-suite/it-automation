@@ -55,7 +55,7 @@ Ansible（Legacy）作業パターン詳細
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
     $url = "01_browse.php?no=2100020103&filter=on&Filter1Tbl_2=";
-    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208030"),'E_ANSIBLE_LNS_PATTERN','PATTERN_ID','PATTERN_NAME',$url,false,false,'',array('OrderByThirdColumn'=>'PATTERN_ID'));
+    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208030"),'E_ANSIBLE_LNS_PATTERN','PATTERN_ID','PATTERN_NAME',$url,false,false,'','',array('OrderByThirdColumn'=>'PATTERN_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208040"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('E_ANSIBLE_LNS_PATTERN_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -66,7 +66,7 @@ Ansible（Legacy）作業パターン詳細
     $table->addColumn($c);
 
     $url = "01_browse.php?no=2100020104&filter=on&Filter1Tbl_2=";
-    $c = new LinkIDColumn('PLAYBOOK_MATTER_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208050"),'D_ANSIBLE_LNS_PLAYBOOK','PLAYBOOK_MATTER_ID','PLAYBOOK_MATTER_NAME',$url,false,false,'');
+    $c = new LinkIDColumn('PLAYBOOK_MATTER_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208050"),'D_ANSIBLE_LNS_PLAYBOOK','PLAYBOOK_MATTER_ID','PLAYBOOK_MATTER_NAME',$url,false,false,'','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-208060"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_ANSIBLE_LNS_PLAYBOOK_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
