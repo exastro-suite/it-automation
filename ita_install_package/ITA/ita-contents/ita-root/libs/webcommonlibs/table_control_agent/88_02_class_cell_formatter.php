@@ -1700,10 +1700,11 @@ class MainLinkTabBFmt extends BFmt {
 	protected $strLinkUrl;
 	protected $urlOption;
 	protected $zeroPadding;
+	protected $urlTartgetID;
 
 	//----ここから継承メソッドの上書き処理
 
-	public function __construct($url="", $urlOption=false, $zeroPadding=false){
+	public function __construct($url="", $urlOption=false, $zeroPadding=false, $urlTartgetID=""){
 		parent::__construct();
 		$this->setTableDataLikeHeaderAgent(false);
 		$this->setTagClassesAgent(array());
@@ -1719,6 +1720,7 @@ class MainLinkTabBFmt extends BFmt {
 		$this->setLinkUrl($url);
 		$this->urlOption = $urlOption;
 		$this->zeroPadding = $zeroPadding;
+		$this->urlTartgetID = $urlTartgetID;
 	}
 
 	public function getData($rowData,$aryVariant){
@@ -1758,10 +1760,18 @@ class MainLinkTabBFmt extends BFmt {
 		}
 
 		//リンク先のURL作成
-		if($this->urlOption === true){
-			$param = mb_substr(strstr($strData, ':'), 1);
-		}else{
-			$param = $strData;
+		if($this->urlTartgetID == ""){
+			if($this->urlOption === true){
+				$param = mb_substr(strstr($strData, ':'), 1);
+			}else{
+				$param = $strData;
+			}
+	  }else{
+			if($this->urlOption === true){
+				$param = mb_substr(strstr($rowData[$this->urlTartgetID], ':'), 1);
+			}else{
+				$param = $rowData[$this->urlTartgetID];
+			}
 		}
 		if($this->zeroPadding === true){
 			$param = str_pad($param, 10, '0', STR_PAD_LEFT);
@@ -1781,8 +1791,6 @@ class MainLinkTabBFmt extends BFmt {
 			}else{
 				// 廃止ロールか判定
 				$DisUseRoleName = sprintf("/^%s\([0-9]+\)$/", preg_quote($objMTS->getSomeMessage("ITAWDCH-STD-11101")));
-				web_log("DisUseRoleName:" .$DisUseRoleName);
-				web_log("strData:" .$strData);
 				if(preg_match($DisUseRoleName,$strData) == 1) {
 				  return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\">";
 				}else{

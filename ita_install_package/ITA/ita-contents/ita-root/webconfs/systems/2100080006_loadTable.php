@@ -79,9 +79,8 @@ Policy素材集
     $table->addColumn($c);
 
     // PolicySet-Policy紐付管理へのリンクボタン
-    $strLabelText1 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103330");
-    $strLabelText2 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103330");
-    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107040");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
     $c->setDBColumn(false);
     $c->getOutputType('print_journal_table')->setVisible(false);
     $c->setEvent("print_table", "onClick", "newOpenWindow", array(':POLICY_NAME'), true);
