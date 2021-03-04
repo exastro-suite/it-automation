@@ -66,7 +66,7 @@ Ansible(Legacy)作業対象ホスト管理
     $table->addColumn($c);
 
     $url = "01_browse.php?no=2100020105&filter=on&Filter1Tbl_2=";
-    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-205050"),'E_ANSIBLE_LNS_PATTERN','PATTERN_ID','PATTERN',$url,true,false,'',array('OrderByThirdColumn'=>'PATTERN_ID'));
+    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-205050"),'E_ANSIBLE_LNS_PATTERN','PATTERN_ID','PATTERN',$url,true,false,'','',array('OrderByThirdColumn'=>'PATTERN_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-205060"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('E_ANSIBLE_LNS_PATTERN_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');

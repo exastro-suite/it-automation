@@ -352,4 +352,9 @@ $ary[106330] = "Download";
 $ary[106340] = "Registered";
 $ary[106350] = "Discarded";
 $ary[106360] = "Unregistered";
+$ary[107010] = "Movement list";
+$ary[107020] = "Workspaces list";
+$ary[107030] = "Movement-Module link";
+$ary[107040] = "PolicySet-Policy link list";
+$ary[107050] = "PolicySet-Workspace link list";
 ?>

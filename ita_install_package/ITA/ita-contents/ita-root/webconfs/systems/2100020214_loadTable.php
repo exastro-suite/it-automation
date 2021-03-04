@@ -167,7 +167,7 @@ Ansible（Pioneer）代入値自動登録設定
             // メニューID
             ////////////////////////////////////////////////////////////
             $url = "01_browse.php?no=";
-            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902010"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902010"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902011"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
@@ -208,7 +208,8 @@ Ansible（Pioneer）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニュー名
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902012"), 'A_MENU_LIST', 'MENU_ID', 'MENU_NAME');
+            $url = "01_browse.php?no=";
+            $c = new LinkIDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902012"), 'A_MENU_LIST', 'MENU_ID', 'MENU_NAME', $url, false, true, 'MENU_ID');
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1902013"));
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);

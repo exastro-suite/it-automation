@@ -106,13 +106,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     // 入力用メニューグループ
     $url = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_2=";
-    $c = new LinkIDColumn('MENUGROUP_FOR_INPUT',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102011"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME',$url,false,false,'');
+    $c = new LinkIDColumn('MENUGROUP_FOR_INPUT',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102011"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME',$url,false,false,'','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102012"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
     // 代入値自動登録用メニューグループ
-    $c = new LinkIDColumn('MENUGROUP_FOR_SUBST',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102013"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME',$url,false,false,'');
+    $c = new LinkIDColumn('MENUGROUP_FOR_SUBST',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102013"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME',$url,false,false,'','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102014"));//エクセル・ヘッダでの説明
     $c->setRequired(false);
     $objVldt = new MgForSubstValidator($c);
@@ -120,7 +120,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
     // 参照用メニューグループ
-    $c = new LinkIDColumn('MENUGROUP_FOR_VIEW',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102015"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME',$url,false,false,'');
+    $c = new LinkIDColumn('MENUGROUP_FOR_VIEW',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102015"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME',$url,false,false,'','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102016"));//エクセル・ヘッダでの説明
     $c->setRequired(false);
     $objVldt = new MgForViewValidator($c);

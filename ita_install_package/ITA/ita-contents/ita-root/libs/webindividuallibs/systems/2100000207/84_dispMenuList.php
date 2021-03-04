@@ -96,6 +96,7 @@
                 <table id="DbTable_Yobi3">
                     <tr class="defaultExplainRow">
                         <th scope="col" onClick="tableSort(1, this, 'DbTable_Yobi3_data', 0, nsort);"  class="sort" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1069053")}</span></th>
+                        <th scope="col" onClick="tableSort(1, this, 'DbTable_Yobi3_data', 1       );"  class="sort" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1030101")}</span></th>
                         <th scope="col" onClick="tableSort(1, this, 'DbTable_Yobi3_data', 1       );"  class="sort" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1030201")}</span></th>
                         <th scope="col" onClick="tableSort(1, this, 'DbTable_Yobi3_data', 2, nsort);"  class="sort" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040901")}</span></th>
                         <th scope="col" onClick="tableSort(1, this, 'DbTable_Yobi3_data', 3, nsort);"  class="sort" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040101")}</span></th>
@@ -111,6 +112,7 @@ EOD;
                 $num_rows += 1;
                 // 項目生成
                 $COLUMN_00 = $temp_no;
+                $COLUMN_07 = nl2br(htmlspecialchars($menu_row['MENU_GROUP_ID']));
                 $COLUMN_01 = nl2br(htmlspecialchars($menu_row['MENU_GROUP_NAME']));
                 $COLUMN_02 = nl2br(htmlspecialchars($menu_row['DISP_SEQ']));
                 $COLUMN_03 = nl2br(htmlspecialchars($menu_row['MENU_ID']));
@@ -120,10 +122,12 @@ EOD;
                 $url = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_2=" .str_replace(" ","%20",$COLUMN_01);
                 $url_02 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_03) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_03);
                 $url_03 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_4=" .str_replace(" ","%20",$COLUMN_04);
+                $url_04 = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_07) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_07);
                 $str_temp =
 <<< EOD
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
+                        <td{$BG_COLOR}><a href={$url_04} target="_blank">{$COLUMN_07}</a></td>
                         <td{$BG_COLOR}><a href={$url} target="_blank">{$COLUMN_01}</a></td>
                         <td class="number" {$BG_COLOR}>{$COLUMN_02}</td>
                         <td class="number" {$BG_COLOR}><a href={$url_02} target="_blank">{$COLUMN_03}</a></td>

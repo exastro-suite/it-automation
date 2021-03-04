@@ -140,9 +140,8 @@ Terraform作業パターン
     $table->addColumn($cg);
 
     // Movement-Module紐付管理へのリンクボタン
-    $strLabelText1 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103530");
-    $strLabelText2 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103540");
-    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText1, $strLabelText2, 'dummy');
+    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107030");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
     $c->setDBColumn(false);
     $c->getOutputType('print_journal_table')->setVisible(false);
     $c->setEvent("print_table", "onClick", "newOpenWindow", array(':PATTERN_NAME'), true);
