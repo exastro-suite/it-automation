@@ -65,7 +65,7 @@ Ansible（Legacy Role）作業パターン詳細
 
 
     $url = "01_browse.php?no=2100020306&filter=on&Filter1Tbl_2=";
-    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208030"),'E_ANSIBLE_LRL_PATTERN','PATTERN_ID','PATTERN',$url,true,false,'',array('OrderByThirdColumn'=>'PATTERN_ID'));
+    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208030"),'E_ANSIBLE_LRL_PATTERN','PATTERN_ID','PATTERN',$url,true,false,'','',array('OrderByThirdColumn'=>'PATTERN_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208040"));//エクセル・ヘッダでの説明
 
     $c->setRequired(true);//登録/更新時には、入力必須
@@ -100,7 +100,7 @@ Ansible（Legacy Role）作業パターン詳細
              'D_ANSIBLE_LRL_ROLE_PKG_LIST',
              'ROLE_PACKAGE_ID',
              'ROLE_PACKAGE_NAME_PULLDOWN',
-             $url,true,false,'');
+             $url,true,false,'','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1208046"));//エクセル・ヘッダでの説明
 
     $c->setEvent('update_table', 'onchange', 'package_upd');

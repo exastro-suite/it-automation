@@ -1909,7 +1909,7 @@ class LinkIDColumn extends IDColumn {
 	//----ここから継承メソッドの上書き処理
 
 	//OVR[ignored]::[1]
-	function __construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $strLinkUrl, $urlOption=false, $zeroPadding=false, $masterTableIdForInput="", $aryEtcetera=array()){
+	function __construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $strLinkUrl, $urlOption=false, $zeroPadding=false, $urlTartgetID="", $masterTableIdForInput="", $aryEtcetera=array()){
 		global $g;
 		parent::__construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster);
 
@@ -1965,7 +1965,7 @@ class LinkIDColumn extends IDColumn {
 
 		$this->setMultiple("filter_table",true);
 
-		$outputType = new IDOutputType(new SortedTabHFmt(), new MainLinkTabBFmt($strLinkUrl, $urlOption, $zeroPadding));
+		$outputType = new IDOutputType(new SortedTabHFmt(), new MainLinkTabBFmt($strLinkUrl, $urlOption, $zeroPadding, $urlTartgetID));
 		$this->setOutputType("print_table", $outputType);
 		$outputType = new IDOutputType(new TabHFmt(), new TextTabBFmt());
 		$this->setOutputType("print_journal_table", $outputType);
