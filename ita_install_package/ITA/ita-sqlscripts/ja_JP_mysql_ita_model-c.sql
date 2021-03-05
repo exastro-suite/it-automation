@@ -801,6 +801,22 @@ FROM
              WHERE DISUSE_FLAG = '0'
             ) TAB_B ON ( TAB_A.ANSTWR_HOST_ID = TAB_B.ANSTWR_HOST_ID );
 
+CREATE VIEW D_TOWER_LOGIN_AUTH_TYPE AS
+SELECT 
+  *
+FROM 
+  B_LOGIN_AUTH_TYPE
+WHERE 
+  LOGIN_AUTH_TYPE_ID <= 4;
+
+CREATE VIEW D_TOWER_LOGIN_AUTH_TYPE_JNL AS
+SELECT 
+  *
+FROM 
+  B_LOGIN_AUTH_TYPE_JNL
+WHERE 
+  LOGIN_AUTH_TYPE_ID <= 4;
+
 -- *****************************************************************************
 -- ***  Ansible Common View *****                                            ***
 -- *****************************************************************************

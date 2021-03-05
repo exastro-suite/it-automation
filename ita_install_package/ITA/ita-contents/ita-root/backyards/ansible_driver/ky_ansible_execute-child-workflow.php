@@ -547,7 +547,8 @@
                                          $hostlist,
                                          $hostprotocollist,
                                          $hostostypelist,
-                                         $hostinfolist);
+                                         $hostinfolist,
+                                         $in_winrm_id);
         if($ret <> true){
             // 例外処理へ
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00010000"));
@@ -1906,6 +1907,7 @@
 
             // OSコマンドでzip圧縮する
             $tmp_str_command = "cd " . $in_zip_data_source_dir . "; zip -r " . $in_zip_temp_save_dir . "/" . $in_zip_file_name . " .";
+            $tmp_str_command .= " -x ssh_key_files\/* -x winrm_ca_files\/*";
 
             shell_exec( $tmp_str_command );
 
