@@ -809,7 +809,10 @@
                     if ($exeCheckAuth) {
                         $auth = null;
                         global $objDBCA;
-                        $ACRCM_id = $strMenuIdNumeric;
+                        $ACRCM_id = "";
+                        if ( isset($strMenuIdNumeric) && !empty($strMenuIdNumeric)) {
+                            $ACRCM_id = $strMenuIdNumeric;
+                        }
                         saLoginExecute($auth, $objDBCA, $ACRCM_id, false);
 
                         if (!$auth->checkAuth()) {
