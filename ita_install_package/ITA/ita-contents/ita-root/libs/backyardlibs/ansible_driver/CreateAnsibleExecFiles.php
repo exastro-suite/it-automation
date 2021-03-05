@@ -193,15 +193,6 @@ class CreateAnsibleExecFiles {
     // WINRM接続ポート デフォルト値
     const LC_WINRM_PORT                    = 5985;
 
-    // 機器一覧 パスワード管理フラグ(LOGIN_PW_HOLD_FLAG)
-    const LC_LOGIN_PW_HOLD_FLAG_OFF           = '0';         // パスワード管理なし
-    const LC_LOGIN_PW_HOLD_FLAG_ON            = '1';         // パスワード管理あり
-    const LC_LOGIN_PW_HOLD_FLAG_DEF           = '0';         // デフォルト値 パスワード管理なし
-    // 機器一覧 Ansible認証方式(LOGIN_AUTH_TYPE)
-    const LC_LOGIN_AUTH_TYPE_KEY              = '1';         // 鍵認証
-    const LC_LOGIN_AUTH_TYPE_PW               = '2';         // パスワード認証
-    const LC_LOGIN_AUTH_TYPE_DEF              = '1';         // デフォルト値 鍵認証
-
     //ローカル変数定義
     private $lv_Ansible_driver_id;                 //Ansibleドライバ(legacy/pioneer)区分
     private $lv_hostaddress_type;
@@ -1748,53 +1739,62 @@ class CreateAnsibleExecFiles {
                 $hosts_extra_args = str_replace('<<<__TAB__>>>' , "\n          ",$hosts_extra_args);
             }
 
+            $indento_sp_host = str_pad( " ", 8 , " ", STR_PAD_LEFT );
+            $indento_sp_param = str_pad( " ", 10, " ", STR_PAD_LEFT );
+
             $param = "";
             $pass = "";
             $port = "";
+
             // sshの接続パラメータを作成する。
-            if( (($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
-                 ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)) &&
-                 // 対象ホストがwindowsの場合
-                (($this->lv_winrm_id == 1) ||
-                 // パスワード認証の場合
-                 ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_PW) ||
-                 ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_KEY)) ){
-                // ユーザー名
+            switch($this->getAnsibleDriverID()) {
+            case DF_LEGACY_DRIVER_ID:
+            case DF_LEGACY_ROLE_DRIVER_ID:
+                // ユーザー設定
                 if($ina_hostinfolist[$host_name]['LOGIN_USER'] != self::LC_ANS_UNDEFINE_NAME)
                 {
                     $param = "ansible_ssh_user: " . $ina_hostinfolist[$host_name]['LOGIN_USER'];
                 }
-                // パスワードが設定されているか(windowsの場合に有効)
-                // パスワード
-                if(($ina_hostinfolist[$host_name]['LOGIN_PW'] != self::LC_ANS_UNDEFINE_NAME) &&
-                   ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_PW))
-                {
-                    $indento_sp12 = str_pad( " ", 24 , " ", STR_PAD_LEFT );
 
-                    $make_vaultpass = $this->makeAnsibleVaultPassword($this->getAnsibleExecuteUser(),
-                                                                      $ina_hostinfolist[$host_name]['LOGIN_PW'],
-                                                                      $ina_hostinfolist[$host_name]['LOGIN_PW_ANSIBLE_VAULT'],
-                                                                      $indento_sp12,
-                                                                      $ina_hostinfolist[$host_name]['SYSTEM_ID']);
-                    if($make_vaultpass === false) {
-                        return false;
+                // パスワード設定
+                switch($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE']) {
+                case DF_LOGIN_AUTH_TYPE_PW:
+                case DF_LOGIN_AUTH_TYPE_PW_WINRM:
+                    // パスワードが設定されているか
+                    if($ina_hostinfolist[$host_name]['LOGIN_PW'] != self::LC_ANS_UNDEFINE_NAME) {
+                        $indento_sp12 = str_pad( " ", 24 , " ", STR_PAD_LEFT );
+
+                        $make_vaultpass = $this->makeAnsibleVaultPassword($this->getAnsibleExecuteUser(),
+                                                                          $ina_hostinfolist[$host_name]['LOGIN_PW'],
+                                                                          $ina_hostinfolist[$host_name]['LOGIN_PW_ANSIBLE_VAULT'],
+                                                                          $indento_sp12,
+                                                                          $ina_hostinfolist[$host_name]['SYSTEM_ID']);
+                        if($make_vaultpass === false) {
+                            return false;
+                        }
+                        $pass = "ansible_ssh_pass: " . $make_vaultpass;
                     }
-                    $pass = "ansible_ssh_pass: " . $make_vaultpass;
+                    break;
                 }
-                // 対象ホストがwindowsの場合かつPioneer以外
-                if( (($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
-                 ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)) &&
-                 ($this->lv_winrm_id == 1) ) {
+
+                // Winrm接続情報
+                switch($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE']) {
+                case DF_LOGIN_AUTH_TYPE_PW_WINRM:
                     // WINRM接続プロトコルよりポート番号取得
                     $port = "ansible_ssh_port: " . $ina_hostinfolist[$host_name]['WINRM_PORT'];
-                    $port = $port . "\n" . "          ansible_connection: winrm";
+                    //$port = $port . "\n" . "          ansible_connection: winrm";
+                    $port .= "\n" . $indento_sp_param . "ansible_connection: winrm";
+                    break;
                 }
+                break;
             }
 
             $ssh_key_file = '';
-            // 認証方式が鍵認証でWinRM接続でないか判定
-            if(($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_KEY ) &&
-               ($this->lv_winrm_id != 1)){
+            $win_ca_file  = '';
+            // 秘密鍵ファイルが必要な認証方式か判定
+            switch($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE']) {
+            case DF_LOGIN_AUTH_TYPE_KEY:
+            case DF_LOGIN_AUTH_TYPE_KEY_PP_USE:
                 if(strlen(trim($ina_hostinfolist[$host_name]['SSH_KEY_FILE'])) != 0){
                     // 機器一覧にSSH鍵認証ファイルが登録されている場合はSSH鍵認証ファイルをinディレクトリ配下にコピーする。
                     $ret = $this->CreateSSH_key_file($ina_hostinfolist[$host_name]['SYSTEM_ID'],
@@ -1828,22 +1828,22 @@ class CreateAnsibleExecFiles {
                         return false;
                     }
 
-
-                      // Pioneerではssh-agentは使用しない
-                      if($ina_hostinfolist[$host_name]["SSH_KEY_FILE_PASSPHRASE"] != "") {
-                          $CreateSSHAgentConfigInfoFile = true;
-                          $SSHAgentConfigInfoFile = $this->getTemporary_file_Dir()  . '/' . self::LC_ANS_SSHAGENTCONFIG_FILE;
-                          ///////////////////////////////////////////////////
-                          // ssh-agentの設定に必要な情報を一時ファイルに出力
-                          ///////////////////////////////////////////////////
-                          if($this->CreateSSHAgentConfigInfoFile($SSHAgentConfigInfoFile,
-                                                                 $ina_hostinfolist[$host_name]["HOSTNAME"],
-                                                                 $ssh_key_file_path,
-                                                                 $ina_hostinfolist[$host_name]["SSH_KEY_FILE_PASSPHRASE"]) === false) {
-                              return false;
-                          }
-                      }
-
+                    // 秘密鍵認証の場合にssh-agntでパスフレーズの入力を省略する為の情報生成
+                    if($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == DF_LOGIN_AUTH_TYPE_KEY_PP_USE) {
+                        if($ina_hostinfolist[$host_name]["SSH_KEY_FILE_PASSPHRASE"] != "") {
+                            $CreateSSHAgentConfigInfoFile = true;
+                            $SSHAgentConfigInfoFile = $this->getTemporary_file_Dir()  . '/' . self::LC_ANS_SSHAGENTCONFIG_FILE;
+                            ///////////////////////////////////////////////////
+                            // ssh-agentの設定に必要な情報を一時ファイルに出力
+                            ///////////////////////////////////////////////////
+                            if($this->CreateSSHAgentConfigInfoFile($SSHAgentConfigInfoFile,
+                                                                   $ina_hostinfolist[$host_name]["HOSTNAME"],
+                                                                   $ssh_key_file_path,
+                                                                   $ina_hostinfolist[$host_name]["SSH_KEY_FILE_PASSPHRASE"]) === false) {
+                                return false;
+                            }
+                        }
+                    }
 
                     if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
                        ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)){
@@ -1854,11 +1854,8 @@ class CreateAnsibleExecFiles {
                         $ina_pioneer_sshkeyfilelist[$host_name]=$ssh_key_file_path;
                     }
                 }
-            }
-
-            $win_ca_file = '';
-            // WinRM接続か判定
-            if($this->lv_winrm_id == 1) {
+                break;
+            case DF_LOGIN_AUTH_TYPE_PW_WINRM:
                 if(strlen(trim($ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'])) != 0){
                     // 機器一覧にサーバー証明書ファイルが登録されている場合はサーバー証明書ファイルをinディレクトリ配下にコピーする
                     $ret = $this->CreateWIN_cs_file($ina_hostinfolist[$host_name]['SYSTEM_ID'],
@@ -1896,48 +1893,59 @@ class CreateAnsibleExecFiles {
                         $win_ca_file = 'ansible_winrm_ca_trust_path: ' . $win_ca_file_path;
                     }
                 }
+                break;
             }
              
             $now_host_name = $ina_hostinfolist[$host_name]['HOSTNAME'];
             // ホストアドレス方式がホスト名方式の場合はホスト名をhostsに登録する。
             if($this->lv_hostaddress_type == 2) {       
-                $host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n";
+                //$host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n";
+                $host_name  = $indento_sp_host . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n";
             } 
             else {
                 // ホストアドレス方式がIPアドレスの場合   
-                $host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n" . '          ansible_ssh_host: ' . $host_name . "\n";     
+                //$host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n" . '          ansible_ssh_host: ' . $host_name . "\n";     
+                $host_name  =   $indento_sp_host . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":\n" 
+                              . $indento_sp_param . 'ansible_ssh_host: ' . $host_name . "\n";     
             }
 
             // Pioneerでホスト名がlocalhostの場合に、インベントファイルに
             // ansible_connection: localを追加する
             if(($now_host_name == 'localhost') && 
                ($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID)) {
-                 $host_name .= "          ansible_connection: local\n";
+                 //$host_name .= "          ansible_connection: local\n";
+                 $host_name .= $indento_sp_param . "ansible_connection: local\n";
             }
              
              if(strlen($param) !== 0) {
-                 $host_name .= "          $param" . "\n";
+                 //$host_name .= "          $param" . "\n";
+                 $host_name .= $indento_sp_param . $param . "\n";
              }
              if(strlen($pass) !== 0) {
-                 $host_name .= "          $pass" . "\n";
+                 //$host_name .= "          $pass" . "\n";
+                 $host_name .= $indento_sp_param . $pass . "\n";
              }
              if(strlen($port) !== 0) {
-                 $host_name .= "          $port" . "\n";
+                 //$host_name .= "          $port" . "\n";
+                 $host_name .= $indento_sp_param . $port . "\n";
              }
              if(strlen($ssh_key_file) !== 0) {
-                 $host_name .= "          $ssh_key_file" . "\n";
+                 //$host_name .= "          $ssh_key_file" . "\n";
+                 $host_name .= $indento_sp_param . $ssh_key_file . "\n";
              }
              if(strlen($ssh_extra_args) !== 0) {
-                 $host_name .= "          $ssh_extra_args" . "\n";
+                 //$host_name .= "          $ssh_extra_args" . "\n";
+                 $host_name .= $indento_sp_param . $ssh_extra_args . "\n";
              }
              if(strlen($hosts_extra_args) !== 0) {
-                 $host_name .= "          $hosts_extra_args" . "\n";
+                 //$host_name .= "          $hosts_extra_args" . "\n";
+                 $host_name .= $indento_sp_param . $hosts_extra_args . "\n";
              }
              if(strlen($win_ca_file) !== 0) {
-                 $host_name .= "          $win_ca_file". "\n";
+                 //$host_name .= "          $win_ca_file". "\n";
+                 $host_name .= $indento_sp_param . $win_ca_file . "\n";
              }
             
-
              if( @fputs($fd, $host_name) === false ){
                  $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55205",array(__LINE__));
                  $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -6017,6 +6025,8 @@ class CreateAnsibleExecFiles {
     //                                         WINRM_SSL_CA_FILE=>      サーバー証明書ファイル
     //                                         HOSTS_EXTRA_ARGS=>       インベントリファイル 追加パラメータ
     //                                         SSH_KEY_FILE_PASSPHRASE=>  SSH秘密鍵ファイル パスフレーズ
+    //  $in_winrm_id:          Movement一覧のwinrm接続の設定値
+    //                                "1": winrm接続選択
     // 
     // 戻り値
     //   true:   正常
@@ -6026,11 +6036,23 @@ class CreateAnsibleExecFiles {
                            &$ina_hostlist,
                            &$ina_hostprotcollist,
                            &$ina_hostostypelist,
-                           &$ina_hostinfolist)
+                           &$ina_hostinfolist,
+                           $in_winrm_id)
     {
         global $log_output_dir;
         global $log_file_prefix;
         global $log_level;
+        global $root_dir_path;
+
+        if ( empty($root_dir_path) ){
+            $root_dir_temp = array();
+            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+            $root_dir_path = $root_dir_temp[0] . "ita-root";
+        }
+        
+        // 共通モジュールをロード
+        require_once ($root_dir_path . "/libs/commonlibs/common_required_check.php");
+
         // C_STM_LISTに対するDISUSE_FLAG = '0'の
         // 条件はSELECT文に入れない。
         $sql = "SELECT \n" .
@@ -6052,6 +6074,7 @@ class CreateAnsibleExecFiles {
                "  TBL_2.LOGIN_PW_ANSIBLE_VAULT, \n".
                "  TBL_2.CREDENTIAL_TYPE_ID, \n".
                "  TBL_2.SSH_KEY_FILE_PASSPHRASE, \n".
+               "  TBL_2.PROTOCOL_ID, \n".
                "  ( \n" .
                "    SELECT \n" .
                "      TBL_3.PROTOCOL_NAME \n" .
@@ -6111,6 +6134,10 @@ class CreateAnsibleExecFiles {
         $ina_hostinfolist = array();
         while ( $row = $objQuery->resultFetch() ){
             if($row['DISUSE_FLAG']=='0'){
+
+                // ドライバ区分退避
+                $driver_id = $this->getAnsibleDriverID();
+
                 if(strlen($row['IP_ADDRESS'])==0){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56205",
                                                                array($row['SYSTEM_ID']));
@@ -6128,91 +6155,61 @@ class CreateAnsibleExecFiles {
                     return false;
                 }
 
-                // 認証方式の設定値確認
-                $driver_id = $this->getAnsibleDriverID();
-                switch($this->getAnsibleDriverID()) {
-                case DF_PIONEER_DRIVER_ID:
-                    break;
-                case DF_LEGACY_DRIVER_ID:
-                case DF_LEGACY_ROLE_DRIVER_ID:
-                    if(strlen($row['LOGIN_AUTH_TYPE']) === 0){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70040",
-                                                                   array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-
-                        unset($objQuery);
-                        return false;
-                    }
-                    break;
-                }
-                $login_auth_type = '';
-                if(strlen($row['LOGIN_AUTH_TYPE']) === 0){
-                    // 未設定なのでデフォルト値設定
-                    $login_auth_type = self::LC_LOGIN_AUTH_TYPE_DEF;  // 鍵認証
-                }
-                else{
-                    switch($row['LOGIN_AUTH_TYPE']){
-                    case self::LC_LOGIN_AUTH_TYPE_KEY:               // 鍵認証
-                    case self::LC_LOGIN_AUTH_TYPE_PW:                // パスワード認証
-                        $login_auth_type = $row['LOGIN_AUTH_TYPE'];
-                        break;
-                    }
-                }
-
-                // パスワード管理フラグの設定値確認
-                $pw_hold_flag = '';
-                if(@strlen($row['LOGIN_PW_HOLD_FLAG']) === 0){
-                    // 未設定なのでデフォルト値設定
-                    $pw_hold_flag = self::LC_LOGIN_PW_HOLD_FLAG_DEF;  // パスワード管理なし
-                }
-                else{
-                    switch($row['LOGIN_PW_HOLD_FLAG']){
-                    case self::LC_LOGIN_PW_HOLD_FLAG_ON: // パスワード管理あり
-                        $pw_hold_flag = $row['LOGIN_PW_HOLD_FLAG']; 
-                        break;
-                    }
-                }
-                if($pw_hold_flag == ''){
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70041",
-                                                               array($row['IP_ADDRESS']));
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-    
+                // 機器一覧の認証方式に応じた必須入力をチェック
+                $errMsgParameterAry = array();
+                $errMsgParameterAry = array($row['HOSTNAME']);
+                $chkobj = new AuthTypeParameterRequiredCheck();
+                $retStrBody = $chkobj->DeviceListAuthTypeRequiredParameterCheck($chkobj->chkType_WorkflowExec_DevaiceList,
+                                                                                $this->lv_objMTS,$errMsgParameterAry,
+                                                                                $row['LOGIN_AUTH_TYPE'],
+                                                                                $row['LOGIN_USER'],
+                                                                                $row['LOGIN_PW_HOLD_FLAG'],
+                                                                                $row['LOGIN_PW'],
+                                                                                $row['CONN_SSH_KEY_FILE'],
+                                                                                $row['SSH_KEY_FILE_PASSPHRASE'],
+                                                                                $this->getAnsibleDriverID(),
+                                                                                $row['PROTOCOL_ID']);
+                if($retStrBody !== true) {
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$retStrBody);
                     unset($objQuery);
                     return false;
                 }
-                // 認証方式がパスワード認証の場合に管理パスワードがありでパスワードが設定されているか判定
-                if($login_auth_type === self::LC_LOGIN_AUTH_TYPE_PW){
-                    // パスワード管理ありの判定
-                    if($pw_hold_flag != self::LC_LOGIN_PW_HOLD_FLAG_ON){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70042",
-                                                               array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-    
-                        unset($objQuery);
-                        return false;
-                    }   
-                    // パスワード登録の判定
-                    if(strlen($row['LOGIN_PW'])==0){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70043",
-                                                               array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-    
-                        unset($objQuery);
-                        return false;
-                    }
-                }
-                // パスワード管理ありでパスワードが設定されているか判定
-                // パスワード管理ありの判定
-                if($pw_hold_flag == self::LC_LOGIN_PW_HOLD_FLAG_ON){
-                    // パスワード登録の判定
-                    if(strlen($row['LOGIN_PW'])==0){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70043",
-                                                                   array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
-                        unset($objQuery);
-                        return false;
-                    }
+                // ログインユーザーID退避
+                $login_user = $row['LOGIN_USER'];
+
+                // 認証方式の設定値確認
+                $login_auth_type = $row['LOGIN_AUTH_TYPE'];
+
+                // Movement一覧でwinrm接続が選択されている場合
+                // 機器一覧の認証方式がパスワード認証(winrm)か判定
+                if(($in_winrm_id == "1") && ($login_auth_type != DF_LOGIN_AUTH_TYPE_PW_WINRM)) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56214",
+                                                                array($row['IP_ADDRESS']));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    unset($objQuery);
+                    return false;
+                }
+
+                // Movement一覧でwinrm接続が選択されていない場合
+                // 機器一覧の認証方式がパスワード認証(winrm)以外か判定
+                if(($in_winrm_id != "1") && ($login_auth_type == DF_LOGIN_AUTH_TYPE_PW_WINRM)) {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56215",
+                                                                array($row['IP_ADDRESS']));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    unset($objQuery);
+                    return false;
+                }
+
+                // パスワード管理フラグの設定値退避
+                $pw_hold_flag = $row['LOGIN_PW_HOLD_FLAG'];
+                if(@strlen($row['LOGIN_PW_HOLD_FLAG']) === 0){
+                    // 未設定なのでデフォルト値設定
+                    $pw_hold_flag = DF_LOGIN_PW_HOLD_FLAG_DEF;  // パスワード管理なし
+                }
+
+                // パスワード管理ありでパスワード退避
+                if($pw_hold_flag == DF_LOGIN_PW_HOLD_FLAG_ON){
                     // パスワード退避
                     $login_pass = ky_decrypt($row['LOGIN_PW']);
                
@@ -6222,6 +6219,7 @@ class CreateAnsibleExecFiles {
                     $login_pass = self::LC_ANS_UNDEFINE_NAME;
                 }
                         
+                // Pioneerプロトコル退避
                 switch($this->getAnsibleDriverID()){
                 case DF_LEGACY_DRIVER_ID:
                 case DF_LEGACY_ROLE_DRIVER_ID:
@@ -6231,32 +6229,10 @@ class CreateAnsibleExecFiles {
                     else{
                         $protocol = $row['PROTOCOL_NAME'];
                     }
-                    if(strlen($row['LOGIN_USER'])==0){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56203",
-                                                                   array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-    
-                        unset($objQuery);
-                        return false;
-                    }
-                    $login_user = $row['LOGIN_USER'];
                     break;
                 case DF_PIONEER_DRIVER_ID:
-                    if($row['PROTOCOL_NAME']===null){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56104",
-                                                                   array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-        
-                        unset($objQuery);
-                        return false;
-                    }
                     $protocol = $row['PROTOCOL_NAME'];
-                    if(strlen($row['LOGIN_USER'])==0){
-                        $login_user = self::LC_ANS_UNDEFINE_NAME;
-                    }
-                    else{
-                        $login_user = $row['LOGIN_USER'];
-                    }
+
                     if(strlen($row['OS_TYPE_ID'])==0){
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56204",
                                                                    array($row['IP_ADDRESS']));
@@ -6306,6 +6282,7 @@ class CreateAnsibleExecFiles {
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_PW']           = $login_pass;       //パスワード
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_PW_HOLD_FLAG'] = $pw_hold_flag;     //パスワード管理フラグ
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_AUTH_TYPE']    = $login_auth_type;  //Ansible認証方式
+
                 $ina_hostinfolist[$row['IP_ADDRESS']]['WINRM_PORT']         = $winrm_port;       //WINRM接続プロトコル
                 $ina_hostinfolist[$row['IP_ADDRESS']]['OS_TYPE_ID']         = $row['OS_TYPE_ID'];//OS種別
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_PW_ANSIBLE_VAULT'] = $row['LOGIN_PW_ANSIBLE_VAULT']; //ansible-vaultで暗号化したパスワード
