@@ -33,8 +33,8 @@ require_once($root_dir_path . "/libs/commonlibs/common_php_functions.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/AnsibleTowerCommonLib.php");   
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/setenv.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/MessageTemplateStorageHolder.php");
-
 require_once($root_dir_path . '/libs/commonlibs/common_ansible_vault.php');
+require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php');
 
 $rest_api_command = $root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/";
 require_once($rest_api_command . "AnsibleTowerRestApiProjects.php");
@@ -424,13 +424,13 @@ class ExecuteDirector {
         $src_path  = $this->getMaterialsTransferSourcePath($ifInfoRow['ANSIBLE_STORAGE_PATH_LNX'],$execution_no);
         $dest_path = $this->getMaterialsTransferDestinationPath($execution_no);
 
-        $tmp_log_file = '/tmp/.ky_ansible_materials_transfer_' . getmypid() . ".log";
+        $tmp_log_file = '/tmp/.ky_ansible_materials_transfer_logfile_' . getmypid() . ".log";
         @unlink($tmp_log_file);
 
         $result_code = true;
         foreach($TowerHostList as $credential) {
 
-            $tmp_TowerInfo_File = '/tmp/.ky_TowerInfoFile_' . getmypid() . ".log";
+            $tmp_TowerInfo_File = '/tmp/.ky_ansible_materials_transfer_TowerInfo_' . getmypid() . ".log";
             @unlink($tmp_TowerInfo_File);
 
             $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
@@ -458,7 +458,6 @@ class ExecuteDirector {
 
                 exec($cmd,$arry_out,$return_var);
                 if($return_var !== 0) {
-    
                     $log = file_get_contents($tmp_log_file);
                     $this->logger->error($log);
                     $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040035",array($credential['host_name']));
@@ -483,12 +482,12 @@ class ExecuteDirector {
 
         $dest_path = $this->getMaterialsTransferDestinationPath($execution_no);
 
-        $tmp_log_file = '/tmp/.ky_ansible_materials_delete_' . getmypid() . ".log";
+        $tmp_log_file = '/tmp/.ky_ansible_materials_delete_logfile_' . getmypid() . ".log";
 
         $result_code = true;
         foreach($TowerHostList as $credential) {
        
-            $tmp_TowerInfo_File = '/tmp/.ky_TowerInfoFile_' . getmypid() . ".log";
+            $tmp_TowerInfo_File = '/tmp/.ky_ansible_materials_delete_TowerInfo_' . getmypid() . ".log";
             @unlink($tmp_TowerInfo_File);
 
             $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
@@ -535,6 +534,7 @@ class ExecuteDirector {
 
         global $vg_tower_driver_type;
         global $vg_tower_driver_id;
+        global $root_dir_temp;
 
         $this->logger->trace(__METHOD__);
 
@@ -544,71 +544,116 @@ class ExecuteDirector {
             "DISUSE_FLAG" => '0',
         );
 
+        if ( empty($root_dir_path) ){
+            $root_dir_temp = array();
+            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+            $root_dir_path = $root_dir_temp[0] . "ita-root";
+        }
+
+        // 共通モジュールをロード
+        require_once ($root_dir_path . "/libs/commonlibs/common_required_check.php");
+
         $rows = $this->dbAccess->selectRowsUseBind('B_ANS_TWR_HOST', false, $condition);
 
+        $chkobj = new AuthTypeParameterRequiredCheck();
 
         foreach($rows as $row) {
             // isolated node は省く
             if(strlen($row['ANSTWR_ISOLATED_TYPE']) != 0) {
                 continue;
             }
-            $username          = $row['ANSTWR_LOGIN_USER'];
-            $password          = ky_decrypt($row['ANSTWR_LOGIN_PASSWORD']);
-            if(strlen(trim($password)) == 0) {
-                $password      = "undefine";
-            }
-            $sshKeyFile        = $row['ANSTWR_LOGIN_SSH_KEY_FILE'];
-            if(strlen(trim($sshKeyFile)) == 0) {
-                $sshKeyFile    = "undefine";
-            } else {
-                $src_file   = getAnsibleTowerSshKeyFileContent($row['ANSTWR_HOST_ID'],$row['ANSTWR_LOGIN_SSH_KEY_FILE']);
-                $sshKeyFile = sprintf("%s/%s/%s/%s/in/ssh_key_files/AnsibleTower_%s_%s",
-                                      $dataRelayStoragePath,
-                                      $vg_tower_driver_type,
-                                      $vg_tower_driver_id,
-                                      addPadding($execution_no),
-                                      addPadding($row['ANSTWR_HOST_ID']),
-                                      $row['ANSTWR_LOGIN_SSH_KEY_FILE']);
-                if( copy($src_file,$sshKeyFile) === false ){
-                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000106",array(basename($src_file)));
-                    $this->errorLogOut($errorMessage);
-                    return false;
-                }
 
-
-                // ky_encryptで中身がスクランブルされているので復元する
-                $ret = ky_file_decrypt($sshKeyFile,$sshKeyFile);
-                if($ret === false) {
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000117",array());
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    return false;
-                }
-
-                if( !chmod( $sshKeyFile, 0600 ) ){
-                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
-                    $this->errorLogOut($errorMessage);
-                    return false;
-                }
+            // 認証方式に応じた必須項目の設定確認
+            $errMsgParameterAry = array();
+            $errMsgParameterAry = array($row['ANSTWR_HOSTNAME']);
+            $strError = $chkobj->TowerHostListAuthTypeRequiredParameterCheck($chkobj->AuthType_WorkflowExec_TowerHostList,
+                                                                             $this->objMTS,
+                                                                             $errMsgParameterAry,
+                                                                             $row['ANSTWR_LOGIN_AUTH_TYPE'],
+                                                                             $row['ANSTWR_LOGIN_PASSWORD'],
+                                                                             $row['ANSTWR_LOGIN_SSH_KEY_FILE'],
+                                                                             $row['ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE']);
+            if($strError !== true) {
+                $this->errorLogOut($strError);
+                return false;
             }
 
-            $sshKeyFilePass  = ky_decrypt($row['ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE']);
-            if(strlen(trim($sshKeyFilePass)) == 0) {
-                $sshKeyFilePass = "undefine";
+            $username      = $row['ANSTWR_LOGIN_USER'];
+            $password      = "undefine";
+            switch($row['ANSTWR_LOGIN_AUTH_TYPE']) {
+            case DF_LOGIN_AUTH_TYPE_PW:          // パスワード認証
+                if(strlen(trim($row['ANSTWR_LOGIN_PASSWORD'])) != 0) {
+                    $password          = ky_decrypt($row['ANSTWR_LOGIN_PASSWORD']);
+                    if(strlen(trim($password)) == 0) {
+                        $password      = "undefine";;
+                    }
+                }
+                break;
+            }
+
+            $sshKeyFile    = "undefine";
+            switch($row['ANSTWR_LOGIN_AUTH_TYPE']) {
+            case DF_LOGIN_AUTH_TYPE_KEY:         // 鍵認証(パスフレーズなし)
+            case DF_LOGIN_AUTH_TYPE_KEY_PP_USE:  // 認証方式:鍵認証(パスフレーズあり)
+                $sshKeyFile    = $row['ANSTWR_LOGIN_SSH_KEY_FILE'];
+                if(strlen(trim($sshKeyFile)) == 0) {
+                    $sshKeyFile    = "undefine";
+                } else {
+                    $src_file   = getAnsibleTowerSshKeyFileContent($row['ANSTWR_HOST_ID'],$row['ANSTWR_LOGIN_SSH_KEY_FILE']);
+                    $sshKeyFile = sprintf("%s/%s/%s/%s/in/ssh_key_files/AnsibleTower_%s_%s",
+                                          $dataRelayStoragePath,
+                                          $vg_tower_driver_type,
+                                          $vg_tower_driver_id,
+                                          addPadding($execution_no),
+                                          addPadding($row['ANSTWR_HOST_ID']),
+                                          $row['ANSTWR_LOGIN_SSH_KEY_FILE']);
+                    if( copy($src_file,$sshKeyFile) === false ){
+                        $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000106",array(basename($src_file)));
+                        $this->errorLogOut($errorMessage);
+                        return false;
+                    }
+
+
+                    // ky_encryptで中身がスクランブルされているので復元する
+                    $ret = ky_file_decrypt($sshKeyFile,$sshKeyFile);
+                    if($ret === false) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000117",array());
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        return false;
+                    }
+
+                    if( !chmod( $sshKeyFile, 0600 ) ){
+                        $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                        $this->errorLogOut($errorMessage);
+                        return false;
+                    }
+                }
+                break;
+            }
+
+            $sshKeyFilePass = "undefine";
+            switch($row['ANSTWR_LOGIN_AUTH_TYPE']) {
+            case DF_LOGIN_AUTH_TYPE_KEY_PP_USE:  // 鍵認証(パスフレーズあり)
+                $sshKeyFilePass  = ky_decrypt($row['ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE']);
+                if(strlen(trim($sshKeyFilePass)) == 0) {
+                    $sshKeyFilePass = "undefine";
+                }
+                break;
             }
 
             switch($row['ANSTWR_LOGIN_AUTH_TYPE']) {
-            case 1:   // 鍵認証
+            case DF_LOGIN_AUTH_TYPE_KEY:         // 鍵認証(パスフレーズなし)
+            case DF_LOGIN_AUTH_TYPE_KEY_PP_USE:  // 鍵認証(パスフレーズあり)
                 $auth_type   = "key";
                 break;
-            case 2:   // パスワード認証
-                $auth_type   = "pass";
-                break;
-            default:  // 認証未指定
+            case DF_LOGIN_AUTH_TYPE_KEY_EXCH:    // 鍵認証(鍵交換済み)
                 $auth_type   = "none";
+                break;
+            case DF_LOGIN_AUTH_TYPE_PW:          // パスワード認証
+                $auth_type   = "pass";
                 break;
             }
 
-// 637
             $credential = array(
                 "id"               => $row['ANSTWR_HOST_ID'],
                 "host_name"        => $row['ANSTWR_HOSTNAME'],
@@ -644,18 +689,37 @@ class ExecuteDirector {
                 return false;
             }
 
+            $username        = $hostInfo['LOGIN_USER'];
+
+            $password        = "";
+            switch($hostInfo['LOGIN_AUTH_TYPE']) {
+            case DF_LOGIN_AUTH_TYPE_PW:          // パスワード認証
+            case DF_LOGIN_AUTH_TYPE_PW_WINRM:    // 認証方式:パスワード認証(winrm)
+                $password    = $hostInfo['LOGIN_PW'];
+                break;
+            }
+
             $sshPrivateKey = "";
-            if(!empty($hostInfo['CONN_SSH_KEY_FILE'])) {
-                $sshPrivateKey = getSshKeyFileContent($hostInfo['SYSTEM_ID'], $hostInfo['CONN_SSH_KEY_FILE']);
-                // ky_encrptのスクランブルを復号
-                $sshPrivateKey = ky_decrypt($sshPrivateKey);
+            switch($hostInfo['LOGIN_AUTH_TYPE']) {
+            case DF_LOGIN_AUTH_TYPE_KEY:         // 鍵認証(パスフレーズなし)
+            case DF_LOGIN_AUTH_TYPE_KEY_PP_USE:  // 認証方式:鍵認証(パスフレーズあり)
+                if(!empty($hostInfo['CONN_SSH_KEY_FILE'])) {
+                    $sshPrivateKey = getSshKeyFileContent($hostInfo['SYSTEM_ID'], $hostInfo['CONN_SSH_KEY_FILE']);
+                    // ky_encrptのスクランブルを復号
+                    $sshPrivateKey = ky_decrypt($sshPrivateKey);
+                }
+                break;
             }
 
             $sshPrivateKeyPass = "";
-            if(!empty($hostInfo['SSH_KEY_FILE_PASSPHRASE'])) {
-                $sshPrivateKeyPass = $hostInfo['SSH_KEY_FILE_PASSPHRASE'];
-                // ky_encrptのスクランブルを復号
-                $sshPrivateKeyPass = ky_decrypt($sshPrivateKeyPass);
+            switch($hostInfo['LOGIN_AUTH_TYPE']) {
+            case DF_LOGIN_AUTH_TYPE_KEY_PP_USE:  // 認証方式:鍵認証(パスフレーズあり)
+                if(!empty($hostInfo['SSH_KEY_FILE_PASSPHRASE'])) {
+                    $sshPrivateKeyPass = $hostInfo['SSH_KEY_FILE_PASSPHRASE'];
+                    // ky_encrptのスクランブルを復号
+                    $sshPrivateKeyPass = ky_decrypt($sshPrivateKeyPass);
+                }
+                break;
             }
 
             $instanceGroupId = null;
@@ -684,23 +748,7 @@ class ExecuteDirector {
             $credential_type_id = $hostInfo['CREDENTIAL_TYPE_ID'];
 
             // 配列のキーに使いたいだけ
-            $key = $hostInfo['LOGIN_USER'] . $hostInfo['LOGIN_PW'] . $sshPrivateKey . $instanceGroupId . "CREDENTIAL_TYPE_ID_" . $credential_type_id;
-            $username        = $hostInfo['LOGIN_USER'];
-            $password        = $hostInfo['LOGIN_PW'];
-            switch($hostInfo['LOGIN_AUTH_TYPE']) {
-            case 1:   // 鍵認証
-                $password      = "";
-                break;
-            case 2:   // パスワード認証
-                $sshPrivateKey = "";
-                $sshPrivateKeyPass = "";
-                break;
-            default:  // 認証未指定
-                $password      = "";
-                $sshPrivateKey = "";
-                $sshPrivateKeyPass = "";
-                break;
-            }
+            $key = sprintf("username_%s_password_%s_sshPrivateKey_%s_sshPrivateKeyPass_%s_instanceGroupId_%s_credential_type_id_%s",$username,$password,$sshPrivateKey,$sshPrivateKeyPass,$instanceGroupId,$credential_type_id);
             $credential = array(
                 "username"        => $username,
                 "password"        => $password,
@@ -727,32 +775,21 @@ class ExecuteDirector {
             }
 
             // WinRM接続
-            if(empty($exeInsRow['I_ANS_WINRM_ID'])) {
-                $exeInsRow['I_ANS_WINRM_ID'] = 0;
-            }
-            $hostData['winrm'] = $exeInsRow['I_ANS_WINRM_ID'];
-            if($exeInsRow['I_ANS_WINRM_ID'] == 1) {
+            $hostData['winrm'] = 0;
+            switch($hostInfo['LOGIN_AUTH_TYPE']) {
+            case DF_LOGIN_AUTH_TYPE_PW_WINRM:    // 認証方式:パスワード認証(winrm)
+                $hostData['winrm'] = 1;
                 if(empty($hostInfo['WINRM_PORT'])) {
                     $hostInfo['WINRM_PORT'] = LC_WINRM_PORT;
                 }
                 $hostData['winrmPort'] = $hostInfo['WINRM_PORT'];
 
-                if(empty($hostInfo['LOGIN_USER'])) {
-                    $this->logger->error("Need 'LOGIN_USER'.");
-                    return false;
-                }
-                $hostData['username'] = $hostInfo['LOGIN_USER'];
-
-                if(empty($hostInfo['LOGIN_PW'])) {
-                    $this->logger->error("Need 'LOGIN_PW'.");
-                    return false;
-                }
-                $hostData['password'] = $hostInfo['LOGIN_PW'];
-
+                // username/password delete
                 if(strlen($hostInfo['WINRM_SSL_CA_FILE']) != 0) {
                     $filePath = "winrm_ca_files/" . addPadding($hostInfo['SYSTEM_ID']) . "-" . $hostInfo['WINRM_SSL_CA_FILE'];
                     $hostData['ansible_winrm_ca_trust_path'] = $filePath;
                 }
+                break;
             }
 
             $hostData['hosts_extra_args'] = $hostInfo['HOSTS_EXTRA_ARGS'];
@@ -886,6 +923,8 @@ class ExecuteDirector {
 
         $this->logger->trace(__METHOD__);
 
+        global $vg_tower_driver_name;
+
         if(!array_key_exists("hosts", $inventory) || empty($inventory['hosts'])) {
             $this->logger->debug(__METHOD__ . " no hosts.");
             return -1;
@@ -928,6 +967,13 @@ class ExecuteDirector {
             $param['name'] = $hostname;
 
             $variables_array = array();
+
+            // ホスト名がlocalhostでpioneer実行の場合、インベントリオプションにansible_connection: localを追加
+            if(($hostname== 'localhost') &&
+               ($vg_tower_driver_name == "pioneer")) {
+                 $variables_array[] = "ansible_connection: local";
+            }
+
             if(array_key_exists("ipAddress", $hostData) && !empty($hostData['ipAddress'])) {
                 $variables_array[] = "ansible_ssh_host: " . $hostData['ipAddress'];
             }

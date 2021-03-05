@@ -19,6 +19,14 @@
 //    ・WebDBCore機能を用いたWebページの中核設定を行う。
 //
 //////////////////////////////////////////////////////////////////////
+if ( empty($root_dir_path) ){
+    $root_dir_temp = array();
+    $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+    $root_dir_path = $root_dir_temp[0] . "ita-root";
+}
+
+// 共通モジュールをロード
+require_once ($root_dir_path . "/libs/commonlibs/common_required_check.php");
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
@@ -59,8 +67,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-101070"));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
-
-
     $objVldt = new TextValidator(1, 128, false, '/^[\._a-zA-Z0-9-]+$/', "");
     $objVldt->setRegexp("/^[^\r\n]*$/s","DTiS_filterDefault");
     $c = new TextColumn('HOSTNAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-101080"));
@@ -69,8 +75,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);//登録/更新時には、入力必須
     $c->setUnique(true);
     $table->addColumn($c);
-
-
 
     $c = new TextColumn('IP_ADDRESS',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102010"));
     $c->setRequired(true);
@@ -132,7 +136,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     // ログイン
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-102061"));
-
         //----ログインパスワード/管理のバリデーター定義
         $objFunction01 = function($objClientValidator, $value, $strNumberForRI, $arrayRegData, $arrayVariant){
             global $g;
@@ -166,6 +169,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 if($value == 1){
                     if(strlen($strLoginPw) === 0){
                         $retBool = false;
+                        // [102071] = "ログインパスワード管理を●とする場合、ログインパス ワードの入力は必須です。"
                         $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102071");
                     }
                 }
@@ -175,6 +179,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 else{
                     //----想定外の値の場合
                     $retBool = false;
+                    // [11404] = "利用できない値です。";
                     $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-11404");
                     //想定外の値の場合----
                 }
@@ -192,23 +197,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->addValidator($objVarVali);
         $cg->addColumn($c);
 
-        $objFunctionpssword = function($objOutputType, $rowData, $aryVariant, $objColumn){
-            $strInitedColId = $objColumn->getID();
-            $aryVariant['callerClass'] = get_class($objOutputType);
-            $aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
-            list($strSetValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($rowData,array($strInitedColId),null);
-            $strSetValue = (strlen($strSetValue)==0)?"":"********";
-            $rowData[$strInitedColId] = $strSetValue;
-            $objBody = $objOutputType->getBody();
-            return $objBody->getData($rowData,$aryVariant);
-        };
-
         $objFunction02 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
             $boolRet = true;
             $intErrorType = null;
             $aryErrMsgBody = array();
             $strErrMsg = "";
             $strErrorBuf = "";
+                   
             if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
                 $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
                 if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
@@ -304,20 +299,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             return $retArray;
         };
 
-        $outputType01 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
-        $outputType01->setFunctionForGetBodyTag($objFunctionpssword);
-        $outputType02 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
-        $outputType02->setFunctionForGetBodyTag($objFunctionpssword);
-        $outputType03 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
-        $outputType03->setFunctionForGetBodyTag($objFunctionpssword);
-
         $objVldt = new SingleTextValidator(0,30,false);
         $c = new PasswordColumn('LOGIN_PW',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102070"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102080"));//エクセル・ヘッダでの説明
         $c->setHiddenMainTableColumn(true);
-        $c->setOutputType("print_table", $outputType01);
-        $c->setOutputType('delete_table', $outputType02);
-        $c->setOutputType('print_journal_table', $outputType03);
         $c->setValidator($objVldt);
         $c->setEncodeFunctionName("ky_encrypt");
         $c->setFunctionForEvent('beforeTableIUDAction',$objFunction02);
@@ -333,35 +318,21 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
         $c->setFileHideMode(true);
 
-// #637
         // CONN_SSH_KEY_FILEをアップロード時に「ky__encrypt」で暗号化する設定
         $c->setFileEncryptFunctionName("ky_file_encrypt");
-// #637
 
         $cg->addColumn($c);
-
-// #637
-        $outputType01 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
-        $outputType01->setFunctionForGetBodyTag($objFunctionpssword);
-        $outputType02 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
-        $outputType02->setFunctionForGetBodyTag($objFunctionpssword);
-        $outputType03 = new VariantOutputType(new TabHFmt(), new TextTabBFmt());
-        $outputType03->setFunctionForGetBodyTag($objFunctionpssword);
 
         $objVldt = new SingleTextValidator(0,256,false);
         $c = new PasswordColumn('SSH_KEY_FILE_PASSPHRASE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-109008"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-109009"));
         $c->setHiddenMainTableColumn(true);
-        $c->setOutputType("print_table", $outputType01);
-        $c->setOutputType('delete_table', $outputType02);
-        $c->setOutputType('print_journal_table', $outputType03);
         $c->setValidator($objVldt);
         $c->setEncodeFunctionName("ky_encrypt");
 
       $cg->addColumn($c);
 
     $table->addColumn($cg);
-// #637
 
     $wanted_filename = "ita_ansible-driver";
     if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
@@ -397,31 +368,38 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                         list($strLoginPw   ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW')          ,"");
                         list($intPwHoldFlag,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW_HOLD_FLAG'),"");
                     }
-                    
+// enomoto                    
                     if( $strModeId == "DTUP_singleRecDelete" || $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
                         $boolPasswordInput = false;
                         $strErrorMsgPreBody = "";
-                        if( strlen($value) == 0 || $value == 1 ){
-                            //----入力値がない場合または鍵認証の場合
+                        //if( strlen($value) == 0 || $value == 1 ){
+                        if((strlen($value) == 0) || ($value == 1) || ($value == 3) || ($value == 4)){
+                            //----鍵認証系の場合
                             if( $intPwHoldFlag == 1 ){
                                 //----パスワード管理が●とされている場合
-                                $boolPasswordInput = true;
+                                // パスワード管理側でも同等のチェックをしているので、チェックはしない
+                                $boolPasswordInput = false;
+                                //[102071] = "ログインパスワード管理を●とする場合、ログインパス ワードの入力は必須です。";
                                 $strErrorMsgPreBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102071");
                                 //パスワード管理が●とされている場合----
                             }else{
+                                //[102072] = "ログインパスワード管理を●としない場合、ログインパ スワードの入力は禁止です。";
                                 $strErrorMsgPreBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102072");
                             }
                             //入力値がない場合または鍵認証の場合----
-                        }else if( $value == 2 ){
+                        }else if(( $value == 2 ) || ($value == 5)) {
                             //----パスワード認証の場合
                             if( $intPwHoldFlag == 1 ){
                                 //----パスワード管理が●とされている場合
-                                $boolPasswordInput = true;
+                                // パスワード管理側でも同等のチェックをしているので、チェックはしない
+                                $boolPasswordInput = false;
+                                //[102073] = "認証方式がパスワード認証の場合、ログインパスワード の入力は必須です。";
                                 $strErrorMsgPreBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102073");
                                 //パスワード管理が●とされている場合----
                             }else{
                                 //----パスワード管理が●とされていない場合
                                 $retBool = false;
+                                //[102074] = "認証方式がパスワード認証の場合、ログインパスワード の管理は必須です。";
                                 $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102074");
                                 //パスワード管理が●とされていない場合----
                             }
@@ -429,6 +407,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                         }else{
                             //----想定外の値の場合
                             $retBool = false;
+                            //[102075] = "認証方式の入力値が不正です。";
                             $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102075");
                             //想定外の値の場合----
                         }
@@ -475,7 +454,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $objVarVali->setErrShowPrefix(false);
                 $objVarVali->setFunctionForIsValid($objFunction01);
                 
-                $c = new IDColumn('LOGIN_AUTH_TYPE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102088"),'B_LOGIN_AUTH_TYPE','LOGIN_AUTH_TYPE_ID','LOGIN_AUTH_TYPE_NAME','');
+                $c = new IDColumn('LOGIN_AUTH_TYPE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102088"),'B_LOGIN_AUTH_TYPE','LOGIN_AUTH_TYPE_ID','LOGIN_AUTH_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102089"));//エクセル・ヘッダでの説明
                 $c->addValidator($objVarVali);
                 $cg->addColumn($c);
@@ -498,10 +477,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
                     $c->setFileHideMode(true);
 
-// #637
                     // WINRM_SSL_CA_FILEをアップロード時に「ky_encrypt」で暗号化する設定
                     $c->setFileEncryptFunctionName("ky_file_encrypt");
-// #637
 
                   $cg3->addColumn($c);
 
@@ -642,6 +619,179 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $tmpAryColumn['SYSTEM_ID']->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
     $table->fixColumn();
+
+    //----組み合わせバリデータ----
+    $tmpAryColumn = $table->getColumns();
+    $objLU4UColumn = $tmpAryColumn[$table->getRequiredUpdateDate4UColumnID()];
+
+    $objFunction = function($objClientValidator, $value, $strNumberForRI, $arrayRegData, $arrayVariant){
+
+        global $g;
+        global $root_dir_path;
+        $retBool = true;
+        $retStrBody = '';
+
+        $strModeId = "";
+        $modeValue_sub = "";
+
+        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php' );
+
+        if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                $strModeId = $aryTcaAction["ACTION_MODE"];
+            }
+        }
+
+        // $arrayRegDataはUI入力ベースの情報
+        // $arrayVariant['edit_target_row']はDBに登録済みの情報
+        if($strModeId == "DTUP_singleRecRegister") {
+
+            // 認証方式の設定値取得
+            $strAuthMode   = array_key_exists('LOGIN_AUTH_TYPE',$arrayRegData)?
+                                $arrayRegData['LOGIN_AUTH_TYPE']:null;
+
+            // ユーザーIDの設定値取得
+            $strLoginUser  = array_key_exists('LOGIN_USER',$arrayRegData)?
+                                $arrayRegData['LOGIN_USER']:null;
+
+            // パスワード管理の設定値取得
+            $strPasswdHoldFlag  = array_key_exists('LOGIN_PW_HOLD_FLAG',$arrayRegData)?
+                                     $arrayRegData['LOGIN_PW_HOLD_FLAG']:null;
+
+            // パスワードの設定値取得
+            $strPasswd     = array_key_exists('LOGIN_PW',$arrayRegData)?
+                                $arrayRegData['LOGIN_PW']:null;
+
+            // パスフレーズの設定値取得
+            $strPassphrase = array_key_exists('SSH_KEY_FILE_PASSPHRASE',$arrayRegData)?
+                                $arrayRegData['SSH_KEY_FILE_PASSPHRASE']:null;
+
+            // 公開鍵ファイルの設定値取得
+            $strsshKeyFile = array_key_exists('CONN_SSH_KEY_FILE',$arrayRegData)?
+                                $arrayRegData['CONN_SSH_KEY_FILE']:null;
+
+            // Pioneerプロトコルの設定値取得
+            $strProtocolID = array_key_exists('PROTOCOL_ID',$arrayRegData)?
+                                $arrayRegData['PROTOCOL_ID']:null;
+
+        } elseif ($strModeId == "DTUP_singleRecDelete") {
+
+            // 認証方式の設定値取得
+            $strAuthMode        = isset($arrayVariant['edit_target_row']['LOGIN_AUTH_TYPE'])?
+                                        $arrayVariant['edit_target_row']['LOGIN_AUTH_TYPE']:null;
+
+            // ユーザーIDの設定値取得
+            $strLoginUser       = isset($arrayVariant['edit_target_row']['LOGIN_USER'])?
+                                        $arrayVariant['edit_target_row']['LOGIN_USER']:null;
+
+            // パスワード管理の設定値取得
+            $strPasswdHoldFlag  = isset($arrayVariant['edit_target_row']['LOGIN_PW_HOLD_FLAG'])?
+                                        $arrayVariant['edit_target_row']['LOGIN_PW_HOLD_FLAG']:null;
+
+            // パスワードの設定値取得
+            $strPasswd          = isset($arrayVariant['edit_target_row']['LOGIN_PW'])?
+                                        $arrayVariant['edit_target_row']['LOGIN_PW']:null;
+
+            // パスフレーズの設定値取得
+            $strPassphrase      = isset($arrayVariant['edit_target_row']['SSH_KEY_FILE_PASSPHRASE'])?
+                                        $arrayVariant['edit_target_row']['SSH_KEY_FILE_PASSPHRASE']:null;
+
+            // 公開鍵ファイルの設定値取得
+            $strsshKeyFile      = isset($arrayVariant['edit_target_row']['CONN_SSH_KEY_FILE'])?
+                                        $arrayVariant['edit_target_row']['CONN_SSH_KEY_FILE']:null;
+
+            // Pioneerプロトコルの設定値取得
+            $strProtocolID      = isset($arrayVariant['edit_target_row']['PROTOCOL_ID'])?
+                                        $arrayVariant['edit_target_row']['PROTOCOL_ID']:null;
+
+        } elseif ($strModeId == "DTUP_singleRecUpdate") {
+
+            // 認証方式の設定値取得
+            $strAuthMode   = array_key_exists('LOGIN_AUTH_TYPE',$arrayRegData)?
+                                $arrayRegData['LOGIN_AUTH_TYPE']:null;
+
+            // ユーザーIDの設定値取得
+            $strLoginUser  = array_key_exists('LOGIN_USER',$arrayRegData)?
+                                $arrayRegData['LOGIN_USER']:null;
+
+            // パスワード管理の設定値取得
+            $strPasswdHoldFlag  = array_key_exists('LOGIN_PW_HOLD_FLAG',$arrayRegData)?
+                                     $arrayRegData['LOGIN_PW_HOLD_FLAG']:null;
+
+            // パスワードの設定値取得
+            // PasswordColumnはデータの更新がないと$arrayRegDataの設定は空になっているので
+            // パスワードが更新されているか判定
+            // 更新されていない場合は設定済みのパスワード($arrayVariant['edit_target_row'])取得
+            $strPasswd     = array_key_exists('LOGIN_PW',$arrayRegData)?
+                                $arrayRegData['LOGIN_PW']:null;
+            if($strPasswd == "") {
+                $strPasswd     = isset($arrayVariant['edit_target_row']['LOGIN_PW'])?
+                                       $arrayVariant['edit_target_row']['LOGIN_PW']:null;
+            }
+            // パスフレーズの設定値取得
+            // PasswordColumnはデータの更新がないと$arrayRegDataの設定は空になっているので
+            // パスフレーズが更新されているか判定
+            // 更新されていない場合は設定済みのパスフレーズ($arrayVariant['edit_target_row'])取得
+            $strPassphrase = array_key_exists('SSH_KEY_FILE_PASSPHRASE',$arrayRegData)?
+                                $arrayRegData['SSH_KEY_FILE_PASSPHRASE']:null;
+            if($strPassphrase== "") {
+                $strPassphrase = isset($arrayVariant['edit_target_row']['SSH_KEY_FILE_PASSPHRASE'])?
+                                       $arrayVariant['edit_target_row']['SSH_KEY_FILE_PASSPHRASE']:null;
+            }
+            // 公開鍵ファイルの設定値取得
+            // FileUploadColumnはファイルの更新がないと$arrayRegDataの設定は空になっているので
+            // ダウンロード済みのファイルが削除されていると$arrayRegData['del_flag_COL_IDSOP_xx']がonになる
+            // 更新されていない場合は設定済みのファイル名($arrayVariant['edit_target_row'])を取得
+            $strsshKeyFileDel  = array_key_exists('del_flag_COL_IDSOP_17',$arrayRegData)?
+                                    $arrayRegData['del_flag_COL_IDSOP_17']:null;
+            if($strsshKeyFileDel == 'on') {
+                $strsshKeyFile = "";
+            } else {
+                // 公開鍵ファイルが更新されているか判定
+                $strsshKeyFile = array_key_exists('CONN_SSH_KEY_FILE',$arrayRegData)?
+                                    $arrayRegData['CONN_SSH_KEY_FILE']:null;
+                if($strsshKeyFile == "") {
+                    $strsshKeyFile= isset($arrayVariant['edit_target_row']['CONN_SSH_KEY_FILE'])?
+                                          $arrayVariant['edit_target_row']['CONN_SSH_KEY_FILE']:null;
+                }
+            }
+
+            // Pioneerプロトコルの設定値取得
+            $strProtocolID = array_key_exists('PROTOCOL_ID',$arrayRegData)?
+                                $arrayRegData['PROTOCOL_ID']:null;
+        }
+
+        switch($strModeId) {
+        case "DTUP_singleRecUpdate":
+        case "DTUP_singleRecRegister":
+        case "DTUP_singleRecDelete":
+            // 選択されている認証方式に応じた必須入力をチェック
+            // 但し、パスワード管理・パスワードは既存のチェック処理で必須入力判定
+            $errMsgParameterAry = array();
+            $DriverID = "";
+            $chkobj = new AuthTypeParameterRequiredCheck();
+            $retStrBody = $chkobj->DeviceListAuthTypeRequiredParameterCheck($chkobj->chkType_Loadtable_TowerHostList,$g['objMTS'],$errMsgParameterAry,$strAuthMode,$strLoginUser,$strPasswdHoldFlag,$strPasswd,$strsshKeyFile,$strPassphrase,$DriverID,$strProtocolID);
+            if($retStrBody === true) {
+                $retStrBody = "";
+            } else {
+                $retBool = false;
+            }
+            break;
+        }
+        if($retBool===false){
+            $objClientValidator->setValidRule($retStrBody);
+        }
+        return $retBool;
+    };
+
+    $objVarVali = new VariableValidator();
+    $objVarVali->setErrShowPrefix(false);
+    $objVarVali->setFunctionForIsValid($objFunction);
+    $objVarVali->setVariantForIsValid(array());
+
+    $objLU4UColumn->addValidator($objVarVali);
+    //組み合わせバリデータ----
 
     $table->setGeneObject('webSetting', $arrayWebSetting);
     return $table;
