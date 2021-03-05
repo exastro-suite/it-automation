@@ -180,8 +180,13 @@ callback.prototype = {
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
+        var table = document.getElementById("Mix1_1");
+        table.rows[0].cells[6].style.display = 'none';
+        for(var i=2;table.rows[i];i++) {
+          table.rows[i].cells[9].style.display = 'none';
+        }
     },
-    
+
     Filter2Tbl_add_selectbox : function( result ){
         var filterAreaWrap = 'Filter2_Nakami';
         var strFilterPrintId = 'Filter2Tbl';
@@ -194,7 +199,7 @@ callback.prototype = {
 
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-        
+
         var resultSetTargetSeq = ary_result[2];
         var resultContentTag = ary_result[3];
 
