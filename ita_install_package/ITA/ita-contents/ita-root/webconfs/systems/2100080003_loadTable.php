@@ -151,11 +151,19 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($cg);
 
     // PolicySet-Workspace紐付管理へのリンクボタン
-    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107050");
+    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107010");
     $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
     $c->setDBColumn(false);
     $c->getOutputType('print_journal_table')->setVisible(false);
     $c->setEvent("print_table", "onClick", "newOpenWindow", array('this',':WORKSPACE_NAME'), true);
+    $table->addColumn($c);
+
+    // PolicySet-Workspace紐付管理へのリンクボタン
+    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107050");
+    $c = new LinkButtonColumn('ethWakeOrder2',$strLabelText, $strLabelText, 'dummy');
+    $c->setDBColumn(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow2", array('this',':WORKSPACE_NAME'), true);
     $table->addColumn($c);
 
 
