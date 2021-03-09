@@ -1290,4 +1290,9 @@ VAR_SAMPLE_2:
 $ary[1207311] = "Member variables";
 $ary[1207312] = "If the variable name is an array or hash structure, you must enter a member variable.";
 $ary[1207313] = "Parameter sheet(TO)";
+$ary[1207314] = "Movement playbook link";
+$ary[1207315] = "Movement dialogue type link";
+$ary[1207316] = "Dialogue file material collection";
+$ary[1207317] = "Movement role link";
+$ary[1207318] = "Substitution value management";
 ?>
