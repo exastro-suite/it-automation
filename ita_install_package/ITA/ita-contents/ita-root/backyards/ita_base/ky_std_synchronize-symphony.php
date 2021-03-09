@@ -533,13 +533,14 @@
             ///////////////////////////////////////////////////////////////////////////////////
             /// (ここから)緊急停止が発令されていて、受理フラグがなければ、緊急停止を発令する //
             ///////////////////////////////////////////////////////////////////////////////////
-            
+            $status_id = $rowOfFocusMovement['STATUS_ID'];
             if( $intFocusMovementSeq === 0 ){
                 //----まだ最初のムーブメントも始まっていない場合
                 $boolMovementFinedAfterHP = true;
                 //まだ最初のムーブメントも始まっていない場合----
             }
-            else{
+
+            if( $intFocusMovementSeq != 0 || $status_id == 1 ){
                 //----すでに1個はムーブメントがはじまった後である場合
                 
                 $boolMovUpdateFlag = false;
@@ -1099,8 +1100,6 @@
                 //----未実行の場合
                 if( $boolScramAfterOrcFined === true ){
                     $strAfterStatusNumeric = '6'; //緊急停止
-                    // 終了日時を入れる
-                    $strEndTimeOfSymphony = "DATETIMEAUTO(6)";
                 }
                 //未実行の場合----
             }
@@ -1132,8 +1131,10 @@
                         break;
                     case "7": // 緊急停止
                         $strAfterStatusNumeric = '6'; //緊急停止
-                        // 終了日時を入れる
-                        $strEndTimeOfSymphony = "DATETIMEAUTO(6)";
+                        if( $rowOfFocusMovement['STATUS_ID'] != '1' ){
+                            // 終了日時を入れる
+                            $strEndTimeOfSymphony = "DATETIMEAUTO(6)";
+                        }
                         break;
                     case "6": // 異常終了
                     case "10": // 準備エラー

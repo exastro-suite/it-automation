@@ -744,6 +744,67 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
     $strFxName = "<noname:[GROUP]srcamExecute,[FILE]".__FILE__.">";
 
     $error_info = "";
+    $temp_array = "";
+
+    global $root_dir_path;
+    global $g;
+    global $log_level;
+
+    require_once ($root_dir_path . "/libs/backyardlibs/common/common_db_access.php");
+    $log_output_php = '/libs/backyardlibs/backyard_log_output.php';
+
+    //----------------------------------------------
+    // 作業インスタンス情報 configのSQl生成
+    //----------------------------------------------
+    $arrayConfig_terraform = array(
+        "JOURNAL_SEQ_NO"=>"",
+        "JOURNAL_ACTION_CLASS"=>"",
+        "JOURNAL_REG_DATETIME"=>"",
+        "EXECUTION_NO"=>"",
+        "EXECUTION_USER"=>"",
+        "SYMPHONY_NAME"=>"",
+        "STATUS_ID"=>"",
+        "SYMPHONY_INSTANCE_NO"=>"",
+        "PATTERN_ID"=>"",
+        "I_PATTERN_NAME"=>"",
+        "I_TIME_LIMIT"=>"",
+        "I_TERRAFORM_RUN_ID"=>"",
+        "I_TERRAFORM_WORKSPACE_ID"=>"",
+        "OPERATION_NO_UAPK"=>"",
+        "I_OPERATION_NAME"=>"",
+        "I_OPERATION_NO_IDBH"=>"",
+        "CONDUCTOR_NAME"=>"",
+        "CONDUCTOR_INSTANCE_NO"=>"",
+        "TIME_BOOK"=>"DATETIME",
+        "TIME_START"=>"DATETIME",
+        "TIME_END"=>"DATETIME",
+        "FILE_INPUT"=>"",
+        "FILE_RESULT"=>"",
+        "RUN_MODE"=>"",
+        "DISUSE_FLAG"=>"",
+        "NOTE"=>"",
+        "LAST_UPDATE_TIMESTAMP"=>"",
+        "LAST_UPDATE_USER"=>""
+    );
+
+    if( $objDBCA->getTransactionMode()===false ){
+        ////////////////////////////////////////////////////////////////
+        // トランザクション開始
+        ////////////////////////////////////////////////////////////////
+        if( $objDBCA->transactionStart()===false ){
+            // 異常フラグON
+            $error_flag = 1;
+            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+            throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000800")) );
+        }
+        // トレースメッセージ
+        if ( $log_level === 'DEBUG' ){
+            // トランザクション開始(ステータスを変更する処理)(作業No.:{})
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-80001", $tgt_execution_no);
+            require ($root_dir_path . $log_output_php );
+        }
+    }
+
 
     // 処理開始
     try{
@@ -751,14 +812,11 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         // E_TERRAFORM_EXE_INS_MNG 対象レコードをSELECT                                       //
         ////////////////////////////////////////////////////////////////
         // SQL作成
-        $sql = "SELECT  STATUS_ID "
-              ."       ,STATUS_NAME "
-              ."       ,PATTERN_ID "
-              ."       ,OPERATION_NO_UAPK "
-              ."       ,I_TERRAFORM_RUN_ID "
+        $sql = "SELECT * "
               ."FROM    {$strExeCurTableIdForSelect} "
               ."WHERE   DISUSE_FLAG = '0' "
-              ."AND     EXECUTION_NO = :EXECUTION_NO_BV ";
+              ."AND     EXECUTION_NO = :EXECUTION_NO_BV "
+              ."FOR UPDATE ";
 
         $tmpAryBind = array( 'EXECUTION_NO_BV'=>$target_execution_no );
         $retArray = singleSQLCoreExecute($objDBCA, $sql, $tmpAryBind, $strFxName);
@@ -797,8 +855,155 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         ////////////////////////////////////////////////////////////////
         // ステータスIDによって処理を分岐                             //
         ////////////////////////////////////////////////////////////////
+        // ステータスIDが未実行(1)の場合
+        if( $status_id == 1 ){
+
+            $login_id = $g['login_id'];
+            $vg_exe_ins_msg_table_name       = 'C_TERRAFORM_EXE_INS_MNG';
+            $vg_exe_ins_msg_table_jnl_name   = 'C_TERRAFORM_EXE_INS_MNG_JNL';
+            $vg_exe_ins_msg_table_jnl_seq    = 'C_TERRAFORM_EXE_INS_MNG_JSQ';
+            $db_model_ch = $objDBCA->getModelChannel();
+ 
+            $dbobj = new CommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,$login_id);
+            $tgt_execution_row = $showTgtRow;
+            $tgt_execution_no = $tgt_execution_row['EXECUTION_NO'];
+
+            //----------------------------------------------
+            // シーケンスをロック
+            //----------------------------------------------
+            $retArray = getSequenceLockInTrz($vg_exe_ins_msg_table_jnl_seq,'A_SEQUENCE');
+            if( $retArray[1] != 0 ){
+                // 異常フラグON
+                $error_flag = 1;
+                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000900")) );
+            }
+
+            //----------------------------------------------
+            // 「C_TERRAFORM_EXE_INS_MNG」の処理対象レコードのステータスをUPDATE
+            //----------------------------------------------
+            // 履歴シーケンス払い出し
+            $retArray = getSequenceValueFromTable($vg_exe_ins_msg_table_jnl_seq, 'A_SEQUENCE', FALSE );
+            if( $retArray[1] != 0 ){
+                // 異常フラグON
+                $error_flag = 1;
+                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00001000")) );
+            }
+
+            ////////////////////////////////////////////////////////////////
+            // 処理対象の作業インスタンスのステータスを緊急停止に設定
+            ////////////////////////////////////////////////////////////////
+            $tgt_execution_row['JOURNAL_SEQ_NO']   = $retArray[0];
+            $tgt_execution_row["STATUS_ID"]        = 8;
+            $tgt_execution_row["LAST_UPDATE_USER"] = $login_id;
+
+            $retArray = makeSQLForUtnTableUpdate($db_model_ch,
+                                                    "UPDATE",
+                                                    "EXECUTION_NO",
+                                                    $vg_exe_ins_msg_table_name,
+                                                    $vg_exe_ins_msg_table_jnl_name,
+                                                    $arrayConfig_terraform,
+                                                    $tgt_execution_row,
+                                                    $temp_array );
+
+            $sqlUtnBody = $retArray[1];
+            $arrayUtnBind = $retArray[2];
+
+            $sqlJnlBody = $retArray[3];
+            $arrayJnlBind = $retArray[4];
+
+            $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
+            $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
+
+            if( $objQueryUtn->getStatus()===false ||
+                $objQueryJnl->getStatus()===false ){
+                // 異常フラグON
+                $error_flag = 1;
+                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00001100")) );
+            }
+
+            if( $objQueryUtn->sqlBind($arrayUtnBind) != "" ||
+                $objQueryJnl->sqlBind($arrayJnlBind) != "" ){
+                // 異常フラグON
+                $error_flag = 1;
+                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00001200")) );
+            }
+
+            //SQL実行
+            $rUtn = $objQueryUtn->sqlExecute();
+            if($rUtn!=true){
+                // 異常フラグON
+                $error_flag = 1;
+                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00001300")) );
+            }
+
+            //SQL実行(JNL)
+            $rJnl = $objQueryJnl->sqlExecute();
+            if($rJnl!=true){
+                // 異常フラグON
+                $error_flag = 1;
+                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00001400")) );
+            }
+
+            // トレースメッセージ
+            if ( $log_level === 'DEBUG' ){
+                // [処理]UPDATE実行(作業No.:{$tgt_row["EXECUTION_NO"]})
+                $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-70009",$tgt_row["EXECUTION_NO"]);
+                require ($root_dir_path . $log_output_php );
+            }
+
+            if( $objDBCA->getTransactionMode() ){
+                //----------------------------------------------
+                // コミット(レコードロックを解除)
+                //----------------------------------------------
+                $r = $objDBCA->transactionCommit();
+                if (!$r){
+                    // 異常フラグON
+                    $error_flag = 1;
+                    // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                    throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00001500")) );
+                }
+
+                // トレースメッセージ
+                if ( $log_level === 'DEBUG' ){
+                    // コミット(ステータスを変更する処理)
+                    $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-70010");
+                    require ($root_dir_path . $log_output_php );
+                }
+
+                //----------------------------------------------
+                // トランザクション終了
+                //----------------------------------------------
+                $objDBCA->transactionExit();
+
+                // トランザクションフラグ(初期値はfalse)
+                $transaction_flag = false;
+
+                // トレースメッセージ
+                if ( $log_level === 'DEBUG' ){
+                    // トランザクション終了(ステータスを変更する処理)(作業No.:{})
+                    $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-80002", $tgt_execution_no);
+                    require ($root_dir_path . $log_output_php );
+                }
+            }
+     
+            // 正常向けの結果メッセージを作成
+            $strOutputMsgBody = $objMTS->getSomeMessage("ITATERRAFORM-STD-201020",$target_execution_no);
+            // エラーと警告以外のメッセージ系
+            $aryRetMsgBody = array($strOutputMsgBody,$strInfoBody,$strWarningInfo);
+            
+            $retArray = array(0,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRetMsgBody);
+
+            return $retArray;
+        
+        }
         // ステータスIDが実行中(3) or 実行中(遅延)(4)以外の場合
-        if( $status_id != 3 && $status_id != 4 ){
+        else if( $status_id != 3 && $status_id != 4 ){
             $intResultDetail = 21;
             $intErrorType = 701;
             // 処理中の対象作業のステータスは緊急停止の実施対象外です。({$status_name})
@@ -806,6 +1011,34 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
             $strWarningInfo = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221030",$status_name);
 
             throw new Exception( '00000400-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
+        if( $objDBCA->getTransactionMode() ){
+            //----------------------------------------------
+            // コミット(レコードロックを解除)
+            //----------------------------------------------
+            $r = $objDBCA->transactionCommit();
+            if (!$r){
+                // 異常フラグON
+                $error_flag = 1;
+                // 例外処理へ
+                throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00005000")) );
+            }
+            // トレースメッセージ
+            if ( $log_level === 'DEBUG' ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-55015");
+                require ($root_dir_path . $log_output_php );
+            }
+
+            //----------------------------------------------
+            // トランザクション終了
+            //----------------------------------------------
+            $objDBCA->transactionExit();
+            // トレースメッセージ
+            if ( $log_level === 'DEBUG' ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-55005");
+                require ($root_dir_path . $log_output_php );
+            }
         }
 
         /////////////////////////////////////////////////////////////
