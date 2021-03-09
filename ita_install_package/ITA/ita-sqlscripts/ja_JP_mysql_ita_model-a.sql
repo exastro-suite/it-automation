@@ -1525,7 +1525,7 @@ CREATE TABLE B_LOGIN_AUTH_TYPE
 (
 LOGIN_AUTH_TYPE_ID                INT                        , -- 識別シーケンス
 
-LOGIN_AUTH_TYPE_NAME              VARCHAR (32)               ,
+LOGIN_AUTH_TYPE_NAME              VARCHAR (64)               ,
 
 DISP_SEQ                          INT                        , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -1547,7 +1547,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                , -- 履歴用変�
 
 LOGIN_AUTH_TYPE_ID                INT                        , -- 識別シーケンス
 
-LOGIN_AUTH_TYPE_NAME              VARCHAR (32)               ,
+LOGIN_AUTH_TYPE_NAME              VARCHAR (64)               ,
 
 DISP_SEQ                          INT                        , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
