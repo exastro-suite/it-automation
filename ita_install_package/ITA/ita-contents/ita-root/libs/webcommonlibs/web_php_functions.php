@@ -1570,6 +1570,47 @@ class RoleBasedAccessControl {
 
    ///////////////////////////////////////////////////////////////////
    // 【処理概要】
+   //   Excel/Rest更新・廃止・復活時
+   //   該当レコードのアクセス許可ロールとログインユーザのアクセス許可
+   //   ロールが適合しているか判定する。
+   // 【パラメータ】
+   //   $userID:           ログインID
+   //   $RoleIDString:     ロールIDのCSV文字列(該当レコードのアクセス許可ロール)
+   //
+   // 【戻り値】
+   //   true:    正常
+   //   false:   異常
+   //
+   // 【備考】
+   ///////////////////////////////////////////////////////////////////
+   function chkLoginUserAccessAuthForTargetRecodeAccessAuth($userID,$RoleIDString) {
+       $ErrorRoleNameAry = array();
+       $RoleID2Name = array();
+       $RoleName2ID = array();
+       // 廃止されているレコードは除かれる
+       $ret = $this->getRoleSearchHashList($userID,$RoleID2Name,$RoleName2ID);
+       if($ret === false) {
+           return false;
+       }
+       $makeRoleIDString = "";
+       // ロール名をロールIDに置換
+       if(strlen($RoleIDString) != 0) {
+           $nowRoleIDlist = explode(',',$RoleIDString);
+           foreach($nowRoleIDlist as $nowRoleID) {
+               if(array_key_exists($nowRoleID,$RoleID2Name)) {
+                   return true;
+               } else {
+                   continue;
+               }
+           }
+       } else {
+           return true;
+       }
+       return false;
+   }
+
+   ///////////////////////////////////////////////////////////////////
+   // 【処理概要】
    //   登録・更新用
    //   ロール名のCSV文字列をロールIDのCSV文字列に変換
    //   ID変換失敗ロールは無視
@@ -1581,7 +1622,12 @@ class RoleBasedAccessControl {
    //                      2:[CSV]からの新規登録
    //                      3:[JSON]からの新規登録
    //                      4:[ブラウザからの新規登録(トランザクション無)
+   //   $modeValue:       DBアクセスモード
+   //                     DTUP_singleRecUpdate: 更新
+   //                     DTUP_singleRecRegister: 登録
+   //                     DTUP_singleRecDelete:   廃止・復活
    //   $RoleNameString:  ロール名のCSV文字列
+   //   $TargetRecodeRoleIDString:   ロールIDのCSV文字列(該当レコードのアクセス許可ロール)
    //   $ErrorRoleNameAry: 変換できなかったロール名配列
    //
    // 【戻り値】
@@ -1591,10 +1637,14 @@ class RoleBasedAccessControl {
    //              
    // 【備考】
    ///////////////////////////////////////////////////////////////////
-   function getRoleNameStringToRoleIDStringForDBUpdate($userID,$ordMode,$RoleNameString,&$ErrorRoleNameAry) {
+   function getRoleNameStringToRoleIDStringForDBUpdate($userID,$ordMode,$modeValue,$RoleNameString,$TargetRecodeRoleIDString,&$ErrorRoleNameAry) {
        $ErrorRoleNameAry = array();
        $RoleID2Name = array();
        $RoleName2ID = array();
+       
+       // 該当レコードのアクセス許可ロールを配列化
+       $TargetRecodeRoleIDList =  explode(',',$TargetRecodeRoleIDString);
+
        // 廃止されているレコードは除かれる
        $ret = $this->getRoleSearchHashList($userID,$RoleID2Name,$RoleName2ID);
        if($ret === false) {
@@ -1623,23 +1673,22 @@ class RoleBasedAccessControl {
                        $ErrorRoleName = true;
                        // 登録種別がExcel/CSV/Restの場合、ロールIDが有効で紐づいていないロールか判定
                        if(($ordMode == '1') || ($ordMode == '2') || ($ordMode == '3')) {
-                           // ユーザーに紐づいているロールIDか判定
-                           if(array_key_exists($UnAuthRoleIDString,$RoleID2Name)) {
-                               // ユーザーに紐づいているロールIDならエラー
-                               $ErrorRoleName = false;
-                           } else {
-                               if(array_key_exists($UnAuthRoleIDString,$AllRoleID2Name)) {
-                                   // 廃止されてるロールIDか判定
-                                   if($AllRoleID2Name[$UnAuthRoleIDString]['DISUSE_FLAG'] == '1') {
-                                       // 廃止されてるロールIDの場合はエラー
+                           // ユーザーに紐づいていないロールIDでも、ターゲットレコードのアクセス許可ロールに元々設定されているロールか判定
+                           // 複数ユーザーで共有されているレコードの場合を想定
+                           if(array_key_exists($UnAuthRoleIDString,$RoleID2Name) === false) {
+                               // 更新の場合
+                               if($modeValue == "DTUP_singleRecUpdate") {
+                                   // ユーザーに紐づいていない、ターゲットレコードのアクセス許可ロールに元々設定されているロールでもない
+                                   if(array_search($UnAuthRoleIDString,$TargetRecodeRoleIDList) === false) {
                                        $ErrorRoleName = false;
-                                   } else {
-                                       // 廃止されていないロールID
                                    }
                                } else {
-                                   // 未登録のロールIDの場合、廃止ロールとして扱うのでエラー
+                               // ユーザーに紐づいていないロールIDならエラー
+                               
                                    $ErrorRoleName = false;
                                }
+                           } else {
+                               $ErrorRoleName = false;
                            }
                        }
                        if($ErrorRoleName === false) {
@@ -1660,7 +1709,7 @@ class RoleBasedAccessControl {
                            // ロール名とロールIDの適合を判定
                            // ロール名がID変換エラーの場合、ロールIDも廃止か未登録かを判定
                            // ユーザーに紐づいているロールIDか判定
-                           if(array_key_exists($DisUserRoleIDString,$RoleID2Name)) {
+                           if(array_key_exists($DisUserRoleIDString,$RoleID2Name)===false) {
                                // ユーザーに紐づいているロールIDならエラー
                                $ErrorRoleName = false;
                            } else {
