@@ -953,91 +953,158 @@ class TableControlAgent {
 			$objTable =  $objColumn->getTable();
 
 			$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+                        if($modeValue == "DTUP_singleRecDelete"){
+                            $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];
+                        }
+                        // Pkey情報取得
+                        $pkeyColumnName = $this->getRowIdentifyColumnID();
+                        $pkeyID = null;
+                        if( $modeValue=="DTUP_singleRecRegister" ) {
+                            $pkeyID = array_key_exists($pkeyColumnName,$reqOrgData)?
+                                           $reqOrgData[$pkeyColumnName]:null;
 
-                        if( $modeValue=="DTUP_singleRecDelete") {
-                            $mode      = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];
-                            // 復活の場合
-                            if($mode == 'off') {
-		    	        $obj = new RoleBasedAccessControl($g['objDBCA']);
-                                $userID = 0;  //未使用
-                                $ret = $obj->getAllRoleSearchHashList($userID,$RoleID2Name,$RoleName2ID);
-                                if($ret === false) {
+                        } else {
+                            $pkeyID = isset($aryVariant['edit_target_row'][$pkeyColumnName])?
+                                            $aryVariant['edit_target_row'][$pkeyColumnName]:null;
+                        }
+                        if($pkeyID == null) {
+                            web_log('[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . 'Primary key information not found.');
+
+                            // Pkeyが不明なため、処理続行不可
 		                    throw new Exception( '00002100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                        }
+                        $TargetRecodeAccessAuth = "";
+                        if( $modeValue != "DTUP_singleRecRegister" ) {
+                            // 登録以外の場合に、ログインユーザーのアクセス許可ロールと
+                            // 更新対象レコードのアクセス許可ロールが適合しているか判定
+                            $sql = sprintf("SELECT %s,%s FROM %s WHERE %s=%s",$pkeyColumnName,
+                                                                              $this->getAccessAuthColumnName(),
+                                                                              $this->getDBMainTableID(),
+                                                                              $pkeyColumnName,
+                                                                              $pkeyID);
+                            $objQuery = $g['objDBCA']->sqlPrepare($sql);
+                            if($objQuery->getStatus()===false){
+                                $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$sql);
+                                $message .= "\n" . $objQuery->getLastError();
+                                throw new Exception($message);
+                            }
+                            $objQuery->sqlBind( array());
+                            $r = $objQuery->sqlExecute();
+                            if(!$r) {
+                                $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$sql);
+                                $message .= "\n" . $objQuery->getLastError();
+                                throw new Exception($message);
+                            }
+                            $user_role_list = array();
+                            if ($objQuery->effectedRowCount() != 1) {
+                                if($objQuery->effectedRowCount() == 0) {
+                                    //更新対象のレコードを特定できませんでした。
+		    	            $boolRet = false;
+		    	            $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-314");
+                                } else {
+                                    //更新対象のレコードが複数ありました。
+		    	            $boolRet = false;
+		    	            $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-315");
                                 }
-                                $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
-                                if(array_key_exists($AccessAuthColumnName,$reqOrgData)) {
-                                    // アクセス許可ロールにID変換失敗のロールが無い事を確認
-			            $RoleIDString   = $reqOrgData[$AccessAuthColumnName];
-		    	            if(strlen($RoleIDString) != 0) {
-                                        $RoleIDlist = explode(',',$RoleIDString);
-                                        foreach($RoleIDlist as $RoleID) {
-                                            $role_reg = false;
-                                            if(array_key_exists($RoleID,$RoleID2Name)) {
-                                                if($RoleID2Name[$RoleID]['DISUSE_FLAG'] == 0) {
-                                                    $role_reg = true;
+                            } else {
+                                $row = $objQuery->resultFetch();
+                                $TargetRecodeAccessAuth = $row[$this->getAccessAuthColumnName()];
+		    	        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                $userID = $g['login_id'];
+                                $ret = $obj->chkLoginUserAccessAuthForTargetRecodeAccessAuth($userID,$row[$this->getAccessAuthColumnName()]);
+                                if($ret === false) {
+                                    // ログインユーザーのアクセス許可ロールと更新対象レコードのアクセス許可ロールが適合しているか判定
+		    	            $boolRet = false;
+		    	            $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-316");
+                                }
+                            }
+                        }
+                        if($boolRet === true) {
+                            if( $modeValue=="DTUP_singleRecDelete") {
+                                $mode      = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];
+                                // 復活の場合
+                                if($mode == 'off') {
+		    	            $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                    $userID = 0;  //未使用
+                                    $ret = $obj->getAllRoleSearchHashList($userID,$RoleID2Name,$RoleName2ID);
+                                    if($ret === false) {
+		                        throw new Exception( '00002100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    }
+                                    $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                                    if(array_key_exists($AccessAuthColumnName,$reqOrgData)) {
+                                        // アクセス許可ロールにID変換失敗のロールが無い事を確認
+			                $RoleIDString   = $reqOrgData[$AccessAuthColumnName];
+		    	                if(strlen($RoleIDString) != 0) {
+                                            $RoleIDlist = explode(',',$RoleIDString);
+                                            foreach($RoleIDlist as $RoleID) {
+                                                $role_reg = false;
+                                                if(array_key_exists($RoleID,$RoleID2Name)) {
+                                                    if($RoleID2Name[$RoleID]['DISUSE_FLAG'] == 0) {
+                                                        $role_reg = true;
+                                                    }
                                                 }
-                                            }
-                                            if($role_reg === false) {
-	    	                                $boolRet = false;
-                                                $strErrMsg = sprintf("%s:%s",
-                                                             $objColumn->getColLabel(),
-                                                             $g['objMTS']->getSomeMessage("ITAWDCH-ERR-11404"));
-                                                break;
-                            
+                                                if($role_reg === false) {
+	    	                                    $boolRet = false;
+                                                    $strErrMsg = sprintf("%s:%s",
+                                                                 $objColumn->getColLabel(),
+                                                                 $g['objMTS']->getSomeMessage("ITAWDCH-ERR-11404"));
+                                                    break;
+                                
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
+			    if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+			        $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+			        if(array_key_exists($AccessAuthColumnName,$exeQueryData)) {
+                                    if($ordMode != 4) {
+			                $RoleNameString   = $exeQueryData[$AccessAuthColumnName];
+		    	                $RoleIDString = "";
+		    	                if(strlen($RoleNameString) != 0) {
+		    	                    // ロールID文字列のアクセス権をロール名称の文字列に変換
+		    	                    // 廃止ロールはカットする。
+		    	                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+		    	                    $ErrorRoleNameAry = array();
+		    	                    $RoleIDString = $obj->getRoleNameStringToRoleIDStringForDBUpdate($g['login_id'],$ordMode,$modeValue,$RoleNameString,$TargetRecodeAccessAuth,$ErrorRoleNameAry);  
+		    	                    unset($obj);
+		    	                    if($RoleIDString === false) {
+		    	                        $boolRet = false;
+		    	                        $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19021",array(implode(",", $ErrorRoleNameAry))) . "\n";
+		    	                        // intErrorTypeは設定不要
+		    	                        // $intErrorType = 500;
+		    	                    }
+		    	                }
+		    	                if($RoleIDString !== false) {
+		    	                     // 登録するアクセス権をロール名称の文字列に設定
+		    	                     $exeQueryData[$AccessAuthColumnName] = $RoleIDString;
+		    	                }
+		    	            } else {
+			                $RoleIDString   = $exeQueryData[$AccessAuthColumnName];
+		    	                $chkRoleIDString = "";
+		    	                if(strlen($RoleIDString) != 0) {
+		    	                    // ロールID文字列のアクセス権をロール名称の文字列に変換
+		    	                    // 廃止ロールはカットする。
+		    	                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+		    	                    $ErrorRoleNameAry = array();
+		    	                    $chkRoleIDString = $obj->chkRoleIDStringForDBUpdate($g['login_id'],$ordMode,$RoleIDString,$ErrorRoleNameAry);  
+		    	                    unset($obj);
+		    	                    if($chkRoleIDString === false) {
+		    	                        $boolRet = false;
+		    	                        $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19021",array(implode(",", $ErrorRoleNameAry))) . "\n";
+		    	                        // intErrorTypeは設定不要
+		    	                        // $intErrorType = 500;
+		    	                    }
+		    	                }
+		    	                if($chkRoleIDString !== false) {
+		    	                    // 登録するアクセス権をロール名称の文字列に設定
+		    	                    $exeQueryData[$AccessAuthColumnName] = $chkRoleIDString;
+		    	                }
+		    	            }
+                                }
+		    	    }
                         }
-			if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
-			    $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
-			    if(array_key_exists($AccessAuthColumnName,$exeQueryData)) {
-                                if($ordMode != 4) {
-			            $RoleNameString   = $exeQueryData[$AccessAuthColumnName];
-		    	            $RoleIDString = "";
-		    	            if(strlen($RoleNameString) != 0) {
-		    	                // ロールID文字列のアクセス権をロール名称の文字列に変換
-		    	                // 廃止ロールはカットする。
-		    	                $obj = new RoleBasedAccessControl($g['objDBCA']);
-		    	                $ErrorRoleNameAry = array();
-		    	                $RoleIDString = $obj->getRoleNameStringToRoleIDStringForDBUpdate($g['login_id'],$ordMode,$RoleNameString,$ErrorRoleNameAry);  
-		    	                unset($obj);
-		    	                if($RoleIDString === false) {
-		    	                    $boolRet = false;
-		    	                    $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19021",array(implode(",", $ErrorRoleNameAry))) . "\n";
-		    	                    // intErrorTypeは設定不要
-		    	                    // $intErrorType = 500;
-		    	                }
-		    	            }
-		    	            if($RoleIDString !== false) {
-		    	                 // 登録するアクセス権をロール名称の文字列に設定
-		    	                 $exeQueryData[$AccessAuthColumnName] = $RoleIDString;
-		    	            }
-		    	        } else {
-			            $RoleIDString   = $exeQueryData[$AccessAuthColumnName];
-		    	            $chkRoleIDString = "";
-		    	            if(strlen($RoleIDString) != 0) {
-		    	                // ロールID文字列のアクセス権をロール名称の文字列に変換
-		    	                // 廃止ロールはカットする。
-		    	                $obj = new RoleBasedAccessControl($g['objDBCA']);
-		    	                $ErrorRoleNameAry = array();
-		    	                $chkRoleIDString = $obj->chkRoleIDStringForDBUpdate($g['login_id'],$ordMode,$RoleIDString,$ErrorRoleNameAry);  
-		    	                unset($obj);
-		    	                if($chkRoleIDString === false) {
-		    	                    $boolRet = false;
-		    	                    $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-19021",array(implode(",", $ErrorRoleNameAry))) . "\n";
-		    	                    // intErrorTypeは設定不要
-		    	                    // $intErrorType = 500;
-		    	                }
-		    	            }
-		    	            if($chkRoleIDString !== false) {
-		    	                // 登録するアクセス権をロール名称の文字列に設定
-		    	                $exeQueryData[$AccessAuthColumnName] = $chkRoleIDString;
-		    	            }
-		    	        }
-                            }
-		    	}
 		        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
 		        return $retArray;
 		    };
