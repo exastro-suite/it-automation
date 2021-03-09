@@ -31,6 +31,26 @@
         // DBコネクト
         $num_rows = 0;
 
+        // ログイン中のユーザのロールID取得
+        $sql = "SELECT ROLE_ID
+                FROM   D_ROLE_ACCOUNT_LINK_LIST
+                WHERE  USER_ID = :USER_ID
+                AND DISUSE_FLAG = '0'";
+
+        $tmpAryBind = array('USER_ID'=>$g['login_id']);
+        $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
+        $role_id = array();
+        if( $retArray[0] === true ){
+            $objQuery =& $retArray[1];
+            while($row = $objQuery->resultFetch() ){
+                array_push($role_id, $row['ROLE_ID']);
+            }
+            unset($objQuery);
+        }
+        else{
+            throw new Exception( '00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
         // メニュー一覧(A_MENU_LIST)が存在しているかチェック
         $sql = "SELECT DISUSE_FLAG
                 FROM   A_MENU_LIST
@@ -93,7 +113,8 @@
                 $sql = "SELECT TAB_1.ROLE_ID,
                                 TAB_3.NAME AS PRIVILEGE_DISP,
                                 TAB_1.PRIVILEGE,
-                                TAB_2.ROLE_NAME
+                                TAB_2.ROLE_NAME,
+                                TAB_2.ACCESS_AUTH
                         FROM   A_ROLE_MENU_LINK_LIST TAB_1
                                 LEFT JOIN A_ROLE_LIST TAB_2 ON (TAB_1.ROLE_ID = TAB_2.ROLE_ID)
                                 LEFT JOIN A_PRIVILEGE_LIST TAB_3 ON (TAB_1.PRIVILEGE = TAB_3.FLAG)
@@ -122,6 +143,7 @@ EOD;
                     while ( $row =  $objQuery->resultFetch() ){
                         $row_counter += 1;
 
+                        $menu_role_id = explode("," , $row['ACCESS_AUTH']);
                         $COLUMN_00 = nl2br(htmlspecialchars($row['ROLE_ID']));
                         if($row['PRIVILEGE'] == 1 || $row['PRIVILEGE'] == 2){
                             $COLUMN_01 = nl2br(htmlspecialchars($row['PRIVILEGE_DISP']));
@@ -135,7 +157,18 @@ EOD;
                         $COLUMN_02 = nl2br(htmlspecialchars($row['ROLE_NAME']));
                         $url = "01_browse.php?no=2100000207&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_00) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_00);
                         $url_02 = "01_browse.php?no=2100000207&filter=on&Filter1Tbl_2=" .str_replace(" ","%20",$COLUMN_02);
-                        $output_str .=
+                        // アクセス許可ロール判定
+                        $auth_flag = '0';
+                        foreach ($menu_role_id as $value) {
+                          if(in_array($value, $role_id)){
+                            $auth_flag = '1';
+                          }
+                          if(empty($value)){
+                            $auth_flag = '1';
+                          }
+                        }
+                        if($auth_flag == '1'){
+                          $output_str .=
 <<< EOD
                             <tr valign="top">
                                 <td class="likeHeader number" scope="row" ><a href={$url} target="_blank">{$COLUMN_00}</a></td>
@@ -143,6 +176,7 @@ EOD;
                                 <td{$BG_COLOR}><a href={$url_02} target="_blank">{$COLUMN_02}</a></td>
                             </tr>
 EOD;
+                        }
                     }
                     unset($objQuery);
 
@@ -216,7 +250,8 @@ EOD;
 
                 $sql = "SELECT TAB_1.ROLE_ID,
                                 TAB_1.PRIVILEGE,
-                                TAB_2.ROLE_NAME
+                                TAB_2.ROLE_NAME,
+                                TAB_2.ACCESS_AUTH
                         FROM   A_ROLE_MENU_LINK_LIST TAB_1
                                 LEFT JOIN A_ROLE_LIST TAB_2 ON (TAB_1.ROLE_ID = TAB_2.ROLE_ID)
                         WHERE  TAB_1.DISUSE_FLAG = '0'
@@ -225,7 +260,8 @@ EOD;
                         UNION
                         SELECT TAB_1.ROLE_ID,
                                 0 AS PRIVILEGE,
-                                TAB_1.ROLE_NAME
+                                TAB_1.ROLE_NAME,
+                                ''
                         FROM   A_ROLE_LIST TAB_1
                         WHERE  TAB_1.ROLE_ID NOT IN ( SELECT ROLE_ID
                                                         FROM   A_ROLE_MENU_LINK_LIST
@@ -255,6 +291,7 @@ EOD;
                     while ($row = $objQuery->resultFetch() ){
                         $row_counter += 1;
 
+                        $menu_role_id = explode("," , $row['ACCESS_AUTH']);
                         // 念のため改行コード(LF)を<br>に変換する
                         $COLUMN_01 = nl2br(htmlspecialchars($row['ROLE_ID']));
                         $COLUMN_02 = nl2br(htmlspecialchars($row['ROLE_NAME']));
@@ -264,7 +301,18 @@ EOD;
                         $selected0 = ($checked_flag == 0 ? "selected":"");
                         $selected1 = ($checked_flag == 1 ? "selected":"");
                         $selected2 = ($checked_flag == 2 ? "selected":"");
-                        $str_temp =
+                        // アクセス許可ロール判定
+                        $auth_flag = '0';
+                        foreach ($menu_role_id as $value) {
+                          if(in_array($value, $role_id)){
+                            $auth_flag = '1';
+                          }
+                          if(empty($value)){
+                            $auth_flag = '1';
+                          }
+                        }
+                        if($auth_flag == '1'){
+                          $str_temp =
 <<< EOD
 <tr valign="top">
 <td class="likeHeader" scope="row" ><span id="role_id_{$row_counter}" style="display:none">{$row['ROLE_ID']}</span><SELECT id="priv_{$row_counter}" >
@@ -277,7 +325,22 @@ EOD;
 <td>$COLUMN_02</td>
 </tr>
 EOD;
-                            $output_str .= $str_temp;
+                        }else{
+                          $str_temp =
+<<< EOD
+<tr valign="top" style="display:none">
+<td class="likeHeader" scope="row" ><span id="role_id_{$row_counter}" style="display:none">{$row['ROLE_ID']}</span><SELECT id="priv_{$row_counter}" >
+    <OPTION value="0" {$selected0}></OPTION>
+    <OPTION value="1" {$selected1}>{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040058")}</OPTION>
+    <OPTION value="2" {$selected2}>{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040059")}</OPTION>
+</SELECT>
+</td>
+<td class="likeHeader number" scope="row" >$COLUMN_01</td>
+<td>$COLUMN_02</td>
+</tr>
+EOD;
+                        }
+                        $output_str .= $str_temp;
                     }
                     unset($objQuery);
 
