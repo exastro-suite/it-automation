@@ -768,12 +768,14 @@
                     ///////////////////////////////////////////////////////////////////////////////////
                     /// (ここから)緊急停止が発令されていて、受理フラグがなければ、緊急停止を発令する //
                     ///////////////////////////////////////////////////////////////////////////////////
-                    
+                    $status_id = $rowOfFocusMovement['STATUS_ID'];
                     if( $intFocusMovementSeq === 0 ){
                         //----まだ最初のムーブメントも始まっていない場合
                         $boolMovementFinedAfterHP = true;
                         //まだ最初のムーブメントも始まっていない場合----
-                    }else{
+                    }
+
+                    if( $intFocusMovementSeq != 0 || $status_id == 1 ){
                         //----すでに1個はムーブメントがはじまった後である場合
 
                         $boolMovUpdateFlag = false;
@@ -850,6 +852,7 @@
                                     $arySymInsCallUpdateTgtSource['ABORT_EXECUTE_FLAG']   = 2; //発令済
                                     $arySymInsCallUpdateTgtSource['LAST_UPDATE_USER']     = $g['login_id'];
                                     $arySymInsCallUpdateTgtSource['TIME_START'] = str_replace("-","/",$arySymInsCallUpdateTgtSource['TIME_START']) ;
+                                    
                                     // 更新用のテーブル定義
                                     $aryConfigForIUD = $arrayConfigForSymInsIUD;
 
@@ -888,7 +891,10 @@
                                 $arySymInsUpdateTgtSource['LAST_UPDATE_USER'] = $db_access_user_id;
                                 $arySymInsUpdateTgtSource['STATUS_ID']= 6; //準備エラー
                                 $arySymInsUpdateTgtSource['TIME_START'] = str_replace("-","/",$arySymInsUpdateTgtSource['TIME_START']) ;
-                                $arySymInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
+                                
+                                if( $status_id != 1 ){
+                                    $arySymInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
+                                }
                                
                                 break; 
                             }

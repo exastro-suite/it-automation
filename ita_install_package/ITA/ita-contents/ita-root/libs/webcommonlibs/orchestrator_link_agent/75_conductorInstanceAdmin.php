@@ -717,213 +717,219 @@ function conductorInstanceScram($fxVarsIntConductorInstanceId){
         //////////////////////////////////////////////////
         // (ここまで)緊急停止フラグを有効化する[最優先] //
         //////////////////////////////////////////////////
+
+        $status_id = $tgtSource_row['STATUS_ID'];
+
+        if ( $status_id != 1 ){
         
-        ////////////////////////////////////////////////////////////////////
-        // (ここから)現在のムーブメントを調べて、緊急停止をリクエストする //
-        ////////////////////////////////////////////////////////////////////
-        
-        // ----トランザクション開始
-        $varTrzStart = $objDBCA->transactionStart();
-        if( $varTrzStart === false ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00000900";
+            ////////////////////////////////////////////////////////////////////
+            // (ここから)現在のムーブメントを調べて、緊急停止をリクエストする //
+            ////////////////////////////////////////////////////////////////////
             
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        $boolInTransactionFlag = true;
-        // トランザクション開始----
-        
-        // ----MOV-INSTANCE-シーケンスを掴む
-        $retArray = getSequenceLockInTrz('C_NODE_INSTANCE_MNG_JSQ','A_SEQUENCE');
-        if( $retArray[1] != 0 ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00001000";
+            // ----トランザクション開始
+            $varTrzStart = $objDBCA->transactionStart();
+            if( $varTrzStart === false ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000900";
+                
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $boolInTransactionFlag = true;
+            // トランザクション開始----
             
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        // MOV-INSTANCE-シーケンスを掴む----
-        
-        $aryRetBody = getSingleConductorInfoFromNodeInstances($intConductorInstanceId, 1);
-        if( $aryRetBody[1] !== null ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00001100";
+            // ----MOV-INSTANCE-シーケンスを掴む
+            $retArray = getSequenceLockInTrz('C_NODE_INSTANCE_MNG_JSQ','A_SEQUENCE');
+            if( $retArray[1] != 0 ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00001000";
+                
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            // MOV-INSTANCE-シーケンスを掴む----
             
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        $aryRowOfMovInstanceTable = $aryRetBody[4];
-        unset($aryRetBody);
-        
-        require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
-        $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA,$g);
-        
-        $aryRetBody = $objOLA->getConductorStatusFromNode($aryRowOfMovInstanceTable);
-
-        if( $aryRetBody[1] !== null ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00001200";
-            //
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-        }
-        $aryStatusInfo = $aryRetBody[0];
-        unset($aryRetBody);
-
-        $arrRowOfFocusMovement=array();
-        foreach ($aryStatusInfo['RUNS_NODE'] as $key => $rowOfFocusMovement) {
-            if( $rowOfFocusMovement['I_ORCHESTRATOR_ID'] != "" )$arrRowOfFocusMovement[]=$rowOfFocusMovement;
-        }
-
-        foreach ($arrRowOfFocusMovement as $key => $rowOfFocusMovement) {
-
-            $aryRetBody = $objOLA->getLiveOrchestratorFromMaster();
+            $aryRetBody = getSingleConductorInfoFromNodeInstances($intConductorInstanceId, 1);
             if( $aryRetBody[1] !== null ){
                 // エラーフラグをON
                 // 例外処理へ
-                $strErrStepIdInFx="00001300";
+                $strErrStepIdInFx="00001100";
                 
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            $aryOrcListRow = $aryRetBody[0];
+            $aryRowOfMovInstanceTable = $aryRetBody[4];
+            unset($aryRetBody);
             
-            $boolOrchestratorExists = false;
-            foreach($aryOrcListRow as $arySingleOrcInfo){
-                $varOrcId = $arySingleOrcInfo['ITA_EXT_STM_ID'];
-                $varOrcRPath = $arySingleOrcInfo['ITA_EXT_LINK_LIB_PATH'];
-                
-                if( $varOrcId==$rowOfFocusMovement['I_ORCHESTRATOR_ID'] ){
-                    $objOLA->addFuncionsPerOrchestrator($varOrcId,$varOrcRPath);
-                    $boolOrchestratorExists = true;
-                    break;
-                }
-            }
+            require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
+            $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA,$g);
             
-            if( $boolOrchestratorExists === false ){
+            $aryRetBody = $objOLA->getConductorStatusFromNode($aryRowOfMovInstanceTable);
+
+            if( $aryRetBody[1] !== null ){
                 // エラーフラグをON
                 // 例外処理へ
-                $strErrStepIdInFx="00001400";
-                
+                $strErrStepIdInFx="00001200";
+                //
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            
-            if( strlen($rowOfFocusMovement['EXECUTION_NO']) === 0 ){
-                //----オーケストレータ側テーブルに、まだレコードが存在していない場合は、実際の、緊急停止の発令はしない。
-                $boolScramExecute = false;
-                //オーケストレータ側テーブルに、まだレコードが存在していない場合は、実際の、緊急停止の発令はしない。----
+            $aryStatusInfo = $aryRetBody[0];
+            unset($aryRetBody);
+
+            $arrRowOfFocusMovement=array();
+            foreach ($aryStatusInfo['RUNS_NODE'] as $key => $rowOfFocusMovement) {
+                if( $rowOfFocusMovement['I_ORCHESTRATOR_ID'] != "" )$arrRowOfFocusMovement[]=$rowOfFocusMovement;
             }
-            else if( $rowOfFocusMovement['ABORT_RECEPTED_FLAG'] === '2' ){
-                //----すでに緊急停止発令受理フラグが、ムーブメントに立っている場合は、実際の、緊急停止の発令はしない。
-                $boolScramExecute = false;
-                //すでに緊急停止発令受理フラグが、ムーブメントに立っている場合は、実際の、緊急停止の発令はしない。----
-            }
-            
-            if( $boolScramExecute === true ){
-                $aryRetBody = $objOLA->srcamExecute($rowOfFocusMovement['I_ORCHESTRATOR_ID'], $rowOfFocusMovement['EXECUTION_NO']);
-                if( $aryRetBody[1] === null && $aryRetBody[0] === 0 ){
-                    //----正常に受け付けられたので、ムーブメント更新フラグをONにする
-                    $boolMovUpdateFlag = true;
-                    //正常に受け付けられたので、ムーブメント更新フラグをONにする----
+
+            foreach ($arrRowOfFocusMovement as $key => $rowOfFocusMovement) {
+
+                $aryRetBody = $objOLA->getLiveOrchestratorFromMaster();
+                if( $aryRetBody[1] !== null ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001300";
+                    
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                 }
-                else{
-                    //----正常に受け付けられなかった場合
-                    $boolScramExecute = false;
-                    if( $aryRetBody[1] !== null ){
-                        $error_info = $aryRetBody[3];
-                        
-                        if( 0 < strlen($error_info) ){
-                            // エラーフラグをON
-                            // 例外処理へ
-                            $strErrStepIdInFx="00001500";
-                            
-                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                        }
+                $aryOrcListRow = $aryRetBody[0];
+                
+                $boolOrchestratorExists = false;
+                foreach($aryOrcListRow as $arySingleOrcInfo){
+                    $varOrcId = $arySingleOrcInfo['ITA_EXT_STM_ID'];
+                    $varOrcRPath = $arySingleOrcInfo['ITA_EXT_LINK_LIB_PATH'];
+                    
+                    if( $varOrcId==$rowOfFocusMovement['I_ORCHESTRATOR_ID'] ){
+                        $objOLA->addFuncionsPerOrchestrator($varOrcId,$varOrcRPath);
+                        $boolOrchestratorExists = true;
+                        break;
                     }
-                    //正常に受け付けられなかった場合----
+                }
+                
+                if( $boolOrchestratorExists === false ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001400";
+                    
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                
+                if( strlen($rowOfFocusMovement['EXECUTION_NO']) === 0 ){
+                    //----オーケストレータ側テーブルに、まだレコードが存在していない場合は、実際の、緊急停止の発令はしない。
+                    $boolScramExecute = false;
+                    //オーケストレータ側テーブルに、まだレコードが存在していない場合は、実際の、緊急停止の発令はしない。----
+                }
+                else if( $rowOfFocusMovement['ABORT_RECEPTED_FLAG'] === '2' ){
+                    //----すでに緊急停止発令受理フラグが、ムーブメントに立っている場合は、実際の、緊急停止の発令はしない。
+                    $boolScramExecute = false;
+                    //すでに緊急停止発令受理フラグが、ムーブメントに立っている場合は、実際の、緊急停止の発令はしない。----
+                }
+                
+                if( $boolScramExecute === true ){
+                    $aryRetBody = $objOLA->srcamExecute($rowOfFocusMovement['I_ORCHESTRATOR_ID'], $rowOfFocusMovement['EXECUTION_NO']);
+                    if( $aryRetBody[1] === null && $aryRetBody[0] === 0 ){
+                        //----正常に受け付けられたので、ムーブメント更新フラグをONにする
+                        $boolMovUpdateFlag = true;
+                        //正常に受け付けられたので、ムーブメント更新フラグをONにする----
+                    }
+                    else{
+                        //----正常に受け付けられなかった場合
+                        $boolScramExecute = false;
+                        if( $aryRetBody[1] !== null ){
+                            $error_info = $aryRetBody[3];
+                            
+                            if( 0 < strlen($error_info) ){
+                                // エラーフラグをON
+                                // 例外処理へ
+                                $strErrStepIdInFx="00001500";
+                                
+                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                            }
+                        }
+                        //正常に受け付けられなかった場合----
+                    }
+                }
+                
+                if( $boolMovUpdateFlag===true ){
+                    //----ムーブメントを、「緊急停止REST-API受付完了確認フラグ」を「受付済」にするために更新する
+                    $update_tgt_row = $rowOfFocusMovement;
+                    
+                    $update_tgt_row['ABORT_RECEPTED_FLAG']  = 2; //確認済
+                    $update_tgt_row['LAST_UPDATE_USER']     = $g['login_id'];
+                    
+                    $arrayConfigForIUD = $arrayConfigForMovInsIUD;
+                    $tgtSource_row = $update_tgt_row;
+                    
+                    $retArray = makeSQLForUtnTableUpdate($g['db_model_ch']
+                                                    ,$sqlType
+                                                    ,"NODE_INSTANCE_NO"
+                                                    ,"C_NODE_INSTANCE_MNG"
+                                                    ,"C_NODE_INSTANCE_MNG_JNL"
+                                                    ,$arrayConfigForIUD
+                                                    ,$tgtSource_row);
+
+                    if( $retArray[0] === false ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00001600";
+                        
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                    
+                    $sqlUtnBody = $retArray[1];
+                    $arrayUtnBind = $retArray[2];
+                    
+                    $sqlJnlBody = $retArray[3];
+                    $arrayJnlBind = $retArray[4];
+                    
+                    // ----履歴シーケンス払い出し
+                    $retArray = getSequenceValueFromTable('C_NODE_INSTANCE_MNG_JSQ', 'A_SEQUENCE', FALSE );
+                    if( $retArray[1] != 0 ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00001700";
+                        
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                    else{
+                        $varJSeq = $retArray[0];
+                        $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
+                    }
+                    // 履歴シーケンス払い出し----
+                    
+                    $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
+                    $retArray02 = singleSQLCoreExecute($objDBCA, $sqlJnlBody, $arrayJnlBind, $strFxName);
+                    if( $retArray01[0] !== true || $retArray02[0] !== true ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00001800";
+                        
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                    unset($retArray01);
+                    unset($retArray02);
+                    //ムーブメントを、「緊急停止REST-API受付完了確認フラグ」を「受付済」にするために更新する----
                 }
             }
-            
-            if( $boolMovUpdateFlag===true ){
-                //----ムーブメントを、「緊急停止REST-API受付完了確認フラグ」を「受付済」にするために更新する
-                $update_tgt_row = $rowOfFocusMovement;
-                
-                $update_tgt_row['ABORT_RECEPTED_FLAG']  = 2; //確認済
-                $update_tgt_row['LAST_UPDATE_USER']     = $g['login_id'];
-                
-                $arrayConfigForIUD = $arrayConfigForMovInsIUD;
-                $tgtSource_row = $update_tgt_row;
-                
-                $retArray = makeSQLForUtnTableUpdate($g['db_model_ch']
-                                                ,$sqlType
-                                                ,"NODE_INSTANCE_NO"
-                                                ,"C_NODE_INSTANCE_MNG"
-                                                ,"C_NODE_INSTANCE_MNG_JNL"
-                                                ,$arrayConfigForIUD
-                                                ,$tgtSource_row);
 
-                if( $retArray[0] === false ){
+            if( $objDBCA->getTransactionMode() ){
+                // ----トランザクション終了
+                $boolResult = $objDBCA->transactionCommit();
+                if ( $boolResult === false ){
                     // エラーフラグをON
                     // 例外処理へ
-                    $strErrStepIdInFx="00001600";
+                    $strErrStepIdInFx="00001900";
                     
                     throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                 }
-                
-                $sqlUtnBody = $retArray[1];
-                $arrayUtnBind = $retArray[2];
-                
-                $sqlJnlBody = $retArray[3];
-                $arrayJnlBind = $retArray[4];
-                
-                // ----履歴シーケンス払い出し
-                $retArray = getSequenceValueFromTable('C_NODE_INSTANCE_MNG_JSQ', 'A_SEQUENCE', FALSE );
-                if( $retArray[1] != 0 ){
-                    // エラーフラグをON
-                    // 例外処理へ
-                    $strErrStepIdInFx="00001700";
-                    
-                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                }
-                else{
-                    $varJSeq = $retArray[0];
-                    $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
-                }
-                // 履歴シーケンス払い出し----
-                
-                $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
-                $retArray02 = singleSQLCoreExecute($objDBCA, $sqlJnlBody, $arrayJnlBind, $strFxName);
-                if( $retArray01[0] !== true || $retArray02[0] !== true ){
-                    // エラーフラグをON
-                    // 例外処理へ
-                    $strErrStepIdInFx="00001800";
-                    
-                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                }
-                unset($retArray01);
-                unset($retArray02);
-                //ムーブメントを、「緊急停止REST-API受付完了確認フラグ」を「受付済」にするために更新する----
+
+                $objDBCA->transactionExit();
+                $boolInTransactionFlag = false;
+                // トランザクション終了----
             }
-        }
-
-        
-        // ----トランザクション終了
-        $boolResult = $objDBCA->transactionCommit();
-        if ( $boolResult === false ){
-            // エラーフラグをON
-            // 例外処理へ
-            $strErrStepIdInFx="00001900";
             
-            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            ////////////////////////////////////////////////////////////////////
+            // (ここまで)現在のムーブメントを調べて、緊急停止をリクエストする //
+            ////////////////////////////////////////////////////////////////////
         }
-
-        $objDBCA->transactionExit();
-        $boolInTransactionFlag = false;
-        // トランザクション終了----
-        
-        ////////////////////////////////////////////////////////////////////
-        // (ここまで)現在のムーブメントを調べて、緊急停止をリクエストする //
-        ////////////////////////////////////////////////////////////////////
     }
     catch (Exception $e){
         //----トランザクション中のエラーの場合
