@@ -74,6 +74,7 @@ define('FILE_PARTS_ID',                 'parts_id.php');                        
 define('FILE_PARTS_PW',                 'parts_password.php');                      // 00_loadTable.phpのデータ部テンプレート(PW用)
 define('FILE_PARTS_UPL',                'parts_upload.php');                        // 00_loadTable.phpのデータ部テンプレート(ファイルアップロード用)
 define('FILE_PARTS_LNK',                'parts_link.php');                          // 00_loadTable.phpのデータ部テンプレート(リンク用)
+define('FILE_PARTS_REF',                'parts_view_reference.php');                // 00_loadTable.phpのデータ部テンプレート(プルダウン選択の参照項目用)
 
 define('FILE_PARTS_VIEW_SNG',           'parts_view_string.php');                   // 00_loadTable.php(VIEW用)のデータ部テンプレート(単一行文字列用)
 define('FILE_PARTS_VIEW_MUL',           'parts_view_multiString.php');              // 00_loadTable.php(VIEW用)のデータ部テンプレート(複数行文字列用)
@@ -85,6 +86,7 @@ define('FILE_PARTS_VIEW_ID',            'parts_view_id.php');                   
 define('FILE_PARTS_VIEW_PW',            'parts_view_password.php');                 // 00_loadTable.php(VIEW用)のデータ部テンプレート(PW用)
 define('FILE_PARTS_VIEW_UPL',           'parts_view_upload.php');                   // 00_loadTable.php(VIEW用)のデータ部テンプレート(ファイルアップロード用)
 define('FILE_PARTS_VIEW_LNK',           'parts_view_link.php');                     // 00_loadTable.php(VIEW用)のデータ部テンプレート(リンク用)
+define('FILE_PARTS_VIEW_REF',           'parts_view_reference.php');                // 00_loadTable.php(VIEW用)のデータ部テンプレート(プルダウン選択の参照項目用)
 
 
 define('TABLE_PREFIX',                  'KY_AUTO_TABLE_');                          // テーブル名の接頭語
@@ -119,3 +121,14 @@ define('REPLACE_PW_MAX_LENGTH',         '★★★PW_MAX_LENGTH★★★');
 define('REPLACE_UPLOAD_FILE_SIZE',      '★★★UPLOAD_FILE_SIZE★★★');
 define('REPLACE_UPLOAD_REF_MENU_ID',    '★★★UPLOAD_REF_MENU_ID★★★');
 define('REPLACE_LINK_MAX_LENGTH',       '★★★LINK_MAX_LENGTH★★★');
+define('REPLACE_REFERENCE',             '★★★REFERENCE★★★');
+define('REPLACE_REF_NUMBER',            '★★★REFERENCE_NUMBER★★★');
+define('REPLACE_CLONE_VALUE',           '★★★CLONE_VALUE_NAME★★★');
+define('REPLACE_CLONE_DISP',            '★★★CLONE_DISP_NAME★★★');
+define('REPLACE_CLONE_ID_TABLE',        '★★★CLONE_ID_TABLE_NAME★★★');
+define('REPLACE_CLONE_PRI',             '★★★CLONE_PRI_KEY_NAME★★★');
+define('REPLACE_CLONE_COL',             '★★★CLONE_ID_COL_NAME★★★');
+define('REPLACE_CLONE_INFO',            '★★★CLONE_INFO★★★');
+define('REPLACE_ITEM_PASSWORD',         '★★★REFERENCE_ITEM_PASSWORD★★★');
+define('REPLACE_ITEM_DATE',             '★★★REFERENCE_ITEM_DATE★★★');
+define('REPLACE_ITEM_DATETIME',         '★★★REFERENCE_ITEM_DATETIME★★★');
