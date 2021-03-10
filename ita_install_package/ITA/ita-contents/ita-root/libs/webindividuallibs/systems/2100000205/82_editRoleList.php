@@ -261,7 +261,7 @@ EOD;
                         SELECT TAB_1.ROLE_ID,
                                 0 AS PRIVILEGE,
                                 TAB_1.ROLE_NAME,
-                                ''
+                                TAB_1.ACCESS_AUTH
                         FROM   A_ROLE_LIST TAB_1
                         WHERE  TAB_1.ROLE_ID NOT IN ( SELECT ROLE_ID
                                                         FROM   A_ROLE_MENU_LINK_LIST
