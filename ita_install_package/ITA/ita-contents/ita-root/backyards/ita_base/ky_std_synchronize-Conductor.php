@@ -1181,8 +1181,6 @@
                                             $conditionalflg="1";
                                         }
                                     }
-                                    $d_array=array(date('Y-m-d H:i:s').' '.__FILE__.' '.__LINE__ , $conditionalflg );
-                                    error_log(print_r($d_array, true), 3, "/exastro/ita-root/temp/debug" .date('Ymd') . ".txt");
 
 
 
