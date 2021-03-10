@@ -28,6 +28,26 @@
 	        throw new Exception( '00000100-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
 	    }
 
+      // ログイン中のユーザのロールID取得
+      $sql = "SELECT ROLE_ID
+              FROM   D_ROLE_ACCOUNT_LINK_LIST
+              WHERE  USER_ID = :USER_ID
+              AND DISUSE_FLAG = '0'";
+
+      $tmpAryBind = array('USER_ID'=>$g['login_id']);
+      $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
+      $role_id = array();
+      if( $retArray[0] === true ){
+          $objQuery =& $retArray[1];
+          while($row = $objQuery->resultFetch() ){
+              array_push($role_id, $row['ROLE_ID']);
+          }
+          unset($objQuery);
+      }
+      else{
+          throw new Exception( '00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+      }
+
         // ロール一覧(A_ROLE_LIST)が存在しているかチェック
         $sql = "SELECT DISUSE_FLAG
                 FROM   A_ROLE_LIST
@@ -72,7 +92,8 @@
         $sql = "SELECT TAB_1.USER_ID,
                         TAB_2.USERNAME,
                         TAB_2.USERNAME_JP,
-                        TAB_2.DISUSE_FLAG
+                        TAB_2.DISUSE_FLAG,
+                        TAB_2.ACCESS_AUTH
                 FROM   A_ROLE_ACCOUNT_LINK_LIST TAB_1
                         LEFT JOIN A_ACCOUNT_LIST TAB_2 ON (TAB_1.USER_ID = TAB_2.USER_ID)
                 WHERE  TAB_1.ROLE_ID = :ROLE_ID_BV
@@ -100,19 +121,39 @@ EOD;
             while ( $user_row = $objQuery->resultFetch() ){
                 $num_rows += 1;
                 // 項目生成
+                $user_role_id = explode("," , $user_row['ACCESS_AUTH']);
                 $COLUMN_00 = $temp_no;
                 $COLUMN_01 = nl2br(htmlspecialchars($user_row['USER_ID']));
                 $COLUMN_02 = nl2br(htmlspecialchars($user_row['USERNAME']));
                 $COLUMN_03 = nl2br(htmlspecialchars($user_row['USERNAME_JP']));
                 $url = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_01) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_01);
                 $url_02 = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_2=" .str_replace(" ","%20",$COLUMN_02);
+                $htmlText = "<td class=\"number\" " .$BG_COLOR. "><a href=\"" .$url. "\"target=\"_blank\">" .$COLUMN_01. "</a></td>";
+                $htmlText_02 = "<td" .$BG_COLOR. "><a href=\"" .$url_02. "\"target=\"_blank\">" .$COLUMN_02. "</a></td>";
+                // アクセス許可ロール判定
+                $auth_flag = '0';
+                foreach ($user_role_id as $value) {
+                  if(in_array($value, $role_id)){
+                    $auth_flag = '1';
+                  }
+                  if(empty($value)){
+                    $auth_flag = '1';
+                  }
+                }
+                if($auth_flag == '0'){
+                  $COLUMN_01 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($user_row['USER_ID'])) . ')';
+                  $COLUMN_02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($user_row['USER_ID'])) . ')';
+                  $htmlText = "<td" .$BG_COLOR .">" .$COLUMN_01. "</td>";
+                  $htmlText_02 = "<td" .$BG_COLOR .">" .$COLUMN_02. "</td>";
+                }
+
 
                 $str_temp =
 <<< EOD
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
-                        <td class="number" {$BG_COLOR}><a href={$url} target="_blank">{$COLUMN_01}</a></td>
-                        <td{$BG_COLOR}><a href={$url_02} target="_blank">{$COLUMN_02}</a></td>
+                        {$htmlText}
+                        {$htmlText_02}
                         <td{$BG_COLOR}>{$COLUMN_03}</td>
                     </tr>
 EOD;

@@ -16,7 +16,7 @@
 
     $intControlDebugLevel01 = 50;
     $varTrzStart = null;
-    
+
     $strFxName = __FUNCTION__;
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-1",__FILE__),$intControlDebugLevel01);
 
@@ -26,14 +26,34 @@
         if( $objIntNumVali->isValid($p_user_id) === false ){
             throw new Exception( '00000100-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
-        
+
         // DBコネクト
         $num_rows = 0;
-        
+
+        // ログイン中のユーザのロールID取得
+        $sql = "SELECT ROLE_ID
+                FROM   D_ROLE_ACCOUNT_LINK_LIST
+                WHERE  USER_ID = :USER_ID
+                AND DISUSE_FLAG = '0'";
+
+        $tmpAryBind = array('USER_ID'=>$g['login_id']);
+        $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
+        $role_id = array();
+        if( $retArray[0] === true ){
+            $objQuery =& $retArray[1];
+            while($row = $objQuery->resultFetch() ){
+                array_push($role_id, $row['ROLE_ID']);
+            }
+            unset($objQuery);
+        }
+        else{
+            throw new Exception( '00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
         // ユーザ一覧(A_ACCOUNT_LIST)が存在しているかチェック
         $sql = "SELECT DISUSE_FLAG
                 FROM   A_ACCOUNT_LIST
-                WHERE  USER_ID = :USER_ID_BV 
+                WHERE  USER_ID = :USER_ID_BV
                 AND    DISUSE_FLAG IN ('0','1')";
 
         $tmpAryBind = array('USER_ID_BV'=>$p_user_id);
@@ -59,9 +79,9 @@
         else{
             throw new Exception( '00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
-        
+
         $p_account_list_disuse_flag    = $showTgtRow['DISUSE_FLAG'];
-        
+
         switch($mode){
             case 1 :
             case 2 :
@@ -70,7 +90,7 @@
                 }
             break;
         }
-        
+
         switch($mode){
             // ----モードによって処理分岐
             case 0 :
@@ -85,11 +105,12 @@
                     $BG_COLOR = " class=\"disuse\" ";
                     $LNK_ABLE = "disabled";
                 }
-                
+
                 // 所属しているロールのリストを生成
 
                 $sql = "SELECT TAB_1.ROLE_ID,
-                                TAB_2.ROLE_NAME
+                                TAB_2.ROLE_NAME,
+                                TAB_2.ACCESS_AUTH
                         FROM   A_ROLE_ACCOUNT_LINK_LIST TAB_1
                                 LEFT JOIN A_ROLE_LIST TAB_2 ON (TAB_1.ROLE_ID = TAB_2.ROLE_ID )
                         WHERE  TAB_1.DISUSE_FLAG = '0'
@@ -101,7 +122,7 @@
                 $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
-                    $output_str .= 
+                    $output_str .=
 <<< EOD
                         <div class="fakeContainer_Yobi1">
                         <table id="DbTable_Yobi1">
@@ -113,19 +134,32 @@ EOD;
                     $row_counter = 0;
                     while($row = $objQuery->resultFetch() ){
                         $row_counter += 1;
+                        $role_role_id = explode("," , $row['ACCESS_AUTH']);
                         $COLUMN_00 = nl2br(htmlspecialchars($row['ROLE_ID']));
                         $COLUMN_01 = nl2br(htmlspecialchars($row['ROLE_NAME']));
-                        $output_str .=
+                        // アクセス許可ロール判定
+                        $auth_flag = '0';
+                        foreach ($role_role_id as $value) {
+                          if(in_array($value, $role_id)){
+                            $auth_flag = '1';
+                          }
+                          if(empty($value)){
+                            $auth_flag = '1';
+                          }
+                        }
+                        if($auth_flag == '1'){
+                          $output_str .=
 <<< EOD
                             <tr valign="top">
                                 <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
                                 <td{$BG_COLOR}>{$COLUMN_01}</td>
                             </tr>
 EOD;
+                        }
                     }
                     unset($objQuery);
 
-                    $output_str .= 
+                    $output_str .=
 <<< EOD
                         </table>
                         </div>
@@ -155,18 +189,18 @@ EOD;
                 // ロールアカウント紐付リストの中で一番LAST_UPDATE_TIMESTAMPが新しいものをメモする
 
                 $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($g['db_model_ch'],"MAX(LAST_UPDATE_TIMESTAMP)","DATETIME",true,true);
-                
+
                 $strSelectMaxLastUpdateTimestamp = "CASE WHEN MAX(LAST_UPDATE_TIMESTAMP) IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END";
-                
+
                 $sql = "SELECT {$strSelectMaxLastUpdateTimestamp} AS MAX_LAST_UPDATE_TIMESTAMP
                         FROM   A_ROLE_ACCOUNT_LINK_LIST
                         WHERE  USER_ID = :USER_ID_BV ";
-                        
+
                 $tmpAryBind = array('USER_ID_BV'=>$p_user_id);
                 $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
-                    
+
                     $intTmpRowCount=0;
                     $getTgtRow = array();
                     while($row = $objQuery->resultFetch() ){
@@ -186,12 +220,13 @@ EOD;
                 else{
                     throw new Exception( '00000700-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                 }
-                
+
                 $strMaxLastUpdateTimestamp = $getTgtRow['MAX_LAST_UPDATE_TIMESTAMP'];
-                
+
                 $sql = "SELECT TAB_1.ROLE_ID,
                                 TAB_2.ROLE_NAME,
-                                1 AS FLAG
+                                1 AS FLAG,
+                                TAB_2.ACCESS_AUTH
                         FROM   A_ROLE_ACCOUNT_LINK_LIST TAB_1
                                 LEFT JOIN A_ROLE_LIST TAB_2 ON (TAB_1.ROLE_ID = TAB_2.ROLE_ID)
                         WHERE  TAB_1.DISUSE_FLAG = '0'
@@ -200,20 +235,21 @@ EOD;
                         UNION
                         SELECT TAB_1.ROLE_ID,
                                 TAB_1.ROLE_NAME,
-                                NULL AS FLAG
-                        FROM   A_ROLE_LIST TAB_1
-                        WHERE  TAB_1.ROLE_ID NOT IN ( SELECT ROLE_ID
-                                                        FROM   A_ROLE_ACCOUNT_LINK_LIST
-                                                        WHERE  USER_ID = :USER_ID_BV
-                                                        AND    DISUSE_FLAG = '0' )
-                        AND    TAB_1.DISUSE_FLAG = '0' ";
+                                NULL AS FLAG,
+                                TAB_1.ACCESS_AUTH
+                                FROM   A_ROLE_LIST TAB_1
+                                WHERE  TAB_1.ROLE_ID NOT IN ( SELECT ROLE_ID
+                                                                FROM   A_ROLE_ACCOUNT_LINK_LIST
+                                                                WHERE  USER_ID = :USER_ID_BV
+                                                                AND    DISUSE_FLAG = '0' )
+                                AND    TAB_1.DISUSE_FLAG = '0'";
 
                 $tmpAryBind = array('USER_ID_BV'=>$p_user_id);
                 $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
-                    
-                    $output_str .= 
+
+                    $output_str .=
 <<< EOD
                         <div id="max_last_update_timestamp"  style="display:none;" >{$strMaxLastUpdateTimestamp}</div>
                         <div class="fakeContainer_Yobi1">
@@ -226,21 +262,35 @@ EOD;
 EOD;
                     $row_counter1 = 0;
                     while ( $row1 = $objQuery->resultFetch() ){
+                        $role_role_id = explode("," , $row1['ACCESS_AUTH']);
                         // 念のため改行コード(LF)を<br>に変換する
-                        
+
                         $COLUMN_01 = nl2br(htmlspecialchars($row1['ROLE_ID']));
                         $COLUMN_02 = nl2br(htmlspecialchars($row1['ROLE_NAME']));
-                        
+
                         // レコード通番を採番する
                         $row_counter1 += 1;
                         //$row_counter = oci_num_rows($stid_2);
-                        
+
                         // 所属済みの場合はチェック状態にする
                         $checked_flag="";
                         if($row1['FLAG']){
                             $checked_flag="checked";
                         }
-                        $str_temp = 
+
+                        // アクセス許可ロール判定
+                        $auth_flag = '0';
+                        foreach ($role_role_id as $value) {
+                          web_log("value:" .$value);
+                          if(in_array($value, $role_id)){
+                            $auth_flag = '1';
+                          }
+                          if(empty($value)){
+                            $auth_flag = '1';
+                          }
+                        }
+                        if($auth_flag == '1'){
+                          $str_temp =
 <<< EOD
                             <tr valign="top">
                                 <td class="likeHeader" scope="row"><div align="center"><input type="checkbox" id="role_id_{$row_counter1}" value="{$COLUMN_01}" $checked_flag></div></td>
@@ -248,11 +298,21 @@ EOD;
                                 <td>$COLUMN_02</td>
                             </tr>
 EOD;
+                        }else{
+                          $str_temp =
+<<< EOD
+                          <tr valign="top" style="display:none">
+                              <td class="likeHeader" scope="row"><div align="center"><input type="checkbox" id="role_id_{$row_counter1}" value="{$COLUMN_01}" $checked_flag></div></td>
+                              <td class="likeHeader number" scope="row">$COLUMN_01</td>
+                              <td>$COLUMN_02</td>
+                          </tr>
+EOD;
+                        }
                         $output_str .= $str_temp;
                     }
                     unset($objQuery);
 
-                    $str_temp = 
+                    $str_temp =
 <<< EOD
                         </table>
                         </div>
@@ -260,7 +320,7 @@ EOD;
                     $output_str .= $str_temp;
 
                     // 実行ボタンと戻るボタンを出力
-                    $str_temp = 
+                    $str_temp =
 <<< EOD
                         <input type="button" class="tableOuterElement updatebutton" value="{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070055")}" onClick=location.href="javascript:edit_role_list(0,$p_user_id);" >
                         <input type="button" class="tableOuterElement updatebutton" value="{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070056")}" onClick=location.href="javascript:edit_role_list(2,$p_user_id);" id="now_on_maintenance" >
@@ -347,12 +407,12 @@ EOD;
                 else{
                     throw new Exception( '00001400-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                 }
-                
+
                 if( $row0['DISUSE_FLAG'] != '0' ){
                     $output_str = "<span class=\"generalErrMsg\">{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070057")}</span>";
                     $boolExeContinue = false;
                 }
-                
+
                 // ----シーケンスを掴む
                 if( $boolExeContinue === true  ){
                     $retArray = getSequenceLockInTrz('JSEQ_A_ROLE_ACCOUNT_LINK_LIST','A_SEQUENCE');
@@ -367,12 +427,12 @@ EOD;
                     }
                 }
                 // シーケンスを掴む----
-                
+
                 if( $boolExeContinue === true  ){
                     // ----該当のユーザIDのリストを取得する
                     $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($g['db_model_ch'],"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
                     $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-                    
+
                     // ----全行および全行中、最後に更新された日時を取得する
                     $arrayConfigForSelect = array(
                         "JOURNAL_SEQ_NO"=>"",
@@ -387,7 +447,7 @@ EOD;
                         "LAST_UPDATE_USER"=>"",
                         $strSelectMaxLastUpdateTimestamp=>""
                     );
-                    
+
                     $arrayValueTmpl = array(
                         "JOURNAL_SEQ_NO"=>"",
                         "JOURNAL_ACTION_CLASS"=>"",
@@ -402,9 +462,9 @@ EOD;
                         $strSelectMaxLastUpdateTimestamp=>""
                     );
                     $arrayValue = $arrayValueTmpl;
-                                
+
                     $temp_array = array('WHERE'=>"DISUSE_FLAG IN ('0','1') AND USER_ID = :USER_ID ");
-                    
+
                     $retArray = makeSQLForUtnTableUpdate($g['db_model_ch'],
                                                     "SELECT FOR UPDATE",
                                                     "LINK_ID",
@@ -418,25 +478,25 @@ EOD;
                     if( $retArray[0] === false ){
                         throw new Exception( '00001700-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     }
-                    
+
                     $sqlUtnBody = $retArray[1];
                     $arrayUtnBind = $retArray[2];
                     $objQueryUtn = $g['objDBCA']->sqlPrepare($sqlUtnBody);
-                    
+
                     if( $objQueryUtn->getStatus()===false ){
                         throw new Exception( '00001800-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     }
-                    
+
                     $arrayUtnBind['USER_ID'] = $p_user_id;
                     if( $objQueryUtn->sqlBind($arrayUtnBind) != "" ){
                         throw new Exception( '00001900-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     }
-                    
+
                     $boolResult = $objQueryUtn->sqlExecute();
                     if( $boolResult === false ){
                         throw new Exception( '00002000-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     }
-                    
+
                     //----発見行だけループ
                     while ( $row = $objQueryUtn->resultFetch() ){
                         if($row!==false){
@@ -450,7 +510,7 @@ EOD;
                                     //----マイクロ秒付のUNIXタイムスタンプへ
                                     $intFocusLUT = convFromStrDateToUnixtime($row["LUT4U"],true);
                                     //マイクロ秒付のUNIXタイムスタンプへ----
-                                    
+
                                     if(bccomp($intFocusLUT, $intSelectMaxLUTimestamp,6) == 1){
                                         $intSelectMaxLUTimestamp = $intFocusLUT;
                                     }
@@ -460,7 +520,7 @@ EOD;
                     }
                     //発見行だけループ----
                     unset($objQueryUtn);
-                    
+
                     if($intSelectMaxLUTimestamp === ""){
                         $strSelectMaxLUTimestamp = "VALNULL";
                     }
@@ -468,15 +528,15 @@ EOD;
                         $strSelectMaxLUTimestamp = convFromUnixtimeToStrDate($intSelectMaxLUTimestamp,true,1);
                     }
                     unset($intSelectMaxLUTimestamp);
-                    
+
                     if( $strSelectMaxLUTimestamp != $p_max_last_update_timestamp ){
                         $output_str = "<span class=\"generalErrMsg\">{$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070058")}</span>";
                         $boolExeContinue = false;
                     }
                     // 全行および全行中、最後に更新された日時を取得する----
                     // 該当のメニューIDのリストを取得する----
-                } 
-                   
+                }
+
                 if( $boolExeContinue === true  ){
                     // ----チェックが入っているロールと「$p_role_array」と、テーブルのありもの、を統合する
                     $tmpArrayOrder = array();
@@ -501,7 +561,7 @@ EOD;
                     unset($tmpChkArray);
                     // チェックが入っているロールと「$p_role_array」と、テーブルのありもの、を統合する----
                 }
-                    
+
                 if( $boolExeContinue === true  ){
                     $arrayConfigForIUD = array(
                         "JOURNAL_SEQ_NO"=>"",
@@ -515,18 +575,18 @@ EOD;
                         "LAST_UPDATE_TIMESTAMP"=>"",
                         "LAST_UPDATE_USER"=>""
                     );
-                    
+
                     foreach($tmpArrayOrder as $intRole=>$strOrd){
                         //----ループ
                         $tmpRowExists = false;
                         $strDisuseFlag = $strOrd;
                         $tgtSource_row = array();
-                        
+
                         if(array_key_exists($intRole, $aryResult01) === true){
                             $cln_update_row = $aryResult01[$intRole];
                             $tmpRowExists = true;
                         }
-                        
+
                         if( $tmpRowExists === true ){
                             //----更新
                             if( $cln_update_row['DISUSE_FLAG'] == $strDisuseFlag ){
@@ -562,56 +622,56 @@ EOD;
                             $tgtSource_row = $new_insert_row;
                             //登録----
                         }
-                        
+
                         $retArray = makeSQLForUtnTableUpdate($g['db_model_ch'],
                             $sqlType,
                             "LINK_ID",
                             "A_ROLE_ACCOUNT_LINK_LIST",
                             "A_ROLE_ACCOUNT_LINK_LIST_JNL",
                             $arrayConfigForIUD,
-                            $tgtSource_row 
+                            $tgtSource_row
                         );
-                        
+
                         if( $retArray[0] === false ){
                             throw new Exception( '00002300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
-                        
+
                         $sqlUtnBody = $retArray[1];
                         $arrayUtnBind = $retArray[2];
-                        
+
                         $sqlJnlBody = $retArray[3];
                         $arrayJnlBind = $retArray[4];
-                        
+
                         // 履歴シーケンス払い出し
                         $retArray = getSequenceValueFromTable('JSEQ_A_ROLE_ACCOUNT_LINK_LIST', 'A_SEQUENCE', FALSE );
                         if( $retArray[1] != 0 ){
                             throw new Exception( '00002400-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
-                        
+
                         $varJSeq = $retArray[0];
                         $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
-                        
+
                         $objQueryUtn = $g['objDBCA']->sqlPrepare($sqlUtnBody);
                         $objQueryJnl = $g['objDBCA']->sqlPrepare($sqlJnlBody);
-                        
+
                         if( $objQueryUtn->getStatus()===false || $objQueryJnl->getStatus()===false ){
                             throw new Exception( '00002500-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
-                        
+
                         if( $objQueryUtn->sqlBind($arrayUtnBind) != "" || $objQueryJnl->sqlBind($arrayJnlBind) != "" ){
                             throw new Exception( '00002600-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
-                        
+
                         $rUtn = $objQueryUtn->sqlExecute();
                         if($rUtn!=true){
                             throw new Exception( '00002700-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
-                        
+
                         $rJnl = $objQueryJnl->sqlExecute();
                         if($rJnl!=true){
                             throw new Exception( '00002800-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
-                        
+
                         //SQL実行----
                         unset($objQueryUtn);
                         unset($objQueryJnl);
@@ -624,7 +684,7 @@ EOD;
                     }
                     $g['objDBCA']->transactionExit();
                     // トランザクション終了----
-                    
+
                     if( $boolExeContinue === true  ){
                         // ----正常の場合はログインID(数字)を返却する(受け取り側でmatchメソッドを使うので、文字列型へキャスト)
                         // ----暗黙の型変換されないように注意すること
@@ -643,15 +703,15 @@ EOD;
     catch (Exception $e){
         // エラーフラグをON
         $error_flag = 1;
-        
+
         $tmpErrMsgBody = $e->getMessage();
         dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-        
+
         // DBアクセス事後処理
         if( isset($objQuery) )    unset($objQuery);
         if( isset($objQueryUtn) ) unset($objQueryUtn) ;
         if( isset($objQueryJnl) ) unset($objQueryJnl) ;
-        
+
         if( $varTrzStart === true ){
             $varRollBack = $g['objDBCA']->transactionRollBack();
             if( $varRollBack === false ){

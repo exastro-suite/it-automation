@@ -68,7 +68,31 @@
             $BG_COLOR = " class=\"disuse\" ";
         }
 
-        $sql = "SELECT TAB_2.MENU_GROUP_ID,
+        // ログイン中のユーザのロールID取得
+        $sql = "SELECT ROLE_ID
+                FROM   D_ROLE_ACCOUNT_LINK_LIST
+                WHERE  USER_ID = :USER_ID
+                AND DISUSE_FLAG = '0'";
+
+        $tmpAryBind = array('USER_ID'=>$g['login_id']);
+        $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
+        $role_id = "";
+        if( $retArray[0] === true ){
+            $objQuery =& $retArray[1];
+            while($row = $objQuery->resultFetch() ){
+                array_push($role_id, $row['ROLE_ID']);
+            }
+            unset($objQuery);
+        }
+        else{
+            throw new Exception( '00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
+        $sql = "SELECT TAB_3.DISUSE_FLAG      AS MG_DISUSE_FLAG,
+                        TAB_2.DISUSE_FLAG,
+                        TAB_3.ACCESS_AUTH     AS MG_ACCESS_AUTH,
+                        TAB_2.ACCESS_AUTH,
+                        TAB_2.MENU_GROUP_ID,
                         TAB_3.MENU_GROUP_NAME,
                         TAB_2.DISP_SEQ,
                         TAB_1.MENU_ID,
@@ -111,6 +135,8 @@ EOD;
             while ( $menu_row =  $objQuery->resultFetch() ){
                 $num_rows += 1;
                 // 項目生成
+                $mg_role_id = explode("," , $menu_row['MG_ACCESS_AUTH']);
+                $menu_role_id = explode("," , $menu_row['ACCESS_AUTH']);
                 $COLUMN_00 = $temp_no;
                 $COLUMN_07 = nl2br(htmlspecialchars($menu_row['MENU_GROUP_ID']));
                 $COLUMN_01 = nl2br(htmlspecialchars($menu_row['MENU_GROUP_NAME']));
@@ -123,15 +149,69 @@ EOD;
                 $url_02 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_03) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_03);
                 $url_03 = "01_browse.php?no=2100000205&filter=on&Filter1Tbl_4=" .str_replace(" ","%20",$COLUMN_04);
                 $url_04 = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_1__S=" .str_replace(" ","%20",$COLUMN_07) ."&Filter1Tbl_1__E=" .str_replace(" ","%20",$COLUMN_07);
+                $htmlText = "<td" .$BG_COLOR. "><a href=\"" .$url_04. "\"target=\"_blank\">" .$COLUMN_07. "</a></td>";
+                $htmlText_02 = "<td" .$BG_COLOR. "><a href=\"" .$url. "\"target=\"_blank\">" .$COLUMN_01. "</a></td>";
+                // 廃止判定
+                if( $menu_row['MG_DISUSE_FLAG'] == '1' ){
+                  $COLUMN_07 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($menu_row['MENU_GROUP_ID'])) . ')';
+                  $COLUMN_01 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($menu_row['MENU_GROUP_ID'])) . ')';
+                  $htmlText = "<td" .$BG_COLOR .">" .$COLUMN_07. "</td>";
+                  $htmlText_02 = "<td" .$BG_COLOR .">" .$COLUMN_01. "</td>";
+                }else{
+                  // アクセス許可ロール判定
+                  $auth_flag = '0';
+                  foreach ($mg_role_id as $value) {
+                    web_log("value:" .$value);
+                    if($role_id == $value){
+                      $auth_flag = '1';
+                    }
+                    if(empty($value)){
+                      $auth_flag = '1';
+                    }
+                  }
+                  if($auth_flag == '0'){
+                    $COLUMN_07 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($menu_row['MENU_GROUP_ID'])) . ')';
+                    $COLUMN_01 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($menu_row['MENU_GROUP_ID'])) . ')';
+                    $htmlText = "<td" .$BG_COLOR .">" .$COLUMN_07. "</td>";
+                    $htmlText_02 = "<td" .$BG_COLOR .">" .$COLUMN_01. "</td>";
+                  }
+                }
+                $htmlText_03 = "<td class=\"number\"" .$BG_COLOR ."><a href=\"" .$url_02. "\"target=\"_blank\">" .$COLUMN_03. "</a></td>";
+                $htmlText_04 = "<td" .$BG_COLOR. "><a href=\"" .$url_03. "\"target=\"_blank\">" .$COLUMN_04. "</a></td>";
+                // 廃止判定
+                if( $menu_row['DISUSE_FLAG'] == '1' ){
+                  $COLUMN_03 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($menu_row['MENU_ID'])) . ')';
+                  $COLUMN_04 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($menu_row['MENU_ID'])) . ')';
+                  $htmlText_03 = "<td" .$BG_COLOR .">" .$COLUMN_03. "</td>";
+                  $htmlText_04 = "<td" .$BG_COLOR .">" .$COLUMN_04. "</td>";
+                }else{
+                  // アクセス許可ロール判定
+                  $auth_flag = '0';
+                  foreach ($menu_role_id as $value) {
+                    web_log("value:" .$value);
+                    if($role_id == $value){
+                      $auth_flag = '1';
+                    }
+                    if(empty($value)){
+                      $auth_flag = '1';
+                    }
+                  }
+                  if($auth_flag == '0'){
+                    $COLUMN_03 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($menu_row['MENU_ID'])) . ')';
+                    $COLUMN_04 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($menu_row['MENU_ID'])) . ')';
+                    $htmlText_03 = "<td" .$BG_COLOR .">" .$COLUMN_03. "</td>";
+                    $htmlText_04 = "<td" .$BG_COLOR .">" .$COLUMN_04. "</td>";
+                  }
+                }
                 $str_temp =
 <<< EOD
                     <tr valign="top">
                         <td class="likeHeader number" scope="row" >{$COLUMN_00}</td>
-                        <td{$BG_COLOR}><a href={$url_04} target="_blank">{$COLUMN_07}</a></td>
-                        <td{$BG_COLOR}><a href={$url} target="_blank">{$COLUMN_01}</a></td>
+                        {$htmlText}
+                        {$htmlText_02}
                         <td class="number" {$BG_COLOR}>{$COLUMN_02}</td>
-                        <td class="number" {$BG_COLOR}><a href={$url_02} target="_blank">{$COLUMN_03}</a></td>
-                        <td{$BG_COLOR}><a href={$url_03} target="_blank">{$COLUMN_04}</a></td>
+                        {$htmlText_03}
+                        {$htmlText_04}
                         <td{$BG_COLOR}>{$COLUMN_05}</td>
                         <td{$BG_COLOR}>{$COLUMN_06}</td>
                     </tr>

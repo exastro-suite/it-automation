@@ -27,6 +27,26 @@
             throw new Exception( '00000100-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
 
+        // ログイン中のユーザのロールID取得
+        $sql = "SELECT ROLE_ID
+                FROM   D_ROLE_ACCOUNT_LINK_LIST
+                WHERE  USER_ID = :USER_ID
+                AND DISUSE_FLAG = '0'";
+
+        $tmpAryBind = array('USER_ID'=>$g['login_id']);
+        $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
+        $role_id = array();
+        if( $retArray[0] === true ){
+            $objQuery =& $retArray[1];
+            while($row = $objQuery->resultFetch() ){
+                array_push($role_id, $row['ROLE_ID']);
+            }
+            unset($objQuery);
+        }
+        else{
+            throw new Exception( '00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
         // レコードをSELECT
 
         $strSelectLastUpdateTimestamp = makeSelectSQLPartForDateWildColumn($g['db_model_ch'],"TAB_1.LAST_UPDATE_TIMESTAMP","DATEDATE",false);
@@ -40,6 +60,7 @@
                         TAB_4.NAME             AS LOGIN_NECESSITY_DISP,
                         TAB_1.DISP_SEQ,
                         TAB_1.NOTE,
+                        TAB_3.ACCESS_AUTH,
                         {$strSelectLastUpdateTimestamp}  AS LAST_UPDATE_TIMESTAMP,
                         TAB_1.LAST_UPDATE_USER           AS LAST_UPDATE_USER_RAW,
                         TAB_2.USERNAME_JP                AS LAST_UPDATE_USER_JP
@@ -105,13 +126,29 @@
                 $strDispLastUpdateUser = $showTgtRow['LAST_UPDATE_USER_JP'];
             }
 
+            $menu_role_id = explode("," , $showTgtRow['ACCESS_AUTH']);
             $COLUMN_00 = nl2br($strDisuseFlagShow);
             $COLUMN_01 = nl2br(htmlspecialchars($showTgtRow['MENU_ID']));
             $COLUMN_02 = nl2br(htmlspecialchars($showTgtRow['MENU_GROUP_ID']));
             $COLUMN_03 = nl2br(htmlspecialchars($showTgtRow['MENU_GROUP_NAME']));
             if( $showTgtRow['MG_DISUSE_FLAG'] == '1' ){
-              $COLUMN_02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . $COLUMN_02 . ')';
-              $COLUMN_03 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . $COLUMN_02 . ')';
+              $COLUMN_02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($showTgtRow['MENU_GROUP_ID'])) . ')';
+              $COLUMN_03 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($showTgtRow['MENU_GROUP_ID'])) . ')';
+            }else{
+              // アクセス許可ロール判定
+              $auth_flag = '0';
+              foreach ($menu_role_id as $value) {
+                if(in_array($value, $role_id)){
+                  $auth_flag = '1';
+                }
+                if(empty($value)){
+                  $auth_flag = '1';
+                }
+              }
+              if($auth_flag == '0'){
+                $COLUMN_02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($showTgtRow['MENU_GROUP_ID'])) . ')';
+                $COLUMN_03 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11101") . '(' . nl2br(htmlspecialchars($showTgtRow['MENU_GROUP_ID'])) . ')';
+              }
             }
             $COLUMN_04 = nl2br(htmlspecialchars($showTgtRow['MENU_NAME']));
             $COLUMN_05 = nl2br(htmlspecialchars($showTgtRow['LOGIN_NECESSITY_DISP']));
