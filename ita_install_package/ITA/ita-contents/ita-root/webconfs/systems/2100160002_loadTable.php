@@ -210,6 +210,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102124"));//エクセル・ヘッダでの説明
     $cg->addColumn($c);
 
+    // 参照項目
+    $c = new TextColumn('REFERENCE_ITEM',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102147"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102148"));//エクセル・ヘッダでの説明
+    $objVldt = new ReferenceItemValidator();
+    $c->setValidator($objVldt);
+    $cg->addColumn($c);
+
     $table->addColumn($cg);
 
     // パスワード

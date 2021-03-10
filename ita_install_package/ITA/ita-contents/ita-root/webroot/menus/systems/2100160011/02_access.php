@@ -192,6 +192,7 @@
                     if(!array_key_exists("PW_MAX_LENGTH",$itemData))        $itemData["PW_MAX_LENGTH"] = "";
                     if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
                     if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
+                    if(!array_key_exists("REFERENCE_ITEM",$itemData))       $itemData["REFERENCE_ITEM"] = "";
                     
                     $arrayRegisterData = array("CREATE_MENU_ID"     => $menuData['menu']['CREATE_MENU_ID'],
                                                "ITEM_NAME"          => $itemData['ITEM_NAME'],
@@ -213,6 +214,7 @@
                                                "PW_MAX_LENGTH"      => $itemData['PW_MAX_LENGTH'],
                                                "UPLOAD_MAX_SIZE"    => $itemData['UPLOAD_MAX_SIZE'],
                                                "LINK_LENGTH"        => $itemData['LINK_LENGTH'],
+                                               "REFERENCE_ITEM"     => $itemData['REFERENCE_ITEM'],
                                                "DESCRIPTION"        => $itemData['DESCRIPTION'],
                                                "ACCESS_AUTH"        => $menuData['menu']['ACCESS_AUTH'],
                                                "NOTE"               => $itemData['NOTE']
@@ -622,6 +624,13 @@
                                             if($itemData['OTHER_MENU_LINK_ID'] != $createItemInfoData['OTHER_MENU_LINK_ID']){
                                                 $changedFlg = true;
                                             }
+
+                                            //参照項目
+                                            if(isset($itemData['REFERENCE_ITEM'])){
+                                                if($itemData['REFERENCE_ITEM'] != $createItemInfoData['REFERENCE_ITEM']){
+                                                    $changedFlg = true;
+                                                }
+                                            }
                                         }
 
                                         //パスワードの場合
@@ -719,6 +728,7 @@
                         if(!array_key_exists("PW_MAX_LENGTH",$itemData))        $itemData["PW_MAX_LENGTH"] = "";
                         if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
                         if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
+                        if(!array_key_exists("REFERENCE_ITEM",$itemData))       $itemData["REFERENCE_ITEM"] = "";
                         
                         $strNumberForRI = $itemData['CREATE_ITEM_ID'];
                         $arrayUpdateData = array("CREATE_MENU_ID"       => $menuData['menu']['CREATE_MENU_ID'],
@@ -741,6 +751,7 @@
                                                  "PW_MAX_LENGTH"        => $itemData['PW_MAX_LENGTH'],
                                                  "UPLOAD_MAX_SIZE"      => $itemData['UPLOAD_MAX_SIZE'],
                                                  "LINK_LENGTH"          => $itemData['LINK_LENGTH'],
+                                                 "REFERENCE_ITEM"       => $itemData['REFERENCE_ITEM'],
                                                  "DESCRIPTION"          => $itemData['DESCRIPTION'],
                                                  "ACCESS_AUTH"          => $menuData['menu']['ACCESS_AUTH'],
                                                  "NOTE"                 => $itemData['NOTE'],
@@ -794,6 +805,7 @@
                         if(!array_key_exists("PW_MAX_LENGTH",$itemData))        $itemData["PW_MAX_LENGTH"] = "";
                         if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
                         if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
+                        if(!array_key_exists("REFERENCE_ITEM",$itemData))       $itemData["REFERENCE_ITEM"] = "";
                         
                         $arrayRegisterData = array("CREATE_MENU_ID"         => $menuData['menu']['CREATE_MENU_ID'],
                                                    "ITEM_NAME"              => $itemData['ITEM_NAME'],
@@ -815,6 +827,7 @@
                                                    "PW_MAX_LENGTH"          => $itemData['PW_MAX_LENGTH'],
                                                    "UPLOAD_MAX_SIZE"        => $itemData['UPLOAD_MAX_SIZE'],
                                                    "LINK_LENGTH"            => $itemData['LINK_LENGTH'],
+                                                   "REFERENCE_ITEM"         => $itemData['REFERENCE_ITEM'],
                                                    "DESCRIPTION"            => $itemData['DESCRIPTION'],
                                                    "ACCESS_AUTH"            => $menuData['menu']['ACCESS_AUTH'],
                                                    "NOTE"                   => $itemData['NOTE']
@@ -1267,7 +1280,69 @@
 
             return makeAjaxProxyResultStream($arrayResult);
         }
-        
+
+        /////////////////////
+        // 参照項目リスト取得
+        /////////////////////
+        function selectReferenceItemList(){
+            // グローバル変数宣言
+            global $g;
+            
+            // ローカル変数宣言
+            $arrayResult = array();
+
+            require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
+            $referenceItemTable = new ReferenceItemTable($g["objDBCA"], $g["db_model_ch"]);
+            $sql = $referenceItemTable->createSselect("WHERE DISUSE_FLAG = '0' ORDER BY LINK_ID, DISP_SEQ");
+            $result = $referenceItemTable->selectTable($sql);
+            if(!is_array($result)){
+                $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                $arrayResult = array("999","", $result);
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            // 権限があるデータのみに絞る
+            $ret = $obj->chkRecodeArrayAccessPermission($result);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            $filteredData = array();
+
+            foreach($result as $pdData){
+                $addArray = array();
+                $addArray['ITEM_ID']         = $pdData['ITEM_ID'];
+                $addArray['LINK_ID']         = $pdData['LINK_ID'];
+                $addArray['DISP_SEQ']        = $pdData['DISP_SEQ'];
+                $addArray['COL_GROUP_NAME']  = $pdData['COL_GROUP_NAME'];
+                $addArray['ITEM_NAME']       = $pdData['ITEM_NAME'];
+                $addArray['MASTER_COL_FLAG'] = $pdData['MASTER_COL_FLAG'];
+                $filteredData[] = $addArray;
+            }
+            $arrayResult = array("000","", json_encode($filteredData));
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+
         /////////////////////
         // メニュー作成情報関連データ取得
         /////////////////////
@@ -1530,6 +1605,7 @@
                         "PW_MAX_LENGTH"         => $itemInfoData['PW_MAX_LENGTH'],
                         "UPLOAD_MAX_SIZE"       => $itemInfoData['UPLOAD_MAX_SIZE'],
                         "LINK_LENGTH"           => $itemInfoData['LINK_LENGTH'],
+                        "REFERENCE_ITEM"        => $itemInfoData['REFERENCE_ITEM'],
                         "DESCRIPTION"           => $itemInfoData['DESCRIPTION'],
                         "REPEAT_ITEM"           => $repeatItem,
                         "MIN_WIDTH"             => "",

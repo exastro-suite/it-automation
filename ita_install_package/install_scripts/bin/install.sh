@@ -109,6 +109,10 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+2))
     fi
 
+    if [ "$CREATEPARAM3_FLG" -eq 1 ]; then
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+1))
+    fi
+
     if [ "$HOSTGROUP_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
@@ -156,6 +160,10 @@ func_install_messasge() {
 
     if [ CREATEPARAM2_FLG = ${1} ]; then
         MESSAGE="Createparam2"
+    fi
+
+    if [ CREATEPARAM3_FLG = ${1} ]; then
+        MESSAGE="Createparam3"
     fi
 
     if [ HOSTGROUP_FLG = ${1} ]; then
@@ -349,6 +357,7 @@ CREATE_TABLES=(
     MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
+    CREATEPARAM3_FLG
     HOSTGROUP_FLG
 )
 
@@ -409,6 +418,7 @@ MATERIAL2_FLG=0
 MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
+CREATEPARAM3_FLG=0
 HOSTGROUP_FLG=0
 
 declare -A REPLACE_CHAR;
@@ -599,6 +609,16 @@ elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] && [ "$ANSIBL
     CREATEPARAM2_FLG=1
 elif [ "$ANSIBLE_FLG" -eq 1 ] && [ "$CREATEPARAM_FLG" -eq 1 ] ; then
     CREATEPARAM2_FLG=1
+fi
+
+if [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] &&  [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_hostgroup" ] ; then
+    CREATEPARAM3_FLG=0
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_hostgroup" ] && [ "$CREATEPARAM_FLG" -eq 1 ] ; then
+    CREATEPARAM3_FLG=1
+elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] && [ "$HOSTGROUP_FLG" -eq 1 ] ; then
+    CREATEPARAM3_FLG=1
+elif [ "$HOSTGROUP_FLG" -eq 1 ] && [ "$CREATEPARAM_FLG" -eq 1 ] ; then
+    CREATEPARAM3_FLG=1
 fi
 
 if [ "$CREATEPARAM_FLG" -eq 1 ]; then
