@@ -14,12 +14,12 @@
 //   limitations under the License.
 //
 ////ja_JP_UTF-8_ITAANSIBLEC_STD
-$ary["ITAANSIBLEC-99999"] = "ダミー";
-$ary["ITAANSIBLEC-101050"] = "緊急停止してよろしいですか？";
-$ary["ITAANSIBLEC-101060"] = "予約を取り消してよろしいですか？";
-$ary["ITAANSIBLEC-101070"] = "作業管理リストから作業No.を選択して下さい。";
-$ary["ITAANSIBLEC-102040"] = "実行しますか？";
-$ary["ITAANSIBLEC-103030"] = "緊急停止してよろしいですか？";
-$ary["ITAANSIBLEC-103040"] = "予約を取り消してよろしいですか？";
-$ary["ITAANSIBLEC-103050"] = "作業管理リストから作業No.を選択して下さい。";
+$ary["ITAANSIBLEC99999"]    = "ダミー";
+$ary["ITAANSIBLEC101050"]   = "緊急停止してよろしいですか？";
+$ary["ITAANSIBLEC101060"]   = "予約を取り消してよろしいですか？";
+$ary["ITAANSIBLEC101070"]   = "作業管理リストから作業No.を選択して下さい。";
+$ary["ITAANSIBLEC102040"]   = "実行しますか？";
+$ary["ITAANSIBLEC103030"]   = "緊急停止してよろしいですか？";
+$ary["ITAANSIBLEC103040"]   = "予約を取り消してよろしいですか？";
+$ary["ITAANSIBLEC103050"]   = "作業管理リストから作業No.を選択して下さい。";
 ?>

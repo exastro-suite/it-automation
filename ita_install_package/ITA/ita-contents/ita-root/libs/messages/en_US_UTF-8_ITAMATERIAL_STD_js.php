@@ -14,8 +14,8 @@
 //   limitations under the License.
 //
 ////en_US_UTF-8_ITAMATERIAL_STD
-$ary["ITAMATERIAL_1001"] = "Set a remote repository URL and a clone repository directory.";
-$ary["ITAMATERIAL_1002"] = "Do you want to run the initial synchronization?";
-$ary["ITAMATERIAL_1003"] = "Initial synchronization has started.";
-$ary["ITAMATERIAL_1004"] = "Initial synchronization is complete.";
+$ary["ITAMATERIAL_1001"]     = "Set a remote repository URL and a clone repository directory.";
+$ary["ITAMATERIAL_1002"]     = "Do you want to run the initial synchronization?";
+$ary["ITAMATERIAL_1003"]     = "Initial synchronization has started.";
+$ary["ITAMATERIAL_1004"]     = "Initial synchronization is complete.";
 ?>
