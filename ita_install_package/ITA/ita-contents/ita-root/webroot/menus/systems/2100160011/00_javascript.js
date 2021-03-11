@@ -156,11 +156,26 @@ callback.prototype = {
        // 正常の場合
        if( ary_result[0] == "000" ){
            menuEditorArray.selectPulldownList = JSON.parse(ary_result[2]);
-           if ( menuEditorTargetID === '') {
+           selectReferenceItemList();
+       }
+        // システムエラーの場合
+        else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+    },
+    /////////////////////
+    // callback: プルダウン選択項目リスト取得
+    /////////////////////
+    selectReferenceItemList : function(result){
+       var ary_result = getArrayBySafeSeparator(result);
+       // 正常の場合
+       if( ary_result[0] == "000" ){
+            menuEditorArray.referenceItemList = JSON.parse(ary_result[2]);
+            if ( menuEditorTargetID === '') {
               menuEditor( menuEditorMode, menuEditorArray );
-           } else {
+            } else {
               selectMenuInfo( menuEditorTargetID );
-           }
+            }
        }
         // システムエラーの場合
         else{
@@ -238,6 +253,13 @@ function selectMenuGroupList(){
 /////////////////////
 function selectPulldownList(){
     proxy.selectPulldownList();
+}
+
+/////////////////////
+// 参照項目リスト取得
+/////////////////////
+function selectReferenceItemList(){
+    proxy.selectReferenceItemList();
 }
 
 /////////////////////

@@ -1475,3 +1475,101 @@ function Mix2_1_InsertAccessPermission() {
 function InsertAccessPermission() {
     setAccessPermission('ins-access-auth-id="access_auth_data"');
 }
+
+//////////////////////////////////////////////////////
+// 参照項目一覧取得・選択
+//////////////////////////////////////////////////////
+// モーダル Body HTML
+function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancelCallBack, closeCallBack, selectMasterId, valueType ) {
+      if ( valueType === undefined ) valueType = 'id';
+      const $modalBody = $('.editor-modal-body');
+      const $modalFooterMenu = $('.editor-modal-footer-menu');
+
+      let itemSelectHTML;
+
+      // 入力値を取得する
+      const checkList = ( initData !== null || initData !== undefined )? initData.split(','): [''];
+      const itemLength = itemList.length;
+
+      //itemListから表示させたいアイテムだけを抽出
+      let extractItemList = [];
+      for ( let i = 0; i < itemLength; i++ ) {
+        if(itemList[i]['LINK_ID'] == selectMasterId && itemList[i]['MASTER_COL_FLAG'] != 1){
+            extractItemList.push(itemList[i]);
+        }
+      }
+      const extractItemLength = extractItemList.length;
+
+      if(extractItemLength != 0){
+          itemSelectHTML = '<div class="modal-table-wrap">'
+                            + '<form id="modal-reference-item-select">'
+                            + '<table class="modal-table modal-select-table">'
+                              + '<thead>'
+                                + '<th class="select">Select</th><th class="id">ID</th><th class="name">Name</th>'
+                              + '</thead>'
+                              + '<tbody>';
+
+
+          for ( let i = 0; i < extractItemLength; i++ ) {
+            const itemName = extractItemList[i]['ITEM_NAME'],
+                  itemID = extractItemList[i]['ITEM_ID'],
+                  masterID = extractItemList[i]['MASTER_COLUMN_ID'],
+                  checkValue = ( valueType === 'name')? itemName: itemID,
+                  checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
+                  value = ( valueType === 'name')? itemName: itemID;
+            itemSelectHTML += '<tr>'
+            + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
+            + '<th>' + itemID + '</th><td>' + itemName + '</td></tr>';
+          }
+
+          itemSelectHTML += ''      
+              + '</tbody>'
+            + '</table>'
+            + '</form>'
+          + '</div>';
+
+      }else{
+          //ボタンを「閉じる」に変更
+          $modalFooterMenu.children().remove();
+          $modalFooterMenu.append('<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">' + getSomeMessage("ITAWDCC92003") + '</li>');
+          itemSelectHTML = '<p class="modal-one-message">'+getSomeMessage("ITACREPAR_1251")+'</p>';
+      }
+
+      $modalBody.html( itemSelectHTML );
+
+      // 行で選択
+      $modalBody.find('.modal-select-table').on('click', 'tr', function(){
+        const $tr = $( this ),
+              checked = $tr.find('.modal-checkbox').prop('checked');
+        if ( checked ) {
+          $tr.find('.modal-checkbox').prop('checked', false );
+        } else {
+          $tr.find('.modal-checkbox').prop('checked', true );
+        }
+      });
+
+      // 決定・取り消しボタン
+      const $modalButton = $('.editor-modal-footer-menu-button');
+      $modalButton.prop('disabled', false ).on('click', function() {
+        const $button = $( this ),
+              btnType = $button.attr('data-button-type');
+        switch( btnType ) {
+          case 'ok':
+            // 選択しているチェックボックスを取得
+            let checkboxArray = new Array;
+            $modalBody.find('.modal-checkbox:checked').each( function(){
+              checkboxArray.push( $( this ).val() );
+            });
+            const newItemList = checkboxArray.join(',');
+            okCallback( newItemList, extractItemList );
+            break;
+          case 'cancel':
+            cancelCallBack();
+            break;
+          case 'close':
+            closeCallBack();
+            break;
+        }
+      });
+}
+

@@ -16,6 +16,7 @@ SELECT TAB_A.ROW_ID                     ,
 
 -- 個別項目
 ★★★COLUMN★★★
+★★★REFERENCE★★★
 -- 個別項目
 
        TAB_A.ACCESS_AUTH                ,
@@ -46,6 +47,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO             ,
 
 -- 個別項目
 ★★★COLUMN★★★
+★★★REFERENCE★★★
 -- 個別項目
 
        TAB_A.ACCESS_AUTH                ,
