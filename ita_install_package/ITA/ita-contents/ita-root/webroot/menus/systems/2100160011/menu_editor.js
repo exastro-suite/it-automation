@@ -78,8 +78,7 @@ const menuEditorLog = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // モーダルを開く
-function itaModalOpen( headerTitle, bodyFunc, modalType ) {
-    
+function itaModalOpen( headerTitle, bodyFunc, modalType, target = "" ) {
     if ( typeof bodyFunc !== 'function' ) return false;
 
     // 初期値
@@ -131,7 +130,7 @@ function itaModalOpen( headerTitle, bodyFunc, modalType ) {
     $body.append( $editorModal );
     $container.css('filter','blur(2px)');
     $firstFocus.focus();
-    
+
     $window.on('keydown.modal', function( e ) {
       
       switch ( e.keyCode ) {
@@ -160,7 +159,11 @@ function itaModalOpen( headerTitle, bodyFunc, modalType ) {
       $editorModal.find('.editor-modal-footer-menu-button[data-button-type="close"]').on('click', itaModalClose );
     }
     
-    bodyFunc();
+    if(target != ""){
+      bodyFunc(target);
+    }else{
+      bodyFunc();
+    }
 
 }
 
@@ -280,7 +283,10 @@ const languageText = {
 '0039':[getSomeMessage("ITACREPAR_1243"),''],
 '0040':[getSomeMessage("ITACREPAR_1244"),''],
 '0041':[getSomeMessage("ITACREPAR_1245"),''],
-'0042':[getSomeMessage("ITACREPAR_1246"),'']
+'0042':[getSomeMessage("ITACREPAR_1246"),''],
+'0043':[getSomeMessage("ITACREPAR_1252"),''],
+'0044':[getSomeMessage("ITACREPAR_1253"),''],
+'0045':[getSomeMessage("ITACREPAR_1254"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
@@ -465,6 +471,13 @@ const columnHTML = ''
             + '<td>'
               + '<select class="config-select pulldown-select"'+modeDisabled+''+modeKeepData+'>' + selectPulldownListHTML + '</select>'
             + '</td>'
+          + '</tr>'
+          + '<tr class="select reference">'
+            + '<th rowspan="2">' + textCode('0043') + '</th>'
+            + '<td><span type="text" class="config-text reference-item property-span" type="text" data-reference-item-id '+modeDisabled+''+modeKeepData+'></span></td>'
+          + '</tr>'
+          + '<tr class="select reference">'
+            + '<td><button class="reference-item-select property-button" '+modeDisabled+''+modeKeepData+'>' + textCode('0045') + '</button></td>'
           + '</tr>'
           + '<tr class="password">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
@@ -681,7 +694,22 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
   if ( editorWindowWidth < tableWidth ) {
     $menuEditWindow.children().stop(0,0).animate({'scrollLeft': tableWidth - editorWindowWidth }, 200 );
   }
-  
+
+
+  //参照項目を選択するモーダル表示イベント
+  const $referenceItemSelectButton = $addColumn.find('.reference-item-select');
+  $referenceItemSelectButton.on('click', function() {
+    itaModalOpen('Reference Item select', modalReferenceItemList, 'reference' , $(this));
+  });
+
+  //選択項目変更時、参照項目を空にする
+  const $pulldownSelect = $addColumn.find('.pulldown-select');
+  $pulldownSelect.on('change', function(){
+    const $input = $addColumn.find('.reference-item');
+    $input.attr('data-reference-item-id', '');
+    $input.html('');
+  });
+
   emptyCheck();
 
 };
@@ -713,6 +741,8 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
         $newColumnTarget.find('.config-select'+'.pulldown-select').prop('disabled', false); //選択項目
         $newColumnTarget.find('.config-number'+'.password-max-byte').prop('disabled', false); //パスワード最大バイト数
         $newColumnTarget.find('.config-number'+'.file-max-size').prop('disabled', false); //ファイル最大バイト数
+        $newColumnTarget.find('.config-text'+'.reference-item').prop('disabled', false); //参照項目
+        $newColumnTarget.find('.reference-item-select').prop('disabled', false); //参照項目を選択ボタン
         $newColumnTarget.find('.config-checkbox'+'.required').prop('disabled', false); //必須
         $newColumnTarget.find('.config-checkbox'+'.unique').prop('disabled', false); //一意制
         $newColumnTarget.find('.config-checkbox'+'.required').removeClass('disabled-checkbox'); //必須のチェックボックスの色約
@@ -1310,14 +1340,61 @@ const sortMark = '<span class="sortMarkWrap"><span class="sortNotSelected"></spa
         + '<td class="likeHeader">' + textCode('0032') + '</td>';
 
 // リピートを含めた子の列数を返す
-const childColumnCount = function( $column ) {
+const childColumnCount = function( $column, type ) {
   let counter = $column.find('.menu-column, .column-empty').length;
+  const menuColumnBody = $column.find('.menu-column');
+  menuColumnBody.each(function(){
+    const selectTypeValue = $(this).find('.menu-column-type-select').val();
+    //プルダウン選択の場合、参照項目の数だけcounterを追加
+    if(selectTypeValue == '7'){
+        const referenceItem = $(this).find('.reference-item');
+        referenceItem.each(function(){
+            //リピート内の場合はカウントしない
+            if($(this).parents('.menu-column-repeat').length == 0){
+                const referenceItemValue = $( this ).attr('data-reference-item-id');
+                if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                    const referenceItemAry = referenceItemValue.split(',');
+                    counter = counter + referenceItemAry.length;
+                }
+            }
+
+            //リピート内かつグループ内の場合はカウント
+            if(type == 'group' && $column.parents('.menu-column-repeat').length != 0 && $column.find('.menu-column-group-header').length != 0){
+                const referenceItemValue = $( this ).attr('data-reference-item-id');
+                if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                    const referenceItemAry = referenceItemValue.split(',');
+                    counter = counter + referenceItemAry.length;
+                }
+            }
+        });
+    }
+  });
+
   $column.find('.menu-column-repeat').each( function() {
     const columnLength = $( this ).find('.menu-column, .column-empty').length;
     if ( columnLength !== 0 ) {
-      counter = counter + ( columnLength * ( Number( $( this ).find('.menu-column-repeat-number-input').val() ) - 1 ) );
+        const repeatNumberInput = Number( $( this ).find('.menu-column-repeat-number-input').val());
+        let referenceItemCount = 0;
+        //プルダウン選択の場合、参照項目の数だけcounterを追加
+        const repeatMenuColumnBody = $(this).find('.menu-column');
+        repeatMenuColumnBody.each(function(){
+            const repeatSelectTypeValue = $(this).find('.menu-column-type-select').val();
+            if(repeatSelectTypeValue == '7'){
+                const referenceItem = $(this).find('.reference-item');
+                referenceItem.each(function(){
+                    const referenceItemValue = $(this).attr('data-reference-item-id');
+                    if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                        const referenceItemAry = referenceItemValue.split(',');
+                        referenceItemCount = referenceItemCount + Number( referenceItemAry.length );
+                    }
+                });
+            }
+        });
+
+        counter = counter + ( (columnLength * (repeatNumberInput -1)) + ((referenceItemCount) * repeatNumberInput) );
     }
   });
+
   return counter;
 }
 
@@ -1346,6 +1423,7 @@ const previewTable = function(){
 
         if ( $column.is('.menu-column') ) {
           // 項目ここから
+            const selectTypeValue = $column.find('.menu-column-type-select').val();
             // Head
             const rowspan = $column.attr('data-rowpan');
             let itemHTML = '<th rowspan="' + rowspan + '" class="sortTriggerInTbl">'
@@ -1355,14 +1433,49 @@ const previewTable = function(){
             }
             itemHTML += sortMark + '</th>';
             tableArray[ currentFloor ].push( itemHTML );
+
+            //プルダウン選択の参照項目
+            if(selectTypeValue == '7'){
+                const referenceItemValue = $column.find('.reference-item').attr('data-reference-item-id');
+                const referenceItemName = $column.find('.reference-item').html();
+                if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                    const referenceItemAry = referenceItemValue.split(',');
+                    const referenceItemNameAry = referenceItemName.split(',');
+                    const referenceItemLength = referenceItemAry.length;
+                    for ( let i = 0; i < referenceItemLength; i++ ) {
+                        let referenceItemHTML = '<th rowspan="' + rowspan + '" class="sortTriggerInTbl">'+referenceItemNameAry[i];
+                        if ( repeatCount > 1 ) {
+                            referenceItemHTML += '[' + repeatCount + ']';
+                        }
+                        referenceItemHTML += sortMark + '</th>';
+                        tableArray[ currentFloor ].push( referenceItemHTML );
+                    }
+                }
+            }
+
             // Body
-            const selectTypeValue = $column.find('.menu-column-type-select').val();
             let dummyText = selectDummyText[ selectTypeValue ][ 0 ],
                 dummyType = selectDummyText[ selectTypeValue ][ 2 ];
             if ( dummyType === 'select' ) {
               dummyText = $column.find('.config-select').find('option:selected').text();
             }
             tbodyArray.push('<td class="' + dummyType + '">' + dummyText + '</td>');
+
+            //プルダウン選択の参照項目
+            if(selectTypeValue == '7'){
+                const referenceItemValue = $column.find('.reference-item').attr('data-reference-item-id');
+                const referenceItemName = $column.find('.reference-item').html();
+                if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                    const referenceItemAry = referenceItemValue.split(',');
+                    const referenceItemNameAry = referenceItemName.split(',');
+                    const referenceItemLength = referenceItemAry.length;
+                    for ( let i = 0; i < referenceItemLength; i++ ) {
+                        const referenceItemHTML = '<td class="' + 'reference' + '">' + textCode('0044') + '</td>';
+                        tbodyArray.push(referenceItemHTML);
+                    };
+                }
+            }
+
           // Item end
         } else if ( $column.is('.menu-column-repeat') ) {
           // リピート
@@ -1383,7 +1496,7 @@ const previewTable = function(){
           // Repeat end
         } else if ( $column.is('.menu-column-group') ) {
           // グループ
-            const colspan = childColumnCount( $column ),
+            const colspan = childColumnCount( $column, 'group' ),
                   groupTitle = textEntities( $column.find('.menu-column-title-input').eq(0).val() ),
                   regexTitle = new RegExp( '<th colspan=".+">' + groupTitle + '<\/th>'),
                   tableArrayLength = tableArray[ currentFloor ].length - 1;
@@ -1411,12 +1524,12 @@ const previewTable = function(){
   tableAnalysis ( $menuTable, 0 );
   
   // thead HTMLを生成
-  const itemLength = childColumnCount( $menuTable );
-  
+  const itemLength = childColumnCount( $menuTable, 'menu' );
+
   if ( previewType === 1 || previewType === 3 ) {
     maxLevel++;
     tableArray.unshift('');
-  }   
+  }
   const tableArrayLength = tableArray.length;
   for ( let i = 0; i < tableArrayLength; i++ ) {
     tableHTML += '<tr class="defaultExplainRow">';
@@ -1860,7 +1973,7 @@ const modalRoleList = function() {
   const cancelEvent = function( newRoleList ) {
     itaModalClose();
   };
-  
+
   setRoleSelectModalBody( menuEditorArray.roleList, initRoleList, okEvent, cancelEvent );
   
 };
@@ -1869,6 +1982,47 @@ const $roleSlectButton = $('#permission-role-select');
 $roleSlectButton.on('click', function() {
   itaModalOpen('Permission role select', modalRoleList, 'role');
 });
+
+
+//参照項目セレクト
+const modalReferenceItemList = function($target) {
+  const $input = $target.closest('.menu-column-config-table').find('.reference-item');
+  const initItemList = ( $input.attr('data-reference-item-id') === undefined )? '': $input.attr('data-reference-item-id');
+  const selectMasterId = $target.closest('.menu-column-config-table').find('.pulldown-select option:selected').val();
+
+  // 決定時の処理    
+  const okEvent = function( newItemList, extractItemList ) {
+    $input.attr('data-reference-item-id', newItemList );
+    //newItemListのIDから項目名に変換
+    const newItemListArray = newItemList.split(',');
+    const newItemNameListArray = [];
+    newItemListArray.forEach(function(id){
+      extractItemList.forEach(function(data){
+        if(data['ITEM_ID'] == id){
+          newItemNameListArray.push(data['ITEM_NAME']);
+        }
+      });
+    });
+
+    //カンマ区切りの文字列に変換に参照項目上に表示
+    var newItemNameList = newItemNameListArray.join(',');
+    $input.html(newItemNameList);
+
+    previewTable();
+    itaModalClose();
+  };
+  // キャンセル時の処理    
+  const cancelEvent = function( newItemList ) {
+    itaModalClose();
+  };
+  // 閉じる時の処理
+  const closeEvent = function ( newItemList ) {
+    itaModalClose();
+  }
+
+  setRerefenceItemSelectModalBody(menuEditorArray.referenceItemList, initItemList, okEvent, cancelEvent, closeEvent, selectMasterId );
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2027,6 +2181,7 @@ const createRegistrationData = function( type ){
                 break;
               case '7':
                 createMenuJSON['item'][key]['OTHER_MENU_LINK_ID'] = $column.find('.pulldown-select').val();
+                createMenuJSON['item'][key]['REFERENCE_ITEM'] = $column.find('.reference-item').attr('data-reference-item-id');
                 break;
               case '8':
                 createMenuJSON['item'][key]['PW_MAX_LENGTH'] = $column.find('.password-max-byte').val();
@@ -2239,6 +2394,28 @@ const loadMenu = function() {
               break;
             case '7':
               $item.find('.pulldown-select').val( itemData['OTHER_MENU_LINK_ID'] ).change();
+              $item.find('.reference-item').attr('data-reference-item-id', itemData['REFERENCE_ITEM']).change();
+              //newItemListのIDから項目名に変換
+              if(itemData['REFERENCE_ITEM'] != null){
+                const newItemListArray = itemData['REFERENCE_ITEM'].split(',');
+                const newItemNameListArray = [];
+                newItemListArray.forEach(function(id){
+                  let existsFlg = false;
+                  menuEditorArray.referenceItemList.forEach(function(data){
+                    if(data['ITEM_ID'] == id){
+                      newItemNameListArray.push(data['ITEM_NAME']);
+                      existsFlg = true;
+                    }
+                  });
+                  //referenceItemListに存在しない参照項目はID変換失敗(ID)を表示させる。
+                  if(existsFlg == false){
+                    newItemNameListArray.push(getSomeMessage("ITACREPAR_1255", id));
+                  }
+                });
+                //カンマ区切りの文字列に変換に参照項目上に表示
+                var newItemNameList = newItemNameListArray.join(',');
+                $item.find('.reference-item').html( newItemNameList ).change();
+              }
               break;
             case '8':
               $item.find('.password-max-byte').val( itemData['PW_MAX_LENGTH'] ).change();

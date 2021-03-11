@@ -98,6 +98,8 @@ try{
                               TEMPLATE_PATH . FILE_CMDB_EDIT_SQL,
                               TEMPLATE_PATH . FILE_H_OP_EDIT_SQL,
                               TEMPLATE_PATH . FILE_CONVERT_H_OP_EDIT_SQL,
+                              TEMPLATE_PATH . FILE_PARTS_REF,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_REF,
                              );
     $templateArray = array();
     foreach($templatePathArray as $templatePath){
@@ -158,6 +160,8 @@ try{
     $cmdbEditSqlTmpl            = $templateArray[40];
     $hostEditSqlOpTmpl          = $templateArray[41];
     $convHostSqlOpEditTmpl      = $templateArray[42];
+    $partReference              = $templateArray[43];
+    $partViewReference          = $templateArray[44];
 
 
     //////////////////////////
@@ -204,6 +208,27 @@ try{
         throw new Exception($msg);
     }
     $otherMenuLinkArray = $result;
+
+    //////////////////////////
+    // 参照項目情報テーブルを検索
+    //////////////////////////
+    $referenceItemArray = array();
+    $referenceItemTable = new ReferenceItemTable($objDBCA, $db_model_ch);
+    $sql = $referenceItemTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+    // SQL実行
+    $result = $referenceItemTable->selectTable($sql);
+    if(!is_array($result)){
+        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+        outputLog($msg);
+        throw new Exception($msg);
+    }
+    if(!empty($result)){
+        //検索しやすいようにITEM_IDをkeyにする
+        foreach($result as $row){
+            $referenceItemArray[$row['ITEM_ID']] = $row;
+        }  
+    }
 
     //////////////////////////
     // カラムグループ管理テーブルを検索
@@ -351,6 +376,7 @@ try{
             $beforeItemArray = array();
             $repeatItemArray = array();
             $afterItemArray = array();
+            $duplicateItemNameArray = array();
             $startFlg = false;
             $repeatItemCnt = $cpiData['COL_CNT'] * $cpiData['REPEAT_CNT'];
 
@@ -506,8 +532,15 @@ try{
             }
 
             $convertItemInfoArray = $beforeItemArray;
-            for($i = 0; $i < $cpiData['COL_CNT']; $i ++){
-                $convertItemInfoArray[] = $repeatItemArray[$i];
+            $repeatItemCount = 0;
+            foreach($repeatItemArray as $repeatItemInfo){
+                if($repeatItemCount < $cpiData['COL_CNT']){
+                    $convertItemInfoArray[] = $repeatItemInfo;
+                }else{
+                    //リピートで複製されたItemの名前を抽出し格納
+                    $duplicateItemNameArray[] = $repeatItemInfo['ITEM_NAME'];
+                }
+                $repeatItemCount++;
             }
             $convertItemInfoArray = array_merge($convertItemInfoArray, $afterItemArray);
         }
@@ -523,6 +556,7 @@ try{
         //////////////////////////
         $columnTypes = "";
         $columns = "";
+        $reference = "";
         $hgLoadTableVal = "";
         $hostLoadTableVal = "";
         $viewLoadTableVal = "";
@@ -584,6 +618,14 @@ try{
                     break;
                 case 7: //プルダウン
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
+                    if(!empty($itemInfo['REFERENCE_ITEM'])){
+                        $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
+                        $referenceCount1 = 0;
+                        foreach($aryReferenceItem as $id){
+                            $referenceCount1++;
+                            $reference = $reference . "TAB_A." . $itemInfo['COLUMN_NAME'] . " " . $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount1 . ",\n";
+                        }
+                    }
                     break;
                 case 8: //文字列(PW)
                     $columnTypes = $columnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
@@ -624,6 +666,66 @@ try{
                         break;
                     case 7:
                         $work = $partId;        // プルダウン
+
+                        $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                        if($matchIdx === FALSE){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                            outputLog($msg);
+                            // パラメータシート作成管理更新処理を行う
+                            updateMenuStatus($targetData, "4", $msg, false, true);
+                            $errFlg = true;
+                            break 2;
+                        }
+
+                        //参照項目がある場合
+                        if(!empty($itemInfo['REFERENCE_ITEM'])){
+                            $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
+                            $work_ref = "";
+                            $referenceCount2 = 0;
+                            foreach($aryReferenceItem as $id){
+                                $repracePassword = "";
+                                $repraceDate = "";
+                                $repraceDatetime = "";
+                                $work_ref_tmpl = $partReference;
+                                $referenceCount2++;
+
+                                //カラムグループに追加
+                                $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2] = $columnGroupSplit;
+                                //対象の参照項目情報
+                                $referenceItemInfo = $referenceItemArray[$id];
+
+                                //パスワード表示
+                                if($referenceItemInfo['SENSITIVE_FLAG'] == 2){
+                                    $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                }
+
+                                //日時表示
+                                if($referenceItemInfo['INPUT_METHOD_ID'] == 5){
+                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                }
+
+                                //日付表示
+                                if($referenceItemInfo['INPUT_METHOD_ID'] == 6){
+                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d");';
+                                }
+
+                                $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+
+                                $work_ref = $work_ref . $work_ref_tmpl;
+                            }
+                            $work = $work . $work_ref;
+                        }
                         break;
                     case 8:
                         $work = $partPassword;  // 文字列(PW)
@@ -759,6 +861,72 @@ try{
                             break;
                         case 7:
                             $work = $partId;        // プルダウン
+
+                            $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                            if($matchIdx === FALSE){
+                                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                                outputLog($msg);
+                                // パラメータシート作成管理更新処理を行う
+                                updateMenuStatus($targetData, "4", $msg, false, true);
+                                $errFlg = true;
+                                break 2;
+                            }
+
+                            //参照項目がある場合
+                            if(!empty($itemInfo['REFERENCE_ITEM'])){
+                                //参照項目をリピートする場合、項目名の末尾に追加する[x]を抽出
+                                $extractRepeatNoStr = "";
+                                if(in_array($itemInfo['ITEM_NAME'], $duplicateItemNameArray)){
+                                    $extractRepeatNoStr = extractRepeatItemNo($itemInfo['ITEM_NAME']);
+                                }
+
+                                $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
+                                $work_ref = "";
+                                $referenceCount2 = 0;
+                                foreach($aryReferenceItem as $id){
+                                    $repracePassword = "";
+                                    $repraceDate = "";
+                                    $repraceDatetime = "";
+                                    $work_ref_tmpl = $partReference;
+                                    $referenceCount2++;
+
+                                    //カラムグループに追加
+                                    $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2] = $columnGroupSplit;
+                                    //対象の参照項目情報
+                                    $referenceItemInfo = $referenceItemArray[$id];
+
+                                    //パスワード表示
+                                    if($referenceItemInfo['SENSITIVE_FLAG'] == 2){
+                                        $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
+                                        $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
+                                        $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                    }
+
+                                    //日時表示
+                                    if($referenceItemInfo['INPUT_METHOD_ID'] == 5){
+                                        $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                    }
+
+                                    //日付表示
+                                    if($referenceItemInfo['INPUT_METHOD_ID'] == 6){
+                                        $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d");';
+                                    }
+
+                                    $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'] . $extractRepeatNoStr, $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+
+                                    $work_ref = $work_ref . $work_ref_tmpl;
+                                }
+                                $work = $work . $work_ref;
+                            }
                             break;
                         case 8:
                             $work = $partPassword;  // 文字列(PW)
@@ -894,6 +1062,73 @@ try{
                         break;
                     case 7:
                         $work = $partId;        // プルダウン
+
+                        $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                        if($matchIdx === FALSE){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                            outputLog($msg);
+                            // パラメータシート作成管理更新処理を行う
+                            updateMenuStatus($targetData, "4", $msg, false, true);
+                            $errFlg = true;
+                            break 2;
+                        }
+
+                        //参照項目がある場合
+                        if(!empty($itemInfo['REFERENCE_ITEM'])){
+                            //参照項目をリピートする場合、項目名の末尾に追加する[x]を抽出
+                            $extractRepeatNoStr = "";
+                            if(in_array($itemInfo['ITEM_NAME'], $duplicateItemNameArray)){
+                                $extractRepeatNoStr = extractRepeatItemNo($itemInfo['ITEM_NAME']);
+                            }
+
+                            $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
+                            $work_ref = "";
+                            $referenceCount2 = 0;
+                            foreach($aryReferenceItem as $id){
+                                $repracePassword = "";
+                                $repraceDate = "";
+                                $repraceDatetime = "";
+                                $work_ref_tmpl = $partReference;
+                                $referenceCount2++;
+
+                                //カラムグループに追加
+                                $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2] = $columnGroupSplit;
+                                //対象の参照項目情報
+                                $referenceItemInfo = $referenceItemArray[$id];
+
+                                //パスワード表示
+                                if($referenceItemInfo['SENSITIVE_FLAG'] == 2){
+                                    $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                }
+
+                                //日時表示
+                                if($referenceItemInfo['INPUT_METHOD_ID'] == 5){
+                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                }
+
+                                //日付表示
+                                if($referenceItemInfo['INPUT_METHOD_ID'] == 6){
+                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d");';
+                                }
+
+                                $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'] . $extractRepeatNoStr, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+
+                                $work_ref = $work_ref . $work_ref_tmpl;
+                            }
+                            $work = $work . $work_ref;
+                        }
+
                         break;
                     case 8:
                         $work = $partPassword;  // 文字列(PW)
@@ -1030,6 +1265,67 @@ try{
                         break;
                     case 7:
                         $work = $partViewId;        // プルダウン
+
+                        $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                        if($matchIdx === FALSE){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                            outputLog($msg);
+                            // パラメータシート作成管理更新処理を行う
+                            updateMenuStatus($targetData, "4", $msg, false, true);
+                            $errFlg = true;
+                            break 2;
+                        }
+
+                        //参照項目がある場合
+                        if(!empty($itemInfo['REFERENCE_ITEM'])){
+                            $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
+                            $work_ref = "";
+                            $referenceCount2 = 0;
+                            foreach($aryReferenceItem as $id){
+                                $repracePassword = "";
+                                $repraceDate = "";
+                                $repraceDatetime = "";
+                                $work_ref_tmpl = $partViewReference;
+                                $referenceCount2++;
+
+                                //カラムグループに追加
+                                $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2] = $columnGroupSplit;
+                                //対象の参照項目情報
+                                $referenceItemInfo = $referenceItemArray[$id];
+
+                                //パスワード表示
+                                if($referenceItemInfo['SENSITIVE_FLAG'] == 2){
+                                    $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                }
+
+                                //日時表示
+                                if($referenceItemInfo['INPUT_METHOD_ID'] == 5){
+                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                }
+
+                                //日付表示
+                                if($referenceItemInfo['INPUT_METHOD_ID'] == 6){
+                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d");';
+                                }
+
+                                $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+
+                                $work_ref = $work_ref . $work_ref_tmpl;
+                            }
+                            $work = $work . $work_ref;
+                        }
+
                         break;
                     case 8:
                         $work = $partViewPassword;  // 文字列(PW)
@@ -1148,6 +1444,7 @@ try{
             //////////////////////////
             $convColumnTypes = "";
             $convColumns = "";
+            $convReference = "";
             $convertLoadTableVal = "";
             $convertViewLoadTableVal = "";
             $errFlg = false;
@@ -1210,6 +1507,14 @@ try{
                         break;
                     case 7:
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    INT,\n";
+                        if(!empty($itemInfo['REFERENCE_ITEM'])){
+                            $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
+                            $convReferenceCount1 = 0;
+                            foreach($aryReferenceItem as $id){
+                                $convReferenceCount1++;
+                                $convReference = $convReference . "TAB_A." . $itemInfo['COLUMN_NAME'] . " " . $itemInfo['COLUMN_NAME'] . "_CLONE_" . $convReferenceCount1 . ",\n";
+                            }
+                        }
                         break;
                     case 8:
                         $convColumnTypes = $convColumnTypes . $itemInfo['COLUMN_NAME'] . "    TEXT,\n";
@@ -1250,6 +1555,66 @@ try{
                         break;
                     case 7:
                         $work = $partId;        // プルダウン
+
+                        $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                        if($matchIdx === FALSE){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                            outputLog($msg);
+                            // パラメータシート作成管理更新処理を行う
+                            updateMenuStatus($targetData, "4", $msg, false, true);
+                            $errFlg = true;
+                            break 2;
+                        }
+
+                        //参照項目がある場合
+                        if(!empty($itemInfo['REFERENCE_ITEM'])){
+                            $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
+                            $work_ref = "";
+                            $convReferenceCount2 = 0;
+                            foreach($aryReferenceItem as $id){
+                                $repracePassword = "";
+                                $repraceDate = "";
+                                $repraceDatetime = "";
+                                $work_ref_tmpl = $partReference;
+                                $convReferenceCount2++;
+
+                                //カラムグループに追加
+                                $convItemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2] = $columnGroupSplit;
+                                //対象の参照項目情報
+                                $convReferenceItemInfo = $referenceItemArray[$id];
+
+                                //パスワード表示
+                                if($convReferenceItemInfo['SENSITIVE_FLAG'] == 2){
+                                    $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                }
+
+                                //日時表示
+                                if($convReferenceItemInfo['INPUT_METHOD_ID'] == 5){
+                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                }
+
+                                //日付表示
+                                if($convReferenceItemInfo['INPUT_METHOD_ID'] == 6){
+                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setDateFormat("Y/m/d");';
+                                }
+
+                                $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $convReferenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $convReferenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $convReferenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $convReferenceItemInfo['PRI_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $convReferenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $convReferenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+
+                                $work_ref = $work_ref . $work_ref_tmpl;
+                            }
+                            $work = $work . $work_ref;
+                        }
                         break;
                     case 8:
                         $work = $partPassword;  // 文字列（PW）
@@ -1384,6 +1749,66 @@ try{
                         break;
                     case 7:
                         $work = $partViewId;        // プルダウン
+
+                        $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
+                        if($matchIdx === FALSE){
+                            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
+                            outputLog($msg);
+                            // パラメータシート作成管理更新処理を行う
+                            updateMenuStatus($targetData, "4", $msg, false, true);
+                            $errFlg = true;
+                            break 2;
+                        }
+
+                        //参照項目がある場合
+                        if(!empty($itemInfo['REFERENCE_ITEM'])){
+                            $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
+                            $work_ref = "";
+                            $convReferenceCount2 = 0;
+                            foreach($aryReferenceItem as $id){
+                                $repracePassword = "";
+                                $repraceDate = "";
+                                $repraceDatetime = "";
+                                $work_ref_tmpl = $partViewReference;
+                                $convReferenceCount2++;
+
+                                //カラムグループに追加
+                                $convItemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2] = $columnGroupSplit;
+                                //対象の参照項目情報
+                                $convReferenceItemInfo = $referenceItemArray[$id];
+
+                                //パスワード表示
+                                if($convReferenceItemInfo['SENSITIVE_FLAG'] == 2){
+                                    $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                }
+
+                                //日時表示
+                                if($convReferenceItemInfo['INPUT_METHOD_ID'] == 5){
+                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                }
+
+                                //日付表示
+                                if($convReferenceItemInfo['INPUT_METHOD_ID'] == 6){
+                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setDateFormat("Y/m/d");';
+                                }
+
+                                $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $convReferenceCount2, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $convReferenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $convReferenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $convReferenceItemInfo['PRI_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $convReferenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $convReferenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+
+                                $work_ref = $work_ref . $work_ref_tmpl;
+                            }
+                            $work = $work . $work_ref;
+                        }
                         break;
                     case 8:
                         $work = $partViewPassword;  // 文字列(PW)
@@ -1534,8 +1959,9 @@ try{
                 }
                 $work = $cmdbEditSqlTmpl;
                 $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
-                $work = str_replace(REPLACE_ALTER_COL,   $alterColumnSql,   $work);
+                $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql,   $work);
                 $work = str_replace(REPLACE_COL,        $columns,       $work);
+                $work = str_replace(REPLACE_REFERENCE,  $reference,     $work);
                 $cmdbSql = $work;
 
             }else{ //初期化および新規作成の場合
@@ -1543,6 +1969,7 @@ try{
                 $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
                 $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
                 $work = str_replace(REPLACE_COL,        $columns,       $work);
+                $work = str_replace(REPLACE_REFERENCE,  $reference,     $work);
                 $cmdbSql = $work;
             }
         }
@@ -1663,12 +2090,14 @@ EOD;
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
                     $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
                     $work = str_replace(REPLACE_COL,        $columns,        $work);
+                    $work = str_replace(REPLACE_REFERENCE,  $reference,     $work);
                     $hgSql = $work;
                 }else{ //初期化および新規作成の場合
                     $work = $hgSqlTmpl;
                     $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
                     $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
                     $work = str_replace(REPLACE_COL,        $columns,       $work);
+                    $work = str_replace(REPLACE_REFERENCE,  $reference,     $work);
                     $hgSql = $work;
                 }
             }
@@ -1687,12 +2116,14 @@ EOD;
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
                     $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
                     $work = str_replace(REPLACE_COL,        $columns,        $work);
+                    $work = str_replace(REPLACE_REFERENCE,  $reference,     $work);
                     $hostSql = $work;
                 }else{ //初期化および新規作成の場合
                     $work = $hostSqlTmpl;
                     $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
                     $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
                     $work = str_replace(REPLACE_COL,        $columns,       $work);
+                    $work = str_replace(REPLACE_REFERENCE,  $reference,     $work);
                     $hostSql = $work;
                 }
             }
@@ -1710,12 +2141,14 @@ EOD;
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
                     $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
                     $work = str_replace(REPLACE_COL,        $columns,        $work);
+                    $work = str_replace(REPLACE_REFERENCE,  $reference,     $work);
                     $hostSql = $work;
                 }else{ //初期化および新規作成の場合
                     $work = $hostSqlOpTmpl;
                     $work = str_replace(REPLACE_TABLE,      $menuTableName, $work);
                     $work = str_replace(REPLACE_COL_TYPE,   $columnTypes,   $work);
                     $work = str_replace(REPLACE_COL,        $columns,       $work);
+                    $work = str_replace(REPLACE_REFERENCE,  $reference,     $work);
                     $hostSql = $work;
                 }
             }
@@ -1737,6 +2170,7 @@ EOD;
                         $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
                         $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
                         $work = str_replace(REPLACE_COL,        $convColumns,    $work);
+                        $work = str_replace(REPLACE_REFERENCE,  $convReference,  $work);
                         $convertSql = $work;
                         //カラムの追加/削除sqlを作成
                         $alterColumnSql = createAlterColumnSql("conv_h", $menuTableName, $convColumnNameListArray);
@@ -1749,17 +2183,20 @@ EOD;
                         $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
                         $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
                         $work = str_replace(REPLACE_COL,        $convColumns,    $work);
+                        $work = str_replace(REPLACE_REFERENCE,  $convReference,  $work);
                         $convertSql .= $work;
                     }else{ //初期化および新規作成の場合
                         $work = $convSqlTmpl;
                         $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
                         $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
                         $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                        $work = str_replace(REPLACE_REFERENCE,  $convReference,         $work);
                         $convertSql = $work;
                         $work = $convHostSqlTmpl;
                         $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
                         $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
                         $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                        $work = str_replace(REPLACE_REFERENCE,  $convReference,         $work);
                         $convertSql .= $work;
                     }
                 }
@@ -1776,12 +2213,14 @@ EOD;
                         $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
                         $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
                         $work = str_replace(REPLACE_COL,        $convColumns,    $work);
+                        $work = str_replace(REPLACE_REFERENCE,  $convReference,  $work);
                         $convertSql = $work;
                     }else{ //初期化および新規作成の場合
                         $work = $convHostSqlTmpl;
                         $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
                         $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
                         $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                        $work = str_replace(REPLACE_REFERENCE,  $convReference,         $work);
                         $convertSql = $work;
                     }
                 }
@@ -1798,12 +2237,14 @@ EOD;
                         $work = str_replace(REPLACE_TABLE,      $menuTableName,  $work);
                         $work = str_replace(REPLACE_ALTER_COL,  $alterColumnSql, $work);
                         $work = str_replace(REPLACE_COL,        $convColumns,    $work);
+                        $work = str_replace(REPLACE_REFERENCE,  $convReference,  $work);
                         $convertSql = $work;
                     }else{ //初期化および新規作成の場合
                         $work = $convHostSqlOpTmpl;
                         $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
                         $work = str_replace(REPLACE_COL_TYPE,   $convColumnTypes,       $work);
                         $work = str_replace(REPLACE_COL,        $convColumns,           $work);
+                        $work = str_replace(REPLACE_REFERENCE,  $convReference,         $work);
                         $convertSql = $work; 
                     }
 
@@ -2157,7 +2598,7 @@ EOD;
             //////////////////////////
             // 紐付対象メニューカラム管理更新
             //////////////////////////
-            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData, $noLinkTarget);
+            $result = updateLinkTargetColumn($targetMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData, $noLinkTarget, $otherMenuLinkArray, $duplicateItemNameArray);
 
             if(true !== $result){
                 // パラメータシート作成管理更新処理を行う
@@ -3709,10 +4150,12 @@ function updateLinkTargetTable($hostMenuId, $tableName, $noLinkTarget, $cmiData)
 /*
  * 紐付対象メニューカラム管理更新
  */
-function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData, $noLinkTarget){
+function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArrayArray, $cmiData, $noLinkTarget, $otherMenuLinkArray, $duplicateItemNameArray){
     global $objDBCA, $db_model_ch, $objMTS;
     $otherMenuLinkTable = new OtherMenuLinkTable($objDBCA, $db_model_ch);
     $cmdbMenuColumnTable = new CmdbMenuColumnTable($objDBCA, $db_model_ch);
+    $createItemInfoTable = new CreateItemInfoTable($objDBCA, $db_model_ch);
+    $referenceItemTable = new ReferenceItemTable($objDBCA, $db_model_ch);
 
     try{
         //////////////////////////
@@ -3730,11 +4173,38 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
         $otherMenuLinkArray = $result;
 
         //////////////////////////
+        // 参照項目情報テーブルを検索
+        //////////////////////////
+        $referenceItemArray = array();
+        $sql = $referenceItemTable->createSselect("WHERE DISUSE_FLAG = '0'");
+        // SQL実行
+        $result = $referenceItemTable->selectTable($sql);
+        if(!is_array($result)){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+        if(!empty($result)){
+            //検索しやすいようにITEM_IDをkeyにする
+            foreach($result as $row){
+                $referenceItemArray[$row['ITEM_ID']] = $row;
+            }  
+        }
+
+        //////////////////////////
         // 登録するカラム情報を作成する
         //////////////////////////
         $columnInfoArray = array();
-
+        $loopCount = 0;
         foreach($itemInfoArray as $key => $itemInfo){
+            if($loopCount == 0){
+                //COL_TITLE_DISP_SEQにセットする最初の値を決定
+                $seqNo = $key + 2;
+            }
+            $loopCount++;
+            $aryReferenceItem = array();
+            $referenceCount = 0;
+
             if(5 == $itemInfo['INPUT_METHOD_ID'] || 6 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
             }
@@ -3755,6 +4225,11 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 }
                 else if(10 == $otherMenuLink['COLUMN_TYPE']){
                     $colClass = "HostInsideLinkTextColumn";
+                }
+
+                //参照項目がある場合、配列化する
+                if(!empty($itemInfo['REFERENCE_ITEM'])){
+                    $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
                 }
             }
             else if(1 == $itemInfo['INPUT_METHOD_ID']){
@@ -3806,11 +4281,83 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             $columnInfoArray[] = array('COL_NAME' => $itemInfo['COLUMN_NAME'],
                                        'COL_CLASS' => $colClass,
                                        'COL_TITLE' => $columnTitle,
-                                       'COL_TITLE_DISP_SEQ' => $key + 2,
+                                       'COL_TITLE_DISP_SEQ' => $seqNo,
                                        'REF_TABLE_NAME' => $otherTableName,
                                        'REF_PKEY_NAME' => $otherPriName,
                                        'REF_COL_NAME' => $otherColumnName,
                                       );
+            //COL_TITLE_DISP_SEQにセットする値を++
+            $seqNo++;
+
+            //参照項目についての紐付対象メニューカラム情報を作成する
+            if(!empty($aryReferenceItem)){
+                //参照項目をリピートする場合、項目名の末尾に追加する[x]を抽出
+                $extractRepeatNoStr = "";
+                if(in_array($itemInfo['ITEM_NAME'], $duplicateItemNameArray)){
+                    $extractRepeatNoStr = extractRepeatItemNo($itemInfo['ITEM_NAME']);
+                }
+
+                foreach($aryReferenceItem as $id){
+                    $referenceCount++;
+
+                    //対象の参照項目情報
+                    $referenceItemInfo = $referenceItemArray[$id];
+
+                    if(5 == $referenceItemInfo['INPUT_METHOD_ID'] || 6 == $referenceItemInfo['INPUT_METHOD_ID']){
+                        continue;
+                    }
+                    if(7 == $referenceItemInfo['INPUT_METHOD_ID']){
+                        $colClass = "TextColumn";
+                    }
+                    else if(1 == $referenceItemInfo['INPUT_METHOD_ID']){
+                        $colClass = "TextColumn";
+                    }
+                    else if(2 == $referenceItemInfo['INPUT_METHOD_ID']){
+                        $colClass = "MultiTextColumn";
+                    }
+                    else if(3 == $referenceItemInfo['INPUT_METHOD_ID'] || 4 == $referenceItemInfo['INPUT_METHOD_ID']){
+                        $colClass = "NumColumn";
+                    }
+                    else if(8 == $referenceItemInfo['INPUT_METHOD_ID']){
+                        $colClass = "PasswordColumn";
+                    }
+                    else if(9 == $referenceItemInfo['INPUT_METHOD_ID']){
+                        if(true == $noLinkTarget){
+                            continue;
+                        }
+                        $colClass = "FileUploadColumn";
+                    }
+                    else if(10 == $referenceItemInfo['INPUT_METHOD_ID']){
+                        $colClass = "HostInsideLinkTextColumn";
+                    }else{
+                        $colClass = "TextColumn";
+                    }
+
+                    // 項目名を作成
+                    if("" != $columnGrp){
+                        $columnTitle = $objMTS->getSomeMessage("ITACREPAR-MNU-102612") . "/" . $columnGrp . "/" . $referenceItemInfo['ITEM_NAME'] . $extractRepeatNoStr;
+                    }
+                    else{
+                        $columnTitle = $objMTS->getSomeMessage("ITACREPAR-MNU-102612") . "/" . $referenceItemInfo['ITEM_NAME'] . $extractRepeatNoStr;
+                    }
+
+                    $colName = $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount;
+                    $otherTableName =  $referenceItemInfo['TABLE_NAME'];
+                    $otherPriName = $referenceItemInfo['PRI_NAME'];
+                    $otherColumnName = $referenceItemInfo['COLUMN_NAME'];
+
+                    $columnInfoArray[] = array('COL_NAME'           => $colName,
+                                               'COL_CLASS'          => $colClass,
+                                               'COL_TITLE'          => $columnTitle,
+                                               'COL_TITLE_DISP_SEQ' => $seqNo,
+                                               'REF_TABLE_NAME'     => $otherTableName,
+                                               'REF_PKEY_NAME'      => $otherPriName,
+                                               'REF_COL_NAME'       => $otherColumnName,
+                                               );
+                    //COL_TITLE_DISP_SEQにセットする値を++
+                    $seqNo++;
+                }
+            }
         }
 
         //////////////////////////
@@ -4173,7 +4720,7 @@ function createAlterColumnSql($tableType, $menuTableName, $columnNameListArray){
         //カラム名"KY_AUTO_COL_XXXX"のものだけ抜出す
         $existColumnArray = array();
         foreach($fieldListArray as $column){
-            if(strpos($column,'KY_AUTO_COL_') !== false){
+            if(strpos($column, COLUMN_PREFIX) !== false){
                 $existColumnArray[] = $column;
             }
         }
@@ -4302,3 +4849,33 @@ function createAlterColumnSql($tableType, $menuTableName, $columnNameListArray){
 
 }
 
+
+/*
+ * 項目名から[x]部分を抽出する
+ */
+function extractRepeatItemNo($itemName){
+    $cutItemName = $itemName;
+    $extractRepeatNoStr = "";
+    $extractEndFlg = false;
+    while(!$extractEndFlg && $cutItemName != ""){
+        $checkWord = mb_substr($cutItemName, -1);
+        if($checkWord == "]"){
+            $extractRepeatNoStr = $checkWord . $extractRepeatNoStr;
+        }
+
+        if(is_numeric($checkWord)){
+            $extractRepeatNoStr = $checkWord . $extractRepeatNoStr;
+        }
+
+        if($checkWord == "["){
+            $extractRepeatNoStr = $checkWord . $extractRepeatNoStr;
+            $extractEndFlg = true;
+        }
+
+        $cutItemName = mb_substr($cutItemName, 0, -1);
+
+    }
+
+    return $extractRepeatNoStr;
+
+}

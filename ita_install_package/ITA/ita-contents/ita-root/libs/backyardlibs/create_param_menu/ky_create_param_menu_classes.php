@@ -522,6 +522,7 @@ class CreateItemInfoTable extends BaseTable_CPM {
                                     'PW_MAX_LENGTH',
                                     'UPLOAD_MAX_SIZE',
                                     'LINK_LENGTH',
+                                    'REFERENCE_ITEM',
                                     'DESCRIPTION',
                                     'ACCESS_AUTH',
                                     'NOTE',
@@ -1060,6 +1061,41 @@ class AccountListTable extends BaseTable_CPM {
                                     'AUTH_TYPE',
                                     'PROVIDER_ID',
                                     'PROVIDER_USER_ID',
+                                    'ACCESS_AUTH',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * 参照項目情報テーブル（ビュー）クラス
+ */
+class ReferenceItemTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'G_MENU_REFERENCE_ITEM';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('ITEM_ID',
+                                    'LINK_ID',
+                                    'DISP_SEQ',
+                                    'TABLE_NAME',
+                                    'PRI_NAME',
+                                    'COLUMN_NAME',
+                                    'ITEM_NAME',
+                                    'COL_GROUP_NAME',
+                                    'DESCRIPTION',
+                                    'INPUT_METHOD_ID',
+                                    'SENSITIVE_FLAG',
+                                    'MASTER_COL_FLAG',
                                     'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
