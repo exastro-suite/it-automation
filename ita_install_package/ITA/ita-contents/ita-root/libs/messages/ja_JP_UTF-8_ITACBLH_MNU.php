@@ -14,20 +14,20 @@
 //   limitations under the License.
 //
 ////ja_JP_UTF-8_ITACBLH_MNU
-$ary[1001] = "Cobblerサーバとのインターフェース情報をメンテナンス(閲覧/登録/更新/廃止)できます。 <br>本メニューは必ず1レコードである必要があります。";
-$ary[1004] = "No.";
-$ary[1002] = "Cobblerインターフェース情報";
-$ary[1003] = "Cobblerインターフェース情報";
-$ary[1005] = "データリレイストレージパス(ITA)";
-$ary[1006] = "表示順序";
-$ary[1007] = "";
-$ary[1008] = "Cobblerサーバとの共有ディレクトリを指定して下さい。";
-$ary[1009] = "Cobblerサーバから定期レプリケーションされるプロファイルリストが閲覧できます。";
-$ary[1010] = "No.";
-$ary[1011] = "Cobblerプロファイル一覧";
-$ary[1012] = "Cobblerプロファイル一覧";
-$ary[1013] = "プロファイル名";
-$ary[1014] = "[最大長]256バイト";
-$ary[1015] = "表示順序";
-$ary[1016] = "";
+$ary["ITACBLH-MNU-1001"]            = "Cobblerサーバとのインターフェース情報をメンテナンス(閲覧/登録/更新/廃止)できます。 <br>本メニューは必ず1レコードである必要があります。";
+$ary["ITACBLH-MNU-1002"]            = "Cobblerインターフェース情報";
+$ary["ITACBLH-MNU-1003"]            = "Cobblerインターフェース情報";
+$ary["ITACBLH-MNU-1004"]            = "No.";
+$ary["ITACBLH-MNU-1005"]            = "データリレイストレージパス(ITA)";
+$ary["ITACBLH-MNU-1006"]            = "表示順序";
+$ary["ITACBLH-MNU-1007"]            = "";
+$ary["ITACBLH-MNU-1008"]            = "Cobblerサーバとの共有ディレクトリを指定して下さい。";
+$ary["ITACBLH-MNU-1009"]            = "Cobblerサーバから定期レプリケーションされるプロファイルリストが閲覧できます。";
+$ary["ITACBLH-MNU-1010"]            = "No.";
+$ary["ITACBLH-MNU-1011"]            = "Cobblerプロファイル一覧";
+$ary["ITACBLH-MNU-1012"]            = "Cobblerプロファイル一覧";
+$ary["ITACBLH-MNU-1013"]            = "プロファイル名";
+$ary["ITACBLH-MNU-1014"]            = "[最大長]256バイト";
+$ary["ITACBLH-MNU-1015"]            = "表示順序";
+$ary["ITACBLH-MNU-1016"]            = "";
 ?>

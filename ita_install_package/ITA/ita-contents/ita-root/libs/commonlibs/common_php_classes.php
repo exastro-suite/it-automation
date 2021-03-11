@@ -185,8 +185,8 @@ class MessageTemplateStorage{
             $aryTemplate = $this->getTemplateCollection($strCollectionGrpId,$strProductTypeId);
             if( is_array($aryTemplate) === true ){
                 $intMsgCallNumber = Intval($msgCallNumber);
-                if( array_key_exists($intMsgCallNumber, $aryTemplate) === true ){
-                    $strTemplate = $aryTemplate[$intMsgCallNumber];
+                if( array_key_exists($strMsgId, $aryTemplate) === true ){
+                    $strTemplate = $aryTemplate[$strMsgId];
                     $retStrBody = "";
                     $strDelimiter = "{}";
                     if( mb_strpos($strTemplate,$strDelimiter,0,$this->getLanguageMinorVersion()) === false ){

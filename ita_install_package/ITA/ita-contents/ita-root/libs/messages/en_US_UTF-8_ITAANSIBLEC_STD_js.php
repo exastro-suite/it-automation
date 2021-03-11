@@ -14,12 +14,12 @@
 //   limitations under the License.
 //
 ////en_US_UTF-8_ITAANSIBLEC_STD
-$ary["ITAANSIBLEC-99999"] = "Dummy";
-$ary["ITAANSIBLEC-101050"] = "Are you sure you want to perform emergency stop?";
-$ary["ITAANSIBLEC-101060"] = "Do you want to cancel the schedule?";
-$ary["ITAANSIBLEC-101070"] = "Select Operation No. from the operation tracking list.";
-$ary["ITAANSIBLEC-102040"] = "Do you want to execute?";
-$ary["ITAANSIBLEC-103030"] = "Are you sure you want to perform emergency stop?";
-$ary["ITAANSIBLEC-103040"] = "Are you sure you want to cancel the schedule?";
-$ary["ITAANSIBLEC-103050"] = "Select Operation No. from the operation tracking list.";
+$ary["ITAANSIBLEC99999"]    = "Dummy";
+$ary["ITAANSIBLEC101050"]   = "Are you sure you want to perform emergency stop?";
+$ary["ITAANSIBLEC101060"]   = "Do you want to cancel the schedule?";
+$ary["ITAANSIBLEC101070"]   = "Select Operation No. from the operation tracking list.";
+$ary["ITAANSIBLEC102040"]   = "Do you want to execute?";
+$ary["ITAANSIBLEC103030"]   = "Are you sure you want to perform emergency stop?";
+$ary["ITAANSIBLEC103040"]   = "Are you sure you want to cancel the schedule?";
+$ary["ITAANSIBLEC103050"]   = "Select Operation No. from the operation tracking list.";
 ?>
