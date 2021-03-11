@@ -14,11 +14,11 @@
 //   limitations under the License.
 //
 ////ja_JP_UTF-8_ITACREPAR_STD
-$ary[10001] = "[{}] 開始";
-$ary[10002] = "[{}] 終了(正常)";
-$ary[10003] = "[{}] 終了(異常)";
-$ary[10004] = "対象のレコードがありません。";
-$ary[50001] = "ホスト用";
-$ary[50002] = "ホストグループ用";
-$ary[50003] = "履歴テーブル用";
+$ary["ITACREPAR-STD-10001"]         = "[{}] 開始";
+$ary["ITACREPAR-STD-10002"]         = "[{}] 終了(正常)";
+$ary["ITACREPAR-STD-10003"]         = "[{}] 終了(異常)";
+$ary["ITACREPAR-STD-10004"]         = "対象のレコードがありません。";
+$ary["ITACREPAR-STD-50001"]         = "ホスト用";
+$ary["ITACREPAR-STD-50002"]         = "ホストグループ用";
+$ary["ITACREPAR-STD-50003"]         = "履歴テーブル用";
 ?>
