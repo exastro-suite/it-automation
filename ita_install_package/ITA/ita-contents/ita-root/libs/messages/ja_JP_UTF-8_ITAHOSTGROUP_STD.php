@@ -14,8 +14,8 @@
 //   limitations under the License.
 //
 ////ja_JP_UTF-8_ITAHOSTGROUP_STD
-$ary[10001] = "[{}] 開始";
-$ary[10002] = "[{}] 終了(正常)";
-$ary[10003] = "[{}] 終了(異常)";
-$ary[10004] = "処理対象：[{}] 、処理件数：登録件数=[{}] 件、更新件数=[{}] 件、廃止件数=[{}] 件";
+$ary["ITAHOSTGROUP-STD-10001"]      = "[{}] 開始";
+$ary["ITAHOSTGROUP-STD-10002"]      = "[{}] 終了(正常)";
+$ary["ITAHOSTGROUP-STD-10003"]      = "[{}] 終了(異常)";
+$ary["ITAHOSTGROUP-STD-10004"]      = "処理対象：[{}] 、処理件数：登録件数=[{}] 件、更新件数=[{}] 件、廃止件数=[{}] 件";
 ?>

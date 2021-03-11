@@ -14,11 +14,11 @@
 //   limitations under the License.
 //
 ////en_US_UTF-8_ITACREPAR_STD
-$ary[10001] = "[{}] START";
-$ary[10002] = "[{}] END(NORMAL)";
-$ary[10003] = "[{}] END(ERROR)";
-$ary[10004] = "No target record";
-$ary[50001] = "For Host";
-$ary[50002] = "For HostGroup";
-$ary[50003] = "for the history table.";
+$ary["ITACREPAR-STD-10001"]         = "[{}] START";
+$ary["ITACREPAR-STD-10002"]         = "[{}] END(NORMAL)";
+$ary["ITACREPAR-STD-10003"]         = "[{}] END(ERROR)";
+$ary["ITACREPAR-STD-10004"]         = "No target record";
+$ary["ITACREPAR-STD-50001"]         = "For Host";
+$ary["ITACREPAR-STD-50002"]         = "For HostGroup";
+$ary["ITACREPAR-STD-50003"]         = "for the history table.";
 ?>
