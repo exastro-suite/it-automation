@@ -19,11 +19,11 @@ install_mode:Install_Online
 
 # Enter install directory.
 # e.g) ita_directory:/exastro
-ita_directory:
+ita_directory:/exastro
 
 # Select language. ("en_US" or "ja_JP")
 # e.g) ita_language:en_US
-ita_language:en_US
+ita_language:ja_JP
 
 # Select Operation System. ("CentOS7","CentOS8","RHEL7","RHEL8")
 # e.g) linux_os:RHEL8
@@ -52,7 +52,7 @@ createparam:yes
 hostgroup:yes
 ansible_driver:yes
 cobbler_driver:no
-terraform_driver:no
+terraform_driver:yes
 
 # Enter the ita domain name.
 # e.g) ita_domain:exastro-it-automation.local
