@@ -76,7 +76,7 @@
 
         $tmpAryBind = array('USER_ID'=>$g['login_id']);
         $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
-        $role_id = "";
+        $role_id = array();
         if( $retArray[0] === true ){
             $objQuery =& $retArray[1];
             while($row = $objQuery->resultFetch() ){
