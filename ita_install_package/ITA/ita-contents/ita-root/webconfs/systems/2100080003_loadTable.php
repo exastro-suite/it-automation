@@ -60,7 +60,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     //Organization ID
     $url = "01_browse.php?no=2100080002&filter=on&Filter1Tbl_2=";
-    $c = new LinkIDColumn('ORGANIZATION_ID', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102450'), 'B_TERRAFORM_ORGANIZATIONS', 'ORGANIZATION_ID', 'ORGANIZATION_NAME', $url, false, false, '', '');
+    $c = new LinkIDColumn('ORGANIZATION_ID', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102450'), 'B_TERRAFORM_ORGANIZATIONS', 'ORGANIZATION_ID', 'ORGANIZATION_NAME', $url, false, false, '', '', '', '');
     $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102460')); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('B_TERRAFORM_ORGANIZATIONS_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
