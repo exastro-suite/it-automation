@@ -54,7 +54,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 			$arrUrl = array();
 	    $arrUrl[0] = "01_browse.php?no=2100000207&filter=on&Filter1Tbl_1__S=";
 	    $arrUrl[1] = "&Filter1Tbl_1__E=";
-	    $c = new LinkIDColumn('ROLE_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090201"), "D_ROLE_LIST", 'ROLE_ID', "ROLE_ID", $arrUrl, false, false, '', '', array('OrderByThirdColumn'=>'ROLE_ID'));
+	    $c = new LinkIDColumn('ROLE_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090201"), "D_ROLE_LIST", 'ROLE_ID', "ROLE_ID", $arrUrl, false, false, '', '', '', '', array('OrderByThirdColumn'=>'ROLE_ID'));
 	    $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090202"));
 
     	$c->getOutputType("update_table")->setVisible(false);
@@ -125,7 +125,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     //----チケット953
 		$arrUrl[0] = "01_browse.php?no=2100000208&filter=on&Filter1Tbl_1__S=";
 		$arrUrl[1] = "&Filter1Tbl_1__E=";
-    $c = new LinkIDColumn('USER_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090401"), "D_ACCOUNT_LIST", 'USER_ID', 'USER_ID', $arrUrl, false, false, '', '', array('OrderByThirdColumn'=>'USER_ID'));
+    $c = new LinkIDColumn('USER_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090401"), "D_ACCOUNT_LIST", 'USER_ID', 'USER_ID', $arrUrl, false, false, '', '', '', '', array('OrderByThirdColumn'=>'USER_ID'));
     $c->addClass("number");
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1090402"));
     $c->setHiddenMainTableColumn(false);

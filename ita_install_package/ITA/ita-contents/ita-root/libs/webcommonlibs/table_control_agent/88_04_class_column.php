@@ -1902,14 +1902,14 @@ class LinkIDColumn extends IDColumn {
 
 	protected $strTempBuf;
 
-    protected $strDateFormat;       // as String IDColumnクラスの参照先が日付・日時の場合に指定してフォーマットで表示を変換する。変換無しの場合はnull
+  protected $strDateFormat;       // as String IDColumnクラスの参照先が日付・日時の場合に指定してフォーマットで表示を変換する。変換無しの場合はnull
 
 	//----「(set/get)SearchType()で制御されてきた。
 
 	//----ここから継承メソッドの上書き処理
 
 	//OVR[ignored]::[1]
-	function __construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $strLinkUrl, $urlOption=false, $zeroPadding=false, $urlTartgetID="", $masterTableIdForInput="", $aryEtcetera=array()){
+	function __construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster, $strLinkUrl, $urlOption=false, $zeroPadding=false, $urlTartgetID="", $strSql="", $sqlBindID="", $masterTableIdForInput="", $aryEtcetera=array()){
 		global $g;
 		parent::__construct($strColId, $strColLabel, $masterTableIdForFilter, $strKeyColumnIDOfMaster, $strDispColumnIdOfMaster);
 
@@ -1965,7 +1965,7 @@ class LinkIDColumn extends IDColumn {
 
 		$this->setMultiple("filter_table",true);
 
-		$outputType = new IDOutputType(new SortedTabHFmt(), new MainLinkTabBFmt($strLinkUrl, $urlOption, $zeroPadding, $urlTartgetID));
+		$outputType = new IDOutputType(new SortedTabHFmt(), new MainLinkTabBFmt($strLinkUrl, $urlOption, $zeroPadding, $urlTartgetID, $strSql, $sqlBindID));
 		$this->setOutputType("print_table", $outputType);
 		$outputType = new IDOutputType(new TabHFmt(), new TextTabBFmt());
 		$this->setOutputType("print_journal_table", $outputType);
