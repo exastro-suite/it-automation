@@ -68,7 +68,7 @@ Ansible(Pioneer)作業対象ホスト管理
 
 
     $url = "01_browse.php?no=2100020206&filter=on&Filter1Tbl_2=";
-    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-407060"),'E_ANSIBLE_PNS_PATTERN','PATTERN_ID','PATTERN',$url,true,false,'','',array('OrderByThirdColumn'=>'PATTERN_ID'));
+    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-407060"),'E_ANSIBLE_PNS_PATTERN','PATTERN_ID','PATTERN',$url,true,false,'','','','',array('OrderByThirdColumn'=>'PATTERN_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-407070"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('E_ANSIBLE_PNS_PATTERN_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');

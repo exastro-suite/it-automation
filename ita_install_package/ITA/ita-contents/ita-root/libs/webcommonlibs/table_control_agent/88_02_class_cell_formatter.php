@@ -1704,7 +1704,7 @@ class MainLinkTabBFmt extends BFmt {
 
 	//----ここから継承メソッドの上書き処理
 
-	public function __construct($url="", $urlOption=false, $zeroPadding=false, $urlTartgetID=""){
+	public function __construct($url="", $urlOption=false, $zeroPadding=false, $urlTartgetID="", $strSql="", $sqlBindID=""){
 		parent::__construct();
 		$this->setTableDataLikeHeaderAgent(false);
 		$this->setTagClassesAgent(array());
@@ -1721,6 +1721,8 @@ class MainLinkTabBFmt extends BFmt {
 		$this->urlOption = $urlOption;
 		$this->zeroPadding = $zeroPadding;
 		$this->urlTartgetID = $urlTartgetID;
+		$this->strSql = $strSql;
+		$this->sqlBindID = $sqlBindID;
 	}
 
 	public function getData($rowData,$aryVariant){
@@ -1775,6 +1777,9 @@ class MainLinkTabBFmt extends BFmt {
 		}
 		if($this->zeroPadding === true){
 			$param = str_pad($param, 10, '0', STR_PAD_LEFT);
+		}
+		if($this->strSql != ""){
+			$param = $this->getUrlData($strData);
 		}
 		if(is_array($this->getLinkUrl())){
 			foreach ($this->getLinkUrl() as $value) {
@@ -1993,6 +1998,20 @@ class MainLinkTabBFmt extends BFmt {
 	public function getLinkUrl(){
 		return $this->strLinkUrl;
 	}
+	public function getUrlData($data){
+		$objDBCA = new DBConnectAgent();
+    $tmpResult = $objDBCA->connectOpen();
+		$urlData = "";
+	  $objQuery = $objDBCA->sqlPrepare($this->strSql);
+		if($this->sqlBindID != ""){
+      $objQuery->sqlBind(array($this->sqlBindID=>$data));
+		}
+    $r = $objQuery->sqlExecute();
+	  while($row = $objQuery->resultFetch()) {
+		  $urlData = array_shift($row);
+	  }
+	  return $urlData;
+ }
 
 	//ここまで新規メソッドの定義宣言処理
 

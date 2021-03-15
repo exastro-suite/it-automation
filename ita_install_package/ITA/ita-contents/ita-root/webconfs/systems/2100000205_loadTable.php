@@ -59,7 +59,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $arrUrl = array();
     $arrUrl[0] = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_1__S=";
     $arrUrl[1] = "&Filter1Tbl_1__E=";
-    $c = new LinkIDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040301"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_ID', $arrUrl, false, false, '', '', array('OrderByThirdColumn'=>'MENU_GROUP_ID') );
+    $c = new LinkIDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040301"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_ID', $arrUrl, false, false, '', '', '', '', array('OrderByThirdColumn'=>'MENU_GROUP_ID') );
     $c->addClass("number");
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040302"));
     $c->getOutputType("update_table")->setVisible(false);

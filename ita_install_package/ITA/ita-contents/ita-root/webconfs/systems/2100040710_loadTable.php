@@ -209,7 +209,7 @@ Ansible（Legacy Role）代入値自動登録設定
             // メニューID
             ////////////////////////////////////////////////////////////
             $url = "01_browse.php?no=";
-            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', '', '', '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900011"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
