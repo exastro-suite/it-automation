@@ -24,7 +24,8 @@ let menuEditorTargetID = '';
 let menuEditorArray = {};
 
 // テキストの無害化
-const textEntities = function( text ) {
+const textEntities = function( text, flag ) {
+  if ( flag === undefined ) flag = 0;
     const entities = [
       ['&', 'amp'],
       ['\"', 'quot'],
@@ -35,8 +36,10 @@ const textEntities = function( text ) {
     for ( var i = 0; i < entities.length; i++ ) {
       text = text.replace( new RegExp( entities[i][0], 'g'), '&' + entities[i][1] + ';' );
     }
+    if ( flag !== 1 ) {
     text = text.replace(/^\s+|\s+$/g, '');
     text = text.replace(/\r?\n/g, '<br>');
+    }
     return text;
 };
 
@@ -363,14 +366,14 @@ if ( menuEditorMode === 'edit') disbledCheckbox = ' disabled-checkbox';
 
 // HTML
 const columnHeaderHTML = ''
-  + '<div class="menu-column-move"></div>'
-  + '<div class="menu-column-title on-hover">'
+  + '<div class="menu-column-move" title="' + textEntities(getSomeMessage("ITACREPAR_1257"),1) + '"></div>'
+  + '<div class="menu-column-title on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1256"),1) + '">'
     + '<input class="menu-column-title-input" type="text" value=""'+modeDisabled+'>'
     + '<span class="menu-column-title-dummy"></span>'
   + '</div>'
   + '<div class="menu-column-function">'
-    + '<div class="menu-column-delete on-hover"></div>'
-    + '<div class="menu-column-copy on-hover"></div>'
+    + '<div class="menu-column-delete on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1258"),1) + '"></div>'
+    + '<div class="menu-column-copy on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1259"),1) + '"></div>'
   + '</div>';
 
 const columnEmptyHTML = ''
@@ -389,7 +392,7 @@ const columnRepeatHTML = ''
   + '<div class="menu-column-repeat">'
     + '<div class="menu-column-repeat-header">'
       + '<div class="menu-column-move"></div>'
-      + '<div class="menu-column-repeat-number on-hover">REPEAT : <input class="menu-column-repeat-number-input" data-min="1" data-max="99" value="2" type="number"'+modeDisabled+'></div>'
+      + '<div class="menu-column-repeat-number on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1260"),1) + '">REPEAT : <input class="menu-column-repeat-number-input" data-min="1" data-max="99" value="2" type="number"'+modeDisabled+'></div>'
     + '</div>'
     + '<div class="menu-column-repeat-body">'
     + '</div>'
@@ -433,40 +436,40 @@ const columnHTML = ''
       + columnHeaderHTML
     + '</div>'
     + '<div class="menu-column-body">'
-      + '<div class="menu-column-type">'
+      + '<div class="menu-column-type" title="' + textEntities(getSomeMessage("ITACREPAR_1261"),1) + '">'
         + '<select class="menu-column-type-select"'+modeDisabled+''+modeKeepData+'>' + inputMethodHTML + '</select>'
       + '</div>'
       + '<div class="menu-column-config">'
         + '<table class="menu-column-config-table" date-select-value="1">'
-          + '<tr class="multiple single link">'
+          + '<tr class="multiple single link" title="' + textEntities(getSomeMessage("ITACREPAR_1262"),1) + '">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number max-byte" type="number" data-min="2" data-max="8192" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-number max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="multiple single">'
+          + '<tr class="multiple single" title="' + textEntities(getSomeMessage("ITACREPAR_1263"),1) + '">'
             + '<th>' + textCode('0012') + '</th>'
             + '<td><input class="config-text regex" type="text" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-int">'
+          + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1264"),1) + '">'
             + '<th>' + textCode('0013') + '</th>'
             + '<td><input class="config-number int-min-number" data-min="-2147483648" data-max="2147483647" type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-int">'
+          + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1265"),1) + '">'
             + '<th>' + textCode('0014') + '</th>'
             + '<td><input class="config-number int-max-number" data-min="-2147483648" data-max="2147483647"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-float">'
+          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1266"),1) + '">'
             + '<th>' + textCode('0013') + '</th>'
             + '<td><input class="config-number float-min-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-float">'
+          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1267"),1) + '">'
             + '<th>' + textCode('0014') + '</th>'
             + '<td><input class="config-number float-max-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-float">'
+          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1268"),1) + '">'
             + '<th>' + textCode('0015') + '</th>'
             + '<td><input class="config-number digit-number" data-min="1" data-max="14" type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="select">'
+          + '<tr class="select" title="' + textEntities(getSomeMessage("ITACREPAR_1269"),1) + '">'
             + '<th>' + textCode('0016') + '<span class="input_required">*</span></th>'
             + '<td>'
               + '<select class="config-select pulldown-select"'+modeDisabled+''+modeKeepData+'>' + selectPulldownListHTML + '</select>'
@@ -479,24 +482,24 @@ const columnHTML = ''
           + '<tr class="select reference">'
             + '<td><button class="reference-item-select property-button" '+modeDisabled+''+modeKeepData+'>' + textCode('0045') + '</button></td>'
           + '</tr>'
-          + '<tr class="password">'
+          + '<tr class="password" title="' + textEntities(getSomeMessage("ITACREPAR_1262"),1) + '">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
             + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="file">'
+          + '<tr class="file" title="' + textEntities(getSomeMessage("ITACREPAR_1270"),1) + '">'
             + '<th>' + textCode('0042') + '<span class="input_required">*</span></th>'
             + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="all">'
             + '<td colspan="2">'
-              + '<label class="required-label'+onHover+'"><input class="config-checkbox required'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0017') + '</label>'
-              + '<label class="unique-label'+onHover+'"><input class="config-checkbox unique'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0018') + '</label>'
+              + '<label class="required-label'+onHover+'" title="' + textEntities(getSomeMessage("ITACREPAR_1271"),1) + '"><input class="config-checkbox required'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0017') + '</label>'
+              + '<label class="unique-label'+onHover+'" title="' + textEntities(getSomeMessage("ITACREPAR_1272"),1) + '"><input class="config-checkbox unique'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0018') + '</label>'
             + '</td>'
           + '</tr>'
-          + '<tr class="all">'
+          + '<tr class="all" title="' + textEntities(getSomeMessage("ITACREPAR_1273"),1) + '">'
             + '<td colspan="2"><div class="config-textarea-wrapper"><textarea class="config-textarea explanation"'+modeDisabled+'></textarea><span>' + textCode('0019') + '</span></div></td>'
           + '</tr>'
-          + '<tr class="all">'
+          + '<tr class="all" title="' + textEntities(getSomeMessage("ITACREPAR_1274"),1) + '">'
             + '<td colspan="2"><div class="config-textarea-wrapper"><textarea class="config-textarea note"'+modeDisabled+'></textarea><span>' + textCode('0020') + '</span></div></td>'
           + '</tr>'
         + '</table>'

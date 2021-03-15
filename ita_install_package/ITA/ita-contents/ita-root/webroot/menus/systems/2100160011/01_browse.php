@@ -415,28 +415,28 @@ EOD;
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104211")}</th>
                   <td class="property-td" colspan="3"><span id="create-menu-id" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
-                <tr>
+                <tr title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105023")}">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104212")}<span class="input_required">*</span> :</th>
                   <td class="property-td" colspan="3"><input id="create-menu-name" class="property-text" type="text"></td>
                 </tr>
-                <tr>
+                <tr title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105024")}">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104213")} :</th>
                   <td class="property-td" colspan="3">
                     <select id="create-menu-type" class="property-select" disabled>
                     </select>
                   </td>
                 </tr>
-                <tr>
+                <tr title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105025")}">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104214")}<span class="input_required">*</span> :</th>
                   <td class="property-td" colspan="3"><input id="create-menu-order" class="property-number" type="number" data-min="0" data-max="2147483647"></td>
                 </tr>
-                <tr class="parameter-sheet">
+                <tr class="parameter-sheet" title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105026")}">
                   <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104237")} :</th>
                   <td class="property-td" colspan="2">
                     <label class="property-label" ><input type="checkbox" id="create-menu-use-host-group" disabled> {$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104242")}</label>
                   </td>
                 </tr>
-                <tr class="parameter-sheet parameter-operation">
+                <tr class="parameter-sheet parameter-operation" title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105027")}">
                   <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104238")} <span id="vertical-menu-help" class="editor-help" title="Help">?</span> :</th>
                   <td class="property-td" colspan="2">
                     <label class="property-label" ><input type="checkbox" id="create-menu-use-vertical" disabled> {$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104242")}</label>
@@ -492,12 +492,12 @@ EOD;
             </ul>
           </div>
 
-          <div class="property-group">
+          <div class="property-group" title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105028")}">
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104224")}</div>
             <textarea id="create-menu-explanation" class="property-textarea" spellcheck="false"></textarea>
           </div>
 
-          <div class="property-group">
+          <div class="property-group" title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105029")}">
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104225")}</div>
             <textarea id="create-menu-note" class="property-textarea" spellcheck="false"></textarea>
           </div>
@@ -531,28 +531,28 @@ EOD;
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104211")}</th>
                   <td class="property-td" colspan="3"><span id="create-menu-id" class="property-span" data-value="">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104233")}</span></td>
                 </tr>
-                <tr>
+                <tr title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105023")}">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104212")}<span class="input_required">*</span> :</th>
                   <td class="property-td" colspan="3"><input id="create-menu-name" class="property-text" type="text"></td>
                 </tr>
-                <tr>
+                <tr title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105024")}">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104213")} :</th>
                   <td class="property-td" colspan="3">
                     <select id="create-menu-type" class="property-select">
                     </select>
                   </td>
                 </tr>
-                <tr>
+                <tr title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105025")}">
                   <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104214")}<span class="input_required">*</span> :</th>
                   <td class="property-td" colspan="3"><input id="create-menu-order" class="property-number" type="number" data-min="0" data-max="2147483647"></td>
                 </tr>
-                <tr class="parameter-sheet">
+                <tr class="parameter-sheet" title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105026")}">
                   <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104237")} :</th>
                   <td class="property-td" colspan="2">
                     <label class="property-label" ><input type="checkbox" id="create-menu-use-host-group"> {$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104242")}</label>
                   </td>
                 </tr>
-                <tr class="parameter-sheet parameter-operation">
+                <tr class="parameter-sheet parameter-operation" title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105027")}">
                   <th class="property-th" colspan="2">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104238")} <span id="vertical-menu-help" class="editor-help" title="Help">?</span> :</th>
                   <td class="property-td" colspan="2">
                     <label class="property-label" ><input type="checkbox" id="create-menu-use-vertical"> {$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104242")}</label>
@@ -608,12 +608,12 @@ EOD;
             </ul>
           </div>
 
-          <div class="property-group">
+          <div class="property-group" title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105028")}">
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104224")}</div>
             <textarea id="create-menu-explanation" class="property-textarea" spellcheck="false"></textarea>
           </div>
 
-          <div class="property-group">
+          <div class="property-group" title="{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105029")}">
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104225")}</div>
             <textarea id="create-menu-note" class="property-textarea" spellcheck="false"></textarea>
           </div>
