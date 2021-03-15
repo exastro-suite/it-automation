@@ -664,6 +664,7 @@ class OAuth2 extends Auth
         'proxy'            => '',
         'visibleFlag'      => '',
         'debug'            => '',
+        'ignoreSslVerify'  => '',
     ];
 
     // provider設定用のconfig取得callback関数名保持変数
@@ -1256,6 +1257,13 @@ class OAuth2 extends Auth
             }
         }
         $options['http']['header'] = implode("\r\n",$header);
+
+        $ignoreSslVerify = $this->config['ignoreSslVerify'];
+
+        if ( $ignoreSslVerify === '1' ){
+            $options['ssl']['verify_peer']      = false;
+            $options['ssl']['verify_peer_name'] = false;
+        }
 
         $body = file_get_contents($uri, false, stream_context_create($options));
         preg_match('|^HTTP/1\.[01] ([12345][0-9][0-9]) (.+)$|', $http_response_header[0],$match);

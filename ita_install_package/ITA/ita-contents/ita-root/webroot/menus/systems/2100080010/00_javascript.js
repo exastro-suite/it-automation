@@ -13,8 +13,6 @@
 //   limitations under the License.
 //
 //////// グローバル変数定義 ////////
-// 緊急停止実施フラグ
-var scramed_frag = false;
 // ステータス
 var result_status_id;
 
@@ -65,10 +63,8 @@ function callback() {}
                 else if( result_status_id == 1 ||
                          result_status_id == 3 ||
                          result_status_id == 4 ){
-                    if( scramed_frag == false ){
-                        // ボタンを活性にする
-                        document.getElementById('scrumTryExecute').disabled = false;
-                    }
+                    // ボタンを活性にする
+                    document.getElementById('scrumTryExecute').disabled = false;
                 }
                 else {
                     // ボタンを非活性にする
@@ -140,9 +136,6 @@ function scrum_execution(){
     if( window.confirm( getSomeMessage("ITATERRAFORM110001")) ){
         // ボタンを非活性にする
         document.getElementById('scrumTryExecute').disabled = true;
-        
-        //  緊急停止実施フラグをONにする
-        scramed_frag = true;
         
         // 変数定義(target_execution_noを取得)
         var target_execution_no = document.getElementById('target_execution_no').innerHTML;
