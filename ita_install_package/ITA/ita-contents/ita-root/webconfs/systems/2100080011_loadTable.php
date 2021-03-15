@@ -118,19 +118,13 @@ Terraform作業管理
     //*************************************************************************************************************
     $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103940") );
 
-    $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103950"),'E_TERRAFORM_PATTERN','PATTERN_ID','PATTERN_ID','');
-    $c->setMasterDisplayColumnType(0);
+    $c = new TextColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103950"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103960"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
-    $c->setJournalTableOfMaster('E_TERRAFORM_PATTERN_JNL');
-    $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
-    $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
-    $c->setJournalKeyIDOfMaster('PATTERN_ID');
-    $c->setJournalDispIDOfMaster('PATTERN_ID');
     $cg->addColumn($c);
 
     //*************************************************************************************************************
@@ -158,14 +152,8 @@ Terraform作業管理
             //*************************************************************************************************************
             //----Organization:Workspace
             //*************************************************************************************************************
-            $c = new IDColumn('I_TERRAFORM_WORKSPACE_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104020"),'D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK','WORKSPACE_ID','ORGANIZATION_WORKSPACE','');
+            $c = new TextColumn('I_TERRAFORM_ORGANIZATION_WORKSPACE',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104020"));
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104030"));//エクセル・ヘッダでの説明
-            $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
-            $c->setJournalTableOfMaster('D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK_JNL');
-            $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
-            $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
-            $c->setJournalKeyIDOfMaster('WORKSPACE_ID');
-            $c->setJournalDispIDOfMaster('ORGANIZATION_WORKSPACE');
             $c->setRequired(true);//登録/更新時には、入力必須
             $cg2->addColumn($c);
 
@@ -187,19 +175,13 @@ Terraform作業管理
     //*************************************************************************************************************
     //----オペレーションNo
     //*************************************************************************************************************
-    $c = new IDColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104070"),'E_OPERATION_LIST','OPERATION_NO_UAPK','OPERATION_NO_UAPK','');
-    $c->setMasterDisplayColumnType(0);
+    $c = new TextColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104080"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
-    $c->setJournalTableOfMaster('E_OPERATION_LIST_JNL');
-    $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
-    $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
-    $c->setJournalKeyIDOfMaster('OPERATION_NO_UAPK');
-    $c->setJournalDispIDOfMaster('OPERATION_NO_UAPK');
     $cg->addColumn($c);
 
     //*************************************************************************************************************
@@ -215,19 +197,13 @@ Terraform作業管理
     //*************************************************************************************************************
     //----オペレーションID
     //*************************************************************************************************************
-    $c = new IDColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104110"),'E_OPERATION_LIST','OPERATION_NO_IDBH','OPERATION_NO_IDBH','');
-    $c->setMasterDisplayColumnType(0);
+    $c = new TextColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104110"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104120"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
-    $c->setJournalTableOfMaster('E_OPERATION_LIST_JNL');
-    $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
-    $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
-    $c->setJournalKeyIDOfMaster('OPERATION_NO_IDBH');
-    $c->setJournalDispIDOfMaster('OPERATION_NO_IDBH');
     $cg->addColumn($c);
 
     $table->addColumn($cg);

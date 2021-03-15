@@ -52,6 +52,7 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         "I_TIME_LIMIT"=>"",
         "I_TERRAFORM_RUN_ID"=>"",
         "I_TERRAFORM_WORKSPACE_ID"=>"",
+        "I_TERRAFORM_ORGANIZATION_WORKSPACE"=>"",
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "I_OPERATION_NO_IDBH"=>"",
@@ -82,6 +83,7 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         "I_TIME_LIMIT"=>"",
         "I_TERRAFORM_RUN_ID"=>"",
         "I_TERRAFORM_WORKSPACE_ID"=>"",
+        "I_TERRAFORM_ORGANIZATION_WORKSPACE"=>"",
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "I_OPERATION_NO_IDBH"=>"",
@@ -448,8 +450,43 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         }
         $aryRowOfOperationTable = $arrayRetBody[4];
 
-        // 実行インスタンス管理テーブルにレコードをINSERT
+        //Organization:Workspaceを名前で取得する
+        $workspace_id = $arySinglePatternSource["TERRAFORM_WORKSPACE_ID"];
+        // SQL作成
+        $sql = "SELECT ORGANIZATION_WORKSPACE FROM D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK WHERE WORKSPACE_ID = $workspace_id AND DISUSE_FLAG = '0'";
+        // SQL準備
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if( $objQuery->getStatus()===false ){
+            $strErrStepIdInFx="00000001";
+            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        // SQL発行
+        $r = $objQuery->sqlExecute();
 
+        if (!$r){
+            unset($objQuery);
+            $strErrStepIdInFx="00000001";
+            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
+        // レコードFETCH
+        $organization_workspace = "";
+        $aryRow = array();
+        while ( $row = $objQuery->resultFetch() ){
+            $aryRow[] = $row;
+            $organization_workspace = $row['ORGANIZATION_WORKSPACE'];
+        }
+
+        if( count($aryRow)!= 1 ){
+            // 例外処理へ
+            $strErrStepIdInFx="00000001";
+            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
+        // DBアクセス事後処理
+        unset($objQuery);
+
+        // 実行インスタンス管理テーブルにレコードをINSERT
         $arrayConfig = array(
         "JOURNAL_SEQ_NO"=>"",
         "JOURNAL_ACTION_CLASS"=>"",
@@ -464,6 +501,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "I_TIME_LIMIT"=>"",
         "I_TERRAFORM_RUN_ID"=>"",
         "I_TERRAFORM_WORKSPACE_ID"=>"",
+        "I_TERRAFORM_ORGANIZATION_WORKSPACE"=>"",
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "I_OPERATION_NO_IDBH"=>"",
@@ -516,14 +554,13 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "EXECUTION_USER"=>$user_name,
         "SYMPHONY_NAME"=>$symphony_name,
         "STATUS_ID"=>$status_id_for_update,
-
         "SYMPHONY_INSTANCE_NO"=>$int_Symphony_instance_no,
-
         "PATTERN_ID"=>$intPatternId,
         "I_PATTERN_NAME"=>$arySinglePatternSource["PATTERN_NAME"],
         "I_TIME_LIMIT"=>$arySinglePatternSource["TIME_LIMIT"],
         "I_TERRAFORM_RUN_ID"=>"",
-        "I_TERRAFORM_WORKSPACE_ID"=>$arySinglePatternSource["TERRAFORM_WORKSPACE_ID"],
+        "I_TERRAFORM_WORKSPACE_ID"=>$workspace_id,
+        "I_TERRAFORM_ORGANIZATION_WORKSPACE"=>$organization_workspace,
         "OPERATION_NO_UAPK"=>$intOperationNoUAPK,
         "I_OPERATION_NAME"=>$aryRowOfOperationTable["OPERATION_NAME"],
         "I_OPERATION_NO_IDBH"=>$aryRowOfOperationTable["OPERATION_NO_IDBH"],
