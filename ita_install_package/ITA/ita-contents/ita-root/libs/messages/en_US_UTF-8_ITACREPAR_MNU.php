@@ -288,4 +288,11 @@ $ary["ITACREPAR-MNU-105019"]        = "Sensitive Setting";
 $ary["ITACREPAR-MNU-105020"]        = "";
 $ary["ITACREPAR-MNU-105021"]        = "Master column";
 $ary["ITACREPAR-MNU-105022"]        = "";
+$ary["ITACREPAR-MNU-105023"]       = "Enter the menu name of the menu to be created.\nThe maximum size is 256 bytes.\nThe menu name &quot;Main menu&quot; cannot be used.\n &quot;&#92;&#47;&#58;&#42;&#63;&#34;&#60;&#62;&#124;&#91;&#93;：￥／＊［］&quot; characters cannot be used.";
+$ary["ITACREPAR-MNU-105024"]       = "Select &quot;Parameter Sheet (Host / Operation)&quot; or\n&quot;Data Sheet (master available)&quot; from the pull-down menu.";
+$ary["ITACREPAR-MNU-105025"]       = "Enter the display order in the menu group. They are displayed in ascending order.\nInteger value from 0 to 2147483647 can be entered.";
+$ary["ITACREPAR-MNU-105026"]       = "If the &quot;use&quot; checkbox is checked, a &quot;Host name/Host Group name&quot; parameter sheet will be created in the &quot;Input&quot; Menu group.\nIf the &quot;use &quot; checkbox is checked, a &quot;host name&quot; parameter sheet will be created.";
+$ary["ITACREPAR-MNU-105027"]       = "If the &quot;use&quot; checkbox is checked, a parameter sheet corresponding to the vertical menu will be created.";
+$ary["ITACREPAR-MNU-105028"]       = "Enter the description.\nThe maximum size is 8192 bytes.";
+$ary["ITACREPAR-MNU-105029"]       = "Enter the remarks.\nThe maximum size is 8192 bytes.";
 ?>
