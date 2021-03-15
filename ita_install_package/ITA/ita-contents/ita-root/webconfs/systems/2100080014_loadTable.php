@@ -62,7 +62,7 @@ PolicySet-Workspace紐付管理ページ
     //----Policy SetS
     //************************************************************************************
     $url = "01_browse.php?no=2100080013&filter=on&Filter1Tbl_2=";
-    $c = new LinkIDColumn('POLICY_SET_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103450"), 'D_TERRAFORM_POLICY_SETS', 'POLICY_SET_ID', 'POLICY_SET', $url, false, false, '', '', array('OrderByThirdColumn'=>'POLICY_SET_ID'));
+    $c = new LinkIDColumn('POLICY_SET_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103450"), 'D_TERRAFORM_POLICY_SETS', 'POLICY_SET_ID', 'POLICY_SET', $url, false, false, '', '', '', '', array('OrderByThirdColumn'=>'POLICY_SET_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103460")); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_TERRAFORM_POLICY_SETS_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -76,7 +76,7 @@ PolicySet-Workspace紐付管理ページ
     //----Workspace
     //************************************************************************************
     $url = "01_browse.php?no=2100080003&filter=on&Filter1Tbl_3=";
-    $c = new LinkIDColumn('WORKSPACE_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103470"),'D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK','WORKSPACE_ID','ORGANIZATION_WORKSPACE',$url,true,false,'','');
+    $c = new LinkIDColumn('WORKSPACE_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103470"),'D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK','WORKSPACE_ID','ORGANIZATION_WORKSPACE',$url,true,false,'','','','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103480"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');

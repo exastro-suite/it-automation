@@ -67,7 +67,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     //symphonyクラスID
     $url = "01_browse.php?no=2100180003&conductor_class_id=";
-    $c = new LinkIDColumn('CONDUCTOR_CLASS_NO',$g['objMTS']->getSomeMessage('ITABASEH-MNU-307022'), 'C_CONDUCTOR_EDIT_CLASS_MNG', 'CONDUCTOR_CLASS_NO', 'CONDUCTOR_NAME', $url, false, false, 'REGULARLY_ID', '', array('SELECT_ADD_FOR_ORDER'=>array('CONDUCTOR_CLASS_NO'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+    $sql = "SELECT CONDUCTOR_CLASS_NO
+						FROM   C_CONDUCTOR_EDIT_CLASS_MNG
+						WHERE  CONDUCTOR_NAME = :CONDUCTOR_NAME
+						AND DISUSE_FLAG = '0'";
+    $sqlBindID = 'CONDUCTOR_NAME';
+    $c = new LinkIDColumn('CONDUCTOR_CLASS_NO',$g['objMTS']->getSomeMessage('ITABASEH-MNU-307022'), 'C_CONDUCTOR_EDIT_CLASS_MNG', 'CONDUCTOR_CLASS_NO', 'CONDUCTOR_NAME', $url, false, false, '', $sql, $sqlBindID, '', array('OrderByThirdColumn'=>'CONDUCTOR_CLASS_NO'));
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-307023')); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('C_CONDUCTOR_EDIT_CLASS_MNG_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
