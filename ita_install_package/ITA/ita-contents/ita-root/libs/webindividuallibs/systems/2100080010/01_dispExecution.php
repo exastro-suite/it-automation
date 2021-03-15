@@ -21,7 +21,6 @@
     
     //----オーケストレータ別の設定記述
     $strExeTableIdForSelect = 'E_TERRAFORM_EXE_INS_MNG';
-    $strOrganizationWorkspaceLink = 'D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK';
     //オーケストレータ別の設定記述----
     
     $strFxName = __FUNCTION__;
@@ -52,7 +51,7 @@
                         TAB_A.I_TIME_LIMIT,
                         TAB_A.I_TERRAFORM_RUN_ID,
                         TAB_A.I_TERRAFORM_WORKSPACE_ID,
-                        TAB_C.ORGANIZATION_WORKSPACE,
+                        TAB_A.I_TERRAFORM_ORGANIZATION_WORKSPACE,
                         TAB_A.STATUS_ID,
                         TAB_A.OPERATION_NO_UAPK,
                         TAB_A.I_OPERATION_NAME,
@@ -74,7 +73,6 @@
                                                    END AS LAST_UPDATE_USER
                     FROM    {$strExeTableIdForSelect} TAB_A
                     LEFT JOIN A_ACCOUNT_LIST             TAB_B ON (TAB_A.LAST_UPDATE_USER = TAB_B.USER_ID)
-                    LEFT JOIN {$strOrganizationWorkspaceLink} TAB_C ON (TAB_C.WORKSPACE_ID = TAB_A.I_TERRAFORM_WORKSPACE_ID)
                     WHERE   TAB_A.DISUSE_FLAG = '0'
                     AND     TAB_A.EXECUTION_NO = :EXECUTION_NO_BV ";
         //オーケストレータ別の設定記述----
@@ -148,7 +146,7 @@
         $COLUMN_32 = nl2br(htmlspecialchars($showTgtRow['I_PATTERN_NAME']));
         $COLUMN_33 = nl2br(htmlspecialchars($showTgtRow['I_OPERATION_NO_IDBH']));
         $COLUMN_35 = nl2br(htmlspecialchars($showTgtRow['I_TERRAFORM_RUN_ID']));
-        $COLUMN_36 = nl2br(htmlspecialchars($showTgtRow['ORGANIZATION_WORKSPACE']));
+        $COLUMN_36 = nl2br(htmlspecialchars($showTgtRow['I_TERRAFORM_ORGANIZATION_WORKSPACE']));
 
         $status_id = htmlspecialchars($showTgtRow['STATUS_ID']);
 
