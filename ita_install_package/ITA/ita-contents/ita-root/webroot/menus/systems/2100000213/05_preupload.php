@@ -37,7 +37,7 @@ catch (Exception $e){
 
 $menuId = filter_input(INPUT_GET, 'no');
 $fileName = filter_input(INPUT_GET, 'fn');
-if (preg_match('/^[a-z0-9._]+$/', $fileName)) {
+if (preg_match('/^[a-zA-Z0-9ぁ-んーァ-ンヴー._]+$/', $fileName)) {
     $filePath = $root_dir_path . "/uploadfiles/{$menuId}/{$fileName}";
 
     if (file_exists($filePath) === true) {
