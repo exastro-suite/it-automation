@@ -47,11 +47,11 @@ require $root_dir_path."/libs/webcommonlibs/web_functions_for_sso_auth.php";
 // ----リダイレクト用パラメータ保存
 $grp = '';
 if (isset($_GET['grp'])) {
-    $grp = $_GET['grp'];
+    $grp = htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8");
 }
 $no = '';
 if (isset($_GET['no'])) {
-    $no = $_GET['no'];
+    $no = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
 }
 $nextUrl = "/";
 if (!empty($grp) || !empty($no)) {
@@ -73,7 +73,8 @@ if (!empty($strAuthClassName)) {
     $objAuth->setRegistFunction('autoRegistUser');
     $objAuth->setRegistFormFunction('registFormFunction');
     $objAuth->setNextUri($nextUrl);
-    $objAuth->setRedirectUri(getRequestProtocol().getRequestHost()."{$_SERVER['PHP_SELF']}?{$strAuthType}&callback");
+    $scriptName = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
+    $objAuth->setRedirectUri(getRequestProtocol().getRequestHost()."{$scriptName}?{$strAuthType}&callback");
     if (isset($_GET['debug'])) {
         $objAuth->isDebug = true;
     }

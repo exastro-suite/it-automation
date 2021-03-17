@@ -18,7 +18,7 @@
     global $g;
     $tmpAry=explode('ita-root', dirname(__FILE__));$g['root_dir_path']=$tmpAry[0].'ita-root';unset($tmpAry);
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
 
     // ----DBアクセスを伴う処理
@@ -58,7 +58,7 @@
 
     //----ForReview用の分岐
     if(array_key_exists('commonHiddenSend01',$_POST)===true){
-        $aryVariant = array('pageType'=>$_POST['commonHiddenSend01']);
+        $aryVariant = array('pageType'=>htmlspecialchars($_POST['commonHiddenSend01'], ENT_QUOTES, "UTF-8"));
         $objDefaultTable = loadTable(null,$aryVariant);
     }else{
         $objDefaultTable = loadTable();

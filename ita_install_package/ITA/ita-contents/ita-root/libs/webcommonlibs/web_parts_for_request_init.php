@@ -45,7 +45,7 @@
 
     $g['scheme_n_authority']   = getSchemeNAuthority();
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
 
     $arrayReqInfo = requestTypeAnalyze();
@@ -74,8 +74,8 @@
     
     //URL指定でリクエストされたメニューに関する情報等----
 
-    $g['request_time']         = $_SERVER['REQUEST_TIME'];
-    $g['request_time_micro']   = $_SERVER['REQUEST_TIME_FLOAT'];
+    $g['request_time']         = htmlspecialchars($_SERVER['REQUEST_TIME'], ENT_QUOTES, "UTF-8");
+    $g['request_time_micro']   = htmlspecialchars($_SERVER['REQUEST_TIME_FLOAT'], ENT_QUOTES, "UTF-8");
 
     $g['root_dir_path']        = $root_dir_path;
 

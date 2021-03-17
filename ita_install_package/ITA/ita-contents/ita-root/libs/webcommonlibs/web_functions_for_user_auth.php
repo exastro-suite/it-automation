@@ -707,7 +707,7 @@
             $db_model_ch = $objDBCA->getModelChannel();
 
             $tempBoolPassWordChange = false;
-            $tempRequestTime = $_SERVER["REQUEST_TIME"];
+            $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
             // ----■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。
             if(isset($pass_word_expiry)){
                 // ----設定テーブルに、パスワードの有効期限に関する設定があった場合
@@ -986,7 +986,7 @@
                 //該当ＰＷは、ユーザの手による更新は過去になかった場合----
             }
             else{
-                $tempRequestTime = $_SERVER["REQUEST_TIME"];
+                $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
                 $tmpIntPWLDUnixTime = strtotime($varLastUpdate);
                 if( $tempRequestTime < $tmpIntPWLDUnixTime + ($pw_reuse_forbid * 86400) ){
                     //----再利用禁止期間を経過していない場合
@@ -1446,7 +1446,7 @@
 
                     // ----閾値と現在の失敗値が等しい場合
                     if( $strLockDateUpdate === "LOCK" ){
-                        $arrayValue['LOCKED_TIMESTAMP'] = date("Y/m/d H:i:s",$_SERVER['REQUEST_TIME']);
+                        $arrayValue['LOCKED_TIMESTAMP'] = date("Y/m/d H:i:s",htmlspecialchars($_SERVER['REQUEST_TIME'], ENT_QUOTES, "UTF-8"));
                     }
                     else if( $strLockDateUpdate === "RESET" ){
                         $arrayValue['LOCKED_TIMESTAMP'] = "";
@@ -1742,7 +1742,7 @@
             }
             else{
                 $varUnlockTimeStamp = $pwl_expiry + convFromStrDateToUnixtime($varLockedTimeStamp,false);
-                $varNowTimeStamp = $_SERVER['REQUEST_TIME'];
+                $varNowTimeStamp = htmlspecialchars($_SERVER['REQUEST_TIME'], ENT_QUOTES, "UTF-8");
                 if( $varUnlockTimeStamp <= $varNowTimeStamp ){
                     // ----ロックされてから期間が経過したので、カウントをリセットする。有効期限外とする
                     $retBool = false;

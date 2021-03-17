@@ -22,7 +22,7 @@
     }
 
     // パラメータを持たないURLは使用できないため、基本コンソールへリダイレクト
-    $uri = $_SERVER['REQUEST_URI'];
+    $uri = htmlspecialchars($_SERVER['REQUEST_URI'], ENT_QUOTES, "UTF-8");
     if($uri == "/"){
         $url = '/default/mainmenu/01_browse.php';
         header('Location: ' . $url, true, 301);

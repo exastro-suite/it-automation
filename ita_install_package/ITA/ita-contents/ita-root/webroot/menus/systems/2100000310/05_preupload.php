@@ -26,7 +26,7 @@
         mkdir($filepath, 0777);
     }
 
-    $symphonyId = str_pad($_GET['symphony_instance_id'],10,0,STR_PAD_LEFT);
+    $symphonyId = str_pad(htmlspecialchars($_GET['symphony_instance_id'], ENT_QUOTES, "UTF-8"),10,0,STR_PAD_LEFT);
     
     if(array_key_exists("mode",$_GET)===true){
         if($_GET['mode']=="in"){
@@ -77,7 +77,7 @@
                     WHERE SYMPHONY_INSTANCE_NO = :SYM_NO ";
             
             //Bindしたいものがあれば配列に入れる。
-            $tmpAryBind = array('SYM_NO' => $_GET['symphony_instance_id']);
+            $tmpAryBind = array('SYM_NO' => htmlspecialchars($_GET['symphony_instance_id'], ENT_QUOTES, "UTF-8"));
 
             //関数呼び出し
             $retArray = singleSQLExecuteAgent($sql, $tmpAryBind,  __FUNCTION__);
