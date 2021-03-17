@@ -74,7 +74,7 @@ define('FILE_PARTS_ID',                 'parts_id.php');                        
 define('FILE_PARTS_PW',                 'parts_password.php');                      // 00_loadTable.phpのデータ部テンプレート(PW用)
 define('FILE_PARTS_UPL',                'parts_upload.php');                        // 00_loadTable.phpのデータ部テンプレート(ファイルアップロード用)
 define('FILE_PARTS_LNK',                'parts_link.php');                          // 00_loadTable.phpのデータ部テンプレート(リンク用)
-define('FILE_PARTS_REF',                'parts_view_reference.php');                // 00_loadTable.phpのデータ部テンプレート(プルダウン選択の参照項目用)
+define('FILE_PARTS_REF',                'parts_reference.php');                     // 00_loadTable.phpのデータ部テンプレート(プルダウン選択の参照項目用)
 
 define('FILE_PARTS_VIEW_SNG',           'parts_view_string.php');                   // 00_loadTable.php(VIEW用)のデータ部テンプレート(単一行文字列用)
 define('FILE_PARTS_VIEW_MUL',           'parts_view_multiString.php');              // 00_loadTable.php(VIEW用)のデータ部テンプレート(複数行文字列用)
