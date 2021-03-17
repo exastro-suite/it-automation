@@ -289,13 +289,13 @@ function insertTask(){
                                              array('A_SEQUENCE', 'B_DP_STATUS_JSQ', basename(__FILE__), __LINE__)));
         throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
     }
-    $p_dp_mode = $_POST["dp_mode"];
-    $p_abolished_type = $_POST["abolished_type"];
+    $p_dp_mode = htmlspecialchars($_POST["dp_mode"], ENT_QUOTES, "UTF-8");
+    $p_abolished_type = htmlspecialchars($_POST["abolished_type"], ENT_QUOTES, "UTF-8");
 
     $p_specified_timestamp = NULL;
     if ( isset($p_dp_mode) && $p_dp_mode == 2) {
         if ( isset($_POST["specified_timestamp"]) && !empty($_POST["specified_timestamp"])) {
-            $p_specified_timestamp = $_POST["specified_timestamp"];
+            $p_specified_timestamp = htmlspecialchars($_POST["specified_timestamp"], ENT_QUOTES, "UTF-8");
         } else {
             web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
                                                  array('A_SEQUENCE', 'B_DP_STATUS_JSQ', basename(__FILE__), __LINE__)));

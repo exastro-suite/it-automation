@@ -59,7 +59,7 @@
         
         // メニューのディレクトリを取得
         if(array_key_exists('no', $_GET)){
-            $g['page_dir']  = $_GET['no'];
+            $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
         }
         
         ////////////////////////////////
@@ -140,8 +140,8 @@
         $interval = $row_if_info['REFRESH_INTERVAL']; // 最新化のインターバルタイム(msec)
 
         // 作業インスタンスの状態を取得
-        $execution_no = $_GET["execution_no"];
-        $prg_record_file_id = $_GET["prg_recorder"];
+        $execution_no = htmlspecialchars($_GET["execution_no"], ENT_QUOTES, "UTF-8");
+        $prg_record_file_id = htmlspecialchars($_GET["prg_recorder"], ENT_QUOTES, "UTF-8");
         list($result_code,$send_exec_status_id,$error_msg) = getExecuteStatus($execution_no);
         if($result_code === false) {
             $error_flag = 1;
@@ -158,7 +158,7 @@
             // メニュー情報取得パーツ
             require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_menu_info.php");
             
-            $array_except_referer = array($ACRCM_representative_file_name,$_SERVER['PHP_SELF']);
+            $array_except_referer = array($ACRCM_representative_file_name,htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8"));
             // access系共通ロジックパーツ01
             require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_access_01.php");
             
@@ -172,7 +172,7 @@
             }
             else{
                 // クエリからexecution_noを取得
-                $execution_no = $_GET["execution_no"];
+                $execution_no = htmlspecialchars($_GET["execution_no"], ENT_QUOTES, "UTF-8");
                 
                 $objIntNumVali = new IntNumValidator(null,null,"",array("NOT_NULL"=>true));
                 if( $objIntNumVali->isValid($execution_no) === false ){
@@ -195,7 +195,7 @@
             }
             else{
                 // クエリからprg_recorderを取得
-                $prg_record_file_id = $_GET["prg_recorder"];
+                $prg_record_file_id = htmlspecialchars($_GET["prg_recorder"], ENT_QUOTES, "UTF-8");
                 
                 $objIntNumVali = new IntNumValidator(null,null,"",array("NOT_NULL"=>true));
                 if( $objIntNumVali->isValid($prg_record_file_id) === false ){
@@ -212,7 +212,7 @@
                     throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-510") );
                 }
                 if($prg_record_file_id == '1') { 
-                    $SelectedFile = $_GET['SelectedFile'];
+                    $SelectedFile = htmlspecialchars($_GET['SelectedFile'], ENT_QUOTES, "UTF-8");
                     $prg_record_file_name = $SelectedFile;
                 } else {
                     $prg_record_file_name = $prg_recorder_array[$prg_record_file_id]['PRG_FILE_NAME'];
@@ -269,7 +269,7 @@
             $filter_string = "";
             if( !empty($_GET['filter_string']) ){
                 // フィルタ文字列
-                $filter_string = urldecode($_GET['filter_string']);
+                $filter_string = htmlspecialchars(urldecode($_GET['filter_string']), ENT_QUOTES, "UTF-8");
                 
                 // フィルタ文字列をエスケープ
                 $filter_string_escape = preg_quote($filter_string);
@@ -277,7 +277,7 @@
                 
                 $strMatchLineOnly = "";
                 if( isset($_GET['match_line_only']) ){
-                    $strMatchLineOnly =$_GET['match_line_only'];
+                    $strMatchLineOnly =htmlspecialchars($_GET['match_line_only'], ENT_QUOTES, "UTF-8");
                 }
                 
                 if( $strMatchLineOnly == "on" ){
