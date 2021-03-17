@@ -42,7 +42,7 @@
         // DBアクセス例外処理パーツ----
     }
 
-    $aryVariant = array('search_filter_data'=>$_POST['filter_data']);
+    $aryVariant = array('search_filter_data'=>htmlspecialchars($_POST['filter_data'], ENT_QUOTES, "UTF-8"));
 
     // ----ローカル変数宣言
     $ACRCM_id = "UNKNOWN";

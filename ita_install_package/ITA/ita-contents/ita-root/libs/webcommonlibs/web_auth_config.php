@@ -37,11 +37,11 @@
 
         // クエリーのメニューIDを取得
         if (isset($_GET['no'])) {
-            $ASJTM_id = addslashes($_GET['no']);
+            $ASJTM_id = htmlspecialchars(addslashes($_GET['no']), ENT_QUOTES, "UTF-8");
         }
 
         if (isset($_GET['grp'])) {
-            $ASJTM_grp_id = addslashes(sprintf("%010d", $_GET['grp']));
+            $ASJTM_grp_id = htmlspecialchars(addslashes(sprintf("%010d", $_GET['grp'])), ENT_QUOTES, "UTF-8");
         }
 
         $strLoginActionCaption = $objMTS->getSomeMessage("ITAWDCH-STD-1001");
@@ -52,7 +52,7 @@
 
         // 認証ステータスをチェック
         if (isset($_POST['status'])=== true) {
-            $check_status = addslashes($_POST['status']);
+            $check_status = htmlspecialchars(addslashes($_POST['status']), ENT_QUOTES, "UTF-8");
         } else {
             $check_status = $status;
         }
@@ -61,12 +61,12 @@
         // ログイン認証に成功したが、直後にユーザー情報取得エラーを起こしているユーザーを警告表示する
         // ログイン認証に成功しているので下の$check_status定数とは競合しない
         if (isset($_POST['trial_username'])=== true) {
-            $NoticeTrialUsername = addslashes($_POST['trial_username']);
+            $NoticeTrialUsername = htmlspecialchars(addslashes($_POST['trial_username']), ENT_QUOTES, "UTF-8");
             $strLoginFormHeadBody .= "<span class=\"loginGateWarningMsg\">{$objMTS->getSomeMessage("ITAWDCH-ERR-104", $NoticeTrialUsername )}</span>\n";
         }
         // -----AD連携(外部認証) ADレプリ連携未了ユーザーのログイン時システムエラー、再認証画面遷移対応
 
-        $strGateUrl = htmlspecialchars($_SERVER['PHP_SELF']);
+        $strGateUrl = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, "UTF-8");
 
         switch ($check_status) {
             case AUTH_WRONG_LOGIN:
@@ -296,11 +296,11 @@
 
         $strUsername = '';
         if (array_key_exists('username', $_POST)) {
-            $strUsername = $_POST['username'];
+            $strUsername = htmlspecialchars($_POST['username'], ENT_QUOTES, "UTF-8");
         }
         $strUserPass = '';
         if (array_key_exists('password', $_POST)) {
-            $strUserPass = $_POST['password'];
+            $strUserPass = htmlspecialchars($_POST['password'], ENT_QUOTES, "UTF-8");
         }
 
         // -----入力されたユーザーが内部認証/外部認証ユーザーかを判別する

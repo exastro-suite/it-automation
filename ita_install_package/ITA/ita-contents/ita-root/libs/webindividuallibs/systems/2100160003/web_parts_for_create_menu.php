@@ -31,7 +31,7 @@ try{
     require_once ($g['root_dir_path'] . '/libs/webcommonlibs/web_parts_menu_info.php');
 
     // access系共通ロジックパーツ01
-    $script_name = basename($_SERVER['SCRIPT_NAME']);
+    $script_name = basename(htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8"));
     if (strpos($ACRCM_representative_file_name, $script_name) === false) {
         require_once ($g['root_dir_path'] . '/libs/webcommonlibs/web_parts_for_access_01.php');
     }

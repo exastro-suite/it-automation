@@ -68,7 +68,7 @@
         require_once("{$root_dir_path}/libs/commonlibs/common_php_req_gate.php");
         
         if(array_key_exists('no', $_GET)){
-            $g['page_dir']  = $_GET['no'];
+            $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
         }
         
         ////////////////////////////////
@@ -141,7 +141,7 @@
             // メニュー情報取得パーツ
             require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_menu_info.php");
             
-            $array_except_referer = array($ACRCM_representative_file_name,$_SERVER['PHP_SELF']);
+            $array_except_referer = array($ACRCM_representative_file_name,htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8"));
             // access系共通ロジックパーツ01
             require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_access_01.php");
             
@@ -155,7 +155,7 @@
             }
             else{
                 // クエリからexecution_noを取得
-                $execution_no = $_GET["execution_no"];
+                $execution_no = htmlspecialchars($_GET["execution_no"], ENT_QUOTES, "UTF-8");
                 
                 $objIntNumVali = new IntNumValidator(null,null,"",array("NOT_NULL"=>true));
                 if( $objIntNumVali->isValid($execution_no) === false ){
@@ -178,7 +178,7 @@
             }
             else{
                 // クエリからprg_recorderを取得
-                $prg_record_file_id = $_GET["prg_recorder"];
+                $prg_record_file_id = htmlspecialchars($_GET["prg_recorder"], ENT_QUOTES, "UTF-8");
                 
                 $objIntNumVali = new IntNumValidator(null,null,"",array("NOT_NULL"=>true));
                 if( $objIntNumVali->isValid($prg_record_file_id) === false ){
@@ -239,7 +239,7 @@
             $filter_string = "";
             if( !empty($_GET['filter_string']) ){
                 // フィルタ文字列
-                $filter_string = urldecode($_GET['filter_string']);
+                $filter_string = htmlspecialchars(urldecode($_GET['filter_string']), ENT_QUOTES, "UTF-8");
                 
                 // フィルタ文字列をエスケープ
                 $filter_string_escape = preg_quote($filter_string);
@@ -247,7 +247,7 @@
                 
                 $strMatchLineOnly = "";
                 if( isset($_GET['match_line_only']) ){
-                    $strMatchLineOnly =$_GET['match_line_only'];
+                    $strMatchLineOnly = htmlspecialchars($_GET['match_line_only'], ENT_QUOTES, "UTF-8");
                 }
                 
                 if( $strMatchLineOnly == "on" ){

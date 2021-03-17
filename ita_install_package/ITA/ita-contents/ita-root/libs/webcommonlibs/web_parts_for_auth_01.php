@@ -16,12 +16,12 @@
 
     // ----■ログイン成功後に表示させたいメニューのＩＤが、リクエストのGETクエリーに含まれているかをチェックする。
     if( isset($_GET['no']) ){
-        $req_menu_id = $_GET['no'];
+        $req_menu_id = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
 
     $ASJTM_grp_id = "";
     if( isset($_GET['grp']) ){
-        $ASJTM_grp_id = sprintf("%010d", $_GET['grp']);
+        $ASJTM_grp_id = htmlspecialchars(sprintf("%010d", $_GET['grp']), ENT_QUOTES, "UTF-8");
     }
 
     if( !isset($req_menu_id) ){

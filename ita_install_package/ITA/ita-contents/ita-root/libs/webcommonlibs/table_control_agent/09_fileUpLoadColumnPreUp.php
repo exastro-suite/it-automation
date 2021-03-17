@@ -288,7 +288,7 @@
             //----ここまで共通系ブラックリスト拡張子かどうかのチェック
 
             if( array_key_exists($puUploadFormatter, $_POST) === true ){
-                $formatter_id = $_POST[$puUploadFormatter];
+                $formatter_id = htmlspecialchars($_POST[$puUploadFormatter], ENT_QUOTES, "UTF-8");
             }
             else{
                 $intErrorType = 611;
@@ -514,7 +514,7 @@
             }            
             
             if(array_key_exists("rin",$_GET)===true){
-                $strRIN = $_GET['rin'];
+                $strRIN = htmlspecialchars($_GET['rin'], ENT_QUOTES, "UTF-8");
             }
             else{
                 $intErrorType = 601;
@@ -533,7 +533,7 @@
             
             // ----履歴のファイルが欲しい場合は、対象行を取り直し
             if( array_key_exists('jsn', $_GET) === true ){
-                $strJSN = $_GET['jsn'];
+                $strJSN = htmlspecialchars($_GET['jsn'], ENT_QUOTES, "UTF-8");
                 $arrayColumn[$strJnlSeqNoColId]->setDBColumn(true);
                 
                 $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
@@ -578,7 +578,7 @@
 
             // ----どのカラムなのかを特定する
             if(array_key_exists("csn",$_GET)===true){
-                $strColumnSeqNo = $_GET['csn'];
+                $strColumnSeqNo = htmlspecialchars($_GET['csn'], ENT_QUOTES, "UTF-8");
                 
                 $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
                 if( $objIntNumVali->isValid($strColumnSeqNo) === false ){
@@ -619,7 +619,7 @@
 
             // ----ファイル名を確認する
             if( array_key_exists("fn",$_GET) === true ){
-                $strReceptFileName = $_GET['fn'];
+                $strReceptFileName = htmlspecialchars($_GET['fn'], ENT_QUOTES, "UTF-8");
                 $strSavedFileName = $editTgtRow[$objCheckColumn->getID()];
 
                 $strFilenameForSendBinary = rawurlencode($strSavedFileName);

@@ -193,7 +193,7 @@ function printLinkHtmlTagWithReleaseFile($strMenuGroupId, $strMenuGroupName, $st
 
     // GETからメニューグループIDを取得する
     if(array_key_exists('grp', $_GET)){
-        $strGetMenuGroupId = sprintf("%010d", $_GET['grp']);
+        $strGetMenuGroupId = sprintf("%010d", htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8"));
     }
     else{
         $strGetMenuGroupId = "";

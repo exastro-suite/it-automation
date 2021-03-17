@@ -24,7 +24,7 @@
     // ルートディレクトリを取得
     $tmpAry=explode('ita-root', dirname(__FILE__));$g['root_dir_path']=$tmpAry[0].'ita-root';unset($tmpAry);
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
 
 /*
@@ -100,14 +100,14 @@ EOD;
     $createManagementMenuID = '';
     if ( isset( $_GET['create_menu_id'] ) ) {
       if ( isset( $_GET['mode'] ) ) {
-        $itaEditorMode = $_GET['mode'];
+        $itaEditorMode = htmlspecialchars($_GET['mode'], ENT_QUOTES, "UTF-8");
       } else {
         $itaEditorMode = 'view';
       }
-      $loadMenuID = $_GET['create_menu_id'];
+      $loadMenuID = htmlspecialchars($_GET['create_menu_id'], ENT_QUOTES, "UTF-8");
     }
     if ( isset( $_GET['create_management_menu_id'] ) ) {
-      $createManagementMenuID = $_GET['create_management_menu_id'];
+      $createManagementMenuID = htmlspecialchars($_GET['create_management_menu_id'], ENT_QUOTES, "UTF-8");
     }
 
     // パラメータのチェック

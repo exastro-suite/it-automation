@@ -848,7 +848,7 @@ class OAuth2 extends Auth
     {
         $this->initialize();
         if (isset($_GET[$this->httpAuthorizationProviderParam]) && !empty($_GET[$this->httpAuthorizationProviderParam])) {
-            $this->providerId = $_GET[$this->httpAuthorizationProviderParam];
+            $this->providerId = htmlspecialchars($_GET[$this->httpAuthorizationProviderParam], ENT_QUOTES, "UTF-8");
             return $this->providerId;
         }
         if (isset($this->session['provider_id']) && !empty($this->session['provider_id'])) {
@@ -1057,7 +1057,7 @@ class OAuth2 extends Auth
         }
         // check GET parameter----
         // ----check state
-        if (empty($_GET['state']) || ($_GET['state'] !== $this->session['state'])) {
+        if (empty($_GET['state']) || (htmlspecialchars($_GET['state'], ENT_QUOTES, "UTF-8") !== $this->session['state'])) {
             $this->isError = true;
             $this->errMsg = "invalid state(unmatch)";
             $this->errCode = 'ERR-CALLBACK-04';
@@ -1077,14 +1077,14 @@ class OAuth2 extends Auth
             'client_id'     => $this->config['clientId'],
             'client_secret' => $this->config['clientSecret'],
             'redirect_uri'  => $this->redirectUri,
-            'code'          => $_GET['code'],
+            'code'          => htmlspecialchars($_GET['code'], ENT_QUOTES, "UTF-8"),
             'grant_type'    => 'authorization_code',
         ]);
         if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404 ) {
             $errTrace .= print_r($response, true);
             $response = $this->http_request('POST', $uri,[
                 'redirect_uri'  => $this->redirectUri,
-                'code'          => $_GET['code'],
+                'code'          => htmlspecialchars($_GET['code'], ENT_QUOTES, "UTF-8"),
                 'grant_type'    => 'authorization_code',
                 ], 'Authorization: Basic '.base64_encode($this->config['clientId'].':'.$this->config['clientSecret']));
         }
@@ -1092,7 +1092,7 @@ class OAuth2 extends Auth
             $errTrace .= print_r($response, true);
             $response = $this->http_request('GET', $uri,[
                 'redirect_uri'  => $this->redirectUri,
-                'code'          => $_GET['code'],
+                'code'          => htmlspecialchars($_GET['code'], ENT_QUOTES, "UTF-8"),
                 'grant_type'    => 'authorization_code',
                 ], 'Authorization: Basic '.base64_encode($this->config['clientId'].':'.$this->config['clientSecret']));
         }
@@ -1102,7 +1102,7 @@ class OAuth2 extends Auth
                 'client_id'     => $this->config['clientId'],
                 'client_secret' => $this->config['clientSecret'],
                 'redirect_uri'  => $this->redirectUri,
-                'code'          => $_GET['code'],
+                'code'          => htmlspecialchars($_GET['code'], ENT_QUOTES, "UTF-8"),
                 'grant_type'    => 'authorization_code',
             ]);
         }
