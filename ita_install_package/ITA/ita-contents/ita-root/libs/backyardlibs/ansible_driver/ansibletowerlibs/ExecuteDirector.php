@@ -459,6 +459,7 @@ class ExecuteDirector {
                 exec($cmd,$arry_out,$return_var);
                 if($return_var !== 0) {
                     $log = file_get_contents($tmp_log_file);
+                    $this->errorLogOut($log);
                     $this->logger->error($log);
                     $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040035",array($credential['host_name']));
                     $this->errorLogOut($errorMessage);
@@ -566,7 +567,7 @@ class ExecuteDirector {
             // 認証方式に応じた必須項目の設定確認
             $errMsgParameterAry = array();
             $errMsgParameterAry = array($row['ANSTWR_HOSTNAME']);
-            $strError = $chkobj->TowerHostListAuthTypeRequiredParameterCheck($chkobj->AuthType_WorkflowExec_TowerHostList,
+            $strError = $chkobj->TowerHostListAuthTypeRequiredParameterCheck($chkobj->chkType_WorkflowExec_TowerHostList,
                                                                              $this->objMTS,
                                                                              $errMsgParameterAry,
                                                                              $row['ANSTWR_LOGIN_AUTH_TYPE'],
