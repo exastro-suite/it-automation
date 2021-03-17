@@ -44,7 +44,7 @@
 
         // リファラ取得(リダイレクト判定のため)
         if(isset($_SERVER["HTTP_REFERER"])){
-            $host = $_SERVER['HTTP_REFERER'];
+            $host = htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, "UTF-8");
         }
         else{
             $host = "";
@@ -72,7 +72,7 @@
         
         // ----■ログイン成功後に表示させたいメニューのＩＤが、リクエストのGETクエリーに含まれているかをチェックする。
         if( isset($_GET['no']) ){
-            $req_menu_id = $_GET['no'];
+            $req_menu_id = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
         }
         // ■ログイン成功後に表示させたいメニューのＩＤが、リクエストのGETクエリーに含まれているかをチェックする。----
         
@@ -91,7 +91,7 @@
 
             if( isset($_GET['grp']) ){
                 $ASJTM_id = "";
-                $ASJTM_grp_id = sprintf("%010d", $_GET['grp']);
+                $ASJTM_grp_id = sprintf("%010d", htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8"));
             }
             else{
                 // アクセスログ出力(想定外エラー)
@@ -143,7 +143,7 @@
                 $err_msg .= "{$objMTS->getSomeMessage("ITAWDCH-MNU-1190010")}<br>";
             }
             else{
-                $strRawUsername = $_POST['username'];
+                $strRawUsername = htmlspecialchars($_POST['username'], ENT_QUOTES, "UTF-8");
             }
             //ログインしている状態----
         }
@@ -167,7 +167,8 @@
             $err_msg .= "{$objMTS->getSomeMessage("ITAWDCH-MNU-1190014")}<br>";
         }
         if( empty($err_msg) ){
-            $err_msg = saLoginAccountUpdate($objDBCA, $strRawUsername, $_POST['old_password'], $_POST['new_password']);
+            $err_msg = saLoginAccountUpdate($objDBCA, $strRawUsername, 
+                htmlspecialchars($_POST['old_password'], ENT_QUOTES, "UTF-8"), htmlspecialchars($_POST['new_password'], ENT_QUOTES, "UTF-8"));
         }
     }
     catch (Exception $e){
@@ -200,7 +201,7 @@
         }
         $strExpiry = "";
         if( isset($_POST['expiry'] )){
-            $strExpiry = $_POST['expiry'];
+            $strExpiry = htmlspecialchars($_POST['expiry'], ENT_QUOTES, "UTF-8");
             switch($_POST['expiry']){
                 case "0": case "1": break;
                 default: $strExpiry = ""; break;

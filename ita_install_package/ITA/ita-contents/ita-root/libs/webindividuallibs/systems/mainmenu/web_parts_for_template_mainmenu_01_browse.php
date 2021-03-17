@@ -20,7 +20,7 @@
     $tmpAry=explode('ita-root', dirname(__FILE__));$g['root_dir_path']=$tmpAry[0].'ita-root';unset($tmpAry);
 
 
-    $param = explode ( "?" , $_SERVER["REQUEST_URI"] , 2 );
+    $param = explode ( "?" , htmlspecialchars($_SERVER["REQUEST_URI"], ENT_QUOTES, "UTF-8") , 2 );
     if(count($param) == 2){
         $tmp_param = explode( "=" , $param[1]);
         $url_add_param = "&grp=" . $tmp_param[1];

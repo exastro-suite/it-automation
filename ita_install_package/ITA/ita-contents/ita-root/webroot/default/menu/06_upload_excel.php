@@ -28,7 +28,7 @@ $fileName = basename(__FILE__);
 // メニューID取得
 $_GET_Id = "";
 if(array_key_exists('no', $_GET)){
-    $_GET_Id = $_GET['no'];
+    $_GET_Id = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
 }
 
 $individualSystemFile = $root_dir_path . "/webroot/menus/systems/$_GET_Id/$fileName";

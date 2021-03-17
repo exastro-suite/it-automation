@@ -73,7 +73,7 @@ try {
         throw new Exception("User_id is not set in UR parameter");
     }
 
-    $user_id = $_GET['user_id'];
+    $user_id = htmlspecialchars($_GET['user_id'], ENT_QUOTES, "UTF-8");
 
     $result_role_info = $obj->getUserRoleList($user_id);
     if($result_role_info === false) {

@@ -77,14 +77,14 @@ try {
         throw new Exception(json_encode($Exception));
     }
 
-    $OperationNoUAPK = $_GET['OperationNoUAPK'];
+    $OperationNoUAPK = htmlspecialchars($_GET['OperationNoUAPK'], ENT_QUOTES, "UTF-8");
     if(array_key_exists('PatternId',$_GET)=== false) {
         $AddMsg = "PatternId is not set in URL parameter";
         $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
         $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
         throw new Exception(json_encode($Exception));
     }
-    $PatternId = $_GET['PatternId'];
+    $PatternId = htmlspecialchars($_GET['PatternId'], ENT_QUOTES, "UTF-8");
 
     $OpeAccessAuthStr = "";
     $ret = $RBACobj->getOperationAccessAuth($OperationNoUAPK,$OpeAccessAuthStr);
