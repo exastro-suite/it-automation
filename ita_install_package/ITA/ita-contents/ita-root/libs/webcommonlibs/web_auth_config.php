@@ -66,7 +66,7 @@
         }
         // -----AD連携(外部認証) ADレプリ連携未了ユーザーのログイン時システムエラー、再認証画面遷移対応
 
-        $strGateUrl = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, "UTF-8");
+        $strGateUrl = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
 
         switch ($check_status) {
             case AUTH_WRONG_LOGIN:
