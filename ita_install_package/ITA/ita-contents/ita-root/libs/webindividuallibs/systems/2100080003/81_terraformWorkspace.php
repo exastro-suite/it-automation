@@ -42,9 +42,10 @@ class  terraformWorkspace {
         $token = $registerData['token'];
         $organizationName = $registerData['organizationName'];
         $workspaceName = $registerData['workspaceName'];
+        $proxySetting = $registerData['proxySetting'];
 
         //Workspace一覧取得APIを実行
-        $apiResponse = get_workspaces_list($hostName, $token, $organizationName);
+        $apiResponse = get_workspaces_list($hostName, $token, $organizationName, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
 
         //APIの結果を判定
@@ -82,18 +83,13 @@ class  terraformWorkspace {
         $token = $registerData['token'];
         $organizationName = $registerData['organizationName'];
         $workspaceName = $registerData['workspaceName'];
-        /*
-        $option = array(
-            'applyMethod' => $registerData['applyMethod'],
-            'terraformVersion' => $registerData['terraformVersion'],
-        );
-        */
         $option = array(
             'terraformVersion' => $registerData['terraformVersion']
         );
+        $proxySetting = $registerData['proxySetting'];
 
         //Workspace作成APIを実行
-        $apiResponse = create_workspace($hostName, $token, $organizationName, $workspaceName, $option);
+        $apiResponse = create_workspace($hostName, $token, $organizationName, $workspaceName, $option, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
 
         //APIの結果を判定
@@ -128,9 +124,10 @@ class  terraformWorkspace {
         $option = array(
             'terraformVersion' => $registerData['terraformVersion']
         );
+        $proxySetting = $registerData['proxySetting'];
 
         //Workspace作成APIを実行
-        $apiResponse = update_workspace($hostName, $token, $organizationName, $workspaceName, $option);
+        $apiResponse = update_workspace($hostName, $token, $organizationName, $workspaceName, $option, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
 
         //APIの結果を判定
@@ -156,9 +153,10 @@ class  terraformWorkspace {
         $token = $deleteData['token'];
         $organizationName = $deleteData['organizationName'];
         $workspaceName = $deleteData['workspaceName'];
+        $proxySetting = $deleteData['proxySetting'];
 
         //Workspace作成APIを実行
-        $apiResponse = delete_workspace($hostName, $token, $organizationName, $workspaceName);
+        $apiResponse = delete_workspace($hostName, $token, $organizationName, $workspaceName, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
 
         //APIの結果を判定
