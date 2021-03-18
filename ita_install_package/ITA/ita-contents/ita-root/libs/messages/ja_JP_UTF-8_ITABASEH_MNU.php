@@ -43,7 +43,19 @@ $ary["ITABASEH-MNU-102075"]         = "認証方式の入力値が不正です�
 $ary["ITABASEH-MNU-102080"]         = "[最大長]30バイト";
 $ary["ITABASEH-MNU-102085"]         = "Legacy/Role利用情報";
 $ary["ITABASEH-MNU-102088"]         = "認証方式";
-$ary["ITABASEH-MNU-102089"]         = "Ansibleからホストへ接続する際の認証方式を選択します。\nまた、ホスト側の /etc/sudoer にログイン>ユーザのsudo権限をNOPASSWD付で設定する必要があります。";
+$ary["ITABASEH-MNU-102089"]         = "Ansibleから機器へ接続する際の認証方式を選択します。
+・パスワード認証
+　ログインパスワードの管理で●の選択と、ログインパスワードの入力が必須です。
+・鍵認証（パスフレーズなし）
+　ssh秘密鍵ファイルのアップロードが必須です。
+・鍵認証（パスフレーズあり）
+　ssh秘密鍵ファイルのアップロードと、パスフレーズの入力が必須です。
+・鍵認証（鍵交換済み）
+　ssh秘密鍵ファイルのアップロードは必要ありません。
+・パスワード認証（winrm)
+　必要に応じてWinRM接続情報を入力します。
+尚、パスワード認証（winrm)以外の認証方式の場合、機器側に以下の設定が必要です。
+ログインユーザの sudo 権限を NOPASSWD付で /etc/sudoers に設定する必要があります。";
 $ary["ITABASEH-MNU-102090"]         = "OS種別";
 $ary["ITABASEH-MNU-102110"]         = "EtherWakeOnLan";
 $ary["ITABASEH-MNU-102120"]         = "電源ON";

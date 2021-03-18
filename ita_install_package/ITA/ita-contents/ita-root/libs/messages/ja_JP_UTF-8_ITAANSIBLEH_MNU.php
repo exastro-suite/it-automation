@@ -1289,7 +1289,15 @@ $ary["ITAANSIBLEH-MNU-9010001003"]  = "AnsibleTowerホスト一覧";
 $ary["ITAANSIBLEH-MNU-9010001010"]  = "ホスト";
 $ary["ITAANSIBLEH-MNU-9010001011"]  = "Ansible Towerのホスト名(またはIPアドレス)です。";
 $ary["ITAANSIBLEH-MNU-9010001020"]  = "認証方式";
-$ary["ITAANSIBLEH-MNU-9010001021"]  = "sshでAnsible Towerに接続する場合の認証方式です。";
+$ary["ITAANSIBLEH-MNU-9010001021"]  = "sshでAnsible Towerに接続する場合の認証方式を選択します。
+・パスワード認証
+　ユーザーとパスワードの入力が必須です。
+・鍵認証（パスフレーズなし）
+　ssh秘密鍵ファイルのアップロードが必須です。
+・鍵認証（パスフレーズあり）
+　ssh秘密鍵ファイルのアップロードと、パスフレーズの入力が必須です。
+・鍵認証（鍵交換済み）
+　ssh秘密鍵ファイルのアップロードは必要ありません。";
 $ary["ITAANSIBLEH-MNU-9010001030"]  = "ユーザー";
 $ary["ITAANSIBLEH-MNU-9010001031"]  = "sshでAnsible Towerに接続する場合のユーザー名です。プロジェクトパス(/var/lib/awx/projects)への書込み権限が必要です。";
 $ary["ITAANSIBLEH-MNU-9010001040"]  = "パスワード";
