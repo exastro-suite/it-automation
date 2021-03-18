@@ -1118,6 +1118,9 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         // インタフェース情報をローカル変数に格納
         $terraform_hostname                 = $row_if_info['TERRAFORM_HOSTNAME'];
         $terraform_token                    = ky_decrypt($row_if_info['TERRAFORM_TOKEN']);
+        $terraform_proxy_setting            = array();
+        $terraform_proxy_setting['address'] = $row_if_info['TERRAFORM_PROXY_ADDRESS'];
+        $terraform_proxy_setting['port']    = $row_if_info['TERRAFORM_PROXY_PORT'];
 
         //----------------------------------------------
         // REST API接続function読み込み
@@ -1127,7 +1130,7 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         //----------------------------------------------
         // RUNキャンセAPIをコール
         //----------------------------------------------
-        $apiResponse = cancel_run($terraform_hostname, $terraform_token, $tfe_run_id);
+        $apiResponse = cancel_run($terraform_hostname, $terraform_token, $tfe_run_id, $terraform_proxy_setting);
         $statusCode = $apiResponse['StatusCode'];
 
         // 結果判定

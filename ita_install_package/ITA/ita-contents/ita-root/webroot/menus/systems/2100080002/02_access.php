@@ -79,6 +79,9 @@
             //データをセット
             $registerData['hostName'] = $retInterfaceInfo[1]['TERRAFORM_HOSTNAME'];
             $registerData['token'] = ky_decrypt($retInterfaceInfo[1]['TERRAFORM_TOKEN']);
+            $registerData['proxySetting'] = array();
+            $registerData['proxySetting']['address'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_ADDRESS'];
+            $registerData['proxySetting']['port'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_PORT'];
 
 
             if($type == 'register'){
@@ -176,6 +179,9 @@
             //データをセット
             $checkData['hostName'] = $retInterfaceInfo[1]['TERRAFORM_HOSTNAME'];
             $checkData['token'] = ky_decrypt($retInterfaceInfo[1]['TERRAFORM_TOKEN']);
+            $checkData['proxySetting'] = array();
+            $checkData['proxySetting']['address'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_ADDRESS'];
+            $checkData['proxySetting']['port'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_PORT'];
 
             //----------------------------------------------
             // Organizationの登録状態をチェック
@@ -267,6 +273,9 @@
             //データをセット
             $deleteData['hostName'] = $retInterfaceInfo[1]['TERRAFORM_HOSTNAME'];
             $deleteData['token'] = ky_decrypt($retInterfaceInfo[1]['TERRAFORM_TOKEN']);
+            $deleteData['proxySetting'] = array();
+            $deleteData['proxySetting']['address'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_ADDRESS'];
+            $deleteData['proxySetting']['port'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_PORT'];
 
             //----------------------------------------------
             // Organizationの登録状態をチェック

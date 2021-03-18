@@ -67,18 +67,16 @@ TERRAFORMインタフェース情報
     //************************************************************************************
     //----Hostname
     //************************************************************************************
-    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('TERRAFORM_HOSTNAME', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102050'));
     $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102060'));//エクセル・ヘッダでの説明
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
-    $c->setValidator($objVldt);
+    $c->setValidator(new SingleTextValidator(1,256,false));
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
     //************************************************************************************
     //----トークン
     //************************************************************************************
-    //$c = new TextColumn('TERRAFORM_TOKEN','トークン');
     $c = new PasswordColumn('TERRAFORM_TOKEN', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102070'));
     $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102080'));//エクセル・ヘッダでの説明
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
@@ -87,6 +85,32 @@ TERRAFORMインタフェース情報
     $c->setEncodeFunctionName("ky_encrypt");
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
+
+////メモ：メッセージから参照
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102150'));
+        //************************************************************************************
+        //----Proxyアドレス
+        //************************************************************************************
+        $c = new TextColumn('TERRAFORM_PROXY_ADDRESS', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102160'));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102170'));//エクセル・ヘッダでの説明
+        $c->setDescription("プロキシサーバのアドレス");//エクセル・ヘッダでの説明
+        $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+        $c->setValidator(new SingleTextValidator(0,128,false));
+        $cg->addColumn($c);
+
+        //************************************************************************************
+        //----Proxyポート
+        //************************************************************************************
+        $c = new NumColumn('TERRAFORM_PROXY_PORT', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102180'));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102190'));//エクセル・ヘッダでの説明
+        $c->setDescription("プロキシサーバのポート");//エクセル・ヘッダでの説明
+        $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+        $c->setSubtotalFlag(false);
+        $c->setValidator(new IntNumValidator(1,65535));
+        $cg->addColumn($c);
+
+    $table->addColumn($cg);
+
 
     //************************************************************************************
     //----状態監視周期(単位ミリ秒)

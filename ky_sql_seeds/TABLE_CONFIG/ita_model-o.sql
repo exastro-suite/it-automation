@@ -8,6 +8,8 @@ CREATE TABLE B_TERRAFORM_IF_INFO
 TERRAFORM_IF_INFO_ID              %INT%                            ,
 TERRAFORM_HOSTNAME                %VARCHR%(256)                    ,
 TERRAFORM_TOKEN                   %VARCHR%(512)                    ,
+TERRAFORM_PROXY_ADDRESS           %VARCHR%(128)                    ,
+TERRAFORM_PROXY_PORT              %INT%                            ,
 TERRAFORM_REFRESH_INTERVAL        %INT%                            ,
 TERRAFORM_TAILLOG_LINES           %INT%                            ,
 NULL_DATA_HANDLING_FLG            %INT%                            , -- Null値の連携 1:有効　2:無効
@@ -31,6 +33,8 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴�
 TERRAFORM_IF_INFO_ID              %INT%                            ,
 TERRAFORM_HOSTNAME                %VARCHR%(256)                    ,
 TERRAFORM_TOKEN                   %VARCHR%(512)                    ,
+TERRAFORM_PROXY_ADDRESS           %VARCHR%(128)                    ,
+TERRAFORM_PROXY_PORT              %INT%                            ,
 TERRAFORM_REFRESH_INTERVAL        %INT%                            ,
 TERRAFORM_TAILLOG_LINES           %INT%                            ,
 NULL_DATA_HANDLING_FLG            %INT%                            , -- Null値の連携 1:有効　2:無効
