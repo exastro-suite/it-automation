@@ -468,6 +468,9 @@ callback.prototype = {
 
         }
 
+        //ボタンの非活性を解除
+        resultArea.prev('td').find('input').prop('disabled', false);
+
     },
     deleteWorkspace : function(result){
         // セッションチェック
@@ -971,6 +974,8 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 //---- ここからカスタマイズした場合の一般メソッド配置域
 //TFEとの状態チェックを実行
 function Mix1_1_checkWorkspace(obj, workspaceID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     var resultAreaID = $(obj).closest('td').next().attr('id');
     //エンコード
     workspaceID = encodeURIComponent(workspaceID);
@@ -985,6 +990,8 @@ function Mix1_1_checkWorkspace(obj, workspaceID){
 
 //TFEへの登録を実行
 function Mix1_1_registerWorkspace(obj, workspaceID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     //エンコード
     workspaceID = encodeURIComponent(workspaceID);
     var data = {
@@ -1000,6 +1007,8 @@ function Mix1_1_registerWorkspace(obj, workspaceID){
 
 //TFEへの更新を実行
 function Mix1_1_updateWorkspace(obj, workspaceID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     //エンコード
     workspaceID = encodeURIComponent(workspaceID);
     var data = {
@@ -1015,6 +1024,8 @@ function Mix1_1_updateWorkspace(obj, workspaceID){
 
 //TFEからの削除を実行
 function Mix1_1_deleteWorkspace(obj, workspaceID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     //エンコード
     workspaceID = encodeURIComponent(workspaceID);
     var data = {

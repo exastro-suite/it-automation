@@ -30,6 +30,9 @@ callback.prototype = {
         }else{
             objTableArea.innerHTML = result['htmlBody'];
         }
+
+        //ボタンの非活性を解除
+        $('#Mix1_Nakami').find('input').prop('disabled', false);
     },
     getWorkspaceData : function(result){
         // セッションチェック
@@ -46,6 +49,9 @@ callback.prototype = {
         }else{
             objTableArea.innerHTML = result['htmlBody'];
         }
+
+        //ボタンの非活性を解除
+        $('#Mix2_Nakami').find('input').prop('disabled', false);
     },
     getPolicyData : function(result){
         // セッションチェック
@@ -62,6 +68,9 @@ callback.prototype = {
         }else{
             objTableArea.innerHTML = result['htmlBody'];
         }
+
+        //ボタンの非活性を解除
+        $('#Mix3_Nakami').find('input').prop('disabled', false);
     },
     getPolicySetData : function(result){
         // セッションチェック
@@ -80,6 +89,9 @@ callback.prototype = {
         }else{
             objTableArea.innerHTML = result['htmlBody'];
         }
+
+        //ボタンの非活性を解除
+        $('#Mix4_Nakami').find('input').prop('disabled', false);
     },
     deleteOrganization : function(result){
         // セッションチェック
@@ -207,8 +219,11 @@ window.onload = function(){
 
 
 function getOrganizationData(){
-    // しばらくお待ち下さいを出す
     var organizationAreaWrap = 'Mix1_Nakami';
+    //ボタンを非活性化
+    $('#'+organizationAreaWrap).find('input').attr('disabled', true);
+
+    // しばらくお待ち下さいを出す
     var objTableArea = $('#'+organizationAreaWrap+' .table_area').get()[0];
     objTableArea.innerHTML = "<div class=\"wait_msg2\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
 
@@ -217,8 +232,11 @@ function getOrganizationData(){
 }
 
 function getWorkspaceData(){
-    // しばらくお待ち下さいを出す
     var workspaceAreaWrap = 'Mix2_Nakami';
+    //ボタンを非活性化
+    $('#'+workspaceAreaWrap).find('input').attr('disabled', true);
+
+    // しばらくお待ち下さいを出す
     var objTableArea = $('#'+workspaceAreaWrap+' .table_area').get()[0];
     objTableArea.innerHTML = "<div class=\"wait_msg2\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
 
@@ -227,8 +245,11 @@ function getWorkspaceData(){
 }
 
 function getPolicyData(){
-    // しばらくお待ち下さいを出す
     var policyAreaWrap = 'Mix3_Nakami';
+    //ボタンを非活性化
+    $('#'+policyAreaWrap).find('input').attr('disabled', true);
+
+    // しばらくお待ち下さいを出す
     var objTableArea = $('#'+policyAreaWrap+' .table_area').get()[0];
     objTableArea.innerHTML = "<div class=\"wait_msg2\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
 
@@ -237,8 +258,11 @@ function getPolicyData(){
 }
 
 function getPolicySetData(){
-    // しばらくお待ち下さいを出す
     var policySetAreaWrap = 'Mix4_Nakami';
+    //ボタンを非活性化
+    $('#'+policySetAreaWrap).find('input').attr('disabled', true);
+
+    // しばらくお待ち下さいを出す
     var objTableArea = $('#'+policySetAreaWrap+' .table_area').get()[0];
     objTableArea.innerHTML = "<div class=\"wait_msg2\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
 

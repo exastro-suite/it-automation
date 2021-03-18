@@ -149,8 +149,11 @@
         //----------------------------------------------
         // TERRAFORMインタフェース情報をローカル変数に格納
         //----------------------------------------------
-        $lv_terraform_hostname                 = $lv_terraform_if_info['TERRAFORM_HOSTNAME'];
-        $lv_terraform_token                    = ky_decrypt($lv_terraform_if_info['TERRAFORM_TOKEN']);
+        $lv_terraform_hostname   = $lv_terraform_if_info['TERRAFORM_HOSTNAME'];
+        $lv_terraform_token      = ky_decrypt($lv_terraform_if_info['TERRAFORM_TOKEN']);
+        $proxy_setting            = array();
+        $proxy_setting['address'] = $lv_terraform_if_info['TERRAFORM_PROXY_ADDRESS'];
+        $proxy_setting['port']    = $lv_terraform_if_info['TERRAFORM_PROXY_PORT'];
 
         //----------------------------------------------
         // トランザクション開始
@@ -924,7 +927,7 @@
             $statusCode = 0;
             $count = 0;
             while ($statusCode != 200 && $count < $apiRetryCount){
-                $apiResponse = get_organizations_list($lv_terraform_hostname, $lv_terraform_token);
+                $apiResponse = get_organizations_list($lv_terraform_hostname, $lv_terraform_token, $proxy_setting);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 200){
                     //返却StatusCodeが正常なので終了
@@ -985,7 +988,7 @@
             $statusCode = 0;
             $count = 0;
             while ($statusCode != 200 && $count < $apiRetryCount){
-                $apiResponse = get_workspaces_list($lv_terraform_hostname, $lv_terraform_token ,$organization_name);
+                $apiResponse = get_workspaces_list($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $proxy_setting);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 200){
                     //返却StatusCodeが正常なので終了
@@ -1130,7 +1133,7 @@
             $statusCode = 0;
             $count = 0;
             while ($statusCode != 200 && $count < $apiRetryCount){
-                $apiResponse = get_workspace_var_list($lv_terraform_hostname, $lv_terraform_token ,$tfe_workspace_id);
+                $apiResponse = get_workspace_var_list($lv_terraform_hostname, $lv_terraform_token ,$tfe_workspace_id, $proxy_setting);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 200){
                     //返却StatusCodeが正常なので終了
@@ -1160,7 +1163,7 @@
                     $statusCode = 0;
                     $count = 0;
                     while ($statusCode != 204 && $count < $apiRetryCount){
-                        $apiResponse = delete_workspace_var($lv_terraform_hostname, $lv_terraform_token ,$tfe_workspace_id, $var_id);
+                        $apiResponse = delete_workspace_var($lv_terraform_hostname, $lv_terraform_token ,$tfe_workspace_id, $var_id, $proxy_setting);
                         $statusCode = $apiResponse['StatusCode'];
                         if($statusCode == 204){
                             //返却StatusCodeが正常なので終了
@@ -1199,7 +1202,7 @@
             $hclFlag = false;
             $sensitiveFlag = false;
             while ($statusCode != 201 && $count < $apiRetryCount){
-                $apiResponse = create_workspace_var($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $var_key, $var_value, $hclFlag, $sensitiveFlag, $category);
+                $apiResponse = create_workspace_var($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $var_key, $var_value, $hclFlag, $sensitiveFlag, $category, $proxy_setting);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 201){
                     //返却StatusCodeが正常なので終了
@@ -1238,7 +1241,7 @@
                     $statusCode = 0;
                     $count = 0;
                     while ($statusCode != 201 && $count < $apiRetryCount){
-                        $apiResponse = create_workspace_var($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $var_key, $var_value, $hclFlag, $sensitiveFlag, $category);
+                        $apiResponse = create_workspace_var($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $var_key, $var_value, $hclFlag, $sensitiveFlag, $category, $proxy_setting);
                         $statusCode = $apiResponse['StatusCode'];
                         if($statusCode == 201){
                             //返却StatusCodeが正常なので終了
@@ -1312,7 +1315,7 @@
             $statusCode = 0;
             $count = 0;
             while ($statusCode != 200 && $count < $apiRetryCount){
-                $apiResponse = get_policy_sets_list($lv_terraform_hostname, $lv_terraform_token ,$organization_name);
+                $apiResponse = get_policy_sets_list($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $proxy_setting);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 200){
                     //返却StatusCodeが正常なので終了
@@ -1363,7 +1366,7 @@
                         $statusCode = 0;
                         $count = 0;
                         while ($statusCode != 204 && $count < $apiRetryCount){
-                            $apiResponse = delete_relationships_workspace($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_registered_policy_set_workspace);
+                            $apiResponse = delete_relationships_workspace($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_registered_policy_set_workspace, $proxy_setting);
                             $statusCode = $apiResponse['StatusCode'];
                             if($statusCode == 204){
                                 //返却StatusCodeが正常なので終了
@@ -1547,7 +1550,7 @@
                     $statusCode = 0;
                     $count = 0;
                     while ($statusCode != 200 && $count < $apiRetryCount){
-                        $apiResponse = get_policy_list($lv_terraform_hostname, $lv_terraform_token ,$organization_name);
+                        $apiResponse = get_policy_list($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $proxy_setting);
                         $statusCode = $apiResponse['StatusCode'];
                         if($statusCode == 200){
                             //返却StatusCodeが正常なので終了
@@ -1600,7 +1603,7 @@
                                 $statusCode = 0;
                                 $count = 0;
                                 while ($statusCode != 200 && $count < $apiRetryCount){
-                                    $apiResponse = update_policy($lv_terraform_hostname, $lv_terraform_token ,$tfe_policy_id, $ita_data['policy_name'], $ita_data['policy_matter_file'], $ita_data['policy_note']);
+                                    $apiResponse = update_policy($lv_terraform_hostname, $lv_terraform_token ,$tfe_policy_id, $ita_data['policy_name'], $ita_data['policy_matter_file'], $ita_data['policy_note'], $proxy_setting);
                                     $statusCode = $apiResponse['StatusCode'];
                                     if($statusCode == 200){
                                         //返却StatusCodeが正常なので終了
@@ -1632,7 +1635,7 @@
                                 $statusCode = 0;
                                 $count = 0;
                                 while ($statusCode != 200 && $count < $apiRetryCount){
-                                    $apiResponse = policy_file_upload($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_id, $trg_policy_matter_path);
+                                    $apiResponse = policy_file_upload($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_id, $trg_policy_matter_path, $proxy_setting);
                                     $statusCode = $apiResponse['StatusCode'];
                                     if($statusCode == 200){
                                         //返却StatusCodeが正常なので終了
@@ -1661,7 +1664,7 @@
                                 $statusCode = 0;
                                 $count = 0;
                                 while ($statusCode != 201 && $count < $apiRetryCount){
-                                    $apiResponse = create_policy($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $ita_data['policy_name'], $ita_data['policy_matter_file'], $ita_data['policy_note']);
+                                    $apiResponse = create_policy($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $ita_data['policy_name'], $ita_data['policy_matter_file'], $ita_data['policy_note'], $proxy_setting);
                                     $statusCode = $apiResponse['StatusCode'];
                                     if($statusCode == 201){
                                         //返却StatusCodeが正常なので終了
@@ -1694,7 +1697,7 @@
                                 $statusCode = 0;
                                 $count = 0;
                                 while ($statusCode != 200 && $count < $apiRetryCount){
-                                    $apiResponse = policy_file_upload($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_id, $trg_policy_matter_path);
+                                    $apiResponse = policy_file_upload($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_id, $trg_policy_matter_path, $proxy_setting);
                                     $statusCode = $apiResponse['StatusCode'];
                                     if($statusCode == 200){
                                         //返却StatusCodeが正常なので終了
@@ -1745,7 +1748,7 @@
                             $statusCode = 0;
                             $count = 0;
                             while ($statusCode != 200 && $count < $apiRetryCount){
-                                $apiResponse = update_policy_set($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ita_data['policy_set_name'], $ita_data['policy_set_note']);
+                                $apiResponse = update_policy_set($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ita_data['policy_set_name'], $ita_data['policy_set_note'], $proxy_setting);
                                 $statusCode = $apiResponse['StatusCode'];
                                 if($statusCode == 200){
                                     //返却StatusCodeが正常なので終了
@@ -1775,7 +1778,7 @@
                             $statusCode = 0;
                             $count = 0;
                             while ($statusCode != 204 && $count < $apiRetryCount){
-                                $apiResponse = delete_relationships_policy($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_registered_policy_set_policy);
+                                $apiResponse = delete_relationships_policy($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_registered_policy_set_policy, $proxy_setting);
                                 $statusCode = $apiResponse['StatusCode'];
                                 if($statusCode == 204){
                                     //返却StatusCodeが正常なので終了
@@ -1804,7 +1807,7 @@
                             $statusCode = 0;
                             $count = 0;
                             while ($statusCode != 201 && $count < $apiRetryCount){
-                                $apiResponse = create_policy_set($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $ita_data['policy_set_name'], $ita_data['policy_set_note']);
+                                $apiResponse = create_policy_set($lv_terraform_hostname, $lv_terraform_token ,$organization_name, $ita_data['policy_set_name'], $ita_data['policy_set_note'], $proxy_setting);
                                 $statusCode = $apiResponse['StatusCode'];
                                 if($statusCode == 201){
                                     //返却StatusCodeが正常なので終了
@@ -1849,7 +1852,7 @@
                         $statusCode = 0;
                         $count = 0;
                         while ($statusCode != 204 && $count < $apiRetryCount){
-                            $apiResponse = relationships_workspace($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_register_policy_set_workspace);
+                            $apiResponse = relationships_workspace($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_register_policy_set_workspace, $proxy_setting);
                             $statusCode = $apiResponse['StatusCode'];
                             if($statusCode == 204){
                                 //返却StatusCodeが正常なので終了
@@ -1890,7 +1893,7 @@
                         $statusCode = 0;
                         $count = 0;
                         while ($statusCode != 204 && $count < $apiRetryCount){
-                            $apiResponse = relationships_policy($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_register_policy_set_policy);
+                            $apiResponse = relationships_policy($lv_terraform_hostname, $lv_terraform_token, $tfe_policy_set_id, $ary_register_policy_set_policy, $proxy_setting);
                             $statusCode = $apiResponse['StatusCode'];
                             if($statusCode == 204){
                                 //返却StatusCodeが正常なので終了
@@ -2058,7 +2061,7 @@
             $statusCode = 0;
             $count = 0;
             while ($statusCode != 201 && $count < $apiRetryCount){
-                $apiResponse = get_upload_url($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id);
+                $apiResponse = get_upload_url($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $proxy_setting);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 201){
                     //返却StatusCodeが正常なので終了
@@ -2088,7 +2091,7 @@
             //アップロードの実行
             $count = 0;
             while ($count < $apiRetryCount){
-                $apiResponse = module_upload($lv_terraform_token, $upload_url, $tar_temp_save_dir."/".$tar_module_file);
+                $apiResponse = module_upload($lv_terraform_token, $upload_url, $tar_temp_save_dir."/".$tar_module_file, $proxy_setting);
                 if($apiResponse == ""){
                     //返却StatusCodeが正常なので終了
                     break;
@@ -2115,7 +2118,7 @@
             $statusCode = 0;
             $count = 0;
             while ($statusCode != 201 && $count < $apiRetryCount){
-                $apiResponse = create_run($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $cv_id);
+                $apiResponse = create_run($lv_terraform_hostname, $lv_terraform_token, $tfe_workspace_id, $cv_id, $proxy_setting);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 201){
                     //返却StatusCodeが正常なので終了
