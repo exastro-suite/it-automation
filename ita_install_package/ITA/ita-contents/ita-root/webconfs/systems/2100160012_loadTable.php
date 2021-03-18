@@ -17,9 +17,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
     $arrayWebSetting = array();
-    $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102701");
+    $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105030");
 
-    $table = new TableControlAgent('G_MENU_REFERENCE_ITEM','ITEM_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102702"), 'G_MENU_REFERENCE_ITEM_JNL' );
+    $table = new TableControlAgent('G_MENU_REFERENCE_ITEM','ITEM_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105031"), 'G_MENU_REFERENCE_ITEM_JNL' );
     $tmpAryColumn = $table->getColumns();
     $tmpAryColumn['ITEM_ID']->setSequenceID('F_MENU_REFERENCE_ITEM_RIC');
     $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('F_MENU_REFERENCE_ITEM_JSQ');
@@ -32,9 +32,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定----
 
     // エクセルのファイル名
-    $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102703"));
+    $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105032"));
     // エクセルのシート名
-    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102704"));
+    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105033"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
 

@@ -295,4 +295,8 @@ $ary["ITACREPAR-MNU-105026"]       = "If the &quot;use&quot; checkbox is checked
 $ary["ITACREPAR-MNU-105027"]       = "If the &quot;use&quot; checkbox is checked, a parameter sheet corresponding to the vertical menu will be created.";
 $ary["ITACREPAR-MNU-105028"]       = "Enter the description.\nThe maximum size is 8192 bytes.";
 $ary["ITACREPAR-MNU-105029"]       = "Enter the remarks.\nThe maximum size is 8192 bytes.";
+$ary["ITACREPAR-MNU-105030"]       = "A menu that manages a list of other items that can be referenced based on the menu item selected in the \"Pulldown selection\" of menu creation.<br/>Automatically created.";
+$ary["ITACREPAR-MNU-105031"]       = "Id";
+$ary["ITACREPAR-MNU-105032"]       = "Reference Item Info";
+$ary["ITACREPAR-MNU-105033"]       = "Reference Item Info";
 ?>
