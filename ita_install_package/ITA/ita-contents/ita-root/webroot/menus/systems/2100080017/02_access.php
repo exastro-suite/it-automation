@@ -41,9 +41,10 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//Organization一覧のhtmlBodyを取得
-			$getData = $terraformEnerpriseData->getOrganizationData($hostname, $token);
+			$getData = $terraformEnerpriseData->getOrganizationData($hostname, $token, $proxySetting);
 			$ret['result'] = $getData['result'];
 			$ret['htmlBody'] = $getData['htmlBody'];
 
@@ -69,9 +70,10 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//Workspace一覧のhtmlBodyを取得
-			$getData = $terraformEnerpriseData->getWorkspaceData($hostname, $token);
+			$getData = $terraformEnerpriseData->getWorkspaceData($hostname, $token, $proxySetting);
 			$ret['result'] = $getData['result'];
 			$ret['htmlBody'] = $getData['htmlBody'];
 
@@ -97,9 +99,10 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//Policye一覧のhtmlBodyを取得
-			$getData = $terraformEnerpriseData->getPolicyData($hostname, $token);
+			$getData = $terraformEnerpriseData->getPolicyData($hostname, $token, $proxySetting);
 			$ret['result'] = $getData['result'];
 			$ret['htmlBody'] = $getData['htmlBody'];
 
@@ -126,9 +129,10 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//PolicyeSet一覧のhtmlBodyを取得
-			$getData = $terraformEnerpriseData->getPolicySetData($hostname, $token);
+			$getData = $terraformEnerpriseData->getPolicySetData($hostname, $token, $proxySetting);
 			$ret['result'] = $getData['result'];
 			$ret['htmlBody'] = $getData['htmlBody'];
 
@@ -148,9 +152,10 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//Organization削除APIを実行
-			$apiResponse = delete_organization($hostname, $token, $organizationName);
+			$apiResponse = delete_organization($hostname, $token, $organizationName, $proxySetting);
 			$statusCode = $apiResponse['StatusCode'];
 			if($statusCode != 204){
 				$ret['result'] = false;
@@ -175,9 +180,10 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//Workspace削除APIを実行
-			$apiResponse = delete_workspace($hostname, $token, $organizationName, $workspaceName);
+			$apiResponse = delete_workspace($hostname, $token, $organizationName, $workspaceName, $proxySetting);
 			$statusCode = $apiResponse['StatusCode'];
 			if($statusCode != 200){
 				$ret['result'] = false;
@@ -202,9 +208,10 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//Policy削除APIを実行
-			$apiResponse = delete_policy($hostname, $token, $policyId);
+			$apiResponse = delete_policy($hostname, $token, $policyId, $proxySetting);
 			$statusCode = $apiResponse['StatusCode'];
 			if($statusCode != 204){
 				$ret['result'] = false;
@@ -229,9 +236,10 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//PolicySet削除APIを実行
-			$apiResponse = delete_policy_set($hostname, $token, $policySetId);
+			$apiResponse = delete_policy_set($hostname, $token, $policySetId, $proxySetting);
 			$statusCode = $apiResponse['StatusCode'];
 			if($statusCode != 204){
 				$ret['result'] = false;
@@ -260,6 +268,7 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//PolicySetからWorkspaceを切り離すAPIを実行
 	        $workspaceData = array(
@@ -270,7 +279,7 @@
 	                )
 	            )
 	        );
-			$apiResponse = delete_relationships_workspace($hostname, $token, $policySetId, $workspaceData);
+			$apiResponse = delete_relationships_workspace($hostname, $token, $policySetId, $workspaceData, $proxySetting);
 			$statusCode = $apiResponse['StatusCode'];
 			if($statusCode != 204){
 				$ret['result'] = false;
@@ -299,6 +308,7 @@
 			}
 			$hostname = $interfaceData['hostName'];
 			$token = $interfaceData['token'];
+			$proxySetting = $interfaceData['proxySetting'];
 
 			//PolicySetからWorkspaceを切り離すAPIを実行
 	        $policyData = array(
@@ -309,7 +319,7 @@
 	                )
 	            )
 	        );
-			$apiResponse = delete_relationships_policy($hostname, $token, $policySetId, $policyData);
+			$apiResponse = delete_relationships_policy($hostname, $token, $policySetId, $policyData, $proxySetting);
 			$statusCode = $apiResponse['StatusCode'];
 			if($statusCode != 204){
 				$ret['result'] = false;
@@ -333,6 +343,9 @@
 			//データをセット
 			$interfaceData['hostName'] = $retInterfaceInfo[1]['TERRAFORM_HOSTNAME'];
 			$interfaceData['token'] = ky_decrypt($retInterfaceInfo[1]['TERRAFORM_TOKEN']);
+            $interfaceData['proxySetting'] = array();
+            $interfaceData['proxySetting']['address'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_ADDRESS'];
+            $interfaceData['proxySetting']['port'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_PORT'];
 
 			return($interfaceData);
 		}

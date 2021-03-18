@@ -41,9 +41,10 @@ class  terraformOrganization {
         $hostName = $registerData['hostName'];
         $token = $registerData['token'];
         $organizationName = $registerData['organizationName'];
+        $proxySetting = $registerData['proxySetting'];
 
         //Organization一覧取得APIを実行
-        $apiResponse = get_organizations_list($hostName, $token);
+        $apiResponse = get_organizations_list($hostName, $token, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
 
         //APIの結果を判定
@@ -81,9 +82,10 @@ class  terraformOrganization {
         $token = $registerData['token'];
         $organizationName = $registerData['organizationName'];
         $emailAddress = $registerData['emailAddress'];
+        $proxySetting = $registerData['proxySetting'];
 
         //Organization登録APIを実行
-        $apiResponse = create_organization($hostName, $token, $organizationName, $emailAddress);
+        $apiResponse = create_organization($hostName, $token, $organizationName, $emailAddress, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
 
         //APIの結果を判定
@@ -109,9 +111,10 @@ class  terraformOrganization {
         $token = $registerData['token'];
         $organizationName = $registerData['organizationName'];
         $emailAddress = $registerData['emailAddress'];
+        $proxySetting = $registerData['proxySetting'];
 
         //Organization登録APIを実行
-        $apiResponse = update_organization($hostName, $token, $organizationName, $emailAddress);
+        $apiResponse = update_organization($hostName, $token, $organizationName, $emailAddress, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
 
         //APIの結果を判定
@@ -136,9 +139,10 @@ class  terraformOrganization {
         $hostName = $deleteData['hostName'];
         $token = $deleteData['token'];
         $organizationName = $deleteData['organizationName'];
+        $proxySetting = $deleteData['proxySetting'];
 
         //Organization登録APIを実行
-        $apiResponse = delete_organization($hostName, $token, $organizationName);
+        $apiResponse = delete_organization($hostName, $token, $organizationName, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
 
         //APIの結果を判定

@@ -29,7 +29,7 @@ class  terraformEnerpriseData {
 
     }
 
-    function getOrganizationData($hostname, $token){
+    function getOrganizationData($hostname, $token, $proxySetting){
         //グローバル変数宣言
         global $g;
 
@@ -38,7 +38,7 @@ class  terraformEnerpriseData {
         $ret['htmlBody'] = "";
 
         //Organization一覧取得APIを実行
-        $apiResponse = get_organizations_list($hostname, $token);
+        $apiResponse = get_organizations_list($hostname, $token, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
         if($statusCode != 200){
             $ret['result'] = false;
@@ -160,7 +160,7 @@ EOD;
     }
 
 
-    function getWorkspaceData($hostname, $token){
+    function getWorkspaceData($hostname, $token, $proxySetting){
         //グローバル変数宣言
         global $g;
 
@@ -169,7 +169,7 @@ EOD;
         $ret['htmlBody'] = "";
 
         //Organization一覧取得APIを実行
-        $apiResponse = get_organizations_list($hostname, $token);
+        $apiResponse = get_organizations_list($hostname, $token, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
         if($statusCode != 200){
             $ret['result'] = false;
@@ -198,7 +198,7 @@ EOD;
         $workspaceListData = array();
         $workspaceCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_workspaces_list($hostname, $token, $organizationName);
+            $apiResponse = get_workspaces_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
@@ -333,7 +333,7 @@ EOD;
 
 
 
-    function getPolicyData($hostname, $token){
+    function getPolicyData($hostname, $token, $proxySetting){
         //グローバル変数宣言
         global $g;
 
@@ -342,7 +342,7 @@ EOD;
         $ret['htmlBody'] = "";
 
         //Organization一覧取得APIを実行
-        $apiResponse = get_organizations_list($hostname, $token);
+        $apiResponse = get_organizations_list($hostname, $token, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
         if($statusCode != 200){
             $ret['result'] = false;
@@ -371,7 +371,7 @@ EOD;
         $policyListData = array();
         $policyCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_policy_list($hostname, $token, $organizationName);
+            $apiResponse = get_policy_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
@@ -507,7 +507,7 @@ EOD;
         return $HtmlBody;
     }
 
-    function getPolicySetData($hostname, $token){
+    function getPolicySetData($hostname, $token, $proxySetting){
         //グローバル変数宣言
         global $g;
 
@@ -516,7 +516,7 @@ EOD;
         $ret['htmlBody'] = "";
 
         //Organization一覧取得APIを実行
-        $apiResponse = get_organizations_list($hostname, $token);
+        $apiResponse = get_organizations_list($hostname, $token, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
         if($statusCode != 200){
             $ret['result'] = false;
@@ -545,7 +545,7 @@ EOD;
         $workspaceListData = array();
         $workspaceCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_workspaces_list($hostname, $token, $organizationName);
+            $apiResponse = get_workspaces_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
@@ -564,7 +564,7 @@ EOD;
         $policyListData = array();
         $policyCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_policy_list($hostname, $token, $organizationName);
+            $apiResponse = get_policy_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
@@ -584,7 +584,7 @@ EOD;
         $policySetListData = array();
         $policySetCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_policy_sets_list($hostname, $token, $organizationName);
+            $apiResponse = get_policy_sets_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
