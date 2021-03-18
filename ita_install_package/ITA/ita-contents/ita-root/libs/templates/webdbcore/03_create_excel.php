@@ -27,7 +27,7 @@
     require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_03_create_excel.php");
     //-- サイト個別PHP要素、ここから--
     //-- サイト個別PHP要素、ここまで-- 
-    tableDumpToFile($objDefaultTable,array('search_filter_data'=>htmlspecialchars($_POST['filter_data'], ENT_QUOTES, "UTF-8")));
+    tableDumpToFile($objDefaultTable,array('search_filter_data'=>$_POST['filter_data']));
     //-- サイト個別PHP要素、ここから--
     //-- サイト個別PHP要素、ここまで-- 
 
