@@ -43,7 +43,19 @@ $ary["ITABASEH-MNU-102075"]         = "Input value for authentication method is 
 $ary["ITABASEH-MNU-102080"]         = "[Maximum length] 30 bytes";
 $ary["ITABASEH-MNU-102085"]         = "Dedicated information for Legacy/Role";
 $ary["ITABASEH-MNU-102088"]         = "Authentication method";
-$ary["ITABASEH-MNU-102089"]         = "Management of login password should be ● for password method. \nSudo authority should be set as /etc/sudoers in login user for  key method. ";
+$ary["ITABASEH-MNU-102089"]         = "Select the authentication method when connecting to the device from Ansible.
+-Password authentication
+ Select ● in the login password management and enter the login password.
+-Key authentication (no passphrase)
+ Uploading the ssh private key file is required.
+-Key authentication (with passphrase)
+ You must upload the ssh private key file and enter the passphrase.
+-Key authentication (key exchanged)
+ No upload of ssh private key file is required.
+-Password authentication (winrm)
+ Enter the WinRM connection information as required.
+For authentication methods other than password authentication (winrm), the following settings are required on the device side.
+The login user sudo privileges must be set to / etc / sudoers with his NOPASSWD.";
 $ary["ITABASEH-MNU-102090"]         = "OS type";
 $ary["ITABASEH-MNU-102110"]         = "EtherWakeOnLan";
 $ary["ITABASEH-MNU-102120"]         = "Power ON";
