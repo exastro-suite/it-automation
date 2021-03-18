@@ -1280,7 +1280,15 @@ $ary["ITAANSIBLEH-MNU-9010001003"]  = "AnsibleTowerHostList";
 $ary["ITAANSIBLEH-MNU-9010001010"]  = "Host";
 $ary["ITAANSIBLEH-MNU-9010001011"]  = "It is host name (or IP address) of Ansible Tower.";
 $ary["ITAANSIBLEH-MNU-9010001020"]  = "Authentication method";
-$ary["ITAANSIBLEH-MNU-9010001021"]  = "Authentication method for connecting to Ansible Tower with ssh.";
+$ary["ITAANSIBLEH-MNU-9010001021"]  = "Select the authentication method when connecting to Ansible Tower with ssh.
+-Password authentication
+ Select ● in the login password management and enter the login password.
+-Key authentication (no passphrase)
+ Uploading the ssh private key file is required.
+-Key authentication (with passphrase)
+ You must upload the ssh private key file and enter the passphrase.
+-Key authentication (key exchanged)
+ No upload of ssh private key file is required.";
 $ary["ITAANSIBLEH-MNU-9010001030"]  = "User";
 $ary["ITAANSIBLEH-MNU-9010001031"]  = "User when connecting to Ansible Tower with ssh. Write permission to the project path (/var/lib/awx/projects) is required.";
 $ary["ITAANSIBLEH-MNU-9010001040"]  = "Password";
