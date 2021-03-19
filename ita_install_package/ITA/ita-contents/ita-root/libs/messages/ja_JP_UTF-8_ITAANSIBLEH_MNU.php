@@ -1303,7 +1303,9 @@ $ary["ITAANSIBLEH-MNU-9010001031"]  = "sshでAnsible Towerに接続する場合�
 $ary["ITAANSIBLEH-MNU-9010001040"]  = "パスワード";
 $ary["ITAANSIBLEH-MNU-9010001041"]  = "パスワード認証する場合のパスワードです。";
 $ary["ITAANSIBLEH-MNU-9010001050"]  = "ssh秘密鍵ファイル";
-$ary["ITAANSIBLEH-MNU-9010001051"]  = "鍵認証する場合のssh鍵認証ファイルです。";
+$ary["ITAANSIBLEH-MNU-9010001051"]  = "鍵認証する場合のssh秘密鍵ファイルを入力します。
+アップロードしたファイルは暗号化されて保存されます。
+登録後にダウンロードした場合、暗号化されたファイルがダウンロードされます。";
 $ary["ITAANSIBLEH-MNU-9010001052"]  = "パスフレーズ";
 $ary["ITAANSIBLEH-MNU-9010001053"]  = "ssh秘密鍵ファイルに設定されているパスフレーズを入力します。";
 $ary["ITAANSIBLEH-MNU-9010001054"]  = "ansible-vaultで暗号化されたssh秘密鍵ファイル";
