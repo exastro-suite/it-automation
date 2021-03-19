@@ -17,7 +17,7 @@
 	$tmpAry=explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);
 
 	require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_02_access.php");
-	require_once ( $root_dir_path . "/libs/webindividuallibs/systems/2100080017/81_terraformEnterpriseData.php");
+	require_once ( $root_dir_path . "/libs/webindividuallibs/systems/2100080017/81_linkedTerraformData.php");
 	require_once ( $root_dir_path . "/libs/commonlibs/common_terraform_function.php");
 	require_once ( $root_dir_path . "/libs/commonlibs/common_terraform_restapi.php");
 

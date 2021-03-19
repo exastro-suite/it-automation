@@ -15,35 +15,35 @@
 //
 ////en_US_UTF-8_ITATERRAFORM_STD
 $ary["ITATERRAFORM99999"]   = "Dummy";
-$ary["ITATERRAFORM100001"]  = "Register with Terraform Enterprise.";
-$ary["ITATERRAFORM100002"]  = "Perform an update to Terraform Enterprise.";
-$ary["ITATERRAFORM100003"]  = "Perform a removal from Terraform Enterprise.
+$ary["ITATERRAFORM100001"]  = "Register with Terraform.";
+$ary["ITATERRAFORM100002"]  = "Perform an update to Terraform.";
+$ary["ITATERRAFORM100003"]  = "Perform a removal from Terraform.
 You cannot restore the deleted Organization.
 Also, the Workspace associated with Organization will be deleted.";
-$ary["ITATERRAFORM100004"]  = "You have successfully registered with Terraform Enterprise.";
-$ary["ITATERRAFORM100005"]  = "Registration with Terraform Enterprise failed.";
-$ary["ITATERRAFORM100006"]  = "Successfully updated to Terraform Enterprise.";
-$ary["ITATERRAFORM100007"]  = "Update to Terraform Enterprise failed.";
-$ary["ITATERRAFORM100008"]  = "Successfully removed from Terraform Enterprise.";
-$ary["ITATERRAFORM100009"]  = "Failed to remove from Terraform Enterprise.";
-$ary["ITATERRAFORM100011"]  = "Register with Terraform Enterprise.";
-$ary["ITATERRAFORM100012"]  = "Perform an update to Terraform Enterprise.";
-$ary["ITATERRAFORM100013"]  = "Perform a removal from Terraform Enterprise.
+$ary["ITATERRAFORM100004"]  = "You have successfully registered with Terraform.";
+$ary["ITATERRAFORM100005"]  = "Registration with Terraform failed.";
+$ary["ITATERRAFORM100006"]  = "Successfully updated to Terraform.";
+$ary["ITATERRAFORM100007"]  = "Update to Terraform failed.";
+$ary["ITATERRAFORM100008"]  = "Successfully removed from Terraform.";
+$ary["ITATERRAFORM100009"]  = "Failed to remove from Terraform.";
+$ary["ITATERRAFORM100011"]  = "Register with Terraform.";
+$ary["ITATERRAFORM100012"]  = "Perform an update to Terraform.";
+$ary["ITATERRAFORM100013"]  = "Perform a removal from Terraform.
 You cannot restore a deleted Workspace.";
-$ary["ITATERRAFORM100014"]  = "You have successfully registered with Terraform Enterprise.";
-$ary["ITATERRAFORM100015"]  = "Registration with Terraform Enterprise failed.";
-$ary["ITATERRAFORM100016"]  = "Successfully updated to Terraform Enterprise.";
-$ary["ITATERRAFORM100017"]  = "Update to Terraform Enterprise failed.";
-$ary["ITATERRAFORM100018"]  = "Successfully removed from Terraform Enterprise.";
-$ary["ITATERRAFORM100019"]  = "Failed to remove from Terraform Enterprise.";
-$ary["ITATERRAFORM100021"]  = "Removed {} from Terraform Enterprise.";
-$ary["ITATERRAFORM100022"]  = "Could not remove {} from Terraform Enterprise.";
+$ary["ITATERRAFORM100014"]  = "You have successfully registered with Terraform.";
+$ary["ITATERRAFORM100015"]  = "Registration with Terraform failed.";
+$ary["ITATERRAFORM100016"]  = "Successfully updated to Terraform.";
+$ary["ITATERRAFORM100017"]  = "Update to Terraform failed.";
+$ary["ITATERRAFORM100018"]  = "Successfully removed from Terraform.";
+$ary["ITATERRAFORM100019"]  = "Failed to remove from Terraform.";
+$ary["ITATERRAFORM100021"]  = "Removed {} from Terraform.";
+$ary["ITATERRAFORM100022"]  = "Could not remove {} from Terraform.";
 $ary["ITATERRAFORM100023"]  = "Deleted relationship {} from {}.";
 $ary["ITATERRAFORM100024"]  = "Failed to Deleted relationship {} from {}.";
-$ary["ITATERRAFORM100025"]  = "Remove {} from Terraform Enterprise. The deleted Organization is irreversible.";
-$ary["ITATERRAFORM100026"]  = "Remove {} from Terraform Enterprise. The deleted Workspace is irreversible.";
-$ary["ITATERRAFORM100027"]  = "Remove {} from Terraform Enterprise. The deleted Policy is irreversible.";
-$ary["ITATERRAFORM100028"]  = "Remove {} from Terraform Enterprise. The deleted PolicySet is irreversible.";
+$ary["ITATERRAFORM100025"]  = "Remove {} from Terraform. The deleted Organization is irreversible.";
+$ary["ITATERRAFORM100026"]  = "Remove {} from Terraform. The deleted Workspace is irreversible.";
+$ary["ITATERRAFORM100027"]  = "Remove {} from Terraform. The deleted Policy is irreversible.";
+$ary["ITATERRAFORM100028"]  = "Remove {} from Terraform. The deleted PolicySet is irreversible.";
 $ary["ITATERRAFORM100029"]  = "Delete relationship {} from {}.";
 $ary["ITATERRAFORM110001"]  = "Are you sure you want to perform emergency stop?";
 $ary["ITATERRAFORM110002"]  = "Are you sure you want to cancel the schedule?";

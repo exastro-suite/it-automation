@@ -518,7 +518,7 @@
             if($statusCode == -2 || $statusCode == 401){
                 //初回API実行時のみ、インターフェース情報のhostnameとUserTokenが適切かどうかをチェック。hostnameが不正な場合返り値は-2、UserTokenが不正な場合返り値は401となる。
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142010"); //[API Error]Terraform Enterpriseとの接続に失敗しました。インターフェース情報を確認して下さい。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142010"); //[API Error]Terraformとの接続に失敗しました。インターフェース情報を確認して下さい。
                 LocalLogPrint($error_log, $message);
 
                 // 異常フラグON
