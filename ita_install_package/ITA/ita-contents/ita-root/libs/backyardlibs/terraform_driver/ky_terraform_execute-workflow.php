@@ -943,7 +943,7 @@
             if($statusCode == -2 || $statusCode == 401){
                 //初回API実行時のみ、インターフェース情報のhostnameとUserTokenが適切かどうかをチェック。hostnameが不正な場合返り値は-2、UserTokenが不正な場合返り値は401となる。
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142010"); //[API Error]Terraform Enterpriseとの接続に失敗しました。インターフェース情報を確認して下さい。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142010"); //[API Error]Terraformとの接続に失敗しました。インターフェース情報を確認して下さい。
                 LocalLogPrint($error_log, $message);
 
                 // 異常フラグON
@@ -972,7 +972,7 @@
 
                 if($exist_flag == false){
                     //error_logにメッセージを追記
-                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-131020", $organization_name); //Terraform Enterpriseに対象のOrganizationが登録されていません。(Organization名:{})
+                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-131020", $organization_name); //Terraformに対象のOrganizationが登録されていません。(Organization名:{})
                     LocalLogPrint($error_log, $message);
 
                     // 警告フラグON
@@ -1024,7 +1024,7 @@
 
                 if($exist_flag == false){
                     //error_logにメッセージを追記
-                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-131030", $workspace_name); //Terraform Enterpriseに対象のWorkspaceが登録されていません。(WorkspaceName:{})
+                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-131030", $workspace_name); //Terraformに対象のWorkspaceが登録されていません。(WorkspaceName:{})
                     LocalLogPrint($error_log, $message);
 
                     // 警告フラグON
@@ -1036,7 +1036,7 @@
                 //Plan確認の場合、WorkspaceのApplyMethod設定がAuto Applyになっている場合はエラーにする（Plan確認の場合にApplyが実行されてしまうため）
                 if($run_mode == 2 && $tfe_auto_apply == true){
                     //error_logにメッセージを追記
-                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141205", $workspace_name); //Terraform Enterpriseに対象のWorkspaceが登録されていません。(WorkspaceName:{})
+                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141205", $workspace_name); //Terraformに対象のWorkspaceが登録されていません。(WorkspaceName:{})
                     LocalLogPrint($error_log, $message);
 
                     // 警告フラグON

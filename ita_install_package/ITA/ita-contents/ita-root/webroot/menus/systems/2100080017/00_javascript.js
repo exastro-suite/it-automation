@@ -100,12 +100,12 @@ callback.prototype = {
         }
 
         if(result['result'] == true){
-            //Terraform Enterpriseから{}を削除しました。
+            //Terraformから{}を削除しました。
             if(window.confirm(getSomeMessage("ITATERRAFORM100021",{0:result['target']}))){
                 getOrganizationData();
             }
         }else{
-            //Terraform Enterpriseから{}を削除できませんでした。
+            //Terraformから{}を削除できませんでした。
             if(window.confirm(getSomeMessage("ITATERRAFORM100022",{0:result['target']}))){
                 getOrganizationData();
             }
@@ -118,12 +118,12 @@ callback.prototype = {
         }
 
         if(result['result'] == true){
-            //Terraform Enterpriseから{}を削除しました。
+            //Terraformから{}を削除しました。
             if(window.confirm(getSomeMessage("ITATERRAFORM100021",{0:result['target']}))){
                 getWorkspaceData();
             }
         }else{
-            //Terraform Enterpriseから{}を削除できませんでした。
+            //Terraformから{}を削除できませんでした。
             if(window.confirm(getSomeMessage("ITATERRAFORM100022",{0:result['target']}))){
                 getWorkspaceData();
             }
@@ -136,12 +136,12 @@ callback.prototype = {
         }
 
         if(result['result'] == true){
-            //Terraform Enterpriseから{}を削除しました。
+            //Terraformから{}を削除しました。
             if(window.confirm(getSomeMessage("ITATERRAFORM100021",{0:result['target']}))){
                 getPolicyData();
             }
         }else{
-            //Terraform Enterpriseから{}を削除できませんでした。
+            //Terraformから{}を削除できませんでした。
             if(window.confirm(getSomeMessage("ITATERRAFORM100022",{0:result['target']}))){
                 getPolicyData();
             }
@@ -154,12 +154,12 @@ callback.prototype = {
         }
 
         if(result['result'] == true){
-            //Terraform Enterpriseから{}を削除しました。
+            //Terraformから{}を削除しました。
             if(window.confirm(getSomeMessage("ITATERRAFORM100021",{0:result['target']}))){
                 getPolicySetData();
             }
         }else{
-            //Terraform Enterpriseから{}を削除できませんでした。
+            //Terraformから{}を削除できませんでした。
             if(window.confirm(getSomeMessage("ITATERRAFORM100022",{0:result['target']}))){
                 getPolicySetData();
             }
@@ -227,7 +227,7 @@ function getOrganizationData(){
     var objTableArea = $('#'+organizationAreaWrap+' .table_area').get()[0];
     objTableArea.innerHTML = "<div class=\"wait_msg2\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
 
-    // TerraformEnterpriseからOrganizationを取得し一覧表示
+    // TerraformからOrganizationを取得し一覧表示
     proxy.getOrganizationData();
 }
 
@@ -240,7 +240,7 @@ function getWorkspaceData(){
     var objTableArea = $('#'+workspaceAreaWrap+' .table_area').get()[0];
     objTableArea.innerHTML = "<div class=\"wait_msg2\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
 
-    // TerraformEnterpriseからWorkspaceを取得し一覧表示
+    // TerraformからWorkspaceを取得し一覧表示
     proxy.getWorkspaceData();
 }
 
@@ -253,7 +253,7 @@ function getPolicyData(){
     var objTableArea = $('#'+policyAreaWrap+' .table_area').get()[0];
     objTableArea.innerHTML = "<div class=\"wait_msg2\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
 
-    // TerraformEnterpriseからPolicyを取得し一覧表示
+    // TerraformからPolicyを取得し一覧表示
     proxy.getPolicyData();
 }
 
@@ -266,7 +266,7 @@ function getPolicySetData(){
     var objTableArea = $('#'+policySetAreaWrap+' .table_area').get()[0];
     objTableArea.innerHTML = "<div class=\"wait_msg2\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
 
-    // TerraformEnterpriseからPolicySetを取得し一覧表示
+    // TerraformからPolicySetを取得し一覧表示
     proxy.getPolicySetData();
 }
 
@@ -277,7 +277,7 @@ function deleteOrganization(obj, organizationName){
         'organizationName' : organizationName
     };
 
-    //{}をTerraform Enterpriseから削除します。削除されたOrganizationは元に戻せません。
+    //{}をTerraformから削除します。削除されたOrganizationは元に戻せません。
     if( window.confirm(getSomeMessage("ITATERRAFORM100025",{0:organizationName}))){
         proxy.deleteOrganization(data);
     }
@@ -292,7 +292,7 @@ function deleteWorkspace(obj, organizationName, workspaceName){
         'workspaceName' : workspaceName
     };
 
-    //{}をTerraform Enterpriseから削除します。削除されたWorkspaceは元に戻せません。
+    //{}をTerraformから削除します。削除されたWorkspaceは元に戻せません。
     if( window.confirm(getSomeMessage("ITATERRAFORM100026",{0:workspaceName}))){
         proxy.deleteWorkspace(data);
     }
@@ -307,7 +307,7 @@ function deletePolicy(obj, policyId, policyName){
         'policyName' : policyName
     };
 
-    //{}をTerraform Enterpriseから削除します。削除されたPolicyは元に戻せません。
+    //{}をTerraformから削除します。削除されたPolicyは元に戻せません。
     if( window.confirm(getSomeMessage("ITATERRAFORM100027",{0:policyName}))){
         proxy.deletePolicy(data);
     }
@@ -322,7 +322,7 @@ function deletePolicySet(obj, policySetId, policySetName){
         'policySetName' : policySetName
     };
 
-    //{}をTerraform Enterpriseから削除します。削除されたPolicySetは元に戻せません。
+    //{}をTerraformから削除します。削除されたPolicySetは元に戻せません。
     if( window.confirm(getSomeMessage("ITATERRAFORM100028",{0:policySetName}))){
         proxy.deletePolicySet(data);
     }
