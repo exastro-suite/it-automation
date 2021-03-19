@@ -743,6 +743,11 @@
                 // (ここから)実行中の場合　//
                 //////////////////////////////////////////////////////
                 $intSymInsStatus = $rowOfConductor["STATUS_ID"] ;
+                
+                // BIND用のベースソース(Conductor)
+                $arySymInsUpdateTgtSource = $rowOfConductor;
+                $arySymInsUpdateTgtSource['LAST_UPDATE_USER'] = $db_access_user_id;
+
                 //実行中のノード毎に繰り返し
                 foreach ($arrOfFocusMovement as $Movementkey => $rowOfFocusMovement) {
 
@@ -911,9 +916,6 @@
 
 
                     //ノードパターン別の動作
-                    // BIND用のベースソース(Conductor)
-                    $arySymInsUpdateTgtSource = $rowOfConductor;
-                    $arySymInsUpdateTgtSource['LAST_UPDATE_USER'] = $db_access_user_id;
 
                     // BIND用のベースソース(Node)
                     $aryMovInsUpdateTgtSource = $arrTargetNodeInstance;
@@ -1161,21 +1163,76 @@
 
                                     }
 
-                                    //後続処理conditional用
-                                    switch( $aryMovInsUpdateTgtSource["STATUS_ID"] ){
-                                        case "10":  //準備エラー
-                                        case "6":  //異常終了
-                                        case "7":  //緊急停止
-                                        case "11":  //想定外エラー
-                                        case "12":  //Skip完了
-                                        case "9":  //正常終了
-                                        case "14":  //Skip終了
-                                            $boolNextNodeReadyflg = true;
-                                            break;
-                                        default:
-                                            break;
+                                    //次のNode取得
+                                    $arySqlBind=array(
+                                        "CONDUCTOR_INSTANCE_NO" => $rowOfConductor['CONDUCTOR_INSTANCE_NO'],
+                                        "NODE_CLASS_NO" => $arrTargetNodeInstance["I_NODE_CLASS_NO"],
+                                        "TERMINAL_TYPE_ID" => 2, //out
+                                        );
+                                    $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
+
+                                    //クラスの取得
+                                    $arrNextTargetNodeClass=array();
+                                    foreach ($aryRetBody as $key => $value) {
+                                        foreach ( $arrNodeClassInfo as $key2 => $value2) {
+                                            if( $value2['NODE_NAME'] == $value['CONNECTED_NODE_NAME'] ){
+                                                $arrNextTargetNodeClass[$value2['NODE_CLASS_NO']]=$value2;        
+                                            }
+                                        }
                                     }
 
+                                    $conditionalflg="";
+                                    foreach ($arrNextTargetNodeClass as $key => $nclass) {
+                                        if($nclass['NODE_TYPE_ID'] == 6 ){
+                                            $conditionalflg="1";
+                                        }
+                                    }
+
+
+
+                                    //次のNodeがcondition
+                                    if($conditionalflg == 1 ){
+                                        //後続処理conditional用
+                                        switch( $aryMovInsUpdateTgtSource["STATUS_ID"] ){
+                                            case "10":  //準備エラー
+                                            case "6":  //異常終了
+                                            case "7":  //緊急停止
+                                            case "11":  //想定外エラー    
+                                            case "9":  //正常終了
+                                            case "12":  //Skip完了
+                                            case "14":  //Skip終了
+                                                $boolNextNodeReadyflg = true;
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }else{
+                                        //次のNodeがcondition以外
+                                        $boolNextNodeReadyflg = false;
+                                        //---NODE-Conductorインスタンスのステータス同期
+                                        switch( $aryMovInsUpdateTgtSource["STATUS_ID"] ){
+                                            case "9": // mov.正常終了
+                                            case "14": //mov.Skip終了
+                                                $boolNextNodeReadyflg = true;
+                                                break;
+                                            case "4": // mov.実行中(遅延)
+                                                $arySymInsUpdateTgtSource['STATUS_ID'] = 4;     //.実行中(遅延)へ
+                                                break;
+                                            case "10": // mov.準備エラー
+                                            case "6": // mov.異常終了
+                                                $arySymInsUpdateTgtSource['STATUS_ID'] = 7;     //異常終了へ
+                                                break;
+                                            case "7": // mov.緊急停止
+                                                $arySymInsUpdateTgtSource['STATUS_ID'] = 6;     //緊急停止へ
+                                                break;
+                                            case "11": // mov.想定外エラー
+                                                $arySymInsUpdateTgtSource['STATUS_ID'] = 8;     //想定外エラー
+                                                break;
+                                            default:
+                                                break;
+                                        } 
+                                        //NODE-Conductorインスタンスのステータス同期---
+                                    }
                                 }
                                     
                             break;
