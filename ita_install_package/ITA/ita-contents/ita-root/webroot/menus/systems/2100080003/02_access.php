@@ -255,7 +255,7 @@
                 //エラーログ出力
                 web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211130",'00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')'));
                 $retArray[0] = false;
-                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211150"); //Terraform Enterpriseとの接続に失敗しました。インターフェース情報を確認して下さい。
+                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211150"); //Terraformとの接続に失敗しました。インターフェース情報を確認して下さい。
                 return($retArray);
             }
 

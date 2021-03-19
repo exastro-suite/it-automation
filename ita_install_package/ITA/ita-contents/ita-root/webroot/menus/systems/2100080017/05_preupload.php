@@ -26,8 +26,8 @@
         try{
             require_once ( $root_dir_path . "/libs/commonlibs/common_terraform_function.php");
             require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_05_preupload.php");
-            $purl = htmlspecialchars($_GET['purl'], ENT_QUOTES, "UTF-8");;
-            $policyName = htmlspecialchars($_GET['policyName'], ENT_QUOTES, "UTF-8");;
+            $purl = htmlspecialchars($_GET['purl'], ENT_QUOTES, "UTF-8");
+            $policyName = htmlspecialchars($_GET['policyName'], ENT_QUOTES, "UTF-8");
 
             //インターフェース情報を取得
             $retInterfaceInfo = getInterfaceInfo();
