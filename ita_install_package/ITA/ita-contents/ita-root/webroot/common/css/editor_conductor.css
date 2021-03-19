@@ -245,6 +245,12 @@ background-image: linear-gradient( rgba( 255,255,255,.95 ), rgba( 255,255,255,.7
 transform-origin: center top;
 transform: scale(.8,.6) translateY(4px);
 }
+.node-circle .node-gem-inner {
+display: block;
+position: absolute;
+left: 50%;
+transform: translateX(-50%);
+}
 .node-type,
 .node-name {
 overflow: hidden;
