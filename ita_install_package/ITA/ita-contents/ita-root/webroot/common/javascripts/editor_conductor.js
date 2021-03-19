@@ -1090,6 +1090,19 @@ const nodeSet = function( $node, x, y ){
     
 };
 
+// ノードジェムのテキストが溢れているか確認し調整する
+const nodeGemCheck = function( $node ) {
+    const $gem = $node.find('.node-gem');
+    if ( $gem.length ) {
+        const gemWidth = $gem.width(),
+              gemTextWidth = $gem.find('.node-gem-inner').width();
+        if ( gemWidth < gemTextWidth ) {
+            const scale = Math.floor( gemWidth / gemTextWidth * 1000 ) / 1000;
+            $node.find('.node-gem-inner').css('transform','translateX(-50%) scale(' + scale + ')');
+        }
+    }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   ノードを指定位置に移動する
@@ -1284,7 +1297,7 @@ const createNodeHTML = function( nodeID ) {
     if ( typeCheck.indexOf( nodeData.type ) !== -1 ) {
       nodeHTML += ''
       + '<div class="node-circle">'
-        + '<span class="node-gem">' + nodeCircle + '</span>'
+        + '<span class="node-gem"><span class="node-gem-inner node-gem-length-' + nodeCircle.length + '">' + nodeCircle + '</span></span>'
         + '<span class="node-running"></span>'
         + '<span class="node-result" data-result-text="" data-href="#"></span>'
       + '</div>'
@@ -1777,6 +1790,7 @@ $('.node-table').on('mousedown', 'tbody tr', function( e ){
   // 要素の追加を待つ
   $node.ready( function(){
   
+    nodeGemCheck( $node );
     nodeInterruptCheck( nodeID );
     
     // 分岐ノードの線を描画
@@ -4096,6 +4110,7 @@ const nodeReSet = function( reSetConductorData ) {
         }
         const $node = createNodeHTML( nodeID );
         $artBoard.append( $node );
+        nodeGemCheck( $node );
         nodeSet( $node, reSetConductorData[ nodeID ].x, reSetConductorData[ nodeID ].y );
         
         // 分岐ノード
