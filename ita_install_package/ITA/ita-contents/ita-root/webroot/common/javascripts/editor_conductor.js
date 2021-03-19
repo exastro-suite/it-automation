@@ -3243,16 +3243,21 @@ const panelChange = function( nodeID ) {
     
     // Noteのチェック
     const $noteTextArea = $panel.find('.panel-note');
+    const setNodeNote = function( text ) {
+      if ( conductorEditorMode === 'edit' ) {
+        $noteTextArea.val( text );
+      } else {
+        $noteTextArea.text( text );
+      }
+    }
     if ( 'note' in conductorData[ nodeID ] ) {
       let noteText = conductorData[ nodeID ].note;
       if ( !editor.checkValue( noteText ) ) {
         noteText = '';
       }
-      if ( conductorEditorMode === 'edit' ) {
-        $noteTextArea.val( noteText );
-      } else {
-        $noteTextArea.text( noteText );
-      }
+      setNodeNote( noteText );
+    } else {
+      setNodeNote('')
     }
     
     // 個別Operation表示
