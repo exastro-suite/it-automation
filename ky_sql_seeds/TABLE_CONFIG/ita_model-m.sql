@@ -816,3 +816,197 @@ SELECT TAB_B.JOURNAL_SEQ_NO                              ,
 FROM G_CREATE_REFERENCE_ITEM_JNL TAB_B
 WHERE TAB_B.DISUSE_FLAG = '0'
 ;
+
+
+
+
+-- *****************************************************************************
+-- *** ***** Contrast Tables                                      ***
+-- *****************************************************************************
+-- -------------------------
+-- 比較定義情報
+-- -------------------------
+CREATE TABLE A_CONTRAST_LIST
+(
+CONTRAST_LIST_ID                    %INT%                             , -- 識別シーケンス項番
+CONTRAST_NAME                       TEXT                              ,
+CONTRAST_MENU_ID_1                  %INT%                             ,
+CONTRAST_MENU_ID_2                  %INT%                             ,
+ALL_MATCH_FLG                       %INT%                             ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                %VARCHR% (4000)                   , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (CONTRAST_LIST_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE A_CONTRAST_LIST_JNL
+(
+JOURNAL_SEQ_NO                      %INT%                             , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                %DATETIME6%                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                %VARCHR% (8)                      , -- 履歴用変更種別
+
+CONTRAST_LIST_ID                    %INT%                             , -- 識別シーケンス項番
+CONTRAST_NAME                       TEXT                              ,
+CONTRAST_MENU_ID_1                  %INT%                             ,
+CONTRAST_MENU_ID_2                  %INT%                             ,
+ALL_MATCH_FLG                       %INT%                             ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                %VARCHR% (4000)                   , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+-- -------------------------
+-- 比較定義詳細
+-- -------------------------
+CREATE TABLE A_CONTRAST_DETAIL
+(
+CONTRAST_DETAIL_ID                  %INT%                             , -- 識別シーケンス項番
+CONTRAST_LIST_ID                    %INT%                             ,
+CONTRAST_COL_TITLE                  TEXT                              ,
+CONTRAST_COL_ID_1                   %INT%                             ,
+CONTRAST_COL_ID_2                   %INT%                             ,
+DISP_SEQ                            %INT%                             ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                %VARCHR% (4000)                   , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (CONTRAST_DETAIL_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE A_CONTRAST_DETAIL_JNL
+(
+JOURNAL_SEQ_NO                      %INT%                             , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                %DATETIME6%                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                %VARCHR% (8)                      , -- 履歴用変更種別
+
+CONTRAST_DETAIL_ID                  %INT%                             , -- 識別シーケンス項番
+CONTRAST_LIST_ID                    %INT%                             ,
+CONTRAST_COL_TITLE                  TEXT                              ,
+CONTRAST_COL_ID_1                   %INT%                             ,
+CONTRAST_COL_ID_2                   %INT%                             ,
+DISP_SEQ                            %INT%                             ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                %VARCHR% (4000)                   , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+-- *****************************************************************************
+-- *** ***** Contrast View                                      ***
+-- *****************************************************************************
+-- -------------------------
+-- 比較定義情報「比較定義名:対象メニュー1/2」(プルダウン用)
+-- -------------------------
+CREATE VIEW D_CONTRAST_LIST AS 
+SELECT 
+    TAB_A.* ,
+    concat( TAB_A.CONTRAST_NAME ,' [ ' ,TAB_A.CONTRAST_MENU_ID_1 ,':', TAB_B.MENU_NAME ,'-', TAB_A.CONTRAST_MENU_ID_2 ,':', TAB_C.MENU_NAME ,' ] ') AS PULLDOWN 
+FROM A_CONTRAST_LIST TAB_A
+LEFT JOIN A_MENU_LIST TAB_B ON ( TAB_B.MENU_ID = TAB_A.CONTRAST_MENU_ID_1 )
+LEFT JOIN A_MENU_LIST TAB_C ON ( TAB_C.MENU_ID = TAB_A.CONTRAST_MENU_ID_2 )
+WHERE
+    TAB_A.ALL_MATCH_FLG IS NULL AND
+    TAB_A.DISUSE_FLAG = '0' AND
+    TAB_B.DISUSE_FLAG = '0'
+;
+CREATE VIEW D_CONTRAST_LIST_JNL AS 
+SELECT 
+    TAB_A.*,
+    concat( TAB_A.CONTRAST_NAME ,' [ ' ,TAB_A.CONTRAST_MENU_ID_1 ,':', TAB_B.MENU_NAME ,'-', TAB_A.CONTRAST_MENU_ID_2 ,':', TAB_C.MENU_NAME ,' ] ') AS PULLDOWN 
+FROM A_CONTRAST_LIST_JNL TAB_A
+LEFT JOIN A_MENU_LIST TAB_B ON ( TAB_B.MENU_ID = TAB_A.CONTRAST_MENU_ID_1 )
+LEFT JOIN A_MENU_LIST TAB_C ON ( TAB_C.MENU_ID = TAB_A.CONTRAST_MENU_ID_2 )
+WHERE
+    TAB_A.ALL_MATCH_FLG IS NULL AND
+    TAB_A.DISUSE_FLAG = '0' AND
+    TAB_B.DISUSE_FLAG = '0'
+;
+-- -------------------------
+-- 比較定義詳細
+-- -------------------------
+CREATE VIEW D_CONTRAST_DETAIL AS 
+SELECT 
+    TAB_A.* ,
+    TAB_A.CONTRAST_COL_ID_1 AS REST_CONTRAST_COL_ID_1,
+    TAB_A.CONTRAST_COL_ID_2 AS REST_CONTRAST_COL_ID_2
+FROM
+    A_CONTRAST_DETAIL TAB_A 
+;
+
+CREATE VIEW D_CONTRAST_DETAIL_JNL AS 
+SELECT 
+    TAB_A.* ,
+    TAB_A.CONTRAST_COL_ID_1 AS REST_CONTRAST_COL_ID_1,
+    TAB_A.CONTRAST_COL_ID_2 AS REST_CONTRAST_COL_ID_2
+FROM
+    A_CONTRAST_DETAIL_JNL TAB_A
+;
+
+-- -------------------------
+-- 比較定義詳細項目参照情報「メニューグループ:メニュー:項目」(プルダウン用)
+-- -------------------------
+CREATE VIEW D_CMDB_MG_MU_COL_LIST_CONTRAST AS 
+SELECT
+    TAB_A.*                 , 
+    CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_TITLE_PULLDOWN,
+    TAB_B.SHEET_TYPE                     ,
+    TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+    TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02  ,
+    TAB_D.ACCESS_AUTH AS ACCESS_AUTH_03
+FROM B_CMDB_MENU_COLUMN TAB_A
+    LEFT JOIN B_CMDB_MENU_LIST       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+    LEFT JOIN A_MENU_LIST            TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+    LEFT JOIN A_MENU_GROUP_LIST      TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+    TAB_A.COL_CLASS   <>  'PasswordColumn' AND 
+    TAB_A.DISUSE_FLAG = '0' AND
+    TAB_B.DISUSE_FLAG = '0' AND
+    TAB_C.DISUSE_FLAG = '0' AND
+    TAB_D.DISUSE_FLAG = '0';
+
+CREATE VIEW D_CMDB_MG_MU_COL_LIST_CONTRAST_JNL AS 
+SELECT 
+    TAB_A.*                 , 
+    CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_TITLE_PULLDOWN,
+    TAB_B.SHEET_TYPE                     ,
+    TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+    TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02  ,
+    TAB_D.ACCESS_AUTH AS ACCESS_AUTH_03
+FROM B_CMDB_MENU_COLUMN_JNL TAB_A
+    LEFT JOIN B_CMDB_MENU_LIST           TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+    LEFT JOIN A_MENU_LIST                TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+    LEFT JOIN A_MENU_GROUP_LIST          TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+   TAB_A.COL_CLASS   <>  'PasswordColumn' AND 
+   TAB_A.DISUSE_FLAG = '0' AND
+   TAB_B.DISUSE_FLAG = '0' AND
+   TAB_C.DISUSE_FLAG = '0' AND
+   TAB_D.DISUSE_FLAG = '0';
+
+-- -------------------------------------------------------
+-- 比較定義メニュー参照情報「メニューグループ:メニュー」(プルダウン用)
+-- -------------------------------------------------------
+CREATE VIEW D_CMDB_MENU_LIST_CONTRAST AS
+SELECT
+ *
+FROM D_CMDB_MENU_LIST TAB_A
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
+;
+
+CREATE VIEW D_CMDB_MENU_LIST_CONTRAST_JNL AS
+SELECT
+ *
+FROM D_CMDB_MENU_LIST_JNL TAB_A
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
+;
+
+
+
