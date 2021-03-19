@@ -1684,6 +1684,7 @@
         $VariableColumnAry = array();           // 変数カラムリスト
         $VariableColumnAry['B_ANS_TEMPLATE_FILE']['ANS_TEMPLATE_VARS_NAME']  = 0;
         $VariableColumnAry['B_ANS_CONTENTS_FILE']['CONTENTS_FILE_VARS_NAME'] = 0;
+        $VariableColumnAry['B_ANS_GLOBAL_VARS_MASTER']['VARS_NAME'] = 0;
 
         foreach($ina_table_nameTOsql_list as $table_name=>$sql){
 
