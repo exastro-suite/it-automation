@@ -213,7 +213,9 @@ $ary["ITABASEH-MNU-108300"]         = "DSC Dedicated information";
 $ary["ITABASEH-MNU-108310"]         = "Error retry timeout";
 $ary["ITABASEH-MNU-108320"]         = "If the error persists beyond the specified time (seconds), the status will be in error.";
 $ary["ITABASEH-MNU-109006"]         = "ssh private key file";
-$ary["ITABASEH-MNU-109007"]         = "This is the ssh private key file for key authentication.";
+$ary["ITABASEH-MNU-109007"]         = "This is the ssh private key file for key authentication.
+The uploaded file is encrypted and saved. 
+If you download after registration, the encrypted file will be downloaded.";
 $ary["ITABASEH-MNU-109008"]         = "Passphrase";
 $ary["ITABASEH-MNU-109009"]         = "Enter the passphrase set in the ssh private key file.";
 $ary["ITABASEH-MNU-109010"]         = "Ansible-vault encrypted ssh private key file.";

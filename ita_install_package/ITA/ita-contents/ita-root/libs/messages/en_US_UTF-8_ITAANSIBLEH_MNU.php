@@ -1294,7 +1294,9 @@ $ary["ITAANSIBLEH-MNU-9010001031"]  = "User when connecting to Ansible Tower wit
 $ary["ITAANSIBLEH-MNU-9010001040"]  = "Password";
 $ary["ITAANSIBLEH-MNU-9010001041"]  = "Password for password authentication.";
 $ary["ITAANSIBLEH-MNU-9010001050"]  = "ssh private key file";
-$ary["ITAANSIBLEH-MNU-9010001051"]  = "This is the ssh private key file for key authentication.";
+$ary["ITAANSIBLEH-MNU-9010001051"]  = "This is the ssh private key file for key authentication.
+The uploaded file is encrypted and saved.
+If you download after registration, the encrypted file will be downloaded.";
 $ary["ITAANSIBLEH-MNU-9010001052"]  = "Passphrase";
 $ary["ITAANSIBLEH-MNU-9010001053"]  = "Enter the passphrase set in the ssh private key file.";
 $ary["ITAANSIBLEH-MNU-9010001054"]  = "Ansible-vault encrypted ssh private key file.";
