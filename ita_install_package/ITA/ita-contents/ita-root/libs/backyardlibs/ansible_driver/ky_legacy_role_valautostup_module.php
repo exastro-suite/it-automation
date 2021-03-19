@@ -1457,6 +1457,7 @@ function getCMDBdata($in_tableNameToSqlList,
     $VariableColumnAry = array();           // 変数カラムリスト
     $VariableColumnAry['B_ANS_TEMPLATE_FILE']['ANS_TEMPLATE_VARS_NAME']  = 0;
     $VariableColumnAry['B_ANS_CONTENTS_FILE']['CONTENTS_FILE_VARS_NAME'] = 0;
+    $VariableColumnAry['B_ANS_GLOBAL_VARS_MASTER']['VARS_NAME'] = 0;
 
     // オペ+作業+ホスト+変数の組合せの代入順序 重複確認用
     $lv_varsAssChkList = array();
