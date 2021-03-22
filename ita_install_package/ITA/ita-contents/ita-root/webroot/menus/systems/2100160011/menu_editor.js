@@ -2405,9 +2405,11 @@ const loadMenu = function() {
                 newItemListArray.forEach(function(id){
                   let existsFlg = false;
                   menuEditorArray.referenceItemList.forEach(function(data){
-                    if(data['ITEM_ID'] == id){
-                      newItemNameListArray.push(data['ITEM_NAME']);
-                      existsFlg = true;
+                    if(itemData['OTHER_MENU_LINK_ID'] == data['LINK_ID']){
+                      if(data['ITEM_ID'] == id){
+                        newItemNameListArray.push(data['ITEM_NAME']);
+                        existsFlg = true;
+                      }
                     }
                   });
                   //referenceItemListに存在しない参照項目はID変換失敗(ID)を表示させる。
