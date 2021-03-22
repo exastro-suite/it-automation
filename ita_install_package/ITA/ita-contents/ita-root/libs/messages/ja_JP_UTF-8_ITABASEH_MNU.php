@@ -43,7 +43,19 @@ $ary["ITABASEH-MNU-102075"]         = "認証方式の入力値が不正です�
 $ary["ITABASEH-MNU-102080"]         = "[最大長]30バイト";
 $ary["ITABASEH-MNU-102085"]         = "Legacy/Role利用情報";
 $ary["ITABASEH-MNU-102088"]         = "認証方式";
-$ary["ITABASEH-MNU-102089"]         = "パスワード方式の場合、ログインパスワードの管理は、●である必要があります。\n鍵方式の場合、ログインユーザでのsudo権限を/etc/sudoersに設定しておく必要があります。";
+$ary["ITABASEH-MNU-102089"]         = "Ansibleから機器へ接続する際の認証方式を選択します。
+・パスワード認証
+　ログインパスワードの管理で●の選択と、ログインパスワードの入力が必須です。
+・鍵認証（パスフレーズなし）
+　ssh秘密鍵ファイルのアップロードが必須です。
+・鍵認証（パスフレーズあり）
+　ssh秘密鍵ファイルのアップロードと、パスフレーズの入力が必須です。
+・鍵認証（鍵交換済み）
+　ssh秘密鍵ファイルのアップロードは必要ありません。
+・パスワード認証（winrm)
+　必要に応じてWinRM接続情報を入力します。
+尚、パスワード認証（winrm)以外の認証方式の場合、機器側に以下の設定が必要です。
+ログインユーザの sudo 権限を NOPASSWD付で /etc/sudoers に設定する必要があります。";
 $ary["ITABASEH-MNU-102090"]         = "OS種別";
 $ary["ITABASEH-MNU-102110"]         = "EtherWakeOnLan";
 $ary["ITABASEH-MNU-102120"]         = "電源ON";
@@ -204,7 +216,9 @@ $ary["ITABASEH-MNU-108300"]         = "DSC利用情報";
 $ary["ITABASEH-MNU-108310"]         = "エラーリトライタイムアウト";
 $ary["ITABASEH-MNU-108320"]         = "Movementが指定時間（秒）を超えてエラーが継続した場合にステータスを異常とします。";
 $ary["ITABASEH-MNU-109006"]         = "ssh秘密鍵ファイル";
-$ary["ITABASEH-MNU-109007"]         = "鍵認証する場合のssh秘密鍵ファイルを入力します。";
+$ary["ITABASEH-MNU-109007"]         = "鍵認証する場合のssh秘密鍵ファイルを入力します。
+アップロードしたファイルは暗号化されて保存されます。
+登録後にダウンロードした場合、暗号化されたファイルがダウンロードされます。";
 $ary["ITABASEH-MNU-109008"]         = "パスフレーズ";
 $ary["ITABASEH-MNU-109009"]         = "ssh秘密鍵ファイルに設定されているパスフレーズを入力します。";
 $ary["ITABASEH-MNU-109010"]         = "ansible-vaultで暗号化されたssh秘密鍵ファイル";
@@ -574,6 +588,51 @@ $ary["ITABASEH-MNU-309046"]         = "垂直方向等間隔に分布";
 $ary["ITABASEH-MNU-309047"]         = "水平方向等間隔に分布";
 $ary["ITABASEH-MNU-309048"]         = "Conductor名称を入力します。[最大長]256バイト";
 $ary["ITABASEH-MNU-309049"]         = "説明を入力します。[最大長]8192バイト";
+$ary["ITABASEH-MNU-310000"]         = "比較定義を閲覧できます。こちらで定義した情報を元に比較実行を行います。<br>以下が比較対象メニューとして利用できます。<br>・パラメータシート（ホスト/オペレーションあり）<br>・パラメータシート（ファイルアップロードあり）";
+$ary["ITABASEH-MNU-310001"]         = "比較定義";
+$ary["ITABASEH-MNU-310002"]         = "比較定義名";
+$ary["ITABASEH-MNU-310003"]         = "[最大長]256バイト";
+$ary["ITABASEH-MNU-310004"]         = "比較対象メニュー1";
+$ary["ITABASEH-MNU-310005"]         = "比較対象メニュー2";
+$ary["ITABASEH-MNU-310006"]         = "[元データ]紐付対象メニュー";
+$ary["ITABASEH-MNU-310007"]         = "全件一致";
+$ary["ITABASEH-MNU-310008"]         = "比較対象メニューの項目名が完全一致する場合、●を選択。
+一致しない場合、比較定義詳細の設定が必要となります。";
+$ary["ITABASEH-MNU-310100"]         = "比較定義詳細を閲覧できます。<br>比較対象項目(表示項目名、比較対象項目の紐付)の設定を行います。";
+$ary["ITABASEH-MNU-310101"]         = "比較定義詳細";
+$ary["ITABASEH-MNU-310102"]         = "比較定義名";
+$ary["ITABASEH-MNU-310103"]         = "[元データ]比較定義";
+$ary["ITABASEH-MNU-310104"]         = "表示項目名";
+$ary["ITABASEH-MNU-310105"]         = "[最大長]256バイト";
+$ary["ITABASEH-MNU-310106"]         = "対象カラム1";
+$ary["ITABASEH-MNU-310107"]         = "対象カラム2";
+$ary["ITABASEH-MNU-310108"]         = "[元データ]紐付対象メニューカラム管理";
+$ary["ITABASEH-MNU-310109"]         = "メニューを選択して下さい";
+$ary["ITABASEH-MNU-310110"]         = "表示順";
+$ary["ITABASEH-MNU-310111"]         = "比較実行時の表示順";
+$ary["ITABASEH-MNU-310200"]         = "比較定義で設定した情報を元に、パラメータシートの比較を実行します。<br>比較実行のパラメータは以下です。※基準日を指定しない場合、一番最新の基準日のデータとなります。<br>・比較定義<br>・基準日1(比較対象メニュー1の基準日を指定)<br>・基準日2(比較対象メニュー1の基準日を指定)<br>・対象ホスト";
+$ary["ITABASEH-MNU-310201"]         = "比較実行";
+$ary["ITABASEH-MNU-310202"]         = "比較定義：";
+$ary["ITABASEH-MNU-310203"]         = "基準日1：";
+$ary["ITABASEH-MNU-310204"]         = "基準日2：";
+$ary["ITABASEH-MNU-310205"]         = "対象ホスト：";
+$ary["ITABASEH-MNU-310206"]         = "選択";
+$ary["ITABASEH-MNU-310207"]         = "比較";
+$ary["ITABASEH-MNU-310208"]         = "比較結果";
+$ary["ITABASEH-MNU-310209"]         = "※ここに、パラメータシートの比較実行結果が出力されます。";
+$ary["ITABASEH-MNU-310210"]         = "比較項番";
+$ary["ITABASEH-MNU-310211"]         = "結果";
+$ary["ITABASEH-MNU-310212"]         = "ホスト名";
+$ary["ITABASEH-MNU-310213"]         = "メニュー名称";
+$ary["ITABASEH-MNU-310214"]         = "No";
+$ary["ITABASEH-MNU-310215"]         = "オペレーション名";
+$ary["ITABASEH-MNU-310216"]         = "基準日";
+$ary["ITABASEH-MNU-310217"]         = "差分あり";
+$ary["ITABASEH-MNU-310218"]         = "ID変換失敗({})";
+$ary["ITABASEH-MNU-310219"]         = "Excel出力";
+$ary["ITABASEH-MNU-310220"]         = "CSV出力";
+$ary["ITABASEH-MNU-310221"]         = "指定した条件で比較対象となるデータがありません";
+$ary["ITABASEH-MNU-310222"]         = "メイリオ";
 $ary["ITABASEH-MNU-900001"]         = "エクスポート";
 $ary["ITABASEH-MNU-900002"]         = "アップロード";
 $ary["ITABASEH-MNU-900003"]         = "インポート";

@@ -1040,7 +1040,7 @@ EOD;
         foreach($aryCheckKey as $strFocusCheckKey){
             $strTmpValue = "";
             if( array_key_exists($strFocusCheckKey, $_SERVER ) ){
-                $strTmpValue = $_SERVER[$strFocusCheckKey];
+                $strTmpValue = htmlspecialchars($_SERVER[$strFocusCheckKey], ENT_QUOTES, "UTF-8");
                 $aryExploded = explode(",", $strTmpValue);
                 $strCheckValue = $aryExploded[0];
                 $strCheckValue = str_replace(" ","", $strCheckValue);
@@ -1097,7 +1097,7 @@ EOD;
             $lcStrProtocol = 'https://';  // defaultはhttpsとする
             if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
                 if ($_SERVER['HTTP_X_FORWARDED_PROTO'] === 'http' or $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-                    $lcStrProtocol = $_SERVER['HTTP_X_FORWARDED_PROTO'].'://';
+                    $lcStrProtocol = htmlspecialchars($_SERVER['HTTP_X_FORWARDED_PROTO'], ENT_QUOTES, "UTF-8").'://';
                 }
             }
             // リバースPROXY経由のリクエスト ----
@@ -1117,11 +1117,11 @@ EOD;
         $lcStrHost = '';
         if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
             // ---- リバースPROXY経由のリクエスト
-            $lcStrHost = $_SERVER['HTTP_X_FORWARDED_HOST'];
+            $lcStrHost = htmlspecialchars($_SERVER['HTTP_X_FORWARDED_HOST'], ENT_QUOTES, "UTF-8");
             // リバースPROXY経由のリクエスト ----
         } else {
             // ---- 直接リクエスト
-            $lcStrHost = $_SERVER['HTTP_HOST'];
+            $lcStrHost = htmlspecialchars($_SERVER['HTTP_HOST'], ENT_QUOTES, "UTF-8");
             // 直接リクエスト ----
         }
         return $lcStrHost;

@@ -121,6 +121,20 @@ Ansible(Pioneer)対話素材集
             $strErrMsg = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000108');
             $boolRet = false;
         }
+        // yamlパーサーが正しくパースできるか判定
+        if($boolRet == true) {
+            $obj = new YAMLParse($g['objMTS']);
+            $yaml_parse_array = array();
+            $ret = $obj->yaml_file_parse($strTempFileFullname,$yaml_parse_array);
+            $errmsg = $obj->GetLastError();
+            unset($obj);
+            if($ret === false) {
+                $strErrMsg = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000073",array("Upload file"));
+                $strErrMsg .= "\n" . $errmsg;
+                $boolRet = false;
+            }
+        }
+
         if($boolRet == true) {
             // 共通変数を抜き出す。
             $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);

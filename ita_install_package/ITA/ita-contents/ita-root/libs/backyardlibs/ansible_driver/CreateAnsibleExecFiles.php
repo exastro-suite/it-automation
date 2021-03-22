@@ -3372,16 +3372,17 @@ class CreateAnsibleExecFiles {
                     $dialog_file    = $this->getAnsible_org_dialog_file($hostname,$playbook_pkey,$playbook);
 
                     $parseObj = new YAMLParse($this->lv_objMTS);
-                    $dialog_file_array = $parseObj->Parse($dialog_file);
-                    if($dialog_file_array === false) {
-                        $errmsg = $parseObj->GetLastError();
-                        //$ary[6000073] = "対話ファイルがYAML形式が確認して下さい。(対話ファイル:{})";
-                        $errmsg .= "\n" . $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000073",array($playbook));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg);
-                        unset($parseObj);
+                    $dialog_file_array = array();
+                    $ret = $parseObj->yaml_file_parse($dialog_file,$dialog_file_array);
+                    $errmsg = $parseObj->GetLastError();
+                    unset($parseObj);
+                    if($ret === false) {
+                        $strErrMsg = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000073",array($playbook));
+                        $strErrMsg .= "\n" . $errmsg;
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$strErrMsg);
                         return false;
                     }
-                    unset($parseObj);
+
                     // ホスト変数ファイルのパス取得
                     $host_vars_file = $this->getAnsible_host_var_file($hostname);
 

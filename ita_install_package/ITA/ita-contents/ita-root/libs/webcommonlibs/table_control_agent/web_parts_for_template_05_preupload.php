@@ -17,7 +17,7 @@
     global $g;
     $tmpAry=explode('ita-root', dirname(__FILE__));$g['root_dir_path']=$tmpAry[0].'ita-root';unset($tmpAry);
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
     
     

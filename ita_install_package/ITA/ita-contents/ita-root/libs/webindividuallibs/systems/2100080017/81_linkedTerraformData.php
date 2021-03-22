@@ -29,7 +29,7 @@ class  terraformEnerpriseData {
 
     }
 
-    function getOrganizationData($hostname, $token){
+    function getOrganizationData($hostname, $token, $proxySetting){
         //グローバル変数宣言
         global $g;
 
@@ -38,17 +38,17 @@ class  terraformEnerpriseData {
         $ret['htmlBody'] = "";
 
         //Organization一覧取得APIを実行
-        $apiResponse = get_organizations_list($hostname, $token);
+        $apiResponse = get_organizations_list($hostname, $token, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
         if($statusCode != 200){
             $ret['result'] = false;
-            //Terraform Enterpriseからデータを取得できませんでした。インターフェース情報を確認して下さい。
+            //Terraformからデータを取得できませんでした。インターフェース情報を確認して下さい。
             $ret['htmlBody'] = '<p style="margin-top:20px;">'.$g['objMTS']->getSomeMessage('ITATERRAFORM-ERR-181020').'</p>';
             return $ret;
         }
         $organizationListData = $apiResponse['ResponsContents']['data'];
 
-        //TerraformEnterprise側のOrganization登録が0件の場合
+        //Terraform側のOrganization登録が0件の場合
         if(empty($organizationListData)){
             $ret['result'] = false;
             //Organizationの登録がありません。
@@ -160,7 +160,7 @@ EOD;
     }
 
 
-    function getWorkspaceData($hostname, $token){
+    function getWorkspaceData($hostname, $token, $proxySetting){
         //グローバル変数宣言
         global $g;
 
@@ -169,17 +169,17 @@ EOD;
         $ret['htmlBody'] = "";
 
         //Organization一覧取得APIを実行
-        $apiResponse = get_organizations_list($hostname, $token);
+        $apiResponse = get_organizations_list($hostname, $token, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
         if($statusCode != 200){
             $ret['result'] = false;
-            //Terraform Enterpriseからデータを取得できませんでした。インターフェース情報を確認して下さい。
+            //Terraformからデータを取得できませんでした。インターフェース情報を確認して下さい。
             $ret['htmlBody'] = '<p style="margin-top:20px;">'.$g['objMTS']->getSomeMessage('ITATERRAFORM-ERR-181020').'</p>';
             return $ret;
         }
         $organizationListData = $apiResponse['ResponsContents']['data'];
 
-        //TerraformEnterprise側のOrganization登録が0件の場合
+        //Terraform側のOrganization登録が0件の場合
         if(empty($organizationListData)){
             $ret['result'] = false;
             //Workspaceの登録がありません。
@@ -198,11 +198,11 @@ EOD;
         $workspaceListData = array();
         $workspaceCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_workspaces_list($hostname, $token, $organizationName);
+            $apiResponse = get_workspaces_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
-                //Terraform Enterpriseからデータを取得できませんでした。インターフェース情報を確認して下さい。
+                //Terraformからデータを取得できませんでした。インターフェース情報を確認して下さい。
                 $ret['htmlBody'] = '<p style="margin-top:20px;">'.$g['objMTS']->getSomeMessage('ITATERRAFORM-ERR-181020').'</p>';
                 return $ret;
             }
@@ -213,7 +213,7 @@ EOD;
             }
         }
 
-        //TerraformEnterprise側のWorkspace登録が0件の場合
+        //Terraform側のWorkspace登録が0件の場合
         if($workspaceCount == 0){
             $ret['result'] = false;
             //Workspaceの登録がありません。
@@ -333,7 +333,7 @@ EOD;
 
 
 
-    function getPolicyData($hostname, $token){
+    function getPolicyData($hostname, $token, $proxySetting){
         //グローバル変数宣言
         global $g;
 
@@ -342,17 +342,17 @@ EOD;
         $ret['htmlBody'] = "";
 
         //Organization一覧取得APIを実行
-        $apiResponse = get_organizations_list($hostname, $token);
+        $apiResponse = get_organizations_list($hostname, $token, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
         if($statusCode != 200){
             $ret['result'] = false;
-            //Terraform Enterpriseからデータを取得できませんでした。インターフェース情報を確認して下さい。
+            //Terraformからデータを取得できませんでした。インターフェース情報を確認して下さい。
             $ret['htmlBody'] = '<p style="margin-top:20px;">'.$g['objMTS']->getSomeMessage('ITATERRAFORM-ERR-181020').'</p>';
             return $ret;
         }
         $organizationListData = $apiResponse['ResponsContents']['data'];
 
-        //TerraformEnterprise側のOrganization登録が0件の場合
+        //Terraform側のOrganization登録が0件の場合
         if(empty($organizationListData)){
             $ret['result'] = false;
             //Policyの登録がありません。
@@ -371,11 +371,11 @@ EOD;
         $policyListData = array();
         $policyCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_policy_list($hostname, $token, $organizationName);
+            $apiResponse = get_policy_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
-                //Terraform Enterpriseからデータを取得できませんでした。インターフェース情報を確認して下さい。
+                //Terraformからデータを取得できませんでした。インターフェース情報を確認して下さい。
                 $ret['htmlBody'] = '<p style="margin-top:20px;">'.$g['objMTS']->getSomeMessage('ITATERRAFORM-ERR-181020').'</p>';
                 return $ret;
             }
@@ -386,7 +386,7 @@ EOD;
             }
         }
 
-        //TerraformEnterprise側のPolicy登録が0件の場合
+        //Terraform側のPolicy登録が0件の場合
         if($policyCount == 0){
             $ret['result'] = false;
             //Policyの登録がありません。
@@ -507,7 +507,7 @@ EOD;
         return $HtmlBody;
     }
 
-    function getPolicySetData($hostname, $token){
+    function getPolicySetData($hostname, $token, $proxySetting){
         //グローバル変数宣言
         global $g;
 
@@ -516,17 +516,17 @@ EOD;
         $ret['htmlBody'] = "";
 
         //Organization一覧取得APIを実行
-        $apiResponse = get_organizations_list($hostname, $token);
+        $apiResponse = get_organizations_list($hostname, $token, $proxySetting);
         $statusCode = $apiResponse['StatusCode'];
         if($statusCode != 200){
             $ret['result'] = false;
-            //Terraform Enterpriseからデータを取得できませんでした。インターフェース情報を確認して下さい。
+            //Terraformからデータを取得できませんでした。インターフェース情報を確認して下さい。
             $ret['htmlBody'] = '<p style="margin-top:20px;">'.$g['objMTS']->getSomeMessage('ITATERRAFORM-ERR-181020').'</p>';
             return $ret;
         }
         $organizationListData = $apiResponse['ResponsContents']['data'];
 
-        //TerraformEnterprise側のOrganization登録が0件の場合
+        //Terraform側のOrganization登録が0件の場合
         if(empty($organizationListData)){
             $ret['result'] = true;
             //PolicySetの登録がありません。
@@ -545,11 +545,11 @@ EOD;
         $workspaceListData = array();
         $workspaceCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_workspaces_list($hostname, $token, $organizationName);
+            $apiResponse = get_workspaces_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
-                //Terraform Enterpriseからデータを取得できませんでした。インターフェース情報を確認して下さい。
+                //Terraformからデータを取得できませんでした。インターフェース情報を確認して下さい。
                 $ret['htmlBody'] = '<p style="margin-top:20px;">'.$g['objMTS']->getSomeMessage('ITATERRAFORM-ERR-181020').'</p>';
                 return $ret;
             }
@@ -564,11 +564,11 @@ EOD;
         $policyListData = array();
         $policyCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_policy_list($hostname, $token, $organizationName);
+            $apiResponse = get_policy_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
-                //Terraform Enterpriseからデータを取得できませんでした。インターフェース情報を確認して下さい。
+                //Terraformからデータを取得できませんでした。インターフェース情報を確認して下さい。
                 $ret['htmlBody'] = '<p style="margin-top:20px;">'.$g['objMTS']->getSomeMessage('ITATERRAFORM-ERR-181020').'</p>';
                 return $ret;
             }
@@ -584,11 +584,11 @@ EOD;
         $policySetListData = array();
         $policySetCount = 0;
         foreach($organizationList as $organizationName){
-            $apiResponse = get_policy_sets_list($hostname, $token, $organizationName);
+            $apiResponse = get_policy_sets_list($hostname, $token, $organizationName, $proxySetting);
             $statusCode = $apiResponse['StatusCode'];
             if($statusCode != 200){
                 $ret['result'] = false;
-            //Terraform Enterpriseからデータを取得できませんでした。インターフェース情報を確認して下さい。
+            //Terraformからデータを取得できませんでした。インターフェース情報を確認して下さい。
             $ret['htmlBody'] = '<p style="margin-top:20px;">'.$g['objMTS']->getSomeMessage('ITATERRAFORM-ERR-181020').'</p>';
                 return $ret;
             }
@@ -599,7 +599,7 @@ EOD;
             }
         }
 
-        //TerraformEnterprise側のPolicySet登録が0件の場合
+        //Terraform側のPolicySet登録が0件の場合
         if($policySetCount == 0){
             $ret['result'] = false;
             //PolicySetの登録がありません。

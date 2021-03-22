@@ -22,7 +22,7 @@
 
     $tmpAry=explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
     $privilege = "";
 
@@ -42,7 +42,7 @@
        //アクセス権を判定
         if( array_key_exists( "conductor_class_id", $_GET ) === true ){
             // クエリからsymphony_instance_idを取得
-            $conductor_class_id = $_GET["conductor_class_id"];
+            $conductor_class_id = htmlspecialchars($_GET["conductor_class_id"], ENT_QUOTES, "UTF-8");
 
             // 整数の場合のみ判定
             $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));

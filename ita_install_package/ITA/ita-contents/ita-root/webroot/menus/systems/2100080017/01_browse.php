@@ -14,7 +14,7 @@
 //   limitations under the License.
 //
 /**
- * Terraform Enterprise登録管理
+ * 連携先Terraform管理
  *
  */
 $tmpAry = explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);

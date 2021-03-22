@@ -52,10 +52,6 @@ class parentDirValidator extends IDValidator {
         }
 
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
-
 
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
@@ -79,6 +75,10 @@ class parentDirValidator extends IDValidator {
             }
 
             if($boolCheckContinue===true){
+
+                //----更新前のレコード内容（登録時は空配列）
+                $editTgtRow = $arrayVariant['edit_target_row'];
+                //更新前のレコード内容（登録時は空配列）----
 
                 // 更新時、自分のディレクトリを選択していないかどうか確認
                 $strCheckTgtDeleteTrigId  = array_key_exists('PARENT_DIR_ID',$arrayRegData)?$arrayRegData['PARENT_DIR_ID']:null;
@@ -189,9 +189,6 @@ class dirValidator extends SingleTextValidator {
         }
 
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
 
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
@@ -215,6 +212,10 @@ class dirValidator extends SingleTextValidator {
             }
 
             if($boolCheckContinue===true){
+
+                //----更新前のレコード内容（登録時は空配列）
+                $editTgtRow = $arrayVariant['edit_target_row'];
+                //更新前のレコード内容（登録時は空配列）----
 
                 // ディレクトリの先頭が"/"であるかチェック
                 if("/" === substr($value, 0, 1)){
@@ -393,9 +394,6 @@ class fileValidator extends SingleTextValidator {
             }
         }
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
 
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
@@ -419,6 +417,9 @@ class fileValidator extends SingleTextValidator {
             }
 
             if($boolCheckContinue===true){
+                //----更新前のレコード内容（登録時は空配列）
+                $editTgtRow = $arrayVariant['edit_target_row'];
+                //更新前のレコード内容（登録時は空配列）----
 
                 // 禁止文字チェック
                 if( preg_match('/[!"#$%&\'|`;:\*<>?\/\\\\]+/', $arrayRegData['FILE_NAME']) === 1 || $value === "." || $value === ".."){
@@ -546,10 +547,6 @@ class LinkNameValidator extends SingleTextValidator {
             }
         }
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
-
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時
@@ -632,10 +629,6 @@ class LinkageCheckValidator extends IDValidator {
         }
 
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
-
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時
@@ -733,10 +726,6 @@ class AnsibleDialogCheckValidator extends IDValidator {
         }
 
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
-
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時
@@ -845,10 +834,6 @@ class OsTypeNameValidator extends IDValidator {
         }
 
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
-
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時
@@ -1044,10 +1029,6 @@ class LinkageCheckValidator2 extends IDValidator {
         }
 
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
-
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時
@@ -1135,10 +1116,6 @@ class LinkageCheckValidator3 extends IDValidator {
         }
 
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
-
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時
@@ -1220,10 +1197,6 @@ class RemortRepoUrlValidator extends SingleTextValidator {
             }
         }
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
-
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時
@@ -1288,10 +1261,6 @@ class CloneRepoDirValidator extends SingleTextValidator {
             }
         }
         if( $strModeId != "" ){
-            //----更新前のレコード内容（登録時は空配列）
-            $editTgtRow = $arrayVariant['edit_target_row'];
-            //更新前のレコード内容（登録時は空配列）----
-
             $boolCheckContinue = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時

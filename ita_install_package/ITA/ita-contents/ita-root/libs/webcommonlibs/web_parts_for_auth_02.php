@@ -54,14 +54,16 @@
             if($auth->checkAuth()){
                 // ----ログイン中の場合
                 $auth->logout();
+                $scriptName = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
                 $tmpStrArticleBody .= "<p>{$objMTS->getSomeMessage("ITAWDCH-STD-1102")}</p>\n";
-                $tmpStrArticleBody .= "<p><a href=\"{$_SERVER['PHP_SELF']}?login&grp={$ASJTM_grp_id}&no={$ASJTM_id}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1103")}</a></p>\n";
+                $tmpStrArticleBody .= "<p><a href=\"{$scriptName}?login&grp={$ASJTM_grp_id}&no={$ASJTM_id}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1103")}</a></p>\n";
                 // ログイン中の場合----
             }
             else{
                 // ----ログインしていないユーザからの、ログアウト-リクエスト
+                $scriptName = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
                 $tmpStrArticleBody .= "<p>{$objMTS->getSomeMessage("ITAWDCH-STD-1104")}</p>\n";
-                $tmpStrArticleBody .= "<p><a href=\"{$_SERVER['PHP_SELF']}?login&grp={$ASJTM_grp_id}&no={$ASJTM_id}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1001")}</a></p>\n";
+                $tmpStrArticleBody .= "<p><a href=\"{$scriptName}?login&grp={$ASJTM_grp_id}&no={$ASJTM_id}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1001")}</a></p>\n";
                 // ログインしていないユーザからの、ログアウト-リクエスト----
             }
             //ログアウト----
@@ -72,9 +74,10 @@
     // ログアウト処理を行うフラグが、リクエストのPOSTクエリーに含まれているかをチェックする。■----
     else if(!isset($_GET['login'])){
         //----ログインのオーダもない
+        $scriptName = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
         $tmpStrTitleId = "gateLogin";
         $tmpStrTitleText = $objMTS->getSomeMessage("ITAWDCH-STD-1001");
-        $tmpStrArticleBody .= "<p><a href=\"{$_SERVER['PHP_SELF']}?login&no={$ASJTM_id}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1001")}</a></p>\n";
+        $tmpStrArticleBody .= "<p><a href=\"{$scriptName}?login&no={$ASJTM_id}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1001")}</a></p>\n";
         //ログインのオーダもない----
     }
     else{
@@ -89,7 +92,7 @@
     if($auth->checkAuth()){
         // ----ログイン中の場合
 
-        if( $_SERVER["PHP_SELF"] == $ASJTM_representative_file_name ){
+        if( $_SERVER["SCRIPT_NAME"] == $ASJTM_representative_file_name ){
             //----common_auth自身だった場合
             
             // アクセスログ出力(想定外エラー)

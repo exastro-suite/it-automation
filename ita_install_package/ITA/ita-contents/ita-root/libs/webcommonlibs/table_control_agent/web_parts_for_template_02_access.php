@@ -18,7 +18,7 @@
     // ルートディレクトリを取得
     $tmpAry=explode('ita-root', dirname(__FILE__));$g['root_dir_path']=$tmpAry[0].'ita-root';unset($tmpAry);
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
     if(isset($_SERVER["HTTP_REFERER"])){
         $g['requestByHA'] = 'forHADAC'; //[H]tml-[A]AX.[D]b_[A]ccess_[C]ore

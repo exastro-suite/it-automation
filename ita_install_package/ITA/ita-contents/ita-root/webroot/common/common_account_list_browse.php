@@ -60,7 +60,7 @@
     unset($tmpBoolShowSetting);
     
     if( isset($_GET['no']) ){
-        $req_menu_id = $_GET['no'];
+        $req_menu_id = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
     
     $ASJTM_grp_id = "";
@@ -78,7 +78,7 @@
 
         if( isset($_GET['grp']) ){
             $ASJTM_id = "";
-            $ASJTM_grp_id = sprintf("%010d", $_GET['grp']);
+            $ASJTM_grp_id = sprintf("%010d", htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8"));
         }
         else{
             // アクセスログ出力(想定外エラー)

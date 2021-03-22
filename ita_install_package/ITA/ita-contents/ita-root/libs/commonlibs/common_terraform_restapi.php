@@ -23,7 +23,8 @@
                                         $token,
                                         $requestURI,
                                         $method,
-                                        $requestContents 
+                                        $requestContents,
+                                        $proxySetting
                                     ){
         ///////////////////////////
         // 返却用のArrayを定義      //
@@ -81,13 +82,27 @@
             ////////////////////////////////
             if($requestContents == null){
                 $HttpContext = array( "http" => array( "method"        => $method,
+                                                       "timeout"       => 30,
                                                        "header"        => implode("\r\n", $Header),
                                                        "ignore_errors" => true));
             }else{
                 $HttpContext = array( "http" => array( "method"        => $method,
+                                                       "timeout"       => 30,
                                                        "header"        => implode("\r\n", $Header),
                                                        "content"       => json_encode($requestContents, JSON_UNESCAPED_UNICODE),
                                                        "ignore_errors" => true));
+            }
+
+            ////////////////////////////////
+            // Proxy設定                  //
+            ////////////////////////////////
+            if($proxySetting['address'] != ""){
+                $address = $proxySetting['address'];
+                if($proxySetting['port'] != ""){
+                    $address = $address . ":" . $proxySetting['port'];
+                }
+                $HttpContext['http']['proxy'] = $address;
+                $HttpContext['http']['request_fulluri'] = true;
             }
 
             //=====================================================
@@ -159,7 +174,7 @@
     ///////////////////////////////
     // Organizationsの一覧を取得する//
     ///////////////////////////////
-    function get_organizations_list($hostname, $token){
+    function get_organizations_list($hostname, $token, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations";
         //method
@@ -171,7 +186,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -180,7 +196,7 @@
     /////////////////////////
     // Organizationを作成する//
     /////////////////////////
-    function create_organization($hostname, $token, $organizationName, $emailAddress){
+    function create_organization($hostname, $token, $organizationName, $emailAddress, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations";
         //method
@@ -203,7 +219,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -212,7 +229,7 @@
     /////////////////////////
     // Organizationを更新する//
     /////////////////////////
-    function update_organization($hostname, $token, $organizationName, $emailAddress){
+    function update_organization($hostname, $token, $organizationName, $emailAddress, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName;
         //method
@@ -234,7 +251,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -243,7 +261,7 @@
     /////////////////////////
     // Organizationを削除する//
     /////////////////////////
-    function delete_organization($hostname, $token, $organizationName){
+    function delete_organization($hostname, $token, $organizationName, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName;
         //method
@@ -255,7 +273,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -264,7 +283,7 @@
     /////////////////////////////
     // Workspacesの一覧を取得する//
     /////////////////////////////
-    function get_workspaces_list($hostname, $token, $organizationName){
+    function get_workspaces_list($hostname, $token, $organizationName, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName . "/workspaces";
         //method
@@ -276,7 +295,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -286,7 +306,7 @@
     //////////////////////
     // Workspaceを作成する//
     //////////////////////
-    function create_workspace($hostname, $token, $organizationName, $workspaceName, $option){
+    function create_workspace($hostname, $token, $organizationName, $workspaceName, $option, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName . "/workspaces";
         //method
@@ -318,7 +338,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -328,7 +349,7 @@
     /////////////////////////
     // Workspaceを更新する//
     /////////////////////////
-    function update_workspace($hostname, $token, $organizationName, $workspaceName, $option){
+    function update_workspace($hostname, $token, $organizationName, $workspaceName, $option, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName . "/workspaces/" . $workspaceName;
         //method
@@ -360,7 +381,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -371,7 +393,7 @@
     //////////////////////
     // Workspaceを削除する//
     //////////////////////
-    function delete_workspace($hostname, $token, $organizationName, $workspaceName){
+    function delete_workspace($hostname, $token, $organizationName, $workspaceName, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName . "/workspaces/" . $workspaceName;
         //method
@@ -383,7 +405,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -393,7 +416,7 @@
     ////////////////////////////////////////
     // Workspaceのstateバージョンの一覧を取得する//
     ///////////////////////////////////////
-    function get_workspace_state_version($hostname, $token, $organizationName, $workspaceName, $page = 10){
+    function get_workspace_state_version($hostname, $token, $organizationName, $workspaceName, $page = 10, $proxySetting){
         //requestURI
         $requestURI = "api/v2/state-versions?filter%5Bworkspace%5D%5Bname%5D=" . $workspaceName . "&filter%5Borganization%5D%5Bname%5D=" . $organizationName . "&page%5Bsize%5D=" . $page;
 
@@ -406,7 +429,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -415,7 +439,7 @@
     ////////////////////////////////////////
     // Workspaceの現在のstateバージョンを取得する//
     ///////////////////////////////////////
-    function get_workspace_current_state_version($hostname, $token, $workspaceID){
+    function get_workspace_current_state_version($hostname, $token, $workspaceID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/workspaces/" . $workspaceID . "/current-state-version";
         //method
@@ -427,7 +451,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -437,7 +462,7 @@
     ////////////////////////////
     // Workspace変数の一覧を取得する//
     ////////////////////////////
-    function get_workspace_var_list($hostname, $token, $workspaceID){
+    function get_workspace_var_list($hostname, $token, $workspaceID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/workspaces/" . $workspaceID . "/vars";
         //method
@@ -449,7 +474,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -458,7 +484,7 @@
     ////////////////////////////
     // Workspace変数を作成する//
     ////////////////////////////
-    function create_workspace_var($hostname, $token, $workspaceID, $workspaceVarKey, $workspaceVarValue, $hclFlag = false, $sensitiveFlag = false, $category = "terraform"){
+    function create_workspace_var($hostname, $token, $workspaceID, $workspaceVarKey, $workspaceVarValue, $hclFlag = false, $sensitiveFlag = false, $category = "terraform", $proxySetting){
         //requestURI
         $requestURI = "api/v2/workspaces/" . $workspaceID . "/vars";
         //method
@@ -489,7 +515,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -498,7 +525,7 @@
     ////////////////////////////
     // Workspace変数を削除する//
     ////////////////////////////
-    function delete_workspace_var($hostname, $token, $workspaceID, $variableID){
+    function delete_workspace_var($hostname, $token, $workspaceID, $variableID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/workspaces/" . $workspaceID . "/vars/" . $variableID;
         //method
@@ -510,7 +537,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -520,7 +548,7 @@
     /////////////////////////////////////////////////////
     // Terraformコード（モジュール）をアップロードするためのURLを取得//
     ////////////////////////////////////////////////////
-    function get_upload_url($hostname, $token, $workspaceID){
+    function get_upload_url($hostname, $token, $workspaceID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/workspaces/" . $workspaceID . "/configuration-versions";
         //method
@@ -544,7 +572,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -554,7 +583,7 @@
     ////////////////////////////////////////
     // Terraformコード（モジュール）をアップロードする//
     ////////////////////////////////////////
-    function module_upload($token, $uploadURL, $uploadFile){
+    function module_upload($token, $uploadURL, $uploadFile, $proxySetting){
         $method = "PUT";
         $Header = array( "Authorization: Bearer ". $token,
                          "Content-Type: application/vnd.api+json");
@@ -568,6 +597,14 @@
         curl_setopt($curl, CURLOPT_HTTPHEADER, $Header);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+        //プロキシ設定
+        if($proxySetting['address'] != ""){
+            curl_setopt($curl, CURLOPT_HTTPPROXYTUNNEL, TRUE);
+            curl_setopt($curl, CURLOPT_PROXY, $proxySetting['address']);
+            if($proxySetting['port'] != ""){
+                curl_setopt($curl, CURLOPT_PROXYPORT, $proxySetting['port']);
+            }
+        }
 
         //アップロードファイルをセット
         $data = file_get_contents($uploadFile);
@@ -583,7 +620,7 @@
     ////////////////
     // Runを作成する//
     ////////////////
-    function create_run($hostname, $token, $workspaceID, $cv_id){
+    function create_run($hostname, $token, $workspaceID, $cv_id, $proxySetting){
         //requestURI
         $requestURI = "api/v2/runs";
 
@@ -621,7 +658,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -630,7 +668,7 @@
     ////////////////////
     // Runの詳細を取得する//
     ////////////////////
-    function get_run_data($hostname, $token, $runID){
+    function get_run_data($hostname, $token, $runID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/runs/" . $runID;
         //method
@@ -642,7 +680,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -651,7 +690,7 @@
     ///////////////////////////////////////
     // Runに付随するpolicy-checkの一覧を取得する//
     ///////////////////////////////////////
-    function get_run_policy_check_data($hostname, $token, $runID){
+    function get_run_policy_check_data($hostname, $token, $runID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/runs/" . $runID . "/policy-checks";
         //method
@@ -663,7 +702,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -672,7 +712,7 @@
     ////////////////////
     // RUNをキャンセルする//
     ////////////////////
-    function cancel_run($hostname, $token, $runID){
+    function cancel_run($hostname, $token, $runID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/runs/" . $runID . "/actions/cancel";
 
@@ -685,7 +725,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -694,7 +735,7 @@
     ////////////////////
     // Planの詳細を取得する//
     ////////////////////
-    function get_plan_data($hostname, $token, $planID){
+    function get_plan_data($hostname, $token, $planID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/plans/" . $planID;
         //method
@@ -706,7 +747,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -715,7 +757,7 @@
     ////////////////////
     // Applyの詳細を取得する//
     ////////////////////
-    function get_apply_data($hostname, $token, $applyID){
+    function get_apply_data($hostname, $token, $applyID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/applies/" . $applyID;
         //method
@@ -727,7 +769,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -736,7 +779,7 @@
     //////////////////////////
     // RUNを適用する(Applyを実行)//
     //////////////////////////
-    function apply_execution($hostname, $token, $runID){
+    function apply_execution($hostname, $token, $runID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/runs/" . $runID . "/actions/apply";
         //method
@@ -748,7 +791,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -757,7 +801,7 @@
     //////////////////////////
     // RUNを破棄する(Applyを中止)//
     //////////////////////////
-    function apply_discard($hostname, $token, $runID){
+    function apply_discard($hostname, $token, $runID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/runs/" . $runID . "/actions/discard";
         //method
@@ -769,7 +813,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -778,7 +823,7 @@
     ///////////////////////////////
     // Policy Setsの一覧を取得する//
     ///////////////////////////////
-    function get_policy_sets_list($hostname, $token, $organizationName){
+    function get_policy_sets_list($hostname, $token, $organizationName, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName . "/policy-sets";
         //method
@@ -790,7 +835,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -799,7 +845,7 @@
     ///////////////////////////////
     // Policy Setsを作成する//
     ///////////////////////////////
-    function create_policy_set($hostname, $token, $organizationName, $policySetName, $policySetNote){
+    function create_policy_set($hostname, $token, $organizationName, $policySetName, $policySetNote, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName . "/policy-sets";
         //method
@@ -824,7 +870,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -834,7 +881,7 @@
     /////////////////////////
     // Policy Setsを更新する//
     /////////////////////////
-    function update_policy_set($hostname, $token, $policySetID, $policySetName, $policySetNote){
+    function update_policy_set($hostname, $token, $policySetID, $policySetName, $policySetNote, $proxySetting){
         //requestURI
         $requestURI = "api/v2/policy-sets/" . $policySetID;
         //method
@@ -859,7 +906,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -868,7 +916,7 @@
     //////////////////////////////
     // Policy SetsにWorkspaceを追加する//
     //////////////////////////////
-    function relationships_workspace($hostname, $token, $policySetID, $workspaceData){
+    function relationships_workspace($hostname, $token, $policySetID, $workspaceData, $proxySetting){
         //requestURI
         $requestURI = "api/v2/policy-sets/" . $policySetID . "/relationships/workspaces";
         //method
@@ -897,7 +945,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -906,7 +955,7 @@
     //////////////////////////////
     // Policy SetsからWorkspaceを切り離す//
     //////////////////////////////
-    function delete_relationships_workspace($hostname, $token, $policySetID, $workspaceData){
+    function delete_relationships_workspace($hostname, $token, $policySetID, $workspaceData, $proxySetting){
         //requestURI
         $requestURI = "api/v2/policy-sets/" . $policySetID . "/relationships/workspaces";
         //method
@@ -935,7 +984,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -944,7 +994,7 @@
     //////////////////////////////
     // Policy SetsにPolicyを追加する//
     //////////////////////////////
-    function relationships_policy($hostname, $token, $policySetID, $policyData){
+    function relationships_policy($hostname, $token, $policySetID, $policyData, $proxySetting){
         //requestURI
         $requestURI = "api/v2/policy-sets/" . $policySetID . "/relationships/policies";
         //method
@@ -973,7 +1023,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -982,7 +1033,7 @@
     //////////////////////////////
     // Policy SetsからPolicyを削除する//
     //////////////////////////////
-    function delete_relationships_policy($hostname, $token, $policySetID, $policyData){
+    function delete_relationships_policy($hostname, $token, $policySetID, $policyData, $proxySetting){
         //requestURI
         $requestURI = "api/v2/policy-sets/" . $policySetID . "/relationships/policies";
         //method
@@ -1011,7 +1062,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -1021,7 +1073,7 @@
     ///////////////////////////////
     // Policyの一覧を取得する//
     ///////////////////////////////
-    function get_policy_list($hostname, $token, $organizationName){
+    function get_policy_list($hostname, $token, $organizationName, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName . "/policies";
         //method
@@ -1033,7 +1085,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -1042,7 +1095,7 @@
     ///////////////////////////////
     // Policysを作成する//
     ///////////////////////////////
-    function create_policy($hostname, $token, $organizationName, $policyName, $policyFileName, $policyNote){
+    function create_policy($hostname, $token, $organizationName, $policyName, $policyFileName, $policyNote, $proxySetting){
         //requestURI
         $requestURI = "api/v2/organizations/" . $organizationName . "/policies";
         //method
@@ -1071,7 +1124,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -1081,7 +1135,7 @@
     ///////////////////////////////
     // Policysを更新する//
     ///////////////////////////////
-    function update_policy($hostname, $token, $policyID, $policyName, $policyFileName, $policyNote){
+    function update_policy($hostname, $token, $policyID, $policyName, $policyFileName, $policyNote, $proxySetting){
         //requestURI
         $requestURI = "api/v2/policies/" . $policyID;
 
@@ -1111,7 +1165,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            $requestContents //requestContents
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -1121,7 +1176,7 @@
     ///////////////////////////////
     // Policyを削除する//
     ///////////////////////////////
-    function delete_policy($hostname, $token, $policyID){
+    function delete_policy($hostname, $token, $policyID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/policies/" . $policyID;
 
@@ -1134,7 +1189,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -1144,7 +1200,7 @@
     ///////////////////////////////
     // PolicySetを削除する//
     ///////////////////////////////
-    function delete_policy_set($hostname, $token, $policySetID){
+    function delete_policy_set($hostname, $token, $policySetID, $proxySetting){
         //requestURI
         $requestURI = "api/v2/policy-sets/" . $policySetID;
 
@@ -1157,7 +1213,8 @@
             $token, //token
             $requestURI, //requestURI
             $method, //method
-            null //requestContents
+            null, //requestContents
+            $proxySetting //proxySetting
         );
 
         return $restApiResponse;
@@ -1167,7 +1224,7 @@
     ///////////////////////////////
     // Policy素材をアップロードする//
     ///////////////////////////////
-    function policy_file_upload($hostname, $token, $policyID, $targetPolicyMatterPath){
+    function policy_file_upload($hostname, $token, $policyID, $targetPolicyMatterPath, $proxySetting){
         //返却用array
          $respons_array = array();
 
@@ -1189,6 +1246,14 @@
         curl_setopt($curl, CURLOPT_HTTPHEADER, $Header);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+        //プロキシ設定
+        if($proxySetting['address'] != ""){
+            curl_setopt($curl, CURLOPT_HTTPPROXYTUNNEL, TRUE);
+            curl_setopt($curl, CURLOPT_PROXY, $proxySetting['address']);
+            if($proxySetting['port'] != ""){
+                curl_setopt($curl, CURLOPT_PROXYPORT, $proxySetting['port']);
+            }
+        }
 
         //アップロードファイルをセット
         $data = file_get_contents($targetPolicyMatterPath);
