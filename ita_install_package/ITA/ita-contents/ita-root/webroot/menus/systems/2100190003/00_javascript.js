@@ -156,6 +156,12 @@ window.onload = function(){
     }
     //initProcess('instanceConstructWithDR');
     show('SetsumeiMidashi','SetsumeiNakami');
+    
+    $('[name="CONTRAST_ID"]').select2({
+        dropdownAutoWidth: true,
+        width: '300'
+    })
+
 }
 
 
