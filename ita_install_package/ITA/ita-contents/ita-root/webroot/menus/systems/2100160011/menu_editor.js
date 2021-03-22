@@ -698,24 +698,27 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
     $menuEditWindow.children().stop(0,0).animate({'scrollLeft': tableWidth - editorWindowWidth }, 200 );
   }
 
-
-  //参照項目を選択するモーダル表示イベント
-  const $referenceItemSelectButton = $addColumn.find('.reference-item-select');
-  $referenceItemSelectButton.on('click', function() {
-    itaModalOpen('Reference Item select', modalReferenceItemList, 'reference' , $(this));
-  });
-
-  //選択項目変更時、参照項目を空にする
-  const $pulldownSelect = $addColumn.find('.pulldown-select');
-  $pulldownSelect.on('change', function(){
-    const $input = $addColumn.find('.reference-item');
-    $input.attr('data-reference-item-id', '');
-    $input.html('');
-  });
-
   emptyCheck();
 
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   参照項目選択
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//参照項目を選択するモーダル表示イベント
+$menuEditor.on('click', '.reference-item-select', function() {
+  itaModalOpen('Reference Item select', modalReferenceItemList, 'reference' , $(this));
+});
+
+//選択項目変更時、参照項目を空にする
+$menuEditor.on('change', '.pulldown-select', function(){
+  const $input = $(this).closest('.menu-column-config-table').find('.reference-item');
+  $input.attr('data-reference-item-id', '');
+  $input.html('');
+});
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2065,10 +2068,11 @@ const createRegistrationData = function( type ){
       }
     }
   }
-  // リピート項目チェック（名前からCREATE_ITEM_IDとLAST_UPDATE_TIMESTAMPを返す）
-  const repeatItemCheckID = function( itemName ) {
+  // リピート項目チェック（名前とグループからCREATE_ITEM_IDとLAST_UPDATE_TIMESTAMPを返す）
+  const repeatItemCheckID = function( groupID, itemName ) {
     for ( let key in menuEditorArray.selectMenuInfo['item'] ) {
-      if ( menuEditorArray.selectMenuInfo['item'][ key ]['ITEM_NAME'] === itemName ) {
+      if ( menuEditorArray.selectMenuInfo['item'][ key ]['COL_GROUP_ID'] === groupID &&
+           menuEditorArray.selectMenuInfo['item'][ key ]['ITEM_NAME'] === itemName ) {
         // リピートで作成された項目かチェック
         if ( menuEditorArray.selectMenuInfo['item'][ key ]['REPEAT_ITEM'] === true ) {
           return [
@@ -2124,6 +2128,14 @@ const createRegistrationData = function( type ){
                 LAST_UPDATE_TIMESTAMP = menuEditorArray.selectMenuInfo['item'][key]['LAST_UPDATE_TIMESTAMP'];
               }
             }
+            // 親カラムグループ
+            let parentArray = [];
+            $column.parents('.menu-column-group').each( function() {
+              parentArray.unshift( $( this ).find('.menu-column-title-input').val() );
+            });
+            const parents = parentArray.join('/');
+            let   parentsID = $column.closest('.menu-column-group').attr('data-group-id');
+            if ( parentsID === undefined ) parentsID = null;
             // 項目名
             let itemName = $column.find('.menu-column-title-input').val();
             if ( repeatCount > 1 ) {
@@ -2134,19 +2146,12 @@ const createRegistrationData = function( type ){
               // 更新時のリピート項目チェック
               if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit' ) {
                 const originalBeforeName = CREATE_ITEM_ID_to_KEY( CREATE_ITEM_ID ),
-                      repeatItemData = repeatItemCheckID( originalBeforeName + '[' + repeatCount + ']');
+                      repeatItemData = repeatItemCheckID( parentsID, originalBeforeName + '[' + repeatCount + ']');
                 CREATE_ITEM_ID = repeatItemData[0];
                 LAST_UPDATE_TIMESTAMP = repeatItemData[1];
               }
 
             }
-            // 親カラムグループ
-            let parents = '',
-                parentArray = [];
-            $column.parents('.menu-column-group').each( function() {
-              parentArray.unshift( $( this ).find('.menu-column-title-input').val() );
-            });
-            parents = parentArray.join('/');
             // JSONデータ
             createMenuJSON['item'][key] = {
               'CREATE_ITEM_ID' : CREATE_ITEM_ID,
