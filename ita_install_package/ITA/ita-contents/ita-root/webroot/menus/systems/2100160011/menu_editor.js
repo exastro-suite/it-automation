@@ -2133,8 +2133,9 @@ const createRegistrationData = function( type ){
             $column.parents('.menu-column-group').each( function() {
               parentArray.unshift( $( this ).find('.menu-column-title-input').val() );
             });
-            const parents = parentArray.join('/'),
-                  parentsID = $column.closest('.menu-column-group').attr('data-group-id');
+            const parents = parentArray.join('/');
+            let   parentsID = $column.closest('.menu-column-group').attr('data-group-id');
+            if ( parentsID === undefined ) parentsID = null;
             // 項目名
             let itemName = $column.find('.menu-column-title-input').val();
             if ( repeatCount > 1 ) {
