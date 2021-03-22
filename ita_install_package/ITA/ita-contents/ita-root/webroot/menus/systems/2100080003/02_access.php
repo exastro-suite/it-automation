@@ -62,7 +62,9 @@
             //データをセット
             $registerData['hostName'] = $retInterfaceInfo[1]['TERRAFORM_HOSTNAME'];
             $registerData['token'] = ky_decrypt($retInterfaceInfo[1]['TERRAFORM_TOKEN']);
-
+            $registerData['proxySetting'] = array();
+            $registerData['proxySetting']['address'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_ADDRESS'];
+            $registerData['proxySetting']['port'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_PORT'];
 
             //----------------------------------------------
             // Workspace情報を取得
@@ -209,7 +211,9 @@
             //データをセット
             $checkData['hostName'] = $retInterfaceInfo[1]['TERRAFORM_HOSTNAME'];
             $checkData['token'] = ky_decrypt($retInterfaceInfo[1]['TERRAFORM_TOKEN']);
-
+            $checkData['proxySetting'] = array();
+            $checkData['proxySetting']['address'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_ADDRESS'];
+            $checkData['proxySetting']['port'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_PORT'];
 
             //----------------------------------------------
             // Workspaceの登録状態をチェック
@@ -251,7 +255,7 @@
                 //エラーログ出力
                 web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211130",'00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')'));
                 $retArray[0] = false;
-                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211150"); //Terraform Enterpriseとの接続に失敗しました。インターフェース情報を確認して下さい。
+                $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211150"); //Terraformとの接続に失敗しました。インターフェース情報を確認して下さい。
                 return($retArray);
             }
 
@@ -289,6 +293,9 @@
             //データをセット
             $deleteData['hostName'] = $retInterfaceInfo[1]['TERRAFORM_HOSTNAME'];
             $deleteData['token'] = ky_decrypt($retInterfaceInfo[1]['TERRAFORM_TOKEN']);
+            $deleteData['proxySetting'] = array();
+            $deleteData['proxySetting']['address'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_ADDRESS'];
+            $deleteData['proxySetting']['port'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_PORT'];
 
             //----------------------------------------------
             // Workspace情報を取得

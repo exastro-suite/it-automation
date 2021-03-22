@@ -25,7 +25,7 @@
         require_once ($root_dir_path . "/libs/webcommonlibs/web_functions_for_menu_info.php");
 
         if(array_key_exists('grp', $_GET) && "" != $_GET['grp']){
-            $ACRCM_group_id = sprintf("%010d", $_GET['grp']);
+            $ACRCM_group_id = sprintf("%010d", htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8"));
             $ACRCM_id = "";
             $ACRCM_login_nf = "1";
         }
@@ -40,7 +40,8 @@
             if( $tmpAryRetBody[1] !== null ){
                 if( $tmpAryRetBody[1] == 502 ){
                     // アクセスログ出力(想定外エラー)
-                    web_log($objMTS->getSomeMessage("ITAWDCH-ERR-40",array($_SERVER["PHP_SELF"],$tmpAryRetBody[0]['rowLength'])));
+                    web_log($objMTS->getSomeMessage("ITAWDCH-ERR-40",
+                        array(htmlspecialchars($_SERVER["SCRIPT_NAME"], ENT_QUOTES, "UTF-8"),$tmpAryRetBody[0]['rowLength'])));
                     // 想定外エラー通知画面にリダイレクト
                     webRequestForceQuitFromEveryWhere(500,10510101);
                     exit();
@@ -88,7 +89,7 @@
         }
 
         if (isset($_GET['grp']) && !empty($_GET['grp'])) {
-            $ACRCM_representative_file_name = "/default/mainmenu/01_browse.php?grp=" . $_GET['grp'];
+            $ACRCM_representative_file_name = "/default/mainmenu/01_browse.php?grp=" . htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8");
         } else {
             $ACRCM_representative_file_name = "/default/mainmenu/01_browse.php";
         }

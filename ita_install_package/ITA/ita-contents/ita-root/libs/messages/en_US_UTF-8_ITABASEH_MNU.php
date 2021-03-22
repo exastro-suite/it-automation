@@ -43,7 +43,19 @@ $ary["ITABASEH-MNU-102075"]         = "Input value for authentication method is 
 $ary["ITABASEH-MNU-102080"]         = "[Maximum length] 30 bytes";
 $ary["ITABASEH-MNU-102085"]         = "Dedicated information for Legacy/Role";
 $ary["ITABASEH-MNU-102088"]         = "Authentication method";
-$ary["ITABASEH-MNU-102089"]         = "Management of login password should be ● for password method. \nSudo authority should be set as /etc/sudoers in login user for  key method. ";
+$ary["ITABASEH-MNU-102089"]         = "Select the authentication method when connecting to the device from Ansible.
+-Password authentication
+ Select ● in the login password management and enter the login password.
+-Key authentication (no passphrase)
+ Uploading the ssh private key file is required.
+-Key authentication (with passphrase)
+ You must upload the ssh private key file and enter the passphrase.
+-Key authentication (key exchanged)
+ No upload of ssh private key file is required.
+-Password authentication (winrm)
+ Enter the WinRM connection information as required.
+For authentication methods other than password authentication (winrm), the following settings are required on the device side.
+The login user sudo privileges must be set to / etc / sudoers with his NOPASSWD.";
 $ary["ITABASEH-MNU-102090"]         = "OS type";
 $ary["ITABASEH-MNU-102110"]         = "EtherWakeOnLan";
 $ary["ITABASEH-MNU-102120"]         = "Power ON";
@@ -201,7 +213,9 @@ $ary["ITABASEH-MNU-108300"]         = "DSC Dedicated information";
 $ary["ITABASEH-MNU-108310"]         = "Error retry timeout";
 $ary["ITABASEH-MNU-108320"]         = "If the error persists beyond the specified time (seconds), the status will be in error.";
 $ary["ITABASEH-MNU-109006"]         = "ssh private key file";
-$ary["ITABASEH-MNU-109007"]         = "This is the ssh private key file for key authentication.";
+$ary["ITABASEH-MNU-109007"]         = "This is the ssh private key file for key authentication.
+The uploaded file is encrypted and saved. 
+If you download after registration, the encrypted file will be downloaded.";
 $ary["ITABASEH-MNU-109008"]         = "Passphrase";
 $ary["ITABASEH-MNU-109009"]         = "Enter the passphrase set in the ssh private key file.";
 $ary["ITABASEH-MNU-109010"]         = "Ansible-vault encrypted ssh private key file.";
@@ -572,6 +586,51 @@ $ary["ITABASEH-MNU-309046"]         = "Distribute evenly vertically";
 $ary["ITABASEH-MNU-309047"]         = "Distribute evenly horizontally";
 $ary["ITABASEH-MNU-309048"]         = "Enter Conductor name.(Maximum length) 256 bytes";
 $ary["ITABASEH-MNU-309049"]         = "Enter description (Maximum length) 8192 bytes";
+$ary["ITABASEH-MNU-310000"]         = "Contrast list can be viewed. <br> The following can be used as a Contrast target menu. <br> -Parameter Sheet(Host/Operation) <br> -Parameter sheet(FileUpload)";
+$ary["ITABASEH-MNU-310001"]         = "Contrast list";
+$ary["ITABASEH-MNU-310002"]         = "Contrast name";
+$ary["ITABASEH-MNU-310003"]         = "[Maximum length] 256 bytes";
+$ary["ITABASEH-MNU-310004"]         = "Contrast target menu 1";
+$ary["ITABASEH-MNU-310005"]         = "Contrast target menu 2";
+$ary["ITABASEH-MNU-310006"]         = "[Original data] Linked menu";
+$ary["ITABASEH-MNU-310007"]         = "Match all cases";
+$ary["ITABASEH-MNU-310008"]         = "If the item names in the Contrast target menu match exactly, select ●.
+If they do not match, you need to set the Contrast definition details. ";
+$ary["ITABASEH-MNU-310100"]         = "Contrast details can be viewed . <br> Set the Contrast target item (display item name, link of Contrast target item).";
+$ary["ITABASEH-MNU-310101"]         = "Contrast details";
+$ary["ITABASEH-MNU-310102"]         = "Contrast name";
+$ary["ITABASEH-MNU-310103"]         = "[Original data] Contrast list";
+$ary["ITABASEH-MNU-310104"]         = "Display item name";
+$ary["ITABASEH-MNU-310105"]         = "[Maximum length] 256 bytes";
+$ary["ITABASEH-MNU-310106"]         = "Target column 1";
+$ary["ITABASEH-MNU-310107"]         = "Target column 2";
+$ary["ITABASEH-MNU-310108"]         = "[Original data] Linked menu column management";
+$ary["ITABASEH-MNU-310109"]         = "Please select a menu";
+$ary["ITABASEH-MNU-310110"]         = "Display order";
+$ary["ITABASEH-MNU-310111"]         = "Display order when Contrast executed";
+$ary["ITABASEH-MNU-310200"]         = "Contrast execution the parameter sheets based on the information set in the Contrast list. <br> The parameters of contrast execution are as follows. * If you do not specify the base date, it will be the latest base date data. <br> -Contrast list <br> -Base date 1 (specify the base date of the Contrast target menu 1) <br> -Base date 2 (specify the base date of the Contrast  target menu 1) <br> -Target host";
+$ary["ITABASEH-MNU-310201"]         = "Contrast execution";
+$ary["ITABASEH-MNU-310202"]         = "Contrast list:";
+$ary["ITABASEH-MNU-310203"]         = "Base date 1:";
+$ary["ITABASEH-MNU-310204"]         = "Base date 2:";
+$ary["ITABASEH-MNU-310205"]         = "Target host:";
+$ary["ITABASEH-MNU-310206"]         = "Choice";
+$ary["ITABASEH-MNU-310207"]         = "Contrast";
+$ary["ITABASEH-MNU-310208"]         = "Contrast result";
+$ary["ITABASEH-MNU-310209"]         = "* The Contrast execution result of the parameter sheet is output here.";
+$ary["ITABASEH-MNU-310210"]         = "Contrast item number";
+$ary["ITABASEH-MNU-310211"]         = "Result";
+$ary["ITABASEH-MNU-310212"]         = "Hostname";
+$ary["ITABASEH-MNU-310213"]         = "Menu name";
+$ary["ITABASEH-MNU-310214"]         = "No";
+$ary["ITABASEH-MNU-310215"]         = "Operation name";
+$ary["ITABASEH-MNU-310216"]         = "Base date";
+$ary["ITABASEH-MNU-310217"]         = "Difference";
+$ary["ITABASEH-MNU-310218"]         = "Exchange ID has failed ({})";
+$ary["ITABASEH-MNU-310219"]         = "Excel output";
+$ary["ITABASEH-MNU-310220"]         = "CSV output";
+$ary["ITABASEH-MNU-310221"]         = "There is no data to compare under the specified conditions";
+$ary["ITABASEH-MNU-310222"]         = "Arial";
 $ary["ITABASEH-MNU-900001"]         = "Export";
 $ary["ITABASEH-MNU-900002"]         = "Upload";
 $ary["ITABASEH-MNU-900003"]         = "Import";

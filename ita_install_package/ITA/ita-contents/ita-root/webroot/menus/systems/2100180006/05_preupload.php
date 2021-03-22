@@ -28,7 +28,7 @@
         mkdir($filepath, 0777);
     }
 
-    $conductorId = $_GET['conductor_instance_id'];
+    $conductorId = htmlspecialchars($_GET['conductor_instance_id'], ENT_QUOTES, "UTF-8");
     $conductorId10 = str_pad($conductorId,10,0,STR_PAD_LEFT);
 
     $conductorCol = array(array("CONDUCTOR_INSTANCE_NO" => $conductorId));

@@ -16,7 +16,7 @@
 
     $tmpAry=explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
 
     try{
@@ -39,7 +39,7 @@
         //アクセス権を判定
         if( array_key_exists( "symphony_instance_id", $_GET ) === true ){
             // クエリからsymphony_instance_idを取得
-            $symphony_instance_id = $_GET["symphony_instance_id"];
+            $symphony_instance_id = htmlspecialchars($_GET["symphony_instance_id"], ENT_QUOTES, "UTF-8");
             
             // 整数の場合のみ判定
             $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));

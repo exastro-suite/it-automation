@@ -18,7 +18,7 @@ header('Content-Type: text/css; charset=utf-8');
 
 function itaThemeSelect() {
 
-$theme = $_GET['theme'];
+$theme = htmlspecialchars($_GET['theme'], ENT_QUOTES, "UTF-8");
 
 
 

@@ -470,6 +470,9 @@ callback.prototype = {
 
         }
 
+        //ボタンの非活性を解除
+        resultArea.prev('td').find('input').prop('disabled', false);
+
     },
     deleteOrganization : function(result){
         // セッションチェック
@@ -974,6 +977,8 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 //---- ここからカスタマイズした場合の一般メソッド配置域
 //TFEとの状態チェックを実行
 function Mix1_1_checkOrganization(obj, organizationID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     var resultAreaID = $(obj).closest('td').next().attr('id');
     //エンコード
     organizationID = encodeURIComponent(organizationID);
@@ -988,6 +993,8 @@ function Mix1_1_checkOrganization(obj, organizationID){
 
 //TFEへの登録を実行
 function Mix1_1_registerOrganization(obj, organizationID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     //エンコード
     organizationID = encodeURIComponent(organizationID);
     var data = {
@@ -1002,6 +1009,8 @@ function Mix1_1_registerOrganization(obj, organizationID){
 
 //TFEへの更新を実行
 function Mix1_1_updateOrganization(obj, organizationID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     //エンコード
     organizationID = encodeURIComponent(organizationID);
     var data = {
@@ -1016,6 +1025,8 @@ function Mix1_1_updateOrganization(obj, organizationID){
 
 //TFEからの削除を実行
 function Mix1_1_deleteOrganization(obj, organizationID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     //エンコード
     organizationID = encodeURIComponent(organizationID);
     var data = {

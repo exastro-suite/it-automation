@@ -39,7 +39,7 @@
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
         if(isset($_GET['req_errlog_target_name'])){
-            $req_errlog_target_name = $_GET['req_errlog_target_name'];
+            $req_errlog_target_name = htmlspecialchars($_GET['req_errlog_target_name'], ENT_QUOTES, "UTF-8");
             printUploadLog($req_errlog_target_name, $aryVariant, $arySetting);
         }
         else{
@@ -102,7 +102,7 @@
 
             $strFormatterId = "";
             if( array_key_exists("FORMATTER_ID",$_POST) === true ){
-                $strFormatterId = $_POST['FORMATTER_ID'];
+                $strFormatterId = htmlspecialchars($_POST['FORMATTER_ID'], ENT_QUOTES, "UTF-8");
             }
 
             $objListFormatter = $objTable->getFormatter($strFormatterId);
@@ -1358,7 +1358,8 @@
                     $objTable->writeAllToFileOnce($output_logfile_name_full_path, $strErrorStreamFromEditExecute, "w");
 
                     $strAnchorInnerText = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-286");
-                    $strAnchorBody = "<a href=\"" . $scheme_n_authority . $_SERVER['PHP_SELF'] . "?no={$g['page_dir']}&req_errlog_target_name=" . $output_logfile_name . "\">{$strAnchorInnerText}</a>";
+                    $strAnchorBody = "<a href=\"" . $scheme_n_authority . htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8")
+                                     . "?no={$g['page_dir']}&req_errlog_target_name=" . $output_logfile_name . "\">{$strAnchorInnerText}</a>";
 
                     $strRetStrBody .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-287",$strAnchorBody)."<br>\n";
                 }

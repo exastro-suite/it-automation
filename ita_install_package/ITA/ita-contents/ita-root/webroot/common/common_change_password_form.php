@@ -48,7 +48,7 @@
 
     // ----■ログイン成功後に表示させたいメニューのＩＤが、リクエストのGETクエリーに含まれているかをチェックする。
     if( isset($_GET['no']) ){
-        $req_menu_id = $_GET['no'];
+        $req_menu_id = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
 
     $ASJTM_grp_id = "";
@@ -67,7 +67,7 @@
 
         if( isset($_GET['grp']) ){
             $ASJTM_id = "";
-            $ASJTM_grp_id = sprintf("%010d", $_GET['grp']);
+            $ASJTM_grp_id = sprintf("%010d", htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8"));
         }
         else{
             // アクセスログ出力(想定外エラー)
@@ -85,7 +85,7 @@
     $boolChangeForced = false;
     $strExpiry = "";
     if( isset($_POST['expiry'] )){
-        $strExpiry = $_POST['expiry'];
+        $strExpiry = htmlspecialchars($_POST['expiry'], ENT_QUOTES, "UTF-8");
         switch($_POST['expiry']){
             case "0":
                 $boolChangeForced = true;
@@ -111,7 +111,7 @@
     
     $strUsername = "";
     if( isset($_POST['username'] )){
-        $strUsername = $_POST['username'];
+        $strUsername = htmlspecialchars($_POST['username'], ENT_QUOTES, "UTF-8");
     }
     
     require_once ($root_dir_path . "/libs/webcommonlibs/web_auth_config.php");
