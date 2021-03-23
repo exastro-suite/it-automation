@@ -39,7 +39,6 @@ try{
     if (strpos($ACRCM_representative_file_name, $script_name) === false) {
         require_once ($g['root_dir_path'] . '/libs/webcommonlibs/web_parts_for_access_01.php');
     }
-    require_once  $g['root_dir_path'] . '/webconfs/systems/' . $g['page_dir'] . '_loadTable.php';
 
     // データポータビリティ用関数群読み込み
     require_once($g['root_dir_path'] . '/libs/webindividuallibs/systems/2100000211/web_functions_for_data_portability.php');
