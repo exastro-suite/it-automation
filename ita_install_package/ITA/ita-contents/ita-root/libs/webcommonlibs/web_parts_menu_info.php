@@ -92,7 +92,7 @@
                 throw new Exception( $tmpAryRetBody[3] );
                 // 取得できなかった----
             }
-            $ACRCM_group_name = $tmpAryRetBody[0]['MenuGroupName'];
+            $ACRCM_group_name = htmlspecialchars($tmpAryRetBody[0]['MenuGroupName'], ENT_QUOTES, "UTF-8");
             unset($tmpAryRetBody);
         }
     }
