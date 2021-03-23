@@ -535,6 +535,8 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                         ." F_MENU_TABLE_LINK TAB_C ON  ( TAB_A.MENU_ID = TAB_C.MENU_ID) "
                         ."WHERE "
                         ." TAB_A.DISUSE_FLAG IN ('0') "
+                        ." AND TAB_B.DISUSE_FLAG IN ('0') "
+                        ." AND TAB_C.DISUSE_FLAG IN ('0') "
                         ." AND TAB_A.MENU_ID = :MENU_ID "
                         ." AND TAB_A.SHEET_TYPE IN ('1','4') "
                         ." AND TAB_B.COL_CLASS   <>  'PasswordColumn' "
@@ -618,7 +620,7 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                                 
                     $arrContrastColOriList[$tmpColName][$tmpMenuId] = $tmpColTitle;
                     $arrContrastList[$tmpMenuId]=$tmpTableName;
-                    if( array_search($tmpColTitle,$arrContrastTitleList) === false )$arrContrastTitleList[$intcnt]=$tmpColTitle;
+                    if( array_search($tmpColTitle,$arrContrastTitleList) === false )$arrContrastTitleList[]=$tmpColTitle;
                 }
                 $arrContrastTableList[$intcnt]=array( $tmpMenuId => $tmpTableName ) ;
             }
@@ -816,6 +818,8 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                         ." F_MENU_TABLE_LINK TAB_E ON  ( TAB_C.MENU_ID = TAB_E.MENU_ID) "
                         ."WHERE "
                         ." TAB_A.DISUSE_FLAG IN ('0') "
+                        ." AND TAB_B.DISUSE_FLAG IN ('0') "
+                        ." AND TAB_C.DISUSE_FLAG IN ('0') "
                         ." AND TAB_A.CONTRAST_LIST_ID = :CONTRAST_LIST_ID "
                         ." AND TAB_B.COL_CLASS   <>  'PasswordColumn' "
                         ." AND TAB_C.COL_CLASS   <>  'PasswordColumn' "
