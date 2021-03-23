@@ -2419,7 +2419,7 @@ const loadMenu = function() {
                   });
                   //referenceItemListに存在しない参照項目はID変換失敗(ID)を表示させる。
                   if(existsFlg == false){
-                    newItemNameListArray.push(getSomeMessage("ITACREPAR_1255", id));
+                    newItemNameListArray.push(getSomeMessage("ITACREPAR_1255", {0:id}));
                   }
                 });
                 //カンマ区切りの文字列に変換に参照項目上に表示
