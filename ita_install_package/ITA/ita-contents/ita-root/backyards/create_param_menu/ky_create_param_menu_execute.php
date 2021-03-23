@@ -3418,6 +3418,9 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
         }
         $otherMenuLinkArray = $result;
 
+        //廃止対象候補配列
+        $disuseList = array();
+
         foreach($otherMenuLinkArray as $omlData){
             // メニューIDが一致した場合、廃止
             if($omlData['MENU_ID'] == $hgMenuId ||
@@ -3427,22 +3430,13 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
                $omlData['MENU_ID'] == $convMenuId ||
                $omlData['MENU_ID'] == $convHostMenuId){
 
-                // 廃止する
-                $updateData = $omlData;
-                $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
-                $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
-
-                //////////////////////////
-                // 他メニュー連携テーブルを更新
-                //////////////////////////
-                $result = $otherMenuLinkTable->updateTable($updateData, $jnlSeqNo);
-                if(true !== $result){
-                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                    outputLog($msg);
-                    throw new Exception($msg);
-                }
+                //廃止候補のリストに追加
+                $disuseList[$omlData['LINK_ID']] = $omlData;
             }
         }
+
+        //廃止候補の複製を作成
+        $disuseListRep = $disuseList;
 
         // 登録するメニューID、テーブル名を決定する
         if("" != $hgMenuId && "" == $convMenuId){
@@ -3456,6 +3450,9 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
 
         // 登録する
         foreach($itemInfoArray as $itemInfo){
+            //最終的に登録するかしないかのフラグ
+            $noRegisterFlag = false;
+
             // プルダウン選択、パスワード、ファイルアップロードは対象外のため、スキップする
             if(7 == $itemInfo['INPUT_METHOD_ID'] || 8 == $itemInfo['INPUT_METHOD_ID'] || 9 == $itemInfo['INPUT_METHOD_ID']){
                 continue;
@@ -3488,16 +3485,53 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
                 $insertData['DISUSE_FLAG']      = "0";                          // 廃止フラグ
                 $insertData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM;         // 最終更新者
 
-                //////////////////////////
-                // 他メニュー連携テーブルに登録
-                //////////////////////////
-                $result = $otherMenuLinkTable->insertTable($insertData, $seqNo, $jnlSeqNo);
-                if(true !== $result){
-                    $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                    outputLog($msg);
-                    throw new Exception($msg);
+                //廃止候補のデータと「メニューID」「項目名」「テーブル名」「主キー」「カラム名」「アクセス許可ロール」が一致した場合、廃止も新規登録もしない。
+                foreach($disuseList as $data){
+                    if($data['MENU_ID'] == $insertData['MENU_ID'] &&
+                       $data['COLUMN_DISP_NAME'] == $insertData['COLUMN_DISP_NAME'] &&
+                       $data['TABLE_NAME'] == $insertData['TABLE_NAME'] &&
+                       $data['PRI_NAME'] == $insertData['PRI_NAME'] &&
+                       $data['COLUMN_NAME'] == $insertData['COLUMN_NAME'] &&
+                       $data['ACCESS_AUTH'] == $insertData['ACCESS_AUTH']){
+
+                        //登録しないフラグをたてる
+                        $noRegisterFlag = true;
+
+                        //廃止リストから除外
+                        unset($disuseListRep[$data['LINK_ID']]);
+                    }
+                }
+
+                //登録しないフラグがfalseの場合、登録を実行
+                if($noRegisterFlag == false){
+                    //////////////////////////
+                    // 他メニュー連携テーブルに登録
+                    //////////////////////////
+                    $result = $otherMenuLinkTable->insertTable($insertData, $seqNo, $jnlSeqNo);
+                    if(true !== $result){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                        outputLog($msg);
+                        throw new Exception($msg);
+                    } 
                 }
             }
+        }
+
+        //最終的に廃止リストに残ったものを廃止する
+        foreach($disuseListRep as $data){
+            // 廃止する
+            $data['DISUSE_FLAG']      = "1";                  // 廃止フラグ
+            $data['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+
+            //////////////////////////
+            // 他メニュー連携テーブルを更新
+            //////////////////////////
+            $result = $otherMenuLinkTable->updateTable($data, $jnlSeqNo);
+            if(true !== $result){
+                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                outputLog($msg);
+                throw new Exception($msg);
+            } 
         }
 
         return true;
