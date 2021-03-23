@@ -92,7 +92,7 @@ if (!empty($g['menu_initial_filter'])) {
                       <!-- ログイン情報表示エリア -->
                       <div class="itaLoginUserInformation">
                         <div class="itaLoginUserData">
-                          <div class="itaLoginUserName"><?= $objMTS->getSomeMessage("ITAWDCH-STD-501",'<span class="userDataText">'.$username_jp.'</span>') ?></div>
+                          <div class="itaLoginUserName"><?= $objMTS->getSomeMessage("ITAWDCH-STD-501",'<span class="userDataText">'.htmlspecialchars($username_jp, ENT_QUOTES, "UTF-8").'</span>') ?></div>
                           <div class="itaLoginUserID"><?= $objMTS->getSomeMessage("ITAWDCH-STD-502",'<span class="userDataText">'.$username.'</span>') ?></div>
                         </div>
 
