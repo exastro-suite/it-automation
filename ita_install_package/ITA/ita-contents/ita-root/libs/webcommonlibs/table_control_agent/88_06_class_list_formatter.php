@@ -1052,9 +1052,11 @@ class ExcelFormatter extends ListFormatter {
                 }
 
                 $intCountAdd = 0;
-                foreach($arrayDispSelectTag as $data){
-                    $intCountAdd += 1;
-                    $sheet->setCellValue(self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, $intFocusRowOfMasterSheet++), $data);
+                if($arrayDispSelectTag != null){
+                    foreach($arrayDispSelectTag as $data){
+                        $intCountAdd += 1;
+                        $sheet->setCellValue(self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, $intFocusRowOfMasterSheet++), $data);
+                    }
                 }
                 if( 0 < $intCountAdd ){
                     $intSetRow = $intFocusRowOfMasterSheet - 1;
