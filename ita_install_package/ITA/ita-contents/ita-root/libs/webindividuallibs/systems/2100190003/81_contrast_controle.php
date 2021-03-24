@@ -705,6 +705,16 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                     $strQuery = $strQuery. "GROUP BY TAB_A.BASE_TIMESTAMP , TAB_A.HOST_ID  ORDER BY TAB_A.BASE_TIMESTAMP DESC ,TAB_A.HOST_ID ASC";
 
                     $tmpContrastResult = execsql($strQuery,$bindkeyVlaue);
+                    $tmpDate = $tmpContrastResult[0];
+
+                    //テンプレート生成
+                    if( is_array($tmpDate)  ) {
+                        if( count($tmpDate) != count($tmpBase) ){
+                            foreach ($tmpDate as $tmpkey => $tmpvalue) {
+                                $tmpBase[$intcnt][$tmpkey] = NULL;#"---";
+                            }
+                        }                        
+                    }
 
                     //アクセス権
                     $objRBAC = new RoleBasedAccessControl($g['objDBCA']);
@@ -725,16 +735,6 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
 
                             } 
                         }
-                    }
-
-                    $tmpDate = $tmpContrastResult[0];
-                    //テンプレート生成
-                    if( is_array($tmpDate)  ) {
-                        if( count($tmpDate) != count($tmpBase) ){
-                            foreach ($tmpDate as $tmpkey => $tmpvalue) {
-                                $tmpBase[$intcnt][$tmpkey] = NULL;#"---";
-                            }
-                        }                        
                     }
 
                     //整形
