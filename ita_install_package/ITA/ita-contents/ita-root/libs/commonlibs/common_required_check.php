@@ -128,8 +128,8 @@ class AuthTypeParameterRequiredCheck {
     //                             DF_PIONEER_DRIVER_ID
     //    $strProtocolID:        Pioneerプロトコル
     //                               "": 未選択
-    //                               1:  ssh
-    //                               2:  telnet
+    //                               1:  telnet
+    //                               2:  ssh
     //
     // 戻り値
     //   true:   正常
@@ -213,7 +213,7 @@ class AuthTypeParameterRequiredCheck {
                 break;
             case DF_PIONEER_DRIVER_ID:    // pioneer
                 switch($strProtocolID) {
-                case '1':  // ssh
+                case '2':  // ssh
                     switch($strAuthMode) {
                     case DF_LOGIN_AUTH_TYPE_PW_WINRM: //認証方式:パスワード認証(winrm)
                         $error_cde = $this->errMsgCodeAry[$chkType]['ERROR_TYPE9'];
@@ -227,19 +227,20 @@ class AuthTypeParameterRequiredCheck {
                         break;
                     }
                     break;
-                case '2':  // telnet
+                case '1':  // telnet
                     switch($strAuthMode) {
                     case DF_LOGIN_AUTH_TYPE_KEY:        //認証方式:鍵認証(パスフレーズなし) 
                     case DF_LOGIN_AUTH_TYPE_PW:         //認証方式:パスワード認証
                     case DF_LOGIN_AUTH_TYPE_KEY_EXCH:   //認証方式:鍵認証(鍵交換済み)
                     case DF_LOGIN_AUTH_TYPE_KEY_PP_USE: //認証方式:鍵認証(パスフレーズあり) 
+                    case DF_LOGIN_AUTH_TYPE_PW_WINRM:   //認証方式:パスワード認証(winrm)
                     case '':
                         break;
-                    case DF_LOGIN_AUTH_TYPE_PW_WINRM:   //認証方式:パスワード認証(winrm)
-                        $error_cde = $this->errMsgCodeAry[$chkType]['ERROR_TYPE9'];
-                        if(strlen($result) != 0) $result .= "\n";
-                        $result .= $objMTS->getSomeMessage($error_cde,$errMsgParameterAry);
-                        break;
+//                    case DF_LOGIN_AUTH_TYPE_PW_WINRM:   //認証方式:パスワード認証(winrm)
+//                        $error_cde = $this->errMsgCodeAry[$chkType]['ERROR_TYPE9'];
+//                        if(strlen($result) != 0) $result .= "\n";
+//                        $result .= $objMTS->getSomeMessage($error_cde,$errMsgParameterAry);
+//                        break;
                     }
                     break;
                 case '':
