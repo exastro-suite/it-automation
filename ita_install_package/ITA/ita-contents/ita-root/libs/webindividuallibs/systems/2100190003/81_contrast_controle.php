@@ -570,7 +570,11 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
             
             //項目全件一致項目名チェック
             foreach ($arrMenuColInfo1 as $key => $arrinfo ) {
-                if( $arrMenuColInfo1[$key]['COL_TITLE'] != $arrMenuColInfo2[$key]['COL_TITLE'] ){
+                if( isset($arrMenuColInfo1[$key]['COL_TITLE']) === true && isset($arrMenuColInfo2[$key]['COL_TITLE']) === true){
+                    if( $arrMenuColInfo1[$key]['COL_TITLE'] != $arrMenuColInfo2[$key]['COL_TITLE'] ){
+                        $intallMatchflg=1;
+                    }
+                }else{
                     $intallMatchflg=1;
                 }
             }
@@ -1122,6 +1126,19 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
         }
 
         //比較用データ整形
+        //結果0件の場合
+        if( count($arrContrastResultALL) == 0 ){
+            $strStreamOfContrastResult=array(array(),array());
+            $strResultCode = sprintf("%03d", "");
+            $strDetailCode = sprintf("%03d", "");
+            $arrayResult = array($strResultCode,
+                                 $strDetailCode,
+                                 $strStreamOfContrastResult,
+                                 $strExpectedErrMsgBodyForUI
+                                 );
+            dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+            return $arrayResult;
+        }
 
         //比較対象テンプレート0件
         if( count($tmpBase) == 0 ){
