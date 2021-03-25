@@ -6182,24 +6182,29 @@ class CreateAnsibleExecFiles {
                 // 認証方式の設定値確認
                 $login_auth_type = $row['LOGIN_AUTH_TYPE'];
 
-                // Movement一覧でwinrm接続が選択されている場合
-                // 機器一覧の認証方式がパスワード認証(winrm)か判定
-                if(($in_winrm_id == "1") && ($login_auth_type != DF_LOGIN_AUTH_TYPE_PW_WINRM)) {
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56214",
-                                                                array($row['IP_ADDRESS']));
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    unset($objQuery);
-                    return false;
-                }
+                switch($this->getAnsibleDriverID()){
+                case DF_LEGACY_DRIVER_ID:
+                case DF_LEGACY_ROLE_DRIVER_ID:
+                    // Movement一覧でwinrm接続が選択されている場合
+                    // 機器一覧の認証方式がパスワード認証(winrm)か判定
+                    if(($in_winrm_id == "1") && ($login_auth_type != DF_LOGIN_AUTH_TYPE_PW_WINRM)) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56214",
+                                                                    array($row['IP_ADDRESS']));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        unset($objQuery);
+                        return false;
+                    }
 
-                // Movement一覧でwinrm接続が選択されていない場合
-                // 機器一覧の認証方式がパスワード認証(winrm)以外か判定
-                if(($in_winrm_id != "1") && ($login_auth_type == DF_LOGIN_AUTH_TYPE_PW_WINRM)) {
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56215",
-                                                                array($row['IP_ADDRESS']));
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    unset($objQuery);
-                    return false;
+                    // Movement一覧でwinrm接続が選択されていない場合
+                    // 機器一覧の認証方式がパスワード認証(winrm)以外か判定
+                    if(($in_winrm_id != "1") && ($login_auth_type == DF_LOGIN_AUTH_TYPE_PW_WINRM)) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56215",
+                                                                    array($row['IP_ADDRESS']));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        unset($objQuery);
+                        return false;
+                    }
+                    break;
                 }
 
                 // パスワード管理フラグの設定値退避

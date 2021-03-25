@@ -158,7 +158,55 @@ def main():
     # normal exit
     #########################################################
     private_fail_json(obj=module,msg='exec_file no found fail exit')
-  config = yaml.load(open(module.params['exec_file']).read())
+
+  # 対話ファイルを読み込む
+  try:
+    config = yaml.load(open(module.params['exec_file']).read())
+  # パーサーの例外をキャッチするようにする
+  except Exception as e:
+    msg = "dialog file yaml load failure."
+    private_log_output(log_file_name,host_name,msg)
+    private_log_output(log_file_name,host_name,str(e))
+    exec_log_output(msg)
+    exec_log_output(str(e))
+    #########################################################
+    # fail exit
+    #########################################################
+    module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
+
+  # オリジナル対話ファイルにyaml文法エラーがない事を確認する。
+  with_tmp = module.params['exec_file']
+  with_tmp = with_tmp.replace("/in/", "/tmp/")
+  with_tmp = with_tmp.replace("/dialog_files/", "/original_dialog_files/")
+
+  try:
+    with_file = yaml.load(open(with_tmp).read())
+  # パーサーの例外をキャッチするようにする
+  except Exception as e:
+    msg = "Original dialog file yaml load failure."
+    private_log_output(log_file_name,host_name,msg)
+    private_log_output(log_file_name,host_name,str(e))
+    exec_log_output(msg)
+    exec_log_output(str(e))
+    #########################################################
+    # fail exit
+    #########################################################
+    module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
+
+  # ホスト変数ファイルにyaml文法エラーがない事を確認する。
+  try:
+    with_def = yaml.load(open(module.params['host_vars_file']).read())
+  # パーサーの例外をキャッチするようにする
+  except Exception as e:
+    msg = "Host variable file yaml load failure."
+    private_log_output(log_file_name,host_name,msg)
+    private_log_output(log_file_name,host_name,str(e))
+    exec_log_output(msg)
+    exec_log_output(str(e))
+    #########################################################
+    # fail exit
+    #########################################################
+    module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
 
   private_log_output(log_file_name,host_name,'python version:' + str(sys.version))
   private_log_output(log_file_name,host_name,'default encoding:' + str(sys.getdefaultencoding()))
@@ -228,9 +276,23 @@ def main():
     else:
       chk_mode = ''
 
+    # 暗号化変数ファイル読み込み
     vault_vars_file = module.params['host_vars_file']
     vault_vars_file = vault_vars_file.replace("/original_host_vars/", "/vault_host_vars/")
-    vault_vars_def  = yaml.load(open(vault_vars_file).read())
+    # パーサーの例外をキャッチするようにする
+    try:
+      vault_vars_def = yaml.load(open(vault_vars_file).read())
+    except Exception as e:
+      msg = "Cryptographic variable file yaml load failure."
+      private_log_output(log_file_name,host_name,msg)
+      private_log_output(log_file_name,host_name,str(e))
+      exec_log_output(msg)
+      exec_log_output(str(e))
+      #########################################################
+      # fail exit
+      #########################################################
+      module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
+
     if vault_vars_def is not None:
       for var,value in vault_vars_def.items():
         enc_value = base64.b64decode(codecs.encode(value, "rot-13"))
@@ -564,13 +626,40 @@ def main():
               when_tmp = str(input[cmd][i])
               when_cmd[i] = when_tmp
           elif 'with_items' == cmd:
+
+            # オリジナル対話ファイルを読み込む
             with_tmp = module.params['exec_file']
             with_tmp = with_tmp.replace("/in/", "/tmp/")
             with_tmp = with_tmp.replace("/dialog_files/", "/original_dialog_files/")
 
-            with_file = yaml.load(open(with_tmp).read())
+            try:
+              with_file = yaml.load(open(with_tmp).read())
+            # パーサーの例外をキャッチするようにする
+            except Exception as e:
+              msg = "Original dialog file yaml load failure."
+              private_log_output(log_file_name,host_name,msg)
+              private_log_output(log_file_name,host_name,str(e))
+              exec_log_output(msg)
+              exec_log_output(str(e))
+              #########################################################
+              # fail exit
+              #########################################################
+              module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
 
-            with_def = yaml.load(open(module.params['host_vars_file']).read())
+            # ホスト変数ファイルを読み込む
+            try:
+              with_def = yaml.load(open(module.params['host_vars_file']).read())
+            # パーサーの例外をキャッチするようにする
+            except Exception as e:
+              msg = "Host variable file yaml load failure."
+              private_log_output(log_file_name,host_name,msg)
+              private_log_output(log_file_name,host_name,str(e))
+              exec_log_output(msg)
+              exec_log_output(str(e))
+              #########################################################
+              # fail exit
+              #########################################################
+              module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
 
             # playbookから変数を取得
             idx = 0
