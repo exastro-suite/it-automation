@@ -67,9 +67,9 @@ Ansible（Pioneer）作業パターン詳細
     $table->addColumn($c);
 
     $url = "01_browse.php?no=2100020204&filter=on&Filter1Tbl_2=";
-    $c = new LinkIDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-406030"),'D_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME',$url,false,false,'','','','');
+    $c = new LinkIDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-406030"),'B_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME',$url,false,false,'','','','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-406040"));//エクセル・ヘッダでの説明
-    $c->setJournalTableOfMaster('D_ANSIBLE_PNS_DIALOG_TYPE_JNL');
+    $c->setJournalTableOfMaster('B_ANSIBLE_PNS_DIALOG_TYPE_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
     $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
     $c->setJournalKeyIDOfMaster('DIALOG_TYPE_ID');
