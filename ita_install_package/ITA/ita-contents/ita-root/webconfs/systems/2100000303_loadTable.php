@@ -492,7 +492,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102040"));//エクセル・ヘッダでの説明
                 $cg->addColumn($c);
 
-                $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102090"),'D_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
+                $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102090"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-103010"));//エクセル・ヘッダでの説明
                 $cg->addColumn($c);
 

@@ -317,7 +317,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $cg3 = new ColumnGroup($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101119"));
 
-        $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101120"),'D_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
+        $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101120"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101121"));//エクセル・ヘッダでの説明
         $objVldt = new OsTypeNameValidator($c);
         $c->setValidator($objVldt);

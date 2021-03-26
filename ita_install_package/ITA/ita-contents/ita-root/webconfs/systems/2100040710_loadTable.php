@@ -161,7 +161,7 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューグループ名
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
+            $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900008"));
