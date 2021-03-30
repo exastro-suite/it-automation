@@ -35,12 +35,27 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $objQuery  = "";
     $ansible_exec_mode = 0;
     $ret = $dbobj->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
+    $arrayReqInfo = requestTypeAnalyze();
     if($ret === false) {
-        web_log($dbobj->GetLastErrorMsg());
+        if( $arrayReqInfo[0] == "web" ){
+            web_log($dbobj->GetLastErrorMsg());
+        }
+        else if( $arrayReqInfo[0] == "backyard" ){
+        }
+        else{
+        }
+        // web_log($dbobj->GetLastErrorMsg());
     } else {
         if($objQuery->effectedRowCount() == 0) {
             $message = sprintf("Recode not found. (Table:B_ANSIBLE_IF_INFO");
-            web_log(basename(__FILE__),__LINE__,$message);
+            if( $arrayReqInfo[0] == "web" ){
+                web_log(basename(__FILE__),__LINE__,$message);
+            }
+            else if( $arrayReqInfo[0] == "backyard" ){
+            }
+            else{
+            }
+            // web_log(basename(__FILE__),__LINE__,$message);
         } else {
             $row = $objQuery->resultFetch();
             // ANSIBLE_EXEC_MODE=2 ansible tower

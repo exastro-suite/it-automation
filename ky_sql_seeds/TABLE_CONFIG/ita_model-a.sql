@@ -4191,3 +4191,101 @@ LOADED_FLG              %VARCHR%(1)         ,
 LAST_UPDATE_TIMESTAMP   %DATETIME6%         ,
 PRIMARY KEY(ROW_ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
+
+
+-- -------------------------------------------------------
+-- --ER図
+-- -------------------------------------------------------
+CREATE TABLE B_ER_DATA
+(
+ROW_ID                            %INT%                            , -- 識別シーケンス
+MENU_TABLE_LINK_ID                %INT%                            , -- メニュー*テーブルのリンクID
+COLUMN_ID                         %VARCHR%(32)                     , -- カラムID名
+COLUMN_TYPE                       %INT%                            , -- カラムタイプ
+PARENT_COLUMN_ID                  %VARCHR%(32)                     , -- 親カラムID
+PHYSICAL_NAME                     %VARCHR%(1000)                   , -- 物理名
+LOGICAL_NAME                      %VARCHR%(1000)                   , -- 論理名
+RELATION_TABLE_NAME               %VARCHR%(1000)                   , -- 関連テーブル名
+RELATION_COLUMN_ID                %VARCHR%(1000)                   , -- 関連カラムID
+DISP_SEQ                          %INT%                            , -- 表示順
+NOTE                              %VARCHR%(4000)                   , -- 備考
+ACCESS_AUTH                       TEXT                             ,
+DISUSE_FLAG                       %VARCHR%(32)                     , -- 廃止フラグ
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+PRIMARY KEY(ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_ER_MENU_TABLE_LINK_LIST
+(
+ROW_ID                            %INT%                            , -- 識別シーケンス
+MENU_ID                           %INT%                            , -- メニューID
+TABLE_NAME                        %VARCHR%(1000)                   , -- テーブル名
+VIEW_TABLE_NAME                   %VARCHR%(1000)                   , -- テーブルビュー名
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+ACCESS_AUTH                       TEXT                             ,
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+PRIMARY KEY(ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_ER_COLUMN_TYPE
+(
+COLUMN_TYPE_ID                    %INT%                            , -- 識別シーケンス
+COLUMN_TYPE_NAME                  %VARCHR%(64)                     , -- テーブル名
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+ACCESS_AUTH                       TEXT                             ,
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+PRIMARY KEY(COLUMN_TYPE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE OR REPLACE VIEW D_ER_MENU_TABLE_LINK_LIST AS 
+SELECT TAB_A.ROW_ID,
+       TAB_C.MENU_GROUP_ID,
+       TAB_C.MENU_GROUP_ID      MENU_GROUP_ID_CLONE,
+       TAB_C.MENU_GROUP_NAME,
+       TAB_A.MENU_ID,
+       TAB_A.MENU_ID            MENU_ID_CLONE,
+       TAB_A.MENU_ID            MENU_ID_CLONE_02,
+       TAB_B.MENU_NAME,
+       [%CONCAT_HEAD/%]TAB_C.MENU_GROUP_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.MENU_GROUP_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.MENU_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.MENU_NAME[%CONCAT_TAIL/%] MENU_PULLDOWN,
+       TAB_A.TABLE_NAME,
+       TAB_A.VIEW_TABLE_NAME,
+       TAB_A.NOTE,
+       TAB_A.ACCESS_AUTH,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01,
+       TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
+FROM B_ER_MENU_TABLE_LINK_LIST TAB_A
+LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID);
+
+CREATE OR REPLACE VIEW D_ER_DATA AS 
+SELECT TAB_A.ROW_ID,
+       TAB_A.MENU_TABLE_LINK_ID,
+       TAB_B.MENU_GROUP_ID,
+       TAB_B.MENU_GROUP_ID      MENU_GROUP_ID_CLONE,
+       TAB_B.MENU_ID,
+       TAB_B.MENU_ID            MENU_ID_CLONE,
+       TAB_A.COLUMN_ID,
+       TAB_A.COLUMN_TYPE,
+       TAB_A.PARENT_COLUMN_ID,
+       TAB_A.PHYSICAL_NAME,
+       TAB_A.LOGICAL_NAME,
+       TAB_A.RELATION_TABLE_NAME,
+       TAB_A.RELATION_COLUMN_ID,
+       TAB_A.DISP_SEQ,
+       TAB_A.NOTE,
+       TAB_A.ACCESS_AUTH,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM B_ER_DATA TAB_A
+LEFT JOIN D_ER_MENU_TABLE_LINK_LIST TAB_B ON (TAB_A.MENU_TABLE_LINK_ID = TAB_B.ROW_ID);
+

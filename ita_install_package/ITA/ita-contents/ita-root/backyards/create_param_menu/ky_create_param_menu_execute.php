@@ -2911,6 +2911,7 @@ EOD;
         // パラメータシート作成管理更新処理を行う（完了）
         //////////////////////////
         updateMenuStatus($targetData, "3", NULL, false, false, $zipFileName, $zipFilePath);
+        insertERTask();
     }
 
     // 作業用ディレクトリを削除する
@@ -4918,4 +4919,42 @@ function extractRepeatItemNo($itemName){
 
     return $extractRepeatNoStr;
 
+}
+
+/**
+ * 処理済みフラグをクリアする
+ *
+ * @param    なし
+ * @return   なし
+ */
+function insertERTask(){
+    global $objDBCA, $objMTS;
+
+    $sql = "UPDATE A_PROC_LOADED_LIST
+            SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP
+            WHERE PROC_NAME = 'ky_create_er-workflow'";
+
+    if (LOG_LEVEL === 'DEBUG') {
+        outputLog(LOG_PREFIX, $sql);
+    }
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                      array(basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+
+    $objDBCA->setQueryTime();
+    $res = $objQuery->sqlBind(array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP' => $objDBCA->getQueryTime()));
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                      array(basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+
+    return true;
 }
