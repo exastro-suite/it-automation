@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2020 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 //////////////////////////////////////////////////////////
 //
 //  【処理概要】
-//   ・updateTable内のrequire先を ita-root/libs/webindividuallibs/systems/2100000216/04_updateTable.php に変更
+//   ・updateTable内のrequire先を ita-root/libs/webindividuallibs/systems/2100000327/04_updateTable.php に変更
 //
 //////////////////////////////////////////////////////////
 
