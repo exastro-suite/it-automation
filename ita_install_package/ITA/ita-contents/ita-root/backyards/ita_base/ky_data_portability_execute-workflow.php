@@ -496,9 +496,11 @@ function registData($record, &$importedTableAry){
 
             $importedTableAry[] = $fileName;
 
-            $res = insertTable($table['JNL_TABLE_NAME'], $importPath . '/'. $tbl);
-            if ($res === false) {
-                return false;
+            if ($table['JNL_TABLE_NAME'] != "") {
+                $res = insertTable($table['JNL_TABLE_NAME'], $importPath . '/'. $tbl);
+                if ($res === false) {
+                    return false;
+                }
             }
         }
 
@@ -1644,7 +1646,6 @@ function exportData($record){
     $taskId = $record['TASK_ID'];
     $dpMode = $record['DP_MODE'];
     $specifiedTimestamp = $record['SPECIFIED_TIMESTAMP'];
-    outputLog(LOG_PREFIX, $specifiedTimestamp);
     $abolishedType = $record['ABOLISHED_TYPE'];
     $exportPath = EXPORT_PATH . $taskId;
 
@@ -1783,68 +1784,70 @@ function exportData($record){
             }
         }
 
-        $filePath = "{$exportPath}/{$key}_" . $value['JNL_TABLE_NAME'];
-        if ( $dpMode == 1 && $abolishedType == 1 ) {
-            // 環境移行/廃止を含む
-            $cmd  = 'mysqldump --single-transaction --opt';
-            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
-            $cmd .= ' -h' . DB_HOST;
-            $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
-            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
-            $cmd .= ' 2>&1 > ' . $filePath;
+        if ( $value['JNL_TABLE_NAME'] != "") {
+            $filePath = "{$exportPath}/{$key}_" . $value['JNL_TABLE_NAME'];
+            if ( $dpMode == 1 && $abolishedType == 1 ) {
+                // 環境移行/廃止を含む
+                $cmd  = 'mysqldump --single-transaction --opt';
+                $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+                $cmd .= ' -h' . DB_HOST;
+                $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
+                $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+                $cmd .= ' 2>&1 > ' . $filePath;
 
-            $sql = "";
-        } elseif ( $dpMode == 1 && $abolishedType == 2 ) {
-            // 環境移行/廃止を含まない
-            $cmd  = 'mysqldump --single-transaction --opt';
-            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
-            $cmd .= ' -h' . DB_HOST;
-            $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
-            $cmd .= ' --where \'' . $value['PRIMARY_KEY'] . ' IN (SELECT ' . $value['PRIMARY_KEY'] . ' FROM ' . $value['TABLE_NAME'] . ' WHERE DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000))\'';
-            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
-            $cmd .= ' 2>&1 > ' . $filePath;
+                $sql = "";
+            } elseif ( $dpMode == 1 && $abolishedType == 2 ) {
+                // 環境移行/廃止を含まない
+                $cmd  = 'mysqldump --single-transaction --opt';
+                $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+                $cmd .= ' -h' . DB_HOST;
+                $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
+                $cmd .= ' --where \'' . $value['PRIMARY_KEY'] . ' IN (SELECT ' . $value['PRIMARY_KEY'] . ' FROM ' . $value['TABLE_NAME'] . ' WHERE DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000))\'';
+                $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+                $cmd .= ' 2>&1 > ' . $filePath;
 
-            $sql = "";
-        } elseif ( $dpMode == 2 && $abolishedType == 1 ) {
-            // 時刻指定/廃止を含む
-            $cmd  = 'mysqldump --single-transaction --opt';
-            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
-            $cmd .= ' -h' . DB_HOST;
-            $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'] . " --skip-add-drop-table --replace";
-            $cmd .= ' --where \'LAST_UPDATE_TIMESTAMP >= "'.$specifiedTimestamp.'"\'';
-            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
-            $cmd .= " | sed -e 's/CREATE TABLE/CREATE TABLE IF NOT EXISTS/g' ";
-            $cmd .= ' 2>&1 > ' . $filePath;
+                $sql = "";
+            } elseif ( $dpMode == 2 && $abolishedType == 1 ) {
+                // 時刻指定/廃止を含む
+                $cmd  = 'mysqldump --single-transaction --opt';
+                $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+                $cmd .= ' -h' . DB_HOST;
+                $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'] . " --skip-add-drop-table --replace";
+                $cmd .= ' --where \'LAST_UPDATE_TIMESTAMP >= "'.$specifiedTimestamp.'"\'';
+                $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+                $cmd .= " | sed -e 's/CREATE TABLE/CREATE TABLE IF NOT EXISTS/g' ";
+                $cmd .= ' 2>&1 > ' . $filePath;
 
-            $sql = "SELECT {$value['PRIMARY_KEY']} FROM {$value['JNL_TABLE_NAME']}
-                    WHERE LAST_UPDATE_TIMESTAMP >= '{$specifiedTimestamp}'";
-        } elseif ( $dpMode == 2 && $abolishedType == 2 ) {
-            // 時刻指定/廃止を含まない
-            $cmd  = 'mysqldump --single-transaction --opt';
-            $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
-            $cmd .= ' -h' . DB_HOST;
-            $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME']. " --skip-add-drop-table --replace";
-            $cmd .= ' --where \'' . $value['PRIMARY_KEY'] . ' IN (SELECT ' . $value['PRIMARY_KEY'] . ' FROM ' . $value['TABLE_NAME'] . ' WHERE LAST_UPDATE_TIMESTAMP >= "'.$specifiedTimestamp.'" AND (DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000)))\'';
-            $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
-            $cmd .= " | sed -e 's/CREATE TABLE/CREATE TABLE IF NOT EXISTS/g' ";
-            $cmd .= ' 2>&1 > ' . $filePath;
+                $sql = "SELECT {$value['PRIMARY_KEY']} FROM {$value['JNL_TABLE_NAME']}
+                        WHERE LAST_UPDATE_TIMESTAMP >= '{$specifiedTimestamp}'";
+            } elseif ( $dpMode == 2 && $abolishedType == 2 ) {
+                // 時刻指定/廃止を含まない
+                $cmd  = 'mysqldump --single-transaction --opt';
+                $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
+                $cmd .= ' -h' . DB_HOST;
+                $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME']. " --skip-add-drop-table --replace";
+                $cmd .= ' --where \'' . $value['PRIMARY_KEY'] . ' IN (SELECT ' . $value['PRIMARY_KEY'] . ' FROM ' . $value['TABLE_NAME'] . ' WHERE LAST_UPDATE_TIMESTAMP >= "'.$specifiedTimestamp.'" AND (DISUSE_FLAG<>"1" OR (DISUSE_FLAG="1" AND ' . $value['PRIMARY_KEY'] . '>200000000)))\'';
+                $cmd .= ' | sed -e "s/DEFINER[ ]*=[ ]*[^*]*\*/\*/" ';
+                $cmd .= " | sed -e 's/CREATE TABLE/CREATE TABLE IF NOT EXISTS/g' ";
+                $cmd .= ' 2>&1 > ' . $filePath;
 
-            $sql = "SELECT {$value['PRIMARY_KEY']} FROM {$value['TABLE_NAME']}
-                    WHERE {$value['PRIMARY_KEY']}
-                    IN (SELECT {$value['PRIMARY_KEY']}
-                    FROM {$value['TABLE_NAME']}
-                    WHERE LAST_UPDATE_TIMESTAMP >= '{$specifiedTimestamp}'
-                    AND (DISUSE_FLAG<>'1' OR (DISUSE_FLAG='1' AND {$value['PRIMARY_KEY']} > 200000000)))";
-        } else {
-            return false;
-        }
+                $sql = "SELECT {$value['PRIMARY_KEY']} FROM {$value['TABLE_NAME']}
+                        WHERE {$value['PRIMARY_KEY']}
+                        IN (SELECT {$value['PRIMARY_KEY']}
+                        FROM {$value['TABLE_NAME']}
+                        WHERE LAST_UPDATE_TIMESTAMP >= '{$specifiedTimestamp}'
+                        AND (DISUSE_FLAG<>'1' OR (DISUSE_FLAG='1' AND {$value['PRIMARY_KEY']} > 200000000)))";
+            } else {
+                return false;
+            }
 
-        $output = NULL;
-        exec($cmd, $output, $return_var);
+            $output = NULL;
+            exec($cmd, $output, $return_var);
 
-        if(0 != $return_var){
-            outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
-            return false;
+            if(0 != $return_var){
+                outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
+                return false;
+            }
         }
 
         // JNLのdump取得（VIEW）
@@ -2217,7 +2220,12 @@ function getInfoOfLTUsingIdOfMenuForDBtoDBLink($strMenuIdNumeric){
 
     $retAry['PRIMARY_KEY'] = $aryValues['TABLE_INFO']['UTN_ROW_INDENTIFY'];
     $retAry['TABLE_NAME'] = $aryValues['TABLE_INFO']['UTN']['OBJECT_ID'];
-    $retAry['JNL_TABLE_NAME'] = $aryValues['TABLE_INFO']['JNL']['OBJECT_ID'];
+    // JNLテーブルの存在チェック
+    $jnl_table = $aryValues['TABLE_INFO']['JNL']['OBJECT_ID'];
+    if (!existTable($jnl_table)) {
+        $jnl_table = "";
+    }
+    $retAry['JNL_TABLE_NAME'] = $jnl_table;
     $retAry['VIEW_NAME'] = $aryValues['TABLE_INFO']['VIEW']['UTN_VIEW'];
     $retAry['JNL_VIEW_NAME'] = $aryValues['TABLE_INFO']['VIEW']['JNL_VIEW'];
     $retAry['SEQUENCE_RIC'] = $aryValues['TABLE_INFO']['REQUIRED_COLUMNS']['UtnSeqName'];
@@ -2683,4 +2691,79 @@ function getPrimarykey($table_name) {
     while ($row = $objQuery->resultFetch()) {
         return $row['Column_name'];
     }
+}
+
+/**
+ * ER図作成タスクを登録する
+ *
+ * @param    なし
+ * @return   なし
+ */
+function insertERTask(){
+
+    global $objDBCA, $objMTS;
+
+    $sql = "UPDATE A_PROC_LOADED_LIST 
+            SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP
+            WHERE PROC_NAME = 'ky_create_er-workflow'";
+
+    if (LOG_LEVEL === 'DEBUG') {
+        outputLog(LOG_PREFIX, $sql);
+    }
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                      array(basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+
+    $objDBCA->setQueryTime();
+    $res = $objQuery->sqlBind(array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP' => $objDBCA->getQueryTime()));
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                      array(basename(__FILE__), __LINE__)));
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+    return true;
+}
+
+/**
+ * テーブルの存在チェック
+ */
+function existTable($tableName){
+
+    global $objDBCA, $objMTS;
+
+    // テーブルを検索する
+    $sql = "SELECT * FROM information_schema.tables WHERE table_name = '$tableName'";
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+
+    $res = $objQuery->sqlExecute();
+    if ($res === false) {
+        outputLog(LOG_PREFIX, "SQL=[{$sql}].");
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(__FILE__, __LINE__)));
+        return false;
+    }
+
+    $resultArray = array();
+    while ($row = $objQuery->resultFetch()){
+        $resultArray[] = $row;
+    }
+    if (empty($resultArray)) {
+        return false;
+    }
+
+    return true;
 }

@@ -752,6 +752,44 @@ class Column extends ColumnGroup {
 		}
 		return $retStrValue;
 	}
+	//NEW[10]
+	function getColLabelForER($boolParentsAdd=false, $strColumnId, $objColumn, $dispSeq){
+		$result = array(
+			"PHYSICAL_NAME" => array(),
+			"OBJ_COLUMN"    => array(),
+			"ITEM"          => array(),
+			"GROUP"         => array(),
+			"DISP_SEQ"      => $dispSeq,
+		);
+		$retStrValue = "";
+		$i = 0;
+		if( $boolParentsAdd === true ){
+			$boolLoopFlag = true;
+			$objColumnGroup = $this;
+			do {
+				$objColumnGroup = $objColumnGroup->getParent();
+
+				if( $objColumnGroup->getStaticRowLevel() === 0 ){
+					//----rootに至った場合
+					$boolLoopFlag = false;
+					$retStrValue .= $this->strColLabel;
+				}else{
+					$result["GROUP"][$i] = $objColumnGroup->getColGrpLabel();
+					$i = $i + 1;
+				}
+			} while( $boolLoopFlag === true );
+
+		}else{
+			$retStrValue = $this->strColLabel;
+		}
+		$result["PHYSICAL_NAME"] = $strColumnId;
+		$result["OBJ_COLUMN"]    = $objColumn;
+		$result["ITEM"]          = $retStrValue;
+		$result["GROUP"]         = array_reverse($result["GROUP"]);
+
+		return $result;
+	}
+
 	//----シノニム
 	//NEW[11]
 	//----廃止予定
