@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2020 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-class simpleTableControlAgent extends TableControlAgent {
+class simpleTableControlAgent_2100000327 extends TableControlAgent {
     /* Table : DBと１対１になるデータの集合。
         DBの情報と、DBから取得した値を保持
         データの出力はFormatterに委譲
@@ -46,7 +46,7 @@ class simpleTableControlAgent extends TableControlAgent {
             $c = new RowEditByFileColumn($this->getRequiredRowEditByFileColumnID(), $strRowEditByFileColLabel);
             $this->addColumn($c);
             
-            $c = new JournalSeqNoColumnDummy($this->getRequiredJnlSeqNoColumnID(), $strJnlSeqNoColLabel);  // Dummyに変更
+            $c = new JournalSeqNoColumnDummy_2100000327($this->getRequiredJnlSeqNoColumnID(), $strJnlSeqNoColLabel);  // Dummyに変更
             $this->addColumn($c);
             $c = new JournalRegDateTimeColumn($this->getRequiredJnlRegTimeColumnID(), $strJnlRegTimeColLabel);
             $this->addColumn($c);
@@ -56,10 +56,9 @@ class simpleTableControlAgent extends TableControlAgent {
             $c = new UpdBtnColumn($this->getRequiredUpdateButtonColumnID(), $strUpdateColLabel, $this->getRequiredDisuseColumnID());
             $this->addColumn($c);
             $c = new DelBtnColumn($this->getRequiredDisuseColumnID(), $strDisuseFlagColLabel);
-            $c->setHiddenMainTableColumn(false);   // DISUSE_FLAGは更新対象から除外
             $this->addColumn($c);
             //
-            $c = new RowIdentifyColumn($this->getRowIdentifyColumnID(), $strRIColumnLabel);  // column classを変更: RowIdentifyColumn -> RowIdentifyTextColumn
+            $c = new RowIdentifyColumn($this->getRowIdentifyColumnID(), $strRIColumnLabel);
             $this->addColumn($c);
             //ここまで必須系[1]----
         }

@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2020 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -15,89 +15,11 @@
 //
 //////////////////////////////////////////////////////////////////////
 //  【処理概要】
-//    ・本体tableのPKをtext(varchar等)にする
 //    ・journal tableを使わないがcolumn class自体はdummyで存在させる(journalTableへの更新系でのSQLはskipする)
 //    ・start transaction直後のsequenceへのselect .. for updateをskipする
 //////////////////////////////////////////////////////////////////////
 
-class RowIdentifyTextColumn extends TextColumn {
-    protected $uniqueColumns;
-    protected $strSequenceId;
-
-    //----ここから継承メソッドの上書き処理
-
-    function __construct ($strColId, $strColLabel, $strSequenceId=null, $uniqueColumns=[]) {
-        global $g;
-        
-        parent::__construct($strColId, $strColLabel, $strSequenceId);
-        $this->strSequenceId = $strSequenceId;
-        $this->setHiddenMainTableColumn(true);
-        $this->setHeader(true);
-
-        $outputType = new OutputType(new ReqTabHFmt(), new TextTabBFmt());
-        $this->setOutputType("update_table", $outputType);
-        //自動入力
-        $outputType = new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($g['objMTS']->getSomeMessage("ITAWDCH-STD-11401")));
-        $this->setOutputType("register_table", $outputType);
-
-        //----このインスタンスに紐づくOutputTypeインスタンスにアクセスする
-        $this->getOutputType("delete_table")->init($this, "delete_table");
-        $this->getOutputType("filter_table")->init($this, "filter_table");
-        $this->getOutputType("print_table")->init($this, "print_table");
-        //このインスタンスに紐づくOutputTypeインスタンスにアクセスする----
-
-        $this->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-STD-11402"));
-
-        $this->setValidator(new SingleTextValidator(0,256));
-    }
-
-    //----AddColumnイベント系
-    function initTable ($objTable, $colNo=null) {
-        parent::initTable($objTable, $colNo);
-    }
-    //AddColumnイベント系----
-
-    //----TableIUDイベント系
-    public function beforeIUDValidateCheck (&$exeQueryData, &$reqOrgData=[], &$aryVariant=[]) {
-        $boolRet = false;
-        $intErrorType = null;
-        $aryErrMsgBody = [];
-        $strErrMsg = "";
-        $strErrorBuf = "";
-
-        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
-        if ($modeValue === "DTUP_singleRecRegister") {
-            //----親クラス[AutoNumColumn]の同名関数を呼んで、その後作業
-            $retArray = parent::beforeIUDValidateCheck($exeQueryData, $reqOrgData, $aryVariant);
-            //親クラス[AutoNumColumn]の同名関数を呼んで、その後作業----
-        } else if ($modeValue === "DTUP_singleRecUpdate") {
-            //----更新の場合
-            $boolRet = true;
-            $retArray = [$boolRet, $intErrorType, $aryErrMsgBody, $strErrMsg, $strErrorBuf];
-            //更新の場合----
-        } else if ($modeValue === "DTUP_singleRecDelete") {
-            //----廃止の場合
-            $boolRet = true;
-            $retArray = [$boolRet, $intErrorType, $aryErrMsgBody, $strErrMsg, $strErrorBuf];
-            //廃止の場合----
-        }
-        return $retArray;
-    }
-    //TableIUDイベント系----
-
-    //ここまで継承メソッドの上書き処理----
-
-    //----ここから新規メソッドの定義宣言処理
-    public function setSequenceID ($strSequenceId) {
-        $this->strSequenceId = $strSequenceId;
-    }
-    function getSequenceID() {
-        return $this->strSequenceId;
-    }
-    //ここまで新規メソッドの定義宣言処理----
-}
-
-class JournalSeqNoColumnDummy extends TextColumn {
+class JournalSeqNoColumnDummy_2100000327 extends TextColumn {
     //通常時は表示しない
 
     protected $strSequenceId;
