@@ -297,6 +297,9 @@ try{
         //作成タイプを取得
         $menuCreateTypeId = $targetData['MENU_CREATE_TYPE_ID'];
 
+        //変数を定義
+        $duplicateItemNameArray = array();
+
         //////////////////////////
         // パラメータシート作成情報を特定する
         //////////////////////////
@@ -376,7 +379,6 @@ try{
             $beforeItemArray = array();
             $repeatItemArray = array();
             $afterItemArray = array();
-            $duplicateItemNameArray = array();
             $startFlg = false;
             $repeatItemCnt = $cpiData['COL_CNT'] * $cpiData['REPEAT_CNT'];
 
