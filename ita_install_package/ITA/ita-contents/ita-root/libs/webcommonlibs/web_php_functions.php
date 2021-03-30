@@ -805,23 +805,6 @@
                         $hiddenInputBody .= "<input type=\"hidden\" name=\"{$key}\" value=\"{$val}\">";
                     }
 
-                    // セッションチェック＆アラート表示
-                    if ($exeCheckAuth) {
-                        $auth = null;
-                        global $objDBCA;
-                        $ACRCM_id = "";
-                        if ( isset($strMenuIdNumeric) && !empty($strMenuIdNumeric)) {
-                            $ACRCM_id = $strMenuIdNumeric;
-                        }
-                        saLoginExecute($auth, $objDBCA, $ACRCM_id, false);
-
-                        if (!$auth->checkAuth()) {
-                            global $objMTS;
-                            $alert = "<script type='text/javascript'>alert('".$objMTS->getSomeMessage("ITAWDCH-MNU-1300006")."');</script>";
-                            echo $alert;
-                        }
-                    }
-
                     print 
 <<<EOD
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">

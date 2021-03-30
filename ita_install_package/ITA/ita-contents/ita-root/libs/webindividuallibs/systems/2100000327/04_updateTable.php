@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2020 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -394,6 +394,20 @@ function updateTableMain($intBaseMode, $strNumberForRI, $reqUpdateData=null, $st
                     }
                 }
                 //登録前の処理----
+
+                //---- RBAC対応
+                // ACCESS_AUTHカラム 汎用個別バリデータ
+                // ロール名をロールIDに置換
+                foreach($arrayObjColumn as $objColumn){
+                    $arrayTmp = $objColumn->beforeTableIUDIndividualValidator($ordMode, $exeUpdateData, $reqUpdateData, $aryVariant);
+                    if($arrayTmp[0]===false){
+                        // エラー時は返却さけているメッセージを表示 
+                        $error_str .= $arrayTmp[3];
+                        $intErrorType = 2;
+                        throw new Exception( '00002100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                    }
+                }
+                //RBAC対応 ----
 
                 // ----一旦SELECTしてレコードの追い越し更新がないかチェックする
                 $arrayResult = selectRowForUpdateWithoutNumericCheck($objTable, $strNumberForRI, $ordMode, 1);
