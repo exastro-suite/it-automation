@@ -1795,3 +1795,4 @@ margin-right: 16px;
 #editor[data-editor-mode="checking"] #editor-footer .editor-menu-list {
 display: inline-block;
 }
+#editor[data-editor-mode="edit"][data-editor-config="update"] #editor-footer .editor-menu-list.edit { display: none; }
