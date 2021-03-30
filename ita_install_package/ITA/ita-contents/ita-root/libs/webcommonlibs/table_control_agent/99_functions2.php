@@ -2565,7 +2565,7 @@ EOD;
                  ."FROM "
                  ."    {$masterTableBody} "
                  ."WHERE "
-                 ."    {$masterDisuseFlagColumnId} IN ('0') "
+                 ."    {$masterDisuseFlagColumnId} IN ('0','H') "
                  ."ORDER BY C2";
         return $query;
         // RBAC対応 ---
