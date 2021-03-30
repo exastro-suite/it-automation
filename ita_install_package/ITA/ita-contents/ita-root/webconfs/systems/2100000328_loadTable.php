@@ -21,8 +21,8 @@
 //////////////////////////////////////////////////////////////////////
 
 $root_dir_path = preg_replace('|^(.*/ita-root)/.*$|', '$1', __FILE__);
-require_once $root_dir_path.'/libs/webindividuallibs/systems/2100000328/simpleTableControlAgent_class.php';
-require_once $root_dir_path.'/libs/webindividuallibs/systems/2100000328/column_class.php';
+require_once $root_dir_path.'/libs/webindividuallibs/systems/2100000327/simpleTableControlAgent_class.php';
+require_once $root_dir_path.'/libs/webindividuallibs/systems/2100000327/column_class.php';
 
 $tmpFx = function (&$aryVariant=[], &$arySetting=[]) {
     global $g;
