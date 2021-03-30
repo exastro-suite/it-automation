@@ -73,7 +73,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     //ファイル名
     $c = new FileUploadColumn('FILE_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-900015"));
-    $filePath = "uploadfiles/{$g['page_dir']}";
+    $filePath = "";
+    $arrayReqInfo = requestTypeAnalyze();
+    if( $arrayReqInfo[0] == "web" ){
+        $filePath = "uploadfiles/{$g['page_dir']}";
+    }
     $c->setNRPathAnyToBranchPerFUC($filePath);
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-900017"));//エクセル・ヘッダでの説明
     $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト

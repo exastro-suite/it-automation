@@ -17,7 +17,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
     $arrayWebSetting = array();
-    $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101001");
+    $arrayReqInfo = requestTypeAnalyze();
+    $page_dir = "";
+    if( $arrayReqInfo[0] == "web" ){
+        $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101001");
+        $page_dir = $g['page_dir'];
+    }
 
     $tmpAry = array(
         'TT_SYS_01_JNL_SEQ_ID'=>'JOURNAL_SEQ_NO',
@@ -60,7 +65,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('register_table')->setVisible(false);
     $table->addColumn($c);
 
-    $c = new FileUploadColumn('RETURN_FILE',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101007"),"{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$g['page_dir']}","/uploadfiles/2100150101/RETURN_FILE");
+    $c = new FileUploadColumn('RETURN_FILE',$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101007"),"{$g['scheme_n_authority']}/default/menu/05_preupload.php?no=$page_dir","/uploadfiles/2100150101/RETURN_FILE");
     $c->setDescription($g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101008"));//エクセル・ヘッダでの説明
     $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
     $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。

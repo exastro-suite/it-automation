@@ -119,6 +119,8 @@ class TableControlAgent {
 		$this->strDBJournalTableAgentQuery = null;
 		$this->strDBJournalTableHiddenId = "";
 
+		$this->strRIColumnLabel = $strRIColumnLabel;
+
 		$arrayVariant['TT_SYS_00_ROW_IDENTIFY_LABEL'] = $strRIColumnLabel;
 
 		$strJnlSeqNoColId = isset($arrayVariant['TT_SYS_01_JNL_SEQ_ID'])?$arrayVariant['TT_SYS_01_JNL_SEQ_ID']:"JOURNAL_SEQ_NO";
@@ -758,6 +760,10 @@ class TableControlAgent {
 		return $this->getRowIdentifyColumnID();
 	}
 	//廃止予定----
+	// ラベル名取得
+	public function getRowIdentifyColumnLabel(){
+		return $this->strRIColumnLabel;
+	}
 	//シノニム----
 	public function setRowIdentifyColumnID($strColId){
 		$this->strRowIdentifyColumnId = $strColId;
