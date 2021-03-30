@@ -384,6 +384,7 @@ CONFIG_PLACE=(
 #サービスの登録作成関数用配列
 #サービスの登録するドライバを記載する
 SERVICES_SET=(
+    BASE_FLG
     ANSIBLE_FLG
     COBBLER_FLG
     TERRAFORM_FLG
@@ -398,6 +399,7 @@ SERVICES_SET=(
 #クーロンタブ設定関数用配列
 #クーロンタブを設定するドライバを記載する
 CRONTAB_SET=(
+    BASE_FLG
 )
 
 
@@ -1002,17 +1004,6 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log 'WARNING : Failed to create symbolic link /etc/sysconfig/ita_env.'
     fi
     PROCCESS_CNT=$((PROCCESS_CNT+1))
-
-    ################################################################################################
-    #Set up ITA services for base functions."
-    ################################################################################################
-    func_services_set BASE_FLG
-
-    #################################################################################################
-    #Set up ITA crontab for base functions."
-    #################################################################################################
-    func_crontab_set BASE_FLG
-
 fi
 
 #################################################################################################
