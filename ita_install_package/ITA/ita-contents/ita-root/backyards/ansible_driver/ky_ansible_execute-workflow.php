@@ -59,7 +59,7 @@
     $php_req_gate_php                = '/libs/commonlibs/common_php_req_gate.php';
     $db_connect_php                  = '/libs/commonlibs/common_db_connect.php';
     $ansible_table_define_php        = '/libs/backyardlibs/ansible_driver/AnsibleTableDefinition.php';
-    $DBaccess_php                    = "/libs/backyardlibs/common/common_db_access.php";  // enomoto
+    $DBaccess_php                    = "/libs/backyardlibs/common/common_db_access.php";  
     $comDBaccess_php                 = "/libs/backyardlibs/ansible_driver/ky_ansible_execute-workflow_common.php";
 
     ////////////////////////////////
