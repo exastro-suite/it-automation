@@ -213,21 +213,19 @@ class ExecuteDirector {
 
         // ansible vault認証情報生成
         $vault_credentialId = -1;
-        if($vg_tower_driver_name != "pioneer") {
-           $vaultobj = new AnsibleVault();
-           list($ret,$dir,$file,$vault_password) = $vaultobj->getValutPasswdFileInfo();
-           if($ret === false) {
-               $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000080");
-               $this->errorLogOut($errorMessage);
-               return -1;
-           }
-           unset($vaultobj);
-           $vault_credentialId = $this->createVaultCredential($execution_no, $vault_password, $OrganizationId);
-           if($vault_credentialId == -1) {
-               $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040031");
-               $this->errorLogOut($errorMessage);
-               return -1;
-           }
+        $vaultobj = new AnsibleVault();
+        list($ret,$dir,$file,$vault_password) = $vaultobj->getValutPasswdFileInfo();
+        if($ret === false) {
+            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000080");
+            $this->errorLogOut($errorMessage);
+            return -1;
+        }
+        unset($vaultobj);
+        $vault_credentialId = $this->createVaultCredential($execution_no, $vault_password, $OrganizationId);
+        if($vault_credentialId == -1) {
+            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040031");
+            $this->errorLogOut($errorMessage);
+            return -1;
         }
 
         $jobTemplateIds = array();
@@ -269,13 +267,11 @@ class ExecuteDirector {
                     $this->errorLogOut($errorMessage);
                     return -1;
                 }
-                if($vg_tower_driver_name != "pioneer") {
-                    $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTemplateId, $vault_credentialId);
-                    if($response_array['success'] == false) {
-                        $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
-                        $this->errorLogOut($errorMessage);
-                        return -1;
-                    }
+                $response_array = AnsibleTowerRestApiJobTemplates::postCredentialsAdd($this->restApiCaller,$jobTemplateId, $vault_credentialId);
+                if($response_array['success'] == false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040032");
+                    $this->errorLogOut($errorMessage);
+                    return -1;
                 }
             }
             //Ansible Tower Version Check (Not Ver3.5) ----
@@ -367,13 +363,11 @@ class ExecuteDirector {
         if($ret == false) {
             $allResult = false;
         }
-        if($vg_tower_driver_name != "pioneer") {
-            // /api/v2/credentials/?name__startswith=ita_legacy_executions_vault_credential_0000010436
-            // /api/v2/credentials/1612/
-            $ret = $this->cleanUpVaultCredential($execution_no);
-            if($ret == false) {
-                $allResult = false;
-            }
+        // /api/v2/credentials/?name__startswith=ita_legacy_executions_vault_credential_0000010436
+        // /api/v2/credentials/1612/
+        $ret = $this->cleanUpVaultCredential($execution_no);
+        if($ret == false) {
+            $allResult = false;
         }
 
         // /api/v2/inventories/?name__startswith=ita_legacy_executions_inventory_0000010436
