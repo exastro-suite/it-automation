@@ -364,7 +364,7 @@ Ansibleインターフェース情報
         case "DTUP_singleRecRegister":
             $retStrBody = "";
             $ary   = array();
-            $ary[] = array("VALUE"=>$strTwrHostID  ,"MSG_CODE"=>"ITAANSIBLEH-MNU-1203030");
+            $ary[] = array("VALUE"=>$strTwrHostID  ,"MSG_CODE"=>"ITAANSIBLEH-MNU-1203041");
             $ary[] = array("VALUE"=>$strTwrProtocol,"MSG_CODE"=>"ITAANSIBLEH-MNU-1203010");
             $ary[] = array("VALUE"=>$strTwrPort,    "MSG_CODE"=>"ITAANSIBLEH-MNU-1203050");
             $ary[] = array("VALUE"=>$strOrgName,    "MSG_CODE"=>"ITAANSIBLEH-MNU-9010000002");
