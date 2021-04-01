@@ -877,11 +877,9 @@
 
                         //対象ホスト、ファイルのリスト作成
                         foreach ($arrTargetUploadfiles as $strTargetUploadfile) {
-                            $targetHosts =  explode( "/", str_replace( $strCollectTargetFilesPath , "" , $strTargetUploadfile ) );
-                            $ext = substr($strTargetUploadfile, strrpos($strTargetUploadfile, '.') + 1);
-                            $targetFileName =  str_replace( ".".$ext , "" ,  basename($strTargetUploadfile) );
                             //ホスト名、ファイル名、パス
-                            $arrTargetUploadLists[$targetHosts[1]][$targetFileName .".". $ext]=$strTargetUploadfile;
+                            $arrTargetUploadLists[$targetHosts[1]][basename($strTargetUploadfile)]=$strTargetUploadfile;
+
                         }
 
                         //ホスト毎に実施
