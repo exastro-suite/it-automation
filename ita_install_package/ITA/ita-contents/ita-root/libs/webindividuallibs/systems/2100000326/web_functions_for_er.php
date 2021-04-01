@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2019 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -24,54 +24,28 @@ define('ACCOUNT_NAME', -100326);
  */
 function getERInfo(){
     global $g, $objDBCA, $objMTS;
-    $login_id = $g["login_id"]; // ログインID
+    $login_id = $g["login_id"]; // ユーザID
 
     // 返り値
     $result = array("MENU_GROUP" => array());
 
-    // ロールIDの取得
-    $sql = "SELECT A_ROLE_ACCOUNT_LINK_LIST.ROLE_ID AS ROLE_ID
-            FROM A_ACCOUNT_LIST
-            LEFT OUTER JOIN A_ROLE_ACCOUNT_LINK_LIST
-            ON A_ACCOUNT_LIST.USER_ID = A_ROLE_ACCOUNT_LINK_LIST.USER_ID
-            WHERE A_ACCOUNT_LIST.USER_ID = :USER_ID
-            AND A_ACCOUNT_LIST.DISUSE_FLAG = 0
-            AND A_ROLE_ACCOUNT_LINK_LIST.DISUSE_FLAG = 0
-            ";
-    $objQuery = $objDBCA->sqlPrepare($sql);
-    if ($objQuery->getStatus() === false) {
-        web_log($objMTS->getSomeMessage('ITABASEH-ERR-900054',
-                                             array(__FILE__, __LINE__)));
-        web_log($sql);
-        web_log($objQuery->getLastError());
-        throw new Exception($objMTS->getSomeMessage('ITABASEH-ERR-900066'));
-    }
-    $res = $objQuery->sqlBind(array("USER_ID" => $login_id));
-    $res = $objQuery->sqlExecute();
-    if ($res === false) {
-        web_log($objMTS->getSomeMessage('ITABASEH-ERR-900054',
-                                             array(__FILE__, __LINE__)));
-        web_log($sql);
-        web_log($objQuery->getLastError());
-        throw new Exception($objMTS->getSomeMessage('ITABASEH-ERR-900066'));
-    }
-    while ($row = $objQuery->resultFetch()){
-        $role_id = $row["ROLE_ID"];
-    }
-
     // 取得可能なメニューIDの取得
     $canGetMenuGroupList = array();
     $canGetMenuList = array();
+
     $sql = "SELECT DISTINCT A_MENU_LIST.MENU_ID, MENU_NAME, A_MENU_LIST.MENU_GROUP_ID, MENU_GROUP_NAME, A_MENU_LIST.DISP_SEQ
             FROM A_MENU_LIST
             JOIN A_ROLE_MENU_LINK_LIST
             ON A_MENU_LIST.MENU_ID = A_ROLE_MENU_LINK_LIST.MENU_ID
             LEFT OUTER JOIN A_MENU_GROUP_LIST
             ON A_MENU_LIST.MENU_GROUP_ID = A_MENU_GROUP_LIST.MENU_GROUP_ID
-            WHERE A_ROLE_MENU_LINK_LIST.ROLE_ID = :ROLE_ID
+            LEFT OUTER JOIN A_ROLE_ACCOUNT_LINK_LIST
+            ON A_ROLE_ACCOUNT_LINK_LIST.ROLE_ID = A_ROLE_MENU_LINK_LIST.ROLE_ID
+            WHERE A_ROLE_ACCOUNT_LINK_LIST.USER_ID = :USER_ID
             AND A_MENU_LIST.DISUSE_FLAG = 0
             AND A_ROLE_MENU_LINK_LIST.DISUSE_FLAG = 0
             AND A_MENU_GROUP_LIST.DISUSE_FLAG = 0
+            AND A_ROLE_ACCOUNT_LINK_LIST.DISUSE_FLAG = 0
             ORDER BY A_MENU_LIST.MENU_GROUP_ID, A_MENU_LIST.DISP_SEQ, A_MENU_LIST.MENU_ID DESC
             ";
 
@@ -83,7 +57,7 @@ function getERInfo(){
         web_log($objQuery->getLastError());
         throw new Exception($objMTS->getSomeMessage('ITABASEH-ERR-900066'));
     }
-    $res = $objQuery->sqlBind(array("ROLE_ID" => $role_id));
+    $res = $objQuery->sqlBind(array("USER_ID" => $login_id));
     $res = $objQuery->sqlExecute();
     if ($res === false) {
         web_log($objMTS->getSomeMessage('ITABASEH-ERR-900054',
@@ -122,8 +96,6 @@ function getERInfo(){
                 "TABLE_NAME" => $tableInfo["TABLE_INFO"],
                 "DISP_SEQ"   => $dispSeq,
                 "COLUMNS"    => getColumnInfo($menuTableLinkId),
-                // "GROUP"      => getGroupInfo($menuTableLinkId),
-                // "ITEM"       => getItemInfo($menuTableLinkId),
                 "GROUP_ITEM" => array_merge(getGroupInfo($menuTableLinkId), getItemInfo($menuTableLinkId))
             );
             if ( !in_array( $menuGroupId, array_column( $result["MENU_GROUP"], 'ID')) ) {
