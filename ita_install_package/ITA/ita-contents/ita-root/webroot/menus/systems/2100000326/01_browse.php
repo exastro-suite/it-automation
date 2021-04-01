@@ -110,17 +110,15 @@ EOD;
       <div class="editor-header-menu">
         <div class="editor-header-main-menu">
           <ul class="editor-menu-list">
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="er-print">プリント</button></li>
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="er-menu-group">メニューグループ選択</button></li>
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="er-relation">リレーション<span class="check-mark"></span></button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="er-print">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309050")}</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="er-menu-group">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309051")}</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="er-relation">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309052")}<span class="check-mark"></span></button></li>
           </ul>
         </div>
         <div class="editor-header-sub-menu">
           <ul class="editor-menu-list">
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-all">全体表示</button></li>
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-reset">表示リセット</button></li>
-            <!--<li class="editor-menu-item full-screen-hide"><button class="editor-menu-button" data-menu="full-screen-on">フルスクリーン</button></li>
-            <li class="editor-menu-item full-screen-show"><button class="editor-menu-button" data-menu="full-screen-off">フルスクリーン解除</button></li>-->
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-all">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309013")}</button></li>
+            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="view-reset">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309014")}</button></li>
           </ul>
         </div>
       </div>
@@ -144,10 +142,10 @@ EOD;
               <div id="editor-display">
                 <div id="editor-explanation">
                   <dl class="explanation-list">
-                    <dt class="explanation-term"><span class="mouse-icon mouse-wheel"></span>マウスホイール</dt>
-                    <dd class="explanation-description">画面の拡大・縮小</dd>
-                    <dt class="explanation-term"><span class="mouse-icon mouse-right"></span>マウス右ドラッグ</dt>
-                    <dd class="explanation-description">画面の移動</dd>
+                    <dt class="explanation-term"><span class="mouse-icon mouse-wheel"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309053")}</dt>
+                    <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309054")}</dd>
+                    <dt class="explanation-term"><span class="mouse-icon mouse-right"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309055")}</dt>
+                    <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309056")}</dd>
                   </dl>
                 </div>
               </div><!-- / #editor-display -->
