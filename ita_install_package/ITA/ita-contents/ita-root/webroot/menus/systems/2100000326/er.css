@@ -276,11 +276,16 @@ background-color: #FFF;
 }
 .entity-item.connect {
 background-color: #DFF4CF;
+cursor: pointer;
+}
+#editor[data-relation-mode="on"] .entity-item.connect {
+cursor: default;
 }
 #editor[data-relation="off"] .entity-item.connect {
 background-color: #FFF;
+color: #333;
 }
-.entity-item[data-strong="on"] {
+#editor .entity-item[data-strong="on"].connect {
 background-color: #FF640A;
 color: #FFF;
 }
@@ -292,6 +297,7 @@ line-height: 1.5;
 word-break: break-all;
 letter-spacing: 0.05em;
 font-size: 12px;
+color: #333;
 }
 
 
@@ -354,6 +360,17 @@ stroke: #FF640A!important;
 }
 .svg-line-translucent[data-strong="on"] {
 opacity: 1!important;
+}
+#editor[data-relation-mode="on"] #svg-area,
+#editor[data-relation-mode="on"] #svg-translucent,
+#editor[data-relation-mode="on"] #svg-mark {
+visibility: hidden;
+}
+#editor[data-relation-mode="on"] .svg-group[data-strong="on"] > .svg-line,
+#editor[data-relation-mode="on"] .svg-line-translucent[data-strong="on"],
+#editor[data-relation-mode="on"] .svg-mark[data-strong="on"],
+#editor[data-relation-mode="on"] .svg-arrow[data-strong="on"] {
+visibility: visible;
 }
 
 .select-menu-group-all-check {

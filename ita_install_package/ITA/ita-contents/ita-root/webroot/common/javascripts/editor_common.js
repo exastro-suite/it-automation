@@ -80,7 +80,7 @@ editorFunction.getParamAll = function () {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-editorFunction.textEntities = function( text ) {
+editorFunction.textEntities = function( text, spaceFlag, brFlag ) {
     const entities = [
       ['&', 'amp'],
       ['\"', 'quot'],
@@ -91,8 +91,10 @@ editorFunction.textEntities = function( text ) {
     for ( var i = 0; i < entities.length; i++ ) {
       text = text.replace( new RegExp( entities[i][0], 'g'), '&' + entities[i][1] + ';' );
     }
-    text = text.replace(/^\s+|\s+$/g, '');
-    text = text.replace(/\r?\n/g, '<br>');
+    if ( spaceFlag !== false ) spaceFlag = true;
+    if ( spaceFlag === true ) text = text.replace(/^\s+|\s+$/g, '');
+    if ( brFlag !== false ) brFlag = true;
+    if ( brFlag === true ) text = text.replace(/\r?\n/g, '<br>');
     return text;
 };
 
