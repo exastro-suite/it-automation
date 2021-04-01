@@ -461,7 +461,7 @@ function createEntityHTML() {
     
         const menuGroupData = menuGroupList.MENU_GROUP[i],
               menuGroupID = menuGroupData.ID,
-              menuGroupName = menuGroupData.NAME,
+              menuGroupName = editor.textEntities( menuGroupData.NAME, false ).replace(/\s/g, '&nbsp;'),
               menuLength = menuGroupData.MENU.length;
 
         // Menu順番ソート
@@ -486,7 +486,7 @@ function createEntityHTML() {
 
                 const menuData = menuGroupData.MENU[j],
                       entityID = menuData.ID,
-                      entityTitle = menuData.NAME,
+                      entityTitle = editor.textEntities( menuData.NAME, false ).replace(/\s/g, '&nbsp;'),
                       topColumns = menuData.COLUMNS,
                       groupItem = menuData.GROUP_ITEM;
                 
@@ -507,10 +507,11 @@ function createEntityHTML() {
                       const length = columns.length;
                       for ( let k = 0; k < length; k++ ) {
                         const column = columns[k],
-                              type = groupItem[column].TYPE;
+                              type = groupItem[column].TYPE,
+                              itemName = editor.textEntities( groupItem[column].LOGICAL_NAME, false );
                         if ( type === 'ITEM' ) {
                           html += '<div id="e' + entityID + '__' + groupItem[column].PHYSICAL_NAME + '" class="entity-item">';
-                          html += groupItem[column].LOGICAL_NAME;
+                          html += itemName;
                           html += '</div>';
                           // リレーション情報
                           if ( groupItem[column].RELATION_MENU_ID.length > 0 && groupItem[column].RELATION_COLUMN_ID !== '' ) {
@@ -521,10 +522,9 @@ function createEntityHTML() {
                             ]);
                           }
                         } else if ( type === 'GROUP' ) {
-                          const groupTitle = groupItem[column].LOGICAL_NAME;
                           html += ''
                             + '<div class="entity-group">'
-                              + '<div class="entity-group-name">' + groupTitle + '</div>';
+                              + '<div class="entity-group-name">' + itemName + '</div>';
                           columnsHTML( groupItem[column].COLUMNS );
                           html += '</div>';
                         }
@@ -859,50 +859,80 @@ resetArtBoard();
 //   リレーション強調
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 強調解除
+const resetRelationStrong = function() {
+  const relationMode = $editor.attr('data-relation-mode');
+  if ( relationMode !== 'on' ) {
+    $editor.find('[data-strong="on"]').removeAttr('data-strong');
+  }
+};
+
+// 強調固定
+const setRelationStrong = function() {
+  const relationMode = $editor.attr('data-relation-mode');
+  if ( relationMode !== 'on' ) {
+    $editor.attr('data-relation-mode', 'on');
+    setTimeout( function(){
+      $window.on('click.relationMode', function(){
+        $window.off('click.relationMode');
+        $editor.removeAttr('data-relation-mode');
+        $editor.find('[data-strong="on"]').removeAttr('data-strong');
+      });
+    }, 100 );
+  }
+};
+
+// 出力
 $editor.on({
   'mouseenter': function(){
-    const $item = $( this ),
-          id = $item.attr('id'),
-          flag = $editor.attr('data-relation');
+    const relationMode = $editor.attr('data-relation-mode');
+    if ( relationMode !== 'on' ) {
+      const $item = $( this ),
+            id = $item.attr('id'),
+            flag = $editor.attr('data-relation');
     
-    if ( relationOutArray[id] !== undefined ) {
-      const relationLength = relationOutArray[id].length;
-      $item.attr('data-strong','on');
-      for ( let i = 0; i < relationLength; i++ ) {
-        const $target = $('#' + relationOutArray[id][i] );
-        if ( flag === 'on' && $target.length ) {
-          $target.attr('data-strong','on');
-          $('[data-target="'+id+relationOutArray[id][i]+'"]').attr('data-strong','on');
+      if ( relationOutArray[id] !== undefined ) {
+        const relationLength = relationOutArray[id].length;
+        $item.attr('data-strong','on');
+        for ( let i = 0; i < relationLength; i++ ) {
+          const $target = $('#' + relationOutArray[id][i] );
+          if ( flag === 'on' && $target.length ) {
+            $target.attr('data-strong','on');
+            $('[data-target="'+id+relationOutArray[id][i]+'"]').attr('data-strong','on');
+          }
         }
       }
     }
   },
-  'mouseleave': function(){
-    $editor.find('[data-strong="on"]').removeAttr('data-strong');
-  }
+  'mouseleave': resetRelationStrong,
+  'click': setRelationStrong
 }, '.connect-out');
 
+// 入力
 $editor.on({
   'mouseenter': function(){
-    const $item = $( this ),
-          id = $item.attr('id'),
-          flag = $editor.attr('data-relation');
-    
-    if ( relationInArray[id] !== undefined ) {
-      const relationLength = relationInArray[id].length;
-      $item.attr('data-strong','on');
-      for ( let i = 0; i < relationLength; i++ ) {
-        const $target = $('#' + relationInArray[id][i] );
-        if ( flag === 'on' && $target.length ) {
-          $target.attr('data-strong','on');
-          $('[data-target="'+relationInArray[id][i]+id+'"]').attr('data-strong','on');
+    const relationMode = $editor.attr('data-relation-mode');
+    if ( relationMode !== 'on' ) {
+      const $item = $( this ),
+            id = $item.attr('id'),
+            flag = $editor.attr('data-relation');
+
+      if ( relationInArray[id] !== undefined ) {
+        const relationLength = relationInArray[id].length;
+        $item.attr('data-strong','on');
+        for ( let i = 0; i < relationLength; i++ ) {
+          const $target = $('#' + relationInArray[id][i] );
+          if ( flag === 'on' && $target.length ) {
+            $target.attr('data-strong','on');
+            $('[data-target="'+relationInArray[id][i]+id+'"]').attr('data-strong','on');
+          }
         }
       }
     }
   },
-  'mouseleave': function(){
-    $editor.find('[data-strong="on"]').removeAttr('data-strong');
-  }
+  'mouseleave': resetRelationStrong,
+  'click': setRelationStrong
 }, '.connect-in');
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1023,9 +1053,26 @@ const toggleRelation = function() {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const erPrint = function() {
+    // タイトルの変更（ファイル名）
+    const $title = $('html').find('title'),
+          title = $title.text(),
+          showMenuArray = new Array(),
+          maxFileNameLength = 128;
+    $editor.find('.menu-group').each( function(){
+      showMenuArray.push( $( this ).find('.menu-group-name-inner').text() );
+    });
+    let fileName = showMenuArray.join('_');
+    if ( fileName.length > 128 ) {
+      fileName = fileName.substr( 0, maxFileNameLength ) + '...';
+    }
+    const printTitle = 'er(' + fileName + ')';
     $body.addClass('print');
     entityViewAll(0);
+    
+    $title.text( printTitle );
     window.print();
+    
+    $title.text( title );
     $body.removeClass('print');
     entityViewAll(0);
 };
