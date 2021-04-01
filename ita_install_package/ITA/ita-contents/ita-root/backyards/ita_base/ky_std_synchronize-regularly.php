@@ -152,6 +152,10 @@
     $intErrorFlag                 = 0;        // 異常フラグ(1：異常発生)
     $boolInTransactionFlag = false;
 
+    ////////////////////////////////
+    // グローバル変数宣言         //
+    ////////////////////////////////
+    global $g;
 
     ////////////////////////////////
     // 共通モジュールの呼び出し   //
@@ -184,6 +188,10 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-STD-160007"); //[処理]最初の次回実行日付取得(開始)
             require ($root_dir_path . $log_output_php );
         }
+
+        //グローバル変数設定
+        $g['objMTS'] = $objMTS;
+        $g['objDBCA'] = $objDBCA;
 
         // 更新用のテーブル定義
         $aryConfigForIUD = $aryConfigForRegListIUD;
@@ -429,10 +437,13 @@
             $registerFailedSymphonyInstance = false;
             //次回実行日付が過ぎた場合のフラグ(初期値はfalse)
             $passedNextExecutionDate = false;
+            //インスタンス実行前エラーフラグ
+            $beforeExecuteCheckFlag = false;
             //実行ユーザの廃止フラグ
             $userAbolishedFlag = false;
             //実行ユーザID
             $executionUserId = $rowOfReguralyList['EXECUTION_USER_ID'];
+            $g['login_id'] = $executionUserId;
 
             //実行ユーザIDから実行ユーザ名を取得
             $strSqlUtnBody = "SELECT * FROM D_ACCOUNT_LIST WHERE USER_ID = :USER_ID";
