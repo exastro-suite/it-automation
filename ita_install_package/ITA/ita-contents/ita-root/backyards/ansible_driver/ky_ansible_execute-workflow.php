@@ -440,15 +440,14 @@
             $log_file_postfix = ".log";
             $logfile = $log_output_dir .'/' . $log_file_prefix . date("Ymd",$tmpVarTimeStamp) . $log_file_postfix;
 
-            $cmd = sprintf("%s %s%s %s %010s %s-%010s >> %s 2>&1 &",
+            $cmd = sprintf("%s %s%s %s %010s %s-%010s &",
                             $php_command,
                             $root_dir_path,
                             "/backyards/ansible_driver/ky_ansible_execute-child-workflow.php",
                             $vg_driver_id,
                             $tgt_execution_no,
                             $tgt_driver_name,
-                            $tgt_execution_no,
-                            $logfile);
+                            $tgt_execution_no);
 
             // トレースメッセージ
             if ( $log_level === 'DEBUG' ){
