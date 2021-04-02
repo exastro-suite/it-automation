@@ -361,12 +361,13 @@ stroke: #FF640A!important;
 .svg-line-translucent[data-strong="on"] {
 opacity: 1!important;
 }
-#editor[data-relation-mode="on"] #svg-area,
-#editor[data-relation-mode="on"] #svg-translucent,
-#editor[data-relation-mode="on"] #svg-mark {
+#editor[data-relation-mode="on"] .svg-group > *,
+#editor[data-relation-mode="on"] .svg-line-translucent,
+#editor[data-relation-mode="on"] .svg-mark,
+#editor[data-relation-mode="on"] .svg-arrow {
 visibility: hidden;
 }
-#editor[data-relation-mode="on"] .svg-group[data-strong="on"] > .svg-line,
+#editor[data-relation-mode="on"] .svg-group[data-strong="on"] > *,
 #editor[data-relation-mode="on"] .svg-line-translucent[data-strong="on"],
 #editor[data-relation-mode="on"] .svg-mark[data-strong="on"],
 #editor[data-relation-mode="on"] .svg-arrow[data-strong="on"] {
