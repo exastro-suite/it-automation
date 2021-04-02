@@ -878,62 +878,51 @@ const setRelationStrong = function() {
         $window.off('click.relationMode');
         $editor.removeAttr('data-relation-mode');
         $editor.find('[data-strong="on"]').removeAttr('data-strong');
+        if ( $editor.find('.entity-item.connect.hover').length ) {
+          relationConnect( $editor.find('.entity-item.connect.hover') );
+        }
       });
-    }, 100 );
+    }, 10 );
+  }
+};
+
+// リレーション接続
+const relationConnect = function( $item ) {
+  const relationMode = $editor.attr('data-relation-mode');
+  if ( relationMode !== 'on' ) {
+    const id = $item.attr('id'),
+          flag = $editor.attr('data-relation'),
+          type = ( $item.is('.connect-in') )? 'in': 'out',
+          itemArray = ( type === 'in')? relationInArray: relationOutArray;
+
+    if ( itemArray[id] !== undefined ) {
+      const relationLength = itemArray[id].length;
+      $item.attr('data-strong','on');
+      for ( let i = 0; i < relationLength; i++ ) {
+        const $target = $('#' + itemArray[id][i] );
+        if ( flag === 'on' && $target.length ) {
+          $target.attr('data-strong', 'on');
+          const lineTarget = ( type === 'in')? itemArray[id][i] + id: id + itemArray[id][i];
+          $('[data-target="' + lineTarget + '"]').attr('data-strong','on');
+        }
+      }
+    }
   }
 };
 
 // 出力
 $editor.on({
   'mouseenter': function(){
-    const relationMode = $editor.attr('data-relation-mode');
-    if ( relationMode !== 'on' ) {
-      const $item = $( this ),
-            id = $item.attr('id'),
-            flag = $editor.attr('data-relation');
-    
-      if ( relationOutArray[id] !== undefined ) {
-        const relationLength = relationOutArray[id].length;
-        $item.attr('data-strong','on');
-        for ( let i = 0; i < relationLength; i++ ) {
-          const $target = $('#' + relationOutArray[id][i] );
-          if ( flag === 'on' && $target.length ) {
-            $target.attr('data-strong','on');
-            $('[data-target="'+id+relationOutArray[id][i]+'"]').attr('data-strong','on');
-          }
-        }
-      }
-    }
+    const $item = $( this );
+    $item.addClass('hover');
+    relationConnect( $item );
   },
-  'mouseleave': resetRelationStrong,
-  'click': setRelationStrong
-}, '.connect-out');
-
-// 入力
-$editor.on({
-  'mouseenter': function(){
-    const relationMode = $editor.attr('data-relation-mode');
-    if ( relationMode !== 'on' ) {
-      const $item = $( this ),
-            id = $item.attr('id'),
-            flag = $editor.attr('data-relation');
-
-      if ( relationInArray[id] !== undefined ) {
-        const relationLength = relationInArray[id].length;
-        $item.attr('data-strong','on');
-        for ( let i = 0; i < relationLength; i++ ) {
-          const $target = $('#' + relationInArray[id][i] );
-          if ( flag === 'on' && $target.length ) {
-            $target.attr('data-strong','on');
-            $('[data-target="'+relationInArray[id][i]+id+'"]').attr('data-strong','on');
-          }
-        }
-      }
-    }
+  'mouseleave': function(){
+    $( this ).removeClass('hover');
+    resetRelationStrong();
   },
-  'mouseleave': resetRelationStrong,
   'click': setRelationStrong
-}, '.connect-in');
+}, '.entity-item.connect');
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
