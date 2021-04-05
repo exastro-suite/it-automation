@@ -142,18 +142,14 @@ func_install_messasge() {
         MESSAGE="Createparam2"
     fi
 
+    if [ CREATEPARAM3_FLG = ${1} ]; then
+        MESSAGE="Createparam3"
+    fi
+
     if [ HOSTGROUP_FLG = ${1} ]; then
         MESSAGE="Hostgroup"
     fi
 
-    if [ HOSTGROUP2_FLG = ${1} ]; then
-        MESSAGE="Hostgroup2"
-    fi
-
-    if [ HOSTGROUP3_FLG = ${1} ]; then
-        MESSAGE="Hostgroup3"
-    fi    
-    
     echo "$MESSAGE"
 }
 
@@ -183,9 +179,8 @@ MATERIAL2_FLG=0
 MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
+CREATEPARAM3_FLG=0
 HOSTGROUP_FLG=0
-HOSTGROUP2_FLG=0
-HOSTGROUP3_FLG=0
 
 #インストール済みフラグ配列
 INSTALLED_FLG_LIST=(
@@ -198,9 +193,8 @@ INSTALLED_FLG_LIST=(
     MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
+    CREATEPARAM3_FLG
     HOSTGROUP_FLG
-    HOSTGROUP2_FLG
-    HOSTGROUP3_FLG
 )
 
 #リリースファイル設置作成関数用配列
@@ -215,8 +209,6 @@ RELEASE_PLASE=(
     ita_material4
     ita_createparam
     ita_hostgroup
-    ita_hostgroup2
-    ita_hostgroup3
 )
 
 #ディレクトリ変数定義
@@ -460,14 +452,11 @@ fi
 if [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_createparam" ] && [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_ansible-driver" ] ; then
     CREATEPARAM2_FLG=1
 fi
+if [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_createparam" ] &&  [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_hostgroup" ] ; then
+    CREATEPARAM3_FLG=1
+fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_hostgroup" ; then
     HOSTGROUP_FLG=1
-fi
-if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_hostgroup2" ; then
-    HOSTGROUP2_FLG=1
-fi
-if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_hostgroup3" ; then
-    HOSTGROUP3_FLG=1
 fi
 
 ############################################################
@@ -703,7 +692,7 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
     #その他必要なスクリプトを実行する
     SHELL_FILE="${VERSION_UP_DIR}/${LIST_VERSION}/other_exec.sh"
     if test -e ${SHELL_FILE} ; then
-        sh ${SHELL_FILE} >> "$LOG_FILE" 2>&1
+        sh ${SHELL_FILE} ${ITA_DIRECTORY} >> "$LOG_FILE" 2>&1
     fi
 
 done < ${VERSION_UP_LIST_FILE}
