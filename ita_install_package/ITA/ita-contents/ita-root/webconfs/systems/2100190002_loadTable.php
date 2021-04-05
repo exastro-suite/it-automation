@@ -73,7 +73,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-310105"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
     $c->setRequired(true);
-    $c->setUnique(true);
+    
     $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
 
@@ -814,8 +814,16 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-ERR-310101");
                 $boolExecuteContinue = false;
                 $retBool = false;
-            }else if( strlen($intRestContratColId1) === 0 || strlen($intRestContratColId2) === 0  ){
-                if( strlen($intContratColId1) === 0 || strlen($intContratColId1) === 0  ){
+            }elseif( $intRestContratColId1 == "" && $intRestContratColId2 == ""  ){
+                //WEB
+                if( $intContratColId1 == "" || $intContratColId2 == ""  ){
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-ERR-310100");
+                    $boolExecuteContinue = false;
+                    $retBool = false;                    
+                }
+            }elseif( $intContratColId1 == "" && $intContratColId2 == ""  ){
+                //RestAPI/Excel/CSV 
+                if( $intRestContratColId1 == "" || $intRestContratColId2 == ""  ){
                     $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-ERR-310100");
                     $boolExecuteContinue = false;
                     $retBool = false;                    

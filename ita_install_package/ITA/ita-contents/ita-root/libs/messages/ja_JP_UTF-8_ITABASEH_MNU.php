@@ -662,6 +662,7 @@ $ary["ITABASEH-MNU-310219"]         = "Excel出力";
 $ary["ITABASEH-MNU-310220"]         = "CSV出力";
 $ary["ITABASEH-MNU-310221"]         = "指定した条件で比較対象となるデータがありません";
 $ary["ITABASEH-MNU-310222"]         = "メイリオ";
+$ary["ITABASEH-MNU-310223"]         = "差分なし";
 $ary["ITABASEH-MNU-900001"]         = "エクスポート";
 $ary["ITABASEH-MNU-900002"]         = "アップロード";
 $ary["ITABASEH-MNU-900003"]         = "インポート";
