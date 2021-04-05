@@ -660,6 +660,7 @@ $ary["ITABASEH-MNU-310219"]         = "Excel output";
 $ary["ITABASEH-MNU-310220"]         = "CSV output";
 $ary["ITABASEH-MNU-310221"]         = "There is no data to compare under the specified conditions";
 $ary["ITABASEH-MNU-310222"]         = "Arial";
+$ary["ITABASEH-MNU-310223"]         = "No Difference";
 $ary["ITABASEH-MNU-900001"]         = "Export";
 $ary["ITABASEH-MNU-900002"]         = "Upload";
 $ary["ITABASEH-MNU-900003"]         = "Import";
