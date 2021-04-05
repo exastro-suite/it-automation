@@ -4899,6 +4899,7 @@ class OrchestratorLinkAgent {
                                   ,'FOCUS_NODE_SEQ'=>$intFocusMovementSeq
                                   ,'FOCUS_NODE_ROW'=>$rowOfFocusMovement
                                   ,'RUNS_NODE'=>$aryRunningMovement
+                                   ,'ERR_NODE'=>$aryAbortedMovement
                               );
         }
         catch (Exception $e){
