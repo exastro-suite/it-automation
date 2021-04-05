@@ -956,7 +956,16 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                     $arrContrastColOriList[$tmpColName][$tmpMenuId] = $tmpColTitle;
                     
                     if( $arrContrastMenuList[$intcnt] != $tmpMenuId  ){
-                        exit;
+                        $strStreamOfContrastResult=array(array(),array());
+                        $strResultCode = sprintf("%03d", "");
+                        $strDetailCode = sprintf("%03d", "");
+                        $arrayResult = array($strResultCode,
+                                             $strDetailCode,
+                                             $strStreamOfContrastResult,
+                                             $strExpectedErrMsgBodyForUI
+                                             );
+                        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+                        return $arrayResult;
                     }
 
                     $arrContrastList[$tmpMenuId]=$tmpTableName;
@@ -1587,6 +1596,8 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                     $arrdiffResult[$hostname] = $resultcode;
                 }elseif( $arrdiffResult[$hostname] ==  ""  && $resultcode != "" ){
                     $arrdiffResult[$hostname] = $resultcode;
+                }elseif( $arrdiffResult[$hostname] ==  ""  && $resultcode == "" ){
+                    $arrdiffResult[$hostname] = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310223");#"差分なし";
                 }
                 if( $tmpMenuid1 != $tmpMenuid2 ){
                     $arrtdlistflg[$hostname][$tmpMenuid1][$colname1] = $resultcode;
@@ -1819,7 +1830,7 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                         $tmpConstResultflg[]="";#$rowNo;
 
                         $flgval="";
-                        if( $arrdiffResult[$hostname] != "" )$flgval="1";
+                        if( $arrdiffResult[$hostname] != $g['objMTS']->getSomeMessage("ITABASEH-MNU-310223") )$flgval="1";#"差分なし"
                         $tmpConstResultflg[]=$flgval;
 
                         foreach ($arrcolval as $tmpcol =>  $value) {
@@ -1842,7 +1853,7 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                     $tmpConstResultflg= array();
                     $tmpConstResultflg[]="";#$rowNo;
                     $flgval="";
-                    if( $arrdiffResult[$hostname] != "" )$flgval="1";
+                    if( $arrdiffResult[$hostname] != $g['objMTS']->getSomeMessage("ITABASEH-MNU-310223")  )$flgval="1";#"差分なし"
                     $tmpConstResultflg[]=$flgval;
 
                     foreach ($tmpcolval[0] as $tmpcol =>  $value) {
@@ -2080,14 +2091,4 @@ function execsql($strQuery,$bindkeyVlaue){
 };
 
 
-//デバッグ用
-function debug_output($g,$d_array,$fnc=" ",$lin=" "){
-    $file = $g['root_dir_path'] . "/temp/debug" .date('Ymd') . ".txt";
-    file_put_contents($file, PHP_EOL . date('Y-m-d H:i:s') . " " . $fnc ." " . $lin . PHP_EOL, FILE_APPEND);
-    error_log(print_r($d_array, true), 3, $file);
-    echo('<pre>');
-    print_r( $d_array );
-    echo('</pre>');
-
-}
 ?>
