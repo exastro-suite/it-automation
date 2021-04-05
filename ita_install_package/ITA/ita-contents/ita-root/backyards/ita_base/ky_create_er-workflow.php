@@ -442,6 +442,8 @@ function insertERData($erBindAry){
                                           array(basename(__FILE__), __LINE__)));
     }
 
+    $erBindAry = raplaceColumnName($erBindAry);
+
     $sql = "INSERT INTO B_ER_DATA (
                 ROW_ID,
                 MENU_TABLE_LINK_ID,
@@ -1238,17 +1240,23 @@ function getInfoOfLoadTableForER($strMenuIdNumeric,&$aryVariant=array(), &$arySe
             $groupColumnListArray = array(); // グループがある場合、ITEMのIDを入れておく
             $groupListArray       = array(); // グループがある場合、グループのIDを管理する
             $groupDetailListArray = array(); // グループがある場合、グループIDとグループ名の対応リストを入れておく
+            $childColListArray    = array();
 
             $NGList = getNGList($strMenuIdNumeric);
-            // ^G[0-9]+$
-            // ^I[0-9]+$
 
             foreach ($ColLabelForERList as $colsInfo) {
+                $fullName = "";
                 // グループがあるかどうか判定
                 if ( !empty($colsInfo["GROUP"]) ) {
                     foreach ($colsInfo["GROUP"] as $key => $colInfo) {
+                        if ($key == 0) {
+                            $fullName = "$colInfo";
+                        } else {
+                            $fullName = "$fullName/$colInfo";
+                        }
+
                         // すでに入ってるグループかどうか判定、なければ入れる。
-                        if ( !in_array( $colInfo, array_column( $groupDetailListArray, 'NAME')) ) {
+                        if ( !in_array( $fullName, array_column( $groupDetailListArray, 'FULL_NAME')) ) {
                             $gID                          = "G$g"; // グループID
                             $groupListArray[]             = "G$g"; // グループIDリストにin
 
@@ -1260,15 +1268,27 @@ function getInfoOfLoadTableForER($strMenuIdNumeric,&$aryVariant=array(), &$arySe
                             }
                             // グループ情報を管理
                             $groupDetailListArray[] = array(
-                                "ID"   => $gID,
-                                "NAME" => $colInfo,
+                                "ID"        => $gID,
+                                "NAME"      => $colInfo,
+                                "FULL_NAME" => $fullName
                             );
 
 
                             // 親
                             $parent = "";
                             if ($key > 0) {
-                                $parent = "G" . strval($g - $key);
+                                $parentName = $colsInfo["GROUP"][$key-1];
+
+                                $parentFullName = "";
+                                for ($p = 0; $p < $key; $p++) {
+                                    if ($parentFullName == "") {
+                                        $parentFullName = $colsInfo["GROUP"][$p];
+                                    } else {
+                                        $parentFullName = "$parentFullName/" . $colsInfo["GROUP"][$p];
+                                    }
+                                }
+                                $parentIndex = array_search($parentFullName, array_column( $groupDetailListArray, 'FULL_NAME'));
+                                $parent = $groupDetailListArray[$parentIndex]["ID"];
                                 $result["GROUP"][$parent]["COLUMNS"][] = $gID;
                             }
 
@@ -1292,23 +1312,42 @@ function getInfoOfLoadTableForER($strMenuIdNumeric,&$aryVariant=array(), &$arySe
             $dispSeqArray        = array();
             foreach ($ColLabelForERList as $colsInfo) {
                 $iID = "I$i"; // ITEMのID
+                $fullName = "";
                 if ( in_array( $iID, array_column( $NGList, 'COLUMN_ID')) ) {
                     while (in_array( $iID, array_column( $NGList, 'COLUMN_ID'))) {
                         $i++;
                         $iID = "I$i";
                     }
                 }
-                // グループがない場合
+
+                // グループがある場合
                 if ( !empty($colsInfo["GROUP"]) ) {
+                    foreach ($colsInfo["GROUP"] as $key => $colInfo) {
+                        if ($fullName == "") {
+                            $fullName = $colInfo;
+                        } else {
+                            $fullName = "$fullName/$colInfo";
+                        }
+                    }
+
                     $trgGroup = $colsInfo["GROUP"][count($colsInfo["GROUP"]) - 1];
                     // グループがある場合は対象グループ配下のカラムリストに入る
-                    $groupNum = array_search( $trgGroup, array_column( $groupDetailListArray, 'NAME'));
+                    $groupNum = array_search($fullName, array_column( $groupDetailListArray, 'FULL_NAME'));
+
                     $groupKey = $groupDetailListArray[$groupNum]["ID"];
                     $result["GROUP"][$groupKey]["COLUMNS"][] = $iID;
-                    if (!in_array($groupKey, $colListArray)) {
+                    // PARENTがあれば上位層のものを辿って入れる。
+                    if (!in_array($groupKey, $colListArray) && $result["GROUP"][$groupKey]["PARENT"] != "") {
+                        $parentKey = $result["GROUP"][$groupKey]["PARENT"];
+                        if (!in_array($parentKey, $colListArray) && $result["GROUP"][$parentKey]["PARENT"] == "") {
+                            $colListArray[] = $parentKey;
+                        }
+                    }
+                    else if (!in_array($groupKey, $colListArray) && $result["GROUP"][$groupKey]["PARENT"] == "") {
                         $colListArray[] = $groupKey;
                     }
-                } else {
+                }
+                else {
                     // グループがないので1階層目に入れる
                     $colListArray[] = $iID;
                 }
@@ -1685,4 +1724,279 @@ function claerExecFlg(){
     }
 
     return true;
+}
+
+/**
+ * 関連テーブル名と関連カラムをリストに従って変換する
+ *
+ * @param    array    $erBindAry    変換前の情報
+ * @return   array    $erBindAry    変換後の情報
+ */
+function raplaceColumnName($erBindAry){
+    // 変換リスト
+    $replaceColumnList = array(
+        // 変換例
+        // array(
+        //     "BEFORE_TABLE_NAME"  => "BEFORE_TABLE",
+        //     "BEFORE_COLUMN_ID" => "BEFORE_COLUMN",
+        //     "AFTER_TABLE_NAME"   => "AFTER_TABLE",
+        //     "AFTER_COLUMN_ID"  => "AFTER_COLUMN",
+        // ),
+        array(
+            "BEFORE_TABLE_NAME" => "G_CREATE_ITEM_INFO",
+            "BEFORE_COLUMN_ID"  => "LINK_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "F_CREATE_ITEM_INFO",
+            "AFTER_COLUMN_ID"   => "ITEM_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_MENU_LIST",
+            "BEFORE_COLUMN_ID"  => "MENU_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "D_MENU_LIST",
+            "AFTER_COLUMN_ID"   => "MENU_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_MENU_LIST",
+            "BEFORE_COLUMN_ID"  => "MENU_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "D_MENU_LIST",
+            "AFTER_COLUMN_ID"   => "MENU_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_MENU_LIST",
+            "BEFORE_COLUMN_ID"  => "MENU_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "D_MENU_LIST",
+            "AFTER_COLUMN_ID"   => "MENU_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK",
+            "BEFORE_COLUMN_ID"  => "ORGANIZATION_WORKSPACE",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_WORKSPACES",
+            "AFTER_COLUMN_ID"   => "WORKSPACE_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_POLICY_SETS",
+            "BEFORE_COLUMN_ID"  => "POLICY_SET",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_POLICY_SETS",
+            "AFTER_COLUMN_ID"   => "POLICY_SET_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_POLICY",
+            "BEFORE_COLUMN_ID"  => "POLICY",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_POLICY",
+            "AFTER_COLUMN_ID"   => "POLICY_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_POLICY_SETS",
+            "BEFORE_COLUMN_ID"  => "POLICY_SET",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_POLICY_SETS",
+            "AFTER_COLUMN_ID"   => "POLICY_SET_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK",
+            "BEFORE_COLUMN_ID"  => "ORGANIZATION_WORKSPACE",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_WORKSPACES",
+            "AFTER_COLUMN_ID"   => "WORKSPACE_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "E_TERRAFORM_PATTERN",
+            "BEFORE_COLUMN_ID"  => "PATTERN",
+            "AFTER_TABLE_NAME"  => "E_TERRAFORM_PATTERN",
+            "AFTER_COLUMN_ID"   => "PATTERN_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_MODULE",
+            "BEFORE_COLUMN_ID"  => "MODULE",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_MODULE",
+            "AFTER_COLUMN_ID"   => "MODULE_MATTER_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "E_TERRAFORM_PATTERN",
+            "BEFORE_COLUMN_ID"  => "PATTERN",
+            "AFTER_TABLE_NAME"  => "E_TERRAFORM_PATTERN",
+            "AFTER_COLUMN_ID"   => "PATTERN_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_PTN_VARS_LINK",
+            "BEFORE_COLUMN_ID"  => "VARS_LINK_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_MODULE_VARS_LINK",
+            "AFTER_COLUMN_ID"   => "VARS_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_PTN_VARS_LINK",
+            "BEFORE_COLUMN_ID"  => "VARS_LINK_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_MODULE_VARS_LINK",
+            "AFTER_COLUMN_ID"   => "VARS_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "E_TERRAFORM_PATTERN",
+            "BEFORE_COLUMN_ID"  => "PATTERN",
+            "AFTER_TABLE_NAME"  => "E_TERRAFORM_PATTERN",
+            "AFTER_COLUMN_ID"   => "PATTERN_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_PTN_VARS_LINK",
+            "BEFORE_COLUMN_ID"  => "VARS_LINK_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_MODULE_VARS_LINK",
+            "AFTER_COLUMN_ID"   => "VARS_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_CMDB_MENU_LIST_CONTRAST",
+            "BEFORE_COLUMN_ID"  => "MENU_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "D_CMDB_MENU_LIST",
+            "AFTER_COLUMN_ID"   => "MENU_ID_CLONE_02"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_CONTRAST_LIST",
+            "BEFORE_COLUMN_ID"  => "PULLDOWN",
+            "AFTER_TABLE_NAME"  => "A_CONTRAST_LIST",
+            "AFTER_COLUMN_ID"   => "CONTRAST_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_CMDB_MG_MU_COL_LIST_CONTRAST",
+            "BEFORE_COLUMN_ID"  => "MENU_COL_TITLE_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "B_CMDB_MENU_COLUMN",
+            "AFTER_COLUMN_ID"   => "COL_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "G_FILE_MASTER",
+            "BEFORE_COLUMN_ID"  => "FILE_NAME_FULLPATH",
+            "AFTER_TABLE_NAME"  => "G_FILE_MASTER",
+            "AFTER_COLUMN_ID"   => "FILE_ID_CLONE",
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_MENU_LIST",
+            "BEFORE_COLUMN_ID"  => "MENU_GROUP_ID",
+            "AFTER_TABLE_NAME"  => "A_MENU_GROUP_LIST",
+            "AFTER_COLUMN_ID"   => "MENU_GROUP_ID",
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_MENU_LIST",
+            "BEFORE_COLUMN_ID"  => "MENU_GROUP_NAME",
+            "AFTER_TABLE_NAME"  => "A_MENU_GROUP_LIST",
+            "AFTER_COLUMN_ID"   => "MENU_GROUP_NAME",
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_CMDB_TARGET_MENU_LIST",
+            "BEFORE_COLUMN_ID"  => "MENU_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "A_MENU_LIST",
+            "AFTER_COLUMN_ID"   => "MENU_NAME",
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_ANS_LNS_PTN_VARS_LINK",
+            "BEFORE_COLUMN_ID"  => "VARS_LINK_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "B_ANS_LNS_PTN_VARS_LINK",
+            "AFTER_COLUMN_ID"   => "VARS_NAME_ID"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_ANS_LRL_ARRAY_MEMBER",
+            "BEFORE_COLUMN_ID"  => "VRAS_NAME",
+            "AFTER_TABLE_NAME"  => "B_ANS_LRL_ARRAY_MEMBER",
+            "AFTER_COLUMN_ID"   => "VARS_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_ANS_LRL_MEMBER_COL_COMB",
+            "BEFORE_COLUMN_ID"  => "COMBINATION_MEMBER",
+            "AFTER_TABLE_NAME"  => "B_ANS_LRL_MEMBER_COL_COMB",
+            "AFTER_COLUMN_ID"   => "COL_COMBINATION_MEMBER_ALIAS"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_ANS_PNS_PTN_VARS_LINK",
+            "BEFORE_COLUMN_ID"  => "VARS_LINK_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "B_ANS_PNS_PTN_VARS_LINK",
+            "AFTER_COLUMN_ID"   => "VARS_NAME_ID"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_ANS_TWR_HOST",
+            "BEFORE_COLUMN_ID"  => "ANSTWR_HOSTNAME",
+            "AFTER_TABLE_NAME"  => " B_ANS_TWR_HOST",
+            "AFTER_COLUMN_ID"   => "ANSTWR_HOSTNAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_ANSIBLE_LRL_ROLE_LIST",
+            "BEFORE_COLUMN_ID"  => "ROLE_NAME_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "B_ANSIBLE_LRL_ROLE",
+            "AFTER_COLUMN_ID"   => "ROLE_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_ANSIBLE_LRL_ROLE_PKG_LIST",
+            "BEFORE_COLUMN_ID"  => "ROLE_PACKAGE_NAME_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "B_ANSIBLE_LRL_ROLE_PACKAGE",
+            "AFTER_COLUMN_ID"   => "ROLE_PACKAGE_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_ANS_LRL_PTN_VARS_LINK",
+            "BEFORE_COLUMN_ID"  => "VARS_LINK_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "B_ANSIBLE_LRL_VARS_MASTER",
+            "AFTER_COLUMN_ID"   => "VARS_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_CMDB_MENU_COLUMN_SHEET_TYPE_4",
+            "BEFORE_COLUMN_ID"  => "COL_TITLE",
+            "AFTER_TABLE_NAME"  => "B_CMDB_MENU_COLUMN",
+            "AFTER_COLUMN_ID"   => "COL_TITLE"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_CMDB_MENU_COLUMN_SHEET_TYPE_1_PIONEER",
+            "BEFORE_COLUMN_ID"  => "COL_TITLE",
+            "AFTER_TABLE_NAME"  => "B_CMDB_MENU_COLUMN",
+            "AFTER_COLUMN_ID"   => "COL_TITLE"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_CMDB_MENU_COLUMN_SHEET_TYPE_1",
+            "BEFORE_COLUMN_ID"  => "COL_TITLE",
+            "AFTER_TABLE_NAME"  => "B_CMDB_MENU_COLUMN",
+            "AFTER_COLUMN_ID"   => "COL_TITLE"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK",
+            "AFTER_TABLE_NAME"  => "B_TERRAFORM_WORKSPACES",
+            "BEFORE_COLUMN_ID"  => "ORGANIZATION_WORKSPACE",
+            "AFTER_COLUMN_ID"   => "WORKSPACE_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "E_OPERATION_LIST",
+            "AFTER_TABLE_NAME"  => "C_OPERATION_LIST",
+            "BEFORE_COLUMN_ID"  => "OPERATION",
+            "AFTER_COLUMN_ID"   => "OPERATION_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "E_STM_LIST",
+            "BEFORE_COLUMN_ID"  => "HOST_PULLDOWN",
+            "AFTER_TABLE_NAME"  => "C_STM_LIST",
+            "AFTER_COLUMN_ID"   => "HOSTNAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "E_ANSIBLE_LNS_PATTERN",
+            "BEFORE_COLUMN_ID"  => "PATTERN",
+            "AFTER_TABLE_NAME"  => "E_ANSIBLE_LNS_PATTERN",
+            "AFTER_COLUMN_ID"   => "PATTERN_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "E_ANSIBLE_LRL_PATTERN",
+            "BEFORE_COLUMN_ID"  => "PATTERN",
+            "AFTER_TABLE_NAME"  => "E_ANSIBLE_LRL_PATTERN",
+            "AFTER_COLUMN_ID"   => "PATTERN_NAME"
+        ),
+        array(
+            "BEFORE_TABLE_NAME" => "E_ANSIBLE_PNS_PATTERN",
+            "BEFORE_COLUMN_ID"  => "PATTERN",
+            "AFTER_TABLE_NAME"  => "E_ANSIBLE_PNS_PATTERN",
+            "AFTER_COLUMN_ID"   => "PATTERN_NAME"
+        ),
+    );
+
+    $tmpAry = array_column($replaceColumnList, 'BEFORE_TABLE_NAME');
+    $tableName = preg_replace( '/\A[\p{C}\p{Z}]++|[\p{C}\p{Z}]++\z/u', '', $erBindAry["RELATION_TABLE_NAME"]);
+    $beforeRelationColumnId = preg_replace( '/\A[\p{C}\p{Z}]++|[\p{C}\p{Z}]++\z/u', '', $erBindAry["RELATION_COLUMN_ID"]);
+
+    // 対象テーブルと名前の一致するインデックスリスト
+    $trgIndexList = array_keys($tmpAry, $tableName);
+
+    foreach ($trgIndexList as $index) {
+        if ($replaceColumnList[$index]["BEFORE_COLUMN_ID"] == $beforeRelationColumnId) {
+            $erBindAry["RELATION_TABLE_NAME"] = $replaceColumnList[$index]["AFTER_TABLE_NAME"];
+            $erBindAry["RELATION_COLUMN_ID"]  = $replaceColumnList[$index]["AFTER_COLUMN_ID"];
+        }
+    }
+
+    return $erBindAry;
 }
