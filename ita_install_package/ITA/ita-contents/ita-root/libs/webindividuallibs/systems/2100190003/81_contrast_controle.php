@@ -1593,12 +1593,17 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                 }
                 
                 if( isset( $arrdiffResult[$hostname])  !== true  ){
+                    if( $resultcode == "" ){
+                        $arrdiffResult[$hostname] = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310223");#"差分なし";
+                    }else{
+                        $arrdiffResult[$hostname] = $resultcode;
+                    }
+                }elseif( $arrdiffResult[$hostname] == $g['objMTS']->getSomeMessage("ITABASEH-MNU-310223")  && $resultcode != "" ){
                     $arrdiffResult[$hostname] = $resultcode;
-                }elseif( $arrdiffResult[$hostname] ==  ""  && $resultcode != "" ){
-                    $arrdiffResult[$hostname] = $resultcode;
-                }elseif( $arrdiffResult[$hostname] ==  ""  && $resultcode == "" ){
+                }elseif( $arrdiffResult[$hostname] == $g['objMTS']->getSomeMessage("ITABASEH-MNU-310223")  && $resultcode == "" ){
                     $arrdiffResult[$hostname] = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310223");#"差分なし";
                 }
+
                 if( $tmpMenuid1 != $tmpMenuid2 ){
                     $arrtdlistflg[$hostname][$tmpMenuid1][$colname1] = $resultcode;
                     $arrtdlistflg[$hostname][$tmpMenuid2][$colname2] = $resultcode;
