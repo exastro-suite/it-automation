@@ -317,7 +317,7 @@ $itaTable.find('.input_required').closest('th').addClass('requiredColumn');
 $itaTable.find('.tdInner').filter( function(){
   const offsetWidth = this.offsetWidth,
         scrollWidth = this.scrollWidth;
-  if ( scrollWidth - offsetWidth > 1 ) {
+  if ( scrollWidth - offsetWidth > 1 && !$( this ).find('select').length ) {
     return true;
   } else {
     return false;
@@ -1264,10 +1264,32 @@ $itaTable.find('.richFilterSelectListCaller').on('click', function(){
     // 監視を解除
     observer.disconnect();
     // select2を選択状態にする
-    $target.find('.select2-search__field').click();
+    $target.find('.select2-search__field').click().trigger('mousedown');
   });
   // 監視を開始
   observer.observe( $target.get(0), { childList: true });
+});
+
+// select2が画面からはみ出る場合調整する
+$itaTable.on('mousedown', '.select2-search__field, .select2-selection', function(){
+    const $select2 = $( this ).closest('.select2-container'),
+          tableScrollWidth = $tableScroll.outerWidth(),
+          scrollLeft = $tableScroll.scrollLeft(),
+          positionLeft = $select2.offset().left - $tableScroll.offset().left,
+          select2Width = $select2.outerWidth(),
+          padding = 4;
+
+    if ( tableScrollWidth < positionLeft + select2Width ) {
+        // 右側にあふれている
+        const scroll = ( positionLeft + scrollLeft ) + select2Width - tableScrollWidth + padding;
+        if ( scroll > 0 ) {
+            $tableScroll.scrollLeft( scroll ).trigger('scroll');
+        }
+    } else if ( positionLeft < 0 ) {
+        // 左側にあふれている
+        $tableScroll.scrollLeft( positionLeft + scrollLeft - padding ).trigger('scroll');
+    }
+
 });
 
 $itaTableHeading.on('click', function(){
