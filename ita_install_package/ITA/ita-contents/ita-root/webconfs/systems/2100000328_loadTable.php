@@ -160,7 +160,7 @@ $tmpFx = function (&$aryVariant=[], &$arySetting=[]) {
     $table->addColumn($c);
 
     // 論理名
-    $c = new TextColumn('LOGICAL_NAME', $g['objMTS']->getSomeMessage("ITABASEH-MNU-120005"));
+    $c = new MultiTextColumn('LOGICAL_NAME', $g['objMTS']->getSomeMessage("ITABASEH-MNU-120005"));
     $c->setHiddenMainTableColumn(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-120015"));
     $c->setRequired(true);
