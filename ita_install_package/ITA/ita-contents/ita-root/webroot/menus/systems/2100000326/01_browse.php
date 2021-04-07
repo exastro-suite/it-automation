@@ -101,7 +101,7 @@ EOD;
     print
 <<< EOD
 
-<div id="editor" data-relation="on">
+<div id="editor" data-relation="on" class="load-wait">
   <div class="editor-inner">
 
 
