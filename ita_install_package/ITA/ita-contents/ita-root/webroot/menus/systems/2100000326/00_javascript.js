@@ -40,6 +40,7 @@ window.onload = function(){
 
 //////// メニューグループ図の作成 ////////
 function createMenuGroupDiagram( menuGroupList ) {
+
 'use strict';
 
 const editor = new itaEditorFunctions();
@@ -71,6 +72,9 @@ const editorValue = {
 
 // メニューグループ非表示 リスト用
 let menuGroupHideList = new Array();
+
+// 初期状態で表示しないメニューグループ
+menuGroupHideList.push('2100000002');
 
 // リレーションリスト用
 let relationList = new Array();
