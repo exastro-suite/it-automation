@@ -188,17 +188,17 @@ CREATE TABLE B_ER_DATA
 (
 ROW_ID                            INT                              , -- 識別シーケンス
 MENU_TABLE_LINK_ID                INT                              , -- メニュー*テーブルのリンクID
-COLUMN_ID                         VARCHAR (32)                     , -- カラムID名
+COLUMN_ID                         TEXT                             , -- カラムID名
 COLUMN_TYPE                       INT                              , -- カラムタイプ
-PARENT_COLUMN_ID                  VARCHAR (32)                     , -- 親カラムID
-PHYSICAL_NAME                     VARCHAR (1000)                   , -- 物理名
-LOGICAL_NAME                      VARCHAR (1000)                   , -- 論理名
-RELATION_TABLE_NAME               VARCHAR (1000)                   , -- 関連テーブル名
-RELATION_COLUMN_ID                VARCHAR (1000)                   , -- 関連カラムID
+PARENT_COLUMN_ID                  TEXT                             , -- 親カラムID
+PHYSICAL_NAME                     TEXT                             , -- 物理名
+LOGICAL_NAME                      TEXT                             , -- 論理名
+RELATION_TABLE_NAME               TEXT                             , -- 関連テーブル名
+RELATION_COLUMN_ID                TEXT                             , -- 関連カラムID
 DISP_SEQ                          INT                              , -- 表示順
 NOTE                              VARCHAR (4000)                   , -- 備考
 ACCESS_AUTH                       TEXT                             ,
-DISUSE_FLAG                       VARCHAR (32)                     , -- 廃止フラグ
+DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 LAST_UPDATE_USER                  INT                              , -- 最終更新ユーザ
 LAST_UPDATE_TIMESTAMP             DATETIME(6)                      , -- 最終更新日時
 PRIMARY KEY(ROW_ID)
@@ -208,8 +208,8 @@ CREATE TABLE B_ER_MENU_TABLE_LINK_LIST
 (
 ROW_ID                            INT                              , -- 識別シーケンス
 MENU_ID                           INT                              , -- メニューID
-TABLE_NAME                        VARCHAR (1000)                   , -- テーブル名
-VIEW_TABLE_NAME                   VARCHAR (1000)                   , -- テーブルビュー名
+TABLE_NAME                        TEXT                             , -- テーブル名
+VIEW_TABLE_NAME                   TEXT                             , -- テーブルビュー名
 NOTE                              VARCHAR (4000)                   , -- 備考
 DISUSE_FLAG                       VARCHAR (1)                      , -- 廃止フラグ
 ACCESS_AUTH                       TEXT                             ,
