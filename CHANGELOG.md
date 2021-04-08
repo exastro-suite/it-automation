@@ -7,6 +7,7 @@ Exastro IT Automation 1.7.0 (2021-04-09)
  * バージョンアップパッチv1.7.0 #662
  * ita_answers.txtの初期値変更 #805
  * オフラインインストール時にpipが古い場合にエラーになる #902
+ * botoライブラリのインストール #957
 
 全般
 ---------------
@@ -115,6 +116,7 @@ Ansible-Driver
  * pioneerでテンプレート管理を使用した場合の不備 #915
  * 収集機能で拡張子無しのファイルが収集できない #929
  * Ansible実行すると/exastro/ita-root/logs/backyardlogsに0バイトのログファイルが作成される #938
+ * pioneerの対話ファイルでcommand:with_itemsを使用した場合の不備 #956
 
 Cobbler-Driver
 ---------------
