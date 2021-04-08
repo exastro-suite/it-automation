@@ -1425,7 +1425,7 @@ PIP_PACKAGE_PIP=(
 # pip package (for ansible)
 declare -A PIP_PACKAGE_ANSIBLE;
 PIP_PACKAGE_ANSIBLE=(
-    ["remote"]="ansible pexpect pywinrm boto3 paramiko"
+    ["remote"]="ansible pexpect pywinrm boto3 paramiko boto"
     ["local"]=`list_pip_package ${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]}`
 )
 
