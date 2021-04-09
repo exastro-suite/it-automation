@@ -1,2 +1,0 @@
-/ita-root/backyards/hostgroup/ky_hostgroup_regist_var_legacy
-/ita-root/backyards/hostgroup/ky_hostgroup_regist_var_legacy_role
