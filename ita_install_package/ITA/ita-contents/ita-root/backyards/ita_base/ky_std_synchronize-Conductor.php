@@ -2690,8 +2690,8 @@
                     $arrOfErrMovement = $tmpRetBody[0]['ERR_NODE'];
 
                     //実行中待機状態でない場合,movement,call後のconditionalかの判定
-                    if( $intNextJobStopflg != 2 || array_search($aryMovInsUpdateTgtSource['I_NODE_TYPE_ID'],array(3,4,10) ) !== false ){
-                        if( array_search($aryMovInsUpdateTgtSource['I_NODE_TYPE_ID'],array(3,4,10) ) !== false && count($arrOfFocusMovement) >= 1  ){
+                    if( $intNextJobStopflg != 2 || array_search($aryMovInsUpdateTgtSource['I_NODE_TYPE_ID'],array(3,4,10,8) ) !== false ){
+                        if( array_search($aryMovInsUpdateTgtSource['I_NODE_TYPE_ID'],array(3,4,10,8) ) !== false && count($arrOfFocusMovement) >= 1  ){
 
                             //次のNode取得
                             $arySqlBind=array(
@@ -2715,6 +2715,11 @@
                                 if($nclass['NODE_TYPE_ID'] == 6 ){
                                     $intNextJobStopflg="1";
                                 }
+                            }
+
+                            //後続処理conditionalでない＋pause実行中の場合
+                            if( $intNextJobStopflg != "1" && $aryMovInsUpdateTgtSource['I_NODE_TYPE_ID'] == 8 ){
+                                $intNextJobStopflg="1";
                             }
 
                             //conditionalの場合後続処理実行
