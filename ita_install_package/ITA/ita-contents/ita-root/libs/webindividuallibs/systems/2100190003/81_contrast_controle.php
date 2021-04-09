@@ -109,12 +109,15 @@ function getContrastList($mode=""){
                                     if( $tmpmenuid == $aryRetBody[$key]['CONTRAST_MENU_ID_1'] ){
                                         $serch1 = $aryRetBody[$key]['CONTRAST_MENU_ID_1'].":".$aryRetBody[$key]['CONTRAST_MENU_NAME_1'];
                                         $tmpval = $aryRetBody[$key]['PULLDOWN'];
-                                        $tmpval = str_replace($serch1, "ID変換失敗(".$aryRetBody[$key]['CONTRAST_MENU_ID_1'].")", $tmpval);
+                                        #$tmpval = str_replace($serch1, "ID変換失敗(".$aryRetBody[$key]['CONTRAST_MENU_ID_1'].")", $tmpval);
+                                        $tmpval = str_replace($serch1, $g['objMTS']->getSomeMessage("ITABASEH-MNU-310224").$aryRetBody[$key]['CONTRAST_MENU_ID_1'].")", $tmpval);
                                         $aryRetBody[$key]['PULLDOWN'] = $tmpval;
                                     }elseif( $tmpmenuid == $aryRetBody[$key]['CONTRAST_MENU_ID_2'] ){
                                         $serch1 = $aryRetBody[$key]['CONTRAST_MENU_ID_2'].":".$aryRetBody[$key]['CONTRAST_MENU_NAME_2'];
                                         $tmpval = $aryRetBody[$key]['PULLDOWN'];
-                                        $tmpval = str_replace($serch1, "ID変換失敗(".$aryRetBody[$key]['CONTRAST_MENU_ID_2'].")", $tmpval);     
+                                        #$tmpval = str_replace($serch1, "ID変換失敗(".$aryRetBody[$key]['CONTRAST_MENU_ID_2'].")", $tmpval);     
+                                        $tmpval = str_replace($serch1, $g['objMTS']->getSomeMessage("ITABASEH-MNU-310224").$aryRetBody[$key]['CONTRAST_MENU_ID_2'].")", $tmpval);
+
                                         $aryRetBody[$key]['PULLDOWN'] = $tmpval;
                                     }
                                 }
@@ -607,6 +610,33 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                 1 => $contrastDate[0]['CONTRAST_MENU_ID_2']
             );    # array(  0 => メニューID  ,   1 => メニューID  )
 
+            //-1.5menu対応
+            $arrMenutAccessAuthflg = array(
+                $contrastDate[0]['CONTRAST_MENU_ID_1'] => 1,    
+                $contrastDate[0]['CONTRAST_MENU_ID_2'] => 1, 
+            );    # array(  メニューID => 0/1  ,メニューID => 0/1 ) 0/1
+            foreach ($arrContrastMenuList as $tmpkey => $tmpMenuId) {
+                $strQuery = "SELECT * ";
+                $strQuery = $strQuery 
+                            ." FROM B_CMDB_MENU_LIST TAB_A ";
+                $strQuery = $strQuery
+                            ."WHERE "
+                            ." TAB_A.DISUSE_FLAG = 0 "
+                            ."AND "
+                            ." TAB_A.MENU_ID = :MENU_ID "
+                            ."";
+                $bindkeyVlaue = array(
+                    "MENU_ID" => $tmpMenuId,
+                );
+
+                $tmpcmdbmenuInfo = execsql($strQuery,$bindkeyVlaue);
+                $tmpmenutype = $tmpcmdbmenuInfo[0]['ACCESS_AUTH_FLG'];
+                if( $tmpmenutype != 1){
+                    $arrMenutAccessAuthflg[$tmpMenuId]=0;
+                }
+            }
+
+
             //対象メニュー情報から比較用リスト作成
             foreach ( $baseParm['DATA'] as $intcnt =>$tmpMenuColInfo ) {
                 foreach ($tmpMenuColInfo as $key => $value) {
@@ -652,9 +682,15 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                         $strhostlist = implode( ",", $baseParm['HOST_LIST'] );
                     }
 
+                    ///-1.5menu対応
+                    $tmpConfigForCMDBbaseIUD = $arrConfigForCMDBbaseIUD;
+                    if( $arrMenutAccessAuthflg[$tmpMenuId] == 0 ){
+                        unset($tmpConfigForCMDBbaseIUD["ACCESS_AUTH"]);
+                    }
+                    
                     $bindkeyVlaue = array();  
                     $strQuery = "SELECT  ";
-                    foreach ($arrConfigForCMDBbaseIUD as $tmpcolname => $tmpval) {
+                    foreach ($tmpConfigForCMDBbaseIUD as $tmpcolname => $tmpval) {
                         
                         if( $tmpcolname == "BASE_TIMESTAMP" ){
                             $strQuery = $strQuery ." DATE_FORMAT( TAB_A.BASE_TIMESTAMP ,'%Y/%m/%d %H:%i') AS BASE_TIMESTAMP ,";
@@ -720,25 +756,28 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                         }                        
                     }
 
-                    //アクセス権
-                    $objRBAC = new RoleBasedAccessControl($g['objDBCA']);
-                    $ret  = $objRBAC->getAccountInfo($g['login_id']);
-                    foreach ($tmpContrastResult as $key => $targetRow) {
-                        if( isset($targetRow['ROW_ID']) === true ){
-                            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
-                            if($ret === false) {
-                                // 例外処理へ
-                                $strErrStepIdInFx="00000100";
-                                $intErrorType = 1; //システムエラー
-                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                            } else {
-                                if($permission !== true) {
-                                    //アクセス権限を持っていない場合
-                                    unset($tmpContrastResult[$key]);
-                                }
+                    ///-1.5menu対応
+                    if( $arrMenutAccessAuthflg[$tmpMenuId] == 1 ){
+                        //アクセス権
+                        $objRBAC = new RoleBasedAccessControl($g['objDBCA']);
+                        $ret  = $objRBAC->getAccountInfo($g['login_id']);
+                        foreach ($tmpContrastResult as $key => $targetRow) {
+                            if( isset($targetRow['ROW_ID']) === true ){
+                                list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                                if($ret === false) {
+                                    // 例外処理へ
+                                    $strErrStepIdInFx="00000100";
+                                    $intErrorType = 1; //システムエラー
+                                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                                } else {
+                                    if($permission !== true) {
+                                        //アクセス権限を持っていない場合
+                                        unset($tmpContrastResult[$key]);
+                                    }
 
-                            } 
-                        }
+                                } 
+                            }
+                        }                        
                     }
 
                     //整形
@@ -935,6 +974,31 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                 1 => $contrastDate[0]['CONTRAST_MENU_ID_2']
             );    # array(  0 => メニューID  ,   1 => メニューID  )
 
+            //-1.5menu対応
+            $arrMenutAccessAuthflg = array(
+                $contrastDate[0]['CONTRAST_MENU_ID_1'] => 1,    
+                $contrastDate[0]['CONTRAST_MENU_ID_2'] => 1, 
+            );    # array(  メニューID => 0/1  ,メニューID => 0/1 ) 0/1
+            foreach ($arrContrastMenuList as $tmpkey => $tmpMenuId) {
+                $strQuery = "SELECT * ";
+                $strQuery = $strQuery 
+                            ." FROM B_CMDB_MENU_LIST TAB_A ";
+                $strQuery = $strQuery
+                            ."WHERE "
+                            ." TAB_A.DISUSE_FLAG = 0 "
+                            ."AND "
+                            ." TAB_A.MENU_ID = :MENU_ID "
+                            ."";
+                $bindkeyVlaue = array(
+                    "MENU_ID" => $tmpMenuId,
+                );
+
+                $tmpcmdbmenuInfo = execsql($strQuery,$bindkeyVlaue);
+                $tmpmenutype = $tmpcmdbmenuInfo[0]['ACCESS_AUTH_FLG'];
+                if( $tmpmenutype != 1){
+                    $arrMenutAccessAuthflg[$tmpMenuId]=0;
+                }
+            }
 
             //対象メニュー情報から比較用リスト作成
             foreach ( $baseParm['DATA'] as $intcnt => $tmpMenuColInfo ) {
@@ -997,10 +1061,16 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                         $strhostlist = implode( ",", $baseParm['HOST_LIST'] );
                     }
 
+                    ///-1.5menu対応
+                    $tmpConfigForCMDBbaseIUD = $arrConfigForCMDBbaseIUD;
+                    if( $arrMenutAccessAuthflg[$tmpMenuId] == 0 ){
+                        unset($tmpConfigForCMDBbaseIUD["ACCESS_AUTH"]);
+                    }
+
                     //ベース
                     $bindkeyVlaue = array();  
                     $strQuery = "SELECT  ";
-                    foreach ($arrConfigForCMDBbaseIUD as $tmpcolname => $tmpval) {
+                    foreach ($tmpConfigForCMDBbaseIUD as $tmpcolname => $tmpval) {
                         if( $tmpcolname == "BASE_TIMESTAMP" ){
                             $strQuery = $strQuery ." DATE_FORMAT( TAB_A.BASE_TIMESTAMP ,'%Y/%m/%d %H:%i') AS BASE_TIMESTAMP ,";
                         }else{
@@ -1063,25 +1133,28 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                         }                        
                     }
 
-                    //アクセス権
-                    $objRBAC = new RoleBasedAccessControl($g['objDBCA']);
-                    $ret  = $objRBAC->getAccountInfo($g['login_id']);
-                    foreach ($tmpContrastResult as $key => $targetRow) {
+                    ///-1.5menu対応
+                    if( $arrMenutAccessAuthflg[$tmpMenuId] == 1 ){
+                        //アクセス権
+                        $objRBAC = new RoleBasedAccessControl($g['objDBCA']);
+                        $ret  = $objRBAC->getAccountInfo($g['login_id']);
+                        foreach ($tmpContrastResult as $key => $targetRow) {
 
-                        if( isset($targetRow['ROW_ID']) === true ){
-                            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
-                            if($ret === false) {
-                                // 例外処理へ
-                                $strErrStepIdInFx="00000100";
-                                $intErrorType = 1; //システムエラー
-                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                            } else {
-                                if($permission !== true) {
-                                    //アクセス権限を持っていない場合
-                                    unset($tmpContrastResult[$key]);
+                            if( isset($targetRow['ROW_ID']) === true ){
+                                list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                                if($ret === false) {
+                                    // 例外処理へ
+                                    $strErrStepIdInFx="00000100";
+                                    $intErrorType = 1; //システムエラー
+                                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                                } else {
+                                    if($permission !== true) {
+                                        //アクセス権限を持っていない場合
+                                        unset($tmpContrastResult[$key]);
+                                    }
                                 }
                             }
-                        }
+                        }                      
                     }
 
                     //整形
@@ -1697,23 +1770,31 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                                     $tmpcolid => $tmpval
                                 );
                                 $aryRetBody = execsql($strQuery,$bindkeyVlaue);
-
-                                $ret  = $objRBAC->getAccountInfo($g['login_id']);
-                                foreach ($aryRetBody as $key => $targetRow) {
-                                    if( isset($targetRow[$tmpcolid]) === true ){
-                                        list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
-                                        if($ret === false) {
-                                            // 例外処理へ
-                                            $strErrStepIdInFx="00000100";
-                                            $intErrorType = 1; //システムエラー
-                                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                                        } else {
-                                            if($permission !== true) {
-                                                $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$g['objMTS']->getSomeMessage("ITABASEH-MNU-310218",array($tmpval));
-                                                #"ID変換失敗(".$tmpval.")";
-                                            }else{
-                                                $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$targetRow[$tmpcolName];
+                                ///-1.5menu対応
+                                if( $arrMenutAccessAuthflg[$MenuID] == 1 ){
+                                    $ret  = $objRBAC->getAccountInfo($g['login_id']);
+                                    foreach ($aryRetBody as $key => $targetRow) {
+                                        if( isset($targetRow[$tmpcolid]) === true ){
+                                            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                                            if($ret === false) {
+                                                // 例外処理へ
+                                                $strErrStepIdInFx="00000100";
+                                                $intErrorType = 1; //システムエラー
+                                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                                            } else {
+                                                if($permission !== true) {
+                                                    $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$g['objMTS']->getSomeMessage("ITABASEH-MNU-310218",array($tmpval));
+                                                    #"ID変換失敗(".$tmpval.")";
+                                                }else{
+                                                    $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$targetRow[$tmpcolName];
+                                                }
                                             }
+                                        }
+                                    }
+                                }else{
+                                    foreach ($aryRetBody as $key => $targetRow) {
+                                        if( isset($targetRow[$tmpcolid]) === true ){
+                                            $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$targetRow[$tmpcolName];
                                         }
                                     }
                                 }
@@ -1789,22 +1870,31 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                                 );
                                 $aryRetBody = execsql($strQuery,$bindkeyVlaue);
 
-                                $ret  = $objRBAC->getAccountInfo($g['login_id']);
+                                ///-1.5menu対応
+                                if( $arrMenutAccessAuthflg[$MenuID] == 1  ){
+                                    $ret  = $objRBAC->getAccountInfo($g['login_id']);
 
-                                foreach ($aryRetBody as $key => $targetRow) {
-                                    if( isset($targetRow[$tmpcolid]) === true ){
-                                        list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
-                                        if($ret === false) {
-                                            // 例外処理へ
-                                            $strErrStepIdInFx="00000100";
-                                            $intErrorType = 1; //システムエラー
-                                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                                        } else {
-                                            if($permission !== true) {
-                                                $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$g['objMTS']->getSomeMessage("ITABASEH-MNU-310218",array($tmpval));#"ID変換失敗(".$tmpval.")";
-                                            }else{
-                                                $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$targetRow[$tmpcolName];
+                                    foreach ($aryRetBody as $key => $targetRow) {
+                                        if( isset($targetRow[$tmpcolid]) === true ){
+                                            list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
+                                            if($ret === false) {
+                                                // 例外処理へ
+                                                $strErrStepIdInFx="00000100";
+                                                $intErrorType = 1; //システムエラー
+                                                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                                            } else {
+                                                if($permission !== true) {
+                                                    $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$g['objMTS']->getSomeMessage("ITABASEH-MNU-310218",array($tmpval));#"ID変換失敗(".$tmpval.")";
+                                                }else{
+                                                    $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$targetRow[$tmpcolName];
+                                                }
                                             }
+                                        }
+                                    }
+                                }else{
+                                    foreach ($aryRetBody as $key => $targetRow) {
+                                        if( isset($targetRow[$tmpcolid]) === true ){
+                                            $arrtdlistcolname[$hostid][$MenuID][$tmpkey][$tmpcol]=$targetRow[$tmpcolName];
                                         }
                                     }
                                 }
