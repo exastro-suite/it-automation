@@ -26,7 +26,7 @@
     global $g;
     $tmpAry=explode('ita-root', dirname(__FILE__));$g['root_dir_path']=$tmpAry[0].'ita-root';unset($tmpAry);
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
 
     require_once ("{$g['root_dir_path']}/libs/webindividuallibs/systems/2100150004/99_material_download_inner.php");

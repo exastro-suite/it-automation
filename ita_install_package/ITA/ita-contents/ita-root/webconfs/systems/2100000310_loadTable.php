@@ -65,8 +65,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
     //リンクボタン----
 
-    $c = new IDColumn('I_SYMPHONY_CLASS_NO',$g['objMTS']->getSomeMessage("ITABASEH-MNU-202030"),'C_SYMPHONY_CLASS_MNG','SYMPHONY_CLASS_NO','SYMPHONY_NAME','');
+    $objVldt = new SingleTextValidator(1,256,false);
+    $c = new TextColumn('I_SYMPHONY_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-202030"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-202040"));//エクセル・ヘッダでの説明
+    $c->setValidator($objVldt);
     $c->setSubtotalFlag(false);
     $table->addColumn($c);
 

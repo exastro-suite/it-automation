@@ -31,6 +31,55 @@ class  AnsibleVault {
         $this->dir     = '.tmp';
         $this->file    = '.tmpkey';
     }
+
+    function FileVault($exec_user,$password_file,$vault_file,&$vaultData,&$error_msg,$indento="  ") {
+        $result = true;
+
+        $path = sprintf('%s/confs/commonconfs/path_ANSIBLE_MODULE.txt',$this->root_dir_path);
+        // 改行コードが付いている場合に取り除く
+        $ansible_path = file_get_contents($path);
+        $ansible_path = str_replace("\n","",$ansible_path);
+        if($ansible_path === false) {
+            $error_msg = 'ansible path file not found';
+            return false;
+        }
+        // CR+LFをLFに置換
+
+        $cmd = "sudo -u $exec_user -i $ansible_path/ansible-vault encrypt $vault_file --vault-password-file $password_file 2>&1";
+
+        exec($cmd,$output,$return_var);
+        if($return_var != 0) {
+            $indento = '';
+        }
+        // vaultされたファイルはパーミッションが$exec_userで 0600 になるので
+        // パーミッション変更
+        $cmd = "sudo -u $exec_user -i chmod 0777 $vault_file 2>&1";
+        exec($cmd,$output_chmod,$return_var_chmod);
+        if($return_var_chmod != 0) {
+           error_log("FILE:". basename(__FILE__) .":LINE:" .__LINE__.":".print_r($output_chmod,true));
+           // エラーでも先に進む
+        }
+
+        $vaultData = file_get_contents($vault_file);
+        //unlink($vault_file);
+
+        foreach($output as $line) {
+            if(strlen(trim($line)) == 0) {
+                continue;
+            }
+            if(strlen($error_msg) != 0) {
+                $error_msg .= "\n";
+            }
+            // インデント設定
+            $error_msg .= $indento . $line;
+        }
+        $result = true;
+        if($return_var != 0) {
+            $result = false;
+        }
+        return $result;
+    }
+
     function Vault($exec_user,$password_file,$value ,&$encode_value,$indento="  ") {
         $result = true;
         $encode_value = ""; 
@@ -82,6 +131,7 @@ class  AnsibleVault {
         }
         return $result;
     }
+
     function setValutPasswdIndento($val,$indento) {
         $edit_val = "";
         $arry = explode("\n",$val);

@@ -67,9 +67,10 @@ Ansible(Pioneer)対話素材集
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
 
-    $c = new IDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306010"),'D_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME','');
+    $url = "01_browse.php?no=2100020204&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306010"),'B_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME',$url,false,false,'','','','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306020"));//エクセル・ヘッダでの説明
-    $c->setJournalTableOfMaster('D_ANSIBLE_PNS_DIALOG_TYPE_JNL');
+    $c->setJournalTableOfMaster('B_ANSIBLE_PNS_DIALOG_TYPE_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
     $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
     $c->setJournalKeyIDOfMaster('DIALOG_TYPE_ID');
@@ -77,9 +78,10 @@ Ansible(Pioneer)対話素材集
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-    $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306030"),'D_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
+    $url = "01_browse.php?no=2100000302&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306030"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME',$url,false,false,'','','','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306040"));//エクセル・ヘッダでの説明
-    $c->setJournalTableOfMaster('D_OS_TYPE_JNL');
+    $c->setJournalTableOfMaster('B_OS_TYPE_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
     $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
     $c->setJournalKeyIDOfMaster('OS_TYPE_ID');
@@ -119,6 +121,20 @@ Ansible(Pioneer)対話素材集
             $strErrMsg = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000108');
             $boolRet = false;
         }
+        // yamlパーサーが正しくパースできるか判定
+        if($boolRet == true) {
+            $obj = new YAMLParse($g['objMTS']);
+            $yaml_parse_array = array();
+            $ret = $obj->yaml_file_parse($strTempFileFullname,$yaml_parse_array);
+            $errmsg = $obj->GetLastError();
+            unset($obj);
+            if($ret === false) {
+                $strErrMsg = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000073",array("Upload file"));
+                $strErrMsg .= "\n" . $errmsg;
+                $boolRet = false;
+            }
+        }
+
         if($boolRet == true) {
             // 共通変数を抜き出す。
             $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);
@@ -223,17 +239,22 @@ Ansible(Pioneer)対話素材集
             } else {
                 $PkeyID = array_key_exists('DIALOG_MATTER_ID',$arrayRegData)?$arrayRegData['DIALOG_MATTER_ID']:null;
             }
-            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_9',$arrayRegData)?
-                               $arrayRegData['tmp_file_COL_IDSOP_9']:null;
+            $Playbook_file = array_key_exists('DIALOG_MATTER_FILE',$arrayRegData)?$arrayRegData['DIALOG_MATTER_FILE']:null;
+            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_10',$arrayRegData)?
+                               $arrayRegData['tmp_file_COL_IDSOP_10']:null;
             $TPFVarListfile = $root_dir_path . "/temp/file_up_column/" . $tmpFile . "_vars_list";
             $tmpfilepath    = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
 
         }
-        
+
         // 一時ファイルから使用しているテンプレート変数のリストを取得
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
-                if(strlen($tmpFile) != 0) {
+                if(! array_key_exists('tmp_file_COL_IDSOP_10',$arrayRegData)) {
+                    $boolExecuteContinue = false;
+                    $retBool = false;
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55212",array($PkeyID,$Playbook_file));
+                } elseif (strlen($tmpFile) != 0) {
                     // FileUpload後に登録・更新でエラーが発生した場合、tmp_file_COL_IDSOP_8が別ファイルになる対応
                     if( ! file_exists($TPFVarListfile)) {
                         // 共通変数を抜き出す。

@@ -59,7 +59,8 @@ Terraform作業パターン詳細
     //************************************************************************************
     //----作業パターン
     //************************************************************************************
-    $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103550"),'E_TERRAFORM_PATTERN','PATTERN_ID','PATTERN','',array('OrderByThirdColumn'=>'PATTERN_ID'));
+    $url = "01_browse.php?no=2100080004&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103550"),'E_TERRAFORM_PATTERN','PATTERN_ID','PATTERN',$url,true,false,'','','','',array('OrderByThirdColumn'=>'PATTERN_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103560"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('E_TERRAFORM_PATTERN_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -72,7 +73,8 @@ Terraform作業パターン詳細
     //************************************************************************************
     //----Module素材
     //************************************************************************************
-    $c = new IDColumn('MODULE_MATTER_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103570"),'D_TERRAFORM_MODULE','MODULE_MATTER_ID','MODULE','',array('OrderByThirdColumn'=>'MODULE_MATTER_ID'));
+    $url = "01_browse.php?no=2100080005&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('MODULE_MATTER_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103570"),'D_TERRAFORM_MODULE','MODULE_MATTER_ID','MODULE',$url,true,false,'','','','',array('OrderByThirdColumn'=>'MODULE_MATTER_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103580"));//エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('D_TERRAFORM_MODULE_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');

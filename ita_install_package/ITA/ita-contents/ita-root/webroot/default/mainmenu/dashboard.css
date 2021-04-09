@@ -750,6 +750,9 @@ opacity: .7;
 .pie-chart {
 padding-bottom: 0;
 }
+.pie-chart.start {
+pointer-events: none;
+}
 .pie-chart-inner {
 position: relative;
 z-index: 1;
@@ -860,7 +863,7 @@ text-align: right;
 .number-table .emphasis td {
 background-color: rgba( 255,255,0,.2 );
 }
-.zero {
+span.zero {
 color: #DDD!important;
 }
 /* -------------------------------------------------- *

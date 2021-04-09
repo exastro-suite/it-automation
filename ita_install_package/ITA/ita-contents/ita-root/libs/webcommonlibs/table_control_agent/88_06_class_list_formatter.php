@@ -1052,9 +1052,11 @@ class ExcelFormatter extends ListFormatter {
                 }
 
                 $intCountAdd = 0;
-                foreach($arrayDispSelectTag as $data){
-                    $intCountAdd += 1;
-                    $sheet->setCellValue(self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, $intFocusRowOfMasterSheet++), $data);
+                if($arrayDispSelectTag != null){
+                    foreach($arrayDispSelectTag as $data){
+                        $intCountAdd += 1;
+                        $sheet->setCellValue(self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, $intFocusRowOfMasterSheet++), $data);
+                    }
                 }
                 if( 0 < $intCountAdd ){
                     $intSetRow = $intFocusRowOfMasterSheet - 1;
@@ -1491,6 +1493,10 @@ class ExcelFormatter extends ListFormatter {
                     if( $objColumn->isUpdateRequireExcept()!==false ){
                         $reqFlag = $strTextExplain05;
                     }
+                    $tmp_array['required2'][] = $reqFlag;
+                }else if($objColumn->isRequiredMark() === true){
+                    $reqFlag = $strTextExplain04;
+                    $tmp_array['required1'][] = $reqFlag;
                     $tmp_array['required2'][] = $reqFlag;
                 }else{
                     //任意

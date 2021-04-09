@@ -35,12 +35,15 @@
 
     function loadTable($registeredKey="",&$aryVariant=array(), &$arySetting=array()){
         global $g;
+        $arrayReqInfo = requestTypeAnalyze();
         $intControlDebugLevel01=200;
         
         $intErrorType = null;
         
         $strFxName = __FUNCTION__;
-        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        if( $arrayReqInfo[0] == "web" ){
+            dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        }
         
         $retObject = null;
         try{
@@ -77,12 +80,17 @@
         }
         catch (Exception $e){
             $tmpErrMsgBody = $e->getMessage();
-            dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5005",array($tmpErrMsgBody,$intErrorType)));
-            webRequestForceQuitFromEveryWhere(500,90110101);
-            exit();
+
+            if( $arrayReqInfo[0] == "web" ){
+                dev_log($tmpErrMsgBody, $intControlDebugLevel01);
+                web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5005",array($tmpErrMsgBody,$intErrorType)));
+                webRequestForceQuitFromEveryWhere(500,90110101);
+                exit();
+            }
         }
-        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        if( $arrayReqInfo[0] == "web" ){
+            dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        }
         return $retObject;
     }
 
@@ -2557,7 +2565,7 @@ EOD;
                  ."FROM "
                  ."    {$masterTableBody} "
                  ."WHERE "
-                 ."    {$masterDisuseFlagColumnId} IN ('0') "
+                 ."    {$masterDisuseFlagColumnId} IN ('0','H') "
                  ."ORDER BY C2";
         return $query;
         // RBAC対応 ---

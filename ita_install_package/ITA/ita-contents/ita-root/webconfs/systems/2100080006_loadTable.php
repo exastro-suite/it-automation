@@ -78,6 +78,14 @@ Policy素材集
     $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $table->addColumn($c);
 
+    // PolicySet-Policy紐付管理へのリンクボタン
+    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107040");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
+    $c->setDBColumn(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':POLICY_NAME'), true);
+    $table->addColumn($c);
+
 
     $table->fixColumn();
 

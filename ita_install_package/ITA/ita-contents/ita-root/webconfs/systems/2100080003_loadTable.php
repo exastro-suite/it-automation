@@ -59,7 +59,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
 
     //Organization ID
-    $c = new IDColumn('ORGANIZATION_ID', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102450'), 'B_TERRAFORM_ORGANIZATIONS', 'ORGANIZATION_ID', 'ORGANIZATION_NAME', '');
+    $url = "01_browse.php?no=2100080002&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('ORGANIZATION_ID', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102450'), 'B_TERRAFORM_ORGANIZATIONS', 'ORGANIZATION_ID', 'ORGANIZATION_NAME', $url, false, false, '', '', '', '');
     $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102460')); //エクセル・ヘッダでの説明
     $c->setJournalTableOfMaster('B_TERRAFORM_ORGANIZATIONS_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -148,6 +149,22 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg->addColumn($c);
 
     $table->addColumn($cg);
+
+    // PolicySet-Workspace紐付管理へのリンクボタン
+    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107010");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
+    $c->setDBColumn(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array('this',':WORKSPACE_NAME'), true);
+    $table->addColumn($c);
+
+    // PolicySet-Workspace紐付管理へのリンクボタン
+    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107050");
+    $c = new LinkButtonColumn('ethWakeOrder2',$strLabelText, $strLabelText, 'dummy');
+    $c->setDBColumn(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow2", array('this',':WORKSPACE_NAME'), true);
+    $table->addColumn($c);
 
 
 

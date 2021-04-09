@@ -14,7 +14,7 @@
 //
 //////// ----コールバックファンクション ////////
 function callback() {}
-callback.prototype = {  
+callback.prototype = {
     Filter1Tbl_add_selectbox : function( result ){
         var filterAreaWrap = 'Filter1_Nakami';
         var strFilterPrintId = 'Filter1Tbl';
@@ -210,7 +210,7 @@ callback.prototype = {
                                     "fakeContainer_Update1",
                                     webStdTableHeight,
                                     webStdTableWidth );
-                    
+
                     linkDateInputHelper(strMixOuterFrameName);
             }
         }else if( ary_result[0] == "002" ){
@@ -301,12 +301,12 @@ callback.prototype = {
                     break;
                 case "201":
                     // エラーなく登録完了
-                default:                
+                default:
                     objRegiterArea.innerHTML="";
                     $(objRegiterArea).html(resultContentTag);
 
                     objAlertArea.style.display = "none";
-                    
+
                     adjustTableAuto (strMixInnerFramePrefix+'1',
                                     "sDefault",
                                     "fakeContainer_Register2",
@@ -822,7 +822,7 @@ function Journal1Tbl_pre_search_async(inputedCode){
 function Journal1Tbl_search_async(){
     // 履歴検索実施フラグを初期化
     var journal1AreaWrap = 'Journal1_Nakami';
-    
+
     var exec_flag = true;
 
     // 検索実施フラグがtrueの場合は検索実施
@@ -866,6 +866,11 @@ function queryDataToFilter(){
             // フィルタボタンを押下したことにする
             Filter1Tbl_search_async('orderFromFilterCmdBtn');
     }
+ }
+ function Mix1_1_newOpenWindow(targetText){
+   var searchText = decodeURIComponent(escape(atob(targetText)));;
+   var url = "01_browse.php?no=2100020206&filter=on&Filter1Tbl_2=" + searchText;
+   window.open(url, '_blank');
  }
 
 // ここまでカスタマイズした場合の一般メソッド配置域----

@@ -29,6 +29,7 @@ PASSWORD                %VARCHR%(32)            ,
 USERNAME_JP             %VARCHR%(270)           ,
 MAIL_ADDRESS            %VARCHR%(256)           ,
 PW_LAST_UPDATE_TIME     %DATETIME6%             ,
+LAST_LOGIN_TIME         %DATETIME6%             ,
 AUTH_TYPE               %VARCHR%(10)            ,
 PROVIDER_ID             %INT%                   ,
 PROVIDER_USER_ID        %VARCHR%(256)           ,
@@ -316,6 +317,7 @@ PASSWORD                %VARCHR%(32)            ,
 USERNAME_JP             %VARCHR%(270)           ,
 MAIL_ADDRESS            %VARCHR%(256)           ,
 PW_LAST_UPDATE_TIME     %DATETIME6%             ,
+LAST_LOGIN_TIME         %DATETIME6%             ,
 AUTH_TYPE               %VARCHR%(10)            ,
 PROVIDER_ID             %INT%                   ,
 PROVIDER_USER_ID        %VARCHR%(256)           ,
@@ -840,6 +842,7 @@ GATEWAY                           %VARCHR%(15)              , -- FOR COBLLER
 STATIC                            %VARCHR%(32)              , -- FOR COBLLER
 
 CONN_SSH_KEY_FILE                 %VARCHR%(256)             ,
+SSH_KEY_FILE_PASSPHRASE           TEXT                      ,
 
 ANSTWR_INSTANCE_GROUP_NAME        %VARCHR%(512)             , -- インスタンスグループ名
 
@@ -892,6 +895,7 @@ GATEWAY                           %VARCHR%(15)              , -- FOR COBLLER
 STATIC                            %VARCHR%(32)              , -- FOR COBLLER
 
 CONN_SSH_KEY_FILE                 %VARCHR%(256)             ,
+SSH_KEY_FILE_PASSPHRASE           TEXT                      ,
 
 ANSTWR_INSTANCE_GROUP_NAME        %VARCHR%(512)             , -- インスタンスグループ名
 
@@ -1521,7 +1525,7 @@ CREATE TABLE B_LOGIN_AUTH_TYPE
 (
 LOGIN_AUTH_TYPE_ID                %INT%                      , -- 識別シーケンス
 
-LOGIN_AUTH_TYPE_NAME              %VARCHR%(32)               ,
+LOGIN_AUTH_TYPE_NAME              %VARCHR%(64)               ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -1543,7 +1547,7 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変�
 
 LOGIN_AUTH_TYPE_ID                %INT%                      , -- 識別シーケンス
 
-LOGIN_AUTH_TYPE_NAME              %VARCHR%(32)               ,
+LOGIN_AUTH_TYPE_NAME              %VARCHR%(64)               ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -1613,6 +1617,7 @@ TASK_STATUS                       %INT%                             , -- ステ�
 DP_TYPE                           %INT%                             , -- 処理種別
 DP_MODE                           %INT%                             , -- 処理モード
 ABOLISHED_TYPE                    %INT%                             , -- 廃止情報
+SPECIFIED_TIMESTAMP               %DATETIME6%                       , -- 指定時刻
 FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
 DISP_SEQ                          %INT%                             , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
@@ -1634,6 +1639,7 @@ TASK_STATUS                       %INT%                             , -- ステ�
 DP_TYPE                           %INT%                             , -- 処理種別
 DP_MODE                           %INT%                             , -- 処理モード
 ABOLISHED_TYPE                    %INT%                             , -- 廃止情報
+SPECIFIED_TIMESTAMP               %DATETIME6%                       , -- 指定時刻
 FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
 DISP_SEQ                          %INT%                             , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
@@ -1916,92 +1922,6 @@ LAST_UPDATE_USER                  %INT%                             , -- 最終�
 PRIMARY KEY (JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- メインメニューパネル化対応 -
-
-
--- -------------------------------------------------------
--- --Symphony/オペレーション エクスポート/インポート機能用
--- -------------------------------------------------------
--- エクスポート/インポート管理 -
-CREATE TABLE B_DP_SYM_OPE_STATUS
-(
-TASK_ID                           %INT%                             , -- タスクID
---
-TASK_STATUS                       %INT%                             , -- ステータス
-DP_TYPE                           %INT%                             , -- 処理種別
-FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
-DISP_SEQ                          %INT%                             , -- 表示順序
-ACCESS_AUTH                       TEXT                              ,
-NOTE                              %VARCHR%(4000)                    , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
-PRIMARY KEY (TASK_ID)
-)%%TABLE_CREATE_OUT_TAIL%%;
-
-CREATE TABLE B_DP_SYM_OPE_STATUS_JNL
-(
-JOURNAL_SEQ_NO                    %INT%                             , -- 履歴用シーケンス
-JOURNAL_REG_DATETIME              %DATETIME6%                       , -- 履歴用変更日時
-JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴用変更種別
---
-TASK_ID                           %INT%                             , -- 識別シーケンス
-TASK_STATUS                       %INT%                             , -- ステータス
-DP_TYPE                           %INT%                             , -- 処理種別
-FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
-DISP_SEQ                          %INT%                             , -- 表示順序
-ACCESS_AUTH                       TEXT                              ,
-NOTE                              %VARCHR%(4000)                    , -- 備考
-DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
-LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
-LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
-PRIMARY KEY (JOURNAL_SEQ_NO)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- エクスポート/インポート管理 -
-
--- Symphonyエクスポート紐付 -
-CREATE TABLE B_SYMPHONY_EXPORT_LINK
-(
-ROW_ID                          %INT%                               , -- ID
-
-HIERARCHY                       %INT%                               , -- 階層
-SRC_ROW_ID                      %INT%                               , -- 検索元項番
-SRC_ITEM                        %VARCHR%(128)                       , -- 検索元項目名
-DEST_MENU_ID                    %INT%                               , -- 検索先メニュー
-DEST_ITEM                       %VARCHR%(128)                       , -- 検索先項目名
-OTHER_CONDITION                 %VARCHR%(1024)                      , -- その他検索条件
-SPECIAL_SELECT_FUNC             %VARCHR%(1024)                      , -- 検索専用特別関数
-
-PRIMARY KEY (ROW_ID)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- Symphonyエクスポート紐付 -
-
--- オペレーションエクスポート紐付 -
-CREATE TABLE B_OPERATION_EXPORT_LINK
-(
-ROW_ID                          %INT%                               , -- ID
-
-HIERARCHY                       %INT%                               , -- 階層
-SRC_ROW_ID                      %INT%                               , -- 検索元項番
-SRC_ITEM                        %VARCHR%(128)                       , -- 検索元項目名
-DEST_MENU_ID                    %INT%                               , -- 検索先メニュー
-DEST_ITEM                       %VARCHR%(128)                       , -- 検索先項目名
-OTHER_CONDITION                 %VARCHR%(1024)                      , -- その他検索条件
-SPECIAL_SELECT_FUNC             %VARCHR%(1024)                      , -- 検索専用特別関数
-
-PRIMARY KEY (ROW_ID)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- オペレーションエクスポート紐付 -
-
--- Symオペインポート時停止サービス -
-CREATE TABLE B_SVC_TO_STOP_IMP_SYM_OPE
-(
-ROW_ID                          %INT%                               , -- ID
-
-SERVICE_NAME                    %VARCHR%(128)                       , -- サービス名
-
-PRIMARY KEY (ROW_ID)
-)%%TABLE_CREATE_OUT_TAIL%%;
--- Symオペインポート時停止サービス -
 
 -- -------------------------------------------------------
 -- --定期作業実行用
@@ -2826,6 +2746,36 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- SensitiveFマスタ----
 
+-- ----メニュー作成タイプマスタ
+CREATE TABLE F_MENU_CREATE_TYPE
+(
+MENU_CREATE_TYPE_ID                 %INT%                           , -- 識別シーケンス項番
+MENU_CREATE_TYPE_NAME               %VARCHR%(64)                    , -- メニュー作成タイプ名
+ACCESS_AUTH                         TEXT                            ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY (MENU_CREATE_TYPE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_MENU_CREATE_TYPE_JNL
+(
+JOURNAL_SEQ_NO                      %INT%                           , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                %DATETIME6%                     , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴用変更種別
+
+MENU_CREATE_TYPE_ID                 %INT%                           , -- 識別シーケンス項番
+MENU_CREATE_TYPE_NAME               %VARCHR%(64)                    , -- メニュー作成タイプ名
+ACCESS_AUTH                         TEXT                            ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- メニュー作成タイプマスタ----
+
 -- -------------------------------------------------------
 -- --定期作業実行用(Conductor)
 -- -------------------------------------------------------
@@ -2962,6 +2912,7 @@ SELECT TAB_A.USER_ID              ,
        TAB_A.USERNAME_JP          ,
        TAB_A.MAIL_ADDRESS         ,
        TAB_A.PW_LAST_UPDATE_TIME  ,
+       TAB_A.LAST_LOGIN_TIME      ,
        TAB_B.LOCK_ID              ,
        TAB_B.MISS_INPUT_COUNTER   ,
        TAB_B.LOCKED_TIMESTAMP     ,
@@ -2992,6 +2943,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        TAB_A.USERNAME_JP          ,
        TAB_A.MAIL_ADDRESS         ,
        TAB_A.PW_LAST_UPDATE_TIME  ,
+       TAB_A.LAST_LOGIN_TIME      ,
        TAB_B.LOCK_ID              ,
        TAB_B.MISS_INPUT_COUNTER   ,
        TAB_B.LOCKED_TIMESTAMP     ,
@@ -3360,6 +3312,7 @@ SELECT TAB_A.SYSTEM_ID                        SYSTEM_ID                     ,
        TAB_A.STATIC                           STATIC                        ,
 
        TAB_A.CONN_SSH_KEY_FILE                CONN_SSH_KEY_FILE             ,
+       TAB_A.SSH_KEY_FILE_PASSPHRASE          SSH_KEY_FILE_PASSPHRASE       ,
 
        TAB_A.DISP_SEQ                         DISP_SEQ                      ,
        TAB_A.ACCESS_AUTH                      ACCESS_AUTH                   ,
@@ -3400,6 +3353,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                   JOURNAL_SEQ_NO                ,
        TAB_A.STATIC                           STATIC                        ,
 
        TAB_A.CONN_SSH_KEY_FILE                CONN_SSH_KEY_FILE             ,
+       TAB_A.SSH_KEY_FILE_PASSPHRASE          SSH_KEY_FILE_PASSPHRASE       ,
 
        TAB_A.DISP_SEQ                         DISP_SEQ                      ,
        TAB_A.ACCESS_AUTH                      ACCESS_AUTH                   ,
@@ -4173,25 +4127,6 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 
 -- VIEW作成
 
-CREATE UNIQUE INDEX IND_A_ACCOUNT_LIST_01           ON A_ACCOUNT_LIST           ( USER_ID, DISUSE_FLAG                      );
-CREATE        INDEX IND_A_ACCOUNT_LOCK_01           ON A_ACCOUNT_LOCK           ( USER_ID                                   );
-CREATE        INDEX IND_A_ACCOUNT_LOCK_02           ON A_ACCOUNT_LOCK           ( USER_ID, DISUSE_FLAG                      );
-CREATE        INDEX IND_A_ROLE_LIST_01              ON A_ROLE_LIST              ( DISUSE_FLAG                               );
-CREATE UNIQUE INDEX IND_A_ROLE_LIST_02              ON A_ROLE_LIST              ( ROLE_ID, DISUSE_FLAG                      );
-CREATE UNIQUE INDEX IND_A_MENU_GROUP_LIST_01        ON A_MENU_GROUP_LIST        ( MENU_GROUP_ID, DISUSE_FLAG                );
-CREATE UNIQUE INDEX IND_A_MENU_LIST_01              ON A_MENU_LIST              ( MENU_ID, DISUSE_FLAG                      );
-CREATE        INDEX IND_A_MENU_LIST_02              ON A_MENU_LIST              ( MENU_GROUP_ID                             );
-CREATE        INDEX IND_A_MENU_LIST_03              ON A_MENU_LIST              ( LOGIN_NECESSITY                           );
-CREATE        INDEX IND_A_MENU_LIST_04              ON A_MENU_LIST              ( SERVICE_STATUS                            );
-CREATE        INDEX IND_A_ROLE_ACC_LINK_LIST_01     ON A_ROLE_ACCOUNT_LINK_LIST ( ROLE_ID, DISUSE_FLAG                      );
-CREATE        INDEX IND_A_ROLE_ACC_LINK_LIST_02     ON A_ROLE_ACCOUNT_LINK_LIST ( USER_ID, DISUSE_FLAG                      );
-CREATE        INDEX IND_A_ROLE_ACC_LINK_LIST_03     ON A_ROLE_ACCOUNT_LINK_LIST ( ROLE_ID, USER_ID, DISUSE_FLAG             );
-CREATE        INDEX IND_A_ROLE_MENU_LINK_LIST_01    ON A_ROLE_MENU_LINK_LIST    ( ROLE_ID, DISUSE_FLAG                      );
-CREATE        INDEX IND_A_ROLE_MENU_LINK_LIST_02    ON A_ROLE_MENU_LINK_LIST    ( MENU_ID, DISUSE_FLAG                      );
-CREATE        INDEX IND_A_ROLE_MENU_LINK_LIST_03    ON A_ROLE_MENU_LINK_LIST    ( ROLE_ID, MENU_ID, DISUSE_FLAG             );
-CREATE UNIQUE INDEX IND_B_CMDB_MENU_TABLE_01        ON B_CMDB_MENU_TABLE        ( MENU_ID                                   );
-CREATE UNIQUE INDEX IND_C_OPERATION_LIST_01         ON C_OPERATION_LIST         ( OPERATION_NO_IDBH                         );
-
 CREATE TABLE B_VALID_INVALID_MASTER
 (
 FLAG_ID                           %INT%                            , -- 識別シーケンス
@@ -4237,3 +4172,133 @@ LOADED_FLG              %VARCHR%(1)         ,
 LAST_UPDATE_TIMESTAMP   %DATETIME6%         ,
 PRIMARY KEY(ROW_ID)
 )%%TABLE_CREATE_OUT_TAIL%%;
+
+
+-- -------------------------------------------------------
+-- --ER図
+-- -------------------------------------------------------
+CREATE TABLE B_ER_DATA
+(
+ROW_ID                            %INT%                            , -- 識別シーケンス
+MENU_TABLE_LINK_ID                %INT%                            , -- メニュー*テーブルのリンクID
+COLUMN_ID                         TEXT                             , -- カラムID名
+COLUMN_TYPE                       %INT%                            , -- カラムタイプ
+PARENT_COLUMN_ID                  TEXT                             , -- 親カラムID
+PHYSICAL_NAME                     TEXT                             , -- 物理名
+LOGICAL_NAME                      TEXT                             , -- 論理名
+RELATION_TABLE_NAME               TEXT                             , -- 関連テーブル名
+RELATION_COLUMN_ID                TEXT                             , -- 関連カラムID
+DISP_SEQ                          %INT%                            , -- 表示順
+NOTE                              %VARCHR%(4000)                   , -- 備考
+ACCESS_AUTH                       TEXT                             ,
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+PRIMARY KEY(ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_ER_MENU_TABLE_LINK_LIST
+(
+ROW_ID                            %INT%                            , -- 識別シーケンス
+MENU_ID                           %INT%                            , -- メニューID
+TABLE_NAME                        TEXT                             , -- テーブル名
+VIEW_TABLE_NAME                   TEXT                             , -- テーブルビュー名
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+ACCESS_AUTH                       TEXT                             ,
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+PRIMARY KEY(ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_ER_COLUMN_TYPE
+(
+COLUMN_TYPE_ID                    %INT%                            , -- 識別シーケンス
+COLUMN_TYPE_NAME                  %VARCHR%(64)                     , -- テーブル名
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+ACCESS_AUTH                       TEXT                             ,
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+PRIMARY KEY(COLUMN_TYPE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE OR REPLACE VIEW D_ER_MENU_TABLE_LINK_LIST AS 
+SELECT TAB_A.ROW_ID,
+       TAB_C.MENU_GROUP_ID,
+       TAB_C.MENU_GROUP_ID      MENU_GROUP_ID_CLONE,
+       TAB_C.MENU_GROUP_NAME,
+       TAB_A.MENU_ID,
+       TAB_A.MENU_ID            MENU_ID_CLONE,
+       TAB_A.MENU_ID            MENU_ID_CLONE_02,
+       TAB_B.MENU_NAME,
+       [%CONCAT_HEAD/%]TAB_C.MENU_GROUP_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_C.MENU_GROUP_NAME[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.MENU_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_B.MENU_NAME[%CONCAT_TAIL/%] MENU_PULLDOWN,
+       TAB_A.TABLE_NAME,
+       TAB_A.VIEW_TABLE_NAME,
+       TAB_A.NOTE,
+       TAB_A.ACCESS_AUTH,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01,
+       TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02
+FROM B_ER_MENU_TABLE_LINK_LIST TAB_A
+LEFT JOIN A_MENU_LIST TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
+LEFT JOIN A_MENU_GROUP_LIST TAB_C ON (TAB_B.MENU_GROUP_ID = TAB_C.MENU_GROUP_ID);
+
+CREATE OR REPLACE VIEW D_ER_DATA AS 
+SELECT TAB_A.ROW_ID,
+       TAB_A.MENU_TABLE_LINK_ID,
+       TAB_B.MENU_GROUP_ID,
+       TAB_B.MENU_GROUP_ID      MENU_GROUP_ID_CLONE,
+       TAB_B.MENU_ID,
+       TAB_B.MENU_ID            MENU_ID_CLONE,
+       TAB_A.COLUMN_ID,
+       TAB_A.COLUMN_TYPE,
+       TAB_A.PARENT_COLUMN_ID,
+       TAB_A.PHYSICAL_NAME,
+       TAB_A.LOGICAL_NAME,
+       TAB_A.RELATION_TABLE_NAME,
+       TAB_A.RELATION_COLUMN_ID,
+       TAB_A.DISP_SEQ,
+       TAB_A.NOTE,
+       TAB_A.ACCESS_AUTH,
+       TAB_A.DISUSE_FLAG,
+       TAB_A.LAST_UPDATE_TIMESTAMP,
+       TAB_A.LAST_UPDATE_USER,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM B_ER_DATA TAB_A
+LEFT JOIN D_ER_MENU_TABLE_LINK_LIST TAB_B ON (TAB_A.MENU_TABLE_LINK_ID = TAB_B.ROW_ID);
+
+
+
+-- *****************************************************************************
+-- *** ***** INDEX
+-- *****************************************************************************
+CREATE UNIQUE INDEX IND_A_ACCOUNT_LIST_01           ON A_ACCOUNT_LIST           ( USER_ID, DISUSE_FLAG                      );
+CREATE        INDEX IND_A_ACCOUNT_LOCK_01           ON A_ACCOUNT_LOCK           ( USER_ID                                   );
+CREATE        INDEX IND_A_ACCOUNT_LOCK_02           ON A_ACCOUNT_LOCK           ( USER_ID, DISUSE_FLAG                      );
+CREATE        INDEX IND_A_ROLE_LIST_01              ON A_ROLE_LIST              ( DISUSE_FLAG                               );
+CREATE UNIQUE INDEX IND_A_ROLE_LIST_02              ON A_ROLE_LIST              ( ROLE_ID, DISUSE_FLAG                      );
+CREATE UNIQUE INDEX IND_A_MENU_GROUP_LIST_01        ON A_MENU_GROUP_LIST        ( MENU_GROUP_ID, DISUSE_FLAG                );
+CREATE UNIQUE INDEX IND_A_MENU_LIST_01              ON A_MENU_LIST              ( MENU_ID, DISUSE_FLAG                      );
+CREATE        INDEX IND_A_MENU_LIST_02              ON A_MENU_LIST              ( MENU_GROUP_ID                             );
+CREATE        INDEX IND_A_MENU_LIST_03              ON A_MENU_LIST              ( LOGIN_NECESSITY                           );
+CREATE        INDEX IND_A_MENU_LIST_04              ON A_MENU_LIST              ( SERVICE_STATUS                            );
+CREATE        INDEX IND_A_ROLE_ACC_LINK_LIST_01     ON A_ROLE_ACCOUNT_LINK_LIST ( ROLE_ID, DISUSE_FLAG                      );
+CREATE        INDEX IND_A_ROLE_ACC_LINK_LIST_02     ON A_ROLE_ACCOUNT_LINK_LIST ( USER_ID, DISUSE_FLAG                      );
+CREATE        INDEX IND_A_ROLE_ACC_LINK_LIST_03     ON A_ROLE_ACCOUNT_LINK_LIST ( ROLE_ID, USER_ID, DISUSE_FLAG             );
+CREATE        INDEX IND_A_ROLE_MENU_LINK_LIST_01    ON A_ROLE_MENU_LINK_LIST    ( ROLE_ID, DISUSE_FLAG                      );
+CREATE        INDEX IND_A_ROLE_MENU_LINK_LIST_02    ON A_ROLE_MENU_LINK_LIST    ( MENU_ID, DISUSE_FLAG                      );
+CREATE        INDEX IND_A_ROLE_MENU_LINK_LIST_03    ON A_ROLE_MENU_LINK_LIST    ( ROLE_ID, MENU_ID, DISUSE_FLAG             );
+CREATE UNIQUE INDEX IND_B_CMDB_MENU_TABLE_01        ON B_CMDB_MENU_TABLE        ( MENU_ID                                   );
+CREATE UNIQUE INDEX IND_C_OPERATION_LIST_01         ON C_OPERATION_LIST         ( OPERATION_NO_IDBH                         );
+CREATE UNIQUE INDEX IND_C_SYMPHONY_INSTANCE_MNG_01      ON C_SYMPHONY_INSTANCE_MNG      ( DISUSE_FLAG,SYMPHONY_INSTANCE_NO                  );
+CREATE        INDEX IND_C_CONDUCTOR_IF_INFO_01          ON C_CONDUCTOR_IF_INFO          ( DISUSE_FLAG                                       );
+CREATE UNIQUE INDEX IND_C_NODE_CLASS_MNG_01             ON C_NODE_CLASS_MNG             ( NODE_CLASS_NO,DISUSE_FLAG                         );
+CREATE        INDEX IND_C_NODE_TERMINALS_CLASS_MNG_01   ON C_NODE_TERMINALS_CLASS_MNG   ( NODE_CLASS_NO,DISUSE_FLAG,TERMINAL_TYPE_ID        );
+CREATE        INDEX IND_C_CONDUCTOR_INSTANCE_MNG_01     ON C_CONDUCTOR_INSTANCE_MNG     ( DISUSE_FLAG,STATUS_ID,TIME_BOOK                   );
+CREATE UNIQUE INDEX IND_C_CONDUCTOR_INSTANCE_MNG_02     ON C_CONDUCTOR_INSTANCE_MNG     ( DISUSE_FLAG,CONDUCTOR_INSTANCE_NO                 );
+CREATE        INDEX IND_C_NODE_INSTANCE_MNG_01          ON C_NODE_INSTANCE_MNG          ( CONDUCTOR_INSTANCE_NO,I_NODE_TYPE_ID,DISUSE_FLAG  );
+CREATE        INDEX IND_C_NODE_INSTANCE_MNG_02          ON C_NODE_INSTANCE_MNG          ( I_NODE_CLASS_NO,DISUSE_FLAG,CONDUCTOR_INSTANCE_NO );
+

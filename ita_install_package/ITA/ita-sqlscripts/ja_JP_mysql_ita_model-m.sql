@@ -74,6 +74,7 @@ FLOAT_DIGIT                         INT                             ,
 PW_MAX_LENGTH                       INT                             ,
 UPLOAD_MAX_SIZE                     LONG                            ,
 LINK_LENGTH                         INT                             ,
+REFERENCE_ITEM                      TEXT                            ,
 DESCRIPTION                         VARCHAR (1024)                  ,
 ACCESS_AUTH                         TEXT                            ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
@@ -110,6 +111,7 @@ FLOAT_DIGIT                         INT                             ,
 PW_MAX_LENGTH                       INT                             ,
 UPLOAD_MAX_SIZE                     LONG                            ,
 LINK_LENGTH                         INT                             ,
+REFERENCE_ITEM                      TEXT                            ,
 DESCRIPTION                         VARCHAR (1024)                  ,
 ACCESS_AUTH                         TEXT                            ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
@@ -166,6 +168,7 @@ MM_STATUS_ID                        INT                             , -- 識別�
 
 CREATE_MENU_ID                      INT                             ,
 STATUS_ID                           INT                             ,
+MENU_CREATE_TYPE_ID                 INT                             ,
 FILE_NAME                           VARCHAR (64)                    ,
 ACCESS_AUTH                         TEXT                            ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
@@ -184,6 +187,7 @@ JOURNAL_ACTION_CLASS                VARCHAR  (8)                    , -- 履歴�
 MM_STATUS_ID                        INT                             , -- 識別シーケンス項番
 CREATE_MENU_ID                      INT                             ,
 STATUS_ID                           INT                             ,
+MENU_CREATE_TYPE_ID                 INT                             ,
 FILE_NAME                           VARCHAR (64)                    ,
 ACCESS_AUTH                         TEXT                            ,
 NOTE                                VARCHAR  (4000)                 , -- 備考
@@ -439,6 +443,56 @@ LAST_UPDATE_USER              INT               ,
 PRIMARY KEY (JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
+-- -------------------------
+-- 参照項目情報
+-- -------------------------
+CREATE TABLE F_MENU_REFERENCE_ITEM
+(
+ITEM_ID                             INT                               , -- 識別シーケンス項番
+LINK_ID                             INT                               ,
+DISP_SEQ                            INT                               ,
+TABLE_NAME                          VARCHAR  (64)                     ,
+PRI_NAME                            VARCHAR  (64)                     ,
+COLUMN_NAME                         VARCHAR  (64)                     ,
+ITEM_NAME                           VARCHAR  (64)                     ,
+COL_GROUP_NAME                      TEXT                              ,
+DESCRIPTION                         TEXT                              ,
+INPUT_METHOD_ID                     INT                               ,
+SENSITIVE_FLAG                      VARCHAR  (1)                      ,
+MASTER_COL_FLAG                     VARCHAR  (1)                      ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                VARCHAR  (4000)                   , -- 備考
+DISUSE_FLAG                         VARCHAR  (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                    INT                               , -- 最終更新ユーザ
+PRIMARY KEY (ITEM_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE F_MENU_REFERENCE_ITEM_JNL
+(
+JOURNAL_SEQ_NO                      INT                               , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                DATETIME(6)                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                VARCHAR  (8)                      , -- 履歴用変更種別
+
+ITEM_ID                             INT                               , -- 識別シーケンス項番
+LINK_ID                             INT                               ,
+DISP_SEQ                            INT                               ,
+TABLE_NAME                          VARCHAR  (64)                     ,
+PRI_NAME                            VARCHAR  (64)                     ,
+COLUMN_NAME                         VARCHAR  (64)                     ,
+ITEM_NAME                           VARCHAR  (64)                     ,
+COL_GROUP_NAME                      TEXT                              ,
+DESCRIPTION                         TEXT                              ,
+INPUT_METHOD_ID                     INT                               ,
+SENSITIVE_FLAG                      VARCHAR  (1)                      ,
+MASTER_COL_FLAG                     VARCHAR  (1)                      ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                VARCHAR  (4000)                  , -- 備考
+DISUSE_FLAG                         VARCHAR  (1)                     , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                    INT                               , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 
 
@@ -541,6 +595,7 @@ SELECT TAB_A.CREATE_ITEM_ID,
        TAB_A.PW_MAX_LENGTH,
        TAB_A.UPLOAD_MAX_SIZE,
        TAB_A.LINK_LENGTH,
+       TAB_A.REFERENCE_ITEM,
        TAB_A.DESCRIPTION,
        TAB_C.FULL_COL_GROUP_NAME,
        CASE
@@ -585,6 +640,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO,
        TAB_A.PW_MAX_LENGTH,
        TAB_A.UPLOAD_MAX_SIZE,
        TAB_A.LINK_LENGTH,
+       TAB_A.REFERENCE_ITEM,
        TAB_A.DESCRIPTION,
        CASE
            WHEN TAB_C.FULL_COL_GROUP_NAME IS NULL THEN CONCAT(TAB_B.MENU_NAME,':',TAB_A.ITEM_NAME)
@@ -602,6 +658,358 @@ LEFT JOIN F_CREATE_MENU_INFO TAB_B ON (TAB_A.CREATE_MENU_ID = TAB_B.CREATE_MENU_
 LEFT JOIN F_COLUMN_GROUP TAB_C ON (TAB_A.COL_GROUP_ID = TAB_C.COL_GROUP_ID)
 WHERE TAB_B.VERTICAL != ""
 ;
+
+
+-- -------------------------
+-- 参照項目情報（メニュー作成用）
+-- -------------------------
+CREATE VIEW G_CREATE_REFERENCE_ITEM AS 
+SELECT TAB_A.CREATE_ITEM_ID ITEM_ID               ,
+       TAB_C.LINK_ID LINK_ID                      ,
+       TAB_A.DISP_SEQ DISP_SEQ                    ,
+       TAB_C.TABLE_NAME TABLE_NAME                ,
+       TAB_C.PRI_NAME PRI_NAME                    ,
+       CONCAT('KY_AUTO_COL_', lpad(TAB_A.CREATE_ITEM_ID, 4, '0')) COLUMN_NAME,
+       TAB_A.ITEM_NAME ITEM_NAME                  ,
+       TAB_D.FULL_COL_GROUP_NAME COL_GROUP_NAME   ,
+       TAB_A.DESCRIPTION DESCRIPTION              ,
+       TAB_A.INPUT_METHOD_ID INPUT_METHOD_ID      ,
+       CASE WHEN TAB_A.INPUT_METHOD_ID = 8 THEN 2 ELSE 1 END AS SENSITIVE_FLAG,
+       CASE WHEN CONCAT('KY_AUTO_COL_', lpad(TAB_A.CREATE_ITEM_ID, 4, '0')) = TAB_C.COLUMN_NAME THEN 1 ELSE '' END AS MASTER_COL_FLAG,
+       TAB_A.ACCESS_AUTH                          ,
+       TAB_A.NOTE                                 ,
+       TAB_A.DISUSE_FLAG                          ,
+       TAB_A.LAST_UPDATE_TIMESTAMP                ,
+       TAB_A.LAST_UPDATE_USER                     ,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01        ,
+       TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02        ,
+       TAB_D.ACCESS_AUTH AS ACCESS_AUTH_03 
+FROM F_CREATE_ITEM_INFO TAB_A
+LEFT JOIN F_CREATE_MENU_INFO TAB_B ON (TAB_A.CREATE_MENU_ID = TAB_B.CREATE_MENU_ID)
+LEFT JOIN G_OTHER_MENU_LINK TAB_C ON (TAB_B.MENU_NAME = TAB_C.MENU_NAME)
+LEFT JOIN F_COLUMN_GROUP TAB_D ON (TAB_A.COL_GROUP_ID = TAB_D.COL_GROUP_ID)
+WHERE NOT TAB_A.INPUT_METHOD_ID = 7 AND TAB_B.DISUSE_FLAG='0' AND TAB_C.DISUSE_FLAG='0'
+;
+
+
+CREATE VIEW G_CREATE_REFERENCE_ITEM_JNL AS 
+SELECT TAB_A.JOURNAL_SEQ_NO                       ,
+       TAB_A.JOURNAL_REG_DATETIME                 ,
+       TAB_A.JOURNAL_ACTION_CLASS                 ,
+       TAB_A.CREATE_ITEM_ID ITEM_ID               ,
+       TAB_C.LINK_ID LINK_ID                      ,
+       TAB_A.DISP_SEQ DISP_SEQ                    ,
+       TAB_C.TABLE_NAME TABLE_NAME                ,
+       TAB_C.PRI_NAME PRI_NAME                    ,
+       CONCAT('KY_AUTO_COL_', lpad(TAB_A.CREATE_ITEM_ID, 4, '0')) COLUMN_NAME,
+       TAB_A.ITEM_NAME ITEM_NAME                  ,
+       TAB_D.FULL_COL_GROUP_NAME COL_GROUP_NAME   ,
+       TAB_A.DESCRIPTION DESCRIPTION              ,
+       TAB_A.INPUT_METHOD_ID INPUT_METHOD_ID      ,
+       CASE WHEN TAB_A.INPUT_METHOD_ID = 8 THEN 2 ELSE 1 END AS SENSITIVE_FLAG,
+       CASE WHEN CONCAT('KY_AUTO_COL_', lpad(TAB_A.CREATE_ITEM_ID, 4, '0')) = TAB_C.COLUMN_NAME THEN 1 ELSE '' END AS MASTER_COL_FLAG,
+       TAB_A.ACCESS_AUTH                          ,
+       TAB_A.NOTE                                 ,
+       TAB_A.DISUSE_FLAG                          ,
+       TAB_A.LAST_UPDATE_TIMESTAMP                ,
+       TAB_A.LAST_UPDATE_USER                     ,
+       TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01        ,
+       TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02        ,
+       TAB_D.ACCESS_AUTH AS ACCESS_AUTH_03 
+FROM F_CREATE_ITEM_INFO_JNL TAB_A
+LEFT JOIN F_CREATE_MENU_INFO TAB_B ON (TAB_A.CREATE_MENU_ID = TAB_B.CREATE_MENU_ID)
+LEFT JOIN G_OTHER_MENU_LINK TAB_C ON (TAB_B.MENU_NAME = TAB_C.MENU_NAME)
+LEFT JOIN F_COLUMN_GROUP TAB_D ON (TAB_A.COL_GROUP_ID = TAB_D.COL_GROUP_ID)
+WHERE NOT TAB_A.INPUT_METHOD_ID = 7 AND TAB_B.DISUSE_FLAG='0' AND TAB_C.DISUSE_FLAG='0'
+;
+
+-- -------------------------
+-- 参照項目情報（既存メニュー/作成メニュー結合）
+-- -------------------------
+CREATE VIEW G_MENU_REFERENCE_ITEM AS 
+SELECT TAB_A.ITEM_ID  ITEM_ID                            ,
+       TAB_A.LINK_ID  LINK_ID                            ,
+       TAB_A.DISP_SEQ DISP_SEQ                           ,
+       TAB_A.TABLE_NAME TABLE_NAME                       ,
+       TAB_A.PRI_NAME PRI_NAME                           ,
+       TAB_A.COLUMN_NAME COLUMN_NAME                     ,
+       TAB_A.ITEM_NAME ITEM_NAME                         ,
+       TAB_A.COL_GROUP_NAME COL_GROUP_NAME               ,
+       TAB_A.DESCRIPTION DESCRIPTION                     ,
+       TAB_A.INPUT_METHOD_ID INPUT_METHOD_ID             ,
+       TAB_A.SENSITIVE_FLAG SENSITIVE_FLAG               ,
+       TAB_A.MASTER_COL_FLAG MASTER_COL_FLAG             ,
+       TAB_A.ACCESS_AUTH ACCESS_AUTH                     ,
+       TAB_A.NOTE NOTE                                   ,
+       TAB_A.DISUSE_FLAG DISUSE_FLAG                     ,
+       TAB_A.LAST_UPDATE_TIMESTAMP LAST_UPDATE_TIMESTAMP ,
+       TAB_A.LAST_UPDATE_USER LAST_UPDATE_USER
+FROM  F_MENU_REFERENCE_ITEM TAB_A
+WHERE TAB_A.DISUSE_FLAG = '0'
+UNION ALL
+SELECT TAB_B.ITEM_ID  ITEM_ID                            ,
+       TAB_B.LINK_ID  LINK_ID                            ,
+       TAB_B.DISP_SEQ DISP_SEQ                           ,
+       TAB_B.TABLE_NAME TABLE_NAME                       ,
+       TAB_B.PRI_NAME PRI_NAME                           ,
+       TAB_B.COLUMN_NAME COLUMN_NAME                     ,
+       TAB_B.ITEM_NAME ITEM_NAME                         ,
+       TAB_B.COL_GROUP_NAME COL_GROUP_NAME               ,
+       TAB_B.DESCRIPTION DESCRIPTION                     ,
+       TAB_B.INPUT_METHOD_ID INPUT_METHOD_ID             ,
+       TAB_B.SENSITIVE_FLAG SENSITIVE_FLAG               ,
+       TAB_B.MASTER_COL_FLAG MASTER_COL_FLAG             ,
+       TAB_B.ACCESS_AUTH ACCESS_AUTH                     ,
+       TAB_B.NOTE NOTE                                   ,
+       TAB_B.DISUSE_FLAG DISUSE_FLAG                     ,
+       TAB_B.LAST_UPDATE_TIMESTAMP LAST_UPDATE_TIMESTAMP ,
+       TAB_B.LAST_UPDATE_USER LAST_UPDATE_USER
+FROM G_CREATE_REFERENCE_ITEM TAB_B
+WHERE TAB_B.DISUSE_FLAG = '0'
+;
+
+
+CREATE VIEW G_MENU_REFERENCE_ITEM_JNL AS 
+SELECT TAB_A.JOURNAL_SEQ_NO                              ,
+       TAB_A.JOURNAL_REG_DATETIME                        ,
+       TAB_A.JOURNAL_ACTION_CLASS                        ,
+       TAB_A.ITEM_ID  ITEM_ID                            ,
+       TAB_A.LINK_ID  LINK_ID                            ,
+       TAB_A.DISP_SEQ DISP_SEQ                           ,
+       TAB_A.TABLE_NAME TABLE_NAME                       ,
+       TAB_A.PRI_NAME PRI_NAME                           ,
+       TAB_A.COLUMN_NAME COLUMN_NAME                     ,
+       TAB_A.ITEM_NAME ITEM_NAME                         ,
+       TAB_A.COL_GROUP_NAME COL_GROUP_NAME               ,
+       TAB_A.DESCRIPTION DESCRIPTION                     ,
+       TAB_A.INPUT_METHOD_ID INPUT_METHOD_ID             ,
+       TAB_A.SENSITIVE_FLAG SENSITIVE_FLAG               ,
+       TAB_A.MASTER_COL_FLAG MASTER_COL_FLAG             ,
+       TAB_A.ACCESS_AUTH ACCESS_AUTH                     ,
+       TAB_A.NOTE NOTE                                   ,
+       TAB_A.DISUSE_FLAG DISUSE_FLAG                     ,
+       TAB_A.LAST_UPDATE_TIMESTAMP LAST_UPDATE_TIMESTAMP ,
+       TAB_A.LAST_UPDATE_USER LAST_UPDATE_USER
+FROM  F_MENU_REFERENCE_ITEM_JNL TAB_A
+WHERE TAB_A.DISUSE_FLAG = '0'
+UNION ALL
+SELECT TAB_B.JOURNAL_SEQ_NO                              ,
+       TAB_B.JOURNAL_REG_DATETIME                        ,
+       TAB_B.JOURNAL_ACTION_CLASS                        ,
+       TAB_B.ITEM_ID  ITEM_ID                            ,
+       TAB_B.LINK_ID  LINK_ID                            ,
+       TAB_B.DISP_SEQ DISP_SEQ                           ,
+       TAB_B.TABLE_NAME TABLE_NAME                       ,
+       TAB_B.PRI_NAME PRI_NAME                           ,
+       TAB_B.COLUMN_NAME COLUMN_NAME                     ,
+       TAB_B.ITEM_NAME ITEM_NAME                         ,
+       TAB_B.COL_GROUP_NAME COL_GROUP_NAME               ,
+       TAB_B.DESCRIPTION DESCRIPTION                     ,
+       TAB_B.INPUT_METHOD_ID INPUT_METHOD_ID             ,
+       TAB_B.SENSITIVE_FLAG SENSITIVE_FLAG               ,
+       TAB_B.MASTER_COL_FLAG MASTER_COL_FLAG             ,
+       TAB_B.ACCESS_AUTH ACCESS_AUTH                     ,
+       TAB_B.NOTE NOTE                                   ,
+       TAB_B.DISUSE_FLAG DISUSE_FLAG                     ,
+       TAB_B.LAST_UPDATE_TIMESTAMP LAST_UPDATE_TIMESTAMP ,
+       TAB_B.LAST_UPDATE_USER LAST_UPDATE_USER
+FROM G_CREATE_REFERENCE_ITEM_JNL TAB_B
+WHERE TAB_B.DISUSE_FLAG = '0'
+;
+
+
+
+
+-- *****************************************************************************
+-- *** ***** Contrast Tables                                      ***
+-- *****************************************************************************
+-- -------------------------
+-- 比較定義情報
+-- -------------------------
+CREATE TABLE A_CONTRAST_LIST
+(
+CONTRAST_LIST_ID                    INT                               , -- 識別シーケンス項番
+CONTRAST_NAME                       TEXT                              ,
+CONTRAST_MENU_ID_1                  INT                               ,
+CONTRAST_MENU_ID_2                  INT                               ,
+ALL_MATCH_FLG                       INT                               ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                VARCHAR  (4000)                   , -- 備考
+DISUSE_FLAG                         VARCHAR  (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                    INT                               , -- 最終更新ユーザ
+PRIMARY KEY (CONTRAST_LIST_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE A_CONTRAST_LIST_JNL
+(
+JOURNAL_SEQ_NO                      INT                               , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                DATETIME(6)                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                VARCHAR  (8)                      , -- 履歴用変更種別
+
+CONTRAST_LIST_ID                    INT                               , -- 識別シーケンス項番
+CONTRAST_NAME                       TEXT                              ,
+CONTRAST_MENU_ID_1                  INT                               ,
+CONTRAST_MENU_ID_2                  INT                               ,
+ALL_MATCH_FLG                       INT                               ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                VARCHAR  (4000)                   , -- 備考
+DISUSE_FLAG                         VARCHAR  (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                    INT                               , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+-- -------------------------
+-- 比較定義詳細
+-- -------------------------
+CREATE TABLE A_CONTRAST_DETAIL
+(
+CONTRAST_DETAIL_ID                  INT                               , -- 識別シーケンス項番
+CONTRAST_LIST_ID                    INT                               ,
+CONTRAST_COL_TITLE                  TEXT                              ,
+CONTRAST_COL_ID_1                   INT                               ,
+CONTRAST_COL_ID_2                   INT                               ,
+DISP_SEQ                            INT                               ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                VARCHAR  (4000)                   , -- 備考
+DISUSE_FLAG                         VARCHAR  (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                    INT                               , -- 最終更新ユーザ
+PRIMARY KEY (CONTRAST_DETAIL_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE A_CONTRAST_DETAIL_JNL
+(
+JOURNAL_SEQ_NO                      INT                               , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                DATETIME(6)                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                VARCHAR  (8)                      , -- 履歴用変更種別
+
+CONTRAST_DETAIL_ID                  INT                               , -- 識別シーケンス項番
+CONTRAST_LIST_ID                    INT                               ,
+CONTRAST_COL_TITLE                  TEXT                              ,
+CONTRAST_COL_ID_1                   INT                               ,
+CONTRAST_COL_ID_2                   INT                               ,
+DISP_SEQ                            INT                               ,
+ACCESS_AUTH                         TEXT                              ,
+NOTE                                VARCHAR  (4000)                   , -- 備考
+DISUSE_FLAG                         VARCHAR  (1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               DATETIME(6)                       , -- 最終更新日時
+LAST_UPDATE_USER                    INT                               , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+-- *****************************************************************************
+-- *** ***** Contrast View                                      ***
+-- *****************************************************************************
+-- -------------------------
+-- 比較定義情報「比較定義名:対象メニュー1/2」(プルダウン用)
+-- -------------------------
+CREATE VIEW D_CONTRAST_LIST AS 
+SELECT 
+    TAB_A.* ,
+    concat( TAB_A.CONTRAST_NAME ,' [ ' ,TAB_A.CONTRAST_MENU_ID_1 ,':', TAB_B.MENU_NAME ,'-', TAB_A.CONTRAST_MENU_ID_2 ,':', TAB_C.MENU_NAME ,' ] ') AS PULLDOWN 
+FROM A_CONTRAST_LIST TAB_A
+LEFT JOIN A_MENU_LIST TAB_B ON ( TAB_B.MENU_ID = TAB_A.CONTRAST_MENU_ID_1 )
+LEFT JOIN A_MENU_LIST TAB_C ON ( TAB_C.MENU_ID = TAB_A.CONTRAST_MENU_ID_2 )
+WHERE
+    TAB_A.ALL_MATCH_FLG IS NULL AND
+    TAB_A.DISUSE_FLAG = '0' AND
+    TAB_B.DISUSE_FLAG = '0'
+;
+CREATE VIEW D_CONTRAST_LIST_JNL AS 
+SELECT 
+    TAB_A.*,
+    concat( TAB_A.CONTRAST_NAME ,' [ ' ,TAB_A.CONTRAST_MENU_ID_1 ,':', TAB_B.MENU_NAME ,'-', TAB_A.CONTRAST_MENU_ID_2 ,':', TAB_C.MENU_NAME ,' ] ') AS PULLDOWN 
+FROM A_CONTRAST_LIST_JNL TAB_A
+LEFT JOIN A_MENU_LIST TAB_B ON ( TAB_B.MENU_ID = TAB_A.CONTRAST_MENU_ID_1 )
+LEFT JOIN A_MENU_LIST TAB_C ON ( TAB_C.MENU_ID = TAB_A.CONTRAST_MENU_ID_2 )
+WHERE
+    TAB_A.ALL_MATCH_FLG IS NULL AND
+    TAB_A.DISUSE_FLAG = '0' AND
+    TAB_B.DISUSE_FLAG = '0'
+;
+-- -------------------------
+-- 比較定義詳細
+-- -------------------------
+CREATE VIEW D_CONTRAST_DETAIL AS 
+SELECT 
+    TAB_A.* ,
+    TAB_A.CONTRAST_COL_ID_1 AS REST_CONTRAST_COL_ID_1,
+    TAB_A.CONTRAST_COL_ID_2 AS REST_CONTRAST_COL_ID_2
+FROM
+    A_CONTRAST_DETAIL TAB_A 
+;
+
+CREATE VIEW D_CONTRAST_DETAIL_JNL AS 
+SELECT 
+    TAB_A.* ,
+    TAB_A.CONTRAST_COL_ID_1 AS REST_CONTRAST_COL_ID_1,
+    TAB_A.CONTRAST_COL_ID_2 AS REST_CONTRAST_COL_ID_2
+FROM
+    A_CONTRAST_DETAIL_JNL TAB_A
+;
+
+-- -------------------------
+-- 比較定義詳細項目参照情報「メニューグループ:メニュー:項目」(プルダウン用)
+-- -------------------------
+CREATE VIEW D_CMDB_MG_MU_COL_LIST_CONTRAST AS 
+SELECT
+    TAB_A.*                 , 
+    CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_TITLE_PULLDOWN,
+    TAB_B.SHEET_TYPE                     ,
+    TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+    TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02  ,
+    TAB_D.ACCESS_AUTH AS ACCESS_AUTH_03
+FROM B_CMDB_MENU_COLUMN TAB_A
+    LEFT JOIN B_CMDB_MENU_LIST       TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+    LEFT JOIN A_MENU_LIST            TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+    LEFT JOIN A_MENU_GROUP_LIST      TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+    TAB_A.COL_CLASS   <>  'PasswordColumn' AND 
+    TAB_A.DISUSE_FLAG = '0' AND
+    TAB_B.DISUSE_FLAG = '0' AND
+    TAB_C.DISUSE_FLAG = '0' AND
+    TAB_D.DISUSE_FLAG = '0';
+
+CREATE VIEW D_CMDB_MG_MU_COL_LIST_CONTRAST_JNL AS 
+SELECT 
+    TAB_A.*                 , 
+    CONCAT(TAB_D.MENU_GROUP_ID,':',TAB_D.MENU_GROUP_NAME,':',TAB_A.MENU_ID,':',TAB_C.MENU_NAME,':',TAB_A.COLUMN_LIST_ID,':',TAB_A.COL_TITLE) MENU_COL_TITLE_PULLDOWN,
+    TAB_B.SHEET_TYPE                     ,
+    TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01  ,
+    TAB_C.ACCESS_AUTH AS ACCESS_AUTH_02  ,
+    TAB_D.ACCESS_AUTH AS ACCESS_AUTH_03
+FROM B_CMDB_MENU_COLUMN_JNL TAB_A
+    LEFT JOIN B_CMDB_MENU_LIST           TAB_B ON (TAB_A.MENU_ID       = TAB_B.MENU_ID)
+    LEFT JOIN A_MENU_LIST                TAB_C ON (TAB_A.MENU_ID       = TAB_C.MENU_ID)
+    LEFT JOIN A_MENU_GROUP_LIST          TAB_D ON (TAB_C.MENU_GROUP_ID = TAB_D.MENU_GROUP_ID)
+WHERE
+   TAB_A.COL_CLASS   <>  'PasswordColumn' AND 
+   TAB_A.DISUSE_FLAG = '0' AND
+   TAB_B.DISUSE_FLAG = '0' AND
+   TAB_C.DISUSE_FLAG = '0' AND
+   TAB_D.DISUSE_FLAG = '0';
+
+-- -------------------------------------------------------
+-- 比較定義メニュー参照情報「メニューグループ:メニュー」(プルダウン用)
+-- -------------------------------------------------------
+CREATE VIEW D_CMDB_MENU_LIST_CONTRAST AS
+SELECT
+ *
+FROM D_CMDB_MENU_LIST TAB_A
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
+;
+
+CREATE VIEW D_CMDB_MENU_LIST_CONTRAST_JNL AS
+SELECT
+ *
+FROM D_CMDB_MENU_LIST_JNL TAB_A
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
+;
+
+
+
 INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_CREATE_MENU_INFO_RIC',1,'2100160001',2100610001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
 INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_CREATE_MENU_INFO_JSQ',1,'2100160001',2100610002,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
@@ -646,6 +1054,18 @@ INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) 
 
 INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_INPUT_METHOD_JSQ',3,NULL,2100690006,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_MENU_REFERENCE_ITEM_RIC',1,'2100160012',2100610017,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('F_MENU_REFERENCE_ITEM_JSQ',1,'2100160012',2100610018,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('A_CONTRAST_LIST_RIC',1,'2100190001',2100900001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('A_CONTRAST_LIST_JSQ',1,'2100190001',2100900002,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('A_CONTRAST_DETAIL_RIC',1,'2100190002',2100900003,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('A_CONTRAST_DETAIL_JSQ',1,'2100190002',2100900004,'履歴テーブル用',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
 
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011601,'メニュー作成','sheet.png',51,'メニュー作成','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100011601,'メニュー作成','sheet.png',51,'メニュー作成','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -659,17 +1079,19 @@ INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DIS
 INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160012,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100011612,'参照用','for-view.png',54,'メニュー作成','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100011613,'縦横変換用中間シート',NULL,58,'メニュー作成','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160013,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100011613,'縦横変換用中間シート',NULL,58,'メニュー作成','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100110001,'比較','comparison.png',55,'比較','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160014,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100110001,'比較','comparison.png',55,'比較','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
-INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160001,2100011601,'メニュー定義一覧',NULL,NULL,NULL,1,0,1,2,2,'create_menu_info','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160001,2100011601,'メニュー定義一覧',NULL,NULL,NULL,1,0,1,2,2,'create_menu_info','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160002,2100011601,'メニュー項目作成情報',NULL,NULL,NULL,1,0,1,2,4,'create_item_info','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160002,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160002,2100011601,'メニュー項目作成情報',NULL,NULL,NULL,1,0,1,2,4,'create_item_info','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160003,2100011601,'メニュー作成実行',NULL,NULL,NULL,1,0,2,2,6,'create_menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160003,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160003,2100011601,'メニュー作成実行',NULL,NULL,NULL,1,0,2,2,6,'create_menu','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160004,2100011601,'メニュー作成履歴',NULL,NULL,NULL,1,0,1,2,7,'create_menu_status','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160004,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160004,2100011601,'メニュー作成履歴',NULL,NULL,NULL,1,0,1,2,7,'create_menu_status','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160005,2100011601,'メニュー・テーブル紐付',NULL,NULL,NULL,1,0,1,2,101,'menu_table_link','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160005,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160005,2100011601,'メニュー・テーブル紐付',NULL,NULL,NULL,1,0,1,2,101,'menu_table_link','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160001,2100011601,'メニュー定義一覧',NULL,NULL,NULL,1,0,1,2,2,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160001,2100011601,'メニュー定義一覧',NULL,NULL,NULL,1,0,1,2,2,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160002,2100011601,'メニュー項目作成情報',NULL,NULL,NULL,1,0,1,2,4,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160002,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160002,2100011601,'メニュー項目作成情報',NULL,NULL,NULL,1,0,1,2,4,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160003,2100011601,'メニュー作成実行',NULL,NULL,NULL,1,0,2,2,6,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160003,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160003,2100011601,'メニュー作成実行',NULL,NULL,NULL,1,0,2,2,6,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160004,2100011601,'メニュー作成履歴',NULL,NULL,NULL,1,0,1,2,7,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160004,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160004,2100011601,'メニュー作成履歴',NULL,NULL,NULL,1,0,1,2,7,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160005,2100011601,'メニュー・テーブル紐付',NULL,NULL,NULL,1,0,1,2,101,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160005,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160005,2100011601,'メニュー・テーブル紐付',NULL,NULL,NULL,1,0,1,2,101,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160007,2100011601,'他メニュー連携',NULL,NULL,NULL,1,0,1,2,103,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160007,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160007,2100011601,'他メニュー連携',NULL,NULL,NULL,1,0,1,2,103,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160008,2100011601,'カラムグループ管理',NULL,NULL,NULL,1,0,1,2,3,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -678,8 +1100,16 @@ INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRI
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160009,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160009,2100011601,'メニュー(縦)作成情報',NULL,NULL,NULL,1,0,1,2,5,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160010,2100011601,'メニュー縦横変換管理',NULL,NULL,NULL,1,0,1,2,104,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160010,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160010,2100011601,'メニュー縦横変換管理',NULL,NULL,NULL,1,0,1,2,104,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160011,2100011601,'メニュー定義/作成',NULL,NULL,NULL,1,0,1,2,1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160011,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160011,2100011601,'メニュー定義/作成',NULL,NULL,NULL,1,0,1,2,1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160011,2100011601,'メニュー定義・作成',NULL,NULL,NULL,1,0,1,2,1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160011,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160011,2100011601,'メニュー定義・作成',NULL,NULL,NULL,1,0,1,2,1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160012,2100011601,'参照項目情報',NULL,NULL,NULL,1,0,1,2,105,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160012,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160012,2100011601,'参照項目情報',NULL,NULL,NULL,1,0,1,2,105,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100190001,2100110001,'比較定義',NULL,NULL,NULL,1,0,1,2,10,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160013,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100190001,2100110001,'比較定義',NULL,NULL,NULL,1,0,1,2,10,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100190002,2100110001,'比較定義詳細',NULL,NULL,NULL,1,0,1,2,20,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160014,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100190002,2100110001,'比較定義詳細',NULL,NULL,NULL,1,0,1,2,20,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100190003,2100110001,'比較実行',NULL,NULL,NULL,1,0,1,2,30,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160015,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100190003,2100110001,'比較実行',NULL,NULL,NULL,1,0,1,2,30,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-101601,'m01','5ebbc37e034d6874a2af59eb04beaa52','メニュー作成機能','sample@xxx.bbb.ccc',NULL,NULL,'H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-101601,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-101601,'m01','5ebbc37e034d6874a2af59eb04beaa52','メニュー作成機能','sample@xxx.bbb.ccc',NULL,NULL,'H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -708,6 +1138,14 @@ INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160010,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160010,1,2100160010,2,'システム管理者','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160011,1,2100160011,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160011,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160011,1,2100160011,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100160012,1,2100160012,2,'システム管理者','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160012,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100160012,1,2100160012,2,'システム管理者','1',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100190001,1,2100190001,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160013,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100190001,1,2100190001,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100190002,1,2100190002,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160014,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100190002,1,2100190002,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100190003,1,2100190003,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-160015,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100190003,1,2100190003,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO F_CM_STATUS_MASTER (STATUS_ID,STATUS_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'未実行',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_CM_STATUS_MASTER_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,STATUS_ID,STATUS_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'未実行',NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -748,6 +1186,29 @@ INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_N
 INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000001,2100000303,'ホスト名','C_STM_LIST','SYSTEM_ID','HOSTNAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000002,2100000303,'IPアドレス','C_STM_LIST','SYSTEM_ID','IP_ADDRESS',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000002,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000002,2100000303,'IPアドレス','C_STM_LIST','SYSTEM_ID','IP_ADDRESS',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000005,2100000205,'メニュー名称','D_MENU_LIST','MENU_ID','MENU_PULLDOWN',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000005,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000005,2100000205,'メニュー名称','D_MENU_LIST','MENU_ID','MENU_PULLDOWN',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000006,2100000208,'ログインID','A_ACCOUNT_LIST','USER_ID','USERNAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000006,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000006,2100000208,'ログインID','A_ACCOUNT_LIST','USER_ID','USERNAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000007,2100000304,'オペレーション名','C_OPERATION_LIST','OPERATION_NO_UAPK','OPERATION_NAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000007,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000007,2100000304,'オペレーション名','C_OPERATION_LIST','OPERATION_NO_UAPK','OPERATION_NAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000008,2100000305,'Movement名','C_PATTERN_PER_ORCH','PATTERN_ID','PATTERN_NAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000008,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000008,2100000305,'Movement名','C_PATTERN_PER_ORCH','PATTERN_ID','PATTERN_NAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000009,2100000307,'Symphony名称','C_SYMPHONY_CLASS_MNG','SYMPHONY_CLASS_NO','SYMPHONY_NAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000009,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000009,2100000307,'Symphony名称','C_SYMPHONY_CLASS_MNG','SYMPHONY_CLASS_NO','SYMPHONY_NAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK (LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000010,2100180002,'Conductor名称','C_CONDUCTOR_EDIT_CLASS_MNG','CONDUCTOR_CLASS_NO','CONDUCTOR_NAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_OTHER_MENU_LINK_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,MENU_ID,COLUMN_DISP_NAME,TABLE_NAME,PRI_NAME,COLUMN_NAME,COLUMN_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000010,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000010,2100180002,'Conductor名称','C_CONDUCTOR_EDIT_CLASS_MNG','CONDUCTOR_CLASS_NO','CONDUCTOR_NAME',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO F_MENU_REFERENCE_ITEM (ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000001,2000000005,0,'A_MENU_LIST','MENU_ID','MENU_ID','メニューID',NULL,NULL,1,1,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_MENU_REFERENCE_ITEM_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000001,2000000005,0,'A_MENU_LIST','MENU_ID','MENU_ID','メニューID',NULL,NULL,1,1,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_MENU_REFERENCE_ITEM (ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000003,2000000006,0,'A_ACCOUNT_LIST','USER_ID','MAIL_ADDRESS','メールアドレス',NULL,NULL,1,1,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_MENU_REFERENCE_ITEM_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000003,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000003,2000000006,0,'A_ACCOUNT_LIST','USER_ID','MAIL_ADDRESS','メールアドレス',NULL,NULL,1,1,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_MENU_REFERENCE_ITEM (ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000004,2000000001,0,'C_STM_LIST','SYSTEM_ID','IP_ADDRESS','IPアドレス',NULL,NULL,1,1,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_MENU_REFERENCE_ITEM_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000004,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000004,2000000001,0,'C_STM_LIST','SYSTEM_ID','IP_ADDRESS','IPアドレス',NULL,NULL,1,1,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_MENU_REFERENCE_ITEM (ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000005,2000000001,1,'C_STM_LIST','SYSTEM_ID','LOGIN_USER','ログインユーザID',NULL,NULL,1,1,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_MENU_REFERENCE_ITEM_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000005,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000005,2000000001,1,'C_STM_LIST','SYSTEM_ID','LOGIN_USER','ログインユーザID',NULL,NULL,1,1,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_MENU_REFERENCE_ITEM (ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000006,2000000001,2,'C_STM_LIST','SYSTEM_ID','LOGIN_PW','ログインパスワード',NULL,NULL,8,2,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO F_MENU_REFERENCE_ITEM_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,LINK_ID,DISP_SEQ,TABLE_NAME,PRI_NAME,COLUMN_NAME,ITEM_NAME,COL_GROUP_NAME,DESCRIPTION,INPUT_METHOD_ID,SENSITIVE_FLAG,MASTER_COL_FLAG,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2000000006,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2000000006,2000000001,2,'C_STM_LIST','SYSTEM_ID','LOGIN_PW','ログインパスワード',NULL,NULL,8,2,NULL,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 
 COMMIT;

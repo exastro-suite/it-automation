@@ -18,7 +18,7 @@
         require_once ($root_dir_path . "/libs/webcommonlibs/web_functions_for_menu_info.php");
 
         if( array_key_exists('grp', $_GET) && "" != $_GET['grp'] ){
-            $ACRCM_group_id = sprintf("%010d", $_GET['grp']);
+            $ACRCM_group_id = sprintf("%010d", htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8"));
             $ACRCM_id = "";
             $ACRCM_login_nf = "1";
         }
@@ -35,7 +35,7 @@
         else{
             //----メニューの情報取得
             if ( isset($_GET['no']) && !empty($_GET['no']) ) {
-                $no = $_GET['no'];
+                $no = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
             } else {
                 $no = "";
             }
@@ -45,7 +45,7 @@
                 if( $tmpAryRetBody[1] == 502 ){
                     // ----該当メニューIDが1件でない(通常は0件)
                     // アクセスログ出力(想定外エラー)
-                    web_log($objMTS->getSomeMessage("ITAWDCH-ERR-40",array($_SERVER["PHP_SELF"],$tmpAryRetBody[0]['rowLength'])));
+                    web_log($objMTS->getSomeMessage("ITAWDCH-ERR-40",array(htmlspecialchars($_SERVER["SCRIPT_NAME"], ENT_QUOTES, "UTF-8"),$tmpAryRetBody[0]['rowLength'])));
                     // 404エラーを表示
                     webRequestForceQuitFromEveryWhere(404);
                     exit();
@@ -92,7 +92,7 @@
                 throw new Exception( $tmpAryRetBody[3] );
                 // 取得できなかった----
             }
-            $ACRCM_group_name = $tmpAryRetBody[0]['MenuGroupName'];
+            $ACRCM_group_name = htmlspecialchars($tmpAryRetBody[0]['MenuGroupName'], ENT_QUOTES, "UTF-8");
             unset($tmpAryRetBody);
         }
     }

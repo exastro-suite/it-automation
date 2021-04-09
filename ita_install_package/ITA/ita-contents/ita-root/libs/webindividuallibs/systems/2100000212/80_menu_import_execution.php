@@ -72,7 +72,7 @@ function menuImportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
                 $importPath = $g['root_dir_path'] . '/temp/data_import/import/' . $dirName;   
 
                 // DP_INFO 取得 #270 対応
-                $dpinfoPath = $g['root_dir_path'] . '/temp/data_import/import/' . $dirName; 
+                $dpinfoPath = $g['root_dir_path'] . '/temp/data_import/import/' . $dirName;
                 $json = file_get_contents($dpinfoPath .'/DP_INFO');
                 $dp_info = json_decode(json_decode(json_encode($json), true), true);
                 $_SESSION["dp_info"] = check_dp_info($dp_info);
@@ -165,14 +165,8 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
     //アップロードしたファイル名($_SESSION 利用関数対応)
     $_SESSION['data_portability_upload_file_name']      = $tmpJSONOfReceptedData['data_portability_upload_file_name'];
 
-    //インポート時実行タイプの設定
-    if (array_key_exists('importButton', $tmpJSONOfReceptedData))$tmparray['importButton'] = $tmpJSONOfReceptedData['importButton'];
-    if (array_key_exists('importButton2', $tmpJSONOfReceptedData))$tmparray['importButton2'] = $tmpJSONOfReceptedData['importButton2'];
-
     //不要な要素の削除
     unset($tmpJSONOfReceptedData['no']);
-    unset($tmpJSONOfReceptedData['importButton']);
-    unset($tmpJSONOfReceptedData['importButton2']);
     unset($tmpJSONOfReceptedData['post_kind']);
     unset($tmpJSONOfReceptedData['menu_on']);
     unset($tmpJSONOfReceptedData['upload_id']);
@@ -207,8 +201,6 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
             // 入力値チェック
             $requestAry = $_POST;
             //メニューグループ、IDチェック
-            unset($requestAry['importButton']);
-            unset($requestAry['importButton2']);
             foreach ($requestAry as $menuGroupId =>$menuIds) {
                 if (ctype_digit($menuGroupId) === false || strlen($menuGroupId) > MENU_ID_LENGTH) {
                     $errFlg = 1;
@@ -306,7 +298,11 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
     #270 対応
     if( isset( $_SESSION['dp_info'] ) ){
         $arrayResult["dp_mode"] = $_SESSION['dp_info']['DP_MODE']['ID'];
-        $arrayResult["abolished_type"] = $_SESSION['dp_info']['ABOLISHED_TYPE']['ID'];        
+        $arrayResult["abolished_type"] = $_SESSION['dp_info']['ABOLISHED_TYPE']['ID'];
+        $arrayResult["specified_timestamp"] = NULL;
+        if ( $arrayResult["dp_mode"] == "2" ) {
+            $arrayResult["specified_timestamp"] = $_SESSION['dp_info']['SPECIFIED_TIMESTAMP'];
+        }
     }
 
     if( $intResultCode == "000" )$arrayResult["IMPORT_LIST"] = $retImportAry;

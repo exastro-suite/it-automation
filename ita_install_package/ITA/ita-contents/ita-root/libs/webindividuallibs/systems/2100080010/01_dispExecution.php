@@ -21,7 +21,6 @@
     
     //----オーケストレータ別の設定記述
     $strExeTableIdForSelect = 'E_TERRAFORM_EXE_INS_MNG';
-    $strOrganizationWorkspaceLink = 'D_TERRAFORM_ORGANIZATION_WORKSPACE_LINK';
     //オーケストレータ別の設定記述----
     
     $strFxName = __FUNCTION__;
@@ -52,7 +51,7 @@
                         TAB_A.I_TIME_LIMIT,
                         TAB_A.I_TERRAFORM_RUN_ID,
                         TAB_A.I_TERRAFORM_WORKSPACE_ID,
-                        TAB_C.ORGANIZATION_WORKSPACE,
+                        TAB_A.I_TERRAFORM_ORGANIZATION_WORKSPACE,
                         TAB_A.STATUS_ID,
                         TAB_A.OPERATION_NO_UAPK,
                         TAB_A.I_OPERATION_NAME,
@@ -66,6 +65,7 @@
                         TAB_A.FILE_INPUT,
                         TAB_A.FILE_RESULT,
                         TAB_A.RUN_MODE_NAME,
+                        TAB_A.ACCESS_AUTH,
                         TAB_A.NOTE,
                         {$strSelectLastUpdateTimestamp4} AS LAST_UPDATE_TIMESTAMP,
                         CASE TAB_B.USERNAME_JP WHEN NULL THEN {$strConnectString1}
@@ -73,7 +73,6 @@
                                                    END AS LAST_UPDATE_USER
                     FROM    {$strExeTableIdForSelect} TAB_A
                     LEFT JOIN A_ACCOUNT_LIST             TAB_B ON (TAB_A.LAST_UPDATE_USER = TAB_B.USER_ID)
-                    LEFT JOIN {$strOrganizationWorkspaceLink} TAB_C ON (TAB_C.WORKSPACE_ID = TAB_A.I_TERRAFORM_WORKSPACE_ID)
                     WHERE   TAB_A.DISUSE_FLAG = '0'
                     AND     TAB_A.EXECUTION_NO = :EXECUTION_NO_BV ";
         //オーケストレータ別の設定記述----
@@ -147,7 +146,7 @@
         $COLUMN_32 = nl2br(htmlspecialchars($showTgtRow['I_PATTERN_NAME']));
         $COLUMN_33 = nl2br(htmlspecialchars($showTgtRow['I_OPERATION_NO_IDBH']));
         $COLUMN_35 = nl2br(htmlspecialchars($showTgtRow['I_TERRAFORM_RUN_ID']));
-        $COLUMN_36 = nl2br(htmlspecialchars($showTgtRow['ORGANIZATION_WORKSPACE']));
+        $COLUMN_36 = nl2br(htmlspecialchars($showTgtRow['I_TERRAFORM_ORGANIZATION_WORKSPACE']));
 
         $status_id = htmlspecialchars($showTgtRow['STATUS_ID']);
 
@@ -164,7 +163,7 @@
         // Movement一覧へ遷移するボタン生成
         $caption = $COLUMN_32;
         $url = sprintf("/default/menu/01_browse.php?no=2100080004&movement_id=%s",$movement_param);
-        $COLUMN_40 =  sprintf("<input class=\"linkBtnInTbl\" type=\"button\" value=\"%s\" onClick=\"window.open('%s')\">",$caption,$url);
+        $COLUMN_40 =  sprintf("<button class=\"linkBtnInTbl\" type=\"button\" onClick=\"window.open('%s')\">%s</button>",$url,$caption);
 
 
         //オーケストレータ別の設定記述----

@@ -126,6 +126,7 @@ EOD;
                         <label id="export_radio2" class="export_label">
                             <input type="radio" class="export_radio" value="2" name="dp_mode" for="export_radio2">
                             <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900027');?></span>
+                            <span class="export_label_input"><input id="bookdatetime" name="specified_timestamp" type="text" maxlength="16" disabled="disabled"></span>
                         </label>
                     </p>
                 </div>
@@ -175,19 +176,5 @@ EOD;
 <!-------------------------------- エクスポート -------------------------------->
 
 <?php
-//   Copyright 2019 NEC Corporation
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
 // 共通HTMLフッタパーツ
 require_once ( $root_dir_path . '/libs/webcommonlibs/web_parts_html_footer.php');

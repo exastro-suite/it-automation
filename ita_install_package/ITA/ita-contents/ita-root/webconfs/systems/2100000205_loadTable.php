@@ -38,9 +38,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table = new TableControlAgent('D_MENU_LIST','MENU_ID', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040101"), 'D_MENU_LIST_JNL');
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040002"));
     $table->getFormatter("excel")->setGeneValue("sheetNameForEditByFile",$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040003"));
-    
+
     $table->setAccessAuth(true);    // データごとのRBAC設定
-    
+
     $table->setJsEventNamePrefix(true);
 
     $table->setGeneObject("webSetting", $arrayWebSetting);
@@ -56,7 +56,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // メニューグループ
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040201"));
 
-    $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040301"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_ID', '', array('OrderByThirdColumn'=>'MENU_GROUP_ID') );
+    $arrUrl = array();
+    $arrUrl[0] = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_1__S=";
+    $arrUrl[1] = "&Filter1Tbl_1__E=";
+    $c = new LinkIDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040301"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_ID', $arrUrl, false, false, '', '', '', '', array('OrderByThirdColumn'=>'MENU_GROUP_ID') );
     $c->addClass("number");
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040302"));
     $c->getOutputType("update_table")->setVisible(false);
@@ -82,7 +85,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $cg->addColumn($c);
 
     // 名称
-    $c = new IDColumn('MENU_GROUP_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040401"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
+    $url = "01_browse.php?no=2100000204&filter=on&Filter1Tbl_2=";
+    $c = new LinkIDColumn('MENU_GROUP_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040401"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME', $url);
     $c->setAllowSendFromFile(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040402"));
     $c->setOutputType('update_table',new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt('<div id="sel_menu_group_name_chg" style="width: 200px; word-wrap:break-word; white-space:pre-wrap;" ></div>')));
@@ -118,7 +122,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setAllowSendFromFile(true);
     $c->setRequired(true);
     $table->addColumn($c);
-    
+
     // メニュー名称
     $c = new TextColumn('MENU_NAME',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040601"));
     $c->setRequired(true);
@@ -128,7 +132,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new MenuNameValidator_2100000205(1, 256, false));
     $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
-    
+
     // 認証要否
     $c = new IDColumn('LOGIN_NECESSITY', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1040701"), 'A_LOGIN_NECESSITY_LIST', 'FLAG', 'NAME', NULL );
     $c->setRequired(true);
@@ -164,13 +168,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);
     $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
-    
+
     // ロール情報
     $strLabelText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041001");
-    $c = new LinkButtonColumn('RoleInfo',$strLabelText, $strLabelText, 'edit_role_list', array(0, ':MENU_ID')); 
+    $c = new LinkButtonColumn('RoleInfo',$strLabelText, $strLabelText, 'edit_role_list', array(0, ':MENU_ID'));
     $c->setDBColumn(false);
     $table->addColumn($c);
-    
+
     // オートフィルタチェック
     $c = new IDColumn('AUTOFILTER_FLG',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041501"),'A_TODO_MASTER','TODO_ID','TODO_STATUS','', array('OrderByThirdColumn'=>'TODO_ID'));
     $c->setHiddenMainTableColumn(true);
@@ -187,13 +191,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     // Web表示上限行数
     $c = new NumColumn('WEB_PRINT_LIMIT', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041201"));
-    $c->setHiddenMainTableColumn(true);    
+    $c->setHiddenMainTableColumn(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041202"));
     $c->setSubtotalFlag(false);
     $c->setValidator(new IntNumValidator(0, 2147483647));
 
     $table->addColumn($c);
-    
+
     // Web表示確認行数
     $c = new NumColumn('WEB_PRINT_CONFIRM', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041301"));
     $c->setHiddenMainTableColumn(true);
@@ -201,7 +205,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setSubtotalFlag(false);
     $c->setValidator(new IntNumValidator(0, 2147483647));
     $table->addColumn($c);
-    
+
     // エクセル表示行数
     $c = new NumColumn('XLS_PRINT_LIMIT', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041401"));
     $c->setHiddenMainTableColumn(true);
@@ -209,9 +213,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setSubtotalFlag(false);
     $c->setValidator(new IntNumValidator(-1, 2147483647));
     $table->addColumn($c);
-    
+
     $table->fixColumn();
-    
+
     return $table;
 };
 loadTableFunctionAdd($tmpFx,__FILE__);

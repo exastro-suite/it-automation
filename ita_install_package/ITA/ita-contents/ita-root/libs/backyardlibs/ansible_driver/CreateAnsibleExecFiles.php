@@ -28,6 +28,7 @@
 //  F0004-2 CreateHostvarsfiles
 //  F0005-1 CreateRoleHostvarsfile
 //  F0005-2 CreateHostvarsfile
+//  F0005-2-1 CreatePioneerTemplateHostvarsfile
 //  F0005-3 CreateVaultHostvarsfiles
 //  F0006 CreatePlaybookfile
 //  F0007 CreateLegacyPlaybookfiles
@@ -95,6 +96,7 @@ require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonL
 require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php');
 require_once ($root_dir_path . '/libs/commonlibs/common_ansible_vault.php');
 
+require_once ($root_dir_path . "/libs/commonlibs/common_php_functions.php");
 
 class CreateAnsibleExecFiles {
     // Ansible 作業ディレクトリ名
@@ -118,6 +120,7 @@ class CreateAnsibleExecFiles {
     const LC_ANS_ORG_HOST_VARS_DIR           = "original_host_vars";
 
     const LC_ANS_VAULT_HOST_VARS_DIR         = "vault_host_vars";
+    const LC_ANS_PIONEER_TEMPLATE_HOST_VARS_DIR  = "pioneer_template_host_vars";
 
     // テンプレートファイル格納ディレクトリ名
     const LC_ANS_TEMPLATE_FILES_DIR          = "template_files";
@@ -157,7 +160,10 @@ class CreateAnsibleExecFiles {
     const LC_ANS_PLAYBOOK_FILE               = "playbook.yml";
     const LC_ANS_ROLE_PLAYBOOK_FILE          = "site.yml";
 
+    const LC_ANS_SSHAGENTCONFIG_FILE         = ".sshAgentConfig.txt";
+
     const LC_ANS_HOST_VAR_FILE_MK            = "%s/%s";
+    const LC_ANS_PIONEER_TEMPLATE_HOST_VAR_FILE_MK  = "%s/%s";
     const LC_ANS_CHILD_PLAYBOOK_FILE_MK      = "%s/%s-%s";
     const LC_ANS_DIALOG_FILE_HOST_DIR_MK     = "%s/%s";
     const LC_ANS_DIALOG_FILE_MK              = "%s/%s/%s-%s";
@@ -190,15 +196,6 @@ class CreateAnsibleExecFiles {
     // WINRM接続ポート デフォルト値
     const LC_WINRM_PORT                    = 5985;
 
-    // 機器一覧 パスワード管理フラグ(LOGIN_PW_HOLD_FLAG)
-    const LC_LOGIN_PW_HOLD_FLAG_OFF           = '0';         // パスワード管理なし
-    const LC_LOGIN_PW_HOLD_FLAG_ON            = '1';         // パスワード管理あり
-    const LC_LOGIN_PW_HOLD_FLAG_DEF           = '0';         // デフォルト値 パスワード管理なし
-    // 機器一覧 Ansible認証方式(LOGIN_AUTH_TYPE)
-    const LC_LOGIN_AUTH_TYPE_KEY              = '1';         // 鍵認証
-    const LC_LOGIN_AUTH_TYPE_PW               = '2';         // パスワード認証
-    const LC_LOGIN_AUTH_TYPE_DEF              = '1';         // デフォルト値 鍵認証
-
     //ローカル変数定義
     private $lv_Ansible_driver_id;                 //Ansibleドライバ(legacy/pioneer)区分
     private $lv_hostaddress_type;
@@ -215,7 +212,10 @@ class CreateAnsibleExecFiles {
     private $lv_Ansible_original_hosts_vars_Dir;   //original_host_varsディレクトリ
     private $lv_Ansible_template_files_Dir;        //template_filesディレクトリ
     private $lv_Ansible_vault_hosts_vars_Dir;      //vault_host_varsディレクトリ
+    private $lv_Ansible_pioneer_template_hosts_vars_Dir;  //pioneer template用 host_varsディレクトリ
     private $lv_Ansible_in_original_dialog_files_Dir; //in/original_dialog_filesディレクトリ
+
+    private $lv_Ansible_temporary_files_Dir;       //.tmpディレクトリ
 
     //親PlayBook内各ディレクトリ変数
     private $lv_Playbook_child_playbooks_Dir;      //PlayBook内 子PlayBookパス
@@ -320,6 +320,7 @@ class CreateAnsibleExecFiles {
     private  $lv_cpf_vars_list;
     private  $lv_use_gbl_vars_list;
     private  $lv_parent_vars_list;
+    private  $lv_pioneer_template_parent_vars_list;
    
     private  $lv_tpf_var_file_path_list;
     private  $lv_cpf_var_file_path_list;
@@ -476,6 +477,7 @@ class CreateAnsibleExecFiles {
         $this->lv_cpf_vars_list             = array();
         $this->lv_use_gbl_vars_list         = array();
         $this->lv_parent_vars_list          = array();
+        $this->lv_pioneer_template_parent_vars_list = array();
         $this->lv_tpf_var_file_path_list    = array();
         $this->lv_cpf_var_file_path_list    = array();
 
@@ -1294,6 +1296,22 @@ class CreateAnsibleExecFiles {
     
             // vault_host_varsディレクトリ名を記憶
             $this->setAnsible_vault_hosts_vars_Dir($c_dirwk);
+
+            // pioneer_template_host_varsディレクトリ作成
+            $c_dirwk = $c_tmpdir . "/" . self::LC_ANS_PIONEER_TEMPLATE_HOST_VARS_DIR;
+            if( !mkdir( $c_dirwk, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            if( !chmod( $c_dirwk, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+
+            // pioneer_template_host_varsディレクトリ名を記憶
+            $this->setAnsible_pioneer_template_hosts_vars_Dir($c_dirwk);
         }
 
         $this->ansible_vault_password_file_dir = $c_dir;
@@ -1309,7 +1327,7 @@ class CreateAnsibleExecFiles {
             return false;
         }
 
-        $c_tmpdir = $c_dir . "/" . $dir;
+        $c_tmpdir = $c_dir . "/" . $dir;   //.tmp
         // ディレクトリが既に作成されている場合を判定
         if( ! is_dir($c_tmpdir)) {
             // ディレクトリ作成
@@ -1324,6 +1342,8 @@ class CreateAnsibleExecFiles {
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             return false;
         }
+        $this->setTemporary_file_Dir($c_tmpdir);
+
         return true;
     }
 
@@ -1337,6 +1357,10 @@ class CreateAnsibleExecFiles {
     //                          [管理システム項番]=[ホスト名(IP)]
     //
     //   $ina_host_vars:        ホスト変数配列
+    //                          [ホスト名(IP)][ 変数名 ]=>具体値
+    //
+    //   $ina_pioneer_template_host_vars:
+    //                          ホスト変数配列 pioneer template用 変数一覧返却配列 (passwordColumnの具体値がansible-vaultで暗号化)
     //                          [ホスト名(IP)][ 変数名 ]=>具体値
     //
     //   $vault_vars:           PasswordCoulumn変数一覧(Pioneer用)
@@ -1375,16 +1399,22 @@ class CreateAnsibleExecFiles {
     //   既存のデータが重なるが、今後の開発はこの変数を使用する。
     //   $ina_hostinfolist:     機器一覧ホスト情報配列
     //                          [ホスト名(IP)]=HOSTNAME=>''             ホスト名
-    //                                         PROTOCOL_ID=>''          接続プロトコル
+    //                                         PROTOCOL_ID=>''	        接続プロトコル
     //                                         LOGIN_USER=>''           ログインユーザー名
     //                                         LOGIN_PW_HOLD_FLAG=>''   パスワード管理フラグ
-    //                                                                  1:管理(●)   0:未管理
+    //                                                                  1:管理(●)   N0:未管理
     //                                         LOGIN_PW=>''             パスワード
     //                                                                  パスワード管理が1の場合のみ有効
     //                                         LOGIN_AUTH_TYPE=>''      Ansible認証方式
     //                                                                  2:パスワード認証 1:鍵認証
     //                                         WINRM_PORT=>''           WinRM接続プロトコル
     //                                         OS_TYPE_ID=>''           OS種別
+    //                                         SSH_EXTRA_ARGS=>         SSHコマンド 追加パラメータ
+    //                                         SSH_KEY_FILE=>           SSH秘密鍵ファイル
+    //                                         SYSTEM_ID=>              項番
+    //                                         WINRM_SSL_CA_FILE=>      サーバー証明書ファイル
+    //                                         HOSTS_EXTRA_ARGS=>       インベントリファイル 追加パラメータ
+    //                                         SSH_KEY_FILE_PASSPHRASE=>  SSH秘密鍵ファイル パスフレーズ
     //
     //   $ina_host_child_vars:  配列変数一覧返却配列(変数一覧に配列変数含む)
     //                          [ホスト名(IP)][ 変数名 ][列順序][メンバー変数]=[具体値]
@@ -1402,6 +1432,7 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     function CreateAnsibleWorkingFiles($ina_hosts,
                                        $ina_host_vars,
+                                       $ina_pioneer_template_host_vars,
                                        $ina_vault_vars,
                                        $ina_vault_host_vars_file_list,
                                        $ina_child_playbooks,
@@ -1425,7 +1456,7 @@ class CreateAnsibleExecFiles {
         $this->lv_hostinfolist = $ina_hostinfolist;
 
         // 追加された予約変数生成
-        $ret = $this->CreateOperationVariables($this->run_operation_id,$ina_hostinfolist,$ina_host_vars);
+        $ret = $this->CreateOperationVariables($this->run_operation_id,$ina_hostinfolist,$ina_host_vars,$ina_pioneer_template_host_vars);
         if($ret === false) {
             return false;
         }
@@ -1433,7 +1464,7 @@ class CreateAnsibleExecFiles {
         //////////////////////////////////////////////
         // 収集機能用ディレクトリ生成/ホスト変数生成
         //////////////////////////////////////////////
-        $ret = $this->CreateDirectoryForCollectionProcess($ina_hostinfolist,$ina_host_vars);
+        $ret = $this->CreateDirectoryForCollectionProcess($ina_hostinfolist,$ina_host_vars,$ina_pioneer_template_host_vars);
         if($ret === false) {
             return false;
         }
@@ -1482,7 +1513,7 @@ class CreateAnsibleExecFiles {
         case DF_LEGACY_DRIVER_ID:
         case DF_PIONEER_DRIVER_ID:
             // host_varsファイルにホスト名を設定可能するためにホスト毎プロトコル一覧を渡す。
-            if ( $this->CreateHostvarsfiles($ina_host_vars,$ina_hostprotcollist,
+            if ( $this->CreateHostvarsfiles($ina_host_vars,$ina_pioneer_template_host_vars,$ina_hostprotcollist,
                                             $ina_host_child_vars,$ina_DB_child_vars_master) === false)
             {
                 return false;
@@ -1510,6 +1541,7 @@ class CreateAnsibleExecFiles {
             }
             break;
         }
+
         //ドライバ区分を判定
         switch($this->getAnsibleDriverID()){
         case DF_LEGACY_DRIVER_ID:
@@ -1545,7 +1577,7 @@ class CreateAnsibleExecFiles {
             // ホスト変数ファイルにグローバル変数・コピー変数
             // テンプレート変数の情報を出力する。
             ////////////////////////////////////////////////
-            if( $this->CommitHostVarsfiles($ina_hosts,$ina_hostprotcollist,$ina_host_vars) === false){
+            if( $this->CommitHostVarsfiles($ina_hosts,$ina_hostprotcollist,$ina_host_vars,$ina_pioneer_template_host_vars) === false){
                 return false;
             }
             break;
@@ -1592,7 +1624,7 @@ class CreateAnsibleExecFiles {
             // ホスト変数ファイルにグローバル変数・コピー変数
             // テンプレート変数の情報を出力する。
             ////////////////////////////////////////////////
-            if( $this->CommitHostVarsfiles($ina_hosts,$ina_hostprotcollist,$ina_host_vars) === false){
+            if( $this->CommitHostVarsfiles($ina_hosts,$ina_hostprotcollist,$ina_host_vars,$ina_pioneer_template_host_vars) === false){
                 return false;
             }
             /////////////////////////////////////////////////
@@ -1646,18 +1678,22 @@ class CreateAnsibleExecFiles {
     //                          [ホスト名(IP)][ホスト名][PROTOCOL_NAME][LOGIN_USER]=LOGIN_PASSWD
     //   $ina_hostinfolist:     機器一覧ホスト情報配列
     //                          [ホスト名(IP)]=HOSTNAME=>''             ホスト名
-    //                                         PROTOCOL_ID=>''          接続プロトコル
+    //                                         PROTOCOL_ID=>''	        接続プロトコル
     //                                         LOGIN_USER=>''           ログインユーザー名
     //                                         LOGIN_PW_HOLD_FLAG=>''   パスワード管理フラグ
-    //                                                                  1:管理(●)   0:未管理
+    //                                                                  1:管理(●)   N0:未管理
     //                                         LOGIN_PW=>''             パスワード
     //                                                                  パスワード管理が1の場合のみ有効
     //                                         LOGIN_AUTH_TYPE=>''      Ansible認証方式
     //                                                                  2:パスワード認証 1:鍵認証
     //                                         WINRM_PORT=>''           WinRM接続プロトコル
     //                                         OS_TYPE_ID=>''           OS種別
-    //                                         SYSTEM_ID=>''            機器一覧主キー
-    //                                         SSH_KEY_FILE=>''         SSH秘密鍵ファイル
+    //                                         SSH_EXTRA_ARGS=>         SSHコマンド 追加パラメータ
+    //                                         SSH_KEY_FILE=>           SSH秘密鍵ファイル
+    //                                         SYSTEM_ID=>              項番
+    //                                         WINRM_SSL_CA_FILE=>      サーバー証明書ファイル
+    //                                         HOSTS_EXTRA_ARGS=>       インベントリファイル 追加パラメータ
+    //                                         SSH_KEY_FILE_PASSPHRASE=>  SSH秘密鍵ファイル パスフレーズ
     //   $ina_sshkeyfilelist:             SSHSSH秘密鍵ファイルリスト(pioneer専用)
     //   $ina_pioneer_sshextraargslist:   SSH_EXTRA_ARGSリスト(pioneer専用)
     // 
@@ -1670,6 +1706,7 @@ class CreateAnsibleExecFiles {
                             &$ina_pioneer_sshkeyfilelist,
                             &$ina_pioneer_sshextraargslist) 
     {
+        $CreateSSHAgentConfigInfoFile = false;
 
         $ina_pioneer_sshkeyfilelist   = array();
         $ina_pioneer_sshextraargslist = array();
@@ -1729,58 +1766,87 @@ class CreateAnsibleExecFiles {
                 $hosts_extra_args = str_replace('<<<__TAB__>>>' , "\n          ",$hosts_extra_args);
             }
 
+            $indento_sp_host = str_pad( " ", 8 , " ", STR_PAD_LEFT );
+            $indento_sp_param = str_pad( " ", 10, " ", STR_PAD_LEFT );
+
             $param = "";
             $pass = "";
             $port = "";
+
             // sshの接続パラメータを作成する。
-            if( (($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
-                 ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)) &&
-                 // 対象ホストがwindowsの場合
-                (($this->lv_winrm_id == 1) ||
-                 // パスワード認証の場合
-                 ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_PW) ||
-                 ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_KEY)) ){
-                // ユーザー名
+            switch($this->getAnsibleDriverID()) {
+            case DF_LEGACY_DRIVER_ID:
+            case DF_LEGACY_ROLE_DRIVER_ID:
+                // ユーザー設定
                 if($ina_hostinfolist[$host_name]['LOGIN_USER'] != self::LC_ANS_UNDEFINE_NAME)
                 {
                     $param = "ansible_ssh_user: " . $ina_hostinfolist[$host_name]['LOGIN_USER'];
                 }
-                // パスワードが設定されているか(windowsの場合に有効)
-                // パスワード
-                if(($ina_hostinfolist[$host_name]['LOGIN_PW'] != self::LC_ANS_UNDEFINE_NAME) &&
-                   ($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_PW))
-                {
-                    $indento_sp12 = str_pad( " ", 24 , " ", STR_PAD_LEFT );
 
-                    $make_vaultpass = $this->makeAnsibleVaultPassword($this->getAnsibleExecuteUser(),
-                                                                      $ina_hostinfolist[$host_name]['LOGIN_PW'],
-                                                                      $ina_hostinfolist[$host_name]['LOGIN_PW_ANSIBLE_VAULT'],
-                                                                      $indento_sp12,
-                                                                      $ina_hostinfolist[$host_name]['SYSTEM_ID']);
-                    if($make_vaultpass === false) {
-                        return false;
+                // パスワード設定
+                switch($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE']) {
+                case DF_LOGIN_AUTH_TYPE_PW:
+                case DF_LOGIN_AUTH_TYPE_PW_WINRM:
+                    // パスワードが設定されているか
+                    if($ina_hostinfolist[$host_name]['LOGIN_PW'] != self::LC_ANS_UNDEFINE_NAME) {
+                        $indento_sp12 = str_pad( " ", 24 , " ", STR_PAD_LEFT );
+
+                        $make_vaultpass = $this->makeAnsibleVaultPassword($this->getAnsibleExecuteUser(),
+                                                                          $ina_hostinfolist[$host_name]['LOGIN_PW'],
+                                                                          $ina_hostinfolist[$host_name]['LOGIN_PW_ANSIBLE_VAULT'],
+                                                                          $indento_sp12,
+                                                                          $ina_hostinfolist[$host_name]['SYSTEM_ID']);
+                        if($make_vaultpass === false) {
+                            return false;
+                        }
+                        $pass = "ansible_ssh_pass: " . $make_vaultpass;
                     }
-                    $pass = "ansible_ssh_pass: " . $make_vaultpass;
+                    break;
                 }
-                // 対象ホストがwindowsの場合かつPioneer以外
-                if( (($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
-                 ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)) &&
-                 ($this->lv_winrm_id == 1) ) {
+
+                // Winrm接続情報
+                switch($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE']) {
+                case DF_LOGIN_AUTH_TYPE_PW_WINRM:
                     // WINRM接続プロトコルよりポート番号取得
                     $port = "ansible_ssh_port: " . $ina_hostinfolist[$host_name]['WINRM_PORT'];
-                    $port = $port . "\n" . "          ansible_connection: winrm";
+                    //$port = $port . "\n" . "          ansible_connection: winrm";
+                    $port .= "\n" . $indento_sp_param . "ansible_connection: winrm";
+                    break;
                 }
+                break;
             }
 
             $ssh_key_file = '';
-            // 認証方式が鍵認証でWinRM接続でないか判定
-            if(($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == self::LC_LOGIN_AUTH_TYPE_KEY ) &&
-               ($this->lv_winrm_id != 1)){
+            $win_ca_file  = '';
+            // 秘密鍵ファイルが必要な認証方式か判定
+            switch($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE']) {
+            case DF_LOGIN_AUTH_TYPE_KEY:
+            case DF_LOGIN_AUTH_TYPE_KEY_PP_USE:
                 if(strlen(trim($ina_hostinfolist[$host_name]['SSH_KEY_FILE'])) != 0){
                     // 機器一覧にSSH鍵認証ファイルが登録されている場合はSSH鍵認証ファイルをinディレクトリ配下にコピーする。
                     $ret = $this->CreateSSH_key_file($ina_hostinfolist[$host_name]['SYSTEM_ID'],
                                                      $ina_hostinfolist[$host_name]['SSH_KEY_FILE'],
                                                      $ssh_key_file_path);
+
+                    // ky_encryptで中身がスクランブルされているので復元する
+                    $ret = ky_file_decrypt($ssh_key_file_path,$ssh_key_file_path);
+                    if($ret === false) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        return false;
+                    }
+
+// ansibleがvaultで暗号化された秘密鍵ファイルに対応していないので
+// 対応したタイミングで秘密鍵ファイルをvaultで暗号化
+//                    $file_id = 0; //ssh秘密鍵
+//                    $ret = $this->makeAnsibleVaultSSHFile($this->getAnsibleExecuteUser(),
+//                                                          $file_id,
+//                                                          $ssh_key_file_path,
+//                                                          $ina_hostinfolist[$host_name]['VAULT_CONN_SSH_KEY_FILE'],
+//                                                          $ina_hostinfolist[$host_name]['SYSTEM_ID']);
+//                    if($ret === false){
+//                        return false;
+//                    }
 
                     $ssh_key_file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
                                                      $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
@@ -1788,6 +1854,24 @@ class CreateAnsibleExecFiles {
                     if($ret === false){
                         return false;
                     }
+
+                    // 秘密鍵認証の場合にssh-agntでパスフレーズの入力を省略する為の情報生成
+                    if($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == DF_LOGIN_AUTH_TYPE_KEY_PP_USE) {
+                        if($ina_hostinfolist[$host_name]["SSH_KEY_FILE_PASSPHRASE"] != "") {
+                            $CreateSSHAgentConfigInfoFile = true;
+                            $SSHAgentConfigInfoFile = $this->getTemporary_file_Dir()  . '/' . self::LC_ANS_SSHAGENTCONFIG_FILE;
+                            ///////////////////////////////////////////////////
+                            // ssh-agentの設定に必要な情報を一時ファイルに出力
+                            ///////////////////////////////////////////////////
+                            if($this->CreateSSHAgentConfigInfoFile($SSHAgentConfigInfoFile,
+                                                                   $ina_hostinfolist[$host_name]["HOSTNAME"],
+                                                                   $ssh_key_file_path,
+                                                                   $ina_hostinfolist[$host_name]["SSH_KEY_FILE_PASSPHRASE"]) === false) {
+                                return false;
+                            }
+                        }
+                    }
+
                     if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
                        ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)){
                         // hostsファイルに追加するSSH鍵認証ファイルのパラメータ生成
@@ -1797,16 +1881,33 @@ class CreateAnsibleExecFiles {
                         $ina_pioneer_sshkeyfilelist[$host_name]=$ssh_key_file_path;
                     }
                 }
-            }
-
-            $win_ca_file = '';
-            // WinRM接続か判定
-            if($this->lv_winrm_id == 1) {
+                break;
+            case DF_LOGIN_AUTH_TYPE_PW_WINRM:
                 if(strlen(trim($ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'])) != 0){
                     // 機器一覧にサーバー証明書ファイルが登録されている場合はサーバー証明書ファイルをinディレクトリ配下にコピーする
                     $ret = $this->CreateWIN_cs_file($ina_hostinfolist[$host_name]['SYSTEM_ID'],
                                                     $ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'],
                                                     $win_ca_file_path);
+                    // ky_encryptで中身がスクランブルされているので、復元
+                    $ret = ky_file_decrypt($win_ca_file_path,$win_ca_file_path);
+                    if($ret === false) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        return false;
+                    }
+
+// ansibleがvaultで暗号化された秘密鍵ファイルに対応していないので
+// 対応したタイミングで秘密鍵ファイルをvaultで暗号化
+//                    $file_id = 1; //winrm
+//                    $ret = $this->makeAnsibleVaultSSHFile($this->getAnsibleExecuteUser(),
+//                                                          $file_id,
+//                                                          $win_ca_file_path,
+//                                                          $ina_hostinfolist[$host_name]['VAULT_WINRM_SSL_CA_FILE'],
+//                                                          $ina_hostinfolist[$host_name]['SYSTEM_ID']);
+//                    if($ret === false){
+//                        return false;
+//                    }
+
                     $win_ca_file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
                                                     $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                                     $win_ca_file_path);
@@ -1819,40 +1920,59 @@ class CreateAnsibleExecFiles {
                         $win_ca_file = 'ansible_winrm_ca_trust_path: ' . $win_ca_file_path;
                     }
                 }
+                break;
             }
              
+            $now_host_name = $ina_hostinfolist[$host_name]['HOSTNAME'];
             // ホストアドレス方式がホスト名方式の場合はホスト名をhostsに登録する。
             if($this->lv_hostaddress_type == 2) {       
-                $host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n";
+                //$host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n";
+                $host_name  = $indento_sp_host . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n";
             } 
             else {
                 // ホストアドレス方式がIPアドレスの場合   
-                $host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n" . '          ansible_ssh_host: ' . $host_name . "\n";     
+                //$host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n" . '          ansible_ssh_host: ' . $host_name . "\n";     
+                $host_name  =   $indento_sp_host . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":\n" 
+                              . $indento_sp_param . 'ansible_ssh_host: ' . $host_name . "\n";     
+            }
+
+            // Pioneerでホスト名がlocalhostの場合に、インベントファイルに
+            // ansible_connection: localを追加する
+            if(($now_host_name == 'localhost') && 
+               ($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID)) {
+                 //$host_name .= "          ansible_connection: local\n";
+                 $host_name .= $indento_sp_param . "ansible_connection: local\n";
             }
              
              if(strlen($param) !== 0) {
-                 $host_name .= "          $param" . "\n";
+                 //$host_name .= "          $param" . "\n";
+                 $host_name .= $indento_sp_param . $param . "\n";
              }
              if(strlen($pass) !== 0) {
-                 $host_name .= "          $pass" . "\n";
+                 //$host_name .= "          $pass" . "\n";
+                 $host_name .= $indento_sp_param . $pass . "\n";
              }
              if(strlen($port) !== 0) {
-                 $host_name .= "          $port" . "\n";
+                 //$host_name .= "          $port" . "\n";
+                 $host_name .= $indento_sp_param . $port . "\n";
              }
              if(strlen($ssh_key_file) !== 0) {
-                 $host_name .= "          $ssh_key_file" . "\n";
+                 //$host_name .= "          $ssh_key_file" . "\n";
+                 $host_name .= $indento_sp_param . $ssh_key_file . "\n";
              }
              if(strlen($ssh_extra_args) !== 0) {
-                 $host_name .= "          $ssh_extra_args" . "\n";
+                 //$host_name .= "          $ssh_extra_args" . "\n";
+                 $host_name .= $indento_sp_param . $ssh_extra_args . "\n";
              }
              if(strlen($hosts_extra_args) !== 0) {
-                 $host_name .= "          $hosts_extra_args" . "\n";
+                 //$host_name .= "          $hosts_extra_args" . "\n";
+                 $host_name .= $indento_sp_param . $hosts_extra_args . "\n";
              }
              if(strlen($win_ca_file) !== 0) {
-                 $host_name .= "          $win_ca_file". "\n";
+                 //$host_name .= "          $win_ca_file". "\n";
+                 $host_name .= $indento_sp_param . $win_ca_file . "\n";
              }
             
-
              if( @fputs($fd, $host_name) === false ){
                  $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55205",array(__LINE__));
                  $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -1863,6 +1983,18 @@ class CreateAnsibleExecFiles {
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55205",array(__LINE__));
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             return false;
+        }
+
+        ///////////////////////////////////////////////////
+        // ssh-agentの設定に必要な情報を一時ファイルをスクランブル
+        ///////////////////////////////////////////////////
+        if($CreateSSHAgentConfigInfoFile === true) {
+            $ret = ky_file_encrypt($SSHAgentConfigInfoFile,$SSHAgentConfigInfoFile);
+            if($ret === false) {
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70082");
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
         }
         return true;
     } 
@@ -1963,6 +2095,9 @@ class CreateAnsibleExecFiles {
     // パラメータ
     //   $ina_host_vars:        ホスト変数配列
     //                          [ipaddress][ 変数名 ]=>具体値
+    //   $ina_pioneer_template_host_vars:
+    //                          ホスト変数配列 (passwordcolumnの項目がansible-vaultで暗号化されている)
+    //                          [ipaddress][ 変数名 ]=>具体値
     //   $ina_hostprotcollist:  ホスト毎プロトコル一覧
     //                          [ホスト名(IP)][ホスト名][PROTOCOL_NAME][LOGIN_USER]=LOGIN_PASSWD
     //   $ina_host_child_vars:  配列変数一覧返却配列(変数一覧に配列変数含む)
@@ -1976,7 +2111,7 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     // #0001 hostsファイルにホスト名を設定可能するためにホスト毎プロトコル一覧を貰う
-    function CreateHostvarsfiles($ina_host_vars,$ina_hostprotcollist,
+    function CreateHostvarsfiles($ina_host_vars,$ina_pioneer_template_host_vars,$ina_hostprotcollist,
                                  $ina_host_child_vars,$ina_DB_child_vars_master) 
     {
         // ホスト変数配列よりホスト名(IP)を取得
@@ -1999,7 +2134,6 @@ class CreateAnsibleExecFiles {
             case DF_PIONEER_DRIVER_ID:
                 // ホストアドレス方式がホスト名方式の場合はhost_varsをホスト名する。
                 ////PIONEER用のオリジナルホスト変数定義ファイル名を取得
-                //$file_name = $this->getAnsible_org_host_var_file($host_vars_file);        
                 $file_name = $this->getAnsible_host_var_file($host_vars_file);
                 break;
             default:
@@ -2008,8 +2142,11 @@ class CreateAnsibleExecFiles {
                 return false;
             }
             //該当ホストの変数配列を取得
-            $vars_list = $ina_host_vars[$host_name];
 
+            $vars_list = array();
+            if(@count($ina_host_vars[$host_name]) != 0) {
+                $vars_list = $ina_host_vars[$host_name];
+            }
 
             $chl_vars_list = array();
             switch($this->getAnsibleDriverID()){
@@ -2022,12 +2159,28 @@ class CreateAnsibleExecFiles {
             }
 
             // ホスト変数定義ファイル作成
-            //if($this->CreateHostvarsfile("VAR",$host_name,
             if($this->CreateHostvarsfile("VAR",$hostname,
-                                         $file_name,$vars_list,
-                                         $chl_vars_list,$ina_DB_child_vars_master) === false)
+                                         $file_name,$vars_list) === false)
+                                         //$chl_vars_list,$ina_DB_child_vars_master) === false)
             {
                 return false;
+            }
+            /////////////////////////////////////////
+            // Pioneer template用ホスト変数作成    //
+            /////////////////////////////////////////
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $pioneer_template_vars_list = array();
+                if(@count($ina_pioneer_template_host_vars[$host_name]) != 0) {
+                    $pioneer_template_vars_list = $ina_pioneer_template_host_vars[$host_name];
+                }
+                $file_name = $this->getAnsible_pioneer_template_host_var_file($host_vars_file);
+                if($this->CreatePioneerTemplateHostvarsfile("VAR",$hostname,
+                                                            $file_name,$pioneer_template_vars_list) === false)
+                {
+                    return false;
+                }
+                break;
             }
         }
         return true;
@@ -2232,6 +2385,7 @@ class CreateAnsibleExecFiles {
         }
         return true;
     }
+
     ////////////////////////////////////////////////////////////////////////////////
     // F0005-2
     // 処理内容
@@ -2246,13 +2400,6 @@ class CreateAnsibleExecFiles {
     //                      [ 変数名 ]=>具体値
     //                      pioneerの場合
     //                      [対話ファイル変数名]=対話ファイル名
-    //   $ina_host_child_vars:  
-    //                      配列変数一覧返却配列(変数一覧に配列変数含む)
-    //                      [ 変数名 ][列順序][メンバー変数]=[具体値]
-    //                      空の場合がある
-    //   $ina_DB_child_vars_master: 
-    //                      メンバー変数マスタの配列変数のメンバー変数リスト返却
-    //                      [変数名][メンバー変数名]=0
     //   $in_mode:          書込モード
     //                      "w":上書   デフォルト
     //                      "a":追加
@@ -2263,7 +2410,6 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     function CreateHostvarsfile($in_var_type,$in_host_name,
                                 $in_file_name,$ina_var_list,
-                                $ina_child_vars,$ina_DB_child_vars_master,
                                 $in_mode="w"){
         switch($this->getAnsibleDriverID()){
         case DF_PIONEER_DRIVER_ID:
@@ -2439,6 +2585,153 @@ class CreateAnsibleExecFiles {
     }
 
     ////////////////////////////////////////////////////////////////////////////////
+    // F0005-2-1
+    // 処理内容
+    //   Pioneer template用 ホスト変数定義ファイル(1ホスト)を作成する。
+    // パラメータ
+    //   $in_var_type:      登録対象の変数タイプ
+    //                      "VAR"/"CPF"/"TPF"/"CMT"
+    //   $in_host_name:     ホスト名
+    //   $in_file_name:     ホスト変数定義ファイル名
+    //   $ina_var_list:     ホスト変数配列 
+    //                      legacyの場合
+    //                      [ 変数名 ]=>具体値
+    //                      pioneerの場合
+    //                      [対話ファイル変数名]=対話ファイル名
+    //   $in_mode:          書込モード
+    //                      "w":上書   デフォルト
+    //                      "a":追加
+    // 
+    // 戻り値
+    //   true:   正常
+    //   false:  異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreatePioneerTemplateHostvarsfile($in_var_type,$in_host_name,
+                                               $in_file_name,$ina_var_list,
+                                               $in_mode="w"){
+        if($this->getAnsibleDriverID() != DF_PIONEER_DRIVER_ID) {
+            return false;
+        }
+        $var_str = "";
+        if($in_var_type != "CMT"){
+            foreach( $ina_var_list as $var=>$val ){
+                if(@count($this->lv_pioneer_template_parent_vars_list[$in_host_name][$var]) != 0){
+                    continue;
+                }
+                $this->lv_pioneer_template_parent_vars_list[$in_host_name][$var] = 0;
+
+                // 機器一覧のプロトコルが未登録の場合を判定
+                if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) &&
+                   ($var == self::LC_ANS_PROTOCOL_VAR_NAME) &&
+                   ($val == self::LC_ANS_UNDEFINE_NAME)){
+                    // __loginprotocol__をホスト変数に出力しない
+                    continue;
+                }
+                //ホスト変数ファイルのレコード生成
+                //変数名: 具体値
+
+                // 機器一覧のパスワードをansible-vaultで暗号化
+                if(($var == self::LC_ANS_PASSWD_VAR_NAME) &&
+                   ($val != self::LC_ANS_UNDEFINE_NAME)) {
+                    $ip_addr = '';
+                    // ホスト名からIPを取得         
+                    foreach($this->lv_hostinfolist as $ip_addr=>$info) {
+                        if($info['HOSTNAME'] == $in_host_name) {
+                            break;
+                        }
+                    }
+                    // ansible-vaultで暗号化
+                    $indento_sp2 = str_pad( " ", 4 , " ", STR_PAD_LEFT );
+
+                    $make_vaultpass = $this->makeAnsibleVaultPassword($this->getAnsibleExecuteUser(),
+                                                                      $val,
+                                                                      $this->lv_hostinfolist[$ip_addr]['LOGIN_PW_ANSIBLE_VAULT'],
+                                                                      $indento_sp2,
+                                                                      $this->lv_hostinfolist[$ip_addr]['SYSTEM_ID']);
+                    if($make_vaultpass === false) {
+                        return false;
+                    }
+                    $val = $make_vaultpass;
+                } else {
+                    // 複数行具体値のyaml書式対応
+                    $NumPadding = 2;
+                    $val = $this->HostVarEdit($val,$NumPadding);
+                }
+                $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+            }
+        } 
+        // ファイル管理とテンプレート管理の変数を使用していないケースは CPF/TPF で
+        // このモジュールが呼ばれない。
+        // グローバル変数の情報をホスト変数ファイルに出力するタイミングでファイル管理とテンプレート管理の変数を出力する。
+        if($in_var_type == "CMT"){
+            // グローバル変数をホスト変数ファイルに登録する。
+            foreach( $this->lva_global_vars_list as $var=>$val ){
+                // Playbookで使用しているグローバル変数のみを対象にする。
+                if(@count($this->lv_use_gbl_vars_list[$var]) != 0){
+                    if(@count($this->lv_pioneer_template_parent_vars_list[$in_host_name][$var]) != 0){
+                        continue;
+                    }
+                    $this->lv_pioneer_template_parent_vars_list[$in_host_name][$var] = 0;
+
+                    //ホスト変数ファイルのレコード生成
+                    //変数名: 具体値
+                    //複数行具体値の場合に複数行の扱い記号を付ける ----
+                    $edit_val = $this->makeMultilineValue($val);
+                    //-----複数行具体値の場合に複数行の扱い記号を付ける
+                    $NumPadding = 2;
+                    $out_val = $this->MultilineValueEdit($edit_val,$NumPadding);
+                    $var_str = $var_str . sprintf("%s: %s\n",$var,$out_val);
+
+                }
+            }
+
+            // 変数の具体値に使用しているテンプレート変数の情報をホスト変数ファイルに出力
+            if(@count($this->lv_tpf_vars_list[$in_host_name]) != 0){
+                foreach($this->lv_tpf_vars_list[$in_host_name] as $var=>$val){
+                    if(@count($this->lv_pioneer_template_parent_vars_list[$in_host_name][$var]) != 0){
+                        continue;
+                    }
+                    $this->lv_pioneer_template_parent_vars_list[$in_host_name][$var] = 0;
+
+                    $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+                }
+            }
+            // 変数の具体値に使用しているコピー変数の情報をホスト変数ファイルに出力
+            if(@count($this->lv_cpf_vars_list[$in_host_name]) != 0){
+                foreach($this->lv_cpf_vars_list[$in_host_name] as $var=>$val){
+                    if(@count($this->lv_pioneer_template_parent_vars_list[$in_host_name][$var]) != 0){
+                        continue;
+                    }
+                    $this->lv_pioneer_template_parent_vars_list[$in_host_name][$var] = 0;
+                    
+                    $var_str = $var_str . sprintf("%s: %s\n",$var,$val);
+                }
+            }
+        }
+
+        if ( $var_str != "" ){
+            $fd = @fopen($in_file_name, $in_mode);
+
+            if($fd == null){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55206",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            if( @fputs($fd, $var_str) === false ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55207",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            if( @fclose($fd) === false ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55207",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
     // F0005-3
     // 処理内容
     //   暗号化されている変数のホスト変数ファイルを作成する。
@@ -2475,6 +2768,7 @@ class CreateAnsibleExecFiles {
                                                        ky_encrypt($ina_host_vars[$ipaddres][self::LC_ANS_PASSWD_VAR_NAME]));
                     }
                 }
+
                 // 暗号化している変数の有無判定
                 if(@count($ina_vault_host_vars_file_list[$ipaddres]) != 0) {
 
@@ -2903,11 +3197,22 @@ class CreateAnsibleExecFiles {
             //////////////////////////////////////////
             // ホスト変数ファイル作成(Pioneer)      //
             //////////////////////////////////////////
-            //if($this->CreateHostvarsfile("SYS_VAR",$host_name,$file_name,$host_vars_list,"","","a") === false)
-            if($this->CreateHostvarsfile("SYS_VAR",$hostname,$file_name,$host_vars_list,"","","a") === false)
+            if($this->CreateHostvarsfile("SYS_VAR",$hostname,$file_name,$host_vars_list,"a") === false)
             {
                 return false;
             }
+            /////////////////////////////////////////
+            // Pioneer template用ホスト変数作成    //
+            /////////////////////////////////////////
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $file_name = $this->getAnsible_pioneer_template_host_var_file($host_vars_file);
+                if($this->CreatePioneerTemplateHostvarsfile("SYS_VAR",$hostname,$file_name,$host_vars_list,"a") === false)
+                {
+                    return false;
+                }
+                break;
+           }
         }
         // in/original_dialog_filesに加工前の対話ファイルをコピー
         $cmd = sprintf("/bin/cp -rfp %s/* %s/.",$this->getAnsible_original_dialog_files_Dir(),
@@ -3225,7 +3530,7 @@ class CreateAnsibleExecFiles {
     //   $ina_host_vars:        ホスト変数配列
     //                          [ホスト名(IP)][ 変数名 ]=>具体値
     // 
-    //   $vault_vars:           PasswordCoulumn変数一覧(Pioneer用)
+    //   $ina_vault_vars:       PasswordCoulumn変数一覧(Pioneer用)
     //                          [ 変数名 ] = << 変数名 >>
     //
     //   $ina_dialog_files:     対話ファイル配列
@@ -3267,16 +3572,17 @@ class CreateAnsibleExecFiles {
                     $dialog_file    = $this->getAnsible_org_dialog_file($hostname,$playbook_pkey,$playbook);
 
                     $parseObj = new YAMLParse($this->lv_objMTS);
-                    $dialog_file_array = $parseObj->Parse($dialog_file);
-                    if($dialog_file_array === false) {
-                        $errmsg = $parseObj->GetLastError();
-                        //$ary[6000073] = "対話ファイルがYAML形式が確認して下さい。(対話ファイル:{})";
-                        $errmsg .= "\n" . $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000073",array($playbook));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$errmsg);
-                        unset($parseObj);
+                    $dialog_file_array = array();
+                    $ret = $parseObj->yaml_file_parse($dialog_file,$dialog_file_array);
+                    $errmsg = $parseObj->GetLastError();
+                    unset($parseObj);
+                    if($ret === false) {
+                        $strErrMsg = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000073",array($playbook));
+                        $strErrMsg .= "\n" . $errmsg;
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$strErrMsg);
                         return false;
                     }
-                    unset($parseObj);
+
                     // ホスト変数ファイルのパス取得
                     $host_vars_file = $this->getAnsible_host_var_file($hostname);
 
@@ -5604,6 +5910,32 @@ class CreateAnsibleExecFiles {
 
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
+    //  pioneer template用 host_varsディレクトリ名を記憶
+    //   暗号化された変数のみのホスト変数ファイル
+    // パラメータ
+    //   $in_dir:      pioneer_template_hosts_varsディレクトリ
+    // 
+    // 戻り値
+    //   なし
+    ////////////////////////////////////////////////////////////////////////////////
+    function setAnsible_pioneer_template_hosts_vars_Dir($in_indir){
+        $this->lv_Ansible_pioneer_template_hosts_vars_Dir = $in_indir;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   pioneer template用 host_varsディレクトリ名を取得
+    // パラメータ
+    //   なし
+    // 
+    // 戻り値
+    //   vault_host_varsディレクトリ名
+    ////////////////////////////////////////////////////////////////////////////////
+    function getAnsible_pioneer_template_hosts_vars_Dir(){
+        return($this->lv_Ansible_pioneer_template_hosts_vars_Dir);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
     //   子PlayBook格納ディレクトリ名を記憶
     // パラメータ
     //   $in_dir:      子PlayBook格納ディレクトリ
@@ -5678,6 +6010,20 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     function getAnsible_playbook_file(){
         $file = $this->lv_Ansible_in_Dir . "/" . self::LC_ANS_PLAYBOOK_FILE;
+        return($file);
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   Pioneer template用 ホスト変数定義ファイル名を取得
+    // パラメータ
+    //   $in_hostname:       ホスト名(IPアドレス)
+    // 
+    // 戻り値
+    //   ホスト変数定義ファイル名
+    ////////////////////////////////////////////////////////////////////////////////
+    function getAnsible_pioneer_template_host_var_file($in_hostname){
+        $file = sprintf(self::LC_ANS_PIONEER_TEMPLATE_HOST_VAR_FILE_MK,$this->getAnsible_pioneer_template_hosts_vars_Dir(),$in_hostname);
         return($file);
     }
     
@@ -5919,6 +6265,9 @@ class CreateAnsibleExecFiles {
     //                                         SYSTEM_ID=>              項番
     //                                         WINRM_SSL_CA_FILE=>      サーバー証明書ファイル
     //                                         HOSTS_EXTRA_ARGS=>       インベントリファイル 追加パラメータ
+    //                                         SSH_KEY_FILE_PASSPHRASE=>  SSH秘密鍵ファイル パスフレーズ
+    //  $in_winrm_id:          Movement一覧のwinrm接続の設定値
+    //                                "1": winrm接続選択
     // 
     // 戻り値
     //   true:   正常
@@ -5928,11 +6277,23 @@ class CreateAnsibleExecFiles {
                            &$ina_hostlist,
                            &$ina_hostprotcollist,
                            &$ina_hostostypelist,
-                           &$ina_hostinfolist)
+                           &$ina_hostinfolist,
+                           $in_winrm_id)
     {
         global $log_output_dir;
         global $log_file_prefix;
         global $log_level;
+        global $root_dir_path;
+
+        if ( empty($root_dir_path) ){
+            $root_dir_temp = array();
+            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+            $root_dir_path = $root_dir_temp[0] . "ita-root";
+        }
+        
+        // 共通モジュールをロード
+        require_once ($root_dir_path . "/libs/commonlibs/common_required_check.php");
+
         // C_STM_LISTに対するDISUSE_FLAG = '0'の
         // 条件はSELECT文に入れない。
         $sql = "SELECT \n" .
@@ -5953,6 +6314,8 @@ class CreateAnsibleExecFiles {
                "  TBL_2.HOSTS_EXTRA_ARGS, \n".
                "  TBL_2.LOGIN_PW_ANSIBLE_VAULT, \n".
                "  TBL_2.CREDENTIAL_TYPE_ID, \n".
+               "  TBL_2.SSH_KEY_FILE_PASSPHRASE, \n".
+               "  TBL_2.PROTOCOL_ID, \n".
                "  ( \n" .
                "    SELECT \n" .
                "      TBL_3.PROTOCOL_NAME \n" .
@@ -6012,6 +6375,10 @@ class CreateAnsibleExecFiles {
         $ina_hostinfolist = array();
         while ( $row = $objQuery->resultFetch() ){
             if($row['DISUSE_FLAG']=='0'){
+
+                // ドライバ区分退避
+                $driver_id = $this->getAnsibleDriverID();
+
                 if(strlen($row['IP_ADDRESS'])==0){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56205",
                                                                array($row['SYSTEM_ID']));
@@ -6029,91 +6396,66 @@ class CreateAnsibleExecFiles {
                     return false;
                 }
 
-                // 認証方式の設定値確認
-                $driver_id = $this->getAnsibleDriverID();
-                switch($this->getAnsibleDriverID()) {
-                case DF_PIONEER_DRIVER_ID:
-                    break;
-                case DF_LEGACY_DRIVER_ID:
-                case DF_LEGACY_ROLE_DRIVER_ID:
-                    if(strlen($row['LOGIN_AUTH_TYPE']) === 0){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70040",
-                                                                   array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-
-                        unset($objQuery);
-                        return false;
-                    }
-                    break;
-                }
-                $login_auth_type = '';
-                if(strlen($row['LOGIN_AUTH_TYPE']) === 0){
-                    // 未設定なのでデフォルト値設定
-                    $login_auth_type = self::LC_LOGIN_AUTH_TYPE_DEF;  // 鍵認証
-                }
-                else{
-                    switch($row['LOGIN_AUTH_TYPE']){
-                    case self::LC_LOGIN_AUTH_TYPE_KEY:               // 鍵認証
-                    case self::LC_LOGIN_AUTH_TYPE_PW:                // パスワード認証
-                        $login_auth_type = $row['LOGIN_AUTH_TYPE'];
-                        break;
-                    }
-                }
-
-                // パスワード管理フラグの設定値確認
-                $pw_hold_flag = '';
-                if(@strlen($row['LOGIN_PW_HOLD_FLAG']) === 0){
-                    // 未設定なのでデフォルト値設定
-                    $pw_hold_flag = self::LC_LOGIN_PW_HOLD_FLAG_DEF;  // パスワード管理なし
-                }
-                else{
-                    switch($row['LOGIN_PW_HOLD_FLAG']){
-                    case self::LC_LOGIN_PW_HOLD_FLAG_ON: // パスワード管理あり
-                        $pw_hold_flag = $row['LOGIN_PW_HOLD_FLAG']; 
-                        break;
-                    }
-                }
-                if($pw_hold_flag == ''){
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70041",
-                                                               array($row['IP_ADDRESS']));
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-    
+                // 機器一覧の認証方式に応じた必須入力をチェック
+                $errMsgParameterAry = array();
+                $errMsgParameterAry = array($row['HOSTNAME']);
+                $chkobj = new AuthTypeParameterRequiredCheck();
+                $retStrBody = $chkobj->DeviceListAuthTypeRequiredParameterCheck($chkobj->chkType_WorkflowExec_DevaiceList,
+                                                                                $this->lv_objMTS,$errMsgParameterAry,
+                                                                                $row['LOGIN_AUTH_TYPE'],
+                                                                                $row['LOGIN_USER'],
+                                                                                $row['LOGIN_PW_HOLD_FLAG'],
+                                                                                $row['LOGIN_PW'],
+                                                                                $row['CONN_SSH_KEY_FILE'],
+                                                                                $row['SSH_KEY_FILE_PASSPHRASE'],
+                                                                                $this->getAnsibleDriverID(),
+                                                                                $row['PROTOCOL_ID']);
+                if($retStrBody !== true) {
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$retStrBody);
                     unset($objQuery);
                     return false;
                 }
-                // 認証方式がパスワード認証の場合に管理パスワードがありでパスワードが設定されているか判定
-                if($login_auth_type === self::LC_LOGIN_AUTH_TYPE_PW){
-                    // パスワード管理ありの判定
-                    if($pw_hold_flag != self::LC_LOGIN_PW_HOLD_FLAG_ON){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70042",
-                                                               array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-    
-                        unset($objQuery);
-                        return false;
-                    }   
-                    // パスワード登録の判定
-                    if(strlen($row['LOGIN_PW'])==0){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70043",
-                                                               array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-    
-                        unset($objQuery);
-                        return false;
-                    }
-                }
-                // パスワード管理ありでパスワードが設定されているか判定
-                // パスワード管理ありの判定
-                if($pw_hold_flag == self::LC_LOGIN_PW_HOLD_FLAG_ON){
-                    // パスワード登録の判定
-                    if(strlen($row['LOGIN_PW'])==0){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70043",
-                                                                   array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
+                // ログインユーザーID退避
+                $login_user = $row['LOGIN_USER'];
+
+                // 認証方式の設定値確認
+                $login_auth_type = $row['LOGIN_AUTH_TYPE'];
+
+                switch($this->getAnsibleDriverID()){
+                case DF_LEGACY_DRIVER_ID:
+                case DF_LEGACY_ROLE_DRIVER_ID:
+                    // Movement一覧でwinrm接続が選択されている場合
+                    // 機器一覧の認証方式がパスワード認証(winrm)か判定
+                    if(($in_winrm_id == "1") && ($login_auth_type != DF_LOGIN_AUTH_TYPE_PW_WINRM)) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56214",
+                                                                    array($row['IP_ADDRESS']));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                         unset($objQuery);
                         return false;
                     }
+
+                    // Movement一覧でwinrm接続が選択されていない場合
+                    // 機器一覧の認証方式がパスワード認証(winrm)以外か判定
+                    if(($in_winrm_id != "1") && ($login_auth_type == DF_LOGIN_AUTH_TYPE_PW_WINRM)) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56215",
+                                                                    array($row['IP_ADDRESS']));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        unset($objQuery);
+                        return false;
+                    }
+                    break;
+                }
+
+                // パスワード管理フラグの設定値退避
+                $pw_hold_flag = $row['LOGIN_PW_HOLD_FLAG'];
+                if(@strlen($row['LOGIN_PW_HOLD_FLAG']) === 0){
+                    // 未設定なのでデフォルト値設定
+                    $pw_hold_flag = DF_LOGIN_PW_HOLD_FLAG_DEF;  // パスワード管理なし
+                }
+
+                // パスワード管理ありでパスワード退避
+                if($pw_hold_flag == DF_LOGIN_PW_HOLD_FLAG_ON){
                     // パスワード退避
                     $login_pass = ky_decrypt($row['LOGIN_PW']);
                
@@ -6123,6 +6465,7 @@ class CreateAnsibleExecFiles {
                     $login_pass = self::LC_ANS_UNDEFINE_NAME;
                 }
                         
+                // Pioneerプロトコル退避
                 switch($this->getAnsibleDriverID()){
                 case DF_LEGACY_DRIVER_ID:
                 case DF_LEGACY_ROLE_DRIVER_ID:
@@ -6132,32 +6475,10 @@ class CreateAnsibleExecFiles {
                     else{
                         $protocol = $row['PROTOCOL_NAME'];
                     }
-                    if(strlen($row['LOGIN_USER'])==0){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56203",
-                                                                   array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-    
-                        unset($objQuery);
-                        return false;
-                    }
-                    $login_user = $row['LOGIN_USER'];
                     break;
                 case DF_PIONEER_DRIVER_ID:
-                    if($row['PROTOCOL_NAME']===null){
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56104",
-                                                                   array($row['IP_ADDRESS']));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-        
-                        unset($objQuery);
-                        return false;
-                    }
                     $protocol = $row['PROTOCOL_NAME'];
-                    if(strlen($row['LOGIN_USER'])==0){
-                        $login_user = self::LC_ANS_UNDEFINE_NAME;
-                    }
-                    else{
-                        $login_user = $row['LOGIN_USER'];
-                    }
+
                     if(strlen($row['OS_TYPE_ID'])==0){
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56204",
                                                                    array($row['IP_ADDRESS']));
@@ -6207,10 +6528,23 @@ class CreateAnsibleExecFiles {
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_PW']           = $login_pass;       //パスワード
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_PW_HOLD_FLAG'] = $pw_hold_flag;     //パスワード管理フラグ
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_AUTH_TYPE']    = $login_auth_type;  //Ansible認証方式
+
                 $ina_hostinfolist[$row['IP_ADDRESS']]['WINRM_PORT']         = $winrm_port;       //WINRM接続プロトコル
                 $ina_hostinfolist[$row['IP_ADDRESS']]['OS_TYPE_ID']         = $row['OS_TYPE_ID'];//OS種別
                 $ina_hostinfolist[$row['IP_ADDRESS']]['LOGIN_PW_ANSIBLE_VAULT'] = $row['LOGIN_PW_ANSIBLE_VAULT']; //ansible-vaultで暗号化したパスワード
                 $ina_hostinfolist[$row['IP_ADDRESS']]['CREDENTIAL_TYPE_ID'] = $row['CREDENTIAL_TYPE_ID']; 
+
+                if($row['SSH_KEY_FILE_PASSPHRASE'] != "") {
+                    $ina_hostinfolist[$row['IP_ADDRESS']]['SSH_KEY_FILE_PASSPHRASE'] = ky_decrypt($row['SSH_KEY_FILE_PASSPHRASE']); 
+                } else {
+                    $ina_hostinfolist[$row['IP_ADDRESS']]['SSH_KEY_FILE_PASSPHRASE'] = "";
+                }
+
+// ansibleがvaultで暗号化された秘密鍵ファイルに対応していないので
+// 対応したタイミングで秘密鍵ファイルをvaultで暗号化
+//                $ina_hostinfolist[$row['IP_ADDRESS']]['VAULT_CONN_SSH_KEY_FILE'] = $row['VAULT_CONN_SSH_KEY_FILE']; 
+//                $ina_hostinfolist[$row['IP_ADDRESS']]['VAULT_WINRM_SSL_CA_FILE'] = $row['VAULT_WINRM_SSL_CA_FILE']; 
+
             }
             // 作業対象ホスト管理に登録されているホストが管理対象システム一覧(C_STM_LIST )に未登録
             elseif($row['DISUSE_FLAG']===null){
@@ -6615,7 +6949,9 @@ class CreateAnsibleExecFiles {
     // パラメータ
     //   $in_pattern_id:        作業パターンID
     //   $in_operation_id:      オペレーションID
-    //   $ina_host_vars:        変数一覧返却配列
+    //   $ina_host_vars:        変数一覧返却配列 (pionner:passwordColumnの具体値がky_encryptで暗号化)
+    //                          [ホスト名(IP)][ 変数名 ]=>具体値
+    //   $ina_pionner_template_host_vars: pioneer template用 変数一覧返却配列 (passwordColumnの具体値がansible-vaultで暗号化)
     //                          [ホスト名(IP)][ 変数名 ]=>具体値
     //   $ina_vault_vars:       PasswordCoulumn変数一覧(Pioneer用)
     //                          [ 変数名 ] = << 変数名 >>
@@ -6632,6 +6968,7 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function getDBVarList($in_pattern_id,$in_operation_id,&$ina_host_vars,
+                         &$ina_pionner_template_host_vars,
                          &$ina_vault_vars,&$ina_vault_host_vars_file_list,
                          &$ina_child_vars_list,&$ina_DB_child_vars_list)
     {
@@ -6817,13 +7154,18 @@ class CreateAnsibleExecFiles {
         }
     
         $ina_host_vars = array();
+        $ina_pionner_template_host_vars = array();
+
         $tgt_row = array();
         $array_tgt_row = array();
         while ( $row = $objQuery->resultFetch() ){
             array_push( $tgt_row, $row );
         }
+
         foreach( $tgt_row as $row )
         {
+            // ina_pionner_template_host_vars用の具体値
+            $row['VARS_ENTRY_PIONEER_TEMP'] = $row['VARS_ENTRY'];
             $assign_seq = true;
             switch($this->getAnsibleDriverID()){
             case DF_LEGACY_DRIVER_ID:
@@ -6933,11 +7275,18 @@ class CreateAnsibleExecFiles {
                         if($make_vaultvalue === false) {
                             return false;
                         }
-                        // 具体値を暗号化した具体値で上書き
-                        $row['VARS_ENTRY'] = $make_vaultvalue; 
+                        // pioneer以外の場合に具体値を暗号化した具体値で上書き
+                        if($this->getAnsibleDriverID() != DF_PIONEER_DRIVER_ID) {
+                            $row['VARS_ENTRY'] = $make_vaultvalue; 
+                        }
+                        // pioneer template用 ホスト変数にansible-vaultで暗号化した具体値で上書き
+                        $row['VARS_ENTRY_PIONEER_TEMP'] = $make_vaultvalue;
+
                     } else {
                         //複数行具体値の場合に複数行の扱い記号を付ける ----
                         $row['VARS_ENTRY'] = $this->makeMultilineValue($row['VARS_ENTRY']);
+                        // pioneer template用 ホスト変数用
+                        $row['VARS_ENTRY_PIONEER_TEMP'] = $this->makeMultilineValue($row['VARS_ENTRY_PIONEER_TEMP']);
                         //-----複数行具体値の場合に複数行の扱い記号を付ける
                     }
                     // ----具体値の暗号化が必要か判定
@@ -6946,6 +7295,8 @@ class CreateAnsibleExecFiles {
                     if(($row['VARS_NAME_COUNT'] == 1) && (@strlen($row['ASSIGN_SEQ']) == 0)) {
                         //ホスト変数配列作成
                         $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= $row['VARS_ENTRY'];
+                        // pioneer template用 ホスト変数用 ホスト変数配列作成
+                        $ina_pionner_template_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= $row['VARS_ENTRY_PIONEER_TEMP'];
 
                         switch($this->getAnsibleDriverID()){
                         case DF_PIONEER_DRIVER_ID:
@@ -6960,6 +7311,10 @@ class CreateAnsibleExecFiles {
                         if(@count($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
                             $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "";
                         }
+                        if(@count($ina_pionner_template_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
+                            $ina_pionner_template_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "";
+                        }
+
                         if($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) {
                             // 202複数具体値変数は対話ファイルの変数の具体値に置換
                             if(@count($ina_vault_vars[$row['VARS_NAME']]) !== 0) {
@@ -6971,7 +7326,7 @@ class CreateAnsibleExecFiles {
                         switch($this->getAnsibleDriverID()){
                         case DF_PIONEER_DRIVER_ID:
                             if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
-                                // 202 複数具体値の通番(0～)を求める
+                                // 複数具体値の通番(0～)を求める
                                 $value_count = $this->getArrayTypeValuecount($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]);
                                 // 複数具体値の場合の変数名を「変数名.x x:0からの通番」設定
                                 $varname = sprintf("%s.%s",$row['VARS_NAME'],$value_count);
@@ -6987,6 +7342,8 @@ class CreateAnsibleExecFiles {
                         }
                         // 複数行具体値をjson形式で収める
                         $value_count = $this->ArrayTypeValue_encode($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$var_val);
+                        // pioneer template用ホスト変数
+                        $value_count = $this->ArrayTypeValue_encode($ina_pionner_template_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$row['VARS_ENTRY_PIONEER_TEMP']);
 
                     }
                 }
@@ -7004,6 +7361,9 @@ class CreateAnsibleExecFiles {
 
         // 代入順序がブランクの場合の処理は不要なのでコメントアウト
         foreach( $tgt_row as $row ){
+            // ina_pionner_template_host_vars用の具体値
+            $row['VARS_ENTRY_PIONEER_TEMP'] = $row['VARS_ENTRY'];
+
             // 代入順序がブランクか判定
             $assign_seq = false;
             switch($this->getAnsibleDriverID()){
@@ -7077,20 +7437,29 @@ class CreateAnsibleExecFiles {
                         if($make_vaultvalue === false) {
                             return false;
                         }
-                        // 具体値を暗号化した具体値で上書き
-                        $row['VARS_ENTRY'] = $make_vaultvalue; 
+                        // pioneer以外の場合に具体値を暗号化した具体値で上書き
+                        if($this->getAnsibleDriverID() != DF_PIONEER_DRIVER_ID) {
+                            $row['VARS_ENTRY'] = $make_vaultvalue;
+                        }
+                        // pioneer template用 ホスト変数にansible-vaultで暗号化した具体値で上書き
+                        $row['VARS_ENTRY_PIONEER_TEMP'] = $make_vaultvalue;
+
                     } else {
                         //複数行具体値の場合に複数行の扱い記号を付ける 
                         $row['VARS_ENTRY'] = $this->makeMultilineValue($row['VARS_ENTRY']);
+                        // pioneer template用 ホスト変数用
+                        $row['VARS_ENTRY_PIONEER_TEMP'] = $this->makeMultilineValue($row['VARS_ENTRY_PIONEER_TEMP']);
                         //-----複数行具体値の場合に複数行の扱い記号を付ける 
                     }
                     // ----具体値の暗号化が必要か判定 
 
                     // 複数具体値変数で具体値が1つの場合の不備対応
                     if(($row['VARS_NAME_COUNT'] == 1) && (@strlen($row['ASSIGN_SEQ']) == 0)) {
+
                         //ホスト変数配列作成
                         $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= $row['VARS_ENTRY'];
-
+                        // pioneer template用 ホスト変数用 ホスト変数配列作成
+                        $ina_pionner_template_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]= $row['VARS_ENTRY_PIONEER_TEMP'];
                         switch($this->getAnsibleDriverID()){
                         case DF_PIONEER_DRIVER_ID:
                             // 暗号化されたホスト変数のリスト生成(pioneer用)
@@ -7104,8 +7473,12 @@ class CreateAnsibleExecFiles {
                         if(@count($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
                             $ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "";
                         }
+                        if(@count($ina_pionner_template_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']])==0){
+                            $ina_pionner_template_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']] = "";
+                        }
+
                         if($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) {
-                            // 202複数具体値変数は対話ファイルの変数の具体値に置換
+                            // 複数具体値変数は対話ファイルの変数の具体値に置換
                             if(@count($ina_vault_vars[$row['VARS_NAME']]) !== 0) {
                                 unset($ina_vault_vars[$row['VARS_NAME']]);
                             }
@@ -7115,7 +7488,7 @@ class CreateAnsibleExecFiles {
                         switch($this->getAnsibleDriverID()){
                         case DF_PIONEER_DRIVER_ID:
                             if($row['SENSITIVE_FLAG'] == DF_SENSITIVE_ON) {
-                                // 202 複数具体値の通番(0～)を求める
+                                // 複数具体値の通番(0～)を求める
                                 $value_count = $this->getArrayTypeValuecount($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']]);
                                 // 複数具体値の場合の変数名を「変数名.x x:0からの通番」設定
                                 $varname = sprintf("%s.%s",$row['VARS_NAME'],$value_count);
@@ -7132,6 +7505,9 @@ class CreateAnsibleExecFiles {
                         }
                         // 複数行具体値をjson形式で収める
                         $value_count = $this->ArrayTypeValue_encode($ina_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$var_val);
+                        // pioneer template用ホスト変数
+                        $value_count = $this->ArrayTypeValue_encode($ina_pionner_template_host_vars[$row['IP_ADDRESS']][$row['VARS_NAME']],$row['VARS_ENTRY_PIONEER_TEMP']);
+
 
                     }
                 }
@@ -7864,6 +8240,32 @@ class CreateAnsibleExecFiles {
     function getHostvarsfile_template_file_Dir(){
         return($this->lv_Hostvarsfile_template_file_Dir);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   ITA側一時ファイル格納ディレクトリ名を記憶
+    // パラメータ
+    //   $in_dir:      一時ファイル格納ディレクトリ
+    //
+    // 戻り値
+    //   なし
+    ////////////////////////////////////////////////////////////////////////////////
+    function setTemporary_file_Dir($in_indir){
+        $this->lv_Ansible_temporary_files_Dir = $in_indir;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   ITA側一時ファイル格納ディレクトリ名を取得
+    // パラメータ
+    //   なし
+    //
+    // 戻り値
+    //   一時ファイル格納ディレクトリ名
+    ////////////////////////////////////////////////////////////////////////////////
+    function getTemporary_file_Dir(){
+        return($this->lv_Ansible_temporary_files_Dir);
+    }
         
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
@@ -8177,8 +8579,7 @@ class CreateAnsibleExecFiles {
                 //LEGACY用のホスト変数定義ファイル名を取得
                 $file_name = $this->getAnsible_host_var_file($host_vars_file);
                 // ホスト変数定義ファイルにテンプレート変数を追加
-                //if($this->CreateHostvarsfile("TPF",$host_name,$file_name,$la_tpf_path,"","","a") === false)
-                if($this->CreateHostvarsfile("TPF",$hostname,$file_name,$la_tpf_path,"","","a") === false)
+                if($this->CreateHostvarsfile("TPF",$hostname,$file_name,$la_tpf_path,"a") === false)
                 {
                     return false;
                 }
@@ -9375,8 +9776,7 @@ class CreateAnsibleExecFiles {
                 //LEGACY用のホスト変数定義ファイル名を取得
                 $file_name = $this->getAnsible_host_var_file($host_vars_file);
                 // ホスト変数定義ファイルにコピー変数を追加
-                //if($this->CreateHostvarsfile("CPF",$host_name,$file_name,$la_cpf_path,"","","a") === false)
-                if($this->CreateHostvarsfile("CPF",$hostname,$file_name,$la_cpf_path,"","","a") === false)
+                if($this->CreateHostvarsfile("CPF",$hostname,$file_name,$la_cpf_path,"a") === false)
                 {
                     return false;
                 }
@@ -10934,11 +11334,14 @@ class CreateAnsibleExecFiles {
     //   $ina_host_vars:        ホスト変数配列
     //                          [ホスト名(IP)][ 変数名 ]=>具体値
     // 
+    //   $ina_pioneer_template_host_vars:
+    //                          ホスト変数配列 (passwordcolumnの項目がansible-vaultで暗号化されている)
+    //
     // 戻り値
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
-    function CommitHostVarsfiles($ina_hosts,$ina_hostprotcollist,$ina_host_vars){
+    function CommitHostVarsfiles($ina_hosts,$ina_hostprotcollist,$ina_host_vars,$ina_pioneer_template_host_vars){
         // ホスト変数配列のホスト)分繰返し
         foreach( $ina_hosts as $host_name){
             foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
@@ -10947,10 +11350,25 @@ class CreateAnsibleExecFiles {
             $vars_list = $ina_host_vars[$host_name];
             $file_name = $this->getAnsible_host_var_file($host_vars_file);
             // グローバル変数・テンプレート変数・コピー変数をホスト変数ファイルに出力
-            //if($this->CreateHostvarsfile("CMT",$host_name,$file_name,$vars_list,"","","a") === false){
-            if($this->CreateHostvarsfile("CMT",$hostname,$file_name,$vars_list,"","","a") === false){
+            if($this->CreateHostvarsfile("CMT",$hostname,$file_name,$vars_list,"a") === false){
                 return false;
             }
+            /////////////////////////////////////////
+            // Pioneer template用ホスト変数作成    //
+            /////////////////////////////////////////
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $file_name = $this->getAnsible_pioneer_template_host_var_file($host_vars_file);
+                $pioneer_template_vars_list = array();
+                if(@count($ina_pioneer_template_host_vars[$host_name]) != 0) {
+                    $pioneer_template_vars_list = $ina_pioneer_template_host_vars[$host_name];
+                }
+                if($this->CreatePioneerTemplateHostvarsfile("CMT",$hostname,$file_name,$pioneer_template_vars_list,"a") === false){
+                    return false;
+                }
+                break;
+            }
+
             // Pioneerの場合、オリジナル ホスト変数ファイルを生成
             switch($this->getAnsibleDriverID()){
             case DF_PIONEER_DRIVER_ID:
@@ -11098,11 +11516,17 @@ class CreateAnsibleExecFiles {
                 $host_vars_file = $hostname;
     
                 //Pioneer用のホスト変数定義ファイル名を取得
-                //$file_name = $this->getAnsible_org_host_var_file($host_vars_file);
                 $file_name = $this->getAnsible_host_var_file($host_vars_file);
                 // ホスト変数定義ファイルにコピー変数を追加
-                //if($this->CreateHostvarsfile("CPF",$host_name,$file_name,$la_cpf_path,"","","a") === false)
-                if($this->CreateHostvarsfile("CPF",$hostname,$file_name,$la_cpf_path,"","","a") === false)
+                if($this->CreateHostvarsfile("CPF",$hostname,$file_name,$la_cpf_path,"a") === false)
+                {
+                    return false;
+                }
+                /////////////////////////////////////////
+                // Pioneer template用ホスト変数作成    //
+                /////////////////////////////////////////
+                $file_name = $this->getAnsible_pioneer_template_host_var_file($host_vars_file);
+                if($this->CreatePioneerTemplateHostvarsfile("CPF",$hostname,$file_name,$la_cpf_path,"a") === false)
                 {
                     return false;
                 }
@@ -11366,11 +11790,16 @@ class CreateAnsibleExecFiles {
                 $host_vars_file = $hostname;
     
                 //Pioneer用のホスト変数定義ファイル名を取得
-                //$file_name = $this->getAnsible_org_host_var_file($host_vars_file);
                 $file_name = $this->getAnsible_host_var_file($host_vars_file);
                 // ホスト変数定義ファイルにテンプレート変数を追加
-                //if($this->CreateHostvarsfile("TPF",$host_name,$file_name,$la_tpf_path,"","","a") === false) {
-                if($this->CreateHostvarsfile("TPF",$hostname,$file_name,$la_tpf_path,"","","a") === false) {
+                if($this->CreateHostvarsfile("TPF",$hostname,$file_name,$la_tpf_path,"a") === false) {
+                    return false;
+                }
+                /////////////////////////////////////////
+                // Pioneer template用ホスト変数作成    //
+                /////////////////////////////////////////
+                $file_name = $this->getAnsible_pioneer_template_host_var_file($host_vars_file);
+                if($this->CreatePioneerTemplateHostvarsfile("TPF",$hostname,$file_name,$la_tpf_path,"a") === false) {
                     return false;
                 }
             }
@@ -11643,7 +12072,7 @@ class CreateAnsibleExecFiles {
                 $j = $j + 1;
                 $host_vars_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
                                               $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                              $this->getAnsible_original_hosts_vars_Dir());
+                                              $this->getAnsible_pioneer_template_hosts_vars_Dir());
                 $playbookwrite[$j] = "      include_vars: " . $host_vars_path . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}\n";
                 foreach( $in_tpf_path as $var_name=>$fileinfo ) {
                     $j = $j + 1;
@@ -11833,6 +12262,120 @@ class CreateAnsibleExecFiles {
 
         return $out_vaultpass;
     }
+// ansibleがvaultで暗号化された秘密鍵ファイルに対応していないので
+// 対応したタイミングで秘密鍵ファイルをvaultで暗号化
+    //$in_file_id 0: ssh秘密鍵/1: WinRM
+    function makeAnsibleVaultSSHFile($in_exec_user,$in_file_id,$in_sshKeyFile,$in_vault_sshKeyFileData,$in_system_id) {
+        // 暗号化されていない
+        global      $root_dir_path;
+        global      $vg_OrchestratorSubId;
+        $vaultobj = new AnsibleVault();
+
+        // 鍵ファイルが暗号化されているか判定
+        if(strlen(trim($in_vault_sshKeyFileData)) != 0) {
+            $vaultData = $in_vault_sshKeyFileData;
+            $ret = file_put_contents($in_sshKeyFile,$vaultData);
+            if($ret === false) {
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        } else {
+            // 鍵ファイルのスクランブルを復号
+            $tmp_decrypt_file = sprintf("/tmp/%s_%s",getmypid(),basename($in_sshKeyFile));
+            $ret = ky_file_decrypt($in_sshKeyFile,$tmp_decrypt_file);
+            if($ret === false) {
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            // 鍵ファイルの内容を取得
+            $decryptData = file_get_contents($tmp_decrypt_file);
+            
+            if($decryptData === false) {
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+
+            ////////////////////////////////
+            // REST API接続function定義   //
+            ////////////////////////////////
+            require_once ($root_dir_path . '/libs/commonlibs/common_ansible_restapi.php' );
+
+            $RequestURI = "/restapi/ansible_driver/file_vault.php";
+            $Method     = 'GET';
+            $RequestContents
+                = array(
+                    //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
+                    'DATA_RELAY_STORAGE_TRUNK'=>'/tmp',
+                    //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
+                    "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
+                    //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
+                    "EXE_NO"=>"9999999999",
+                    // ansible-vault 実行ユーザー
+                    "EXEC_USER"=>$in_exec_user,
+                    // 暗号化する文字列
+                    "TARGET_VALUE"=>$decryptData);
+
+            ////////////////////////////////////////////////////////////////
+            // ansible-vault 暗号化 REST APIコール                        //
+            ////////////////////////////////////////////////////////////////
+            $rest_api_response = ansible_restapi_access( $this->lv_ans_if_info['ANSIBLE_PROTOCOL'],
+                                                         $this->lv_ans_if_info['ANSIBLE_HOSTNAME'],
+                                                         $this->lv_ans_if_info['ANSIBLE_PORT'],
+                                                         $this->lv_ans_if_info['ANSIBLE_ACCESS_KEY_ID'],
+                                                         ky_decrypt( $this->lv_ans_if_info['ANSIBLE_SECRET_ACCESS_KEY'] ),
+                                                         $RequestURI,
+                                                         $Method,
+                                                         $RequestContents );
+            if( $rest_api_response['StatusCode'] == 200 ){
+                $vaultData = $rest_api_response['ResponsContents']['resultdata'];
+                if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
+                    return false;
+                }
+            } else {
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+
+            // 鍵ファイルの内容をVaultで暗号かした内容で更新
+            $ret = file_put_contents($in_sshKeyFile,$vaultData);
+            if($ret === false) {
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+
+            $strFxName = __FUNCTION__;
+
+            $aryForBind = array('VAULT_DATA'=>$vaultData);
+            // Vaultで暗号かした内容をDBに保持
+            if($in_file_id == 0) {
+                $strQuery =   "UPDATE C_STM_LIST SET VAULT_CONN_SSH_KEY_FILE = :VAULT_DATA "
+                            . "WHERE SYSTEM_ID = " . $in_system_id;
+            } else {
+                $strQuery =   "UPDATE C_STM_LIST SET VAULT_WINRM_SSL_CA_FILE = :VAULT_DATA "
+                            . "WHERE SYSTEM_ID = " . $in_system_id;
+            }  
+  
+            $ret = $this->RecordAccess($strQuery,$aryForBind);
+  
+            if($ret !== true ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+        return true;
+    }
 
     function makeAnsibleVaultValue($in_exec_user,$in_pass,$in_vaultpass,$in_indento,$in_assign_id) {
         $vaultobj = new AnsibleVault();
@@ -11850,24 +12393,18 @@ class CreateAnsibleExecFiles {
                 // 既に暗号化されている場合
                 $out_vaultpass = $this->lv_vault_value_list[$in_pass];
             } else {
-                // 暗号化されていない
-                switch($this->getAnsibleDriverID()) {
-                case DF_PIONEER_DRIVER_ID:
-                    $out_vaultpass = $in_pass;
-                    break;
-                default:
-                    ////////////////////////////////
-                    // REST API接続function定義   //
-                    ////////////////////////////////
-                    require_once ($root_dir_path . '/libs/commonlibs/common_ansible_restapi.php' );
+                ////////////////////////////////
+                // REST API接続function定義   //
+                ////////////////////////////////
+                require_once ($root_dir_path . '/libs/commonlibs/common_ansible_restapi.php' );
 
-                    $RequestURI = "/restapi/ansible_driver/vault.php";
-                    $Method     = 'GET';
-                    // $in_passはrot13+base64で暗号化されている 
-                    $enc_in_pass = $in_pass;
+                $RequestURI = "/restapi/ansible_driver/vault.php";
+                $Method     = 'GET';
+                // $in_passはrot13+base64で暗号化されている 
+                $enc_in_pass = $in_pass;
 
-                    $RequestContents
-                    = array(
+                $RequestContents
+                = array(
                         //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
                         'DATA_RELAY_STORAGE_TRUNK'=>'/tmp',
                         //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
@@ -11879,37 +12416,35 @@ class CreateAnsibleExecFiles {
                         // 暗号化する文字列
                         "TARGET_VALUE"=>$enc_in_pass);
 
-                    ////////////////////////////////////////////////////////////////
-                    // ansible-vault 暗号化 REST APIコール                        //
-                    ////////////////////////////////////////////////////////////////
-                    $rest_api_response = ansible_restapi_access( $this->lv_ans_if_info['ANSIBLE_PROTOCOL'],
-                                                                 $this->lv_ans_if_info['ANSIBLE_HOSTNAME'],
-                                                                 $this->lv_ans_if_info['ANSIBLE_PORT'],
-                                                                 $this->lv_ans_if_info['ANSIBLE_ACCESS_KEY_ID'],
-                                                                 ky_decrypt( $this->lv_ans_if_info['ANSIBLE_SECRET_ACCESS_KEY'] ),
-                                                                 $RequestURI,
-                                                                 $Method,
+                ////////////////////////////////////////////////////////////////
+                // ansible-vault 暗号化 REST APIコール                        //
+                ////////////////////////////////////////////////////////////////
+                $rest_api_response = ansible_restapi_access( $this->lv_ans_if_info['ANSIBLE_PROTOCOL'],
+                                                             $this->lv_ans_if_info['ANSIBLE_HOSTNAME'],
+                                                             $this->lv_ans_if_info['ANSIBLE_PORT'],
+                                                             $this->lv_ans_if_info['ANSIBLE_ACCESS_KEY_ID'],
+                                                             ky_decrypt( $this->lv_ans_if_info['ANSIBLE_SECRET_ACCESS_KEY'] ),
+                                                             $RequestURI,
+                                                             $Method,
                                                              $RequestContents );
-                    if( $rest_api_response['StatusCode'] == 200 ){
-                        $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
-                        if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
-                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($in_assign_id));
-                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
-                            return false;
-                        }
-                    } else {
+                if( $rest_api_response['StatusCode'] == 200 ){
+                    $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
+                    if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($in_assign_id));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
                         return false;
                     }
-                    $out_vaultpass = " !vault |\n" . $out_vaultpass;
-                    $this->lv_vault_value_list[$in_pass] = $out_vaultpass;
-                    break;
+                } else {
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000077",array($in_assign_id));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
                 }
+                $out_vaultpass = " !vault |\n" . $out_vaultpass;
+                $this->lv_vault_value_list[$in_pass] = $out_vaultpass;
             } 
 
 // 今後の拡張処理----
@@ -12044,7 +12579,8 @@ if(isset($Expansion_root)) {
 
     function getArrayTypeValuecount($val) {
         $ary = json_decode($val,true);
-        return count($ary);
+        // 空の場合のワーニング抑止
+        return @count($ary);
     }
     function ArrayTypeValue_encode(&$jsonstr,$val) {
         if(strlen($jsonstr) == 0) {
@@ -12099,12 +12635,14 @@ if(isset($Expansion_root)) {
     // パラメータ
     //   $ina_hostinfolist:  機器一覧ホスト情報配列
     //   $ina_host_vars:     ホスト変数定義配列
+    //   $ina_pioneer_template_host_vars:     
+    //                       pioneer tamplate用 ホスト変数定義配列
     //
     // 戻り値
     //   true:  正常
     //   false: 異常
     ////////////////////////////////////////////////////////////////////////////////
-    function CreateDirectoryForCollectionProcess($ina_hostinfolist,&$ina_host_vars) {
+    function CreateDirectoryForCollectionProcess($ina_hostinfolist,&$ina_host_vars,&$ina_pioneer_template_host_vars) {
         $drive_list[DF_LEGACY_DRIVER_ID]      = 'legacy/ns';
         $drive_list[DF_PIONEER_DRIVER_ID]     = 'pioneer/ns';
         $drive_list[DF_LEGACY_ROLE_DRIVER_ID] = 'legacy/rl';
@@ -12133,7 +12671,13 @@ if(isset($Expansion_root)) {
                     return false;
                 }
             }
+
             $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $ina_pioneer_template_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+                break;
+            }
 
             $host_var_name  = "__parameter_dir__"; 
             $mkdir          = sprintf("%s/%s/%s/out/_parameters/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
@@ -12147,7 +12691,13 @@ if(isset($Expansion_root)) {
                     return false;
                 }
             }
+
             $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $ina_pioneer_template_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+                break;
+            }
 
             $host_var_name  = "__parameters_file_dir_for_epc__"; 
             $mkdir          = sprintf("%s/%s/%s/in/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
@@ -12161,7 +12711,13 @@ if(isset($Expansion_root)) {
                     return false;
                 }
             }
+
             $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $ina_pioneer_template_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+                break;
+            }
 
             $host_var_name  = "__parameters_file_dir__"; 
             $mkdir          = sprintf("%s/%s/%s/out/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
@@ -12175,7 +12731,13 @@ if(isset($Expansion_root)) {
                     return false;
                 }
             }
+
             $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $ina_pioneer_template_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+                break;
+            }
         }
         return true;
     }
@@ -12187,12 +12749,14 @@ if(isset($Expansion_root)) {
     //   $in_operation_id:   オペレーションID
     //   $ina_hostinfolist:  機器一覧ホスト情報配列
     //   $ina_host_vars:     ホスト変数定義配列
+    //   $ina_pioneer_template_host_vars:     
+    //                       pioneer tamplate用 ホスト変数定義配列
     //
     // 戻り値
     //   true:  正常
     //   false: 異常
     ////////////////////////////////////////////////////////////////////////////////
-    function CreateOperationVariables($in_operation_id,$ina_hostinfolist,&$ina_host_vars) {
+    function CreateOperationVariables($in_operation_id,$ina_hostinfolist,&$ina_host_vars,&$ina_pioneer_template_host_vars) {
         $sql = " SELECT \n"
              . "   OPERATION_NAME, \n"
              . "   DATE_FORMAT(OPERATION_DATE, '%Y/%m/%d %H:%i') OPERATION_DATE \n"
@@ -12249,6 +12813,34 @@ if(isset($Expansion_root)) {
         foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
             $hostname = $hostinfo['HOSTNAME'];
             $ina_host_vars[$host_ip][self::LC_OPERATION_VAR_NAME] = $operationStr;
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $ina_pioneer_template_host_vars[$host_ip][self::LC_OPERATION_VAR_NAME] = $operationStr;
+                break;
+            }
+        }
+        return true;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   ssh-agentの設定に必要な情報を一時ファイルに出力
+    // パラメータ
+    //   $file:         一時ファイル
+    //   $hostname:     ホスト名
+    //   $ssh_key_file: 秘密鍵ファイル
+    //   $pssphrase:    パスフレーズ
+    //
+    // 戻り値
+    //   true:  正常
+    //   false: 異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreateSSHAgentConfigInfoFile($file,$hostname,$ssh_key_file,$pssphrase) {
+        $row = sprintf("%s\t%s\t%s\t\n",$hostname,$ssh_key_file,$pssphrase);
+        $ret = file_put_contents($file,$row,FILE_APPEND);
+        if($ret === false) {
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70082");
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
         }
         return true;
     }

@@ -22,7 +22,7 @@
     }
 
     // パラメータを持たないURLは使用できないため、基本コンソールへリダイレクト
-    $uri = $_SERVER['REQUEST_URI'];
+    $uri = htmlspecialchars($_SERVER['REQUEST_URI'], ENT_QUOTES, "UTF-8");
     if($uri == "/"){
         $url = '/default/mainmenu/01_browse.php';
         header('Location: ' . $url, true, 301);
@@ -85,8 +85,6 @@ EOD;
         $strMailTag = $objMTS->getSomeMessage("ITAWDCH-MNU-1100004",$admin_addr);
     }
     
-    $manualLink = "/default/menu/01_browse.php?no=2100000401 target = _blank";
-
     //各メニュリンク用
     require_once ( $root_dir_path . "/libs/webcommonlibs/web_php_tag_print_functions.php");
     

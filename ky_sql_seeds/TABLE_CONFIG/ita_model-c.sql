@@ -137,6 +137,7 @@ CREATE TABLE B_ANS_TWR_HOST (
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
   ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
+  ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
 -- 
   DISP_SEQ                        %INT%                             ,
@@ -161,6 +162,7 @@ CREATE TABLE B_ANS_TWR_HOST_JNL (
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
   ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
+  ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
 -- 
   DISP_SEQ                        %INT%                             ,
@@ -771,6 +773,7 @@ SELECT
   TAB_B.ANSTWR_LOGIN_USER,
   TAB_B.ANSTWR_LOGIN_PASSWORD,
   TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE,
+  TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE,
   TAB_B.ANSTWR_ISOLATED_TYPE
 FROM
   B_ANSIBLE_IF_INFO           TAB_A
@@ -788,6 +791,7 @@ SELECT
   TAB_B.ANSTWR_LOGIN_USER,
   TAB_B.ANSTWR_LOGIN_PASSWORD,
   TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE,
+  TAB_B.ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE,
   TAB_B.ANSTWR_ISOLATED_TYPE
 FROM
   B_ANSIBLE_IF_INFO_JNL         TAB_A
@@ -796,6 +800,22 @@ FROM
              FROM B_ANS_TWR_HOST_JNL
              WHERE DISUSE_FLAG = '0'
             ) TAB_B ON ( TAB_A.ANSTWR_HOST_ID = TAB_B.ANSTWR_HOST_ID );
+
+CREATE VIEW D_TOWER_LOGIN_AUTH_TYPE AS
+SELECT 
+  *
+FROM 
+  B_LOGIN_AUTH_TYPE
+WHERE 
+  LOGIN_AUTH_TYPE_ID <= 4;
+
+CREATE VIEW D_TOWER_LOGIN_AUTH_TYPE_JNL AS
+SELECT 
+  *
+FROM 
+  B_LOGIN_AUTH_TYPE_JNL
+WHERE 
+  LOGIN_AUTH_TYPE_ID <= 4;
 
 -- *****************************************************************************
 -- ***  Ansible Common View *****                                            ***
@@ -1239,14 +1259,6 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_LNS_PTN_VARS_LINK TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1272,14 +1284,6 @@ SELECT
         ANS_PLAYBOOK_HED_DEF      ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_LNS_PTN_VARS_LINK_JNL TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -2068,14 +2072,6 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_PNS_PTN_VARS_LINK TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2099,14 +2095,6 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_PNS_PTN_VARS_LINK_JNL TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -3178,14 +3166,6 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_LRL_PTN_VARS_LINK TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3211,14 +3191,6 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
-        (SELECT 
-           COUNT(*) 
-         FROM 
-           B_ANS_LRL_PTN_VARS_LINK_JNL TBL_S
-         WHERE
-           TBL_S.PATTERN_ID = TAB_A.PATTERN_ID AND
-           DISUSE_FLAG = '0'
-        ) VARS_COUNT                  ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,

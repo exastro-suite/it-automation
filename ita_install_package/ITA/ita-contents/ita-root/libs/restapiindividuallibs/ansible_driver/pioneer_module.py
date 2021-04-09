@@ -108,8 +108,6 @@ execute_when_log_str = "%s: [%s]"
 exec_log = [] 
 host_name=''
 
-register_used_flg = 0
-
 class SignalReceive(Exception): pass
 
 def signal_handle(signum,frame):
@@ -158,7 +156,55 @@ def main():
     # normal exit
     #########################################################
     private_fail_json(obj=module,msg='exec_file no found fail exit')
-  config = yaml.load(open(module.params['exec_file']).read())
+
+  # 対話ファイルを読み込む
+  try:
+    config = yaml.load(open(module.params['exec_file']).read())
+  # パーサーの例外をキャッチするようにする
+  except Exception as e:
+    msg = "dialog file yaml load failure."
+    private_log_output(log_file_name,host_name,msg)
+    private_log_output(log_file_name,host_name,str(e))
+    exec_log_output(msg)
+    exec_log_output(str(e))
+    #########################################################
+    # fail exit
+    #########################################################
+    module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
+
+  # オリジナル対話ファイルにyaml文法エラーがない事を確認する。
+  with_tmp = module.params['exec_file']
+  with_tmp = with_tmp.replace("/in/", "/tmp/")
+  with_tmp = with_tmp.replace("/dialog_files/", "/original_dialog_files/")
+
+  try:
+    with_file = yaml.load(open(with_tmp).read())
+  # パーサーの例外をキャッチするようにする
+  except Exception as e:
+    msg = "Original dialog file yaml load failure."
+    private_log_output(log_file_name,host_name,msg)
+    private_log_output(log_file_name,host_name,str(e))
+    exec_log_output(msg)
+    exec_log_output(str(e))
+    #########################################################
+    # fail exit
+    #########################################################
+    module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
+
+  # ホスト変数ファイルにyaml文法エラーがない事を確認する。
+  try:
+    with_def = yaml.load(open(module.params['host_vars_file']).read())
+  # パーサーの例外をキャッチするようにする
+  except Exception as e:
+    msg = "Host variable file yaml load failure."
+    private_log_output(log_file_name,host_name,msg)
+    private_log_output(log_file_name,host_name,str(e))
+    exec_log_output(msg)
+    exec_log_output(str(e))
+    #########################################################
+    # fail exit
+    #########################################################
+    module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
 
   private_log_output(log_file_name,host_name,'python version:' + str(sys.version))
   private_log_output(log_file_name,host_name,'default encoding:' + str(sys.getdefaultencoding()))
@@ -228,9 +274,23 @@ def main():
     else:
       chk_mode = ''
 
+    # 暗号化変数ファイル読み込み
     vault_vars_file = module.params['host_vars_file']
     vault_vars_file = vault_vars_file.replace("/original_host_vars/", "/vault_host_vars/")
-    vault_vars_def  = yaml.load(open(vault_vars_file).read())
+    # パーサーの例外をキャッチするようにする
+    try:
+      vault_vars_def = yaml.load(open(vault_vars_file).read())
+    except Exception as e:
+      msg = "Cryptographic variable file yaml load failure."
+      private_log_output(log_file_name,host_name,msg)
+      private_log_output(log_file_name,host_name,str(e))
+      exec_log_output(msg)
+      exec_log_output(str(e))
+      #########################################################
+      # fail exit
+      #########################################################
+      module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
+
     if vault_vars_def is not None:
       for var,value in vault_vars_def.items():
         enc_value = base64.b64decode(codecs.encode(value, "rot-13"))
@@ -266,8 +326,6 @@ def main():
       exec_when_cmd = {}
       continue_flg = 0
       register_flg = 0
-      global register_used_flg
-      register_used_flg = 0
       register_tmp_name = ''
       count = 0
       timeout2 = config['conf']['timeout']
@@ -564,13 +622,40 @@ def main():
               when_tmp = str(input[cmd][i])
               when_cmd[i] = when_tmp
           elif 'with_items' == cmd:
+
+            # オリジナル対話ファイルを読み込む
             with_tmp = module.params['exec_file']
             with_tmp = with_tmp.replace("/in/", "/tmp/")
             with_tmp = with_tmp.replace("/dialog_files/", "/original_dialog_files/")
 
-            with_file = yaml.load(open(with_tmp).read())
+            try:
+              with_file = yaml.load(open(with_tmp).read())
+            # パーサーの例外をキャッチするようにする
+            except Exception as e:
+              msg = "Original dialog file yaml load failure."
+              private_log_output(log_file_name,host_name,msg)
+              private_log_output(log_file_name,host_name,str(e))
+              exec_log_output(msg)
+              exec_log_output(str(e))
+              #########################################################
+              # fail exit
+              #########################################################
+              module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
 
-            with_def = yaml.load(open(module.params['host_vars_file']).read())
+            # ホスト変数ファイルを読み込む
+            try:
+              with_def = yaml.load(open(module.params['host_vars_file']).read())
+            # パーサーの例外をキャッチするようにする
+            except Exception as e:
+              msg = "Host variable file yaml load failure."
+              private_log_output(log_file_name,host_name,msg)
+              private_log_output(log_file_name,host_name,str(e))
+              exec_log_output(msg)
+              exec_log_output(str(e))
+              #########################################################
+              # fail exit
+              #########################################################
+              module.fail_json(msg=host_name + ": " + msg,exec_log=exec_log)
 
             # playbookから変数を取得
             idx = 0
@@ -792,25 +877,12 @@ def main():
 
                     if com_re_search( temp, temp_cmd ):
 
-                      # 空でない場合
-                      if len(def_cmd[j][i]) != 0:
-
-                        # 置換
-                        temp_cmd = temp_cmd.replace( temp, def_cmd[j][i] )
-
-                      # 空の場合
-                      else:
-
-                        command_exec_flg = 1
-                        break
+                      # 置換
+                      temp_cmd = temp_cmd.replace( temp, def_cmd[j][i] )
 
                   # item.Xがない場合ループから抜ける
                   else:
                     break
-
-                if command_exec_flg == 1:
-
-                  continue
 
                 # exec_when有無判定 -- block-4 start
                 if exec_when_cmd:
@@ -2743,10 +2815,6 @@ def main():
 
         # when条件判定結果判定  -- block-1 end
 
-        if register_used_flg == 1:
-          register_cmd == ''
-          register_name == ''
-
         ####################################################
         # read line
         ####################################################
@@ -2908,7 +2976,6 @@ def craete_stdout_file(file,data):
 def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,host_name):
 
   global vault_vars_def
-  global register_used_flg
   r = re.compile("(.*)(\n)(.*)")
 
   when_cmd = password_replace(vault_vars_def,when_cmd) 
@@ -2920,8 +2987,6 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
       # whenとregister変数が一致する場合
       if com_re_search( register_name, when_cmd ):
-
-        register_used_flg = 1
 
         # '('が何文字目か検索
         tmp1 = str(when_cmd.find('('))
@@ -3043,8 +3108,6 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
       # whenとregister変数が一致する場合
       if com_re_search( register_name, when_cmd ):
 
-        register_used_flg = 1
-
         # '('が何文字目か検索
         tmp1 = str(when_cmd.find('('))
 
@@ -3164,8 +3227,6 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
       # whenとregister変数が一致する場合
       if com_re_search( register_name, when_cmd ):
-
-        register_used_flg = 1
 
         # register取得
         tmp1 = register_cmd
@@ -3291,8 +3352,6 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
       # whenとregister変数が一致する場合
       if com_re_search( register_name, when_cmd ):
 
-        register_used_flg = 1
-
         # register取得
         tmp1 = register_cmd
 
@@ -3415,8 +3474,6 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
       # whenとregister変数が一致する場合
       if com_re_search( register_name, when_cmd ):
-
-        register_used_flg = 1
 
         # 後ろの'='の位置を取得
         tmp1 = str(when_cmd.rfind('='))
@@ -3541,8 +3598,6 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
       # whenとregister変数が一致する場合
       if com_re_search( register_name, when_cmd ):
 
-        register_used_flg = 1
-
         # '>'の位置を取得
         tmp1 = str(when_cmd.find('>'))
 
@@ -3661,8 +3716,6 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
       # whenとregister変数が一致する場合
       if com_re_search( register_name, when_cmd ):
-
-        register_used_flg = 1
 
         # 後ろの'='の位置を取得
         tmp1 = str(when_cmd.rfind('='))
@@ -3787,8 +3840,6 @@ def when_check(when_cmd,register_cmd,register_name,host_vars_file,log_file_name,
 
       # whenとregister変数が一致する場合
       if com_re_search( register_name, when_cmd ):
-
-        register_used_flg = 1
 
         # '<'の位置を取得
         tmp1 = str(when_cmd.find('<'))

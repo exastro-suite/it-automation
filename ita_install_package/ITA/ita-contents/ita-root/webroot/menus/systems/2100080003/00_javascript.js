@@ -15,8 +15,13 @@
 
 //////// ----コールバックファンクション ////////
 function callback() {}
-callback.prototype = {  
+callback.prototype = {
     Filter1Tbl_add_selectbox : function( result ){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var filterAreaWrap = 'Filter1_Nakami';
         var strFilterPrintId = 'Filter1Tbl';
         var containerClassName = 'fakeContainer_Filter1Setting';
@@ -55,6 +60,11 @@ callback.prototype = {
         showForDeveloper(result);
     },
     Filter1Tbl_reload : function( result ){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var filterAreaWrap = 'Filter1_Nakami';
         var strFilterPrintId = 'Filter1Tbl';
 
@@ -101,6 +111,11 @@ callback.prototype = {
         }
     },
     Filter1Tbl_recCount : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var strMixOuterFrameName = 'Mix1_Nakami';
 
         var ary_result = getArrayBySafeSeparator(result);
@@ -140,6 +155,11 @@ callback.prototype = {
         showForDeveloper(result);
     },
     Filter1Tbl_printTable : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var strMixOuterFrameName = 'Mix1_Nakami';
         var strMixInnerFramePrefix = 'Mix1_';
 
@@ -178,6 +198,11 @@ callback.prototype = {
         showForDeveloper(result);
     },
     Mix1_1_updateTable : function( result ){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var strMixOuterFrameName = 'Mix1_Nakami';
         var strMixInnerFramePrefix = 'Mix1_';
 
@@ -208,7 +233,7 @@ callback.prototype = {
                                     "fakeContainer_Update1",
                                     webStdTableHeight,
                                     webStdTableWidth );
-                    
+
                     linkDateInputHelper(strMixOuterFrameName);
             }
         }else if( ary_result[0] == "002" ){
@@ -228,6 +253,11 @@ callback.prototype = {
         showForDeveloper(result);
     },
     Mix1_1_deleteTable : function( result ){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var strMixOuterFrameName = 'Mix1_Nakami';
         var strMixInnerFramePrefix = 'Mix1_';
 
@@ -278,6 +308,11 @@ callback.prototype = {
         showForDeveloper(result);
     },
     Mix2_1_registerTable : function( result ){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var strMixOuterFrameName = 'Mix2_Nakami';
         var strMixInnerFramePrefix = 'Mix2_';
 
@@ -305,7 +340,7 @@ callback.prototype = {
                     $(objRegiterArea).html(resultContentTag);
 
                     objAlertArea.style.display = "none";
-                    
+
                     adjustTableAuto (strMixInnerFramePrefix+'1',
                                     "sDefault",
                                     "fakeContainer_Register2",
@@ -330,6 +365,11 @@ callback.prototype = {
         showForDeveloper(result);
     },
     Journal1Tbl_printJournal : function( result ){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var strMixOuterFrameName = 'Journal1_Nakami';
         var strMixInnerFrame = 'Journal1Tbl';
 
@@ -364,6 +404,11 @@ callback.prototype = {
     },
     //---- ここからカスタマイズした場合の[callback]メソッド配置域
     registerWorkspace : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         if(result == true){
             //登録成功通知メッセージ
             window.alert(getSomeMessage("ITATERRAFORM100014"));
@@ -377,6 +422,11 @@ callback.prototype = {
         }
     },
     updateWorkspace : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         if(result == true){
             //更新成功通知メッセージ
             window.alert(getSomeMessage("ITATERRAFORM100016"));
@@ -390,6 +440,11 @@ callback.prototype = {
         }
     },
     checkWorkspace : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         var resultAreaID = result[1];
         var resultMessage = result[2];
         var resultArea = $('#'+resultAreaID);
@@ -413,8 +468,16 @@ callback.prototype = {
 
         }
 
+        //ボタンの非活性を解除
+        resultArea.prev('td').find('input').prop('disabled', false);
+
     },
     deleteWorkspace : function(result){
+        // セッションチェック
+        if ( typeof result == "string" ) {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
         if(result == true){
             //削除成功通知メッセージ
             window.alert(getSomeMessage("ITATERRAFORM100018"));
@@ -883,7 +946,7 @@ function Journal1Tbl_pre_search_async(inputedCode){
 function Journal1Tbl_search_async(){
     // 履歴検索実施フラグを初期化
     var journal1AreaWrap = 'Journal1_Nakami';
-    
+
     var exec_flag = true;
 
     // 検索実施フラグがtrueの場合は検索実施
@@ -911,6 +974,8 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 //---- ここからカスタマイズした場合の一般メソッド配置域
 //TFEとの状態チェックを実行
 function Mix1_1_checkWorkspace(obj, workspaceID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     var resultAreaID = $(obj).closest('td').next().attr('id');
     //エンコード
     workspaceID = encodeURIComponent(workspaceID);
@@ -925,6 +990,8 @@ function Mix1_1_checkWorkspace(obj, workspaceID){
 
 //TFEへの登録を実行
 function Mix1_1_registerWorkspace(obj, workspaceID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     //エンコード
     workspaceID = encodeURIComponent(workspaceID);
     var data = {
@@ -940,6 +1007,8 @@ function Mix1_1_registerWorkspace(obj, workspaceID){
 
 //TFEへの更新を実行
 function Mix1_1_updateWorkspace(obj, workspaceID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     //エンコード
     workspaceID = encodeURIComponent(workspaceID);
     var data = {
@@ -955,6 +1024,8 @@ function Mix1_1_updateWorkspace(obj, workspaceID){
 
 //TFEからの削除を実行
 function Mix1_1_deleteWorkspace(obj, workspaceID){
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
     //エンコード
     workspaceID = encodeURIComponent(workspaceID);
     var data = {
@@ -966,5 +1037,21 @@ function Mix1_1_deleteWorkspace(obj, workspaceID){
         proxy.deleteWorkspace(data);
     }
 
+}
+function Mix1_1_newOpenWindow(currentElement,currentText){
+  var searchText = decodeURIComponent(escape(atob(currentText)));;
+  var current_id = currentElement.offsetParent.id;
+  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "4";
+  var searchText1 = document.getElementById(target_id).children[0].innerText;
+  var url = "01_browse.php?no=2100080004&filter=on&Filter1Tbl_5=" + searchText1 + ":" + searchText;
+  window.open(url, '_blank');
+}
+function Mix1_1_newOpenWindow2(currentElement,currentText){
+  var searchText = decodeURIComponent(escape(atob(currentText)));;
+  var current_id = currentElement.offsetParent.id;
+  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "4";
+  var searchText1 = document.getElementById(target_id).children[0].innerText;
+  var url = "01_browse.php?no=2100080014&filter=on&Filter1Tbl_3=" + searchText1 + ":" + searchText;
+  window.open(url, '_blank');
 }
 // ここまでカスタマイズした場合の一般メソッド配置域----

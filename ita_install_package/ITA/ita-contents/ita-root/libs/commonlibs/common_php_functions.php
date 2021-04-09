@@ -1258,6 +1258,33 @@
         // 復号化
         return base64_decode(str_rot13($lcStr));
     }
+
+    function ky_file_encrypt($src_file,$dest_file) {
+        $src_data =  file_get_contents($src_file);
+        if($src_data === false) {
+            return false;
+        }
+        $enc_data = ky_encrypt($src_data);
+        $ret = file_put_contents($dest_file, $enc_data);
+        if($ret === false) {
+            return false;
+        }
+        return true;
+    }
+    // ky_build_and_follow_side_Ansible.phpにも同じfunctionあり
+    function ky_file_decrypt($src_file,$dest_file) {
+        $src_data =  file_get_contents($src_file);
+        if($src_data === false) {
+            return false;
+        }
+        $dec_data = ky_decrypt($src_data);
+        $ret = file_put_contents($dest_file, $dec_data);
+        if($ret === false) {
+            return false;
+        }
+        return true;
+    }
+
     // 簡易暗号化・復号化ファンクション----
 
     function ky_phpProcessSleep($lcIntSec){

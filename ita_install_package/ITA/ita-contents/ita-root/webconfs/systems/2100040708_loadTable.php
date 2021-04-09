@@ -20,6 +20,16 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+if ( empty($root_dir_path) ){
+    $root_dir_temp = array();
+    $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+    $root_dir_path = $root_dir_temp[0] . "ita-root";
+}
+
+// 共通モジュールをロード
+require_once ($root_dir_path . "/libs/commonlibs/common_required_check.php");
+
+
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
@@ -66,7 +76,7 @@ Ansible 共通 Ansible Tower インスタンス一覧
     //ホスト名----
 
     //----認証方式
-    $c = new IDColumn('ANSTWR_LOGIN_AUTH_TYPE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001020"),'B_LOGIN_AUTH_TYPE','LOGIN_AUTH_TYPE_ID','LOGIN_AUTH_TYPE_NAME','');
+    $c = new IDColumn('ANSTWR_LOGIN_AUTH_TYPE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001020"),'D_TOWER_LOGIN_AUTH_TYPE','LOGIN_AUTH_TYPE_ID','LOGIN_AUTH_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001021"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
@@ -89,18 +99,34 @@ Ansible 共通 Ansible Tower インスタンス一覧
     $c->setRequired(false);        // 必須チャックはDB登録前処理で実施
     $c->setUpdateRequireExcept(1); // 1は空白の場合は維持、それ以外はNULL扱いで更新
     $c->setEncodeFunctionName("ky_encrypt");
+
     $table->addColumn($c);
     //ログインパスワード----
 
-    //----ssh鍵認証ファイル
-    $c = new FileUploadColumn('ANSTWR_LOGIN_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001050"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001051"));
-    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
-    $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
-    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
-    $c->setFileHideMode(true);
-    $table->addColumn($c);
-    //ssh鍵認証ファイル----
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001055"));
+      //----秘密鍵ファイル
+      $c = new FileUploadColumn('ANSTWR_LOGIN_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001050"));
+      $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001051"));
+      $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
+      $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+      $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+      $c->setFileHideMode(true);
+      // CONN_SSH_KEY_FILEをアップロード時に「ky__encrypt」で暗号化する設定
+      $c->setFileEncryptFunctionName("ky_file_encrypt");
+      $cg->addColumn($c);
+      //秘密鍵ファイル----
+
+      //----秘密鍵ファイル パスフレーズ
+      $objVldt = new SingleTextValidator(0,256,false);
+      $c = new PasswordColumn('ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001052"));
+      $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001053"));
+      $c->setEncodeFunctionName("ky_encrypt");
+
+      $c->setValidator($objVldt);
+
+      $cg->addColumn($c);
+      //秘密鍵ファイル パスフレーズ----
+    $table->addColumn($cg);
 
     //----isolated Tower
     $c = new IDColumn('ANSTWR_ISOLATED_TYPE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001060"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
@@ -132,42 +158,74 @@ Ansible 共通 Ansible Tower インスタンス一覧
                 $strModeId = $aryTcaAction["ACTION_MODE"];
             }
         }
-
-        if($strModeId == "DTUP_singleRecDelete"){
-            //----更新前のレコードから、各カラムの値を取得
-            $strAuthMode   = isset($arrayVariant['edit_target_row']['ANSTWR_LOGIN_AUTH_TYPE'])?
-                                   $arrayVariant['edit_target_row']['ANSTWR_LOGIN_AUTH_TYPE']:null;
-            $strPasswd     = isset($arrayVariant['edit_target_row']['ANSTWR_LOGIN_PASSWORD'])?
-                                   $arrayVariant['edit_target_row']['ANSTWR_LOGIN_PASSWORD']:null;
-            $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
-            $PkeyID = $strNumberForRI;
-            //更新前のレコードから、各カラムの値を取得----
-        }else if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
+        // $arrayRegDataはUI入力ベースの情報
+        // $arrayVariant['edit_target_row']はDBに登録済みの情報
+        if($strModeId == "DTUP_singleRecRegister") {
+            // 認証方式の設定値取得
             $strAuthMode   = array_key_exists('ANSTWR_LOGIN_AUTH_TYPE',$arrayRegData)?
-                                 $arrayRegData['ANSTWR_LOGIN_AUTH_TYPE']:null;
-            // PasswordColumn
-            $strPasswd     = isset($arrayVariant['edit_target_row']['ANSTWR_LOGIN_PASSWORD'])?
-                                   $arrayVariant['edit_target_row']['ANSTWR_LOGIN_PASSWORD']:null;
-            if(strlen($strPasswd)==0) {
-                $strPasswd = array_key_exists('ANSTWR_LOGIN_PASSWORD',$arrayRegData)?
+                                $arrayRegData['ANSTWR_LOGIN_AUTH_TYPE']:null;
+            // パスワードの設定値取得
+            $strPasswd     = array_key_exists('ANSTWR_LOGIN_PASSWORD',$arrayRegData)?
                                 $arrayRegData['ANSTWR_LOGIN_PASSWORD']:null;
+            // パスフレーズの設定値取得
+            $strPassphrase = array_key_exists('ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE',$arrayRegData)?
+                                $arrayRegData['ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE']:null;
+            // 公開鍵ファイルの設定値取得
+            $strsshKeyFile = array_key_exists('ANSTWR_LOGIN_SSH_KEY_FILE',$arrayRegData)?
+                                $arrayRegData['ANSTWR_LOGIN_SSH_KEY_FILE']:null;
+        } elseif ($strModeId == "DTUP_singleRecUpdate") {
+            // 認証方式の設定値取得
+            $strAuthMode   = array_key_exists('ANSTWR_LOGIN_AUTH_TYPE',$arrayRegData)?
+                                $arrayRegData['ANSTWR_LOGIN_AUTH_TYPE']:null;
+
+            // パスワードの設定値取得
+            // PasswordColumnはデータの更新がないと$arrayRegDataの設定は空になっているので
+            // パスワードが更新されているか判定
+            // 更新されていない場合は設定済みのパスワード($arrayVariant['edit_target_row'])取得
+            $strPasswd     = array_key_exists('ANSTWR_LOGIN_PASSWORD',$arrayRegData)?
+                                $arrayRegData['ANSTWR_LOGIN_PASSWORD']:null;
+            if($strPasswd == "") {
+                $strPasswd     = isset($arrayVariant['edit_target_row']['ANSTWR_LOGIN_PASSWORD'])?
+                                       $arrayVariant['edit_target_row']['ANSTWR_LOGIN_PASSWORD']:null;
+            }
+            // パスフレーズの設定値取得
+            // PasswordColumnはデータの更新がないと$arrayRegDataの設定は空になっているので
+            // パスフレーズが更新されているか判定
+            // 更新されていない場合は設定済みのパスフレーズ($arrayVariant['edit_target_row'])取得
+            $strPassphrase = array_key_exists('ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE',$arrayRegData)?
+                                $arrayRegData['ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE']:null;
+            if($strPassphrase== "") {
+                $strPassphrase = isset($arrayVariant['edit_target_row']['ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE'])?
+                                       $arrayVariant['edit_target_row']['ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE']:null;
+            }
+            // 公開鍵ファイルの設定値取得
+            // FileUploadColumnはファイルの更新がないと$arrayRegDataの設定は空になっているので
+            // ダウンロード済みのファイルが削除されていると$arrayRegData['del_flag_COL_IDSOP_xx']がonになる
+            // 更新されていない場合は設定済みのファイル名($arrayVariant['edit_target_row'])を取得
+            $strsshKeyFileDel  = array_key_exists('del_flag_COL_IDSOP_12',$arrayRegData)?
+                                    $arrayRegData['del_flag_COL_IDSOP_12']:null;
+            if($strsshKeyFileDel == 'on') {
+                $strsshKeyFile = "";
+            } else {
+                // 公開鍵ファイルが更新されているか判定
+                $strsshKeyFile = array_key_exists('ANSTWR_LOGIN_SSH_KEY_FILE',$arrayRegData)?
+                                     $arrayRegData['ANSTWR_LOGIN_SSH_KEY_FILE']:null;
+                if($strsshKeyFile == "") {
+                    $strsshKeyFile= isset($arrayVariant['edit_target_row']['ANSTWR_LOGIN_SSH_KEY_FILE'])?
+                                          $arrayVariant['edit_target_row']['ANSTWR_LOGIN_SSH_KEY_FILE']:null;
+                }
             }
         }
 
         switch($strModeId) {
-        case "DTUP_singleRecDelete":
-            break;
         case "DTUP_singleRecUpdate":
         case "DTUP_singleRecRegister":
-            $retStrBody = "";
-            // パスワード認証の場合の、パスワードの必須入力チェック
-            if($strAuthMode == '2') {
-                if(trim(strlen($strPasswd)) == 0) {
-                    $item = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001040");
-                    $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000018",array($item));
-                }
-            }
-            if(strlen($retStrBody) != 0) {
+            $errMsgParameterAry = array();
+            $chkobj = new AuthTypeParameterRequiredCheck();
+            $retStrBody = $chkobj->TowerHostListAuthTypeRequiredParameterCheck($chkobj->chkType_Loadtable_TowerHostList,$g['objMTS'],$errMsgParameterAry,$strAuthMode,$strPasswd,$strsshKeyFile,$strPassphrase);
+            if($retStrBody === true) {
+                $retStrBody = "";
+            } else {
                 $retBool = false;
             }
             break;

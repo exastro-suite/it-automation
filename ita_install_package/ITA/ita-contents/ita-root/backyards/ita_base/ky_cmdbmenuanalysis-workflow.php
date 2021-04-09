@@ -614,7 +614,10 @@ try{
                 }
                 // 対象クラス確認
                 if(!in_array($clomn_class, $arrayTargetIDColumnClassList)){
-                    continue;
+                    //カラム名に_CLONE_が含まれている場合、チェックをスキップ
+                    if(!strpos($list[0],'_CLONE_')){
+                        continue;
+                    }
                 }
             } else {
                 $clomn_class = $list[5];

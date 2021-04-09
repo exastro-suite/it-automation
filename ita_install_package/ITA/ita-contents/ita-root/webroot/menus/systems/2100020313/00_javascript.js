@@ -13,8 +13,6 @@
 //   limitations under the License.
 //
 //////// グローバル変数定義 ////////
-// 緊急停止実施フラグ
-var scramed_frag = false;
 // ステータス
 var result_status_id;
 
@@ -82,13 +80,16 @@ function callback() {}
                         }
                     }
                 }
-                // ステータスIDが実行中(3)、実行中(遅延)(4)の場合
-                else if( result_status_id == 3 ||
+                // ステータスIDが未実行(1)、実行中(3)、実行中(遅延)(4)の場合
+                else if( result_status_id == 1 ||
+                         result_status_id == 3 ||
                          result_status_id == 4 ){
-                    if( scramed_frag == false ){
-                        // ボタンを活性にする
-                        document.getElementById('scrumTryExecute').disabled = false;
-                    }
+                    // ボタンを活性にする
+                    document.getElementById('scrumTryExecute').disabled = false;
+                }
+                else {
+                    // ボタンを非活性にする
+                    document.getElementById('scrumTryExecute').disabled = true;
                 }
                 // ステータスIDが未実行(予約)(9)でない場合
                 if( result_status_id != 9 ){
@@ -156,9 +157,6 @@ function scrum_execution(){
     if( window.confirm( getSomeMessage("ITAANSIBLEC101050") ) ){
         // ボタンを非活性にする
         document.getElementById('scrumTryExecute').disabled = true;
-        
-        //  緊急停止実施フラグをONにする
-        scramed_frag = true;
         
         // 変数定義(target_execution_noを取得)
         var target_execution_no = document.getElementById('target_execution_no').innerHTML;

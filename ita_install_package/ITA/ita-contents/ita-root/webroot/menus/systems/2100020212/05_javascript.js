@@ -71,6 +71,12 @@ const target = window.parent.document.getElementById("disp_execution_area"),
       observer = new MutationObserver( observerFunction ),
       config = { childList: true };
 
+// 対象がすでに表示済みなら実行する
+if ( target.innerHTML !== '') {
+    observerFunction();
+    start();
+}
+
 // 対象を監視し変更があったら実行する
 observer.observe( target, config );
 

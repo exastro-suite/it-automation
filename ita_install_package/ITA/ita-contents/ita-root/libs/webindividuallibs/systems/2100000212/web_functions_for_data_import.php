@@ -448,6 +448,16 @@ function insertTask($dp_info){
 
     $dp_mode = $dp_info['DP_MODE']['ID'];
     $abolished_type = $dp_info['ABOLISHED_TYPE']['ID'];
+    $specified_timestamp = NULL;
+    if ( $dp_mode == "2" ) {
+        if ( isset($dp_info['SPECIFIED_TIMESTAMP']) && !empty($dp_info['SPECIFIED_TIMESTAMP']) ) {
+            $specified_timestamp = $dp_info['SPECIFIED_TIMESTAMP'];
+        } else {
+            web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
+                                                 array('A_SEQUENCE', 'B_DP_STATUS_JSQ', basename(__FILE__), __LINE__)));
+            throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        }
+    }
 
     // Jnl№を取得する
     $resArray = array();
@@ -468,6 +478,7 @@ function insertTask($dp_info){
         'DP_TYPE' => '',
         'DP_MODE' => $dp_mode,
         'ABOLISHED_TYPE' => $abolished_type,
+        "SPECIFIED_TIMESTAMP" => $specified_timestamp,
         'FILE_NAME' => '',
         'DISP_SEQ' => '',
         'NOTE' => '',
@@ -487,6 +498,7 @@ function insertTask($dp_info){
         'DP_TYPE' => 2,
         'DP_MODE' => $dp_mode,
         'ABOLISHED_TYPE' => $abolished_type,
+        "SPECIFIED_TIMESTAMP" => $specified_timestamp,
         'FILE_NAME' => $filePath,
         'DISP_SEQ' => '',
         'NOTE' => '',
@@ -710,6 +722,10 @@ function check_dp_info($dp_info){
     $row = $objQuery->resultFetch();
     $abolished_type = $row["ABOLISHED_TYPE"];
 
+    $specified_timestamp = NULL;
+    if ( $dp_info["DP_MODE"] == 2 ) {
+        $specified_timestamp = $dp_info["SPECIFIED_TIMESTAMP"];
+    }
     $result = array(
         "DP_MODE" => array(
             "NAME" => $dp_mode,
@@ -718,7 +734,8 @@ function check_dp_info($dp_info){
         "ABOLISHED_TYPE" => array(
             "NAME" => $abolished_type,
             "ID" => $dp_info["ABOLISHED_TYPE"],
-        )
+        ),
+        "SPECIFIED_TIMESTAMP" => $specified_timestamp
     );
 
     return $result;

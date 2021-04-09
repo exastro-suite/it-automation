@@ -61,7 +61,7 @@ Ansible（Legacy Role）代入値自動登録設定
     $table->setDBJournalTableHiddenID('B_ANS_CMDB_LINK_JNL');
     // 利用時は、更新対象カラムに、「$c->setHiddenMainTableColumn(true);」を付加すること
     // VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定----
- 
+
     $table->addUniqueColumnSet(array('MENU_ID','COLUMN_LIST_ID','FILE_PREFIX','VARS_NAME','VRAS_MEMBER_NAME'));
 
     //動的プルダウンの作成用
@@ -161,7 +161,7 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューグループ名
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"), 'D_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
+            $c = new IDColumn('MENU_GROUP_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900007"), 'A_MENU_GROUP_LIST', 'MENU_GROUP_ID', 'MENU_GROUP_NAME');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900008"));
@@ -208,7 +208,8 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューID
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $url = "01_browse.php?no=";
+            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900010"), "D_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', '', '', '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900011"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
@@ -248,7 +249,8 @@ Ansible（Legacy Role）代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニュー名
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900012"), 'D_MENU_LIST', 'MENU_ID', 'MENU_NAME');
+            $url = "01_browse.php?no=";
+            $c = new LinkIDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900012"), 'D_MENU_LIST', 'MENU_ID', 'MENU_NAME', $url, false, true, 'MENU_ID');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900013"));
@@ -317,6 +319,8 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setJournalKeyIDOfMaster('MENU_ID');
         $c->setJournalDispIDOfMaster('MENU_PULLDOWN');
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         $cgg->addColumn($c);
@@ -353,6 +357,8 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1900121"));
 
         $c->setHiddenMainTableColumn(true); //更新対象カラム
+
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
 
@@ -549,6 +555,8 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->getOutputType('csv')->setVisible(true);
         $c->getOutputType('json')->setVisible(true);
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setJournalTableOfMaster('D_CMDB_MG_MU_COL_LIST_JNL');
         $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
@@ -675,7 +683,7 @@ Ansible（Legacy Role）代入値自動登録設定
         // MENU_ID;未設定 COLUMN_LIST_ID:未設定 REST_COLUMN_LIST_ID:設定 => RestAPI/Excel/CSV
         // その他はUI
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
-            if((strlen($rg_menu_id)             === 0) && 
+            if((strlen($rg_menu_id)             === 0) &&
                (strlen($rg_column_list_id)      === 0) &&
                (strlen($rg_rest_column_list_id) !== 0)){
                 $query =  "SELECT                                             "

@@ -31,11 +31,10 @@ try{
     require_once ($g['root_dir_path'] . '/libs/webcommonlibs/web_parts_menu_info.php');
 
     // access系共通ロジックパーツ01
-    $script_name = basename($_SERVER['SCRIPT_NAME']);
+    $script_name = basename(htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8"));
     if (strpos($ACRCM_representative_file_name, $script_name) === false) {
         require_once ($g['root_dir_path'] . '/libs/webcommonlibs/web_parts_for_access_01.php');
     }
-    require_once  $g['root_dir_path'] . '/webconfs/systems/2100160003_loadTable.php';
 
     // メニュー作成用関数群読み込み
     require_once($g['root_dir_path'] . '/libs/webindividuallibs/systems/2100160003/web_functions_for_create_menu.php');

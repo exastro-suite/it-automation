@@ -657,6 +657,10 @@ line-height: 1;
 #KIZI .menu-column-config-table textarea {
 min-height: 48px;
 }
+.select2-container {
+min-width: 100%;
+width: 16px!important;
+}
 
 #KIZI .menu-column-config-table textarea:focus,
 #KIZI .menu-column-config-table input[type="text"]:focus,
@@ -686,8 +690,21 @@ border-color: #BBB;
 }
 #KIZI .config-checkbox {
 position: absolute;
-left: -9999px; top: 0;
+left: 0; top: 0;
 z-index: 2;
+visibility: hidden;
+}
+#KIZI .config-checkbox.disabled-checkbox + span {
+position: relative;
+z-index: 1;
+display: inline-block;
+width: 12px; height: 12px;
+margin-right: .3em;
+background-color: #EEE;
+border: 1px solid #AAA;
+border-radius: 2px;
+box-shadow: 0 0 2px rgba( 0,0,0,.2 ) inset;
+vertical-align: -3px;
 }
 #KIZI .config-checkbox + span {
 position: relative;

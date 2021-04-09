@@ -17,7 +17,7 @@
 global $g;
 $tmpAry=explode('ita-root', dirname(__FILE__));$g['root_dir_path']=$tmpAry[0].'ita-root';unset($tmpAry);
 if(array_key_exists('no', $_GET)){
-    $g['page_dir']  = $_GET['no'];
+    $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
 }
 
 // メニューIDの桁数
@@ -35,11 +35,10 @@ try{
     require_once ($g['root_dir_path'] . '/libs/webcommonlibs/web_parts_menu_info.php');
 
     // access系共通ロジックパーツ01
-    $script_name = basename($_SERVER['SCRIPT_NAME']);
+    $script_name = basename(htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8"));
     if (strpos($ACRCM_representative_file_name, $script_name) === false) {
         require_once ($g['root_dir_path'] . '/libs/webcommonlibs/web_parts_for_access_01.php');
     }
-    require_once  $g['root_dir_path'] . '/webconfs/systems/' . $g['page_dir'] . '_loadTable.php';
 
     // データポータビリティ用関数群読み込み
     require_once($g['root_dir_path'] . '/libs/webindividuallibs/systems/2100000211/web_functions_for_data_portability.php');

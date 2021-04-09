@@ -66,6 +66,22 @@ Policy Sets管理ページ
     $c->setValidator(new TextValidator(1, 256, false, '/^[a-zA-Z0-9_-]+$/', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103265")));
     $table->addColumn($c);
 
+    // PolicySet-Policy紐付管理へのリンクボタン
+    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107040");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
+    $c->setDBColumn(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':POLICY_SET_NAME'), true);
+    $table->addColumn($c);
+
+    // PolicySet-Workspace紐付管理へのリンクボタン
+    $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107050");
+    $c = new LinkButtonColumn('ethWakeOrder2',$strLabelText, $strLabelText, 'dummy');
+    $c->setDBColumn(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow2", array(':POLICY_SET_NAME'), true);
+    $table->addColumn($c);
+
     $table->fixColumn();
 
     $table->setGeneObject('webSetting', $arrayWebSetting);

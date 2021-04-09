@@ -26,8 +26,8 @@
         try{
             require_once ( $root_dir_path . "/libs/commonlibs/common_terraform_function.php");
             require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_05_preupload.php");
-            $purl = $_GET['purl'];
-            $policyName = $_GET['policyName'];
+            $purl = htmlspecialchars($_GET['purl'], ENT_QUOTES, "UTF-8");
+            $policyName = htmlspecialchars($_GET['policyName'], ENT_QUOTES, "UTF-8");
 
             //インターフェース情報を取得
             $retInterfaceInfo = getInterfaceInfo();
@@ -37,6 +37,9 @@
             }
             $hostname = $retInterfaceInfo[1]['TERRAFORM_HOSTNAME'];
             $token = ky_decrypt($retInterfaceInfo[1]['TERRAFORM_TOKEN']);
+            $proxySetting = array();
+            $proxySetting['address'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_ADDRESS'];
+            $proxySetting['port'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_PORT'];
 
             //一時保存ディレクトリを作成
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -62,6 +65,16 @@
                                                    "ignore_errors" => true));
             $HttpContext['ssl']['verify_peer']=false;
             $HttpContext['ssl']['verify_peer_name']=false;
+
+            //proxy設定
+            if($proxySetting['address'] != ""){
+                $address = $proxySetting['address'];
+                if($proxySetting['port'] != ""){
+                    $address = $address . ":" . $proxySetting['port'];
+                }
+                $HttpContext['http']['proxy'] = $address;
+                $HttpContext['http']['request_fulluri'] = true;
+            }
 
             //Policyコードファイルを取得
             $downloadUrl = "https://" . $hostname . $purl;

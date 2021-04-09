@@ -635,6 +635,11 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1134");
                     }
+                    // 参照項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('REFERENCE_ITEM',$arrayRegData) && "" != $arrayRegData['REFERENCE_ITEM']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1160");
+                    }
                 }
                 // 入力方式が文字列(複数行)の場合
                 else if("2" == $value){
@@ -697,6 +702,11 @@ class InputMethodValidator extends IDValidator {
                     if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1135");
+                    }
+                    // 参照項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('REFERENCE_ITEM',$arrayRegData) && "" != $arrayRegData['REFERENCE_ITEM']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1161");
                     }
                 }
                 // 入力方式が整数の場合
@@ -769,6 +779,11 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1136");
                     }
+                    // 参照項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('REFERENCE_ITEM',$arrayRegData) && "" != $arrayRegData['REFERENCE_ITEM']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1162");
+                    }
                 }
                 // 入力方式が小数の場合
                 else if("4" == $value){
@@ -834,6 +849,11 @@ class InputMethodValidator extends IDValidator {
                     if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1137");
+                    }
+                    // 参照項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('REFERENCE_ITEM',$arrayRegData) && "" != $arrayRegData['REFERENCE_ITEM']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1163");
                     }
                 }
                 // 入力方式が日時の場合
@@ -903,6 +923,11 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1138");
                     }
+                    // 参照項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('REFERENCE_ITEM',$arrayRegData) && "" != $arrayRegData['REFERENCE_ITEM']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1164");
+                    }
                 }
                 // 入力方式が日付の場合
                 else if("6" == $value){
@@ -970,6 +995,11 @@ class InputMethodValidator extends IDValidator {
                     if($retBool == true && array_key_exists('LINK_LENGTH',$arrayRegData) && "" != $arrayRegData['LINK_LENGTH']){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1139");
+                    }
+                    // 参照項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('REFERENCE_ITEM',$arrayRegData) && "" != $arrayRegData['REFERENCE_ITEM']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1165");
                     }
                 }
                 // 入力方式がプルダウンの場合
@@ -1107,6 +1137,11 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1141");
                     }
+                    // 参照項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('REFERENCE_ITEM',$arrayRegData) && "" != $arrayRegData['REFERENCE_ITEM']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1166");
+                    }
                 }
                 // 入力方式がファイルアップロードの場合
                 else if("9" == $value){
@@ -1175,6 +1210,11 @@ class InputMethodValidator extends IDValidator {
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1142");
                     }
+                    // 参照項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('REFERENCE_ITEM',$arrayRegData) && "" != $arrayRegData['REFERENCE_ITEM']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1167");
+                    }
                 }
                 // 入力方式がリンクの場合
                 else if("10" == $value){
@@ -1242,6 +1282,11 @@ class InputMethodValidator extends IDValidator {
                     if($retBool == true && (!array_key_exists('LINK_LENGTH',$arrayRegData) || "" == $arrayRegData['LINK_LENGTH'])){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1143");
+                    }
+                    // 参照項目が設定されている場合、エラー
+                    if($retBool == true && array_key_exists('REFERENCE_ITEM',$arrayRegData) && "" != $arrayRegData['REFERENCE_ITEM']){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1168");
                     }
                 }
                 if( $retBool === false ){
@@ -1422,4 +1467,129 @@ class PregMatchValidator extends SingleTextValidator {
         return $retBool;
     }
 }
+
+/**
+* 参照項目専用のバリデータクラス
+*/
+
+class ReferenceItemValidator extends SingleTextValidator {
+
+    protected $eventMasterName;
+
+    function isValid($value, $strNumberForRI=null, $arrayRegData=null, &$arrayVariant=array()){
+
+        global $g;
+        $retBool = true;
+        $strModeId = "";
+
+        if( parent::isValid($value, $strNumberForRI, $arrayRegData, $arrayVariant) != true ) {
+            return false;
+        }
+
+        if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                $strModeId = $aryTcaAction["ACTION_MODE"];
+            }
+        }
+
+        if( $strModeId != "" ){
+            //入力方式が「プルダウン選択」以外、もしくは値が空ならチェックをしない
+            if($arrayRegData['INPUT_METHOD_ID'] != 7 || $value == ""){
+                return true;
+            }
+
+            $boolCheckContinue = false;
+            if($strModeId == "DTUP_singleRecRegister" ){
+                //----各種登録時
+                $boolCheckContinue = true;
+                //各種登録時----
+            }else if($strModeId == "DTUP_singleRecUpdate"){
+                //----各種更新時
+                $boolCheckContinue = true;
+                //各種更新時----
+            }else if($strModeId == "DTUP_singleRecDelete"){
+                $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];
+                if( $modeValue_sub=="on" ){
+                    //処理をしない
+                }else if( $modeValue_sub=="off" ){
+                    //復活時
+                    $boolCheckContinue = true;
+                }
+            }else{
+                //処理をしない
+            }
+
+            if($boolCheckContinue===true){
+                if(!empty($arrayRegData['OTHER_MENU_LINK_ID'])){
+                    //プルダウン選択のIDを取得
+                    $otherMenuLinkId = $arrayRegData['OTHER_MENU_LINK_ID']; 
+                }else{
+                    //プルダウン選択がないのでエラー
+                    $retBool = false;
+                    $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1169");
+                    $this->setValidRule($strErrAddMsg);
+                    return $retBool;
+                }
+
+                //$valueがカンマ区切りの数字であることをチェック
+                $aryReferenceItem = explode(',', $value);
+                foreach($aryReferenceItem as $id){
+                    if(!is_numeric($id)){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1170");
+                        $this->setValidRule($strErrAddMsg);
+                        return $retBool;
+                    }
+                }
+
+                //参照項目リストを取得
+                $query01 = "SELECT ITEM_ID, LINK_ID "
+                            ." FROM G_MENU_REFERENCE_ITEM "
+                            ." WHERE DISUSE_FLAG = '0' AND LINK_ID = :LINK_ID ";
+
+                $aryForBind01['LINK_ID'] = $otherMenuLinkId;
+
+                // SQL発行
+                $retArray01 = singleSQLExecuteAgent($query01, $aryForBind01, "");
+                $aryDiscover01 = array();
+                if( $retArray01[0] === true ){
+                    $objQuery01 =& $retArray01[1];
+                    while($row01 = $objQuery01->resultFetch()){
+                        $aryDiscover01[] = $row01;
+                    }
+                    unset($objQuery01);
+                }
+                else{
+                    // DBエラー
+                    $retBool = false;
+                    $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1171", $retArray01[2]);
+                    $this->setValidRule($strErrAddMsg);
+                    return $retBool;
+                }
+
+                //参照項目リストから、プルダウン選択のメニューの中に参照項目のIDが存在するかをチェック
+                foreach($aryReferenceItem as $id){
+                    $checkFlg = false;
+                    foreach($aryDiscover01 as $data){
+                        if($data['ITEM_ID'] == $id){
+                            $checkFlg = true;
+                            break;
+                        }
+                    }
+                    if($checkFlg == false){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1172");
+                    }
+                }
+            }
+
+            if( $retBool === false ){
+                $this->setValidRule($strErrAddMsg);
+            }
+        }
+        return $retBool;
+    }
+}
+
 ?>

@@ -305,6 +305,7 @@ class Auth
             // ----id/pass認証
             if ($this->login()) {
                 // ログイン成功
+                $retResult = $this->setLastLoginTime();
                 return;
             }
             // id/pass認証----
@@ -626,6 +627,17 @@ class Auth
     {
         return $this->status;
     }
+
+    // 最終ログイン日時設定
+    protected function setLastLoginTime() {
+      $objDBCA = new DBConnectAgent();
+      $tmpResult = $objDBCA->connectOpen();
+      $tmpArrayBind = array('USERNAME'=>$this->session['username'] );
+      $sql = "UPDATE A_ACCOUNT_LIST SET LAST_LOGIN_TIME = SYSDATE() WHERE USERNAME = :USERNAME";
+      $objQuery = $objDBCA->sqlPrepare($sql);
+      $objQuery->sqlBind($tmpArrayBind);
+      $r = $objQuery->sqlExecute();
+    }
 }
 
 class OAuth2 extends Auth
@@ -652,6 +664,7 @@ class OAuth2 extends Auth
         'proxy'            => '',
         'visibleFlag'      => '',
         'debug'            => '',
+        'ignoreSslVerify'  => '',
     ];
 
     // provider設定用のconfig取得callback関数名保持変数
@@ -672,7 +685,7 @@ class OAuth2 extends Auth
     /**
       * regist form function name
       * callback function name
-      * function args ($this->session)   // 
+      * function args ($this->session)   //
       * $this->session is [
       *                      'provider_id'         => provider_id,
       *                      'provider_name'       => provider_name,
@@ -680,7 +693,7 @@ class OAuth2 extends Auth
       *                      'provider_user_name'  => provider_user_name,
       *                      'provider_user_email' => provider_user_email,
       *                    ]
-      * 
+      *
       * @type string
       **/
     protected $registFormFunction = '';
@@ -688,7 +701,7 @@ class OAuth2 extends Auth
     /**
       * regist function name
       * callback function name
-      * function args ($this->session)   // 
+      * function args ($this->session)   //
       * $this->session is [
       *                      'provider_id'         => provider_id,
       *                      'provider_name'       => provider_name,
@@ -696,7 +709,7 @@ class OAuth2 extends Auth
       *                      'provider_user_name'  => provider_user_name,
       *                      'provider_user_email' => provider_user_email,
       *                    ]
-      * 
+      *
       * @type string
       **/
     protected $registFunction = '';
@@ -704,7 +717,7 @@ class OAuth2 extends Auth
     /**
       * find user function
       * callback function name
-      * function args ($this->session)   // 
+      * function args ($this->session)   //
       *   $this->session is [
       *                      'provider_id'         => provider_id,
       *                      'provider_user_id'    => provider_user_id,
@@ -731,7 +744,7 @@ class OAuth2 extends Auth
       **/
     /**
       *  setConfig
-      *  
+      *
       *  @return void
       **/
     public function __construct()
@@ -809,7 +822,7 @@ class OAuth2 extends Auth
 
     /**
       * set NextURI
-      * 
+      *
       * @return void
       */
     public function setNextUri ($nextUri)
@@ -821,7 +834,7 @@ class OAuth2 extends Auth
 
     /**
       * set redirect URI
-      * 
+      *
       * @return void
       */
     public function setRedirectUri ($redirectUri)
@@ -835,7 +848,7 @@ class OAuth2 extends Auth
     {
         $this->initialize();
         if (isset($_GET[$this->httpAuthorizationProviderParam]) && !empty($_GET[$this->httpAuthorizationProviderParam])) {
-            $this->providerId = $_GET[$this->httpAuthorizationProviderParam];
+            $this->providerId = htmlspecialchars($_GET[$this->httpAuthorizationProviderParam], ENT_QUOTES, "UTF-8");
             return $this->providerId;
         }
         if (isset($this->session['provider_id']) && !empty($this->session['provider_id'])) {
@@ -902,7 +915,7 @@ class OAuth2 extends Auth
         }
         // ----ローカルDBへの登録関数実行
         // ローカルDBへの登録関数実行時のエラーはisError,errMsg,errCodeにセットして返却する
-        $strRegMsg = call_user_func($this->registFunction, $this->session); 
+        $strRegMsg = call_user_func($this->registFunction, $this->session);
         if ($this->isError) {
             return false;
         }
@@ -936,7 +949,7 @@ class OAuth2 extends Auth
             }
             // next uriがなかったらどうしよう。。。(認証には成功しているがリダイレクト先が不明)
         }
-        
+
         // $usernameを取得できなかった
         // 未登録ユーザーは登録フォーム表示関数の呼び出し
         // コールバック関数が利用可能か確認
@@ -1032,7 +1045,7 @@ class OAuth2 extends Auth
             return false;
         }
         // check config----
-        // ----check GET parameter 
+        // ----check GET parameter
         if (isset($_GET['error']) || isset($_GET['error_message'])) {
             unset($this->session['state']);
             $this->isError = true;
@@ -1044,7 +1057,7 @@ class OAuth2 extends Auth
         }
         // check GET parameter----
         // ----check state
-        if (empty($_GET['state']) || ($_GET['state'] !== $this->session['state'])) {
+        if (empty($_GET['state']) || (htmlspecialchars($_GET['state'], ENT_QUOTES, "UTF-8") !== $this->session['state'])) {
             $this->isError = true;
             $this->errMsg = "invalid state(unmatch)";
             $this->errCode = 'ERR-CALLBACK-04';
@@ -1064,36 +1077,36 @@ class OAuth2 extends Auth
             'client_id'     => $this->config['clientId'],
             'client_secret' => $this->config['clientSecret'],
             'redirect_uri'  => $this->redirectUri,
-            'code'          => $_GET['code'],
+            'code'          => htmlspecialchars($_GET['code'], ENT_QUOTES, "UTF-8"),
             'grant_type'    => 'authorization_code',
         ]);
         if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404 ) {
             $errTrace .= print_r($response, true);
-            $response = $this->http_request('POST', $uri,[ 
+            $response = $this->http_request('POST', $uri,[
                 'redirect_uri'  => $this->redirectUri,
-                'code'          => $_GET['code'],
+                'code'          => htmlspecialchars($_GET['code'], ENT_QUOTES, "UTF-8"),
                 'grant_type'    => 'authorization_code',
                 ], 'Authorization: Basic '.base64_encode($this->config['clientId'].':'.$this->config['clientSecret']));
         }
         if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404 ) {
             $errTrace .= print_r($response, true);
-            $response = $this->http_request('GET', $uri,[ 
+            $response = $this->http_request('GET', $uri,[
                 'redirect_uri'  => $this->redirectUri,
-                'code'          => $_GET['code'],
+                'code'          => htmlspecialchars($_GET['code'], ENT_QUOTES, "UTF-8"),
                 'grant_type'    => 'authorization_code',
                 ], 'Authorization: Basic '.base64_encode($this->config['clientId'].':'.$this->config['clientSecret']));
         }
         if ($response->code === 400 || $response->code === 401 || $response->code === 403 || $response->code === 404 ) {
             $errTrace .= print_r($response, true);
-            $response = $this->http_request('GET', $uri,[ 
+            $response = $this->http_request('GET', $uri,[
                 'client_id'     => $this->config['clientId'],
                 'client_secret' => $this->config['clientSecret'],
                 'redirect_uri'  => $this->redirectUri,
-                'code'          => $_GET['code'],
+                'code'          => htmlspecialchars($_GET['code'], ENT_QUOTES, "UTF-8"),
                 'grant_type'    => 'authorization_code',
             ]);
         }
-        if ($response->code !== 200 || !isset($response->body->access_token)) { 
+        if ($response->code !== 200 || !isset($response->body->access_token)) {
             $errTrace .= print_r($response, true);
             $this->isError = true;
             $this->errMsg = "can not get access_token";
@@ -1188,6 +1201,9 @@ class OAuth2 extends Auth
         $this->session['provider_user_image_url'] = $providerUserImageUrl;
         $this->session['provider_user_data'] = $response->body;
         // まとめてsessionに登録----
+
+        //最終ログイン日時設定
+        $retResult = $this->setLastLoginTime();
         return true;
     }
 
@@ -1201,7 +1217,7 @@ class OAuth2 extends Auth
         }
         $options = [
             'http' => [
-                'ignore_errors' => true, 
+                'ignore_errors' => true,
                 'method'        => $method,
                 'user_agent'    => php_uname().'; PHP/'. PHP_VERSION,
             ]
@@ -1241,7 +1257,14 @@ class OAuth2 extends Auth
             }
         }
         $options['http']['header'] = implode("\r\n",$header);
-        
+
+        $ignoreSslVerify = $this->config['ignoreSslVerify'];
+
+        if ( $ignoreSslVerify === '1' ){
+            $options['ssl']['verify_peer']      = false;
+            $options['ssl']['verify_peer_name'] = false;
+        }
+
         $body = file_get_contents($uri, false, stream_context_create($options));
         preg_match('|^HTTP/1\.[01] ([12345][0-9][0-9]) (.+)$|', $http_response_header[0],$match);
         $code = intval($match[1]);
@@ -1259,8 +1282,8 @@ class OAuth2 extends Auth
             $body = json_decode($body);
         }
         if (preg_match('/html/i', $type2)) {
-            //$body = preg_replace('/</', '&lt;', $body); 
-            //$body = preg_replace('/>/', '&gt;', $body); 
+            //$body = preg_replace('/</', '&lt;', $body);
+            //$body = preg_replace('/>/', '&gt;', $body);
         }
         $response = json_decode(json_encode([
             'uri'  => "{$method} {$uri}",
@@ -1276,5 +1299,16 @@ class OAuth2 extends Auth
 
     protected function debug($str='') {
         if ($this->isDebug) error_log($str);
+    }
+
+    // 最終ログイン日時設定
+    protected function setLastLoginTime() {
+      $objDBCA = new DBConnectAgent();
+      $tmpResult = $objDBCA->connectOpen();
+      $tmpArrayBind = array('PROVIDER_USER_ID'=>$this->session['provider_user_id'] );
+      $sql = "UPDATE A_ACCOUNT_LIST SET LAST_LOGIN_TIME = SYSDATE() WHERE PROVIDER_USER_ID = :PROVIDER_USER_ID";
+      $objQuery = $objDBCA->sqlPrepare($sql);
+      $objQuery->sqlBind($tmpArrayBind);
+      $r = $objQuery->sqlExecute();
     }
 }

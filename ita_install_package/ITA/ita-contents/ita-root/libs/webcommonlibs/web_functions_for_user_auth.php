@@ -442,6 +442,11 @@
             "USERNAME_JP"=>"",
             "MAIL_ADDRESS"=>"",
             "PW_LAST_UPDATE_TIME"=>"DATETIMEAUTO(6)",
+            "LAST_LOGIN_TIME"=>"",
+            "AUTH_TYPE"=>"",
+            "PROVIDER_ID"=>"",
+            "PROVIDER_USER_ID"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -458,6 +463,11 @@
             "USERNAME_JP"=>"",
             "MAIL_ADDRESS"=>"",
             "PW_LAST_UPDATE_TIME"=>"",
+            "LAST_LOGIN_TIME"=>"",
+            "AUTH_TYPE"=>"",
+            "PROVIDER_ID"=>"",
+            "PROVIDER_USER_ID"=>"",
+            "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -557,7 +567,38 @@
             $arrayValue['LAST_UPDATE_USER']    = $strFixedId;
             $arrayValue['PASSWORD']            = md5($strRawNewPassword);
             $arrayValue['PW_LAST_UPDATE_TIME'] = $strQueryTimeDate;
-            
+
+            // 最終ログイン日時、認証方式
+            $sql = "SELECT LAST_LOGIN_TIME ,"
+                  ."       AUTH_TYPE       ,"
+                  ."       PROVIDER_ID     ,"
+                  ."       PROVIDER_USER_ID,"
+                  ."       ACCESS_AUTH      "
+                  ."FROM   A_ACCOUNT_LIST   "
+                  ."WHERE USER_ID = :USER_ID";
+
+            $tmpArrayBind = array('USER_ID'=>$strFixedId);
+
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            if( $objQuery->getStatus()===false ){
+                throw new Exception( '00000100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            if( $objQuery->sqlBind($tmpArrayBind) != "" ){
+                throw new Exception( '00000200-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $tmpBoolResult = $objQuery->sqlExecute();
+            if($tmpBoolResult!=true){
+                throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            while($row = $objQuery->resultFetch() ){
+              $arrayValue['LAST_LOGIN_TIME'] = $row['LAST_LOGIN_TIME'];
+              $arrayValue['AUTH_TYPE'] = $row['AUTH_TYPE'];
+              $arrayValue['PROVIDER_ID'] = $row['PROVIDER_ID'];
+              $arrayValue['PROVIDER_USER_ID'] = $row['PROVIDER_USER_ID'];
+              $arrayValue['ACCESS_AUTH'] = $row['ACCESS_AUTH'];
+            }
+
             $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                             "UPDATE",
                                             "USER_ID",
@@ -666,7 +707,7 @@
             $db_model_ch = $objDBCA->getModelChannel();
 
             $tempBoolPassWordChange = false;
-            $tempRequestTime = $_SERVER["REQUEST_TIME"];
+            $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
             // ----■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。
             if(isset($pass_word_expiry)){
                 // ----設定テーブルに、パスワードの有効期限に関する設定があった場合
@@ -945,7 +986,7 @@
                 //該当ＰＷは、ユーザの手による更新は過去になかった場合----
             }
             else{
-                $tempRequestTime = $_SERVER["REQUEST_TIME"];
+                $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
                 $tmpIntPWLDUnixTime = strtotime($varLastUpdate);
                 if( $tempRequestTime < $tmpIntPWLDUnixTime + ($pw_reuse_forbid * 86400) ){
                     //----再利用禁止期間を経過していない場合
@@ -1405,7 +1446,7 @@
 
                     // ----閾値と現在の失敗値が等しい場合
                     if( $strLockDateUpdate === "LOCK" ){
-                        $arrayValue['LOCKED_TIMESTAMP'] = date("Y/m/d H:i:s",$_SERVER['REQUEST_TIME']);
+                        $arrayValue['LOCKED_TIMESTAMP'] = date("Y/m/d H:i:s",htmlspecialchars($_SERVER['REQUEST_TIME'], ENT_QUOTES, "UTF-8"));
                     }
                     else if( $strLockDateUpdate === "RESET" ){
                         $arrayValue['LOCKED_TIMESTAMP'] = "";
@@ -1701,7 +1742,7 @@
             }
             else{
                 $varUnlockTimeStamp = $pwl_expiry + convFromStrDateToUnixtime($varLockedTimeStamp,false);
-                $varNowTimeStamp = $_SERVER['REQUEST_TIME'];
+                $varNowTimeStamp = htmlspecialchars($_SERVER['REQUEST_TIME'], ENT_QUOTES, "UTF-8");
                 if( $varUnlockTimeStamp <= $varNowTimeStamp ){
                     // ----ロックされてから期間が経過したので、カウントをリセットする。有効期限外とする
                     $retBool = false;

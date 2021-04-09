@@ -724,7 +724,6 @@ configure_php() {
     fi
     # Install some packages.
     yum_install ${YUM_PACKAGE["php"]}
-    pip3 install --upgrade pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
     # Check installation php packages
     yum_package_check ${YUM_PACKAGE["php"]}
 
@@ -838,6 +837,7 @@ configure_ansible() {
     
     # Install some pip packages.
     if [ "${exec_mode}" == "3" ]; then
+        pip3 install --upgrade pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
         for key in ${PIP_PACKAGE["ansible"]}; do
             echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             pip3 install $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -848,6 +848,14 @@ configure_ansible() {
             fi
         done
     else
+        echo "----------Installation[${PIP_PACKAGE[pip]}]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pip3 install --ignore-installed --no-index --find-links=${PIP_PACKAGE_DOWNLOAD_DIR["pip"]} ${PIP_PACKAGE["pip"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            log "ERROR:Installation failed pip packages."
+            ERR_FLG="false"
+            func_exit_and_delete_file
+        fi
+
         for key in ${PIP_PACKAGE["ansible"]}; do
             echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             pip3 install --ignore-installed --no-index --find-links=${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]} $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1315,7 +1323,7 @@ YUM__ENV_PACKAGE="${YUM_PACKAGE_YUM_ENV[${MODE}]}"
 declare -A YUM_PACKAGE;
 YUM_PACKAGE=(
     ["httpd"]="httpd mod_ssl"
-    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-gd python3 php-devel libyaml libyaml-devel make sudo crontabs"
+    ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-gd python3 python3-pip php-devel libyaml libyaml-devel make sudo crontabs"
     ["git"]="git"
     ["ansible"]="sshpass expect nc"
 )
@@ -1400,6 +1408,7 @@ PHP_TAR_GZ_PACKAGE=(
 # download directory
 declare -A PIP_PACKAGE_DOWNLOAD_DIR;
 PIP_PACKAGE_DOWNLOAD_DIR=(
+    ["pip"]="${DOWNLOAD_DIR["pip"]}/pip"
     ["ansible"]="${DOWNLOAD_DIR["pip"]}/ansible"
 )
 
@@ -1407,15 +1416,23 @@ PIP_PACKAGE_DOWNLOAD_DIR=(
 # package
 
 # pip package (for ansible)
+declare -A PIP_PACKAGE_PIP;
+PIP_PACKAGE_PIP=(
+    ["remote"]="pip"
+    ["local"]=`list_pip_package ${PIP_PACKAGE_DOWNLOAD_DIR["pip"]}`
+)
+
+# pip package (for ansible)
 declare -A PIP_PACKAGE_ANSIBLE;
 PIP_PACKAGE_ANSIBLE=(
-    ["remote"]="ansible pexpect pywinrm boto3 paramiko"
+    ["remote"]="ansible pexpect pywinrm boto3 paramiko boto"
     ["local"]=`list_pip_package ${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]}`
 )
 
 # all pip packages
 declare -A PIP_PACKAGE;
 PIP_PACKAGE=(
+    ["pip"]=${PIP_PACKAGE_PIP[${MODE}]}
     ["ansible"]=${PIP_PACKAGE_ANSIBLE[${MODE}]}
 )
 

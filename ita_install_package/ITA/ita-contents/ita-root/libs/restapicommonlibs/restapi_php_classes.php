@@ -896,7 +896,7 @@ class RestAPIInfoAdmin{
         foreach($aryCheckKey as $strFocusCheckKey){
             $strTmpValue = "";
             if( array_key_exists($strFocusCheckKey, $_SERVER ) ){
-                $strTmpValue = $_SERVER[$strFocusCheckKey];
+                $strTmpValue = htmlspecialchars($_SERVER[$strFocusCheckKey], ENT_QUOTES, "UTF-8");
                 $aryExploded = explode(",", $strTmpValue);
                 $strCheckValue = $aryExploded[0];
                 $strCheckValue = str_replace(" ","", $strCheckValue);

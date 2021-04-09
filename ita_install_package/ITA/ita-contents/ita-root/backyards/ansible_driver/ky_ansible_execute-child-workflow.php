@@ -459,6 +459,7 @@
         $playbooklist     = array();
         $dialogfilelist   = array();
         $host_vars        = array();
+        $pioneer_template_host_vars = array();
         $vault_vars       = array(); 
         $vault_host_vars_file_list = array(); 
 
@@ -547,7 +548,8 @@
                                          $hostlist,
                                          $hostprotocollist,
                                          $hostostypelist,
-                                         $hostinfolist);
+                                         $hostinfolist,
+                                         $in_winrm_id);
         if($ret <> true){
             // 例外処理へ
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00010000"));
@@ -616,6 +618,9 @@
             // データベースから変数情報を取得する。
             //   $host_vars:        変数一覧返却配列
             //                      [ホスト名(IP)][ 変数名 ]=>具体値
+            //   $pioneer_template_host_vars:
+            //                      変数一覧返却配列 pioneer template用 変数一覧返却配列 (passwordColumnの具体値がansible-vaultで暗号化)
+            //                      [ホスト名(IP)][ 変数名 ]=>具体値
             //   $vault_vars:       PasswordCoulumn変数一覧(Pioneer用)
             //                      [ 変数名 ] = {{ 変数名 }} 
             //   $ina_vault_host_vars_file_list:  PasswordCoulumn変数のみのホスト変数一覧(Pioneer用)
@@ -630,6 +635,7 @@
             $ret = $in_ansdrv->getDBVarList($in_pattern_id,
                                             $in_operation_id,
                                             $host_vars,
+                                            $pioneer_template_host_vars,
                                             $vault_vars,
                                             $vault_host_vars_file_list,
                                             $host_child_vars,
@@ -669,6 +675,7 @@
         // ansibleで実行するファイル作成
         $ret = $in_ansdrv->CreateAnsibleWorkingFiles($hostlist,
                                                      $host_vars,
+                                                     $pioneer_template_host_vars,
                                                      $vault_vars, 
                                                      $vault_host_vars_file_list,
                                                      $playbooklist,
@@ -1906,6 +1913,7 @@
 
             // OSコマンドでzip圧縮する
             $tmp_str_command = "cd " . $in_zip_data_source_dir . "; zip -r " . $in_zip_temp_save_dir . "/" . $in_zip_file_name . " .";
+            $tmp_str_command .= " -x ssh_key_files\/* -x winrm_ca_files\/*";
 
             shell_exec( $tmp_str_command );
 

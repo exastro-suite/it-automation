@@ -937,7 +937,7 @@
                     }
                 }
                 $menu_group = array(
-                    "name" => $row["MENU_GROUP_NAME"],
+                    "name" => htmlspecialchars($row["MENU_GROUP_NAME"], ENT_QUOTES, "UTF-8"),
                     "order"=> $row['DISP_SEQ'],
                     "icon"=> $menu_icon,
                     "remarks"=> $row["NOTE"],

@@ -44,18 +44,25 @@ define('FILE_CONVERT_H_LOADTABLE_VAL',  'convert_host_00_loadTable_value.php'); 
 define('FILE_CONVERT_H_LOADTABLE_ID',   'convert_host_00_loadTable_id.php');        // 縦管理メニュー(ホスト)用の00_loadTable.phpのデータ部テンプレート(ID用)
 
 define('FILE_HG_SQL',                   'hostgroupDB.sql');                         // ホストグループ用のDB作成用のSQLテンプレート
+define('FILE_HG_EDIT_SQL',              'hostgroupDB_edit.sql');                    // ホストグループ用のDB作成用のSQLテンプレート(編集)
 define('FILE_H_SQL',                    'hostDB.sql');                              // ホスト用のDB作成用のSQLテンプレート
+define('FILE_H_EDIT_SQL',               'hostDB_edit.sql');                         // ホスト用のDB作成用のSQLテンプレート(編集)
 define('FILE_CONVERT_SQL',              'convertDB.sql');                           // 縦管理メニュー(ホストグループ)用のDB作成用のSQLテンプレート
+define('FILE_CONVERT_EDIT_SQL',         'convertDB_edit.sql');                      // 縦管理メニュー(ホストグループ)用のDB作成用のSQLテンプレート(編集)
 define('FILE_CONVERT_H_SQL',            'convert_hostDB.sql');                      // 縦管理メニュー(ホスト)用のDB作成用のSQLテンプレート
+define('FILE_CONVERT_H_EDIT_SQL',       'convert_hostDB_edit.sql');                 // 縦管理メニュー(ホスト)用のDB作成用のSQLテンプレート(編集)
 
 define('FILE_CMDB_LOADTABLE',           'cmdb_00_loadTable.php');                   // データシート用の00_loadTable.phpテンプレート
 define('FILE_CMDB_SQL',                 'cmdbDB.sql');                              // データシート用のDB作成用のSQLテンプレート
+define('FILE_CMDB_EDIT_SQL',            'cmdbDB_edit.sql');                         // データシート用のDB作成用のSQLテンプレート(編集)
 
 define('FILE_H_LOADTABLE_OP',           'oponly_host_00_loadTable.php');            // (オペレーションのみ)ホスト用の00_loadTable.phpテンプレート
 define('FILE_VIEW_LOADTABLE_OP',        'oponly_view_00_loadTable.php');            // (オペレーションのみ)最新値参照用の00_loadTable.phpテンプレート
 define('FILE_CONVERT_H_LOADTABLE_OP',   'oponly_convert_host_00_loadTable.php');    // (オペレーションのみ)縦管理メニュー(ホスト)用の00_loadTable.phpテンプレート
 define('FILE_H_OP_SQL',                 'oponly_hostDB.sql');                       // (オペレーションのみ)ホスト用のDB作成用のSQLテンプレート
+define('FILE_H_OP_EDIT_SQL',            'oponly_hostDB_edit.sql');                  // (オペレーションのみ)ホスト用のDB作成用のSQLテンプレート(編集)
 define('FILE_CONVERT_H_OP_SQL',         'oponly_convert_hostDB.sql');               // (オペレーションのみ)縦管理メニュー(ホスト)用のDB作成用のSQLテンプレート
+define('FILE_CONVERT_H_OP_EDIT_SQL',    'oponly_convert_hostDB_edit.sql');          // (オペレーションのみ)縦管理メニュー(ホスト)用のDB作成用のSQLテンプレート(編集)
 
 define('FILE_PARTS_SNG',                'parts_string.php');                        // 00_loadTable.phpのデータ部テンプレート(単一行文字列用)
 define('FILE_PARTS_MUL',                'parts_multiString.php');                   // 00_loadTable.phpのデータ部テンプレート(複数行文字列用)
@@ -67,6 +74,7 @@ define('FILE_PARTS_ID',                 'parts_id.php');                        
 define('FILE_PARTS_PW',                 'parts_password.php');                      // 00_loadTable.phpのデータ部テンプレート(PW用)
 define('FILE_PARTS_UPL',                'parts_upload.php');                        // 00_loadTable.phpのデータ部テンプレート(ファイルアップロード用)
 define('FILE_PARTS_LNK',                'parts_link.php');                          // 00_loadTable.phpのデータ部テンプレート(リンク用)
+define('FILE_PARTS_REF',                'parts_reference.php');                     // 00_loadTable.phpのデータ部テンプレート(プルダウン選択の参照項目用)
 
 define('FILE_PARTS_VIEW_SNG',           'parts_view_string.php');                   // 00_loadTable.php(VIEW用)のデータ部テンプレート(単一行文字列用)
 define('FILE_PARTS_VIEW_MUL',           'parts_view_multiString.php');              // 00_loadTable.php(VIEW用)のデータ部テンプレート(複数行文字列用)
@@ -78,6 +86,7 @@ define('FILE_PARTS_VIEW_ID',            'parts_view_id.php');                   
 define('FILE_PARTS_VIEW_PW',            'parts_view_password.php');                 // 00_loadTable.php(VIEW用)のデータ部テンプレート(PW用)
 define('FILE_PARTS_VIEW_UPL',           'parts_view_upload.php');                   // 00_loadTable.php(VIEW用)のデータ部テンプレート(ファイルアップロード用)
 define('FILE_PARTS_VIEW_LNK',           'parts_view_link.php');                     // 00_loadTable.php(VIEW用)のデータ部テンプレート(リンク用)
+define('FILE_PARTS_VIEW_REF',           'parts_view_reference.php');                // 00_loadTable.php(VIEW用)のデータ部テンプレート(プルダウン選択の参照項目用)
 
 
 define('TABLE_PREFIX',                  'KY_AUTO_TABLE_');                          // テーブル名の接頭語
@@ -95,6 +104,7 @@ define('REPLACE_UNIQUED',               '★★★UNIQUED★★★');
 define('REPLACE_SIZE',                  '★★★SIZE★★★');
 define('REPLACE_COL_TYPE',              '★★★COLUMN_TYPE★★★');
 define('REPLACE_COL',                   '★★★COLUMN★★★');
+define('REPLACE_ALTER_COL',             '★★★ALTER_COLUMN★★★');
 define('REPLACE_ID_TABLE',              '★★★ID_TABLE_NAME★★★');
 define('REPLACE_ID_PRI',                '★★★PRI_KEY_NAME★★★');
 define('REPLACE_ID_COL',                '★★★ID_COL_NAME★★★');
@@ -111,3 +121,14 @@ define('REPLACE_PW_MAX_LENGTH',         '★★★PW_MAX_LENGTH★★★');
 define('REPLACE_UPLOAD_FILE_SIZE',      '★★★UPLOAD_FILE_SIZE★★★');
 define('REPLACE_UPLOAD_REF_MENU_ID',    '★★★UPLOAD_REF_MENU_ID★★★');
 define('REPLACE_LINK_MAX_LENGTH',       '★★★LINK_MAX_LENGTH★★★');
+define('REPLACE_REFERENCE',             '★★★REFERENCE★★★');
+define('REPLACE_REF_NUMBER',            '★★★REFERENCE_NUMBER★★★');
+define('REPLACE_CLONE_VALUE',           '★★★CLONE_VALUE_NAME★★★');
+define('REPLACE_CLONE_DISP',            '★★★CLONE_DISP_NAME★★★');
+define('REPLACE_CLONE_ID_TABLE',        '★★★CLONE_ID_TABLE_NAME★★★');
+define('REPLACE_CLONE_PRI',             '★★★CLONE_PRI_KEY_NAME★★★');
+define('REPLACE_CLONE_COL',             '★★★CLONE_ID_COL_NAME★★★');
+define('REPLACE_CLONE_INFO',            '★★★CLONE_INFO★★★');
+define('REPLACE_ITEM_PASSWORD',         '★★★REFERENCE_ITEM_PASSWORD★★★');
+define('REPLACE_ITEM_DATE',             '★★★REFERENCE_ITEM_DATE★★★');
+define('REPLACE_ITEM_DATETIME',         '★★★REFERENCE_ITEM_DATETIME★★★');

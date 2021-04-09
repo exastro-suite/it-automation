@@ -40,7 +40,7 @@
     
     // メニューのディレクトリを取得
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
     
     // DBアクセスを伴う処理を開始
@@ -69,7 +69,7 @@
         
         if( array_key_exists( "execution_no", $_GET ) === true ){
             // クエリからexecution_noを取得
-            $execution_no = $_GET["execution_no"];
+            $execution_no = htmlspecialchars($_GET["execution_no"], ENT_QUOTES, "UTF-8");
             
             // 整数でない場合はNGとする
             $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));

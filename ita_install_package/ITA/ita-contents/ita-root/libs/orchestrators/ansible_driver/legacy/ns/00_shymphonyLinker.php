@@ -748,16 +748,41 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
 
             throw new Exception( '00000100-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
+
+        global $root_dir_path;
+        global $g;
+        global $log_level;
+
+        require_once ($root_dir_path . "/libs/backyardlibs/common/common_db_access.php");
+        require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_execute-workflow_common.php");
+        $log_output_php = '/libs/backyardlibs/backyard_log_output.php';
+
+        if( $objDBCA->getTransactionMode()===false ){
+            ////////////////////////////////////////////////////////////////
+            // トランザクション開始
+            ////////////////////////////////////////////////////////////////
+            if( $objDBCA->transactionStart()===false ){
+                // 異常フラグON  例外処理へ
+                $error_flag = 1;
+                throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00001000")) );
+            }
+    
+            // トレースメッセージ
+            if ( $log_level === 'DEBUG' ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-55004");
+                require ($root_dir_path . $log_output_php );
+            }
+        }
         
         ////////////////////////////////////////////////////////////////
         // 対象レコードをSELECT                                       //
         ////////////////////////////////////////////////////////////////
         // SQL作成
-        $sql = "SELECT  STATUS_ID "
-              ."       ,STATUS_NAME "
+        $sql = "SELECT * "
               ."FROM    {$strExeCurTableIdForSelect} "
               ."WHERE   DISUSE_FLAG = '0' "
-              ."AND     EXECUTION_NO = :EXECUTION_NO_BV ";
+              ."AND     EXECUTION_NO = :EXECUTION_NO_BV "
+              ."FOR UPDATE ";
         
         $tmpAryBind = array( 'EXECUTION_NO_BV'=>$target_execution_no );
         $retArray = singleSQLCoreExecute($objDBCA, $sql, $tmpAryBind, $strFxName);
@@ -795,8 +820,80 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         ////////////////////////////////////////////////////////////////
         // ステータスIDによって処理を分岐                             //
         ////////////////////////////////////////////////////////////////
+        // ステータスIDが未実行(1)の場合
+        if( $status_id == 1 ){
+            
+            $login_id = $g['login_id'];
+            $vg_exe_ins_msg_table_name       = 'C_ANSIBLE_LNS_EXE_INS_MNG';
+            $vg_exe_ins_msg_table_jnl_name   = 'C_ANSIBLE_LNS_EXE_INS_MNG_JNL';
+            $vg_exe_ins_msg_table_jnl_seq    = 'C_ANSIBLE_LNS_EXE_INS_MNG_JSQ';
+            $db_model_ch = $objDBCA->getModelChannel();
+ 
+            $dbobj = new CommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,$login_id);
+            $tgt_execution_row = $showTgtRow;
+            $tgt_execution_no = $tgt_execution_row['EXECUTION_NO'];
+        
+            ////////////////////////////////////////////////////////////////
+            // シーケンスをロックし履歴シーケンス採番
+            ////////////////////////////////////////////////////////////////
+            $dbobj->ClearLastErrorMsg();
+            $intJournalSeqNo = cm_dbaccessGetSequence($dbobj,$vg_exe_ins_msg_table_jnl_seq,$tgt_execution_no,$FREE_LOG);
+            if($intJournalSeqNo === false) {
+                require ($root_dir_path . $log_output_php );
+                throw new Exception($ErrorMsg);
+            }
+
+            ////////////////////////////////////////////////////////////////
+            // 処理対象の作業インスタンスのステータスを緊急停止に設定
+            ////////////////////////////////////////////////////////////////
+            $tgt_execution_row['JOURNAL_SEQ_NO']   = $intJournalSeqNo;
+            $tgt_execution_row["STATUS_ID"]        = 8;
+            $tgt_execution_row["LAST_UPDATE_USER"] = $login_id;
+
+            $ret = cm_InstanceRecodeUpdate($dbobj,$vg_exe_ins_msg_table_name,$vg_exe_ins_msg_table_jnl_name,$tgt_execution_row, $FREE_LOG);
+            if($ret === false) {
+                $error_flag = 1; throw new Exception( $FREE_LOG );
+            }
+
+            if( $objDBCA->getTransactionMode() ){
+                //----------------------------------------------
+                // コミット(レコードロックを解除)
+                //----------------------------------------------
+                $r = $objDBCA->transactionCommit();
+                if (!$r){
+                    // 異常フラグON
+                    $error_flag = 1;
+                    // 例外処理へ
+                    throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00005000")) );
+                }
+                // トレースメッセージ
+                if ( $log_level === 'DEBUG' ){
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-55015");
+                    require ($root_dir_path . $log_output_php );
+                }
+
+                //----------------------------------------------
+                // トランザクション終了
+                //----------------------------------------------
+                $objDBCA->transactionExit();
+                // トレースメッセージ
+                if ( $log_level === 'DEBUG' ){
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-55005");
+                    require ($root_dir_path . $log_output_php );
+                }
+            }
+     
+            // 正常向けの結果メッセージを作成
+            $strOutputMsgBody = $objMTS->getSomeMessage("ITAANSIBLEH-STD-101010",$target_execution_no);
+            // エラーと警告以外のメッセージ系
+            $aryRetMsgBody = array($strOutputMsgBody,$strInfoBody,$strWarningInfo);
+            
+            $retArray = array(0,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRetMsgBody);
+
+            return $retArray;
+        }
         // ステータスIDが実行中(3) or 実行中(遅延)(4)以外の場合
-        if( $status_id != 3 && $status_id != 4 ){
+        else if( $status_id != 3 && $status_id != 4 ){
             $intResultDetail = 21;
             $intErrorType = 701;
             // エラー箇所をメモ
@@ -805,6 +902,34 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
             $strWarningInfo = $objMTS->getSomeMessage("ITABASEH-ERR-803",$status_name);
             
             throw new Exception( '00000400-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
+        if( $objDBCA->getTransactionMode() ){
+            //----------------------------------------------
+            // コミット(レコードロックを解除)
+            //----------------------------------------------
+            $r = $objDBCA->transactionCommit();
+            if (!$r){
+                // 異常フラグON
+                $error_flag = 1;
+                // 例外処理へ
+                throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00005000")) );
+            }
+            // トレースメッセージ
+            if ( $log_level === 'DEBUG' ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-55015");
+                require ($root_dir_path . $log_output_php );
+            }
+
+            //----------------------------------------------
+            // トランザクション終了
+            //----------------------------------------------
+            $objDBCA->transactionExit();
+            // トレースメッセージ
+            if ( $log_level === 'DEBUG' ){
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-55005");
+                require ($root_dir_path . $log_output_php );
+            }
         }
         
         /////////////////////////////////////////////////////////////
@@ -1028,7 +1153,7 @@ $tmpFx = function ($objOLA, $strSearchKeyValue="", $boolBinaryDistinctOnDTiS=fal
               ."{$strPatternMasterDispColId} PATTERN_NAME "
               ."FROM   {$strPatternMasterTableId} "
               ."WHERE  {$strWhereZone} "
-              ."ORDER  BY DISP_SEQ ASC";
+              ."ORDER  BY PATTERN_ID ASC";
         
         $retArray = singleSQLCoreExecute($objDBCA, $sql, $tmpAryBind, $strFxName);
         if( $retArray[0]===true ){

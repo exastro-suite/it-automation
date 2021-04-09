@@ -16,7 +16,7 @@
 
     // リファラ取得(リダイレクト判定のため)
     if(isset($_SERVER["HTTP_REFERER"])){
-        $host = $_SERVER['HTTP_REFERER'];
+        $host = htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, "UTF-8");
     }
     else{
         $host = "";

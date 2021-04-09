@@ -18,7 +18,7 @@
     // ルートディレクトリを取得
     $tmpAry=explode('ita-root', dirname(__FILE__));$g['root_dir_path']=$tmpAry[0].'ita-root';unset($tmpAry);
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
 
     $param = explode ( "?" , $_SERVER["REQUEST_URI"] , 2 );
@@ -52,34 +52,41 @@
     $systemFile = "{$g['root_dir_path']}/webconfs/systems/{$g['page_dir']}_loadTable.php";
     $sheetFile = "{$g['root_dir_path']}/webconfs/sheets/{$g['page_dir']}_loadTable.php";
     $userFile = "{$g['root_dir_path']}/webconfs/users/{$g['page_dir']}_loadTable.php";
+    $existLoadTable = false;
     if(file_exists($systemFile)){
         require_once($systemFile);
+        $existLoadTable = true;
     }
     else if(file_exists($sheetFile)){
         require_once($sheetFile);
+        $existLoadTable = true;
     }
     else if(file_exists($userFile)){
         require_once($userFile);
+        $existLoadTable = true;
     }
-    $retArray = getTCAConfig();
+    $retArray = array();
+    if(true === $existLoadTable){
+        $retArray = getTCAConfig();
+    }
 
-    $objDefaultTable = $retArray['objTable'];
-    $privilege = $retArray['privilege'];
-    $pageType = $retArray['pageType'];
-    $strPageInfo = $retArray['PageInfoArea'];
-    $strDeveloperArea = $retArray['DeveloperArea'];
-    $strHtmlFilter1Commnad = $retArray['FilterCmdArea'];
-    $strHtmlFilter2Commnad = $retArray['RegisterFilterArea'];
-    $boolShowRegisterArea = $retArray['RegisterAreaShow'];
-    $strHtmlFileEditCommnad = $retArray['QMFileAreaCmd'];
-    $strTemplateBody = $retArray['JscriptTmpl'];
-    $strHtmlJnlFilterCommnad = $retArray['JnlSearchFilterCmdArea'];
+    $objDefaultTable = (array_key_exists('objTable', $retArray)) ? $retArray['objTable'] : null;
+    $privilege = (array_key_exists('objTable', $retArray)) ? $retArray['privilege'] : null;
+    $pageType = (array_key_exists('objTable', $retArray)) ? $retArray['pageType'] : null;
+    $strPageInfo = (array_key_exists('objTable', $retArray)) ? $retArray['PageInfoArea'] : null;
+    $strDeveloperArea = (array_key_exists('objTable', $retArray)) ? $retArray['DeveloperArea'] : null;
+    $strHtmlFilter1Commnad = (array_key_exists('objTable', $retArray)) ? $retArray['FilterCmdArea'] : null;
+    $strHtmlFilter2Commnad = (array_key_exists('objTable', $retArray)) ? $retArray['RegisterFilterArea'] : null;
+    $boolShowRegisterArea = (array_key_exists('objTable', $retArray)) ? $retArray['RegisterAreaShow'] : null;
+    $strHtmlFileEditCommnad = (array_key_exists('objTable', $retArray)) ? $retArray['QMFileAreaCmd'] : null;
+    $strTemplateBody = (array_key_exists('objTable', $retArray)) ? $retArray['JscriptTmpl'] : null;
+    $strHtmlJnlFilterCommnad = (array_key_exists('objTable', $retArray)) ? $retArray['JnlSearchFilterCmdArea'] : null;
 
-    $varWebRowLimit = $retArray['WebPrintRowLimit'];
-    $varWebRowConfirm = $retArray['WebPrintRowConfirm'];
+    $varWebRowLimit = (array_key_exists('objTable', $retArray)) ? $retArray['WebPrintRowLimit'] : null;
+    $varWebRowConfirm = (array_key_exists('objTable', $retArray)) ? $retArray['WebPrintRowConfirm'] : null;
 
-    $intTableWidth = $retArray['WebStdTableWidth'];
-    $intTableHeight = $retArray['WebStdTableHeight'];
+    $intTableWidth = (array_key_exists('objTable', $retArray)) ? $retArray['WebStdTableWidth'] : null;
+    $intTableHeight = (array_key_exists('objTable', $retArray)) ? $retArray['WebStdTableHeight'] : null;
 
     $strCmdWordAreaOpen = $g['objMTS']->getSomeMessage("ITAWDCH-STD-251");
     $strCmdWordAreaClose = $g['objMTS']->getSomeMessage("ITAWDCH-STD-252");

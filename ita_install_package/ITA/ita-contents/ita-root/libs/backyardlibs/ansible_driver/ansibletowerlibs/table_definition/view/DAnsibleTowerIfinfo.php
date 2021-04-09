@@ -65,6 +65,7 @@ class DAnsibleTowerIfinfo extends TableBaseDefinition {
             "ANSTWR_LOGIN_USER"             => "",
             "ANSTWR_LOGIN_PASSWORD"         => "",
             "ANSTWR_LOGIN_SSH_KEY_FILE"     => "",
+            "ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE" => "",
             "ANSTWR_ISOLATED_TYPE"          => "",
         );
 
@@ -79,4 +80,3 @@ class DAnsibleTowerIfinfo extends TableBaseDefinition {
 }
 
 ?>
-

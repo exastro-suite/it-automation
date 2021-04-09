@@ -16,7 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 //  【処理概要】
-//    ・Ansibleインターフェース情報 
+//    ・Ansibleインターフェース情報
 //
 //////////////////////////////////////////////////////////////////////
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
@@ -55,7 +55,7 @@ Ansibleインターフェース情報
 
 
     //--------------------------------------------------------------
-    //----実行区分 
+    //----実行区分
     //--------------------------------------------------------------
     $c = new IDColumn('ANSIBLE_EXEC_MODE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203065"),'B_ANSIBLE_EXEC_MODE','ID','NAME','', array('OrderByThirdColumn'=>'ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203066"));
@@ -143,7 +143,7 @@ Ansibleインターフェース情報
 
         //----代表ホスト名
         $objVldt = new SingleTextValidator(0,128,false);
-	$c = new IDColumn('ANSTWR_HOST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203041"),'B_ANS_TWR_HOST','ANSTWR_HOST_ID','ANSTWR_HOSTNAME','');
+	$c = new IDColumn('ANSTWR_HOST_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203041"),'D_ANS_TWR_HOST','ANSTWR_HOST_ID','ANSTWR_HOSTNAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203042"));//エクセル・ヘッダでの説明
         $c->setValidator($objVldt);
         $c->setRequired(false);//必須チャックはDB登録前処理で実施
@@ -230,7 +230,7 @@ Ansibleインターフェース情報
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
     //Symphonyデータリレイストレージパス(Ansible/Tower)----
-    
+
     //--------------------------------------------------------------
     //----conductorデータリレイストレージパス(Ansible/Tower)
     //--------------------------------------------------------------
@@ -241,7 +241,7 @@ Ansibleインターフェース情報
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
     //conductorデータリレイストレージパス(Ansible/Tower)----
-    
+
     //--------------------------------------------------------------
     //----Ansible-Playbook実行時のオプションパラメータ
     //--------------------------------------------------------------
@@ -364,7 +364,7 @@ Ansibleインターフェース情報
         case "DTUP_singleRecRegister":
             $retStrBody = "";
             $ary   = array();
-            $ary[] = array("VALUE"=>$strTwrHostID  ,"MSG_CODE"=>"ITAANSIBLEH-MNU-1203030");
+            $ary[] = array("VALUE"=>$strTwrHostID  ,"MSG_CODE"=>"ITAANSIBLEH-MNU-1203041");
             $ary[] = array("VALUE"=>$strTwrProtocol,"MSG_CODE"=>"ITAANSIBLEH-MNU-1203010");
             $ary[] = array("VALUE"=>$strTwrPort,    "MSG_CODE"=>"ITAANSIBLEH-MNU-1203050");
             $ary[] = array("VALUE"=>$strOrgName,    "MSG_CODE"=>"ITAANSIBLEH-MNU-9010000002");
@@ -412,9 +412,13 @@ Ansibleインターフェース情報
             2=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12203")
         )
     );
-    //廃止・復活ボタンを隠す
-    $outputType = new OutputType(new TabHFmt(), new DelTabBFmt());
-    $tmpAryColumn['DISUSE_FLAG']->setOutputType("print_table", $outputType);
+    // 廃止ボタン
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_journal_table')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['DISUSE_FLAG']->getOutputType('json')->setVisible(false);
 
     return $table;
 };

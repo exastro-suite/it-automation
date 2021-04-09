@@ -50,6 +50,8 @@ class CellFormatter {
 
 	protected $strPrintTableId;
 
+	protected $boolRequiredMark;
+
 	//他のクラスから独立して利用するための設定----
 
 	//----他のクラスと連動して利用するための変数
@@ -97,8 +99,10 @@ class CellFormatter {
 		$this->objOutputType = null;
 		$this->strFormatterId = "";
 		//他のクラスと連動して利用するための設定----
-		
+
 		$this->setSafingHtmlBeforePrintAgent(true);
+
+		$this->setRequiredMarkAgent(false);
 	}
 
 	//----「__construct、ではないので注意」
@@ -248,7 +252,7 @@ class CellFormatter {
 			//カラムがセットされている場合----
 		}
 		return $retValue;
-	}	
+	}
 
 	//NEW[14]
 	public function setColumnIDHiddenAgent($boolColumnIdHidden){
@@ -339,7 +343,7 @@ class CellFormatter {
 		}
 		return $strRequiredDisuseColumnId;
 	}
-	
+
 	//NEW[26]
 	public function setRequiredUpdateDate4UColumnIDAgent($strRequiredUpdateDate4UColumnId){
 		$this->strRequiredUpdateDate4UColumnId = $strRequiredUpdateDate4UColumnId;
@@ -358,8 +362,8 @@ class CellFormatter {
 		return $strRequiredUpdateDate4UColumnId;
 	}
 	//TCA必須カラム系----
-	
-	//NEW[28]	
+
+	//NEW[28]
 	public function setJsFxNamePrefixAgent($boolJsFxNamePrefix){
 		$this->boolJsFxNamePrefix = $boolJsFxNamePrefix;
 	}
@@ -376,8 +380,8 @@ class CellFormatter {
 		}
 		return $boolJsFxNamePrefix;
 	}
-	
-	
+
+
 	//NEW[30]
 	public function setPrintTableIDAgent($strPrintTableId){
 		$this->strPrintTableId = $strPrintTableId;
@@ -395,7 +399,7 @@ class CellFormatter {
 		}
 		return $strPrintTableId;
 	}
-	
+
 	//NEW[32]
 	public function setDefaultValueAgent($varDefaultValue){
 		$this->varDefaultValue = $varDefaultValue;
@@ -441,7 +445,7 @@ class CellFormatter {
 		}
 		return $data;
 	}
-	
+
 	//他のクラスから独立して利用するための関数----
 
 	//NEW[34]
@@ -489,7 +493,7 @@ class CellFormatter {
 		}
 		return $data;
 	}
-	
+
 	//他のクラスから独立して利用するための関数----
 
 	//NEW[36]
@@ -558,6 +562,21 @@ class CellFormatter {
 	function getFunctionForOverrideValue(){
 		return $this->objFunctionForOverrideValue;
 	}
+
+	//NEW[46]
+	public function setRequiredMarkAgent($boolRequiredMark){
+		$this->boolRequiredMark = $boolRequiredMark;
+	}
+	//NEW[47]
+	public function getRequiredMark(){
+		$retValue = $this->boolRequiredMark;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$retValue = $this->objColumn->isRequiredMark();
+			//カラムがセットされている場合----
+		}
+		return $retValue;
+	}
 	//ここまで新規メソッドの定義宣言処理----
 
 }
@@ -615,7 +634,7 @@ class HFmt extends CellFormatter {
 		}
 		return $retValue;
 	}
-	
+
 	//NEW[6]
 	public function setDescriptionAgent($strVal){
 		$this->strDescription = $strVal;
@@ -661,7 +680,7 @@ class VariantHFmt extends HFmt {
 
 	//----ここから新規メソッドの定義宣言処理
 
-	
+
 	//NEW[1]
 	function setFunctionForGetData($objFunctionForGetData){
 		$this->objFunctionForGetData = $objFunctionForGetData;
@@ -693,7 +712,7 @@ class TabHFmt extends HFmt {
 		$strPrintBody = $this->makeSafeHeaderForBrowse($this->getStaticPrintRawData());
 		$strPrintBody = nl2br($strPrintBody);
 		return $this->getTag("{$this->strDataPreFix}<span class=\"{$this->strBasicTagClass}\">{$strPrintBody}</span>{$this->strDataPostFix}", $attr);
-		
+
 	}
 
 	//ここまで継承メソッドの上書き処理----
@@ -759,7 +778,7 @@ class VariantTabHFmt extends TabHFmt {
 
 	//----ここから新規メソッドの定義宣言処理
 
-	
+
 	//NEW[1]
 	function setFunctionForGetData($objFunctionForGetData){
 		$this->objFunctionForGetData = $objFunctionForGetData;
@@ -800,7 +819,7 @@ class SortedTabHFmt extends TabHFmt {
 	protected $strSortSelectedDescTagClass;
 
 	//----ここから継承メソッドの上書き処理
-	
+
 	public function __construct(){
 		parent::__construct();
 		$this->setIsNumAgent(false);
@@ -871,7 +890,7 @@ class SortedTabHFmt extends TabHFmt {
 		}
 		return $retValue;
 	}
-	//NEW[5]	
+	//NEW[5]
 	public function setSortTargetColumnNoAgent($intSortTargetColumnNo){
 		$this->intSortTargetColumnNo = $intSortTargetColumnNo;
 	}
@@ -903,7 +922,7 @@ class SortedTabHFmt extends TabHFmt {
 		}
 		return $retValue;
 	}
-	
+
 	//他のクラスから独立して利用するための関数----
 
 	//NEW[9]
@@ -977,7 +996,7 @@ class ReqTabHFmt extends TabHFmt {
 				}
 				//必須備考カラムの場合----
 			}else{
-				if( $this->getRequired() === true ){
+				if( $this->getRequired() === true || $this->getRequiredMark() === true ){
 					$star = '<span class="'.$this->strInputRequredTagClass.'">*</span>';
 					if( $this->checkListFormatterMode("RegisterTableFormatter") === true ){
 						if( $this->getRegisterRequiredExcept() !== false ){
@@ -987,6 +1006,8 @@ class ReqTabHFmt extends TabHFmt {
 						if( $this->getUpdateRequiredExcept() !== false ){
 							$star = "";
 						}
+					}else if( $this->checkListFormatterMode("JournalTableFormatter") === true ){
+						$star = "";
 					}
 				}
 			}
@@ -1069,7 +1090,7 @@ class ReqTabHFmt extends TabHFmt {
 		}
 		return $retValue;
 	}
-	
+
 	//他のクラスから独立して利用するための関数----
 
 	//NEW[9]
@@ -1254,7 +1275,7 @@ class BFmt extends CellFormatter {
 		}
 		return $retValue;
 	}
-	
+
 	//他のクラスから独立して利用するための関数----
 
 	//NEW[12]
@@ -1344,7 +1365,7 @@ class StaticBFmt extends BFmt {
 		$this->boolShowWhenNotNull  = $boolShowWhenNotNull;
 		$this->strShowOtherColumnId = $strShowOtherColumnId;
 	}
-	
+
 	public function getData($rowData,$aryVariant){
 		$strSetValue = $this->text;
 		if( $this->boolShowWhenNotNull === true ){
@@ -1388,7 +1409,7 @@ class DelBFmt extends BFmt {
 
 		$strColId = $this->getPrintTargetKey();
 		list($strData,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($rowData,array($strColId),"");
-		
+
 		if($strData == "0"){
 		}else if($strData == "1"){
 			$retStrVal = $g['objMTS']->getSomeMessage("ITAWDCH-STD-610");
@@ -1496,7 +1517,7 @@ class TabBFmt extends BFmt {
 		}
 		return $retBool;
 	}
-	
+
 	public function setTagClassesAgent($aryTagClasses){
 		$this->aryTagClasses = $aryTagClasses;
 	}
@@ -1509,7 +1530,7 @@ class TabBFmt extends BFmt {
 		}
 		return $retValue;
 	}
-	
+
 	public function setTagIDForHandleAgent($strValue){
 		$this->strTagIdForHandle = $strValue;
 	}
@@ -1534,7 +1555,7 @@ class TabBFmt extends BFmt {
 		return $retValue;
 	}
 
-	
+
 	public function setDataPrefixAgent($strDataPrefix){
 		$this->strDataPrefix = $strDataPrefix;
 	}
@@ -1547,7 +1568,7 @@ class TabBFmt extends BFmt {
 		}
 		return $retValue;
 	}
-	
+
 	public function setDataPostfixAgent($strDataPostfix){
 		$this->strDataPostfix = $strDataPostfix;
 	}
@@ -1560,7 +1581,7 @@ class TabBFmt extends BFmt {
 		}
 		return $retValue;
 	}
-	
+
 	public function setJsEventAgent($strEventName, $strJsFunctionName, $aryJsFunctionArgs=array()){
 		if( is_null($aryJsFunctionArgs) === true ){
 			//----引数がnullで指定されていた場合
@@ -1583,12 +1604,12 @@ class TabBFmt extends BFmt {
 		}
 		return $aryObjJsEvent;
 	}
-	
+
 	function printJsAttrs($rowData,$aryOverWrite=array(),$aryObjJsEvent=null){
 		$strJsAttrsBody = " ";
 
 		$strFunctionPreFix = "";
-		if( $this->getJsFxNamePrefix()===true ){ 
+		if( $this->getJsFxNamePrefix()===true ){
 			$strFunctionPreFix = $this->getPrintTableID()."_";
 		}
 		if( is_array($aryObjJsEvent) === false ){
@@ -1613,7 +1634,7 @@ class TabBFmt extends BFmt {
 		}
 		return $strJsAttrsBody;
 	}
-	
+
 	public function setAttrsAgent($aryAttr){
 		$this->aryAttr = $aryAttr;
 	}
@@ -1636,7 +1657,7 @@ class TabBFmt extends BFmt {
 		}
 		return $retStrAttrs;
 	}
-	
+
 	public function setTextTagLastAttr($strTextTagtLastAttr){
 		$this->strTextTagLastAttr = $strTextTagtLastAttr;
 	}
@@ -1657,6 +1678,340 @@ class TabBFmt extends BFmt {
 	public function getFilterMatchClass(){
 		return $this->strFilterMatchClass;
 	}
+
+	//ここまで新規メソッドの定義宣言処理
+
+}
+
+class MainLinkTabBFmt extends BFmt {
+	protected $boolTableDataLikeHeader;
+	protected $aryTagClasses;
+	protected $strTagIdForHandle;
+	protected $strDataPrefix;
+	protected $strDataPostfix;
+
+	protected $aryObjJsEvent;
+	protected $aryJsAttr;
+	protected $aryAttr;
+	protected $strTextTagLastAttr;
+
+	protected $strFilterMatchClass;
+
+	protected $strLinkUrl;
+	protected $urlOption;
+	protected $zeroPadding;
+	protected $urlTartgetID;
+
+	//----ここから継承メソッドの上書き処理
+
+	public function __construct($url="", $urlOption=false, $zeroPadding=false, $urlTartgetID="", $strSql="", $sqlBindID=""){
+		parent::__construct();
+		$this->setTableDataLikeHeaderAgent(false);
+		$this->setTagClassesAgent(array());
+		$this->setTagIDForHandleAgent("");
+		$this->setDataPrefixAgent("");
+		$this->setDataPostfixAgent("");
+
+		$this->aryObjJsEvent = null;
+		$this->setAttrsAgent(null);
+		$this->setTextTagLastAttr("");
+
+		$this->setFilterMatchClass("filter_match");
+		$this->setLinkUrl($url);
+		$this->urlOption = $urlOption;
+		$this->zeroPadding = $zeroPadding;
+		$this->urlTartgetID = $urlTartgetID;
+		$this->strSql = $strSql;
+		$this->sqlBindID = $sqlBindID;
+	}
+
+	public function getData($rowData,$aryVariant){
+		$strData = "";
+		$strColId = $this->getPrintTargetKey();
+		list($strData,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($rowData,array($strColId),"");
+		return $this->getTag($strData, $rowData);
+	}
+
+	//ここまで継承メソッドの上書き処理----
+
+	//----ここから新規メソッドの定義宣言処理
+
+	public function getTag($data, $rowData){
+		//----タグ（先頭と末尾）の結合を取得
+		$strRetBody = $this->getSTag($rowData,$data).$this->getDataPrefix().$data.$this->getDataPostfix().$this->getETag($rowData);
+		return $strRetBody;
+	}
+
+	public function getSTag($rowData,$strData){
+		global $objMTS;
+		$strIdOfHtmlTag = $this->getTagIDForHandle($rowData);
+		$strTagClasses = "";
+		$strScopeAttBody = "";
+		$strLinkUrl = "";
+
+		$strTagClasses = " class=\"";
+
+		$aryClass = $this->getTagClasses();
+		if( $this->getTableDataLikeHeader() ){
+			$strScopeAttBody = " scope=\"row\"";
+			$strTagClasses .= " likeHeader";
+		}
+		$strTmpClasses = implode(" ",$aryClass);
+		if($strTmpClasses != ""){
+			$strTagClasses .= " {$strTmpClasses}";
+		}
+
+		//リンク先のURL作成
+		if($this->urlTartgetID == ""){
+			if($this->urlOption === true){
+				$param = mb_substr(strstr($strData, ':'), 1);
+			}else{
+				$param = $strData;
+			}
+	  }else{
+			if($this->urlOption === true){
+				$param = mb_substr(strstr($rowData[$this->urlTartgetID], ':'), 1);
+			}else{
+				$param = $rowData[$this->urlTartgetID];
+			}
+		}
+		if($this->zeroPadding === true){
+			$param = str_pad($param, 10, '0', STR_PAD_LEFT);
+		}
+		if($this->strSql != ""){
+			$param = $this->getUrlData($strData);
+		}
+		if(is_array($this->getLinkUrl())){
+			foreach ($this->getLinkUrl() as $value) {
+				$strLinkUrl .=  str_replace(" ","%20",$value.$param);
+			}
+		}else{
+			$strLinkUrl =  str_replace(" ","%20",$this->getLinkUrl().$param);
+		}
+
+		$strTagClasses .= "\"";
+
+			if($rowData["DISUSE_FLAG"] == "1"){
+				return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\">";
+			}else{
+				// 廃止ロールか判定
+				$DisUseRoleName = sprintf("/^%s\([0-9]+\)$/", preg_quote($objMTS->getSomeMessage("ITAWDCH-STD-11101")));
+				if(preg_match($DisUseRoleName,$strData) == 1) {
+				  return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\">";
+				}else{
+					return  "<td {$strIdOfHtmlTag}{$strScopeAttBody}{$strTagClasses}><div class=\"tdInner\"><a href={$strLinkUrl} target=\"_blank\">";
+				}
+			}
+		//タグの種類の分岐----
+	}
+
+	public function getETag($rowData){
+		//----タグの種類の分岐
+		if($rowData["DISUSE_FLAG"] == "1"){
+			return "</div></td>\n";
+		}else{
+			return "</a></div></td>\n";
+		}
+		//タグの種類の分岐----
+	}
+
+	//ここまで継承メソッドの上書き処理----
+
+	//----他のクラスから独立して利用するための関数
+	public function setTableDataLikeHeaderAgent($boolLikeHeader){
+		$this->boolTableDataLikeHeader = $boolLikeHeader;
+	}
+	public function getTableDataLikeHeader(){
+		$retBool = $this->boolTableDataLikeHeader;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$retBool = $this->objColumn->isHeader();
+			//カラムがセットされている場合----
+		}
+		return $retBool;
+	}
+
+	public function setTagClassesAgent($aryTagClasses){
+		$this->aryTagClasses = $aryTagClasses;
+	}
+	public function getTagClasses(){
+		$retValue = $this->aryTagClasses;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$retValue = $this->objColumn->getClasses();
+			//カラムがセットされている場合----
+		}
+		return $retValue;
+	}
+
+	public function setTagIDForHandleAgent($strValue){
+		$this->strTagIdForHandle = $strValue;
+	}
+	public function getTagIDForHandle($rowData){
+		$retValue = $this->strTagIdForHandle;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$strRIColId = $this->getRIColumnKey();
+			if( $this->objColumn->getColumnIDHidden() === true ){
+				$strCellHandlePostFix = $this->objOutputType->getPrintSeq();
+			}else{
+				$strCellHandlePostFix = $this->objColumn->getID();
+			}
+			$strNumberForRI = "";
+			if( $rowData === null ){
+			}else{
+				$strNumberForRI = (array_key_exists($strRIColId, $rowData))?$rowData[$strRIColId]."_":"";
+			}
+			$retValue = "id=\"cell_{$this->strFormatterId}_{$strNumberForRI}{$strCellHandlePostFix}\"";
+			//カラムがセットされている場合----
+		}
+		return $retValue;
+	}
+
+
+	public function setDataPrefixAgent($strDataPrefix){
+		$this->strDataPrefix = $strDataPrefix;
+	}
+	public function getDataPrefix(){
+		$retValue = $this->strDataPrefix;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$retValue = $this->objColumn->getPrefix();
+			//カラムがセットされている場合----
+		}
+		return $retValue;
+	}
+
+	public function setDataPostfixAgent($strDataPostfix){
+		$this->strDataPostfix = $strDataPostfix;
+	}
+	public function getDataPostfix(){
+		$retValue = $this->strDataPostfix;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$retValue = $this->objColumn->getPostfix();
+			//カラムがセットされている場合----
+		}
+		return $retValue;
+	}
+
+	public function setJsEventAgent($strEventName, $strJsFunctionName, $aryJsFunctionArgs=array()){
+		if( is_null($aryJsFunctionArgs) === true ){
+			//----引数がnullで指定されていた場合
+			$aryJsFunctionArgs = array();
+		}
+		if( is_string($strEventName) === true && $strJsFunctionName === null ){
+			if( array_key_exists($strEventName, $this->aryObjJsEvent) === true ){
+				unset($this->aryObjJsEvent[$strEventName]);
+			}
+		}else{
+			$this->aryObjJsEvent[$strEventName] = new JsEvent($strEventName, $strJsFunctionName, $aryJsFunctionArgs);
+		}
+	}
+	public function getJsEvents(){
+		$aryObjJsEvent = $this->aryObjJsEvent;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$aryObjJsEvent = $this->objOutputType->getJsEvents();
+			//カラムがセットされている場合----
+		}
+		return $aryObjJsEvent;
+	}
+
+	function printJsAttrs($rowData,$aryOverWrite=array(),$aryObjJsEvent=null){
+		$strJsAttrsBody = " ";
+
+		$strFunctionPreFix = "";
+		if( $this->getJsFxNamePrefix()===true ){
+			$strFunctionPreFix = $this->getPrintTableID()."_";
+		}
+		if( is_array($aryObjJsEvent) === false ){
+			$aryObjJsEvent = $this->getJsEvents();
+		}
+		foreach($aryObjJsEvent as $jsEvent){
+			$boolOverWrite=false;
+			if( is_a($jsEvent,"JsEvent") === true ){
+				foreach($aryOverWrite as $strEventName=>$strJsBody){
+					if( strtolower($jsEvent->getEventName())==strtolower($strEventName) ){
+						$boolOverWrite=true;
+						break;
+					}
+				}
+				if( $boolOverWrite===false ){
+					$strJsAttrsBody .= $jsEvent->getJsAttr($rowData, $strFunctionPreFix)." ";
+				}
+			}
+		}
+		foreach($aryOverWrite as $strEventName=>$strJsBody){
+			$strJsAttrsBody .= "{$strEventName}=\"{$strJsBody}\" ";
+		}
+		return $strJsAttrsBody;
+	}
+
+	public function setAttrsAgent($aryAttr){
+		$this->aryAttr = $aryAttr;
+	}
+	function printAttrs($aryAddOnDefault,$aryOverWrite){
+		$retStrAttrs = " ";
+		$aryAttr = $this->aryAttr;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$aryAttr = $this->objOutputType->getAttrs();
+			//カラムがセットされている場合----
+		}
+		foreach($aryAddOnDefault as $strKeyAttrName=>$strValAttrValue){
+			if( array_key_exists($strKeyAttrName, $aryAttr)===false ){
+				$aryAttr[$strKeyAttrName] = $strValAttrValue;
+			}
+		}
+		$aryAttr = array_merge($aryAttr,$aryOverWrite);
+		foreach($aryAttr as $strKeyAttrName=>$strValAttrValue){
+			$retStrAttrs .= $strKeyAttrName.'="'.$strValAttrValue.'" ';
+		}
+		return $retStrAttrs;
+	}
+
+	public function setTextTagLastAttr($strTextTagtLastAttr){
+		$this->strTextTagLastAttr = $strTextTagtLastAttr;
+	}
+	public function getTextTagLastAttr(){
+		$strTextTagLastAttr = $this->strTextTagLastAttr;
+		if( is_a($this->objColumn, "Column")===true ){
+			//----カラムがセットされている場合
+			$strTextTagLastAttr = $this->objOutputType->getTextTagLastAttr();
+			//カラムがセットされている場合----
+		}
+		return $strTextTagLastAttr;
+	}
+	//他のクラスから独立して利用するための関数----
+
+	public function setFilterMatchClass($strClassName){
+		$this->strFilterMatchClass = $strClassName;
+	}
+	public function getFilterMatchClass(){
+		return $this->strFilterMatchClass;
+	}
+
+	public function setLinkUrl($url){
+		$this->strLinkUrl = $url;
+	}
+	public function getLinkUrl(){
+		return $this->strLinkUrl;
+	}
+	public function getUrlData($data){
+		$objDBCA = new DBConnectAgent();
+    $tmpResult = $objDBCA->connectOpen();
+		$urlData = "";
+	  $objQuery = $objDBCA->sqlPrepare($this->strSql);
+		if($this->sqlBindID != ""){
+      $objQuery->sqlBind(array($this->sqlBindID=>$data));
+		}
+    $r = $objQuery->sqlExecute();
+	  while($row = $objQuery->resultFetch()) {
+		  $urlData = array_shift($row);
+	  }
+	  return $urlData;
+ }
 
 	//ここまで新規メソッドの定義宣言処理
 
@@ -1738,19 +2093,19 @@ class TextTabBFmt extends TabBFmt {
 				//範囲検索タイプの場合----
 			}else{
 				//----範囲検索タイプではない場合
-				
+
 				$boolSearchZenHanDistinct = $this->getFormatterSearchType();
-				
+
 				foreach($this->getFilterValuesForMatchCheck() as $filterValue){
 					//----リッチ検索条件ではない、通常の検索条件数のループ
 					if( $filterValue!="" ){
 						//----1つのカラムに複数のフィルター条件がある場合は、想定していない
-	
+
 						if( $boolSearchZenHanDistinct === true ){
 							//----あいまい検索ではない場合
-							
+
 							$target = $this->makeSafeValueForBrowse($filterValue);
-							
+
 							//----区切り文字を#とした。
 							$pregStr = $target;
 							$pregStr = str_replace('#','\#', $pregStr);
@@ -1762,16 +2117,16 @@ class TextTabBFmt extends TabBFmt {
 							$pregStr = str_replace('+','\+', $pregStr);
 							$pregStr = '#('.str_replace(')','\)', $pregStr).')#i';
 							//区切り文字を#とした。----
-							
+
 							$strTagInnerBody = preg_replace($pregStr, '<span class="'.$this->getFilterMatchClass().'">\1</span>', $escapedData);
-							
+
 							//あいまい検索ではない場合----
 						}else{
 							//----あいまい検索の場合
 							$strTagInnerBody = '<span class="'.$this->getFilterMatchClass().'">'.$escapedData.'</span>';
 							//あいまい検索の場合----
 						}
-						
+
 						break;
 
 						//1つのカラムに複数のフィルター条件がある場合は、想定していない----
@@ -1789,16 +2144,16 @@ class TextTabBFmt extends TabBFmt {
 
 	public function checkMatchRichFilter(&$escapedData, $data, $rowData){
 		$boolRet = true;
-		
+
 		$varRichFilterValues = $this->getRichFilterValuesForMatchCheck();
 		//if($varRichFilterValues != ""){
 		if( is_array($varRichFilterValues)===true ){
 			//----リッチ検索条件あり
-			
+
 			//----ここからチケット234
 			$strCompareData = $data;
 			//ここまでチケット234----
-			
+
 			foreach($varRichFilterValues as $filterValue){
 				$target = $filterValue;
 				if( $target != "" && $target == $strCompareData ){
@@ -1809,7 +2164,7 @@ class TextTabBFmt extends TabBFmt {
 					//完全合致----
 				}
 			}
-			
+
 			//リッチ検索条件あり----
 		}else{
 			//----リッチ検索条件なし
@@ -1824,12 +2179,12 @@ class DateTextTabBFmt extends TextTabBFmt {
 
 	public function checkMatchRichFilter(&$escapedData, $data, $rowData){
 		$boolRet = true;
-		
+
 		$varRichFilterValues = $this->getRichFilterValuesForMatchCheck();
 		//if( $varRichFilterValues != "" ){
 		if( is_array($varRichFilterValues)===true ){
 			//----リッチ検索条件あり
-			
+
 			foreach($varRichFilterValues as $filterValue){
 				$target = $filterValue;
 				$target = date("Y/m/d", strToTime($target));
@@ -1853,7 +2208,7 @@ class DateTimeTextTabBFmt extends TextTabBFmt {
 
 	public function checkMatchRichFilter(&$escapedData, $data, $rowData){
 		$boolRet = true;
-		
+
 		$varRichFilterValues = $this->getRichFilterValuesForMatchCheck();
 		//if($varRichFilterValues != ""){
 		if( is_array($varRichFilterValues)===true ){
@@ -1910,7 +2265,7 @@ class NumTabBFmt extends TextTabBFmt {
 		$strTagInnerBody = $escapedData;
 
 		if($boolCheckContinue===true){
-			
+
 			$boolCheckContinue=true;
 			$varRichFilterValues = $this->getRichFilterValuesForMatchCheck();
 			if( is_array($varRichFilterValues)===true ){
@@ -1924,7 +2279,7 @@ class NumTabBFmt extends TextTabBFmt {
 				}
 			}
 		}
-		
+
 		if($boolCheckContinue===true){
 			switch($this->getColumnSearchType()){
 				case "in":
@@ -1936,15 +2291,15 @@ class NumTabBFmt extends TextTabBFmt {
 					break;
 				case "range":
 					$arrayFilterData = $this->getFilterValuesForMatchCheck();
-					
+
 					$valueStart=array_key_exists(0,$arrayFilterData)?$arrayFilterData[0]:null;
 					$valueLast=array_key_exists(1,$arrayFilterData)?$arrayFilterData[1]:null;
-					
+
 					if($valueStart === null && $valueLast === null){
 						//----開始・終了の両値の指定なし
 						//開始・終了の両値の指定なし----
 					}else if($valueStart !== null && $valueLast !== null){
-						if( bccomp($varDataForCompare, $valueStart, $this->intDigitScale)!=-1 
+						if( bccomp($varDataForCompare, $valueStart, $this->intDigitScale)!=-1
 						    && bccomp($varDataForCompare, $valueLast, $this->intDigitScale)!=1 ){
 							$strTagInnerBody = "<span class=\"{$this->getFilterMatchClass()}\">{$escapedData}</span>";
 						}
@@ -2021,9 +2376,9 @@ class SubtotalTabBFmt extends NumTabBFmt {
 
 	public function getData($rowData,$aryVariant){
 		$varValue = $this->getSubTotalValue();
-		
+
 		$strTagInnerBody = nl2br(number_format($varValue, $this->intDigitScale,".",","));
-		
+
 		return $this->getTag($strTagInnerBody, $rowData);
 	}
 
@@ -2098,7 +2453,7 @@ class LinkTabBFmt extends TextTabBFmt{
 		$intControlDebugLevel01=250;
 		$strFxName = __CLASS__."::".__FUNCTION__;
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-		
+
 		$strTagInnerBody = "";
 		if( $rowData === null ){
 		}else{
@@ -2113,7 +2468,7 @@ class LinkTabBFmt extends TextTabBFmt{
 				}
 			}
 		}
-		
+
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 		return $this->getTag($strTagInnerBody, $rowData);
 	}
@@ -2291,7 +2646,7 @@ class DelButtonTabBFmt extends TabBFmt {
 		$aryOverWrite["value"] = $strButtonFace;//----毎回変わるのでValueはDefaultではない。
 
 		$strPrefix = "";
-		if( $this->getJsFxNamePrefix()===true ){ 
+		if( $this->getJsFxNamePrefix()===true ){
 			$strPrefix = $this->getPrintTableID()."_";
 		}
 
@@ -2300,7 +2655,7 @@ class DelButtonTabBFmt extends TabBFmt {
 			$strTagInnerBody .="onClick=\"{$strPrefix}delete_async($delParam,'{$strNumberForRI}');\" ";
 		}
 		$strTagInnerBody .= "/>";
-		
+
 		return $this->getTag($strTagInnerBody, $rowData);
 	}
 
@@ -2326,6 +2681,26 @@ class DelTabBFmt extends TabBFmt {
 		}else{
 			$strTagInnerBody = "";
 		}
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
+}
+
+class JnlButtonTabBFmt extends TabBFmt {
+
+	public function getData($rowData,$aryVariant){
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+		$strRIColId = $this->getRIColumnKey();
+		$strColLabel = $this->getColLabel();
+
+		$jnlable = "";
+		$aryAddOnDefault["class"] = "historyBtnInTbl";
+
+		$aryOverWrite["type"] = "button";
+		$aryOverWrite["value"] = $strColLabel;
+
+		$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$jnlable}>";
 		return $this->getTag($strTagInnerBody, $rowData);
 	}
 
@@ -2506,7 +2881,7 @@ class NumInputTabBFmt extends InputTabBFmt {
 		//htmlタグがdataに入っている場合に異常動作させないための処理----
 		if($data !== NULL){
 			$data = $this->getValueForDisplay($data);
-			
+
 			//----入力時には、区切り文字を取り除く
 			//入力時には、区切り文字を取り除く----
 		}
@@ -2581,7 +2956,7 @@ class TextAreaTabBFmt extends InputTabBFmt {
 		$aryOverWrite["id"] = $this->getFSTIDForIdentify();
 		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
 		$aryOverWrite["value"] = $data;
-		
+
 		$strTagInnerBody = "<textarea {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>{$data}</textarea>";
 
 		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
@@ -2599,7 +2974,7 @@ class SelectTabBFmt extends InputTabBFmt {
 
 	//----OnTime用タグ属性
 	protected $strSelectWaitingText;
-	
+
 	protected $objFunctionForGetMultiple;
 	protected $objFunctionForGetSelectList;
 	protected $strNoOptionMessageText;
@@ -2633,7 +3008,7 @@ class SelectTabBFmt extends InputTabBFmt {
 		$this->setFunctionForGetMultiple(null);
 		$this->setFunctionForGetSelectList(null);
 		$this->setFunctionForAddToTagTail(null);
-		
+
 		$this->setFunctionForGetMainDataOverride(null);
 		//OnTime用タグ属性----
 
@@ -2656,7 +3031,7 @@ class SelectTabBFmt extends InputTabBFmt {
 	public function getSettingDataBeforeEdit($boolDelete=false,$boolArrayIgnore=false,$rowData=array(),$aryVariant=array()){
 		//----selectedを返す
 		$data = parent::getSettingDataBeforeEdit(false,false,$rowData,$aryVariant); //----設定値が配列の場合も取得
-		
+
 		if( $data === null){
 			$selected = null;
 		}else{
@@ -2767,7 +3142,7 @@ class SelectTabBFmt extends InputTabBFmt {
 							$boolWhiteKeyAdd = true;
 						}
 					}
-					
+
 					if( is_callable($this->objFunctionForGetMainDataOverride) === true ){
 						$tmpObjFunction = $this->objFunctionForGetMainDataOverride;
 						$aryRetBody = $tmpObjFunction($this,$arraySelectElement,$data,$boolWhiteKeyAdd,$rowData,$aryVariant);
@@ -2798,7 +3173,7 @@ class SelectTabBFmt extends InputTabBFmt {
 						$strTagInnerBody .= $strSelectTagBody;
 
                         // プルダウンあいまい検索
-            			$strTagInnerBody .= 
+            			$strTagInnerBody .=
 <<< EOD
                         <script type="text/javascript">
                             var strAdjustRulerClassName = "{$select2ClassName}";
@@ -2820,7 +3195,7 @@ class SelectTabBFmt extends InputTabBFmt {
                         </script>
 EOD;
 					}
-					
+
 					//----追い越し判定用フラグなどの追加タグ
 					$aryRetBody  = $this->getAddToTagTail($rowData,$aryVariant);
 					if( $aryRetBody[1]!==null ){
@@ -2829,7 +3204,7 @@ EOD;
 					}
 					//追い越し判定用フラグなどの追加タグ----
 				}
-				
+
 			}
 		}else{
 			$strTagInnerBody .= $strSelectWaitingText;
@@ -2859,7 +3234,7 @@ EOD;
 	public function setFunctionForGetMainDataOverride($objFunctionForGetMainDataOverridel){
 		$this->objFunctionForGetMainDataOverride = $objFunctionForGetMainDataOverridel;
 	}
-	
+
 	public function setFunctionForGetFADMultiple($objFunctionForGetFADMultiple){
 		$this->objFunctionForGetFADMultiple = $objFunctionForGetFADMultiple;
 	}
@@ -2885,7 +3260,7 @@ EOD;
 	public function getFunctionForGetMainDataOverride(){
 		return $this->objFunctionForGetMainDataOverride;
 	}
-	
+
 	public function getFunctionForGetFADMultiple(){
 		return $this->objFunctionForGetFADMultiple;
 	}
@@ -2912,9 +3287,9 @@ EOD;
 		}else{
 			if( is_a($this->objColumn, "IDColumn") === true ){
 				//----IDColumnとの連動系
-				
+
 				$retBool = $this->objColumn->getMultiple($this->strFormatterId);
-				
+
 				//IDColumnとの連動系----
 			}
 			$aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg);
@@ -2939,14 +3314,14 @@ EOD;
 		$aryErrMsgBody = array();
 		$strErrMsg = "";
 		$aryDataSet = array();
-	
+
 		$objFunction = $this->objFunctionForGetSelectList;
 		if( is_callable($objFunction)=== true ){
 			$aryRetBody = $objFunction($this, $rowData, $aryVariant);
 		}else{
 			if( is_a($this->objColumn, "IDColumn")===true ){
 				//----IDColumnとの連動系
-				
+
 				$arrayDispSelectTag=$this->objColumn->getArrayMasterTableByFormatName($this->strFormatterId);
 				if($arrayDispSelectTag===null){
 					//----通常は、ここを通る
@@ -2964,7 +3339,7 @@ EOD;
 					}
 					//特別に、各Formatterごとに、設定がされていた場合は、ここを通る----
 				}
-				
+
 				//IDColumnとの連動系----
 			}else{
 				$aryDataSet = null;
@@ -2987,7 +3362,7 @@ EOD;
 		}else{
 			if( is_a($this->objColumn,'MultiSelectSaveColumn') === true ){
 				//----MultiSelectSaveColumnとの連動系
-				
+
 				$intAnchorValue = "";
 				if( $rowData === null ){
 				}else{
@@ -2997,7 +3372,7 @@ EOD;
 				}
 		    	$strMaxLUDValue = getDataFromLinkTable($this->objColumn, $intAnchorValue, 0);
 				$strBody = "<input type=\"hidden\" name=\""."tmp_mlustf_".$this->getFSTNameForIdentify()."\" value=\"".$strMaxLUDValue."\" >";
-				
+
 				//MultiSelectSaveColumnとの連動系----
 			}
 			$aryRetBody = array($strBody, $intErrorType, $aryErrMsgBody, $strErrMsg);
@@ -3075,7 +3450,7 @@ EOD;
 
 			if( is_a($this->objColumn, "Column")===true ){
 				//----IDColumnとの連動系
-				
+
 				$objOT = $this->objColumn->getOutputType($this->strFormatterId);
 
 				$aryRetBody = $objOT->getFADSelectList($aryVariant, $arySetting, $aryOverride);
@@ -3094,14 +3469,14 @@ EOD;
 		$intErrorType = null;
 		$aryErrMsgBody = array();
 		$strErrMsg = "";
-		
+
 		$objFunction = $this->objFunctionForGetFADAddToTagTail;
 		if( is_callable($objFunction)=== true ){
 			$aryRetBody = $objFunction($this, $rowData, $aryVariant);
 		}else{
 			if( is_a($this->objColumn,'MultiSelectSaveColumn') === true ){
 				//----MultiSelectSaveColumnとの連動系
-				
+
 				$intAnchorValue = "";
 				if( $rowData === null ){
 				}else{
@@ -3113,7 +3488,7 @@ EOD;
 				$strBody = "<input type=\"hidden\" name=\""."tmp_mlustf_".$this->getFSTNameForIdentify()."\" value=\"".$strMaxLUDValue."\" >";
 			}
 			$aryRetBody = array($strBody, $intErrorType, $aryErrMsgBody, $strErrMsg);
-			
+
 			//MultiSelectSaveColumnとの連動系----
 		}
 		return $aryRetBody;
@@ -3135,9 +3510,9 @@ EOD;
 		}else{
 			if( is_a($this->objColumn, "IDColumn") === true ){
 				//----IDColumnとの連動系
-				
+
 				$retBool = $this->objColumn->getMultiple($this->strFormatterId);
-				
+
 				//IDColumnとの連動系----
 			}
 			$aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg);
@@ -3211,7 +3586,7 @@ EOD;
 			$varAddResultData = $aryRetBody[5];
 		}
 		//リストとして表示するデータソースを取得する----
-		
+
 		if( $boolExecuteContinue === true ){
 
 			$data = array();
@@ -3226,7 +3601,7 @@ EOD;
 				}
 			}
 		}
-		
+
 		if( $boolExecuteContinue === true ){
 
 			if( is_callable($this->objFunctionForGetFADMainDataOverride) === true ){
@@ -3288,7 +3663,7 @@ EOD;
 				}
 
                 // プルダウンあいまい検索
-    			$retStrBody .= 
+    			$retStrBody .=
 <<< EOD
                 <script type="text/javascript">
                     var strAdjustRulerClassName = "psl_{$printTagId}";
@@ -3405,13 +3780,13 @@ class DateInputTabBFmt extends InputTabBFmt {
 			//日までの入力版----
 		}
 		$aryOverWrite["value"] = $data;
-		
+
 		$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)}>";
 		$strTagInnerBody .= '<div style="display:none">'.$strAddDiv.'</div>';
 
 		$aryJsEvent = $this->getJsEvents();
 		$strFunctionPreFix = "";
-		if( $this->getJsFxNamePrefix()===true ){ 
+		if( $this->getJsFxNamePrefix()===true ){
 			$strFunctionPreFix = $this->getPrintTableID()."_";
 		}
 		$aryEventSet = array(
@@ -3501,7 +3876,7 @@ class FileUploadTabBFmt extends InputTabBFmt {
 	protected $strActionUrlAgent;
 	protected $strAnchorHrefAgent;
 	protected $strLAPathOfAnchorHrefTargetAgent;
-	
+
 	protected $strMaxFileSizeNumericAgent;
 
 	public function __construct(){
@@ -3530,7 +3905,7 @@ class FileUploadTabBFmt extends InputTabBFmt {
 		$this->strMaxFileSizeNumericAgent = $strMaxFileSizeNumericAgent;
 	}
 	//他のクラスから独立して利用するための関数----
-	
+
 	public function getCheckStorageSetting(){
 		$retAryCheckStorageSetting = $this->aryCheckStorageSetting;
 		if( is_a($this->objColumn, "Column")===true ){
@@ -3595,27 +3970,27 @@ class FileUploadTabBFmt extends InputTabBFmt {
 		global $g;
 		$aryAddOnDefault = array();
 		$aryOverWrite = array();
-		
+
 		$retStrVal = "";
-		
+
 		$intControlDebugLevel01 = 50;
-		
+
 		$boolProcessContinue = true;
 		$strTagInnerBody = "";
-		
+
 		$arrayTempRet = $this->getCheckStorageSetting();
-		
+
 		$boolProcessContinue = $arrayTempRet[0];
 		$strTagInnerBody = $arrayTempRet[2];
 
 		if( $boolProcessContinue === true ){
 			$strColId = $this->getPrintTargetKey();
-			
+
 			$strColMark = $strColId;
 			if( $this->getColumnIDHidden() === true ){
 				$strColMark = $this->getIDSynonym();
 			}
-			
+
 			//----IU時に利用するもの
 			$strIdOfFSTOfTmpFile = "{$this->strFormatterId}_tmp_file_{$strColMark}";
 			$strNameOfFSTOfTmpFile = "tmp_file_{$strColMark}";
@@ -3632,33 +4007,33 @@ class FileUploadTabBFmt extends InputTabBFmt {
 			//----事前アップロード時にメインで利用するもの
 			$strIdOfIframe = "{$this->strFormatterId}_if_{$strColMark}";
 			$strNameOfIframe = "{$this->strFormatterId}_if_{$strColMark}";
-			
+
 			$strIdOfForm = "{$this->strFormatterId}_{$strColMark}";
-			
+
 			$strIdOfInputButton = "{$this->strFormatterId}_btn_{$strColMark}";
 			$strIdOfResultArea = "{$this->strFormatterId}_result_{$strColMark}";
-			
+
 			//----どのカラムに向けての送信かの識別用
 			$strIdOfFSTOfFileId = "{$this->strFormatterId}_file_id_{$strColMark}";
 			$strNameOfFSTOfFileId = "file_id_{$strColMark}";
 			//どのカラムに向けての送信かの識別用----
-			
+
 			//----どのリストフォーマッタからの送信か
 			$strNameOfFromFormatterId = "frmFmt_{$strColMark}";
 			//どのリストフォーマッタからの送信か----
-			
+
 			$strLabelForDelFlag = "del{$strColMark}";
-			
+
 			//事前アップロード時にメインで利用するもの----
-			
+
 			$current = "";
 			$strDummyValue01 = "dummy";
-			
+
 			list($fileName,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($rowData,array($strColId),"");
-			
+
 			if( 1 <= strlen($fileName) ){
 				//----ファイルがアップロードされている場合
-				
+
 				$url = $this->getAnchorHref($rowData);
 
 				$fileName = $this->makeSafeValueForBrowse($fileName);
@@ -3672,13 +4047,13 @@ class FileUploadTabBFmt extends InputTabBFmt {
 				}
 				//必須項目の場合
 				if( $this->getRequired() === true ){
-					$current = 
+					$current =
 <<<EOD
 {$g['objMTS']->getSomeMessage("ITAWDCH-STD-631")}: <br />
 {$strAnchorTag}
 EOD;
                 }else{
-                	$current = 
+                	$current =
 <<<EOD
 {$g['objMTS']->getSomeMessage("ITAWDCH-STD-631")}: <br />
 {$strAnchorTag}
@@ -3690,11 +4065,11 @@ EOD;
 document.getElementById("{$strIdOfFSTOfDelFlag}").onchange = function(){
     if(this.checked == true){
         $("#"+"{$strIdOfForm}_file").attr("disabled",true);
-        $("#"+"{$strIdOfInputButton}").attr("disabled",true); 
+        $("#"+"{$strIdOfInputButton}").attr("disabled",true);
     }
     else{
         $("#"+"{$strIdOfForm}_file").attr("disabled",false);
-        $("#"+"{$strIdOfInputButton}").attr("disabled",false); 
+        $("#"+"{$strIdOfInputButton}").attr("disabled",false);
     }
 }
 </script>
@@ -3705,18 +4080,18 @@ EOD;
 			}
 			//Sequenceが指定されていない場合は、もはや存在しなくなったので、分岐機能を削除----
 		}
-		
+
 		if( $boolProcessContinue === true ){
-			
+
 			$strConfSetFilesizeNumeric = $this->getMaxFileSize();
-			
+
 			if( 1 > strlen($strConfSetFilesizeNumeric) ){
 				$strConfSetFilesizeNumeric = 20000000;
 			}
-			
+
 			$strActionUrl = $this->getActionUrl();
-			
-			$strTagInnerBody = 
+
+			$strTagInnerBody =
 <<<EOD
 {$current}<iframe id="{$strIdOfIframe}" name="{$strNameOfIframe}" style="display:none" >
 </iframe><form id="{$strIdOfForm}" action="{$strActionUrl}" method="POST" encoding="multipart/form-data" enctype="multipart/form-data" target="{$strIdOfIframe}"><input type="hidden" id="{$strIdOfFSTOfTmpFile}" name="{$strNameOfFSTOfTmpFile}" value="" /><input type="hidden" id="{$strIdOfFSTOfFileId}" name="{$strNameOfFSTOfFileId}" value="{$strDummyValue01}" /><input type="hidden" name="MAX_FILE_SIZE" value="{$strConfSetFilesizeNumeric}" /><input type="hidden" name="{$strNameOfFromFormatterId}" value="{$this->strFormatterId}" /><span name="filewrapper"><input type="file" name="file" id="{$strIdOfForm}_file"/></span></form><input type="button" id="{$strIdOfInputButton}" name="1" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-634")}" onclick="
@@ -3739,9 +4114,9 @@ document.getElementById("{$strIdOfForm}_file").onchange = function(){
 }
 </script>
 EOD;
-			
+
 		}
-		
+
 		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
 			$objFunction = $this->objFunctionForReturnOverrideGetData;
 			$strTagInnerBody = $objFunction($strTagInnerBody,$this,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite);
@@ -3779,7 +4154,7 @@ class FilterTabBFmt extends TabBFmt {
 	public function __construct($strPrintType=""){
 		parent::__construct();
 		$this->strPrintType = $strPrintType; //ほぼ廃止
-		
+
 		$this->setSelectTagCallerShowAgent(false);
 
 		//----FADタグ属性
@@ -3882,9 +4257,9 @@ class FilterTabBFmt extends TabBFmt {
 		}else{
 			if( is_a($this->objColumn, "IDColumn") === true ){
 				//----IDColumnとの連動系
-				
+
 				$retBool = $this->objColumn->getMultiple($this->strFormatterId);
-				
+
 				//IDColumnとの連動系----
 			}
 			$aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg);
@@ -3952,7 +4327,7 @@ class FilterTabBFmt extends TabBFmt {
 			}
 			$selectTagShowJSBody = "javascript:{$strJsEventNamePrefix}add_selectbox('{$this->getPrintSeq()}')";
 			$strSetIdBody = "na_{$this->getPrintTableID()}_{$strColSynonym}";
-			
+
 			$body .= "<br>";
 			$body .= "<div class=\"{$this->getPrintSeq()} {$this->strFADClassOfSelectTagWrapper}\">";
 			$body .= "<div onclick=\"{$selectTagShowJSBody}\" class=\"{$this->strFADClassOfSelectTagCaller}\">{$g['objMTS']->getSomeMessage("ITAWDCH-STD-641")}</div>";
@@ -4107,11 +4482,11 @@ class DateFilterTabBFmt extends FilterTabBFmt {
 
 		if( $this->getFilterInputType() == "DATETIME" ){
 			//----分、秒までの入力版
-			
+
                         // 秒の非表示の場合に最大入力サイズ調整
 			$aryAddOnDefault["size"] = "16";
 			$aryAddOnDefault["maxLength"] = "16";
-			
+
 			$strSecondsHide = "1";
 			if( $this->getSecondsInputOnFilter() === true ){
 			        $aryAddOnDefault["size"]      = "19";
@@ -4129,10 +4504,10 @@ class DateFilterTabBFmt extends FilterTabBFmt {
 			//分、秒までの入力版----
 		}else{
 			//----日までの入力版
-			
+
 			$aryAddOnDefault["size"] = "10";
 			$aryAddOnDefault["maxLength"] = "10";
-			
+
 			$strSecondsHide = "0";
 			$strSecStep = $this->getMinuteScaleInputOnFilter();
 			$strSecStep = "0";
@@ -4153,7 +4528,7 @@ class DateFilterTabBFmt extends FilterTabBFmt {
 
 		$aryJsEvent = $this->getJsEvents();
 		$strFunctionPreFix = "";
-		if( $this->getJsFxNamePrefix()===true ){ 
+		if( $this->getJsFxNamePrefix()===true ){
 			$strFunctionPreFix = $this->getPrintTableID()."_";
 		}
 
@@ -4175,7 +4550,7 @@ class DateFilterTabBFmt extends FilterTabBFmt {
 				$body .= "<input name=\"TT_SYS_dummy\" id=\"{$tagIdentify_S}Agt{$strEventNo}\" {$strJsAttrsBody} >";
 				$body .= "<input name=\"TT_SYS_dummy\" id=\"{$tagIdentify_E}Agt{$strEventNo}\" {$strJsAttrsBody} >";
 			}
-			
+
 		}
 		$body .= '</div>';
 
@@ -4261,11 +4636,11 @@ class SingleDateFilterTabBFmt extends DateFilterTabBFmt {
 
         if( $this->getFilterInputType() == "DATETIME" ){
             //----分、秒までの入力版
-            
+
                         // 秒の非表示の場合に最大入力サイズ調整
             $aryAddOnDefault["size"] = "16";
             $aryAddOnDefault["maxLength"] = "16";
-            
+
             $strSecondsHide = "1";
             if( $this->getSecondsInputOnFilter() === true ){
                     $aryAddOnDefault["size"]      = "19";
@@ -4281,10 +4656,10 @@ class SingleDateFilterTabBFmt extends DateFilterTabBFmt {
             //分、秒までの入力版----
         }else{
             //----日までの入力版
-            
+
             $aryAddOnDefault["size"] = "10";
             $aryAddOnDefault["maxLength"] = "10";
-            
+
             $strSecondsHide = "0";
             $strSecStep = $this->getMinuteScaleInputOnFilter();
             $strSecStep = "0";
@@ -4301,7 +4676,7 @@ class SingleDateFilterTabBFmt extends DateFilterTabBFmt {
 
         $aryJsEvent = $this->getJsEvents();
         $strFunctionPreFix = "";
-        if( $this->getJsFxNamePrefix()===true ){ 
+        if( $this->getJsFxNamePrefix()===true ){
             $strFunctionPreFix = $this->getPrintTableID()."_";
         }
 
@@ -4322,7 +4697,7 @@ class SingleDateFilterTabBFmt extends DateFilterTabBFmt {
                 $strJsAttrsBody = $jsEvent->getJsAttr($rowData, $strFunctionPreFix, "onclick");
                 $body .= "<input name=\"TT_SYS_dummy\" id=\"{$tagIdentify_S}Agt{$strEventNo}\" {$strJsAttrsBody} >";
             }
-            
+
         }
         $body .= '</div>';
 
@@ -4373,7 +4748,7 @@ class DateRangeInFilterTabBFmt extends FilterTabBFmt {
 
 		if( $this->getFilterInputType() == "DATETIME" ){
 			//----分、秒までの入力版
-			
+
                         // 秒の非表示の場合に最大入力サイズ調整
 			$aryAddOnDefault["size"] = "16";
 			$aryAddOnDefault["maxLength"] = "16";
@@ -4392,10 +4767,10 @@ class DateRangeInFilterTabBFmt extends FilterTabBFmt {
 			//分、秒までの入力版----
 		}else if( $this->getFilterInputType() == "DATE" ){
 			//----日までの入力版
-			
+
 			$aryAddOnDefault["size"] = "10";
 			$aryAddOnDefault["maxLength"] = "10";
-			
+
 			$strSecondsHide = "0";
 			$strSecStep = $this->getMinuteScaleInputOnFilter();
 			$strSecStep = "0";
@@ -4412,7 +4787,7 @@ class DateRangeInFilterTabBFmt extends FilterTabBFmt {
 
 		$aryJsEvent = $this->getJsEvents();
 		$strFunctionPreFix = "";
-		if( $this->getJsFxNamePrefix()===true ){ 
+		if( $this->getJsFxNamePrefix()===true ){
 			$strFunctionPreFix = $this->getPrintTableID()."_";
 		}
 
@@ -4603,7 +4978,7 @@ class SelectFilterTabBFmt extends TextFilterTabBFmt {
 	public function getSettingDataBeforeEdit($boolDelete=false,$boolArrayIgnore=false,$rowData=array(),$aryVariant=array()){
 		//----selectedを返す
 		$data = parent::getSettingDataBeforeEdit(false,false,$rowData,$aryVariant); //----設定値が配列の場合も取得
-		
+
 		if( $data === null){
 			$selected = null;
 		}else{
@@ -4684,7 +5059,7 @@ class SelectFilterTabBFmt extends TextFilterTabBFmt {
 			}
 		}
 		$body  = "";
-		
+
 		if( $arraySelectElement === null ){
 			//$body .= "テーブルまたはカラムが存在しません。";
 			$body = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12201");
@@ -4693,17 +5068,17 @@ class SelectFilterTabBFmt extends TextFilterTabBFmt {
 				//$body = "マスター(テーブル)の、被参照キー列に、空白が含まれています。";
 				$body = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12202");
 			}else{
-				
+
 				$selected = $this->getSettingDataBeforeEdit(false,false,$rowData,$aryVariant);
-				
+
 				//$strBlankBody = "空白";
 				$strBlankBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-651");
 				$strOptionBody = makeSelectOption($arraySelectElement, $selected, true, "{".$strBlankBody."}", true);
-				
+
 				$body .= "<select {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} >\n";
 				$body .= $strOptionBody;
 				$body .= "</select>";
-				
+
 			}
 		}
 		return $this->getTag($body, $rowData);
@@ -5088,7 +5463,7 @@ class DelCSVBFmt extends DelBFmt {
 class HostInsideLinkTextTabBFmt extends TextTabBFmt {
 	protected $strOriginAgent;
 
-	protected $objFunctionForGetContentInTag; 
+	protected $objFunctionForGetContentInTag;
 
 	public function __construct(){
 		parent::__construct();
@@ -5257,7 +5632,7 @@ class ReviewTemplateTableTabBFmt extends TabBFmt {
 	}
 
 	//----他のクラスから独立して利用するための関数
-	
+
 	//----テーブル系
 	public function setPageTypeAgent($strPageTypeAgent){
 		$this->strPageTypeAgent = $strPageTypeAgent;
@@ -5338,7 +5713,7 @@ class ReviewTemplateTableTabBFmt extends TabBFmt {
 		}
 		return $retStrActionNameOfApplyRegistrationForNew;
 	}
-	
+
 	public function getActionNameOfApplyRegistrationForUpdate(){
 		$retStrActionNameOfApplyRegistrationForUpdate = $this->strActionNameOfApplyRegistrationForUpdateAgent;
 		if( is_a($this->objColumn, "Column")===true ){
@@ -5472,7 +5847,7 @@ class ReviewTemplateTableTabBFmt extends TabBFmt {
 		return $retStrActionNameOfLogicDeleteOff;
 	}
 	//テーブル系----
-	
+
 	//----カラム系
 	public function getEditUserColumnID(){
 		$retStrEditUserColumnId = $this->strEditUserColumnIdAgent;
@@ -5530,70 +5905,70 @@ class EditLockUpdButtonTabBFmt extends ReviewTemplateTableTabBFmt {
 
         //$updParam = 1; // 利用されていない
         $strRIColId = $this->getRIColumnKey();
-        
+
         $strApplyUserColId = $this->getEditUserColumnID();
         $strDisuseFlagColId = $this->getCheckDisuseColumnID();
         $strEditStatusColId = $this->getEditStatusColumnID();
-        
+
         $strPageType = $this->getPageType();
-        
+
         list($strValueOfDisuseFlag,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array($strDisuseFlagColId),"");
-        
+
         if( 0 < strlen($strValueOfDisuseFlag) ){
             //----レコードに1バイト以上の値が入っている場合
             if( $strValueOfDisuseFlag === "0" ){
                 //----活性中の場合
-                
+
                 // 編集ステータスの値を取得
                 list($strValueOfEditStatusNumeric,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array($strEditStatusColId),"");
-                
+
                 if( $strValueOfEditStatusNumeric == "1" ){
                     //----編集中の場合
-                    
+
                     $strUpdable="disabled";
-                    
+
                     if( $strPageType == "apply" ){
-                        
+
                         list($strValueOfApplyUserNumeric,$tmpBoolKeyExist02)=isSetInArrayNestThenAssign($rowData,array($strApplyUserColId),"");
-                        
+
                         if( $strValueOfApplyUserNumeric === $g['login_id'] ){
                             //----申請者IDと、ログインしているユーザのIDが等しい
-                            
+
                             $strUpdable="";
-                            
+
                             //申請者IDと、ログインしているユーザのIDが等しい----
                         }else{
                             //----申請者IDと、ログインしているユーザのIDが等しくない
-                            
+
                             $strUpdable="disabled";
-                            
+
                             //申請者IDと、ログインしているユーザのIDが等しくない----
                         }
                     }
-                    
+
                     //編集中の場合----
                 }else if( $strValueOfEditStatusNumeric == "2" ){
                     //----申請中の場合
-                    
+
                     $strUpdable="disabled";
-                    
+
                     if( $strPageType == "confirm" ){
-                        
+
                         $strUpdable="";
-                        
+
                     }
-                    
+
                     //申請中の場合----
                 }else{
                     //----編集中ではない場合
-                    
+
                     $strUpdable="disabled";
-                    
+
                     if( $strPageType == "view" ){
                         $strDefaultButtonFace = $this->getActionNameOfApplyRegistrationForUpdate();
                         $strUpdable="";
                     }
-                    
+
                     //編集中ではない場合----
                 }
                 //活性中の場合----
@@ -5601,15 +5976,15 @@ class EditLockUpdButtonTabBFmt extends ReviewTemplateTableTabBFmt {
                 //----活性中ではない場合
                 if( $strValueOfDisuseFlag === "1" ){
                     //----廃止されている場合
-                    
+
                     $strUpdable="disabled";
-                    
+
                     //廃止されている場合----
                 }else{
                     //----そのほかのステータスの場合
-                    
+
                     $strUpdable="disabled";
-                    
+
                     //そのほかのステータスの場合----
                 }
                 //活性中ではない場合----
@@ -5620,7 +5995,7 @@ class EditLockUpdButtonTabBFmt extends ReviewTemplateTableTabBFmt {
                 $strDefaultButtonFace = $this->getActionNameOfConfirmUpdate();
             }else{
                 $strDefaultButtonFace = $this->getActionNameOfApplyRegistrationForUpdate();
-            }            
+            }
             //レコードに1バイト以上の値が入っている場合----
         }
 
@@ -5639,44 +6014,44 @@ class EditLockUpdButtonTabBFmt extends ReviewTemplateTableTabBFmt {
 class EditStatusControlBtnTabBFmt extends ReviewTemplateTableTabBFmt {
     public function getData($rowData,$aryVariant){
         global $g;
-        
+
         $intControlDebugLevel01=250;
         $intControlDebugLevel02=250;
 
         $aryAddOnDefault = array();
         $aryOverWrite = array();
         $aryJsEventOverWrite = array();
-        
+
         $strBodyInCell = "";
-        
+
         $strRIColId = $this->getRIColumnKey();
         $strApplyUserColId = $this->getEditUserColumnID();
         $strDisuseFlagColId = $this->getCheckDisuseColumnID();
         $strEditStatusColId = $this->getEditStatusColumnID();
-        
+
         $strPageType = $this->getPageType();
-        
+
         list($strValueOfDisuseFlag,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array($strDisuseFlagColId),"");
-        
+
         if( $strValueOfDisuseFlag === "0" ){
             //----活性中の場合
-            
+
             list($strRIValueNumeric       ,$tmpBoolKeyExist02)=isSetInArrayNestThenAssign($rowData,array($strRIColId),"");
-            list($strValueForChekTimeStamp,$tmpBoolKeyExist03)=isSetInArrayNestThenAssign($rowData,array($this->getRequiredUpdateDate4UColumnID()),"");            
-            
+            list($strValueForChekTimeStamp,$tmpBoolKeyExist03)=isSetInArrayNestThenAssign($rowData,array($this->getRequiredUpdateDate4UColumnID()),"");
+
             if( $tmpBoolKeyExist02 === true && $tmpBoolKeyExist03 === true ){
-                
+
                 // 編集ステータスの値を取得
                 list($strValueOfEditStatusNumeric,$tmpBoolKeyExist01)=isSetInArrayNestThenAssign($rowData,array($strEditStatusColId),"");
-                
+
                 if( $strPageType == "apply" ){
                     //----申請者ページの場合
-                    
+
                     list($strValueOfApplyUserNumeric,$tmpBoolKeyExist02)=isSetInArrayNestThenAssign($rowData,array($strApplyUserColId),"");
-                    
+
                     if( $strValueOfApplyUserNumeric === $g['login_id'] ){
                         //----閲覧者と編集者が同じである
-                        
+
                         if( $strValueOfEditStatusNumeric == "1" ){
                             //----編集ステータスが、編集中である場合
 
@@ -5709,7 +6084,7 @@ class EditStatusControlBtnTabBFmt extends ReviewTemplateTableTabBFmt {
 
                             $aryJsEventOverWrite["onClick"] = "pre_apply_async('{$strRIValueNumeric}',0,'{$strValueForChekTimeStamp}');";
                             $strBodyInCell .= "<p><input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData,$aryJsEventOverWrite)} /></p>";
-                            
+
                             $strBodyInCell .= "　";
                             $strButtonFace = $this->getActionNameOfApplyEditRestart();
                             $aryOverWrite["value"] = $strButtonFace;
@@ -5872,7 +6247,7 @@ class SensitiveTextAreaTabBFmt extends InputTabBFmt {
 		if($sensitive_flag == 2){
 			$data = "";
 		}
-		
+
 		$strTagInnerBody = "<textarea {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>{$data}</textarea>";
 
 

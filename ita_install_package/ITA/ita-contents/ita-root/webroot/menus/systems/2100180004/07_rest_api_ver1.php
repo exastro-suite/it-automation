@@ -25,7 +25,7 @@
     global $g;
     // ルートディレクトリを取得
     $tmpAry=explode('ita-root', dirname(__FILE__));$g['root_dir_path']=$tmpAry[0].'ita-root';unset($tmpAry);
-    $g['page_dir'] = dirname($_SERVER['PHP_SELF']);
+    $g['page_dir'] = dirname(htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8"));
 
     $g['requestByREST'] = array('resultStatusCode'=>200,
                                 'preResponsContents'=>array('successInfo'=>array('status'=>'SUCCEED',

@@ -18,7 +18,7 @@ header('Content-Type: text/css; charset=utf-8');
 
 function itaThemeSelect() {
 
-$theme = $_GET['theme'];
+$theme = htmlspecialchars($_GET['theme'], ENT_QUOTES, "UTF-8");
 
 
 
@@ -428,14 +428,16 @@ a:active {
    BUTTON
  * ********************************************************************* */
 input[type="button"],
-input[type="submit"] {
+input[type="submit"],
+button.linkBtnInTbl {
   background-color: {$color->hex($c['BUTTON'][0],100)};
   border-color: {$color->hex($c['BUTTON'][0],100)};
   box-shadow: 0 2px 0 {$color->hex($c['BUTTON'][0],70,'000000')};
   color: #FFFFFF;
 }
 input[type="button"]:hover,
-input[type="submit"]:hover {
+input[type="submit"]:hover,
+button.linkBtnInTbl:hover {
   background-color: {$color->hex($c['BUTTON'][1],100)};
   border-color: {$color->hex($c['BUTTON'][1],100)};
   box-shadow: 0 1px 0 {$color->hex($c['BUTTON'][1],70,'000000')};
@@ -465,7 +467,9 @@ input.deleteBtnInTbl[type="button"][value="Restore"]:hover {
   box-shadow: 0 1px 0 #0030A1;
 }
 
-input[type="button"]:active, input[type="submit"]:active {
+input[type="button"]:active,
+input[type="submit"]:active,
+button.linkBtnInTbl:active {
 	box-shadow: none;
 	transform: translateY( 0 );
 }
@@ -476,7 +480,10 @@ input[type="button"][disabled]:hover,
 input[type="button"][disabled]:active,
 input[type="submit"][disabled],
 input[type="submit"][disabled]:hover,
-input[type="submit"][disabled]:active {
+input[type="submit"][disabled]:active,
+button.linkBtnInTbl[disabled],
+button.linkBtnInTbl[disabled]:hover,
+button.linkBtnInTbl[disabled]:active {
 	background-color: {$color->hex($c['TABLE'][2],100)};
 	border-color: {$color->hex($c['TABLE'][3],100)};
   color: {$color->hex($c['TEXT'][0],50,$c['TEXT'][1])};

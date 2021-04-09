@@ -164,7 +164,8 @@ Terrraform 代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニューID
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104920"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", '', array('OrderByThirdColumn'=>'MENU_ID'));
+            $url = "01_browse.php?no=";
+            $c = new LinkIDColumn('MENU_ID_CLONE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104920"), "A_MENU_LIST", 'MENU_ID', "MENU_ID", $url, false, true, '', '', '', '', array('OrderByThirdColumn'=>'MENU_ID'));
             $c->addClass("number");
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104930"));
             $c->setJournalTableOfMaster('A_MENU_LIST_JNL');
@@ -204,7 +205,8 @@ Terrraform 代入値自動登録設定
             ////////////////////////////////////////////////////////////
             // メニュー名
             ////////////////////////////////////////////////////////////
-            $c = new IDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104940"), 'A_MENU_LIST', 'MENU_ID', 'MENU_NAME');
+            $url = "01_browse.php?no=";
+            $c = new LinkIDColumn('MENU_ID_CLONE_02', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104940"), 'A_MENU_LIST', 'MENU_ID', 'MENU_NAME', $url, false, true, 'MENU_ID');
             $c->setHiddenMainTableColumn(false);
             $c->setAllowSendFromFile(false);
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104950"));
@@ -271,6 +273,8 @@ Terrraform 代入値自動登録設定
         $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
         $c->setJournalKeyIDOfMaster('MENU_ID');
         $c->setJournalDispIDOfMaster('MENU_PULLDOWN');
+
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
@@ -469,6 +473,8 @@ Terrraform 代入値自動登録設定
         $c->setJournalKeyIDOfMaster('COLUMN_LIST_ID');
         $c->setJournalDispIDOfMaster('COL_TITLE');
 
+        $c->setRequiredMark(true);//必須マークのみ付与
+
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         $cgg->addColumn($c);
@@ -511,6 +517,7 @@ Terrraform 代入値自動登録設定
 
         //登録/更新時には、必須でない
         $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         $cgg->addColumn($c);
 
@@ -578,6 +585,7 @@ Terrraform 代入値自動登録設定
 
         // 必須チェックは組合せバリデータで行う。
         $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
 
         //コンテンツのソースがヴューの場合、登録/更新の対象とする
         $c->setHiddenMainTableColumn(true);
@@ -1353,7 +1361,7 @@ Terrraform 代入値自動登録設定
         // MENU_ID;未設定 COLUMN_LIST_ID:未設定 MENU_COLUMN_LIST_ID:設定 => RestAPI/Excel/CSV
         // その他はUI
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
-            if((strlen($rg_menu_id)             === 0) && 
+            if((strlen($rg_menu_id)             === 0) &&
                (strlen($rg_column_list_id)      === 0) &&
                (strlen($rg_rest_column_list_id) !== 0)){
                 $query =  "SELECT                                             "
@@ -1561,7 +1569,7 @@ Terrraform 代入値自動登録設定
                 $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211380");
                 $boolExecuteContinue = false;
                 $retBool = false;
-            }    
+            }
         }
 
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){

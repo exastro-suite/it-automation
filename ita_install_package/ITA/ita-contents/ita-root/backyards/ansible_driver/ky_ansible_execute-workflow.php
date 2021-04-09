@@ -59,7 +59,7 @@
     $php_req_gate_php                = '/libs/commonlibs/common_php_req_gate.php';
     $db_connect_php                  = '/libs/commonlibs/common_db_connect.php';
     $ansible_table_define_php        = '/libs/backyardlibs/ansible_driver/AnsibleTableDefinition.php';
-    $DBaccess_php                    = "/libs/backyardlibs/common/common_db_access.php";  // enomoto
+    $DBaccess_php                    = "/libs/backyardlibs/common/common_db_access.php";  
     $comDBaccess_php                 = "/libs/backyardlibs/ansible_driver/ky_ansible_execute-workflow_common.php";
 
     ////////////////////////////////
@@ -394,6 +394,14 @@
                 require ($root_dir_path . $log_output_php );
                 return false;
             }
+            // 未実行状態で緊急停止出来るようにしているので
+            // 未実行状態かを判定
+            if(($tgt_execution_row["STATUS_ID"] != 1) &&
+               ($tgt_execution_row["STATUS_ID"] != 9)) {
+                $FREE_LOG = "Emergency stop in unexecuted state.(execution_no: $tgt_execution_no)";
+                require ($root_dir_path . $log_output_php );
+                return false;
+            }
     
             ////////////////////////////////////////////////////////////////
             // 処理対象の作業インスタンスのステータスを処理中に設定
@@ -432,15 +440,14 @@
             $log_file_postfix = ".log";
             $logfile = $log_output_dir .'/' . $log_file_prefix . date("Ymd",$tmpVarTimeStamp) . $log_file_postfix;
 
-            $cmd = sprintf("%s %s%s %s %010s %s-%010s >> %s 2>&1 &",
+            $cmd = sprintf("%s %s%s %s %010s %s-%010s &",
                             $php_command,
                             $root_dir_path,
                             "/backyards/ansible_driver/ky_ansible_execute-child-workflow.php",
                             $vg_driver_id,
                             $tgt_execution_no,
                             $tgt_driver_name,
-                            $tgt_execution_no,
-                            $logfile);
+                            $tgt_execution_no);
 
             // トレースメッセージ
             if ( $log_level === 'DEBUG' ){

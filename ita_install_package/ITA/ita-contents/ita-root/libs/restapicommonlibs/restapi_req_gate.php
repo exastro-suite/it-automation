@@ -62,7 +62,7 @@
     $aryReqHeaderData = array();
     $aryReqAuthData = array();
     
-    $strRequestURIOnRest = $_SERVER['PHP_SELF'];
+    $strRequestURIOnRest = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
     
     $objJSON = array();
     

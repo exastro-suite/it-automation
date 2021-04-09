@@ -106,6 +106,15 @@ Ansible（Legacy Role）ロールパッケージ一覧
 
     $table->addColumn($c);
 
+    // Movement詳細へのリンクボタン
+    $strLabelText = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207317");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
+    $c->setDBColumn(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':ROLE_PACKAGE_NAME'));
+    $c->getOutputType('print_journal_table')->setVisible(false);
+
+    $table->addColumn($c);
+
 
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
     $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
@@ -190,8 +199,8 @@ Ansible（Legacy Role）ロールパッケージ一覧
             } else {
                 $PkeyID = array_key_exists('ROLE_PACKAGE_ID',$arrayRegData)?$arrayRegData['ROLE_PACKAGE_ID']:null;
             }
-            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_8',$arrayRegData)?
-                               $arrayRegData['tmp_file_COL_IDSOP_8']:null;
+            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_9',$arrayRegData)?
+                               $arrayRegData['tmp_file_COL_IDSOP_9']:null;
             $strTempFileFullname = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
 
             $role_package_name = array_key_exists('ROLE_PACKAGE_NAME',$arrayRegData)?
@@ -224,7 +233,7 @@ Ansible（Legacy Role）ロールパッケージ一覧
         $User2ITA_var_list    = array();
         $save_vars_array      = array();
         $disuse_role_chk      = true;
-        
+
         $global_vars_master_list = array();
         $template_master_list    = array();
         $obj = new VarStructAnalysisFileAccess($g['objMTS'],
@@ -281,7 +290,7 @@ Ansible（Legacy Role）ロールパッケージ一覧
                             {
                                 $retBool    = false;
                                 $retStrBody = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000018');
-                            } 
+                            }
                         }
                         if($retBool === true) {
                             $dbObj = new WebDBAccessClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
@@ -315,7 +324,7 @@ Ansible（Legacy Role）ロールパッケージ一覧
         }
         if($retBool === true) {
             // 登録・更新・復活の場合
-            if( ($strModeId == "DTUP_singleRecUpdate")   || 
+            if( ($strModeId == "DTUP_singleRecUpdate")   ||
                 ($strModeId == "DTUP_singleRecRegister") ||
                (($strModeId == "DTUP_singleRecDelete")   &&
                 ($modeValue_sub == 'off'))) {

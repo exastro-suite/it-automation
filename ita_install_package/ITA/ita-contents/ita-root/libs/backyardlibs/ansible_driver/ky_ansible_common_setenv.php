@@ -77,6 +77,17 @@
         // 具体値 SENSITIVE設定値
         define("DF_SENSITIVE_OFF"              ,"1");  //OFF
         define("DF_SENSITIVE_ON"               ,"2");  //ON
+
+   	 // 機器一覧 パスワード管理フラグ(LOGIN_PW_HOLD_FLAG)
+    	define("DF_LOGIN_PW_HOLD_FLAG_OFF"     ,'0');  // パスワード管理なし
+    	define("DF_LOGIN_PW_HOLD_FLAG_ON"      ,'1');  // パスワード管理あり
+    	define("DF_LOGIN_PW_HOLD_FLAG_DEF"     ,'0');  // デフォルト値 パスワード管理なし
+    	// 機器一覧 認証方式(LOGIN_AUTH_TYPE)
+    	define("DF_LOGIN_AUTH_TYPE_KEY"        ,'1');  // 鍵認証(パスフレーズなし)
+    	define("DF_LOGIN_AUTH_TYPE_PW"         ,'2');  // パスワード認証
+    	define("DF_LOGIN_AUTH_TYPE_KEY_EXCH"   ,'3');  // 認証方式:鍵認証(鍵交換済み)
+    	define("DF_LOGIN_AUTH_TYPE_KEY_PP_USE" ,'4');  // 認証方式:鍵認証(パスフレーズあり)
+    	define("DF_LOGIN_AUTH_TYPE_PW_WINRM"   ,'5');  // 認証方式:パスワード認証(winrm)
     }
 
     // ITA側で管理している legacy用 子playbookファイル格納先ディレクトリ

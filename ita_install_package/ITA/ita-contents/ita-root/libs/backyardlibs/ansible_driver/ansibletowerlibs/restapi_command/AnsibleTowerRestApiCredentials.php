@@ -125,6 +125,10 @@ class AnsibleTowerRestApiCredentials extends AnsibleTowerRestApiBase {
             $content['inputs']['ssh_key_data'] = $param['ssh_private_key'];
         } // 任意パラメータは無くてもNG返さない
 
+        if(!empty($param['ssh_private_key_pass'])) {
+            $content['inputs']['ssh_key_unlock'] = $param['ssh_private_key_pass'];
+        } // 任意パラメータは無くてもNG返さない
+
         // REST APIアクセス
         $method = "POST";
         $response_array = $RestApiCaller->restCall($method, self::API_PATH, $content);

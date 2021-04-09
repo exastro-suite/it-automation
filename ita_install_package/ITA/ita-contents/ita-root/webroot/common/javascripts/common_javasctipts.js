@@ -46,14 +46,22 @@ $( window ).on({
                     let nakamiID;
                     if ( $heading.next().is('.open') ) {
                         nakamiID = $heading.next('.open').find('.text').attr('id')
-                    } else {
+                    } else if ( $heading.next().is('h3') ) {
+                        if ( $heading.next('h3').next().is('.text') ) {
+                            nakamiID = $heading.next('h3').next('.text').attr('id');
+                        } else if ( $heading.next('h3').next().is('.open') ) {
+                            nakamiID = $heading.next('h3').next('.open').attr('id');
+                        }
+                    } else if ( $heading.next().is('.text') ) {
                         nakamiID = $heading.next('.text').attr('id');
                     }
                     // 開閉できないものとFilterの次に来るもは除外する
-                    if ( !checkOpenNow( nakamiID ) && midashiID !== undefined && !prevNakamiID.match(/^Filter/) ) {                      
-                        headingArray[midashiID] = nakamiID;
+                    if ( nakamiID !== undefined ) {
+                      if ( !checkOpenNow( nakamiID ) && midashiID !== undefined && !prevNakamiID.match(/^Filter/) ) {                      
+                          headingArray[midashiID] = nakamiID;
+                      }
+                      prevNakamiID = nakamiID;
                     }
-                    prevNakamiID = nakamiID;
                 });
                 func.setSessionStorage( keyName, JSON.stringify( headingArray ) );
             }
@@ -145,7 +153,7 @@ function set_layout_setting() {
             exclusionPageNo = [
               '2100180003','2100180005',
               '2100160011',
-              '2100000211','2100000212','2100000401','2100000402'
+              '2100000211','2100000212'
             ];
       
       if ( pageNo !== null && grpNo === null && exclusionPageNo.indexOf( pageNo ) === -1 ) {
@@ -217,16 +225,24 @@ function set_layout_setting() {
                       let nakamiID;
                       if ( $heading.next().is('.open') ) {
                           nakamiID = $heading.next('.open').find('.text').attr('id')
-                      } else {
+                      } else if ( $heading.next().is('h3') ) {
+                          if ( $heading.next('h3').next().is('.text') ) {
+                              nakamiID = $heading.next('h3').next('.text').attr('id');
+                          } else if ( $heading.next('h3').next().is('.open') ) {
+                              nakamiID = $heading.next('h3').next('.open').find('.text').attr('id');
+                          }
+                      } else if ( $heading.next().is('.text') ) {
                           nakamiID = $heading.next('.text').attr('id');
                       }
-                      // 開閉できないものとFilterの次に来るもは除外する
-                      if ( midashiID !== undefined && !prevNakamiID.match(/^Filter/) ) {                      
-                          headingArray.push([ midashiID, midashiTEXT, nakamiID, '']);
-                      } else {
-                          headingArray.push([ undefined, midashiTEXT, undefined, 'disabled']);
+                      if ( nakamiID !== undefined ) {
+                        // 開閉できないものとFilterの次に来るもは除外する
+                        if ( midashiID !== undefined && !prevNakamiID.match(/^Filter/) ) {                      
+                            headingArray.push([ midashiID, midashiTEXT, nakamiID, '']);
+                        } else {
+                            headingArray.push([ undefined, midashiTEXT, undefined, 'disabled']);
+                        }
+                        prevNakamiID = nakamiID;
                       }
-                      prevNakamiID = nakamiID;
                   });
 
                   // 開閉状態変更リスト作成
@@ -413,3 +429,27 @@ function userNameAllDisplay() {
     }
   });
 }
+
+//////// ----変更履歴遷移用ファンクション ////////
+function Mix1_1_journal_async( mode, inner_seq ){
+  var ele = document.getElementsByName("COL_IDSOP_7");
+  ele[0].value = inner_seq;
+  Journal1Tbl_search_async();
+  if( document.getElementById("Journal1_Nakami").style.display == "none" ) {
+      show('Journal1_Midashi','Journal1_Nakami');
+  }
+  // Journal1_Midashiのところまでジャンプ
+  jumpToSelfHtml('Journal1_Midashi');
+}
+
+function journal_async( mode, inner_seq ){
+  var ele = document.getElementsByName("COL_IDSOP_7");
+  ele[0].value = inner_seq;
+  Journal1Tbl_search_async();
+  if( document.getElementById("Journal1_Nakami").style.display == "none" ) {
+      show('Journal1_Midashi','Journal1_Nakami');
+  }
+  // Journal1_Midashiのところまでジャンプ
+  jumpToSelfHtml('Journal1_Midashi');
+}
+//////// 変更履歴遷移用ファンクション---- ////////

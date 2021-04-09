@@ -14,26 +14,26 @@
 //   limitations under the License.
 //
 ////ja_JP_UTF-8_ITACBLH_STD
-$ary[1001] = "Notice:Start synchronizing profile master.";
-$ary[1002] = "Notice:Success connecting with DB.";
-$ary[1003] = "Notice:Start transaction.";
-$ary[1004] = "Notice:This is a no changed record.Do not update.( {} ) Line:[ {} ]";
-$ary[1005] = "Success:Record is locked.( {} )";
-$ary[1006] = "Notice:Create insert SQL.( {} )";
-$ary[1007] = "Notice:Create update SQL.( {} )";
-$ary[1008] = "Success:Rollback.";
-$ary[1009] = "Success:End transaction.";
-$ary[1010] = "Success:Commited";
-$ary[2001] = "Notice:Start to make system file for synchronizing.";
-$ary[2002] = "Notice:Success connecting with DB.";
-$ary[2003] = "Notice:Start transaction.";
-$ary[2004] = "Success:Rollback.";
-$ary[2005] = "Notice:End transaction.";
-$ary[2006] = "Notice:Rollback at error.";
-$ary[3001] = "Notice:Start to make synchronizing profile file.";
-$ary[3002] = "Success:Get profile list from cobbler.";
-$ary[3003] = "Success:Complete making profile list file.";
-$ary[4001] = "Notice:Start to synchronize system list.";
-$ary[4002] = "Notice:Get the system file.";
-$ary[4003] = "Success:Complete syncronizing system list.";
+$ary["ITACBLH-STD-1001"]            = "Notice:Start synchronizing profile master.";
+$ary["ITACBLH-STD-1002"]            = "Notice:Success connecting with DB.";
+$ary["ITACBLH-STD-1003"]            = "Notice:Start transaction.";
+$ary["ITACBLH-STD-1004"]            = "Notice:This is a no changed record.Do not update.( {} ) Line:[ {} ]";
+$ary["ITACBLH-STD-1005"]            = "Success:Record is locked.( {} )";
+$ary["ITACBLH-STD-1006"]            = "Notice:Create insert SQL.( {} )";
+$ary["ITACBLH-STD-1007"]            = "Notice:Create update SQL.( {} )";
+$ary["ITACBLH-STD-1008"]            = "Success:Rollback.";
+$ary["ITACBLH-STD-1009"]            = "Success:End transaction.";
+$ary["ITACBLH-STD-1010"]            = "Success:Commited";
+$ary["ITACBLH-STD-2001"]            = "Notice:Start to make system file for synchronizing.";
+$ary["ITACBLH-STD-2002"]            = "Notice:Success connecting with DB.";
+$ary["ITACBLH-STD-2003"]            = "Notice:Start transaction.";
+$ary["ITACBLH-STD-2004"]            = "Success:Rollback.";
+$ary["ITACBLH-STD-2005"]            = "Notice:End transaction.";
+$ary["ITACBLH-STD-2006"]            = "Notice:Rollback at error.";
+$ary["ITACBLH-STD-3001"]            = "Notice:Start to make synchronizing profile file.";
+$ary["ITACBLH-STD-3002"]            = "Success:Get profile list from cobbler.";
+$ary["ITACBLH-STD-3003"]            = "Success:Complete making profile list file.";
+$ary["ITACBLH-STD-4001"]            = "Notice:Start to synchronize system list.";
+$ary["ITACBLH-STD-4002"]            = "Notice:Get the system file.";
+$ary["ITACBLH-STD-4003"]            = "Success:Complete syncronizing system list.";
 ?>

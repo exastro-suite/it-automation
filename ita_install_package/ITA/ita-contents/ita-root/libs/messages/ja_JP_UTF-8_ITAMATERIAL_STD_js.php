@@ -14,8 +14,8 @@
 //   limitations under the License.
 //
 ////ja_JP_UTF-8_ITAMATERIAL_STD
-$ary["ITAMATERIAL_1001"] = "リモートリポジトリURLとクローンリポジトリディレクトリを設定してください。";
-$ary["ITAMATERIAL_1002"] = "初期同期を実行してよろしいですか？";
-$ary["ITAMATERIAL_1003"] = "初期同期を開始しました。";
-$ary["ITAMATERIAL_1004"] = "初期同期が完了しました。";
+$ary["ITAMATERIAL_1001"]     = "リモートリポジトリURLとクローンリポジトリディレクトリを設定してください。";
+$ary["ITAMATERIAL_1002"]     = "初期同期を実行してよろしいですか？";
+$ary["ITAMATERIAL_1003"]     = "初期同期を開始しました。";
+$ary["ITAMATERIAL_1004"]     = "初期同期が完了しました。";
 ?>

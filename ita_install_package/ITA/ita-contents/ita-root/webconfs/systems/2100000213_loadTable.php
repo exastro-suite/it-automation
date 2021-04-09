@@ -43,7 +43,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // エクセルのシート名
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage('ITABASEH-MNU-900008'));
 
-    $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setAccessAuth(false);    // データごとのRBAC設定
 
     $c = new IDColumn('TASK_STATUS',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900014'),'B_DP_STATUS_MASTER','TASK_ID','TASK_STATUS','');
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900016'));//エクセル・ヘッダでの説明
@@ -66,9 +66,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
+    // 指定時刻
+    $c = new DateTimeColumn('SPECIFIED_TIMESTAMP', $g['objMTS']->getSomeMessage("ITABASEH-MNU-900033"),'TIMESTAMP','TIMESTAMP',false);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-900034"));
+    $table->addColumn($c);
+
     //ファイル名
     $c = new FileUploadColumn('FILE_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-900015"));
-    $filePath = "uploadfiles/{$g['page_dir']}";
+    $filePath = "";
+    $arrayReqInfo = requestTypeAnalyze();
+    if( $arrayReqInfo[0] == "web" ){
+        $filePath = "uploadfiles/{$g['page_dir']}";
+    }
     $c->setNRPathAnyToBranchPerFUC($filePath);
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-900017"));//エクセル・ヘッダでの説明
     $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト

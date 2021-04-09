@@ -22,7 +22,7 @@
 
     $tmpAry=explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);
     if(array_key_exists('no', $_GET)){
-        $g['page_dir']  = $_GET['no'];
+        $g['page_dir']  = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
     }
     $privilege = "";
 
@@ -42,7 +42,7 @@
        //アクセス権を判定
         if( array_key_exists( "conductor_class_id", $_GET ) === true ){
             // クエリからsymphony_instance_idを取得
-            $conductor_class_id = $_GET["conductor_class_id"];
+            $conductor_class_id = htmlspecialchars($_GET["conductor_class_id"], ENT_QUOTES, "UTF-8");
 
             // 整数の場合のみ判定
             $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
@@ -170,16 +170,16 @@ EOD;
       <div id="editor-mode"></div>
       <div class="editor-header-menu">
         <div class="editor-header-main-menu">
-          <ul class="editor-menu-list edit">
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-new">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309007")}</button></li>
+          <ul class="editor-menu-list conductor-header-menu1">
+            <li class="editor-menu-item edit"><button class="editor-menu-button" data-menu="conductor-new">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309007")}</button></li>
             <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-save">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309008")}</button></li>
-            <li class="editor-menu-item"><button class="editor-menu-button" data-menu="conductor-read">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309009")}</button></li>
+            <li class="editor-menu-item edit"><button class="editor-menu-button" data-menu="conductor-read">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309009")}</button></li>
           </ul>
-          <ul class="editor-menu-list">
+          <ul class="editor-menu-list conductor-header-menu2">
             <li class="editor-menu-item"><button id="button-undo" class="editor-menu-button" data-menu="undo" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309010")}</button></li>
             <li class="editor-menu-item"><button id="button-redo" class="editor-menu-button" data-menu="redo" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309011")}</button></li>
           </ul>
-          <ul class="editor-menu-list">
+          <ul class="editor-menu-list conductor-header-menu3">
             <li class="editor-menu-item"><button id="node-delete-button" class="editor-menu-button" data-menu="node-delete" disabled>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309012")}</button></li>
           </ul>
         </div>
@@ -265,6 +265,7 @@ EOD;
                   <li class="editor-tab-menu-item" data-tab="merge">Merge</li>
                   <li class="editor-tab-menu-item" data-tab="call">Conductor call</li>
                   <li class="editor-tab-menu-item" data-tab="call_s">Symphony call</li>
+                  <li class="editor-tab-menu-item" data-tab="multiple">Node</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
 
@@ -279,9 +280,9 @@ EOD;
                           <th class="panel-th">ID :</th>
                           <td class="panel-td"><span id="conductor-class-id" class="panel-span"></span></td>
                         </tr>
-                        <tr>
+                        <tr title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309048")}">
                           <th class="panel-th">Name :</th>
-                          <td class="panel-td"><input id="conductor-class-name" class="edit panel-text" type="text"><span id="conductor-class-name-view" class="view panel-span"></span></td>
+                          <td class="panel-td"><input maxlength="256" id="conductor-class-name" class="edit panel-text" type="text"><span id="conductor-class-name-view" class="view panel-span"></span></td>
                         </tr>
                         <tr class="view">
                           <th class="panel-th">Role :</th>
@@ -300,12 +301,12 @@ EOD;
                         </tbody>
                       </table>
                       <ul class="panel-button-group">
-                        <li class="panel-button-group-item"><button id="conductor-role-select" class="panel-button">Permission role select</button></li>
+                        <li class="panel-button-group-item"><button id="conductor-role-select" class="panel-button">Select</button></li>
                       </ul>                      
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="conductor-class-note" class="edit panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="conductor-class-note" class="edit panel-note panel-textarea" spellcheck="false"></textarea>
                       <span id="conductor-class-note-view" class="view panel-note panel-span"></span>
                     </div>                    
                   </div>
@@ -351,7 +352,7 @@ EOD;
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="movement-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="movement-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -369,7 +370,7 @@ EOD;
                     </table>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="function-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="function-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -408,7 +409,7 @@ EOD;
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="branch-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="branch-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -431,7 +432,7 @@ EOD;
                     </table>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="marge-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="marge-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -454,7 +455,7 @@ EOD;
                     </table>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="merge-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="merge-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -502,7 +503,7 @@ EOD;
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="conductor-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="conductor-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -550,7 +551,31 @@ EOD;
                     </div>
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
-                      <textarea id="symphony-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="symphony-call-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Node 複数選択 -->
+                <div id="multiple" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <div class="panel-group">
+                      <div class="panel-group-title">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309038")}</div>
+                      <ul id="node-align" class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="node-align-left" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309040")}"><span class="align-icon algin-left"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-vertical" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309041")}"><span class="align-icon algin-vertical"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-right" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309042")}"><span class="align-icon algin-right"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-top" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309043")}"><span class="align-icon algin-top"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-horizonal" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309044")}"><span class="align-icon algin-horizonal"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-align-bottom" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309045")}"><span class="align-icon algin-bottom"></span></button></li>
+                      </ul>
+                    </div>
+                    <div class="panel-group">
+                      <div class="panel-group-title">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309039")}</div>
+                      <ul id="node-equally-spaced" class="panel-button-group">
+                        <li class="panel-button-group-item"><button id="node-equally-spaced-vertical" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309046")}"><span class="align-icon algin-equally-vertical"></span></button></li>
+                        <li class="panel-button-group-item"><button id="node-equally-spaced-horizonal" class="panel-button" title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309047")}"><span class="align-icon algin-equally-horizonal"></span></button></li>
+                      </ul>
                     </div>
                   </div>
                 </div>
@@ -583,9 +608,13 @@ EOD;
                     <div class="movement-filter">
                       <table class="panel-table">
                         <tbody>
-                          <tr>
-                            <th class="panel-th">Filter :</th>
-                            <td class="panel-td"><input id="movement-filter" class="panel-text" type="text"><span id="filter-setting"></span></td>
+                          <tr class="movement-filter-row">
+                            <th class="panel-th">Name Filter :</th>
+                            <td class="panel-td"><input id="movement-filter" class="panel-text" type="text" placeholder="Movement Name"><span class="filter-setting-btn" title="Filter setting"></span></td>
+                          </tr>
+                          <tr class=""movement-filter-id-row">
+                            <th class="panel-th">ID Filter :</th>
+                            <td class="panel-td"><input id="movement-filter-id" class="panel-text" type="text" placeholder="Movement ID"><span class="filter-setting-btn" title="Filter setting"></span></td>
                           </tr>
                         </tbody>
                       </table>
@@ -593,11 +622,39 @@ EOD;
                     <div class="node-table-wrap">
                       <table class="node-table">
                         <thead>
-                          <tr><th><div>+</div></th><th><div>ID</div></th><th><div>Movement name</div></th></tr>
+                          <tr>
+                            <th class="movement-list-orchestrator" title="Orchestrator"><div class="movement-list-sort" data-sort="ORCHESTRATOR_ID" data-sort-type="number">+</div></th>
+                            <th class="movement-list-id" title="Movement ID"><div class="movement-list-sort" data-sort="PATTERN_ID" data-sort-type="number">ID</div></th>
+                            <th class="movement-list-name" title="Movement Name"><div class="movement-list-sort" data-sort="PATTERN_NAME" data-sort-type="string">Movement name</div></th>
+                          </tr>
                         </thead>
                         <tbody id="movement-list-rows">
                         </tbody>
                       </table>
+                    </div>
+                    <div id="movement-filter-setting">
+                      <div class="movement-filter-setting-inner">
+                        <div class="movement-filter-setting-body">
+                          <div class="panel-group">
+                            <div class="panel-group-title">Filter target</div>
+                            <ul class="movement-filter-setting-list">
+                              <li><label class="property-label"><input type="radio" name="filter-target" id="filter-target-id"> Movement ID</label></li>
+                              <li><label class="property-label"><input type="radio" name="filter-target" id="filter-target-name" checked> Movement Name</label></li>
+                            </ul>
+                          </div>
+                          <div class="panel-group">
+                            <div class="panel-group-title">Orchestrator select</div>
+                            <ul id="orchestrator-list" class="movement-filter-setting-list">
+                            </ul>
+                          </div>
+                        </div>
+                        <div class="movement-filter-setting-footer">
+                          <ul class="panel-button-group">
+                            <li class="panel-button-group-item"><button id="movement-filter-ok" class="positive panel-button">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309036")}</button></li>
+                            <li class="panel-button-group-item"><button id="movement-filter-cancel" class="negative panel-button">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309037")}</button></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

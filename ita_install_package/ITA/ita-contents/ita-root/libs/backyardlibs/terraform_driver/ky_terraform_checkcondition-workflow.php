@@ -145,8 +145,11 @@
         //----------------------------------------------
         // TERRAFORMインタフェース情報をローカル変数に格納
         //----------------------------------------------
-        $lv_terraform_hostname                 = $lv_terraform_if_info['TERRAFORM_HOSTNAME'];
-        $lv_terraform_token                    = ky_decrypt($lv_terraform_if_info['TERRAFORM_TOKEN']);
+        $lv_terraform_hostname   = $lv_terraform_if_info['TERRAFORM_HOSTNAME'];
+        $lv_terraform_token      = ky_decrypt($lv_terraform_if_info['TERRAFORM_TOKEN']);
+        $proxy_setting            = array();
+        $proxy_setting['address'] = $lv_terraform_if_info['TERRAFORM_PROXY_ADDRESS'];
+        $proxy_setting['port']    = $lv_terraform_if_info['TERRAFORM_PROXY_PORT'];
 
         //----------------------------------------------
         // 作業インスタンス情報 configのSQl生成
@@ -165,6 +168,7 @@
             "I_TIME_LIMIT"=>"",
             "I_TERRAFORM_RUN_ID"=>"",
             "I_TERRAFORM_WORKSPACE_ID"=>"",
+            "I_TERRAFORM_ORGANIZATION_WORKSPACE"=>"",
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "I_OPERATION_NO_IDBH"=>"",
@@ -176,6 +180,7 @@
             "FILE_INPUT"=>"",
             "FILE_RESULT"=>"",
             "RUN_MODE"=>"",
+            "ACCESS_AUTH"=>"",
             "DISUSE_FLAG"=>"",
             "NOTE"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -208,6 +213,7 @@
             "I_TIME_LIMIT"=>"",
             "I_TERRAFORM_RUN_ID"=>"",
             "I_TERRAFORM_WORKSPACE_ID"=>"",
+            "I_TERRAFORM_ORGANIZATION_WORKSPACE"=>"",
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "I_OPERATION_NO_IDBH"=>"",
@@ -219,6 +225,7 @@
             "FILE_INPUT"=>"",
             "FILE_RESULT"=>"",
             "RUN_MODE"=>"",
+            "ACCESS_AUTH"=>"",
             "DISUSE_FLAG"=>"",
             "NOTE"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
@@ -295,6 +302,16 @@
         $HttpContext = array( "http" => array( "method"        => 'GET',
                                                "header"        => implode("\r\n", $Header),
                                                "ignore_errors" => true));
+        //proxy設定
+        if($proxy_setting['address'] != ""){
+            $address = $proxy_setting['address'];
+            if($proxy_setting['port'] != ""){
+                $address = $address . ":" . $proxy_setting['port'];
+            }
+            $HttpContext['http']['proxy'] = $address;
+            $HttpContext['http']['request_fulluri'] = true;
+        }
+
         $HttpContext['ssl']['verify_peer']=false;
         $HttpContext['ssl']['verify_peer_name']=false;
 
@@ -485,7 +502,7 @@
             $statusCode = 0;
             $count = 0;
             while ($statusCode != 200 && $count < $apiRetryCount){
-                $apiResponse = get_run_data($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id);
+                $apiResponse = get_run_data($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id, $proxy_setting);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 200){
                     //返却StatusCodeが正常なので終了
@@ -501,7 +518,7 @@
             if($statusCode == -2 || $statusCode == 401){
                 //初回API実行時のみ、インターフェース情報のhostnameとUserTokenが適切かどうかをチェック。hostnameが不正な場合返り値は-2、UserTokenが不正な場合返り値は401となる。
                 //error_logにメッセージを追記
-                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142010"); //[API Error]Terraform Enterpriseとの接続に失敗しました。インターフェース情報を確認して下さい。
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142010"); //[API Error]Terraformとの接続に失敗しました。インターフェース情報を確認して下さい。
                 LocalLogPrint($error_log, $message);
 
                 // 異常フラグON
@@ -542,7 +559,7 @@
             $statusCode = 0;
             $count = 0;
             while ($statusCode != 200 && $count < $apiRetryCount){
-                $apiResponse = get_plan_data($lv_terraform_hostname, $lv_terraform_token, $tfe_plan_id);
+                $apiResponse = get_plan_data($lv_terraform_hostname, $lv_terraform_token, $tfe_plan_id, $proxy_setting);
                 $statusCode = $apiResponse['StatusCode'];
                 if($statusCode == 200){
                     //返却StatusCodeが正常なので終了
@@ -615,7 +632,7 @@
                 $statusCode = 0;
                 $count = 0;
                 while ($statusCode != 200 && $count < $apiRetryCount){
-                    $apiResponse = get_run_policy_check_data($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id);
+                    $apiResponse = get_run_policy_check_data($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id, $proxy_setting);
                     $statusCode = $apiResponse['StatusCode'];
                     if($statusCode == 200){
                         //返却StatusCodeが正常なので終了
@@ -713,7 +730,7 @@
                         $statusCode = 0;
                         $count = 0;
                         while ($statusCode != 202 && $count < $apiRetryCount){
-                            $apiResponse = apply_discard($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id);
+                            $apiResponse = apply_discard($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id, $proxy_setting);
                             $statusCode = $apiResponse['StatusCode'];
                             if($statusCode == 202){
                                 //返却StatusCodeが正常なので終了
@@ -760,7 +777,7 @@
                         $statusCode = 0;
                         $count = 0;
                         while ($statusCode != 202 && $count < $apiRetryCount){
-                            $apiResponse = apply_execution($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id);
+                            $apiResponse = apply_execution($lv_terraform_hostname, $lv_terraform_token, $tfe_run_id, $proxy_setting);
                             $statusCode = $apiResponse['StatusCode'];
                             if($statusCode == 202){
                                 //返却StatusCodeが正常なので終了
@@ -790,7 +807,7 @@
                     $statusCode = 0;
                     $count = 0;
                     while ($statusCode != 200 && $count < $apiRetryCount){
-                        $apiResponse = get_apply_data($lv_terraform_hostname, $lv_terraform_token, $tfe_apply_id);
+                        $apiResponse = get_apply_data($lv_terraform_hostname, $lv_terraform_token, $tfe_apply_id, $proxy_setting);
                         $statusCode = $apiResponse['StatusCode'];
                         if($statusCode == 200){
                             //返却StatusCodeが正常なので終了
@@ -848,7 +865,7 @@
                         $statusCode = 0;
                         $count = 0;
                         while ($statusCode != 200 && $count < $apiRetryCount){
-                            $apiResponse = get_workspace_state_version($lv_terraform_hostname, $lv_terraform_token, $organization_name, $workspace_name, 10);
+                            $apiResponse = get_workspace_state_version($lv_terraform_hostname, $lv_terraform_token, $organization_name, $workspace_name, 10, $proxy_setting);
                             $statusCode = $apiResponse['StatusCode'];
                             if($statusCode == 200){
                                 //返却StatusCodeが正常なので終了
@@ -910,7 +927,7 @@
                             }
 
                             //ファイルに中身を追記
-                            file_put_contents($state_file, $state_file_content, FILE_APPEND);
+                            file_put_contents($state_file, ky_encrypt($state_file_content), FILE_APPEND);
 
                         }else{
                             //stateファイルの取得に失敗。(作業No:{} FILE:{} LINE:{})

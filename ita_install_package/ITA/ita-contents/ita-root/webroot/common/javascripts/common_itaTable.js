@@ -18,7 +18,7 @@ function setTextOverfrowScrollEvent( $target ) {
     if ( $target.is('.textOverfrow') ) {
         const $itaTable = $target.closest('table');
         $target.on({
-          'mouseenter.textOverfrow': function(){console.log('!');
+          'mouseenter.textOverfrow': function(){
               const $td = $( this ),
                     tdWidth = $td.find('.tdInner').width(),
                     offsetWidth = $td.find('.tdInner').get(0).offsetWidth,
@@ -41,6 +41,10 @@ function setTextOverfrowScrollEvent( $target ) {
           }
         });
         $target.find('.tof').on({
+          'click' : function(e){
+            // クリックイベントは親要素へ伝播しない
+            e.stopPropagation();
+          },
           'mousedown': function( e ){
             // 選択状態を解除する
             getSelection().removeAllRanges();
@@ -77,7 +81,7 @@ function setTextOverfrowScrollEvent( $target ) {
                 $itaTable.removeClass('overfrowScroll');
                 $scrollBar.removeClass('scrollKnobMove');
                 $window.off('mousemove.scrollBar mouseup.scrollBar');
-                if ( !$tdInner.closest('td').is('.mouseenter') ) {
+                if ( !$tdInner.closest('th,td').is('.mouseenter') ) {
                   $scrollKnob.css({
                     'width': 0,
                     'opacity': 0
@@ -105,7 +109,7 @@ function setTextOverfrowScrollEvent( $target ) {
 
 // 文字があふれているかチェックする
 function checkOverfrowText( $target ) {
-  const $td = $target.closest('td'),
+  const $td = $target.closest('th,td'),
         offsetWidth = $target.get(0).offsetWidth,
         scrollWidth = $target.get(0).scrollWidth;
   if ( scrollWidth - offsetWidth > 1 ) {
@@ -298,17 +302,27 @@ log(
 
 //////////////////////////////////////////////////
 //
+//   defaultExplainRow内のセルに.tdInner
+//
+$itaTable.find('.defaultExplainRow .generalBold').wrap('<div class="tdInner" />');
+
+// 必須・ソートマークチェック
+$itaTable.find('.sortMarkWrap').closest('th').addClass('sortColumn');
+$itaTable.find('.input_required').closest('th').addClass('requiredColumn');
+
+//////////////////////////////////////////////////
+//
 //   文字が溢れているかチェックする
 //
 $itaTable.find('.tdInner').filter( function(){
   const offsetWidth = this.offsetWidth,
         scrollWidth = this.scrollWidth;
-  if ( scrollWidth - offsetWidth > 1 ) {
+  if ( scrollWidth - offsetWidth > 1 && !$( this ).find('select').length ) {
     return true;
   } else {
     return false;
   }
-}).after('<div class="tof"><div class="tofb"></div></div>').closest('td').addClass('textOverfrow');
+}).after('<div class="tof"><div class="tofb"></div></div>').closest('th,td').addClass('textOverfrow');
 setTextOverfrowScrollEvent( $itaTable.find('.textOverfrow') );
 
 //////////////////////////////////////////////////
@@ -401,7 +415,6 @@ const headingSizeUpdate = function() {
         return false;
       }
   });
-
   $fixedRowTbHeadStyle.html( fixedStyleHTML );
 
 }
@@ -1215,6 +1228,7 @@ loadCheckStatus( tableKey );
 
 const tableUpdate = function() {
     setTimeout( function(){
+      headingSizeUpdate();
       fixedBorderUpdate();
       scrollCheck( $tableScroll );
     }, 1 );
@@ -1226,15 +1240,56 @@ $itaTable.find('select').on('change', tableUpdate );
 
 // フィルタプルダウンがクリックされたら調整しなおす
 $itaTable.find('.richFilterSelectListCaller').on('click', function(){
-  const target = $( this ).closest('.richFilterSelectListWrapper').get(0);
+  const $target = $( this ).closest('.richFilterSelectListWrapper'),
+        targetWidthBefore = $target.outerWidth();
+  
   const observer = new MutationObserver( function(){
+    // select2でplaceholderを設定すると
+    // value=""の{空白}を除外してしまうため一時的に値を入れる
+    const $blank = $target.find('select').find('option').eq(0);
+    $blank.val(' ');
+    setTimeout(function(){$blank.val('');},1);
+    // select2を適用する
+    $target.find('select').select2({placeholder:"Filter"});
+    // 適用後の幅
+    const targetWidthAfter = $target.outerWidth();
+    // select2の項目が縦スクロールバーの分で改行しないように幅を調整する
+    if ( targetWidthBefore < targetWidthAfter ) {
+      $target.find('.select2-container').css('width', targetWidthAfter + 24 );
+    }
+    // table調整
+    headingSizeUpdate();
     fixedBorderUpdate();
     scrollCheck( $tableScroll );
     // 監視を解除
     observer.disconnect();
+    // select2を選択状態にする
+    $target.find('.select2-search__field').click().trigger('mousedown');
   });
   // 監視を開始
-  observer.observe( target, { childList: true });
+  observer.observe( $target.get(0), { childList: true });
+});
+
+// select2が画面からはみ出る場合調整する
+$itaTable.on('mousedown', '.select2-search__field, .select2-selection', function(){
+    const $select2 = $( this ).closest('.select2-container'),
+          tableScrollWidth = $tableScroll.outerWidth(),
+          scrollLeft = $tableScroll.scrollLeft(),
+          positionLeft = $select2.offset().left - $tableScroll.offset().left,
+          select2Width = $select2.outerWidth(),
+          padding = 4;
+
+    if ( tableScrollWidth < positionLeft + select2Width ) {
+        // 右側にあふれている
+        const scroll = ( positionLeft + scrollLeft ) + select2Width - tableScrollWidth + padding;
+        if ( scroll > 0 ) {
+            $tableScroll.scrollLeft( scroll ).trigger('scroll');
+        }
+    } else if ( positionLeft < 0 ) {
+        // 左側にあふれている
+        $tableScroll.scrollLeft( positionLeft + scrollLeft - padding ).trigger('scroll');
+    }
+
 });
 
 $itaTableHeading.on('click', function(){

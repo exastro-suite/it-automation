@@ -24,7 +24,8 @@ let menuEditorTargetID = '';
 let menuEditorArray = {};
 
 // テキストの無害化
-const textEntities = function( text ) {
+const textEntities = function( text, flag ) {
+  if ( flag === undefined ) flag = 0;
     const entities = [
       ['&', 'amp'],
       ['\"', 'quot'],
@@ -35,8 +36,10 @@ const textEntities = function( text ) {
     for ( var i = 0; i < entities.length; i++ ) {
       text = text.replace( new RegExp( entities[i][0], 'g'), '&' + entities[i][1] + ';' );
     }
+    if ( flag !== 1 ) {
     text = text.replace(/^\s+|\s+$/g, '');
     text = text.replace(/\r?\n/g, '<br>');
+    }
     return text;
 };
 
@@ -78,8 +81,7 @@ const menuEditorLog = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // モーダルを開く
-function itaModalOpen( headerTitle, bodyFunc, modalType ) {
-    
+function itaModalOpen( headerTitle, bodyFunc, modalType, target = "" ) {
     if ( typeof bodyFunc !== 'function' ) return false;
 
     // 初期値
@@ -131,7 +133,7 @@ function itaModalOpen( headerTitle, bodyFunc, modalType ) {
     $body.append( $editorModal );
     $container.css('filter','blur(2px)');
     $firstFocus.focus();
-    
+
     $window.on('keydown.modal', function( e ) {
       
       switch ( e.keyCode ) {
@@ -160,7 +162,11 @@ function itaModalOpen( headerTitle, bodyFunc, modalType ) {
       $editorModal.find('.editor-modal-footer-menu-button[data-button-type="close"]').on('click', itaModalClose );
     }
     
-    bodyFunc();
+    if(target != ""){
+      bodyFunc(target);
+    }else{
+      bodyFunc();
+    }
 
 }
 
@@ -280,7 +286,10 @@ const languageText = {
 '0039':[getSomeMessage("ITACREPAR_1243"),''],
 '0040':[getSomeMessage("ITACREPAR_1244"),''],
 '0041':[getSomeMessage("ITACREPAR_1245"),''],
-'0042':[getSomeMessage("ITACREPAR_1246"),'']
+'0042':[getSomeMessage("ITACREPAR_1246"),''],
+'0043':[getSomeMessage("ITACREPAR_1252"),''],
+'0044':[getSomeMessage("ITACREPAR_1253"),''],
+'0045':[getSomeMessage("ITACREPAR_1254"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
@@ -346,16 +355,25 @@ const listIdName = function( type, id ) {
 let modeDisabled = '';
 if ( menuEditorMode === 'view') modeDisabled = ' disabled';
 
+let modeKeepData = '';
+if ( menuEditorMode === 'edit') modeKeepData = ' disabled';
+
+let onHover = ' on-hover';
+if ( menuEditorMode === 'edit') onHover = '';
+
+let disbledCheckbox = '';
+if ( menuEditorMode === 'edit') disbledCheckbox = ' disabled-checkbox';
+
 // HTML
 const columnHeaderHTML = ''
-  + '<div class="menu-column-move"></div>'
-  + '<div class="menu-column-title on-hover">'
+  + '<div class="menu-column-move" title="' + textEntities(getSomeMessage("ITACREPAR_1257"),1) + '"></div>'
+  + '<div class="menu-column-title on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1256"),1) + '">'
     + '<input class="menu-column-title-input" type="text" value=""'+modeDisabled+'>'
     + '<span class="menu-column-title-dummy"></span>'
   + '</div>'
   + '<div class="menu-column-function">'
-    + '<div class="menu-column-delete on-hover"></div>'
-    + '<div class="menu-column-copy on-hover"></div>'
+    + '<div class="menu-column-delete on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1258"),1) + '"></div>'
+    + '<div class="menu-column-copy on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1259"),1) + '"></div>'
   + '</div>';
 
 const columnEmptyHTML = ''
@@ -374,7 +392,7 @@ const columnRepeatHTML = ''
   + '<div class="menu-column-repeat">'
     + '<div class="menu-column-repeat-header">'
       + '<div class="menu-column-move"></div>'
-      + '<div class="menu-column-repeat-number on-hover">REPEAT : <input class="menu-column-repeat-number-input" data-min="1" data-max="99" value="2" type="number"'+modeDisabled+'></div>'
+      + '<div class="menu-column-repeat-number on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1260"),1) + '">REPEAT : <input class="menu-column-repeat-number-input" data-min="1" data-max="99" value="2" type="number"'+modeDisabled+'></div>'
     + '</div>'
     + '<div class="menu-column-repeat-body">'
     + '</div>'
@@ -418,63 +436,70 @@ const columnHTML = ''
       + columnHeaderHTML
     + '</div>'
     + '<div class="menu-column-body">'
-      + '<div class="menu-column-type">'
-        + '<select class="menu-column-type-select"'+modeDisabled+'>' + inputMethodHTML + '</select>'
+      + '<div class="menu-column-type" title="' + textEntities(getSomeMessage("ITACREPAR_1261"),1) + '">'
+        + '<select class="menu-column-type-select"'+modeDisabled+''+modeKeepData+'>' + inputMethodHTML + '</select>'
       + '</div>'
       + '<div class="menu-column-config">'
         + '<table class="menu-column-config-table" date-select-value="1">'
-          + '<tr class="multiple single link">'
+          + '<tr class="multiple single link" title="' + textEntities(getSomeMessage("ITACREPAR_1262"),1) + '">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number max-byte" type="number" data-min="2" data-max="8192" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="multiple single">'
+          + '<tr class="multiple single" title="' + textEntities(getSomeMessage("ITACREPAR_1263"),1) + '">'
             + '<th>' + textCode('0012') + '</th>'
-            + '<td><input class="config-text regex" type="text" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-text regex" type="text" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-int">'
+          + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1264"),1) + '">'
             + '<th>' + textCode('0013') + '</th>'
-            + '<td><input class="config-number int-min-number" data-min="-2147483648" data-max="2147483647" type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number int-min-number" data-min="-2147483648" data-max="2147483647" type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-int">'
+          + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1265"),1) + '">'
             + '<th>' + textCode('0014') + '</th>'
-            + '<td><input class="config-number int-max-number" data-min="-2147483648" data-max="2147483647"  type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number int-max-number" data-min="-2147483648" data-max="2147483647"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-float">'
+          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1266"),1) + '">'
             + '<th>' + textCode('0013') + '</th>'
-            + '<td><input class="config-number float-min-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number float-min-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-float">'
+          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1267"),1) + '">'
             + '<th>' + textCode('0014') + '</th>'
-            + '<td><input class="config-number float-max-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number float-max-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="number-float">'
+          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1268"),1) + '">'
             + '<th>' + textCode('0015') + '</th>'
-            + '<td><input class="config-number digit-number" data-min="1" data-max="14" type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number digit-number" data-min="1" data-max="14" type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
-          + '<tr class="select">'
+          + '<tr class="select" title="' + textEntities(getSomeMessage("ITACREPAR_1269"),1) + '">'
             + '<th>' + textCode('0016') + '<span class="input_required">*</span></th>'
             + '<td>'
-              + '<select class="config-select pulldown-select"'+modeDisabled+'>' + selectPulldownListHTML + '</select>'
+              + '<select class="config-select pulldown-select"'+modeDisabled+''+modeKeepData+'>' + selectPulldownListHTML + '</select>'
             + '</td>'
           + '</tr>'
-          + '<tr class="password">'
-            + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
+          + '<tr class="select reference" title="' + textEntities(getSomeMessage("ITACREPAR_1275"),1) + '">'
+            + '<th rowspan="2">' + textCode('0043') + '</th>'
+            + '<td><span type="text" class="config-text reference-item property-span" type="text" data-reference-item-id '+modeDisabled+''+modeKeepData+'></span></td>'
           + '</tr>'
-          + '<tr class="file">'
+          + '<tr class="select reference" title="' + textEntities(getSomeMessage("ITACREPAR_1275"),1) + '">'
+            + '<td><button class="reference-item-select property-button" '+modeDisabled+''+modeKeepData+'>' + textCode('0045') + '</button></td>'
+          + '</tr>'
+          + '<tr class="password" title="' + textEntities(getSomeMessage("ITACREPAR_1262"),1) + '">'
+            + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
+            + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+''+modeKeepData+'></td>'
+          + '</tr>'
+          + '<tr class="file" title="' + textEntities(getSomeMessage("ITACREPAR_1270"),1) + '">'
             + '<th>' + textCode('0042') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+'></td>'
+            + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
           + '<tr class="all">'
             + '<td colspan="2">'
-              + '<label class="required-label on-hover"><input class="config-checkbox required" type="checkbox"'+modeDisabled+'><span></span>' + textCode('0017') + '</label>'
-              + '<label class="unique-label on-hover"><input class="config-checkbox unique" type="checkbox"'+modeDisabled+'><span></span>' + textCode('0018') + '</label>'
+              + '<label class="required-label'+onHover+'" title="' + textEntities(getSomeMessage("ITACREPAR_1271"),1) + '"><input class="config-checkbox required'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0017') + '</label>'
+              + '<label class="unique-label'+onHover+'" title="' + textEntities(getSomeMessage("ITACREPAR_1272"),1) + '"><input class="config-checkbox unique'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0018') + '</label>'
             + '</td>'
           + '</tr>'
-          + '<tr class="all">'
+          + '<tr class="all" title="' + textEntities(getSomeMessage("ITACREPAR_1273"),1) + '">'
             + '<td colspan="2"><div class="config-textarea-wrapper"><textarea class="config-textarea explanation"'+modeDisabled+'></textarea><span>' + textCode('0019') + '</span></div></td>'
           + '</tr>'
-          + '<tr class="all">'
+          + '<tr class="all" title="' + textEntities(getSomeMessage("ITACREPAR_1274"),1) + '">'
             + '<td colspan="2"><div class="config-textarea-wrapper"><textarea class="config-textarea note"'+modeDisabled+'></textarea><span>' + textCode('0020') + '</span></div></td>'
           + '</tr>'
         + '</table>'
@@ -570,12 +595,14 @@ const history = {
     $menuTable.html( workHistory[ workCounter ] );
     historyButtonCheck();
     previewTable();
+    resetSelect2( $menuTable );
   },
   'redo' : function() {
     workCounter++;
     $menuTable.html( workHistory[ workCounter ] );
     historyButtonCheck();
     previewTable();
+    resetSelect2( $menuTable );
   },
   'clear' : function() {
     workCounter = 0;
@@ -626,7 +653,7 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
   
   $target.append( $addColumn );
   // プルダウンにselect2を適用する
-  //$target.find('.config-select').select2();
+  $target.find('.config-select').select2();
   
   $addColumn.attr('id', id );
 
@@ -670,10 +697,28 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
   if ( editorWindowWidth < tableWidth ) {
     $menuEditWindow.children().stop(0,0).animate({'scrollLeft': tableWidth - editorWindowWidth }, 200 );
   }
-  
+
   emptyCheck();
 
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   参照項目選択
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//参照項目を選択するモーダル表示イベント
+$menuEditor.on('click', '.reference-item-select', function() {
+  itaModalOpen('Reference Item select', modalReferenceItemList, 'reference' , $(this));
+});
+
+//選択項目変更時、参照項目を空にする
+$menuEditor.on('change', '.pulldown-select', function(){
+  const $input = $(this).closest('.menu-column-config-table').find('.reference-item');
+  $input.attr('data-reference-item-id', '');
+  $input.html('');
+});
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -686,7 +731,32 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
         buttonType = $button.attr('data-menu-button');
   switch ( buttonType ) {
     case 'newColumn':
+      const currentItemCounter = itemCounter;
       addColumn( $menuTable, 'item', itemCounter++ );
+      //editの場合disabledを外す。
+      if(menuEditorMode === 'edit'){
+        const $newColumnTarget = $menuEditor.find('#i'+currentItemCounter);
+        $newColumnTarget.find('.menu-column-type-select').prop('disabled', false); //カラムタイプ
+        $newColumnTarget.find('.config-number'+'.max-byte').prop('disabled', false); //最大バイト数
+        $newColumnTarget.find('.config-text'+'.regex').prop('disabled', false); //正規表現
+        $newColumnTarget.find('.config-number'+'.int-min-number').prop('disabled', false); //整数の最小値
+        $newColumnTarget.find('.config-number'+'.int-max-number').prop('disabled', false); //整数の最大値
+        $newColumnTarget.find('.config-number'+'.float-min-number').prop('disabled', false); //少数の最小値
+        $newColumnTarget.find('.config-number'+'.float-max-number').prop('disabled', false); //少数の最大値
+        $newColumnTarget.find('.config-number'+'.digit-number').prop('disabled', false); //少数の桁数
+        $newColumnTarget.find('.config-select'+'.pulldown-select').prop('disabled', false); //選択項目
+        $newColumnTarget.find('.config-number'+'.password-max-byte').prop('disabled', false); //パスワード最大バイト数
+        $newColumnTarget.find('.config-number'+'.file-max-size').prop('disabled', false); //ファイル最大バイト数
+        $newColumnTarget.find('.config-text'+'.reference-item').prop('disabled', false); //参照項目
+        $newColumnTarget.find('.reference-item-select').prop('disabled', false); //参照項目を選択ボタン
+        $newColumnTarget.find('.config-checkbox'+'.required').prop('disabled', false); //必須
+        $newColumnTarget.find('.config-checkbox'+'.unique').prop('disabled', false); //一意制
+        $newColumnTarget.find('.config-checkbox'+'.required').removeClass('disabled-checkbox'); //必須のチェックボックスの色約
+        $newColumnTarget.find('.config-checkbox'+'.unique').removeClass('disabled-checkbox'); //一意制約のチェックボックスの色
+        $newColumnTarget.find('.required-label').addClass('on-hover'); //必須のカーソル動作
+        $newColumnTarget.find('.unique-label').addClass('on-hover'); //一意制約のカーソル動作
+      }
+
       break;
     case 'newColumnGroup':
       addColumn( $menuTable, 'group', groupCounter++ );
@@ -706,9 +776,18 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
       if ( !window.confirm(getSomeMessage("ITACREPAR_1201") ) ) return false;
       createRegistrationData('registration');
       break;
+    case 'update-initialize':
+      if ( !window.confirm(getSomeMessage("ITACREPAR_1250") ) ) return false;
+      createRegistrationData('update-initialize');
+      break;
     case 'update':
-      if ( !window.confirm(getSomeMessage("ITACREPAR_1201") ) ) return false;
+      if ( !window.confirm(getSomeMessage("ITACREPAR_1249") ) ) return false;
       createRegistrationData('update');
+      break;
+    case 'initialize':
+    case 'reload-initialize':
+      // 初期化モードで開きなおす
+      location.href = '/default/menu/01_browse.php?no=2100160011&create_menu_id=' + menuEditorTargetID + '&mode=initialize';
       break;
     case 'edit':
     case 'reload':
@@ -801,7 +880,7 @@ $menuEditor.on('change', '.config-text', function() {
   previewTable();
   history.add();
 });
-$menuEditor.on('change', '.config-number, .menu-column-repeat-number-input', function() {
+$menuEditor.on('change', '.config-number, .menu-column-repeat-number-input, .property-number', function() {
   const $input = $( this ),
         min = Number( $input.attr('data-min') ),
         max = Number( $input.attr('data-max') );
@@ -1114,6 +1193,17 @@ $menuEditor.on('click', '.menu-column-delete', function(){
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// select2を再適用
+const resetSelect2 = function( $target ) {
+    if ( $target.find('.select2-container').length ) {
+      // select2要素を削除
+      $target.find('.config-select').removeClass('select2-hidden-accessible').removeAttr('tabindex aria-hidden');
+      $target.find('.select2-container').remove();
+      // select2を再適用
+      $target.find('.config-select').select2();
+    }
+};
+
 $menuEditor.on('click', '.menu-column-copy', function(){
   const $column = $( this ).closest('.menu-column, .menu-column-group');
   
@@ -1124,25 +1214,15 @@ $menuEditor.on('click', '.menu-column-copy', function(){
   }
   
   const $clone = $column.clone();
-  //$clone.find('.config-select').removeClass('select2-hidden-accessible').removeAttr('tabindex aria-hidden');
-  //$clone.find('.select2-container').remove();
-  
-  // クローン追加
-  $column.after( $clone );
-  // プルダウンにselect2を適用する
-  //$clone.find('.config-select').select2();
+  $column.after( $clone );  
   
   // 追加を待つ
   $clone.ready( function() {
+    
+    resetSelect2( $clone );
+    
     $clone.find('.hover').removeClass('hover');
     
-    // IDをプラス
-    /*
-    $clone.find('.menu-column-repeat').each( function() {
-      const r = repeatCounter++;
-      $( this ).attr('id', 'r' + r );
-    });
-    */
     // IDをプラス・名前にコピー番号を追加
     $clone.find('.menu-column-title-input').each( function() {
       const $input = $( this ),
@@ -1266,14 +1346,61 @@ const sortMark = '<span class="sortMarkWrap"><span class="sortNotSelected"></spa
         + '<td class="likeHeader">' + textCode('0032') + '</td>';
 
 // リピートを含めた子の列数を返す
-const childColumnCount = function( $column ) {
+const childColumnCount = function( $column, type ) {
   let counter = $column.find('.menu-column, .column-empty').length;
+  const menuColumnBody = $column.find('.menu-column');
+  menuColumnBody.each(function(){
+    const selectTypeValue = $(this).find('.menu-column-type-select').val();
+    //プルダウン選択の場合、参照項目の数だけcounterを追加
+    if(selectTypeValue == '7'){
+        const referenceItem = $(this).find('.reference-item');
+        referenceItem.each(function(){
+            //リピート内の場合はカウントしない
+            if($(this).parents('.menu-column-repeat').length == 0){
+                const referenceItemValue = $( this ).attr('data-reference-item-id');
+                if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                    const referenceItemAry = referenceItemValue.split(',');
+                    counter = counter + referenceItemAry.length;
+                }
+            }
+
+            //リピート内かつグループ内の場合はカウント
+            if(type == 'group' && $column.parents('.menu-column-repeat').length != 0 && $column.find('.menu-column-group-header').length != 0){
+                const referenceItemValue = $( this ).attr('data-reference-item-id');
+                if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                    const referenceItemAry = referenceItemValue.split(',');
+                    counter = counter + referenceItemAry.length;
+                }
+            }
+        });
+    }
+  });
+
   $column.find('.menu-column-repeat').each( function() {
     const columnLength = $( this ).find('.menu-column, .column-empty').length;
     if ( columnLength !== 0 ) {
-      counter = counter + ( columnLength * ( Number( $( this ).find('.menu-column-repeat-number-input').val() ) - 1 ) );
+        const repeatNumberInput = Number( $( this ).find('.menu-column-repeat-number-input').val());
+        let referenceItemCount = 0;
+        //プルダウン選択の場合、参照項目の数だけcounterを追加
+        const repeatMenuColumnBody = $(this).find('.menu-column');
+        repeatMenuColumnBody.each(function(){
+            const repeatSelectTypeValue = $(this).find('.menu-column-type-select').val();
+            if(repeatSelectTypeValue == '7'){
+                const referenceItem = $(this).find('.reference-item');
+                referenceItem.each(function(){
+                    const referenceItemValue = $(this).attr('data-reference-item-id');
+                    if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                        const referenceItemAry = referenceItemValue.split(',');
+                        referenceItemCount = referenceItemCount + Number( referenceItemAry.length );
+                    }
+                });
+            }
+        });
+
+        counter = counter + ( (columnLength * (repeatNumberInput -1)) + ((referenceItemCount) * repeatNumberInput) );
     }
   });
+
   return counter;
 }
 
@@ -1302,6 +1429,7 @@ const previewTable = function(){
 
         if ( $column.is('.menu-column') ) {
           // 項目ここから
+            const selectTypeValue = $column.find('.menu-column-type-select').val();
             // Head
             const rowspan = $column.attr('data-rowpan');
             let itemHTML = '<th rowspan="' + rowspan + '" class="sortTriggerInTbl">'
@@ -1311,14 +1439,49 @@ const previewTable = function(){
             }
             itemHTML += sortMark + '</th>';
             tableArray[ currentFloor ].push( itemHTML );
+
+            //プルダウン選択の参照項目
+            if(selectTypeValue == '7'){
+                const referenceItemValue = $column.find('.reference-item').attr('data-reference-item-id');
+                const referenceItemName = $column.find('.reference-item').html();
+                if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                    const referenceItemAry = referenceItemValue.split(',');
+                    const referenceItemNameAry = referenceItemName.split(',');
+                    const referenceItemLength = referenceItemAry.length;
+                    for ( let i = 0; i < referenceItemLength; i++ ) {
+                        let referenceItemHTML = '<th rowspan="' + rowspan + '" class="sortTriggerInTbl">'+referenceItemNameAry[i];
+                        if ( repeatCount > 1 ) {
+                            referenceItemHTML += '[' + repeatCount + ']';
+                        }
+                        referenceItemHTML += sortMark + '</th>';
+                        tableArray[ currentFloor ].push( referenceItemHTML );
+                    }
+                }
+            }
+
             // Body
-            const selectTypeValue = $column.find('.menu-column-type-select').val();
             let dummyText = selectDummyText[ selectTypeValue ][ 0 ],
                 dummyType = selectDummyText[ selectTypeValue ][ 2 ];
             if ( dummyType === 'select' ) {
               dummyText = $column.find('.config-select').find('option:selected').text();
             }
             tbodyArray.push('<td class="' + dummyType + '">' + dummyText + '</td>');
+
+            //プルダウン選択の参照項目
+            if(selectTypeValue == '7'){
+                const referenceItemValue = $column.find('.reference-item').attr('data-reference-item-id');
+                const referenceItemName = $column.find('.reference-item').html();
+                if(referenceItemValue != null && referenceItemValue != ""){ //空もしくはundefinedではない場合
+                    const referenceItemAry = referenceItemValue.split(',');
+                    const referenceItemNameAry = referenceItemName.split(',');
+                    const referenceItemLength = referenceItemAry.length;
+                    for ( let i = 0; i < referenceItemLength; i++ ) {
+                        const referenceItemHTML = '<td class="' + 'reference' + '">' + textCode('0044') + '</td>';
+                        tbodyArray.push(referenceItemHTML);
+                    };
+                }
+            }
+
           // Item end
         } else if ( $column.is('.menu-column-repeat') ) {
           // リピート
@@ -1339,7 +1502,7 @@ const previewTable = function(){
           // Repeat end
         } else if ( $column.is('.menu-column-group') ) {
           // グループ
-            const colspan = childColumnCount( $column ),
+            const colspan = childColumnCount( $column, 'group' ),
                   groupTitle = textEntities( $column.find('.menu-column-title-input').eq(0).val() ),
                   regexTitle = new RegExp( '<th colspan=".+">' + groupTitle + '<\/th>'),
                   tableArrayLength = tableArray[ currentFloor ].length - 1;
@@ -1367,12 +1530,12 @@ const previewTable = function(){
   tableAnalysis ( $menuTable, 0 );
   
   // thead HTMLを生成
-  const itemLength = childColumnCount( $menuTable );
-  
+  const itemLength = childColumnCount( $menuTable, 'menu' );
+
   if ( previewType === 1 || previewType === 3 ) {
     maxLevel++;
     tableArray.unshift('');
-  }   
+  }
   const tableArrayLength = tableArray.length;
   for ( let i = 0; i < tableArrayLength; i++ ) {
     tableHTML += '<tr class="defaultExplainRow">';
@@ -1470,6 +1633,8 @@ const repeatRemoveConfirm = function() {
         } else {
           // 中身をリピートと入れ替える
           $repeat.replaceWith( $repeat.children('.menu-column-repeat-body').html() );
+          // select2を再適用する
+          resetSelect2( $menuTable );
         }
         emptyCheck();
         previewTable();
@@ -1814,7 +1979,7 @@ const modalRoleList = function() {
   const cancelEvent = function( newRoleList ) {
     itaModalClose();
   };
-  
+
   setRoleSelectModalBody( menuEditorArray.roleList, initRoleList, okEvent, cancelEvent );
   
 };
@@ -1823,6 +1988,47 @@ const $roleSlectButton = $('#permission-role-select');
 $roleSlectButton.on('click', function() {
   itaModalOpen('Permission role select', modalRoleList, 'role');
 });
+
+
+//参照項目セレクト
+const modalReferenceItemList = function($target) {
+  const $input = $target.closest('.menu-column-config-table').find('.reference-item');
+  const initItemList = ( $input.attr('data-reference-item-id') === undefined )? '': $input.attr('data-reference-item-id');
+  const selectMasterId = $target.closest('.menu-column-config-table').find('.pulldown-select option:selected').val();
+
+  // 決定時の処理    
+  const okEvent = function( newItemList, extractItemList ) {
+    $input.attr('data-reference-item-id', newItemList );
+    //newItemListのIDから項目名に変換
+    const newItemListArray = newItemList.split(',');
+    const newItemNameListArray = [];
+    newItemListArray.forEach(function(id){
+      extractItemList.forEach(function(data){
+        if(data['ITEM_ID'] == id){
+          newItemNameListArray.push(data['ITEM_NAME']);
+        }
+      });
+    });
+
+    //カンマ区切りの文字列に変換に参照項目上に表示
+    var newItemNameList = newItemNameListArray.join(',');
+    $input.html(newItemNameList);
+
+    previewTable();
+    itaModalClose();
+  };
+  // キャンセル時の処理    
+  const cancelEvent = function( newItemList ) {
+    itaModalClose();
+  };
+  // 閉じる時の処理
+  const closeEvent = function ( newItemList ) {
+    itaModalClose();
+  }
+
+  setRerefenceItemSelectModalBody(menuEditorArray.referenceItemList, initItemList, okEvent, cancelEvent, closeEvent, selectMasterId );
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1841,7 +2047,8 @@ const createRegistrationData = function( type ){
     'menu' : {},
     'group' : {},
     'item' : {},
-    'repeat' : {}
+    'repeat' : {},
+    'type' : {}
   };
   
   // Order用カウンター
@@ -1849,7 +2056,7 @@ const createRegistrationData = function( type ){
   
   // メニュー作成情報
   createMenuJSON['menu'] = getPanelParameter();
-  if ( menuEditorMode === 'edit' ) {
+  if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit') {
     createMenuJSON['menu']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['menu']['LAST_UPDATE_TIMESTAMP'];
   }
   
@@ -1861,10 +2068,11 @@ const createRegistrationData = function( type ){
       }
     }
   }
-  // リピート項目チェック（名前からCREATE_ITEM_IDとLAST_UPDATE_TIMESTAMPを返す）
-  const repeatItemCheckID = function( itemName ) {
+  // リピート項目チェック（名前とグループからCREATE_ITEM_IDとLAST_UPDATE_TIMESTAMPを返す）
+  const repeatItemCheckID = function( groupID, itemName ) {
     for ( let key in menuEditorArray.selectMenuInfo['item'] ) {
-      if ( menuEditorArray.selectMenuInfo['item'][ key ]['ITEM_NAME'] === itemName ) {
+      if ( menuEditorArray.selectMenuInfo['item'][ key ]['COL_GROUP_ID'] === groupID &&
+           menuEditorArray.selectMenuInfo['item'][ key ]['ITEM_NAME'] === itemName ) {
         // リピートで作成された項目かチェック
         if ( menuEditorArray.selectMenuInfo['item'][ key ]['REPEAT_ITEM'] === true ) {
           return [
@@ -1915,11 +2123,19 @@ const createRegistrationData = function( type ){
                 LAST_UPDATE_TIMESTAMP = null;
 
             if ( CREATE_ITEM_ID === '') CREATE_ITEM_ID = null;
-            if ( menuEditorMode === 'edit' ) {
+            if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit' ) {
               if ( menuEditorArray.selectMenuInfo['item'][key] ) {
                 LAST_UPDATE_TIMESTAMP = menuEditorArray.selectMenuInfo['item'][key]['LAST_UPDATE_TIMESTAMP'];
               }
             }
+            // 親カラムグループ
+            let parentArray = [];
+            $column.parents('.menu-column-group').each( function() {
+              parentArray.unshift( $( this ).find('.menu-column-title-input').val() );
+            });
+            const parents = parentArray.join('/');
+            let   parentsID = $column.closest('.menu-column-group').attr('data-group-id');
+            if ( parentsID === undefined ) parentsID = null;
             // 項目名
             let itemName = $column.find('.menu-column-title-input').val();
             if ( repeatCount > 1 ) {
@@ -1928,21 +2144,14 @@ const createRegistrationData = function( type ){
               key = key + '[' + repeatCount + ']';
 
               // 更新時のリピート項目チェック
-              if ( menuEditorMode === 'edit' ) {
+              if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit' ) {
                 const originalBeforeName = CREATE_ITEM_ID_to_KEY( CREATE_ITEM_ID ),
-                      repeatItemData = repeatItemCheckID( originalBeforeName + '[' + repeatCount + ']');
+                      repeatItemData = repeatItemCheckID( parentsID, originalBeforeName + '[' + repeatCount + ']');
                 CREATE_ITEM_ID = repeatItemData[0];
                 LAST_UPDATE_TIMESTAMP = repeatItemData[1];
               }
 
             }
-            // 親カラムグループ
-            let parents = '',
-                parentArray = [];
-            $column.parents('.menu-column-group').each( function() {
-              parentArray.unshift( $( this ).find('.menu-column-title-input').val() );
-            });
-            parents = parentArray.join('/');
             // JSONデータ
             createMenuJSON['item'][key] = {
               'CREATE_ITEM_ID' : CREATE_ITEM_ID,
@@ -1980,6 +2189,7 @@ const createRegistrationData = function( type ){
                 break;
               case '7':
                 createMenuJSON['item'][key]['OTHER_MENU_LINK_ID'] = $column.find('.pulldown-select').val();
+                createMenuJSON['item'][key]['REFERENCE_ITEM'] = $column.find('.reference-item').attr('data-reference-item-id');
                 break;
               case '8':
                 createMenuJSON['item'][key]['PW_MAX_LENGTH'] = $column.find('.password-max-byte').val();
@@ -2012,7 +2222,7 @@ const createRegistrationData = function( type ){
                   'COLUMNS' : columns,
                   'REPEAT_CNT' : repeatNumber
                 }
-                if ( menuEditorMode === 'edit' ) {
+                if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit' ) {
                   if ( menuEditorArray.selectMenuInfo['repeat']['r1'] && menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'] ) {
                     createMenuJSON['repeat']['LAST_UPDATE_TIMESTAMP'] = menuEditorArray.selectMenuInfo['repeat']['r1']['LAST_UPDATE_TIMESTAMP'];
                   }
@@ -2035,7 +2245,7 @@ const createRegistrationData = function( type ){
               key = key + '[' + repeatCount + ']';
 
               // 更新時のリピート項目チェック
-              if ( menuEditorMode === 'edit' ) {
+              if ( menuEditorMode === 'initialize' || menuEditorMode === 'edit' ) {
                 const originalBeforeName = COL_GROUP_ID_to_KEY( groupID ),
                       repeatGroupID = repeatGroupCheckID( originalBeforeName + '[' + repeatCount + ']');
                 groupID = repeatGroupID;
@@ -2074,6 +2284,9 @@ const createRegistrationData = function( type ){
   });
   createMenuJSON['menu']['columns'] = topColumns;
 
+  //メニュー作成タイプを格納
+  createMenuJSON['type'] = type;
+
   // 解析スタート
   tableAnalysis ( $menuTable, 0 );
   
@@ -2082,7 +2295,7 @@ const createRegistrationData = function( type ){
 
   if ( type === 'registration' ) {
     registerTable(menuData);
-  } else if ( type === 'update' ) {
+  } else if ( type === 'update-initialize' || type === 'update') {
     updateTable(menuData);
   }
 
@@ -2189,6 +2402,30 @@ const loadMenu = function() {
               break;
             case '7':
               $item.find('.pulldown-select').val( itemData['OTHER_MENU_LINK_ID'] ).change();
+              $item.find('.reference-item').attr('data-reference-item-id', itemData['REFERENCE_ITEM']).change();
+              //newItemListのIDから項目名に変換
+              if(itemData['REFERENCE_ITEM'] != null){
+                const newItemListArray = itemData['REFERENCE_ITEM'].split(',');
+                const newItemNameListArray = [];
+                newItemListArray.forEach(function(id){
+                  let existsFlg = false;
+                  menuEditorArray.referenceItemList.forEach(function(data){
+                    if(itemData['OTHER_MENU_LINK_ID'] == data['LINK_ID']){
+                      if(data['ITEM_ID'] == id){
+                        newItemNameListArray.push(data['ITEM_NAME']);
+                        existsFlg = true;
+                      }
+                    }
+                  });
+                  //referenceItemListに存在しない参照項目はID変換失敗(ID)を表示させる。
+                  if(existsFlg == false){
+                    newItemNameListArray.push(getSomeMessage("ITACREPAR_1255", {0:id}));
+                  }
+                });
+                //カンマ区切りの文字列に変換に参照項目上に表示
+                var newItemNameList = newItemNameListArray.join(',');
+                $item.find('.reference-item').html( newItemNameList ).change();
+              }
               break;
             case '8':
               $item.find('.password-max-byte').val( itemData['PW_MAX_LENGTH'] ).change();

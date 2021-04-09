@@ -288,7 +288,7 @@
             //----ここまで共通系ブラックリスト拡張子かどうかのチェック
 
             if( array_key_exists($puUploadFormatter, $_POST) === true ){
-                $formatter_id = $_POST[$puUploadFormatter];
+                $formatter_id = htmlspecialchars($_POST[$puUploadFormatter], ENT_QUOTES, "UTF-8");
             }
             else{
                 $intErrorType = 611;
@@ -358,6 +358,17 @@
                 $intErrorType = 617;
                 throw new Exception( '00002000-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
+            // ダウンロードしたファイルの暗号化が必要か判定
+            $FileEncryptFunctionName = $objFileUpCol->getFileEncryptFunctionName();
+            if($FileEncryptFunctionName !== false) {
+                // ダウンロードしたファイルの暗号化
+                $ret = $FileEncryptFunctionName($dst_file,$dst_file);
+                if($ret === false) {
+                    $intErrorType = 620;
+                    throw new Exception( '00002000-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+                 
+            }
             
             $boolResultOfChmod = chmod($dst_file, 0644);
             if( $boolResultOfFileMove === false ){
@@ -389,6 +400,8 @@
             // ----一般訪問ユーザに見せてよいメッセージを作成
             
             switch($intErrorType){
+                case 620: $ret_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-519");break;
+
                 case 614: $ret_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-513",$aryErrMsgElement);break;
                 case 610: $ret_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-509",$aryErrMsgElement);break;
                 case 619: $ret_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-518",$aryErrMsgElement);break;
@@ -501,7 +514,7 @@
             }            
             
             if(array_key_exists("rin",$_GET)===true){
-                $strRIN = $_GET['rin'];
+                $strRIN = htmlspecialchars($_GET['rin'], ENT_QUOTES, "UTF-8");
             }
             else{
                 $intErrorType = 601;
@@ -520,7 +533,7 @@
             
             // ----履歴のファイルが欲しい場合は、対象行を取り直し
             if( array_key_exists('jsn', $_GET) === true ){
-                $strJSN = $_GET['jsn'];
+                $strJSN = htmlspecialchars($_GET['jsn'], ENT_QUOTES, "UTF-8");
                 $arrayColumn[$strJnlSeqNoColId]->setDBColumn(true);
                 
                 $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
@@ -565,7 +578,7 @@
 
             // ----どのカラムなのかを特定する
             if(array_key_exists("csn",$_GET)===true){
-                $strColumnSeqNo = $_GET['csn'];
+                $strColumnSeqNo = htmlspecialchars($_GET['csn'], ENT_QUOTES, "UTF-8");
                 
                 $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
                 if( $objIntNumVali->isValid($strColumnSeqNo) === false ){
@@ -606,7 +619,7 @@
 
             // ----ファイル名を確認する
             if( array_key_exists("fn",$_GET) === true ){
-                $strReceptFileName = $_GET['fn'];
+                $strReceptFileName = htmlspecialchars($_GET['fn'], ENT_QUOTES, "UTF-8");
                 $strSavedFileName = $editTgtRow[$objCheckColumn->getID()];
 
                 $strFilenameForSendBinary = rawurlencode($strSavedFileName);
@@ -631,7 +644,7 @@
 
             // ファイルダウンロード
             $content_length = filesize($strFilePath);
-            header("Content-Disposition: attachment; filename=" . basename($strFilePath));
+            header('Content-Disposition: attachment; filename*=UTF-8\'\''.rawurlencode(basename($strFilePath)));
             header("Content-Length: ".$content_length);
             header("Content-Type: application/octet-stream");
             header('Content-Transfer-Encoding: binary');

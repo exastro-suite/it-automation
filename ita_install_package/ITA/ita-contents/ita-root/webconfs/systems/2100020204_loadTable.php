@@ -64,7 +64,21 @@ Ansible（Pioneer）対話種別リスト
     $c->setUnique(true);
     $table->addColumn($c);
 
+    // Movement詳細へのリンクボタン
+    $strLabelText = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207315");
+    $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
+    $c->setDBColumn(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow", array(':DIALOG_TYPE_NAME'));
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $table->addColumn($c);
 
+    // 対話ファイル素材集へのリンクボタン
+    $strLabelText = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207316");
+    $c = new LinkButtonColumn('ethWakeOrder2',$strLabelText, $strLabelText, 'dummy');
+    $c->setDBColumn(false);
+    $c->setEvent("print_table", "onClick", "newOpenWindow2", array(':DIALOG_TYPE_NAME'));
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $table->addColumn($c);
 
     $table->fixColumn();
 

@@ -530,7 +530,8 @@ margin-right: 0;
 /* 05.input button & submit *******************************************/
 /* default button */
 input[type="button"],
-input[type="submit"] {
+input[type="submit"],
+button.linkBtnInTbl {
 	font-size: 12px;
 	color: #FFF;
 	padding: 5px 10px;
@@ -556,9 +557,15 @@ input.deleteBtnInTbl[type="button"][value="Restore"] {
 	border: 1px solid #0078DC;
 	box-shadow: 0 2px 0 #0050B4;
 }
+input.historyBtnInTbl[type="button"] {
+	background-color: #16A23A;
+	border-color: #16A23A;
+	box-shadow: 0 2px 0 #12822E;
+}
 
 /* default button:hover */
-input[type="button"]:hover, input[type="submit"]:hover {
+input[type="button"]:hover, input[type="submit"]:hover,
+button.linkBtnInTbl:hover {
 	background: #FF640A;
 	border: 1px solid #FF640A;
 	transform: translateY(-1px);
@@ -575,15 +582,23 @@ input.deleteBtnInTbl[type="button"][value="Restore"]:hover {
 	border: 1px solid #0064C8;
 	box-shadow: 0 1px 0 #0030A1;
 }
+input.historyBtnInTbl[type="button"]:hover {
+	background-color: #149234;
+	border-color: #149234;
+	box-shadow: 0 1px 0 #0F7129;
+}
 
 /* default button:active */
-input[type="button"]:active, input[type="submit"]:active {
+input[type="button"]:active, input[type="submit"]:active,
+button.linkBtnInTbl:active {
 	box-shadow: none;
 	transform: translateY( 0 );
 }
 
 /* disabled button */
-input[type="button"][disabled], input[type="button"][disabled]:hover, input[type="button"][disabled]:active, input[type="submit"][disabled], input[type="submit"][disabled]:hover, input[type="submit"][disabled]:active {
+input[type="button"][disabled], input[type="button"][disabled]:hover, input[type="button"][disabled]:active,
+input[type="submit"][disabled], input[type="submit"][disabled]:hover, input[type="submit"][disabled]:active,
+button.linkBtnInTbl[disabled],  button.linkBtnInTbl[disabled]:hover,  button.linkBtnInTbl[disabled]:active {
 	background: #EBEBEB;
 	border: 1px solid #BABABA;
 	cursor: default;
@@ -595,7 +610,8 @@ input[type="button"][disabled], input[type="button"][disabled]:hover, input[type
 }
 
 /* buttons for supertable */
-input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl {
+input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl, input.historyBtnInTbl,
+button.linkBtnInTbl {
 	min-width: 100%;
 	width: 100%;
 	max-width: 300px;
@@ -604,6 +620,14 @@ input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl {
 	border-radius: 3px;
 	font-size: 90%;
 	height: 20px;
+}
+button.linkBtnInTbl {
+  min-width: 200px; min-height: auto;
+  max-width: none;
+  width: auto;  height: auto;
+  padding: 1px 4px;
+  word-break: break-all;
+  line-height: 1.5;
 }
 
 /* login button */
@@ -1113,7 +1137,7 @@ span.sortMarkWrap > * {
 	height: 96px;
 }
 .richFilterSelectListWrapper {
-	height: 100px;
+	/* height: 100px; */
 }
 .richFilterSelectListCaller {
 	cursor: pointer;
@@ -1615,4 +1639,75 @@ box-shadow: 0 0 0 1px rgba( 255,255,255,.5 );
 }
 .fixed-layout-button.on:hover {
   opacity: .8;
+}
+
+.itaPopup {
+position: fixed;
+transform: translate(-50%,-100%);
+padding: 4px 8px;
+border-radius: 2px;
+background-color: #111;
+color: #FFF;
+pointer-events: none;
+}
+.itaPopup::after {
+content: '';
+display: block;
+position: absolute;
+left: 50%; bottom: -8px;
+transform: translateX(-4px);
+border: 4px solid transparent;
+border-top-color: #111;
+}
+
+
+
+
+/* filter_area select2 */
+
+#filter_area .select2-container--default .select2-selection--multiple .select2-selection__rendered,
+#select_area .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+padding-right: 0;
+padding-bottom: 5px;
+}
+#filter_area .select2-search,
+#select_area .select2-search {
+margin-left: 0!important;
+}
+#filter_area .select2-selection__choice,
+#select_area .select2-selection__choice {
+margin-left: 0!important;
+word-break: break-all;
+white-space: normal;
+}
+.select2-container {
+max-width: 640px;
+}
+#filter_area .select2-container,
+#select_area .select2-container {
+min-width: 100%;
+margin-top: 4px;
+}
+#filter_area .likeHeader .select2-container,
+#select_area .likeHeader .select2-container {
+max-width: 320px;
+}
+#filter_area .select2-search,
+#select_area .select2-search {
+max-width: 100%;
+margin: 5px 5px 0 0;
+}
+#filter_area .select2-container .select2-search--inline .select2-search__field,
+#select_area .select2-container .select2-search--inline .select2-search__field {
+max-width: 100%;
+margin: 0;
+}
+#filter_area .select2-container .select2-search--inline .select2-search__field::placeholder,
+#select_area .select2-container .select2-search--inline .select2-search__field::placeholder {
+color: #AAA;
+}
+#filter_area .select2-container--default.select2-container--focus .select2-selection--multiple,
+#select_area .select2-container--default.select2-container--focus .select2-selection--multiple {
+border-color: #0070FF;
+background-color: #E5F1FF;
 }

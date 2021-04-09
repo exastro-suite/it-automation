@@ -205,7 +205,7 @@
 
             // ----■リクエストされたPHPが代表ページかをチェックする。
             $tempRepresentativeFlag = false;
-            if(basename($_SERVER["PHP_SELF"]) === "01_browse.php"){
+            if(basename($_SERVER["SCRIPT_NAME"]) === "01_browse.php"){
                 $tempRepresentativeFlag = true;
             }
             // ■リクエストされたPHPが代表ページかをチェックする。----

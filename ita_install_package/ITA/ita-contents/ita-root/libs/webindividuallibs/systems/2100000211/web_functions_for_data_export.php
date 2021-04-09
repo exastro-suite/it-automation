@@ -89,7 +89,7 @@ function makeExportCheckbox(){
     $sql .= ' SELECT hm.MENU_ID';
     $sql .= ' FROM B_DP_HIDE_MENU_LIST AS hm';
     $sql .= ' WHERE m.MENU_ID = hm.MENU_ID)';
-    $sql .= ' ORDER BY m.MENU_GROUP_ID ASC, m.DISP_SEQ ASC';
+    $sql .= ' ORDER BY m.MENU_GROUP_ID ASC, m.DISP_SEQ ASC, m.MENU_ID ASC';
 
     $objQuery = $g['objDBCA']->sqlPrepare($sql);
     if ($objQuery->getStatus() === false) {
@@ -148,9 +148,24 @@ function makeExportDataList($dirName){
     unset($_POST['menu_on']);
     $menuIdAry = array();
 
-    // メニューが一つも選択されていない場合はエラー
-    if (count($_POST) === 0) {
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900047'));
+    // モード未選択はエラー
+    if ( !isset($_POST["dp_mode"]) || is_int($_POST["dp_mode"] )) {
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900077'));
+    }
+
+    // 廃止情報未選択はエラー
+    if ( !isset($_POST["abolished_type"]) || is_int($_POST["abolished_type"] )) {
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900077'));
+    }
+
+    // モードが時刻指定で、指定時刻がない場合はエラー
+    if ( $_POST["dp_mode"] == "2" && (!isset($_POST["specified_timestamp"]) || empty($_POST["specified_timestamp"])) ) {
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900078'));
+    }
+
+    // モードが時刻指定で、指定時刻がない場合はエラー
+    if ( $_POST["dp_mode"] == "2" && validateDate($_POST["specified_timestamp"] )) {
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900078'));
     }
 
     foreach ($_POST as $key => $value) {
@@ -168,6 +183,12 @@ function makeExportDataList($dirName){
             $menuIdAry = array_merge($menuIdAry, $value);
         }
     }
+
+    // メニューが一つも選択されていない場合はエラー
+    if (count($menuIdAry) === 0) {
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900047'));
+    }
+
     $json = json_encode($menuIdAry);
     $fileputflg = file_put_contents($path . '/MENU_ID_LIST', $json);
 
@@ -258,8 +279,29 @@ function insertTask(){
     $p_execution_jnl_no = $resArray[0];
 
     // exportの種類
-    $p_dp_mode = $_POST["dp_mode"];
-    $p_abolished_type = $_POST["abolished_type"];
+    if ( $_POST["dp_mode"] != 1 && $_POST["dp_mode"] != 2 ) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
+                                             array('A_SEQUENCE', 'B_DP_STATUS_JSQ', basename(__FILE__), __LINE__)));
+        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+    }
+    if ( $_POST["abolished_type"] != 1 && $_POST["abolished_type"] != 2 ) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
+                                             array('A_SEQUENCE', 'B_DP_STATUS_JSQ', basename(__FILE__), __LINE__)));
+        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+    }
+    $p_dp_mode = htmlspecialchars($_POST["dp_mode"], ENT_QUOTES, "UTF-8");
+    $p_abolished_type = htmlspecialchars($_POST["abolished_type"], ENT_QUOTES, "UTF-8");
+
+    $p_specified_timestamp = NULL;
+    if ( isset($p_dp_mode) && $p_dp_mode == 2) {
+        if ( isset($_POST["specified_timestamp"]) && !empty($_POST["specified_timestamp"])) {
+            $p_specified_timestamp = htmlspecialchars($_POST["specified_timestamp"], ENT_QUOTES, "UTF-8");
+        } else {
+            web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900053',
+                                                 array('A_SEQUENCE', 'B_DP_STATUS_JSQ', basename(__FILE__), __LINE__)));
+            throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        }
+    }
 
     $arrayConfig = array(
         'JOURNAL_SEQ_NO' => '',
@@ -270,6 +312,7 @@ function insertTask(){
         'DP_TYPE' => '',
         'DP_MODE' => $p_dp_mode,
         'ABOLISHED_TYPE' => $p_abolished_type,
+        'SPECIFIED_TIMESTAMP' => $p_specified_timestamp,
         'FILE_NAME' => '',
         'DISP_SEQ' => '',
         'NOTE' => '',
@@ -287,6 +330,7 @@ function insertTask(){
         'DP_TYPE' => 1,
         'DP_MODE' => $p_dp_mode,
         'ABOLISHED_TYPE' => $p_abolished_type,
+        'SPECIFIED_TIMESTAMP' => $p_specified_timestamp,
         'FILE_NAME' => '',
         'DISP_SEQ' => '',
         'NOTE' => '',
@@ -397,4 +441,14 @@ function renameExportDir($dirName, $taskNo){
         web_log($g['objMTS']->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900001'));
     }
+}
+
+/**
+ * 日付時刻の有効性のチェック
+ *
+ */
+function validateDate($date, $format = 'Y-m-d H:i:s')
+{
+    $d = DateTime::createFromFormat($format, $date);
+    return $d && $d->format($format) == $date;
 }
