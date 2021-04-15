@@ -664,7 +664,7 @@ try{
                         $work = $partDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $partViewDate;  // 日付
+                        $work = $partDate;  // 日付
                         break;
                     case 7:
                         $work = $partId;        // プルダウン
@@ -860,7 +860,7 @@ try{
                             $work = $partDateTime;  // 日時
                             break;
                         case 6:
-                            $work = $partViewDate;  // 日付
+                            $work = $partDate;  // 日付
                             break;
                         case 7:
                             $work = $partId;        // プルダウン
@@ -1062,7 +1062,7 @@ try{
                         $work = $partDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $partViewDate;  // 日付
+                        $work = $partDate;  // 日付
                         break;
                     case 7:
                         $work = $partId;        // プルダウン
@@ -1557,7 +1557,7 @@ try{
                         $work = $partDateTime;  // 日時
                         break;
                     case 6:
-                        $work = $partViewDate;  // 日付
+                        $work = $partDate;  // 日付
                         break;
                     case 7:
                         $work = $partId;        // プルダウン
