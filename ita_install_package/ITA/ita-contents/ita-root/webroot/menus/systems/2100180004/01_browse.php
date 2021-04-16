@@ -416,7 +416,7 @@ EOD;
                   <li class="editor-tab-menu-item" data-tab="function">Function</li>
                   <li class="editor-tab-menu-item" data-tab="conditional-branch">Conditional branch</li>
                   <li class="editor-tab-menu-item" data-tab="parallel-branch">Parallel branch</li>
-                  <li class="editor-tab-menu-item" data-tab="merge">Merge</li>
+                  <li class="editor-tab-menu-item" data-tab="merge">Parallel merge</li>
                   <li class="editor-tab-menu-item" data-tab="call">Conductor call</li>
                   <li class="editor-tab-menu-item" data-tab="call_s">Symphony call</li>
                 </ul>
