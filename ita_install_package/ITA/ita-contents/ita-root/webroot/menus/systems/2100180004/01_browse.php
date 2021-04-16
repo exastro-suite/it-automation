@@ -349,7 +349,20 @@ EOD;
                 <div id="art-board">      
                 </div><!-- / .art-board -->
               </div><!-- / .canvas -->
-            </div><!-- / .canvas-wrap -->
+            </div><!-- / .canvas-visible-area -->
+            
+            <div id="editor-display">
+              <div id="editor-explanation">
+                <dl class="explanation-list">
+                  <dt class="explanation-term"><span class="mouse-icon mouse-left"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309057")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309061")}</dd>
+                  <dt class="explanation-term"><span class="mouse-icon mouse-wheel"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309053")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309054")}</dd>
+                  <dt class="explanation-term"><span class="mouse-icon mouse-right"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309055")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309056")}</dd>
+                </dl>
+              </div>
+            </div><!-- / #editor-display -->
             
           </div>
         </div><!-- /#editor-edit -->
