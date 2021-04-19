@@ -581,6 +581,7 @@ class CheckAnsibleRoleFiles {
         $all_parent_vars_list = array();
         $user_vars_file = $in_base_dir . "/ita_readme_" . $edit_role_name. ".yml";
 
+
         $user_vars_list = array();
         $user_varsval_list = array();
         $user_array_vars_list = array();
@@ -2128,7 +2129,6 @@ class DefaultVarsFileAnalysis{
                 $in_var_type == self::LC_VAR_TYPE_USER_ITA) ||
                ($this->GetRunModeVarFile() == LC_RUN_MODE_VARFILE))
             {
-
                 $ina_vars_list[$in_var] = 0;
                 $ina_varsval_list[$in_var][0] = $in_var_array;
             }
@@ -3274,12 +3274,12 @@ class DefaultVarsFileAnalysis{
                 break;
             case DF_VAR_TYPE_USER:
                 // 読替表にある変数はITA変数として扱う
-                if(@count($ina_User2ITA_var_list[$ParentVarName]) != 0){
+                if(@count($ina_User2ITA_var_list[$role_name][$ParentVarName]) != 0){
                     // 読替変数
                     $var_type =  self::LC_VAR_TYPE_USER_ITA;
                 } else{
-                     // USER変数
-                     $var_type = self::LC_VAR_TYPE_USER;
+                    // USER変数
+                    $var_type = self::LC_VAR_TYPE_USER;
                 }
                 break;
             }
