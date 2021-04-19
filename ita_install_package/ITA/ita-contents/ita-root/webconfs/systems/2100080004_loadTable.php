@@ -209,6 +209,8 @@ Terraform作業パターン
 
             $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true);
             $table->getFormatter('print_table')->setGeneValue("linkCSVFormShow",false);
+
+            $tmpAryColumn['ethWakeOrder']->getOutputType('print_table')->setVisible(false);
         }
     }
     unset($tmpAryColumn);
