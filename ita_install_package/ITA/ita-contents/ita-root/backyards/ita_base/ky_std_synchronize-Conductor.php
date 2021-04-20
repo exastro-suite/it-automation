@@ -2997,6 +2997,10 @@
                     //Conductor、Nodeのステータスが不一致の場合、Conductorのステータスこ更新
                     //待機状態でない場合、ステータス更新
                     if( $intNextJobStopflg != "2" ){
+                        //異常系の場合、完了日時追加
+                        if( $arySymInsUpdateTgtSource['STATUS_ID'] > 5 ){
+                            $arySymInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
+                        } 
                         // 更新用のテーブル定義
                         $aryConfigForIUD = $aryConfigForSymInsIUD;
                         
