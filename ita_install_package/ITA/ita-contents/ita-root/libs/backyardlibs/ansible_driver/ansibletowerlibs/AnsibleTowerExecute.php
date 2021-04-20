@@ -76,11 +76,16 @@ global $objDBCA;
         ////////////////////////////////
         // トレースメッセージ
         $logger->debug("Authorize AnsibleTower.");
+
+        $proxySetting              = array();
+        $proxySetting['address']   = $ansibleTowerIfInfo["ANSIBLE_PROXY_ADDRESS"];
+        $proxySetting['port']      = $ansibleTowerIfInfo["ANSIBLE_PROXY_PORT"];
     
         $restApiCaller = new RestApiCaller($ansibleTowerIfInfo['ANSTWR_PROTOCOL'],
                                            $ansibleTowerIfInfo['ANSTWR_HOSTNAME'],
                                            $ansibleTowerIfInfo['ANSTWR_PORT'],
-                                           $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN']);
+                                           $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN'],
+                                           $proxySetting);
                                        
         $response_array = $restApiCaller->authorize();
         if($response_array['success'] != true) {

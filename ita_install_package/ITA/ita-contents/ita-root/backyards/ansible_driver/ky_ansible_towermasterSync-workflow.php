@@ -137,6 +137,10 @@ try {
 
     $ansibleTowerIfInfo = $ifInfoRows[0];
 
+    $proxySetting              = array();
+    $proxySetting['address']   = $ansibleTowerIfInfo["ANSIBLE_PROXY_ADDRESS"];
+    $proxySetting['port']      = $ansibleTowerIfInfo["ANSIBLE_PROXY_PORT"];
+
     ////////////////////////////////
     // RESTの認証
     ////////////////////////////////
@@ -146,7 +150,8 @@ try {
     $restApiCaller = new RestApiCaller($ansibleTowerIfInfo['ANSTWR_PROTOCOL'],    
                                         $ansibleTowerIfInfo['ANSTWR_HOSTNAME'],
                                         $ansibleTowerIfInfo['ANSTWR_PORT'],
-                                        $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN']); // 暗号復号は内部処理
+                                        $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN'],
+                                        $proxySetting); // 暗号復号は内部処理
 
     $response_array = $restApiCaller->authorize();
     if($response_array['success'] == false) {

@@ -1063,6 +1063,10 @@
             $lv_ans_exec_user         = $in_ans_if_info['ANSIBLE_EXEC_USER'];
             $lv_ans_exec_mode         = $in_ans_if_info['ANSIBLE_EXEC_MODE'];
 
+            $proxySetting              = array();
+            $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+            $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+
             // Towerの接続情報
             $lv_anstwr_protocol       = $in_ans_if_info['ANSTWR_PROTOCOL'];
             $lv_anstwr_hostname       = $in_ans_if_info['ANSTWR_HOSTNAME'];
@@ -1249,7 +1253,8 @@
                                                                  $lv_ans_secret_access_key,
                                                                  $RequestURI,
                                                                  $Method,
-                                                                 $RequestContents );
+                                                                 $RequestContents,
+                                                                 $proxySetting );
 
 
                     // トレースメッセージ
@@ -1424,6 +1429,10 @@
             $lv_ans_exec_user         = $in_ans_if_info['ANSIBLE_EXEC_USER'];
             $lv_ans_exec_mode         = $in_ans_if_info['ANSIBLE_EXEC_MODE'];
 
+            $proxySetting              = array();
+            $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+            $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+
             // Towerの接続情報
             $lv_anstwr_protocol       = $in_ans_if_info['ANSTWR_PROTOCOL'];
             $lv_anstwr_hostname       = $in_ans_if_info['ANSTWR_HOSTNAME'];
@@ -1471,7 +1480,8 @@
                                                              $lv_ans_secret_access_key,
                                                              $RequestURI,
                                                              $Method,
-                                                             $RequestContents );
+                                                             $RequestContents,
+                                                             $proxySetting );
     
                 ////////////////////////////////////////////////////////////////
                 // REST API結果判定                                           //

@@ -193,10 +193,29 @@ Ansibleインターフェース情報
 	$tcg -> addColumn($c);
 	//実行時データ削除----
 
-
-
     $table -> addColumn($tcg);
     //Ansible Tower情報----
+
+   $cg = new ColumnGroup($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000021'));
+        //************************************************************************************
+        //----Proxyアドレス
+        //************************************************************************************
+        $c = new TextColumn('ANSIBLE_PROXY_ADDRESS', $g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000022'));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000023'));//エクセル・ヘッダでの説明
+        $c->setHiddenMainTableColumn(true);
+        $c->setValidator(new SingleTextValidator(0,128,false));
+        $cg->addColumn($c);
+
+        //************************************************************************************
+        //----Proxyポート
+        //************************************************************************************
+        $c = new NumColumn('ANSIBLE_PROXY_PORT', $g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000024'));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000025'));//エクセル・ヘッダでの説明
+        $c->setHiddenMainTableColumn(true);
+        $c->setSubtotalFlag(false);
+        $c->setValidator(new IntNumValidator(1,65535));
+        $cg->addColumn($c);
+    $table->addColumn($cg);
 
     //--------------------------------------------------------------
     //----データリレイストレージパス(ITA)

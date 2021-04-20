@@ -45,6 +45,8 @@ class DAnsibleTowerIfinfo extends TableBaseDefinition {
             "ANSTWR_HOST_ID"                => "",
             "ANSTWR_PROTOCOL"               => "",
             "ANSTWR_PORT"                   => "",
+            "ANSIBLE_PROXY_ADDRESS"         => "",
+            "ANSIBLE_PROXY_PORT"            => "",
             "ANSIBLE_EXEC_MODE"             => "",
             "ANSIBLE_STORAGE_PATH_LNX"      => "",
             "ANSIBLE_STORAGE_PATH_ANS"      => "",
