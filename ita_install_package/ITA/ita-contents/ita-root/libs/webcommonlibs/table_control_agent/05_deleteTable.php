@@ -682,6 +682,9 @@
                     }
                     
                     foreach($arrayObjColumn as $objColumn){
+                        // loadtableでafterTrzStartActionにfunctionを登録しても、Excel/Rest経由の登録・更新の場合、条件にマッチしないので
+                        // afterTrzStartActionで登録したfunctionが呼ばれません。03_registerTable.php 04_updateTable.phpを参照
+                        // beforeTableIUDActionを使用して下さい。
                         $arrayTmp = $objColumn->afterTableIUDAction($exeDeleteData, $reqDeleteData, $aryVariant);
                         if($arrayTmp[0]===false){
                             $intErrorType = $arrayTmp[1];
