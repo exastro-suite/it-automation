@@ -52,7 +52,9 @@ class RestApiCaller {
 
     private $version;
 
-    function __construct($protocol, $hostName, $portNo, $encryptedAuthToken) {
+    private $proxySetting;
+
+    function __construct($protocol, $hostName, $portNo, $encryptedAuthToken,$proxySetting) {
         $this->baseURI = $protocol . "://" . $hostName . ":" . $portNo . self::API_BASE_PATH;
         $this->decryptedAuthToken= ky_decrypt($encryptedAuthToken);
 
@@ -68,6 +70,7 @@ class RestApiCaller {
             $exec_mode = "unknowned";
         }
         $UIErrorMsg = array();
+        $this->$proxySetting = $proxySetting;
     }
     function setUp($log_output_php, $log_output_dir, $log_file_prefix, $log_level, $UIExecLogPath, $UIErrorLogPath) {
         $this->logger->setUp($log_output_php, $log_output_dir, $log_file_prefix, $log_level, $UIExecLogPath, $UIErrorLogPath);
@@ -152,6 +155,18 @@ class RestApiCaller {
         $httpContext['http']['method']          = $method;
         $httpContext['http']['ignore_errors']   = true;
         $httpContext['http']['header']          = implode("\r\n", $header);
+
+        ////////////////////////////////
+        // Proxy設定                  //
+        ////////////////////////////////
+        if($this->$proxySetting['address'] != ""){
+            $address = $this->$proxySetting['address'];
+            if($this->$proxySetting['port'] != ""){
+                $address = $address . ":" . $this->$proxySetting['port'];
+            }
+            $HttpContext['http']['proxy'] = $address;
+            $HttpContext['http']['request_fulluri'] = true;
+        }
 
         // 暫定対応 SSL認証エラー無視
         $httpContext['ssl']['verify_peer']      = false;

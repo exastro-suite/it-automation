@@ -57,6 +57,8 @@ ANSIBLE_STORAGE_PATH_ANS        VARCHAR (256)                     ,
 SYMPHONY_STORAGE_PATH_ANS       VARCHAR (256)                     ,
 CONDUCTOR_STORAGE_PATH_ANS      VARCHAR (256)                     ,
 ANSIBLE_EXEC_OPTIONS            VARCHAR (512)                     , -- ansible-playbook実行時のオプションパラメータ
+ANSIBLE_PROXY_ADDRESS           VARCHAR (128)                     ,
+ANSIBLE_PROXY_PORT              INT                               ,
 -- ansible独自情報
 ANSIBLE_EXEC_USER               VARCHAR (64)                      , -- ansible-playbook実行ユーザー
 ANSIBLE_ACCESS_KEY_ID           VARCHAR (64)                      , 
@@ -104,6 +106,8 @@ ANSIBLE_STORAGE_PATH_ANS        VARCHAR (256)                     ,
 SYMPHONY_STORAGE_PATH_ANS       VARCHAR (256)                     ,
 CONDUCTOR_STORAGE_PATH_ANS      VARCHAR (256)                     ,
 ANSIBLE_EXEC_OPTIONS            VARCHAR (512)                     , -- ansible-playbook実行時のオプションパラメータ
+ANSIBLE_PROXY_ADDRESS           VARCHAR (128)                     ,
+ANSIBLE_PROXY_PORT              INT                               ,
 -- ansible独自情報
 ANSIBLE_EXEC_USER               VARCHAR (64)                      , -- ansible-playbook実行ユーザー
 ANSIBLE_ACCESS_KEY_ID           VARCHAR (64)                      , 

@@ -69,7 +69,8 @@
                                      $SecretAccessKey,
                                      $RequestURI,
                                      $Method,
-                                     $RequestContents ){
+                                     $RequestContents,
+                                     $proxySetting ){
         ////////////////////////////////
         // 返却用のArrayを定義        //
         ////////////////////////////////
@@ -148,6 +149,18 @@
 
             $HttpContext['ssl']['verify_peer']=false;                      
             $HttpContext['ssl']['verify_peer_name']=false;                 
+
+            ////////////////////////////////
+            // Proxy設定                  //
+            ////////////////////////////////
+            if($proxySetting['address'] != ""){
+                $address = $proxySetting['address'];
+                if($proxySetting['port'] != ""){
+                    $address = $address . ":" . $proxySetting['port'];
+                }
+                $HttpContext['http']['proxy'] = $address;
+                $HttpContext['http']['request_fulluri'] = true;
+            }
 
             ////////////////////////////////
             // REST APIアクセス           //

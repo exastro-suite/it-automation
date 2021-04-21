@@ -12199,6 +12199,10 @@ class CreateAnsibleExecFiles {
                     // 暗号化する文字列
                     "TARGET_VALUE"=>$enc_in_pass);
 
+                $proxySetting              = array();
+                $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+                $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+
                 ////////////////////////////////////////////////////////////////
                 // ansible-vault 暗号化 REST APIコール                        //
                 ////////////////////////////////////////////////////////////////
@@ -12209,7 +12213,8 @@ class CreateAnsibleExecFiles {
                                                              ky_decrypt( $this->lv_ans_if_info['ANSIBLE_SECRET_ACCESS_KEY'] ),
                                                              $RequestURI,
                                                              $Method,
-                                                             $RequestContents );
+                                                             $RequestContents,
+                                                             $proxySetting );
                 if( $rest_api_response['StatusCode'] == 200 ){
                     $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
                     if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
@@ -12318,6 +12323,10 @@ class CreateAnsibleExecFiles {
                     // 暗号化する文字列
                     "TARGET_VALUE"=>$decryptData);
 
+            $proxySetting              = array();
+            $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+            $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+
             ////////////////////////////////////////////////////////////////
             // ansible-vault 暗号化 REST APIコール                        //
             ////////////////////////////////////////////////////////////////
@@ -12328,7 +12337,8 @@ class CreateAnsibleExecFiles {
                                                          ky_decrypt( $this->lv_ans_if_info['ANSIBLE_SECRET_ACCESS_KEY'] ),
                                                          $RequestURI,
                                                          $Method,
-                                                         $RequestContents );
+                                                         $RequestContents,
+                                                         $proxySetting );
             if( $rest_api_response['StatusCode'] == 200 ){
                 $vaultData = $rest_api_response['ResponsContents']['resultdata'];
                 if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
@@ -12416,6 +12426,10 @@ class CreateAnsibleExecFiles {
                         // 暗号化する文字列
                         "TARGET_VALUE"=>$enc_in_pass);
 
+                $proxySetting              = array();
+                $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+                $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+
                 ////////////////////////////////////////////////////////////////
                 // ansible-vault 暗号化 REST APIコール                        //
                 ////////////////////////////////////////////////////////////////
@@ -12426,7 +12440,9 @@ class CreateAnsibleExecFiles {
                                                              ky_decrypt( $this->lv_ans_if_info['ANSIBLE_SECRET_ACCESS_KEY'] ),
                                                              $RequestURI,
                                                              $Method,
-                                                             $RequestContents );
+                                                             $RequestContents,
+                                                             $proxySetting );
+
                 if( $rest_api_response['StatusCode'] == 200 ){
                     $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
                     if($rest_api_response['ResponsContents']['status'] != "SUCCEED") {
