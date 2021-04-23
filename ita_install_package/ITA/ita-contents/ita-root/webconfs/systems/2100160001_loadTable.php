@@ -127,6 +127,29 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
+    // メニュー作成状態
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+
+        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+        if( $modeValue=="DTUP_singleRecRegister"){
+            $exeQueryData[$objColumn->getID()] = 1; //「登録」の場合必ず1(未作成)にする
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
+    $c = new IDColumn('MENU_CREATE_STATUS', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102027"),'F_MENU_CREATE_STATUS','MENU_CREATE_STATUS','MENU_CREATE_STATUS_SELECT', '', array('OrderByThirdColumn'=>'MENU_CREATE_STATUS'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102028"));//エクセル・ヘッダでの説明
+    $c->setAllowSendFromFile(false); //エクセル/CSVからのアップロードは不可能
+    $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt(''))); //入力不可にして裏で値を持って置く場合。
+    $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt(''))); //入力不可にして裏で値を持って置く場合。
+    $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction); //「登録」時に1(未作成)に
+    $table->addColumn($c);
+
     // 説明
     $objVldt = new MultiTextValidator(0,1024,false);
     $c = new MultiTextColumn('DESCRIPTION', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102017"));

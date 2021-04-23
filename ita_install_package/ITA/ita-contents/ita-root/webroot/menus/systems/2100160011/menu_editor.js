@@ -289,7 +289,8 @@ const languageText = {
 '0042':[getSomeMessage("ITACREPAR_1246"),''],
 '0043':[getSomeMessage("ITACREPAR_1252"),''],
 '0044':[getSomeMessage("ITACREPAR_1253"),''],
-'0045':[getSomeMessage("ITACREPAR_1254"),'']
+'0045':[getSomeMessage("ITACREPAR_1254"),''],
+'0046':[getSomeMessage("ITACREPAR_1276"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
@@ -777,7 +778,12 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
       createRegistrationData('registration');
       break;
     case 'update-initialize':
-      if ( !window.confirm(getSomeMessage("ITACREPAR_1250") ) ) return false;
+      //メニュー作成状態が「未作成」の場合、windowメッセージを変更
+      if(menuEditorArray['selectMenuInfo']['menu']['MENU_CREATE_STATUS'] == 1){
+        if ( !window.confirm(getSomeMessage("ITACREPAR_1201")) ) return false;
+      }else{
+        if ( !window.confirm(getSomeMessage("ITACREPAR_1250")) ) return false;
+      }
       createRegistrationData('update-initialize');
       break;
     case 'update':
@@ -2596,6 +2602,18 @@ const setPanelParameter = function( setData ) {
         $('#create-menu-for-input')
           .attr('data-id', setData['menu']['MENUGROUP_FOR_INPUT'] )
           .text( listIdName( 'group', setData['menu']['MENUGROUP_FOR_INPUT'] ));
+    }
+
+    //「メニュー作成状態」が2(作成済み)の場合は、メニュー名入力欄を非活性にする。
+    if(setData['menu']['MENU_CREATE_STATUS'] == 2){
+      $('#create-menu-name').prop('disabled', true);
+    }
+
+    //「メニュー作成状態」が1（未作成）の場合に各種ボタンを操作
+    if(setData['menu']['MENU_CREATE_STATUS'] == 1){
+      $('[data-menu-button="edit"]').parent().remove(); //「編集」ボタンを削除
+      $('[data-menu-button="initialize"]').text(textCode('0046')); //「初期化」ボタンを「作成」に名称変更
+      $('[data-menu-button="update-initialize"]').text(textCode('0046')); //「作成(初期化)」ボタンを「作成」に名称変更
     }
 
     itemCounter = setData['menu']['number-item'] + 1;

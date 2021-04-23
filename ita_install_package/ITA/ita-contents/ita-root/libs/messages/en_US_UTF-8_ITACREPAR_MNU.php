@@ -38,6 +38,8 @@ $ary["ITACREPAR-MNU-102020"]        = "Enter when creating a vertical menu";
 $ary["ITACREPAR-MNU-102023"]        = "Creation target";
 $ary["ITACREPAR-MNU-102026"]        = "If you select \"Parameter Sheet\", ITA will create a parameter sheet menu that is set in the substitution value automatic registration setting.
 If you select \"Data Sheet\", ITA will create a data sheet menu that is not set in the substitution value automatic registration setting.";
+$ary["ITACREPAR-MNU-102027"]        = "Menu creation status";
+$ary["ITACREPAR-MNU-102028"]        = "If the menu has never been created in this ID, it will be \"Not created\", and if you have created it even once, it will be \"Created\". If it is \"Created\", you cannot change the \"Menu name\".";
 $ary["ITACREPAR-MNU-102101"]        = "Maintenance (view/register/update/discard) can be performed on items managed in the menu.";
 $ary["ITACREPAR-MNU-102102"]        = "Id";
 $ary["ITACREPAR-MNU-102103"]        = "Menu item creation information";
