@@ -837,7 +837,7 @@ configure_ansible() {
     
     # Install some pip packages.
     if [ "${exec_mode}" == "3" ]; then
-        pip3 install --upgrade pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pip3 install --upgrade pip requests >> "$ITA_BUILDER_LOG_FILE" 2>&1
         for key in ${PIP_PACKAGE["ansible"]}; do
             echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             pip3 install $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1061,7 +1061,7 @@ download() {
     
     #pip install
     yum_install python3
-    pip3 install --upgrade pip >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    pip3 install --upgrade pip requests >> "$ITA_BUILDER_LOG_FILE" 2>&1
     
     for key in ${!PIP_PACKAGE[@]}; do
         local download_dir="${DOWNLOAD_DIR["pip"]}/$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
