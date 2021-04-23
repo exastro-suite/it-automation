@@ -47,6 +47,7 @@ class MenuNameValidator extends SingleTextValidator {
 
         if( $strModeId != "" ){
             $boolCheckContinue = false;
+            $boolCheckContinueUpdateOnly = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時
                 $boolCheckContinue = true;
@@ -54,6 +55,7 @@ class MenuNameValidator extends SingleTextValidator {
             }else if($strModeId == "DTUP_singleRecUpdate"){
                 //----各種更新時
                 $boolCheckContinue = true;
+                $boolCheckContinueUpdateOnly = true;
                 //各種更新時----
             }else if($strModeId == "DTUP_singleRecDelete"){
                 $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];
@@ -65,6 +67,20 @@ class MenuNameValidator extends SingleTextValidator {
                 }
             }else{
                 //処理をしない
+            }
+
+            //更新時のみ。メニュー作成状態が2（作成済み）の場合、メニュー名が変更されていないことをチェック。
+            if($boolCheckContinueUpdateOnly===true){
+                $menuCreateFlag = $arrayVariant['edit_target_row']['MENU_CREATE_STATUS']; //1（未作成）、2（作成済み）
+                $beforeMenuName = $arrayVariant['edit_target_row']['MENU_NAME'];
+                $afterMenuName = $arrayRegData['MENU_NAME'];
+                if($menuCreateFlag == 2){
+                    if($beforeMenuName != $afterMenuName){
+                        $retBool = false;
+                        $boolCheckContinue = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1173");
+                    }
+                }
             }
 
             if($boolCheckContinue===true){

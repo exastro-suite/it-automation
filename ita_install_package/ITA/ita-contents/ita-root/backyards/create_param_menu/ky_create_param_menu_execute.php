@@ -2910,6 +2910,16 @@ EOD;
         $zip = NULL;
 
         //////////////////////////
+        // メニュー定義一覧の「メニュー作成状態」を更新する（2（作成済み）にする）
+        //////////////////////////
+        $result = updateMenuCreateFlag($cmiData);
+        if(true !== $result){
+            // パラメータシート作成管理更新処理を行う
+            updateMenuStatus($targetData, "4", $result, true, true);
+            continue;
+        }
+
+        //////////////////////////
         // パラメータシート作成管理更新処理を行う（完了）
         //////////////////////////
         updateMenuStatus($targetData, "3", NULL, false, false, $zipFileName, $zipFilePath);
@@ -3139,6 +3149,36 @@ function updateMenuStatus($targetData, $status, $note, $rollbackFlg, $tranFlg, $
         if(true === $tranFlg){
             $objDBCA->transactionRollback();
         }
+        return $e->getMessage();
+    }
+}
+
+/**
+ * メニュー作成状態
+ * 
+ */
+function updateMenuCreateFlag($cmiData){
+    global $objDBCA, $db_model_ch, $objMTS;
+    $createMenuInfoTable = new CreateMenuInfoTable($objDBCA, $db_model_ch);
+
+    try{
+        //////////////////////////
+        // メニュー定義一覧テーブルを更新
+        //////////////////////////
+        $updateData = $cmiData;
+        $updateData['MENU_CREATE_STATUS'] = "2"; // メニュー作成状態
+        $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+        $result = $createMenuInfoTable->updateTable($updateData, $jnlSeqNo);
+        if(true !== $result){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5024', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+
+        return true;
+
+    }
+    catch(Exception $e){
         return $e->getMessage();
     }
 }

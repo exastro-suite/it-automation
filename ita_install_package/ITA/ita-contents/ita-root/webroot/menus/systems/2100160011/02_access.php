@@ -424,8 +424,12 @@
                 // メニュー作成情報を更新
                 //////////////////////////
                 $arrayUpdateData = NULL;
+                $menuCreateFlag = NULL;
                 foreach($createMenuInfoArray as $createMenuInfoData){
                     if($createMenuInfoData['CREATE_MENU_ID'] == $menuData['menu']['CREATE_MENU_ID']){
+                         //メニュー作成履歴のMENU_CREATE_TYPE判定のためMENU_CREATE_STATUSを取得
+                         $menuCreateFlag = $createMenuInfoData['MENU_CREATE_STATUS'];
+
                          //「編集」の場合は「作業対象」「縦メニュー利用」「ホストグループ利用」に変更がないことをチェック
                          if($menuData['type'] === 'update'){
                             if($createMenuInfoData['TARGET'] != $menuData['menu']['TARGET']){
@@ -942,7 +946,12 @@
                 if($menuData['type'] === 'update'){
                     $insertData['MENU_CREATE_TYPE_ID'] = "3"; //編集
                 }else{
-                    $insertData['MENU_CREATE_TYPE_ID'] = "2"; //初期化
+                    //メニュー作成状態が2(作成済み)の場合は「初期化」に、それ以外(1(未作成))なら「新規作成」
+                    if($menuCreateFlag == "2"){
+                        $insertData['MENU_CREATE_TYPE_ID'] = "2"; //初期化
+                    }else{
+                        $insertData['MENU_CREATE_TYPE_ID'] = "1"; //新規作成
+                    }
                 }
                 $insertData['FILE_NAME'] = "";
                 $insertData['ACCESS_AUTH'] = $menuData['menu']['ACCESS_AUTH'];
@@ -1456,6 +1465,7 @@
                             "MENUGROUP_FOR_INPUT"      => $createMenuInfoData['MENUGROUP_FOR_INPUT'],
                             "MENUGROUP_FOR_SUBST"      => $createMenuInfoData['MENUGROUP_FOR_SUBST'],
                             "MENUGROUP_FOR_VIEW"       => $createMenuInfoData['MENUGROUP_FOR_VIEW'],
+                            "MENU_CREATE_STATUS"       => $createMenuInfoData['MENU_CREATE_STATUS'],
                             "DISP_SEQ"                 => $createMenuInfoData['DISP_SEQ'],
                             "DESCRIPTION"              => $createMenuInfoData['DESCRIPTION'],
                             "ACCESS_AUTH"              => $createMenuInfoData['ACCESS_AUTH'],

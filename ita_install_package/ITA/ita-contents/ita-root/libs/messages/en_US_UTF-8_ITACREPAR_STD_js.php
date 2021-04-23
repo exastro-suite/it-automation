@@ -91,4 +91,7 @@ $ary["ITACREPAR_1272"]       = "To make it a unique item, check the check box.";
 $ary["ITACREPAR_1273"]       = "Enter the description that will be displayed when users hover mouse cursor over the item name.\nThe maximum size is 1024 bytes.";
 $ary["ITACREPAR_1274"]       = "Enter the remarks column.\nThe maximum size is 8192 bytes.";
 $ary["ITACREPAR_1275"]       = "You can refer to other items based on the menu item you selected in \"Pulldown Selection\".";
+$ary["ITACREPAR_1276"]       = "Create";
+$ary["ITACREPAR_1277"]       = "Not created";
+$ary["ITACREPAR_1278"]       = "Created";
 ?>

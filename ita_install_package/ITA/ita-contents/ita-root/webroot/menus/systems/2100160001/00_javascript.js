@@ -230,6 +230,25 @@ callback.prototype = {
                 var action = 'update';
                 selectValue(action, $('#' + action + '_table2').val());
                 selectTargetAction(action); 
+
+                var menuCreateFlagArea = $('#Mix1_1').find('input[name="COL_IDSOP_17"]');
+                var menuCreateFlag = menuCreateFlagArea.val();
+                if(menuCreateFlag == 1){
+                    //「メニュー作成状態」をIDから文字列表記に変換(未作成)
+                    var creFlagEle = getSomeMessage("ITACREPAR_1277")+'<input type="hidden" id="update_table9" name="COL_IDSOP_17" value="'+menuCreateFlag+'">';
+                    menuCreateFlagArea.parent('div').html(creFlagEle);
+                }else if(menuCreateFlag == 2){
+                    //「メニュー作成状態」をIDから文字列表記に変換(作成済み)
+                    var creFlagEle = getSomeMessage("ITACREPAR_1278")+'<input type="hidden" id="update_table9" name="COL_IDSOP_17" value="'+menuCreateFlag+'">';
+                    menuCreateFlagArea.parent('div').html(creFlagEle);
+
+                    //「メニュー名」の入力欄を非アクティブ化
+                    var menuNameArea = $('#Mix1_1').find('input[name="COL_IDSOP_8"]');
+                    var menuName = menuNameArea.val();
+                    var menuNameEle = menuName+'<input type="hidden" id="update_table1" name="COL_IDSOP_8" value="'+menuName+'">';
+                    menuNameArea.parent('div').html(menuNameEle);
+                }
+
             }());
         }
     },
