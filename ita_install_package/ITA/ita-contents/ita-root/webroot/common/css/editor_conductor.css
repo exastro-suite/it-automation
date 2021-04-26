@@ -1772,7 +1772,7 @@ margin-right: 16px;
 #editor[data-editor-mode="edit"] #conductor .view,
 #editor[data-editor-mode="view"] #conductor .edit { display: none; }
 
-/* Conductor Hooterメニュー切替 */
+/* Conductor Headerメニュー切替 */
 #editor #editor-header .editor-menu-list,
 #editor[data-editor-mode="view"] #editor-header .edit,
 #editor[data-editor-mode="edit"][data-editor-config="update"] #editor-header .edit { display: none; }
@@ -1783,7 +1783,9 @@ margin-right: 16px;
 
 #editor[data-editor-mode="edit"] #editor-header .editor-menu-list,
 #editor[data-editor-mode="edit"][data-editor-config="update"] #editor-header .editor-menu-list,
-#editor[data-editor-mode="view"] #editor-header .conductor-header-menu1 { display: inline-block; }
+#editor[data-editor-mode="view"] #editor-header .conductor-header-menu1,
+#editor[data-editor-mode="execute"] #editor-header .editor-header-sub-menu .editor-menu-list,
+#editor[data-editor-mode="checking"] #editor-header .editor-header-sub-menu .editor-menu-list { display: inline-block; }
 
 /* Conductor Footerメニュー切替 */
 #editor #editor-footer .editor-menu-list { display: none; }
