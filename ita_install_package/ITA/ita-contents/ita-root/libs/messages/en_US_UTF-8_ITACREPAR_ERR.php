@@ -179,6 +179,7 @@ $ary["ITACREPAR-ERR-1170"]          = "Only comma-separated IDs can be entered i
 $ary["ITACREPAR-ERR-1171"]          = "Failed to search \"Reference item information\" table. SQL error = [{}].";
 $ary["ITACREPAR-ERR-1172"]          = "Contains a reference item ID that cannot be selected.。";
 $ary["ITACREPAR-ERR-1173"]          = "If you have already created a menu, you cannot change the \"Menu name\".";
+$ary["ITACREPAR-ERR-1174"]          = "Item name cannot contain \"/\".";
 $ary["ITACREPAR-ERR-5001"]          = "File does not exist. File=[{}].";
 $ary["ITACREPAR-ERR-5002"]          = "Failed to read the file. File=[{}].";
 $ary["ITACREPAR-ERR-5003"]          = "Failed to execute SQL. SQL error = [{}].";
