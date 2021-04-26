@@ -2605,8 +2605,10 @@ const setPanelParameter = function( setData ) {
     }
 
     //「メニュー作成状態」が2(作成済み)の場合は、メニュー名入力欄を非活性にする。
-    if(setData['menu']['MENU_CREATE_STATUS'] == 2){
-      $('#create-menu-name').prop('disabled', true);
+    if(menuEditorMode != 'diversion'){
+      if(setData['menu']['MENU_CREATE_STATUS'] == 2){
+        $('#create-menu-name').prop('disabled', true);
+      }
     }
 
     //「メニュー作成状態」が1（未作成）の場合に各種ボタンを操作
