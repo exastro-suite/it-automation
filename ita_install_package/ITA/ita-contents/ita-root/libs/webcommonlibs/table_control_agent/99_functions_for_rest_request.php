@@ -17,7 +17,7 @@
     require_once("{$g['root_dir_path']}/libs/webcommonlibs/table_control_agent/08_dumpToFile.php");
     require_once("{$g['root_dir_path']}/libs/webcommonlibs/table_control_agent/07_TableIUbyFIle.php");
 
-    function ReSTCommandDeal($strCalledRestVer,$strCommand,$objJSONOfReceptedData,$objTable){
+    function ReSTCommandDeal($strCalledRestVer,$strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg=false){
         global $g;
         $strFxName = __FUNCTION__;
 
@@ -31,7 +31,7 @@
         else{
             if( $strCommand == "INFO" || $strCommand == "GET" || $strCommand == "FILTER" ){
                 //----GETまたはFILTER
-                $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable);
+                $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
                 //GETまたはFILTER----
             }
             else if( $strCommand == "EDIT" ){
@@ -89,7 +89,7 @@
         //JSON形式で返す----
     }
 
-    function ReSTCommandFilterExecute($strCommand, $objJSONOfReceptedData, $objTable){
+    function ReSTCommandFilterExecute($strCommand, $objJSONOfReceptedData, $objTable, $strApiFlg=false){
         global $g;
         // ----ローカル変数宣言
         $intControlDebugLevel01=250;
@@ -251,7 +251,7 @@
                                                                             )
                                                               );
 
-                $aryResultOfDump = dumpDataFromTable(array('to_area_type'=>'toReturn'), $objTable, $tmpArrayVariant, $tmpArraySetting);
+                $aryResultOfDump = dumpDataFromTable(array('to_area_type'=>'toReturn'), $objTable, $tmpArrayVariant, $tmpArraySetting, $strApiFlg);
                 $aryForResultData = $aryResultOfDump[0];
                 if( $aryResultOfDump[1] !== null ){
                     //----エラー発生

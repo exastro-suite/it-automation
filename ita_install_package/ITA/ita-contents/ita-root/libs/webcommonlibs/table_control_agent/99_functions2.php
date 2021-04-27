@@ -963,7 +963,7 @@ EOD;
     }
     //08-履歴フィルタ作成部品----
 
-    function DTiSFilterCheckValid($objTable, $strFormatterId, $aryFilterData, &$aryVariant=array(), &$arySetting=array()){
+    function DTiSFilterCheckValid($objTable, $strFormatterId, $aryFilterData, &$aryVariant=array(), &$arySetting=array(), $strApiFlg=false){
         global $g;
         $intControlDebugLevel01=50;
 
@@ -1061,9 +1061,13 @@ EOD;
                             if($objColumn->getValidator()->isValid($strValue, $strRIValueNumeric, $aryFilterData, $aryVariant)){
                                 $objColumn->addRichFilterValue($strValue);
                             }else{
-                                $intErrCount+=1;
-                                foreach($objColumn->getValidator()->getValidRule() as $strData){
-                                    $aryErrorMsgBody[] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-101", array($strData, $objColumn->getColLabel(true)));
+                                if($strApiFlg === true){
+                                    $objColumn->addRichFilterValue($strValue);
+                                }else{
+                                    $intErrCount+=1;
+                                    foreach($objColumn->getValidator()->getValidRule() as $strData){
+                                        $aryErrorMsgBody[] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-101", array($strData, $objColumn->getColLabel(true)));
+                                    }
                                 }
                             }
                         }else{
