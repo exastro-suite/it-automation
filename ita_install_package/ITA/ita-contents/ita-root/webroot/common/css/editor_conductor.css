@@ -1784,6 +1784,7 @@ margin-right: 16px;
 #editor[data-editor-mode="edit"] #editor-header .editor-menu-list,
 #editor[data-editor-mode="edit"][data-editor-config="update"] #editor-header .editor-menu-list,
 #editor[data-editor-mode="view"] #editor-header .conductor-header-menu1,
+#editor[data-editor-mode="view"] #editor-header .editor-header-sub-menu .editor-menu-list,
 #editor[data-editor-mode="execute"] #editor-header .editor-header-sub-menu .editor-menu-list,
 #editor[data-editor-mode="checking"] #editor-header .editor-header-sub-menu .editor-menu-list { display: inline-block; }
 
