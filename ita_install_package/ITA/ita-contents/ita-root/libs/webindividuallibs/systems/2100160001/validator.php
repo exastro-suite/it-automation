@@ -47,6 +47,7 @@ class MenuNameValidator extends SingleTextValidator {
 
         if( $strModeId != "" ){
             $boolCheckContinue = false;
+            $boolCheckContinueUpdateOnly = false;
             if($strModeId == "DTUP_singleRecRegister" ){
                 //----各種登録時
                 $boolCheckContinue = true;
@@ -54,6 +55,7 @@ class MenuNameValidator extends SingleTextValidator {
             }else if($strModeId == "DTUP_singleRecUpdate"){
                 //----各種更新時
                 $boolCheckContinue = true;
+                $boolCheckContinueUpdateOnly = true;
                 //各種更新時----
             }else if($strModeId == "DTUP_singleRecDelete"){
                 $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];
@@ -65,6 +67,20 @@ class MenuNameValidator extends SingleTextValidator {
                 }
             }else{
                 //処理をしない
+            }
+
+            //更新時のみ。メニュー作成状態が2（作成済み）の場合、メニュー名が変更されていないことをチェック。
+            if($boolCheckContinueUpdateOnly===true){
+                $menuCreateFlag = $arrayVariant['edit_target_row']['MENU_CREATE_STATUS']; //1（未作成）、2（作成済み）
+                $beforeMenuName = $arrayVariant['edit_target_row']['MENU_NAME'];
+                $afterMenuName = $arrayRegData['MENU_NAME'];
+                if($menuCreateFlag == 2){
+                    if($beforeMenuName != $afterMenuName){
+                        $retBool = false;
+                        $boolCheckContinue = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1173");
+                    }
+                }
             }
 
             if($boolCheckContinue===true){
@@ -1588,6 +1604,69 @@ class ReferenceItemValidator extends SingleTextValidator {
                 $this->setValidRule($strErrAddMsg);
             }
         }
+        return $retBool;
+    }
+}
+
+/**
+* 項目名専用のバリデータクラス（「/」を含んでいる場合はエラー）
+*/
+
+class ItemNameValidator extends SingleTextValidator {
+
+    protected $eventMasterName;
+
+    function isValid($value, $strNumberForRI=null, $arrayRegData=null, &$arrayVariant=array()){
+
+        global $g;
+        $retBool = true;
+        $strModeId = "";
+
+        if( parent::isValid($value, $strNumberForRI, $arrayRegData, $arrayVariant) != true ) {
+            return false;
+        }
+
+        if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                $strModeId = $aryTcaAction["ACTION_MODE"];
+            }
+        }
+
+        if( $strModeId != "" ){
+
+            $boolCheckContinue = false;
+            if($strModeId == "DTUP_singleRecRegister" ){
+                //----各種登録時
+                $boolCheckContinue = true;
+                //各種登録時----
+            }else if($strModeId == "DTUP_singleRecUpdate"){
+                //----各種更新時
+                $boolCheckContinue = true;
+                //各種更新時----
+            }else if($strModeId == "DTUP_singleRecDelete"){
+                $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];
+                if( $modeValue_sub=="on" ){
+                    //処理をしない
+                }else if( $modeValue_sub=="off" ){
+                    //復活時
+                    $boolCheckContinue = true;
+                }
+            }else{
+                //処理をしない
+            }
+
+            if($boolCheckContinue===true){
+                //「/」を含んでいる場合はエラー
+                if(preg_match("/\//", $value)){
+                    $retBool = false;
+                    $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1174");
+                    $this->setValidRule($strErrAddMsg);
+                    return $retBool;
+                }
+            }
+        }
+
         return $retBool;
     }
 }

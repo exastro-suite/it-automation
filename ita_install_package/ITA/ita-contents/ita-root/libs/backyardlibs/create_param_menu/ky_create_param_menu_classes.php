@@ -476,6 +476,7 @@ class CreateMenuInfoTable extends BaseTable_CPM {
                                     'MENUGROUP_FOR_INPUT',
                                     'MENUGROUP_FOR_SUBST',
                                     'MENUGROUP_FOR_VIEW',
+                                    'MENU_CREATE_STATUS',
                                     'DISP_SEQ',
                                     'DESCRIPTION',
                                     'ACCESS_AUTH',

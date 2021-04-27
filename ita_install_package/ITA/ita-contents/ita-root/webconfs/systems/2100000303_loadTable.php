@@ -238,13 +238,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 }else{
                 }
             }
-            $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
-            return $retArray;
-        };
+            if($boolRet !== true) {
+                $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+                return $retArray;
+            }
 
-        // パスワードをansible-vaultで暗号化した文字列を隠しカラムに登録する。
-        $objFunction04 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
-
+            // 変更前と変更後のパスワードを判定し、違う場合にansible-vaultで暗号化した文字列を初期化
             global $g;
             if ( empty($root_dir_path) ){
                 $root_dir_temp = array();
@@ -306,7 +305,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setValidator($objVldt);
         $c->setEncodeFunctionName("ky_encrypt");
         $c->setFunctionForEvent('beforeTableIUDAction',$objFunction02);
-        $c->setFunctionForEvent('afterTableIUDAction',$objFunction04);
         $cg->addColumn($c);
     $table->addColumn($cg);
 
