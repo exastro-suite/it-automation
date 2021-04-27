@@ -27,7 +27,7 @@
     //----webroot(03,04)
 
     //----webroot(03,04,07)
-    function dumpDataFromTable($aryToArea, $objTable, $aryVariant=array(), &$arySetting=array()){
+    function dumpDataFromTable($aryToArea, $objTable, $aryVariant=array(), &$arySetting=array(), $strApiFlg=false){
         global $g;
         // ----ローカル変数宣言
         $intControlDebugLevel01=250;
@@ -299,7 +299,7 @@
 
                     //----バリデーションチェックは、かならず、あいまいモードにする前に行うこと(IDColumnの問題があるので）
                     if( $objFunction01ForOverride === null ){
-                        $tmpAryRet = DTiSFilterCheckValid($objTable, $strFormatterId, $filterData, $aryVariant, $arySetting);
+                        $tmpAryRet = DTiSFilterCheckValid($objTable, $strFormatterId, $filterData, $aryVariant, $arySetting, $strApiFlg);
                     }
                     else{
                         $tmpAryRet = $objFunction01ForOverride($objTable, $strFormatterId, $filterData, $aryVariant);
