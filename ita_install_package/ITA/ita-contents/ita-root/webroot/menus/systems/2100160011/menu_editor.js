@@ -448,7 +448,7 @@ const columnHTML = ''
           + '</tr>'
           + '<tr class="multiple single" title="' + textEntities(getSomeMessage("ITACREPAR_1263"),1) + '">'
             + '<th>' + textCode('0012') + '</th>'
-            + '<td><input class="config-text regex" type="text" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-text regex" type="text" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1264"),1) + '">'
             + '<th>' + textCode('0013') + '</th>'
@@ -739,7 +739,6 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
         const $newColumnTarget = $menuEditor.find('#i'+currentItemCounter);
         $newColumnTarget.find('.menu-column-type-select').prop('disabled', false); //カラムタイプ
         $newColumnTarget.find('.config-number'+'.max-byte').prop('disabled', false); //最大バイト数
-        $newColumnTarget.find('.config-text'+'.regex').prop('disabled', false); //正規表現
         $newColumnTarget.find('.config-number'+'.int-min-number').prop('disabled', false); //整数の最小値
         $newColumnTarget.find('.config-number'+'.int-max-number').prop('disabled', false); //整数の最大値
         $newColumnTarget.find('.config-number'+'.float-min-number').prop('disabled', false); //少数の最小値
