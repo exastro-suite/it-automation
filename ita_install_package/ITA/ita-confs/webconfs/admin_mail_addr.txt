@@ -1,1 +1,1 @@
-"mailto:abc@sample.com;def@sample.com"
+"mailto:abc@example.com;def@example.com"
