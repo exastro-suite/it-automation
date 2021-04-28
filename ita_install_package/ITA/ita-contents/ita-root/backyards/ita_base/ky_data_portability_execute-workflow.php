@@ -356,11 +356,14 @@ function registData($record, &$importedTableAry){
                     outputLog(LOG_PREFIX, $objQuery->getLastError());
                     return false;
                 }
+
+                // $ExistingseqValueの初期化
+                $ExistingseqValue = PHP_INT_MIN;
                 while ($row = $objQuery->resultFetch()) {
                     $ExistingseqValue = $row['VALUE'];
                 }
 
-                if ( isset($ExistingseqValue) && $seqValue > $ExistingseqValue ) {
+                if ( $seqValue > $ExistingseqValue ) {
                     $res = updateSequence(array('name' => $table['SEQUENCE_RIC'], 'value' => $seqValue));
                     if ($res === false) {
                         return false;
@@ -372,43 +375,48 @@ function registData($record, &$importedTableAry){
         }
 
         // 履歴系シーケンス番号取得
-        $seqValue = $jsqAry[$table['SEQUENCE_JSQ']];
-        if ( $dpMode == 1 ) {
-            $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
-            if ($res === false) {
-                return false;
-            }
-        } else if ( $dpMode == 2 ) {
-            if ( array_key_exists($table['SEQUENCE_JSQ'], $jsqAry) ) {
-                // 既存のシーケンス番号の取得
-                $sql  = 'SELECT VALUE FROM A_SEQUENCE';
-                $sql .= " WHERE NAME = '" . $value['SEQUENCE_JSQ'] . "'";
-                $objQuery = $objDBCA->sqlPrepare($sql);
-                if ($objQuery->getStatus() === false) {
-                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
-                    outputLog(LOG_PREFIX, "SQL=[$sql].");
-                    outputLog(LOG_PREFIX, $objQuery->getLastError());
-                    return false;
-                }
-                $res = $objQuery->sqlExecute();
+        if ( array_key_exists($table['SEQUENCE_JSQ'], $jsqAry) ) {
+            $seqValue = $jsqAry[$table['SEQUENCE_JSQ']];
+            if ( $dpMode == 1 ) {
+                $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
                 if ($res === false) {
-                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
-                    outputLog(LOG_PREFIX, "SQL=[$sql].");
-                    outputLog(LOG_PREFIX, $objQuery->getLastError());
                     return false;
                 }
-                while ($row = $objQuery->resultFetch()) {
-                    $ExistingseqValue = $row['VALUE'];
-                }
-                if ( isset($ExistingseqValue) && $seqValue > $ExistingseqValue ) {
-                    $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
-                    if ($res === false) {
+            } else if ( $dpMode == 2 ) {
+                if ( array_key_exists($table['SEQUENCE_JSQ'], $jsqAry) ) {
+                    // 既存のシーケンス番号の取得
+                    $sql  = 'SELECT VALUE FROM A_SEQUENCE';
+                    $sql .= " WHERE NAME = '" . $table['SEQUENCE_JSQ'] . "'";
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    if ($objQuery->getStatus() === false) {
+                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
+                        outputLog(LOG_PREFIX, "SQL=[$sql].");
+                        outputLog(LOG_PREFIX, $objQuery->getLastError());
                         return false;
                     }
+                    $res = $objQuery->sqlExecute();
+                    if ($res === false) {
+                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054', array(basename(__FILE__), __LINE__)));
+                        outputLog(LOG_PREFIX, "SQL=[$sql].");
+                        outputLog(LOG_PREFIX, $objQuery->getLastError());
+                        return false;
+                    }
+
+                    // $ExistingseqValueの初期化
+                    $ExistingseqValue = PHP_INT_MIN;
+                    while ($row = $objQuery->resultFetch()) {
+                        $ExistingseqValue = $row['VALUE'];
+                    }
+                    if ( $seqValue > $ExistingseqValue ) {
+                        $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
+                        if ($res === false) {
+                            return false;
+                        }
+                    }
                 }
+            } else {
+                return false;
             }
-        } else {
-            return false;
         }
 
         if(array_key_exists('SEQUENCE_OTHER', $table) && 0 < count($table['SEQUENCE_OTHER'])){
@@ -437,10 +445,12 @@ function registData($record, &$importedTableAry){
                         outputLog(LOG_PREFIX, $objQuery->getLastError());
                         return false;
                     }
+                    // $ExistingseqValueの初期化
+                    $ExistingseqValue = PHP_INT_MIN;
                     while ($row = $objQuery->resultFetch()) {
                         $ExistingseqValue = $row['VALUE'];
                     }
-                    if ( isset($ExistingseqValue) && $seqValue > $ExistingseqValue ) {
+                    if ( $seqValue > $ExistingseqValue ) {
                         $res = updateSequence(array('name' => $seqName, 'value' => $seqValue));
                         if ($res === false) {
                             return false;
