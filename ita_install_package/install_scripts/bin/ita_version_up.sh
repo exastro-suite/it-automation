@@ -692,7 +692,7 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
     #その他必要なスクリプトを実行する
     SHELL_FILE="${VERSION_UP_DIR}/${LIST_VERSION}/other_exec.sh"
     if test -e ${SHELL_FILE} ; then
-        sh ${SHELL_FILE} ${ITA_DIRECTORY} >> "$LOG_FILE" 2>&1
+        sh ${SHELL_FILE} ${ITA_DIRECTORY} ${NOW_VERSION} >> "$LOG_FILE" 2>&1
     fi
 
 done < ${VERSION_UP_LIST_FILE}
