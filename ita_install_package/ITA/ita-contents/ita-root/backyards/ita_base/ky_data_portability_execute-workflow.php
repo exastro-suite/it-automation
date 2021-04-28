@@ -356,13 +356,14 @@ function registData($record, &$importedTableAry){
                     outputLog(LOG_PREFIX, $objQuery->getLastError());
                     return false;
                 }
+
                 // $ExistingseqValueの初期化
-                $ExistingseqValue = "";
+                $ExistingseqValue = PHP_INT_MIN;
                 while ($row = $objQuery->resultFetch()) {
                     $ExistingseqValue = $row['VALUE'];
                 }
 
-                if ( isset($ExistingseqValue) && $seqValue > $ExistingseqValue ) {
+                if ( $seqValue > $ExistingseqValue ) {
                     $res = updateSequence(array('name' => $table['SEQUENCE_RIC'], 'value' => $seqValue));
                     if ($res === false) {
                         return false;
@@ -402,11 +403,11 @@ function registData($record, &$importedTableAry){
                     }
 
                     // $ExistingseqValueの初期化
-                    $ExistingseqValue = "";
+                    $ExistingseqValue = PHP_INT_MIN;
                     while ($row = $objQuery->resultFetch()) {
                         $ExistingseqValue = $row['VALUE'];
                     }
-                    if ( isset($ExistingseqValue) && $seqValue > $ExistingseqValue ) {
+                    if ( $seqValue > $ExistingseqValue ) {
                         $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
                         if ($res === false) {
                             return false;
@@ -445,11 +446,11 @@ function registData($record, &$importedTableAry){
                         return false;
                     }
                     // $ExistingseqValueの初期化
-                    $ExistingseqValue = "";
+                    $ExistingseqValue = PHP_INT_MIN;
                     while ($row = $objQuery->resultFetch()) {
                         $ExistingseqValue = $row['VALUE'];
                     }
-                    if ( isset($ExistingseqValue) && $seqValue > $ExistingseqValue ) {
+                    if ( $seqValue > $ExistingseqValue ) {
                         $res = updateSequence(array('name' => $seqName, 'value' => $seqValue));
                         if ($res === false) {
                             return false;
