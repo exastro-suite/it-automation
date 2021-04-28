@@ -5968,9 +5968,7 @@ class DateColumn extends Column {
 					if($flag===true){
 						$retStrQuery .= " AND ";
 					}
-					//----期間の終わりは約1日足す
-					$retStrQuery .= "{$strSelfAliasStrConColId} < ".$this->getFilterConvertValue(":{$this->getID()}__1")."+1-(1/86400) ";
-					//期間の終わりは約1日足す----
+					$retStrQuery .= "{$strSelfAliasStrConColId} <= ".$this->getFilterConvertValue(":{$this->getID()}__1");
 				}
 			}
 		}
