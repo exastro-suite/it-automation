@@ -21,6 +21,7 @@ $ary["ITABASEH-MNU-101050"]         = "ITA管理対象システム一覧";
 $ary["ITABASEH-MNU-101060"]         = "HW機器種別";
 $ary["ITABASEH-MNU-101070"]         = "HW機器の種別を選択します。\n・NW(ネットワーク)\n・ST(ストレージ)\n・SV(サーバー)";
 $ary["ITABASEH-MNU-101080"]         = "ホスト名";
+$ary["ITABASEH-MNU-101081"]         = "ホスト名が不正です。数値のホスト名は設定出来ません。";
 $ary["ITABASEH-MNU-101090"]         = "[最大長]128バイト";
 $ary["ITABASEH-MNU-102010"]         = "IPアドレス";
 $ary["ITABASEH-MNU-102020"]         = "[最大長]15バイト\nxxx.xxx.xxx.xxxの形式で入力してください。";

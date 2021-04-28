@@ -21,6 +21,7 @@ $ary["ITABASEH-MNU-101050"]         = "ITA target system list";
 $ary["ITABASEH-MNU-101060"]         = "HW device type";
 $ary["ITABASEH-MNU-101070"]         = "Select HW device type.\n・NW(network)\n・ST(storage)\n・SV(server)";
 $ary["ITABASEH-MNU-101080"]         = "Host name";
+$ary["ITABASEH-MNU-101081"]         = "Host name is invalid. Numerical host names cannot be set.";
 $ary["ITABASEH-MNU-101090"]         = "[Maximum length] 128 bytes";
 $ary["ITABASEH-MNU-102010"]         = "IP address";
 $ary["ITABASEH-MNU-102020"]         = "Enter in [Maximum length]15byte\nxxx.xxx.xxx.xxx format.";
