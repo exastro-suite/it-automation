@@ -574,20 +574,12 @@
                                             if($itemData['MAX_LENGTH'] != $createItemInfoData['MAX_LENGTH']){
                                                 $changedFlg = true;
                                             }
-                                            //正規表現
-                                            if($itemData['PREG_MATCH'] != $createItemInfoData['PREG_MATCH']){
-                                                $changedFlg = true;
-                                            }
                                         }
 
                                         //文字列(複数行)の場合
                                         if($itemData['INPUT_METHOD_ID'] == 2){
                                             //最大バイト数
                                             if($itemData['MULTI_MAX_LENGTH'] != $createItemInfoData['MULTI_MAX_LENGTH']){
-                                                $changedFlg = true;
-                                            }
-                                            //正規表現
-                                            if($itemData['MULTI_PREG_MATCH'] != $createItemInfoData['MULTI_PREG_MATCH']){
                                                 $changedFlg = true;
                                             }
                                         }
