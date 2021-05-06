@@ -7,13 +7,14 @@ box-sizing: border-box;
 height: 100%;
 }
 #INDEX {
-overflow: hidden;
+overflow: auto;
 }
 #HEADER {
 box-sizing: border-box;
 height: 86px;
 }
 #KIZI {
+min-height: auto!important;
 box-sizing: border-box;
 height: calc( 100% - 123px );
 padding: 0;

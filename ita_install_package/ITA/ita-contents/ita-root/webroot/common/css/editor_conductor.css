@@ -16,7 +16,7 @@ html, body,
   height: 80px;
 }
 #KIZI {
-
+  min-height: auto!important;
   box-sizing: border-box;
   height: calc( 100% - 117px );
   padding: 0;
