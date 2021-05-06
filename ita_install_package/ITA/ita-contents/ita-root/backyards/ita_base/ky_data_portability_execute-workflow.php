@@ -333,7 +333,14 @@ function registData($record, &$importedTableAry){
         // 更新系シーケンス番号取得
         $seqValue = $ricAry[$table['SEQUENCE_RIC']];
         if ( $dpMode == 1 ) {
-            $res = updateSequence(array('name' => $table['SEQUENCE_RIC'], 'value' => $seqValue));
+            $res = updateSequence(array('name'                  => $table['SEQUENCE_RIC'],
+                                        'value'                 => $seqValue['VALUE'],
+                                        'menu_id'               => $seqValue['MENU_ID'],
+                                        'disp_seq'              => $seqValue['DISP_SEQ'],
+                                        'note'                  => $seqValue['NOTE'],
+                                        'last_update_timestamp' => $seqValue['LAST_UPDATE_TIMESTAMP'],
+                                       )
+                                 );
             if ($res === false) {
                 return false;
             }
@@ -362,12 +369,18 @@ function registData($record, &$importedTableAry){
                 while ($row = $objQuery->resultFetch()) {
                     $ExistingseqValue = $row['VALUE'];
                 }
+                $value = ($seqValue['VALUE'] > $ExistingseqValue)? $seqValue['VALUE'] : $ExistingseqValue;
 
-                if ( $seqValue > $ExistingseqValue ) {
-                    $res = updateSequence(array('name' => $table['SEQUENCE_RIC'], 'value' => $seqValue));
-                    if ($res === false) {
-                        return false;
-                    }
+                $res = updateSequence(array('name'                  => $table['SEQUENCE_RIC'],
+                                            'value'                 => $value,
+                                            'menu_id'               => $seqValue['MENU_ID'],
+                                            'disp_seq'              => $seqValue['DISP_SEQ'],
+                                            'note'                  => $seqValue['NOTE'],
+                                            'last_update_timestamp' => $seqValue['LAST_UPDATE_TIMESTAMP'],
+                                           )
+                                     );
+                if ($res === false) {
+                    return false;
                 }
             }
         } else {
@@ -378,7 +391,14 @@ function registData($record, &$importedTableAry){
         if ( array_key_exists($table['SEQUENCE_JSQ'], $jsqAry) ) {
             $seqValue = $jsqAry[$table['SEQUENCE_JSQ']];
             if ( $dpMode == 1 ) {
-                $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
+                $res = updateSequence(array('name'                  => $table['SEQUENCE_JSQ'],
+                                            'value'                 => $seqValue['VALUE'],
+                                            'menu_id'               => $seqValue['MENU_ID'],
+                                            'disp_seq'              => $seqValue['DISP_SEQ'],
+                                            'note'                  => $seqValue['NOTE'],
+                                            'last_update_timestamp' => $seqValue['LAST_UPDATE_TIMESTAMP'],
+                                           )
+                                     );
                 if ($res === false) {
                     return false;
                 }
@@ -407,11 +427,19 @@ function registData($record, &$importedTableAry){
                     while ($row = $objQuery->resultFetch()) {
                         $ExistingseqValue = $row['VALUE'];
                     }
-                    if ( $seqValue > $ExistingseqValue ) {
-                        $res = updateSequence(array('name' => $table['SEQUENCE_JSQ'], 'value' => $seqValue));
-                        if ($res === false) {
-                            return false;
-                        }
+                    $value = ($seqValue['VALUE'] > $ExistingseqValue)? $seqValue['VALUE'] : $ExistingseqValue;
+
+                    $res = updateSequence(array('name'                  => $table['SEQUENCE_JSQ'],
+                                                'value'                 => $value,
+                                                'menu_id'               => $seqValue['MENU_ID'],
+                                                'disp_seq'              => $seqValue['DISP_SEQ'],
+                                                'note'                  => $seqValue['NOTE'],
+                                                'last_update_timestamp' => $seqValue['LAST_UPDATE_TIMESTAMP'],
+                                               )
+                                         );
+
+                    if ($res === false) {
+                        return false;
                     }
                 }
             } else {
@@ -422,7 +450,14 @@ function registData($record, &$importedTableAry){
         if(array_key_exists('SEQUENCE_OTHER', $table) && 0 < count($table['SEQUENCE_OTHER'])){
             $seqValue = $otherSeqAry[$seqName];
             if ( $dpMode == 1 ) {
-                $res = updateSequence(array('name' => $seqName, 'value' => $seqValue));
+                $res = updateSequence(array('name'                  => $seqName,
+                                            'value'                 => $seqValue['VALUE'],
+                                            'menu_id'               => $seqValue['MENU_ID'],
+                                            'disp_seq'              => $seqValue['DISP_SEQ'],
+                                            'note'                  => $seqValue['NOTE'],
+                                            'last_update_timestamp' => $seqValue['LAST_UPDATE_TIMESTAMP'],
+                                           )
+                                     );
                 if ($res === false) {
                     return false;
                 }
@@ -450,11 +485,19 @@ function registData($record, &$importedTableAry){
                     while ($row = $objQuery->resultFetch()) {
                         $ExistingseqValue = $row['VALUE'];
                     }
-                    if ( $seqValue > $ExistingseqValue ) {
-                        $res = updateSequence(array('name' => $seqName, 'value' => $seqValue));
-                        if ($res === false) {
-                            return false;
-                        }
+                    $value = ($seqValue['VALUE'] > $ExistingseqValue)? $seqValue['VALUE'] : $ExistingseqValue;
+
+                    $res = updateSequence(array('name'                  => $seqName,
+                                                'value'                 => $value,
+                                                'menu_id'               => $seqValue['MENU_ID'],
+                                                'disp_seq'              => $seqValue['DISP_SEQ'],
+                                                'note'                  => $seqValue['NOTE'],
+                                                'last_update_timestamp' => $seqValue['LAST_UPDATE_TIMESTAMP'],
+                                               )
+                                         );
+
+                    if ($res === false) {
+                        return false;
                     }
                 }
             } else {
@@ -764,33 +807,42 @@ function updateSequence($paramAry){
 
     if(1 === $count){
 
-        $sql  = 'UPDATE A_SEQUENCE set VALUE = :value';
-        $sql .= ' WHERE NAME = :name';
+        // 何か変更があった場合のみ更新
+        if($row['VALUE'] != $paramAry['value'] ||
+           $row['MENU_ID'] != $paramAry['menu_id'] ||
+           $row['DISP_SEQ'] != $paramAry['disp_seq'] ||
+           $row['NOTE'] != $paramAry['note'] ||
+           $row['LAST_UPDATE_TIMESTAMP'] != $paramAry['last_update_timestamp']
+          ){
 
-        if (LOG_LEVEL === 'DEBUG') {
-            outputLog(LOG_PREFIX, $sql);
-        }
+            $sql  = 'UPDATE A_SEQUENCE set VALUE = :value, MENU_ID = :menu_id, DISP_SEQ = :disp_seq, NOTE = :note, LAST_UPDATE_TIMESTAMP = :last_update_timestamp';
+            $sql .= ' WHERE NAME = :name';
 
-        $objQuery = $objDBCA->sqlPrepare($sql);
-        if ($objQuery->getStatus() === false) {
-            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
-                                                          array(basename(__FILE__), __LINE__)));
-            outputLog(LOG_PREFIX, $objQuery->getLastError());
-            return false;
-        }
-        $res = $objQuery->sqlBind($paramAry);
-        $res = $objQuery->sqlExecute();
-        if ($res === false) {
-            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900017',
-                                                          array(basename(__FILE__), __LINE__)));
-            outputLog(LOG_PREFIX, $objQuery->getLastError());
-            return false;
+            if (LOG_LEVEL === 'DEBUG') {
+                outputLog(LOG_PREFIX, $sql);
+            }
+
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            if ($objQuery->getStatus() === false) {
+                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                              array(basename(__FILE__), __LINE__)));
+                outputLog(LOG_PREFIX, $objQuery->getLastError());
+                return false;
+            }
+            $res = $objQuery->sqlBind($paramAry);
+            $res = $objQuery->sqlExecute();
+            if ($res === false) {
+                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900017',
+                                                              array(basename(__FILE__), __LINE__)));
+                outputLog(LOG_PREFIX, $objQuery->getLastError());
+                return false;
+            }
         }
     }
 
     else{
 
-        $sql  = 'INSERT INTO A_SEQUENCE(NAME,VALUE) VALUES(:name,:value)';
+        $sql  = 'INSERT INTO A_SEQUENCE(NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES(:name,:value,:menu_id,:disp_seq,:note,:last_update_timestamp)';
 
         if (LOG_LEVEL === 'DEBUG') {
             outputLog(LOG_PREFIX, $sql);
@@ -1880,7 +1932,7 @@ function exportData($record){
         }
 
         // 更新系シーケンス番号取得
-        $sql  = 'SELECT VALUE FROM A_SEQUENCE';
+        $sql  = 'SELECT VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP FROM A_SEQUENCE';
         $sql .= " WHERE NAME = '" . $value['SEQUENCE_RIC'] . "'";
         $objQuery = $objDBCA->sqlPrepare($sql);
         if ($objQuery->getStatus() === false) {
@@ -1897,11 +1949,11 @@ function exportData($record){
             return false;
         }
         while ($row = $objQuery->resultFetch()) {
-            $ricAry[$value['SEQUENCE_RIC']] = $row['VALUE'];
+            $ricAry[$value['SEQUENCE_RIC']] = $row;
         }
 
         // 履歴系シーケンス番号取得
-        $sql  = 'SELECT VALUE FROM A_SEQUENCE';
+        $sql  = 'SELECT VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP FROM A_SEQUENCE';
         $sql .= " WHERE NAME = '" . $value['SEQUENCE_JSQ'] . "'";
         $objQuery = $objDBCA->sqlPrepare($sql);
         if ($objQuery->getStatus() === false) {
@@ -1918,13 +1970,13 @@ function exportData($record){
             return false;
         }
         while ($row = $objQuery->resultFetch()) {
-            $jsqAry[$value['SEQUENCE_JSQ']] = $row['VALUE'];
+            $jsqAry[$value['SEQUENCE_JSQ']] = $row;
         }
 
         // その他のシーケンス番号取得
         if(array_key_exists('SEQUENCE_OTHER', $value) && 0 < $value['SEQUENCE_OTHER']){
             foreach($value['SEQUENCE_OTHER'] as $seqName){
-                $sql  = 'SELECT VALUE FROM A_SEQUENCE';
+                $sql  = 'SELECT VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP FROM A_SEQUENCE';
                 $sql .= " WHERE NAME = '" . $seqName . "'";
                 $objQuery = $objDBCA->sqlPrepare($sql);
                 if ($objQuery->getStatus() === false) {
@@ -1941,7 +1993,7 @@ function exportData($record){
                     return false;
                 }
                 while ($row = $objQuery->resultFetch()) {
-                    $otherSeqAry[$seqName] = $row['VALUE'];
+                    $otherSeqAry[$seqName] = $row;
                 }
             }
         }
