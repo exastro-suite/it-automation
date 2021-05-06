@@ -1137,6 +1137,14 @@
                                         $tmpNameFile = $objColumn->getLAPathToPreUploadSave() . "/fn_" . $inputArray[$colKey] . "_" . $nowTime;
 
                                         file_put_contents($tmpFile, base64_decode($uploadFiles[$row_i][$dlcFnv2]));
+
+                                        // ダウンロードしたファイルの暗号化が必要か判定
+                                        $FileEncryptFunctionName = $objColumn->getFileEncryptFunctionName();
+                                        if($FileEncryptFunctionName !== false) {
+                                            // ダウンロードしたファイルの暗号化
+                                            $ret = $FileEncryptFunctionName($tmpFile,$tmpFile);
+                                        }
+
                                         file_put_contents($tmpNameFile, $inputArray[$colKey]);
 
                                         $arrTempFiles[]=array(
