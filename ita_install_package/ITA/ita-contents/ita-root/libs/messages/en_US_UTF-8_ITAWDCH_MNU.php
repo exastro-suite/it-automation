@@ -189,7 +189,7 @@ $ary["ITAWDCH-MNU-1070303"]         = "Single byte alphanumeric characters and a
 $ary["ITAWDCH-MNU-1070401"]         = "User name";
 $ary["ITAWDCH-MNU-1070402"]         = "Multiple lines of character string are not allowed, character count is 1 to 270 byte, enter tab and linefeed cannot be entered, required item.";
 $ary["ITAWDCH-MNU-1070501"]         = "Mail address";
-$ary["ITAWDCH-MNU-1070502"]         = "Multiple lines of character string are not allowed, character count is 0 to 256 bytes, mail address format (available symbols from user name section (-_+=.)), required item";
+$ary["ITAWDCH-MNU-1070502"]         = "Multiple lines of character string are not allowed, character count is 0 to 256 bytes, mail address format (available symbols from user name section (-_+=.))";
 $ary["ITAWDCH-MNU-1070503"]         = "Mail address format (available symbols from user name section (-_+=.))";
 $ary["ITAWDCH-MNU-1070601"]         = "Role information";
 $ary["ITAWDCH-MNU-1070701"]         = "Last update date/time of password";
