@@ -94,6 +94,14 @@ if(array_key_exists('no', $_GET)){
             foreach ($arrContrastList as $arrContrast) {
                 if( $arrContrast['CONTRAST_LIST_ID'] == $intContrastid )$strContrastName = $arrContrast['CONTRAST_LIST_ID']."_".$arrContrast['CONTRAST_NAME'] ;
             }
+
+            //出力時、ファイル名文字数制限
+            $charlimit=128;
+            if( mb_strlen($strContrastName) > $charlimit ){
+                //ファイル名短縮                
+                $strContrastName = mb_substr($strContrastName, 0, $charlimit, "UTF-8");
+            }
+
             $outputdate=date('YmdHis');
             $outputfilename = $strContrastName . "_" . $outputdate;
 
