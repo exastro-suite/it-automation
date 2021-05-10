@@ -1088,7 +1088,7 @@ function checkNodeUseCaseValidate($aryNodeData){
         "out"=>array('movement','call','call_s','blank')
     );
     $arrNodeVariList['conditional-branch']=array(
-        "in"=>array('movement','call'),
+        "in"=>array('movement','call','call_s'),
         "out"=>array('end','movement','call','call_s','parallel-branch','pause','blank')
     );
     $arrNodeVariList['merge']=array(
