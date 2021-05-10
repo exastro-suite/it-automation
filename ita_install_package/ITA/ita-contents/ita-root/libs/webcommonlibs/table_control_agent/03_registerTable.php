@@ -440,6 +440,9 @@
 
                     //1行更新の場合
                     if( $varCommitSpan === 1  || $ordMode == 4 ){
+                        // loadtableでafterTrzStartActionにfunctionを登録しても、Excel/Rest経由の登録・更新の場合、上記の条件にマッチしないので
+                        // afterTrzStartActionで登録したfunctionが呼ばれません。
+                        // beforeTableIUDActionを使用して下さい。
                         foreach($arrayObjColumn as $objColumn){
                             $arrayTmp = $objColumn->afterTableIUDAction($exeRegisterData, $reqRegisterData, $aryVariant);
                             if($arrayTmp[0]===false){

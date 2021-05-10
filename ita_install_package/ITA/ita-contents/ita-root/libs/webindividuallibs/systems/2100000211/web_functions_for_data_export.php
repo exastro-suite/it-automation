@@ -164,7 +164,7 @@ function makeExportDataList($dirName){
     }
 
     // モードが時刻指定で、指定時刻がない場合はエラー
-    if ( $_POST["dp_mode"] == "2" && validateDate($_POST["specified_timestamp"] )) {
+    if ( $_POST["dp_mode"] == "2" && validateDateTime($_POST["specified_timestamp"] )) {
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900078'));
     }
 
@@ -447,7 +447,7 @@ function renameExportDir($dirName, $taskNo){
  * 日付時刻の有効性のチェック
  *
  */
-function validateDate($date, $format = 'Y-m-d H:i:s')
+function validateDateTime($date, $format = 'Y-m-d H:i:s')
 {
     $d = DateTime::createFromFormat($format, $date);
     return $d && $d->format($format) == $date;

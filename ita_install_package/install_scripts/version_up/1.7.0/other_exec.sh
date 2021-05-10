@@ -1,6 +1,8 @@
 #!/bin/sh
 
+CURRENT_DIR=`dirname $0`
 ITA_DIRECTORY=$1
+NOW_VERSION=$2
 
 # リリースファイルの削除
 RELEASE_FILE_LIST=("${ITA_DIRECTORY}/ita-root/libs/release/ita_hostgroup2"
@@ -25,3 +27,9 @@ for ITEM in ${SERVICE_FILE_LIST[@]}; do
         rm -rf "/usr/lib/systemd/system/${ITEM}"
     fi
 done
+
+# ファイルの暗号化
+if [ "${NOW_VERSION}" != "1.7.0" ] ; then
+    PHP_MODULE=`cat "${ITA_DIRECTORY}/ita-root/confs/backyardconfs/path_PHP_MODULE.txt"`
+    ${PHP_MODULE} "${CURRENT_DIR}/other_exec.php" ${ITA_DIRECTORY}
+fi

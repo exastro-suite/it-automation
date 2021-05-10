@@ -179,11 +179,6 @@ callback.prototype = {
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
-        var table = document.getElementById("Mix1_1");
-        table.rows[0].cells[6].style.display = 'none';
-        for(var i=2;table.rows[i];i++) {
-          table.rows[i].cells[7].style.display = 'none';
-        }
     },
 
     Filter2Tbl_add_selectbox : function( result ){

@@ -238,13 +238,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 }else{
                 }
             }
-            $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
-            return $retArray;
-        };
+            if($boolRet !== true) {
+                $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+                return $retArray;
+            }
 
-        // パスワードをansible-vaultで暗号化した文字列を隠しカラムに登録する。
-        $objFunction04 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
-
+            // 変更前と変更後のパスワードを判定し、違う場合にansible-vaultで暗号化した文字列を初期化
             global $g;
             if ( empty($root_dir_path) ){
                 $root_dir_temp = array();
@@ -306,7 +305,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setValidator($objVldt);
         $c->setEncodeFunctionName("ky_encrypt");
         $c->setFunctionForEvent('beforeTableIUDAction',$objFunction02);
-        $c->setFunctionForEvent('afterTableIUDAction',$objFunction04);
         $cg->addColumn($c);
     $table->addColumn($cg);
 
@@ -647,6 +645,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         // $arrayVariant['edit_target_row']はDBに登録済みの情報
         if($strModeId == "DTUP_singleRecRegister") {
 
+            // ホスト名
+            $strhostname   = array_key_exists('HOSTNAME',$arrayRegData)?
+                                $arrayRegData['HOSTNAME']:null;
+
             // 認証方式の設定値取得
             $strAuthMode   = array_key_exists('LOGIN_AUTH_TYPE',$arrayRegData)?
                                 $arrayRegData['LOGIN_AUTH_TYPE']:null;
@@ -677,6 +679,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         } elseif ($strModeId == "DTUP_singleRecDelete") {
 
+            // ホスト名
+            $strhostname        = isset($arrayVariant['edit_target_row']['HOSTNAME'])?
+                                        $arrayVariant['edit_target_row']['HOSTNAME']:null;
+
             // 認証方式の設定値取得
             $strAuthMode        = isset($arrayVariant['edit_target_row']['LOGIN_AUTH_TYPE'])?
                                         $arrayVariant['edit_target_row']['LOGIN_AUTH_TYPE']:null;
@@ -706,6 +712,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                                         $arrayVariant['edit_target_row']['PROTOCOL_ID']:null;
 
         } elseif ($strModeId == "DTUP_singleRecUpdate") {
+
+            // ホスト名
+            $strhostname   = array_key_exists('HOSTNAME',$arrayRegData)?
+                                $arrayRegData['HOSTNAME']:null;
 
             // 認証方式の設定値取得
             $strAuthMode   = array_key_exists('LOGIN_AUTH_TYPE',$arrayRegData)?
@@ -766,6 +776,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         case "DTUP_singleRecUpdate":
         case "DTUP_singleRecRegister":
         case "DTUP_singleRecDelete":
+            //ホスト名が数値文字列か判定
+            if(is_numeric($strhostname) === true) {
+                $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-101081");
+                $objClientValidator->setValidRule($retStrBody);
+                $retBool = false;
+                return $retBool;
+            }
             // 選択されている認証方式に応じた必須入力をチェック
             // 但し、パスワード管理・パスワードは既存のチェック処理で必須入力判定
             $errMsgParameterAry = array();

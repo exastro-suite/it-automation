@@ -1707,7 +1707,7 @@
                         else{
                             $parent = substr($returnDataArray['group'][$group]['PARENT'],0,strpos($returnDataArray['group'][$group]['PARENT'].'/','/'));
                             foreach($returnDataArray['group'] as $key => $group){
-                                if($group['COL_GROUP_NAME'] == $parent){
+                                if($group['COL_GROUP_NAME'] == $parent && $group['PARENT'] == ''){
                                     $columns[] = $key;
                                     break;
                                 }

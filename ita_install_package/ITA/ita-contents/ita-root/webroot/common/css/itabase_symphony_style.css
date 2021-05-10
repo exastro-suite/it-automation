@@ -335,7 +335,7 @@ border-top: none;border-radius: 0 0 4px 4px;
 	box-shadow: 0 0 0 2px #C00;
 }
 .movement2 .pause_box label.pause_box_label {
-	width: 120px; padding-left: 42px;
+	width: 100px; padding-left: 42px;
 	text-align: left;
 }
 .movement2 .pause_box label.pause_box_label::after {
