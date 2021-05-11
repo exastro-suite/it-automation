@@ -702,7 +702,7 @@ $ary["ITAANSIBLEH-MNU-1207101"]     = "status";
 $ary["ITAANSIBLEH-MNU-1207102"]     = "Displays the collection status.";
 $ary["ITAANSIBLEH-MNU-1207103"]     = "Collection log";
 $ary["ITAANSIBLEH-MNU-1207104"]     = "You can download the run-time log at the time of collection.";
-$ary["ITAANSIBLEH-MNU-1207200"]     = "You can maintain (view / update) the connection interface information for the REST API used by the collection function. <br> This menu must be one record.";
+$ary["ITAANSIBLEH-MNU-1207200"]     = "You can maintain (view / update) the connection interface information for the REST API used by the collection function. <br> This menu must be one record. <br>If the REST user and REST password are not entered, the collection function will not be executed.";
 $ary["ITAANSIBLEH-MNU-1207201"]     = "ID";
 $ary["ITAANSIBLEH-MNU-1207202"]     = "Collection interface information";
 $ary["ITAANSIBLEH-MNU-1207203"]     = "Collection interface information";
@@ -713,7 +713,8 @@ $ary["ITAANSIBLEH-MNU-1207207"]     = "[Maximum length] 15 bytes
 Please enter in the format xxx.xxx.xxx.xxx. ";
 $ary["ITAANSIBLEH-MNU-1207208"]     = "REST user";
 $ary["ITAANSIBLEH-MNU-1207209"]     = "Users associated with the role of system administrator,
-Alternatively, create an equivalent role and enter the user associated with it. ";
+Alternatively, create an equivalent role and enter the user associated with it. 
+If the REST user and REST password are not entered, the collection function will not be executed.";
 $ary["ITAANSIBLEH-MNU-1207210"]     = "REST password";
 $ary["ITAANSIBLEH-MNU-1207211"]     = "[Maximum length] 30 bytes";
 $ary["ITAANSIBLEH-MNU-1207212"]     = "REST method";
