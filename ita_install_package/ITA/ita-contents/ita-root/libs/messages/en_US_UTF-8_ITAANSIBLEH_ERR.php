@@ -190,6 +190,7 @@ $ary["ITAANSIBLEH-ERR-56212"]       = "ITA proprietary variable cannot be used i
 $ary["ITAANSIBLEH-ERR-56213"]       = "ITA proprietary variable cannot be used in playbook because protocol of device list is blank. (playbook:{} ITA proprietary variable: host:{})";
 $ary["ITAANSIBLEH-ERR-56214"]       = "In the case of Movement where winrm connection is selected in the Movement list, devices whose authentication method in the device list is other than password authentication (winrm) cannot be set in the target host list. (host:{})";
 $ary["ITAANSIBLEH-ERR-56215"]       = "If winrm connection is not selected in the Movement list, the device whose authentication method in the device list is password authentication (winrm) cannot be set in the target host list. (host:{})";
+$ary["ITAANSIBLEH-ERR-56216"]       = "The LANG in the device list is invalid. (host: {})";
 $ary["ITAANSIBLEH-ERR-56230"]       = "If the device list authentication method is password authentication, the login password is a required item. (host:{})";
 $ary["ITAANSIBLEH-ERR-56231"]       = "If the authentication method of the device list is key authentication (no passphrase), the private key file (id_rsa) is a required item. (host:{})";
 $ary["ITAANSIBLEH-ERR-56232"]       = "If the authentication method of the device list is key authentication (with passphrase), the private key file (id_rsa) is a required item. (host:{})";

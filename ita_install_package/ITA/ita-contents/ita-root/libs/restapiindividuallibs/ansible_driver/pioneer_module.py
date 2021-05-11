@@ -30,6 +30,7 @@
 ##       log_file_dir:       プライベートログ出力先ディレトクリ
 ##       ssh_key_file:       SSH秘密鍵ファイル
 ##       extra_args:         ssh/telnet接続時の追加パラメータ
+##       lang:               文字コード
 ##      <<返却値>>
 ##       なし
 ##
@@ -73,7 +74,11 @@ option:
     required: true
     description:
       - private log path
-author: Hiroyuki Seike
+  lang:
+    required: true
+    description:
+      - target host lang 
+author: exastro
 '''
 
 import yaml
@@ -137,6 +142,7 @@ def main():
       log_file_dir=dict(required=True),
       ssh_key_file=dict(required=True),
       extra_args=dict(required=True),
+      lang=dict(required=True),
     ),
 #  ドライランモード許可設定
     supports_check_mode=True
@@ -151,6 +157,7 @@ def main():
   log_file_name = module.params['log_file_dir'] + '/private.log'
   ssh_key_file   = module.params['ssh_key_file']
   extra_args = module.params['extra_args']
+  lang       = module.params['lang']
   if not module.params['exec_file']:
     #########################################################
     # normal exit
@@ -263,9 +270,13 @@ def main():
     private_log_output(log_file_name,host_name,exec_name)
     exec_log_output(exec_name)
 
-    # python2ではencodingは機能しない
-    #p = pexpect.spawn(exec_cmd,  encoding='utf-8',codec_errors='replace')
-    p = pexpect.spawn(exec_cmd)
+    loger = str(os.environ)
+    exec_log_output(exec_name)
+
+    if sys.version_info.major == 2:
+      p = pexpect.spawn(exec_cmd,  encoding=lang ,codec_errors='replace')
+    else:
+      p = pexpect.spawn(exec_cmd,  encoding=lang ,codec_errors='replace')
 
     # ドライランモードを退避しタイムアウト値を5秒にする。
     if module.check_mode:
@@ -2862,6 +2873,9 @@ def main():
   except pexpect.TIMEOUT:
     exec_log_output('except command timeout')
     private_log_output(log_file_name,host_name,'except command timeout')
+    loger = 'buffer:[' + unicode2encode(p.before) + ']'
+    exec_log_output(loger)
+    private_log_output(log_file_name,host_name,loger)
     #########################################################
     # fail exit
     #########################################################
