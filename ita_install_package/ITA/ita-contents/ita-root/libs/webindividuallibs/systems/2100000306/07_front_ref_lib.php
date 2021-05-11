@@ -25,7 +25,7 @@
     if($strCommand == "EDIT"){
         $aryForResultData = symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
 
-    }else if ($strCommand == "FILTER" ){
+    }else if ($strCommand == "FILTER" || $strCommand == "FILTER_NOTITLE"){
          $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable);
          $aryForResultData = filter_add($aryForResultData);
 

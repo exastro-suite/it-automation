@@ -29,7 +29,7 @@
                                       );
         }
         else{
-            if( $strCommand == "INFO" || $strCommand == "GET" || $strCommand == "FILTER" ){
+            if( $strCommand == "INFO" || $strCommand == "GET" || $strCommand == "FILTER" || $strCommand == "FILTER_NOTITLE"){
                 //----GETまたはFILTER
                 $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
                 //GETまたはFILTER----
@@ -139,7 +139,7 @@
                 throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
 
-            if( $strCommand == "GET" || $strCommand == "FILTER" ){
+            if( $strCommand == "GET" || $strCommand == "FILTER" || $strCommand == "FILTER_NOTITLE" ){
                 //----全部一覧または一部一覧の取得
                 $aryLabelListOfOpendColumn = $objListFormatter->getLabelListOfOpendColumn(true);
 
@@ -276,11 +276,20 @@
                     //----正常終了（リスト全体[ヘッダーとレコード]とレコード行を返す）
                     $intResultStatusCode = 200;
                     $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
-                    $aryForResultData['resultdata'] = array('CONTENTS'=>array('RECORD_LENGTH'=>count($aryResultOfDump[0]) - 1,
+                    if( $strCommand == "FILTER_NOTITLE" ){
+                        array_shift($aryResultOfDump[0]);
+                        $aryForResultData['resultdata'] = array('CONTENTS'=>array('RECORD_LENGTH'=>count($aryResultOfDump[0]),
                                                                               'BODY'=>$aryResultOfDump[0],
                                                                               'UPLOAD_FILE'=>$aryResultOfDump[4],
                                                                              )
                                                            );
+                    }else{
+                        $aryForResultData['resultdata'] = array('CONTENTS'=>array('RECORD_LENGTH'=>count($aryResultOfDump[0]) - 1,
+                                                                              'BODY'=>$aryResultOfDump[0],
+                                                                              'UPLOAD_FILE'=>$aryResultOfDump[4],
+                                                                             )
+                                                           );
+                    }
                 }
                 //全部一覧または一部一覧の取得----
             }
@@ -316,7 +325,7 @@
         }
         $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
                               'ResultData'=>$aryForResultData);
-        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);        
         return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
     }
 
