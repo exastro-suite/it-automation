@@ -161,6 +161,10 @@ Ansible 共通 Ansible Tower インスタンス一覧
         // $arrayRegDataはUI入力ベースの情報
         // $arrayVariant['edit_target_row']はDBに登録済みの情報
         if($strModeId == "DTUP_singleRecRegister") {
+            // ホスト名
+            $strhostname   = array_key_exists('ANSTWR_HOSTNAME',$arrayRegData)?
+                                $arrayRegData['ANSTWR_HOSTNAME']:null;
+
             // 認証方式の設定値取得
             $strAuthMode   = array_key_exists('ANSTWR_LOGIN_AUTH_TYPE',$arrayRegData)?
                                 $arrayRegData['ANSTWR_LOGIN_AUTH_TYPE']:null;
@@ -173,7 +177,18 @@ Ansible 共通 Ansible Tower インスタンス一覧
             // 公開鍵ファイルの設定値取得
             $strsshKeyFile = array_key_exists('ANSTWR_LOGIN_SSH_KEY_FILE',$arrayRegData)?
                                 $arrayRegData['ANSTWR_LOGIN_SSH_KEY_FILE']:null;
+
+        } elseif ($strModeId == "DTUP_singleRecDelete") {
+
+            // ホスト名
+            $strhostname        = isset($arrayVariant['edit_target_row']['ANSTWR_HOSTNAME'])?
+                                        $arrayVariant['edit_target_row']['ANSTWR_HOSTNAME']:null;
+
         } elseif ($strModeId == "DTUP_singleRecUpdate") {
+            // ホスト名
+            $strhostname   = array_key_exists('ANSTWR_HOSTNAME',$arrayRegData)?
+                                $arrayRegData['ANSTWR_HOSTNAME']:null;
+
             // 認証方式の設定値取得
             $strAuthMode   = array_key_exists('ANSTWR_LOGIN_AUTH_TYPE',$arrayRegData)?
                                 $arrayRegData['ANSTWR_LOGIN_AUTH_TYPE']:null;
@@ -215,6 +230,13 @@ Ansible 共通 Ansible Tower インスタンス一覧
                                           $arrayVariant['edit_target_row']['ANSTWR_LOGIN_SSH_KEY_FILE']:null;
                 }
             }
+        }
+        //ホスト名が数値文字列か判定
+        if(is_numeric($strhostname) === true) {
+            $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-101081");
+            $objClientValidator->setValidRule($retStrBody);
+            $retBool = false;
+            return $retBool;
         }
 
         switch($strModeId) {

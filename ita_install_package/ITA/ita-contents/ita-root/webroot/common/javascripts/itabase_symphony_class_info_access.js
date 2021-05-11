@@ -401,6 +401,7 @@ function printSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
             case "7": //異常終了
             case "8": //想定外エラー
                 boolLoopExit = true;
+                minorPhase = 22;
                 break;
             default:
                 break;
