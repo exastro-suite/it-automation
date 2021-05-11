@@ -70,7 +70,7 @@ class RestApiCaller {
             $exec_mode = "unknowned";
         }
         $UIErrorMsg = array();
-        $this->$proxySetting = $proxySetting;
+        $this->proxySetting = $proxySetting;
     }
     function setUp($log_output_php, $log_output_dir, $log_file_prefix, $log_level, $UIExecLogPath, $UIErrorLogPath) {
         $this->logger->setUp($log_output_php, $log_output_dir, $log_file_prefix, $log_level, $UIExecLogPath, $UIErrorLogPath);
@@ -159,10 +159,10 @@ class RestApiCaller {
         ////////////////////////////////
         // Proxy設定                  //
         ////////////////////////////////
-        if($this->$proxySetting['address'] != ""){
-            $address = $this->$proxySetting['address'];
-            if($this->$proxySetting['port'] != ""){
-                $address = $address . ":" . $this->$proxySetting['port'];
+        if($this->proxySetting['address'] != ""){
+            $address = $this->proxySetting['address'];
+            if($this->proxySetting['port'] != ""){
+                $address = $address . ":" . $this->proxySetting['port'];
             }
             $HttpContext['http']['proxy'] = $address;
             $HttpContext['http']['request_fulluri'] = true;

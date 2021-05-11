@@ -494,6 +494,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-103010"));//エクセル・ヘッダでの説明
                 $cg->addColumn($c);
 
+                $c = new IDColumn('PIONEER_LANG_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102100"),'B_ANS_PNS_LANG_MASTER','ID','NAME','',array('SELECT_ADD_FOR_ORDER'=>array('ID'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
+                $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102101"));//エクセル・ヘッダでの説明
+                $cg->addColumn($c);
+
         $cg2->addColumn($cg);
 
         $objVldt = new SingleTextValidator(0,512,false);

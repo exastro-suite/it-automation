@@ -828,6 +828,7 @@ LOGIN_AUTH_TYPE                   %INT%                     ,
 WINRM_PORT                        %INT%                     , -- WinRM接続プロトコル
 WINRM_SSL_CA_FILE                 %VARCHR%(256)             , -- WinRM接続 SSLサーバー証明書
 OS_TYPE_ID                        %INT%                     ,
+PIONEER_LANG_ID                   %INT%                     , -- loginuser LANG
 SSH_EXTRA_ARGS                    %VARCHR%(512)             , -- ssh追加パラメータ
 HOSTS_EXTRA_ARGS                  %VARCHR%(512)             , -- インベントリファイル(hosts)追加パラメータ
 CREDENTIAL_TYPE_ID                %INT%                     , -- Ansible-Tower認証情報　接続タイプ
@@ -882,6 +883,7 @@ LOGIN_AUTH_TYPE                   %INT%                     ,
 WINRM_PORT                        %INT%                     , -- WinRM接続プロトコル
 WINRM_SSL_CA_FILE                 %VARCHR%(256)             , -- WinRM接続 SSLサーバー証明書
 OS_TYPE_ID                        %INT%                     ,
+PIONEER_LANG_ID                   %INT%                     , -- loginuser LANG
 SSH_EXTRA_ARGS                    %VARCHR%(512)             , -- ssh追加パラメータ
 HOSTS_EXTRA_ARGS                  %VARCHR%(512)             , -- インベントリファイル(hosts)追加パラメータ
 CREDENTIAL_TYPE_ID                %INT%                     , -- Ansible-Tower認証情報　接続タイプ
@@ -3303,6 +3305,8 @@ SELECT TAB_A.SYSTEM_ID                        SYSTEM_ID                     ,
        TAB_A.LOGIN_AUTH_TYPE                  LOGIN_AUTH_TYPE               ,
        TAB_A.WINRM_PORT                       WINRM_PORT                    ,
        TAB_A.OS_TYPE_ID                       OS_TYPE_ID                    ,
+       TAB_A.PIONEER_LANG_ID                  PIONEER_LANG_ID               ,
+       
        TAB_A.HOSTNAME                         SYSTEM_NAME                   ,
        TAB_A.COBBLER_PROFILE_ID               COBBLER_PROFILE_ID            ,
        TAB_A.INTERFACE_TYPE                   INTERFACE_TYPE                ,
@@ -3344,6 +3348,8 @@ SELECT TAB_A.JOURNAL_SEQ_NO                   JOURNAL_SEQ_NO                ,
        TAB_A.LOGIN_AUTH_TYPE                  LOGIN_AUTH_TYPE               ,
        TAB_A.WINRM_PORT                       WINRM_PORT                    ,
        TAB_A.OS_TYPE_ID                       OS_TYPE_ID                    ,
+       TAB_A.PIONEER_LANG_ID                  PIONEER_LANG_ID               ,
+
        TAB_A.HOSTNAME                         SYSTEM_NAME                   ,
        TAB_A.COBBLER_PROFILE_ID               COBBLER_PROFILE_ID            ,
        TAB_A.INTERFACE_TYPE                   INTERFACE_TYPE                ,
