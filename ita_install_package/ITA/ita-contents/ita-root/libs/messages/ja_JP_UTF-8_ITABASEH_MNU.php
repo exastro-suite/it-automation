@@ -59,7 +59,7 @@ $ary["ITABASEH-MNU-102089"]         = "Ansibleから機器へ接続する際の�
 ログインユーザの sudo 権限を NOPASSWD付で /etc/sudoers に設定する必要があります。";
 $ary["ITABASEH-MNU-102090"]         = "OS種別";
 $ary["ITABASEH-MNU-102100"]         = "LANG";
-$ary["ITABASEH-MNU-102101"]         = "ログインユーザーのLNAGを設定します。デフォルトはutf-8です。";
+$ary["ITABASEH-MNU-102101"]         = "Pioneerの対話ファイルを実行する際の文字エンコード(LANG)を選択します。 空白の場合はutf-8扱いとなります。";
 $ary["ITABASEH-MNU-102110"]         = "EtherWakeOnLan";
 $ary["ITABASEH-MNU-102120"]         = "電源ON";
 $ary["ITABASEH-MNU-102130"]         = "電源ON";
