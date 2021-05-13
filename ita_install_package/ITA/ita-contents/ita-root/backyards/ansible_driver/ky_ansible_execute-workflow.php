@@ -440,7 +440,7 @@
             $log_file_postfix = ".log";
             $logfile = $log_output_dir .'/' . $log_file_prefix . date("Ymd",$tmpVarTimeStamp) . $log_file_postfix;
 
-            $cmd = sprintf("%s %s%s %s %010s %s-%010s &",
+            $cmd = sprintf("%s %s%s %s %010s %s-%010s > /dev/null &",
                             $php_command,
                             $root_dir_path,
                             "/backyards/ansible_driver/ky_ansible_execute-child-workflow.php",

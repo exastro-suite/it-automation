@@ -59,7 +59,7 @@ For authentication methods other than password authentication (winrm), the follo
 The login user sudo privileges must be set to / etc / sudoers with his NOPASSWD.";
 $ary["ITABASEH-MNU-102090"]         = "OS type";
 $ary["ITABASEH-MNU-102100"]         = "LANG";
-$ary["ITABASEH-MNU-102101"]         = "Set the LNAG of the logged-in user. The default is utf-8.";
+$ary["ITABASEH-MNU-102101"]         = "Select the character encoding (LANG) when executing the Pioneer dialog file. If it is blank, it will be treated as utf-8.";
 $ary["ITABASEH-MNU-102110"]         = "EtherWakeOnLan";
 $ary["ITABASEH-MNU-102120"]         = "Power ON";
 $ary["ITABASEH-MNU-102130"]         = "Power ON";
