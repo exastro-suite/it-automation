@@ -301,4 +301,14 @@ $ary["ITACREPAR-MNU-105030"]       = "A menu that manages a list of other items 
 $ary["ITACREPAR-MNU-105031"]       = "Id";
 $ary["ITACREPAR-MNU-105032"]       = "Reference Item Info";
 $ary["ITACREPAR-MNU-105033"]       = "Reference Item Info";
+$ary["ITACREPAR-MNU-105034"]       = "Flag manegement menu";
+$ary["ITACREPAR-MNU-105035"]       = "Id";
+$ary["ITACREPAR-MNU-105036"]       = "Flag";
+$ary["ITACREPAR-MNU-105037"]       = "Flag";
+$ary["ITACREPAR-MNU-105038"]       = "Yes-No";
+$ary["ITACREPAR-MNU-105039"]       = "";
+$ary["ITACREPAR-MNU-105040"]       = "True-False";
+$ary["ITACREPAR-MNU-105041"]       = "";
+$ary["ITACREPAR-MNU-105042"]       = "*-(blank)";
+$ary["ITACREPAR-MNU-105043"]       = "";
 ?>
