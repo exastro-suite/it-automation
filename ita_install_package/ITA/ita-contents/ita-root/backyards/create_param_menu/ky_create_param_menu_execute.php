@@ -100,6 +100,8 @@ try{
                               TEMPLATE_PATH . FILE_CONVERT_H_OP_EDIT_SQL,
                               TEMPLATE_PATH . FILE_PARTS_REF,
                               TEMPLATE_PATH . FILE_PARTS_VIEW_REF,
+                              TEMPLATE_PATH . FILE_PARTS_LINK_ID,
+                              TEMPLATE_PATH . FILE_PARTS_VIEW_LINK_ID,
                              );
     $templateArray = array();
     foreach($templatePathArray as $templatePath){
@@ -162,7 +164,8 @@ try{
     $convHostSqlOpEditTmpl      = $templateArray[42];
     $partReference              = $templateArray[43];
     $partViewReference          = $templateArray[44];
-
+    $partLinkId                 = $templateArray[45];
+    $partViewLinkId             = $templateArray[46];
 
     //////////////////////////
     // パラメータシート作成情報を取得
@@ -208,6 +211,9 @@ try{
         throw new Exception($msg);
     }
     $otherMenuLinkArray = $result;
+
+    $urlOptionTargetArray = array('2000000005'); //「他メニュー連携」のメニューの中でLinkIDColumnのUrlOptionをtrueにする対象。（プルダウン選択の項目名がVIEWで作られた「〇〇:△△」というような形式の場合に指定する。
+    $noLinkMenuIdArray = array('2100160016'); //LinkIDColumnではなくIDColumnで作成したい対象のメニューID。「Yes/No」などの固定のフラグを選択するものが対象。
 
     //////////////////////////
     // 参照項目情報テーブルを検索
@@ -667,8 +673,6 @@ try{
                         $work = $partDate;  // 日付
                         break;
                     case 7:
-                        $work = $partId;        // プルダウン
-
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         if($matchIdx === FALSE){
                             $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
@@ -679,6 +683,13 @@ try{
                             break 2;
                         }
 
+                        $otherMenuId = $otherMenuLinkArray[$matchIdx]['MENU_ID'];
+                        if(in_array($otherMenuId, $noLinkMenuIdArray)){
+                            $work = $partId;     //プルダウン選択(IDColumn)
+                        }else{
+                            $work = $partLinkId; //プルダウン選択(LinkIDColumn)
+                        }
+
                         //参照項目がある場合
                         if(!empty($itemInfo['REFERENCE_ITEM'])){
                             $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
@@ -686,8 +697,7 @@ try{
                             $referenceCount2 = 0;
                             foreach($aryReferenceItem as $id){
                                 $repracePassword = "";
-                                $repraceDate = "";
-                                $repraceDatetime = "";
+                                $repraceDateFormat = "null";
                                 $work_ref_tmpl = $partReference;
                                 $referenceCount2++;
 
@@ -700,18 +710,18 @@ try{
                                 if($referenceItemInfo['SENSITIVE_FLAG'] == 2){
                                     $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
                                     $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
-                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);' . "\n";
                                     $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->getOutputType("filter_table")->setVisible(false);';
                                 }
 
                                 //日時表示
                                 if($referenceItemInfo['INPUT_METHOD_ID'] == 5){
-                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                    $repraceDateFormat = '\'Y/m/d H:i:s\'';
                                 }
 
                                 //日付表示
                                 if($referenceItemInfo['INPUT_METHOD_ID'] == 6){
-                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d");';
+                                    $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
@@ -722,8 +732,7 @@ try{
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
                                 $work_ref = $work_ref . $work_ref_tmpl;
                             }
@@ -801,6 +810,11 @@ try{
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                    //LinkIDColumn用のurl
+                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
+                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
                 if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -863,8 +877,6 @@ try{
                             $work = $partDate;  // 日付
                             break;
                         case 7:
-                            $work = $partId;        // プルダウン
-
                             $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                             if($matchIdx === FALSE){
                                 $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
@@ -874,6 +886,13 @@ try{
                                 $errFlg = true;
                                 break 2;
                             }
+
+	                        $otherMenuId = $otherMenuLinkArray[$matchIdx]['MENU_ID'];
+	                        if(in_array($otherMenuId, $noLinkMenuIdArray)){
+	                            $work = $partId;     //プルダウン選択(IDColumn)
+	                        }else{
+	                            $work = $partLinkId; //プルダウン選択(LinkIDColumn)
+	                        }
 
                             //参照項目がある場合
                             if(!empty($itemInfo['REFERENCE_ITEM'])){
@@ -888,8 +907,7 @@ try{
                                 $referenceCount2 = 0;
                                 foreach($aryReferenceItem as $id){
                                     $repracePassword = "";
-                                    $repraceDate = "";
-                                    $repraceDatetime = "";
+                                    $repraceDateFormat = "null";
                                     $work_ref_tmpl = $partReference;
                                     $referenceCount2++;
 
@@ -902,18 +920,18 @@ try{
                                     if($referenceItemInfo['SENSITIVE_FLAG'] == 2){
                                         $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
                                         $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
-                                        $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                        $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);' . "\n";
                                         $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->getOutputType("filter_table")->setVisible(false);';
                                     }
 
                                     //日時表示
                                     if($referenceItemInfo['INPUT_METHOD_ID'] == 5){
-                                        $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                        $repraceDateFormat = '\'Y/m/d H:i:s\'';
                                     }
 
                                     //日付表示
                                     if($referenceItemInfo['INPUT_METHOD_ID'] == 6){
-                                        $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d");';
+                                        $repraceDateFormat = '\'Y/m/d\'';
                                     }
 
                                     $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
@@ -924,8 +942,7 @@ try{
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
-                                    $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
-                                    $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
                                     $work_ref = $work_ref . $work_ref_tmpl;
                                 }
@@ -1004,6 +1021,11 @@ try{
                         $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                         $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                         $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                        //LinkIDColumn用のurl
+                        $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                        $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
+                        $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                        $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                     }
                     // 整数の場合
                     if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -1065,8 +1087,6 @@ try{
                         $work = $partDate;  // 日付
                         break;
                     case 7:
-                        $work = $partId;        // プルダウン
-
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         if($matchIdx === FALSE){
                             $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
@@ -1075,6 +1095,13 @@ try{
                             updateMenuStatus($targetData, "4", $msg, false, true);
                             $errFlg = true;
                             break 2;
+                        }
+
+                        $otherMenuId = $otherMenuLinkArray[$matchIdx]['MENU_ID'];
+                        if(in_array($otherMenuId, $noLinkMenuIdArray)){
+                            $work = $partId;     //プルダウン選択(IDColumn)
+                        }else{
+                            $work = $partLinkId; //プルダウン選択(LinkIDColumn)
                         }
 
                         //参照項目がある場合
@@ -1090,8 +1117,7 @@ try{
                             $referenceCount2 = 0;
                             foreach($aryReferenceItem as $id){
                                 $repracePassword = "";
-                                $repraceDate = "";
-                                $repraceDatetime = "";
+                                $repraceDateFormat = "null";
                                 $work_ref_tmpl = $partReference;
                                 $referenceCount2++;
 
@@ -1104,18 +1130,18 @@ try{
                                 if($referenceItemInfo['SENSITIVE_FLAG'] == 2){
                                     $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
                                     $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
-                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);' . "\n";
                                     $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->getOutputType("filter_table")->setVisible(false);';
                                 }
 
                                 //日時表示
                                 if($referenceItemInfo['INPUT_METHOD_ID'] == 5){
-                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                    $repraceDateFormat = '\'Y/m/d H:i:s\'';
                                 }
 
                                 //日付表示
                                 if($referenceItemInfo['INPUT_METHOD_ID'] == 6){
-                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d");';
+                                    $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
@@ -1126,8 +1152,7 @@ try{
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
                                 $work_ref = $work_ref . $work_ref_tmpl;
                             }
@@ -1208,6 +1233,11 @@ try{
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                    //LinkIDColumn用のurl
+                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
+                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
                 if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -1269,8 +1299,6 @@ try{
                         $work = $partViewDate;      // 日付
                         break;
                     case 7:
-                        $work = $partViewId;        // プルダウン
-
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         if($matchIdx === FALSE){
                             $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
@@ -1281,6 +1309,13 @@ try{
                             break 2;
                         }
 
+                        $otherMenuId = $otherMenuLinkArray[$matchIdx]['MENU_ID'];
+                        if(in_array($otherMenuId, $noLinkMenuIdArray)){
+                            $work = $partViewId;      //プルダウン選択(IDColumn)
+                        }else{
+                            $work = $partViewLinkId; //プルダウン選択(LinkIDColumn)
+                        }
+
                         //参照項目がある場合
                         if(!empty($itemInfo['REFERENCE_ITEM'])){
                             $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
@@ -1288,8 +1323,7 @@ try{
                             $referenceCount2 = 0;
                             foreach($aryReferenceItem as $id){
                                 $repracePassword = "";
-                                $repraceDate = "";
-                                $repraceDatetime = "";
+                                $repraceDateFormat = "null";
                                 $work_ref_tmpl = $partViewReference;
                                 $referenceCount2++;
 
@@ -1302,18 +1336,18 @@ try{
                                 if($referenceItemInfo['SENSITIVE_FLAG'] == 2){
                                     $repracePassword = '$outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt("********"));' . "\n";
                                     $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_table", $outputType);' . "\n";
-                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);';
+                                    $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setOutputType("print_journal_table", $outputType);' . "\n";
                                     $repracePassword = $repracePassword.'    ' . '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->getOutputType("filter_table")->setVisible(false);';
                                 }
 
                                 //日時表示
                                 if($referenceItemInfo['INPUT_METHOD_ID'] == 5){
-                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                    $repraceDateFormat = '\'Y/m/d H:i:s\'';
                                 }
 
                                 //日付表示
                                 if($referenceItemInfo['INPUT_METHOD_ID'] == 6){
-                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $referenceCount2 . '->setDateFormat("Y/m/d");';
+                                    $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
@@ -1324,8 +1358,7 @@ try{
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
                                 $work_ref = $work_ref . $work_ref_tmpl;
                             }
@@ -1393,6 +1426,11 @@ try{
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                    //LinkIDColumn用のurl
+                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
+                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
                 if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -1560,8 +1598,6 @@ try{
                         $work = $partDate;  // 日付
                         break;
                     case 7:
-                        $work = $partId;        // プルダウン
-
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         if($matchIdx === FALSE){
                             $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
@@ -1572,6 +1608,13 @@ try{
                             break 2;
                         }
 
+                        $otherMenuId = $otherMenuLinkArray[$matchIdx]['MENU_ID'];
+                        if(in_array($otherMenuId, $noLinkMenuIdArray)){
+                            $work = $partId;     //プルダウン選択(IDColumn)
+                        }else{
+                            $work = $partLinkId; //プルダウン選択(LinkIDColumn)
+                        }
+
                         //参照項目がある場合
                         if(!empty($itemInfo['REFERENCE_ITEM'])){
                             $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
@@ -1579,8 +1622,7 @@ try{
                             $convReferenceCount2 = 0;
                             foreach($aryReferenceItem as $id){
                                 $repracePassword = "";
-                                $repraceDate = "";
-                                $repraceDatetime = "";
+                                $repraceDateFormat = "null";
                                 $work_ref_tmpl = $partReference;
                                 $convReferenceCount2++;
 
@@ -1599,12 +1641,12 @@ try{
 
                                 //日時表示
                                 if($convReferenceItemInfo['INPUT_METHOD_ID'] == 5){
-                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                    $repraceDateFormat = '\'Y/m/d H:i:s\'';
                                 }
 
                                 //日付表示
                                 if($convReferenceItemInfo['INPUT_METHOD_ID'] == 6){
-                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setDateFormat("Y/m/d");';
+                                    $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2, $work_ref_tmpl);
@@ -1615,8 +1657,7 @@ try{
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $convReferenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $convReferenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
                                 $work_ref = $work_ref . $work_ref_tmpl;
                             }
@@ -1695,6 +1736,11 @@ try{
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                    //LinkIDColumn用のurl
+                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
+                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
                 if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -1755,8 +1801,6 @@ try{
                         $work = $partViewDate;      // 日付
                         break;
                     case 7:
-                        $work = $partViewId;        // プルダウン
-
                         $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
                         if($matchIdx === FALSE){
                             $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5019', array($itemInfo['CREATE_ITEM_ID']));
@@ -1767,6 +1811,13 @@ try{
                             break 2;
                         }
 
+                        $otherMenuId = $otherMenuLinkArray[$matchIdx]['MENU_ID'];
+                        if(in_array($otherMenuId, $noLinkMenuIdArray)){
+                            $work = $partViewId;     //プルダウン選択(IDColumn)
+                        }else{
+                            $work = $partViewLinkId; //プルダウン選択(LinkIDColumn)
+                        }
+
                         //参照項目がある場合
                         if(!empty($itemInfo['REFERENCE_ITEM'])){
                             $aryReferenceItem = explode(',', $itemInfo['REFERENCE_ITEM']);
@@ -1774,8 +1825,7 @@ try{
                             $convReferenceCount2 = 0;
                             foreach($aryReferenceItem as $id){
                                 $repracePassword = "";
-                                $repraceDate = "";
-                                $repraceDatetime = "";
+                                $repraceDateFormat = "null";
                                 $work_ref_tmpl = $partViewReference;
                                 $convReferenceCount2++;
 
@@ -1794,12 +1844,12 @@ try{
 
                                 //日時表示
                                 if($convReferenceItemInfo['INPUT_METHOD_ID'] == 5){
-                                    $repraceDatetime = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setDateFormat("Y/m/d H:i:s");';
+                                    $repraceDateFormat = '\'Y/m/d H:i:s\'';
                                 }
 
                                 //日付表示
                                 if($convReferenceItemInfo['INPUT_METHOD_ID'] == 6){
-                                    $repraceDate = '$c' . $itemInfo['CREATE_ITEM_ID'] . '_ref_' . $convReferenceCount2 . '->setDateFormat("Y/m/d");';
+                                    $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2, $work_ref_tmpl);
@@ -1810,8 +1860,7 @@ try{
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $convReferenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $convReferenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATETIME, $repraceDatetime, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_ITEM_DATE, $repraceDate, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
                                 $work_ref = $work_ref . $work_ref_tmpl;
                             }
@@ -1881,6 +1930,11 @@ try{
                     $work = str_replace(REPLACE_ID_TABLE,   $otherMenuLink['TABLE_NAME'],   $work);
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
+                    //LinkIDColumn用のurl
+                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
+                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
                 if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -3505,16 +3559,29 @@ function updateOtherMenuLink($menuTableName, $itemInfoArray, $itemColumnGrpArray
 
                 // 項目名を決定する
                 if(0 < count($itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']])){
-                    $columnDispName = $objMTS->getSomeMessage("ITACREPAR-MNU-102612") .
-                                      "/" .
-                                      implode("/", $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']]) .
-                                      "/" .
-                                      $itemInfo['ITEM_NAME'];
+                    if($cmiData['TARGET'] == 2){
+                        //「データシート」の場合は「パラメータ」グループを付けない
+                        $columnDispName = implode("/", $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']]) .
+                                          "/" .
+                                          $itemInfo['ITEM_NAME'];
+                    }else{
+                        $columnDispName = $objMTS->getSomeMessage("ITACREPAR-MNU-102612") .
+                                          "/" .
+                                          implode("/", $itemColumnGrpArrayArray[$itemInfo['CREATE_ITEM_ID']]) .
+                                          "/" .
+                                          $itemInfo['ITEM_NAME'];
+                    }
                 }
                 else{
-                    $columnDispName = $objMTS->getSomeMessage("ITACREPAR-MNU-102612") .
-                                      "/" .
-                                      $itemInfo['ITEM_NAME'];
+                    if($cmiData['TARGET'] == 2){
+                        //「データシート」の場合は「パラメータ」グループを付けない
+                        $columnDispName = $itemInfo['ITEM_NAME'];
+                    }else{
+                        $columnDispName = $objMTS->getSomeMessage("ITACREPAR-MNU-102612") .
+                                          "/" .
+                                          $itemInfo['ITEM_NAME']; 
+                    }
+
                 }
 
                 $insertData = array();

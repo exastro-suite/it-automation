@@ -71,6 +71,7 @@ define('FILE_PARTS_FLT',                'parts_float.php');                     
 define('FILE_PARTS_DAY',                'parts_date.php');                          // 00_loadTable.phpのデータ部テンプレート(日付用)
 define('FILE_PARTS_DT',                 'parts_datetime.php');                      // 00_loadTable.phpのデータ部テンプレート(日時用)
 define('FILE_PARTS_ID',                 'parts_id.php');                            // 00_loadTable.phpのデータ部テンプレート(ID用)
+define('FILE_PARTS_LINK_ID',            'parts_link_id.php');                       // 00_loadTable.phpのデータ部テンプレート(リンクID用)
 define('FILE_PARTS_PW',                 'parts_password.php');                      // 00_loadTable.phpのデータ部テンプレート(PW用)
 define('FILE_PARTS_UPL',                'parts_upload.php');                        // 00_loadTable.phpのデータ部テンプレート(ファイルアップロード用)
 define('FILE_PARTS_LNK',                'parts_link.php');                          // 00_loadTable.phpのデータ部テンプレート(リンク用)
@@ -83,6 +84,7 @@ define('FILE_PARTS_VIEW_FLT',           'parts_view_float.php');                
 define('FILE_PARTS_VIEW_DAY',           'parts_view_date.php');                     // 00_loadTable.php(VIEW用)のデータ部テンプレート(日付用)
 define('FILE_PARTS_VIEW_DT',            'parts_view_datetime.php');                 // 00_loadTable.php(VIEW用)のデータ部テンプレート(日時用)
 define('FILE_PARTS_VIEW_ID',            'parts_view_id.php');                       // 00_loadTable.php(VIEW用)のデータ部テンプレート(ID用)
+define('FILE_PARTS_VIEW_LINK_ID',       'parts_view_link_id.php');                  // 00_loadTable.php(VIEW用)のデータ部テンプレート(リンクID用)
 define('FILE_PARTS_VIEW_PW',            'parts_view_password.php');                 // 00_loadTable.php(VIEW用)のデータ部テンプレート(PW用)
 define('FILE_PARTS_VIEW_UPL',           'parts_view_upload.php');                   // 00_loadTable.php(VIEW用)のデータ部テンプレート(ファイルアップロード用)
 define('FILE_PARTS_VIEW_LNK',           'parts_view_link.php');                     // 00_loadTable.php(VIEW用)のデータ部テンプレート(リンク用)
@@ -130,5 +132,6 @@ define('REPLACE_CLONE_PRI',             '★★★CLONE_PRI_KEY_NAME★★★');
 define('REPLACE_CLONE_COL',             '★★★CLONE_ID_COL_NAME★★★');
 define('REPLACE_CLONE_INFO',            '★★★CLONE_INFO★★★');
 define('REPLACE_ITEM_PASSWORD',         '★★★REFERENCE_ITEM_PASSWORD★★★');
-define('REPLACE_ITEM_DATE',             '★★★REFERENCE_ITEM_DATE★★★');
-define('REPLACE_ITEM_DATETIME',         '★★★REFERENCE_ITEM_DATETIME★★★');
+define('REPLACE_REFERENCE_DATE_FORMAT', '★★★REFERENCE_DATE_FORMAT★★★');
+define('REPLACE_LINK_ID_URL',           '★★★LINK_ID_URL★★★');
+define('REPLACE_URL_OPTION',            '★★★URL_OPTION★★★');

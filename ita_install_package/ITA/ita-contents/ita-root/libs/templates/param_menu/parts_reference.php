@@ -8,6 +8,5 @@
     $c★★★REFERENCE_NUMBER★★★->getOutputType("delete_table")->setVisible(false);
     $c★★★REFERENCE_NUMBER★★★->getOutputType("excel")->setVisible(true);
     $c★★★REFERENCE_NUMBER★★★->getOutputType("csv")->setVisible(false);
+    $c★★★REFERENCE_NUMBER★★★->setDateFormat(★★★REFERENCE_DATE_FORMAT★★★);
     ★★★REFERENCE_ITEM_PASSWORD★★★
-    ★★★REFERENCE_ITEM_DATE★★★
-    ★★★REFERENCE_ITEM_DATETIME★★★
