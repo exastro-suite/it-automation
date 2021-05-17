@@ -441,6 +441,9 @@ contionue;
 								if("IDColumn" === get_class($objColumn) && $objColumn->getDateFormat() !== null){
 									$valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
 								}
+								if("LinkIDColumn" === get_class($objColumn) && $objColumn->getDateFormat() !== null){
+									$valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
+								}
 								//date型の型変換----
 
 								$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody);
@@ -729,6 +732,9 @@ class TraceOutputType extends OutputType {
             if("IDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
                 $strSearchKeyValue = date($this->objColumn->getDateFormat(), strtotime($strSearchKeyValue));
             }
+            if("LinkIDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
+                $strSearchKeyValue = date($this->objColumn->getDateFormat(), strtotime($strSearchKeyValue));
+            }
             //date型の型変換----
 
 			$rowData[$strInitedColId] = $strSearchKeyValue;
@@ -878,6 +884,12 @@ class IDOutputType extends OutputType {
                             }
                             $utnMasterTable = $arrayTmp;
                         }
+                        if("LinkIDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
+                            foreach($utnMasterTable as $key => $value){
+                                $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
+                            }
+                            $utnMasterTable = $arrayTmp;
+                        }
                         //date型の型変換----
 
 						$rowData[$strInitedColId] = $utnMasterTable[$mainIdColVal];
@@ -935,6 +947,12 @@ class IDOutputType extends OutputType {
                         //----date型の型変換
                         $arrayTmp = array();
                         if("IDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
+                            foreach($jnlMasterTable as $key => $value){
+                                $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
+                            }
+                            $jnlMasterTable = $arrayTmp;
+                        }
+                        if("LinkIDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
                             foreach($jnlMasterTable as $key => $value){
                                 $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
                             }
