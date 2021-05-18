@@ -255,7 +255,7 @@ $ary["ITAWDCH-STD-19029"]           = "Authorized approver name";
 $ary["ITAWDCH-STD-19030"]           = "Discard";
 $ary["ITAWDCH-STD-19031"]           = "Restore";
 $ary["ITAWDCH-STD-19032"]           = "History";
-$ary["ITAWDCH-STD-19033"] 
+$ary["ITAWDCH-STD-19033"]           = "Duplicate";
 $ary["ITAWDCH-STD-20001"]           = "Are you sure you want to execute?";
 $ary["ITAWDCH-STD-30011"]           = "Description";
 $ary["ITAWDCH-STD-30021"]           = "Display filter";
