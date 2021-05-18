@@ -23,9 +23,9 @@
     require_once( dirname(__FILE__) ."/82_symphony_register.php" );
 
     if($strCommand == "EDIT"){
-        $aryForResultData = symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
+        $aryForResultData = symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData,true);
 
-    }else if ($strCommand == "FILTER" || $strCommand == "FILTER_NOTITLE"){
+    }else if ($strCommand == "FILTER" || $strCommand == "FILTER_DATAONLY"){
          $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable);
          $aryForResultData = filter_add($aryForResultData);
 

@@ -325,7 +325,7 @@
         return $retStrBody;
     }
 
-    function tableIUDByQMFile($strIUDSourceFullname, $varLoadTableSetting=null, $intModeFileCh=0, $strQMFileSendAreaFormatterId, &$aryVariant=array(), &$arySetting=array()){
+    function tableIUDByQMFile($strIUDSourceFullname, $varLoadTableSetting=null, $intModeFileCh=0, $strQMFileSendAreaFormatterId, &$aryVariant=array(), &$arySetting=array(), $strApiFlg=false){
         global $g;
         // ----ローカル変数宣言
         $intControlDebugLevel01=250;
@@ -1170,7 +1170,7 @@
                 }
                 
                 //----テーブルへのアクセスを実行
-                $arrayRetResult = $objREBFColumn->editExecute($inputArray, $dlcOrderMode, $aryVariant);             
+                $arrayRetResult = $objREBFColumn->editExecute($inputArray, $dlcOrderMode, $aryVariant, $strApiFlg);             
                 //DB更新後処理用の情報取得（全行Commit時用）
                 $tmparrRetResults[]=$arrayRetResult;
                 unset($arrayRetResult[99]);
