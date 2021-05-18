@@ -757,8 +757,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             // FileUploadColumnはファイルの更新がないと$arrayRegDataの設定は空になっているので
             // ダウンロード済みのファイルが削除されていると$arrayRegData['del_flag_COL_IDSOP_xx']がonになる
             // 更新されていない場合は設定済みのファイル名($arrayVariant['edit_target_row'])を取得
-            $strsshKeyFileDel  = array_key_exists('del_flag_COL_IDSOP_17',$arrayRegData)?
-                                    $arrayRegData['del_flag_COL_IDSOP_17']:null;
+            $strsshKeyFileDel  = array_key_exists('del_flag_COL_IDSOP_18',$arrayRegData)?
+                                    $arrayRegData['del_flag_COL_IDSOP_18']:null;
             if($strsshKeyFileDel == 'on') {
                 $strsshKeyFile = "";
             } else {

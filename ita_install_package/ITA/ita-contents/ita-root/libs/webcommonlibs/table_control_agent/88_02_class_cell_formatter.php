@@ -610,6 +610,11 @@ class HFmt extends CellFormatter {
 		return $retValue;
 	}
 
+	public function getDataDuplicate($colNo="", $attr="", $fileEncrypt=false){
+		$retValue = $this->getStaticPrintRawData();
+		return $retValue;
+	}
+
 	//NEW[2]
 	public function setDataPreFix($strVal){
 		$this->strDataPreFix = $strVal;
@@ -2707,6 +2712,36 @@ class JnlButtonTabBFmt extends TabBFmt {
 
 }
 
+class DupButtonTabBFmt extends TabBFmt {
+	public function getData($rowData,$aryVariant){
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+		$strRIColId = $this->getRIColumnKey();
+		$strColLabel = $this->getColLabel();
+
+		$depflg = "";
+		if( $rowData === null ){
+			$depflg = "";
+		}else{
+			$strCheckColumnId = $this->getRequiredDisuseColumnID();
+			if( array_key_exists($strCheckColumnId, $rowData) === true && $rowData[$strCheckColumnId] === "0" ){
+				$depflg = "";
+			}else{
+				$depflg = "disabled";
+			}
+		}
+
+		$aryAddOnDefault["class"] = "duplicateBtnInTbl";
+
+		$aryOverWrite["type"] = "button";
+		$aryOverWrite["value"] = $strColLabel;
+
+		$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$depflg}>";
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
+}
+
 //----ここから、Write入力系
 
 class InputTabBFmt extends TabBFmt {
@@ -2780,6 +2815,38 @@ class PasswordInputTabBFmt extends InputTabBFmt {
 		return $this->getTag($strTagInnerBody, $rowData);
 	}
 
+	public function getDataDuplicate($rowData, $aryVariant, $sensitive_flag){
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+		
+		if( $sensitive_flag != 2 ){
+			$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
+		}else{
+			$data = "";
+		}
+		
+		//----htmlタグがdataに入っている場合に異常動作させないための処理
+		$data = $this->makeSafeValueForBrowse($data);
+		//htmlタグがdataに入っている場合に異常動作させないための処理----
+
+		$aryAddOnDefault["maxLength"] = $this->getMaxInputLength();
+		$aryAddOnDefault["size"]      = 15;
+
+		$aryOverWrite["type"] = "text";
+		$aryOverWrite["id"]   = $this->getFSTIDForIdentify();
+		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
+		$aryOverWrite["value"] = $data;
+
+		$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>";
+
+		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
+			$objFunction = $this->objFunctionForReturnOverrideGetData;
+			$strTagInnerBody = $objFunction($strTagInnerBody,$this,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite);
+		}
+
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
 }
 
 class TextInputTabBFmt extends InputTabBFmt {
@@ -2789,6 +2856,38 @@ class TextInputTabBFmt extends InputTabBFmt {
 		$aryOverWrite = array();
 		$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
 
+		//----htmlタグがdataに入っている場合に異常動作させないための処理
+		$data = $this->makeSafeValueForBrowse($data);
+		//htmlタグがdataに入っている場合に異常動作させないための処理----
+
+		$aryAddOnDefault["maxLength"] = $this->getMaxInputLength();
+		$aryAddOnDefault["size"]      = 15;
+
+		$aryOverWrite["type"] = "text";
+		$aryOverWrite["id"]   = $this->getFSTIDForIdentify();
+		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
+		$aryOverWrite["value"] = $data;
+
+		$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>";
+
+		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
+			$objFunction = $this->objFunctionForReturnOverrideGetData;
+			$strTagInnerBody = $objFunction($strTagInnerBody,$this,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite);
+		}
+
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
+	public function getDataDuplicate($rowData, $aryVariant, $sensitive_flag){
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+		
+		if( $sensitive_flag != 2 ){
+			$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
+		}else{
+			$data = "";
+		}
+		
 		//----htmlタグがdataに入っている場合に異常動作させないための処理
 		$data = $this->makeSafeValueForBrowse($data);
 		//htmlタグがdataに入っている場合に異常動作させないための処理----
@@ -2968,6 +3067,40 @@ class TextAreaTabBFmt extends InputTabBFmt {
 		return $this->getTag($strTagInnerBody, $rowData);
 	}
 
+	public function getDataDuplicate($rowData, $aryVariant, $sensitive_flag){
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+
+		if( $sensitive_flag != 2 ){
+			$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
+		}else{
+			$data = "";
+		}
+		
+		$strColId = $this->getPrintTargetKey();
+
+		//----<textarea></textarea>がdataに入っている場合に異常動作させないための処理
+		$data = $this->makeSafeValueForBrowse($data);
+		//<textarea></textarea>がdataに入っている場合に異常動作させないための処理----
+
+		$aryAddOnDefault["maxLength"] = $this->getMaxInputLength();
+		$aryAddOnDefault["rows"]      = 5;
+		$aryAddOnDefault["cols"]      = 60;
+
+		$aryOverWrite["id"] = $this->getFSTIDForIdentify();
+		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
+		$aryOverWrite["value"] = $data;
+
+		$strTagInnerBody = "<textarea {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>{$data}</textarea>";
+
+		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
+			$objFunction = $this->objFunctionForReturnOverrideGetData;
+			$strTagInnerBody = $objFunction($strTagInnerBody,$this,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite);
+		}
+
+		return $this->getTag($strTagInnerBody, $rowData);
+	}
+
 }
 
 class SelectTabBFmt extends InputTabBFmt {
@@ -3092,6 +3225,10 @@ class SelectTabBFmt extends InputTabBFmt {
         }
         $aryAddOnDefault["class"] = $aryAddOnDefault["class"] . " " . $select2ClassName;
 
+		// 複製処理用 is_array($rowData)=true であるが登録用テーブルの場合。
+		$select2ClassNameDuplicate = $aryVariant['callerVars']['initedColumnID'] . "_UPD";
+		$preClassDuplicate = "Mix2_";
+
 		$aryOverWrite["type"] = "text";
 		$aryOverWrite["id"] = $this->getFSTIDForIdentify();
 		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
@@ -3122,7 +3259,7 @@ class SelectTabBFmt extends InputTabBFmt {
 		$strTagInnerBody  = "<div class=\"{$this->getPrintSeq()} {$this->strFADClassOfSelectTagWrapper}\">";
 		$strTagInnerBody .= "<div class=\"{$strSetIdBody}\"></div>";
 
-		if( strlen($strSelectWaitingText) === 0 ){
+		if( strlen($strSelectWaitingText) === 0 || is_array($rowData) === true ){
 			if($arraySelectElement === null){
 				//$strTagInnerBody = "テーブルまたはカラムが存在しません";
 				$strTagInnerBody .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12001");
@@ -3179,6 +3316,9 @@ class SelectTabBFmt extends InputTabBFmt {
                         <script type="text/javascript">
                             var strAdjustRulerClassName = "{$select2ClassName}";
                             var objAdjustRulerForWidth = $('#'+"{$preClass}"+'Nakami'+' .'+strAdjustRulerClassName).get()[0];
+							if (!objAdjustRulerForWidth) {
+								objAdjustRulerForWidth = $('#'+"{$preClassDuplicate}"+'Nakami'+' .'+"{$select2ClassNameDuplicate}").get()[0];
+							}
                             var intNewWidth = objAdjustRulerForWidth.offsetWidth;
                             if(30 == intNewWidth){
                                 intNewWidth = 45;
@@ -4125,6 +4265,182 @@ EOD;
 
 		$retStrVal = $this->getTag($strTagInnerBody, $rowData);
 
+		return $retStrVal;
+	}
+
+	public function getDataDuplicate($rowData,$aryVariant,$fileEncrypt){
+		
+		global $g;
+		$aryAddOnDefault = array();
+		$aryOverWrite = array();
+		$retStrVal = "";
+
+		$intControlDebugLevel01 = 50;
+
+		$boolProcessContinue = true;
+		$strTagInnerBody = "";
+
+		$arrayTempRet = $this->getCheckStorageSetting();
+
+		$boolProcessContinue = $arrayTempRet[0];
+		$strTagInnerBody = $arrayTempRet[2];
+		
+		if( $boolProcessContinue === true ){
+			$strColId = $this->getPrintTargetKey();
+
+			$strColMark = $strColId;
+			if( $this->getColumnIDHidden() === true ){
+				$strColMark = $this->getIDSynonym();
+			}
+
+			//----IU時に利用するもの
+			$strIdOfFSTOfTmpFile = "{$this->strFormatterId}_tmp_file_{$strColMark}";
+			$strNameOfFSTOfTmpFile = "tmp_file_{$strColMark}";
+
+			//----ローカルでの元名前の一時保存
+			$strIdOfFSTOfOrgName = "{$this->strFormatterId}_org_file_{$strColMark}";
+			$strNameOfFSTOfOrgName = "org_file_{$strColMark}";
+			//ローカルでの元名前の一時保存----
+
+			$strIdOfFSTOfDelFlag = "{$this->strFormatterId}_del_{$strColMark}";
+			$strNameOfFSTOfDelFlag = "del_flag_{$strColMark}";
+			//IU時に利用するもの----
+
+			//----事前アップロード時にメインで利用するもの
+			$strIdOfIframe = "{$this->strFormatterId}_if_{$strColMark}";
+			$strNameOfIframe = "{$this->strFormatterId}_if_{$strColMark}";
+
+			$strIdOfForm = "{$this->strFormatterId}_{$strColMark}";
+
+			$strIdOfInputButton = "{$this->strFormatterId}_btn_{$strColMark}";
+			$strIdOfResultArea = "{$this->strFormatterId}_result_{$strColMark}";
+
+			//----どのカラムに向けての送信かの識別用
+			$strIdOfFSTOfFileId = "{$this->strFormatterId}_file_id_{$strColMark}";
+			$strNameOfFSTOfFileId = "file_id_{$strColMark}";
+			//どのカラムに向けての送信かの識別用----
+
+			//----どのリストフォーマッタからの送信か
+			$strNameOfFromFormatterId = "frmFmt_{$strColMark}";
+			//どのリストフォーマッタからの送信か----
+
+			$strLabelForDelFlag = "del{$strColMark}";
+
+			//事前アップロード時にメインで利用するもの----
+
+			$current = "";
+			$strDummyValue01 = "dummy";
+			$fileNameTmp = "";
+
+			list($fileName,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($rowData,array($strColId),"");
+			
+			if( 1 <= strlen($fileName) && $fileEncrypt == false ){
+
+				//----ファイルがアップロードされている場合
+				$url = $this->getAnchorHref($rowData);
+				$fileName = $this->makeSafeValueForBrowse($fileName);
+
+				$strLAPathOfRefTargetFile = $this->getLAPathOfAnchorHrefTarget($rowData);
+				if( file_exists($strLAPathOfRefTargetFile) === true ){
+					$strAnchorTag = "<a href=\"{$url}\" target=\"_blank\">{$fileName}</a>";
+
+					// 最新時間を取得（一時ファイル名に利用）
+					$now = \DateTime::createFromFormat("U.u", sprintf("%6F", microtime(true)));
+					$nowTime = date("YmdHis") . $now->format("u");
+
+					$fileExtension = pathinfo( $strLAPathOfRefTargetFile, PATHINFO_EXTENSION);
+					$fileNameTarget = str_replace("." .$fileExtension, "", $fileName );
+					$fileNameTmp = $fileNameTarget . "_". $nowTime;
+					$fileUpPath = $this->objColumn->getLAPathToPreUploadSave();
+
+					$copyFilePath = $fileUpPath . "/" . $fileNameTmp;
+					$fnFilePath = $fileUpPath . "/fn_". $fileNameTmp;
+					
+					#事前アップロードした場合と同様のファイルを作成
+					copy($strLAPathOfRefTargetFile, $copyFilePath);
+					file_put_contents($fnFilePath,$fileName);
+
+				}else{
+					//$strAnchorTag="ファイル({$fileName})が見つかません。";
+					$strAnchorTag = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12102",$fileName);
+				}
+				//必須項目の場合
+				if( $this->getRequired() === true ){
+					$current =
+<<<EOD
+{$g['objMTS']->getSomeMessage("ITAWDCH-STD-631")}: <br />
+{$strAnchorTag}
+EOD;
+			}else{
+				$current =
+<<<EOD
+{$g['objMTS']->getSomeMessage("ITAWDCH-STD-631")}: <br />
+{$strAnchorTag}
+<p>{$g['objMTS']->getSomeMessage("ITAWDCH-STD-632")}</p>
+<input type="checkbox" id="{$strIdOfFSTOfDelFlag}" name="{$strNameOfFSTOfDelFlag}" />
+<label for="{$strLabelForDelFlag}">{$g['objMTS']->getSomeMessage("ITAWDCH-STD-633")}</label>
+
+<script type="text/javascript">
+document.getElementById("{$strIdOfFSTOfDelFlag}").onchange = function(){
+if(this.checked == true){
+	$("#"+"{$strIdOfForm}_file").attr("disabled",true);
+	$("#"+"{$strIdOfInputButton}").attr("disabled",true);
+}
+else{
+	$("#"+"{$strIdOfForm}_file").attr("disabled",false);
+	$("#"+"{$strIdOfInputButton}").attr("disabled",false);
+}
+}
+</script>
+EOD;
+			}
+			//
+			//ファイルがアップロードされている場合----
+		}
+		//Sequenceが指定されていない場合は、もはや存在しなくなったので、分岐機能を削除----
+	}
+
+	if( $boolProcessContinue === true ){
+		$strConfSetFilesizeNumeric = $this->getMaxFileSize();
+
+		if( 1 > strlen($strConfSetFilesizeNumeric) ){
+			$strConfSetFilesizeNumeric = 20000000;
+		}
+
+		$strActionUrl = $this->getActionUrl();
+
+		$strTagInnerBody =
+<<<EOD
+{$current}<iframe id="{$strIdOfIframe}" name="{$strNameOfIframe}" style="display:none" >
+</iframe><form id="{$strIdOfForm}" action="{$strActionUrl}" method="POST" encoding="multipart/form-data" enctype="multipart/form-data" target="{$strIdOfIframe}"><input type="hidden" id="{$strIdOfFSTOfTmpFile}" name="{$strNameOfFSTOfTmpFile}" value="{$fileNameTmp}" /><input type="hidden" id="{$strIdOfFSTOfFileId}" name="{$strNameOfFSTOfFileId}" value="{$fileName}" /><input type="hidden" name="MAX_FILE_SIZE" value="{$strConfSetFilesizeNumeric}" /><input type="hidden" name="{$strNameOfFromFormatterId}" value="{$this->strFormatterId}" /><span name="filewrapper"><input type="file" name="file" id="{$strIdOfForm}_file"/></span></form><input type="button" id="{$strIdOfInputButton}" name="1" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-634")}" onclick="
+formControlForFUCFileUpLoad(
+this,'{$strIdOfForm}','{$strIdOfResultArea}','{$strIdOfIframe}','{$strIdOfFSTOfTmpFile}','{$strIdOfInputButton}',
+'{$g['objMTS']->getSomeMessage("ITAWDCH-ERR-12103")}','{$g['objMTS']->getSomeMessage("ITAWDCH-STD-635")}'
+);
+" />
+{$g['objMTS']->getSomeMessage("ITAWDCH-STD-636")}:<div id="{$strIdOfResultArea}"><input type="hidden" name="{$strColMark}" value="{$fileName}"></div><br />
+<script type="text/javascript">
+document.getElementById("{$strIdOfForm}_file").onchange = function(){
+if(document.getElementById("{$strIdOfFSTOfDelFlag}") != null){
+	if(this.value.length != 0){
+		$("#"+"{$strIdOfFSTOfDelFlag}").attr("disabled",true).css("color", "#9E9E9E");
+	}
+	else{
+		$("#"+"{$strIdOfFSTOfDelFlag}").attr("disabled",false).css("color", "#000000");
+	}
+}
+}
+</script>
+EOD;
+
+		}
+
+		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
+			$objFunction = $this->objFunctionForReturnOverrideGetData;
+			$strTagInnerBody = $objFunction($strTagInnerBody,$this,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite);
+		}
+
+		$retStrVal = $this->getTag($strTagInnerBody, $rowData);
 		return $retStrVal;
 	}
 

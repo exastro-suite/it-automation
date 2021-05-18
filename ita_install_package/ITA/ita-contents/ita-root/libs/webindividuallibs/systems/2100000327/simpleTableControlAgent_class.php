@@ -38,6 +38,7 @@ class simpleTableControlAgent_2100000327 extends TableControlAgent {
         //
         $strRowEditByFileColLabel = isset($arrayVariant['TT_SYS_NDB_ROW_EDIT_BY_FILE_LABEL'])?$arrayVariant['TT_SYS_NDB_ROW_EDIT_BY_FILE_LABEL']:$g['objMTS']->getSomeMessage("ITAWDCH-STD-18007");
         $strUpdateColLabel = isset($arrayVariant['TT_SYS_NDB_UPDATE_LABEL'])?$arrayVariant['TT_SYS_NDB_UPDATE_LABEL']:$g['objMTS']->getSomeMessage("ITAWDCH-STD-18008");
+        $strDuplicateColLabel = $g['objMTS']->getSomeMessage("ITAWDCH-STD-19033");
         //
         $boolDefaultColumnsSet = isset($arrayVariant['DEFAULT_COLUMNS_SET'])?$arrayVariant['DEFAULT_COLUMNS_SET']:true;
         //
@@ -53,6 +54,8 @@ class simpleTableControlAgent_2100000327 extends TableControlAgent {
             $c = new JournalRegClassColumn($this->getRequiredJnlRegClassColumnID(), $strJnlClassColLabel);
             $this->addColumn($c);
             //
+            $c = new DuplicateBtnColumn($this->getDupButtonColumnID(), $strDuplicateColLabel);
+            $this->addColumn($c);
             $c = new UpdBtnColumn($this->getRequiredUpdateButtonColumnID(), $strUpdateColLabel, $this->getRequiredDisuseColumnID());
             $this->addColumn($c);
             $c = new DelBtnColumn($this->getRequiredDisuseColumnID(), $strDisuseFlagColLabel);
