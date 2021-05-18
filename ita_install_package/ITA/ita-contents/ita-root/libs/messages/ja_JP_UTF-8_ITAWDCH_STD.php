@@ -256,6 +256,7 @@ $ary["ITAWDCH-STD-19029"]           = "承認権者氏名";
 $ary["ITAWDCH-STD-19030"]           = "廃止";
 $ary["ITAWDCH-STD-19031"]           = "復活";
 $ary["ITAWDCH-STD-19032"]           = "履歴";
+$ary["ITAWDCH-STD-19033"]           = "複製";
 $ary["ITAWDCH-STD-20001"]           = "実行してよろしいですか？";
 $ary["ITAWDCH-STD-30011"]           = "説明";
 $ary["ITAWDCH-STD-30021"]           = "表示フィルタ";

@@ -296,6 +296,18 @@ class OutputType {
 	}
 	//htmlタグ取得用(2014-12-01名前にTagを追加)----
 
+	function getBodyTagDuplicate($rowData, $aryVariant, $option){
+		//----$rowData「NULLまたは連想配列を想定」
+		global $g;
+		$intControlDebugLevel01=200;
+		$strFxName = __CLASS__."::".__FUNCTION__;
+		$strInitedColId = $this->objColumn->getID();
+		$aryVariant['callerClass'] = get_class($this);
+		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+		return $this->body->getDataDuplicate($rowData, $aryVariant, $option);
+	}
+
 	//NEW[29]
 	public function setDescription($strDescription){
 		$this->strDescription = $strDescription;

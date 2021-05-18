@@ -30,7 +30,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         'TT_SYS_06_LUP_USER_ID'=>'LAST_UPDATE_USER',
         'TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'=>'ROW_EDIT_BY_FILE',
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
-        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
+        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP',
+        'TT_SYS_08_DUPLICATE_ID'=>'WEB_BUTTON_DUPLICATE'
     );
 
     $table = new TableControlAgent('G_FILE_MANAGEMENT_3','FILE_M_ID', $g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101301"), 'G_FILE_MANAGEMENT_JNL', $tmpAry);
@@ -44,6 +45,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $tmpAryColumn['ROW_EDIT_BY_FILE']->setCommandArrayForEdit(array(2=>$g['objMTS']->getSomeMessage("ITAMATERIAL-MNU-101354"),
                                                                    )
                                                              );
+                                                             $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
     $outputType = new OutputType(new TabHFmt(), new DelTabBFmt());
     $tmpAryColumn['DISUSE_FLAG']->setOutputType("print_table", $outputType);
     unset($tmpAryColumn);

@@ -73,6 +73,7 @@
 
             $lcRequiredDisuseFlagColumnId = $objTable->getRequiredDisuseColumnID(); //"DISUSE_FLAG"
             $lcRequiredUpdateButtonColumnId = $objTable->getRequiredUpdateButtonColumnID(); //"UPDATE"
+            $lcDuplicateButtonColumnId = $objTable->getDupButtonColumnID(); //"DUPLICATE"
 
             //----出力されるタグの属性値
 
@@ -118,13 +119,15 @@
                 // ----1はメンテナンス権限あり
                 // 1はメンテナンス権限あり----
             }else if( $strPrivilege === "2" ){
-                // ----2は参照のみなので更新・廃止ボタンを表示しない
+                // ----2は参照のみなので更新・廃止・複製ボタンを表示しない
                 $aryObjColumn = $objTable->getColumns();
                 $objColumnRUB = $aryObjColumn[$lcRequiredUpdateButtonColumnId];
                 $objColumnRUB->getOutputType($strFormatterId)->setVisible(false);
                 $objColumnRDF = $aryObjColumn[$lcRequiredDisuseFlagColumnId];
                 $objColumnRDF->getOutputType($strFormatterId)->setVisible(false);
-                // 2は参照のみなので更新・廃止ボタンを表示しない----
+                $objColumnDPC = $aryObjColumn[$lcDuplicateButtonColumnId];
+                $objColumnDPC->getOutputType($strFormatterId)->setVisible(false);
+                // 2は参照のみなので更新・廃止・複製ボタンを表示しない----
             }else{
                 // ----0は権限がないので出力しない
                 $intErrorType = 1;

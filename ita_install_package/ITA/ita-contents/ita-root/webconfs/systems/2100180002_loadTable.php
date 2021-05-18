@@ -38,7 +38,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         'TT_SYS_06_LUP_USER_ID'=>'LAST_UPDATE_USER',
         'TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'=>'ROW_EDIT_BY_FILE',
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
-        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
+        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP',
+        'TT_SYS_08_DUPLICATE_ID'=>'WEB_BUTTON_DUPLICATE'
     );
 
     $table = new TableControlAgent('C_CONDUCTOR_EDIT_CLASS_MNG','CONDUCTOR_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-305040"), 'C_CONDUCTOR_EDIT_CLASS_MNG_JNL', $tmpAry);
@@ -159,6 +160,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     );
     $outputType = new OutputType(new TabHFmt(), new DelTabBFmt());
     $tmpAryColumn['WEB_BUTTON_UPDATE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
 
     list($strTmpValue,$tmpKeyExists) = isSetInArrayNestThenAssign($aryVariant,array('callType'),null);
     if( $tmpKeyExists===true ){

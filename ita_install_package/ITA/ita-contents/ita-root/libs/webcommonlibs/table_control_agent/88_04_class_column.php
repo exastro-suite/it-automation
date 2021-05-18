@@ -1780,6 +1780,15 @@ class Column extends ColumnGroup {
 			return $this->aryObjOutputType[$strFormatterId]->getBodyTag($aryRawRecord,$aryVariant);
 		}
 	}
+
+	function getOutputBodyDuplicate($strFormatterId, $aryRawRecord, $option){
+		//----各Formatterクラスから呼ばれる
+		if( isset($this->aryObjOutputType[$strFormatterId]) === true && $this->aryObjOutputType[$strFormatterId]->isVisible() === true ){
+			$aryVariant = array();
+			return $this->aryObjOutputType[$strFormatterId]->getBodyTagDuplicate($aryRawRecord, $aryVariant, $option);
+		}
+	}
+
 	//NEW[96]
 	function setDefaultValue($strFormatterId, $value){
 		//inputタグ系のデフォルト値を設定する
@@ -10628,6 +10637,48 @@ class JournalBtnColumn extends Column {
     }
     //AddColumnイベント系----
     //ここまで継承メソッドの上書き処理----
+}
+
+class DuplicateBtnColumn extends Column {
+
+    protected $strCheckDisuseColumnId;
+    //----ここから継承メソッドの上書き処理
+    function __construct($strColId, $strColLabel){
+        parent::__construct($strColId, $strColLabel);
+        $this->setDBColumn(false);
+        $this->setHeader(true);
+        $outputType = new OutputType(new TabHFmt(), new DupButtonTabBFmt());
+        $this->setOutputType("print_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+        $outputType->setVisible(false);
+        $this->setOutputType("print_journal_table", $outputType);
+        $this->getOutputType("filter_table")->setVisible(false);
+        $this->getOutputType("update_table")->setVisible(false);
+        $this->getOutputType("register_table")->setVisible(false);
+        $this->getOutputType("delete_table")->setVisible(false);
+        $this->getOutputType("excel")->setVisible(false);
+        $this->getOutputType("csv")->setVisible(false);
+        $this->getOutputType("json")->setVisible(false);
+    }
+    //----AddColumnイベント系
+    function initTable($objTable, $colNo=null){
+        parent::initTable($objTable, $colNo);
+        $this->setEvent("print_table", "onclick", "duplicate_async", array(3, ":".$this->objTable->getRIColumnID()));
+    }
+    //AddColumnイベント系----
+    //ここまで継承メソッドの上書き処理----
+
+	//----ここから新規メソッドの定義宣言処理
+	//NEW[1]
+	function setCheckDisuseColumnID($strColname){
+		$this->strCheckDisuseColumnId = $strColname;
+	}
+	//NEW[2]
+	function getCheckDisuseColumnID(){
+		return $this->strCheckDisuseColumnId;
+	}
+
+	//ここまで新規メソッドの定義宣言処理----
 }
 
 class EditStatusControlBtnColumn extends Column {
