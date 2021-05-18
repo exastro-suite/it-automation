@@ -40,7 +40,8 @@ Ansible(Pioneer)作業管理
         'TT_SYS_06_LUP_USER_ID'=>'LAST_UPDATE_USER',
         'TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'=>'ROW_EDIT_BY_FILE',
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
-        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
+        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP',
+        'TT_SYS_08_DUPLICATE_ID'=>'WEB_BUTTON_DUPLICATE'
     );
 
     $table = new TableControlAgent('C_ANSIBLE_PNS_EXE_INS_MNG','EXECUTION_NO',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309010"), 'C_ANSIBLE_PNS_EXE_INS_MNG_JNL', $tmpAry);
@@ -250,10 +251,11 @@ Ansible(Pioneer)作業管理
 
     $table->fixColumn();
 
-    // 廃止・更新ボタンを隠す
+    // 廃止・更新・複製ボタンを隠す
     $tmpAryColumn= $table->getColumns();
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_table')->setVisible(false);
     $tmpAryColumn['WEB_BUTTON_UPDATE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
 
     // ----非表示項目設定
     // 備考

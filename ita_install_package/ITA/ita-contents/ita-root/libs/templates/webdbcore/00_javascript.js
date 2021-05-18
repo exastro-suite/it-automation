@@ -780,6 +780,25 @@ function Journal1Tbl_search_async(){
 }
 //////// 履歴検索条件指定用ファンクション---- ////////
 
+//////// ----複製用ファンクション ////////
+function Duplicate_async(){
+    // 複製実施フラグを初期化
+    var registerAreaWrap = 'Mix2_Nakami';
+ 
+    var exec_flag = true;
+
+    // 実施フラグがtrueの場合は検索実施
+    if( exec_flag == true ){
+        // しばらくお待ち下さいを出す
+        var objTableArea = $('#'+registerAreaWrap+' .table_area').get()[0];
+        objTableArea.innerHTML = "<div class=\"wait_msg2\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
+
+        var filterData = $('#'+registerAreaWrap+' :input:not(:button)').serializeArray();
+        proxy.Journal1Tbl_printJournal(filterData);
+    }
+}
+//////// 複製用ファンクション---- ////////
+
 //////// ----汎用系ファンクション ////////
 function setInputButtonDisable(rangeId,targetClass,toValue){
     if(toValue === true){

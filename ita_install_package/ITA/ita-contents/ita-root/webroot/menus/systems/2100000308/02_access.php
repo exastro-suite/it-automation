@@ -188,6 +188,10 @@
             $objDisuseColumn = $aryObjColumn[$objTable1->getRequiredDisuseColumnID()];
             $objDisuseColumn->getOutputType('print_table')->setVisible(false);
 
+            // 複製ボタン
+            $objDuplicateColumn = $aryObjColumn[$objTable1->getDupButtonColumnID()];
+            $objDuplicateColumn->getOutputType('print_table')->setVisible(false);
+
             // 履歴ボタン
             $objJournalColumn = $aryObjColumn[$objTable1->getJnlButtonColumnID()];
             $objJournalColumn->getOutputType('print_table')->setVisible(false);
@@ -360,6 +364,10 @@
             // 履歴ボタン
             $objJournalColumn = $aryObjColumn[$objTable2->getJnlButtonColumnID()];
             $objJournalColumn->getOutputType('print_table')->setVisible(false);
+
+            // 複製ボタン
+            $objDuplicateColumn = $aryObjColumn[$objTable2->getDupButtonColumnID()];
+            $objDuplicateColumn->getOutputType('print_table')->setVisible(false);
 
             // 本体ロジックをコール
 

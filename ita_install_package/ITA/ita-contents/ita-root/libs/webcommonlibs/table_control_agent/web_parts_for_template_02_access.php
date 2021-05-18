@@ -332,6 +332,40 @@
             }
             return makeAjaxProxyResultStream($arrayResult);
         }
+
+        ///////////////////////////////////
+        //  duplicateファンクション  //
+        ///////////////////////////////////
+        function Mix1_1_duplicate($mode, $innerSeq, $arrayReceptData = null){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $arrayUpdateData = array();
+
+            $arrayUpdateData = convertReceptDataToDataForIUD($arrayReceptData);
+
+            $arySetting = array("Mix1_1","fakeContainer_Register2","Filter1Tbl");
+
+            // 本体ロジックをコール
+
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/03_registerTable.php");
+            $arrayResult = registerTableMain($mode, $arrayUpdateData, null, 0, $aryVariant, $arySetting, $innerSeq);
+
+            // 結果判定
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return makeAjaxProxyResultStream($arrayResult);
+        }
     }
 
     class Db_Access_Core_ForReview extends Db_Access_Core

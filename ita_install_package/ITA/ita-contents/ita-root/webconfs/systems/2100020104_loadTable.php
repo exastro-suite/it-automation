@@ -215,8 +215,8 @@ Ansible(Legacy(NS))プレイブック素材集
                 $PkeyID = array_key_exists('PLAYBOOK_MATTER_ID',$arrayRegData)?$arrayRegData['PLAYBOOK_MATTER_ID']:null;
             }
             $Playbook_file = array_key_exists('PLAYBOOK_MATTER_FILE',$arrayRegData)?$arrayRegData['PLAYBOOK_MATTER_FILE']:null;
-            $tmpFile       = array_key_exists('tmp_file_COL_IDSOP_9',$arrayRegData)?
-                                $arrayRegData['tmp_file_COL_IDSOP_9']:null;
+            $tmpFile       = array_key_exists('tmp_file_COL_IDSOP_10',$arrayRegData)?
+                                $arrayRegData['tmp_file_COL_IDSOP_10']:null;
             $TPFVarListfile = $root_dir_path . "/temp/file_up_column/" . $tmpFile . "_vars_list";
             $tmpfilepath    = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
         }
@@ -225,12 +225,12 @@ Ansible(Legacy(NS))プレイブック素材集
         unset($g['COM_VARS_LIST_VALUE']);
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ) {
-                if( ! array_key_exists('tmp_file_COL_IDSOP_9',$arrayRegData)) {
+                if( ! array_key_exists('tmp_file_COL_IDSOP_10',$arrayRegData)) {
                     $boolExecuteContinue = false;
                     $retBool = false;
                     $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55210",array($PkeyID,$Playbook_file));
                 } elseif(strlen($tmpFile) != 0) {
-                    // FileUpload後に登録・更新でエラーが発生した場合、tmp_file_COL_IDSOP_8が別ファイルになる対応
+                    // FileUpload後に登録・更新でエラーが発生した場合、tmp_file_COL_IDSOP_9が別ファイルになる対応
                     if( ! file_exists($TPFVarListfile)) {
                         // 共通変数を抜き出す。
                         $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);

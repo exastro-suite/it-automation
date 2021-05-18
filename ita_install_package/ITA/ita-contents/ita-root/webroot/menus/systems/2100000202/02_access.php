@@ -45,7 +45,7 @@
             $arrayResult = registerTableMain($mode, $arrayRegisterData, null, 0, $aryVariant, $arySetting);
 
             // DESIGN_TYPEだけ$innerSeq101にする
-            if($mode == 2 && $arrayRegisterData["COL_IDSOP_8"] == "DESIGN_TYPE"){
+            if($mode == 2 && $arrayRegisterData["COL_IDSOP_9"] == "DESIGN_TYPE"){
                 $arrayResult[1]=101;
             }
 

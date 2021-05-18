@@ -36,7 +36,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         'TT_SYS_06_LUP_USER_ID'=>'LAST_UPDATE_USER',
         'TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'=>'ROW_EDIT_BY_FILE',
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
-        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
+        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP',
+        'TT_SYS_08_DUPLICATE_ID'=>'WEB_BUTTON_DUPLICATE'
     );
 
     $table = new TableControlAgent('D_ANS_LRL_MAX_MEMBER_COL','MAX_COL_SEQ_ID', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705020"), 'D_ANS_LRL_MAX_MEMBER_COL_JNL', $tmpAry);
@@ -56,6 +57,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                                                             ,'error'   =>array('name'=>$strResultType99  ,'ct'=>0)
                                                             )
                                                       );
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
     $tmpAryColumn['ROW_EDIT_BY_FILE']->setCommandArrayForEdit(array( 1=>$strResultType01
                                                                     ,2=>$strResultType02
                                                                     )

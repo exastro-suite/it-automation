@@ -199,7 +199,6 @@ $ary["ITAWDCH-STD-16206"]           = "OK";
 $ary["ITAWDCH-STD-16207"]           = "NG";
 $ary["ITAWDCH-STD-16208"]           = "Copy the line above this line and insert to increase the lines.";
 $ary["ITAWDCH-STD-16209"]           = "Arial";
-$ary["ITAWDCH-STD-16211"]           = "履歴";
 $ary["ITAWDCH-STD-16301"]           = "Blank";
 $ary["ITAWDCH-STD-17001"]           = "Register";
 $ary["ITAWDCH-STD-17002"]           = "Update";
@@ -256,6 +255,7 @@ $ary["ITAWDCH-STD-19029"]           = "Authorized approver name";
 $ary["ITAWDCH-STD-19030"]           = "Discard";
 $ary["ITAWDCH-STD-19031"]           = "Restore";
 $ary["ITAWDCH-STD-19032"]           = "History";
+$ary["ITAWDCH-STD-19033"] 
 $ary["ITAWDCH-STD-20001"]           = "Are you sure you want to execute?";
 $ary["ITAWDCH-STD-30011"]           = "Description";
 $ary["ITAWDCH-STD-30021"]           = "Display filter";

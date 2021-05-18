@@ -519,7 +519,7 @@ function userNameAllDisplay() {
 
 //////// ----変更履歴遷移用ファンクション ////////
 function Mix1_1_journal_async( mode, inner_seq ){
-  var ele = document.getElementsByName("COL_IDSOP_7");
+  var ele = document.getElementsByName("COL_IDSOP_8");
   ele[0].value = inner_seq;
   Journal1Tbl_search_async();
   if( document.getElementById("Journal1_Nakami").style.display == "none" ) {
@@ -530,7 +530,7 @@ function Mix1_1_journal_async( mode, inner_seq ){
 }
 
 function journal_async( mode, inner_seq ){
-  var ele = document.getElementsByName("COL_IDSOP_7");
+  var ele = document.getElementsByName("COL_IDSOP_8");
   ele[0].value = inner_seq;
   Journal1Tbl_search_async();
   if( document.getElementById("Journal1_Nakami").style.display == "none" ) {
@@ -540,3 +540,74 @@ function journal_async( mode, inner_seq ){
   jumpToSelfHtml('Journal1_Midashi');
 }
 //////// 変更履歴遷移用ファンクション---- ////////
+
+//////// ----複製用ファンクション ////////
+function Mix1_1_duplicate_async( mode, inner_seq ){
+  
+  var registerAreaWrap = 'Mix2_Nakami';
+
+  // アラート用エリアを初期化
+  var objAlertArea = $('#'+registerAreaWrap+' .alert_area').get()[0];
+  objAlertArea.innerHTML = '';
+  objAlertArea.style.display = "none";
+
+  // registerTableファンクション呼び出し要否フラグ
+  var exec_flag = true;
+
+  if( document.getElementById(registerAreaWrap).style.display == "block" ) {
+      //----登録中ですが中断してよろしいですか？
+      if( window.confirm( getSomeMessage("ITAWDCC20202")) == false ){
+        exec_flag = false;
+      }
+  }
+
+  // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
+  restruct_for_IE();
+
+  if( exec_flag ){
+      // proxy.registerTable実行
+      var registerData = $('#'+registerAreaWrap+' :input').serializeArray();
+      proxy.Mix1_1_duplicate( mode, inner_seq, registerData);
+
+      if( document.getElementById(registerAreaWrap).style.display == "none" ) {
+          show('Mix2_Midashi',registerAreaWrap);
+      }
+      // Mix2_Midashiのところまでジャンプ
+      jumpToSelfHtml('Mix2_Midashi');
+  }
+}
+
+function duplicate_async( mode, inner_seq ){
+
+  var registerAreaWrap = 'Mix2_Nakami';
+
+  // アラート用エリアを初期化
+  var objAlertArea = $('#'+registerAreaWrap+' .alert_area').get()[0];
+  objAlertArea.innerHTML = '';
+  objAlertArea.style.display = "none";
+
+  // registerTableファンクション呼び出し要否フラグ
+  var exec_flag = true;
+
+  if( document.getElementById(registerAreaWrap).style.display == "block" ) {
+      //----登録中ですが中断してよろしいですか？
+      if( window.confirm( getSomeMessage("ITAWDCC20202")) == false ){
+        exec_flag = false;
+      }
+  }
+
+  // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
+  restruct_for_IE();
+
+  if( exec_flag ){
+      // proxy.registerTable実行
+      var registerData = $('#'+registerAreaWrap+' :input').serializeArray();
+      proxy.Mix1_1_duplicate( mode, inner_seq, registerData);
+
+      if( document.getElementById(registerAreaWrap).style.display == "none" ) {
+          show('Mix2_Midashi',registerAreaWrap);
+      }
+      // Mix2_Midashiのところまでジャンプ
+      jumpToSelfHtml('Mix2_Midashi');
+  }
+}
