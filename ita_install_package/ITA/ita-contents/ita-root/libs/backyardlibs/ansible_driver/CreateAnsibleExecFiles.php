@@ -298,6 +298,8 @@ class CreateAnsibleExecFiles {
     const LC_ANS_SSH_KEY_FILE_VAR_NAME    = "__ssh_key_file__";
     //Pioneer用 ssh_extra_args変数名
     const LC_ANS_SSH_EXTRA_ARGS_VAR_NAME    = "__ssh_extra_args__";
+    //Pioneer用 LANG変数名
+    const LC_ANS_PIONEER_LANG_VAR_NAME    = "__pioneer_lang__";
     
     //Ansible実行時のinディレクトリ配下のSSH秘密鍵ファイル格納ディレクトリパス
     private $lv_Ansible_ssh_key_files_Dir;
@@ -1457,6 +1459,12 @@ class CreateAnsibleExecFiles {
 
         // 追加された予約変数生成
         $ret = $this->CreateOperationVariables($this->run_operation_id,$ina_hostinfolist,$ina_host_vars,$ina_pioneer_template_host_vars);
+        if($ret === false) {
+            return false;
+        }
+
+        // Pioneer LANG用 ローカル変数設定
+        $ret = $this->CreatePioneerLANGVariables($ina_hostinfolist,$ina_host_vars);
         if($ret === false) {
             return false;
         }
@@ -2933,7 +2941,8 @@ class CreateAnsibleExecFiles {
                                                   "grep_shell_dir='./library' " .
                                                   "log_file_dir='" . $log_file_path . "' " . 
                                                   "ssh_key_file={{ " . self::LC_ANS_SSH_KEY_FILE_VAR_NAME . " }} " .
-                                                  "extra_args={{ " . self::LC_ANS_SSH_EXTRA_ARGS_VAR_NAME . " }}\n";
+                                                  "extra_args={{ " . self::LC_ANS_SSH_EXTRA_ARGS_VAR_NAME . " }} " .
+                                                  "lang={{ " . self::LC_ANS_PIONEER_LANG_VAR_NAME . " }}\n";
 
                     $value = $value . "      delegate_to: 127.0.0.1\n";
 
@@ -6266,6 +6275,7 @@ class CreateAnsibleExecFiles {
     //                                         WINRM_SSL_CA_FILE=>      サーバー証明書ファイル
     //                                         HOSTS_EXTRA_ARGS=>       インベントリファイル 追加パラメータ
     //                                         SSH_KEY_FILE_PASSPHRASE=>  SSH秘密鍵ファイル パスフレーズ
+    //                                         PIONEER_LANG_STRING=>    Pioneer LANG 文字コード文字列
     //  $in_winrm_id:          Movement一覧のwinrm接続の設定値
     //                                "1": winrm接続選択
     // 
@@ -6316,6 +6326,7 @@ class CreateAnsibleExecFiles {
                "  TBL_2.CREDENTIAL_TYPE_ID, \n".
                "  TBL_2.SSH_KEY_FILE_PASSPHRASE, \n".
                "  TBL_2.PROTOCOL_ID, \n".
+               "  TBL_2.PIONEER_LANG_ID, \n".
                "  ( \n" .
                "    SELECT \n" .
                "      TBL_3.PROTOCOL_NAME \n" .
@@ -6491,6 +6502,27 @@ class CreateAnsibleExecFiles {
 
                     break;
                 }
+                // Pioneer LNAG のIDを文字コードに置換する
+                $pioneer_lang_string = "";
+                switch($this->getAnsibleDriverID()){
+                case DF_PIONEER_DRIVER_ID:
+                    $lang_id2lang_str = array();
+                    $lang_id2lang_str[null] = 'utf-8';
+                    $lang_id2lang_str[1] = 'utf-8';
+                    $lang_id2lang_str[2] = 'shift_jis';
+                    $lang_id2lang_str[3] = 'euc_jp';
+                    if( isset($lang_id2lang_str[$row['PIONEER_LANG_ID']])) {
+                        $pioneer_lang_string = $lang_id2lang_str[$row['PIONEER_LANG_ID']];
+                    } else {
+                        // LANG ID 不正
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56216",
+                                                                   array($row['IP_ADDRESS']));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);    
+                        unset($objQuery);
+                        return false;
+                    }
+                    break;
+                }
                 // 接続タイプが選択されていることを確認
                 if(strlen($row['CREDENTIAL_TYPE_ID'])==0){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70059",
@@ -6539,6 +6571,9 @@ class CreateAnsibleExecFiles {
                 } else {
                     $ina_hostinfolist[$row['IP_ADDRESS']]['SSH_KEY_FILE_PASSPHRASE'] = "";
                 }
+
+                // Pioneer LANG退避
+                $ina_hostinfolist[$row['IP_ADDRESS']]['PIONEER_LANG_STRING']  = $pioneer_lang_string;
 
 // ansibleがvaultで暗号化された秘密鍵ファイルに対応していないので
 // 対応したタイミングで秘密鍵ファイルをvaultで暗号化
@@ -12200,8 +12235,8 @@ class CreateAnsibleExecFiles {
                     "TARGET_VALUE"=>$enc_in_pass);
 
                 $proxySetting              = array();
-                $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-                $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+                $proxySetting['address']   = $this->in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+                $proxySetting['port']      = $this->in_ans_if_info["ANSIBLE_PROXY_PORT"];
 
                 ////////////////////////////////////////////////////////////////
                 // ansible-vault 暗号化 REST APIコール                        //
@@ -12324,8 +12359,8 @@ class CreateAnsibleExecFiles {
                     "TARGET_VALUE"=>$decryptData);
 
             $proxySetting              = array();
-            $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-            $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+            $proxySetting['address']   = $this->in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+            $proxySetting['port']      = $this->in_ans_if_info["ANSIBLE_PROXY_PORT"];
 
             ////////////////////////////////////////////////////////////////
             // ansible-vault 暗号化 REST APIコール                        //
@@ -12427,8 +12462,8 @@ class CreateAnsibleExecFiles {
                         "TARGET_VALUE"=>$enc_in_pass);
 
                 $proxySetting              = array();
-                $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-                $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+                $proxySetting['address']   = $this->in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+                $proxySetting['port']      = $this->in_ans_if_info["ANSIBLE_PROXY_PORT"];
 
                 ////////////////////////////////////////////////////////////////
                 // ansible-vault 暗号化 REST APIコール                        //
@@ -12758,6 +12793,28 @@ if(isset($Expansion_root)) {
         return true;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   Pioneer LAMG用 ローカル変数設定
+    // パラメータ
+    //   $ina_hostinfolist:  機器一覧ホスト情報配列
+    //   $ina_host_vars:     ホスト変数定義配列
+    //
+    // 戻り値
+    //   true:  正常
+    //   false: 異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreatePioneerLANGVariables($ina_hostinfolist,&$ina_host_vars) {
+        // Pioneer LANG用の予約変数設定
+        switch($this->getAnsibleDriverID()){
+        case DF_PIONEER_DRIVER_ID:
+            foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
+                $ina_host_vars[$host_ip][self::LC_ANS_PIONEER_LANG_VAR_NAME] = $hostinfo['PIONEER_LANG_STRING'];
+            }
+            break;
+        }
+        return true;
+    }
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
     //   オペレーション用 予約変数設定

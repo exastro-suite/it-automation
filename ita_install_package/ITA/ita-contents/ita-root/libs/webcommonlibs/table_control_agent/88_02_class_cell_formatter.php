@@ -1764,7 +1764,8 @@ class MainLinkTabBFmt extends BFmt {
 		//リンク先のURL作成
 		if($this->urlTartgetID == ""){
 			if($this->urlOption === true){
-				$param = mb_substr(strstr($strData, ':'), 1);
+				$explode = explode(':', $strData);
+				$param = end($explode); //「:」で区切られた最後の文字列
 			}else{
 				$param = $strData;
 			}
