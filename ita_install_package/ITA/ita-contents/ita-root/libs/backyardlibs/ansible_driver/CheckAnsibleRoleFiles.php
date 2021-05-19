@@ -623,7 +623,7 @@ class CheckAnsibleRoleFiles {
             $errmsg = "";
             $f_line = "";
             $f_name = "";
-            $ret = $chkObj->FirstAnalysis($yaml_parse_array,$tgt_role_pkg_name,$tgt_role_name,$tgt_file_name, $ina_ITA2User_var_list, $ina_User2ITA_var_list, $parent_vars_list,$errmsg,$f_name,$f_line);
+            $ret = $chkObj->FirstAnalysis($yaml_parse_array,$tgt_role_pkg_name,$tgt_role_name,$tgt_file_name, $ina_ITA2User_var_list[$in_rolename], $ina_User2ITA_var_list[$in_rolename], $parent_vars_list,$errmsg,$f_name,$f_line);
             if($ret === false) {
                 $errmsg = $errmsg . "(" . $f_line . ")";
                 $this->SetLastError(basename(__FILE__),__LINE__,$errmsg);
@@ -3274,7 +3274,7 @@ class DefaultVarsFileAnalysis{
                 break;
             case DF_VAR_TYPE_USER:
                 // 読替表にある変数はITA変数として扱う
-                if(@count($ina_User2ITA_var_list[$role_name][$ParentVarName]) != 0){
+                if(@count($ina_User2ITA_var_list[$ParentVarName]) != 0){
                     // 読替変数
                     $var_type =  self::LC_VAR_TYPE_USER_ITA;
                 } else{
