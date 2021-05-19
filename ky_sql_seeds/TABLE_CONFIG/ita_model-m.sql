@@ -528,6 +528,9 @@ LAST_UPDATE_USER                    %INT%                           , -- 最終�
 PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
+-- -------------------------
+-- フラグ管理マスタ
+-- -------------------------
 CREATE TABLE F_FLAG_MASTER
 (
 FLAG_ID                            %INT%                             , -- 識別シーケンス

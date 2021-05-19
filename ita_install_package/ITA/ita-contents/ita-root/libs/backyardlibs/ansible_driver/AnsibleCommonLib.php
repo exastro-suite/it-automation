@@ -1109,6 +1109,8 @@ class YAMLParse {
     
         $yaml_analys_result_file = "/tmp/yaml_analys_result_file_" . getmypid();
         // yaml parse
+        // コマンドライン用のエスケープ処理
+        $yaml_file= escapeshellarg($yaml_file);
         $cmd = sprintf("%s %s/backyards/ansible_driver/ky_ansible_yaml_parse.php %s %s",$php_command,$root_dir_path,$yaml_file,$yaml_analys_result_file);
         $arry_out = array();
         $return_var = 0;
