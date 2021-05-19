@@ -2526,6 +2526,18 @@ EOD;
         }
 
         //////////////////////////
+        // メニュー管理廃止(利用していないメニューグループのメニューを廃止)
+        //////////////////////////
+        $discardMenuIdArray = array();
+        $result = discardMenuList($cmiData, $discardMenuIdArray);
+
+        if(true !== $result){
+            // パラメータシート作成管理更新処理を行う
+            updateMenuStatus($targetData, "4", $result, true, true);
+            continue;
+        }
+
+        //////////////////////////
         // シーケンステーブル更新(シーケンス管理メニュー対応)
         //////////////////////////
         $result = updateSequence($hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $menuTableName);
@@ -2718,7 +2730,21 @@ EOD;
                     continue;
                 }
             }
-        } 
+        }
+
+        //////////////////////////
+        // メニュー管理で廃止したレコードと同じメニューIDが紐付いているレコードを廃止する
+        //////////////////////////
+        if(!empty($discardMenuIdArray)){
+            $result = discardRerationTable($discardMenuIdArray);
+
+            if(true !== $result){
+                // パラメータシート作成管理更新処理を行う
+                updateMenuStatus($targetData, "4", $result, true, true);
+                continue;
+            }
+        }
+
         //////////////////////////
         // loadTableを配置する
         //////////////////////////
@@ -3886,6 +3912,175 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$vi
         // 作成対象; データシート
         else if("2" == $cmiData['TARGET']){
             $hostMenuId = $targetArray[0]['MENU_ID'];  // MenuID はホスト用を使用
+        }
+
+        return true;
+    }
+    catch(Exception $e){
+        return $e->getMessage();
+    }
+}
+
+/*
+ * メニュー管理廃止(利用していないメニューグループのメニューを廃止)
+ */
+function discardMenuList($cmiData, &$discardMenuIdArray){
+    global $objDBCA, $db_model_ch, $objMTS;
+    $menuListTable = new MenuListTable($objDBCA, $db_model_ch);
+
+    try{
+        //////////////////////////
+        // メニュー管理テーブル内を対象のメニュー名で検索
+        //////////////////////////
+        $menuName = $cmiData['MENU_NAME'];
+        $sql = $menuListTable->createSselect("WHERE DISUSE_FLAG = '0' AND MENU_NAME = '".$menuName."'");
+
+        // SQL実行
+        $result = $menuListTable->selectTable($sql);
+        if(!is_array($result)){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+        $menuListArray = $result;
+
+        $menuGroupForInput = $cmiData['MENUGROUP_FOR_INPUT'];
+        $menuGroupForSubst = $cmiData['MENUGROUP_FOR_SUBST'];
+        $menuGroupForView  = $cmiData['MENUGROUP_FOR_VIEW'];
+
+        foreach($menuListArray as $menuData){
+            //入力用のメニューグループが一致する場合は処理をスキップ
+            if($menuData['MENU_GROUP_ID'] == $menuGroupForInput){
+                continue;
+            }
+            //代入値自動登録用のメニューグループが一致する場合は処理をスキップ
+            if($menuData['MENU_GROUP_ID'] == $menuGroupForSubst){
+                continue;
+            }
+            //参照用のメニューグループが一致する場合は処理をスキップ
+            if($menuData['MENU_GROUP_ID'] == $menuGroupForView){
+                continue;
+            }
+            //「ホストグループ」「縦メニュー利用」が両方利用ありの場合
+            if($cmiData['PURPOSE'] == 2 && $cmiData['TARGET'] == 1){
+                //メニューグループIDが2100011609(縦メニューホスト分解用中間シート)の場合はスキップ
+                if($menuData['MENU_GROUP_ID'] == '2100011609'){
+                    continue;
+                }
+                //メニューグループIDが2100011613(縦横変換用中間シート)の場合はスキップ
+                if($menuData['MENU_GROUP_ID'] == '2100011613'){
+                    continue;
+                }
+            }
+
+            //対象メニューグループで利用が無いメニューを廃止する
+            $updateData = $menuData;
+            $updateData['DISUSE_FLAG']          = "1"; //廃止
+            $updateData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;     // 最終更新者
+
+            //////////////////////////
+            // メニュー管理テーブルを更新
+            //////////////////////////
+            $result = $menuListTable->updateTable($updateData, $jnlSeqNo);
+            if(true !== $result){
+                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                outputLog($msg);
+                throw new Exception($msg);
+            }
+
+            //廃止したメニューIDを保管
+            array_push($discardMenuIdArray, $menuData['MENU_ID']);
+
+        }
+
+        return true;
+    }
+    catch(Exception $e){
+        return $e->getMessage();
+    }
+}
+
+/*
+ * メニュー管理で廃止したレコードと同じメニューIDが紐付いているレコードを廃止する（「メニュー・テーブル紐付」「メニュー縦横変換管理」テーブルが対象）
+ */
+function discardRerationTable($discardMenuIdArray){
+    global $objDBCA, $db_model_ch, $objMTS;
+    $menuTableLinkTable = new MenuTableLinkTable($objDBCA, $db_model_ch);
+    $colToRowMngTable = new ColToRowMngTable($objDBCA, $db_model_ch);
+
+    try{
+        //////////////////////////
+        // メニュー・テーブル紐付テーブルを検索
+        //////////////////////////
+        $sql = $menuTableLinkTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+        // SQL実行
+        $result = $menuTableLinkTable->selectTable($sql);
+        if(!is_array($result)){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+        $menuTableLinkArray = $result;
+
+        //「メニュー・テーブル紐付」のレコードで、「メニュー管理」で廃止されたIDを利用している対象を廃止する。
+        foreach($menuTableLinkArray as $mtlData){
+            if(in_array($mtlData['MENU_ID'], $discardMenuIdArray, true)){
+                //すでに廃止されている場合は除外
+                if($mtlData['DISUSE_FLAG'] != "1"){
+                    // 廃止する
+                    $updateData = $mtlData;
+                    $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+
+                    //////////////////////////
+                    // メニュー・テーブル紐付テーブルを更新
+                    //////////////////////////
+                    $result = $menuTableLinkTable->updateTable($updateData, $jnlSeqNo);
+                    if(true !== $result){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                        outputLog($msg);
+                        throw new Exception($msg);
+                    }
+                }
+            }
+        }
+
+        //////////////////////////
+        // パラメータシート縦横変換管理テーブルを検索
+        //////////////////////////
+        $sql = $colToRowMngTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+        // SQL実行
+        $result = $colToRowMngTable->selectTable($sql);
+        if(!is_array($result)){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+        $colToRowMngArray = $result;
+
+        //「メニュー縦横変換管理」のレコードで、「メニュー管理」で廃止されたIDを利用している対象を廃止する。
+        foreach($colToRowMngArray as $colToRowMng){
+            if(in_array($colToRowMng['FROM_MENU_ID'], $discardMenuIdArray, true) || in_array($colToRowMng['TO_MENU_ID'], $discardMenuIdArray, true)){
+                //すでに廃止されている場合は除外
+                if($colToRowMng['DISUSE_FLAG'] != "1"){
+                    // 廃止する
+                    $updateData = $colToRowMng;
+                    $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+
+                    //////////////////////////
+                    // パラメータシート縦横変換管理テーブルを更新
+                    //////////////////////////
+                    $result = $colToRowMngTable->updateTable($updateData, $jnlSeqNo);
+                    if(true !== $result){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                        outputLog($msg);
+                        throw new Exception($msg);
+                    }
+                }
+            }
         }
 
         return true;
