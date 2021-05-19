@@ -8699,7 +8699,7 @@ class RowEditByFileColumn extends Column{
 	//登録時に、主キー値が指定されていた場合----
 
 	//NEW[11]
-	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array()){
+	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array(), $strApiFlg=false){
 		global $g;
 		$arrayRetResult = array();
 
@@ -8828,6 +8828,9 @@ class RowEditByFileColumn extends Column{
 				//----更新が入力されていた場合
 				$boolUniqueCheckSkip = false; //ユニークチェックをスキップするか？(原則：スキップしない)
 				$boolRequiredColumnCheckSkip = false; //必須カラムの送信チェックをスキップするか？(原則：スキップしない)
+				if($strApiFlg === true){
+				  $boolRequiredColumnCheckSkip = true;
+				}
 
 				$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
 				$mode = 3;  //実行モード
@@ -9086,7 +9089,7 @@ class RowEditByFileColumnForReview extends RowEditByFileColumn{
 	}
 	//FixColumnイベント系----
 
-	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array()){
+	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array(), $strApiFlg=false){
 		global $g;
 		$arrayRetResult = array();
 
