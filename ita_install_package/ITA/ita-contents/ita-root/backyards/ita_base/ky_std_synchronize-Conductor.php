@@ -45,6 +45,7 @@
     $php_req_gate_php   = '/libs/commonlibs/common_php_req_gate.php';
     $db_connect_php     = '/libs/commonlibs/common_db_connect.php';
     $ola_lib_agent_php  = '/libs/commonlibs/common_ola_classes.php';
+    $weblog_output_php  = '/libs/webcommonlibs/web_php_functions.php';
     $db_access_user_id  = -6; //
     
     $strFxName          = "proc({$log_file_prefix})";
@@ -67,6 +68,7 @@
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
+        "EXEC_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -92,6 +94,7 @@
         "TIME_BOOK"=>"",
         "TIME_START"=>"",
         "TIME_END"=>"",
+        "EXEC_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -309,6 +312,9 @@
         $aryOrderToReqGate = array('DBConnect'=>'LATE');
         require ($root_dir_path . $php_req_gate_php );
         
+        require ($root_dir_path . $weblog_output_php );
+
+
         // 開始メッセージ
         if ( $log_level === 'DEBUG' ){
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-STD-50001");
@@ -552,7 +558,8 @@
             
             $strStartTimeOfConductor = "";
             $strEndTimeOfConductor = "";
-            
+            $tmpexecLogMessage = "";
+
             $aryProperParameter = array('CALLER'=>array('NAME'=>'SYNCHRONIZE-CONDUCTOR'));
 
             //////////////////////////
@@ -1394,6 +1401,25 @@
                                                 $arySymInsCallUpdateTgtSource = $aryRetBody[0];
 
                                                 $arySymInsCallUpdateTgtSource['STATUS_ID'] = 7;     //異常終了
+
+                                                //　#749対応
+                                                if( $retArray[6] != "" ){
+                                                    $arrexecLogMessage = explode( PHP_EOL, $retArray[6]);
+                                                    foreach ($arrexecLogMessage as $tmpvalmsg ) {
+                                                        if( $tmpvalmsg != ""){
+                                                            $execLogMessage = "[ERROR] " . $tmpvalmsg;
+                                                            //サブConductor（CALL先）のインスタンスへのログ登録
+                                                            $arySymInsCallUpdateTgtSource['EXEC_LOG'] = $arySymInsCallUpdateTgtSource['EXEC_LOG'] . $execLogMessage .PHP_EOL ;
+
+                                                            //Conductor（CALL元）インスタンスへのログ登録
+                                                            $intNodeInsNo = $arrTargetNodeInstance['NODE_INSTANCE_NO'];
+                                                            //[ERROR]Movementに作業対象ホストが登録されていません。(MovementID:X) [ Node instance ID :XXXX ]
+                                                            $tmpexecLogMessage = $objMTS->getSomeMessage("ITABASEH-STD-170004",array($execLogMessage,$intNodeInsNo) );
+                                                            $arySymInsUpdateTgtSource['EXEC_LOG'] = $arySymInsUpdateTgtSource['EXEC_LOG'] . $tmpexecLogMessage .PHP_EOL ;                                                            
+                                                        }
+                                                    }
+                                                }
+
                                                 // 更新用のテーブル定義
                                                 $aryConfigForIUD = $aryConfigForSymInsIUD;
 
@@ -2349,8 +2375,8 @@
                                                 );
                                             }
 
-                                            // ----シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録
-                                            $retArray = $objOLA->registerSymphonyInstanceForConductor($intShmphonyClassId, $intOperationNoUAPK,"", $aryOptionOrder, "", $userId, $userName);
+                                            // ----シンフォニーIDおよびオペレーションNoからMovementのチェック
+                                            $retArray = $objOLA->chkSymphonyInstanceForConductor($intShmphonyClassId, $intOperationNoUAPK,"", $aryOptionOrder, "", $userId, $userName);
 
                                             // Symphonyインスタンス生成時のエラー処理　#745
                                             if($retArray[0] == false){
@@ -2362,24 +2388,23 @@
                                                 if( isset( $retArray[5] ) )$intSubSymcallInsNo = $retArray[5];   
                                                 if ( $intSubSymcallInsNo != "")$aryMovInsUpdateTgtSource['CONDUCTOR_INSTANCE_CALL_NO'] =  $intSubSymcallInsNo;
 
-                                                //Symphonyインスタンス生成失敗時の対応
-                                                if( $aryMovInsUpdateTgtSource['CONDUCTOR_INSTANCE_CALL_NO'] == "" ){
-                                                    
-                                                    //Symphonyインスタンス生成失敗
-                                                    $FREE_LOG = str_replace(PHP_EOL, '', $retArray[6]);
-                                                    require ($root_dir_path . $log_output_php );
-                                                    
-                                                    // ロールバック
-                                                    if( $objDBCA->transactionRollBack()=== true ){
-                                                        //[処理]ロールバック
-                                                        $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-STD-50016");
-                                                        require ($root_dir_path . $log_output_php );
+                                                $execLogMessage = $retArray[6];
+    
+                                                //　#749対応
+                                                if( $retArray[6] != "" ){
+                                                    $arrexecLogMessage = explode( PHP_EOL, $retArray[6]);
+                                                    foreach ($arrexecLogMessage as $tmpvalmsg ) {
+                                                        if( $tmpvalmsg != ""){
+                                                            $execLogMessage = "[ERROR] " . $tmpvalmsg;
+
+                                                            //Conductor（CALL元）インスタンスへのログ登録
+                                                            $intNodeInsNo = $arrTargetNodeInstance['NODE_INSTANCE_NO'];
+                                                            //[ERROR]Movementに作業対象ホストが登録されていません。(MovementID:X) [ Node instance ID :XXXX ]
+                                                            $tmpexecLogMessage = $objMTS->getSomeMessage("ITABASEH-STD-170004",array($execLogMessage,$intNodeInsNo) );
+                                                            $arySymInsUpdateTgtSource['EXEC_LOG'] = $arySymInsUpdateTgtSource['EXEC_LOG'] . $tmpexecLogMessage .PHP_EOL ;                                                            
+                                                        }
                                                     }
-                                                    else{
-                                                        //ロールバックに失敗しました
-                                                        $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-ERR-50005");
-                                                        require ($root_dir_path . $log_output_php );
-                                                    }            
+
                                                 }
     
                                                 // 更新用のテーブル定義
@@ -2426,14 +2451,75 @@
                                                     break;
 
                                                 }
-                                            }
-                                            // シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録----
+                                            }else{
+                                                // ----シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録
+                                                $retArray = $objOLA->registerSymphonyInstanceForConductor($intShmphonyClassId, $intOperationNoUAPK,"", $aryOptionOrder, "", $userId, $userName);
+                                                // Symphonyインスタンス生成時のエラー処理　#745
+                                                if($retArray[0] == false){
+    
+                                                    //---CALLノードを異常終了へ
+                                                    $aryMovInsUpdateTgtSource['STATUS_ID'] = 6;     //異常終了
+                                                    $aryMovInsUpdateTgtSource['TIME_START'] = "DATETIMEAUTO(6)";
+                                                    $aryMovInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
+                                                    
+                                                    if( isset( $retArray[5] ) )$intSubSymcallInsNo = $retArray[5];   
+                                                    if ( $intSubSymcallInsNo != "")$aryMovInsUpdateTgtSource['CONDUCTOR_INSTANCE_CALL_NO'] =  $intSubSymcallInsNo;
+      
+                                                    // 更新用のテーブル定義
+                                                    $aryConfigForIUD = $aryConfigForMovInsIUD;
 
-                                            $intSubSymcallInsNo = $retArray[5];
-                                            //---ノードインスタンス取得
-                                            $arySqlBind=array(
-                                                "SYMPHONY_INSTANCE_NO" =>  $intSubSymcallInsNo,
-                                                );
+                                                    // BIND用のベースソース
+                                                    $aryBaseSourceForBind = $aryMovInsUpdateTgtSource;
+                                                    
+                                                    $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+
+                                                    //次のNode取得
+                                                    $arySqlBind=array(
+                                                        "CONDUCTOR_INSTANCE_NO" => $rowOfConductor['CONDUCTOR_INSTANCE_NO'],
+                                                        "NODE_CLASS_NO" => $arrTargetNodeInstance["I_NODE_CLASS_NO"],
+                                                        "TERMINAL_TYPE_ID" => 2, //out
+                                                        );
+                                                    $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
+
+                                                    //クラスの取得
+                                                    $arrParallelTargetNodeClass=array();
+                                                    foreach ($aryRetBody as $key => $value) {
+                                                        foreach ( $arrNodeClassInfo as $key2 => $value2) {
+                                                            if( $value2['NODE_NAME'] == $value['CONNECTED_NODE_NAME'] ){
+                                                                $arrParallelTargetNodeClass[$value2['NODE_CLASS_NO']]=$value2;        
+                                                            }
+                                                        }
+                                                    }
+
+                                                    $conditionalflg="";
+                                                    foreach ($arrParallelTargetNodeClass as $key => $nclass) {
+                                                        //次のNodeがconditionの場合
+                                                        if($nclass['NODE_TYPE_ID'] == 6 ){
+                                                            $conditionalflg="1";
+                                                        }
+                                                    }
+                                                    //次のNodeがcondition以外
+                                                    if($conditionalflg != 1 ){
+                                                            //Conductorインスタンスのステータスを異常終了へ
+                                                            $arySymInsUpdateTgtSource['STATUS_ID'] = 7;     //異常終了
+                                                            break;    
+                                                    }else{
+                                                        $boolNextNodeReadyflg = true;
+               
+                                                        break;
+
+                                                    }
+                                                }
+                                                // シンフォニーIDおよびオペレーションNoからシンフォニーインスタンスを新規登録----
+
+                                                $intSubSymcallInsNo = $retArray[5];
+                                                //---ノードインスタンス取得
+                                                $arySqlBind=array(
+                                                    "SYMPHONY_INSTANCE_NO" =>  $intSubSymcallInsNo,
+                                                    );
+                                            }
+
+
                                         }
 
                                     }else{
@@ -2992,6 +3078,31 @@
                 
                 //Conductorインスタンスのステータス比較
                 if( $strBeforeStatusNumeric == $strAfterStatusNumeric){
+                    //ログのみ更新 　#749対応
+                    if( $tmpexecLogMessage != "" ){
+                            // 更新用のテーブル定義
+                            $aryConfigForIUD = array(
+                                    "JOURNAL_SEQ_NO"=>"",
+                                    "JOURNAL_ACTION_CLASS"=>"",
+                                    "JOURNAL_REG_DATETIME"=>"",
+                                    "CONDUCTOR_INSTANCE_NO"=>"",
+                                    "EXEC_LOG"=>"",
+                                    "LAST_UPDATE_TIMESTAMP"=>"",
+                                    "LAST_UPDATE_USER"=>""
+                                ); 
+
+                            // BIND用のベースソース
+                            $aryBaseSourceForBind = $arySymInsUpdateTgtSource;
+
+                            $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                            
+                            if( $aryRetBody !== true  ){
+                                // 例外処理へ
+                                $strErrStepIdInFx="00002100";
+                                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            }     
+                    }
+
                     //Conductor、Nodeのステータスが一致の場合、Conductorのステータスこ更新はしない
                 }elseif( $strBeforeStatusNumeric <= $strAfterStatusNumeric ){
                     //Conductor、Nodeのステータスが不一致の場合、Conductorのステータスこ更新
@@ -3014,6 +3125,29 @@
                             $strErrStepIdInFx="00002100";
                             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
+                    }elseif( $tmpexecLogMessage != "" ){
+                        //待機状態で、ログのみ更新の場合　#749対応
+                        // 更新用のテーブル定義
+                        $aryConfigForIUD = array(
+                                "JOURNAL_SEQ_NO"=>"",
+                                "JOURNAL_ACTION_CLASS"=>"",
+                                "JOURNAL_REG_DATETIME"=>"",
+                                "CONDUCTOR_INSTANCE_NO"=>"",
+                                "EXEC_LOG"=>"",
+                                "LAST_UPDATE_TIMESTAMP"=>"",
+                                "LAST_UPDATE_USER"=>""
+                            ); 
+
+                        // BIND用のベースソース
+                        $aryBaseSourceForBind = $arySymInsUpdateTgtSource;
+
+                        $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                        
+                        if( $aryRetBody !== true  ){
+                            // 例外処理へ
+                            $strErrStepIdInFx="00002100";
+                            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                        }                        
                     }
                 }
                 //NODEとCONDUCTORインスタンスのへのステータス同期 ---   

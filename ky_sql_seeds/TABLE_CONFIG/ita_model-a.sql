@@ -2519,6 +2519,7 @@ CONDUCTOR_CALLER_NO               %INT%                      ,
 TIME_BOOK                         %DATETIME6%                ,
 TIME_START                        %DATETIME6%                ,
 TIME_END                          %DATETIME6%                ,
+EXEC_LOG                          TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2551,6 +2552,7 @@ CONDUCTOR_CALLER_NO               %INT%                      ,
 TIME_BOOK                         %DATETIME6%                ,
 TIME_START                        %DATETIME6%                ,
 TIME_END                          %DATETIME6%                ,
+EXEC_LOG                          TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,

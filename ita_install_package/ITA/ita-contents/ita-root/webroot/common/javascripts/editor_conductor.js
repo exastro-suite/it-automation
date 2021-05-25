@@ -5005,7 +5005,68 @@ const conductorStatusUpdate = function( exeNumber ) {
       // 予約取消
       break;
   }
-  
+
+
+  //インスタンスログ表示
+  switch( conductorInfo.STATUS_ID ) {
+    // 実行中-終了
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '10':
+      let logflgList = [];
+      if ( conductorInfo.EXEC_LOG !== "" ){
+        //editor-tab-contentsの表示とEXEC_LOGの差分の重複判定
+        var execLogMessages = conductorInfo.EXEC_LOG.split('\n');
+        $(".editor-log-content").each(function(lineNo, tmpmessage){
+            if( $(tmpmessage).text() != "" ){
+              //出力済み取得+タグ除去 //[logtype]XXXXX
+              var tmphtmlmsg = $(tmpmessage).text();
+              tmphtmlmsg = tmphtmlmsg.replace( /\[ERROR\]|\[NOTICE\]|\[WARNING\]/g , "" );
+
+              //execLogMessages重複判定
+              execLogMessages.forEach(function(execlog, index) {
+                if ( index in logflgList !== true ){
+                  logflgList[ index ] = 0;
+                }
+                if( execlog != '' ){
+                  //タグ除去 /[logtype]　XXXXX
+                  execlog = execlog.replace( /\[ERROR\] |\[NOTICE\] |\[WARNING\] /g , "" );
+                  //重複判定
+                  if ( tmphtmlmsg.indexOf( execlog ) != -1) {
+                    logflgList[ index ] = 1;
+                  }
+                }
+              });
+            }
+        });
+
+        //重複無し出力
+        execLogMessages.forEach(function(execlog, index) {
+          if( execlog != '' ){
+            var arrlogtype = execlog.split(' ');
+            var logtype = arrlogtype[0].replace( /\[|\]/g , "" );
+            var editorogtype = logtype.toLowerCase();
+            //[logtype] 削除
+            execlog = execlog.replace( '[' + logtype + '] ' , "" );
+            //実施中-
+            if ( logflgList.length !== 0 ) {
+              if( logflgList[ index ] == 0 ){
+                editor.log.set( editorogtype ,execlog );                
+              }                
+            }else{
+            //完了時
+                editor.log.set( editorogtype ,execlog );  
+            }
+          }
+        });
+      }
+      break;
+  }
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
