@@ -1272,6 +1272,7 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
+        "EXEC_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -1297,6 +1298,7 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
+        "EXEC_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -1901,6 +1903,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
                                   ,'TIME_BOOK'=>$aryRowOfSymInstanceTable['TIME_BOOK']
                                   ,'TIME_START'=>$aryRowOfSymInstanceTable['TIME_START']
                                   ,'TIME_END'=>$aryRowOfSymInstanceTable['TIME_END']
+                                  ,'EXEC_LOG'=> htmlspecialchars($aryRowOfSymInstanceTable['EXEC_LOG'])
         );
         //Conductor(インスタンス)情報を固める----
 
