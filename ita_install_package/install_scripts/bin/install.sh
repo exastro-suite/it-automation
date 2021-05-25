@@ -1101,6 +1101,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     ################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Restart Apache(httpd) service."
     ################################################################################################
+    systemctl daemon-reload
     systemctl restart httpd 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
     systemctl status httpd 2>&1 >> "$LOG_FILE"
     if [ $? -ne 0 ]; then
