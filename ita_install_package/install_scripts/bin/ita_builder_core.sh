@@ -870,7 +870,7 @@ configure_ansible() {
     # Check installation some pip packages.
     for key in ${PIP_PACKAGE_ANSIBLE["remote"]}; do
         echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        pip3 list --format=columns 2> "$ITA_BUILDER_LOG_FILE" | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pip3 list --format=columns 2>> "$ITA_BUILDER_LOG_FILE" | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Package not installed [$key]"
                 ERR_FLG="false"
@@ -958,11 +958,6 @@ make_ita() {
     
     log "php install and setting"
     configure_php
-        
-    if [ "$material" == "yes" ]; then
-        log "git install and setting"
-        configure_git
-    fi
     
     if [ "$ansible_driver" == "yes" ]; then
         log "ansible install and setting"
@@ -1150,12 +1145,6 @@ read_setting_file "$ITA_ANSWER_FILE"
 
 if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
     #check (ita_answers.txt)-----
-    if [ "${material}" != 'yes' -a "${material}" != 'no' ]; then
-        log "ERROR:material should be set to yes or no"
-        ERR_FLG="false"
-        func_exit_and_delete_file
-    fi
-
     if [ "${ansible_driver}" != 'yes' -a "${ansible_driver}" != 'no' ]; then
         log "ERROR:ansible_driver should be set to yes or no"
         ERR_FLG="false"

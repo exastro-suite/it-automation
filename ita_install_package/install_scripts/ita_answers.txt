@@ -47,7 +47,6 @@ db_password:
 # yes : need
 # no  : no need
 ita_base:yes
-material:no
 createparam:yes
 hostgroup:yes
 ansible_driver:yes
