@@ -19,15 +19,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105034");
 
-    $table = new TableControlAgent('F_FLAG_MASTER','FLAG_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105035"), 'F_FLAG_MASTER_JNL' );
+    $table = new TableControlAgent('F_FLAG_ALT_MASTER','FLAG_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105035"), 'F_FLAG_ALT_MASTER_JNL' );
     $tmpAryColumn = $table->getColumns();
-    $tmpAryColumn['FLAG_ID']->setSequenceID('F_FLAG_MASTER_RIC');
-    $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('F_FLAG_MASTER_JSQ');
+    $tmpAryColumn['FLAG_ID']->setSequenceID('F_FLAG_ALT_MASTER_RIC');
+    $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('F_FLAG_ALT_MASTER_JSQ');
     unset($tmpAryColumn);
     
     // ----VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定
-    $table->setDBMainTableHiddenID('F_FLAG_MASTER');
-    $table->setDBJournalTableHiddenID('F_FLAG_MASTER_JNL');
+    $table->setDBMainTableHiddenID('F_FLAG_ALT_MASTER');
+    $table->setDBJournalTableHiddenID('F_FLAG_ALT_MASTER_JNL');
     // 利用時は、更新対象カラムに、「$c->setHiddenMainTableColumn(true);」を付加すること
     // VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定----
 
@@ -51,14 +51,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105041"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
     $table->addColumn($c);
-
-    // * (blank)
-    $objVldt = new SingleTextValidator(1,256,false);
-    $c = new TextColumn('ASTBLANK_STATUS',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105042"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105043"));//エクセル・ヘッダでの説明
-    $c->setValidator($objVldt);
-    $table->addColumn($c);
-
 
     $table->fixColumn();
     
