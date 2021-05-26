@@ -302,7 +302,7 @@ $ary["ITACREPAR-MNU-105030"]       = "メニュー作成の「プルダウン選
 $ary["ITACREPAR-MNU-105031"]       = "項番";
 $ary["ITACREPAR-MNU-105032"]       = "参照項目情報";
 $ary["ITACREPAR-MNU-105033"]       = "参照項目情報";
-$ary["ITACREPAR-MNU-105034"]       = "フラグ管理メニュー";
+$ary["ITACREPAR-MNU-105034"]       = "二択フラグ管理メニュー";
 $ary["ITACREPAR-MNU-105035"]       = "項番";
 $ary["ITACREPAR-MNU-105036"]       = "フラグ";
 $ary["ITACREPAR-MNU-105037"]       = "フラグ";
@@ -312,4 +312,5 @@ $ary["ITACREPAR-MNU-105040"]       = "True-False";
 $ary["ITACREPAR-MNU-105041"]       = "";
 $ary["ITACREPAR-MNU-105042"]       = "*-(ブランク)";
 $ary["ITACREPAR-MNU-105043"]       = "";
+$ary["ITACREPAR-MNU-105044"]       = "フラグ管理メニュー";
 ?>
