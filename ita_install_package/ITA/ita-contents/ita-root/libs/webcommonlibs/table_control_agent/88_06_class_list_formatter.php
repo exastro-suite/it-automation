@@ -1320,6 +1320,7 @@ class ExcelFormatter extends ListFormatter {
         if($rows>1){
             $sheet->mergeCells(self::cr2s(1,1).":".self::cr2s(1, $rows));
             $sheet->mergeCells(self::cr2s(2,1).":".self::cr2s(2, $rows));
+            $sheet->mergeCells(self::cr2s(3,1).":".self::cr2s(3, $rows));
         }
     }
 
