@@ -301,7 +301,7 @@ $ary["ITACREPAR-MNU-105030"]       = "A menu that manages a list of other items 
 $ary["ITACREPAR-MNU-105031"]       = "Id";
 $ary["ITACREPAR-MNU-105032"]       = "Reference Item Info";
 $ary["ITACREPAR-MNU-105033"]       = "Reference Item Info";
-$ary["ITACREPAR-MNU-105034"]       = "Alternative Flag Manegement Menu";
+$ary["ITACREPAR-MNU-105034"]       = "Menu for managing items used in pull-down selection (for 2 selections)";
 $ary["ITACREPAR-MNU-105035"]       = "Id";
 $ary["ITACREPAR-MNU-105036"]       = "Flag";
 $ary["ITACREPAR-MNU-105037"]       = "Flag";
@@ -311,5 +311,5 @@ $ary["ITACREPAR-MNU-105040"]       = "True-False";
 $ary["ITACREPAR-MNU-105041"]       = "";
 $ary["ITACREPAR-MNU-105042"]       = "*-(blank)";
 $ary["ITACREPAR-MNU-105043"]       = "";
-$ary["ITACREPAR-MNU-105044"]       = "Flag Manegement Menu";
+$ary["ITACREPAR-MNU-105044"]       = "Menu for managing items used in pull-down selection (for a selection)";
 ?>
