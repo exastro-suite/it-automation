@@ -288,7 +288,7 @@ $ary["ITACREPAR-MNU-105017"]        = "Input method";
 $ary["ITACREPAR-MNU-105018"]        = "";
 $ary["ITACREPAR-MNU-105019"]        = "Sensitive Setting";
 $ary["ITACREPAR-MNU-105020"]        = "";
-$ary["ITACREPAR-MNU-105021"]        = "Master column";
+$ary["ITACREPAR-MNU-105021"]        = "Original menu";
 $ary["ITACREPAR-MNU-105022"]        = "";
 $ary["ITACREPAR-MNU-105023"]       = "Enter the menu name of the menu to be created.\nThe maximum size is 256 bytes.\nThe menu name &quot;Main menu&quot; cannot be used.\n &quot;&#92;&#47;&#58;&#42;&#63;&#34;&#60;&#62;&#124;&#91;&#93;：￥／＊［］&quot; characters cannot be used.";
 $ary["ITACREPAR-MNU-105024"]       = "Select &quot;Parameter Sheet (Host / Operation)&quot; or\n&quot;Data Sheet (master available)&quot; from the pull-down menu.";
@@ -312,4 +312,6 @@ $ary["ITACREPAR-MNU-105041"]       = "";
 $ary["ITACREPAR-MNU-105042"]       = "*-(blank)";
 $ary["ITACREPAR-MNU-105043"]       = "";
 $ary["ITACREPAR-MNU-105044"]       = "Menu for managing items used in pull-down selection (for a selection)";
+$ary["ITACREPAR-MNU-105045"]        = "Menu";
+$ary["ITACREPAR-MNU-105046"]        = "";
 ?>

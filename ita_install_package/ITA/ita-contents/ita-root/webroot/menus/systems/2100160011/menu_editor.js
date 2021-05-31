@@ -342,7 +342,7 @@ const listIdName = function( type, id ) {
     idKey = 'ROLE_ID';
     nameKey = 'ROLE_NAME';
   }
-  
+
   const listLength = list.length;
   for ( let i = 0; i < listLength; i++ ) {
     if ( Number( list[i][idKey] ) === Number( id ) ) {
@@ -1999,7 +1999,7 @@ $roleSlectButton.on('click', function() {
 const modalReferenceItemList = function($target) {
   const $input = $target.closest('.menu-column-config-table').find('.reference-item');
   const initItemList = ( $input.attr('data-reference-item-id') === undefined )? '': $input.attr('data-reference-item-id');
-  const selectMasterId = $target.closest('.menu-column-config-table').find('.pulldown-select option:selected').val();
+  const selectLinkId = $target.closest('.menu-column-config-table').find('.pulldown-select option:selected').val();
 
   // 決定時の処理    
   const okEvent = function( newItemList, extractItemList ) {
@@ -2031,7 +2031,24 @@ const modalReferenceItemList = function($target) {
     itaModalClose();
   }
 
-  setRerefenceItemSelectModalBody(menuEditorArray.referenceItemList, initItemList, okEvent, cancelEvent, closeEvent, selectMasterId );
+  //選択されている「プルダウン選択」で選択可能な参照項目のみを取得する
+  let targetReferenceItem;
+  const printReferenceItemURL = '/common/common_printReferenceItem.php?link_id=' + selectLinkId + '&user_id=' +gLoginUserID;
+  $.ajax({
+    type: 'get',
+    url: printReferenceItemURL,
+    dataType: 'text'
+  }).done( function( result ) {
+      //選択可能な参照項目の一覧を取得
+      targetReferenceItem = JSON.parse( result );
+      setRerefenceItemSelectModalBody(targetReferenceItem, initItemList, okEvent, cancelEvent, closeEvent);
+
+  }).fail( function( result ) {
+    targetReferenceItem = null;
+    setRerefenceItemSelectModalBody(targetReferenceItem, initItemList, okEvent, cancelEvent, closeEvent);
+
+  });
+
 }
 
 
@@ -2415,11 +2432,9 @@ const loadMenu = function() {
                 newItemListArray.forEach(function(id){
                   let existsFlg = false;
                   menuEditorArray.referenceItemList.forEach(function(data){
-                    if(itemData['OTHER_MENU_LINK_ID'] == data['LINK_ID']){
-                      if(data['ITEM_ID'] == id){
-                        newItemNameListArray.push(data['ITEM_NAME']);
-                        existsFlg = true;
-                      }
+                    if(data['ITEM_ID'] == id){
+                      newItemNameListArray.push(data['ITEM_NAME']);
+                      existsFlg = true;
                     }
                   });
                   //referenceItemListに存在しない参照項目はID変換失敗(ID)を表示させる。
@@ -2427,8 +2442,11 @@ const loadMenu = function() {
                     newItemNameListArray.push(getSomeMessage("ITACREPAR_1255", {0:id}));
                   }
                 });
+                //重複を排除
+                let setNewItemNameList = new Set(newItemNameListArray);
+                let setNewItemNameListArray = Array.from(setNewItemNameList);
                 //カンマ区切りの文字列に変換に参照項目上に表示
-                var newItemNameList = newItemNameListArray.join(',');
+                var newItemNameList = setNewItemNameListArray.join(',');
                 $item.find('.reference-item').html( newItemNameList ).change();
               }
               break;
