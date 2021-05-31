@@ -1240,8 +1240,15 @@ $itaTable.find('select').on('change', tableUpdate );
 
 // フィルタプルダウンがクリックされたら調整しなおす
 $itaTable.find('.richFilterSelectListCaller').on('click', function(){
-  const $target = $( this ).closest('.richFilterSelectListWrapper'),
+  const $button = $( this ),
+        $target = $button.closest('.richFilterSelectListWrapper'),
         targetWidthBefore = $target.outerWidth();
+  
+  // ボタンを無効化する
+  $button.off('click').removeAttr('onclick').css({
+    'pointer-events': 'none',
+    'opacity': .5
+  });
   
   const observer = new MutationObserver( function(){
     // select2でplaceholderを設定すると
