@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2019 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -38,10 +38,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
-
-    // 他メニュー連携ID
-    $c = new TextColumn('LINK_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105001"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105002"));//エクセル・ヘッダでの説明
+    // メニュー
+    $c = new IDColumn('MENU_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105045"),'A_MENU_LIST','MENU_ID','MENU_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105046"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $table->addColumn($c);
@@ -109,8 +108,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('register_table')->setVisible(false);
     $table->addColumn($c);
 
-    // マスターカラム
-    $c = new IDColumn('MASTER_COL_FLAG', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105021"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    //既存メニューフラグ
+    $c = new IDColumn('ORIGINAL_MENU_FLAG', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105021"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105022"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);

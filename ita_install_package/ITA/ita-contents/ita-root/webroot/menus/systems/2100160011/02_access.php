@@ -1266,6 +1266,7 @@
             foreach($result as $pdData){
                 $addArray = array();
                 $addArray['LINK_ID']       = $pdData['LINK_ID'];
+                $addArray['MENU_ID']       = $pdData['MENU_ID'];
                 $addArray['LINK_PULLDOWN'] = $pdData['LINK_PULLDOWN'];
                 $filteredData[] = $addArray;
             }
@@ -1283,62 +1284,78 @@
         }
 
         /////////////////////
-        // 参照項目リスト取得
+        // 参照項目リスト取得（メニュー内の項目で選択されている「プルダウン選択」で利用できる「参照項目」のみ取得。ページ内で名前を変換するために利用。）
         /////////////////////
-        function selectReferenceItemList(){
+        function selectReferenceItemList($itemArray){
             // グローバル変数宣言
             global $g;
             
             // ローカル変数宣言
             $arrayResult = array();
 
-            require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
-            $referenceItemTable = new ReferenceItemTable($g["objDBCA"], $g["db_model_ch"]);
-            $sql = $referenceItemTable->createSselect("WHERE DISUSE_FLAG = '0' ORDER BY LINK_ID, DISP_SEQ");
-            $result = $referenceItemTable->selectTable($sql);
-            if(!is_array($result)){
-                $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                $arrayResult = array("999","", $result);
-                return makeAjaxProxyResultStream($arrayResult);
-            }
+            if(!empty($itemArray)){
+                require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
 
-            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
-            $obj = new RoleBasedAccessControl($g['objDBCA']);
-            $ret = $obj->getAccountInfo($g['login_id']);
-            if($ret === false) {
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
-                $arrayResult = array("999","", "");
-                return makeAjaxProxyResultStream($arrayResult);
-            }
+                //項目に使われている「プルダウン選択」のLINK_IDを抽出
+                $targetOtherMenuLinkIdList = array();
+                foreach($itemArray as $itemData){
+                    if($itemData['INPUT_METHOD_ID'] == 7){
+                        array_push($targetOtherMenuLinkIdList, $itemData['OTHER_MENU_LINK_ID']);
+                    }
+                }
+                //重複排除
+                $targetOtherMenuLinkIdList = array_unique($targetOtherMenuLinkIdList);
 
-            // 権限があるデータのみに絞る
-            $ret = $obj->chkRecodeArrayAccessPermission($result);
-            if($ret === false) {
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
-                $arrayResult = array("999","", "");
-                return makeAjaxProxyResultStream($arrayResult);
-            }
+                //他メニュー連携IDから、そのメニューのIDを取得
+                $targetMenuIdList = array();
+                $otherMenuLinkTable = new OtherMenuLinkTable($g["objDBCA"], $g["db_model_ch"]);
+                foreach($targetOtherMenuLinkIdList as $linkId){
+                    $sql = $otherMenuLinkTable->createSselect("WHERE DISUSE_FLAG = '0'AND LINK_ID = " . $linkId);
 
-            $filteredData = array();
+                    // SQL実行
+                    $result = $otherMenuLinkTable->selectTable($sql);
+                    if(!is_array($result)){
+                        $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                        $arrayResult = array("999","", $result);
+                        return makeAjaxProxyResultStream($arrayResult);
+                    }
+                    if(!empty($result)){
+                        array_push($targetMenuIdList, $result[0]['MENU_ID']);
+                    }
+                }
+                //重複排除
+                $targetMenuIdList = array_unique($targetMenuIdList);
 
-            foreach($result as $pdData){
-                $addArray = array();
-                $addArray['ITEM_ID']         = $pdData['ITEM_ID'];
-                $addArray['LINK_ID']         = $pdData['LINK_ID'];
-                $addArray['DISP_SEQ']        = $pdData['DISP_SEQ'];
-                $addArray['COL_GROUP_NAME']  = $pdData['COL_GROUP_NAME'];
-                $addArray['ITEM_NAME']       = $pdData['ITEM_NAME'];
-                $addArray['MASTER_COL_FLAG'] = $pdData['MASTER_COL_FLAG'];
-                $filteredData[] = $addArray;
-            }
-            $arrayResult = array("000","", json_encode($filteredData));
+                //メニューIDにヒットする参照項目を取得
+                $filteredData = array();
+                $referenceItemTable = new ReferenceItemTable($g["objDBCA"], $g["db_model_ch"]);
+                foreach($targetMenuIdList as $menuId){
+                    $sql = $referenceItemTable->createSselect("WHERE DISUSE_FLAG = '0' AND MENU_ID = " . $menuId ." ORDER BY DISP_SEQ");
+                    $result = $referenceItemTable->selectTable($sql);
+                    if(!is_array($result)){
+                        $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                        $arrayResult = array("999","", $result);
+                        return makeAjaxProxyResultStream($arrayResult);
+                    }
 
-            if($arrayResult[0]=="000"){
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
-            }else if(intval($arrayResult[0])<500){
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+                    foreach($result as $pdData){
+                        $addArray = array();
+                        $addArray['ITEM_ID']         = $pdData['ITEM_ID'];
+                        $addArray['LINK_ID']         = $pdData['LINK_ID'];
+                        $addArray['MENU_ID']         = $pdData['MENU_ID'];
+                        $addArray['DISP_SEQ']        = $pdData['DISP_SEQ'];
+                        $addArray['COL_GROUP_NAME']  = $pdData['COL_GROUP_NAME'];
+                        $addArray['ITEM_NAME']       = $pdData['ITEM_NAME'];
+                        $addArray['ORIGINAL_MENU_FLAG'] = $pdData['ORIGINAL_MENU_FLAG'];
+                        $filteredData[] = $addArray;
+                    }
+                }
+
+                $arrayResult = array("000","", json_encode($filteredData));
+
             }else{
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $filteredData = array();
+                $arrayResult =  array("000","", json_encode($filteredData));
             }
 
             return makeAjaxProxyResultStream($arrayResult);

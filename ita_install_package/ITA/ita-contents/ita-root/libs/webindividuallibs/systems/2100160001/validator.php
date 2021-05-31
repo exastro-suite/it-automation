@@ -1559,9 +1559,9 @@ class ReferenceItemValidator extends SingleTextValidator {
                     }
                 }
 
-                //参照項目リストを取得
-                $query01 = "SELECT ITEM_ID, LINK_ID "
-                            ." FROM G_MENU_REFERENCE_ITEM "
+                //プルダウン選択のIDから対象のメニューIDを取得
+                $query01 = "SELECT LINK_ID, MENU_ID "
+                            ." FROM G_OTHER_MENU_LINK "
                             ." WHERE DISUSE_FLAG = '0' AND LINK_ID = :LINK_ID ";
 
                 $aryForBind01['LINK_ID'] = $otherMenuLinkId;
@@ -1583,15 +1583,63 @@ class ReferenceItemValidator extends SingleTextValidator {
                     $this->setValidRule($strErrAddMsg);
                     return $retBool;
                 }
+                //メニューIDを取得
+                $menuId = "";
+                if(!empty($aryDiscover01)){
+                    $menuId = $aryDiscover01[0]['MENU_ID'];
+                }else{
+                    // エラー
+                    $retBool = false;
+                    $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1175");
+                    $this->setValidRule($strErrAddMsg);
+                    return $retBool;
+                }
+
+
+                //参照項目リストを取得
+                $query02 = "SELECT ITEM_ID, LINK_ID, MENU_ID, ORIGINAL_MENU_FLAG "
+                            ." FROM G_MENU_REFERENCE_ITEM "
+                            ." WHERE DISUSE_FLAG = '0' AND MENU_ID = :MENU_ID ";
+
+                $aryForBind02['MENU_ID'] = $menuId;
+
+                // SQL発行
+                $retArray02 = singleSQLExecuteAgent($query02, $aryForBind02, "");
+                $aryDiscover02 = array();
+                if( $retArray02[0] === true ){
+                    $objQuery02 =& $retArray02[1];
+                    while($row02 = $objQuery02->resultFetch()){
+                        $aryDiscover02[] = $row02;
+                    }
+                    unset($objQuery02);
+                }
+                else{
+                    // DBエラー
+                    $retBool = false;
+                    $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1171", $retArray02[2]);
+                    $this->setValidRule($strErrAddMsg);
+                    return $retBool;
+                }
 
                 //参照項目リストから、プルダウン選択のメニューの中に参照項目のIDが存在するかをチェック
                 foreach($aryReferenceItem as $id){
                     $checkFlg = false;
-                    foreach($aryDiscover01 as $data){
-                        if($data['ITEM_ID'] == $id){
-                            $checkFlg = true;
-                            break;
+                    foreach($aryDiscover02 as $data){
+                        if($data['ORIGINAL_MENU_FLAG'] == 1){
+                            //既存メニューの場合、LINK_IDが一致している場合のみ許可
+                            if($data['LINK_ID'] == $otherMenuLinkId){
+                                if($data['ITEM_ID'] == $id){
+                                    $checkFlg = true;
+                                    break;
+                                } 
+                            }
+                        }else{
+                            if($data['ITEM_ID'] == $id){
+                                $checkFlg = true;
+                                break;
+                            } 
                         }
+
                     }
                     if($checkFlg == false){
                         $retBool = false;

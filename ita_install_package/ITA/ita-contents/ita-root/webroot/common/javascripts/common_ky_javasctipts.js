@@ -1480,7 +1480,7 @@ function InsertAccessPermission() {
 // 参照項目一覧取得・選択
 //////////////////////////////////////////////////////
 // モーダル Body HTML
-function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancelCallBack, closeCallBack, selectMasterId, valueType ) {
+function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancelCallBack, closeCallBack, valueType ) {
       if ( valueType === undefined ) valueType = 'id';
       const $modalBody = $('.editor-modal-body');
       const $modalFooterMenu = $('.editor-modal-footer-menu');
@@ -1489,50 +1489,46 @@ function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancel
 
       // 入力値を取得する
       const checkList = ( initData !== null || initData !== undefined )? initData.split(','): [''];
-      const itemLength = itemList.length;
 
-      //itemListから表示させたいアイテムだけを抽出
-      let extractItemList = [];
-      for ( let i = 0; i < itemLength; i++ ) {
-        if(itemList[i]['LINK_ID'] == selectMasterId && itemList[i]['MASTER_COL_FLAG'] != 1){
-            extractItemList.push(itemList[i]);
-        }
-      }
-      const extractItemLength = extractItemList.length;
-
-      if(extractItemLength != 0){
-          itemSelectHTML = '<div class="modal-table-wrap">'
-                            + '<form id="modal-reference-item-select">'
-                            + '<table class="modal-table modal-select-table">'
-                              + '<thead>'
-                                + '<th class="select">Select</th><th class="id">ID</th><th class="name">Name</th>'
-                              + '</thead>'
-                              + '<tbody>';
+      if(itemList != null){
+          const itemLength = itemList.length;
+          if(itemLength != 0){
+              itemSelectHTML = '<div class="modal-table-wrap">'
+                                + '<form id="modal-reference-item-select">'
+                                + '<table class="modal-table modal-select-table">'
+                                  + '<thead>'
+                                    + '<th class="select">Select</th><th class="id">ID</th><th class="name">Name</th>'
+                                  + '</thead>'
+                                  + '<tbody>';
 
 
-          for ( let i = 0; i < extractItemLength; i++ ) {
-            const itemName = extractItemList[i]['ITEM_NAME'],
-                  itemID = extractItemList[i]['ITEM_ID'],
-                  masterID = extractItemList[i]['MASTER_COLUMN_ID'],
-                  checkValue = ( valueType === 'name')? itemName: itemID,
-                  checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
-                  value = ( valueType === 'name')? itemName: itemID;
-            itemSelectHTML += '<tr>'
-            + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
-            + '<th>' + itemID + '</th><td>' + itemName + '</td></tr>';
+              for ( let i = 0; i < itemLength; i++ ) {
+                const itemName = itemList[i]['ITEM_NAME'],
+                      itemID = itemList[i]['ITEM_ID'],
+                      checkValue = ( valueType === 'name')? itemName: itemID,
+                      checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
+                      value = ( valueType === 'name')? itemName: itemID;
+                itemSelectHTML += '<tr>'
+                + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
+                + '<th>' + itemID + '</th><td>' + itemName + '</td></tr>';
+              }
+
+              itemSelectHTML += ''      
+                  + '</tbody>'
+                + '</table>'
+                + '</form>'
+              + '</div>';
+          }else{
+              //ボタンを「閉じる」に変更
+              $modalFooterMenu.children().remove();
+              $modalFooterMenu.append('<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">' + getSomeMessage("ITAWDCC92003") + '</li>');
+              itemSelectHTML = '<p class="modal-one-message">'+getSomeMessage("ITACREPAR_1251")+'</p>';
           }
-
-          itemSelectHTML += ''      
-              + '</tbody>'
-            + '</table>'
-            + '</form>'
-          + '</div>';
-
       }else{
           //ボタンを「閉じる」に変更
           $modalFooterMenu.children().remove();
           $modalFooterMenu.append('<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">' + getSomeMessage("ITAWDCC92003") + '</li>');
-          itemSelectHTML = '<p class="modal-one-message">'+getSomeMessage("ITACREPAR_1251")+'</p>';
+          itemSelectHTML = '<p class="modal-one-message">'+getSomeMessage("ITACREPAR_1279")+'</p>';
       }
 
       $modalBody.html( itemSelectHTML );
@@ -1561,7 +1557,7 @@ function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancel
               checkboxArray.push( $( this ).val() );
             });
             const newItemList = checkboxArray.join(',');
-            okCallback( newItemList, extractItemList );
+            okCallback( newItemList, itemList );
             break;
           case 'cancel':
             cancelCallBack();

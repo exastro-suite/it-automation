@@ -95,4 +95,5 @@ $ary["ITACREPAR_1275"]       = "「プルダウン選択」で選んだメニュ
 $ary["ITACREPAR_1276"]       = "作成";
 $ary["ITACREPAR_1277"]       = "未作成";
 $ary["ITACREPAR_1278"]       = "作成済み";
+$ary["ITACREPAR_1279"]       = "参照項目の取得に失敗しました。";
 ?>

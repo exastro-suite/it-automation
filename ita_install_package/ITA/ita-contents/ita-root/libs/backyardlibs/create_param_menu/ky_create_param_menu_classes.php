@@ -1087,6 +1087,7 @@ class ReferenceItemTable extends BaseTable_CPM {
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('ITEM_ID',
                                     'LINK_ID',
+                                    'MENU_ID',
                                     'DISP_SEQ',
                                     'TABLE_NAME',
                                     'PRI_NAME',
@@ -1096,7 +1097,7 @@ class ReferenceItemTable extends BaseTable_CPM {
                                     'DESCRIPTION',
                                     'INPUT_METHOD_ID',
                                     'SENSITIVE_FLAG',
-                                    'MASTER_COL_FLAG',
+                                    'ORIGINAL_MENU_FLAG',
                                     'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',
