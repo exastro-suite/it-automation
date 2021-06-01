@@ -2133,4 +2133,91 @@ function getInfoFromOneOfConductorInstances($intSymphonyInstanceId, $intMode=0){
 //ある１のConductorインスタンスの、Conductor部分、Node部分の情報を取得する----
 
 
+//----ConductorクラスをJSON形式で取得
+function getConductorClassJson($intConductorClassId,$getmode=""){
+    // グローバル変数宣言
+    global $g;
+    $retBool = false;
+    $intErrorType = null;
+    $aryErrMsgBody = array();
+    $strErrMsg = "";
+    $intSymphonyInstanceId = null;
+    $strExpectedErrMsgBodyForUI = "";
+    $aryFreeErrMsgBody = array();
+    
+    $intControlDebugLevel01=250;
+    
+    $objMTS = $g['objMTS'];
+    $objDBCA = $g['objDBCA'];
+    
+    $strFxName = '([FUNCTION]'.__FUNCTION__.')';
+    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+    $strSysErrMsgBody = "";
+    $boolInTransactionFlag = false;
+    
+    try{
+        require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
+        $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA);
+        
+        //----ConductorCLASSIDの形式チェック
+        $objIntNumVali = new IntNumValidator(null,null,"",array("NOT_NULL"=>true));
+        if( $objIntNumVali->isValid($intConductorClassId) === false ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000100";
+            $intErrorType = 2;
+            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170003",array($objIntNumVali->getValidRule()));
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        unset($objIntNumVali);
+        //ConductorCLASSIDの形式チェック----
+                
+        $retArray  = $objOLA->convertConductorClassJson($intConductorClassId,1);
+        
+        if($retArray[0] == false){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000500";
+            $intErrorType = $retArray[1];
+            if( $retArray[1] < 500 ){
+                $aryErrMsgBody = $retArray[2];
+                $strErrMsg = $retArray[3];
+                $strSysErrMsgBody = $retArray[4];
+                $strExpectedErrMsgBodyForUI = $retArray[6];
+            }
+            //webError出力用メッセージを出力
+            $aryFreeErrMsgBody = $retArray[7];
+            foreach($aryFreeErrMsgBody as $msg){
+                web_log($msg);
+            }
+
+            if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        // ConductorIDおよびオペレーションNoからConductorインスタンスを新規登録----
+
+        $retBool = true;
+        $intSymphonyInstanceId = $retArray[5];
+        unset($retArray);
+
+    }
+    catch (Exception $e){
+        // エラーフラグをON
+        if( $intErrorType === null ) $intErrorType = 500;
+        $tmpErrMsgBody = $e->getMessage();
+        if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
+    }
+    $retArray = array($retBool,
+                      $intErrorType,
+                      $aryErrMsgBody,
+                      $strErrMsg,
+                      $intSymphonyInstanceId,
+                      $strExpectedErrMsgBodyForUI
+                      );
+    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+    return $retArray;
+}
+//ConductorクラスをJSON形式で取得----
+
 ?>
