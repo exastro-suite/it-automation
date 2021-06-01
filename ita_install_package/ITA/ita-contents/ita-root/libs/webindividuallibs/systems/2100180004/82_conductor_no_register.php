@@ -85,6 +85,32 @@ function conductorNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRec
             $aryRowOfOperationTable = $aryOpRetBody[4];
             $intOperationNo = $aryRowOfOperationTable['OPERATION_NO_UAPK'];
             
+            if(  $aryForOptionOrderOvRd == array() ){
+                $aryRetBody = getConductorClassJson($intSymphonyClassId,1);
+                if( $aryRetBody[1] !== null ){
+                    $intErrorType = $aryRetBody[1];
+                    $intErrorPlaceMark = 3000;
+                    if( $intErrorType == 2 || $intErrorType == 3 ){
+                        $strExpectedErrMsgBodyForUI = $aryRetBody[5];
+                        $intResultStatusCode = 400;
+                        $intResultInfoCode="001";
+                    }
+                }else{
+                    // JSON形式の変換、不要項目の削除
+                    $tmpReceptData = json_decode($aryRetBody[4],true);
+                    $strSortedData=$tmpReceptData;
+                    unset($strSortedData['conductor']);
+                    foreach ($strSortedData as $key => $value) {
+                        if( preg_match('/line-/',$key) ){
+                            unset($strSortedData[$key]);
+                        }
+                    }
+                    unset($strSortedData['conductor']);
+                    unset($strSortedData['config']);
+                    $aryForOptionOrderOvRd = $strSortedData;                    
+                }
+            }
+
             $aryRetBody = conductorInstanceConstuct($intSymphonyClassId, $intOperationNo, $strPreserveDatetime, $strOptionOrderStream, $aryForOptionOrderOvRd);
 
             //SymphonyクラスIDの不備
