@@ -155,7 +155,7 @@ try{
         }
 
         // 比較対象の時刻を計算
-        $targetTime = $nowTime - $row['DEL_DAYS'] * 24 * 60;
+        $targetTime = $nowTime - $row['DEL_DAYS'] * 24 * 60 * 60;
 
         // 直下のディレクトリ・ファイルを取得
         $dataArray = glob($row['TARGET_DIR'] . "/" . $row['TARGET_FILE']);
