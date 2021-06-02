@@ -4681,7 +4681,17 @@ let pollingTimerID = '';
 const conductorStatusUpdate = function( exeNumber ) {
 
   // ポーリングタイム（ms）
-  const intervalTime = 3000;
+  //const intervalTime = 3000;
+  var tmpintervalTime = 3000;
+  if( document.getElementById('intervalOfDisp') !== null ) {
+    var tmpintervalTime = document.getElementById('intervalOfDisp').innerHTML;
+    if( isNaN( tmpintervalTime ) === true ) {
+       var tmpintervalTime = 3000;
+    }
+  }
+  const intervalTime = tmpintervalTime;
+ 
+
   
   // 最初（exeNumberが0）だけ実行する処理
   if ( exeNumber === 0 ) {
