@@ -822,7 +822,7 @@ ETH_WOL_NET_DEVICE                VARCHAR (256)              , -- ETH_WAKE_ON_LA
 PROTOCOL_ID                       INT                       ,
 LOGIN_USER                        VARCHAR (30)              ,
 LOGIN_PW_HOLD_FLAG                INT                       ,
-LOGIN_PW                          VARCHAR (60)              ,
+LOGIN_PW                          TEXT                      ,
 LOGIN_PW_ANSIBLE_VAULT            VARCHAR (512)             , -- パスワード ansible-vault暗号化文字列　隠しカラム
 LOGIN_AUTH_TYPE                   INT                       ,
 WINRM_PORT                        INT                       , -- WinRM接続プロトコル
@@ -877,7 +877,7 @@ ETH_WOL_NET_DEVICE                VARCHAR (256)             , -- ETH_WAKE_ON_LAN
 PROTOCOL_ID                       INT                       ,
 LOGIN_USER                        VARCHAR (30)              ,
 LOGIN_PW_HOLD_FLAG                INT                       ,
-LOGIN_PW                          VARCHAR (60)              ,
+LOGIN_PW                          TEXT                      ,
 LOGIN_PW_ANSIBLE_VAULT            VARCHAR (512)             , -- パスワード ansible-vault暗号化文字列　隠しカラム
 LOGIN_AUTH_TYPE                   INT                       ,
 WINRM_PORT                        INT                       , -- WinRM接続プロトコル
