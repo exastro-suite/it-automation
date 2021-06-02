@@ -827,13 +827,32 @@ transition-property: stroke-dasharray;
 stroke: rgba( 0,0,0,.1 );
 stroke-dasharray: 0;
 }
+.dashboard-text {
+margin: 8px; padding: 16px;
+border: 1px solid #CCC;
+background-color: #F2F2F2;
+border-radius: 4px;
+color: #AAA;
+text-align: center;
+}
 .number-table-wrap {
 padding: 8px;
 }
+.dashboard-table-wrap {
+overflow: auto;
+max-height: 400px;
+}
+.dashboard-table,
 .number-table {
 width: 100%;
 border-collapse: collapse;
 }
+.dashboard-table {
+width: calc( 100% - 16px );
+margin: 8px;
+}
+.dashboard-table th,
+.dashboard-table td,
 .number-table th,
 .number-table td {
 padding: 4px;
@@ -842,13 +861,25 @@ border-bottom: 1px solid #CCC;
 font-size: 11px;
 font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
 }
+.dashboard-table th,
+.dashboard-table td {
+white-space: nowrap;
+}
 .number-table tbody th {
 text-align: left;
 }
+.dashboard-table thead th,
 .number-table thead th {
 background-color: #F2F2F2;
 border-right: none;
 text-align: center;
+}
+.dashboard-table td,
+.number-table td {
+background-color: #FFF;
+}
+.dashboard-table thead th {
+text-align: left;
 }
 .pie-chart-usage {
 display: inline-block;
@@ -1253,11 +1284,6 @@ padding: 0;
 text-align: center;
 line-height: 26px;
 }
-.edit-shortcut-add-button {
-height: 28px;
-padding: 0 8px;
-line-height: 26px;
-}
 .edit-shortcut-remove-button,
 .edit-shortcut-add-button {
 margin: 0;
@@ -1273,6 +1299,11 @@ text-shadow: 1px 1px 1px rgba( 0,0,0,.6 );
 font-size: 11px;
 color: #EEE;
 cursor: pointer;
+}
+.edit-shortcut-add-button {
+height: 28px;
+margin: 4px 4px 0 0; padding: 0 8px;
+line-height: 26px;
 }
 .edit-shortcut-remove-button:focus,
 .edit-shortcut-add-button:focus {
@@ -1318,6 +1349,11 @@ transform: translate(-50%,-50%) rotate(-45deg);
 }
 .widget-image {
 width: 100%; height: auto;
+}
+.edit-input-note {
+padding: 4px 0;
+color: #AAA;
+font-size: 12px;
 }
 /* -------------------------------------------------- *
 

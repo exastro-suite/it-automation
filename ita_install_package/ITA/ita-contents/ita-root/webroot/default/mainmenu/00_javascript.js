@@ -55,6 +55,9 @@ callback.prototype = {
     get_work_result : function( result ) {
       workHistory( result );
       setPieChart( result, 'result');
+    },
+    get_symphony_conductor: function( result ) {
+      setSymphonyConductorList( result );
     }
     // ここまでカスタマイズした場合の[callback]メソッド配置域----
 }
@@ -78,6 +81,13 @@ function get_work_info() {
 }
 function get_work_result() {
     proxy.get_work_result();
+}
+function get_symphony_conductor( days ) {
+  if ( days === undefined || days === '' || days === '0') {
+    proxy.get_symphony_conductor();
+  } else {
+    proxy.get_symphony_conductor( days );
+  }
 }
 //////// 汎用系ファンクション---- ////////
 

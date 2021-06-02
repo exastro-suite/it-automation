@@ -59,7 +59,15 @@ const getWidgetMessage = function( id ) {
       '36':getSomeMessage("ITAWDCC92136"), // 画像URL
       '37':getSomeMessage("ITAWDCC92137"), // リンクURL
       '38':getSomeMessage("ITAWDCC92154"), // 未実行
-      '39':getSomeMessage("ITAWDCC92155")  // 表示できるメニューグループはありません。
+      '39':getSomeMessage("ITAWDCC92155"), // 表示できるメニューグループはありません。
+      '40':getSomeMessage("ITAWDCC92158"), // インスタンスID
+      '41':getSomeMessage("ITAWDCC92159"), // 名称
+      '42':getSomeMessage("ITAWDCC92160"), // オペレーション名
+      '43':getSomeMessage("ITAWDCC92161"), // ステータス
+      '44':getSomeMessage("ITAWDCC92162"), // 予約日時
+      '45':getSomeMessage("ITAWDCC92163"), // 予約作業はありません
+      '46':getSomeMessage("ITAWDCC92164"), // {{N}}日以内の予約作業はありません。
+      '47':getSomeMessage("ITAWDCC92165"), // ※0で全件表示
     };
 
     if ( message[ id ] ) {
@@ -216,6 +224,21 @@ const getWidgetItem = function( widgetID ) {
           'target': '_blank'
         }
       },
+      '10': {
+        'widget_id': '10',
+        'name': 'reserve_symphony_conductor',
+        'display_name': getSomeMessage("ITAWDCC92156"),
+        'description': getSomeMessage("ITAWDCC92157"),
+        'colspan': '3',
+        'rowspan': '1',
+        'display': '1',
+        'title': '1',
+        'background': '1',
+        'unique': '1',
+        'data': {
+          'days': '14'
+        }
+      }
     };
 
     if( widgetID === undefined ) {
@@ -443,6 +466,10 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
           contentHTML = '<a class="widget-image-link" href="' + encodeURI( widgetData['data']['link'] ) + '" target="' + editor.textEntities( widgetData['data']['target'] ) + '">' + contentHTML + '</a>'
         }
         break;
+      case '10':
+        contentHTML = loadingWaitHTML;
+        dataHTML = ' data-days="' + widgetData['data']['days'] + '"';
+        break;
       default:
         contentHTML = '{contents}';
     }
@@ -521,7 +548,7 @@ const initialSet = function() {
   const widgetList = widgetInfo['widget'];
   
   // 読み込みフラグ [Movement,Status,result-History]
-  const loadFlag = [ false, false, false ];
+    const loadFlag = [ false, false, false, false ];
   // gridフラグ
   const gridFlag = gridCheck();
   
@@ -546,7 +573,8 @@ const initialSet = function() {
         case '4': loadFlag[0] = true; break;
         case '5': loadFlag[1] = true; break;
         case '6': 
-        case '7': loadFlag[2] = true;
+        case '7': loadFlag[2] = true; break;
+		case '10': loadFlag[3] = widgetItem['data']['days']; break;
       }      
       
       if ( widgetItem['set_id'] ) {
@@ -608,6 +636,11 @@ const initialSet = function() {
     if ( loadFlag[1] ) get_work_info();
     // 作業結果読み込み
     if ( loadFlag[2] ) get_work_result();
+    // Symphony/Conductor 読み込み
+    if ( loadFlag[3] ) {
+      const days = loadFlag[3];
+      get_symphony_conductor( days );
+    }
     }
 };
 
@@ -698,6 +731,9 @@ const getWidgetData = function( setID ) {
           newWidgetInfo['data']['link'] = ( link === undefined )? '': link;
           newWidgetInfo['data']['target'] = ( target === undefined )? '': target;
           } break;
+        case '10':
+          newWidgetInfo['data']['days'] = $widget.attr('data-days');
+          break;
       }
       
       return newWidgetInfo;
@@ -904,6 +940,12 @@ const addWidget = function( widgetID ) {
       // 作業結果読み込み
       case '6':
       case '7': get_work_result(); break;
+      // Symphony/Conductort読み込み
+      case '10': {
+        let days = widgetData['data']['days'];
+        if ( days === undefined || days === '') days = '0';
+        get_symphony_conductor( days );
+        } break;
     }
     
     widgetCheckBlank();
@@ -1061,6 +1103,9 @@ const editWidget = function( setID ) {
       widgetEditHTML += getRowHTML('Link URL', '<input data-max-length="256" class="edit-input-text edit-image-link" type="text" value="' + editor.textEntities(  widgetData['data']['link'] ) + '">');
       widgetEditHTML += getRowHTML('Link target', '<input data-max-length="16" class="edit-input-text edit-image-target" type="text" value="' + editor.textEntities( widgetData['data']['target'] ) + '">');
       break;
+    case '10':
+      widgetEditHTML += getRowHTML( getWidgetMessage('29') + '<br><span class="edit-input-note">' + getWidgetMessage('47') + '</span>', '<input data-min="0" data-max="365" class="edit-input-number edit-days-number" type="number" value="' + widgetData['data']['days'] + '">');
+      break;
   }
  
   widgetEditHTML += '</tbody></table></div>'
@@ -1133,7 +1178,7 @@ const editWidget = function( setID ) {
             const period = $modalBody.find('.edit-period-number').val();
             // 変更があったらグラフを更新する
             if ( period !== widgetData['data']['period'] ) {
-              $widget.attr('data-period',period );
+              $widget.attr('data-period', period );
               get_work_result();
             }
             } break;
@@ -1153,6 +1198,15 @@ const editWidget = function( setID ) {
               contentHTML = '<a class="widget-image-link" href="' + encodeURI( link ) + '" target="' + editor.textEntities( target ) + '">' + contentHTML + '</a>'
             }
             $widget.find('.widget-body').html( contentHTML );
+            } break;
+          case '10': {
+            let days = $modalBody.find('.edit-days-number').val();
+            if ( days === undefined || days === '') days = '0';
+            // 変更があったらグラフを更新する
+            if ( days !== widgetData['data']['days'] ) {
+              $widget.attr('data-days', days );
+              get_symphony_conductor( days );
+            }
             } break;
         }
         // 位置を再セット
@@ -1947,6 +2001,80 @@ initialSet();
 
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   Symphony, Conductor 予約リスト
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+function setSymphonyConductorList( resultData ) {
+  const editor = new itaEditorFunctions;
+  
+  const widgetID = 10,
+        $target = $('.widget-grid[data-widget-id="' + widgetID + '"]').eq(0),
+        days = $target.attr('data-days'),
+        l = [];
+  
+  // SymphonyとConductorのデータをまとめる
+  for ( const ik in resultData ) {
+    for ( const jk in resultData[ik] ) {
+      l.push({
+        'type': ik,
+        'id': jk,
+        'date': resultData[ik][jk]['time_book']
+      });
+    }
+  }
+  
+  const tableLength = l.length;
+  let tableHTML = '';
+  
+  if ( tableLength > 0 ) {
+    // 日時でソート
+    l.sort( function( a, b ){
+      if( a.date < b.date) return -1;
+      if( a.date > b.date) return 1;
+      return 0;  
+    });
+
+    // Table HTML作成
+    tableHTML = ''
+    + '<div class="dashboard-table-wrap"><table class="dashboard-table">'
+      + '<thead>'
+        + '<tr>'
+          + '<th>' + getWidgetMessage('40') + '</th>'
+          + '<th>' + getWidgetMessage('41') + '</th>'
+          + '<th>' + getWidgetMessage('42') + '</th>'
+          + '<th>' + getWidgetMessage('43') + '</th>'
+          + '<th>' + getWidgetMessage('44') + '</th>'
+        + '</tr>'
+      + '</thead>'
+      + '</tbody>'
+    for ( let i = 0; i < tableLength; i++ ) {
+      const data = resultData[l[i].type][l[i].id],
+            name = ( l[i].type === 'conductor')? 'conductor_name': 'synphony_name',
+            url =  ( l[i].type === 'conductor')?
+              '/default/menu/01_browse.php?no=2100180005&conductor_instance_id=':
+              '/default/menu/01_browse.php?no=2100000309&symphony_instance_id=';
+      tableHTML += ''
+      + '<tr>'
+        + '<td><a href="' + url + l[i].id + '" target="_blank">' + l[i].type + ': ' + l[i].id + '</a></td>'
+        + '<td>' + editor.textEntities( data[name] ) + '</td>'
+        + '<td>' + editor.textEntities( data.operation_name ) + '</td>'
+        + '<td>' + editor.textEntities( data.status ) + '</td>'
+        + '<td>' + data.time_book + '</td>'
+      + '</tr>'
+    }
+    tableHTML += '</tbody></table></div>';
+  } else {
+    if ( days === 0 ) {
+      tableHTML = '<p class="dashboard-text">' + getWidgetMessage('45') + '</p>';
+    } else {
+      const daysMessage = getWidgetMessage('46').replace(/{{N}}/, days );
+      tableHTML = '<p class="dashboard-text">' + daysMessage + '</p>';
+    }
+  }
+  $target.find('.widget-body').html( tableHTML );
+}
 
 
 
