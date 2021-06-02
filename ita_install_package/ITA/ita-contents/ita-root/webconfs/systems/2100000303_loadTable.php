@@ -298,7 +298,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             return $retArray;
         };
 
-        $objVldt = new SingleTextValidator(0,30,false);
+        $objVldt = new SingleTextValidator(0,128,false);
         $c = new PasswordColumn('LOGIN_PW',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102070"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102080"));//エクセル・ヘッダでの説明
         $c->setHiddenMainTableColumn(true);
