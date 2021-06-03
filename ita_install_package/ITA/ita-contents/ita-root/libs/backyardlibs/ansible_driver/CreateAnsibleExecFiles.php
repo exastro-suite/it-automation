@@ -12235,8 +12235,8 @@ class CreateAnsibleExecFiles {
                     "TARGET_VALUE"=>$enc_in_pass);
 
                 $proxySetting              = array();
-                $proxySetting['address']   = $this->in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-                $proxySetting['port']      = $this->in_ans_if_info["ANSIBLE_PROXY_PORT"];
+                $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+                $proxySetting['port']      = $this->lv_ans_if_info["ANSIBLE_PROXY_PORT"];
 
                 ////////////////////////////////////////////////////////////////
                 // ansible-vault 暗号化 REST APIコール                        //
@@ -12359,8 +12359,8 @@ class CreateAnsibleExecFiles {
                     "TARGET_VALUE"=>$decryptData);
 
             $proxySetting              = array();
-            $proxySetting['address']   = $this->in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-            $proxySetting['port']      = $this->in_ans_if_info["ANSIBLE_PROXY_PORT"];
+            $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+            $proxySetting['port']      = $this->lv_ans_if_info["ANSIBLE_PROXY_PORT"];
 
             ////////////////////////////////////////////////////////////////
             // ansible-vault 暗号化 REST APIコール                        //
@@ -12462,8 +12462,8 @@ class CreateAnsibleExecFiles {
                         "TARGET_VALUE"=>$enc_in_pass);
 
                 $proxySetting              = array();
-                $proxySetting['address']   = $this->in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-                $proxySetting['port']      = $this->in_ans_if_info["ANSIBLE_PROXY_PORT"];
+                $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+                $proxySetting['port']      = $this->lv_ans_if_info["ANSIBLE_PROXY_PORT"];
 
                 ////////////////////////////////////////////////////////////////
                 // ansible-vault 暗号化 REST APIコール                        //
