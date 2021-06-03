@@ -326,6 +326,16 @@ vertical-align: top;
 #dashboard[data-mode="edit"] .widget-name-inner {
 padding-bottom: 0;
 }
+.widget-sub-name {
+margin: 8px 8px 0; padding: 8px 8px 0;
+background: linear-gradient( rgba(0,0,0,.05),rgba(0,0,0,0));
+border: 1px solid #CCC;
+border-bottom: none;
+border-radius: 4px 4px 0 0;
+word-break: break-all;
+letter-spacing: .015em;
+color: #555;
+}
 #KIZI .widget-edit-menu-list {
 margin: 0; padding: 0 8px;
 list-style: none;
@@ -863,6 +873,15 @@ font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", 
 }
 .dashboard-table th,
 .dashboard-table td {
+padding: 4px 8px;
+}
+.dashboard-table th {
+white-space: nowrap;
+}
+.dashboard-table-wrap {
+word-break: break-all;
+}
+.dashboard-table-nowrap {
 white-space: nowrap;
 }
 .number-table tbody th {
@@ -897,6 +916,9 @@ background-color: rgba( 255,255,0,.2 );
 span.zero {
 color: #DDD!important;
 }
+
+.widget-grid[data-display-symphony="0"] .reserve-symphony,
+.widget-grid[data-display-conductor="0"] .reserve-conductor { display: none; }
 /* -------------------------------------------------- *
 
    Work history

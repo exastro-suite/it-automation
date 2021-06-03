@@ -142,4 +142,5 @@ $ary["ITAWDCC92162"]        = "Scheduled date/time";
 $ary["ITAWDCC92163"]        = "There is no reservation work.";
 $ary["ITAWDCC92164"]        = "There is no reservation work within {{N}} day.";
 $ary["ITAWDCC92165"]        = "*Enter 0 to show all.";
+$ary["ITAWDCC92166"]        = "period（days）";
 ?>

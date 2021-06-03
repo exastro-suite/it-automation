@@ -68,6 +68,7 @@ const getWidgetMessage = function( id ) {
       '45':getSomeMessage("ITAWDCC92163"), // 予約作業はありません
       '46':getSomeMessage("ITAWDCC92164"), // {{N}}日以内の予約作業はありません。
       '47':getSomeMessage("ITAWDCC92165"), // ※0で全件表示
+      '48':getSomeMessage("ITAWDCC92166"), // 期間（日）
     };
 
     if ( message[ id ] ) {
@@ -224,6 +225,7 @@ const getWidgetItem = function( widgetID ) {
           'target': '_blank'
         }
       },
+      //#488 start
       '10': {
         'widget_id': '10',
         'name': 'reserve_symphony_conductor',
@@ -236,9 +238,12 @@ const getWidgetItem = function( widgetID ) {
         'background': '1',
         'unique': '1',
         'data': {
-          'days': '14'
+          'days': '14',
+          'symphony': '1',
+          'conductor': '1'
         }
       }
+      //#488 end
     };
 
     if( widgetID === undefined ) {
@@ -469,6 +474,8 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
       case '10':
         contentHTML = loadingWaitHTML;
         dataHTML = ' data-days="' + widgetData['data']['days'] + '"';
+        dataHTML += ' data-display-symphony="' + widgetData['data']['symphony'] + '"';
+        dataHTML += ' data-display-conductor="' + widgetData['data']['conductor'] + '"';
         break;
       default:
         contentHTML = '{contents}';
@@ -548,7 +555,7 @@ const initialSet = function() {
   const widgetList = widgetInfo['widget'];
   
   // 読み込みフラグ [Movement,Status,result-History]
-    const loadFlag = [ false, false, false, false ];
+  const loadFlag = [ false, false, false, false ];
   // gridフラグ
   const gridFlag = gridCheck();
   
@@ -574,7 +581,9 @@ const initialSet = function() {
         case '5': loadFlag[1] = true; break;
         case '6': 
         case '7': loadFlag[2] = true; break;
-		case '10': loadFlag[3] = widgetItem['data']['days']; break;
+        //#488 start
+        case '10': loadFlag[3] = widgetItem['data']['days']; break;
+        //#488 end
       }      
       
       if ( widgetItem['set_id'] ) {
@@ -636,11 +645,13 @@ const initialSet = function() {
     if ( loadFlag[1] ) get_work_info();
     // 作業結果読み込み
     if ( loadFlag[2] ) get_work_result();
+    //#488 start
     // Symphony/Conductor 読み込み
     if ( loadFlag[3] ) {
       const days = loadFlag[3];
       get_symphony_conductor( days );
     }
+    //#488 end
     }
 };
 
@@ -733,9 +744,11 @@ const getWidgetData = function( setID ) {
           } break;
         case '10':
           newWidgetInfo['data']['days'] = $widget.attr('data-days');
+          newWidgetInfo['data']['symphony'] = $widget.attr('data-display-symphony');
+          newWidgetInfo['data']['conductor'] = $widget.attr('data-display-conductor');
           break;
       }
-      
+
       return newWidgetInfo;
     } else {
       return undefined;
@@ -1104,7 +1117,9 @@ const editWidget = function( setID ) {
       widgetEditHTML += getRowHTML('Link target', '<input data-max-length="16" class="edit-input-text edit-image-target" type="text" value="' + editor.textEntities( widgetData['data']['target'] ) + '">');
       break;
     case '10':
-      widgetEditHTML += getRowHTML( getWidgetMessage('29') + '<br><span class="edit-input-note">' + getWidgetMessage('47') + '</span>', '<input data-min="0" data-max="365" class="edit-input-number edit-days-number" type="number" value="' + widgetData['data']['days'] + '">');
+      widgetEditHTML += getRowHTML( getWidgetMessage('48') + '<br><span class="edit-input-note">' + getWidgetMessage('47') + '</span>', '<input data-min="0" data-max="365" class="edit-input-number edit-days-number" type="number" value="' + widgetData['data']['days'] + '">');
+      widgetEditHTML += getRowHTML('Symphony', getRadioHTML('display-symphony',[[getWidgetMessage('34'),1],[getWidgetMessage('35'),0]], Number(widgetData['data']['symphony'] ) ) );
+      widgetEditHTML += getRowHTML('Condcutor', getRadioHTML('display-conductor',[[getWidgetMessage('34'),1],[getWidgetMessage('35'),0]], Number(widgetData['data']['conductor'] ) ) );
       break;
   }
  
@@ -1200,6 +1215,10 @@ const editWidget = function( setID ) {
             $widget.find('.widget-body').html( contentHTML );
             } break;
           case '10': {
+            $widget.attr({
+              'data-display-symphony': getRadioChecked('display-symphony'),
+              'data-display-conductor': getRadioChecked('display-conductor')
+            });
             let days = $modalBody.find('.edit-days-number').val();
             if ( days === undefined || days === '') days = '0';
             // 変更があったらグラフを更新する
@@ -2011,72 +2030,81 @@ function setSymphonyConductorList( resultData ) {
   
   const widgetID = 10,
         $target = $('.widget-grid[data-widget-id="' + widgetID + '"]').eq(0),
-        days = $target.attr('data-days'),
-        l = [];
+        days = $target.attr('data-days');
   
-  // SymphonyとConductorのデータをまとめる
-  for ( const ik in resultData ) {
-    for ( const jk in resultData[ik] ) {
-      l.push({
-        'type': ik,
-        'id': jk,
-        'date': resultData[ik][jk]['time_book']
-      });
-    }
-  }
-  
-  const tableLength = l.length;
   let tableHTML = '';
   
-  if ( tableLength > 0 ) {
-    // 日時でソート
-    l.sort( function( a, b ){
-      if( a.date < b.date) return -1;
-      if( a.date > b.date) return 1;
-      return 0;  
-    });
-
-    // Table HTML作成
-    tableHTML = ''
-    + '<div class="dashboard-table-wrap"><table class="dashboard-table">'
-      + '<thead>'
-        + '<tr>'
-          + '<th>' + getWidgetMessage('40') + '</th>'
-          + '<th>' + getWidgetMessage('41') + '</th>'
-          + '<th>' + getWidgetMessage('42') + '</th>'
-          + '<th>' + getWidgetMessage('43') + '</th>'
-          + '<th>' + getWidgetMessage('44') + '</th>'
-        + '</tr>'
-      + '</thead>'
-      + '</tbody>'
-    for ( let i = 0; i < tableLength; i++ ) {
-      const data = resultData[l[i].type][l[i].id],
-            name = ( l[i].type === 'conductor')? 'conductor_name': 'synphony_name',
-            url =  ( l[i].type === 'conductor')?
-              '/default/menu/01_browse.php?no=2100180005&conductor_instance_id=':
-              '/default/menu/01_browse.php?no=2100000309&symphony_instance_id=';
+  for ( const type in resultData ) {
+    const title = ( type === 'conductor')? 'Conductor': 'Synphony',
+          name = ( type === 'conductor')? 'conductor_name': 'synphony_name',
+          url =  ( type === 'conductor')?
+            '/default/menu/01_browse.php?no=2100180005&conductor_instance_id=':
+            '/default/menu/01_browse.php?no=2100000309&symphony_instance_id=',
+          idLength = Object.keys( resultData[type] ).length;
+    
+    tableHTML += ''
+    + '<div class="dashboard-table-wrap reserve-' + type + '">'
+      + '<div class="widget-sub-name">' + title + '</div>';
+  
+    if ( idLength > 0 ) {
       tableHTML += ''
-      + '<tr>'
-        + '<td><a href="' + url + l[i].id + '" target="_blank">' + l[i].type + ': ' + l[i].id + '</a></td>'
-        + '<td>' + editor.textEntities( data[name] ) + '</td>'
-        + '<td>' + editor.textEntities( data.operation_name ) + '</td>'
-        + '<td>' + editor.textEntities( data.status ) + '</td>'
-        + '<td>' + data.time_book + '</td>'
-      + '</tr>'
-    }
-    tableHTML += '</tbody></table></div>';
-  } else {
-    if ( days === 0 ) {
-      tableHTML = '<p class="dashboard-text">' + getWidgetMessage('45') + '</p>';
+      + '<table class="dashboard-table">'
+        + '<thead>'
+          + '<tr>'
+            + '<th>' + getWidgetMessage('40') + '</th>'
+            + '<th>' + getWidgetMessage('41') + '</th>'
+            + '<th>' + getWidgetMessage('42') + '</th>'
+            + '<th>' + getWidgetMessage('43') + '</th>'
+            + '<th>' + getWidgetMessage('44') + '</th>'
+          + '</tr>'
+        + '</thead>'
+        + '</tbody>';
+      
+      // 日時でソート
+      const tableArray = [];
+      for ( const id in resultData[type] ) {
+        tableArray.push({
+          'id': id,
+          'name': resultData[type][id][name],
+          'operation_name': resultData[type][id].operation_name,
+          'status': resultData[type][id].status,
+          'time_book': resultData[type][id].time_book
+        });
+      }
+      tableArray.sort(function( a, b ){
+        if ( a.time_book > b.time_book ) {
+          return 1;          
+        } else {
+          return -1;
+        }
+      });
+      
+      const tableArrayLength = tableArray.length;
+      for ( let i = 0; i < tableArrayLength; i++ ) {
+        tableHTML += ''
+        + '<tr>'
+          + '<td class="dashboard-table-nowrap"><a href="' + url + tableArray[i].id + '" target="_blank">' + tableArray[i].id + '</a></td>'
+          + '<td class="dashboard-table-wrap">' + editor.textEntities( tableArray[i].name ) + '</td>'
+          + '<td class="dashboard-table-wrap">' + editor.textEntities( tableArray[i].operation_name ) + '</td>'
+          + '<td class="dashboard-table-nowrap">' + editor.textEntities( tableArray[i].status ) + '</td>'
+          + '<td class="dashboard-table-nowrap">' + tableArray[i].time_book + '</td>'
+        + '</tr>';
+      }
+      
+      tableHTML += '</tbody></table>';
     } else {
-      const daysMessage = getWidgetMessage('46').replace(/{{N}}/, days );
-      tableHTML = '<p class="dashboard-text">' + daysMessage + '</p>';
+      if ( days === 0 ) {
+        tableHTML += '<p class="dashboard-text">' + getWidgetMessage('45') + '</p>';
+      } else {
+        const daysMessage = getWidgetMessage('46').replace(/{{N}}/, days );
+        tableHTML += '<p class="dashboard-text">' + daysMessage + '</p>';
+      }
     }
+    tableHTML += '</div>';
   }
+
   $target.find('.widget-body').html( tableHTML );
 }
-
-
 
 
 
@@ -2567,7 +2595,7 @@ return [
 ];
 }
 function workHistory( result ) {
-
+  
 const widgetID = 7,
       $target = $('.widget-grid[data-widget-id="' + widgetID + '"]').eq(0),
       resultText = [
