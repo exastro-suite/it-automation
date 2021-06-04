@@ -2043,24 +2043,24 @@ function setSymphonyConductorList( resultData ) {
           idLength = Object.keys( resultData[type] ).length;
     
     tableHTML += ''
-    + '<div class="dashboard-table-wrap reserve-' + type + '">'
-      + '<div class="widget-sub-name">' + title + '</div>';
+    + '<div class="widget-sub-name">' + title + '</div>'
+    + '<div class="dashboard-table-wrap reserve-' + type + '">';
   
     if ( idLength > 0 ) {
       tableHTML += ''
       + '<table class="dashboard-table">'
         + '<thead>'
           + '<tr>'
-            + '<th>' + getWidgetMessage('40') + '</th>'
-            + '<th>' + getWidgetMessage('41') + '</th>'
+            + '<th>' + getWidgetMessage('40') + ' / ' + getWidgetMessage('41') + '</th>'
             + '<th>' + getWidgetMessage('42') + '</th>'
             + '<th>' + getWidgetMessage('43') + '</th>'
             + '<th>' + getWidgetMessage('44') + '</th>'
+            + '<th>実行まで残り</th>'
           + '</tr>'
         + '</thead>'
         + '</tbody>';
       
-      // 日時でソート
+      // ソート用配列の作成
       const tableArray = [];
       for ( const id in resultData[type] ) {
         tableArray.push({
@@ -2071,6 +2071,7 @@ function setSymphonyConductorList( resultData ) {
           'time_book': resultData[type][id].time_book
         });
       }
+      // 日時でソート
       tableArray.sort(function( a, b ){
         if ( a.time_book > b.time_book ) {
           return 1;          
@@ -2082,16 +2083,17 @@ function setSymphonyConductorList( resultData ) {
       const tableArrayLength = tableArray.length;
       for ( let i = 0; i < tableArrayLength; i++ ) {
         tableHTML += ''
-        + '<tr>'
-          + '<td class="dashboard-table-nowrap"><a href="' + url + tableArray[i].id + '" target="_blank">' + tableArray[i].id + '</a></td>'
-          + '<td class="dashboard-table-wrap">' + editor.textEntities( tableArray[i].name ) + '</td>'
-          + '<td class="dashboard-table-wrap">' + editor.textEntities( tableArray[i].operation_name ) + '</td>'
-          + '<td class="dashboard-table-nowrap">' + editor.textEntities( tableArray[i].status ) + '</td>'
-          + '<td class="dashboard-table-nowrap">' + tableArray[i].time_book + '</td>'
+        + '<tr class="reserve-row">'
+          + '<td class="dashboard-table-cell-wrap"><a class="rID" href="' + url + tableArray[i].id + '" target="_blank">' + tableArray[i].id + '</a>' + editor.textEntities( tableArray[i].name ) + '</td>'
+          + '<td class="dashboard-table-cell-wrap">' + editor.textEntities( tableArray[i].operation_name ) + '</td>'
+          + '<td class="dashboard-table-cell-nowrap"><span class="dashboard-reserve-status"><span class="dashboard-reserve-status-icon"></span>' + editor.textEntities( tableArray[i].status ) + '</span></td>'
+          + '<td class="dashboard-table-cell-nowrap reserve-date">' + tableArray[i].time_book + '</td>'
+          + '<td class="dashboard-table-cell-nowrap reserve-count-down"></td>'
         + '</tr>';
       }
       
       tableHTML += '</tbody></table>';
+ 
     } else {
       if ( days === 0 ) {
         tableHTML += '<p class="dashboard-text">' + getWidgetMessage('45') + '</p>';
@@ -2102,8 +2104,49 @@ function setSymphonyConductorList( resultData ) {
     }
     tableHTML += '</div>';
   }
-
+  
   $target.find('.widget-body').html( tableHTML );
+  
+  // カウントダウンする
+  const zP = function( text, digit ){
+    const num = ('0000000000' + text ).slice( -digit ).replace(/^(0+)/,'<span class="zero">$1</span>');
+    return num;    
+  };
+  const coundDown = function(){
+    // タイマーを停止する
+    const $reserveWidget = $('.widget-grid[data-widget-id="' + widgetID + '"]').eq(0),
+          widgetTimerID = Number( $reserveWidget.attr('data-timer-id'));
+    if ( widgetTimerID !== intervalID ) {
+      clearInterval( intervalID );
+      return false;
+    }
+    
+    const today = new Date();
+    $reserveWidget.find('.reserve-date').each(function(){
+      const $date = $( this ),
+            time = new Date( $date.text() ),
+            diff = time - today;
+      
+      const day = ( diff >= 0 )? Math.floor( diff / (24 * 60 * 60 * 1000) ): 0,
+            hour = ( diff >= 0 )? Math.floor(( diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)): 0,
+            min = ( diff >= 0 )? Math.floor(( diff % (24 * 60 * 60 * 1000)) / (60 * 1000)) % 60: 0,
+            html = '<span class="rd">'+zP(day,3)+'</span>日<span class="rd">'+zP(hour,2)+'</span>時間<span class="rd">'+zP(min,2)+'</span>分';
+      
+      if ( diff <= 0 ) {
+        $date.closest('tr').addClass('running').removeClass('shortly');
+      } else if ( day == 0 ) {
+        $date.closest('tr').addClass('shortly');
+      }
+      
+      $date.next().html( html );
+    });
+  };
+  
+  const intervalID = setInterval( coundDown, 60000 );
+  $target.attr('data-timer-id', intervalID );
+  coundDown();
+  
+  
 }
 
 

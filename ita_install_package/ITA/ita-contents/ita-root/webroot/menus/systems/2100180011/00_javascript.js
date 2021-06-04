@@ -1373,9 +1373,9 @@ function setSchedule(target_area_id){
 //////// ----Symphony作業一覧へのリンク ////////
 function Mix1_1_jumpToSymphonyIntList(obj){
     var targetRecort = $(obj).parents('tr');
-    var strSymphonyName = targetRecort.find('td').eq(5).text(); //symphony名称
-    var strOperationName = targetRecort.find('td').eq(6).text(); //オペレーション名
-    var strUserName = targetRecort.find('td').eq(8).text(); //実行ユーザ
+    var strSymphonyName = targetRecort.find('td').eq(6).text(); //symphony名称
+    var strOperationName = targetRecort.find('td').eq(7).text(); //オペレーション名
+    var strUserName = targetRecort.find('td').eq(9).text(); //実行ユーザ
 
     //エンコード
     strSymphonyName = encodeURIComponent(strSymphonyName);
