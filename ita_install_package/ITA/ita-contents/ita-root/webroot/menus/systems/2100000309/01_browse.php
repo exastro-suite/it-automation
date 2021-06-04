@@ -32,10 +32,6 @@
         // browse系共通ロジックパーツ01
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_browse_01.php");
         
-        // メンテナンス可能メニューを参照のみ可能の権限ユーザが見てないか判定するパーツ
-        // (この処理は非テンプレートのコンテンツのみに必要)
-        require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_maintenance.php");
-
         //アクセス権を判定
         if( array_key_exists( "symphony_instance_id", $_GET ) === true ){
             // クエリからsymphony_instance_idを取得
