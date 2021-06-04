@@ -1373,22 +1373,9 @@
                 }
             }
             if($prepare_err_flag == 0){
-
-                // 重複時のオプションパラメータ再作成
-                $newOptionParameter='';
-                $proc_flg=false;
-                foreach($ParamAryExc as $newOptionParameterTmp){
-                    if($proc_flg === false) {
-                        // dummyを除外
-                        $proc_flg = true;
-                        continue;
-                    }
-                    $newOptionParameter = $newOptionParameter . '-' . $newOptionParameterTmp . ' ';
-                }
-
                 // ansible-playbookコマンド実行時のオプションパラメータを共有ディレクトリのファイルに出力
                 $fp=fopen($zip_data_source_dir . "/AnsibleExecOption.txt" , "w");
-                fputs($fp, $newOptionParameter);
+                fputs($fp, $OptionParameter);
                 fclose($fp);
             }
 
