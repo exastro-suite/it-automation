@@ -1582,13 +1582,10 @@ class Column extends ColumnGroup {
 			//----パスワード削除オーダーがあった場合
 			 $boolActionFlag = true;
 			 $aryVariant['edit_target_row'][$strColId] = "";
-			 $exeQueryData[$strColId] = "";
-			error_log ("aryVariant:  ".print_r($aryVariant,true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log"); 
-			error_log ("exeQueryData:  ".print_r($exeQueryData,true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log"); 
-			
+			 $exeQueryData[$strColId] = "";			
 			//パスワード削除オーダーがあった場合----
 		}
-		
+
 		//$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
 		if( is_null($this->aryFunctionsForEvent)===true ){
 			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
