@@ -2805,7 +2805,42 @@ class PasswordInputTabBFmt extends InputTabBFmt {
 		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
 		$aryOverWrite["value"] = "";
 
+		global $g;
+		$strColId = $this->getPrintTargetKey();
+
+		$strColMark = $strColId;
+		if( $this->getColumnIDHidden() === true ){
+			$strColMark = $this->getIDSynonym();
+		}
+		
+		$strIdOfFSTOfDelFlag = "{$this->strFormatterId}_del_password_{$strColMark}";
+		$strNameOfFSTOfDelFlag = "del_password_flag_{$strColMark}";
+		$strLabelForDelFlag = "delPssword{$strColMark}";
+		$strIdOfForm = "{$this->strFormatterId}_{$strColMark}";
+
 		$strTagInnerBody = "<div class=\"input_password\"><input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} ><div class=\"password_eye\"></div></div>";
+
+		if( $this->getRequired() === false && $rowData[$strColId] != ""){
+
+			$strTagInnerBody .= 
+<<<EOD
+<br />
+<input type="checkbox" id="{$strIdOfFSTOfDelFlag}" name="{$strNameOfFSTOfDelFlag}" />
+<label for="{$strLabelForDelFlag}">{$g['objMTS']->getSomeMessage("ITAWDCH-STD-672")}</label>
+<script type="text/javascript">
+document.getElementById("{$strIdOfFSTOfDelFlag}").onchange = function(){
+
+	if(this.checked == true){
+		$("#"+"{$aryOverWrite["id"]}").attr("disabled",true);
+	}
+	else{
+		$("#"+"{$aryOverWrite["id"]}").attr("disabled",false);
+	}
+}
+</script>
+EOD;
+			
+		}
 
 		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
 			$objFunction = $this->objFunctionForReturnOverrideGetData;

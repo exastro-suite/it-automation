@@ -1570,6 +1570,25 @@ class Column extends ColumnGroup {
 		$aryErrMsgBody = array();
 		$strErrMsg = "";
 		$strErrorBuf = "";
+
+		$strColId = $this->getID();
+		$strColMark = $strColId;
+
+		if( $this->getColumnIDHidden() === true ){
+			$strColMark = $this->getIDSOP();
+		}
+	
+		if( array_key_exists("del_password_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_password_flag_'.$strColMark] == "on" ){
+			//----パスワード削除オーダーがあった場合
+			 $boolActionFlag = true;
+			 $aryVariant['edit_target_row'][$strColId] = "";
+			 $exeQueryData[$strColId] = "";
+			error_log ("aryVariant:  ".print_r($aryVariant,true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log"); 
+			error_log ("exeQueryData:  ".print_r($exeQueryData,true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log"); 
+			
+			//パスワード削除オーダーがあった場合----
+		}
+		
 		//$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
 		if( is_null($this->aryFunctionsForEvent)===true ){
 			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
