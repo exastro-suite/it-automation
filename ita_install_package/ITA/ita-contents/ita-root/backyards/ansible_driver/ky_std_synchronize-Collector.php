@@ -1087,6 +1087,8 @@
                                                     
                                                     $tmpFilter = array();   
                                                     $insertData = array();
+                                                    $insertNullflg=array();
+                                                    $tmpFilternullflg=array();
                                                     $UpdateFileData = array();
 
                                                     //RESTパラメータ生成（横メニュー）
@@ -1095,6 +1097,7 @@
                                                         foreach ( $arrRestInfo as $parmNO => $pramName ) {
                                                             if( isset($tgtSource_row[$pramName]) ){
                                                                 $insertData[$parmNO]=$tgtSource_row[$pramName];
+                                                                if( gettype( $tgtSource_row[$pramName] ) === "NULL" ) $insertNullflg[$parmNO] = 1;
 
                                                                 // #449 ファイルアップロードカラム対応
                                                                 if(isset($arrFileUploadList[$filename][$menuid]) == true ){
@@ -1112,7 +1115,7 @@
                                                                 }
 
                                                             }else{
-                                                                $insertData[$parmNO]="";
+                                                                $insertData[$parmNO]=null;
                                                             }
                                                         }
 
@@ -1136,6 +1139,9 @@
                                                         ksort($insertData);
                                                         $tmpFilter[] = $insertData;
 
+                                                        if( $insertNullflg != array() ){
+                                                            $tmpFilternullflg[] = $insertNullflg;
+                                                        }
                                                         // #449 ファイルアップロードカラム対応
                                                         if( $UpdateFileData != array() ){
                                                             #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
@@ -1146,7 +1152,8 @@
                                                     }else{
                                                         //RESTパラメータ生成（縦メニュー）
                                                         $insertData = array();
-
+                                                        $UpdateFileData = array();
+                                                        $insertNullflg=array();
                                                         $intColmun=0;
                                                         $intColmunnum = count($arrRestInfo) - count($arrVertivalRestBase) +1;
 
@@ -1167,8 +1174,17 @@
                                                             foreach ( $arrRestInfo as $parmNO => $pramName ) {
                                                                 //項目名：完全一致
                                                                 if( $pramName == $tgtSource_key ){
-                                                                    $insertData[10]=1;
+                                                                    if( isset($insertData[10]) !== true ){
+                                                                        if( array_key_exists(10, $insertData ) !== true ){
+                                                                            $insertData[10] = 1;
+                                                                        }else{
+                                                                            if( $insertData[10] == "" ){
+                                                                                $insertData[10]=1;   
+                                                                            }                                                                            
+                                                                        }
+                                                                    }
                                                                     $insertData[$parmNO]=$value;
+                                                                    if(gettype( $value ) == "NULL" ) $insertNullflg[$parmNO] = 1;
                                                                 //項目名：リピート部分[X]
                                                                 }elseif(mb_strpos($tgtSource_key,$pramName) !== false){
 
@@ -1176,10 +1192,11 @@
                                                                     if( $tmpColname == $pramName ){
                                                                         $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
                                                                         $insertData[$parmNO]=$value;
+                                                                        if(gettype( $value ) == "NULL" ) $insertNullflg[$parmNO] = 1;
                                                                     }
                                                                 //その他
                                                                 }else{
-                                                                    if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]="";
+                                                                    if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]=null;
                                                                 }
 
                                                                 // #449 ファイルアップロードカラム対応
@@ -1192,19 +1209,40 @@
                                                                             }
                                                                         }else{
                                                                             $insertData[$parmNO]="";
-                                                                            $UpdateFileData[$parmNO] ="";
+                                                                            unset($UpdateFileData[$parmNO]);
+                                                                        }
+                                                                    }else{
+                                                                         //値がNULLの項目を除外　#1050,1051
+                                                                        if( array_key_exists($tgtSource_key, $arrFileUploadList[$filename][$menuid] ) ){
+                                                                            $tmpColname =preg_replace('/\[[0-9]+?\]/u',"",$tgtSource_key);
+                                                                            if( $tmpColname == $pramName ){
+                                                                                if( isset($arrTargetUploadLists[$hostname][$value] ) == true ){
+                                                                                    $upload_filepath = $arrTargetUploadLists[$hostname][$value];
+                                                                                    if( is_file( $upload_filepath ) == true ){
+                                                                                        $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                                    }
+                                                                                }else{
+                                                                                    $insertData[$parmNO]="";
+                                                                                    unset($UpdateFileData[$parmNO]);
+                                                                                }                                                                                
+                                                                            }
                                                                         }
                                                                     }                                                                
                                                                 }
 
                                                                 if(  ( count($arrRestInfo)  ==  count($insertData) ) ){
-                                                                    if( isset($regData[$intColmun]) != true ){
+                                                                    //登録更新種別判定　#1050,1051
+                                                                    foreach ( $regData as $regkey => $arrRegDate) {
+                                                                        if(  $arrRegDate['INPUT_ORDER'] == $insertData[10] ){
+                                                                            $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12203"); //更新
+                                                                            $insertData[2] = $arrRegDate['ROW_ID'];
+                                                                            $updeatetimeNo = count($arrRestInfo)-2;
+                                                                            $insertData[$updeatetimeNo] = $arrRegDate['UPD_UPDATE_TIMESTAMP'];
+                                                                        }
+                                                                    }
+
+                                                                    if( $insertData[0] !== $objMTS->getSomeMessage("ITAWDCH-STD-12203") ){
                                                                         $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12202"); //登録
-                                                                    }else{
-                                                                        $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12203"); //更新
-                                                                        $insertData[2] = $regData[$intColmun]['ROW_ID'];
-                                                                        $updeatetimeNo = count($arrRestInfo)-2;
-                                                                        $insertData[$updeatetimeNo] = $regData[$intColmun]['UPD_UPDATE_TIMESTAMP'];
                                                                     }
                                                                     if(isset($insertData[0])){
                                                                         //共通
@@ -1221,6 +1259,9 @@
                                                                                     foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
                                                                                         if( $tmpinsertDatavalue == "") {
                                                                                             $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                            if( isset($UpdateFileData[$tmpinsertDatakey]) ){
+                                                                                                $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
+                                                                                            }
                                                                                             $inputorderwflg =1;
                                                                                         }
                                                                                     }
@@ -1232,17 +1273,45 @@
                                                                             if( $arrRestAUTH != "" ){
                                                                                 $insertData[$arrRestAUTH] = $strRoleList;
                                                                             }
+                                                                            //種別、オペレーション、ホスト、代入順序　#1050,1051
+                                                                            if( isset($insertData[0]) && isset($insertData[3]) && isset($insertData[9]) && isset($insertData[10]) ){
+                                                                                $tmpFilter[$intColmun] = $insertData;
 
-                                                                            $tmpFilter[] = $insertData;
-                                                                             $intColmun++;
-                                                                            // #449 ファイルアップロードカラム対応
-                                                                            if( $UpdateFileData != array() ){
-                                                                                #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
-                                                                                $tmpFilter['UPLOAD_FILE'][] = $UpdateFileData;
-                                                                            } 
+                                                                                if( $insertNullflg != array() ){
+                                                                                    $tmpFilternullflg[$intColmun] = $insertNullflg;
+                                                                                }
+                                                                                
+                                                                                // #449 ファイルアップロードカラム対応
+                                                                                if( $UpdateFileData != array() ){
+                                                                                    #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
+                                                                                    $tmpFilter['UPLOAD_FILE'][$intColmun] = $UpdateFileData;
+                                                                                }
+                                                                                $intColmun++;                                                                                
+                                                                            }
+
                                                                         }
 
                                                                         $insertData=array();
+                                                                    }
+                                                                }else{
+                                                                     //同一代入順序、パラメータ結合[X]無し時対応　#1050,1051
+                                                                    if( isset($insertData[10]) ){
+                                                                        foreach ( $tmpFilter as $insertDataNO => $tmpinsertData) {
+                                                                            if ( isset( $tmpinsertData[10] ) ){
+                                                                                if( $tmpinsertData[10] == $insertData[10] ){
+                                                                                    foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
+                                                                                        if( isset($insertData[$tmpinsertDatakey]) ) {
+                                                                                            if( $insertData[$tmpinsertDatakey] != "" ) {
+                                                                                                $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                                if( isset($UpdateFileData[$tmpinsertDatakey]) ){
+                                                                                                    $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
                                                                     }
                                                                 }
                                                             }
@@ -1254,6 +1323,19 @@
                                                     $tmpParm['requestURI'] = $tmpParm['requestURI'] .  $strmenuid ; 
                                                     $tmpParm['xCommand'] = "EDIT";
                                                     
+                                                    //値がNULLの項目を除外　#1050,1051
+                                                    foreach ( $tmpFilter as $tk => $tarr) {
+                                                        if( is_numeric($tk) === true ){
+                                                            foreach ( $tarr as $tk1 => $tval) {
+                                                                if( gettype($tval) === "NULL" ){
+                                                                    if( !isset( $tmpFilternullflg[$tk][$tk1] ) ){
+                                                                        unset( $tmpFilter[$tk][$tk1] ); 
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    ksort($tmpFilter);
                                                     $tmpParm['strParaJsonEncoded'] = json_encode($tmpFilter,
                                                                                       JSON_UNESCAPED_UNICODE
                                                                                      );
