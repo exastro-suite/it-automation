@@ -109,7 +109,11 @@ callback.prototype = {
 
 }
 
-var proxy = new Db_Access(new callback());
+try {
+  var proxy = new Db_Access(new callback());
+} catch (error) {
+  console.error(error);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
