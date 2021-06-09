@@ -918,7 +918,7 @@ z-index: 2;
 transform: translateY(-50%);
 width: 16px; height: 16px;
 background: url("../imgs/ita_icon_sprite.png") 0 0 no-repeat;
-background-size: 160px 128px;
+background-size: 160px 144px;
 user-select: none;
 -moz-user-select: none;
 -webkit-user-select: none;
