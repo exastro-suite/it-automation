@@ -2820,7 +2820,7 @@ class PasswordInputTabBFmt extends InputTabBFmt {
 
 		$strTagInnerBody = "<div class=\"input_password\"><input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} ><div class=\"password_eye\"></div></div>";
 
-		if( $this->getRequired() === false && $rowData[$strColId] != ""){
+		if( $this->getRequired() === false ){
 
 			$strTagInnerBody .= 
 <<<EOD
