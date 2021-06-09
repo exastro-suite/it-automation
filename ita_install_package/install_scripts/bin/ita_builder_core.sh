@@ -382,7 +382,7 @@ configure_yum_env() {
             cp -R $ITA_EXT_FILE_DIR/yum/ $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
             yum localinstall -y --nogpgcheck ${YUM__ENV_PACKAGE} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            
+
             ls /etc/yum.repos.d/ita.repo 2>&1 | tee -a "$ITA_BUILDER_LOG_FILE" 2>&1 | xargs grep -s "yum_all" >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
             if [ $? != 0 ]; then
