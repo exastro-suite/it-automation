@@ -8832,7 +8832,13 @@ class RowEditByFileColumn extends Column{
 				  $boolRequiredColumnCheckSkip = true;
 				}
 
-				$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
+                if(array_key_exists($this->objTable->getRIColumnID(), $inputArray)){
+    				$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
+                }
+                else{
+    				$strNumberForRI = NULL;
+                }
+
 				$mode = 3;  //実行モード
 
 				//----ここではRIColumnも削除される
