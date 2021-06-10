@@ -1,4 +1,6 @@
-    $url = '★★★LINK_ID_URL★★★';
+    $url1 = '★★★LINK_ID_URL1★★★';
+    $url2 = '★★★LINK_ID_URL2★★★';
+    $url = $url1 . rawurlencode($url2) . '=';
     $c★★★NUMBER★★★ = new LinkIDColumn('★★★VALUE_NAME★★★','★★★DISP_NAME★★★','★★★ID_TABLE_NAME★★★','★★★PRI_KEY_NAME★★★','★★★ID_COL_NAME★★★',$url, ★★★URL_OPTION★★★, false, '', '', '', '');
     $c★★★NUMBER★★★->setHiddenMainTableColumn(true);
     $c★★★NUMBER★★★->setDescription('★★★INFO★★★');//エクセル・ヘッダでの説明

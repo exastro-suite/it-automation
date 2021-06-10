@@ -133,5 +133,6 @@ define('REPLACE_CLONE_COL',             '★★★CLONE_ID_COL_NAME★★★');
 define('REPLACE_CLONE_INFO',            '★★★CLONE_INFO★★★');
 define('REPLACE_ITEM_PASSWORD',         '★★★REFERENCE_ITEM_PASSWORD★★★');
 define('REPLACE_REFERENCE_DATE_FORMAT', '★★★REFERENCE_DATE_FORMAT★★★');
-define('REPLACE_LINK_ID_URL',           '★★★LINK_ID_URL★★★');
+define('REPLACE_LINK_ID_URL1',          '★★★LINK_ID_URL1★★★');
+define('REPLACE_LINK_ID_URL2',          '★★★LINK_ID_URL2★★★');
 define('REPLACE_URL_OPTION',            '★★★URL_OPTION★★★');
