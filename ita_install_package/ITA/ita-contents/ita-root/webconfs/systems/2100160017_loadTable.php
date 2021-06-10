@@ -32,9 +32,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定----
 
     // エクセルのファイル名
-    $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105036"));
+    $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105047"));
     // エクセルのシート名
-    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105037"));
+    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105048"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
 

@@ -304,8 +304,8 @@ $ary["ITACREPAR-MNU-105032"]       = "参照項目情報";
 $ary["ITACREPAR-MNU-105033"]       = "参照項目情報";
 $ary["ITACREPAR-MNU-105034"]       = "プルダウン選択で使用する項目を管理するメニュー(2択用)";
 $ary["ITACREPAR-MNU-105035"]       = "項番";
-$ary["ITACREPAR-MNU-105036"]       = "フラグ";
-$ary["ITACREPAR-MNU-105037"]       = "フラグ";
+$ary["ITACREPAR-MNU-105036"]       = "選択1";
+$ary["ITACREPAR-MNU-105037"]       = "選択1";
 $ary["ITACREPAR-MNU-105038"]       = "Yes-No";
 $ary["ITACREPAR-MNU-105039"]       = "";
 $ary["ITACREPAR-MNU-105040"]       = "True-False";
@@ -315,4 +315,6 @@ $ary["ITACREPAR-MNU-105043"]       = "";
 $ary["ITACREPAR-MNU-105044"]       = "プルダウン選択で使用する項目を管理するメニュー(1択用)";
 $ary["ITACREPAR-MNU-105045"]        = "メニュー";
 $ary["ITACREPAR-MNU-105046"]        = "";
+$ary["ITACREPAR-MNU-105047"]        = "選択2";
+$ary["ITACREPAR-MNU-105048"]        = "選択2";
 ?>
