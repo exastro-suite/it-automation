@@ -57,10 +57,6 @@
         // browse系共通ロジックパーツ01
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_browse_01.php");
         
-        // メンテナンス可能メニューを参照のみ可能の権限ユーザが見てないか判定するパーツ
-        // (この処理は非テンプレートのコンテンツのみに必要)
-        require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_maintenance.php");
-        
         // クエリ存在判定と成功時の取得
         if( !array_key_exists( "execution_no", $_GET ) ){
             // アクセスログ出力(クエリ無し警告)
