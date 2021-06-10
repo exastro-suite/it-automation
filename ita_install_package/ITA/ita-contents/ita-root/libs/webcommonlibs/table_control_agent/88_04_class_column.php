@@ -2350,7 +2350,7 @@ class IDColumn extends Column {
 
 		//----参照先マスタテーブル
 		$strWpColKeyIdOfMaster  = "{$dbQM}{$this->getKeyColumnIDOfMaster()}{$dbQM}";
-		$strWpColDispIdOfMaster = "{$dbQM}{$this->getDispColumnIDOfMaster()}{$dbQM}";
+		$strWpColDispIdOfMaster = "CONVERT({$this->getDispColumnIDOfMaster()} USING utf8)";
 		$strWpColDisuseFlagIdOfMaster = "{$dbQM}{$this->getRequiredDisuseColumnID()}{$dbQM}";
 		//参照先マスタテーブル----
 
