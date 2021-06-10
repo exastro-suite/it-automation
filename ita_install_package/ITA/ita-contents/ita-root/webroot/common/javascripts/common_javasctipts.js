@@ -426,7 +426,7 @@ function set_initial_filter(){
           
           for ( let key in param ) {
             try {
-              const idKey = decodeURI( key ),
+              const idKey = decodeURIComponent( key ),
                     value = param[key];
               let   targetNum = levelList.indexOf(idKey);
               

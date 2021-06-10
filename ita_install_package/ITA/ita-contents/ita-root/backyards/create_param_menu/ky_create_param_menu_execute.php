@@ -811,9 +811,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
@@ -1022,9 +1025,12 @@ try{
                         $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                         $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                         //LinkIDColumn用のurl
-                        $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                        $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                        $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                        $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                         $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                        $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                        $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                        $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                         $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                     }
                     // 整数の場合
@@ -1234,9 +1240,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
@@ -1427,9 +1436,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
@@ -1737,9 +1749,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
@@ -1931,9 +1946,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
