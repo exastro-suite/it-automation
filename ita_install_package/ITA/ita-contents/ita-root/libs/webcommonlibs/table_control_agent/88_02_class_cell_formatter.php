@@ -1787,6 +1787,7 @@ class MainLinkTabBFmt extends BFmt {
 		if($this->strSql != ""){
 			$param = $this->getUrlData($strData);
 		}
+		$param = rawurlencode($param); //エンコード処理
 		if(is_array($this->getLinkUrl())){
 			foreach ($this->getLinkUrl() as $value) {
 				$strLinkUrl .=  str_replace(" ","%20",$value.$param);
