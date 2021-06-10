@@ -92,7 +92,7 @@ Ansible 共通 Ansible Tower インスタンス一覧
     //ログインユーザー----
 
     //----ログインパスワード
-    $objVldt = new SingleTextValidator(0,30,false);
+    $objVldt = new SingleTextValidator(0,128,false);
     $c = new PasswordColumn('ANSTWR_LOGIN_PASSWORD',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001040"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001041"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
