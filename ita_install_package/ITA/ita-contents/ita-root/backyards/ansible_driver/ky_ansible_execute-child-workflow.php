@@ -1106,6 +1106,10 @@
                     $JobTemplatePropertyParameterAry[$PropertyName] = true;
                     break; 
                 case DF_JobTemplateExtraVarsProperty:
+                    $ExtVarString = trim($PropertyAry[1]);
+                    $ExtVarString = trim($ExtVarString,"\"");
+                    $ExtVarString = trim($ExtVarString,"\'");
+                    $ExtVarString = str_replace("\\n","\n",$ExtVarString);
                     $JobTemplatePropertyParameterAry[$PropertyName] = $ExtVarString;
                     break; 
                 }
@@ -1114,43 +1118,24 @@
         return $result;
     }
     function makeExtraVarsParameter(&$ExtVarString) {
-        $String = " " . $ExtVarString . " ";
-        $ValList = preg_split("/(\s)+(\S)+(\s)*=(\s)*/", $String);
-        if(count($ValList) > 1)
-        {
-            // 先頭に空が入るので取り除く
-            if(strlen(trim($ValList[0])) == 0)
-            {
-                unset($ValList[0]);
-            }
+
+        $ExtVarString = trim($ExtVarString,"\'");
+        $ExtVarString = trim($ExtVarString,"\"");
+        $ExtVarString = str_replace("\\n","\n",$ExtVarString);
+
+        // JSON形式のチェック
+        $chk_json = json_decode($ExtVarString,true);
+        if($chk_json !== null) {
+            return true;
         }
-        // 具体値の設定を確認
-        $Val = array();
-        foreach($ValList as $Val) {
-            if(strlen(trim($Val)) == 0) {
-                return false;
-            }
-            $ValAry[] = $Val;
+
+        // YAML形式のチェック
+        $val = @yaml_parse($ExtVarString);
+        if($val !== false) {
+            return true;
         }
-        $VarCount = preg_match_all("/(\s)+(\S)+(\s)*=(\s)*/", $String,$VarList);
-        if($VarCount == 0) {
-            return false;
-        }
-        if(count($ValAry) != $VarCount) {
-            return false;
-        }
-        $idx = 0;
-        $ExtVarString = "";
-        foreach($VarList[0] as $VarName)
-        {
-            $VarName = preg_split("/(\s)*=(\s)*/", $VarName);
-            $CR = "";
-            if(strlen($ExtVarString) != 0)
-                $CR = "\n";
-            $ExtVarString  .= $CR . trim($VarName[0]) . ': ' .  $ValAry[$idx];
-            $idx++;
-        }
-        return true;
+
+        return false;
     }
     function getMovementAnsibleExecOption($Pattern_id,&$ExecOption) {
 
