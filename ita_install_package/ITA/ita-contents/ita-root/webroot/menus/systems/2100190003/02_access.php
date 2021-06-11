@@ -102,7 +102,7 @@
         //////////////////////////////////////////////
         //  比較結果出力  //
         //////////////////////////////////////////////
-        function contrastResultHtml($intContrastid,$strBaseTime0="",$strBaseTime1="",$strhostlist=""){
+        function contrastResultHtml($intContrastid,$strBaseTime0="",$strBaseTime1="",$strhostlist="",$outputType=""){
             // グローバル変数宣言
             global $g;
 
@@ -111,7 +111,7 @@
 
             require_once($g['root_dir_path']."/libs/webindividuallibs/systems/".$g['page_dir']."/81_contrast_controle.php");
         
-            $arrayResult = gethtmlContrast($intContrastid,$strBaseTime0,$strBaseTime1,$strhostlist);
+            $arrayResult = gethtmlContrast($intContrastid,$strBaseTime0,$strBaseTime1,$strhostlist,$outputType);
 
             if($arrayResult[0]=="000"){
                 web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
