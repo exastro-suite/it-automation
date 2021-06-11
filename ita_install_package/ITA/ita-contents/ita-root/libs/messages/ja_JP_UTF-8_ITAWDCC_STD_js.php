@@ -143,4 +143,8 @@ $ary["ITAWDCC92163"]        = "予約作業はありません。";
 $ary["ITAWDCC92164"]        = "{{N}}日以内の予約作業はありません。";
 $ary["ITAWDCC92165"]        = "※0で全件表示";
 $ary["ITAWDCC92166"]        = "期間（日）";
+$ary["ITAWDCC92167"]        = "実行まで残り";
+$ary["ITAWDCC92168"]        = "日";
+$ary["ITAWDCC92169"]        = "時間";
+$ary["ITAWDCC92170"]        = "分";
 ?>
