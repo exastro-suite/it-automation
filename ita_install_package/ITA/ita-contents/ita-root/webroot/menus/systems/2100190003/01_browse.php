@@ -48,6 +48,7 @@
     $timeStamp_itabase_orchestrator_drive_style_css=filemtime("$root_dir_path/webroot/common/css/itabase_orchestrator_drive_style.css");
     $timeStamp_00_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/00_javascript.js");
     $timeStamp_itabase_orchestrator_drive_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_orchestrator_drive.js");
+    $timeStamp_style_css = filemtime("$root_dir_path/webroot/menus/systems/2100190003/style.css");
 
 print <<< EOD
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_orchestrator_drive.js?{$timeStamp_itabase_orchestrator_drive_js}"></script>
@@ -55,6 +56,7 @@ print <<< EOD
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/00_javascript.js?{$timeStamp_00_javascript_js}"></script>
+    <link rel="stylesheet" type="text/css" href="{$scheme_n_authority}/menus/systems/2100190003/style.css?{$timeStamp_style_css}">
 EOD;
 
     // browse系共通ロジックパーツ02
@@ -151,15 +153,31 @@ EOD;
 
     print 
 <<< EOD
-    <td style="padding-right:10px;padding-left:10px">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310203")}</td>
-    <td> <input id="bookdatetime" name="BASE_TIMESTAMP_0" size="16" maxlength="16" type="text" value="" > </td>
-    <td style="padding-right:10px;padding-left:10px">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310204")}</td>
-    <td> <input id="bookdatetime2" name="BASE_TIMESTAMP_1" size="16" maxlength="16" type="text" value="" > </td>
+                    <td style="padding-right:10px;padding-left:10px">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310203")}</td>
+                    <td> <input id="bookdatetime" name="BASE_TIMESTAMP_0" size="16" maxlength="16" type="text" value="" > </td>
+                    <td style="padding-right:10px;padding-left:10px">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310204")}</td>
+                    <td> <input id="bookdatetime2" name="BASE_TIMESTAMP_1" size="16" maxlength="16" type="text" value="" > </td>
 
-    <td style="padding-right:10px;padding-left:10px">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310205")}</td>
-    <td> <input class="linkBtnInTbl" type="button" value=" {$g['objMTS']->getSomeMessage("ITABASEH-MNU-310206")} " onclick="printHostList()" ></td>
-    <td> <input ins-host-id="host_data" type="hidden" name="HOST_LIST[]" ></td>
+                    <td style="padding-right:10px;padding-left:10px">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310205")}</td>
+                    <td> <input class="linkBtnInTbl" type="button" value=" {$g['objMTS']->getSomeMessage("ITABASEH-MNU-310206")} " onclick="printHostList()" ></td>
+                    <td> <input ins-host-id="host_data" type="hidden" name="HOST_LIST[]" ></td>
 
+                </tr>
+                <tr><td></td></tr>
+                <tr>
+                    <td style="padding-right:2px">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310225")}</td>
+                    <td>
+                        <label id="compare_radio" class="compare_label">
+                            <input type="radio" class="compare_radio" value="1" name="OUTPUT_TYPE" for="compare_radio" checked="true">
+                            <span class="compare_label_name">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310226")}</span>
+                        </label>
+
+                        <label id="compare_radio" class="compare_label">
+                            <input type="radio" class="compare_radio" value="2" name="OUTPUT_TYPE" for="compare_radio" >
+                            <span class="compare_label_name">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310227")}</span>
+                        </label>
+
+                    </td>
                 </tr>
             </table>
                 <br>
