@@ -2043,7 +2043,7 @@ function setSymphonyConductorList( resultData ) {
           idLength = Object.keys( resultData[type] ).length;
     
     tableHTML += ''
-    + '<div class="widget-sub-name">' + title + '</div>'
+    + '<div class="widget-sub-name reserve-' + type + '">' + title + '</div>'
     + '<div class="dashboard-table-wrap reserve-' + type + '">';
   
     if ( idLength > 0 ) {
