@@ -69,6 +69,10 @@ const getWidgetMessage = function( id ) {
       '46':getSomeMessage("ITAWDCC92164"), // {{N}}日以内の予約作業はありません。
       '47':getSomeMessage("ITAWDCC92165"), // ※0で全件表示
       '48':getSomeMessage("ITAWDCC92166"), // 期間（日）
+      '49':getSomeMessage("ITAWDCC92167"), // 実行まで残り
+      '50':getSomeMessage("ITAWDCC92168"), // 日
+      '51':getSomeMessage("ITAWDCC92169"), // 時間
+      '52':getSomeMessage("ITAWDCC92170"), // 分
     };
 
     if ( message[ id ] ) {
@@ -2055,7 +2059,7 @@ function setSymphonyConductorList( resultData ) {
             + '<th>' + getWidgetMessage('42') + '</th>'
             + '<th>' + getWidgetMessage('43') + '</th>'
             + '<th>' + getWidgetMessage('44') + '</th>'
-            + '<th>実行まで残り</th>'
+            + '<th>' + getWidgetMessage('49') + '</th>'
           + '</tr>'
         + '</thead>'
         + '</tbody>';
@@ -2130,7 +2134,7 @@ function setSymphonyConductorList( resultData ) {
       const day = ( diff >= 0 )? Math.floor( diff / (24 * 60 * 60 * 1000) ): 0,
             hour = ( diff >= 0 )? Math.floor(( diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)): 0,
             min = ( diff >= 0 )? Math.floor(( diff % (24 * 60 * 60 * 1000)) / (60 * 1000)) % 60: 0,
-            html = '<span class="rd">'+zP(day,3)+'</span>日<span class="rd">'+zP(hour,2)+'</span>時間<span class="rd">'+zP(min,2)+'</span>分';
+            html = '<span class="rd">'+zP(day,3)+'</span>' + getWidgetMessage('50') + '<span class="rd">'+zP(hour,2)+'</span>' + getWidgetMessage('51') + '<span class="rd">'+zP(min,2)+'</span>' + getWidgetMessage('52');
       
       if ( diff <= 0 ) {
         $date.closest('tr').addClass('running').removeClass('shortly');
