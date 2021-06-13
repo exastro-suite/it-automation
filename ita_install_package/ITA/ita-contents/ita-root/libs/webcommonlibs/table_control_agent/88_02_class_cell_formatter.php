@@ -1742,9 +1742,8 @@ class MainLinkTabBFmt extends BFmt {
 	//----ここから新規メソッドの定義宣言処理
 
 	public function getTag($data, $rowData){
-		$escapedData = $this->makeSafeValueForBrowse($data);
 		//----タグ（先頭と末尾）の結合を取得
-		$strRetBody = $this->getSTag($rowData,$data).$this->getDataPrefix().$escapedData.$this->getDataPostfix().$this->getETag($rowData);
+		$strRetBody = $this->getSTag($rowData,$data).$this->getDataPrefix().$data.$this->getDataPostfix().$this->getETag($rowData);
 		return $strRetBody;
 	}
 
@@ -1788,7 +1787,6 @@ class MainLinkTabBFmt extends BFmt {
 		if($this->strSql != ""){
 			$param = $this->getUrlData($strData);
 		}
-		$param = rawurlencode($param); //エンコード処理
 		if(is_array($this->getLinkUrl())){
 			foreach ($this->getLinkUrl() as $value) {
 				$strLinkUrl .=  str_replace(" ","%20",$value.$param);
@@ -2807,7 +2805,41 @@ class PasswordInputTabBFmt extends InputTabBFmt {
 		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
 		$aryOverWrite["value"] = "";
 
+		global $g;
+		$strColId = $this->getPrintTargetKey();
+
+		$strColMark = $strColId;
+		if( $this->getColumnIDHidden() === true ){
+			$strColMark = $this->getIDSynonym();
+		}
+		
+		$strIdOfFSTOfDelFlag = "{$this->strFormatterId}_del_password_{$strColMark}";
+		$strNameOfFSTOfDelFlag = "del_password_flag_{$strColMark}";
+		$strIdOfForm = "{$this->strFormatterId}_{$strColMark}";
+
 		$strTagInnerBody = "<div class=\"input_password\"><input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} ><div class=\"password_eye\"></div></div>";
+	
+		if( $this->getRequired() === false && is_array($rowData)){
+
+			$strTagInnerBody .= 
+<<<EOD
+<br />
+<label for="{$strIdOfFSTOfDelFlag}"><input type="checkbox" style="vertical-align: top;" id="{$strIdOfFSTOfDelFlag}" name="{$strNameOfFSTOfDelFlag}" />{$g['objMTS']->getSomeMessage("ITAWDCH-STD-672")}</label>
+<script type="text/javascript">
+document.getElementById("{$strIdOfFSTOfDelFlag}").onchange = function(){
+
+	if(this.checked == true){
+		$("#"+"{$aryOverWrite["id"]}").val("");
+		$("#"+"{$aryOverWrite["id"]}").attr("disabled",true);
+	}
+	else{
+		$("#"+"{$aryOverWrite["id"]}").attr("disabled",false);
+	}
+}
+</script>
+EOD;
+			
+		}
 
 		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
 			$objFunction = $this->objFunctionForReturnOverrideGetData;
@@ -4201,8 +4233,7 @@ EOD;
 {$g['objMTS']->getSomeMessage("ITAWDCH-STD-631")}: <br />
 {$strAnchorTag}
 <p>{$g['objMTS']->getSomeMessage("ITAWDCH-STD-632")}</p>
-<input type="checkbox" id="{$strIdOfFSTOfDelFlag}" name="{$strNameOfFSTOfDelFlag}" />
-<label for="{$strLabelForDelFlag}">{$g['objMTS']->getSomeMessage("ITAWDCH-STD-633")}</label>
+<label for="{$strIdOfFSTOfDelFlag}"><input type="checkbox" id="{$strIdOfFSTOfDelFlag}" name="{$strNameOfFSTOfDelFlag}" style="vertical-align: top;" />{$g['objMTS']->getSomeMessage("ITAWDCH-STD-633")}</label>
 
 <script type="text/javascript">
 document.getElementById("{$strIdOfFSTOfDelFlag}").onchange = function(){
@@ -4379,8 +4410,7 @@ EOD;
 {$g['objMTS']->getSomeMessage("ITAWDCH-STD-631")}: <br />
 {$strAnchorTag}
 <p>{$g['objMTS']->getSomeMessage("ITAWDCH-STD-632")}</p>
-<input type="checkbox" id="{$strIdOfFSTOfDelFlag}" name="{$strNameOfFSTOfDelFlag}" />
-<label for="{$strLabelForDelFlag}">{$g['objMTS']->getSomeMessage("ITAWDCH-STD-633")}</label>
+<label for="{$strIdOfFSTOfDelFlag}"><input type="checkbox" id="{$strIdOfFSTOfDelFlag}" name="{$strNameOfFSTOfDelFlag}" style="vertical-align: top;" />{$g['objMTS']->getSomeMessage("ITAWDCH-STD-633")}</label>
 
 <script type="text/javascript">
 document.getElementById("{$strIdOfFSTOfDelFlag}").onchange = function(){
