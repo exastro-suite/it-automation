@@ -1742,8 +1742,9 @@ class MainLinkTabBFmt extends BFmt {
 	//----ここから新規メソッドの定義宣言処理
 
 	public function getTag($data, $rowData){
+		$escapedData = $this->makeSafeValueForBrowse($data);
 		//----タグ（先頭と末尾）の結合を取得
-		$strRetBody = $this->getSTag($rowData,$data).$this->getDataPrefix().$data.$this->getDataPostfix().$this->getETag($rowData);
+		$strRetBody = $this->getSTag($rowData,$data).$this->getDataPrefix().$escapedData.$this->getDataPostfix().$this->getETag($rowData);
 		return $strRetBody;
 	}
 
@@ -1787,6 +1788,7 @@ class MainLinkTabBFmt extends BFmt {
 		if($this->strSql != ""){
 			$param = $this->getUrlData($strData);
 		}
+		$param = rawurlencode($param); //エンコード処理
 		if(is_array($this->getLinkUrl())){
 			foreach ($this->getLinkUrl() as $value) {
 				$strLinkUrl .=  str_replace(" ","%20",$value.$param);

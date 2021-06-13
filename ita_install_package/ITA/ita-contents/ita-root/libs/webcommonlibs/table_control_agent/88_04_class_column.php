@@ -2366,7 +2366,7 @@ class IDColumn extends Column {
 
 		//----参照先マスタテーブル
 		$strWpColKeyIdOfMaster  = "{$dbQM}{$this->getKeyColumnIDOfMaster()}{$dbQM}";
-		$strWpColDispIdOfMaster = "{$dbQM}{$this->getDispColumnIDOfMaster()}{$dbQM}";
+		$strWpColDispIdOfMaster = "CONVERT({$this->getDispColumnIDOfMaster()} USING utf8)";
 		$strWpColDisuseFlagIdOfMaster = "{$dbQM}{$this->getRequiredDisuseColumnID()}{$dbQM}";
 		//参照先マスタテーブル----
 
@@ -8848,7 +8848,13 @@ class RowEditByFileColumn extends Column{
 				  $boolRequiredColumnCheckSkip = true;
 				}
 
+			if(array_key_exists($this->objTable->getRIColumnID(), $inputArray)){
 				$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
+			}
+			else{
+				$strNumberForRI = NULL;
+			}
+			
 				$mode = 3;  //実行モード
 
 				//----ここではRIColumnも削除される
