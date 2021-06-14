@@ -111,6 +111,7 @@ $ary["ITAWDCH-STD-661"]             = "全レコード";
 $ary["ITAWDCH-STD-662"]             = "廃止含まず";
 $ary["ITAWDCH-STD-663"]             = "廃止のみ";
 $ary["ITAWDCH-STD-671"]             = "自動採番";
+$ary["ITAWDCH-STD-672"]             = "パスワード削除";
 $ary["ITAWDCH-STD-1001"]            = "ログイン";
 $ary["ITAWDCH-STD-1002"]            = "ログインID";
 $ary["ITAWDCH-STD-1003"]            = "パスワード";
