@@ -4581,7 +4581,7 @@ class OrchestratorLinkAgent {
                         $arr_json[$value['NODE_NAME']]['Name']="";  
                     }else{
                         //廃止済みMovemnt対応
-                        $arr_json[$value['NODE_NAME']]['PATTERN_ID']="-";
+                        $arr_json[$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];#"-";
                         $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']="-";
                         $arr_json[$value['NODE_NAME']]['Name']="-";                        
                     }
@@ -4601,12 +4601,12 @@ class OrchestratorLinkAgent {
                     if( $aryRetBody[1] !== null ){
                         //廃止済みの場合
                         $strConductorName = "";
-                        $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
+                        $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];#"---";
                     }else{
                         if($aryRetBody[4]['DISUSE_FLAG'] == 1){
                             //廃止済みの場合
                             $strConductorName = "";
-                            $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
+                            $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];#"---";
                         }else{
                             $strConductorName = $aryRetBody[4]['CONDUCTOR_NAME'];
                         }
@@ -4629,7 +4629,7 @@ class OrchestratorLinkAgent {
                         //廃止済みの場合
                         $strConductorName = "";
                         #$arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
-                        $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']="---";
+                        #$arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']="---";
                     }else{
                         $strConductorName = $aryRetBody[4]['SYMPHONY_NAME'];    
                     }
@@ -4722,7 +4722,7 @@ class OrchestratorLinkAgent {
                     if( $arrayRetBody[1] !== null ){
                         //廃止済みの場合
                         $strOpeName = "";
-                        $arr_json[$value['NODE_NAME']]['OPERATION_NO_IDBH']="-";
+                        $arr_json[$value['NODE_NAME']]['OPERATION_NO_IDBH']=$value['OPERATION_NO_IDBH'];#"-";
                     }else{
                         // オペレーションNoからオペレーションの情報を取得する----
                         $aryRowOfOperationTable = $arrayRetBody[4];
@@ -7268,6 +7268,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                     if( $tmpRetBody[1] === 101 ){
                         //----１行も発見できなかった場合
                         $intErrorType = 101;
+                        $strErrMsg = $objMTS->getSomeMessage("ITABASEH-ERR-170038");
                         //１行も発見できなかった場合----
                     }
                     throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );

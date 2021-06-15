@@ -90,6 +90,7 @@ $ary["ITABASEH-ERR-170034"]         = "SymphonyCall - 指定できないSymphony
 $ary["ITABASEH-ERR-170035"]         = "SymphonyCall - Movementに指定できないオペレーションがIDが含まれています。(Conductor:{} Symphony:{})";
 $ary["ITABASEH-ERR-170036"]         = "SymphonyCall - 指定できないMovementが含まれています。(Conductor:{} Symphony:{})";
 $ary["ITABASEH-ERR-170037"]         = "コンダクタ内にアクセス権限がないノードが含まれています(定期実行ID:{})。";
+$ary["ITABASEH-ERR-170038"]         = "対象のオペレーションが見つかりません。レコードが廃止されている可能性があります。";
 $ary["ITABASEH-ERR-170101"]         = "Nodeインスタンス:保留解除できるステータス(保留中)ではありません。";
 $ary["ITABASEH-ERR-170102"]         = "Nodeインスタンス:保留解除できるNodeではありません。";
 $ary["ITABASEH-ERR-170103"]         = "Conductorインタフェース情報が未登録です。";

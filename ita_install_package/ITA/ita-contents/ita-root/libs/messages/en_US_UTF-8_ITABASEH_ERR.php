@@ -90,6 +90,7 @@ $ary["ITABASEH-ERR-170034"]         = "SymphonyCall - Contains a Symphony Class 
 $ary["ITABASEH-ERR-170035"]         = "SymphonyCall - Contains an operation ID that cannot be specified for Movement.(Conductor:{} Symphony:{})";
 $ary["ITABASEH-ERR-170036"]         = "SymphonyCall - Contains a Movement that cannot be specified.(Conductor:{} Symphony:{})";
 $ary["ITABASEH-ERR-170037"]         = "Conductor contains a node for which you do not have access rights. (regularlyId:{}).";
+$ary["ITABASEH-ERR-170038"]         = "Cannot find TargetOperation. Record may have been discarded.";
 $ary["ITABASEH-ERR-170101"]         = "Node instance: Not in a status that can be released (pending).";
 $ary["ITABASEH-ERR-170102"]         = "Node instance: Not a Node that can be released.";
 $ary["ITABASEH-ERR-170103"]         = "Conductor interface information is not registered.";
