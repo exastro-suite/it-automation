@@ -95,8 +95,7 @@ class TableControlAgent {
 
 	protected $boolAccessAuth;    // ACCESS_AUTH Column flag indicator  true:yes false:no
 
-        // #28enomoto Add
-        protected $strAccessAuthColumnName; // ACCESS_AUTH Column Name
+    protected $strAccessAuthColumnName; // ACCESS_AUTH Column Name
 
 	public function __construct($strDBMainTableId, $strRIColumnId, $strRIColumnLabel="", $strDBJournalTableId=null, $arrayVariant=array()){
 		global $g;
