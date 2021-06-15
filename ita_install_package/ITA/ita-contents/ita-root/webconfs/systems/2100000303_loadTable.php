@@ -366,7 +366,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                         list($strLoginPw   ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW')          ,"");
                         list($intPwHoldFlag,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW_HOLD_FLAG'),"");
                     }
-// enomoto                    
+
                     if( $strModeId == "DTUP_singleRecDelete" || $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
                         $boolPasswordInput = false;
                         $strErrorMsgPreBody = "";
