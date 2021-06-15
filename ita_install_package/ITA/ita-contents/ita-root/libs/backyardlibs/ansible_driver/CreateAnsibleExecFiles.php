@@ -2071,18 +2071,6 @@ class CreateAnsibleExecFiles {
             //該当ホストの変数配列を取得
             $vars_list = $ina_host_vars[$host_name];
 
-
-            $chl_vars_list = array();
-
-            switch($this->getAnsibleDriverID()){
-            case DF_LEGACY_ROLE_DRIVER_ID:
-                //該当ホストの配列変数を取得
-                if(@count($ina_host_child_vars[$host_name]) != 0){
-                    $chl_vars_list = $ina_host_child_vars[$host_name];
-                }
-                break;
-            }
-
             // ホスト変数定義ファイル作成
             if($this->CreateRoleHostvarsfile("VAR",
                                              $file_name,$vars_list,
