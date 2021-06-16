@@ -473,6 +473,7 @@ Ansible（Pioneer）代入値自動登録設定
 
         $objVarBFmtReg = new SelectTabBFmt();
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+        $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
         $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -885,6 +886,7 @@ Ansible（Pioneer）代入値自動登録設定
 
         // フォームの表示直後、トリガーカラムが選ばれていない場合のメッセージ
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
+        $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
         // フォームの表示後、ユーザによりトリガーカラムが選ばれたが、選べる選択肢がなかった場合のメッセージ
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
@@ -1131,6 +1133,7 @@ Ansible（Pioneer）代入値自動登録設定
 
         // フォームの表示直後、トリガーカラムが選ばれていない場合のメッセージ
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
+        $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
         // フォームの表示後、ユーザによりトリガーカラムが選ばれたが、選べる選択肢がなかった場合のメッセージ
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
