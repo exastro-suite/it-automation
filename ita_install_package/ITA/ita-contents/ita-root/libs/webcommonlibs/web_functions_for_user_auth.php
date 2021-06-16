@@ -726,6 +726,7 @@
             }
             // ■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。----
 
+            global $arySYSCON;
             if(0 < $tempIntLength){
                 // ----パスワードの有効期限の設定がされている
                 
@@ -900,8 +901,14 @@
                 
                 if($tempBoolPassWordChange===true){
                     // ----有効期限が切れている。
-                    $boolExpiryOut = true;
 
+                    // 初期パスワード変更フラグ
+                    if ($arySYSCON['PWD_MUST_CHANGE'] == "1" && !$p_login_pw_l_update) {
+                        $boolExpiryOut = true;
+                    } else {
+                        $boolExpiryOut = false;
+                    }
+                    // 初期パスワード変更フラグ----
                     // 有効期限が切れている。----
                 }
                 else{
@@ -912,7 +919,14 @@
                 // パスワードの有効期限の設定がされている----
             }
             else{
-
+               // 初期パスワード変更フラグ
+               if ($arySYSCON['PWD_MUST_CHANGE'] == "1" && !$p_login_pw_l_update) {
+                    $boolExpiryOut = true;
+                    $strReasonType = "1";
+               } else {
+                   $boolExpiryOut = false;
+               }
+               // 初期パスワード変更フラグ----
             }
         }
         catch (Exception $e){
