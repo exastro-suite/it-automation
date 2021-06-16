@@ -2440,6 +2440,7 @@ class SingleRowTableFormatter extends TableFormatter {
             }
             // RBAC対応 ----
             $objColumnId = $objColumn->getID();
+            
             if( get_class($this) == "RegisterTableFormatter" && get_class($objColumn) == "FileUploadColumn" ) {
 
                 if( $objColumn->getFileEncryptFunctionName() == false ) {
@@ -2451,6 +2452,8 @@ class SingleRowTableFormatter extends TableFormatter {
             } elseif( get_class($this) == "RegisterTableFormatter" && 
                 ( get_class($objColumn) == "SensitiveMultiTextColumn" || get_class($objColumn) == "SensitiveSingleTextColumn" )) {
                 $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, $outputRowData['SENSITIVE_FLAG']);
+            } elseif( get_class($this) == "RegisterTableFormatter" && get_class($objColumn) == "PasswordColumn") {
+                $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, 2);
             } else {
                 $tmpStr .= $objColumn->getOutputBody($this->strFormatterId, $outputRowData);
             }

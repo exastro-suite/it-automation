@@ -402,6 +402,7 @@ Terraform代入値管理
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
     $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
 
