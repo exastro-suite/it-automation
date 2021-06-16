@@ -908,11 +908,21 @@
                     // ----有効期限が切れていない。
                     // 有効期限が切れていない。----
                 }
-                
+                // パスワード有効期限>0であってもパスワード変更画面へリダイレクトしない
+                if ( getSysconfigList('PWD_MUST_CHANGE') != "1"){
+                    $boolExpiryOut = false;
+                }
+                // パスワード有効期限>0であってもパスワード変更画面へリダイレクトしない----
                 // パスワードの有効期限の設定がされている----
             }
             else{
-
+                // パスワード有効期限>0であってもパスワード変更画面へリダイレクト
+                if ( getSysconfigList('PWD_MUST_CHANGE') == "1" && !$_SESSION['LAST_LOGIN_TIME']){
+                    $boolExpiryOut = true;
+                    $strReasonType = "1";
+                    unset($_SESSION['LAST_LOGIN_TIME']); // 初回ログイン判定を消す
+                }
+                // パスワード有効期限>0であってもパスワード変更画面へリダイレクト----
             }
         }
         catch (Exception $e){
@@ -1147,6 +1157,76 @@
                            'PasswordPerUsername'=>$account_list,
                            'UserID'=>$strFixUserId);
         return array($aryValues,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+    }
+
+    function getAccountLastLoginTime($username = false)
+    {
+        if (!$username) {
+            return false;
+        }
+        global $objDBCA;
+        global $objMTS;
+
+        // SQL作成
+        $sql = "SELECT USER_ID, USERNAME, LAST_LOGIN_TIME
+        FROM   A_ACCOUNT_LIST 
+        WHERE  DISUSE_FLAG = '0' AND USERNAME = '".$username."'";
+        
+        // SQL準備
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if( $objQuery->getStatus()===false ){
+            // 異常フラグON
+            $error_flag = 1;
+            
+            // 例外処理へ
+            throw new Exception( $objMTS->getSomeMessage("ITAWDCH-ERR-50003",array(__FILE__,__LINE__,"00000200")) );
+        }
+        
+        // SQL発行
+        $r = $objQuery->sqlExecute();
+        if (!$r){
+            // 異常フラグON
+            $error_flag = 1;
+            
+            // 例外処理へ
+            throw new Exception( $objMTS->getSomeMessage("ITAWDCH-ERR-50003",array(__FILE__,__LINE__,"00000300")) );
+        }
+        
+        // レコードFETCH
+        $row = $objQuery->resultFetch();
+        if ($row) {
+            return $row;
+        } else {
+            return false;
+        }
+    }
+
+    /*
+     * システム設定一覧より取得しkeyが存在すれば該当値を返却
+     * 該当しない場合はfalse
+     * key値がfalseであれば全返却
+     */
+    function getSysconfigList($key = false)
+    {
+        global $root_dir_path;
+        global $objDBCA;
+        require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_get_sysconfig.php");
+        $tmpAryRetBody = getSystemConfigFromConfigList($objDBCA);
+        if( $tmpAryRetBody[1] !== null ){
+            // アクセスログ出力(想定外エラー)
+            web_log($objMTS->getSomeMessage("ITAWDCH-ERR-36",$tmpAryRetBody[3]));
+    
+            // 想定外エラー通知画面にリダイレクト
+            webRequestForceQuitFromEveryWhere(500,10410101);
+            exit();
+        }
+        if ( isset($tmpAryRetBody[0]['Items'][$key]) ) {
+            return $tmpAryRetBody[0]['Items'][$key];
+        } elseif ( !isset($tmpAryRetBody[0]['Items'][$key]) && $key != false) {
+            return false;
+        } else {
+            return $tmpAryRetBody[0]['Items'];
+        }
     }
 
     function executeLoginLockByUserID($strFixUserId,$checkStatus,$pwl_expiry,$pwl_threshold,$pwl_countmax,$objDBCA){

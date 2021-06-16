@@ -327,6 +327,12 @@
 
             // ----- 外部認証ユーザーのユーザー名/パスワードのチェック処理 ここまで
         } else {
+            // 認証時にLAST_LOGIN_TIMEをupdateされてしまうので先に取得し初期パスワード変更判定に利用
+            $accountLastLoginTime = getAccountLastLoginTime($strUsername);
+            if ( isset($accountLastLoginTime['LAST_LOGIN_TIME']) ) {
+                $_SESSION['LAST_LOGIN_TIME'] = $accountLastLoginTime['LAST_LOGIN_TIME'];
+            }
+            // 認証時にLAST_LOGIN_TIMEをupdateされてしまうので先に取得し初期パスワード変更判定に利用----
             // 内部認証ユーザー のユーザー名/パスワードのチェック処理 -----
             $tmpArrayRet = checkLoginRequestForUserAuth($strUsername, $strUserPass, $pwl_expiry, $pwl_threshold, $pwl_countmax, $objDBCA);
             $checkStatus = $tmpArrayRet[0]['CheckResultType'];
