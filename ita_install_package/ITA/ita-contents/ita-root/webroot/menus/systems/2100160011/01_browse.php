@@ -365,7 +365,19 @@ EOD;
               </tbody>
             </table>
           </div>
-          
+
+          <div id="unique-constraint" class="property-group">
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-107001")}</div>
+            <table class="property-table">
+              <tbody>
+                <tr class="data-sheet parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-107002")}:</th>
+                  <td class="property-td" colspan="3"><span id="unique-constraint-list" type="text" class="property-span"></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <div id="permission-role" class="property-group">
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104243")}</div>
             <table class="property-table">
@@ -476,7 +488,22 @@ EOD;
               <li><button id="create-menu-group-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</button></li>
             </ul>
           </div>
-          
+
+          <div id="unique-constraint" class="property-group">
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-107001")}</div>
+            <table class="property-table">
+              <tbody>
+                <tr class="data-sheet parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-107002")}:</th>
+                  <td class="property-td" colspan="3"><span id="unique-constraint-list" type="text" class="property-span"></span></td>
+                </tr>
+              </tbody>
+            </table>
+            <ul class="property-button-group">
+              <li><button id="unique-constraint-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-107003")}</button></li>
+            </ul>
+          </div>
+
           <div id="permission-role" class="property-group">
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104243")}</div>
             <table class="property-table">
@@ -592,7 +619,22 @@ EOD;
               <li><button id="create-menu-group-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</button></li>
             </ul>
           </div>
-          
+
+          <div id="unique-constraint" class="property-group">
+            <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-107001")}</div>
+            <table class="property-table">
+              <tbody>
+                <tr class="data-sheet parameter-sheet parameter-operation">
+                  <th class="property-th">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-107002")}:</th>
+                  <td class="property-td" colspan="3"><span id="unique-constraint-list" type="text" class="property-span"></span></td>
+                </tr>
+              </tbody>
+            </table>
+            <ul class="property-button-group">
+              <li><button id="unique-constraint-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-107003")}</button></li>
+            </ul>
+          </div>
+
           <div id="permission-role" class="property-group">
             <div class="property-group-title">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104243")}</div>
             <table class="property-table">

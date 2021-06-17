@@ -446,6 +446,36 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
 -- -------------------------
+-- 一意制約管理
+-- -------------------------
+CREATE TABLE F_UNIQUE_CONSTRAINT (
+UNIQUE_CONSTRAINT_ID          %INT%             ,
+CREATE_MENU_ID                %INT%             ,
+UNIQUE_CONSTRAINT_ITEM        TEXT              ,
+ACCESS_AUTH                   TEXT              ,
+NOTE                          %VARCHR% (4000)   ,
+DISUSE_FLAG                   %VARCHR% (1)      ,
+LAST_UPDATE_TIMESTAMP         %DATETIME6%       ,
+LAST_UPDATE_USER              %INT%             ,
+PRIMARY KEY (UNIQUE_CONSTRAINT_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_UNIQUE_CONSTRAINT_JNL (
+JOURNAL_SEQ_NO                %INT%             ,
+JOURNAL_REG_DATETIME          %DATETIME6%       ,
+JOURNAL_ACTION_CLASS          %VARCHR% (8)      ,
+UNIQUE_CONSTRAINT_ID          %INT%             ,
+CREATE_MENU_ID                %INT%             ,
+UNIQUE_CONSTRAINT_ITEM        TEXT              ,
+ACCESS_AUTH                   TEXT              ,
+NOTE                          %VARCHR% (4000)   ,
+DISUSE_FLAG                   %VARCHR% (1)      ,
+LAST_UPDATE_TIMESTAMP         %DATETIME6%       ,
+LAST_UPDATE_USER              %INT%             ,
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+-- -------------------------
 -- 参照項目情報
 -- -------------------------
 CREATE TABLE F_MENU_REFERENCE_ITEM

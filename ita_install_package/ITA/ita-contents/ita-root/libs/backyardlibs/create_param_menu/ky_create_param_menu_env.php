@@ -136,3 +136,4 @@ define('REPLACE_REFERENCE_DATE_FORMAT', '★★★REFERENCE_DATE_FORMAT★★★
 define('REPLACE_LINK_ID_URL1',          '★★★LINK_ID_URL1★★★');
 define('REPLACE_LINK_ID_URL2',          '★★★LINK_ID_URL2★★★');
 define('REPLACE_URL_OPTION',            '★★★URL_OPTION★★★');
+define('REPLACE_UNIQUE_CONSTRAINT',     '★★★UNIQUE_CONSTRAINT★★★');
