@@ -266,6 +266,21 @@ try{
     $convertParamInfoArray = $result;
 
     //////////////////////////
+    // 一意制約管理情報を取得
+    //////////////////////////
+    $uniqueConstraintTable = new UniqueConstraintTable($objDBCA, $db_model_ch);
+    $sql = $uniqueConstraintTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+    // SQL実行
+    $result = $uniqueConstraintTable->selectTable($sql);
+    if(!is_array($result)){
+        $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+        outputLog($msg);
+        throw new Exception($msg);
+    }
+    $uniqueConstraintArray = $result;
+
+    //////////////////////////
     // ロール・ユーザ紐づけ情報を取得
     //////////////////////////
     $roleAccountLinkListTable = new RoleAccountLinkListTable($objDBCA, $db_model_ch);
@@ -551,6 +566,53 @@ try{
                 $repeatItemCount++;
             }
             $convertItemInfoArray = array_merge($convertItemInfoArray, $afterItemArray);
+        }
+
+        //////////////////////////
+        // 一意制約管理情報を特定する
+        //////////////////////////
+        $uniqueConstraintTargetArray = array();
+        foreach($uniqueConstraintArray as $uniqueData){
+            if($targetData['CREATE_MENU_ID'] === $uniqueData['CREATE_MENU_ID']){
+                $uniqueConstraintTargetArray[] = $uniqueData;
+            }
+        }
+
+        //一意制約(複数項目)のloadTableに記載する文字列を生成
+        $uniqueConstraintSet = "";
+        $noExistUniqueConstraintId = false;
+        if(!empty($uniqueConstraintTargetArray)){
+            foreach($uniqueConstraintTargetArray as $uniqueData){
+                $uniqueConstraintItemArray = explode(",", $uniqueData['UNIQUE_CONSTRAINT_ITEM']);
+                $targetColumnSet = "";
+                foreach($uniqueConstraintItemArray as $id){
+                    //項目のIDと一意制約対象のIDが一致しているかどうかを判定
+                    if(!in_array($id, $idArray)){
+                        $noExistUniqueConstraintId = true;
+                    }
+
+                    $columnName = COLUMN_PREFIX . sprintf("%04d", $id);
+                    if($targetColumnSet == ""){
+                        $targetColumnSet = "'" . $columnName . "'";
+                    }else{
+                        $targetColumnSet = $targetColumnSet . "," . "'" . $columnName . "'";
+                    }
+                }
+                if($uniqueConstraintSet == ""){
+                    $uniqueConstraintSet = '    $table->addUniqueColumnSet(array(' . $targetColumnSet . '));' . "\n";
+                }else{
+                    $uniqueConstraintSet = $uniqueConstraintSet . '    $table->addUniqueColumnSet(array(' . $targetColumnSet . '));' . "\n";
+                }
+            }
+        }
+
+        //一意制約の対象IDの中に項目のIDと一致しないものがあった場合エラー処理
+        if($noExistUniqueConstraintId == true){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5025');
+            outputLog($msg);
+            // パラメータシート作成管理更新処理を行う
+            updateMenuStatus($targetData, "4", $msg, false, true);
+            continue;
         }
 
         //////////////////////////
@@ -2023,6 +2085,7 @@ try{
             $work = $cmdbLoadTableTmpl;
             $work = str_replace(REPLACE_INFO,   $description,       $work);
             $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+            $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
             $work = str_replace(REPLACE_MENU,   $menuName,          $work);
             $cmdbLoadTableVal .= $columnGrpParts;
             $work = str_replace(REPLACE_ITEM,   $cmdbLoadTableVal, $work);
@@ -2059,6 +2122,7 @@ try{
                 $work = $hgLoadTableTmpl;
                 $work = str_replace(REPLACE_INFO,   $description,       $work);
                 $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                 $work = str_replace(REPLACE_MENU,   $menuName,          $work);
                 $hgLoadTableVal .= $columnGrpParts;
                 $work = str_replace(REPLACE_ITEM,   $hgLoadTableVal, $work);
@@ -2069,6 +2133,7 @@ try{
                 $work = $hostLoadTableTmpl;
                 $work = str_replace(REPLACE_INFO,   $description,       $work);
                 $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                 $work = str_replace(REPLACE_MENU,   $menuName,          $work);
                 $hostLoadTableVal .= $columnGrpParts;
                 $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
@@ -2079,6 +2144,7 @@ try{
                 $work = $hostLoadTableOpTmpl;
                 $work = str_replace(REPLACE_INFO,   $description,       $work);
                 $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                 $work = str_replace(REPLACE_MENU,   $menuName,          $work);
                 $hostLoadTableVal .= $columnGrpParts;
                 $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
@@ -2094,12 +2160,14 @@ try{
                     $work = $convLoadTableTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertLoadTable = $work;
                     $work = $convHostLoadTableTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertHostLoadTable = $work;
@@ -2108,6 +2176,7 @@ try{
                     $work = $convHostLoadTableTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertLoadTable = $work;
@@ -2116,6 +2185,7 @@ try{
                     $work = $convHostLoadTableOpTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertLoadTable = $work;
@@ -2131,6 +2201,7 @@ try{
             }
             $work = str_replace(REPLACE_INFO,   $description,       $work);
             $work = str_replace(REPLACE_MENU,   $menuName,          $work);
+            $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
             if(true === $createConvFlg){
                 $work = str_replace(REPLACE_TABLE,  $menuTableName . '_CONV',     $work);
                 $inputOrder = <<< 'EOD'

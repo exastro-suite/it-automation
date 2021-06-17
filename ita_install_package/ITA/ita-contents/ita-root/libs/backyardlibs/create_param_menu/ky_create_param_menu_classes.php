@@ -1106,3 +1106,29 @@ class ReferenceItemTable extends BaseTable_CPM {
                                    );
     }
 }
+
+/**
+ * 一意制約(複数項目)管理テーブルクラス
+ */
+class UniqueConstraintTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'F_UNIQUE_CONSTRAINT';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('UNIQUE_CONSTRAINT_ID',
+                                    'CREATE_MENU_ID',
+                                    'UNIQUE_CONSTRAINT_ITEM',
+                                    'ACCESS_AUTH',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}

@@ -290,7 +290,8 @@ const languageText = {
 '0043':[getSomeMessage("ITACREPAR_1252"),''],
 '0044':[getSomeMessage("ITACREPAR_1253"),''],
 '0045':[getSomeMessage("ITACREPAR_1254"),''],
-'0046':[getSomeMessage("ITACREPAR_1276"),'']
+'0046':[getSomeMessage("ITACREPAR_1276"),''],
+'0047':[getSomeMessage("ITACREPAR_1280"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
@@ -597,6 +598,7 @@ const history = {
     historyButtonCheck();
     previewTable();
     resetSelect2( $menuTable );
+    updateUniqueConstraintDispData();
   },
   'redo' : function() {
     workCounter++;
@@ -604,6 +606,7 @@ const history = {
     historyButtonCheck();
     previewTable();
     resetSelect2( $menuTable );
+    updateUniqueConstraintDispData();
   },
   'clear' : function() {
     workCounter = 0;
@@ -835,6 +838,7 @@ $menuEditor.on({
     if ( $( this ).is('.menu-column-title-input') ) {
       history.add();
       previewTable();
+      updateUniqueConstraintDispData();
     }
   },
   'focus' : function() {
@@ -1190,6 +1194,9 @@ $menuEditor.on('click', '.menu-column-delete', function(){
   emptyCheck();
   repeatCheck();
   previewTable();
+  const columnId = $column.attr('id');
+  deleteUniqueConstraintDispData(columnId); //一意制約(複数項目)で削除した項目を除外する。
+  
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2051,6 +2058,199 @@ const modalReferenceItemList = function($target) {
 
 }
 
+//一意制約(複数項目)
+const modalUniqueConstraint = function() {
+  //現在の設定値
+  const $input = $('#unique-constraint-list');
+  const initmodalUniqueConstraintList = ( $input.attr('data-unique-list') === undefined )? '': $input.attr('data-unique-list');
+
+  //表示されている項目のデータを格納
+  let $columnItems = $menuTable.find('.menu-column');
+  let columnItemData = [];
+  let i = 0;
+  $columnItems.each(function(){
+    let targetItem = $(this);
+    let targetItemData = {};
+    let columnId = "";
+    columnId = targetItem.attr('id');
+    let itemName = "";
+    itemName = targetItem.find('.menu-column-title-input').val();
+    let itemId = "";
+    itemId = targetItem.attr('data-item-id');
+    targetItemData = {
+      'columnId': columnId,
+      'itemName': itemName,
+      'itemId': itemId
+    };
+
+    columnItemData[i] = targetItemData;
+    i++;
+  });
+
+
+  // 決定時の処理    
+  const okEvent = function(currentUniqueConstraintArray) {
+    const uniqueConstraintData = getUniqueConstraintDispData(currentUniqueConstraintArray);
+    const uniqueConstraintConv = uniqueConstraintData.conv;
+    const uniqueConstraintName = uniqueConstraintData.name;
+    $input.attr('data-unique-list', uniqueConstraintConv); //一意制約のIDの組み合わせをセット
+    $input.text(uniqueConstraintName); //一意制約の項目名の組み合わせをセット
+
+    //現在の設定値を更新
+    menuEditorArray['unique-constraints-current'] = currentUniqueConstraintArray;
+
+    itaModalClose();
+  };
+  // キャンセル時の処理    
+  const cancelEvent = function() {
+    itaModalClose();
+  };
+  // 閉じる時の処理
+  const closeEvent = function ( ) {
+    itaModalClose();
+  }
+
+  setUniqueConstraintModalBody(columnItemData, initmodalUniqueConstraintList, okEvent, cancelEvent, closeEvent);
+  
+};
+// 一意制約(複数項目)選択のモーダルを開く
+const $multiSetUniqueSlectButton = $('#unique-constraint-select');
+$multiSetUniqueSlectButton.on('click', function() {
+  itaModalOpen( textCode('0047'), modalUniqueConstraint, 'unique' );
+});
+
+//一意制約の登録用のcolumnID連結文字列と、表示用の項目名を作成する
+const getUniqueConstraintDispData = function(uniqueConstraintArrayData){
+  let uniqueConstraintDispData = {
+    "conv" : "",
+    "name" : ""
+  };
+
+  let uniqueConstraintLength = uniqueConstraintArrayData.length;
+
+  if(uniqueConstraintLength == 0){
+    return uniqueConstraintDispData;
+  }
+
+  let uniqueConstraintConv = "";
+  let uniqueConstraintName = "";
+
+  for (let i = 0; i < uniqueConstraintLength; i++){
+      let targetIdLength = uniqueConstraintArrayData[i].length;
+      let idPatternConv = "";
+      let idPatternName = "";
+      if(targetIdLength != 0){
+        for (let j = 0; j < targetIdLength; j++){
+          for (let columnId in uniqueConstraintArrayData[i][j]){
+            if(idPatternConv == ""){
+              idPatternConv = columnId;
+            }else{
+              idPatternConv = idPatternConv + "-" + columnId;
+            }
+
+            if(idPatternName == ""){
+              idPatternName = uniqueConstraintArrayData[i][j][columnId];
+            }else{
+              idPatternName = idPatternName + "," + uniqueConstraintArrayData[i][j][columnId];
+            }
+
+          }
+        }
+
+        //columnID部分の文字列を結合
+        if(uniqueConstraintConv == ""){
+          uniqueConstraintConv = idPatternConv;
+        }else{
+          uniqueConstraintConv = uniqueConstraintConv + "," + idPatternConv;
+        }
+
+        //項目名部分の文字列を結合
+        if(uniqueConstraintName == ""){
+            idPatternName = "(" + idPatternName + ")";
+            uniqueConstraintName = idPatternName;
+        }else{
+            idPatternName = "(" + idPatternName + ")";
+            uniqueConstraintName = uniqueConstraintName + "," + idPatternName;
+        }
+      }
+  }
+
+  uniqueConstraintDispData.conv = uniqueConstraintConv;
+  uniqueConstraintDispData.name = uniqueConstraintName;
+
+  return uniqueConstraintDispData;
+
+}
+
+//項目を削除したとき、一意制約(複数項目)にその項目が含まれていた場合削除する。
+const deleteUniqueConstraintDispData = function(targetColumnId){
+  let currentUniqueConstraintData = menuEditorArray['unique-constraints-current'];
+  let newCurrentUniqueConstraintData = currentUniqueConstraintData;
+  let uniqueConstraintLength = currentUniqueConstraintData.length;
+  for (let i = 0; i < uniqueConstraintLength; i++){
+      let targetIdLength = currentUniqueConstraintData[i].length;
+      for (let j = 0; j < targetIdLength; j++){
+        for (let columnId in currentUniqueConstraintData[i][j]){
+          if(targetColumnId == columnId){
+            newCurrentUniqueConstraintData[i].splice(j, 1); //削除した項目の配列を除外
+          }
+        }
+      }
+  }
+
+  //組み合わせの中身が空になった場合、その配列を除外する。
+  let newUniqueConstraintLength = newCurrentUniqueConstraintData.length;
+  for (let i = 0; i < newUniqueConstraintLength; i++){
+    if(newCurrentUniqueConstraintData[i] != undefined){
+      if(newCurrentUniqueConstraintData[i].length == 0){
+        newCurrentUniqueConstraintData.splice(i, 1);
+      }
+    }
+  }
+
+  //更新後の値をページに反映
+  const uniqueConstraintData = getUniqueConstraintDispData(newCurrentUniqueConstraintData);
+  const uniqueConstraintConv = uniqueConstraintData.conv;
+  const uniqueConstraintName = uniqueConstraintData.name;
+  const $input = $('#unique-constraint-list');
+  $input.attr('data-unique-list', uniqueConstraintConv); //一意制約のIDの組み合わせをセット
+  $input.text(uniqueConstraintName); //一意制約の項目名の組み合わせをセット
+
+  //新しい配列をセット
+  menuEditorArray['unique-constraints-current'] = newCurrentUniqueConstraintData;
+
+}
+
+//項目名が変更されるアクションがあったとき、一意制約(複数項目)で表示している項目名をセットしなおす。
+const updateUniqueConstraintDispData = function(){
+  let currentUniqueConstraintData = menuEditorArray['unique-constraints-current'];
+  let newCurrentUniqueConstraintData = currentUniqueConstraintData;
+  let uniqueConstraintLength = currentUniqueConstraintData.length;
+  for (let i = 0; i < uniqueConstraintLength; i++){
+      let targetIdLength = currentUniqueConstraintData[i].length;
+      for (let j = 0; j < targetIdLength; j++){
+        for (let columnId in currentUniqueConstraintData[i][j]){
+          let $itemNameArea = $menuTable.find('#'+columnId).find('.menu-column-title-input');
+          if($itemNameArea.length != 0){
+            let itemName = $itemNameArea.val();
+            newCurrentUniqueConstraintData[i][j] = {[columnId] : itemName}; //項目名を再設定
+          }
+        }
+      }
+  }
+
+  //更新後の値をページに反映
+  const uniqueConstraintData = getUniqueConstraintDispData(newCurrentUniqueConstraintData);
+  const uniqueConstraintConv = uniqueConstraintData.conv;
+  const uniqueConstraintName = uniqueConstraintData.name;
+  const $input = $('#unique-constraint-list');
+  $input.attr('data-unique-list', uniqueConstraintConv); //一意制約のIDの組み合わせをセット
+  $input.text(uniqueConstraintName); //一意制約の項目名の組み合わせをセット
+
+  //新しい配列をセット
+  menuEditorArray['unique-constraints-current'] = newCurrentUniqueConstraintData;
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2490,6 +2690,7 @@ const getPanelParameter = function() {
     parameterArray['LAST_UPDATE_USER'] = $('#create-last-update-user').attr('data-value'); // 最終更新者
     parameterArray['DESCRIPTION'] = $('#create-menu-explanation').val(); // 説明
     parameterArray['ACCESS_AUTH'] = getRoleListValidID( $('#permission-role-name-list').attr('data-role-id') ); // ロール
+    parameterArray['UNIQUE_CONSTRAINT'] = $('#unique-constraint-list').attr('data-unique-list'); //一意制約(複数項目)
     parameterArray['NOTE'] = $('#create-menu-note').val(); // 備考
     
     // 作成対象別項目
@@ -2564,7 +2765,16 @@ const setPanelParameter = function( setData ) {
     $('#permission-role-name-list')
       .attr('data-role-id', roleList )
       .text( getRoleListIdToName( roleList ) );
-    
+
+    // 一意制約(複数項目)
+    const initUniqueConstraintData = getUniqueConstraintDispData(setData['menu']['unique-constraints-current']);
+    const initUniqueConstraintConv = initUniqueConstraintData.conv;
+    const initUniqueConstraintName = initUniqueConstraintData.name;
+    $('#unique-constraint-list')
+      .text(initUniqueConstraintName)
+      .attr('data-unique-list', initUniqueConstraintConv);
+    menuEditorArray['unique-constraints-current'] = setData['menu']['unique-constraints-current']; //更新用に格納しなおす
+
     // エディットモード別
     if ( menuEditorMode === 'view') {
       $('#create-menu-name').text( setData['menu']['MENU_NAME'] ); // メニュー名

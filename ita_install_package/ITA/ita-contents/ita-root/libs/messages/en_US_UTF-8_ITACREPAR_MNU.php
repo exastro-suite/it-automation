@@ -316,4 +316,15 @@ $ary["ITACREPAR-MNU-105045"]        = "Menu";
 $ary["ITACREPAR-MNU-105046"]        = "";
 $ary["ITACREPAR-MNU-105047"]        = "Selection 2";
 $ary["ITACREPAR-MNU-105048"]        = "Selection 2";
+$ary["ITACREPAR-MNU-106001"]        = "Maintenance (view/register/update/discard) can be performed on Unique constraint(Multiple items) managed in the menu.";
+$ary["ITACREPAR-MNU-106002"]        = "Id";
+$ary["ITACREPAR-MNU-106003"]        = "Unique constraint(Multiple items) creation information";
+$ary["ITACREPAR-MNU-106004"]        = "Unique constraint(Multiple items) creation information";
+$ary["ITACREPAR-MNU-106005"]        = "Menu name";
+$ary["ITACREPAR-MNU-106006"]        = "Select the menu to link the parameter from the pulldown menu.";
+$ary["ITACREPAR-MNU-106007"]        = "Unique constraint(Multiple items)";
+$ary["ITACREPAR-MNU-106008"]        = "Patterns for Unique constraint(Multiple items). Enter the ID of the target item, separated by commas.";
+$ary["ITACREPAR-MNU-107001"]        = "Unique constraint(Multiple items)";
+$ary["ITACREPAR-MNU-107002"]        = "Pattern";
+$ary["ITACREPAR-MNU-107003"]        = "Select Unique constraint(Multiple items)";
 ?>
