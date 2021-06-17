@@ -894,7 +894,6 @@
                         $strReasonType = "1";
                     }
                     unset($tmpIntPWLDUnixTime);
-                    
                     // パスワードが変更された日時が発見された場合----
                 }
                 // パスワード変更基準日時を元に有効期限が切れていないかをチェックする。----
@@ -903,10 +902,16 @@
                     // ----有効期限が切れている。
 
                     // 初期パスワード変更フラグ
-                    if ($arySYSCON['PWD_MUST_CHANGE'] == "1" && !$p_login_pw_l_update) {
-                        $boolExpiryOut = true;
+                    if ( isset($arySYSCON['PWD_MUST_CHANGE']) ) {
+                        if ($arySYSCON['PWD_MUST_CHANGE'] == "1" && !$p_login_pw_l_update) { // PW_LAST_UPDATE_TIMEが空値
+                            $boolExpiryOut = true;
+                        }elseif ($arySYSCON['PWD_MUST_CHANGE'] == "1" && $tempBoolPassWordChange) { // 期限切れ
+                            $boolExpiryOut = true;
+                        } else {
+                            $boolExpiryOut = false;
+                        }
                     } else {
-                        $boolExpiryOut = false;
+                         $boolExpiryOut = true;
                     }
                     // 初期パスワード変更フラグ----
                     // 有効期限が切れている。----
@@ -919,13 +924,15 @@
                 // パスワードの有効期限の設定がされている----
             }
             else{
-               // 初期パスワード変更フラグ
-               if ($arySYSCON['PWD_MUST_CHANGE'] == "1" && !$p_login_pw_l_update) {
-                    $boolExpiryOut = true;
-                    $strReasonType = "1";
-               } else {
-                   $boolExpiryOut = false;
-               }
+                // 初期パスワード変更フラグ
+                if ( isset($arySYSCON['PWD_MUST_CHANGE']) ) {
+                    if ($arySYSCON['PWD_MUST_CHANGE'] == "1" && !$p_login_pw_l_update) {
+                         $boolExpiryOut = true;
+                         $strReasonType = "1";
+                    } else {
+                        $boolExpiryOut = false;
+                    }
+                }
                // 初期パスワード変更フラグ----
             }
         }
