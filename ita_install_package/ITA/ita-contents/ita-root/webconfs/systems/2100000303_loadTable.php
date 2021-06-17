@@ -370,7 +370,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     if( $strModeId == "DTUP_singleRecDelete" || $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
                         $boolPasswordInput = false;
                         $strErrorMsgPreBody = "";
-                        error_log ("arrayVariant:  ".print_r($arrayVariant,true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log");
+                       
                         //if( strlen($value) == 0 || $value == 1 ){
                         if((strlen($value) == 0) || ($value == 1) || ($value == 3) || ($value == 4)){
                             //----鍵認証系の場合
