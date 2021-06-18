@@ -1531,8 +1531,8 @@ function updateSequence($paramAry){
         $count++;
     }
 
+    $last_update_timestamp = date("Y-m-d H:i:s");
     if(1 === $count){
-        $last_update_timestamp = date("Y-m-d H:i:s");
         $sql = "UPDATE A_SEQUENCE
                 SET VALUE = :value,
                 LAST_UPDATE_TIMESTAMP = '$last_update_timestamp'
