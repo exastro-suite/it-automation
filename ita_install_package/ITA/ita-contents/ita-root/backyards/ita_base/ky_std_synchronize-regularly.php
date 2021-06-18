@@ -1281,7 +1281,7 @@ function getNextExecutionDate($rowOfReguralyList){
             case 4:
                 //入力必須カラムのチェック
                 if($nextExecutionDate == null){
-                    array($startDate, $exeInterval, $patternTime, $patternDay);
+                    $required_column = array($startDate, $exeInterval, $patternTime, $patternDay);
                 }else{
                     $required_column = array($exeInterval, $patternTime, $patternDay);
                 }
@@ -1398,7 +1398,7 @@ function getNextExecutionDate($rowOfReguralyList){
             case 5:
                 //入力必須カラムのチェック
                 if($nextExecutionDate == null){
-                    array($startDate, $exeInterval, $patternTime, $patternDayOfWeek, $patternWeekNumber);
+                    $required_column = array($startDate, $exeInterval, $patternTime, $patternDayOfWeek, $patternWeekNumber);
                 }else{
                     $required_column = array($exeInterval, $patternTime, $patternDayOfWeek, $patternWeekNumber);
                 }
@@ -1517,7 +1517,7 @@ function getNextExecutionDate($rowOfReguralyList){
             case 6:
                 //入力必須カラムのチェック
                 if($nextExecutionDate == null){
-                    array($startDate, $exeInterval, $patternTime);
+                    $required_column = array($startDate, $exeInterval, $patternTime);
                 }else{
                     $required_column = array($exeInterval, $patternTime);
                 }
