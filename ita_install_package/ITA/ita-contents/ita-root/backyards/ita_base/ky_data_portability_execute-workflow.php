@@ -311,7 +311,7 @@ function registData($record, &$importedTableAry){
 
     // キーと値の関係を維持しつつ、値を基準に、昇順で並べ替える
     asort($lockLAry);
-    array_unique($lockLAry);
+    $lockLAry = array_unique($lockLAry);
 
     // シーケンステーブルをロックする
     foreach($lockLAry as $strSeqName) {
@@ -2303,7 +2303,7 @@ function getInfoOfLTUsingIdOfMenuForDBtoDBLink($strMenuIdNumeric){
             unset($retUploadAry[$key]);
         }
     }
-    array_values($retUploadAry);
+    $retUploadAry = array_values($retUploadAry);
 
     return array($retAry, $retUploadAry);
 }
