@@ -41,17 +41,17 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
     );
 
-    $table = new TableControlAgent('C_CONDUCTOR_EDIT_CLASS_MNG','CONDUCTOR_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-109040"), 'C_CONDUCTOR_EDIT_CLASS_MNG_JNL', $tmpAry);
+    $table = new TableControlAgent('C_CONDUCTOR_EDIT_CLASS_MNG','CONDUCTOR_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-305040"), 'C_CONDUCTOR_EDIT_CLASS_MNG_JNL', $tmpAry);
     $tmpAryColumn = $table->getColumns();
     $tmpAryColumn['CONDUCTOR_CLASS_NO']->setSequenceID('C_CONDUCTOR_EDIT_CLASS_MNG_RIC');
     $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('C_CONDUCTOR_EDIT_CLASS_MNG_JSQ');
     unset($tmpAryColumn);
     $table->setJsEventNamePrefix(true);
-    
+
     // QMファイル名プレフィックス
-    $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-109050"));
+    $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-305050"));
     // エクセルのシート名
-    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITABASEH-MNU-109060"));
+    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITABASEH-MNU-305060"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
@@ -116,7 +116,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             return $retLinkable;
         };
 
-    $c = new LinkButtonColumn('detail_show',$g['objMTS']->getSomeMessage("ITABASEH-MNU-201010"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-201020"), 'jumpToConductorClassEdit', array(':CONDUCTOR_CLASS_NO')); 
+    $c = new LinkButtonColumn('detail_show',$g['objMTS']->getSomeMessage("ITABASEH-MNU-201010"), $g['objMTS']->getSomeMessage("ITABASEH-MNU-201020"), 'jumpToConductorClassEdit', array(':CONDUCTOR_CLASS_NO'));
     $c->setOutputType('print_table', new OutputType(new SortedTabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array(""))));
     $c->setEvent("print_table", "onClick", "jumpToConductorClassEdit", array(':CONDUCTOR_CLASS_NO'));
     $c->setDBColumn(false);
@@ -125,14 +125,14 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     //リンクボタン----
 
     $objVldt = new SingleTextValidator(1,256,false);
-    $c = new TextColumn('CONDUCTOR_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-109070"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-109080"));//エクセル・ヘッダでの説明
+    $c = new TextColumn('CONDUCTOR_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-305070"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-305080"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
     $c->setRequired(true);//登録/更新時には、入力必須
     $c->setUnique(true);//登録/更新時には、DB上ユニークな入力であること必須
     $table->addColumn($c);
 
-    $c = new MultiTextColumn('DESCRIPTION',$g['objMTS']->getSomeMessage("ITABASEH-MNU-109090"));
+    $c = new MultiTextColumn('DESCRIPTION',$g['objMTS']->getSomeMessage("ITABASEH-MNU-305090"));
     $table->addColumn($c);
 
 
@@ -145,14 +145,14 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $strResultType04 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12205");   //復活
     $strResultType99 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12206");   //エラー
 
-    $tmpAryColumn['ROW_EDIT_BY_FILE']->setResultCount(array( 
+    $tmpAryColumn['ROW_EDIT_BY_FILE']->setResultCount(array(
         'delete'=>array('name'=>"$strResultType03"  ,'ct'=>0)
         ,'revive'  =>array('name'=>"$strResultType04"  ,'ct'=>0)
         ,'error'  =>array('name'=>"$strResultType99"  ,'ct'=>0)
         )
     );
 
-    $tmpAryColumn['ROW_EDIT_BY_FILE']->setCommandArrayForEdit(array( 
+    $tmpAryColumn['ROW_EDIT_BY_FILE']->setCommandArrayForEdit(array(
        3=>"$strResultType03"
        ,4=>"$strResultType04"
         )
@@ -165,19 +165,19 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         if( $strTmpValue=="insConstruct" ){
             $objRadioColumn = $tmpAryColumn['WEB_BUTTON_UPDATE'];
             $objRadioColumn->setColLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-201050"));
-            
+
             $objFunctionB = function ($objOutputType, $rowData, $aryVariant, $objColumn){
                 $strInitedColId = $objColumn->getID();
-                
+
                 $aryVariant['callerClass'] = get_class($objOutputType);
                 $aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
                 $strRIColId = $objColumn->getTable()->getRIColumnID();
-                
+
                 $rowData[$strInitedColId] = '<input type="radio" name="symNo" onclick="javascript:ConductorLoadForExecute(' . $rowData[$strRIColId] . ')"/>';
-                
+
                 return $objOutputType->getBody()->getData($rowData,$aryVariant);
             };
-            
+
             $objTTBF = new TextTabBFmt();
             $objTTHF = new TabHFmt();//new SortedTabHFmt();
             $objTTBF->setSafingHtmlBeforePrintAgent(false);
@@ -185,7 +185,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $objOutputType->setFunctionForGetBodyTag($objFunctionB);
             $objOutputType->setVisible(true);
             $objRadioColumn->setOutputType("print_table", $objOutputType);
-            
+
             $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true);
             $table->getFormatter('print_table')->setGeneValue("linkCSVFormShow",false);
         }
