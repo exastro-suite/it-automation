@@ -156,6 +156,7 @@ switch( $theme ) {
     $c['BASE'] = 'A9AFBF';
     $c['BUTTON'] = array('516C8D','4B6382');
     $c['KIZI'] = 'D4D7DF';
+    $c['MENU_NAME'] = '233153';
     $c['HEADING'] = array('28385E','FF9800','FFFFFF');
     $c['TABLE'] = array('516C8D','425772','EAEDF1','B9C4D1','FFFF8F');
     $c['TABLE_F'] = array('4B6382','667E9B','CBCFD8','ABB8C8');
@@ -171,6 +172,7 @@ switch( $theme ) {
     $c['BASE'] = 'F598A9';
     $c['BUTTON'] = array('F2295F','DF2657');
     $c['KIZI'] = 'F2D8C2';
+    $c['MENU_NAME'] = '593F42';
     $c['HEADING'] = array('F33A6C','F2CF66','FAEFE7');
     $c['TABLE'] = array('F2AEBB','F48DA0','FCEFF1','FADFE4','F2D8C2');
     $c['TABLE_F'] = array('F27E93','F598A9','FCE5E9','FACBD4');
@@ -189,6 +191,7 @@ switch( $theme ) {
     $c['TABLE'] = array('78684F','938672','EFEDEA','C9C3B9','FFFF8F');
     $c['TABLE_F'] = array('6E6049','938672','DFDBD5','C9C3B9');
     $c['KIZI'] = 'DDDABF';
+    $c['MENU_NAME'] = '1A1A1A';
     $c['HEADING'] = array('483E2F','616A1C','EEEEEE');
     $b['HEADER'] = $backgroundPatterns['STRIPE0'];
     $b['FOOTER'] = $backgroundPatterns['STRIPE0'];
@@ -207,6 +210,7 @@ switch( $theme ) {
     $c['TABLE'] = array('D99A25','AE7B1E','F7EBD3','E8C27C','F2CF66');
     $c['TABLE_F'] = array('BF751B','995E16','F2E3D1','D9AC76');
     $c['KIZI'] = 'FAF5EB';
+    $c['MENU_NAME'] = 'FAF6ED';
     $c['HEADING'] = array('BF0413','D99A25','F2E7AE');
     $b['BASE'] = $backgroundPatterns['CHECK1'];
     $b['KIZI'] = $backgroundPatterns['ROUND2'];
@@ -226,6 +230,7 @@ switch( $theme ) {
     $c['HEADING'] = array('FFFFFF','00B5B8','333333');
     $c['BASE'] = 'FFFFFF';
     $c['KIZI'] = 'F2F2F2';
+    $c['MENU_NAME'] = '444444';
     $h['KIZI'] = $headingPatterns['OASE'];
     $b['MENU'] = $backgroundPatterns['NONE'];
     $b['BASE'] = $backgroundPatterns['OASE'];
@@ -242,6 +247,7 @@ switch( $theme ) {
     $c['TABLE_F'] = array('383838','000000','242424','14181A');
     $c['BUTTON'] = array('335581','47668E');
     $c['KIZI'] = '272A2C';
+    $c['MENU_NAME'] = 'D0D1D1';
     $c['HEADING'] = array('3A3D3F','335581','EEEEEE');
     $c['BASE'] = '040505';
     $c['REVERSE'] = array('FFFFFF','000000');
@@ -422,6 +428,10 @@ a:active {
 	border-color: {$color->hex($c['KIZI'],80,'000000')};
   color: {$color->hex($c['TEXT'][0],100)};
   {$b['KIZI']}
+}
+
+#KIZI .menu_name{
+  color: {$color->hex($c['MENU_NAME'])};
 }
 
 /* ********************************************************************* *
@@ -664,6 +674,9 @@ background-color: {$color->hex($c['KIZI'],20)};
 #KIZI .widget-header {
 background-color: {$color->hex($c['KIZI'],40)};
 }
+#KIZI .dashboard-table thead th {
+background-color: {$color->hex($c['HEADER'],100)};
+}
 EOF;
 
 if ( $c['DARKMODE'] == 'ON' ) {
@@ -682,17 +695,80 @@ body, .tableScroll { scrollbar-color: #000F23 #666666; } /* for Firefox */
 ::-webkit-scrollbar-track-piece { background: #000F23; }
 
 /* Input */
-input[name="symphony_name"],#filter_value,
-input[type="text"], input[type="password"], textarea, select,
-#KIZI textarea, #KIZI select, #KIZI option, #KIZI input[type="text"], #KIZI input[type="password"],
+input[name="symphony_name"],
+#filter_value,
+input[type="text"],
+input[type="password"],
+textarea,
+select,
+#KIZI textarea,
+#KIZI select,
+#KIZI option,
+#KIZI input[type="text"],
+#KIZI input[type="password"],
 #KIZI .richFilterSelectListCaller,
 .select2-container--default .select2-search--dropdown .select2-search__field,
 .select2-container--default .select2-selection--single,
-.select2-dropdown {
+.select2-dropdown,
+#PAGETOP #KIZI .menu-column-config-table textarea,
+#PAGETOP #KIZI .menu-column-config-table select,
+#PAGETOP #KIZI .menu-column-config-table input[type="text"],
+#PAGETOP #KIZI .menu-column-config-table input[type="number"],
+#PAGETOP #KIZI .config-id {
   background-color: #000000!important;
   border: 1px solid #666666!important;
   color: #EEE!important;
 }
+input[name="symphony_name"]:focus,
+#filter_value:focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus,
+#KIZI textarea:focus,
+#KIZI select:focus,
+#KIZI option:focus,
+#KIZI input[type="text"]:focus,
+#KIZI input[type="password"]:focus,
+#KIZI .richFilterSelectListCaller:focus,
+.select2-container--default .select2-search--dropdown .select2-search__field:focus,
+.select2-container--default .select2-selection--single:focus,
+.select2-dropdown:focus,
+#PAGETOP #KIZI .menu-column-config-table textarea:focus,
+#PAGETOP #KIZI .menu-column-config-table select:focus,
+#PAGETOP #KIZI .menu-column-config-table input[type="text"]:focus,
+#PAGETOP #KIZI .menu-column-config-table input[type="number"]:focus,
+#PAGETOP #KIZI .config-id:focus {
+background-color: #272B38!important;
+border-color: #4F80FF!important;
+}
+.select2-container--default .select2-selection--multiple {
+background-color: #000000!important;
+border: 1px solid #666666!important;
+color: #EEE!important;
+}
+#filter_area .select2-container .select2-search--inline .select2-search__field::placeholder,
+#select_area .select2-container .select2-search--inline .select2-search__field::placeholder {
+color: #AAA;
+}
+#filter_area .select2-container--default.select2-container--focus .select2-selection--multiple,
+#select_area .select2-container--default.select2-container--focus .select2-selection--multiple {
+background-color: #272B38!important;
+border-color: #4F80FF!important;
+}
+.password_eye {
+background-position: 0 -64px;
+}
+.password_eye.password_see {
+background-position: -16px -64px;
+}
+
+
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+background-color: #444;
+}
+
 #KIZI .richFilterSelectListCaller:hover {
     background-color: #222222;
 }
@@ -735,9 +811,15 @@ box-shadow: 0 0 4px rgba( 0,0,0,.5 ) inset,
 #KIZI #dashboard .dashboard-header {
 background-color: #222;
 }
-#KIZI #dashboard  .dashboard-menu-list {
+#KIZI #dashboard .dashboard-menu-list {
 border-left: 1px solid #555;
 border-right: 1px solid #111;
+}
+#KIZI #dashboard .dashboard-menu-list:first-child {
+border-left: none;
+}
+#KIZI #dashboard .dashboard-menu-list:last-child {
+borrder-right: none;
 }
 #KIZI #dashboard .widget {
 background-color: #222;
@@ -888,12 +970,18 @@ fill: #BBB;
 fill: #999;
 }
 #KIZI #dashboard .number-table th,
-#KIZI #dashboard .number-table td {
+#KIZI #dashboard .number-table td,
+#KIZI #dashboard .dashboard-table th,
+#KIZI #dashboard .dashboard-table td {
 border-top: 1px solid #444;
 border-bottom: 1px solid #444;
 }
-#KIZI #dashboard .number-table thead th {
+#KIZI #dashboard .number-table thead th,
+#KIZI #dashboard .dashboard-table thead th {
 background-color: rgba( 255,255,255,.05 );
+}
+#KIZI .dashboard-table tr:nth-of-type(odd) {
+background-color: transparent;
 }
 #KIZI #dashboard .number-table .emphasis th,
 #KIZI #dashboard .number-table .emphasis td {
@@ -940,6 +1028,139 @@ background-position: 0 -80px;
 }
 #KIZI .widget-delete::after {
 background-position: -40px -80px;
+}
+#KIZI .number-table td {
+background-color: transparent;
+}
+#KIZI .widget-sub-name {
+border-color: #555;
+color: #EEE;
+}
+#KIZI .dashboard-text {
+background-color: transparent;
+border-color: #555;
+color: #AAA;
+}
+#KIZI .dashboard-table-cell-wrap,
+#KIZI .dashboard-table-cell-nowrap{
+color: #EEE;
+}
+#KIZI .rID {
+background-color: #111;
+}
+#KIZI .rd {
+background-color: #111;
+border-color: #444;
+color: #EEE
+}
+#KIZI .pie-chart.start {
+background-color: transparent!important;
+}
+/* -------------------------------------------------- *
+
+   メニューエディタ
+
+ * -------------------------------------------------- */
+#KIZI #menu-editor-edit .menu-editor-block-inner {
+box-shadow: 0 0 4px #000 inset !important;
+background: linear-gradient( transparent, transparent 99px, #111 99px, #111 100px ),
+linear-gradient( 90deg, transparent, transparent 99px, #111 99px, #111 100px ),
+#000 !important;
+background-size: 100px 100px, 100px 100px !important;
+}
+#KIZI #menu-editor-preview {
+background-color: #000;
+}
+#PAGETOP #KIZI input[type="text"].menu-column-title-input:active,
+#PAGETOP #KIZI input[type="text"].menu-column-title-input:focus {
+background-color: #18264D!important;
+}
+#KIZI .menu-table {
+background-image: none;
+background-color: #222;
+}
+#KIZI .menu-column-group-header {
+background-color: #333;
+border-color: #222;
+}
+#KIZI .menu-column-header,
+#KIZI .menu-column-config {
+background-color: #555;
+}
+#KIZI .menu-column-type {
+background-color: #333;
+}
+#KIZI .menu-column-config-table th,
+#KIZI .menu-column-config-table td {
+background-color: #333;
+border-color: #666;
+color: #EEE;
+}
+#KIZI .menu-column-config-table th {
+background-color: #444;
+}
+#KIZI .column-empty {
+background-color: #666!important;
+}
+#KIZI .column-empty p,
+#KIZI #menu-editor-info .empty {
+background-color: #333!important;
+background-image: linear-gradient( -45deg, rgba( 255,255,255,.1 ) 25%, transparent 25%, transparent 50%, rgba( 255,255,255,.1 ) 50%, rgba( 255,255,255,.1 ) 75%, transparent 75%, transparent)!important;
+background-size: 8px 8px!important;
+border: 1px solid #555!important;
+color: #CCC!important;
+}
+#KIZI .column-resize::after {
+background-color: #888;
+}
+#KIZI .required-label.hover,
+#KIZI .unique-label.hover {
+background-color: rgba( 255,255,255,.05 );
+border-color: rgba( 255,255,255,.1 );
+}
+
+
+/* -------------------------------------------------- *
+
+   メニューエディタ
+
+ * -------------------------------------------------- */
+#KIZI #art-board {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 2;
+            background: linear-gradient( transparent, transparent 99px, #111 99px, #111 100px ),
+            linear-gradient( 90deg, transparent, transparent 99px, #111 99px, #111 100px ),
+            linear-gradient( transparent, transparent 49px, #292929 49px, #292929 50px ),
+            linear-gradient( 90deg, transparent, transparent 49px, #292929 49px, #292929 50px ),
+            linear-gradient( transparent, transparent 9px, #292929 9px, #292929 10px ),
+            linear-gradient( 90deg, transparent, transparent 9px, #292929 9px, #292929 10px ),
+            #333;
+            background-size: 100px 100px, 100px 100px, 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+            }
+#KIZI #canvas[data-scale="50"] #art-board {
+            background: linear-gradient( transparent, transparent 98px, #111 98px, #111 100px ),
+            linear-gradient( 90deg, transparent, transparent 98px, #111 98px, #111 100px ),
+            linear-gradient( transparent, transparent 48px, #292929 48px, #292929 50px ),
+            linear-gradient( 90deg, transparent, transparent 48px, #292929 48px, #292929 50px ),
+            #333;
+            background-size: 100px 100px, 100px 100px, 50px 50px, 50px 50px;
+            }
+#KIZI #canvas[data-scale="25"] #art-board {
+background: linear-gradient( transparent, transparent 96px, #292929 96px, #292929 100px ),
+            linear-gradient( 90deg, transparent, transparent 96px, #292929 96px, #292929 100px ),
+            #333;
+background-size: 100px 100px, 100px 100px;
+}
+#KIZI  #canvas[data-scale="10"] #art-board {
+background: #333;
+}
+#KIZI .svg-line-back {
+stroke: #000;
+}
+#KIZI .branch-line .branch-back-line {
+stroke: #000;
 }
 
 EOF;

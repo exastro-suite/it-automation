@@ -151,6 +151,13 @@ callback.prototype = {
             objAlertArea.innerHTML = ary_result[2];
             objAlertArea.style.display = "block";
         }else{
+              // 自身の権限を廃止した直後、表示権限がない場合にエラーメッセージが返ってくるのでDASHBOARDを表示する
+              var exp = new RegExp("^<script.*?>alert\\('(.*?)'\\);</script>ss\\d*?;redirectOrderForHADACClientss\\d*?;1ss\\d*?;(.*)$").exec(result);
+              if ( exp != null && Array.isArray(exp) && exp.length == 3 ){
+                  window.alert(exp[1]);
+                  location.href = exp[2];
+                  return;
+              }
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);

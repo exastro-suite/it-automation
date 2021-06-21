@@ -95,4 +95,10 @@ $ary["ITACREPAR_1275"]       = "「プルダウン選択」で選んだメニュ
 $ary["ITACREPAR_1276"]       = "作成";
 $ary["ITACREPAR_1277"]       = "未作成";
 $ary["ITACREPAR_1278"]       = "作成済み";
+$ary["ITACREPAR_1279"]       = "参照項目の取得に失敗しました。";
+$ary["ITACREPAR_1280"]       = "一意制約(複数項目)";
+$ary["ITACREPAR_1281"]       = "項目が一つもありません";
+$ary["ITACREPAR_1282"]       = "削除";
+$ary["ITACREPAR_1283"]       = "パターンを追加";
+$ary["ITACREPAR_1284"]       = "パターンが一つもありません。";
 ?>

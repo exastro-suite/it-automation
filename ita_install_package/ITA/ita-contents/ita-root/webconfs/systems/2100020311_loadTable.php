@@ -368,6 +368,7 @@ Ansible（Legacy Role）代入値管理
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADJsEvent('onChange','pattern_reg');
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -584,6 +585,7 @@ Ansible（Legacy Role）代入値管理
 
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -791,6 +793,7 @@ Ansible（Legacy Role）代入値管理
     $objVarBFmtReg->setFADJsEvent('onChange','vars_reg');
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
     $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
 
@@ -1228,6 +1231,7 @@ Ansible（Legacy Role）代入値管理
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
     $objVarBFmtReg->setFunctionForGetFADMainDataOverride($objFunction04);
 
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);

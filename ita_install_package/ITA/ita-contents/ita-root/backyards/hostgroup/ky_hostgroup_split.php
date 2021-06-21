@@ -279,7 +279,7 @@ function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target
         }
 
         for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 1; $i++){
-            if($inputTable->columnNames[$i] != $inputTable->columnNames[$i]){
+            if($inputTable->columnNames[$i] != $outputTable->columnNames[$i]){
                 $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5006', array($inputTable->tableName, $outputTable->tableName));
                 outputLog($msg);
                 throw new Exception($msg);
@@ -538,7 +538,7 @@ function splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy,
         }
 
         for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 1; $i++){
-            if($inputTable->columnNames[$i] != $inputTable->columnNames[$i]){
+            if($inputTable->columnNames[$i] != $outputTable->columnNames[$i]){
                 $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5006', array($inputTable->tableName, $outputTable->tableName));
                 outputLog($msg);
                 throw new Exception($msg);

@@ -32,6 +32,8 @@
             // ローカル変数宣言
             $output_str = '';
             
+            $p_last_updatetime_for_update = rawurldecode(base64_decode($p_last_updatetime_for_update));
+
             // 本体ロジックをコール
             require_once ( $g['root_dir_path'] . "/libs/webindividuallibs/systems/{$g['page_dir']}/81_ethWakeOrderSend.php");
             

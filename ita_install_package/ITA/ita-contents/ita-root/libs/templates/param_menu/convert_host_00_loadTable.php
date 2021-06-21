@@ -46,6 +46,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     // マルチユニーク制約
     $table->addUniqueColumnSet(array('HOST_ID','OPERATION_ID','INPUT_ORDER'));
+★★★UNIQUE_CONSTRAINT★★★
 
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel('★★★MENU★★★');

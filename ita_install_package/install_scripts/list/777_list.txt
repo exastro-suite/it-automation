@@ -33,8 +33,6 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000002
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000003
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000004
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011501
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011502
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011601
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011610
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011611
@@ -51,8 +49,6 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000002/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000003/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000004/old
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011501/old
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011502/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011601/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011610/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011611/old
@@ -69,8 +65,6 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000002/old/-000000002
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000003/old/-000000003
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000004/old/-000000004
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011501/old/-000150001
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011502/old/-000150002
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011601/old/-000160001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011610/old/-000160010
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011611/old/-000160011

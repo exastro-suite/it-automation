@@ -44,10 +44,6 @@
         
         // access系共通ロジックパーツ01
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_access_01.php");
-        
-        // メンテナンス可能メニューを参照のみ可能の権限ユーザが見てないか判定するパーツ
-        // (この処理は非テンプレートのコンテンツのみに必要)
-        require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_maintenance.php");
     }
     catch (Exception $e){
         // DBアクセス例外処理パーツ

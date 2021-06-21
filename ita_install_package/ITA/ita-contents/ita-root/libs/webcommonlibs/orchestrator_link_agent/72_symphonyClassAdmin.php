@@ -289,7 +289,7 @@ function printOneOfSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode){
                 //作業パターンが存在している----
             }
             if( $strPatternName == "" ){
-                $strPatternName = $objMTS->getSomeMessage("ITABASEH-ERR-5720205",$row['MOVEMENT_CLASS_NO']);
+                $strPatternName = $objMTS->getSomeMessage("ITABASEH-ERR-5720205",$row['PATTERN_ID']);
             }
             $aryListSource[] = htmlspecialchars($strPatternName);
 

@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2019 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
     $arrayWebSetting = array();
-    $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105034");
+    $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105044");
 
     $table = new TableControlAgent('F_FLAG_MASTER','FLAG_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105035"), 'F_FLAG_MASTER_JNL' );
     $tmpAryColumn = $table->getColumns();
@@ -37,20 +37,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105037"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
-
-    // YES NO
-    $objVldt = new SingleTextValidator(1,256,false);
-    $c = new TextColumn('YESNO_STATUS',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105038"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105039"));//エクセル・ヘッダでの説明
-    $c->setValidator($objVldt);
-    $table->addColumn($c);
-
-    // TRUE FALSE
-    $objVldt = new SingleTextValidator(1,256,false);
-    $c = new TextColumn('TRUEFALSE_STATUS',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-105040"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105041"));//エクセル・ヘッダでの説明
-    $c->setValidator($objVldt);
-    $table->addColumn($c);
 
     // * (blank)
     $objVldt = new SingleTextValidator(1,256,false);

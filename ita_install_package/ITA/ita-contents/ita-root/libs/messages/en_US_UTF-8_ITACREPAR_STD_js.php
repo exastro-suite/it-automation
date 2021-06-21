@@ -94,4 +94,10 @@ $ary["ITACREPAR_1275"]       = "You can refer to other items based on the menu i
 $ary["ITACREPAR_1276"]       = "Create";
 $ary["ITACREPAR_1277"]       = "Not created";
 $ary["ITACREPAR_1278"]       = "Created";
+$ary["ITACREPAR_1279"]       = "Failed to get the reference item.";
+$ary["ITACREPAR_1280"]       = "Unique constraint(Multiple items)";
+$ary["ITACREPAR_1281"]       = "No items.";
+$ary["ITACREPAR_1282"]       = "Delete";
+$ary["ITACREPAR_1283"]       = "Add a pattern";
+$ary["ITACREPAR_1284"]       = "No patterns.";
 ?>

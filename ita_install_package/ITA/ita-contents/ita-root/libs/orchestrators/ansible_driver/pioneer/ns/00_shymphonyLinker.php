@@ -982,8 +982,8 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         $strDRSRPathFromDrv = $row_if_info[$strColIdOfDRSRPathFromDrvSv];
 
         $proxySetting              = array();
-        $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-        $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+        $proxySetting['address']   = $row_if_info["ANSIBLE_PROXY_ADDRESS"];
+        $proxySetting['port']      = $row_if_info["ANSIBLE_PROXY_PORT"];
 
         if($strExecMode == DF_EXEC_MODE_ANSIBLE) {
             $strProtocol        = $row_if_info[$strColIdOfRestAPIProtocol];

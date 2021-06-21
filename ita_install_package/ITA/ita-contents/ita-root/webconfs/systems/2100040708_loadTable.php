@@ -92,7 +92,7 @@ Ansible 共通 Ansible Tower インスタンス一覧
     //ログインユーザー----
 
     //----ログインパスワード
-    $objVldt = new SingleTextValidator(0,30,false);
+    $objVldt = new SingleTextValidator(0,128,false);
     $c = new PasswordColumn('ANSTWR_LOGIN_PASSWORD',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001040"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001041"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
@@ -244,7 +244,19 @@ Ansible 共通 Ansible Tower インスタンス一覧
         case "DTUP_singleRecRegister":
             $errMsgParameterAry = array();
             $chkobj = new AuthTypeParameterRequiredCheck();
-            $retStrBody = $chkobj->TowerHostListAuthTypeRequiredParameterCheck($chkobj->chkType_Loadtable_TowerHostList,$g['objMTS'],$errMsgParameterAry,$strAuthMode,$strPasswd,$strsshKeyFile,$strPassphrase);
+
+            $del_password_arr = array();
+            
+            if(isset($arrayRegData['del_password_flag_COL_IDSOP_12']) && $arrayRegData['del_password_flag_COL_IDSOP_12'] == "on"){
+                $del_password_arr[] = "del_password_flag_COL_IDSOP_12";
+            }
+
+            if(isset($arrayRegData['del_password_flag_COL_IDSOP_14']) && $arrayRegData['del_password_flag_COL_IDSOP_14'] == "on"){
+                $del_password_arr[] = "del_password_flag_COL_IDSOP_14";
+            }
+
+            $retStrBody = $chkobj->TowerHostListAuthTypeRequiredParameterCheck($chkobj->chkType_Loadtable_TowerHostList,$g['objMTS'],$errMsgParameterAry,$strAuthMode,$strPasswd,$strsshKeyFile,$strPassphrase,$del_password_arr);
+            
             if($retStrBody === true) {
                 $retStrBody = "";
             } else {

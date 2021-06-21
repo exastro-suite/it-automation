@@ -5,8 +5,4 @@
 /ita-root/backyards/common/ky_loopcall-php-procedure.sh
 /ita-root/backyards/common/ky_loopcall-sh-script.sh
 /ita-root/backyards/webdbcore/ky_mail.sh
-/ita-root/libs/backyardlibs/material/ky_cloneGit.sh
-/ita-root/libs/backyardlibs/material/ky_pushGit.sh
-/ita-root/backyards/ansible_driver/ky_ansible_materials_delete.sh
-/ita-root/backyards/ansible_driver/ky_ansible_materials_transfer.sh
 /ita-root/backyards/ansible_driver/ky_ansible_playbook_command_shell_template.sh

@@ -266,6 +266,21 @@ try{
     $convertParamInfoArray = $result;
 
     //////////////////////////
+    // 一意制約管理情報を取得
+    //////////////////////////
+    $uniqueConstraintTable = new UniqueConstraintTable($objDBCA, $db_model_ch);
+    $sql = $uniqueConstraintTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+    // SQL実行
+    $result = $uniqueConstraintTable->selectTable($sql);
+    if(!is_array($result)){
+        $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+        outputLog($msg);
+        throw new Exception($msg);
+    }
+    $uniqueConstraintArray = $result;
+
+    //////////////////////////
     // ロール・ユーザ紐づけ情報を取得
     //////////////////////////
     $roleAccountLinkListTable = new RoleAccountLinkListTable($objDBCA, $db_model_ch);
@@ -554,6 +569,53 @@ try{
         }
 
         //////////////////////////
+        // 一意制約管理情報を特定する
+        //////////////////////////
+        $uniqueConstraintTargetArray = array();
+        foreach($uniqueConstraintArray as $uniqueData){
+            if($targetData['CREATE_MENU_ID'] === $uniqueData['CREATE_MENU_ID']){
+                $uniqueConstraintTargetArray[] = $uniqueData;
+            }
+        }
+
+        //一意制約(複数項目)のloadTableに記載する文字列を生成
+        $uniqueConstraintSet = "";
+        $noExistUniqueConstraintId = false;
+        if(!empty($uniqueConstraintTargetArray)){
+            foreach($uniqueConstraintTargetArray as $uniqueData){
+                $uniqueConstraintItemArray = explode(",", $uniqueData['UNIQUE_CONSTRAINT_ITEM']);
+                $targetColumnSet = "";
+                foreach($uniqueConstraintItemArray as $id){
+                    //項目のIDと一意制約対象のIDが一致しているかどうかを判定
+                    if(!in_array($id, $idArray)){
+                        $noExistUniqueConstraintId = true;
+                    }
+
+                    $columnName = COLUMN_PREFIX . sprintf("%04d", $id);
+                    if($targetColumnSet == ""){
+                        $targetColumnSet = "'" . $columnName . "'";
+                    }else{
+                        $targetColumnSet = $targetColumnSet . "," . "'" . $columnName . "'";
+                    }
+                }
+                if($uniqueConstraintSet == ""){
+                    $uniqueConstraintSet = '    $table->addUniqueColumnSet(array(' . $targetColumnSet . '));' . "\n";
+                }else{
+                    $uniqueConstraintSet = $uniqueConstraintSet . '    $table->addUniqueColumnSet(array(' . $targetColumnSet . '));' . "\n";
+                }
+            }
+        }
+
+        //一意制約の対象IDの中に項目のIDと一致しないものがあった場合エラー処理
+        if($noExistUniqueConstraintId == true){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5025');
+            outputLog($msg);
+            // パラメータシート作成管理更新処理を行う
+            updateMenuStatus($targetData, "4", $msg, false, true);
+            continue;
+        }
+
+        //////////////////////////
         // ディレクトリ名、テーブル名を決定する
         //////////////////////////
         $menuDirName = sprintf("%04d", $cmiData['CREATE_MENU_ID']);
@@ -724,13 +786,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $referenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $referenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -811,9 +877,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
@@ -934,13 +1003,17 @@ try{
                                         $repraceDateFormat = '\'Y/m/d\'';
                                     }
 
+                                    // 「'」がある場合は「\'」に変換する
+                                    $cloneItemName = str_replace("'", "\'", $referenceItemInfo['ITEM_NAME']);
+                                    $cloneDescription = str_replace("'", "\'", $referenceItemInfo['DESCRIPTION']);
+
                                     $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
-                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'] . $extractRepeatNoStr, $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName . $extractRepeatNoStr, $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -1022,9 +1095,12 @@ try{
                         $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                         $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                         //LinkIDColumn用のurl
-                        $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                        $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                        $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                        $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                         $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                        $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                        $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                        $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                         $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                     }
                     // 整数の場合
@@ -1144,13 +1220,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $referenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $referenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'] . $extractRepeatNoStr, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName . $extractRepeatNoStr, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -1234,9 +1314,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
@@ -1350,13 +1433,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $referenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $referenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -1427,9 +1514,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
@@ -1649,13 +1739,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $convReferenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $convReferenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $convReferenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $convReferenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $convReferenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $convReferenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $convReferenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $convReferenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -1737,9 +1831,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
@@ -1852,13 +1949,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $convReferenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $convReferenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $convReferenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $convReferenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $convReferenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $convReferenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $convReferenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $convReferenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -1931,9 +2032,12 @@ try{
                     $work = str_replace(REPLACE_ID_PRI,     $otherMenuLink['PRI_NAME'],     $work);
                     $work = str_replace(REPLACE_ID_COL,     $otherMenuLink['COLUMN_NAME'],  $work);
                     //LinkIDColumn用のurl
-                    $url = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&' . str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']) .'=';
+                    $url1 = '01_browse.php?no=' . sprintf('%010d', $otherMenuLink['MENU_ID']) . '&filter=on&';
+                    $url2 = str_replace('/', '\\', $otherMenuLink['COLUMN_DISP_NAME']);
+                    $url2 = str_replace('\'', '\\\'', $url2); //シングルクォーテーションをエスケープ
                     $urlOption = (in_array($otherMenuLink['LINK_ID'], $urlOptionTargetArray)) ? 'true' : 'false';
-                    $work = str_replace(REPLACE_LINK_ID_URL, $url, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
+                    $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
                 }
                 // 整数の場合
@@ -2005,6 +2109,7 @@ try{
             $work = $cmdbLoadTableTmpl;
             $work = str_replace(REPLACE_INFO,   $description,       $work);
             $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+            $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
             $work = str_replace(REPLACE_MENU,   $menuName,          $work);
             $cmdbLoadTableVal .= $columnGrpParts;
             $work = str_replace(REPLACE_ITEM,   $cmdbLoadTableVal, $work);
@@ -2041,6 +2146,7 @@ try{
                 $work = $hgLoadTableTmpl;
                 $work = str_replace(REPLACE_INFO,   $description,       $work);
                 $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                 $work = str_replace(REPLACE_MENU,   $menuName,          $work);
                 $hgLoadTableVal .= $columnGrpParts;
                 $work = str_replace(REPLACE_ITEM,   $hgLoadTableVal, $work);
@@ -2051,6 +2157,7 @@ try{
                 $work = $hostLoadTableTmpl;
                 $work = str_replace(REPLACE_INFO,   $description,       $work);
                 $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                 $work = str_replace(REPLACE_MENU,   $menuName,          $work);
                 $hostLoadTableVal .= $columnGrpParts;
                 $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
@@ -2061,6 +2168,7 @@ try{
                 $work = $hostLoadTableOpTmpl;
                 $work = str_replace(REPLACE_INFO,   $description,       $work);
                 $work = str_replace(REPLACE_TABLE,  $menuTableName,     $work);
+                $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                 $work = str_replace(REPLACE_MENU,   $menuName,          $work);
                 $hostLoadTableVal .= $columnGrpParts;
                 $work = str_replace(REPLACE_ITEM,   $hostLoadTableVal, $work);
@@ -2076,12 +2184,14 @@ try{
                     $work = $convLoadTableTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertLoadTable = $work;
                     $work = $convHostLoadTableTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertHostLoadTable = $work;
@@ -2090,6 +2200,7 @@ try{
                     $work = $convHostLoadTableTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertLoadTable = $work;
@@ -2098,6 +2209,7 @@ try{
                     $work = $convHostLoadTableOpTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
                     $work = str_replace(REPLACE_TABLE,      $menuTableName,         $work);
+                    $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
                     $convertLoadTable = $work;
@@ -2113,6 +2225,7 @@ try{
             }
             $work = str_replace(REPLACE_INFO,   $description,       $work);
             $work = str_replace(REPLACE_MENU,   $menuName,          $work);
+            $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
             if(true === $createConvFlg){
                 $work = str_replace(REPLACE_TABLE,  $menuTableName . '_CONV',     $work);
                 $inputOrder = <<< 'EOD'
@@ -2526,6 +2639,18 @@ EOD;
         }
 
         //////////////////////////
+        // メニュー管理廃止(利用していないメニューグループのメニューを廃止)
+        //////////////////////////
+        $discardMenuIdArray = array();
+        $result = discardMenuList($cmiData, $discardMenuIdArray);
+
+        if(true !== $result){
+            // パラメータシート作成管理更新処理を行う
+            updateMenuStatus($targetData, "4", $result, true, true);
+            continue;
+        }
+
+        //////////////////////////
         // シーケンステーブル更新(シーケンス管理メニュー対応)
         //////////////////////////
         $result = updateSequence($hgMenuId, $hostMenuId, $hostSubMenuId, $viewMenuId, $convMenuId, $convHostMenuId, $cmiData['TARGET'], $menuTableName);
@@ -2718,7 +2843,21 @@ EOD;
                     continue;
                 }
             }
-        } 
+        }
+
+        //////////////////////////
+        // メニュー管理で廃止したレコードと同じメニューIDが紐付いているレコードを廃止する
+        //////////////////////////
+        if(!empty($discardMenuIdArray)){
+            $result = discardRerationTable($discardMenuIdArray);
+
+            if(true !== $result){
+                // パラメータシート作成管理更新処理を行う
+                updateMenuStatus($targetData, "4", $result, true, true);
+                continue;
+            }
+        }
+
         //////////////////////////
         // loadTableを配置する
         //////////////////////////
@@ -3886,6 +4025,176 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$vi
         // 作成対象; データシート
         else if("2" == $cmiData['TARGET']){
             $hostMenuId = $targetArray[0]['MENU_ID'];  // MenuID はホスト用を使用
+        }
+
+        return true;
+    }
+    catch(Exception $e){
+        return $e->getMessage();
+    }
+}
+
+/*
+ * メニュー管理廃止(利用していないメニューグループのメニューを廃止)
+ */
+function discardMenuList($cmiData, &$discardMenuIdArray){
+    global $objDBCA, $db_model_ch, $objMTS;
+    $menuListTable = new MenuListTable($objDBCA, $db_model_ch);
+
+    try{
+        //////////////////////////
+        // メニュー管理テーブル内を対象のメニュー名で検索
+        //////////////////////////
+        $menuName = $cmiData['MENU_NAME'];
+        $sql = $menuListTable->createSselect("WHERE DISUSE_FLAG = '0' AND MENU_NAME = :MENU_NAME");
+        $sqlBind = array('MENU_NAME' => $menuName);
+
+        // SQL実行
+        $result = $menuListTable->selectTable($sql, $sqlBind);
+        if(!is_array($result)){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+        $menuListArray = $result;
+
+        $menuGroupForInput = $cmiData['MENUGROUP_FOR_INPUT'];
+        $menuGroupForSubst = $cmiData['MENUGROUP_FOR_SUBST'];
+        $menuGroupForView  = $cmiData['MENUGROUP_FOR_VIEW'];
+
+        foreach($menuListArray as $menuData){
+            //入力用のメニューグループが一致する場合は処理をスキップ
+            if($menuData['MENU_GROUP_ID'] == $menuGroupForInput){
+                continue;
+            }
+            //代入値自動登録用のメニューグループが一致する場合は処理をスキップ
+            if($menuData['MENU_GROUP_ID'] == $menuGroupForSubst){
+                continue;
+            }
+            //参照用のメニューグループが一致する場合は処理をスキップ
+            if($menuData['MENU_GROUP_ID'] == $menuGroupForView){
+                continue;
+            }
+            //「ホストグループ」「縦メニュー利用」が両方利用ありの場合
+            if($cmiData['PURPOSE'] == 2 && $cmiData['TARGET'] == 1){
+                //メニューグループIDが2100011609(縦メニューホスト分解用中間シート)の場合はスキップ
+                if($menuData['MENU_GROUP_ID'] == '2100011609'){
+                    continue;
+                }
+                //メニューグループIDが2100011613(縦横変換用中間シート)の場合はスキップ
+                if($menuData['MENU_GROUP_ID'] == '2100011613'){
+                    continue;
+                }
+            }
+
+            //対象メニューグループで利用が無いメニューを廃止する
+            $updateData = $menuData;
+            $updateData['DISUSE_FLAG']          = "1"; //廃止
+            $updateData['LAST_UPDATE_USER']     = USER_ID_CREATE_PARAM;     // 最終更新者
+
+            //////////////////////////
+            // メニュー管理テーブルを更新
+            //////////////////////////
+            $result = $menuListTable->updateTable($updateData, $jnlSeqNo);
+            if(true !== $result){
+                $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                outputLog($msg);
+                throw new Exception($msg);
+            }
+
+            //廃止したメニューIDを保管
+            array_push($discardMenuIdArray, $menuData['MENU_ID']);
+
+        }
+
+        return true;
+    }
+    catch(Exception $e){
+        return $e->getMessage();
+    }
+}
+
+/*
+ * メニュー管理で廃止したレコードと同じメニューIDが紐付いているレコードを廃止する（「メニュー・テーブル紐付」「メニュー縦横変換管理」テーブルが対象）
+ */
+function discardRerationTable($discardMenuIdArray){
+    global $objDBCA, $db_model_ch, $objMTS;
+    $menuTableLinkTable = new MenuTableLinkTable($objDBCA, $db_model_ch);
+    $colToRowMngTable = new ColToRowMngTable($objDBCA, $db_model_ch);
+
+    try{
+        //////////////////////////
+        // メニュー・テーブル紐付テーブルを検索
+        //////////////////////////
+        $sql = $menuTableLinkTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+        // SQL実行
+        $result = $menuTableLinkTable->selectTable($sql);
+        if(!is_array($result)){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+        $menuTableLinkArray = $result;
+
+        //「メニュー・テーブル紐付」のレコードで、「メニュー管理」で廃止されたIDを利用している対象を廃止する。
+        foreach($menuTableLinkArray as $mtlData){
+            if(in_array($mtlData['MENU_ID'], $discardMenuIdArray, true)){
+                //すでに廃止されている場合は除外
+                if($mtlData['DISUSE_FLAG'] != "1"){
+                    // 廃止する
+                    $updateData = $mtlData;
+                    $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+
+                    //////////////////////////
+                    // メニュー・テーブル紐付テーブルを更新
+                    //////////////////////////
+                    $result = $menuTableLinkTable->updateTable($updateData, $jnlSeqNo);
+                    if(true !== $result){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                        outputLog($msg);
+                        throw new Exception($msg);
+                    }
+                }
+            }
+        }
+
+        //////////////////////////
+        // パラメータシート縦横変換管理テーブルを検索
+        //////////////////////////
+        $sql = $colToRowMngTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+        // SQL実行
+        $result = $colToRowMngTable->selectTable($sql);
+        if(!is_array($result)){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+        $colToRowMngArray = $result;
+
+        //「メニュー縦横変換管理」のレコードで、「メニュー管理」で廃止されたIDを利用している対象を廃止する。
+        foreach($colToRowMngArray as $colToRowMng){
+            if(in_array($colToRowMng['FROM_MENU_ID'], $discardMenuIdArray, true) || in_array($colToRowMng['TO_MENU_ID'], $discardMenuIdArray, true)){
+                //すでに廃止されている場合は除外
+                if($colToRowMng['DISUSE_FLAG'] != "1"){
+                    // 廃止する
+                    $updateData = $colToRowMng;
+                    $updateData['DISUSE_FLAG']      = "1";                  // 廃止フラグ
+                    $updateData['LAST_UPDATE_USER'] = USER_ID_CREATE_PARAM; // 最終更新者
+
+                    //////////////////////////
+                    // パラメータシート縦横変換管理テーブルを更新
+                    //////////////////////////
+                    $result = $colToRowMngTable->updateTable($updateData, $jnlSeqNo);
+                    if(true !== $result){
+                        $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                        outputLog($msg);
+                        throw new Exception($msg);
+                    }
+                }
+            }
         }
 
         return true;

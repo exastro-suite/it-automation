@@ -305,6 +305,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -579,6 +580,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);

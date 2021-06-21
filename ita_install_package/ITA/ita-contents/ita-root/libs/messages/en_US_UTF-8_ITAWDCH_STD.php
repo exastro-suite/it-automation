@@ -111,6 +111,7 @@ $ary["ITAWDCH-STD-661"]             = "All records";
 $ary["ITAWDCH-STD-662"]             = "Exclude discarded records";
 $ary["ITAWDCH-STD-663"]             = "Only discarded records";
 $ary["ITAWDCH-STD-671"]             = "Auto-numbering";
+$ary["ITAWDCH-STD-672"]             = "Delete password";
 $ary["ITAWDCH-STD-1001"]            = "Login";
 $ary["ITAWDCH-STD-1002"]            = "Login ID";
 $ary["ITAWDCH-STD-1003"]            = "Password";

@@ -2071,18 +2071,6 @@ class CreateAnsibleExecFiles {
             //該当ホストの変数配列を取得
             $vars_list = $ina_host_vars[$host_name];
 
-
-            $chl_vars_list = array();
-
-            switch($this->getAnsibleDriverID()){
-            case DF_LEGACY_ROLE_DRIVER_ID:
-                //該当ホストの配列変数を取得
-                if(@count($ina_host_child_vars[$host_name]) != 0){
-                    $chl_vars_list = $ina_host_child_vars[$host_name];
-                }
-                break;
-            }
-
             // ホスト変数定義ファイル作成
             if($this->CreateRoleHostvarsfile("VAR",
                                              $file_name,$vars_list,
@@ -12235,8 +12223,8 @@ class CreateAnsibleExecFiles {
                     "TARGET_VALUE"=>$enc_in_pass);
 
                 $proxySetting              = array();
-                $proxySetting['address']   = $this->in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-                $proxySetting['port']      = $this->in_ans_if_info["ANSIBLE_PROXY_PORT"];
+                $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+                $proxySetting['port']      = $this->lv_ans_if_info["ANSIBLE_PROXY_PORT"];
 
                 ////////////////////////////////////////////////////////////////
                 // ansible-vault 暗号化 REST APIコール                        //
@@ -12359,8 +12347,8 @@ class CreateAnsibleExecFiles {
                     "TARGET_VALUE"=>$decryptData);
 
             $proxySetting              = array();
-            $proxySetting['address']   = $this->in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-            $proxySetting['port']      = $this->in_ans_if_info["ANSIBLE_PROXY_PORT"];
+            $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+            $proxySetting['port']      = $this->lv_ans_if_info["ANSIBLE_PROXY_PORT"];
 
             ////////////////////////////////////////////////////////////////
             // ansible-vault 暗号化 REST APIコール                        //
@@ -12462,8 +12450,8 @@ class CreateAnsibleExecFiles {
                         "TARGET_VALUE"=>$enc_in_pass);
 
                 $proxySetting              = array();
-                $proxySetting['address']   = $this->in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
-                $proxySetting['port']      = $this->in_ans_if_info["ANSIBLE_PROXY_PORT"];
+                $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+                $proxySetting['port']      = $this->lv_ans_if_info["ANSIBLE_PROXY_PORT"];
 
                 ////////////////////////////////////////////////////////////////
                 // ansible-vault 暗号化 REST APIコール                        //

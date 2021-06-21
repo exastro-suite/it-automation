@@ -89,18 +89,6 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
-    if [ "$MATERIAL_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-    
-    if [ "$MATERIAL2_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-    
-    if [ "$MATERIAL4_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-
     if [ "$CREATEPARAM_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
@@ -142,18 +130,6 @@ func_install_messasge() {
         MESSAGE="Terraform driver"
     fi
 
-    if [ MATERIAL_FLG = ${1} ]; then
-        MESSAGE="Material"
-    fi
-    
-    if [ MATERIAL2_FLG = ${1} ]; then
-        MESSAGE="Material2"
-    fi
-    
-    if [ MATERIAL4_FLG = ${1} ]; then
-        MESSAGE="Material4"
-    fi
-    
     if [ CREATEPARAM_FLG = ${1} ]; then
         MESSAGE="Createparam"
     fi
@@ -352,9 +328,6 @@ CREATE_TABLES=(
     ANSIBLE_FLG
     COBBLER_FLG
     TERRAFORM_FLG
-    MATERIAL_FLG
-    MATERIAL2_FLG
-    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     CREATEPARAM3_FLG
@@ -367,9 +340,6 @@ RELEASE_PLASE=(
     ita_ansible-driver
     ita_cobbler-driver
     ita_terraform-driver
-    ita_material
-    ita_material2
-    ita_material4
     ita_createparam
     ita_hostgroup
 )
@@ -388,9 +358,6 @@ SERVICES_SET=(
     ANSIBLE_FLG
     COBBLER_FLG
     TERRAFORM_FLG
-    MATERIAL_FLG
-    MATERIAL2_FLG
-    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
@@ -415,9 +382,6 @@ BASE_FLG=0
 ANSIBLE_FLG=0
 COBBLER_FLG=0
 TERRAFORM_FLG=0
-MATERIAL_FLG=0
-MATERIAL2_FLG=0
-MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 CREATEPARAM3_FLG=0
@@ -433,7 +397,7 @@ REPLACE_CHAR=(
 
 DRIVER_CNT=0
 ANSWER_DRIVER_CNT=0
-ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'terraform_driver' 'material' 'createparam' 'hostgroup')
+ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'terraform_driver' 'createparam' 'hostgroup')
 
 CERTIFICATE_FILE=''
 PRIVATE_KEY_FILE=''
@@ -488,11 +452,6 @@ while read LINE; do
             if [ "$val" = 'yes' ]; then
                 TERRAFORM_FLG=1
             fi
-        elif [ "$key" = 'material' ]; then
-            func_answer_format_check
-            if [ "$val" = 'yes' ]; then
-                MATERIAL_FLG=1
-            fi
         elif [ "$key" = 'createparam' ]; then
             func_answer_format_check
             if [ "$val" = 'yes' ]; then
@@ -543,9 +502,6 @@ fi
 if [ $TERRAFORM_FLG -eq 1 ]; then
     log "INFO : Installation target : terraform_driver"
 fi
-if [ $MATERIAL_FLG -eq 1 ]; then
-    log "INFO : Installation target : material"
-fi
 if [ $CREATEPARAM_FLG -eq 1 ]; then
     log "INFO : Installation target : create_param"
 fi
@@ -574,33 +530,6 @@ if [ "$TERRAFORM_FLG" -eq 1 ]; then
         log 'WARNING : Terraform driver has already been installed.'
         TERRAFORM_FLG=0
     fi
-fi
-
-if [ "$MATERIAL_FLG" -eq 1 ]; then
-    if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material ; then
-        log 'WARNING : Material has already been installed.'
-        MATERIAL_FLG=0
-    fi
-fi
-
-if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material2 ; then
-    MATERIAL2_FLG=0
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL2_FLG=1
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$ANSIBLE_FLG" -eq 1 ] ; then
-    MATERIAL2_FLG=1
-elif [ "$ANSIBLE_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL2_FLG=1
-fi
-
-if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material4 ; then
-    MATERIAL4_FLG=0
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_terraform-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL4_FLG=1
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$TERRAFORM_FLG" -eq 1 ] ; then
-    MATERIAL4_FLG=1
-elif [ "$TERRAFORM_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL4_FLG=1
 fi
 
 if [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] &&  [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] ; then
@@ -1101,6 +1030,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     ################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Restart Apache(httpd) service."
     ################################################################################################
+    systemctl daemon-reload 2>&1 >> "$LOG_FILE"
     systemctl restart httpd 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
     systemctl status httpd 2>&1 >> "$LOG_FILE"
     if [ $? -ne 0 ]; then

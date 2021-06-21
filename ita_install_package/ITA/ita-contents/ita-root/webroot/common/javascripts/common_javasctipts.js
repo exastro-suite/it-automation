@@ -426,7 +426,7 @@ function set_initial_filter(){
           
           for ( let key in param ) {
             try {
-              const idKey = decodeURI( key ),
+              const idKey = decodeURIComponent( key ),
                     value = param[key];
               let   targetNum = levelList.indexOf(idKey);
               
@@ -444,9 +444,9 @@ function set_initial_filter(){
               if ( targetNum !== -1 ) {
                 // 項目名が一致した場合
                 const $target = $area.find('tr').last().find('td').eq( targetNum ).find('input, select');
-                if ( $target.length >= 2 && value.indexOf('-') !== -1 ) {
-                  // 対象が２つの場合かつ、ハイフンが含まれている場合
-                  const inputValues = param[key].split('-'),
+                if ( $target.length >= 2 && value.indexOf('~') !== -1 ) {
+                  // 対象が２つの場合かつ、「~」が含まれている場合
+                  const inputValues = param[key].split('~'),
                         inputLength = inputValues.length;
                   for ( let i = 0; i < inputLength; i++ ) {
                     $target.eq(i).val( inputValues[i] );

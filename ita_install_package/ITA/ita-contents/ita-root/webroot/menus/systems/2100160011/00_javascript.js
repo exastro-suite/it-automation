@@ -156,21 +156,6 @@ callback.prototype = {
        // 正常の場合
        if( ary_result[0] == "000" ){
            menuEditorArray.selectPulldownList = JSON.parse(ary_result[2]);
-           selectReferenceItemList();
-       }
-        // システムエラーの場合
-        else{
-            window.alert(getSomeMessage("ITAWDCC90101"));
-        }
-    },
-    /////////////////////
-    // callback: プルダウン選択項目リスト取得
-    /////////////////////
-    selectReferenceItemList : function(result){
-       var ary_result = getArrayBySafeSeparator(result);
-       // 正常の場合
-       if( ary_result[0] == "000" ){
-            menuEditorArray.referenceItemList = JSON.parse(ary_result[2]);
             if ( menuEditorTargetID === '') {
               menuEditor( menuEditorMode, menuEditorArray );
             } else {
@@ -190,8 +175,23 @@ callback.prototype = {
         // 正常の場合
         if( ary_result[0] == "000" ){
             menuEditorArray.selectMenuInfo = JSON.parse(ary_result[2]);
-            menuEditor( menuEditorMode, menuEditorArray );
+            selectReferenceItemList(menuEditorArray.selectMenuInfo.item);
         }
+        // システムエラーの場合
+        else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+    },
+    /////////////////////
+    // callback: 参照項目リスト取得
+    /////////////////////
+    selectReferenceItemList : function(result){
+       var ary_result = getArrayBySafeSeparator(result);
+       // 正常の場合
+       if( ary_result[0] == "000" ){
+            menuEditorArray.referenceItemList = JSON.parse(ary_result[2]);
+            menuEditor( menuEditorMode, menuEditorArray );
+       }
         // システムエラーの場合
         else{
             window.alert(getSomeMessage("ITAWDCC90101"));
@@ -258,8 +258,8 @@ function selectPulldownList(){
 /////////////////////
 // 参照項目リスト取得
 /////////////////////
-function selectReferenceItemList(){
-    proxy.selectReferenceItemList();
+function selectReferenceItemList(itemArray){
+    proxy.selectReferenceItemList(itemArray);
 }
 
 /////////////////////

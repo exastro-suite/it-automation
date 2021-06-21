@@ -164,10 +164,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             else if($strModeId == "DTUP_singleRecDelete"){
                 list($strLoginPw   ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayVariant,array('edit_target_row','LOGIN_PW')          ,"");
             }
-            
+
             if( $strModeId == "DTUP_singleRecDelete" || $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
                 if($value == 1){
-                    if(strlen($strLoginPw) === 0){
+                    if(strlen($strLoginPw) === 0 || (isset($arrayRegData["del_password_flag_COL_IDSOP_17"]) && $arrayRegData["del_password_flag_COL_IDSOP_17"] == "on")){
                         $retBool = false;
                         // [102071] = "ログインパスワード管理を●とする場合、ログインパス ワードの入力は必須です。"
                         $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102071");
@@ -298,7 +298,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             return $retArray;
         };
 
-        $objVldt = new SingleTextValidator(0,30,false);
+        $objVldt = new SingleTextValidator(0,128,false);
         $c = new PasswordColumn('LOGIN_PW',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102070"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102080"));//エクセル・ヘッダでの説明
         $c->setHiddenMainTableColumn(true);
@@ -366,10 +366,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                         list($strLoginPw   ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW')          ,"");
                         list($intPwHoldFlag,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW_HOLD_FLAG'),"");
                     }
-// enomoto                    
+
                     if( $strModeId == "DTUP_singleRecDelete" || $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
                         $boolPasswordInput = false;
                         $strErrorMsgPreBody = "";
+                       
                         //if( strlen($value) == 0 || $value == 1 ){
                         if((strlen($value) == 0) || ($value == 1) || ($value == 3) || ($value == 4)){
                             //----鍵認証系の場合
@@ -386,6 +387,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                             }
                             //入力値がない場合または鍵認証の場合----
                         }else if(( $value == 2 ) || ($value == 5)) {
+
                             //----パスワード認証の場合
                             if( $intPwHoldFlag == 1 ){
                                 //----パスワード管理が●とされている場合

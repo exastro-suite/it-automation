@@ -326,6 +326,16 @@ vertical-align: top;
 #dashboard[data-mode="edit"] .widget-name-inner {
 padding-bottom: 0;
 }
+.widget-sub-name {
+margin: 8px 8px 0; padding: 8px 8px 0;
+background: linear-gradient( rgba(0,0,0,.05),rgba(0,0,0,0));
+border: 1px solid #CCC;
+border-bottom: none;
+border-radius: 4px 4px 0 0;
+word-break: break-all;
+letter-spacing: .015em;
+color: #555;
+}
 #KIZI .widget-edit-menu-list {
 margin: 0; padding: 0 8px;
 list-style: none;
@@ -384,6 +394,7 @@ height: calc( 100% - 36px );
 .widget-blank {
 height: 100%;
 background-color: rgba( 255,255,255,.3 );
+border: 2px solid rgba( 0,0,0,.1 );
 border-radius: 4px;
 animation: widgetBlank .3s;
 }
@@ -827,13 +838,32 @@ transition-property: stroke-dasharray;
 stroke: rgba( 0,0,0,.1 );
 stroke-dasharray: 0;
 }
+.dashboard-text {
+margin: 8px; padding: 16px;
+border: 1px solid #CCC;
+background-color: #F2F2F2;
+border-radius: 4px;
+color: #AAA;
+text-align: center;
+}
 .number-table-wrap {
 padding: 8px;
 }
+.dashboard-table-wrap {
+overflow: auto;
+max-height: 400px;
+}
+.dashboard-table,
 .number-table {
 width: 100%;
 border-collapse: collapse;
 }
+.dashboard-table {
+width: calc( 100% - 16px );
+margin: 8px;
+}
+.dashboard-table th,
+.dashboard-table td,
 .number-table th,
 .number-table td {
 padding: 4px;
@@ -842,13 +872,46 @@ border-bottom: 1px solid #CCC;
 font-size: 11px;
 font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
 }
+.dashboard-table tr:nth-of-type(odd) {
+background-color: #FFF;
+}
+.dashboard-table tr:nth-of-type(even) {
+background-color: rgba( 0,0,0,.05 );
+}
+.dashboard-table th,
+.dashboard-table td {
+padding: 4px 8px;
+}
+.dashboard-table th {
+white-space: nowrap;
+}
+.dashboard-table-cell-wrap {
+word-break: break-all;
+min-width: 160px;
+}
+.dashboard-table-cell-nowrap {
+width: 8px;
+white-space: nowrap;
+}
 .number-table tbody th {
 text-align: left;
+}
+.dashboard-table thead th {
+background-color: #002B62;
+border-right: none;
+text-align: center;
+color: #EEE;
 }
 .number-table thead th {
 background-color: #F2F2F2;
 border-right: none;
 text-align: center;
+}
+.number-table td {
+background-color: #FFF;
+}
+.dashboard-table thead th {
+text-align: left;
 }
 .pie-chart-usage {
 display: inline-block;
@@ -866,6 +929,94 @@ background-color: rgba( 255,255,0,.2 );
 span.zero {
 color: #DDD!important;
 }
+
+/* -------------------------------------------------- *
+
+   予約作業確認
+
+ * -------------------------------------------------- */
+.widget-grid[data-display-symphony="0"] .reserve-symphony,
+.widget-grid[data-display-conductor="0"] .reserve-conductor { display: none; }
+
+.dashboard-reserve-status {
+position: relative;
+display: inline-block;
+padding: 1px 4px 1px 24px;
+background-color: #7A91AD;
+border-radius: 4px;
+color: #FFF;
+}
+.dashboard-reserve-status-icon {
+display: inline-block;
+position: absolute;
+top: 50%; left: 4px;
+transform: translateY(-50%);
+width: 14px; height: 14px;
+margin-right: 4px;
+background-color: #FFF;
+border-radius: 50%;
+vertical-align: middle;
+}
+.dashboard-reserve-status-icon::before,
+.dashboard-reserve-status-icon::after {
+content: '';
+display: block;
+position: absolute;
+z-index: 1;
+left: calc( 50% - 1px ); 
+width: 1px;
+transform-origin: center bottom;
+}
+.dashboard-reserve-status-icon::before {
+background-color: #7A91AD;
+}
+.dashboard-reserve-status-icon::after {
+background-color: #7A91AD;
+}
+.dashboard-reserve-status-icon::before {
+top: 0; height: 50%;
+animation: statusRotation 10s linear infinite;
+}
+.dashboard-reserve-status-icon::after {
+top: 15%; height: 35%;
+animation: statusRotation 120s linear infinite;
+}
+@keyframes statusRotation {
+to { transform: rotate(360deg); }
+}
+.reserve-count-down {
+text-align: right;
+}
+
+.rID,
+.rd {
+display: inline-block;
+margin: 0 4px; padding: 2px 6px;
+background-color: #FFF;
+border: 1px solid #CCC;
+border-radius: 2px;
+vertical-align: baseline;
+line-height: 1;
+}
+.rID {
+margin: 0 8px 0 0;
+border-color: #005FD8;
+text-decoration: none;
+}
+.rID:hover,
+.rID:active {
+border-color: #D87900;
+}
+.reserve-row.running {
+  opacity: .5;
+}
+.reserve-row.shortly .reserve-count-down {
+background-color: rgba(96,198,13,.2);
+}
+.reserve-row.shortly .rd {
+border-color: #60C60D;
+}
+
 /* -------------------------------------------------- *
 
    Work history
@@ -1253,11 +1404,6 @@ padding: 0;
 text-align: center;
 line-height: 26px;
 }
-.edit-shortcut-add-button {
-height: 28px;
-padding: 0 8px;
-line-height: 26px;
-}
 .edit-shortcut-remove-button,
 .edit-shortcut-add-button {
 margin: 0;
@@ -1273,6 +1419,11 @@ text-shadow: 1px 1px 1px rgba( 0,0,0,.6 );
 font-size: 11px;
 color: #EEE;
 cursor: pointer;
+}
+.edit-shortcut-add-button {
+height: 28px;
+margin: 4px 4px 0 0; padding: 0 8px;
+line-height: 26px;
 }
 .edit-shortcut-remove-button:focus,
 .edit-shortcut-add-button:focus {
@@ -1318,6 +1469,11 @@ transform: translate(-50%,-50%) rotate(-45deg);
 }
 .widget-image {
 width: 100%; height: auto;
+}
+.edit-input-note {
+padding: 4px 0;
+color: #AAA;
+font-size: 12px;
 }
 /* -------------------------------------------------- *
 

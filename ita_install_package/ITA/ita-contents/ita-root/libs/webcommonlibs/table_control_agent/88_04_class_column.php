@@ -1570,6 +1570,22 @@ class Column extends ColumnGroup {
 		$aryErrMsgBody = array();
 		$strErrMsg = "";
 		$strErrorBuf = "";
+
+		$strColId = $this->getID();
+		$strColMark = $strColId;
+
+		if( $this->getColumnIDHidden() === true ){
+			$strColMark = $this->getIDSOP();
+		}
+	
+		if( array_key_exists("del_password_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_password_flag_'.$strColMark] == "on" ){
+			//----パスワード削除オーダーがあった場合
+			 $boolActionFlag = true;
+			 $aryVariant['edit_target_row'][$strColId] = "";
+			 $exeQueryData[$strColId] = "";			
+			//パスワード削除オーダーがあった場合----
+		}
+
 		//$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
 		if( is_null($this->aryFunctionsForEvent)===true ){
 			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
@@ -2350,7 +2366,7 @@ class IDColumn extends Column {
 
 		//----参照先マスタテーブル
 		$strWpColKeyIdOfMaster  = "{$dbQM}{$this->getKeyColumnIDOfMaster()}{$dbQM}";
-		$strWpColDispIdOfMaster = "{$dbQM}{$this->getDispColumnIDOfMaster()}{$dbQM}";
+		$strWpColDispIdOfMaster = "CONVERT({$this->getDispColumnIDOfMaster()} USING utf8)";
 		$strWpColDisuseFlagIdOfMaster = "{$dbQM}{$this->getRequiredDisuseColumnID()}{$dbQM}";
 		//参照先マスタテーブル----
 
@@ -8832,7 +8848,13 @@ class RowEditByFileColumn extends Column{
 				  $boolRequiredColumnCheckSkip = true;
 				}
 
-				$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
+				if(array_key_exists($this->objTable->getRIColumnID(), $inputArray)){
+					$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
+				}
+				else{
+					$strNumberForRI = NULL;
+				}
+
 				$mode = 3;  //実行モード
 
 				//----ここではRIColumnも削除される

@@ -168,6 +168,18 @@
             
             return $executionResult;
         }
+        function get_symphony_conductor( $days=null ){
+            // グローバル変数宣言
+            global $g;
+            // ローカル変数宣言
+            $executionResult = "";
+
+            // 本体ロジックをコール
+            require_once ( $g['root_dir_path'] . "/libs/webindividuallibs/systems/mainmenu/web_php_panel_functions.php");
+            $executionResult = b_get_symphony_conductor($days);
+            
+            return $executionResult;
+        }
 
         //-- サイト個別PHP要素、ここまで--
     }

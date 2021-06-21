@@ -290,8 +290,8 @@ class AuthTypeParameterRequiredCheck {
     //   true:   正常
     //   他:     エラー
     ////////////////////////////////////////////////////////////////////////////////
-    function TowerHostListAuthTypeRequiredParameterCheck($chkType,$objMTS,$errMsgParameterAry,$strAuthMode,$strPasswd,$strsshKeyFile,$strPassphrase) {
-    
+    function TowerHostListAuthTypeRequiredParameterCheck($chkType,$objMTS,$errMsgParameterAry,$strAuthMode,$strPasswd,$strsshKeyFile,$strPassphrase,$del_password_arr=null) {
+
         $result = "";
         switch($strAuthMode) {
         case DF_LOGIN_AUTH_TYPE_KEY:        //認証方式:鍵認証 
@@ -302,7 +302,7 @@ class AuthTypeParameterRequiredCheck {
             }
             break;
         case DF_LOGIN_AUTH_TYPE_PW:         //認証方式:パスワード認証
-            if($strPasswd == "") {
+            if($strPasswd == "" || (is_array($del_password_arr) && in_array("del_password_flag_COL_IDSOP_12",$del_password_arr))) {
                 $error_cde = $this->errMsgCodeAry[$chkType]['ERROR_TYPE1'];
                 if(strlen($result) != 0) $result .= "\n";
                 $result = $objMTS->getSomeMessage($error_cde,$errMsgParameterAry);
@@ -316,7 +316,7 @@ class AuthTypeParameterRequiredCheck {
                 if(strlen($result) != 0) $result .= "\n";
                 $result = $objMTS->getSomeMessage($error_cde,$errMsgParameterAry);
             }
-            if($strPassphrase == "") {
+            if($strPassphrase == "" || (is_array($del_password_arr) && in_array("del_password_flag_COL_IDSOP_14",$del_password_arr))) {
                 $error_cde = $this->errMsgCodeAry[$chkType]['ERROR_TYPE4'];
                 if(strlen($result) != 0) $result .= "\n";
                 $result .= $objMTS->getSomeMessage($error_cde,$errMsgParameterAry);

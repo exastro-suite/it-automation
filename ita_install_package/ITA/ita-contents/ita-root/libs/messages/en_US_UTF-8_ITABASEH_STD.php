@@ -66,6 +66,7 @@ $ary["ITABASEH-STD-160013"]         = "Regularly management procedure";
 $ary["ITABASEH-STD-170001"]         = "Conductor management procedure";
 $ary["ITABASEH-STD-170002"]         = "Investigate the current Node sequence of the Conductory. (Conductor instance ID: {})";
 $ary["ITABASEH-STD-170003"]         = "The current Node's sequence of Conductors. (Conductor:{}, Node sequence: {})";
+$ary["ITABASEH-STD-170004"]         = "{} [ Node instance ID :{} ]";
 $ary["ITABASEH-STD-900001"]         = "File upload complete";
 $ary["ITABASEH-STD-900002"]         = "Import data complete";
 $ary["ITABASEH-STD-900003"]         = "[Process] Start import menu";

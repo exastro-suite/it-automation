@@ -931,6 +931,11 @@ class ExcelFormatter extends ListFormatter {
         return \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column).$row;
     }
 
+    static function cr2sDollar($column, $row){
+        $str = "$". \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column) . "$" . $row;
+        return $str;
+    }
+
     function cashModeAdjust($intMode=0){
         global $g;
 
@@ -1064,7 +1069,7 @@ class ExcelFormatter extends ListFormatter {
                 else{
                     $intSetRow = self::DATA_START_ROW_ON_MASTER;
                 }
-                $range = self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, self::DATA_START_ROW_ON_MASTER).":".self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, $intSetRow);
+                $range = self::cr2sDollar(self::DATA_START_COL+$intCountAddColOfEditSheet, self::DATA_START_ROW_ON_MASTER).":".self::cr2sDollar(self::DATA_START_COL+$intCountAddColOfEditSheet, $intSetRow);
                 $namedRange = new \PhpOffice\PhpSpreadsheet\NamedRange("FILTER_".$objColumn->getID(), $sheet, $range);
                 $X->addNamedRange($namedRange);
             }
@@ -1085,7 +1090,7 @@ class ExcelFormatter extends ListFormatter {
             $intSetRow = self::DATA_START_ROW_ON_MASTER;
         }
         
-        $range = self::cr2s(self::DATA_START_COL-1, self::DATA_START_ROW_ON_MASTER).":".self::cr2s(self::DATA_START_COL-1, $intSetRow);
+        $range = self::cr2sDollar(self::DATA_START_COL-1, self::DATA_START_ROW_ON_MASTER).":".self::cr2sDollar(self::DATA_START_COL-1, $intSetRow);
         $namedRange = new \PhpOffice\PhpSpreadsheet\NamedRange("FILTER_".$objREBFColumn->getID(), $sheet, $range);
         $X->addNamedRange($namedRange);
 
@@ -1315,6 +1320,7 @@ class ExcelFormatter extends ListFormatter {
         if($rows>1){
             $sheet->mergeCells(self::cr2s(1,1).":".self::cr2s(1, $rows));
             $sheet->mergeCells(self::cr2s(2,1).":".self::cr2s(2, $rows));
+            $sheet->mergeCells(self::cr2s(3,1).":".self::cr2s(3, $rows));
         }
     }
 
@@ -2434,6 +2440,7 @@ class SingleRowTableFormatter extends TableFormatter {
             }
             // RBAC対応 ----
             $objColumnId = $objColumn->getID();
+           
             if( get_class($this) == "RegisterTableFormatter" && get_class($objColumn) == "FileUploadColumn" ) {
 
                 if( $objColumn->getFileEncryptFunctionName() == false ) {
@@ -2445,6 +2452,8 @@ class SingleRowTableFormatter extends TableFormatter {
             } elseif( get_class($this) == "RegisterTableFormatter" && 
                 ( get_class($objColumn) == "SensitiveMultiTextColumn" || get_class($objColumn) == "SensitiveSingleTextColumn" )) {
                 $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, $outputRowData['SENSITIVE_FLAG']);
+            } elseif( get_class($this) == "RegisterTableFormatter" && get_class($objColumn) == "PasswordColumn") {
+                $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, 1);
             } else {
                 $tmpStr .= $objColumn->getOutputBody($this->strFormatterId, $outputRowData);
             }
