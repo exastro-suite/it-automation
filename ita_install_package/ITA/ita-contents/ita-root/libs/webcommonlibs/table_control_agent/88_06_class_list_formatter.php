@@ -604,6 +604,31 @@ class CSVFormatter extends ListFormatter {
                     if($permission === false) {
                         continue;
                     }
+
+                    if($objTable->getAccessAuth() === true) {
+                        $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                        if(array_key_exists($AccessAuthColumnName,$row)) {
+                            $RoleIDString   = $row[$AccessAuthColumnName];
+                            $RoleNameString = "";
+                            if(strlen($RoleIDString) != 0) {
+                                // ロールID文字列のアクセス権をロール名称の文字列に変換
+                                // 廃止されているロールはID変換失敗で表示
+                                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);  // 廃止を含む
+                                unset($obj);
+                            }
+                            if($RoleNameString === false) {
+                                $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Failed.",basename(__FILE__),__LINE__);
+                                web_log($message);
+                                $intErrorType = 500;
+                                throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            }
+                            // 登録するアクセス権をロール名称の文字列に設定
+                            $row[$AccessAuthColumnName] = $RoleNameString;
+                        } else {
+                        }
+                    }
+
                     $intFetchCount += 1;
                     $objTable->addData($row, false);
                     if( ($intFetchCount % 10000) === 0){
@@ -1953,9 +1978,11 @@ class ExcelFormatter extends ListFormatter {
         $description_array = $this->aryEditSheetDescription;
 
         // RBAC対応 ----
-        $AccessAuthColumn_idx += self::DATA_START_COL;
-        for($i_row = $intThisStartRow; $i_row <= $intThisStartRow+self::WHITE_ROWS; ++$i_row){
-            $sheet->setCellValueExplicitByColumnAndRow($AccessAuthColumn_idx, $i_row ,$DefaultAccessRoleString, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+        if($varMinorPrintTypeMode == ""){
+            $AccessAuthColumn_idx += self::DATA_START_COL;
+            for($i_row = $intThisStartRow; $i_row <= $intThisStartRow+self::WHITE_ROWS; ++$i_row){
+                $sheet->setCellValueExplicitByColumnAndRow($AccessAuthColumn_idx, $i_row ,$DefaultAccessRoleString, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            }
         }
         // ---- RBAC対応
 
