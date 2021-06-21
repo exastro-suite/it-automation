@@ -546,6 +546,13 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                     }else{
                         $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170002");                    
                     }
+                    if( isset($terminalnameinfo['edge']) ){
+                        if( $terminalnameinfo['edge'] == "" ){
+                            $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170002");
+                        }
+                    }else{
+                        $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170002");
+                    }
                 }
             }else{
                 $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170002");
@@ -721,7 +728,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                 }
 
             }
-
+            
             if( !isset( $aryDataForMovement['CALL_CONDUCTOR_ID'] ) )$aryDataForMovement['CALL_CONDUCTOR_ID']="";
             if( !isset( $aryDataForMovement['note'] ) )$aryDataForMovement['note']="";
             if( !isset( $aryDataForMovement['NEXT_PENDING_FLAG'] ) )$aryDataForMovement['NEXT_PENDING_FLAG']="";
@@ -1102,20 +1109,36 @@ function checkNodeUseCaseValidate($aryNodeData){
 
     try{
         foreach ($aryNodeData as $key => $value) {
-            $nodetype = $value['type'];
+            if(isset($value['type'])){
+                $nodetype = $value['type'];
+            }
             $arrTerminal=array();
-            foreach ($value['terminal'] as $tkey => $tvalue) {
-                $arrTerminal[$tvalue['type']]=$tvalue['targetNode'];
+            if(isset($value['terminal'])){
+                foreach ($value['terminal'] as $tkey => $tvalue) {
+                    if(isset($tvalue['type'])){
+                        $arrTerminal[$tvalue['type']]=$tvalue['targetNode'];
+                    }else{
+                        $aryErrMsgBody[] = $objMTS->getSomeMessage("ITAWDCH-ERR-26000",array($nodetype));
+                        $strErrStepIdInFx="00000300";
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                }
+            }else{
+                $aryErrMsgBody[] = $objMTS->getSomeMessage("ITAWDCH-ERR-26000",array($nodetype));
+                $strErrStepIdInFx="00000300";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
 
             foreach ($arrTerminal as $tkey => $tvalue) {
                 $nodetype2 = $aryNodeData[$tvalue]['type'];
-
-                $retNodeValidate = in_array($nodetype2,$arrNodeVariList[$nodetype][$tkey]);
-                if( $retNodeValidate == false ){
-                        $aryErrMsgBody[] = $objMTS->getSomeMessage("ITAWDCH-ERR-26000",array($nodetype));
-                        $strErrStepIdInFx="00000300";
-                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                
+                if(isset($arrNodeVariList[$nodetype][$tkey])){
+                    $retNodeValidate = in_array($nodetype2,$arrNodeVariList[$nodetype][$tkey]);
+                    if( $retNodeValidate == false ){
+                            $aryErrMsgBody[] = $objMTS->getSomeMessage("ITAWDCH-ERR-26000",array($nodetype));
+                            $strErrStepIdInFx="00000300";
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
                 }
 
             }

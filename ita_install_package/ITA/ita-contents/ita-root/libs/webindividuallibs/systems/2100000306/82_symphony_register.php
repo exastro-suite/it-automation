@@ -53,7 +53,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
     $strResultType99 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12206");   //エラー/Error
 
     $tmpResult  = array();
-    $resultdata = array();  
+    $resultdata = array();
     $resultdata_count = array();
     $resultdata_count['register'] = array("name" => $strResultType01,"ct" => 0);
     $resultdata_count['update']   = array("name" => $strResultType02,"ct" => 0);
@@ -68,9 +68,21 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
     try{
         $objDBCA = new DBConnectAgent();
         $tmpDbConnectResult = $objDBCA->connectOpen();
-        
+
         //パラメータ整形、入力データチェック
         foreach ($objJSONOfReceptedData as $key => $value) {
+
+            $ret_mov = array();
+            $objJSONarrChk = 1;
+
+            //処理種別のチェック
+            if ( array_key_exists(0, $value) ){
+                $Process_type = $value[0];
+            }else{
+                $Process_type = "";
+            }
+
+            if($Process_type == $strResultType02){
             //更新前のデータを取得
             $tmpArrayBind = array('SYMPHONY_CLASS_NO'=>$value[2] );
             $sql = "SELECT * FROM C_SYMPHONY_CLASS_MNG WHERE SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO";
@@ -88,7 +100,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                     $value[4] = $row['DESCRIPTION'];
                 }
             }
-            
+
             $tmpArrayBind = array('SYMPHONY_CLASS_NO'=>$value[2] );
             $sql = "SELECT * FROM C_MOVEMENT_CLASS_MNG WHERE SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO";
             $objQuery = $objDBCA->sqlPrepare($sql);
@@ -112,16 +124,8 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                 }
             }
             ksort($value);
-
-            $ret_mov = array();
-            $objJSONarrChk = 1;
-
-            //処理種別のチェック
-            if ( array_key_exists(0, $value) ){
-                $Process_type = $value[0];
-            }else{
-                $Process_type = "";
             }
+
             //配列構造のチェック
             switch ($Process_type) {
                 //登録、更新
@@ -130,7 +134,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                         if( count($value) == 6 ){
                             if( is_array($value[9])){
                                 $objJSONarrChk=0;
-                            }                      
+                            }
                     }
                     break;
                 //廃止、復活
@@ -148,7 +152,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                 $strErrStepIdInFx="00000100";
                 throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
-            
+
             //登録、更新/廃止、復活時の変換
             switch ($Process_type) {
                 //登録、更新
@@ -158,7 +162,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                     //symphony要素の配列チェック
                     if( array_key_exists(3, $value) ){
                         if ( !array_key_exists(3, $value) )$value[3]="";
-                        if ( !array_key_exists(4, $value) )$value[4]=""; 
+                        if ( !array_key_exists(4, $value) )$value[4]="";
                     }
 
                     //symphony要素の成形、型変換
@@ -166,11 +170,11 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                     unset($objJSONOfReceptedData[$key][4]);
                     $objJSONOfReceptedData[$key][3][]= array(
                                         "name"  => "symphony_name",
-                                        "value" => $value[3] 
+                                        "value" => $value[3]
                     );
                     $objJSONOfReceptedData[$key][3][]= array(
                                         "name"  => "symphony_tips",
-                                        "value" => $value[4] 
+                                        "value" => $value[4]
                     );
                     //最終更新時刻を変換、チェック
                     if ( array_key_exists(7, $value) ){
@@ -186,14 +190,14 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                             $tmp_ary = array( 0 => $key1+1);
                             $value[9][$key1] = array_merge($tmp_ary, $value[9][$key1]);
                         }
-                        //Movemnt要素ss;<XX>型へ変換 
+                        //Movemnt要素ss;<XX>型へ変換
                         foreach ($value[9] as $key1 => $value1) {
                             $ret_mov[] = "ss;" . implode( "ss;", $value1 );
                         }
                         $objJSONOfReceptedData[$key][9] =  implode( "", $ret_mov ) ;
 
                     }else{
-                        $objJSONOfReceptedData[$key][9] =  array() ;      
+                        $objJSONOfReceptedData[$key][9] =  array() ;
                     }
 
                     break;
@@ -213,7 +217,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                         $objJSONOfReceptedData[$key][7][0]= array(
                                               "name"  => "UPD_UPDATE_TIMESTAMP",
                                               "value" => ""
-                        );   
+                        );
                     }
                     break;
                 default:
@@ -223,7 +227,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
         }
 
 
-        //X-command毎の処理   
+        //X-command毎の処理
         switch ($strCommand) {
             case 'EDIT':
                 #登録種別毎の処理
@@ -240,7 +244,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                     if( array_key_exists(3, $value) ) $arrayReceptData = $value[3];
                     if( array_key_exists(9, $value) ) $strSortedData = $value[9];
                     if( array_key_exists(7, $value) ) $strLT4UBody = $value[7];
-                    
+
                     switch ($Process_type) {
                         //登録
                         case $strResultType01:
@@ -329,7 +333,7 @@ function register_execute($arrayReceptData, $strSortedData){
 
     // ローカル変数宣言
     $arrayResult = array();
-    
+
     require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/72_symphonyClassAdmin.php");
     $arrayResult = symphonyClassRegisterExecute(null, $arrayReceptData, $strSortedData, null);
 
@@ -343,7 +347,7 @@ function register_execute($arrayReceptData, $strSortedData){
         web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
         $arrayResult[3] = str_replace(array(" ", "　"), "",strip_tags($arrayResult[3]));
     }
-    return $arrayResult; 
+    return $arrayResult;
 }
 
 //////////////////////////////////////////
@@ -352,13 +356,13 @@ function register_execute($arrayReceptData, $strSortedData){
 function update_execute($intShmphonyClassId, $arrayReceptData, $strSortedData, $strLT4UBody){
     // グローバル変数宣言
     global $g;
-    
+
     // ローカル変数宣言
     $arrayResult = array();
-    
+
     require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/72_symphonyClassAdmin.php");
     $arrayResult = symphonyClassUpdateExecute($intShmphonyClassId, $arrayReceptData, $strSortedData, $strLT4UBody);
-    
+
     // 結果判定
     if($arrayResult[0]=="000"){
         web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
@@ -457,10 +461,10 @@ function filter_add($aryForResultData){
             //FILTER結果にのMOVEMENT情報説明追加
             $tmparyForResultData[$key][] = array(array(
                 $g['objMTS']->getSomeMessage("ITABASEH-MNU-900100"), //"Orchestrator ID",
-                $g['objMTS']->getSomeMessage("ITABASEH-MNU-900101"), //"Movement ID",       
+                $g['objMTS']->getSomeMessage("ITABASEH-MNU-900101"), //"Movement ID",
                 $g['objMTS']->getSomeMessage("ITABASEH-MNU-900102"), //"一時停止(OFF:/ON:checkedValue)",
                 $g['objMTS']->getSomeMessage("ITABASEH-MNU-900103"), //"説明",
-                $g['objMTS']->getSomeMessage("ITABASEH-MNU-900104")  //"オペレーションID(個別指定)", 
+                $g['objMTS']->getSomeMessage("ITABASEH-MNU-900104")  //"オペレーションID(個別指定)",
             ));
 
         }
