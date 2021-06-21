@@ -126,10 +126,10 @@ class BaseTable_CPM {
     /**
      * SELECT
      */
-    public function selectTable($sql){
+    public function selectTable($sql, $arrayUtnBind=null){
 
         // SQL実行
-        $result = $this->execQuery($sql, NULL, $objQuery);
+        $result = $this->execQuery($sql, $arrayUtnBind, $objQuery);
         if(true !== $result){
             return $result;
         }

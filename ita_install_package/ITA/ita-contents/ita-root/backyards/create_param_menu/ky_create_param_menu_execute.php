@@ -786,13 +786,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $referenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $referenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -999,13 +1003,17 @@ try{
                                         $repraceDateFormat = '\'Y/m/d\'';
                                     }
 
+                                    // 「'」がある場合は「\'」に変換する
+                                    $cloneItemName = str_replace("'", "\'", $referenceItemInfo['ITEM_NAME']);
+                                    $cloneDescription = str_replace("'", "\'", $referenceItemInfo['DESCRIPTION']);
+
                                     $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
-                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'] . $extractRepeatNoStr, $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName . $extractRepeatNoStr, $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                    $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                     $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -1212,13 +1220,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $referenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $referenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'] . $extractRepeatNoStr, $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName . $extractRepeatNoStr, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -1421,13 +1433,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $referenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $referenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $referenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $referenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $referenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $referenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $referenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $referenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $referenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -1723,13 +1739,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $convReferenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $convReferenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $convReferenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $convReferenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $convReferenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $convReferenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $convReferenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $convReferenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -1929,13 +1949,17 @@ try{
                                     $repraceDateFormat = '\'Y/m/d\'';
                                 }
 
+                                // 「'」がある場合は「\'」に変換する
+                                $cloneItemName = str_replace("'", "\'", $convReferenceItemInfo['ITEM_NAME']);
+                                $cloneDescription = str_replace("'", "\'", $convReferenceItemInfo['DESCRIPTION']);
+
                                 $work_ref_tmpl = str_replace(REPLACE_REF_NUMBER, $itemInfo['CREATE_ITEM_ID'] . "_ref_" . $convReferenceCount2, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_VALUE, $itemInfo['COLUMN_NAME'] . "_CLONE_" . $convReferenceCount2, $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $convReferenceItemInfo['ITEM_NAME'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_DISP, $cloneItemName, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_ID_TABLE, $convReferenceItemInfo['TABLE_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_PRI, $convReferenceItemInfo['PRI_NAME'], $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_CLONE_COL, $convReferenceItemInfo['COLUMN_NAME'], $work_ref_tmpl);
-                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $convReferenceItemInfo['DESCRIPTION'], $work_ref_tmpl);
+                                $work_ref_tmpl = str_replace(REPLACE_CLONE_INFO, $cloneDescription, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_ITEM_PASSWORD, $repracePassword, $work_ref_tmpl);
                                 $work_ref_tmpl = str_replace(REPLACE_REFERENCE_DATE_FORMAT, $repraceDateFormat, $work_ref_tmpl);
 
@@ -4022,10 +4046,11 @@ function discardMenuList($cmiData, &$discardMenuIdArray){
         // メニュー管理テーブル内を対象のメニュー名で検索
         //////////////////////////
         $menuName = $cmiData['MENU_NAME'];
-        $sql = $menuListTable->createSselect("WHERE DISUSE_FLAG = '0' AND MENU_NAME = '".$menuName."'");
+        $sql = $menuListTable->createSselect("WHERE DISUSE_FLAG = '0' AND MENU_NAME = :MENU_NAME");
+        $sqlBind = array('MENU_NAME' => $menuName);
 
         // SQL実行
-        $result = $menuListTable->selectTable($sql);
+        $result = $menuListTable->selectTable($sql, $sqlBind);
         if(!is_array($result)){
             $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
             outputLog($msg);
