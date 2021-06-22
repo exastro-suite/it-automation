@@ -78,6 +78,7 @@ function conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecep
           // ローカル変数宣言
           $arrayResult = array();
           $objJSONarrChk = 1;
+          $strJsonKey ="";
           $arrayReceptData = "";
           $Process_type = "";
 
@@ -85,6 +86,8 @@ function conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecep
           $tmpReceptData = $value;
           if( isset($tmpReceptData['edittype'])){
               $Process_type = $tmpReceptData['edittype'];
+          }else{
+              $strJsonKey = 'edittype';
           }
           if( isset($tmpReceptData['conductor'])){
               $arrayReceptData = $tmpReceptData['conductor'];
@@ -94,16 +97,59 @@ function conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecep
           switch ($Process_type) {
               //登録
               case $strResultType01:
-                  if( isset($tmpReceptData['edittype']) && isset($tmpReceptData['config'])){
-                      $objJSONarrChk=0;
+                  if(isset($tmpReceptData['edittype'])){
+                    $objJSONarrChk=0;
+                  }else{
+                    $objJSONarrChk=1;
+                    $strJsonKey = 'edittype';
+                    break;
+                  }
+                  if(isset($tmpReceptData['conductor'])){
+                    $objJSONarrChk=0;
+                  }else{
+                    $objJSONarrChk=1;
+                    $strJsonKey = 'conductor';
+                    break;
+                  }
+                  if(isset($tmpReceptData['config'])){
+                    $objJSONarrChk=0;
+                  }else{
+                    $objJSONarrChk=1;
+                    $strJsonKey = 'config';
+                    break;
                   }
                   break;
               //更新、廃止、復活
               case $strResultType02:
               case $strResultType03:
               case $strResultType04:
-                  if( isset($tmpReceptData['edittype']) && isset($tmpReceptData['config']) && isset($arrayReceptData['id']) && isset($arrayReceptData['LUT4U']) ){
-                      $objJSONarrChk=0;
+                  if(isset($tmpReceptData['edittype'])){
+                    $objJSONarrChk=0;
+                  }else{
+                    $objJSONarrChk=1;
+                    $strJsonKey = 'edittype';
+                    break;
+                  }
+                  if(isset($tmpReceptData['conductor'])){
+                    $objJSONarrChk=0;
+                  }else{
+                    $objJSONarrChk=1;
+                    $strJsonKey = 'conductor';
+                    break;
+                  }
+                  if(isset($arrayReceptData['id'])){
+                    $objJSONarrChk=0;
+                  }else{
+                    $objJSONarrChk=1;
+                    $strJsonKey = 'id';
+                    break;
+                  }
+                  if(isset($arrayReceptData['LUT4U'])){
+                    $objJSONarrChk=0;
+                  }else{
+                    $objJSONarrChk=1;
+                    $strJsonKey = 'LUT4U';
+                    break;
                   }
                   break;
               default:
@@ -114,7 +160,7 @@ function conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecep
           if( $objJSONarrChk != 0 ){
               $intErrorType = 2;
               $strErrStepIdInFx="00000100";
-              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+              throw new Exception( $g['objMTS']->getSomeMessage("ITABASEH-ERR-170107") ."[".$strJsonKey."]" );
           }
       }
 
@@ -143,19 +189,30 @@ function conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecep
                         }
                     }
                     unset($strSortedData['conductor']);
-                    unset($strSortedData['config']);
-                    unset($strSortedData['edittype']);
-                    $strSortedData = $strSortedData['node'];
                     if( array_key_exists('LUT4U', $arrayReceptData) ) $strLT4UBody = substr_replace($arrayReceptData['LUT4U'], '.', -6, 0);
 
                     switch ($Process_type) {
                         //登録
                         case $strResultType01:
+                            unset($strSortedData['config']);
+                            unset($strSortedData['edittype']);
+                            foreach ($strSortedData as $key => $value) {
+                              if(strpos($key,'node') !== false){
+                                $strSortedData['node'][$key] = $value;
+                              }
+                            }
                             $tmparrayResult = register_execute($arrayReceptData, $strSortedData);
                             $resultdata_count = result_chk_count($tmparrayResult,$resultdata_count,'register');
                             break;
                         //更新
                         case $strResultType02:
+                            unset($strSortedData['config']);
+                            unset($strSortedData['edittype']);
+                            foreach ($strSortedData as $key => $value) {
+                              if(strpos($key,'node') !== false){
+                                $strSortedData['node'][$key] = $value;
+                              }
+                            }
                             $tmparrayResult = update_execute($intShmphonyClassId, $arrayReceptData, $strSortedData, $strLT4UBody);
                             $resultdata_count = result_chk_count($tmparrayResult,$resultdata_count,'update');
                             break;
@@ -222,6 +279,7 @@ function conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecep
         }
         $tmpErrMsgBody = $e->getMessage();
         dev_log($tmpErrMsgBody, $intControlDebugLevel01);
+        web_log($tmpErrMsgBody, $intControlDebugLevel01);
         if( $intResultStatusCode === null ) $intResultStatusCode = 500;
         if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
         if( 500 <= $intErrorType ) $strSysErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
@@ -351,13 +409,6 @@ function conductorJsonGetTitle(){
                               'terminalNumber' => 'ターミナルナンバー',
                               'edgeNumber' => 'エッジナンバー');
 
-  $arr_json['line'] = array('id' => 'ラインID',
-                            'type' => '種別',
-                            'inNode' => 'ノード内接続',
-                            'outTerminal' => 'ターミナル外接続',
-                            'inTerminal' => 'ターミナル内接続',
-                            'outNode' => 'ノード外接続');
-
   $arr_json['node'] = array('h' => '高さ',
                             'id' => 'ノードID',
                             'terminal',
@@ -385,6 +436,13 @@ function conductorJsonGetTitle(){
                                         'condition' => '状態',
                                         'x' => '横',
                                         'y' => '縦');
+
+  $arr_json['line'] = array('id' => 'ラインID',
+                            'type' => '種別',
+                            'inNode' => 'ノード内接続',
+                            'outTerminal' => 'ターミナル外接続',
+                            'inTerminal' => 'ターミナル内接続',
+                            'outNode' => 'ノード外接続');
 
   return $arr_json;
  }
@@ -461,7 +519,7 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
     foreach ($arrNodeData as $key => $value) {
 
         //初期値設定
-        $arr_json['node'][$value['NODE_NAME']] = array('h' => '',
+        $arr_json[$value['NODE_NAME']] = array('h' => '',
                                   'id' => '',
                                   'terminal' => array(),
                                   'type' => '',
@@ -480,37 +538,37 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
                                   'x' => '',
                                   'y' => '');
 
-        $arr_json['node'][$value['NODE_NAME']]['h'] = $value['POINT_H'];
-        $arr_json['node'][$value['NODE_NAME']]['id'] = $value['NODE_NAME'];
+        $arr_json[$value['NODE_NAME']]['h'] = $value['POINT_H'];
+        $arr_json[$value['NODE_NAME']]['id'] = $value['NODE_NAME'];
 
         //NODE_TYPE置換
-        if( $value['NODE_TYPE_ID'] == 1) $arr_json['node'][$value['NODE_NAME']]['type']="start";
-        if( $value['NODE_TYPE_ID'] == 2) $arr_json['node'][$value['NODE_NAME']]['type']="end";
-        if( $value['NODE_TYPE_ID'] == 3) $arr_json['node'][$value['NODE_NAME']]['type']="movement";
-        if( $value['NODE_TYPE_ID'] == 4) $arr_json['node'][$value['NODE_NAME']]['type']="call";
-        if( $value['NODE_TYPE_ID'] == 5) $arr_json['node'][$value['NODE_NAME']]['type']="parallel-branch";
-        if( $value['NODE_TYPE_ID'] == 6) $arr_json['node'][$value['NODE_NAME']]['type']="conditional-branch";
-        if( $value['NODE_TYPE_ID'] == 7) $arr_json['node'][$value['NODE_NAME']]['type']="merge";
-        if( $value['NODE_TYPE_ID'] == 8) $arr_json['node'][$value['NODE_NAME']]['type']="pause";
-        if( $value['NODE_TYPE_ID'] == 9) $arr_json['node'][$value['NODE_NAME']]['type']="blank";
-        if( $value['NODE_TYPE_ID'] == 10) $arr_json['node'][$value['NODE_NAME']]['type']="call_s";
+        if( $value['NODE_TYPE_ID'] == 1) $arr_json[$value['NODE_NAME']]['type']="start";
+        if( $value['NODE_TYPE_ID'] == 2) $arr_json[$value['NODE_NAME']]['type']="end";
+        if( $value['NODE_TYPE_ID'] == 3) $arr_json[$value['NODE_NAME']]['type']="movement";
+        if( $value['NODE_TYPE_ID'] == 4) $arr_json[$value['NODE_NAME']]['type']="call";
+        if( $value['NODE_TYPE_ID'] == 5) $arr_json[$value['NODE_NAME']]['type']="parallel-branch";
+        if( $value['NODE_TYPE_ID'] == 6) $arr_json[$value['NODE_NAME']]['type']="conditional-branch";
+        if( $value['NODE_TYPE_ID'] == 7) $arr_json[$value['NODE_NAME']]['type']="merge";
+        if( $value['NODE_TYPE_ID'] == 8) $arr_json[$value['NODE_NAME']]['type']="pause";
+        if( $value['NODE_TYPE_ID'] == 9) $arr_json[$value['NODE_NAME']]['type']="blank";
+        if( $value['NODE_TYPE_ID'] == 10) $arr_json[$value['NODE_NAME']]['type']="call_s";
 
         //Movement個別
         if( $value['NODE_TYPE_ID'] == 3) {
             if( isset( $aryPatternList[$value['PATTERN_ID']] ) ){
-                $arr_json['node'][$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];
-                $arr_json['node'][$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
-                $arr_json['node'][$value['NODE_NAME']]['Name']=$aryPatternList[$value['PATTERN_ID']]['PATTERN_NAME'];
+                $arr_json[$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];
+                $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
+                $arr_json[$value['NODE_NAME']]['Name']=$aryPatternList[$value['PATTERN_ID']]['PATTERN_NAME'];
             }else{
                 if( $getmode == "" ){
-                  $arr_json['node'][$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];
-                  $arr_json['node'][$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
-                  $arr_json['node'][$value['NODE_NAME']]['Name']="";
+                  $arr_json[$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];
+                  $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
+                  $arr_json[$value['NODE_NAME']]['Name']="";
                 }else{
                     //廃止済みMovemnt対応
-                    $arr_json['node'][$value['NODE_NAME']]['PATTERN_ID']="-";
-                    $arr_json['node'][$value['NODE_NAME']]['ORCHESTRATOR_ID']="-";
-                    $arr_json['node'][$value['NODE_NAME']]['Name']="-";
+                    $arr_json[$value['NODE_NAME']]['PATTERN_ID']="-";
+                    $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']="-";
+                    $arr_json[$value['NODE_NAME']]['Name']="-";
                 }
 
             }
@@ -518,7 +576,7 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
 
         //call個別
         if( $value['NODE_TYPE_ID'] == 4) {
-            $arr_json['node'][$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
+            $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
 
             $strConductorName="";
             if( $value['CONDUCTOR_CALL_CLASS_NO'] != "" ){
@@ -528,24 +586,24 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
                 if( $aryRetBody[1] !== null ){
                     //廃止済みの場合
                     $strConductorName = "";
-                    $arr_json['node'][$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
+                    $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
                 }else{
                     if($aryRetBody[4]['DISUSE_FLAG'] == 1){
                         //廃止済みの場合
                         $strConductorName = "";
-                        $arr_json['node'][$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
+                        $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
                     }else{
                         $strConductorName = $aryRetBody[4]['CONDUCTOR_NAME'];
                     }
                 }
             }
-            $arr_json['node'][$value['NODE_NAME']]['CONDUCTOR_NAME']=$strConductorName;
+            $arr_json[$value['NODE_NAME']]['CONDUCTOR_NAME']=$strConductorName;
         }
 
         //call(symphony)個別
         if( $value['NODE_TYPE_ID'] == 10) {
             #$arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
-            $arr_json['node'][$value['NODE_NAME']]['CALL_SYMPHONY_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
+            $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
 
             $strConductorName="";
             if( $value['CONDUCTOR_CALL_CLASS_NO'] != "" ){
@@ -556,12 +614,12 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
                     //廃止済みの場合
                     $strConductorName = "";
                     #$arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
-                    $arr_json['node'][$value['NODE_NAME']]['CALL_SYMPHONY_ID']="---";
+                    $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']="---";
                 }else{
                     $strConductorName = $aryRetBody[4]['SYMPHONY_NAME'];
                 }
             }
-            $arr_json['node'][$value['NODE_NAME']]['SYMPHONY_NAME']=$strConductorName;
+            $arr_json[$value['NODE_NAME']]['SYMPHONY_NAME']=$strConductorName;
         }
 
         //#648 対応
@@ -619,13 +677,13 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
                     }
 
                     if( $value['NODE_TYPE_ID'] == 4 && isset( $rows[$value['NODE_CLASS_NO']] ) ==  true ){
-                        $arr_json['node'][$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$rows[$value['NODE_CLASS_NO']]['CONDUCTOR_INSTANCE_CALL_NO'];
-                        $arr_json['node'][$value['NODE_NAME']]['CONDUCTOR_NAME']=$rows[$value['NODE_CLASS_NO']]['I_PATTERN_NAME'];
+                        $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$rows[$value['NODE_CLASS_NO']]['CONDUCTOR_INSTANCE_CALL_NO'];
+                        $arr_json[$value['NODE_NAME']]['CONDUCTOR_NAME']=$rows[$value['NODE_CLASS_NO']]['I_PATTERN_NAME'];
                     }
 
                     if( $value['NODE_TYPE_ID'] == 10 && isset( $rows[$value['NODE_CLASS_NO']] ) ==  true ){
-                        $arr_json['node'][$value['NODE_NAME']]['CALL_SYMPHONY_ID']=$rows[$value['NODE_CLASS_NO']]['CONDUCTOR_INSTANCE_CALL_NO'];
-                        $arr_json['node'][$value['NODE_NAME']]['SYMPHONY_NAME']=$rows[$value['NODE_CLASS_NO']]['I_PATTERN_NAME'];
+                        $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']=$rows[$value['NODE_CLASS_NO']]['CONDUCTOR_INSTANCE_CALL_NO'];
+                        $arr_json[$value['NODE_NAME']]['SYMPHONY_NAME']=$rows[$value['NODE_CLASS_NO']]['I_PATTERN_NAME'];
                     }
                 }
             }
@@ -633,8 +691,8 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
 
         //Movement,call,call_s共通
         if( $value['NODE_TYPE_ID'] == 3 || $value['NODE_TYPE_ID'] == 4 || $value['NODE_TYPE_ID'] == 10 ) {
-            $arr_json['node'][$value['NODE_NAME']]['OPERATION_NO_IDBH']=$value['OPERATION_NO_IDBH'];
-            $arr_json['node'][$value['NODE_NAME']]['SKIP_FLAG']=$value['SKIP_FLAG'];
+            $arr_json[$value['NODE_NAME']]['OPERATION_NO_IDBH']=$value['OPERATION_NO_IDBH'];
+            $arr_json[$value['NODE_NAME']]['SKIP_FLAG']=$value['SKIP_FLAG'];
 
             $strOpeName="";
             if( $value['OPERATION_NO_IDBH'] != "" ){
@@ -643,7 +701,7 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
                 if( $arrayRetBody[1] !== null ){
                     //廃止済みの場合
                     $strOpeName = "";
-                    $arr_json['node'][$value['NODE_NAME']]['OPERATION_NO_IDBH']="-";
+                    $arr_json[$value['NODE_NAME']]['OPERATION_NO_IDBH']="-";
                 }else{
                     // オペレーションNoからオペレーションの情報を取得する----
                     $aryRowOfOperationTable = $arrayRetBody[4];
@@ -652,14 +710,14 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
 
             }
 
-            $arr_json['node'][$value['NODE_NAME']]['OPERATION_NAME']=$strOpeName;
+            $arr_json[$value['NODE_NAME']]['OPERATION_NAME']=$strOpeName;
         }
 
-        $arr_json['node'][$value['NODE_NAME']]['note']=$value['DESCRIPTION'];
+        $arr_json[$value['NODE_NAME']]['note']=$value['DESCRIPTION'];
 
-        $arr_json['node'][$value['NODE_NAME']]['w']=$value['POINT_W'];
-        $arr_json['node'][$value['NODE_NAME']]['x']=$value['POINT_X'];
-        $arr_json['node'][$value['NODE_NAME']]['y']=$value['POINT_Y'];
+        $arr_json[$value['NODE_NAME']]['w']=$value['POINT_W'];
+        $arr_json[$value['NODE_NAME']]['x']=$value['POINT_X'];
+        $arr_json[$value['NODE_NAME']]['y']=$value['POINT_Y'];
 
         //NODEカウンタの取得
         $tmpNodeNumber  = intval( str_replace( "node-", "", $value['NODE_NAME'] ));
@@ -667,7 +725,7 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
 
         //TERMINAL整形
         foreach ($value['TERMINAL'] as $tkey => $tval) {
-          $arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']] = array('case' => '',
+          $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']] = array('case' => '',
                                                 'edge' => '',
                                                 'id' => '',
                                                 'targetNode' => '',
@@ -676,33 +734,22 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
                                                 'x' => '',
                                                 'y' => '');
 
-            if($tval['CASE_NO'] != "" )$arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case']=$tval['CASE_NO'];
-            if($tval['LINE_NAME'] != "" )$arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['edge']=$tval['LINE_NAME'];
-            $arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['id']=$tval['TERMINAL_CLASS_NAME'];
-            $arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['targetNode']=$tval['CONNECTED_NODE_NAME'];
-            if( $tval['TERMINAL_TYPE_ID'] == 1) $arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['type']="in";
-            if( $tval['TERMINAL_TYPE_ID'] == 2) $arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['type']="out";
+            if($tval['CASE_NO'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case']=$tval['CASE_NO'];
+            if($tval['LINE_NAME'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['edge']=$tval['LINE_NAME'];
+            $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['id']=$tval['TERMINAL_CLASS_NAME'];
+            $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['targetNode']=$tval['CONNECTED_NODE_NAME'];
+            if( $tval['TERMINAL_TYPE_ID'] == 1) $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['type']="in";
+            if( $tval['TERMINAL_TYPE_ID'] == 2) $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['type']="out";
 
             if($tval['CONDITIONAL_ID'] != null ){
                 $arrConditionalID = explode(',', $tval['CONDITIONAL_ID']);
                 foreach ($arrConditionalID as $tckey => $tcvalue) {
-                    $arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['condition']=$tcvalue;
+                    $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['condition']=$tcvalue;
                 }
             }
 
-            if($tval['POINT_X'] != "" )$arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['x']=$tval['POINT_X'];
-            if($tval['POINT_Y'] != "" )$arr_json['node'][$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['y']=$tval['POINT_Y'];
-
-            //LINE生成
-            $arr_json['line'][$tval['LINE_NAME']]['id']=$tval['LINE_NAME'];
-            $arr_json['line'][$tval['LINE_NAME']]['type']="egde";
-            if( $tval['TERMINAL_TYPE_ID'] == "1"  && $tval['LINE_NAME'] != "" ){
-                $arr_json['line'][$tval['LINE_NAME']]['inTerminal']=$tval['TERMINAL_CLASS_NAME'];
-                $arr_json['line'][$tval['LINE_NAME']]['outNode']=$tval['CONNECTED_NODE_NAME'];
-            }elseif($tval['TERMINAL_TYPE_ID'] == "2"  && $tval['LINE_NAME'] != "" ){
-                $arr_json['line'][$tval['LINE_NAME']]['inNode']=$tval['CONNECTED_NODE_NAME'];
-                $arr_json['line'][$tval['LINE_NAME']]['outTerminal']=$tval['TERMINAL_CLASS_NAME'];
-            }
+            if($tval['POINT_X'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['x']=$tval['POINT_X'];
+            if($tval['POINT_Y'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['y']=$tval['POINT_Y'];
 
             //TERMINAL、LINEカウンタの取得
             $tmpTerminalNumber  = intval( str_replace( "terminal-", "", $tval['TERMINAL_CLASS_NAME'] ));
@@ -710,9 +757,22 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
             $tmpEdgeNumber  = intval( str_replace( "line-", "", $tval['LINE_NAME'] ));
             if( $intEdgeNumber < $tmpEdgeNumber )$intEdgeNumber=$tmpEdgeNumber;
         }
-        $tmpAry = $arr_json['node'];
-        unset($arr_json['node']);
-        $arr_json['node'] = $tmpAry;
+    }
+
+    //LINE成形
+    foreach ($arrNodeData as $key => $value) {
+      foreach ($value['TERMINAL'] as $tkey => $tval) {
+        //LINE生成
+        $arr_json[$tval['LINE_NAME']]['id']=$tval['LINE_NAME'];
+        $arr_json[$tval['LINE_NAME']]['type']="egde";
+        if( $tval['TERMINAL_TYPE_ID'] == "1"  && $tval['LINE_NAME'] != "" ){
+            $arr_json[$tval['LINE_NAME']]['inTerminal']=$tval['TERMINAL_CLASS_NAME'];
+            $arr_json[$tval['LINE_NAME']]['outNode']=$tval['CONNECTED_NODE_NAME'];
+        }elseif($tval['TERMINAL_TYPE_ID'] == "2"  && $tval['LINE_NAME'] != "" ){
+            $arr_json[$tval['LINE_NAME']]['inNode']=$tval['CONNECTED_NODE_NAME'];
+            $arr_json[$tval['LINE_NAME']]['outTerminal']=$tval['TERMINAL_CLASS_NAME'];
+        }
+      }
     }
 
     $intNodeNumber++;
@@ -722,7 +782,7 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
     $arr_json['config']['editorVersion'] = '1.0.2';
     $arr_json['config']['nodeNumber'] = $intNodeNumber;
     $arr_json['config']['terminalNumber'] = $intTerminalNumber;
-    $arr_json['config']['edgeNumberedgeNumber'] = $intEdgeNumber;
+    $arr_json['config']['edgeNumber'] = $intEdgeNumber;
 
     //$arr_json[2] = array_values($arr_json[2]);
     //$arr_json[3] = array_values($arr_json[3]);
