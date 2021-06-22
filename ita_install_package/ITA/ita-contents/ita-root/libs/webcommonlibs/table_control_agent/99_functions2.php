@@ -2510,7 +2510,11 @@ EOD;
         }
 
         // ----ORDER BY句を付加
-        $strOrderStream = " ORDER BY {$objTable->getDBSortText()}, {$objTable->getRequiredJnlSeqNoColumnID()} DESC";
+        if ($mode == 2) {
+            $strOrderStream = "ORDER BY {$objTable->getDBSortText()}, {$objTable->getRequiredJnlSeqNoColumnID()} DESC";
+        } else {
+            $strOrderStream = "ORDER BY {$objTable->getRequiredJnlSeqNoColumnID()} DESC";
+        }
         // ORDER BY句を付加----
 
         $query  = "SELECT {$strColStream} ";
