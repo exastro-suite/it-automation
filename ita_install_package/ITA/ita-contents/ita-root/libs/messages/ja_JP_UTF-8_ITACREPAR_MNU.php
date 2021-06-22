@@ -317,4 +317,15 @@ $ary["ITACREPAR-MNU-105045"]        = "メニュー";
 $ary["ITACREPAR-MNU-105046"]        = "";
 $ary["ITACREPAR-MNU-105047"]        = "選択2";
 $ary["ITACREPAR-MNU-105048"]        = "選択2";
+$ary["ITACREPAR-MNU-106001"]        = "メニューで管理する一意制約(複数項目)をメンテナンス(参照/更新/廃止/復活)できます。";
+$ary["ITACREPAR-MNU-106002"]        = "項番";
+$ary["ITACREPAR-MNU-106003"]        = "一意制約(複数項目)作成情報";
+$ary["ITACREPAR-MNU-106004"]        = "一意制約(複数項目)作成情報";
+$ary["ITACREPAR-MNU-106005"]        = "メニュー名";
+$ary["ITACREPAR-MNU-106006"]        = "パラメータを紐付けするメニューをプルダウンから選択します。";
+$ary["ITACREPAR-MNU-106007"]        = "一意制約(複数項目)";
+$ary["ITACREPAR-MNU-106008"]        = "一意制約(複数項目)のパターン。対象となる項目のIDをカンマ区切りで入力します。";
+$ary["ITACREPAR-MNU-107001"]        = "一意制約(複数項目)";
+$ary["ITACREPAR-MNU-107002"]        = "パターン";
+$ary["ITACREPAR-MNU-107003"]        = "一意制約(複数項目)選択";
 ?>

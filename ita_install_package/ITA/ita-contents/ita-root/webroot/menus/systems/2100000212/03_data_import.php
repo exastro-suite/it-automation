@@ -37,7 +37,7 @@ $(window).on('load', function() {
 });
 </script>
 
-<h2><?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-900007'); ?></h2>
+<h2 class="menu_name"><?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-900007'); ?></h2>
 <?php if ($resultFlg === true): ?>
 <form method="post" action="/default/menu/01_browse.php?no=2100000213&task_no=<?php echo $task_no;?>">
     <div style="margin:10px 0 0 10px;">

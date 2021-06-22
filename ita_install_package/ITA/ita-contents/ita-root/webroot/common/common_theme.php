@@ -156,6 +156,7 @@ switch( $theme ) {
     $c['BASE'] = 'A9AFBF';
     $c['BUTTON'] = array('516C8D','4B6382');
     $c['KIZI'] = 'D4D7DF';
+    $c['MENU_NAME'] = '233153';
     $c['HEADING'] = array('28385E','FF9800','FFFFFF');
     $c['TABLE'] = array('516C8D','425772','EAEDF1','B9C4D1','FFFF8F');
     $c['TABLE_F'] = array('4B6382','667E9B','CBCFD8','ABB8C8');
@@ -171,6 +172,7 @@ switch( $theme ) {
     $c['BASE'] = 'F598A9';
     $c['BUTTON'] = array('F2295F','DF2657');
     $c['KIZI'] = 'F2D8C2';
+    $c['MENU_NAME'] = '593F42';
     $c['HEADING'] = array('F33A6C','F2CF66','FAEFE7');
     $c['TABLE'] = array('F2AEBB','F48DA0','FCEFF1','FADFE4','F2D8C2');
     $c['TABLE_F'] = array('F27E93','F598A9','FCE5E9','FACBD4');
@@ -189,6 +191,7 @@ switch( $theme ) {
     $c['TABLE'] = array('78684F','938672','EFEDEA','C9C3B9','FFFF8F');
     $c['TABLE_F'] = array('6E6049','938672','DFDBD5','C9C3B9');
     $c['KIZI'] = 'DDDABF';
+    $c['MENU_NAME'] = '1A1A1A';
     $c['HEADING'] = array('483E2F','616A1C','EEEEEE');
     $b['HEADER'] = $backgroundPatterns['STRIPE0'];
     $b['FOOTER'] = $backgroundPatterns['STRIPE0'];
@@ -207,6 +210,7 @@ switch( $theme ) {
     $c['TABLE'] = array('D99A25','AE7B1E','F7EBD3','E8C27C','F2CF66');
     $c['TABLE_F'] = array('BF751B','995E16','F2E3D1','D9AC76');
     $c['KIZI'] = 'FAF5EB';
+    $c['MENU_NAME'] = 'FAF6ED';
     $c['HEADING'] = array('BF0413','D99A25','F2E7AE');
     $b['BASE'] = $backgroundPatterns['CHECK1'];
     $b['KIZI'] = $backgroundPatterns['ROUND2'];
@@ -226,6 +230,7 @@ switch( $theme ) {
     $c['HEADING'] = array('FFFFFF','00B5B8','333333');
     $c['BASE'] = 'FFFFFF';
     $c['KIZI'] = 'F2F2F2';
+    $c['MENU_NAME'] = '444444';
     $h['KIZI'] = $headingPatterns['OASE'];
     $b['MENU'] = $backgroundPatterns['NONE'];
     $b['BASE'] = $backgroundPatterns['OASE'];
@@ -242,6 +247,7 @@ switch( $theme ) {
     $c['TABLE_F'] = array('383838','000000','242424','14181A');
     $c['BUTTON'] = array('335581','47668E');
     $c['KIZI'] = '272A2C';
+    $c['MENU_NAME'] = 'D0D1D1';
     $c['HEADING'] = array('3A3D3F','335581','EEEEEE');
     $c['BASE'] = '040505';
     $c['REVERSE'] = array('FFFFFF','000000');
@@ -422,6 +428,10 @@ a:active {
 	border-color: {$color->hex($c['KIZI'],80,'000000')};
   color: {$color->hex($c['TEXT'][0],100)};
   {$b['KIZI']}
+}
+
+#KIZI .menu_name{
+  color: {$color->hex($c['MENU_NAME'])};
 }
 
 /* ********************************************************************* *

@@ -1719,4 +1719,128 @@ class ItemNameValidator extends SingleTextValidator {
     }
 }
 
+/**
+* 一意制約管理専用のバリデータクラス
+*/
+
+class UniqueConstraintValidator extends SingleTextValidator {
+
+    protected $eventMasterName;
+
+    function isValid($value, $strNumberForRI=null, $arrayRegData=null, &$arrayVariant=array()){
+
+        global $g;
+        $retBool = true;
+        $strModeId = "";
+
+        if( parent::isValid($value, $strNumberForRI, $arrayRegData, $arrayVariant) != true ) {
+            return false;
+        }
+
+        if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                $strModeId = $aryTcaAction["ACTION_MODE"];
+            }
+        }
+
+        if( $strModeId != "" ){
+            $boolCheckContinue = false;
+            if($strModeId == "DTUP_singleRecRegister" ){
+                //----各種登録時
+                $boolCheckContinue = true;
+                //各種登録時----
+            }else if($strModeId == "DTUP_singleRecUpdate"){
+                //----各種更新時
+                $boolCheckContinue = true;
+                //各種更新時----
+            }else if($strModeId == "DTUP_singleRecDelete"){
+                $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];
+                if( $modeValue_sub=="on" ){
+                    //処理をしない
+                }else if( $modeValue_sub=="off" ){
+                    //復活時
+                    $boolCheckContinue = true;
+                }
+            }else{
+                //処理をしない
+            }
+
+            if($boolCheckContinue===true){
+                if(!empty($arrayRegData['CREATE_MENU_ID'])){
+                    //メニューIDを取得
+                    $createMenuId = $arrayRegData['CREATE_MENU_ID']; 
+                }else{
+                    $retBool = false;
+                    $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1176");
+                    $this->setValidRule($strErrAddMsg);
+                    return $retBool;
+                }
+
+                //$valueがカンマ区切りの数字であることをチェック
+                $aryReferenceItem = explode(',', $value);
+                foreach($aryReferenceItem as $id){
+                    if(!is_numeric($id)){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1177");
+                        $this->setValidRule($strErrAddMsg);
+                        return $retBool;
+                    }
+                }
+
+                //IDが1つしか設定されていない場合はエラー
+                if(count($aryReferenceItem) <= 1){
+                    $retBool = false;
+                    $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1178");
+                    $this->setValidRule($strErrAddMsg);
+                    return $retBool;
+                }
+
+                //メニューIDから、メニューに紐付く項目を取得
+                $query01 = "SELECT CREATE_ITEM_ID, CREATE_MENU_ID "
+                            ." FROM F_CREATE_ITEM_INFO "
+                            ." WHERE DISUSE_FLAG = '0' AND CREATE_MENU_ID = :CREATE_MENU_ID ";
+
+                $aryForBind01['CREATE_MENU_ID'] = $createMenuId;
+
+                // SQL発行
+                $retArray01 = singleSQLExecuteAgent($query01, $aryForBind01, "");
+                $aryDiscover01 = array();
+                $targetItemIdArray = array();
+                if( $retArray01[0] === true ){
+                    $objQuery01 =& $retArray01[1];
+                    while($row01 = $objQuery01->resultFetch()){
+                        $aryDiscover01[] = $row01;
+                        $targetItemIdArray[] = $row01['CREATE_ITEM_ID'];
+                    }
+                    unset($objQuery01);
+                }
+                else{
+                    // DBエラー
+                    $retBool = false;
+                    $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1171", $retArray01[2]);
+                    $this->setValidRule($strErrAddMsg);
+                    return $retBool;
+                }
+
+                //項目のIDに、一意制約で指定したIDが含まれているかを確認
+                foreach($aryReferenceItem as $id){
+                    if(!in_array($id, $targetItemIdArray)){
+                        $retBool = false;
+                        $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1179");
+                        $this->setValidRule($strErrAddMsg);
+                        return $retBool;
+                    }
+                }
+
+            }
+
+            if( $retBool === false ){
+                $this->setValidRule($strErrAddMsg);
+            }
+        }
+        return $retBool;
+    }
+}
+
 ?>

@@ -48,7 +48,6 @@
     $web_php_function_php = '/libs/webcommonlibs/web_php_functions.php';
     $db_access_user_id  = -5; //定期実行管理プロシージャのユーザID
     $strFxName          = "proc({$log_file_prefix})";
-    $strIntervalTime    = "3 MINUTE"; //Symphony作業一覧に実行するどれくらい前に登録をするか
 
     //ステータス定義
     const STATUS_IN_PREPARATION = 1; //ステータス：準備中
@@ -178,6 +177,30 @@
         $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-STD-160003"); //[処理]DBコネクト完了
         require ($root_dir_path . $log_output_php );
     }
+
+    require_once ($root_dir_path . "/libs/webcommonlibs/web_functions_for_get_sysconfig.php");
+
+    $tmpAryRetBody = getSystemConfigFromConfigList($objDBCA);
+    if( $tmpAryRetBody[1] !== null ){
+        // アクセスログ出力(想定外エラー)
+        web_log($objMTS->getSomeMessage("ITAWDCH-ERR-36",$tmpAryRetBody[3]));
+
+        // 想定外エラー通知画面にリダイレクト
+        webRequestForceQuitFromEveryWhere(500,10410101);
+        exit();
+    }
+    $arySYSCON = $tmpAryRetBody[0]['Items'];
+    unset($tmpAryRetBody);
+
+    $sc_interval_time=3;
+    if(array_key_exists('INTERVAL_TIME', $arySYSCON)){
+        $sc_interval_time = intval($arySYSCON['INTERVAL_TIME']);
+    }
+    if($sc_interval_time < 1 || $sc_interval_time > 525600){
+        $sc_interval_time=3;
+    }
+    
+    $strIntervalTime    = $sc_interval_time . " MINUTE"; //Symphony作業一覧に実行するどれくらい前に登録をするか
 
     ////////////////////////////////////////
     // （ここから）初回の次回実行日付のセット処理 //
@@ -1320,7 +1343,7 @@ function getNextExecutionDate($rowOfReguralyList){
             case 4:
                 //入力必須カラムのチェック
                 if($nextExecutionDate == null){
-                    array($startDate, $exeInterval, $patternTime, $patternDay);
+                    $required_column = array($startDate, $exeInterval, $patternTime, $patternDay);
                 }else{
                     $required_column = array($exeInterval, $patternTime, $patternDay);
                 }
@@ -1437,7 +1460,7 @@ function getNextExecutionDate($rowOfReguralyList){
             case 5:
                 //入力必須カラムのチェック
                 if($nextExecutionDate == null){
-                    array($startDate, $exeInterval, $patternTime, $patternDayOfWeek, $patternWeekNumber);
+                    $required_column = array($startDate, $exeInterval, $patternTime, $patternDayOfWeek, $patternWeekNumber);
                 }else{
                     $required_column = array($exeInterval, $patternTime, $patternDayOfWeek, $patternWeekNumber);
                 }
@@ -1556,7 +1579,7 @@ function getNextExecutionDate($rowOfReguralyList){
             case 6:
                 //入力必須カラムのチェック
                 if($nextExecutionDate == null){
-                    array($startDate, $exeInterval, $patternTime);
+                    $required_column = array($startDate, $exeInterval, $patternTime);
                 }else{
                     $required_column = array($exeInterval, $patternTime);
                 }

@@ -2851,14 +2851,14 @@ EOD;
 		return $this->getTag($strTagInnerBody, $rowData);
 	}
 
-	public function getDataDuplicate($rowData, $aryVariant, $sensitive_flag){
+	public function getDataDuplicate($rowData, $aryVariant, $option){
 		$aryAddOnDefault = array();
 		$aryOverWrite = array();
-		
-		if( $sensitive_flag != 2 ){
-			$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
-		}else{
+
+		if( $option == 1 || $option == 2 ){
 			$data = "";
+		}else{
+			$data = $this->getSettingDataBeforeEdit(false,true,$rowData,$aryVariant); //----設定値が配列の場合はnull扱い
 		}
 		
 		//----htmlタグがdataに入っている場合に異常動作させないための処理
@@ -2867,13 +2867,17 @@ EOD;
 
 		$aryAddOnDefault["maxLength"] = $this->getMaxInputLength();
 		$aryAddOnDefault["size"]      = 15;
-
-		$aryOverWrite["type"] = "text";
 		$aryOverWrite["id"]   = $this->getFSTIDForIdentify();
 		$aryOverWrite["name"] = $this->getFSTNameForIdentify();
 		$aryOverWrite["value"] = $data;
 
-		$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>";
+		if( $option == 1 ){
+			$aryOverWrite["type"] = "password";
+			$strTagInnerBody = "<div class=\"input_password\"><input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} ><div class=\"password_eye\"></div></div>";
+		}else{
+			$aryOverWrite["type"] = "text";
+			$strTagInnerBody = "<input {$this->printAttrs($aryAddOnDefault,$aryOverWrite)} {$this->printJsAttrs($rowData)} {$this->getTextTagLastAttr()}>";
+		}
 
 		if( is_callable($this->objFunctionForReturnOverrideGetData) === true ){
 			$objFunction = $this->objFunctionForReturnOverrideGetData;
