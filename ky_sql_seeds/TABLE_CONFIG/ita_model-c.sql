@@ -139,7 +139,7 @@ CREATE TABLE B_ANS_TWR_HOST (
   ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
   ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
-  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_PASSWORD           TEXT                              , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
   ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
@@ -164,7 +164,7 @@ CREATE TABLE B_ANS_TWR_HOST_JNL (
   ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
   ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
-  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_PASSWORD           TEXT                              , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
   ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
