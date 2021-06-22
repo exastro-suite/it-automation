@@ -56,6 +56,7 @@ class BackyardCommonDBAccessClass extends CommonDBAccessCoreClass {
         }
 
         if($objQuery->effectedRowCount() == 0) {
+            $this->ClearLastErrorMsg();
             $message = sprintf("Recode not found. (Table:%s  OPERATION_NO_UAPK:%s)",$TableName,$OperationNo);
             $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
             return false;
@@ -111,6 +112,7 @@ class CommonDBAccessCoreClass {
         // Sequence Lock
         $retArray = getSequenceLockInTrz($tableName, 'A_SEQUENCE');
         if($retArray[1] != 0) {
+            $this->ClearLastErrorMsg();
             $message = "Sequence Lock Error.";
             $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
             $message = implode("\n",$retArray[2]);
@@ -121,6 +123,7 @@ class CommonDBAccessCoreClass {
         // Sequence allocate
         $retArray = getSequenceValueFromTable($tableName, 'A_SEQUENCE', FALSE);
         if($retArray[1] != 0) {
+            $this->ClearLastErrorMsg();
             $message = "Sequence no allocate error.";
             $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
             $message = implode("\n",$retArray[2]);
@@ -136,6 +139,7 @@ class CommonDBAccessCoreClass {
         // Sequence Lock
         $retArray = getSequenceLockInTrz($tableName, 'A_SEQUENCE');
         if($retArray[1] != 0) {
+            $this->ClearLastErrorMsg();
             $message = "Sequence Lock Error.";
             $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
             $message = implode("\n",$retArray[2]);
@@ -151,6 +155,7 @@ class CommonDBAccessCoreClass {
         // Sequence allocate
         $retArray = getSequenceValueFromTable($tableName, 'A_SEQUENCE', FALSE);
         if($retArray[1] != 0) {
+            $this->ClearLastErrorMsg();
             $message = "Sequence no allocate error.";
             $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
             $message = implode("\n",$retArray[2]);
@@ -211,6 +216,7 @@ class CommonDBAccessCoreClass {
 
         $objQuery = $this->objDBCA->sqlPrepare($sqlBody);
         if($objQuery->getStatus() === false) {
+            $this->ClearLastErrorMsg();
             $message = "DB Access Error.";
             $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
             $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$sqlBody);
@@ -223,6 +229,7 @@ class CommonDBAccessCoreClass {
         if(is_array($arrayBind)) {
             $errorDetail = $objQuery->sqlBind($arrayBind);
             if($errorDetail != "") {
+                $this->ClearLastErrorMsg();
                 $message = "DB Access Error.";
                 $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
                 $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$sqlBody);
@@ -234,6 +241,7 @@ class CommonDBAccessCoreClass {
 
         $r = $objQuery->sqlExecute();
         if(!$r) {
+            $this->ClearLastErrorMsg();
             $message = "DB Access Error.";
             $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$message);
             $this->SetLastErrorMsg(basename(__FILE__),__LINE__,$sqlBody);
@@ -286,6 +294,36 @@ class CommonDBAccessCoreClass {
         $JNLMemberAry = array();
         while($row = $objQuery->resultFetch()) {
             $JNLMemberAry[$row['Field']] = '';
+        }
+        unset($objQuery);
+
+        return true;
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    // get Table Definition without Journal
+    /////////////////////////////////////////////////////////////////////
+    function getTableDefinitionWithoutJournal($TableName,&$MemberAry,&$PkeyName) {
+
+        // テーブルの項目定義を取得
+        $sql = "desc $TableName";
+
+        $sqlBody = $sql;
+        $arrayBind = array();
+        $objQuery  = "";
+        $ret = $this->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
+        if($ret == null) {
+            return false;
+        }
+
+        $MemberAry = array();
+        $PkeyName = '';
+        while($row = $objQuery->resultFetch()) {
+            $MemberAry[$row['Field']] = '';
+            if($row['Key'] == "PRI")
+            {
+                $PkeyName = $row['Field'];
+            }
         }
         unset($objQuery);
 
