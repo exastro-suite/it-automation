@@ -290,7 +290,7 @@
 	            // ---- RBAC対応
 	            // ----マスタレコードにアクセス権が無い場合は履歴を表示しない
 	            if($MasterRecodePermission === true) {
-	                $sql = generateJournalSelectSQL($objTable, $boolBinaryDistinctOnDTiS);
+	                $sql = generateJournalSelectSQL(2,$objTable, $boolBinaryDistinctOnDTiS);
 
 	                $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
 	                if( $retArray[0] === true ){
