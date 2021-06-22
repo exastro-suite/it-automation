@@ -97,6 +97,7 @@ $ary["ITABASEH-ERR-170103"]         = "Conductor interface information is not re
 $ary["ITABASEH-ERR-170104"]         = "Multiple Conductor interface information is registered.";
 $ary["ITABASEH-ERR-170105"]         = "WARNING: SETTING CONDUCTOR INSTANCE MONITOR INTERVAL IS LESS THAN OVER EQUAL TO 0.";
 $ary["ITABASEH-ERR-170106"]         = "WARNING: SETTING CONDUCTOR INSTANCE MONITOR INTERVAL IS NOT NUMERIC.";
+$ary["ITABASEH-ERR-170107"]         = "The JSON key name is invalid.";
 $ary["ITABASEH-ERR-310100"]         = "Selected  item does not exist in the Compare target menu.";
 $ary["ITABASEH-ERR-310101"]         = "Compare settings is unselected.";
 $ary["ITABASEH-ERR-900001"]         = "Export menu has failed.";
