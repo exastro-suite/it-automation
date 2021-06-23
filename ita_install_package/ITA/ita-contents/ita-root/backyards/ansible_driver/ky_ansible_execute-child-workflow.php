@@ -790,7 +790,8 @@
                                                $ParamAry,
                                                $ErrorMsgAry,
                                                $ExcList,
-                                               $TagSkipValueKey);
+                                               $TagSkipValueKey,
+                                               $VerboseCnt);
 
 
                 // 重複データの場合のみ
@@ -834,7 +835,8 @@
                                                $ParamAry,
                                                $ErrorMsgAry,
                                                $ExcList,
-                                               $TagSkipValueKeyS);
+                                               $TagSkipValueKeyS,
+                                               $VerboseCnt);
 
                 // 重複データの場合のみ
                 $exclst_cnt = count($ExcList);
@@ -942,14 +944,16 @@
                                                            $JobTemplatePropertyRecode['PROPERTY_TYPE'],
                                                            $JobTemplatePropertyRecode['PROPERTY_NAME'],
                                                            $JobTemplatePropertyParameterAry,
-                                                           $ParamAryExc);
+                                                           $ParamAryExc,
+                                                           $VerboseCnt);
             }
             if(strlen(trim( $JobTemplatePropertyRecode['SHORT_KEY_NAME'] )) != 0) {
                 $ret = makeJobTemplatePropertyParameterAry($JobTemplatePropertyRecode['SHORT_KEY_NAME'],
                                                            $JobTemplatePropertyRecode['PROPERTY_TYPE'],
                                                            $JobTemplatePropertyRecode['PROPERTY_NAME'],
                                                            $JobTemplatePropertyParameterAry,
-                                                           $ParamAryExc);
+                                                           $ParamAryExc,
+                                                           $VerboseCnt);
             }
 
         }
@@ -994,7 +998,7 @@
         return true;
     }
 
-    function makeJobTemplateProperty($KeyString,$PropertyType,$PropertyName,$ParamAry,&$ErrorMsgAry,&$ExcList,&$TagSkipValueKey) {
+    function makeJobTemplateProperty($KeyString,$PropertyType,$PropertyName,$ParamAry,&$ErrorMsgAry,&$ExcList,&$TagSkipValueKey,&$VerboseCnt) {
         global $objMTS;
         $result = true;
         foreach($ParamAry as $ParamString) {
@@ -1044,12 +1048,7 @@
                         $result = false;
                         break;
                     } 
-                    if(@strlen(@trim($ParamString)) >= 6) {
-                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000003",array($ChkParamString));
-                        $ErrorMsgAry[] = $FREE_LOG;
-                        $result = false;
-                        break;
-                    } 
+                    $VerboseCnt = $VerboseCnt + @strlen(@trim($ParamString));
                     break; 
                 case DF_JobTemplatebooleanTrueProperty:
                     if(@strlen(@trim($PropertyAry[1])) != 0)
@@ -1083,7 +1082,7 @@
         return $result;
     }
 
-    function makeJobTemplatePropertyParameterAry($KeyString,$PropertyType,$PropertyName,&$JobTemplatePropertyParameterAry,$ParamAry) {
+    function makeJobTemplatePropertyParameterAry($KeyString,$PropertyType,$PropertyName,&$JobTemplatePropertyParameterAry,$ParamAry,$VerboseCnt) {
         global $objMTS;
         $result = true;
 
@@ -1100,7 +1099,10 @@
                     $JobTemplatePropertyParameterAry[$PropertyName] = trim($PropertyAry[1]);
                     break;
                 case DF_JobTemplateVerbosityProperty:
-                    $JobTemplatePropertyParameterAry[$PropertyName] = strlen(trim($ParamString));
+                    if($VerboseCnt >= 6) {
+                        $VerboseCnt = 5;
+                    }
+                    $JobTemplatePropertyParameterAry[$PropertyName] = $VerboseCnt;
                     break; 
                 case DF_JobTemplatebooleanTrueProperty:
                     $JobTemplatePropertyParameterAry[$PropertyName] = true;
@@ -1330,6 +1332,8 @@
                 // ansible-playbookのオプションパラメータを確認
                 getMovementAnsibleExecOption($in_execution_row["PATTERN_ID"],$MovementAnsibleExecOption);
                 $OptionParameter = $lv_ansible_exec_options . ' ' . $MovementAnsibleExecOption;
+
+                $OptionParameter = str_replace("--verbose","-v",$OptionParameter);
 
                 // Tower実行の場合にオプションパラメータをチェックする。
                 if($lv_ans_exec_mode != DF_EXEC_MODE_ANSIBLE) {
