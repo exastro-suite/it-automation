@@ -30,9 +30,22 @@ require_once ($root_dir_path . '/libs/backyardlibs/common/common_db_access.php')
 require_once ($root_dir_path . '/libs/commonlibs/common_CICD_for_IaC_functions.php');
 require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
 require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
+$wanted_filename = "ita_ansible-driver";
+$ansible_driver  = false;
+if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+    $ansible_driver = true;
+}
+$wanted_filename = "ita_terraform-driver";    
+$terraform_driver  = false;
+if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+    $terraform_driver = true;
+}
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
+
+    global $ansible_driver;
+    global $terraform_driver;
 
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030000");
@@ -268,10 +281,17 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     /////////////////////////////////////////////////////////////
     $cg2 = new ColumnGroup($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030500"));
 
+        // インストールされているドライバを判断し資材タイプに紐付るViewを決定
+        $chkarry               = array();
+        $chkarry[true][true]   = "B_CICD_MATERIAL_TYPE_NAME";
+        $chkarry[true][false]  = "B_CICD_MATERIAL_TYPE_NAME_ANS";
+        $chkarry[false][true]  = "B_CICD_MATERIAL_TYPE_NAME_TERRA";
+        $chkarry[false][false] = "B_CICD_MATERIAL_TYPE_NAME_NULL";
+        $view_name = $chkarry[$ansible_driver][$terraform_driver];
         /////////////////////////////////////////////////////////
         // 資材タイプ  必須入力:true ユニーク:false
         ///////////////////////////////////////////////////////// 
-        $c = new IDColumn('MATL_TYPE_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030600"),'B_CICD_MATERIAL_TYPE_NAME','MATL_TYPE_ROW_ID','MATL_TYPE_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('MATL_TYPE_ROW_ID'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        $c = new IDColumn('MATL_TYPE_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030600"),$view_name,'MATL_TYPE_ROW_ID','MATL_TYPE_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('MATL_TYPE_ROW_ID'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030601"));
 
         $c->setEvent('update_table', 'onchange', 'matl_type_upd');
@@ -280,44 +300,45 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setRequired(true);
         $cg2->addColumn($c);
 
-        /////////////////////////////////////////////////////////////
-        // テンプレート管理
-        /////////////////////////////////////////////////////////////
-        $cg3 = new ColumnGroup($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032300"));
+        if($ansible_driver === true) {
+            /////////////////////////////////////////////////////////////
+            // テンプレート管理
+            /////////////////////////////////////////////////////////////
+            $cg3 = new ColumnGroup($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032300"));
 
-            /////////////////////////////////////////////////////////
-            // 変数定義  必須入力:false ユニーク:false
-            /////////////////////////////////////////////////////////
-            $objVldt = new MultiTextValidator(0,8192,false);
-            $c = new MultiTextColumn('TEMPLATE_FILE_VARS_LIST',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032400"));
-            $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032401"));
-            $c->setValidator($objVldt);
-            $cg3->addColumn($c);
+                /////////////////////////////////////////////////////////
+                // 変数定義  必須入力:false ユニーク:false
+                /////////////////////////////////////////////////////////
+                $objVldt = new MultiTextValidator(0,8192,false);
+                $c = new MultiTextColumn('TEMPLATE_FILE_VARS_LIST',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032400"));
+                $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032401"));
+                $c->setValidator($objVldt);
+                $cg3->addColumn($c);
+    
+            $cg2->addColumn($cg3);
 
-        $cg2->addColumn($cg3);
 
-
-        /////////////////////////////////////////////////////////////
-        // Ansible-Pioneer
-        /////////////////////////////////////////////////////////////
-        $cg3 = new ColumnGroup($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030700"));
-
-            /////////////////////////////////////////////////////////
-            // 対話種別  必須入力:false ユニーク:false
-            /////////////////////////////////////////////////////////
-            $c = new IDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030800"),'B_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME','');
-            $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030801"));
-            $cg3->addColumn($c);
-
-            /////////////////////////////////////////////////////////
-            // OS種別  必須入力:false ユニーク:false
-            /////////////////////////////////////////////////////////
-            $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030900"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
-            $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030901"));
-            $cg3->addColumn($c);
-
-        $cg2->addColumn($cg3);
-
+            /////////////////////////////////////////////////////////////
+            // Ansible-Pioneer
+            /////////////////////////////////////////////////////////////
+            $cg3 = new ColumnGroup($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030700"));
+    
+                /////////////////////////////////////////////////////////
+                // 対話種別  必須入力:false ユニーク:false
+                /////////////////////////////////////////////////////////
+                $c = new IDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030800"),'B_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME','');
+                $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030801"));
+                $cg3->addColumn($c);
+    
+                /////////////////////////////////////////////////////////
+                // OS種別  必須入力:false ユニーク:false
+                /////////////////////////////////////////////////////////
+                $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030900"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
+                $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030901"));
+                $cg3->addColumn($c);
+    
+            $cg2->addColumn($cg3);
+        }
 
         /////////////////////////////////////////////////////////
         // Restユーザー   必須入力:true ユニーク:false
@@ -815,8 +836,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $objLU4UColumn = $tmpAryColumn[$table->getRequiredUpdateDate4UColumnID()];
 
     $objFunction = function($objClientValidator, $value, $strNumberForRI, $arrayRegData, $arrayVariant){
+        global $ansible_driver;
+        global $terraform_driver;
 
+//web_log(print_r($arrayRegData,true));
+//web_log(print_r($arrayVariant,true));
         $getColumnDataFunction = function($strModeId,$columnName,$Type,$arrayVariant,$arrayRegData) {
+//web_log("[$strModeId][$strModeId]");
             $UIbase = "";
             $DBbase = "";
             switch($strModeId){
@@ -824,6 +850,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             case "DTUP_singleRecRegister":
             case "DTUP_singleRecDelete":
                 $UIbase   = array_key_exists($columnName,$arrayRegData)?$arrayRegData[$columnName]:null;
+//web_log("UIbase [$columnName][$UIbase]");
                 break;
             }
             switch($strModeId){
@@ -831,6 +858,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             case "DTUP_singleRecRegister":
             case "DTUP_singleRecDelete":
                 $DBbase   = isset($arrayVariant['edit_target_row'][$columnName])?$arrayVariant['edit_target_row'][$columnName]:null;
+//web_log("DBbase [$columnName][$DBbase]");
+                break;
                 break;
             }
             $ret_array = array();
@@ -848,6 +877,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             } else {
                 $ret_array['COMMIT'] = $ret_array['UI'];
             }
+//web_log(print_r($ret_array,true));
             return $ret_array;
         };
 
@@ -868,7 +898,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         // Pkey取得
         $inputCheck = false;
         switch($strModeId) {
-        case "DTUP_singleRecDelete":
+        case "DTUP_singyyleRecDelete":
             $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
             $PkeyID = $strNumberForRI;
             break;
@@ -880,25 +910,66 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             break;
         }
 
-        // リモート・ローカルリポジトリが変更になったか確認
-        $ColumnArray = array('MATL_LINK_NAME'=>'',
-                             'MATL_TYPE_ROW_ID'=>'', 
-                             'TEMPLATE_FILE_VARS_LIST'=>'', 
-                             'DIALOG_TYPE_ID'=>'', 
-                             'OS_TYPE_ID'=>'',
-                             'DEL_OPE_ID'=>'',
-                             'DEL_MOVE_ID'=>'');
+//web_log("----------------------------------------------------------------".__LINE__);
+        if($ansible_driver === true) {
+            $ColumnArray = array('MATL_LINK_NAME'=>'',
+                                 'MATL_TYPE_ROW_ID'=>'', 
+                                 'TEMPLATE_FILE_VARS_LIST'=>'', 
+                                 'DIALOG_TYPE_ID'=>'', 
+                                 'OS_TYPE_ID'=>'',
+                                 'DEL_OPE_ID'=>'',
+                                 'DEL_MOVE_ID'=>'');
+        } else {
+            $ColumnArray = array('MATL_LINK_NAME'=>'',
+                                 'MATL_TYPE_ROW_ID'=>'', 
+                                 'DEL_OPE_ID'=>'',
+                                 'DEL_MOVE_ID'=>'');
+        }
+//web_log("----------------------------------------------------------------".__LINE__);
         foreach($ColumnArray as $ColumnName=>$Type) {
             // $arrayRegDataはUI入力ベースの情報
             // $arrayVariant['edit_target_row']はDBに登録済みの情報
             $ColumnValueArray[$ColumnName] = $getColumnDataFunction($strModeId,$ColumnName,$Type,$arrayVariant,$arrayRegData);
         }
+//web_log(print_r($ColumnValueArray,true));
+        switch($strModeId) {
+        case "DTUP_singleRecUpdate":
+        case "DTUP_singleRecRegister":
+             $matl_type_chk = true;
+        case "DTUP_singyyleRecDelete":
+            if($modeValue_sub == "off") {
+                $matl_type_chk = true;
+            }
+        }
+//web_log("----------------------------------------------------------------".__LINE__);
+        $MatlTypeColumnName = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030600"); // 紐付先資材タイプ
+        $MatlLinkColumnName = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030100"); // 紐付先資材名
+        if($ansible_driver === false) {
+            switch($ColumnValueArray['MATL_TYPE_ROW_ID']['COMMIT']) {
+            case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_LEGACY:       //Playbook素材集
+            case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_PIONEER:      //対話ファイル素材集
+            case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_ROLE:         //ロールパッケージ管理
+            case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CONTENT:      //ファイル管理
+            case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_TEMPLATE:     //テンプレート管理
+//web_log("----------------------------------------------------------------".__LINE__);
+                $objClientValidator->setValidRule($g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2028"));
+                return $retBool;
+            }
+        }
+        if($terraform_driver === false) {
+            switch($ColumnValueArray['MATL_TYPE_ROW_ID']['COMMIT']) {
+            case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_MODULE:       //Module素材
+            case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY:       //Policy管理
+//web_log("----------------------------------------------------------------".__LINE__);
+                $objClientValidator->setValidRule($g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2028"));
+                return $retBool;
+            }
+        }
+//web_log("----------------------------------------------------------------".__LINE__);
 
         switch($strModeId) {
         case "DTUP_singleRecUpdate":
         case "DTUP_singleRecRegister":
-            $MatlTypeColumnName = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030600"); // 紐付先資材タイプ
-            $MatlLinkColumnName = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030100"); // 紐付先資材名
             // 紐付け先 素材集タイプ毎の必須入力チェック
             switch($ColumnValueArray['MATL_TYPE_ROW_ID']['COMMIT']) {
             case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_LEGACY:       //Playbook素材集
