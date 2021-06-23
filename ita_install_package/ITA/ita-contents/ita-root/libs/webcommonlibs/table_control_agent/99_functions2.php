@@ -699,6 +699,8 @@ EOD;
                 }else{
                     $dlcHtmlBody .=
 <<<EOD
+            <div class="midashi_class">{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30061")}</div>
+            <br>
             <form style="display:inline" name="reqExcelDL_print_table" action="{$g['scheme_n_authority']}/default/menu/04_all_dump_excel.php?no={$g['page_dir']}" method="POST" >
                 <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-322")}" {$btnLatestXlsDlFlag}>
                 <input type="hidden" name="filteroutputfiletype" value="excel">
@@ -858,8 +860,7 @@ EOD;
 <<<EOD
         <br>
         <br>
-        <hr>
-        <p>{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")}{$g['objMTS']->getSomeMessage("ITAWDCH-STD-325")}</p>
+        <div class="midashi_class">{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")}{$g['objMTS']->getSomeMessage("ITAWDCH-STD-325")}</div>
         <br>
         <form style="display:inline" name="reqHistoryExcelDL_print_table" action="{$g['scheme_n_authority']}/default/menu/04_all_dump_excel.php?no={$g['page_dir']}" method="POST" >
             <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")}{$g['objMTS']->getSomeMessage("ITAWDCH-STD-322")}" {$btnHistoryXlsDlFlag}>
