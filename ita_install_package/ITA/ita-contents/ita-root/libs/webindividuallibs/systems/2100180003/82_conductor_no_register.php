@@ -398,7 +398,7 @@ function conductorJsonGetTitle(){
   // グローバル変数宣言
   global $g;
 
-  $arr_json = array('execute' => $g['objMTS']->getSomeMessage("ITAWDCH-STD-12201"),
+  $arr_json = array('edittype' => $g['objMTS']->getSomeMessage("ITAWDCH-STD-12201"),
                     'disuse' => $g['objMTS']->getSomeMessage("ITAWDCH-STD-12204"),);
 
   $arr_json['conductor'] = array('conductor_name' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305070"),
@@ -495,7 +495,7 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
 
 
     $arr_json=array();
-    $arr_json['execute'] = null;
+    $arr_json['edittype'] = null;
     $arr_json['disuse'] = $strDdisuse;
     $strLT4UBody = "T_" .str_replace('.', '', $arrConductorData['LUT4U']);
     $accessAuth = "";
