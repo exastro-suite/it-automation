@@ -825,9 +825,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->addColumn($cg);
 
-    //tail of setting [multi-set-unique]----
-    $table->addUniqueColumnSet(array('DIALOG_TYPE_ID','OS_TYPE_ID'));
-    //----head of setting [multi-set-unique]
+    if($ansible_driver === true) {
+        //tail of setting [multi-set-unique]----
+        $table->addUniqueColumnSet(array('DIALOG_TYPE_ID','OS_TYPE_ID'));
+        //----head of setting [multi-set-unique]
+    }
 
     $table->fixColumn();
 
@@ -839,10 +841,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         global $ansible_driver;
         global $terraform_driver;
 
-//web_log(print_r($arrayRegData,true));
-//web_log(print_r($arrayVariant,true));
         $getColumnDataFunction = function($strModeId,$columnName,$Type,$arrayVariant,$arrayRegData) {
-//web_log("[$strModeId][$strModeId]");
             $UIbase = "";
             $DBbase = "";
             switch($strModeId){
@@ -850,7 +849,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             case "DTUP_singleRecRegister":
             case "DTUP_singleRecDelete":
                 $UIbase   = array_key_exists($columnName,$arrayRegData)?$arrayRegData[$columnName]:null;
-//web_log("UIbase [$columnName][$UIbase]");
                 break;
             }
             switch($strModeId){
@@ -858,7 +856,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             case "DTUP_singleRecRegister":
             case "DTUP_singleRecDelete":
                 $DBbase   = isset($arrayVariant['edit_target_row'][$columnName])?$arrayVariant['edit_target_row'][$columnName]:null;
-//web_log("DBbase [$columnName][$DBbase]");
                 break;
                 break;
             }
@@ -877,7 +874,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             } else {
                 $ret_array['COMMIT'] = $ret_array['UI'];
             }
-//web_log(print_r($ret_array,true));
             return $ret_array;
         };
 
@@ -910,7 +906,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             break;
         }
 
-//web_log("----------------------------------------------------------------".__LINE__);
         if($ansible_driver === true) {
             $ColumnArray = array('MATL_LINK_NAME'=>'',
                                  'MATL_TYPE_ROW_ID'=>'', 
@@ -925,23 +920,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                                  'DEL_OPE_ID'=>'',
                                  'DEL_MOVE_ID'=>'');
         }
-//web_log("----------------------------------------------------------------".__LINE__);
         foreach($ColumnArray as $ColumnName=>$Type) {
             // $arrayRegDataはUI入力ベースの情報
             // $arrayVariant['edit_target_row']はDBに登録済みの情報
             $ColumnValueArray[$ColumnName] = $getColumnDataFunction($strModeId,$ColumnName,$Type,$arrayVariant,$arrayRegData);
         }
-//web_log(print_r($ColumnValueArray,true));
-        switch($strModeId) {
-        case "DTUP_singleRecUpdate":
-        case "DTUP_singleRecRegister":
-             $matl_type_chk = true;
-        case "DTUP_singyyleRecDelete":
-            if($modeValue_sub == "off") {
-                $matl_type_chk = true;
-            }
-        }
-//web_log("----------------------------------------------------------------".__LINE__);
         $MatlTypeColumnName = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030600"); // 紐付先資材タイプ
         $MatlLinkColumnName = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030100"); // 紐付先資材名
         if($ansible_driver === false) {
@@ -951,7 +934,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_ROLE:         //ロールパッケージ管理
             case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CONTENT:      //ファイル管理
             case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_TEMPLATE:     //テンプレート管理
-//web_log("----------------------------------------------------------------".__LINE__);
                 $objClientValidator->setValidRule($g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2028"));
                 return $retBool;
             }
@@ -960,12 +942,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             switch($ColumnValueArray['MATL_TYPE_ROW_ID']['COMMIT']) {
             case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_MODULE:       //Module素材
             case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY:       //Policy管理
-//web_log("----------------------------------------------------------------".__LINE__);
                 $objClientValidator->setValidRule($g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2028"));
                 return $retBool;
             }
         }
-//web_log("----------------------------------------------------------------".__LINE__);
 
         switch($strModeId) {
         case "DTUP_singleRecUpdate":
