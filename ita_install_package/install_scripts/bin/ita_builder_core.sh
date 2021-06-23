@@ -36,16 +36,6 @@ backup_suffix() {
 }
 
 
-service_exists() {
-    local SERVICE_NAME=$1
-    if [[ $(systemctl list-units --all -t service --full --no-legend "${SERVICE_NAME}.service" | cut -f1 -d' ') == ${SERVICE_NAME}.service ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-
 list_pear_package() {
     local dst_dir=$1
 
@@ -474,14 +464,23 @@ configure_mariadb() {
         mkdir -p -m 777 /var/log/mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
-    # install MariaDB
-    service_exists mariadb
+    # check MariaDB is installed
+    # The command "yum list" is case insensitive, so both "mariadb-server" and "MariaDB-Server" will be matched.
+    yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? -ne 0 ]; then
+        log "Install and initialize MariaDB"
         install_mariadb
+        initialize_mariadb
+    else
+        log "Confirm whether root password has been changed"
+        env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ $? == 0 ]; then
+            log "Root password of MariaDB is already setting."
+        else
+            log "Initialize MariaDB"
+            initialize_mariadb
+        fi
     fi
-
-    # initialize MariaDB
-    initialize_mariadb
 }
 
 
