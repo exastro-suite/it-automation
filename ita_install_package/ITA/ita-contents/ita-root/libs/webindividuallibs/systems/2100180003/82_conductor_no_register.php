@@ -395,54 +395,56 @@ function result_chk_count($tmparrayResult,$resultdata_count,$Type){
 
 //Conductorクラス情報のJSON見出し行取得----
 function conductorJsonGetTitle(){
-  $arr_json = array('execute' => '実行処理種別',
-                    'disuse' => '廃止');
+  // グローバル変数宣言
+  global $g;
 
-  $arr_json['conductor'] = array('conductor_name' => 'コンダクター名',
-                                 'id' => 'コンダクタークラスID',
-                                 'note' => '説明',
-                                 'LUT4U' => '更新用の最終更新日時',
-                                 'ACCESS_AUTH' => 'アクセス権/アクセス許可ロール');
+  $arr_json = array('execute' => $g['objMTS']->getSomeMessage("ITAWDCH-STD-12201"),
+                    'disuse' => $g['objMTS']->getSomeMessage("ITAWDCH-STD-12204"),);
 
-  $arr_json['config'] = array('editorVersion' => 'エディタ情報',
-                              'nodeNumber' => 'ノードナンバー',
-                              'terminalNumber' => 'ターミナルナンバー',
-                              'edgeNumber' => 'エッジナンバー');
+  $arr_json['conductor'] = array('conductor_name' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305070"),
+                                 'id' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305040"),
+                                 'note' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305090"),
+                                 'LUT4U' => $g['objMTS']->getSomeMessage("ITAWDCH-STD-18011"),
+                                 'ACCESS_AUTH' => $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300001")."/".$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300002"));
 
-  $arr_json['node'] = array('h' => '高さ',
-                            'id' => 'ノードID',
-                            'terminal',
-                            'type' => '種別',
-                            'PATTERN_ID' => 'パターンID',
-                            'ORCHESTRATOR_ID' => 'オーケストレータID',
-                            'Name' => 'ムーヴメント名',
-                            'CALL_CONDUCTOR_ID' => 'コンダクタークラスID',
-                            'CONDUCTOR_NAME' => 'コンダクター名',
-                            'CALL_SYMPHONY_ID' => 'シンフォニークラスID',
-                            'SYMPHONY_NAME' => 'シンフォニー名',
-                            'OPERATION_NO_IDBH' => 'オペレーションID',
-                            'SKIP_FLAG' => 'スキップフラグ',
-                            'OPERATION_NAME' => 'オペレーション名',
-                            'note' => '説明',
-                            'w' => '幅',
-                            'x' => '横',
-                            'y' => '縦');
+  $arr_json['config'] = array('editorVersion' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305100"),
+                              'nodeNumber' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305110"),
+                              'terminalNumber' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305120"),
+                              'edgeNumber' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305130"));
 
-  $arr_json['node']['terminal'] = array('case' => 'ケースID',
-                                        'edge' => '接続ライン',
-                                        'id' => 'ターミナルID',
-                                        'targetNode' => '対象ノード',
-                                        'type' => '種別',
-                                        'condition' => '状態',
-                                        'x' => '横',
-                                        'y' => '縦');
+  $arr_json['node'] = array('h' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305140"),
+                            'id' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-308001"),
+                            'type' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305150"),
+                            'PATTERN_ID' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-209105"),
+                            'ORCHESTRATOR_ID' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-308005"),
+                            'Name' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-108020"),
+                            'CALL_CONDUCTOR_ID' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305040"),
+                            'CONDUCTOR_NAME' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305070"),
+                            'CALL_SYMPHONY_ID' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-206050"),
+                            'SYMPHONY_NAME' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-206060"),
+                            'OPERATION_NO_IDBH' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-207070"),
+                            'SKIP_FLAG' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-308010"),
+                            'OPERATION_NAME' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-207080"),
+                            'note' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305090"),
+                            'w' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305160"),
+                            'x' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305170"),
+                            'y' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305180"));
 
-  $arr_json['line'] = array('id' => 'ラインID',
-                            'type' => '種別',
-                            'inNode' => 'ノード内接続',
-                            'outTerminal' => 'ターミナル外接続',
-                            'inTerminal' => 'ターミナル内接続',
-                            'outNode' => 'ノード外接続');
+  $arr_json['node']['terminal'] = array('case' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-308110"),
+                                        'edge' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305190"),
+                                        'id' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-308101"),
+                                        'targetNode' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305200"),
+                                        'type' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305150"),
+                                        'condition' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305210"),
+                                        'x' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305170"),
+                                        'y' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305180"));
+
+  $arr_json['line'] = array('id' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305220"),
+                            'type' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305150"),
+                            'inNode' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305230"),
+                            'outTerminal' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305260"),
+                            'inTerminal' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305250"),
+                            'outNode' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305240"));
 
   return $arr_json;
  }
