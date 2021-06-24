@@ -8,3 +8,4 @@
 /ita-root/backyards/ita_base/ky_std_synchronize-Conductor
 /ita-root/backyards/ita_base/ky_std_synchronize-regularly2
 /ita-root/backyards/ita_base/ky_create_er-workflow
+/ita-root/backyards/ita_base/ky_bulk_excel-workflow

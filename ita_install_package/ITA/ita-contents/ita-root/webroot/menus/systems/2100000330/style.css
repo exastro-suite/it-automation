@@ -1,0 +1,74 @@
+/* radioƒ{ƒ^ƒ“ŒQ */
+.export_choose_title {
+    display: block;
+    vertical-align: bottom;
+    float: left;
+    width: 150px;
+    margin: 0;
+    text-align: center;
+    background-color: #666;
+    border-radius: 4px;
+    color: #FFF;
+    font-size: 11px;
+    line-height: 24px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.export_radio_label_block {
+    width: 15%;
+    display: inline-flex;
+    vertical-align: top;
+    white-space: nowrap;
+    letter-spacing: normal;
+}
+.export_radio_label_block:hover {
+    /*background-color: #FFFF8F;*/
+}
+.export_label {
+    cursor: pointer;
+    box-sizing: content-box;
+    /*display: inline-block;*/
+    display: flex !important;
+    padding: 2px 8px;
+    word-break: break-all;
+    /*white-space: normal;*/
+    display: inline-flex;
+    white-space: nowrap !important;
+    align-items: center;
+}
+.export_label_name {
+    margin-left: 5px;
+}
+.export_radio {
+    /*display: block;*/
+}
+.export_label_input {
+    margin-left: 4px;
+}
+.menu_id_label:hover {
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+}
+#importMsg {
+    margin-top: 20px;
+}
+.checkbox_col {
+    width: 10px !important;
+}
+
+.sticky_table thead th {
+  /* 縦スクロール時に固定する */
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  /* tbody内のセルより手前に表示する */
+  z-index: 1;
+}
+
+.itaTableBody th, .itaTableBody td {
+    white-space: nowrap !important;
+}

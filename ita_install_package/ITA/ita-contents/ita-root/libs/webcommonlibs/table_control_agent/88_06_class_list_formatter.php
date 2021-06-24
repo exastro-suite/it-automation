@@ -2089,6 +2089,53 @@ class ExcelFormatter extends ListFormatter {
         return $retBool;
     }
 
+    function formatBulkExcel($taskId, $fileName, $menuId){
+        global $g;
+        $result = false;
+
+        try{
+            $X = $this->objFocusWB;
+
+            require_once $g["root_dir_path"]."/libs/backyardlibs/common/common_functions.php";
+            $menuInfo = getMenuInfoByMenuId($menuId);
+            $menuGroupId = $menuInfo["MENU_GROUP_ID"];
+            $tmpMenuGroupNameAry = explode("/", $menuInfo["MENU_GROUP_NAME"]);
+            $menuGroupName = implode("_", $tmpMenuGroupNameAry);
+            $dirName = $menuGroupId."_".$menuGroupName;
+
+            //----保存
+            $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($X, "Xlsx");
+            //----ファイルへの保存または（引数が空白の場合）標準出力へ
+            // $ret = $objWriter->save($this->getExportFilePath());
+
+            if (!is_dir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/")) {
+                $res = mkdir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/");
+                if ($res == false) {
+                    throw new Exception("Error Processing Request", 1);
+                }
+            }
+            if (!is_dir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName")) {
+                $res = mkdir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName");
+                if ($res == false) {
+                    throw new Exception("Error Processing Request", 1);
+                }
+            }
+            $tmpFilePath = $g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName/$fileName";
+            $objWriter->save($tmpFilePath);
+            //ファイルへの保存または（引数が空白の場合）標準出力へ----
+            //保存----
+
+            $X->disconnectWorksheets();
+            unset($X);
+            $result = $tmpFilePath;
+        }
+        catch(Exception $e){
+            web_log($e->getMessage());
+            $result = false;
+        }
+        return $result;
+    }
+
     function getSheetNameForEditSheet(&$refBoolSetting=true){
         global $g;
         $strText02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-16211");  //"履歴";

@@ -130,4 +130,6 @@ $ary["ITABASEH-STD-10908045"]       = "MovementID";
 $ary["ITABASEH-STD-10908050"]       = "Movement名";
 $ary["ITABASEH-STD-10908055"]       = "オペレーションID";
 $ary["ITABASEH-STD-10908060"]       = "オペレーション名";
+$ary["ITABASEH-STD-2100000331_1"]   = "結果";
+
 ?>
