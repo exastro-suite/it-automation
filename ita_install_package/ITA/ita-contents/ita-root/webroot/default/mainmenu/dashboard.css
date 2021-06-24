@@ -907,6 +907,7 @@ background-color: #F2F2F2;
 border-right: none;
 text-align: center;
 }
+.number-table th,
 .number-table td {
 background-color: #FFF;
 }
