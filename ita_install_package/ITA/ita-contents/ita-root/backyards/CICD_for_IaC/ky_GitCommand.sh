@@ -13,11 +13,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-TYPE=$1
-CLONE_REPO=$2
-GIT_CMD=$3
-REMOTE_USER=$4
-REMOTE_PASSWORD=$5
+PROXYURL=$1
+TYPE=$2
+CLONE_REPO=$3
+GIT_CMD=$4
+REMOTE_USER=$5
+REMOTE_PASSWORD=$6
+
+if [ $PROXYURL != "__undefine__" ]; then
+   export HTTP_PROXY="${PROXYURL}"
+   export HTTPS_PROXY="${PROXYURL}"
+fi
 
 CMD="git --git-dir "$CLONE_REPO"/.git --work-tree="$CLONE_REPO" "$GIT_CMD
 

@@ -13,14 +13,20 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-TYPE=$1
-REMOTE_REPO=$2
-CLONE_REPO=$3
-BRANCH=$4
-REMOTE_USER=$5
-REMOTE_PASSWORD=$6
+PROXYURL=$1
+TYPE=$2
+REMOTE_REPO=$3
+CLONE_REPO=$4
+BRANCH=$5
+REMOTE_USER=$6
+REMOTE_PASSWORD=$7
 
-if [ $BRANCH == "__undefine_branch__"  ]; then
+if [ $PROXYURL != "__undefine__"]; then
+   export HTTP_PROXY="${PROXYURL}"
+   export HTTPS_PROXY="${PROXYURL}"
+fi
+
+if [ $BRANCH = "__undefine_branch__"  ]; then
    BRANCH=""
 else
    BRANCH="-b "$BRANCH
