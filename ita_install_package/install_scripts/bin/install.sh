@@ -105,6 +105,10 @@ func_set_total_cnt() {
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
+    if [ "$CICD_FLG" -eq 1 ]; then
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
+    fi
+
     echo $PROCCESS_TOTAL_CNT
 }
 ############################################################
@@ -144,6 +148,10 @@ func_install_messasge() {
 
     if [ HOSTGROUP_FLG = ${1} ]; then
         MESSAGE="Hostgroup"
+    fi
+
+    if [ CICD_FLG = ${1} ]; then
+        MESSAGE="CI/CD for IaC"
     fi
 
     echo "$MESSAGE"
@@ -332,6 +340,7 @@ CREATE_TABLES=(
     CREATEPARAM2_FLG
     CREATEPARAM3_FLG
     HOSTGROUP_FLG
+    CICD_FLG
 )
 
 #リリースファイル設置作成関数用配列
@@ -342,6 +351,7 @@ RELEASE_PLASE=(
     ita_terraform-driver
     ita_createparam
     ita_hostgroup
+    ita_cicd
 )
 
 #コンフィグファイル設置確認作成関数用配列
@@ -361,6 +371,7 @@ SERVICES_SET=(
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
+    CICD_FLG
 )
 
 #クーロンタブ設定関数用配列
@@ -386,6 +397,7 @@ CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 CREATEPARAM3_FLG=0
 HOSTGROUP_FLG=0
+CICD_FLG=0
 
 declare -A REPLACE_CHAR;
 REPLACE_CHAR=(
@@ -397,7 +409,7 @@ REPLACE_CHAR=(
 
 DRIVER_CNT=0
 ANSWER_DRIVER_CNT=0
-ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'terraform_driver' 'createparam' 'hostgroup')
+ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'terraform_driver' 'createparam' 'hostgroup' 'cicd_for_iac')
 
 CERTIFICATE_FILE=''
 PRIVATE_KEY_FILE=''
@@ -462,6 +474,11 @@ while read LINE; do
             if [ "$val" = 'yes' ]; then
                 HOSTGROUP_FLG=1
             fi
+        elif [ "$key" = 'cicd_for_iac' ]; then
+            func_answer_format_check
+            if [ "$val" = 'yes' ]; then
+                CICD_FLG=1
+            fi
         fi
     fi
 done < "$COPY_ANSWER_FILE"
@@ -507,6 +524,9 @@ if [ $CREATEPARAM_FLG -eq 1 ]; then
 fi
 if [ $HOSTGROUP_FLG -eq 1 ]; then
     log "INFO : Installation target : hostgroup"
+fi
+if [ $CICD_FLG -eq 1 ]; then
+    log "INFO : Installation target : CI/CD for IaC"
 fi
 
 
@@ -563,6 +583,13 @@ if [ "$HOSTGROUP_FLG" -eq 1 ]; then
     if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_hostgroup ; then
         log 'WARNING : Hostgroup has already been installed.'
         HOSTGROUP_FLG=0
+    fi
+fi
+
+if [ "$CICD_FLG" -eq 1 ]; then
+    if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_cicd ; then
+        log 'WARNING : CI/CD for IaC has already been installed.'
+        CICD_FLG=0
     fi
 fi
 

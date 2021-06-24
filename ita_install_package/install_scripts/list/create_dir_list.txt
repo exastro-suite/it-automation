@@ -8,6 +8,7 @@
 /ita-root/logs/terraform_out_logs
 /ita-root/logs/update_by_file
 /ita-root/logs/webaplogs
+/ita-root/repositorys
 /ita-root/temp/data_download
 /ita-root/temp/data_export
 /ita-root/temp/data_import/backup
