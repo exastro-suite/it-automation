@@ -403,7 +403,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $objLU4UColumn = $tmpAryColumn[$table->getRequiredUpdateDate4UColumnID()];
 
     $objFunction = function($objClientValidator, $value, $strNumberForRI, $arrayRegData, $arrayVariant){
-
         $getColumnDataFunction = function($strModeId,$columnName,$Type,$arrayVariant,$arrayRegData) {
             $UIbase = "";
             $DBbase = "";
@@ -466,6 +465,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $PkeyID = array_key_exists('REPO_ROW_ID',$arrayRegData)?$arrayRegData['REPO_ROW_ID']:null;
             break;
         }
+      
+        // パスワード削除フラグ
+        $password_del = false;
+        if(isset($arrayRegData['del_password_flag_COL_IDSOP_15']) && $arrayRegData['del_password_flag_COL_IDSOP_15'] == "on"){
+            $password_del = true;
+        }
+
 
         // リモート・ローカルリポジトリが変更になったか確認
         $ColumnArray = array('GIT_PROTOCOL_TYPE_ROW_ID'=>'','GIT_REPO_TYPE_ROW_ID'=>'','GIT_USER'=>'','GIT_PASSWORD'=>'PasswordCloumn','AUTO_SYNC_FLG'=>'','SYNC_INTERVAL'=>'');
@@ -494,7 +500,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                        $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2010");
                        $retBool = false;
                    }
-                   if(strlen($ColumnValueArray['GIT_PASSWORD']['COMMIT']) == 0) {
+                   if((strlen($ColumnValueArray['GIT_PASSWORD']['COMMIT']) == 0) || ($password_del === true)) {
                        if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
                        // VisibilityタイプがPublicの場合は必須項目です。(項目:Gitパ スワード)
                        $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2011");
