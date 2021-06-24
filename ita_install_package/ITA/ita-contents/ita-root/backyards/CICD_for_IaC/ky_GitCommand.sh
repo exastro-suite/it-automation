@@ -13,22 +13,93 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-CLONE_REPO=$1
-COMMAND=$2
-BRANCH=$3
+TYPE=$1
+CLONE_REPO=$2
+GIT_CMD=$3
+REMOTE_USER=$4
+REMOTE_PASSWORD=$5
 
-if [ $BRANCH == "__undefine_branch__"  ]; then
-   BRANCH=""
+CMD="git --git-dir "$CLONE_REPO"/.git --work-tree="$CLONE_REPO" "$GIT_CMD
+
+if [ "${TYPE}" = "pass" ]; then
+    expect -c "
+    set timeout 5 
+    spawn $CMD
+    expect {
+        \"Cloning into\" {
+            exp_continue
+        } \"Username for \" {
+            send \"${REMOTE_USER}\n\"
+            exp_continue
+        } \"Password for \" {
+            send \"${REMOTE_PASSWORD}\n\"
+            exp_continue
+        } \"remote: \" {
+            set timeout -1
+            exp_continue
+        } timeout {
+            exit 200
+        } eof {
+            catch wait result
+    
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+    
+        } default {
+            catch wait result
+    
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+    
+        }
+    }"
+else
+    expect -c "
+    set timeout 5 
+    spawn $CMD
+    expect {
+        \"Cloning into\" {
+            exp_continue
+        } \"Username for \" {
+            exit 201
+        } \"Password for \" {
+            exit 202
+        } \"remote: \" {
+            set timeout -1
+            exp_continue
+        } timeout {
+            exit 200
+        } eof {
+            catch wait result
+    
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+    
+        } default {
+            catch wait result
+    
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+    
+        }
+    }"
 fi
-
-cd $CLONE_REPO
-
-git checkout $BRANCH
-STATUS=$?
-if [ $STATUS -ne 0 ]; then
-   echo "git checkout "$BRANCH" failed. ("$STATUS")"
-   exit 200
-fi
-git $COMMAND
 STATUS=$?
 exit $STATUS
+

@@ -679,6 +679,26 @@ background-color: {$color->hex($c['HEADER'],100)};
 }
 EOF;
 
+
+if ( $theme == 'gorgeous' ) {
+
+echo <<< EOF
+/* ********************************************************************* *
+   Gorgeous
+ * ********************************************************************* */
+#KIZI .widget-menu-item {
+background-color: #F2F2F2;
+}
+
+#KIZI .number-table-wrap,
+#KIZI .stacked-graph,
+#KIZI .widget-sub-name {
+background-color: #FFF;
+}
+
+EOF;
+}
+
 if ( $c['DARKMODE'] == 'ON' ) {
 
 echo <<< EOF
@@ -1029,6 +1049,7 @@ background-position: 0 -80px;
 #KIZI .widget-delete::after {
 background-position: -40px -80px;
 }
+#KIZI .number-table th,
 #KIZI .number-table td {
 background-color: transparent;
 }

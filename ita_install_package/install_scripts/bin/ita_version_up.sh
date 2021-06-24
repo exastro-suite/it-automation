@@ -546,7 +546,7 @@ if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
                     #Check installation
                     for key in $PIP3_LIB_LIST; do
                         echo "----------Installation[$key]----------" >> "$LOG_FILE" 2>&1
-                        pip3 list --format=columns 2> "$LOG_FILE" | grep "$key" >> "$LOG_FILE" 2>&1
+                        pip3 list --format=columns 2>> "$LOG_FILE" | grep "$key" >> "$LOG_FILE" 2>&1
                         if [ $? != 0 ]; then
                             log "ERROR : Installation failed [$key]"
                             log "INFO : Abort version up."

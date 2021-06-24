@@ -58,6 +58,7 @@ hostgroup:yes
 ansible_driver:yes
 cobbler_driver:no
 terraform_driver:yes
+cicd_for_iac:no
 
 # Enter the ita domain name.
 # e.g) ita_domain:exastro-it-automation.local

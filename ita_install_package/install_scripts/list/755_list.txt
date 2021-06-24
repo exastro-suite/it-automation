@@ -6,3 +6,5 @@
 /ita-root/backyards/common/ky_loopcall-sh-script.sh
 /ita-root/backyards/webdbcore/ky_mail.sh
 /ita-root/backyards/ansible_driver/ky_ansible_playbook_command_shell_template.sh
+/ita-root/backyards/CICD_for_IaC/ky_GitClone.sh
+/ita-root/backyards/CICD_for_IaC/ky_GitCommand.sh

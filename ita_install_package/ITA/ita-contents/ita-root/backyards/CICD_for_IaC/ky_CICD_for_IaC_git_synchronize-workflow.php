@@ -13,12 +13,19 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-    //////////////////////////////////////////////////////////////////////
-    //
-    //  【概要】
-    //      CICD For IaC Gitリモートリポジトリ同期
-    //
-    //////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//
+//  【概要】
+//      CICD For IaC Gitリモートリポジトリ同期 親プロセス
+//
+//      function 
+//        ExecuteChildProcess
+//        getTargetRepoListRow
+//        chkRepoListAndSyncStatusRow
+//        getRunningChildProcess
+//        chkRunningChildProcess
+//
+//////////////////////////////////////////////////////////////////////
     
     ////////////////////////////////
     // ルートディレクトリを取得   //
@@ -67,8 +74,6 @@
 
     $db_access_user_id               = -130000;
 
-    $ChildProcessFileName            = "ky_CICD_for_IaC_git_synchronize-child-workflow.php";
-
     ////////////////////////////////
     // 業務処理開始               //
     ////////////////////////////////
@@ -106,6 +111,7 @@
         require_once ($root_dir_path . '/libs/commonlibs/common_CICD_for_IaC_functions.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
+        require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_definition.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/ControlGit.php');
 
         global $db_model_ch;
@@ -220,6 +226,9 @@
             }
             // 現在時間 >= 前回同期時間 + 同期周期
             $Child_go = false;
+            if(strlen($row["SYNC_INTERVAL"]) == 0) {
+                 $row["SYNC_INTERVAL"] = 60;
+            }
             if((int)$ExecuteTime >= ((int)$row["SYNC_LAST_UNIXTIME"] + (int)$row["SYNC_INTERVAL"])) {
 
                 $Child_go = true;
@@ -230,6 +239,7 @@
                     $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2013",array($RepoId)); 
                     require ($root_dir_path . $log_output_php );
                 }
+
                 ///////////////////////////////////////////////////////////////////////////////////////
                 // 処理対象のリモートリポジトリに対して同期実行中リモートリポジトリの子プロセス確認
                 ///////////////////////////////////////////////////////////////////////////////////////
@@ -327,7 +337,6 @@
         global $log_level;
 
         global $objMTS;
-        global $ChildProcessFileName;
         global $LFCobj;
 
         $php_command = @file_get_contents($root_dir_path . "/confs/backyardconfs/path_PHP_MODULE.txt");
@@ -335,13 +344,12 @@
         // 改行コードが付いている場合に取り除く
         $php_command = str_replace("\n","",$php_command);
 
-        $ChildProcessExecParam = $LFCobj->getChildProcessExecParam($RepoId);
-
-        $cmd = sprintf("%s %s%s %s %s > /dev/null &",
+        $ChildProcessFileName = $LFCobj->getChildProcessExecName();
+        $cmd = sprintf("%s %s/backyards/CICD_for_IaC/%s LINE_%010s %s > /dev/null &",
                        $php_command,
                        $root_dir_path,
-                       "/backyards/CICD_for_IaC/$ChildProcessFileName",
-                       $ChildProcessExecParam,
+                       $LFCobj->getChildProcessExecName(),
+                       $RepoId,
                        $EcecMode);
 
         // プロセス起動 バックグラウンドで起動しているのでエラーは判定不可。
@@ -570,10 +578,12 @@
         global $log_level;
 
         global $objMTS;
-        global $ChildProcessFileName;
+        global $LFCobj;
 
         // usleep time (ms)
         $sleep_time = 3;
+
+        $ChildProcessFileName = $LFCobj->getChildProcessExecName();
 
         // psコマンドでky_CICD_for_IaC_git_synchronize-child-workflow.phpの起動リストを作成
         // psコマンドがマレに起動プロセスリストを取りこぼすことがあるので3回分を作成
@@ -630,7 +640,6 @@
         global $log_level;
 
         global $objMTS;
-        global $ChildProcessFileName;
         global $LFCobj;
 
         $ps_array1 = $ps_array[0];
@@ -638,7 +647,7 @@
         $ps_array3 = $ps_array[2];
 
         // 処理中リモートリポジトリを示す起動パラメータ
-        $ChildProcessExecParam = $LFCobj->getChildProcessExecParam($RepoId);
+        $ChildProcessExecParam = sprintf("LINE_%010s",$RepoId);
 
         // 子プロセス起動確認
         $tgt_hit = false;

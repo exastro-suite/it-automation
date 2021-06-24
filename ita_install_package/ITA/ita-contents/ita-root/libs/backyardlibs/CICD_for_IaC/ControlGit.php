@@ -18,85 +18,6 @@
  *    Git操作クラス
  */
 
-/**
- * Git操作クラス
- * 
- */
-class LocalFilesControl {
-    // Git同期 shellコマンドパス
-    const  C_LocalShellDir = "%s/backyards/CICD_for_IaC";
-    // Git同期 ローカルクローンディレクトリ
-    const  C_LocalCloneDir = "%s/repositorys/%010s";
-    // Git同期 子プロセス 処理情報格納ディレクトリ
-    const  C_ChildProcessControlDir = "/repositorys/ControleFiles";
-    // Git同期 子プロセス 起動パラメータ  LINE_リポジトリ管理項番_起動時間(T_%Y%m%d%H%i%s)
-    const  C_ChildProcessExecParam  = "LINE_%010s";
-    // Git CloneしたリモートリポジトリURL・ブランチ退避ファイル
-    const  C_GitCloneInfoFile     = "%010s" . "_GitCloneInfo.txt";
-    private $root_dir_path;
-
-    public function __construct() {
-        $root_dir_temp = array();
-        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
-        $this->root_dir_path = $root_dir_temp[0] . "ita-root";
-    }
-
-    function getChildProcessExecParam($RepoId) {
-        $param = sprintf(self::C_ChildProcessExecParam,$RepoId);
-        return $param;
-    }
-
-    function getGitCloneInfoFilePath($RepoId) {
-        $file = sprintf(self::C_GitCloneInfoFile,$RepoId);
-        $file = $this->root_dir_path . self::C_ChildProcessControlDir . "/" . $file;
-        return $file;
-    }
-
-    function getGitCloneInfo($RepoId,&$CloneRepoURL,&$CloneBranch) {
-        $CloneRepoURL = "";
-        $CloneBranch  = "";
-        $GitCloneInfoFilePath = $this->getGitCloneInfoFilePath($RepoId);
-        if(file_exists($GitCloneInfoFilePath)) {
-            $json = file_get_contents($GitCloneInfoFilePath);
-            if($json === false) {
-                return false;
-            } else {
-                $LocalCloneInfo=json_decode($json,true);
-                $CloneRepoURL = $LocalCloneInfo["REMORT_REPO_URL"];
-                $CloneBranch  = $LocalCloneInfo["BRANCH_NAME"];
-                return true;
-            }
-        } else {
-            // ファイルがまだ出来ていない場合
-            $CloneRepoURL = "";
-            $CloneBranch  = "";
-            return true;
-        }
-        return false;
-    }
-    function putGitCloneInfo($RepoId,$CloneRepoURL,$CloneBranch) {
-        $GitCloneInfoFilePath = $this->getGitCloneInfoFilePath($RepoId);
-        $LocalCloneInfo = array();
-        $LocalCloneInfo["REMORT_REPO_URL"] = $CloneRepoURL;
-        $LocalCloneInfo["BRANCH_NAME"]     = $CloneBranch;
-        $ret = file_put_contents($GitCloneInfoFilePath,json_encode($LocalCloneInfo));
-        if($ret === false) {
-            return false;
-        }
-        return true;
-    }
-
-    function getLocalCloneDir($RepoId) {
-        $dir = sprintf(self::C_LocalCloneDir,$this->root_dir_path,$RepoId);
-        return $dir;
-    }    
-
-    function getLocalShellDir() {
-        $dir = sprintf(self::C_LocalShellDir,$this->root_dir_path);
-        return $dir;
-    }    
-}
-
 class ControlGit {
 
     private $RepoId;            // Gitのユーザー
@@ -114,11 +35,13 @@ class ControlGit {
     private $retryCount;
     private $retryWaitTime;
     private $objMTS;
+    private $ProxyAddress;
+    private $ProxyPort;
 
     /**
      * コンストラクタ
      */
-    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $libPath, $objMTS, $retryCount, $retryWaitTime) {
+    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $libPath, $objMTS, $retryCount, $retryWaitTime, $ProxyAddress, $ProxyPort) {
         $this->RepoId = $RepoId;
         $this->remortRepoUrl = $remortRepoUrl;
         $this->cloneRepoDir = $cloneRepoDir;
@@ -142,8 +65,10 @@ class ControlGit {
         }
         $this->retryWaitTime = $retryWaitTime;
         if($this->retryWaitTime == "") {
-           $this->retryWaitTime = 1000;  //i単位:ms
+           $this->retryWaitTime = 1000;  //単位:ms
         }
+        $this->ProxyAddress = $ProxyAddress;
+        $this->ProxyPort    = $ProxyPort;
     }
 
     function ClearGitCommandLastErrorMsg() {
@@ -172,6 +97,11 @@ class ControlGit {
         $LastMsg = $this->LastErrorMsg;
         $this->ClearLastErrorMsg();
         return($LastMsg);
+    }
+
+    function LocalCloneDirCheck() {
+        // ローカルクローンディレクトリ有無判定
+        return (file_exists($this->cloneRepoDir));
     }
 
     function LocalCloneDirClean() {
@@ -241,8 +171,7 @@ class ControlGit {
         if($comd_ok === false) {
             // Git clone commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1021"); 
-            $logaddstr = $cmd . "\n";
-            $logaddstr .= implode("\n",$output);
+            $logaddstr = implode("\n",$output);
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -257,8 +186,7 @@ class ControlGit {
         if(0 != $return_var){
             // Git config の設定に失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1020"); 
-            $logaddstr = $cmd . "\n";
-            $logaddstr .= implode("\n",$output);
+            $logaddstr = implode("\n",$output);
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -268,7 +196,7 @@ class ControlGit {
     }
 
     /**
-     * remote
+     * リモートリポジトリ確認
      */
     public function GitRemoteChk() {
 
@@ -285,26 +213,24 @@ class ControlGit {
             if($ret == 1) {
                 $ret = strstr($stdout,$this->remortRepoUrl);
                 if($ret !== false) {
-                    $cmd_ok = true;
+                   $cmd_ok = true;
                 }
             }
         } else {
             //Git remote commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1023"); 
-            $logaddstr = $cmd . "\n";
-            $logaddstr .= implode("\n",$output);
+            $logaddstr = implode("\n",$output);
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
-            return false;
+            return -1;
         } 
         if($cmd_ok === false) {
             // ローカルクローンのリモートリポジトリが不正です。(リモートリポジトリURL:{})
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1022",array($this->remortRepoUrl)); 
-            $logaddstr = $cmd . "\n";
-            $logaddstr .= implode("\n",$output);
+            $logaddstr = implode("\n",$output);
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
-            $this->SetGitCommandLastErrorMsg(mplode("\n",$output));
+            $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
             return false;
         }
@@ -312,31 +238,70 @@ class ControlGit {
     }
 
     /**
-     * checkout
+     * ブラント確認
      */
-    public function GitCheckoutChk() {
+    public function GitBranchChk($Authtype) {
 
-        $output = NULL;
         $return_var = 0;
-        $cmd_ok = false;
 
+        $CurrentBranch = "";
+        $DefaultBranch = "";
         if($this->branch  == "__undefine_branch__") {
-            $branch = "";
-        } else {
-            $branch = escapeshellarg($this->branch);
-        }
-        $cmd = sprintf("sudo git %s checkout %s 2>&1",$this->gitOption,$branch);
-        exec($cmd, $output, $return_var);
-        if($return_var != 0) {
-            //Git checkout commandに失敗しました。
-            $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024"); 
-            $logaddstr = $cmd . "\n";
-            $logaddstr .= implode("\n",$output);
-            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
-            $this->SetGitCommandLastErrorMsg(implode("\n",$output));
-            $this->SetLastErrorMsg($FREE_LOG);
-            return false;
+            // デフォルトブランチ確認
+            $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
+            $cmd1 = sprintf("sudo -i %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+                                                          escapeshellarg($Authtype),
+                                                          escapeshellarg($this->cloneRepoDir),
+                                                          escapeshellarg('remote show origin'),
+                                                          escapeshellarg($this->user),
+                                                          escapeshellarg($this->password));
+            $output1 = NULL;
+            exec($cmd1, $output1, $return_var);
+            if($return_var != 0) {
+                //Git branch commandに失敗しました。
+                $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024"); 
+                $logaddstr = implode("\n",$output1);
+                $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+                $this->SetGitCommandLastErrorMsg(implode("\n",$output1));
+                $this->SetLastErrorMsg($FREE_LOG);
+                return -1;
+            } else {
+                for($idx=0;$idx<count($output1);$idx++) {
+                     // HEAD branch:
+                     $matchstr = "/^(\s)+HEAD(\s)branch:(\s)+/";
+                     $ret = preg_match($matchstr, $output1[$idx]);
+                     if($ret == 1) {
+                          $retAry = preg_split($matchstr, $output1[$idx]);
+                          $DefaultBranch = $retAry[1];
+                          break;
+                     }
+                }
+            }
         } 
+        // カレントブランチ確認
+        $cmd2 = sprintf("sudo -i git %s branch 2>&1",$this->gitOption);
+        $output2 = NULL;
+        exec($cmd2, $output2, $return_var);
+        if($return_var != 0) {
+            //Git branch commandに失敗しました。
+            $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024"); 
+            $logaddstr = implode("\n",$output2);
+            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+            $this->SetGitCommandLastErrorMsg(implode("\n",$output2));
+            $this->SetLastErrorMsg($FREE_LOG);
+            return -1;
+        } else {
+            $CurrentBranch = substr($output2[0],2);
+        }
+        if($this->branch  == "__undefine_branch__") {
+            if($DefaultBranch != $CurrentBranch) {
+                return false;
+            }
+        } else {
+            if($this->branch != $CurrentBranch) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -348,21 +313,15 @@ class ControlGit {
         $output = NULL;
         $return_var = 0;
 
-        $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
-        $cmd = sprintf("sudo -i %s %s ls-files %s 2>&1",escapeshellarg($shell),
-                                               escapeshellarg($this->cloneRepoDir),
-                                               escapeshellarg($this->branch));
+        $cmd = sprintf("sudo -i git %s ls-files 2>&1",$this->gitOption);
 
         exec($cmd, $output, $return_var);
         if($return_var == 0) {
-            // git checkout command stdout delete
-            unset($output[0]);
             $Files = $output;
         } else {
             //Git ls-files commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1026"); 
-            $logaddstr = $cmd . "\n";
-            $logaddstr .= implode("\n",$output);
+            $logaddstr = implode("\n",$output);
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -386,38 +345,43 @@ class ControlGit {
         for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
             $output = NULL;
             $return_var = 0;
-            $shell = sprintf("%s/ky_GitPull.sh",$this->libPath);
+            $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
             $cmd = sprintf("sudo -i %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
-                                                            escapeshellarg($Authtype),
-                                                            escapeshellarg($this->cloneRepoDir),
-                                                            escapeshellarg($this->branch),
-                                                            escapeshellarg($this->user),
-                                                            escapeshellarg($this->password));
+                                                          escapeshellarg($Authtype),
+                                                          escapeshellarg($this->cloneRepoDir),
+                                                          escapeshellarg('pull'),
+                                                          escapeshellarg($this->user),
+                                                          escapeshellarg($this->password));
 
             exec($cmd, $output, $return_var);
-
             if(0 != $return_var){
                 // リトライ中のログは表示しない。
             } else {
-                // git checkout command stdout delete
-                unset($output[0]);
-                unset($output[1]);
-                if($Authtype == "pass") {
-                   unset($output[2]);
+                $saveoutput = $output;
+                $format_ok = false;
+                for($idx1=0;$idx1 < count($output);$idx1++) {
+                    $ret = preg_match("/^(Already up-to-date.|Fast-forward)/", $output[$idx1]);
+                    if($ret == 1) {
+                        $format_ok = true;
+                        break;
+                    }
+                    unset($output[$idx]);
                 }
-                // 結果解析用にindexを0オリジンにする。
-                $pullResultAry = array();
-                foreach($output as $line) 
-                { $pullResultAry[] = $line; }
-                $comd_ok = true;
-                break;
+                if($format_ok == true) {
+                    // 結果解析用にindexを0オリジンにする。
+                    $pullResultAry = array();
+                    foreach($output as $line) { $pullResultAry[] = $line; }
+                    $comd_ok = true;
+                    break;
+                } else {
+                    $output = $saveoutput;
+                }
             }
         }
         if($comd_ok === false) {
             //Git pull commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1030"); 
-            $logaddstr = $cmd . "\n";
-            $logaddstr .= implode("\n",$output);
+            $logaddstr = implode("\n",$output);
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -581,3 +545,4 @@ class ControlGit {
         return true;
     }
 }
+?>

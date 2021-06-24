@@ -65,7 +65,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new TextColumn('UNIQUE_CONSTRAINT_ITEM',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-106007"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-106008"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
-    $objVldt = new UniqueConstraintValidator();
+    $objVldt = new UniqueConstraintValidator(0, 4096, false);
     $c->setValidator($objVldt);
     $table->addColumn($c);
 

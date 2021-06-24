@@ -97,9 +97,8 @@ GIT_USER                           %VARCHR%(128)                    , -- Git ユ
 GIT_PASSWORD                       %VARCHR%(128)                    , -- Git パスワード
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
 SYNC_INTERVAL                      %INT%                            , -- 同期周期(単位:分)
-SYNC_STATUS_ROW_ID                 %INT%                            , -- 同期状態
+SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
-SYNC_LAST_TIME                     %DATETIME6%                      , -- 最終同期時間
 PROXY_ADDRESS                      %VARCHR%(128)                    , -- プロキシーアドレス
 PROXY_PORT                         %INT%                            , -- プロキシーポート
 RETRAY_INTERVAL                    %INT%                            , -- リトライ周期 単位:ms
@@ -132,9 +131,8 @@ GIT_USER                           %VARCHR%(128)                    , -- Git ユ
 GIT_PASSWORD                       %VARCHR%(128)                    , -- Git パスワード
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
 SYNC_INTERVAL                      %INT%                            , -- 同期周期(単位:分)
-SYNC_STATUS_ROW_ID                 %INT%                            , -- 同期状態
+SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
-SYNC_LAST_TIME                     %DATETIME6%                      , -- 最終同期時間
 PROXY_ADDRESS                      %VARCHR%(128)                    , -- プロキシーアドレス
 PROXY_PORT                         %INT%                            , -- プロキシーポート
 RETRAY_INTERVAL                    %INT%                            , -- リトライ周期 単位:ms
@@ -208,7 +206,7 @@ ACCT_ROW_ID                        %INT%                            , -- Restユ
 RBAC_FLG_ROW_ID                    %INT%                            , -- アクセス許可ロール付与フラグ　
 -- 同期状態
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
-SYNC_STATUS_ROW_ID                 %INT%                            , -- 同期状態
+SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 SYNC_LAST_TIME                     %DATETIME6%                      , -- 最終同期時間
 SYNC_LAST_UPDATE_USER              %INT%                            , -- 最終更新ユーザ
@@ -247,7 +245,7 @@ ACCT_ROW_ID                        %INT%                            , -- Restユ
 RBAC_FLG_ROW_ID                    %INT%                            , -- アクセス許可ロール付与フラグ　
 -- 同期状態
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
-SYNC_STATUS_ROW_ID                 %INT%                            , -- 同期状態
+SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 SYNC_LAST_TIME                     %DATETIME6%                      , -- 最終同期時間
 SYNC_LAST_UPDATE_USER              %INT%                            , -- 最終更新ユーザ
@@ -356,6 +354,7 @@ CREATE TABLE B_CICD_MATERIAL_TYPE_NAME
 MATL_TYPE_ROW_ID                   %INT%                           , -- 識別シーケンス項番
 -- --
 MATL_TYPE_NAME                     %VARCHR%(128)                   , -- 資材タイプ名 1:Playbook素材集 2:対話ﾌｧｲﾙ素材集 3:ロールパッケージ管理 4:ﾌｧｲﾙ管理 5:ﾃﾝﾌﾟﾚｰﾄ管理
+DRIVER_TYPE                        %INT%                           , -- ドライバタイプ　1:ansible　2:terraform
 -- --
 ACCESS_AUTH                        TEXT                            ,
 DISP_SEQ                           %INT%                           , -- 表示順序
@@ -377,6 +376,7 @@ JOURNAL_ACTION_CLASS               %VARCHR%(8)                     , -- 履歴�
 MATL_TYPE_ROW_ID                   %INT%                           , -- 識別シーケンス項番
 -- --
 MATL_TYPE_NAME                     %VARCHR%(128)                   , -- 資材タイプ名　1:Playbook素材集 2:対話ﾌｧｲﾙ素材集 3:ロールパッケージ管理 4:ﾌｧｲﾙ管理 5:ﾃﾝﾌﾟﾚｰﾄ管理
+DRIVER_TYPE                        %INT%                           , -- ドライバタイプ　1:ansible　2:terraform
 -- --
 ACCESS_AUTH                        TEXT                            ,
 DISP_SEQ                           %INT%                           , -- 表示順序
@@ -570,27 +570,50 @@ FROM
     B_CICD_REST_ACCOUNT_LIST_JNL TAB_A
     LEFT JOIN A_ACCOUNT_LIST_JNL TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID );
 
-
-CREATE VIEW B_CICD_MATERIAL_LINK_JOIN AS
-SELECT
-    T1.*,
-    T2.DISUSE_FLAG REPO_DISUSE_FLAG,
-    T3.DISUSE_FLAG MATL_DISUSE_FLAG,
-    T4.DISUSE_FLAG RACCT_DISUSE_FLAG,
-    T5.DISUSE_FLAG DALG_DISUSE_FLAG,
-    T6.DISUSE_FLAG OS_DISUSE_FLAG,
-    T7.DISUSE_FLAG OPE_DISUSE_FLAG,
-    T8.DISUSE_FLAG PTN_DISUSE_FLAG,
-    T9.DISUSE_FLAG ACT_DISUSE_FLAG
+CREATE VIEW B_CICD_MATERIAL_TYPE_NAME_ANS AS
+SELECT 
+    * 
 FROM 
-    B_CICD_MATERIAL_LINK_LIST               T1
-    LEFT JOIN B_CICD_REPOSITORY_LIST        T2 ON (T1.REPO_ROW_ID    = T2.REPO_ROW_ID)
-    LEFT JOIN B_CICD_MATERIAL_LIST          T3 ON (T1.MATL_ROW_ID    = T3.MATL_ROW_ID)
-    LEFT JOIN D_CICD_ACCT_LINK              T4 ON (T1.ACCT_ROW_ID    = T4.ACCT_ROW_ID)
-    LEFT JOIN B_ANSIBLE_PNS_DIALOG_TYPE     T5 ON (T1.DIALOG_TYPE_ID = T5.DIALOG_TYPE_ID)
-    LEFT JOIN B_OS_TYPE                     T6 ON (T1.OS_TYPE_ID     = T6.OS_TYPE_ID)
-    LEFT JOIN E_OPERATION_LIST              T7 ON (T1.DEL_OPE_ID     = T7.OPERATION_NO_UAPK)
-    LEFT JOIN C_PATTERN_PER_ORCH            T8 ON (T1.DEL_MOVE_ID    = T8.PATTERN_ID)
-    LEFT JOIN A_ACCOUNT_LIST                T9 ON (T4.USER_ID        = T9.USER_ID)
-WHERE
-    T1.DISUSE_FLAG = '0';
+    B_CICD_MATERIAL_TYPE_NAME 
+WHERE 
+    DRIVER_TYPE=1;
+
+CREATE VIEW B_CICD_MATERIAL_TYPE_NAME_ANS_JNL AS
+SELECT 
+    * 
+FROM 
+    B_CICD_MATERIAL_TYPE_NAME_JNL 
+WHERE 
+    DRIVER_TYPE=1;
+
+CREATE VIEW B_CICD_MATERIAL_TYPE_NAME_TERRA AS
+SELECT 
+    * 
+FROM 
+    B_CICD_MATERIAL_TYPE_NAME 
+WHERE 
+    DRIVER_TYPE=2;
+
+CREATE VIEW B_CICD_MATERIAL_TYPE_NAME_TERRA_JNL AS
+SELECT 
+    * 
+FROM 
+    B_CICD_MATERIAL_TYPE_NAME_JNL 
+WHERE 
+    DRIVER_TYPE=2;
+
+CREATE VIEW B_CICD_MATERIAL_TYPE_NAME_NULL AS
+SELECT 
+    * 
+FROM 
+    B_CICD_MATERIAL_TYPE_NAME 
+WHERE 
+    DRIVER_TYPE = null;
+
+CREATE VIEW B_CICD_MATERIAL_TYPE_NAME_NULL_JNL AS
+SELECT 
+    * 
+FROM 
+    B_CICD_MATERIAL_TYPE_NAME_JNL 
+WHERE 
+    DRIVER_TYPE = null;

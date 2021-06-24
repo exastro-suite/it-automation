@@ -272,8 +272,25 @@
 
             $aryVariant = array('MATL_TYPE_ROW_ID'=>$MatlTypeRowId);
 
+            $wanted_filename = "ita_ansible-driver";
+            $ansible_driver  = false;
+            if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+                $ansible_driver = true;
+            }
+            $wanted_filename = "ita_terraform-driver";
+            $terraform_driver  = false;
+            if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+                $terraform_driver = true;
+            }
+            $chkarry               = array();
+            $chkarry[true][true]   = 12;
+            $chkarry[true][false]  = 12;
+            $chkarry[false][true]  = 9;
+            $chkarry[false][false] = 9;
+            $seq_no  = $chkarry[$ansible_driver][$terraform_driver];
+
             // Movementのカラム位置
-            $int_seq_no = 12;
+            $int_seq_no = seq_no;
 
             require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
             $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
@@ -321,8 +338,25 @@
 
             $aryVariant = array('MATL_TYPE_ROW_ID'=>$MatlTypeRowId);
 
+            $wanted_filename = "ita_ansible-driver";
+            $ansible_driver  = false;
+            if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+                $ansible_driver = true;
+            }
+            $wanted_filename = "ita_terraform-driver";
+            $terraform_driver  = false;
+            if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+                $terraform_driver = true;
+            }
+            $chkarry               = array();
+            $chkarry[true][true]   = 12;
+            $chkarry[true][false]  = 12;
+            $chkarry[false][true]  = 9;
+            $chkarry[false][false] = 9;
+            $seq_no  = $chkarry[$ansible_driver][$terraform_driver];
+
             // Movementのカラム位置
-            $int_seq_no = 12;
+            $int_seq_no = $seq_no;
 
             require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
 
