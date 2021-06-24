@@ -64,3 +64,6 @@ character-set-server = utf8
 # use this group for options that older servers don't understand
 [mariadb-10.4]
 disable_unix_socket
+
+[mariadb-10.5]
+disable_unix_socket
