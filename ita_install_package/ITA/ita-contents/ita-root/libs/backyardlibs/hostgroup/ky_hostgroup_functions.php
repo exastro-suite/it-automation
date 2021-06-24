@@ -106,12 +106,12 @@ function makeTree(&$hierarchy) {
             // すでに子が登録されている場合
             if($treeData['KY_KEY'] === $hostLink['HOSTNAME']) {
                 // 親を配列に追加
-                $treeData['PARENT_IDS'][] = $hostLink['HOSTGROUP_NAME'] + 10000;
+                $treeData['PARENT_IDS'][] = $hostLink['HOSTGROUP_NAME'] + 10000000;
                 $treeData['OPERATION'][] = $hostLink['OPERATION_ID'];
                 $childMatchFlg = true;
             }
             // すでに親が登録されている場合
-            if($treeData['KY_KEY'] === $hostLink['HOSTGROUP_NAME'] + 10000) {
+            if($treeData['KY_KEY'] === $hostLink['HOSTGROUP_NAME'] + 10000000) {
                 // 子を配列に追加
                 $treeData['CHILD_IDS'][] = $hostLink['HOSTNAME'];
                 $treeData['ALL_CHILD_IDS'][] = $hostLink['HOSTNAME'];
@@ -125,7 +125,7 @@ function makeTree(&$hierarchy) {
                                  'OPERATION' =>  array($hostLink['OPERATION_ID']),
                                  'HIERARCHY' => 1,
                                  'DATA' => NULL,
-                                 'PARENT_IDS' => array($hostLink['HOSTGROUP_NAME'] + 10000),
+                                 'PARENT_IDS' => array($hostLink['HOSTGROUP_NAME'] + 10000000),
                                  'CHILD_IDS' => array(),
                                  'ALL_CHILD_IDS' => array(),
                                  'UPLOAD_FILES' => array(),
@@ -134,7 +134,7 @@ function makeTree(&$hierarchy) {
         }
         if($parentMatchFlg === false) {
             // 親追加
-            $treeArray[] = array('KY_KEY' => $hostLink['HOSTGROUP_NAME'] + 10000,
+            $treeArray[] = array('KY_KEY' => $hostLink['HOSTGROUP_NAME'] + 10000000,
                                  'OPERATION' => array(),
                                  'HIERARCHY' => 2,
                                  'DATA' => NULL,
@@ -172,21 +172,21 @@ function makeTree(&$hierarchy) {
             // ホストグループ親子紐付テーブルのレコード数分ループ
             foreach($hostLinkListArray as $hostLinkList) {
 
-                if($treeData['KY_KEY'] != $hostLinkList['CH_HOSTGROUP'] + 10000) {
+                if($treeData['KY_KEY'] != $hostLinkList['CH_HOSTGROUP'] + 10000000) {
                     continue;
                 }
 
                 $treeUpdFlg = true;
 
                 // 親を配列に追加
-                $treeData['PARENT_IDS'][] = $hostLinkList['PA_HOSTGROUP'] + 10000;
+                $treeData['PARENT_IDS'][] = $hostLinkList['PA_HOSTGROUP'] + 10000000;
 
                 // すでに親が登録されているか確認
                 $treeMatchFlg = false;
                 foreach($treeArray as &$treeData2) {
-                    if($treeData2['KY_KEY'] === $hostLinkList['PA_HOSTGROUP'] + 10000 && $treeData2['HIERARCHY'] === $hierarchy + 1) {
+                    if($treeData2['KY_KEY'] === $hostLinkList['PA_HOSTGROUP'] + 10000000 && $treeData2['HIERARCHY'] === $hierarchy + 1) {
                         // 子を配列に追加
-                        $treeData2['CHILD_IDS'][] = $hostLinkList['CH_HOSTGROUP'] + 10000;
+                        $treeData2['CHILD_IDS'][] = $hostLinkList['CH_HOSTGROUP'] + 10000000;
                         $treeData2['ALL_CHILD_IDS'] = array_merge($treeData2['ALL_CHILD_IDS'], $treeData['ALL_CHILD_IDS']);
                         $treeMatchFlg = true;
                         break;
@@ -194,12 +194,12 @@ function makeTree(&$hierarchy) {
                 }
                 if(false === $treeMatchFlg) {
                     // 親追加
-                    $treeArray[] = array('KY_KEY' => $hostLinkList['PA_HOSTGROUP'] + 10000,
+                    $treeArray[] = array('KY_KEY' => $hostLinkList['PA_HOSTGROUP'] + 10000000,
                                          'OPERATION' => NULL,
                                          'HIERARCHY' => $hierarchy + 1,
                                          'DATA' => NULL,
                                          'PARENT_IDS' => array(),
-                                         'CHILD_IDS' => array($hostLinkList['CH_HOSTGROUP'] + 10000),
+                                         'CHILD_IDS' => array($hostLinkList['CH_HOSTGROUP'] + 10000000),
                                          'ALL_CHILD_IDS' => $treeData['ALL_CHILD_IDS'],
                                          'UPLOAD_FILES' => array(),
                                         );
