@@ -263,7 +263,7 @@ function conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecep
 
         $resultdata['LIST']['NORMAL'] = $resultdata_count;
         $resultdata['LIST']['RAW'] = Array();
-        $resultdata['LIST']['RAW'] = $tmparrayResult;
+        $resultdata['LIST']['RAW'] = $tmpResult;
 
         $aryForResultData['resultdata'] = $resultdata;
 
