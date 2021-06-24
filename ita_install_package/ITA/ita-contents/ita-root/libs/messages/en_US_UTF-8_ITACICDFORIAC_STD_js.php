@@ -13,6 +13,6 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-////ja_JP_UTF-8_ITACICDFORIAC_STD
+////en_US_UTF-8_ITACICDFORIAC_STD_js
 
 ?>

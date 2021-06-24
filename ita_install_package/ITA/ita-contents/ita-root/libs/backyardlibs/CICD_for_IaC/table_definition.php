@@ -208,9 +208,9 @@ class TD_C_PATTERN_PER_ORCH  extends TDBase {
 //////////////////////////////////////////////////////////////////////
 class TD_B_CICD_REPO_SYNC_STATUS_NAME  extends TDBase {
     // 同期状態:SYNC_STATUS_ROW_ID 値リスト
-    const C_SYNC_STATUS_ROW_ID_NORMAL   = 1;  // 正常
-    const C_SYNC_STATUS_ROW_ID_ERROR    = 2;  // 異常
-    const C_SYNC_STATUS_ROW_ID_RESTART  = 3;  // 再開
+    const C_SYNC_STATUS_ROW_ID_NORMAL   = '正常';
+    const C_SYNC_STATUS_ROW_ID_ERROR    = '異常';
+    const C_SYNC_STATUS_ROW_ID_RESTART  = '再開';
 
     public  $PKColumnName;
     public  $tblColumndefine;
@@ -359,10 +359,6 @@ class TD_B_CICD_GIT_REPOSITORY_TYPE_NAME  extends TDBase {
 // 同期状態管理テーブル(履歴なし)
 /////////////////////////////////////////////////////////
 class TD_T_CICD_SYNC_STATUS  extends TDBase {
-    // 同期実行状態:SYNC_RUN_STATUS 値リスト
-    const C_SYNC_RUN_STATUS_STOP      = 0;  //停止(未実行)
-    const C_SYNC_RUN_STATUS_EXEC      = 1;  //実行中
-
     public  $PKColumnName;
     public  $tblColumndefine;
     public  $jnlColumndefine;
