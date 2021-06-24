@@ -851,6 +851,11 @@ make_ita() {
     
     log "php install and setting"
     configure_php
+        
+    if [ "$cicd_for_iac" == "yes" ]; then
+        log "git install and setting"
+        configure_git
+    fi
     
     if [ "$ansible_driver" == "yes" ]; then
         log "ansible install and setting"
@@ -1038,6 +1043,12 @@ read_setting_file "$ITA_ANSWER_FILE"
 
 if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
     #check (ita_answers.txt)-----
+    if [ "${cicd_for_iac}" != 'yes' -a "${cicd_for_iac}" != 'no' ]; then
+        log "ERROR:cicd_for_iac should be set to yes or no"
+        ERR_FLG="false"
+        func_exit_and_delete_file
+    fi
+
     if [ "${ansible_driver}" != 'yes' -a "${ansible_driver}" != 'no' ]; then
         log "ERROR:ansible_driver should be set to yes or no"
         ERR_FLG="false"
