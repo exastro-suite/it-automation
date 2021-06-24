@@ -715,6 +715,42 @@ class TableControlAgent {
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 		return $retStrVal;
 	}
+	public function getPrintFormatBulkExcel($strFormatterId, $strIdOfTableTag=null, $strNumberForRI=null, $taskId=null, $fileName=null, $menuId=null){
+        global $g;
+
+        $retStrVal = "";
+        $intControlDebugLevel01 = 250;
+        $strFxName = __FUNCTION__;
+        $result = false;
+
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+        if(array_key_exists($strFormatterId,$this->aryObjFormatter)===true){
+            $strNowPrintingId="";
+            if( $strNumberForRI != null ){
+                $this->aryObjFormatter[$strFormatterId]->setNumberForRI($strNumberForRI);
+            }
+
+            if( $strIdOfTableTag === null ){
+                $strNowPrintingId = $this->aryObjFormatter[$strFormatterId]->getPrintTableID();
+            }else{
+                $strNowPrintingId = $strIdOfTableTag;
+            }
+
+            //----瞬間存在値なのでセット
+            $this->setPrintingTableID($strNowPrintingId);
+
+            //瞬間存在値なのでセット----
+            $result = $this->aryObjFormatter[$strFormatterId]->formatBulkExcel($taskId, $fileName, $menuId);
+
+            //----瞬間存在値なのでクリア
+            $this->setPrintingTableID(null);
+            //瞬間存在値なのでクリア----
+        }
+
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        return $result;
+    }
 
 	public function setGeneObject($dlcKey, $dlcObject, $boolKeyUnset=false){
 		$retBool = true;

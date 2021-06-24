@@ -280,4 +280,17 @@ $ary["ITABASEH-ERR-5733111"]        = "The setting value to skip Movement is not
 $ary["ITABASEH-ERR-5733202"]        = "Execution flow: It is an invalid pattern.";
 $ary["ITABASEH-ERR-5733203"]        = "Execution flow: It is an invalid pattern.";
 $ary["ITABASEH-ERR-5733204"]        = "Execution flow: It is an invalid pattern.";
+$ary["ITABASEH-ERR-2100000329_1"]   = "Export data has failed.";
+$ary["ITABASEH-ERR-2100000329_2"]   = "Failed to create a new zip file. (FILE:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000329_3"]   = "There are no exportable menus.";
+$ary["ITABASEH-ERR-2100000330_1"]   = "You don’t have permission to maintain this menu.";
+$ary["ITABASEH-ERR-2100000330_2"]   = "The target Menu ID does not exist.";
+$ary["ITABASEH-ERR-2100000330_3"]   = "The file extension is invalid.";
+$ary["ITABASEH-ERR-2100000330_4"]   = "The target file does not exist.";
+$ary["ITABASEH-ERR-2100000330_5"]   = "Failed to move zip file.(FILE:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_6"]   = "Failed to copy zip file. (FILE:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_7"]   = "Import data has failed.";
+$ary["ITABASEH-ERR-2100000330_8"]   = "Zip file with an invalid format uploaded. (FILE:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_9"]   = "Zip file to import does not exist. (FILE]:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_10"]  = "Failed to upload file. (Not a zip file). (FILE]:{} LINE:{})";
 ?>

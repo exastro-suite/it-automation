@@ -4278,6 +4278,72 @@ SELECT TAB_A.ROW_ID,
 FROM B_ER_DATA TAB_A
 LEFT JOIN D_ER_MENU_TABLE_LINK_LIST TAB_B ON (TAB_A.MENU_TABLE_LINK_ID = TAB_B.ROW_ID);
 
+-- -------------------------------------------------------
+-- --Excel一括
+-- -------------------------------------------------------
+CREATE TABLE B_BULK_EXCEL_TASK
+(
+TASK_ID                           %INT%                            , -- 識別シーケンス
+TASK_STATUS                       %INT%                            , -- タスクのステータス
+TASK_TYPE                         %INT%                            , -- タスクの種類
+FILE_NAME                         TEXT                             , -- ファイル名
+RESULT_FILE_NAME                  TEXT                             , -- 結果ファイル
+EXECUTE_USER                      %INT%                            , -- 実行ユーザ
+ABOLISHED_TYPE                    %INT%                            , -- 廃止情報
+DISP_SEQ                          %INT%                            , -- 表示順
+NOTE                              %VARCHR%(4000)                   , -- 備考
+ACCESS_AUTH                       TEXT                             ,
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+PRIMARY KEY(TASK_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_BULK_EXCEL_TASK_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+
+TASK_ID                           %INT%                            , -- 識別シーケンス
+TASK_STATUS                       %INT%                            , -- ステータス
+TASK_TYPE                         %INT%                            , -- 処理種別
+FILE_NAME                         TEXT                             , -- ファイル名
+RESULT_FILE_NAME                  TEXT                             , -- 結果ファイル
+EXECUTE_USER                      %INT%                            , -- 実行ユーザ
+ABOLISHED_TYPE                    %INT%                            , -- 廃止情報
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_BULK_EXCEL_ABOLISHED_TYPE
+(
+ROW_ID                            %INT%                             , -- 識別シーケンス
+ABOLISHED_TYPE                    %VARCHR%(100)                     , -- 廃止情報
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_BULK_EXCEL_NG_MENU_LIST
+(
+ROW_ID                            %INT%                             , -- 識別シーケンス
+MENU_ID                           %INT%                             , -- メニューID
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
 
 
 -- *****************************************************************************

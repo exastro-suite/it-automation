@@ -15,6 +15,10 @@
 /ita-root/temp/data_import/import
 /ita-root/temp/data_import/upload
 /ita-root/temp/data_import/uploadfiles
+/ita-root/temp/bulk_excel/export
+/ita-root/temp/bulk_excel/import
+/ita-root/temp/bulk_excel/import/import
+/ita-root/temp/bulk_excel/import/upload
 /ita-root/temp/event_mail
 /ita-root/temp/file_up_column
 /ita-root/temp/ky_mail_queues/ky_sysmail_0_queue
