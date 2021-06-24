@@ -222,7 +222,7 @@ SELECT SYSTEM_ID                                                    AS KY_KEY   
 FROM   C_STM_LIST
 WHERE  DISUSE_FLAG = '0'
 UNION
-SELECT ROW_ID + 10000                                                       AS KY_KEY   ,
+SELECT ROW_ID + 10000000                                                    AS KY_KEY   ,
        [%CONCAT_HEAD/%]'[HG]'[%CONCAT_MID/%]HOSTGROUP_NAME[%CONCAT_TAIL/%]  AS KY_VALUE ,
        1                                                                    AS KY_SOURCE,
        STRENGTH                                                             AS STRENGTH ,
