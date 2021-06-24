@@ -97,7 +97,7 @@ GIT_USER                           VARCHAR (128)                    , -- Git ユ
 GIT_PASSWORD                       VARCHAR (128)                    , -- Git パスワード
 AUTO_SYNC_FLG                      INT                              , -- 自動同期有無
 SYNC_INTERVAL                      INT                              , -- 同期周期(単位:分)
-SYNC_STATUS_ROW_ID                 INT                              , -- 同期状態
+SYNC_STATUS_ROW_ID                 VARCHAR (16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 PROXY_ADDRESS                      VARCHAR (128)                    , -- プロキシーアドレス
 PROXY_PORT                         INT                              , -- プロキシーポート
@@ -131,7 +131,7 @@ GIT_USER                           VARCHAR (128)                    , -- Git ユ
 GIT_PASSWORD                       VARCHAR (128)                    , -- Git パスワード
 AUTO_SYNC_FLG                      INT                              , -- 自動同期有無
 SYNC_INTERVAL                      INT                              , -- 同期周期(単位:分)
-SYNC_STATUS_ROW_ID                 INT                              , -- 同期状態
+SYNC_STATUS_ROW_ID                 VARCHAR (16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 PROXY_ADDRESS                      VARCHAR (128)                    , -- プロキシーアドレス
 PROXY_PORT                         INT                              , -- プロキシーポート
@@ -206,7 +206,7 @@ ACCT_ROW_ID                        INT                              , -- Restユ
 RBAC_FLG_ROW_ID                    INT                              , -- アクセス許可ロール付与フラグ　
 -- 同期状態
 AUTO_SYNC_FLG                      INT                              , -- 自動同期有無
-SYNC_STATUS_ROW_ID                 INT                              , -- 同期状態
+SYNC_STATUS_ROW_ID                 VARCHAR (16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 SYNC_LAST_TIME                     DATETIME(6)                      , -- 最終同期時間
 SYNC_LAST_UPDATE_USER              INT                              , -- 最終更新ユーザ
@@ -245,7 +245,7 @@ ACCT_ROW_ID                        INT                              , -- Restユ
 RBAC_FLG_ROW_ID                    INT                              , -- アクセス許可ロール付与フラグ　
 -- 同期状態
 AUTO_SYNC_FLG                      INT                              , -- 自動同期有無
-SYNC_STATUS_ROW_ID                 INT                              , -- 同期状態
+SYNC_STATUS_ROW_ID                 VARCHAR (16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 SYNC_LAST_TIME                     DATETIME(6)                      , -- 最終同期時間
 SYNC_LAST_UPDATE_USER              INT                              , -- 最終更新ユーザ
@@ -678,6 +678,9 @@ INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRI
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-120004,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100120004,2100120001,'インターフェース情報',NULL,NULL,NULL,1,0,1,1,10,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100120005,2100120001,'Restユーザー管理',NULL,NULL,NULL,1,0,1,1,20,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-120005,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100120005,2100120001,'Restユーザー管理',NULL,NULL,NULL,1,0,1,1,20,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-130000,'c07','5ebbc37e034d6874a2af59eb04beaa52','CICD For IaC Git同期プロシージャ',NULL,NULL,'CICD For IaC Git同期プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-130000,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-130000,'c07','5ebbc37e034d6874a2af59eb04beaa52','CICD For IaC Git同期プロシージャ',NULL,NULL,'CICD For IaC Git同期プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100120001,1,2100120001,1,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-120001,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100120001,1,2100120001,1,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

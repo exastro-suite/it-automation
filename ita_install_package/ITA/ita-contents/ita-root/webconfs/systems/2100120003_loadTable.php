@@ -349,11 +349,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $cg2->addColumn($c);
 
         /////////////////////////////////////////////////////////
-        // アクセス許可ロール   必須入力:true ユニーク:false
+        // アクセス許可ロール   必須入力:false ユニーク:false
         /////////////////////////////////////////////////////////
         $c = new IDColumn('RBAC_FLG_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032200"),'B_CICD_RBAC_FLG_NAME','RBAC_FLG_ROW_ID','RBAC_FLG_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('RBAC_FLG_ROW_ID'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032201"));
-        $c->setRequired(true);
         $cg2->addColumn($c);
 
     $table->addColumn($cg2);
@@ -404,10 +403,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];
                     if($modeValue_sub == "off") {
                         $strFxName = basename(__FILE__) . __LINE__;
-                        $strQuery = "UPDATE B_CICD_REPOSITORY_LIST "
+                        $strQuery = "UPDATE B_CICD_MATERIAL_LINK_LIST "
                                    ."SET SYNC_STATUS_ROW_ID = null "
-                                   ."WHERE REPO_ROW_ID = :REPO_ROW_ID";
-                        $aryForBind = array('REPO_ROW_ID'=>$aryVariant['edit_target_row']['REPO_ROW_ID']);
+                                   ."WHERE MATL_LINK_ROW_ID = :MATL_LINK_ROW_ID";
+                        $aryForBind = array('MATL_LINK_ROW_ID'=>$aryVariant['edit_target_row']['MATL_LINK_ROW_ID']);
 
                         $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
 
@@ -435,9 +434,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
                 return $retArray;
         };
-
-        $c = new IDColumn('SYNC_STATUS_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031200"),'B_CICD_REPO_SYNC_STATUS_NAME','SYNC_STATUS_ROW_ID','SYNC_STATUS_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        $c = new TextColumn('SYNC_STATUS_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031200"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031201"));
+        $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt('')));
+        $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt('')));
         // OutputType一覧  ----
         //$c->getOutputType('filter_table')->setVisible(false);
         //$c->getOutputType('print_table')->setVisible(false);
@@ -445,17 +445,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //$c->getOutputType('register_table')->setVisible(false);
         //$c->getOutputType('delete_table')->setVisible(false);
         //$c->getOutputType('print_journal_table')->setVisible(false);
-        //$c->getOutputType('excel')->setVisible(false);
-        //$c->getOutputType('csv')->setVisible(false);
-        //$c->getOutputType('json')->setVisible(false);
-        // ----  OutputType一覧
-// comment out
-        $c->getOutputType('update_table')->setVisible(false);
-        $c->getOutputType('register_table')->setVisible(false);
-        $c->getOutputType('delete_table')->setVisible(false);
-        $c->getOutputType('json')->setVisible(false);
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
+        $c->getOutputType('json')->setVisible(false);
+        // ----  OutputType一覧
         // ----  エクセル/CSVからのアップロードを禁止する。
         $c->setFunctionForEvent('beforeTableIUDAction',$beforeObjFunction);
         $c->setFunctionForEvent('afterTableIUDAction',$afterObjFunction);

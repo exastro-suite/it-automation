@@ -97,7 +97,7 @@ GIT_USER                           %VARCHR%(128)                    , -- Git ユ
 GIT_PASSWORD                       %VARCHR%(128)                    , -- Git パスワード
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
 SYNC_INTERVAL                      %INT%                            , -- 同期周期(単位:分)
-SYNC_STATUS_ROW_ID                 %INT%                            , -- 同期状態
+SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 PROXY_ADDRESS                      %VARCHR%(128)                    , -- プロキシーアドレス
 PROXY_PORT                         %INT%                            , -- プロキシーポート
@@ -131,7 +131,7 @@ GIT_USER                           %VARCHR%(128)                    , -- Git ユ
 GIT_PASSWORD                       %VARCHR%(128)                    , -- Git パスワード
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
 SYNC_INTERVAL                      %INT%                            , -- 同期周期(単位:分)
-SYNC_STATUS_ROW_ID                 %INT%                            , -- 同期状態
+SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 PROXY_ADDRESS                      %VARCHR%(128)                    , -- プロキシーアドレス
 PROXY_PORT                         %INT%                            , -- プロキシーポート
@@ -206,7 +206,7 @@ ACCT_ROW_ID                        %INT%                            , -- Restユ
 RBAC_FLG_ROW_ID                    %INT%                            , -- アクセス許可ロール付与フラグ　
 -- 同期状態
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
-SYNC_STATUS_ROW_ID                 %INT%                            , -- 同期状態
+SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 SYNC_LAST_TIME                     %DATETIME6%                      , -- 最終同期時間
 SYNC_LAST_UPDATE_USER              %INT%                            , -- 最終更新ユーザ
@@ -245,7 +245,7 @@ ACCT_ROW_ID                        %INT%                            , -- Restユ
 RBAC_FLG_ROW_ID                    %INT%                            , -- アクセス許可ロール付与フラグ　
 -- 同期状態
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
-SYNC_STATUS_ROW_ID                 %INT%                            , -- 同期状態
+SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
 SYNC_ERROR_NOTE                    TEXT                             , -- 同期エラー時の内容
 SYNC_LAST_TIME                     %DATETIME6%                      , -- 最終同期時間
 SYNC_LAST_UPDATE_USER              %INT%                            , -- 最終更新ユーザ

@@ -16,20 +16,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  【概要】
-//      CICD For IaC Git リモートリポジトリ同期処理　子プロセス
+//      CICD For IaC Git リモートリポジトリ同期処理　子プロセス(リモートリポジトリ単位)
 //
-//   function getRolesPath
-//   function getLocalCloneFileList
-//   function CreateLocalClone
-//   function LocalCloneRemoteRepoChk
-//   function getRepoListRow
-//   function setDefaultUIDisplayMsg
-//   function setUIDisplayMsg
-//   function makeReturnArray
-//   function analysisReturnArray
-//   function MatlListMerge
-//   function getMatlListRecodes
-//   function LockPkeySequence
+//   function 
+//      ExceptionRecive
+//      getRolesPath
+//      getLocalCloneFileList
+//      GitPull
+//      CreateLocalClone
+//      LocalCloneRemoteRepoChk
+//      LocalCloneBranchChk
+//      getRepoListRow
+//      setDefaultUIDisplayMsg
+//      setUIDisplayMsg
+//      makeReturnArray
+//      analysisReturnArray
+//      LockPkeySequence
+//      getMatlListRecodes
+//      MatlListMerge
+//      MatlListDisuseUpdate
+//      MatlListInsert
+//      MatlListRolesRecodeUpdate
+//      UpdateSyncStatusRecode
+//      UpdateRepoListSyncStatus
+//      UpdateRepoListRecode
+//      getPasswordAuthType
 //
 ///////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////
@@ -45,19 +56,19 @@
     ///////////////////////////////////////////////////////////////
     if($argc != 3) {
         echo ("Invalid parameter count");
-        exit -1;
+        exit(2);
     }
     $ary = explode("_", $argv[1]);
     if(count($ary) != 2) {
         echo ("Invalid parameter argv[1]");
-        exit -1;
+        exit(2);
     }
     if(is_numeric($ary[1]) === false) {
         echo ("Invalid parameter argv[1]");
-        exit -1;
+        exit(2);
     }
     $RepoId = (int)$ary[1];
-    $MatlListUpdateExeFlg            = false;  // 資材一覧更新判定         　true: リモートリポジトリに差分がなくても資材一覧の更新  false: 差分がなければ資材一覧の更新しない
+    $MatlListUpdateExeFlg            = false;  // 資材一覧更新判定 true: リモートリポジトリに差分がなくても資材一覧の更新  false: 差分がなければ資材一覧の更新しない
     if($argv[2] == "Normal") {
         $MatlListUpdateExeFlg = false;
     } else {
@@ -144,6 +155,7 @@
         require_once ($root_dir_path . '/libs/commonlibs/common_CICD_for_IaC_functions.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
+        require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_definition.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/ControlGit.php');
 
 
@@ -228,27 +240,6 @@
         }
 
         /////////////////////////////////////////////////////////////////
-        // ローカルのクローン情報取得
-        /////////////////////////////////////////////////////////////////
-        $CloneRepoURL  = "";
-        $CloneBranch   = "";
-        $ret = $LFCobj->getGitCloneInfo($RepoId,$CloneRepoURL,$CloneBranch);
-        if($ret !== true) {
-            // 異常フラグON
-            $error_flag = 1;
- 
-            // UIに表示するエラーメッセージ設定
-            setDefaultUIDisplayMsg();
-
-            // 例外処理へ
-            // 一時ファイルの読み込みに失敗しました。(リモートリポジトリ項番:{})
-            $logstr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1011",array($RepoId));  //3005
-            $addlogstr = "";
-            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$addlogstr);
-            throw new Exception($FREE_LOG);
-        }
-
-        /////////////////////////////////////////////////////////////////
         // シーケンスロックはしないで
         // リモートリポジトリ管理の情報を取得
         /////////////////////////////////////////////////////////////////
@@ -268,32 +259,65 @@
             $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$addlogstr);
             throw new Exception($FREE_LOG);
         }
-        if(($RepoListRow['REMORT_REPO_URL'] != $CloneRepoURL) ||
-           ($RepoListRow['BRANCH_NAME']     != $CloneBranch)) {
-            $CloneExeFlg  = true;
 
-            // トレースメッセージ
-            if ( $log_level === 'DEBUG' ){
-                // [処理]リモートリポジトリ管理のリモートリポジトリ(URL)・ブランチの変更検出(リポジトリ項番:{}))
-                $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2014",$RepoId);
-                require ($root_dir_path . $log_output_php );
-            }
-        }
         $cloneRepoDir = $LFCobj->getLocalCloneDir($RepoId);
         $libPath      = $LFCobj->getLocalShellDir();
-        $Gitobj = new ControlGit($RepoId, $RepoListRow['REMORT_REPO_URL'], $RepoListRow['BRANCH_NAME'], $cloneRepoDir, $RepoListRow['GIT_USER'],  $RepoListRow['GIT_PASSWORD'], $libPath, $objMTS, $RepoListRow['RETRAY_COUNT'], $RepoListRow['RETRAY_INTERVAL']);
+        $Gitobj = new ControlGit($RepoId, $RepoListRow['REMORT_REPO_URL'], $RepoListRow['BRANCH_NAME'], $cloneRepoDir, $RepoListRow['GIT_USER'],  $RepoListRow['GIT_PASSWORD'], $libPath, $objMTS, $RepoListRow['RETRAY_COUNT'], $RepoListRow['RETRAY_INTERVAL'], $RepoListRow['PROXY_ADDRESS'], $RepoListRow['PROXY_PORT']);
 
         try {
+            // ローカルクローンディレクトリ有無判定
+            $ret = $Gitobj->LocalCloneDirCheck();
+            if($ret === false) {
+                // ローカルクローンディレクトリなし
+                $CloneExeFlg  = true;
+            }
+            if($CloneExeFlg === false) {
+
+                // トレースメッセージ
+                if ( $log_level === 'DEBUG' ){
+                    //[処理]ローカルクローンのリモートリポジトリとブランチ確認 (リモートリポジトリ項番:{})
+                    $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2007",$RepoId);
+                    require ($root_dir_path . $log_output_php );
+                }
+
+                /////////////////////////////////////////////////////////////////
+                // ローカルクローンのリモートリポジトリ(URL)が正しいか判定
+                /////////////////////////////////////////////////////////////////
+                $ret = LocalCloneRemoteRepoChk($RepoId);
+                if($ret === false) {
+                     // リモートリポジトリ不一致
+                     $CloneExeFlg  = true;
+
+                     // トレースメッセージ
+                     if ( $log_level === 'DEBUG' ){
+                         //[処理]リモートリポジトリ管理のリモートリポジトリ(URL)の変更検出 (リモートリポジトリ項番:{})
+                         $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2014",$RepoId);
+                         require ($root_dir_path . $log_output_php );
+                     }
+                }
+            }
+            if($CloneExeFlg === false) {
+                /////////////////////////////////////////////////////////////////
+                // ローカルクローンのブランチが正しいか判定
+                /////////////////////////////////////////////////////////////////
+                $ret = LocalCloneBranchChk($RepoId,$RepoListRow);
+                if($ret === false) {
+                    // ブランチ不一致
+                    $CloneExeFlg  = true;
+ 
+                    // トレースメッセージ
+                    if ( $log_level === 'DEBUG' ){
+                        // [処理]リモートリポジトリ管理のブランチの変更検出 (リモートリポジトリ項番:{})
+                        $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2029",$RepoId);
+                        require ($root_dir_path . $log_output_php );
+                    }
+                }
+            }
             if($CloneExeFlg === true) {
                 /////////////////////////////////////////////////////////////////
                 // ローカルクローン作成
                 /////////////////////////////////////////////////////////////////
                 $ret = CreateLocalClone($RepoId,$RepoListRow);
-
-                /////////////////////////////////////////////////////////////////
-                // リモートリポジトリ・ブランチ確認
-                /////////////////////////////////////////////////////////////////
-                $ret = LocalCloneRemoteRepoChk($RepoId);
 
                 /////////////////////////////////////////////////////////////////
                 // Git ファイル一覧取得
@@ -308,11 +332,6 @@
                 $RolesPath = getRolesPath($RepoId,$GitFiles);
 
             } else {
-                /////////////////////////////////////////////////////////////////
-                // リモートリポジトリ・ブランチ確認
-                /////////////////////////////////////////////////////////////////
-                $ret = LocalCloneRemoteRepoChk($RepoId);
-
                 /////////////////////////////////////////////////////////////////
                 // Git差分抽出(git pull) 
                 /////////////////////////////////////////////////////////////////
@@ -369,7 +388,7 @@
 
                 $ret = MatlListMerge($RepoId,$MatlListRecodes, $RolesPath, $GitFiles);
 
-                $ret = MatlListRolesRecodeUpdate();
+                $ret = MatlListRolesRecodeUpdate($RepoId);
 
                 //トレースメッセージ
                 if ( $log_level === 'DEBUG' ){
@@ -382,24 +401,6 @@
             // 例外処理
             // 異常フラグONi($error_flag)  UIに表示するエラーメッセージ設定(setUIDisplayMsg)  throw new Exception
             ExceptionRecive($RepoId,$e->getMessage(),__FILE__,__LINE__);
-        }
-
-        //////////////////////////////////////////////////////////////////////
-        // ローカルクローンしたリモートリポジトリ・ブランチをファイルに保存
-        //////////////////////////////////////////////////////////////////////
-        $ret = $LFCobj->putGitCloneInfo($RepoId,$RepoListRow['REMORT_REPO_URL'], $RepoListRow['BRANCH_NAME']);
-        if($ret !== true) {
-            // UIに表示するエラーメッセージ設定
-            setUIDisplayMsg($UIMsg);
-
-            // 異常フラグON
-            $error_flag = 1;
-
-            // 例外処理へ
-            // 一時ファイルの書き込みに失敗しました。(リモートリポジトリ項番:{})
-            $logstr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1012",array($RepoId));
-            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$retlogstr);
-            throw new Exception($FREE_LOG);
         }
 
         /////////////////////////////////////////////////////////////////
@@ -457,7 +458,7 @@
             throw new Exception($FREE_LOG);
         }
         // commit後に同期状態テーブル 処理時間更新とリモートリポジトリ管理の状態を更新をマーク
-        $SyncTimeUpdate_Flg = true;
+        $SyncTimeUpdate_Flg           = true;
         $RepoListSyncStatusUpdate_Flg = true;
 
     } catch (Exception $e){
@@ -639,6 +640,7 @@
                 }
             }
         }
+
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
             //[処理]ローカルクローンのRolesディレクトリ取得 (リモートリポジトリ項番:{})
@@ -686,12 +688,14 @@
             $retary = makeReturnArray($RetCode,$FREE_LOG,$UIDisplayMsg);
             throw new Exception($retary);
         }
+
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
             //[処理]ローカルクローンのファイルリスト取得 (リモートリポジトリ項番:{})
             $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2008",$RepoId);
             require ($root_dir_path . $log_output_php );
         }
+
         return true;
     }
 
@@ -711,16 +715,10 @@
 
         global $objMTS;
 
-        switch($RepoListRow["GIT_REPO_TYPE_ROW_ID"]) {
-        case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PUBLIC:
-            $PassAuth = "nopass";
-            break;
-        case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PRIVATE:
-            $PassAuth = "pass";
-            break;
-        }
+        // Password認証か判定
+        $AuthTypeName = getPasswordAuthType($RepoListRow);
 
-        $ret = $Gitobj->GitPull($pullResultAry,$PassAuth);
+        $ret = $Gitobj->GitPull($pullResultAry,$AuthTypeName);
         if($ret !== true) {
             // 異常フラグON
             $error_flag = 1;
@@ -811,6 +809,7 @@
             $retary = makeReturnArray($RetCode,$FREE_LOG,$UIDisplayMsg);
             throw new Exception($retary);
         }
+
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
             //"[処理]ローカルクローンディレクトリ作成(リモートリポジトリ項番:{}))
@@ -818,16 +817,10 @@
             require ($root_dir_path . $log_output_php );
         }
 
-        switch($RepoListRow["GIT_REPO_TYPE_ROW_ID"]) {
-        case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PUBLIC:
-            $PassAuth = "nopass";
-            break;
-        case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PRIVATE:
-            $PassAuth = "pass";
-            break;
-        }
+        // Password認証か判定
+        $AuthTypeName = getPasswordAuthType($RepoListRow);
 
-        $ret = $Gitobj->GitClone($PassAuth);
+        $ret = $Gitobj->GitClone($AuthTypeName);
         if($ret !== true) {
             // 異常フラグON
             $error_flag = 1;
@@ -877,12 +870,11 @@
 
         // ローカルクローンのリモートリポジトリ確認
         $ret = $Gitobj->GitRemoteChk();
-        if($ret !== true) {
-            // ローカルクローンとリモートリポジトリが不一致
+        if($ret === -1) {
+            // Git remote command error
             // 異常フラグON
             $error_flag = 1;
 
-            // Git remote commandに失敗しました。
             $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1023");
 
             $logaddstr = $Gitobj->GetLastErrorMsg();
@@ -898,20 +890,44 @@
             $RetCode = false;
             $retary = makeReturnArray($RetCode,$FREE_LOG,$UIDisplayMsg);
             throw new Exception($retary);
+        } else {
+            return $ret;
         }
+    }
+
+    function LocalCloneBranchChk($RepoId,$RepoListRow) {
+        global $cmDBobj;
+        global $DBobj;
+        global $LFCobj;
+        global $Gitobj;
+        global $error_flag;
+        global $warning_flag;
+
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+
+        global $objMTS;
+
+        // Password認証か判定
+        $AuthTypeName = getPasswordAuthType($RepoListRow);
 
         // ローカルクローンのブランチ確認
-        $ret = $Gitobj->GitCheckoutChk();
-        if($ret !== true) {
-            // git checkout command error
-            // Git checkout commandに失敗しました。
-            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024");
+        $ret = $Gitobj->GitBranchChk($AuthTypeName);
 
+        if($ret === -1) {
+            // Git remote command error
+            // 異常フラグON
+            $error_flag = 1;
+
+            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024");
             $logaddstr = $Gitobj->GetLastErrorMsg();
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
 
             // UIに表示するメッセージ
-            // Git checkout commandに失敗しました。
+            // Git branch commandに失敗しました。
             $UIDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024");
             $UIDisplayMsg .= "\n" . $Gitobj->GetGitCommandLastErrorMsg();
 
@@ -920,16 +936,9 @@
             $RetCode = false;
             $retary = makeReturnArray($RetCode,$FREE_LOG,$UIDisplayMsg);
             throw new Exception($retary);
+        } else {
+            return $ret;
         }
-
-        // トレースメッセージ
-        if ( $log_level === 'DEBUG' ){
-            //[処理]ローカルクローンのリモートリポジトリとブランチ確認 (リモートリポジトリ項番:{})
-            $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2007",$RepoId);
-            require ($root_dir_path . $log_output_php );
-        }
-
-        return true;
     }
     function getRepoListRow($RepoId,&$RepoListRow) {
         global $cmDBobj;
@@ -1368,7 +1377,7 @@
         return true;
     }
 
-    function MatlListRolesRecodeUpdate() {
+    function MatlListRolesRecodeUpdate($RepoId) {
         global $cmDBobj;
         global $DBobj;
         global $LFCobj;
@@ -1396,16 +1405,19 @@
                               WHERE 
                                     TAB_B.MATL_FILE_PATH LIKE CONCAT(TAB_A.MATL_FILE_PATH,'%s') 
                                 AND TAB_B.MATL_FILE_TYPE_ROW_ID=:FILE_TYPE_ID
+                                AND TAB_B.REPO_ROW_ID=:REPO_ROW_ID
                                 AND TAB_B.DISUSE_FLAG ='0'
                          ) AS FILE_COUNTT
                       FROM
                          %s TAB_A 
                       WHERE 
-                         TAB_A.MATL_FILE_TYPE_ROW_ID=:ROLRS_TYPE_ID ";
+                             TAB_A.MATL_FILE_TYPE_ROW_ID=:ROLRS_TYPE_ID 
+                         AND TAB_A.REPO_ROW_ID = :REPO_ROW_ID";
         $sqlBody   = sprintf($sqlBody,$TDMatlobj->getTableName(),"%",$TDMatlobj->getTableName());
         $arrayBind = array();
         $arrayBind = array('FILE_TYPE_ID'=>TD_B_CICD_MATERIAL_FILE_TYPE_NAME::C_MATL_FILE_TYPE_ROW_ID_FILE,
-                           'ROLRS_TYPE_ID'=>TD_B_CICD_MATERIAL_FILE_TYPE_NAME::C_MATL_FILE_TYPE_ROW_ID_ROLES);
+                           'ROLRS_TYPE_ID'=>TD_B_CICD_MATERIAL_FILE_TYPE_NAME::C_MATL_FILE_TYPE_ROW_ID_ROLES,
+                           'REPO_ROW_ID'=>$RepoId);
         $objQuery  = $DBobj->SelectForSimple($sqlBody,$arrayBind);
         if($objQuery === false) {
             // 異常フラグON
@@ -1642,5 +1654,24 @@
             require ($root_dir_path . $log_output_php );
         }
         return true;
+    }
+    function getPasswordAuthType($RepoListRow) {
+        // httpsの場合に認証が必要か判定
+        switch($RepoListRow["GIT_PROTOCOL_TYPE_ROW_ID"]) {
+        case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_HTTPS:
+            switch($RepoListRow["GIT_REPO_TYPE_ROW_ID"]) {
+            case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PUBLIC:
+                $PassAuth = "nopass";
+                break;
+            case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PRIVATE:
+                $PassAuth = "pass";
+                break;
+            }
+            break;
+        default:
+            $PassAuth = "nopass";
+            break;
+        }
+        return $PassAuth;
     }
 ?>
