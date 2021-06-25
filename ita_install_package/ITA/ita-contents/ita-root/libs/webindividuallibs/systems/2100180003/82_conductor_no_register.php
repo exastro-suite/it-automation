@@ -610,7 +610,7 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
             $strConductorName="";
             if( $value['CONDUCTOR_CALL_CLASS_NO'] != "" ){
                 //Symphonyクラス情報取得
-                $aryRetBody = $this->getInfoFromOneOfSymphonyClasses($value['CONDUCTOR_CALL_CLASS_NO'], 0);
+                $aryRetBody = $objOLA->getInfoFromOneOfSymphonyClasses($value['CONDUCTOR_CALL_CLASS_NO'], 0);
 
                 if( $aryRetBody[1] !== null ){
                     //廃止済みの場合
@@ -746,7 +746,7 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
             if($tval['CONDITIONAL_ID'] != null ){
                 $arrConditionalID = explode(',', $tval['CONDITIONAL_ID']);
                 foreach ($arrConditionalID as $tckey => $tcvalue) {
-                    $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['condition']=$tcvalue;
+                    $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['condition'][]=$tcvalue;
                 }
             }
 
