@@ -270,11 +270,20 @@ function makeImportCheckbox(){
                 $menuGroupName  = $menuInfo["MENU_GROUP_NAME"];
                 $menuName       = $menuInfo["MENU_NAME"];
 
+                if (empty($retImportAry) || $menuInfo == false) {
+                    $declare_key = false;
+                    $declare_file_name_key = false;
+                }
+                else {
+                    $declare_key = array_search($menuId, array_column($retImportAry[$menuGroupId]["menu"], "menu_id"));
+                    $declare_file_name_key = array_search($menuFileName, array_column($retImportAry[$menuGroupId]["menu"], "file_name"));
+                }
+
                 // メニューの存在チェック
                 if ($menuInfo == false) {
                     if (array_key_exists($menuGroupId, $retImportAry)) {
                         // メニューグループは存在するがメニューがない場合
-                        if (!array_search($menuId, array_column($retImportAry[$menuGroupId]["menu"], "menu_id"))) {
+                        if ($declare_key === false) {
                             $retImportAry[$menuGroupId]["menu"][] = array(
                                 "menu_id"   => $menuId,
                                 "menu_name" => $menuName,
@@ -302,7 +311,7 @@ function makeImportCheckbox(){
                 elseif (!canMaintenance($menuId)) {
                     if (array_key_exists($menuGroupId, $retImportAry)) {
                         // メニューグループは存在するがメニューがない場合
-                        if (!array_search($menuId, array_column($retImportAry[$menuGroupId]["menu"], "menu_id"))) {
+                        if ($declare_key === false) {
                             $retImportAry[$menuGroupId]["menu"][] = array(
                                 "menu_id"   => $menuId,
                                 "menu_name" => $menuName,
@@ -327,11 +336,44 @@ function makeImportCheckbox(){
                     }
                 } else {
                     // ファイルの有無
-                    if (file_exists($path.$uploadId."/".$menuFileName)) {
+                    if (file_exists($path.$uploadId."/".$menuFileName) && !empty($menuFileName)) {
                         // $retImportAryのなかに該当メニューグループがあるかどうか
                         if (array_key_exists($menuGroupId, $retImportAry)) {
                             // メニューグループは存在するがメニューがない場合
-                            if (!array_search($menuId, array_column($retImportAry[$menuGroupId]["menu"], "menu_id"))) {
+                            // 同名ファイルが複数あった場合
+                            if ($declare_file_name_key !== false) {
+                                $retImportAry[$menuGroupId]["menu"][] = array(
+                                    "menu_id"   => $menuId,
+                                    "menu_name" => $menuName,
+                                    "disabled"  => true,
+                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_12'),
+                                    "file_name" => $menuFileName
+                                );
+                                $retImportAry[$menuGroupId]["menu"][$declare_file_name_key] = array(
+                                    "menu_id"   => $menuId,
+                                    "menu_name" => $menuName,
+                                    "disabled"  => true,
+                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_12'),
+                                    "file_name" => $menuFileName
+                                );
+                            }
+                            elseif ($declare_key !== false) {
+                                $retImportAry[$menuGroupId]["menu"][] = array(
+                                    "menu_id"   => $menuId,
+                                    "menu_name" => $menuName,
+                                    "disabled"  => true,
+                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_11'),
+                                    "file_name" => $menuFileName
+                                );
+                                $retImportAry[$menuGroupId]["menu"][$declare_key] = array(
+                                    "menu_id"   => $menuId,
+                                    "menu_name" => $menuName,
+                                    "disabled"  => true,
+                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_11'),
+                                    "file_name" => $menuFileName
+                                );
+                            }
+                            else {
                                 $retImportAry[$menuGroupId]["menu"][] = array(
                                     "menu_id"   => $menuId,
                                     "menu_name" => $menuName,
@@ -355,13 +397,13 @@ function makeImportCheckbox(){
                     } else {
                         if (array_key_exists($menuGroupId, $retImportAry)) {
                             // メニューグループは存在するがメニューがない場合
-                            if (!array_search($menuId, array_column($retImportAry[$menuGroupId]["menu"], "menu_id"))) {
+                            if (!$declare_key) {
                                 $retImportAry[$menuGroupId]["menu"][] = array(
                                     "menu_id"   => $menuId,
                                     "menu_name" => $menuName,
                                     "disabled"  => true,
                                     "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_4'),
-                                    "file_name" => ""
+                                    "file_name" => $menuFileName
                                 );
                             }
                         } else {
@@ -373,7 +415,7 @@ function makeImportCheckbox(){
                                         "menu_name" => $menuName,
                                         "disabled"  => true,
                                         "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_4'),
-                                        "file_name" => ""
+                                        "file_name" => $menuFileName
                                     )
                                 )
                             );

@@ -472,7 +472,9 @@ function getInfoOfLoadTable($strMenuIdNumeric, $aryVariant=array(), &$arySetting
 */
 function getExportedMenuIDList($taskId) {
     global $g;
-
+    if (!file_exists(EXPORT_PATH."/".$taskId.'/MENU_ID_LIST')) {
+        return false;
+    }
     $json = file_get_contents(EXPORT_PATH."/".$taskId.'/MENU_ID_LIST');
     $menuIdAry = json_decode($json, true);
     return $menuIdAry;
@@ -1582,11 +1584,9 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
             $menuInfo = getMenuInfoByMenuId($menuId);
             $msg = $menuInfo["MENU_GROUP_ID"]."_".$menuInfo["MENU_GROUP_NAME"].":".$menuId."_".$menuInfo["MENU_NAME"]."\n";
 
-            $strErrCountExplainHead = $objMTS->getSomeMessage("ITAWDCH-ERR-284");
             $strErrCountExplainTail = $objMTS->getSomeMessage("ITAWDCH-ERR-285");
 
-            $msg .= $strErrCountExplainHead.":".$files['file']['name'];
-
+            $msg .= $objMTS->getSomeMessage("ITAWDCH-STD-451",$files['file']['name'])."\n";
             foreach ($aryRetBody[4] as $executeName => $detail) {
                 $msg .= $detail['name'].":    ".$detail['ct'].$strErrCountExplainTail."\n";
             }
@@ -2519,28 +2519,6 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                 $objTable->commonEventHandlerExecute($refValue);
             }
             
-            // if( $strErrorStreamFromEditExecute != "" ){
-            //     if( $upload_log_print == "toHtml" ){
-            //         $strRetStrBody .= "<table class=\"tableIUDByQMFileErrorReport\" border=\"1\">".$strErrorStreamFromEditExecute."</table>\n";
-            //         $strRetStrBody .= $expAddBody01;
-            //     }
-            //     else if( $upload_log_print == "toFile" ){
-            //         $strRetStrBody = $strErrorStreamFromEditExecute;
-            //     }
-            //     if ( isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == "on" ){
-            //         $protocol = "https://";
-            //     }
-            //     else{
-            //         $protocol = "http://";
-            //     }
-            //     $scheme_n_authority = getSchemeNAuthority();
-            //     do
-            //     {
-            //         $output_logfile_name = $output_logfile_prefix . date("YmdHis") . "_" . mt_rand() . ".log";
-            //         $output_logfile_name_full_path = $editErrorLogDir."/".$output_logfile_name;
-            //         $dlcExistsFile = file_exists($output_logfile_name_full_path);
-            //     } while($dlcExistsFile === true);
-            // }
         }
         catch (Exception $e){
             $tmpErrMsgBody = $e->getMessage();

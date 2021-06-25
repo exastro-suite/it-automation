@@ -292,4 +292,7 @@ $ary["ITABASEH-ERR-2100000330_7"]   = "インポートが失敗しました。";
 $ary["ITABASEH-ERR-2100000330_8"]   = "不正なzipファイルがアップロードされました。(FILE:{} LINE:{})";
 $ary["ITABASEH-ERR-2100000330_9"]   = "インポートするzipファイルが存在しません。(FILE]:{} LINE:{})";
 $ary["ITABASEH-ERR-2100000330_10"]  = "zip以外のファイルアップロード(FILE]:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_11"]  = "対象のメニューIDがMENU_LIST.txtに複数行記載されています。";
+$ary["ITABASEH-ERR-2100000330_12"]  = "同名のファイルが複数あります。";
+$ary["ITABASEH-ERR-2100000330_13"]  = "zipファイルをアップロードしている必要があります。";
 ?>

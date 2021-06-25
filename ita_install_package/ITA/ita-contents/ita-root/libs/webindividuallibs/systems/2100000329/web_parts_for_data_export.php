@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2019 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ catch (Exception $e){
 }
 
 // 最終更新者「データポータビリティプロシージャ」
-define('ACCOUNT_NAME', -100024);
+define('ACCOUNT_NAME', -100331);
 
 // 画面表示の固定値（ラべル）
 $headerLabel1 = $g['objMTS']->getSomeMessage('ITAWDCH-STD-30011');

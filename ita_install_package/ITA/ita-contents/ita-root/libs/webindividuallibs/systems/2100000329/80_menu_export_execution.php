@@ -247,7 +247,7 @@ function validateModeid($objJSONOfReceptedData){
 
     $arrChkModeList=array();
     //チェック対象
-    $arrChkModeList["B_DP_ABOLISHED_TYPE"] = array( "ROW_ID" => $tmpJSONOfReceptedData['abolished_type'] );
+    $arrChkModeList["B_BULK_EXCEL_ABOLISHED_TYPE"] = array( "ROW_ID" => $tmpJSONOfReceptedData['abolished_type'] );
 
     foreach ($arrChkModeList as $tablename => $colmun) {
         foreach ($colmun as $key => $value) {

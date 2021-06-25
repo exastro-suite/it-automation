@@ -383,6 +383,7 @@ function makeExportCheckbox(){
     global $g;
 
     $sql = "SELECT
+                DISTINCT
                 A_MENU_GROUP_LIST.MENU_GROUP_ID,
                 A_MENU_GROUP_LIST.MENU_GROUP_NAME,
                 A_MENU_LIST.MENU_ID,

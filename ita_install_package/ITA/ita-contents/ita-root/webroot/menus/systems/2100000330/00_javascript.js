@@ -76,11 +76,15 @@ $(function(){
     $("#import_whole").click(function(e){
         if (e.target.checked) {
             for (let i = 0; i < checkboxList.length; i++) {
-                checkboxList[i].checked = true;
+                if (checkboxList[i].disabled == false) {
+                    checkboxList[i].checked = true;
+                }
             }
         } else {
             for (let i = 0; i < checkboxList.length; i++) {
-                checkboxList[i].checked = false;
+                if (checkboxList[i].disabled == false) {
+                    checkboxList[i].checked = false;
+                }
             }
         }
     });

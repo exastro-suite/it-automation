@@ -114,14 +114,20 @@ try {
             $cmd = "chown -R  apache:apache ".EXPORT_PATH."/$taskId";
             exec($cmd, $output, $return_var);
             if(0 != $return_var){
-                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
-                outputLog(LOG_PREFIX, "command=[{$cmd}]");
+                $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
+                                              array('B_BULK_EXCEL_TASK',basename(__FILE__), __LINE__));
+                outputLog(LOG_PREFIX, $logMsg);
                 setStatus($task['TASK_ID'], STATUS_FAILURE);
                 continue;
             }
 
             // メニューID取得
             $menuIdArray = getExportedMenuIDList($taskId);
+            if ($menuIdArray == false) {
+                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
+                setStatus($task['TASK_ID'], STATUS_FAILURE);
+                continue;
+            }
 
             $fileNameList = "";
 
