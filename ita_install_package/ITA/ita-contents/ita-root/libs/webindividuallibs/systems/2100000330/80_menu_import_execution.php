@@ -80,7 +80,7 @@ function menuImportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
                 }else{
                     $aryRetBody["TASK_ID"] = "";
                     $aryRetBody["RESULTCODE"] = "002";
-                    $aryRetBody['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-900073"); 
+                    $aryRetBody['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-2100000330_13"); 
                 }
 
                 break;

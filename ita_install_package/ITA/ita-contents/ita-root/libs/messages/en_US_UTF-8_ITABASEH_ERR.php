@@ -293,4 +293,7 @@ $ary["ITABASEH-ERR-2100000330_7"]   = "Import data has failed.";
 $ary["ITABASEH-ERR-2100000330_8"]   = "Zip file with an invalid format uploaded. (FILE:{} LINE:{})";
 $ary["ITABASEH-ERR-2100000330_9"]   = "Zip file to import does not exist. (FILE]:{} LINE:{})";
 $ary["ITABASEH-ERR-2100000330_10"]  = "Failed to upload file. (Not a zip file). (FILE]:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_11"]  = "The target Menu ID is written multiple times in the MENU_LIST.txt file.";
+$ary["ITABASEH-ERR-2100000330_12"]  = "There are multiple files with the same name.";
+$ary["ITABASEH-ERR-2100000330_13"]  = "Must have uploaded zip file.";
 ?>

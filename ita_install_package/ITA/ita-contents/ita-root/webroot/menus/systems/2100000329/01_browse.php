@@ -148,7 +148,7 @@ EOD;
             </div>
             <div id="export_div_<?php echo $key;?>">
 <?php foreach($value['menu'] as $menu): ?>
-            <p>&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" name="menu_list[]" value="<?php echo $menu['menu_id']; ?>" id="<?php echo $key; ?>" class="export_<?php echo $key; ?>"><?php echo $menu['menu_name']; ?></label></p>
+            <p><label><input type="checkbox" name="menu_list[]" value="<?php echo $menu['menu_id']; ?>" id="<?php echo $key; ?>" class="export_<?php echo $key; ?>"><?php echo $menu['menu_name']; ?></label></p>
 <?php endforeach; ?>
             </div>
             <p style="margin-bottom: 20px;"></p>

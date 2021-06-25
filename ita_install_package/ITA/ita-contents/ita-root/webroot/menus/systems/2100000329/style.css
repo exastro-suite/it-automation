@@ -39,10 +39,17 @@
 }
 .export_label_name {
     margin-left: 5px;
+    white-space: normal;
 }
 .export_radio {
     /*display: block;*/
 }
 .export_label_input {
     margin-left: 4px;
+}
+#export_form label{
+    display: block;
+}
+#export_form .export_all_div label {
+    display: inline-block;
 }

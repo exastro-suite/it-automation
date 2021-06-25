@@ -64,10 +64,6 @@
     }
 
     //-- サイト個別PHP要素、ここから--
-    //require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/web_parts_for_maintenance.php");
-    // require_once( $g['root_dir_path'] . "/libs/webindividuallibs/systems/{$g['page_dir']}/web_functions_for_data_portability.php");
-    require_once( $g['root_dir_path'] . "/libs/webindividuallibs/systems/{$g['page_dir']}/web_functions_for_data_export.php");
-    require_once( $g['root_dir_path'] . "/libs/webindividuallibs/systems/{$g['page_dir']}/web_functions_for_dump_excel.php");
     require_once( $g['root_dir_path'] . "/libs/webindividuallibs/systems/{$g['page_dir']}/web_functions_for_bulk_excel_export.php");
     require_once( $g['root_dir_path'] . "/libs/webindividuallibs/systems/{$g['page_dir']}/07_front_ref_lib.php" );
     //-- サイト個別PHP要素、ここまで--
