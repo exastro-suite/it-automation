@@ -38,11 +38,12 @@ class ControlGit {
     private $ProxyURL;
     private $ProxyAddress;
     private $ProxyPort;
+    private $GitCmdRsltParsAry;
 
     /**
      * コンストラクタ
      */
-    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $libPath, $objMTS, $retryCount, $retryWaitTime, $ProxyAddress, $ProxyPort) {
+    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $libPath, $objMTS, $retryCount, $retryWaitTime, $ProxyAddress, $ProxyPort, $GitCmdRsltParsAry) {
         $this->RepoId = $RepoId;
         $this->remortRepoUrl = $remortRepoUrl;
         $this->cloneRepoDir = $cloneRepoDir;
@@ -80,6 +81,7 @@ class ControlGit {
         } else {
             $this->ProxyURL = "__undefine__";
         }
+        $this->GitCmdRsltParsAry = $GitCmdRsltParsAry;
     }
 
     function ClearGitCommandLastErrorMsg() {
@@ -354,6 +356,7 @@ class ControlGit {
 
         $comd_ok = false;
 
+        $ResultParsStr = $this->GitCmdRsltParsAry['pull']['allrady-up-to-date'];
         // Git Cloneコマンドが失敗した場合、指定時間Waitし指定回数リトライする。
         for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
             $output = NULL;
@@ -363,7 +366,7 @@ class ControlGit {
                                                           escapeshellarg($this->ProxyURL),
                                                           escapeshellarg($Authtype),
                                                           escapeshellarg($this->cloneRepoDir),
-                                                          escapeshellarg('pull'),
+                                                          escapeshellarg('pull --rebase --ff'),
                                                           escapeshellarg($this->user),
                                                           escapeshellarg($this->password));
 
@@ -374,7 +377,12 @@ class ControlGit {
                 $saveoutput = $output;
                 $format_ok = false;
                 for($idx1=0;$idx1 < count($output);$idx1++) {
-                    $ret = preg_match("/^(Already up-to-date.|Fast-forward)/", $output[$idx1]);
+                    $ret = preg_match($ResultParsStr, $output[$idx1]);
+                    if($ret == 1) {
+                        $format_ok = true;
+                        break;
+                    }
+                    $ret = preg_match("/^Fast-forward/", $output[$idx1]);
                     if($ret == 1) {
                         $format_ok = true;
                         break;

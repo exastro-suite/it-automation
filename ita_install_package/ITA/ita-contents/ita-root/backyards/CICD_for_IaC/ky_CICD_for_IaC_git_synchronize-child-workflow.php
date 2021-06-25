@@ -222,6 +222,24 @@
         }
 
         ///////////////////////////////////////////////////
+        // GitCommand結果解析文字列ファイル読み込み
+        ///////////////////////////////////////////////////
+        $GitCmdRsltParsStrFileNamePath = $LFCobj->getGitCmdRsltParsStrFileNamePath();
+        $GitCmdRsltParsAry = parse_ini_file($GitCmdRsltParsStrFileNamePath, true);
+        if($GitCmdRsltParsAry === false) {
+            // 異常フラグON
+            $error_flag = 1;
+
+            // UIに表示するエラーメッセージ設定
+            setDefaultUIDisplayMsg();
+
+            // ファイル読み込み失敗
+            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1014",array($GitCmdRsltParsStrFileNamePath)); 
+            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$TDMatlobj->GetLastErrorMsg());
+            throw new Exception($FREE_LOG);
+        } 
+
+        ///////////////////////////////////////////////////
         // トランザクション開始
         ///////////////////////////////////////////////////
         $ret = $DBobj->transactionStart();
@@ -262,7 +280,7 @@
 
         $cloneRepoDir = $LFCobj->getLocalCloneDir($RepoId);
         $libPath      = $LFCobj->getLocalShellDir();
-        $Gitobj = new ControlGit($RepoId, $RepoListRow['REMORT_REPO_URL'], $RepoListRow['BRANCH_NAME'], $cloneRepoDir, $RepoListRow['GIT_USER'],  $RepoListRow['GIT_PASSWORD'], $libPath, $objMTS, $RepoListRow['RETRAY_COUNT'], $RepoListRow['RETRAY_INTERVAL'], $RepoListRow['PROXY_ADDRESS'], $RepoListRow['PROXY_PORT']);
+        $Gitobj = new ControlGit($RepoId, $RepoListRow['REMORT_REPO_URL'], $RepoListRow['BRANCH_NAME'], $cloneRepoDir, $RepoListRow['GIT_USER'],  $RepoListRow['GIT_PASSWORD'], $libPath, $objMTS, $RepoListRow['RETRAY_COUNT'], $RepoListRow['RETRAY_INTERVAL'], $RepoListRow['PROXY_ADDRESS'], $RepoListRow['PROXY_PORT'], $GitCmdRsltParsAry);
 
         try {
             // ローカルクローンディレクトリ有無判定
