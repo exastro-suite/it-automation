@@ -2039,8 +2039,8 @@ function setSymphonyConductorList( resultData ) {
   let tableHTML = '';
   
   for ( const type in resultData ) {
-    const title = ( type === 'conductor')? 'Conductor': 'Synphony',
-          name = ( type === 'conductor')? 'conductor_name': 'synphony_name',
+    const title = ( type === 'conductor')? 'Conductor': 'Symphony',
+          name = ( type === 'conductor')? 'conductor_name': 'symphony_name',
           url =  ( type === 'conductor')?
             '/default/menu/01_browse.php?no=2100180005&conductor_instance_id=':
             '/default/menu/01_browse.php?no=2100000309&symphony_instance_id=',
