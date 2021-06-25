@@ -452,6 +452,9 @@ margin-right: 0;
 	box-shadow: 0 0 8px rgba( 0, 0, 0, 0.2 );
 	overflow: hidden;
 }
+#KIZI .text hr{
+	display: block;
+}
 #KIZI .text > div {
 	margin-left: 0!important;
 }
