@@ -1369,6 +1369,105 @@
          return $lcStrBody;
     }
 
+    /********************************************
+    * シーケンス系
+    ********************************************/
+
+    /**
+    * シーケンスの更新
+    * 
+    * @param  string  $sequenceName      シーケンス名
+    * @param  int     $requestSequenceID 更新したい値
+    * @return boolean                    更新できたかどうか
+    */
+    function updateSequenceID($sequenceName, $requestSequenceID=NULL){
+        global $objDBCA, $objMTS;
+
+        $sql = "UPDATE
+                    A_SEQUENCE
+                SET
+                    VALUE = :VALUE,
+                    LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP
+                WHERE
+                    NAME = :NAME";
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if ($objQuery->getStatus() === false) {
+            web_log($objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                 array(__FILE__, __LINE__)));
+            web_log($sql);
+            web_log($objQuery->getLastError());
+            return false;
+        }
+
+        // 指定IDがなければA_SEQUENCEから取得する
+        if ($requestSequenceID == NULL) {
+            $requestSequenceID = getSequenceID($sequenceName) + 1;
+        }
+        // $objDBCA->setQueryTime();
+        $res = $objQuery->sqlBind(
+            array(
+                "VALUE"                 => $requestSequenceID,
+                "LAST_UPDATE_TIMESTAMP" => date("Y-m-d H:i:s"),
+                "NAME"                  => $sequenceName,
+            )
+        );
+        $res = $objQuery->sqlExecute();
+        if ($res === false) {
+            web_log($objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                 array(__FILE__, __LINE__)));
+            web_log($sql);
+            web_log($objQuery->getLastError());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+    * シーケンスIDの取得
+    * 
+    * @param  string $sequenceName シーケンス名
+    * @return string $result       シーケンスID
+    */
+    function  getSequenceID($sequenceName){
+        global $g, $objDBCA, $objMTS;
+
+        $result = array();
+
+        $sql = "SELECT
+                    VALUE
+                FROM
+                    A_SEQUENCE
+                WHERE
+                    NAME = :NAME
+                ";
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if ($objQuery->getStatus() === false) {
+            web_log($objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                 array(__FILE__, __LINE__)));
+            web_log($sql);
+            web_log($objQuery->getLastError());
+            return false;
+        }
+        $res = $objQuery->sqlBind(array('NAME' => $sequenceName));
+        $res = $objQuery->sqlExecute();
+        if ($res === false) {
+            web_log($objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                 array(__FILE__, __LINE__)));
+            web_log($sql);
+            web_log($objQuery->getLastError());
+            return false;
+        }
+
+        while ($row = $objQuery->resultFetch()) {
+            $result = $row["VALUE"];
+        }
+
+        return $result;
+    }
+
     // ここまで業務色を排除した汎用系関数----
 
     // ----ここから追加標準関数を読み込み

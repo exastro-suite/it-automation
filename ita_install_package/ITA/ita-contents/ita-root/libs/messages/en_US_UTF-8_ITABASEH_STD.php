@@ -130,4 +130,5 @@ $ary["ITABASEH-STD-10908045"]       = "Movement ID";
 $ary["ITABASEH-STD-10908050"]       = "Movement Name";
 $ary["ITABASEH-STD-10908055"]       = "Operation ID";
 $ary["ITABASEH-STD-10908060"]       = "Operation Name";
+$ary["ITABASEH-STD-2100000331_1"]   = "Result file";
 ?>

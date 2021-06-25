@@ -89,65 +89,6 @@ Ansible(Pioneer)対話素材集
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-    // FileUpload時にファイルの内容をチェック
-    $objFunction = function($objColumn, $functionCaller, $strTempFileFullname, $strOrgFileName, $aryVariant, $arySetting){
-
-        global $g;
-
-        $boolRet = true;
-        $intErrorType = null;
-        $aryErrMsgBody = array();
-        $strErrMsg = null;
-
-        if ( empty($root_dir_path) ){
-            $root_dir_temp = array();
-            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
-            $root_dir_path = $root_dir_temp[0] . "ita-root";
-        }
-
-        // 対話ファイルの文字コードが"UTF-8以外か判定
-        $outFilename = $strTempFileFullname;
-        $yaml = file_get_contents($outFilename);
-        $encode = mb_detect_encoding($yaml);
-        switch($encode) {
-        case "ASCII":
-        case "UTF-8":
-            if (preg_match('/^[\x0x\xef][\x0x\xbb][\x0x\xbf]/', $yaml)) {
-                $strErrMsg = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000110');
-                $boolRet = false;
-            }
-            break;
-        default:
-            $strErrMsg = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000108');
-            $boolRet = false;
-        }
-        // yamlパーサーが正しくパースできるか判定
-        if($boolRet == true) {
-            $obj = new YAMLParse($g['objMTS']);
-            $yaml_parse_array = array();
-            $ret = $obj->yaml_file_parse($strTempFileFullname,$yaml_parse_array);
-            $errmsg = $obj->GetLastError();
-            unset($obj);
-            if($ret === false) {
-                $strErrMsg = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000073",array("Upload file"));
-                $strErrMsg .= "\n" . $errmsg;
-                $boolRet = false;
-            }
-        }
-
-        if($boolRet == true) {
-            // 共通変数を抜き出す。
-            $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);
-            $outFilename = $root_dir_path . "/temp/file_up_column/" . basename($strTempFileFullname) . "_vars_list";
-            $retArray = $obj->CommonVarssAanalys($strTempFileFullname,$outFilename);
-            unset($obj);
-            return $retArray;
-        } else {
-            $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg);
-            return $retArray;
-        }
-    };
-
     $c = new FileUploadColumn('DIALOG_MATTER_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306050"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-306060"));//エクセル・ヘッダでの説明
     $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
@@ -156,9 +97,6 @@ Ansible(Pioneer)対話素材集
     $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
 
     $c->setRequired(true);//登録/更新時には、入力必須
-
-    // FileUpload時にファイルの内容をチェックするモジュール登録
-    $c->setFunctionForEvent('checkTempFileBeforeMoveOnPreLoad',$objFunction);
 
     $table->addColumn($c);
 
@@ -245,6 +183,43 @@ Ansible(Pioneer)対話素材集
             $TPFVarListfile = $root_dir_path . "/temp/file_up_column/" . $tmpFile . "_vars_list";
             $tmpfilepath    = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
 
+        }
+        if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
+            if(strlen($tmpFile) != 0) {
+                // 対話ファイルの文字コードが"UTF-8以外か判定
+                $outFilename = $tmpfilepath;
+                $yaml = file_get_contents($outFilename);
+                $encode = mb_detect_encoding($yaml);
+                switch($encode) {
+                case "ASCII":
+                case "UTF-8":
+                    if (preg_match('/^[\x0x\xef][\x0x\xbb][\x0x\xbf]/', $yaml)) {
+                        $retStrBody = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000110');
+                        $retBool = false;
+                    }
+                    break;
+                default:
+                    $retStrBody = $g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-6000108');
+                    $retBool = false;
+                }
+                // yamlパーサーが正しくパースできるか判定
+                if($retBool == true) {
+                    $obj = new YAMLParse($g['objMTS']);
+                    $yaml_parse_array = array();
+                    $ret = $obj->yaml_file_parse($tmpfilepath,$yaml_parse_array);
+                    $errmsg = $obj->GetLastError();
+                    unset($obj);
+                    if($ret === false) {
+                        $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6000073",array("Upload file"));
+                        $retStrBody .= "\n" . $errmsg;
+                        $retBool = false;
+                    }
+                }
+                if($retBool === false) {
+                     $objClientValidator->setValidRule($retStrBody);
+                     return $retBool;
+                }
+            }
         }
 
         // 一時ファイルから使用しているテンプレート変数のリストを取得

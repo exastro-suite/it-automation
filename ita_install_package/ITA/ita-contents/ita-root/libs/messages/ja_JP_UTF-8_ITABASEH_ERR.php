@@ -279,4 +279,17 @@ $ary["ITABASEH-ERR-5733111"]        = "Movementをスキップする時の設定
 $ary["ITABASEH-ERR-5733202"]        = "作業フロー:不正な様式です。";
 $ary["ITABASEH-ERR-5733203"]        = "作業フロー:不正な様式です。";
 $ary["ITABASEH-ERR-5733204"]        = "作業フロー:不正な様式です。";
+$ary["ITABASEH-ERR-2100000329_1"]   = "エクスポートが失敗しました。";
+$ary["ITABASEH-ERR-2100000329_2"]   = "新規のzipファイルの作成に失敗しました。(FILE:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000329_3"]   = "エクスポート可能なメニューがありません。";
+$ary["ITABASEH-ERR-2100000330_1"]   = "権限がありません。";
+$ary["ITABASEH-ERR-2100000330_2"]   = "対象のメニューIDが存在しません。";
+$ary["ITABASEH-ERR-2100000330_3"]   = "拡張子が不正です。";
+$ary["ITABASEH-ERR-2100000330_4"]   = "対象ファイルがありません。";
+$ary["ITABASEH-ERR-2100000330_5"]   = "zipファイルの移動が失敗しました。(FILE:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_6"]   = "zipファイルのコピーが失敗しました。(FILE:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_7"]   = "インポートが失敗しました。";
+$ary["ITABASEH-ERR-2100000330_8"]   = "不正なzipファイルがアップロードされました。(FILE:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_9"]   = "インポートするzipファイルが存在しません。(FILE]:{} LINE:{})";
+$ary["ITABASEH-ERR-2100000330_10"]  = "zip以外のファイルアップロード(FILE]:{} LINE:{})";
 ?>

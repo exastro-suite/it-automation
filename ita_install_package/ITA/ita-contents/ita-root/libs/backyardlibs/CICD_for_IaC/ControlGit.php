@@ -35,6 +35,7 @@ class ControlGit {
     private $retryCount;
     private $retryWaitTime;
     private $objMTS;
+    private $ProxyURL;
     private $ProxyAddress;
     private $ProxyPort;
 
@@ -69,6 +70,16 @@ class ControlGit {
         }
         $this->ProxyAddress = $ProxyAddress;
         $this->ProxyPort    = $ProxyPort;
+        if(strlen(trim($ProxyAddress)) != 0) {
+            if (strlen(trim($ProxyPort)) != 0) {
+                $Address  = sprintf("%s:%s",$ProxyAddress,$ProxyPort);
+            } else {
+                $Address  = $ProxyAddress;
+            }
+            $this->ProxyURL = $Address;
+        } else {
+            $this->ProxyURL = "__undefine__";
+        }
     }
 
     function ClearGitCommandLastErrorMsg() {
@@ -150,7 +161,8 @@ class ControlGit {
         // Git Cloneコマンドが失敗した場合、指定時間Waitし指定回数リトライする。
         for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
             $shell = sprintf("%s/ky_GitClone.sh",$this->libPath);
-            $cmd = sprintf("sudo -i  %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+            $cmd = sprintf("sudo -i  %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+                                                      escapeshellarg($this->ProxyURL),
                                                       escapeshellarg($Authtype),
                                                       escapeshellarg($this->remortRepoUrl),
                                                       escapeshellarg($this->cloneRepoDir),
@@ -249,7 +261,8 @@ class ControlGit {
         if($this->branch  == "__undefine_branch__") {
             // デフォルトブランチ確認
             $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
-            $cmd1 = sprintf("sudo -i %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+            $cmd1 = sprintf("sudo -i %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+                                                          escapeshellarg($this->ProxyURL),
                                                           escapeshellarg($Authtype),
                                                           escapeshellarg($this->cloneRepoDir),
                                                           escapeshellarg('remote show origin'),
@@ -346,7 +359,8 @@ class ControlGit {
             $output = NULL;
             $return_var = 0;
             $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
-            $cmd = sprintf("sudo -i %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+            $cmd = sprintf("sudo -i %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+                                                          escapeshellarg($this->ProxyURL),
                                                           escapeshellarg($Authtype),
                                                           escapeshellarg($this->cloneRepoDir),
                                                           escapeshellarg('pull'),

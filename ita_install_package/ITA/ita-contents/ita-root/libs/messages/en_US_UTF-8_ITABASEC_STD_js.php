@@ -129,4 +129,5 @@ $ary["ITABASEC090013"]      = "The following contents will be exported.";
 $ary["ITABASEC090014"]      = "The following contents will be imported.";
 $ary["ITABASEC090015"]      = "Specify the time";
 $ary["ITABASEC090016"]      = "Please specify a valid time.";
+$ary["ITABASEC2100000330_1"]= "Are you sure you want to import?\n※The import operation will follow the order listed in MENU_LIST.txt\nIf you are importing multiple menu data, make sure that you are aware about the data's consistency before executing.";
 ?>
