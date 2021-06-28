@@ -1097,6 +1097,11 @@ class ExcelFormatter extends ListFormatter {
         return \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column).$row;
     }
 
+    static function cr2sDollar($column, $row){
+        $str = "$". \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column) . "$" . $row;
+        return $str;
+    }
+
     function cashModeAdjust($intMode=0){
         global $g;
 
@@ -1230,7 +1235,7 @@ class ExcelFormatter extends ListFormatter {
                 else{
                     $intSetRow = self::DATA_START_ROW_ON_MASTER;
                 }
-                $range = self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, self::DATA_START_ROW_ON_MASTER).":".self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, $intSetRow);
+                $range = self::cr2sDollar(self::DATA_START_COL+$intCountAddColOfEditSheet, self::DATA_START_ROW_ON_MASTER).":".self::cr2sDollar(self::DATA_START_COL+$intCountAddColOfEditSheet, $intSetRow);
                 $namedRange = new \PhpOffice\PhpSpreadsheet\NamedRange("FILTER_".$objColumn->getID(), $sheet, $range);
                 $X->addNamedRange($namedRange);
             }
@@ -1251,7 +1256,7 @@ class ExcelFormatter extends ListFormatter {
             $intSetRow = self::DATA_START_ROW_ON_MASTER;
         }
         
-        $range = self::cr2s(self::DATA_START_COL-1, self::DATA_START_ROW_ON_MASTER).":".self::cr2s(self::DATA_START_COL-1, $intSetRow);
+        $range = self::cr2sDollar(self::DATA_START_COL-1, self::DATA_START_ROW_ON_MASTER).":".self::cr2sDollar(self::DATA_START_COL-1, $intSetRow);
         $namedRange = new \PhpOffice\PhpSpreadsheet\NamedRange("FILTER_".$objREBFColumn->getID(), $sheet, $range);
         $X->addNamedRange($namedRange);
 
