@@ -139,6 +139,17 @@ function checkZipFile(){
             $errCnt++;
         }
     }
+    if ($res === false) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_14',
+                                             array(basename(__FILE__), __LINE__)));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_14'));
+    }
+    $tmp_menu_list = file_get_contents($uploadPath . $uploadId."/MENU_LIST.txt");
+    if ($tmp_menu_list == "") {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15',
+                                             array(basename(__FILE__), __LINE__)));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15'));
+    }
 
     if ($errCnt > 0) {
         if (file_exists($uploadPath . $fileName) === true) {
@@ -149,7 +160,6 @@ function checkZipFile(){
                                              array(basename(__FILE__), __LINE__)));
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
     }
-
 
     // ファイル移動
     $res = copy($uploadPath . $fileName, $importPath . $fileName);
@@ -255,6 +265,11 @@ function makeImportCheckbox(){
     $menuIdFile = file_get_contents($path . $uploadId .'/MENU_LIST.txt');
 
     $tmpMenuIdFileAry = explode("\n", $menuIdFile);
+    if (empty($tmpMenuIdFileAry)) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15',
+                                             array(basename(__FILE__), __LINE__)));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15'));
+    }
 
     $retImportAry = array();
     foreach ($tmpMenuIdFileAry as $menuIdFileInfo) {
@@ -275,8 +290,14 @@ function makeImportCheckbox(){
                     $declare_file_name_key = false;
                 }
                 else {
-                    $declare_key = array_search($menuId, array_column($retImportAry[$menuGroupId]["menu"], "menu_id"));
-                    $declare_file_name_key = array_search($menuFileName, array_column($retImportAry[$menuGroupId]["menu"], "file_name"));
+                    if (array_search($menuGroupId, $retImportAry)) {
+                        $declare_key = array_search($menuId, array_column($retImportAry[$menuGroupId]["menu"], "menu_id"));
+                        $declare_file_name_key = array_search($menuFileName, array_column($retImportAry[$menuGroupId]["menu"], "file_name"));
+                    } else {
+                        $declare_key = false;
+                        $declare_file_name_key = false;
+                    }
+
                 }
 
                 // メニューの存在チェック
@@ -426,6 +447,12 @@ function makeImportCheckbox(){
         }
     }
 
+    if (empty($retImportAry)) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15',
+                                             array(basename(__FILE__), __LINE__)));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15'));
+    }
+
     return $retImportAry;
 }
 
@@ -451,6 +478,12 @@ function getMenuIdFileList(){
     $menuIdFile = file_get_contents($path . $uploadId .'/MENU_LIST.txt');
 
     $tmpMenuIdFileAry = explode("\n", $menuIdFile);
+
+    if (empty($tmpMenuIdFileAry)) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15',
+                                             array(basename(__FILE__), __LINE__)));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15'));
+    }
     
     $retImportAry = array();
     foreach ($tmpMenuIdFileAry as $menuIdFileInfo) {
@@ -464,6 +497,12 @@ function getMenuIdFileList(){
             }
         }
     }
+    if (empty($retImportAry)) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15',
+                                             array(basename(__FILE__), __LINE__)));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15'));
+    }
+
     return $retImportAry;
 }
 

@@ -296,4 +296,6 @@ $ary["ITABASEH-ERR-2100000330_10"]  = "Failed to upload file. (Not a zip file). 
 $ary["ITABASEH-ERR-2100000330_11"]  = "The target Menu ID is written multiple times in the MENU_LIST.txt file.";
 $ary["ITABASEH-ERR-2100000330_12"]  = "There are multiple files with the same name.";
 $ary["ITABASEH-ERR-2100000330_13"]  = "Must have uploaded zip file.";
+$ary["ITABASEH-ERR-2100000330_14"]  = "MENU_LIST.txt not exists.";
+$ary["ITABASEH-ERR-2100000330_15"]  = "The setting value of MENU_LIST.txt are incorrect.";
 ?>
