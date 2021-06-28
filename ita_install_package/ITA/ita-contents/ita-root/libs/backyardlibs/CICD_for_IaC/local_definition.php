@@ -18,6 +18,8 @@
  * 
  */
 class LocalFilesControl {
+    // Gitコマンド標準出力結果解析文字列定義ファイル
+    const  C_GitCmdRsltParstrFileName    = "%s/confs/backyardconfs/CICD_For_IaC/gitCommandResultParsingStringDefinition.ini";
     // Git同期 shellコマンドパス
     const  C_LocalShellDir               = "%s/backyards/CICD_for_IaC";
 
@@ -55,5 +57,10 @@ class LocalFilesControl {
         $dir = sprintf(self::C_LocalShellDir,$this->root_dir_path);
         return $dir;
     }    
+    
+    function getGitCmdRsltParsStrFileNamePath() {
+        $dir = sprintf(self::C_GitCmdRsltParstrFileName,$this->root_dir_path);
+        return $dir;
+    }
 }
 ?>
