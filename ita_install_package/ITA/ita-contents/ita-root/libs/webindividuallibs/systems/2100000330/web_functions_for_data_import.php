@@ -265,6 +265,11 @@ function makeImportCheckbox(){
     $menuIdFile = file_get_contents($path . $uploadId .'/MENU_LIST.txt');
 
     $tmpMenuIdFileAry = explode("\n", $menuIdFile);
+    if (empty($tmpMenuIdFileAry)) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15',
+                                             array(basename(__FILE__), __LINE__)));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15'));
+    }
 
     $retImportAry = array();
     foreach ($tmpMenuIdFileAry as $menuIdFileInfo) {
@@ -440,6 +445,12 @@ function makeImportCheckbox(){
                 }
             }
         }
+    }
+
+    if (empty($retImportAry)) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15',
+                                             array(basename(__FILE__), __LINE__)));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_15'));
     }
 
     return $retImportAry;
