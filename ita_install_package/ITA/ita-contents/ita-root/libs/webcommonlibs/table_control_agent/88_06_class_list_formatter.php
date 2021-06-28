@@ -2681,7 +2681,7 @@ class ExcelFormatter extends ListFormatter {
     function editWorkSheetHistoryNonusedData() {
         $this->objFocusWB->setActiveSheetIndex(0);
         $sheet = $this->objFocusWB->getActiveSheet();
-        for($r = 1; $r <= 8; ++$r){
+        for($r = 1; $r <= $this->headerRows + 7; ++$r){
             $sheet->getRowDimension($r)->setVisible(false);
         }
         $sheet->getColumnDimension('A')->setVisible(false);

@@ -851,12 +851,13 @@ EOD;
 
                 //メンテナンス権限があった場合----
             }
-            if($flag_ExcelHidden !== true){
-                if( $strLinkExcelFormatterId === null){
+            if($historyRowLength !== -1){
+                if($flag_ExcelHidden !== true){
+                    if( $strLinkExcelFormatterId === null){
                     //----エクセル用のフォーマットIDがnullだった
                     //エクセル用のフォーマットIDがnullだった----
-                }else{
-                    $dlcHtmlBody .=
+                    }else{
+                        $dlcHtmlBody .=
 <<<EOD
         <br>
         <br>
@@ -873,24 +874,24 @@ EOD;
         {$strLimitRowWarningMsgBodyHistory}
         <br>
 EOD;
+                    }
                 }
-            }
-            if( $flag_HistoryCSVShow===true ){
-                //----CSV系の常時ダウンロードを無条件で隠すという設定ではない場合、または、エクセルダウンロード上限数以上の場合
-                if( $strLinkCSVFormatterId === null){
-                    //----CSV用のフォーマットIDがnullだった
-                    //CSV用のフォーマットIDがnullだった----
-                }else{$strOutputFileType = $objTable->getFormatter($strLinkCSVFormatterId)->getGeneValue("outputFileType");
-                    if($strOutputFileType=="SafeCSV"){
-                        $fileTypeNameBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-323");
-                    }else{
-                        $fileTypeNameBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-324");
-                    }
+                if( $flag_HistoryCSVShow===true ){
+                    //----CSV系の常時ダウンロードを無条件で隠すという設定ではない場合、または、エクセルダウンロード上限数以上の場合
+                    if( $strLinkCSVFormatterId === null){
+                        //----CSV用のフォーマットIDがnullだった
+                        //CSV用のフォーマットIDがnullだった----
+                    }else{$strOutputFileType = $objTable->getFormatter($strLinkCSVFormatterId)->getGeneValue("outputFileType");
+                        if($strOutputFileType=="SafeCSV"){
+                            $fileTypeNameBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-323");
+                        }else{
+                            $fileTypeNameBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-324");
+                        }
 
-                    if(array_key_exists("FirstBake_AddArea_reqCsvDL", $tmpArray)===true){
-                        $htmlFirstBake_AddArea_reqCsvDL = $tmpArray['FirstBake_AddArea_reqCsvDL'];
-                    }
-                    $dlcHtmlBody .=
+                        if(array_key_exists("FirstBake_AddArea_reqCsvDL", $tmpArray)===true){
+                            $htmlFirstBake_AddArea_reqCsvDL = $tmpArray['FirstBake_AddArea_reqCsvDL'];
+                        }
+                        $dlcHtmlBody .=
 <<<EOD
                 <form style="display:inline" name="reqHistoryCsvDL" action="{$g['scheme_n_authority']}/default/menu/04_all_dump_excel.php?no={$g['page_dir']}" method="POST" >
                     <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")}{$g['objMTS']->getSomeMessage("ITAWDCH-STD-325")}({$fileTypeNameBody})" >
@@ -912,9 +913,9 @@ EOD;
                     <input type="hidden" name="datatype" value="history">
                 </form>
 EOD;
+                    }
                 }
-            }
-
+            } 
             $dlcHtmlBody .= 
 <<<EOD
             </div>
