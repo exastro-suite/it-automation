@@ -560,6 +560,8 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
 
 /**
 * Excelファイルのエクスポート
+* 
+* libs/webcommonlibs/table_controle_agent/08_dumpToFile.phpからコピー＆改修
 * @param    
 * @return   string   $filePath   エクセルファイルのパス
 **/
@@ -1406,9 +1408,16 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
         return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile);
     }
     
-    //webroot(03,04,07)----
-
-
+    /**
+    * エクセルまとめzipをインポートする
+    * 
+    * @param int    $taskId    タスクID
+    * @param        $objTable
+    * @param array  $files     ファイル情報
+    * @param string $menuId    メニューID
+    * @param int    $userId    ユーザID
+    * libs/webcommonlibs/table_controle_agent/07_TableIUbyFIle.phpからコピー＆改修
+    */
     function importBulkExcel($taskId, $objTable, $files, $menuId, $userId, &$aryVariant=array(), &$arySetting=array()){
         global $g, $objDBCA, $objMTS;
 

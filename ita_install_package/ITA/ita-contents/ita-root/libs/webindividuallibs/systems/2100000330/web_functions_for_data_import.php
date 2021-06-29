@@ -560,8 +560,17 @@ function makeImportMenuIdList(){
     $filePath = $g['root_dir_path'] . '/temp/bulk_excel/import/import/' . $_SESSION['upload_id'] . '/IMPORT_MENU_ID_LIST';
 
     $allMenuIdFileList =  getMenuIdFileList();
+
     foreach ($menuIdAry as $menuId) {
-        $res[$menuId] = $allMenuIdFileList[$menuId];
+        if (array_key_exists($menuId, $allMenuIdFileList)) {
+            $res[$menuId] = $allMenuIdFileList[$menuId];
+        }
+    }
+
+    if (empty($res)) {
+        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_16',
+                                             array(basename(__FILE__), __LINE__)));
+        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_16'));
     }
 
     $json = json_encode($res);
@@ -623,6 +632,14 @@ function moveZipFile($taskNo){
     if (file_exists($dpDir) === false) {
         $res = mkdir($dpDir, 0777, true);
         if ($res === false) {
+            web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_5',
+                                                 array(basename(__FILE__), __LINE__)));
+            throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_7'));
+        }
+    } elseif (substr(sprintf('%o', fileperms($dpDir)), -4) != 0777) {
+        $cmd = "sudo chmod 777 $dpDir";
+        exec($cmd, $output, $return_var);
+        if(0 != $return_var){
             web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_5',
                                                  array(basename(__FILE__), __LINE__)));
             throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_7'));
