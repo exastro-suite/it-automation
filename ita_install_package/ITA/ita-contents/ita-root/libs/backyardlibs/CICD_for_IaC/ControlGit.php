@@ -183,6 +183,12 @@ class ControlGit {
             }
         }
         if($comd_ok === false) {
+
+            // clone失敗時はローカルディレクトリを削除
+            $param = escapeshellarg($this->cloneRepoDir);
+            $cmd = "sudo /bin/rm -rf " . $param . " 2>&1";
+            exec($cmd, $output, $return_var);
+
             // Git clone commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1021"); 
             $logaddstr = implode("\n",$output);
