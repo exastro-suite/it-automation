@@ -376,8 +376,9 @@ configure_yum_env() {
             yum_install ${YUM__ENV_PACKAGE}
         else
             # initialize /var/lib/ita
-            rm -rf $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            mkdir -p $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ ! -e $LOCAL_BASE_DIR ]; then
+                mkdir -p $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            fi
             cp -R "$DOWNLOAD_BASE_DIR"/* "$ITA_EXT_FILE_DIR" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             cp -R $ITA_EXT_FILE_DIR/yum/ $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
@@ -391,7 +392,7 @@ name="yum_all"
 baseurl=file://"${YUM_ALL_PACKAGE_LOCAL_DIR}"
 gpgcheck=0
 enabled=0
-" >> /etc/yum.repos.d/ita.repo
+" > /etc/yum.repos.d/ita.repo
 
                 #create repository "ita_repo"
                 createrepo "${YUM_ALL_PACKAGE_LOCAL_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
