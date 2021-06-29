@@ -298,4 +298,5 @@ $ary["ITABASEH-ERR-2100000330_12"]  = "There are multiple files with the same na
 $ary["ITABASEH-ERR-2100000330_13"]  = "Must have uploaded zip file.";
 $ary["ITABASEH-ERR-2100000330_14"]  = "MENU_LIST.txt not exists.";
 $ary["ITABASEH-ERR-2100000330_15"]  = "The setting value of MENU_LIST.txt are incorrect.";
+$ary["ITABASEH-ERR-2100000330_16"]  = "There are no importable menus.";
 ?>

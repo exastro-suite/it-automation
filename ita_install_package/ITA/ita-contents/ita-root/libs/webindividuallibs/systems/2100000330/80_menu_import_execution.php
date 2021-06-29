@@ -170,7 +170,7 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
     class DBException extends Exception{}
     try {
             $uploadId = $_SESSION['upload_id'];
-            
+            $taskNo = null;
             // 入力値チェック
             $requestAry = $_POST;
             //メニューグループ、IDチェック

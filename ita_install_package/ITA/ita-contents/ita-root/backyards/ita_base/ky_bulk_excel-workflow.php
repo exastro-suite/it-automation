@@ -198,6 +198,8 @@ try {
                     setStatus($task['TASK_ID'], STATUS_FAILURE);
                     continue;
                 }
+            } elseif (substr(sprintf('%o', fileperms($dstPath)), -4) != 0777) {
+                chmod($dstPath, 0777);
             }
 
             // scsvファイル編集キットを同梱する
@@ -255,8 +257,12 @@ try {
 
             $res = setStatus($task['TASK_ID'], STATUS_PROCESSED);
 
+            if (substr(sprintf('%o', fileperms(ROOT_DIR_PATH."/uploadfiles/2100000331")), -4) != 0777) {
+                chmod($dstPath, 0777);
+            }
+
             if (!is_dir(ROOT_DIR_PATH."/uploadfiles/2100000331/FILE_RESULT")) {
-                mkdir(ROOT_DIR_PATH."/uploadfiles/2100000331/FILE_RESULT");
+                $res = mkdir(ROOT_DIR_PATH."/uploadfiles/2100000331/FILE_RESULT", 0777);
             }
 
             $targetImportPath = IMPORT_PATH."import/".$taskId;
@@ -282,7 +288,6 @@ try {
                     // ステータスを完了(異常)にする
                     $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
                                                       array('B_BULK_EXCEL_TASK',basename(__FILE__), __LINE__));
-                    $logMsg = "インポートに失敗しました。";
                     $res = setStatus($task['TASK_ID'], STATUS_FAILURE);
                     outputLog(LOG_PREFIX, $logMsg);
                     continue;
