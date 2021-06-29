@@ -387,7 +387,6 @@ class ControlGit {
                         $format_ok = true;
                         break;
                     }
-                    unset($output[$idx]);
                 }
                 if($format_ok == true) {
                     // 結果解析用にindexを0オリジンにする。
