@@ -283,6 +283,7 @@ $ary["ITABASEH-ERR-5733204"]        = "Execution flow: It is an invalid pattern.
 $ary["ITABASEH-ERR-2100000329_1"]   = "Export data has failed.";
 $ary["ITABASEH-ERR-2100000329_2"]   = "Failed to create a new zip file. (FILE:{} LINE:{})";
 $ary["ITABASEH-ERR-2100000329_3"]   = "There are no exportable menus.";
+$ary["ITABASEH-ERR-2100000329_4"]   = "A menu that cannot be exported was specified. MENU_ID:{}";
 $ary["ITABASEH-ERR-2100000330_1"]   = "You don’t have permission to maintain this menu.";
 $ary["ITABASEH-ERR-2100000330_2"]   = "The target Menu ID does not exist.";
 $ary["ITABASEH-ERR-2100000330_3"]   = "The file extension is invalid.";
