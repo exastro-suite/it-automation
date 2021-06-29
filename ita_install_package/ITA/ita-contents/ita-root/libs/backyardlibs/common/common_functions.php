@@ -456,16 +456,22 @@ function getPrivilegeAuthByUserId($menuId, $userId){
                 A_ROLE_MENU_LINK_LIST
             ON
                 A_ROLE_ACCOUNT_LINK_LIST.ROLE_ID = A_ROLE_MENU_LINK_LIST.ROLE_ID
+            LEFT OUTER JOIN
+                A_MENU_LIST
+            ON
+                A_MENU_LIST.MENU_ID = A_ROLE_MENU_LINK_LIST.MENU_ID
             WHERE
                 A_ACCOUNT_LIST.USER_ID = :USER_ID
             AND
                 A_ROLE_MENU_LINK_LIST.MENU_ID = :MENU_ID
             AND
-                A_ACCOUNT_LIST.DISUSE_FLAG = 0;
+                A_ACCOUNT_LIST.DISUSE_FLAG = 0
             AND
-                A_ROLE_ACCOUNT_LINK_LIST.DISUSE_FLAG = 0;
+                A_ROLE_ACCOUNT_LINK_LIST.DISUSE_FLAG = 0
             AND
-                A_ROLE_MENU_LINK_LIST.DISUSE_FLAG = 0";
+                A_ROLE_MENU_LINK_LIST.DISUSE_FLAG = 0
+            AND
+                A_MENU_LIST.DISUSE_FLAG = 0";
 
     $objQuery = $objDBCA->sqlPrepare($sql);
 

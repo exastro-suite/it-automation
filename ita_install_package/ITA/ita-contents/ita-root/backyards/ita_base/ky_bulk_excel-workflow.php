@@ -33,6 +33,8 @@ define('EXPORT_PATH',          ROOT_DIR_PATH . '/temp/bulk_excel/export');
 define('IMPORT_PATH',          ROOT_DIR_PATH . '/temp/bulk_excel/import/');
 define('BACKUP_PATH',          ROOT_DIR_PATH . '/temp/data_import/backup/');
 define('UPLOADFILES_PATH',     ROOT_DIR_PATH . '/temp/data_import/uploadfiles/');
+define('DST_PATH',             ROOT_DIR_PATH . '/uploadfiles/2100000331');
+define('RESULT_PATH',          ROOT_DIR_PATH . '/uploadfiles/2100000331/FILE_RESULT');
 define('LOG_DIR',              '/logs/backyardlogs/');
 define('LOG_LEVEL',            getenv('LOG_LEVEL'));
 define('LAST_UPDATE_USER',     -100024); // データポータビリティプロシージャ
@@ -94,6 +96,9 @@ try {
         // エクスポート
         if ($task["TASK_TYPE"] == 1) {
             $taskId = $task["TASK_ID"];
+            $userId = $task["EXECUTE_USER"];
+            $privilegeErr = false;
+
             $includingScsvFlg = false; // エクスポートするファイル内にSCSVファイルがあるか
             // タスクIDでディレクトリづくり
             if (!is_dir(EXPORT_PATH."/$taskId")) {
@@ -133,63 +138,85 @@ try {
 
             $request = array();
             foreach ($menuIdArray as $menuId) {
-                $objTable = getInfoOfLoadTable($menuId);
-                $menuInfo = getMenuInfoByMenuId($menuId);
+                $privilege = getPrivilegeAuthByUserId($menuId, $userId);
+                outputLog(LOG_PREFIX, "privilege => $privilege");
+                if ($privilege == 1 || $privilege == 2) {
+                    $objTable = getInfoOfLoadTable($menuId);
+                    $menuInfo = getMenuInfoByMenuId($menuId);
 
-                // メニュー周りの情報
-                $menuGroupId   = $menuInfo["MENU_GROUP_ID"];
-                $menuGroupName = $menuInfo["MENU_GROUP_NAME"];
-                $menuName      = $menuInfo["MENU_NAME"];
+                    // メニュー周りの情報
+                    $menuGroupId   = $menuInfo["MENU_GROUP_ID"];
+                    $menuGroupName = $menuInfo["MENU_GROUP_NAME"];
+                    $menuName      = $menuInfo["MENU_NAME"];
 
-                $tmpAry=explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);
+                    $tmpAry=explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);
 
-                $filePath = exportBulkExcelData($task, $menuGroupId, $menuId, array(), $objTable, $taskId);
+                    $filePath = exportBulkExcelData($task, $menuGroupId, $menuId, array(), $objTable, $taskId);
 
-                // ファイルリスト
-                $fileName = explode("/", $filePath)[count(explode("/", $filePath)) - 1];
+                    // ファイルリスト
+                    $fileName = explode("/", $filePath)[count(explode("/", $filePath)) - 1];
 
-                if (!array_key_exists($menuGroupId, $request)) {
-                    $request[$menuGroupId] = array(
-                        "menu_group_name" => $menuGroupName,
-                        "menu" => array(
-                            array(
-                                "menu_id"   => $menuId,
-                                "menu_name" => $menuName
+                    if (!array_key_exists($menuGroupId, $request)) {
+                        $request[$menuGroupId] = array(
+                            "menu_group_name" => $menuGroupName,
+                            "menu" => array(
+                                array(
+                                    "menu_id"   => $menuId,
+                                    "menu_name" => $menuName
+                                )
                             )
-                        )
-                    );
+                        );
+                    } else {
+                        $request[$menuGroupId]["menu"][] = array(
+                            "menu_id"   => $menuId,
+                            "menu_name" => $menuName
+                        );
+                    }
+
+                    if (getExtension($fileName) == "scsv") {
+                        $dumpInfo = array(
+                            "filter_data" => array(
+                            ),
+                            "filteroutputfiletype" => "excel",
+                            "FORMATTER_ID"         => "csv",
+                            "requestuserclass"     => "visitor"
+                        );
+                        $filePath = exportBulkExcelData($task, $menuGroupId, $menuId, array(), $objTable, $taskId, $dumpInfo);
+                    }
+
+                    if (!$includingScsvFlg && getExtension($fileName) == "scsv") {
+                        $includingScsvFlg = true;
+                    }
+                    $fileNameList .= "#$menuGroupId($menuGroupName)\n$menuId:$fileName\n";
                 } else {
-                    $request[$menuGroupId]["menu"][] = array(
-                        "menu_id"   => $menuId,
-                        "menu_name" => $menuName
-                    );
-                }
+                    // 権限エラー
+                    if (!$privilegeErr) {
+                        $privilegeErr = true;
+                    }
+                    // ResultDataの出力
+                    $resFilePath = RESULT_PATH."/ResultData_$taskId.log";
+                    $menuInfo    = getMenuInfoByMenuId($menuId);
+                    $title       = $menuInfo["MENU_GROUP_ID"]."_".$menuInfo["MENU_GROUP_NAME"].":".$menuId."_".$menuInfo["MENU_NAME"];
+                    $msg         = $title."\n".$objMTS->getSomeMessage('ITABASEH-ERR-2100000329_4', array($menuId));
 
-                if (getExtension($fileName) == "scsv") {
-                    $dumpInfo = array(
-                        "filter_data" => array(
-                        ),
-                        "filteroutputfiletype" => "excel",
-                        "FORMATTER_ID"         => "csv",
-                        "requestuserclass"     => "visitor"
-                    );
-                    $filePath = exportBulkExcelData($task, $menuGroupId, $menuId, array(), $objTable, $taskId, $dumpInfo);
+                    dumpResultMsg($msg, $taskId);
                 }
+            }
 
-                if (!$includingScsvFlg && getExtension($fileName) == "scsv") {
-                    $includingScsvFlg = true;
-                }
-                $fileNameList .= "#$menuGroupId($menuGroupName)\n$menuId:$fileName\n";
+            if ($privilegeErr) {
+                $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-2100000329_4', array($menuId));
+                outputLog(LOG_PREFIX, $logMsg);
+                setStatus($task['TASK_ID'], STATUS_FAILURE);
+                continue;
             }
 
             // ファイル一覧をJSONに変換
             $tmpExportPath = EXPORT_PATH."/$taskId/tmp_zip";
             $fileputflg = file_put_contents($tmpExportPath . '/MENU_LIST.txt', $fileNameList);
-            $dstPath = ROOT_DIR_PATH."/uploadfiles/2100000331";
 
             // パスの有無を確認
-            if (!is_dir($dstPath)) {
-                $res = mkdir($dstPath, 0777);
+            if (!is_dir(DST_PATH)) {
+                $res = mkdir(DST_PATH, 0777);
                 if ($res == false) {
                     // ステータスを完了(異常)にする
                     $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
@@ -198,8 +225,8 @@ try {
                     setStatus($task['TASK_ID'], STATUS_FAILURE);
                     continue;
                 }
-            } elseif (substr(sprintf('%o', fileperms($dstPath)), -4) != 0777) {
-                chmod($dstPath, 0777);
+            } elseif (substr(sprintf('%o', fileperms(DST_PATH)), -4) != 0777) {
+                chmod(DST_PATH, 0777);
             }
 
             // scsvファイル編集キットを同梱する
@@ -218,7 +245,7 @@ try {
 
             // ZIPを固める
             $dstFileName = "ITA_FILES_".date("YmdHis").".zip"; // zipのファイル名
-            $dstFilePath = "$dstPath/$dstFileName";
+            $dstFilePath = DST_PATH."/$dstFileName";
             $res = zip(EXPORT_PATH."/$taskId/tmp_zip", $dstFilePath, ".");
             if ($res == false) {
                 // ステータスを完了(異常)にする
@@ -254,43 +281,55 @@ try {
         // インポート
         elseif ($task["TASK_TYPE"] == 2) {
             $taskId = $task["TASK_ID"];
-
+            $userId = $task["EXECUTE_USER"];
+            
             $res = setStatus($task['TASK_ID'], STATUS_PROCESSED);
 
-            if (substr(sprintf('%o', fileperms(ROOT_DIR_PATH."/uploadfiles/2100000331")), -4) != 0777) {
-                chmod($dstPath, 0777);
+            if (substr(sprintf('%o', fileperms(DST_PATH)), -4) != 0777) {
+                chmod(DST_PATH, 0777);
             }
 
-            if (!is_dir(ROOT_DIR_PATH."/uploadfiles/2100000331/FILE_RESULT")) {
-                $res = mkdir(ROOT_DIR_PATH."/uploadfiles/2100000331/FILE_RESULT", 0777);
+            if (!is_dir(RESULT_PATH)) {
+                $res = mkdir(RESULT_PATH, 0777);
             }
 
             $targetImportPath = IMPORT_PATH."import/".$taskId;
 
             $menuIdFileList = json_decode(file_get_contents($targetImportPath . '/IMPORT_MENU_ID_LIST'));
             foreach ($menuIdFileList as $menuId => $fileName) {
-                $objTable = getInfoOfLoadTable(strval($menuId));
+                $privilege = getPrivilegeAuthByUserId($menuId, $userId);
+                if ($privilege == 1) {
+                    $objTable = getInfoOfLoadTable(strval($menuId));
 
-                $files = array(
-                    "file" => array(
-                        "name"     => "$fileName",
-                        "type"     => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "tmp_name" => ROOT_DIR_PATH."/temp/bulk_excel/import/import/$taskId/$fileName",
-                        "error"    => "",
-                        "size"     => filesize(ROOT_DIR_PATH."/temp/bulk_excel/import/import/$taskId/$fileName")
-                    )
-                );
+                    $files = array(
+                        "file" => array(
+                            "name"     => "$fileName",
+                            "type"     => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            "tmp_name" => ROOT_DIR_PATH."/temp/bulk_excel/import/import/$taskId/$fileName",
+                            "error"    => "",
+                            "size"     => filesize(ROOT_DIR_PATH."/temp/bulk_excel/import/import/$taskId/$fileName")
+                        )
+                    );
 
-                // アップロード
-                $resArray = importBulkExcel($taskId, $objTable, $files, $menuId, $task["EXECUTE_USER"]);
+                    // アップロード
+                    $resArray = importBulkExcel($taskId, $objTable, $files, $menuId, $task["EXECUTE_USER"]);
 
-                if ($resArray["result"] == false) {
-                    // ステータスを完了(異常)にする
-                    $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
-                                                      array('B_BULK_EXCEL_TASK',basename(__FILE__), __LINE__));
-                    $res = setStatus($task['TASK_ID'], STATUS_FAILURE);
-                    outputLog(LOG_PREFIX, $logMsg);
-                    continue;
+                    if ($resArray["result"] == false) {
+                        // ステータスを完了(異常)にする
+                        $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
+                                                          array('B_BULK_EXCEL_TASK',basename(__FILE__), __LINE__));
+                        $res = setStatus($task['TASK_ID'], STATUS_FAILURE);
+                        outputLog(LOG_PREFIX, $logMsg);
+                        continue;
+                    }
+                } else {
+                    // 権限エラー
+                    $resFilePath = RESULT_PATH."/ResultData_$taskId.log";
+                    $menuInfo    = getMenuInfoByMenuId($menuId);
+                    $title       = $menuInfo["MENU_GROUP_ID"]."_".$menuInfo["MENU_GROUP_NAME"].":".$menuId."_".$menuInfo["MENU_NAME"];
+                    $msg         = $title."\n".$objMTS->getSomeMessage("ITABASEH-ERR-2100000330_1")."\n";
+
+                    dumpResultMsg($msg, $taskId);
                 }
             }
 
