@@ -982,7 +982,7 @@
                     } else {
                         if($permission === true) {
                             $result[$row["SYMPHONY_INSTANCE_NO"]] = array(
-                                "synphony_name" => $row["I_SYMPHONY_NAME"],
+                                "symphony_name" => $row["I_SYMPHONY_NAME"],
                                 "operation_name" => $row["I_OPERATION_NAME"],
                                 "time_book" => date("Y/m/d H:i", strtotime($row["TIME_BOOK"])),
                                 "status" => $row["SYM_EXE_STATUS_NAME"],
