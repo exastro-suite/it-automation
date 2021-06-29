@@ -822,6 +822,8 @@ Ansible（Legacy Role）代入値自動登録設定
 
             $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
 
+            $objOTForReg->setJsEvent('onChange','key_vars_reg');
+
             // フォームの表示後、ユーザによりトリガーカラムが選ばれたとき、選べる選択肢リストを作成する関数を指定
             $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
 
@@ -1284,6 +1286,8 @@ Ansible（Legacy Role）代入値自動登録設定
 
             $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
 
+            $objOTForReg->setJsEvent('onChange','key_chlVar_reg');
+
             // フォームの表示後、ユーザによりトリガーカラムが選ばれたとき、選べる選択肢リストを作成する関数を指定
             $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
 
@@ -1709,6 +1713,8 @@ Ansible（Legacy Role）代入値自動登録設定
             $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
 
             $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+
+            $objOTForReg->setJsEvent('onChange','vars_reg');
 
             // フォームの表示後、ユーザによりトリガーカラムが選ばれたとき、選べる選択肢リストを作成する関数を指定
             $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
@@ -2166,6 +2172,8 @@ Ansible（Legacy Role）代入値自動登録設定
             $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
             $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+
+            $objOTForReg->setJsEvent('onChange','val_chlVar_reg');
 
             // フォームの表示後、ユーザによりトリガーカラムが選ばれたとき、選べる選択肢リストを作成する関数を指定
             $objOTForReg->setFunctionForGetFADSelectList($objFunction02);

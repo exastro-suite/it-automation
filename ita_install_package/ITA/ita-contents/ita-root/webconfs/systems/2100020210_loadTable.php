@@ -393,6 +393,7 @@ Ansible（Pioneer）代入値管理
     $c->setOutputType('register_table',$objOTForReg);
 
     $c->setEvent('update_table','onChange','pattern_upd',array());
+    $c->setEvent('register_table','onChange','pattern_reg',array());
 
     $c->setJournalTableOfMaster('E_ANSIBLE_PNS_PATTERN_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
