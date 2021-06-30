@@ -900,13 +900,19 @@ download() {
     # Enable mariadb repositories.
     mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
     
-    # MriaDB download packages.
+    # MariaDB package names.
+    if [ "${distro_mariadb}" = "yes" ]; then
+        local MARIADB_PACKAGE_NAMES=(mariadb mariadb-server expect)
+    else
+        local MARIADB_PACKAGE_NAMES=(MariaDB MariaDB-server expect)
+    fi
+
+    # MariaDB download packages.
+    log "Download packages[${MARIADB_PACKAGE_NAMES[*]}]"
     if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
-        log "Download packages[mariadb mariadb-server expect]"
-        dnf download --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        dnf download --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} "${MARIADB_PACKAGE_NAMES[@]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     elif [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
-        log "Download packages[MariaDB MariaDB-server expect]"
-        yumdownloader --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        yumdownloader --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} "${MARIADB_PACKAGE_NAMES[@]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
     download_check
 
