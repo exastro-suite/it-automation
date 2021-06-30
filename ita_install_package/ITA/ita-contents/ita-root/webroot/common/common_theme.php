@@ -39,6 +39,7 @@ $c = array(
   'TABLE_F' => array('777777','555555','E2E2E2','AAAAAA'),
   'BUTTON' => array('FF821E','FF640A'),
   'KIZI' => 'FFFFFF',
+  'MENU_NAME' => '1A1A1A',
   'HEADING' => array('335581','FFA032','FFFFFF'),
   'BASE' => 'E6E6E6',
   'REVERSE' => array('000000','FFFFFF'),
@@ -191,7 +192,6 @@ switch( $theme ) {
     $c['TABLE'] = array('78684F','938672','EFEDEA','C9C3B9','FFFF8F');
     $c['TABLE_F'] = array('6E6049','938672','DFDBD5','C9C3B9');
     $c['KIZI'] = 'DDDABF';
-    $c['MENU_NAME'] = '1A1A1A';
     $c['HEADING'] = array('483E2F','616A1C','EEEEEE');
     $b['HEADER'] = $backgroundPatterns['STRIPE0'];
     $b['FOOTER'] = $backgroundPatterns['STRIPE0'];
