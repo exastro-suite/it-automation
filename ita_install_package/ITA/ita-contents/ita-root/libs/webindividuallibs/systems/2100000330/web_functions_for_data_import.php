@@ -273,43 +273,143 @@ function makeImportCheckbox(){
 
     $retImportAry = array();
     foreach ($tmpMenuIdFileAry as $menuIdFileInfo) {
-        // 頭に#がついているものはコメントなのではじく
-        if (!preg_match("/^#/",$menuIdFileInfo)) {
-            if (!empty($menuIdFileInfo)) {
-                $menuIdFileInfo = explode(":", $menuIdFileInfo);
-                $menuId         = $menuIdFileInfo[0];
-                $menuFileName   = $menuIdFileInfo[1];
-                $menuInfo       = getMenuInfoByMenuId($menuId);
+        // フォーマットチェック
+        if (!preg_match("/^#/",$menuIdFileInfo) && (preg_match("/^[0-9]{10}:.*$/", $menuIdFileInfo) || preg_match("/^[0-9]{10}:.*$/", $menuIdFileInfo))) {
+            $menuIdFileInfo = explode(":", $menuIdFileInfo);
+            $menuId         = $menuIdFileInfo[0];
+            $menuFileName   = $menuIdFileInfo[1];
+            $menuInfo       = getMenuInfoByMenuId($menuId);
 
-                $menuGroupId    = $menuInfo["MENU_GROUP_ID"];
-                $menuGroupName  = $menuInfo["MENU_GROUP_NAME"];
-                $menuName       = $menuInfo["MENU_NAME"];
+            $menuGroupId    = $menuInfo["MENU_GROUP_ID"];
+            $menuGroupName  = $menuInfo["MENU_GROUP_NAME"];
+            $menuName       = $menuInfo["MENU_NAME"];
 
-                if (empty($retImportAry) || $menuInfo == false) {
+            if (empty($retImportAry) || $menuInfo == false) {
+                $declare_key = false;
+                $declare_file_name_key = false;
+            }
+            else {
+                if (array_key_exists($menuGroupId, $retImportAry)) {
+                    $declare_key = array_search($menuId, array_column($retImportAry[$menuGroupId]["menu"], "menu_id"));
+                    $declare_file_name_key = array_search($menuFileName, array_column($retImportAry[$menuGroupId]["menu"], "file_name"));
+                    $declare_menu_info = $retImportAry[$menuGroupId]["menu"][$declare_file_name_key];
+                } else {
                     $declare_key = false;
                     $declare_file_name_key = false;
                 }
-                else {
-                    if (array_search($menuGroupId, $retImportAry)) {
-                        $declare_key = array_search($menuId, array_column($retImportAry[$menuGroupId]["menu"], "menu_id"));
-                        $declare_file_name_key = array_search($menuFileName, array_column($retImportAry[$menuGroupId]["menu"], "file_name"));
-                    } else {
-                        $declare_key = false;
-                        $declare_file_name_key = false;
+
+            }
+
+            // メニューの存在チェック
+            if ($menuInfo == false) {
+                $tmpMenuInfo = array(
+                    "menu_id"   => $menuId,
+                    "menu_name" => $menuName,
+                    "disabled"  => true,
+                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_2'),
+                    "file_name" => $menuFileName
+                );
+                if (array_key_exists($menuGroupId, $retImportAry)) {
+                    // メニューグループは存在するがメニューがない場合
+                    if ($declare_key === false) {
+                        $retImportAry[$menuGroupId]["menu"][] = $tmpMenuInfo;
                     }
-
+                } else {
+                    $retImportAry[$menuGroupId] = array(
+                        "menu_group_name" => $menuGroupName,
+                        "menu"            => array(
+                            $tmpMenuInfo
+                        )
+                    );
                 }
-
-                // メニューの存在チェック
-                if ($menuInfo == false) {
+            }
+            // 権限チェック
+            elseif (!canMaintenance($menuId)) {
+                $tmpMenuInfo = array(
+                    "menu_id"   => $menuId,
+                    "menu_name" => $menuName,
+                    "disabled"  => true,
+                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_1'),
+                    "file_name" => $menuFileName
+                );
+                if (array_key_exists($menuGroupId, $retImportAry)) {
+                    // メニューグループは存在するがメニューがない場合
+                    if ($declare_key === false) {
+                        $retImportAry[$menuGroupId]["menu"][] = $tmpMenuInfo;
+                    }
+                } else {
+                    $retImportAry[$menuGroupId] = array(
+                        "menu_group_name" => $menuGroupName,
+                        "menu"            => array(
+                            $tmpMenuInfo
+                        )
+                    );
+                }
+            }
+            // ファイルの拡張子チェック
+            elseif (getExtension($menuFileName) != "scsv" && getExtension($menuFileName) != "xlsx") {
+                $tmpMenuInfo = array(
+                    "menu_id"   => $menuId,
+                    "menu_name" => $menuName,
+                    "disabled"  => true,
+                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_3'),
+                    "file_name" => $menuFileName
+                );
+                if (array_key_exists($menuGroupId, $retImportAry)) {
+                    // メニューグループは存在するがメニューがない場合
+                    if ($declare_key === false) {
+                        $retImportAry[$menuGroupId]["menu"][] = $tmpMenuInfo;
+                    }
+                } else {
+                    $retImportAry[$menuGroupId] = array(
+                        "menu_group_name" => $menuGroupName,
+                        "menu"            => array(
+                            $tmpMenuInfo
+                        )
+                    );
+                }
+            }
+            else {
+                // ファイルの有無
+                if (file_exists($path.$uploadId."/".$menuFileName) && !empty($menuFileName)) {
+                    // $retImportAryのなかに該当メニューグループがあるかどうか
                     if (array_key_exists($menuGroupId, $retImportAry)) {
                         // メニューグループは存在するがメニューがない場合
-                        if ($declare_key === false) {
-                            $retImportAry[$menuGroupId]["menu"][] = array(
+                        // 同名ファイルが複数あった場合
+                        if ($declare_file_name_key !== false) {
+                            $tmpMenuInfo = array(
                                 "menu_id"   => $menuId,
                                 "menu_name" => $menuName,
                                 "disabled"  => true,
-                                "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_2'),
+                                "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_12'),
+                                "file_name" => $menuFileName
+                            );
+                            
+                            $declare_menu_info["disabled"] = true;
+                            $declare_menu_info["error"] = $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_12');
+
+                            $retImportAry[$menuGroupId]["menu"][] = $tmpMenuInfo;
+                            $retImportAry[$menuGroupId]["menu"][$declare_file_name_key] = $declare_menu_info;
+                        }
+                        elseif ($declare_key !== false) {
+                            $tmpMenuInfo = array(
+                                "menu_id"   => $menuId,
+                                "menu_name" => $menuName,
+                                "disabled"  => true,
+                                "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_11'),
+                                "file_name" => $menuFileName
+                            );
+                            $declare_menu_info["disabled"] = true;
+                            $declare_menu_info["error"] = $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_11');
+
+                            $retImportAry[$menuGroupId]["menu"][] = $tmpMenuInfo;
+                            $retImportAry[$menuGroupId]["menu"][$declare_file_name_key] = $declare_menu_info;
+                        }
+                        else {
+                            $retImportAry[$menuGroupId]["menu"][] = array(
+                                "menu_id"   => $menuId,
+                                "menu_name" => $menuName,
+                                "disabled"  => false,
                                 "file_name" => $menuFileName
                             );
                         }
@@ -320,127 +420,32 @@ function makeImportCheckbox(){
                                 array(
                                     "menu_id"   => $menuId,
                                     "menu_name" => $menuName,
-                                    "disabled"  => true,
-                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_2'),
-                                    "file_name" => $menuFileName
-                                )
-                            )
-                        );
-                    }
-                }
-                // 権限チェック
-                elseif (!canMaintenance($menuId)) {
-                    if (array_key_exists($menuGroupId, $retImportAry)) {
-                        // メニューグループは存在するがメニューがない場合
-                        if ($declare_key === false) {
-                            $retImportAry[$menuGroupId]["menu"][] = array(
-                                "menu_id"   => $menuId,
-                                "menu_name" => $menuName,
-                                "disabled"  => true,
-                                "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_1'),
-                                "file_name" => $menuFileName
-                            );
-                        }
-                    } else {
-                        $retImportAry[$menuGroupId] = array(
-                            "menu_group_name" => $menuGroupName,
-                            "menu"            => array(
-                                array(
-                                    "menu_id"   => $menuId,
-                                    "menu_name" => $menuName,
-                                    "disabled"  => true,
-                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_1'),
+                                    "disabled"  => false,
                                     "file_name" => $menuFileName
                                 )
                             )
                         );
                     }
                 } else {
-                    // ファイルの有無
-                    if (file_exists($path.$uploadId."/".$menuFileName) && !empty($menuFileName)) {
-                        // $retImportAryのなかに該当メニューグループがあるかどうか
-                        if (array_key_exists($menuGroupId, $retImportAry)) {
-                            // メニューグループは存在するがメニューがない場合
-                            // 同名ファイルが複数あった場合
-                            if ($declare_file_name_key !== false) {
-                                $retImportAry[$menuGroupId]["menu"][] = array(
-                                    "menu_id"   => $menuId,
-                                    "menu_name" => $menuName,
-                                    "disabled"  => true,
-                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_12'),
-                                    "file_name" => $menuFileName
-                                );
-                                $retImportAry[$menuGroupId]["menu"][$declare_file_name_key] = array(
-                                    "menu_id"   => $menuId,
-                                    "menu_name" => $menuName,
-                                    "disabled"  => true,
-                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_12'),
-                                    "file_name" => $menuFileName
-                                );
-                            }
-                            elseif ($declare_key !== false) {
-                                $retImportAry[$menuGroupId]["menu"][] = array(
-                                    "menu_id"   => $menuId,
-                                    "menu_name" => $menuName,
-                                    "disabled"  => true,
-                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_11'),
-                                    "file_name" => $menuFileName
-                                );
-                                $retImportAry[$menuGroupId]["menu"][$declare_key] = array(
-                                    "menu_id"   => $menuId,
-                                    "menu_name" => $menuName,
-                                    "disabled"  => true,
-                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_11'),
-                                    "file_name" => $menuFileName
-                                );
-                            }
-                            else {
-                                $retImportAry[$menuGroupId]["menu"][] = array(
-                                    "menu_id"   => $menuId,
-                                    "menu_name" => $menuName,
-                                    "disabled"  => false,
-                                    "file_name" => $menuFileName
-                                );
-                            }
-                        } else {
-                            $retImportAry[$menuGroupId] = array(
-                                "menu_group_name" => $menuGroupName,
-                                "menu"            => array(
-                                    array(
-                                        "menu_id"   => $menuId,
-                                        "menu_name" => $menuName,
-                                        "disabled"  => false,
-                                        "file_name" => $menuFileName
-                                    )
-                                )
-                            );
+                    $tmpMenuInfo = array(
+                        "menu_id"   => $menuId,
+                        "menu_name" => $menuName,
+                        "disabled"  => true,
+                        "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_4'),
+                        "file_name" => $menuFileName
+                    );
+                    if (array_key_exists($menuGroupId, $retImportAry)) {
+                        // メニューグループは存在するがメニューがない場合
+                        if (!$declare_key) {
+                            $retImportAry[$menuGroupId]["menu"][] = $tmpMenuInfo;
                         }
                     } else {
-                        if (array_key_exists($menuGroupId, $retImportAry)) {
-                            // メニューグループは存在するがメニューがない場合
-                            if (!$declare_key) {
-                                $retImportAry[$menuGroupId]["menu"][] = array(
-                                    "menu_id"   => $menuId,
-                                    "menu_name" => $menuName,
-                                    "disabled"  => true,
-                                    "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_4'),
-                                    "file_name" => $menuFileName
-                                );
-                            }
-                        } else {
-                            $retImportAry[$menuGroupId] = array(
-                                "menu_group_name" => $menuGroupName,
-                                "menu"            => array(
-                                    array(
-                                        "menu_id"   => $menuId,
-                                        "menu_name" => $menuName,
-                                        "disabled"  => true,
-                                        "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_4'),
-                                        "file_name" => $menuFileName
-                                    )
-                                )
-                            );
-                        }
+                        $retImportAry[$menuGroupId] = array(
+                            "menu_group_name" => $menuGroupName,
+                            "menu"            => array(
+                                $tmpMenuInfo
+                            )
+                        );
                     }
                 }
             }
@@ -1050,4 +1055,17 @@ function canMaintenance($menuId) {
     }
 
     return $result;
+}
+
+/**
+* 拡張子の取得
+* 
+* @param  int      $fileName       ファイル名
+* @return boolean  $extension      拡張子
+*/function getExtension($fileName) {
+    global $g, $objDBCA, $objMTS;
+    $tmpFileNameAry = explode(".", $fileName);
+    $extension = $tmpFileNameAry[count($tmpFileNameAry)-1];
+
+    return $extension;
 }
