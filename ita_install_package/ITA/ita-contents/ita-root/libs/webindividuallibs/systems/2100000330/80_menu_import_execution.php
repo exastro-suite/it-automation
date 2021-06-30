@@ -58,10 +58,6 @@ function menuImportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
     $strFxName = __FUNCTION__;
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
-    if (!is_dir($g['root_dir_path'] . '/temp/bulk_excel/import/import/')) {
-        # code...
-    }
-
     try{
         //X-command毎の処理 
         switch($strCommand){
@@ -73,7 +69,7 @@ function menuImportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
 
                 //ファイル、パスの設定
                 $dirName = str_replace( "A_", "", $objJSONOfReceptedData['upload_id'] );// . '_ita_data.tar.gz';
-                $importPath = $g['root_dir_path'] . '/temp/bulk_excel/import/import/' . $dirName;   
+                $importPath = $g['root_dir_path'] . '/temp/bulk_excel/import/import/' . $dirName;
 
                 if( file_exists($importPath) ){
                     $aryRetBody = menuImportExecutionFromRest($objJSONOfReceptedData);
@@ -151,18 +147,24 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
     $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
 
     //メニューidをint型からstring型へ変換
+    // メニューidの判定
     foreach ($tmpJSONOfReceptedData as $key => $value) {
         foreach ($value as $value2) {
-            if( $objIntNumVali->isValid($value2) != false ){
-                $tmparray[$key][]= (string)sprintf('%010d', $value2);
-            }else{
-                //メニューID不正時
-                $arrayResult["TASK_ID"] = "";
-                $arrayResult["RESULTCODE"] = "002";
-                $arrayResult['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-900071",$objIntNumVali->getValidRule());
-                return $arrayResult; 
+            if (!is_int($value2) && strlen($value2) == 10) {
+                $value2 = (int)$value2;
+                $importableMenuId = chkImpotableMenuId($key, $value2, ACCOUNT_NAME);
+                if ($importableMenuId != false) {
+                    $tmparray[$key][]= (string)sprintf('%010d', $importableMenuId);
+                }
             }
         }
+    }
+    if (empty($tmparray)) {
+        //メニューID不正時
+        $arrayResult["TASK_ID"] = "";
+        $arrayResult["RESULTCODE"] = "002";
+        $arrayResult['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-900071",$objIntNumVali->getValidRule());
+        return $arrayResult; 
     }
 
     //($_POST 利用関数対応)
@@ -273,8 +275,75 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
     $arrayResult['RESULTINFO'] = strip_tags(trim($resultMsg));
 
 
-    return $arrayResult; 
+    return $arrayResult;
+}
 
+
+function chkImpotableMenuId($menuGroupId, $menuId, $userId) {
+    global $objDBCA, $objMTS;
+
+    $sql = "SELECT
+                A_MENU_LIST.MENU_ID
+            FROM
+                A_ACCOUNT_LIST
+            LEFT OUTER JOIN
+                A_ROLE_ACCOUNT_LINK_LIST
+            ON
+                A_ACCOUNT_LIST.USER_ID = A_ROLE_ACCOUNT_LINK_LIST.USER_ID
+            LEFT OUTER JOIN
+                A_ROLE_MENU_LINK_LIST
+            ON
+                A_ROLE_ACCOUNT_LINK_LIST.ROLE_ID = A_ROLE_MENU_LINK_LIST.ROLE_ID
+            LEFT OUTER JOIN
+                A_MENU_LIST
+            ON
+                A_MENU_LIST.MENU_ID = A_ROLE_MENU_LINK_LIST.MENU_ID
+            WHERE
+                A_ACCOUNT_LIST.USER_ID = :USER_ID
+            AND
+                A_ROLE_MENU_LINK_LIST.MENU_ID = :MENU_ID
+            AND 
+                PRIVILEGE = 1
+            AND
+                A_MENU_LIST.MENU_GROUP_ID = :MENU_GROUP_ID
+            AND
+                A_ACCOUNT_LIST.DISUSE_FLAG = 0
+            AND
+                A_ROLE_ACCOUNT_LINK_LIST.DISUSE_FLAG = 0
+            AND
+                A_ROLE_MENU_LINK_LIST.DISUSE_FLAG = 0
+            AND
+                A_MENU_LIST.DISUSE_FLAG = 0";
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+
+    if ($objQuery->getStatus() === false) {
+        web_log($objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                      array(basename(__FILE__), __LINE__)));
+        web_log($sql);
+        web_log($objQuery->getLastError());
+        return false;
+    }
+
+    $res = $objQuery->sqlBind(
+        array(
+            "MENU_GROUP_ID" => $menuGroupId,
+            "USER_ID"       => $userId,
+            "MENU_ID"       => $menuId
+        )
+    );
+
+    $res = $objQuery->sqlExecute();
+    $result = "";
+    while ($row = $objQuery->resultFetch()) {
+        $result = $row["MENU_ID"];
+    }
+
+    if (empty($result)) {
+        $result = false;
+    }
+
+    return $result;
 }
 //////////////////////////////////////////////////////////////////
 //  ファイルbase64変換処理
