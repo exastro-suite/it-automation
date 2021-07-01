@@ -21,7 +21,7 @@ BRANCH=$5
 REMOTE_USER=$6
 REMOTE_PASSWORD=$7
 
-if [ $PROXYURL != "__undefine__"]; then
+if [ $PROXYURL != "__undefine__" ]; then
    export HTTP_PROXY="${PROXYURL}"
    export HTTPS_PROXY="${PROXYURL}"
 fi

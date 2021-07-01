@@ -105,7 +105,16 @@
                 if($intErrorType == 0) {
 
                     // 同期状態を再開に設定
-                    $row['SYNC_STATUS_ROW_ID'] = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART;
+                    $row['SYNC_STATUS_ROW_ID']    = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART;
+                    // 詳細情報を空白に設定
+                    $row['SYNC_STATUS_ROW_ID']    = "";
+                    $row['SYNC_ERROR_NOTE']       = "";
+                    $row['SYNC_LAST_UPDATE_USER'] = "";
+                    $row['SYNC_LAST_TIME']        = "";
+                    $row['DEL_ERROR_NOTE']        = "";
+                    $row['DEL_MENU_ID']           = "";
+                    $row['DEL_EXEC_INS_NO']       = "";
+
 
                     $BindArray      = array();
                     $ColumnConfigArray = $TDobj->setColumnConfigAttr();
@@ -254,6 +263,7 @@
         function Mix1_1_matl_type_upd($MatlTypeRowId){
             // グローバル変数宣言
             global $g;
+            global $root_dir_path;
 
             // ローカル変数宣言
             $aryOverride = array("Mix1_1");
@@ -277,20 +287,20 @@
             if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
                 $ansible_driver = true;
             }
-            $wanted_filename = "ita_terraform-driver";
-            $terraform_driver  = false;
-            if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
-                $terraform_driver = true;
+            //$wanted_filename = "ita_terraform-driver";
+            //$terraform_driver  = false;
+            //if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+            //    $terraform_driver = true;
+            // }
+
+            if($ansible_driver === true) {
+                $seq_no  = 12;
+            } else {
+                $seq_no  = 9;
             }
-            $chkarry               = array();
-            $chkarry[true][true]   = 12;
-            $chkarry[true][false]  = 12;
-            $chkarry[false][true]  = 9;
-            $chkarry[false][false] = 9;
-            $seq_no  = $chkarry[$ansible_driver][$terraform_driver];
 
             // Movementのカラム位置
-            $int_seq_no = seq_no;
+            $int_seq_no = $seq_no;
 
             require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
             $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
@@ -320,6 +330,7 @@
         function Mix2_1_matl_type_reg($MatlTypeRowId){
             // グローバル変数宣言
             global $g;
+            global $root_dir_path;
 
             // ローカル変数宣言
             $aryOverride = array("Mix2_1");
@@ -343,17 +354,17 @@
             if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
                 $ansible_driver = true;
             }
-            $wanted_filename = "ita_terraform-driver";
-            $terraform_driver  = false;
-            if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
-                $terraform_driver = true;
+            // $wanted_filename = "ita_terraform-driver";
+            // $terraform_driver  = false;
+            // if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+            //     $terraform_driver = true;
+            // }
+
+            if($ansible_driver === true) {
+                $seq_no  = 12;
+            } else {
+                $seq_no  = 9;
             }
-            $chkarry               = array();
-            $chkarry[true][true]   = 12;
-            $chkarry[true][false]  = 12;
-            $chkarry[false][true]  = 9;
-            $chkarry[false][false] = 9;
-            $seq_no  = $chkarry[$ansible_driver][$terraform_driver];
 
             // Movementのカラム位置
             $int_seq_no = $seq_no;

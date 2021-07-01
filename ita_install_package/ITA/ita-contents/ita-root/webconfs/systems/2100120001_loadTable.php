@@ -26,7 +26,7 @@ if ( empty($root_dir_path) ){
     $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
     $root_dir_path = $root_dir_temp[0] . "ita-root";
 }
-require_once ( $root_dir_path . "/libs/commonlibs/common_CICD_for_IaC_functions.php");
+require_once ( $root_dir_path . "/libs/backyardlibs/CICD_for_IaC/local_functions.php");
 require_once ( $root_dir_path . "/libs/backyardlibs/CICD_for_IaC/table_definition.php");
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
@@ -187,6 +187,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c = new IDColumn('AUTO_SYNC_FLG',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011300"),'B_VALID_INVALID_MASTER','FLAG_ID','FLAG_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011301"));
         $c->setHiddenMainTableColumn(true);
+        $c->setRequired(true);
         $cg->addColumn($c);
 
         /////////////////////////////////////////////////////////
@@ -217,78 +218,58 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $aryErrMsgBody = array();
                 $strErrMsg = "";
                 $strErrorBuf = "";
+                $update_flg = false;
                 $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
                 if( $modeValue=="DTUP_singleRecUpdate" ){
-                    if(@count($exeQueryData[$objColumn->getID()]) != 0) {
-                        // 更新時、状態が再開以外は空白に設定
-                        if($exeQueryData[$objColumn->getID()] != TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART) {
-                            $exeQueryData[$objColumn->getID()] = "";
-                        }
-                    }
+                    $exeQueryData[$objColumn->getID()] = "";
+                    $update_flg = true;
                 }
-        };
-        $afterObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
-                $boolRet = true;
-                $intErrorType = null;
-                $aryErrMsgBody = array();
-                $strErrMsg = "";
-                $strErrorBuf = "";
-
-                $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
                 if( $modeValue=="DTUP_singleRecDelete" ){
                     $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];
                     if($modeValue_sub == "off") {
-                        $strFxName = basename(__FILE__) . __LINE__;
-                        $strQuery = "UPDATE B_CICD_REPOSITORY_LIST "
-                                   ."SET SYNC_STATUS_ROW_ID = null "
-                                   ."WHERE REPO_ROW_ID = :REPO_ROW_ID";
-                        $aryForBind = array('REPO_ROW_ID'=>$aryVariant['edit_target_row']['REPO_ROW_ID']);
+                        $exeQueryData[$objColumn->getID()] = "";
+                        $update_flg = true;
+                    }
+                }
+                if($update_flg === true) {
+                    // 同期時刻を更新
+                    $strFxName = "[FILE]:" . basename(__FILE__) . " [LINE]:" . __LINE__;
+                    $strQuery = "UPDATE T_CICD_SYNC_STATUS SET SYNC_LAST_TIMESTAMP = null "
+                               ." WHERE ROW_ID = :ROW_ID ";
+                    $aryForBind = array('ROW_ID'=>$aryVariant['edit_target_row']['REPO_ROW_ID']);
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
 
-                        $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-
-                        if( $aryRetBody[0] !== true ){
-                            $boolRet = false;
-                            $strErrMsg = $aryRetBody[2];
-                            $intErrorType = 500;
-                        }
-                        if($boolRet === true) {
-                            $strQuery = "UPDATE B_CICD_REPOSITORY_LIST_JNL "
-                                       ."SET SYNC_STATUS_ROW_ID = null "
-                                       ."WHERE JOURNAL_SEQ_NO = :JOURNAL_SEQ_NO";
-                            $aryForBind = array('JOURNAL_SEQ_NO'=>$aryVariant['arySqlExe_delete_table']['JOURNAL_SEQ_NO']['JNL']);
-
-                            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-
-                            if( $aryRetBody[0] !== true ){
-                                $boolRet = false;
-                                $strErrMsg = $aryRetBody[2];
-                                $intErrorType = 500;
-                            }
-                        }
+                    if( $aryRetBody[0] !== true ){
+                        web_log($strFxName . " [DB Access error]");
+                        $boolRet = false;
+                        $strErrMsg = $aryRetBody[2];
+                        $intErrorType = 500;
                     }
                 }
                 $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
                 return $retArray;
+
         };
         $c = new TextColumn('SYNC_STATUS_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011600"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011601"));
-        $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt('')));
-        $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt('')));
+        $strWebUIText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070703");
+        $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText)));
+        $c->setOutputType('update_table',   new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText,true)));
         // OutputType一覧  ----
+        // filter 一覧 excel関連のみ表示
         //$c->getOutputType('filter_table')->setVisible(false);
         //$c->getOutputType('print_table')->setVisible(false);
-        //$c->getOutputType('update_table')->setVisible(false);
-        //$c->getOutputType('register_table')->setVisible(false);
-        //$c->getOutputType('delete_table')->setVisible(false);
+        $c->getOutputType('update_table')->setVisible(false);
+        $c->getOutputType('register_table')->setVisible(false);
+        $c->getOutputType('delete_table')->setVisible(false);
         //$c->getOutputType('print_journal_table')->setVisible(false);
-        $c->getOutputType('excel')->setVisible(false);
-        $c->getOutputType('csv')->setVisible(false);
-        $c->getOutputType('json')->setVisible(false);
+        //$c->getOutputType('excel')->setVisible(false);
+        //$c->getOutputType('csv')->setVisible(false);
+        //$c->getOutputType('json')->setVisible(false);
         // ----  OutputType一覧
         // ----  エクセル/CSVからのアップロードを禁止する。
         $c->setAllowSendFromFile(false);
         $c->setFunctionForEvent('beforeTableIUDAction',$beforeObjFunction);
-        $c->setFunctionForEvent('afterTableIUDAction',$afterObjFunction);
         $c->setHiddenMainTableColumn(true);
 
         $cg->addColumn($c);
@@ -296,16 +277,48 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         /////////////////////////////////////////////////////////
         // 詳細情報   必須入力:false ユニーク:false
         ///////////////////////////////////////////////////////// 
+        // 更新時の初期値設定
+        $beforeObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+                global $g;
+                $boolRet = true;
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+                $strErrorBuf = "";
+                $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+                if( $modeValue=="DTUP_singleRecUpdate" ){
+                    // 更新時、空白に設定
+                    $exeQueryData[$objColumn->getID()] = "";
+                }
+                if( $modeValue=="DTUP_singleRecDelete" ){
+                    $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];
+                    if($modeValue_sub == "off") {
+                        $exeQueryData[$objColumn->getID()] = "";
+                    }
+                }
+                $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+                return $retArray;
+        };
         $objVldt = new MultiTextValidator(0,8192,false);
         $c = new MultiTextColumn('SYNC_ERROR_NOTE',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011700"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011701"));
+        $strWebUIText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070703");
+        $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText)));
+        $c->setOutputType('update_table',   new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText,true)));
         $c->setValidator($objVldt);
+        // OutputType一覧  ----
+        // filter 一覧 excel関連のみ表示
+        //$c->getOutputType('filter_table')->setVisible(false);
+        //$c->getOutputType('print_table')->setVisible(false);
         $c->getOutputType('update_table')->setVisible(false);
         $c->getOutputType('register_table')->setVisible(false);
         $c->getOutputType('delete_table')->setVisible(false);
-        $c->getOutputType('json')->setVisible(false);
-        $c->getOutputType('excel')->setVisible(false);
-        $c->getOutputType('csv')->setVisible(false);
+        //$c->getOutputType('print_journal_table')->setVisible(false);
+        //$c->getOutputType('excel')->setVisible(false);
+        //$c->getOutputType('csv')->setVisible(false);
+        //$c->getOutputType('json')->setVisible(false);
+        // ----  OutputType一覧
+        $c->setFunctionForEvent('beforeTableIUDAction',$beforeObjFunction);
         // ----  エクセル/CSVからのアップロードを禁止する。
         $c->setAllowSendFromFile(false);
         $c->setHiddenMainTableColumn(true);
@@ -318,6 +331,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c = new DateTimeColumn('SYNC_LAST_TIMESTAMP',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011800"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011801"));
         $c->setValidator(new DateTimeValidator(null,null));
+        // OutputType一覧  ----
+        // filter 一覧のみ表示
+        //$c->getOutputType('filter_table')->setVisible(false);
+        //$c->getOutputType('print_table')->setVisible(false);
         $c->getOutputType('update_table')->setVisible(false);
         $c->getOutputType('register_table')->setVisible(false);
         $c->getOutputType('delete_table')->setVisible(false);
@@ -325,6 +342,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->getOutputType('json')->setVisible(false);
+        // ----  OutputType一覧
         // ----  エクセル/CSVからのアップロードを禁止する。
         $c->setAllowSendFromFile(false);
         $c->setHiddenMainTableColumn(false);   // DB更新外
@@ -472,8 +490,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $password_del = true;
         }
 
-
-        // リモート・ローカルリポジトリが変更になったか確認
         $ColumnArray = array('GIT_PROTOCOL_TYPE_ROW_ID'=>'','GIT_REPO_TYPE_ROW_ID'=>'','GIT_USER'=>'','GIT_PASSWORD'=>'PasswordCloumn','AUTO_SYNC_FLG'=>'','SYNC_INTERVAL'=>'');
         foreach($ColumnArray as $ColumnName=>$Type) {
             // $arrayRegDataはUI入力ベースの情報
@@ -486,23 +502,35 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             // リポジトリタイプ
             if(strlen($ColumnValueArray['GIT_REPO_TYPE_ROW_ID']['COMMIT'])==0) {
                 if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                // プロトコルがhttpsの場合は必須項目です。(項目:Visibilityタ イプ)
+                // プロトコルがhttpsの場合は必須項目です。(項目:Visibilityタイプ)
                 $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2017");
                 $retBool = false;
             } else {
                switch($ColumnValueArray['GIT_REPO_TYPE_ROW_ID']['COMMIT']) {
                case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PUBLIC:  // Public
+                   if(strlen($ColumnValueArray['GIT_USER']['COMMIT']) != 0) {
+                       // VisibilityタイプがPublicの場合は入力不要な項目です。(項目:Gitユーザ)
+                       if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2059");
+                       $retBool = false;
+                   }
+                   if((strlen($ColumnValueArray['GIT_PASSWORD']['COMMIT']) != 0) && ($password_del === false)) {
+                       // VisibilityタイプがPublicの場合は入力不要な項目です。(項目:Gitパスワード)
+                       if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2060");
+                       $retBool = false;
+                   }
                    break;
                case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PRIVATE: // Private
                    if(strlen($ColumnValueArray['GIT_USER']['COMMIT']) == 0) {
                        if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                       // VisibilityタイプがPublicの場合は必須項目です。(項目:Gitユ ーザ)
+                       // VisibilityタイプがPrivateの場合は必須項目です。(項目:Gitユ ーザ)
                        $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2010");
                        $retBool = false;
                    }
                    if((strlen($ColumnValueArray['GIT_PASSWORD']['COMMIT']) == 0) || ($password_del === true)) {
                        if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                       // VisibilityタイプがPublicの場合は必須項目です。(項目:Gitパ スワード)
+                       // VisibilityタイプがPrivateの場合は必須項目です。(項目:Gitパ スワード)
                        $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2011");
                        $retBool = false;
                    }
@@ -517,6 +545,24 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             }
             break;
         case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_LOCAL:     // Local
+            if(strlen($ColumnValueArray['GIT_REPO_TYPE_ROW_ID']['COMMIT'])!=0) {
+                // プロトコルがLocalの場合は設定不要の項目です。(項目:Visibilityタイプ)
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2061");
+                $retBool = false;
+            }
+            if(strlen($ColumnValueArray['GIT_USER']['COMMIT']) != 0) {
+                // プロトコルがLocalの場合は入力不要な項目です。(項目:Gitユーザ)
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2062");
+                $retBool = false;
+            }
+            if((strlen($ColumnValueArray['GIT_PASSWORD']['COMMIT']) != 0) && ($password_del === false)) {
+                // プロトコルがLocalの場合は入力不要な項目です。(項目:Gitパスワード)
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2063");
+                $retBool = false;
+            }
             break;
         default:
             if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}

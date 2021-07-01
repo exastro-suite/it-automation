@@ -152,7 +152,7 @@
         require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
 
         require_once ($root_dir_path . '/libs/backyardlibs/common/common_db_access.php');
-        require_once ($root_dir_path . '/libs/commonlibs/common_CICD_for_IaC_functions.php');
+        require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_functions.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_definition.php');
@@ -188,6 +188,21 @@
         $TDRepoobj = new TD_B_CICD_REPOSITORY_LIST();
         $ret = $TDRepoobj->setConfig($cmDBobj);
         if($ret === false) {
+            // 異常フラグON
+            $error_flag = 1;
+
+            // UIに表示するエラーメッセージ設定
+            setDefaultUIDisplayMsg();
+
+            // "データベースのアクセスに失敗しました。";
+            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1005");  //2004
+            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$TDMatlobj->GetLastErrorMsg());
+            throw new Exception($FREE_LOG);
+        }
+
+        $TDMatlLinkobj = new TD_B_CICD_MATERIAL_LINK_LIST();
+        $ret = $TDMatlLinkobj->setConfig($cmDBobj);
+        if($ret !== true) {
             // 異常フラグON
             $error_flag = 1;
 
@@ -303,15 +318,15 @@
                 /////////////////////////////////////////////////////////////////
                 $ret = LocalCloneRemoteRepoChk($RepoId);
                 if($ret === false) {
-                     // リモートリポジトリ不一致
-                     $CloneExeFlg  = true;
+                    // リモートリポジトリ不一致
+                    $CloneExeFlg  = true;
 
-                     // トレースメッセージ
-                     if ( $log_level === 'DEBUG' ){
-                         //[処理]リモートリポジトリ管理のリモートリポジトリ(URL)の変更検出 (リモートリポジトリ項番:{})
-                         $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2014",$RepoId);
-                         require ($root_dir_path . $log_output_php );
-                     }
+                    // トレースメッセージ
+                    if ( $log_level === 'DEBUG' ){
+                        //[処理]リモートリポジトリ管理のリモートリポジトリ(URL)の変更検出 (リモートリポジトリ項番:{})
+                        $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2014",$RepoId);
+                        require ($root_dir_path . $log_output_php );
+                    }
                 }
             }
             if($CloneExeFlg === false) {
@@ -358,7 +373,6 @@
                 $MargeExeFlg   = false;
 
                 $ret = GitPull($RepoId,$pullResultAry,$UpdateFiles,$MargeExeFlg,$RepoListRow);
-
                 if(($MargeExeFlg === true) ||
                    ($MatlListUpdateExeFlg === true)) {
 
@@ -478,6 +492,58 @@
         // commit後に同期状態テーブル 処理時間更新とリモートリポジトリ管理の状態を更新をマーク
         $SyncTimeUpdate_Flg           = true;
         $RepoListSyncStatusUpdate_Flg = true;
+
+        ///////////////////////////////////////////////////
+        // トランザクション終了
+        ///////////////////////////////////////////////////
+        $ret = $DBobj->transactionExit();
+        ///////////////////////////////////////////////////
+        // トランザクション開始  
+        // シーケンスロックはしないて、資材紐付管理に登録
+        // されている資材を展開
+        ///////////////////////////////////////////////////
+        $ret = $DBobj->transactionStart();
+        if($ret !== true) {
+            // 異常フラグON
+            $error_flag = 1;
+
+            // "トランザクション処理に失敗しました。";
+            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1003");  //2002
+            $addlogstr = $DBobj->GetLastErrorMsg();
+            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$addlogstr);
+            throw new Exception( $FREE_LOG );
+        }
+
+        ///////////////////////////////////////////////////
+        // 資材紐付管理に登録されている資材を展開
+        ///////////////////////////////////////////////////
+        //$MargeExeFlg          = true;
+        //$MatlListUpdateExeFlg = false;
+     
+        $ret = MatlLinkExecute($RepoId,$MargeExeFlg,$MatlListUpdateExeFlg);
+        if($ret !== true) {
+            // 異常フラグON
+            $error_flag = 1;
+
+            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2003");  
+            $logaddstr = $ret;
+            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+            throw new Exception($FREE_LOG);
+        }
+        /////////////////////////////////////////////////////////////////
+        // トランザクションを終了
+        /////////////////////////////////////////////////////////////////
+        $ret = $DBobj->transactionCommit();
+        if($ret !== true) {
+            // 異常フラグON
+            $error_flag = 1;
+
+            // 例外処理へ
+            // "トランザクション処理に失敗しました。";
+            $logstr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1003");
+            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+            throw new Exception($FREE_LOG);
+        }
 
     } catch (Exception $e){
 
@@ -736,7 +802,7 @@
         // Password認証か判定
         $AuthTypeName = getPasswordAuthType($RepoListRow);
 
-        $ret = $Gitobj->GitPull($pullResultAry,$AuthTypeName);
+        $ret = $Gitobj->GitPull($pullResultAry,$AuthTypeName,$UpdateFlg);
         if($ret !== true) {
             // 異常フラグON
             $error_flag = 1;
@@ -758,28 +824,28 @@
             throw new Exception($retary);
         }
         // Git Pullで変更ファイルを解析する処理が不完全なので、変更の有無だけを判定
-        $UpdateFlg = false;
-        $ret = $Gitobj->GitPullResultAnalysis($pullResultAry,$UpdateFiles,$UpdateFlg);
-        if($ret !== true) {
-            // 異常フラグON
-            $error_flag = 1;
-            // Git pull command の結果解析に失敗しました。
-            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1025");
-
-            $logaddstr = $Gitobj->GetLastErrorMsg();
-            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
-
-            // UIに表示するメッセージ
-            // Git pull command の結果解析に失敗しました。
-            $UIDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1025");
-            $UIDisplayMsg .= "\n" . $Gitobj->GetGitCommandLastErrorMsg();
-
-            // 戻り値編集
-            $retary = array();
-            $RetCode = -1;
-            $retary = makeReturnArray($RetCode,$FREE_LOG,$UIDisplayMsg);
-            throw new Exception($retary);
-        }
+//        $UpdateFlg = false;
+//        $ret = $Gitobj->GitPullResultAnalysis($pullResultAry,$UpdateFiles,$UpdateFlg);
+//        if($ret !== true) {
+//            // 異常フラグON
+//            $error_flag = 1;
+//            // Git pull command の結果解析に失敗しました。
+//            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1025");
+//
+//            $logaddstr = $Gitobj->GetLastErrorMsg();
+//            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+//
+//            // UIに表示するメッセージ
+//            // Git pull command の結果解析に失敗しました。
+//            $UIDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1025");
+//            $UIDisplayMsg .= "\n" . $Gitobj->GetGitCommandLastErrorMsg();
+//
+//            // 戻り値編集
+//            $retary = array();
+//            $RetCode = -1;
+//            $retary = makeReturnArray($RetCode,$FREE_LOG,$UIDisplayMsg);
+//            throw new Exception($retary);
+//        }
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
             //[処理]リモートリポジトリの差分確認 (リモートリポジトリ項番:{})
@@ -1692,4 +1758,181 @@
         }
         return $PassAuth;
     }
+
+    function MatlLinkExecute($RepoId,$MargeExeFlg,$MatlListUpdateExeFlg) {
+        global $cmDBobj;
+        global $DBobj;
+        global $error_flag;
+        global $warning_flag;
+
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+        global $logfile;
+
+        global $objMTS;
+        global $LFCobj;
+
+        /////////////////////////////////////////////////////////////////
+        // ＤＢは更新のみなのでトランザクションは使用しない
+        /////////////////////////////////////////////////////////////////
+
+        /////////////////////////////////////////////////////////////////
+        // 資材紐付管理から処理対象のレコード取得
+        /////////////////////////////////////////////////////////////////
+        $tgtMatlLinkRow   = array();
+
+        $ret = getTargetMatlLinkRow($RepoId,$tgtMatlLinkRow);
+        if($ret !== true) {
+            // 異常フラグON
+            $error_flag = 1;
+            
+            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2002"); 
+            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$ret);
+            return $FREE_LOG;
+        }
+
+        foreach($tgtMatlLinkRow as $row) {
+            $go = false;
+            if(($MargeExeFlg === true) || ($MatlListUpdateExeFlg === true)) {
+                // 同期状態が異常以外の場合を判定
+                if($row['SYNC_STATUS_ROW_ID'] != TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR) {
+                    $go = true;
+                }
+            } else {
+                // 同期状態が再開か空白の場合を判定
+                if(($row['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART) ||
+                   (strlen($row['SYNC_STATUS_ROW_ID']) == 0)) {
+                    $go = true;
+                }
+            }
+            if($go === true) {
+                ///////////////////////////////////////////////////////////////////////////////////////
+                // 資材紐付を行う孫プロセス起動
+                ///////////////////////////////////////////////////////////////////////////////////////
+                $MatlLinkId = $row['MATL_LINK_ROW_ID'];
+                $ret = ExecuteGrandChildProcess($RepoId,$MatlLinkId,$logfile);
+            }
+        }
+        return true;
+    }
+    function ExecuteGrandChildProcess($RepoId,$MatlLinkId,$logfile) {
+        global $cmDBobj;
+        global $DBobj;
+        global $error_flag;
+        global $warning_flag;
+
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+        global $logfile;
+
+        global $objMTS;
+        global $LFCobj;
+
+        $php_command = @file_get_contents($root_dir_path . "/confs/backyardconfs/path_PHP_MODULE.txt");
+
+        // 改行コードが付いている場合に取り除く
+        $php_command = str_replace("\n","",$php_command);
+
+        $cmd = sprintf("%s %s/backyards/CICD_for_IaC/%s  %s %s 2>&1",
+                       $php_command,
+                       $root_dir_path,
+                       $LFCobj->getGrandChildProcessExecName(),
+                       $RepoId,$MatlLinkId);
+
+        // トレースメッセージ
+        if ( $log_level === 'DEBUG' ) {
+            $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2010",array($RepoId,$MatlLinkId)); 
+            require ($root_dir_path . $log_output_php );
+        }
+        // 孫プロセス起動 
+        $output     = array();
+        $return_var = "";
+        exec($cmd,$output,$return_var);
+        if($return_var == 0) {
+            // トレースメッセージ
+            if ( $log_level === 'DEBUG' ) {
+                $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2019",array($RepoId,$MatlLinkId)); 
+                require ($root_dir_path . $log_output_php );
+            }
+        } else {
+            // 孫プロセスのエラーを検出してもログだけ出して先に進む 
+            // ワーニングフラグON
+            $warning_flag =1;
+ 
+            $logaddstr = implode("\n",$output);
+            $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2001",array($RepoId,$MatlLinkId,$logaddstr)); 
+            require ($root_dir_path . $log_output_php );
+        }
+        return true;
+    }
+
+    function getTargetMatlLinkRow($RepoId,&$tgtMatlLinkRow) {
+        global $cmDBobj;
+        global $DBobj;
+        global $error_flag;
+        global $warning_flag;
+
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+
+        global $objMTS;
+        global $TDMatlLinkobj;
+
+        $tgtRepoListRow = array();
+        
+        // ansible/terraformのリリースファイル有無確認(インストール状態確認)
+        $wanted_filename = "ita_ansible-driver";
+        $ansible_driver  = false;
+        if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+            $ansible_driver = true;
+        }
+        $wanted_filename = "ita_terraform-driver";
+        $terraform_driver  = false;
+        if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+            $terraform_driver = true;
+        }
+
+        // 資材紐付管理取得
+        // 条件: 廃止レコード以外　自動同期が有効　
+        // 同期状態は呼出元で判定
+        $Tobj = new TQ_REPO_LIST_ALL_JOIN($ansible_driver,$terraform_driver);
+        $sqlBody = $Tobj->getSql($ansible_driver,$terraform_driver);
+        $sqlBody = $sqlBody . 
+                   " WHERE 
+                          T1.REPO_ROW_ID       =  :REPO_ROW_ID
+                      AND T1.DISUSE_FLAG       =  '0'
+                      AND T1.AUTO_SYNC_FLG     =  :AUTO_SYNC_FLG";
+
+        $arrayBind                       = array();
+        $arrayBind['REPO_ROW_ID']        = $RepoId;
+        $arrayBind['AUTO_SYNC_FLG']      = TD_B_CICD_MATERIAL_LINK_LIST::C_AUTO_SYNC_FLG_ON;
+
+        $objQuery = $DBobj->SelectForSimple($sqlBody,$arrayBind);
+        if($objQuery === false) {
+            // 異常フラグON
+            $error_flag = 1;
+            
+            // データベースのアクセスに失敗しました。
+            $logstr  = $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1005");
+            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+            return $FREE_LOG;
+        }
+        //$num_of_rows = $objQuery->effectedRowCount();
+        $tgtMatlLinkRow = array();
+        while ( $row = $objQuery->resultFetch() ){
+            $tgtMatlLinkRow[] = $row;
+        }
+        unset($objQuery);
+        return true;
+    }
+
 ?>

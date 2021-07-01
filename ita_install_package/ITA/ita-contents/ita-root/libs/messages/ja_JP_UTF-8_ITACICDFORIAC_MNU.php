@@ -25,10 +25,10 @@ $ary["ITACICDFORIAC-MNU-1200010100"]   = "リモートリポジトリ名";
 $ary["ITACICDFORIAC-MNU-1200010101"]   = "ITAでリモートリポジトリを示す名称を入力して下さい。
 [最大長] 256バイト";
 $ary["ITACICDFORIAC-MNU-1200010200"]   = "リモートリポジトリ(URL)";
-$ary["ITACICDFORIAC-MNU-1200010201"]   = "リモートリポジトリのURLを入力して下さい。
+$ary["ITACICDFORIAC-MNU-1200010201"]   = "git cloneコマンドに指定するクローン元のリポジトリを入力してください。
 [最大長] 256バイト";
 $ary["ITACICDFORIAC-MNU-1200010300"]   = "ブランチ";
-$ary["ITACICDFORIAC-MNU-1200010301"]   = "リモートリポジトリのブランチを入力して下さい。
+$ary["ITACICDFORIAC-MNU-1200010301"]   = "ブランチ名を入力して下さい。
 [最大長] 256バイト";
 $ary["ITACICDFORIAC-MNU-1200010400"]   = "プロトコル";
 $ary["ITACICDFORIAC-MNU-1200010401"]   = "リモートリポジトリと接続するプロトコルを選択して下さい。
@@ -48,13 +48,13 @@ VisibilityタイプでPrivateを選択した場合、パスワードの入力は
 [最大長] 128バイト";
 $ary["ITACICDFORIAC-MNU-1200010900"]   = "Proxy";
 $ary["ITACICDFORIAC-MNU-1200011000"]   = "Address";
-$ary["ITACICDFORIAC-MNU-1200011001"]   = "Proxyサーバのアドレスを入力して下さい。
+$ary["ITACICDFORIAC-MNU-1200011001"]   = "Proxyサーバを利用する場合、Proxyサーバのアドレスを入力して下さい。
 [最大長] 128バイト";
 $ary["ITACICDFORIAC-MNU-1200011100"]   = "Port";
-$ary["ITACICDFORIAC-MNU-1200011101"]   = "Proxyサーバのポートを入力して下さい。";
+$ary["ITACICDFORIAC-MNU-1200011101"]   = "Proxyサーバを利用する場合、Proxyサーバのポートを入力して下さい。";
 $ary["ITACICDFORIAC-MNU-1200011200"]   = "リモートリポジトリ同期情報";
 $ary["ITACICDFORIAC-MNU-1200011300"]   = "自動同期";
-$ary["ITACICDFORIAC-MNU-1200011301"]   = "リモートリポジトリとの同期を自動を行うかを選択して下さい。
+$ary["ITACICDFORIAC-MNU-1200011301"]   = "リモートリポジトリとの同期を自動で行うかを選択して下さい。
 有効：入力された周期でリモートリポジトリとの同期を行います。
 無効：リモートリポジトリとの同期は自動で行いません。";
 $ary["ITACICDFORIAC-MNU-1200011400"]   = "周期(秒)";
@@ -63,7 +63,7 @@ $ary["ITACICDFORIAC-MNU-1200011401"]   = "リモートリポジトリとの同�
 単位:秒";
 $ary["ITACICDFORIAC-MNU-1200011500"]   = "リモートリポジトリ同期状態";
 $ary["ITACICDFORIAC-MNU-1200011600"]   = "状態";
-$ary["ITACICDFORIAC-MNU-1200011601"]   = "自動同期で有効を設定した場合、リモートリポジトリとの同期状態を正常／異常で表示します。";
+$ary["ITACICDFORIAC-MNU-1200011601"]   = "自動同期で有効を設定した場合、リモートリポジトリとの同期状態を正常/異常で表示します。";
 $ary["ITACICDFORIAC-MNU-1200011700"]   = "詳細情報";
 $ary["ITACICDFORIAC-MNU-1200011701"]   = "自動同期で有効を設定した場合、リモートリポジトリとの同期でエラーが発生した場合、エラー情報が表示されます。";
 $ary["ITACICDFORIAC-MNU-1200011800"]   = "最終日時";
@@ -110,31 +110,31 @@ $ary["ITACICDFORIAC-MNU-1200030601"]   = "紐付先の資材タイプを選択�
 $ary["ITACICDFORIAC-MNU-1200030700"]   = "Ansible-Pioneer";
 $ary["ITACICDFORIAC-MNU-1200030800"]   = "対話種別";
 $ary["ITACICDFORIAC-MNU-1200030801"]   = "紐付先の資材タイプで対話ファイル素材集を選択している場合、対話種別の選択は必須です。
-[元データ]ansible-pioneerコンソール／対話種別リスト";
+[元データ]ansible-pioneerコンソール/対話種別リスト";
 $ary["ITACICDFORIAC-MNU-1200030900"]   = "OS種別";
 $ary["ITACICDFORIAC-MNU-1200030901"]   = "紐付先の資材タイプで対話ファイル素材集を選択している場合、OS種別マスタの選択は必須です。
-[元データ]ansible-pioneerコンソール／OS種別マスタ";
+[元データ]ansible-pioneerコンソール/OS種別マスタ";
 $ary["ITACICDFORIAC-MNU-1200031000"]   = "素材同期情報";
 $ary["ITACICDFORIAC-MNU-1200031100"]   = "自動同期";
-$ary["ITACICDFORIAC-MNU-1200031101"]   = "リモートリポジトリとの同期を自動を行うかを有効／無効で設定して下さい。
+$ary["ITACICDFORIAC-MNU-1200031101"]   = "リモートリポジトリとの同期を自動を行うかを有効/無効で設定して下さい。
 有効：入力された周期でリモートリポジトリとの同期を行います。
 無効：リモートリポジトリとの同期は自動で行いません。";
 $ary["ITACICDFORIAC-MNU-1200031200"]   = "状態";
-$ary["ITACICDFORIAC-MNU-1200031201"]   = "自動同期で有効を設定した場合、Gitリポジトリとの最新の同期状態を正常／異常／再開で表示します。";
+$ary["ITACICDFORIAC-MNU-1200031201"]   = "自動同期で有効を設定した場合、リモートリポジトリとの最新の同期状態を正常/異常/再開で表示します。";
 $ary["ITACICDFORIAC-MNU-1200031300"]   = "詳細情報";
 $ary["ITACICDFORIAC-MNU-1200031301"]   = "自動同期で有効を設定した場合、リモートリポジトリとの同期でエラーが発生した場合、エラー情報が表示されます。";
 $ary["ITACICDFORIAC-MNU-1200031400"]   = "最終日時";
 $ary["ITACICDFORIAC-MNU-1200031401"]   = "最後にリモートリポジトリと同期した日時";
 $ary["ITACICDFORIAC-MNU-1200031500"]   = "デリバリ情報";
 $ary["ITACICDFORIAC-MNU-1200031600"]   = "オペレーション";
-$ary["ITACICDFORIAC-MNU-1200031601"]   = "[元データ]基本コンソール／オペレーション一覧";
+$ary["ITACICDFORIAC-MNU-1200031601"]   = "[元データ]基本コンソール/オペレーション一覧";
 $ary["ITACICDFORIAC-MNU-1200031700"]   = "Movement";
-$ary["ITACICDFORIAC-MNU-1200031701"]   = "[元データ]各コンソール／Movement一覧";
+$ary["ITACICDFORIAC-MNU-1200031701"]   = "[元データ]各コンソール/Movement一覧";
 $ary["ITACICDFORIAC-MNU-1200031800"]   = "ドライラン";
 $ary["ITACICDFORIAC-MNU-1200031801"]   = "Movementをドライランで実行したい場合、●を選択して下さい。
 デフォルトはドライランでは実行しません。";
-$ary["ITACICDFORIAC-MNU-1200031900"]   = "結果";
-$ary["ITACICDFORIAC-MNU-1200031901"]   = "結果";
+$ary["ITACICDFORIAC-MNU-1200031900"]   = "作業インスタンスNo";
+$ary["ITACICDFORIAC-MNU-1200031901"]   = "Movemntを実行した際に採番された作業インスタンスNoです。";
 $ary["ITACICDFORIAC-MNU-1200032000"]   = "Restユーザ";
 $ary["ITACICDFORIAC-MNU-1200032001"]   = "RestAPI経由で紐付先資材を更新する為のユーザを選択して下さい。
 [元データ]Restユーザ管理";
@@ -160,6 +160,10 @@ $ary["ITACICDFORIAC-MNU-1200032401"]   = "テンプレート素材で使用し�
       VAR_sample:
         name:
         value:";
+$ary["ITACICDFORIAC-MNU-1200032500"]   = "作業実行確認メニューID";
+$ary["ITACICDFORIAC-MNU-1200032501"]   = "作業実行確認メニューID";
+$ary["ITACICDFORIAC-MNU-1200032600"]   = "作業状態確認";
+$ary["ITACICDFORIAC-MNU-1200032601"]   = "作業状態確認";
 $ary["ITACICDFORIAC-MNU-1200032800"]   = "最終更新者";
 $ary["ITACICDFORIAC-MNU-1200032801"]   = "素材同期情報の最終更新者";
 $ary["ITACICDFORIAC-MNU-1200035001"]   = "リポジトリを選択して下さい";
@@ -183,17 +187,17 @@ httpの場合:80
 httpsの場合:443
 です。";
 $ary["ITACICDFORIAC-MNU-1200050000"]   = "ITAとRestAPIを行う為のユーザ情報をメンテナンス(閲覧/登録/更新/廃止)できます。
-ITAとRestAPIを行う為のユーザは、管理コンソール／ユーザ管理に登録しておく必要があります。";
+ITAとRestAPIを行う為のユーザは、管理コンソール/ユーザ管理に登録しておく必要があります。";
 $ary["ITACICDFORIAC-MNU-1200050001"]   = "項番";
 $ary["ITACICDFORIAC-MNU-1200050002"]   = "Restユーザ管理";
 $ary["ITACICDFORIAC-MNU-1200050003"]   = "Restユーザ管理";
 $ary["ITACICDFORIAC-MNU-1200050100"]   = "Restユーザ";
 $ary["ITACICDFORIAC-MNU-1200050101"]   = "CI/CD For IaC用のロールに紐づいているユーザを選択して下さい。
-[元データ]管理コンソール／ユーザ管理";
+[元データ]管理コンソール/ユーザ管理";
 //["ITAWDCH-MNU-1070203"]
 $ary["ITACICDFORIAC-MNU-1200050200"]   = "Restパスワード";
 $ary["ITACICDFORIAC-MNU-1200050201"]   = "Restユーザのパスワードです。
-管理コンソール／ユーザ管理で設定したパスワードを入力して下さい。
+管理コンソール/ユーザ管理で設定したパスワードを入力して下さい。
 文字数は8～30バイト、半角英数字と利用可能な記号（!#$%&'()*+./;<=>?@[]^\\_`{|}~）で入力して下さい。";
 //["ITAWDCH-MNU-1070303"]
 $ary["ITACICDFORIAC-MNU-1200050202"]   = "半角英数字と利用可能な記号（!\"#$%&'()*+,./:;<=>?@[]^\\_`{|}）";

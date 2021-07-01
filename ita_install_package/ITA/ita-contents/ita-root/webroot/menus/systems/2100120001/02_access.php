@@ -19,7 +19,7 @@
 
     //-- サイト個別PHP要素、ここから--
     require_once ($root_dir_path . '/libs/backyardlibs/common/common_db_access.php');
-    require_once ($root_dir_path . '/libs/commonlibs/common_CICD_for_IaC_functions.php');
+    require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_functions.php');
     require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
     require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
     //-- サイト個別PHP要素、ここまで--
@@ -109,6 +109,8 @@
 
                     // 同期状態を再開に設定
                     $row['SYNC_STATUS_ROW_ID'] = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART;
+                    // 詳細情報をクリア
+                    $row['SYNC_ERROR_NOTE'] = "";
 
                     $BindArray      = array();
                     $ColumnConfigArray = $TDobj->setColumnConfigAttr();
@@ -119,6 +121,17 @@
                     if($ret === false) {
                         $logstr = "db access failed.";
                         $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+                        throw new Exception($FREE_LOG);
+                    }
+
+                    $strFxName = "[FILE]:" . basename(__FILE__) . " [LINE]:" . __LINE__;
+                    $strQuery = "UPDATE T_CICD_SYNC_STATUS SET SYNC_LAST_TIMESTAMP = null "
+                               ." WHERE ROW_ID = :ROW_ID ";
+                    $aryForBind = array('ROW_ID'=>$tgtRepoId);
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                    if( $aryRetBody[0] !== true ){
+                        $logstr = "db access failed.";
+                        $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,"");
                         throw new Exception($FREE_LOG);
                     }
 

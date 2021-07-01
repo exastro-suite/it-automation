@@ -1153,5 +1153,19 @@ function buttonDisableControl(mode,strTid,objButton){
     }
     return retValue;
 }
+function Journal1Tbl_monitor_execution( objButton,execution_no,menu_no ){
+    // 遷移先URLを作成
+    var url = '/default/menu/01_browse.php?no=' + menu_no + '&execution_no=' + execution_no;
+
+    // 作業状態確認メニューに遷移
+    open( url, "_blank") ;
+}
+function Mix1_1_monitor_execution( objButton,execution_no,menu_no ){
+    // 遷移先URLを作成
+    var url = '/default/menu/01_browse.php?no=' + menu_no + '&execution_no=' + execution_no;
+
+    // 作業状態確認メニューに遷移
+    open( url, "_blank") ;
+}
 
 // ここまでカスタマイズした場合の一般メソッド配置域----
