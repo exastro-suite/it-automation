@@ -71,12 +71,6 @@ function insertBulkExcelTask(){
     $taskId = getSequenceID("B_BULK_EXCEL_TASK_RIC");
     $p_abolishedType = htmlspecialchars($_POST["abolished_type"], ENT_QUOTES, "UTF-8");
 
-        ob_start();
-    var_dump($taskId);
-    $str = ob_get_contents();//バッファの内容を取得
-    ob_end_clean();
-    web_log($str);
-
     $res = $objQuery->sqlBind(
         array(
             "TASK_ID"               => $taskId,
@@ -90,7 +84,7 @@ function insertBulkExcelTask(){
             "NOTE"                  => "",
             "ACCESS_AUTH"           => "",
             "DISUSE_FLAG"           => 0,
-            "LAST_UPDATE_USER"      => "-100331",
+            "LAST_UPDATE_USER"      => $g["login_id"],
             "LAST_UPDATE_TIMESTAMP" => date('Y-m-d H:i:s')
         )
     );

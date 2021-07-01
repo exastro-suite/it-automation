@@ -735,7 +735,7 @@ function insertBulkExcelTask(){
             "NOTE"                  => "",
             "ACCESS_AUTH"           => "",
             "DISUSE_FLAG"           => 0,
-            "LAST_UPDATE_USER"      => ACCOUNT_NAME,
+            "LAST_UPDATE_USER"      => $g["login_id"],
             "LAST_UPDATE_TIMESTAMP" => date('Y-m-d H:i:s')
         )
     );

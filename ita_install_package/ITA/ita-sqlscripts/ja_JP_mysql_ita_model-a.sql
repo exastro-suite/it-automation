@@ -1621,6 +1621,7 @@ DP_MODE                           INT                               , -- 処理�
 ABOLISHED_TYPE                    INT                               , -- 廃止情報
 SPECIFIED_TIMESTAMP               DATETIME(6)                       , -- 指定時刻
 FILE_NAME                         VARCHAR (64)                      , -- ファイル名
+EXECUTE_USER                      INT                               , -- 実行ユーザ
 DISP_SEQ                          INT                               , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
 NOTE                              VARCHAR (4000)                    , -- 備考
@@ -1643,6 +1644,7 @@ DP_MODE                           INT                               , -- 処理�
 ABOLISHED_TYPE                    INT                               , -- 廃止情報
 SPECIFIED_TIMESTAMP               DATETIME(6)                       , -- 指定時刻
 FILE_NAME                         VARCHAR (64)                      , -- ファイル名
+EXECUTE_USER                      INT                               , -- 実行ユーザ
 DISP_SEQ                          INT                               , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
 NOTE                              VARCHAR (4000)                    , -- 備考

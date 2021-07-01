@@ -61,6 +61,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
+    // 実行ユーザ
+    $c = new IDColumn('EXECUTE_USER',$g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-103100'),'A_ACCOUNT_LIST','USER_ID','USERNAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
+    $table->addColumn($c);
+
     //ファイル名
     $c = new FileUploadColumn('FILE_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-900015"));
     $filePath = "";
