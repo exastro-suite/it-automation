@@ -4892,6 +4892,12 @@ class MultiTextColumn extends TextColumn {
 		$aryErrMsgBody = array();
 		$strErrMsg = "";
 		$strErrorBuf = "";
+
+                $arrayTmp = parent::beforeTableIUDAction($exeQueryData, $reqOrgData, $aryVariant);
+                if($arrayTmp[0]===false){
+                    return $arrayTmp;
+                }
+
 		if( $this->getParaGpaphMode()===1 ){
 			//----CrLfがあったらLfへ統一するモード
 			$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];

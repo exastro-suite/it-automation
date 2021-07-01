@@ -19,7 +19,7 @@ $ary["ITACICDFORIAC-MNU-1200011400"]  = "Address";
 $ary["ITACICDFORIAC-MNU-1200011401"]  = "Proxy server address";
 $ary["ITACICDFORIAC-MNU-1200011500"]  = "Port";
 $ary["ITACICDFORIAC-MNU-1200011501"]  = "Proxy server port";
-$ary["ITACICDFORIAC-MNU-1200032300"]   = "Template list;
+$ary["ITACICDFORIAC-MNU-1200032300"]   = "Template list";
 $ary["ITACICDFORIAC-MNU-1200032400"]   = "Variable definition";
 $ary["ITACICDFORIAC-MNU-1200032401"]   = "Define the structure of the variable (VAR_) used in Template file in YAML format.
 The structure of variables can be defined by the following three types.

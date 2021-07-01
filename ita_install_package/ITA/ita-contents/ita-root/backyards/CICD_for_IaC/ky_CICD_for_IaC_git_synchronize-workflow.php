@@ -108,7 +108,7 @@
         require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
 
         require_once ($root_dir_path . '/libs/backyardlibs/common/common_db_access.php');
-        require_once ($root_dir_path . '/libs/commonlibs/common_CICD_for_IaC_functions.php');
+        require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_functions.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
         require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_definition.php');
@@ -396,6 +396,7 @@
                           TAB_A.DISUSE_FLAG         =  '0'
                       AND TAB_A.AUTO_SYNC_FLG       =  :AUTO_SYNC_FLG
                       AND (TAB_A.SYNC_STATUS_ROW_ID <> :SYNC_STATUS_ROW_ID OR TAB_A.SYNC_STATUS_ROW_ID is NULL)";
+
         $sqlBody = sprintf($sqlBody,$TDRepoobj->getTableName(),$TDSyncStsobj->getTableName());
           
         $arrayBind                       = array();

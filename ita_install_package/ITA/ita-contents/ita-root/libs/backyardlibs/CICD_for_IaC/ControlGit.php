@@ -187,11 +187,12 @@ class ControlGit {
             // clone失敗時はローカルディレクトリを削除
             $param = escapeshellarg($this->cloneRepoDir);
             $cmd = "sudo /bin/rm -rf " . $param . " 2>&1";
-            exec($cmd, $output, $return_var);
+            exec($cmd, $outdel, $return_del);
 
             // Git clone commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1021"); 
             $logaddstr = implode("\n",$output);
+            $logaddstr .= "\nexit code:($return_var)";
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -207,6 +208,7 @@ class ControlGit {
             // Git config の設定に失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1020"); 
             $logaddstr = implode("\n",$output);
+            $logaddstr .= "\nexit code:($return_var)";
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -220,13 +222,19 @@ class ControlGit {
      */
     public function GitRemoteChk() {
 
-        $output = NULL;
-        $return_var = 0;
         $cmd_ok = false;
 
         $cmd = sprintf("sudo git %s remote -v 2>&1",$this->gitOption);
 
-        exec($cmd, $output, $return_var);
+        // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
+        for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+            $output = NULL;
+            $return_var = 0;
+            exec($cmd, $output, $return_var);
+            if($return_var == 0) {
+                break;
+            }
+        }
         if($return_var == 0) {
             $stdout = $output[0];
             $ret = preg_match("/^origin(\s)/", $stdout);
@@ -240,6 +248,7 @@ class ControlGit {
             //Git remote commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1023"); 
             $logaddstr = implode("\n",$output);
+            $logaddstr .= "\nexit code:($return_var)";
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -249,6 +258,7 @@ class ControlGit {
             // ローカルクローンのリモートリポジトリが不正です。(リモートリポジトリURL:{})
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1022",array($this->remortRepoUrl)); 
             $logaddstr = implode("\n",$output);
+            $logaddstr .= "\nexit code:($return_var)";
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -276,12 +286,20 @@ class ControlGit {
                                                           escapeshellarg('remote show origin'),
                                                           escapeshellarg($this->user),
                                                           escapeshellarg($this->password));
-            $output1 = NULL;
-            exec($cmd1, $output1, $return_var);
+
+            // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
+            for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+                $output1 = NULL;
+                exec($cmd1, $output1, $return_var);
+                if($return_var == 0) {
+                    break;
+                }
+            }
             if($return_var != 0) {
-                //Git branch commandに失敗しました。
+                //Git remote show origin commandに失敗しました。
                 $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024"); 
                 $logaddstr = implode("\n",$output1);
+                $logaddstr .= "\nexit code:($return_var)";
                 $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
                 $this->SetGitCommandLastErrorMsg(implode("\n",$output1));
                 $this->SetLastErrorMsg($FREE_LOG);
@@ -301,12 +319,20 @@ class ControlGit {
         } 
         // カレントブランチ確認
         $cmd2 = sprintf("sudo -i git %s branch 2>&1",$this->gitOption);
-        $output2 = NULL;
-        exec($cmd2, $output2, $return_var);
+
+        // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
+        for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+            $output2 = NULL;
+            exec($cmd2, $output2, $return_var);
+            if($return_var == 0){
+                break;
+            }
+        }
         if($return_var != 0) {
-            //Git branch commandに失敗しました。
+            //Git remote show origin commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024"); 
             $logaddstr = implode("\n",$output2);
+            $logaddstr .= "\nexit code:($return_var)";
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output2));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -331,18 +357,24 @@ class ControlGit {
      */
     public function GitLsFiles(&$Files) {
 
-        $output = NULL;
-        $return_var = 0;
-
         $cmd = sprintf("sudo -i git %s ls-files 2>&1",$this->gitOption);
 
-        exec($cmd, $output, $return_var);
+        // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
+        for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+            $output = NULL;
+            $return_var = 0;
+            exec($cmd, $output, $return_var);
+            if($return_var == 0) {
+                break;
+            }
+        }
         if($return_var == 0) {
             $Files = $output;
         } else {
             //Git ls-files commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1026"); 
             $logaddstr = implode("\n",$output);
+            $logaddstr .= "\nexit code:($return_var)";
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);
@@ -354,7 +386,7 @@ class ControlGit {
     /**
      * git pull
      */
-    public function GitPull(&$pullResultAry,$Authtype) {
+    public function GitPull(&$pullResultAry,$Authtype,&$UpdateFlg=true) {
         global $g;
 
         $output = NULL;
@@ -386,11 +418,13 @@ class ControlGit {
                     $ret = preg_match($ResultParsStr, $output[$idx1]);
                     if($ret == 1) {
                         $format_ok = true;
+                        $UpdateFlg = false;
                         break;
                     }
                     $ret = preg_match("/^Fast-forward/", $output[$idx1]);
                     if($ret == 1) {
                         $format_ok = true;
+                        $UpdateFlg = true;
                         break;
                     }
                 }
@@ -409,6 +443,7 @@ class ControlGit {
             //Git pull commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1030"); 
             $logaddstr = implode("\n",$output);
+            $logaddstr .= "\nexit code:($return_var)";
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             $this->SetGitCommandLastErrorMsg(implode("\n",$output));
             $this->SetLastErrorMsg($FREE_LOG);

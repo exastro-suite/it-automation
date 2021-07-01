@@ -215,7 +215,8 @@ DEL_OPE_ID                         %INT%                            , -- 構築�
 DEL_MOVE_ID                        %INT%                            , -- 構築時のMovementID
 DEL_EXEC_TYPE                      %INT%                            , -- 構築時の実行タイプ　ドライラン
 DEL_ERROR_NOTE                     TEXT                             , -- 構築エラー時の内容
-DEL_URL                            %VARCHR% (256)                   , -- 構築時の実行結果　URL
+DEL_EXEC_INS_NO                    %VARCHR% (16)                    , -- 構築時の作業インスタンス番号
+DEL_MENU_NO                        %VARCHR% (16)                    , -- 構築時の作業実行確認メニューID
 --
 ACCESS_AUTH                        TEXT                             ,
 NOTE                               %VARCHR%(4000)                   , -- 備考
@@ -252,9 +253,10 @@ SYNC_LAST_UPDATE_USER              %INT%                            , -- 最終�
 -- デリバリ情報
 DEL_OPE_ID                         %INT%                            , -- 構築時のオペレーションID
 DEL_MOVE_ID                        %INT%                            , -- 構築時のMovementID
-DEL_EXEC_TYPE                      %INT%                            , -- 構築時の実行タイプ　ドライラン
+DEL_EXEC_TYPE                      %INT%                            , -- 構築時の実行タイプ　1:ドライラン
 DEL_ERROR_NOTE                     TEXT                             , -- 構築エラー時の内容
-DEL_URL                            %VARCHR% (256)                   , -- 構築時の実行結果　URL
+DEL_EXEC_INS_NO                    %VARCHR% (16)                    , -- 構築時の作業インスタンス番号
+DEL_MENU_NO                        %VARCHR% (16)                    , -- 構築時の作業実行確認メニューID
 --
 ACCESS_AUTH                        TEXT                             ,
 NOTE                               %VARCHR%(4000)                   , -- 備考
@@ -570,6 +572,10 @@ FROM
     B_CICD_REST_ACCOUNT_LIST_JNL TAB_A
     LEFT JOIN A_ACCOUNT_LIST_JNL TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID );
 
+-- -------------------------------------------------
+-- -- 資材紐付管理の紐付先資材タイプ　プルダウン用 
+-- -- (ansible/terrafome各インストール有無用)
+-- -------------------------------------------------
 CREATE VIEW B_CICD_MATERIAL_TYPE_NAME_ANS AS
 SELECT 
     * 
@@ -617,3 +623,82 @@ FROM
     B_CICD_MATERIAL_TYPE_NAME_JNL 
 WHERE 
     DRIVER_TYPE = null;
+
+-- -------------------------------------------------
+-- -- 資材紐付管理のExcel/Rest用の　メインビュー  
+-- -------------------------------------------------
+CREATE VIEW D_CICD_MATERIAL_LINK_LIST AS
+SELECT
+  TAB_A.*,
+  TAB_A.DEL_MOVE_ID      REST_DEL_MOVE_ID,
+  TAB_A.MATL_ROW_ID      REST_MATL_ROW_ID
+FROM
+  B_CICD_MATERIAL_LINK_LIST TAB_A;
+
+CREATE VIEW D_CICD_MATERIAL_LINK_LIST_JNL AS
+SELECT
+  TAB_A.*,
+  TAB_A.DEL_MOVE_ID      REST_DEL_MOVE_ID,
+  TAB_A.MATL_ROW_ID      REST_MATL_ROW_ID
+FROM
+  B_CICD_MATERIAL_LINK_LIST_JNL TAB_A;
+  
+-- -------------------------------------------------
+-- -- 資材紐付管理のExcel/Rest用の　プルダウン用 
+-- -- リモートリポジトリ+資材パス用
+-- -------------------------------------------------
+CREATE VIEW D_CICD_MATL_FILE_LIST AS
+SELECT 
+  TAB_A.*,
+  TAB_A.MATL_ROW_ID                                MATL_FILE_PATH_PULLKEY,
+  CONCAT(TAB_B.REPO_NAME,':',TAB_A.MATL_FILE_PATH) MATL_FILE_PATH_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM
+            B_CICD_MATERIAL_LIST   TAB_A
+  LEFT JOIN B_CICD_REPOSITORY_LIST TAB_B ON ( TAB_A.REPO_ROW_ID = TAB_B.REPO_ROW_ID )
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0';
+
+CREATE VIEW D_CICD_MATL_FILE_LIST_JNL AS
+SELECT 
+  TAB_A.*,
+  TAB_A.MATL_ROW_ID                                MATL_FILE_PATH_PULLKEY,
+  CONCAT(TAB_B.REPO_NAME,':',TAB_A.MATL_FILE_PATH) MATL_FILE_PATH_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM
+            B_CICD_MATERIAL_LIST_JNL   TAB_A
+  LEFT JOIN B_CICD_REPOSITORY_LIST_JNL TAB_B ON ( TAB_A.REPO_ROW_ID = TAB_B.REPO_ROW_ID )
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0';
+
+-- -------------------------------------------------
+-- -- 資材紐付管理のExcel/Rest用の　プルダウン用 
+-- -- Movement用
+-- -------------------------------------------------
+CREATE VIEW D_CICD_MATL_PATTERN_LIST AS
+SELECT
+  TAB_A.*,
+  TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
+  CONCAT(TAB_B.ITA_EXT_STM_NAME,':',TAB_A.PATTERN_NAME) MATL_PTN_NAME_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM 
+            C_PATTERN_PER_ORCH    TAB_A
+  LEFT JOIN B_ITA_EXT_STM_MASTER  TAB_B ON (TAB_A.ITA_EXT_STM_ID = TAB_B.ITA_EXT_STM_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0';
+
+CREATE VIEW D_CICD_MATL_PATTERN_LIST_JNL AS
+SELECT
+  TAB_A.*,
+  TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
+  CONCAT(TAB_B.ITA_EXT_STM_NAME,':',TAB_A.PATTERN_NAME) MATL_PTN_NAME_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM 
+            C_PATTERN_PER_ORCH_JNL    TAB_A
+  LEFT JOIN B_ITA_EXT_STM_MASTER_JNL  TAB_B ON (TAB_A.ITA_EXT_STM_ID = TAB_B.ITA_EXT_STM_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0';
