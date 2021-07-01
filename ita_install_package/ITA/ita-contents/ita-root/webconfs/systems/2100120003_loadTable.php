@@ -1079,7 +1079,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
                 return $retArray;
         };
-        $c = new TextColumn('DEL_MENU_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032500"));
+        $c = new TextColumn('DEL_MENU_NO',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032500"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032501"));
         $strWebUIText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070703");
         $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText)));
