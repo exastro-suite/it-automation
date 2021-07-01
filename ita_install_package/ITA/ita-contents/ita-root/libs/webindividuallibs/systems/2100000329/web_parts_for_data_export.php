@@ -49,9 +49,6 @@ catch (Exception $e){
     require_once ($g['root_dir_path'] . '/libs/webcommonlibs/web_parts_db_access_exception.php');
 }
 
-// 最終更新者「データポータビリティプロシージャ」
-define('ACCOUNT_NAME', -100331);
-
 // 画面表示の固定値（ラべル）
 $headerLabel1 = $g['objMTS']->getSomeMessage('ITAWDCH-STD-30011');
 $exportLabel1 = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900001');

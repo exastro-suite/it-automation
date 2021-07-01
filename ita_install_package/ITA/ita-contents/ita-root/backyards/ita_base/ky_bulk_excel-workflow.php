@@ -37,7 +37,7 @@ define('DST_PATH',             ROOT_DIR_PATH . '/uploadfiles/2100000331');
 define('RESULT_PATH',          ROOT_DIR_PATH . '/uploadfiles/2100000331/FILE_RESULT');
 define('LOG_DIR',              '/logs/backyardlogs/');
 define('LOG_LEVEL',            getenv('LOG_LEVEL'));
-define('LAST_UPDATE_USER',     -100024); // データポータビリティプロシージャ
+define('LAST_UPDATE_USER',     -100331); // Excel一括実行プロシージャ
 define('STATUS_RUNNING',       2); // 実行中
 define('STATUS_PROCESSED',     3); // 完了
 define('STATUS_FAILURE',       4); // 完了(異常) 

@@ -103,7 +103,8 @@ function setStatus($taskId, $status, $uploadFile=NULL){
         $sql = "UPDATE
                     B_BULK_EXCEL_TASK
                 SET
-                    TASK_STATUS = :TASK_STATUS
+                    TASK_STATUS      = :TASK_STATUS,
+                    LAST_UPDATE_USER = :LAST_UPDATE_USER
                 WHERE
                     TASK_ID = :TASK_ID
                 AND
@@ -119,8 +120,9 @@ function setStatus($taskId, $status, $uploadFile=NULL){
         }
         $res = $objQuery->sqlBind(
             array(
-                "TASK_STATUS" => $status,
-                "TASK_ID"     => $taskId
+                "TASK_STATUS"      => $status,
+                "LAST_UPDATE_USER" => LAST_UPDATE_USER,
+                "TASK_ID"          => $taskId,
             )
         );
         $res = $objQuery->sqlExecute();
@@ -130,7 +132,6 @@ function setStatus($taskId, $status, $uploadFile=NULL){
                                                           basename(__FILE__), __LINE__)));
             outputLog(LOG_PREFIX, $objQuery->getLastError());
             throw new Exception( $ErrorMsg );
-            // return false;
         }
 
         // 履歴テーブルに登録
@@ -143,7 +144,6 @@ function setStatus($taskId, $status, $uploadFile=NULL){
                                                           basename(__FILE__), __LINE__)));
             outputLog(LOG_PREFIX, $objQuery->getLastError());
             throw new Exception( $ErrorMsg );
-            // return false;
         }
 
         // JOURNAL_ACTION_CLASS
@@ -164,7 +164,6 @@ function setStatus($taskId, $status, $uploadFile=NULL){
             outputLog(LOG_PREFIX, $sql);
                         outputLog(LOG_PREFIX, $objQuery->getLastError());
             throw new Exception( $ErrorMsg );
-            // return false;
         }
         $res = $objQuery->sqlBind(
             array(
@@ -182,7 +181,6 @@ function setStatus($taskId, $status, $uploadFile=NULL){
             outputLog(LOG_PREFIX, $sql);
             outputLog(LOG_PREFIX, $objQuery->getLastError());
             throw new Exception( $ErrorMsg );
-            // return false;
         }
 
         $taskInfo = array();
@@ -196,7 +194,6 @@ function setStatus($taskId, $status, $uploadFile=NULL){
             outputLog(LOG_PREFIX, $sql);
             outputLog(LOG_PREFIX, $objQuery->getLastError());
             throw new Exception( $ErrorMsg );
-            // return false;
         }
 
         $taskInfo = $taskInfo[0];
@@ -241,7 +238,6 @@ function setStatus($taskId, $status, $uploadFile=NULL){
             outputLog(LOG_PREFIX, $sql);
             outputLog(LOG_PREFIX, $objQuery->getLastError());
             throw new Exception( $ErrorMsg );
-            // return false;
         }
 
         $now = date("Y-m-d H:i:s");
@@ -272,7 +268,6 @@ function setStatus($taskId, $status, $uploadFile=NULL){
             outputLog(LOG_PREFIX, $sql);
             outputLog(LOG_PREFIX, $objQuery->getLastError());
             throw new Exception( $ErrorMsg );
-            // return false;
         }
 
         // シーケンスの更新
@@ -286,7 +281,6 @@ function setStatus($taskId, $status, $uploadFile=NULL){
             outputLog(LOG_PREFIX, $sql);
             outputLog(LOG_PREFIX, $objQuery->getLastError());
             throw new Exception( $ErrorMsg );
-            // return false;
         }
 
         // トランザクションコミット
