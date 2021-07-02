@@ -213,7 +213,7 @@ try{
     $otherMenuLinkArray = $result;
 
     $urlOptionTargetArray = array('2000000005'); //「他メニュー連携」のメニューの中でLinkIDColumnのUrlOptionをtrueにする対象。（プルダウン選択の項目名がVIEWで作られた「〇〇:△△」というような形式の場合に指定する。
-    $noLinkMenuIdArray = array('2100160016'); //LinkIDColumnではなくIDColumnで作成したい対象のメニューID。「Yes/No」などの固定のフラグを選択するものが対象。
+    $noLinkMenuIdArray = array('2100160016', '2100160017'); //LinkIDColumnではなくIDColumnで作成したい対象のメニューID。「Yes/No」などの固定のフラグを選択するものが対象。
 
     //////////////////////////
     // 参照項目情報テーブルを検索
