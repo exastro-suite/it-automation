@@ -149,7 +149,7 @@ function setStatus($taskId, $status, $uploadFile=NULL){
         // JOURNAL_ACTION_CLASS
         $jnlActClass = "UPDATE";
         $sql = "SELECT
-                    TASK_ID, TASK_STATUS, TASK_TYPE, ABOLISHED_TYPE, FILE_NAME, RESULT_FILE_NAME, NOTE, DISP_SEQ, ACCESS_AUTH, DISUSE_FLAG, LAST_UPDATE_USER, LAST_UPDATE_TIMESTAMP
+                    TASK_ID, TASK_STATUS, TASK_TYPE, ABOLISHED_TYPE, FILE_NAME, RESULT_FILE_NAME, EXECUTE_USER, NOTE, DISP_SEQ, ACCESS_AUTH, DISUSE_FLAG, LAST_UPDATE_USER, LAST_UPDATE_TIMESTAMP
                 FROM
                     B_BULK_EXCEL_TASK
                 WHERE
@@ -209,6 +209,7 @@ function setStatus($taskId, $status, $uploadFile=NULL){
                     ABOLISHED_TYPE,
                     FILE_NAME,
                     RESULT_FILE_NAME,
+                    EXECUTE_USER,
                     DISP_SEQ,
                     ACCESS_AUTH,
                     NOTE,
@@ -225,6 +226,7 @@ function setStatus($taskId, $status, $uploadFile=NULL){
                     :ABOLISHED_TYPE,
                     :FILE_NAME,
                     :RESULT_FILE_NAME,
+                    :EXECUTE_USER,
                     :DISP_SEQ,
                     :ACCESS_AUTH,
                     :NOTE,
@@ -252,6 +254,7 @@ function setStatus($taskId, $status, $uploadFile=NULL){
                 "ABOLISHED_TYPE"        => $taskInfo["ABOLISHED_TYPE"],
                 "FILE_NAME"             => $taskInfo["FILE_NAME"],
                 "RESULT_FILE_NAME"      => $taskInfo["RESULT_FILE_NAME"],
+                "EXECUTE_USER"          => $taskInfo["EXECUTE_USER"],
                 "DISP_SEQ"              => $taskInfo["DISP_SEQ"],
                 "ACCESS_AUTH"           => $taskInfo["ACCESS_AUTH"],
                 "NOTE"                  => $taskInfo["NOTE"],
