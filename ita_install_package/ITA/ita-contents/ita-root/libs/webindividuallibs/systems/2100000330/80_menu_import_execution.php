@@ -253,7 +253,65 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
         checkZipFile();
 
         //メニューリストの取得
-        $retImportAry = makeImportCheckbox();
+        $tmpRetImportAry = makeImportCheckbox();
+        if (empty($tmpRetImportAry)) {
+            throw new Exception($g['objMTS']->getSomeMessage("ITABASEH-ERR-2100000330_16"));
+        }
+        $retImportAry = array();
+        $retUnImportAry = array();
+        foreach ($tmpRetImportAry as $menuGroupId => $menuGroupInfo) {
+            foreach ($menuGroupInfo["menu"] as $menuInfo) {
+                $menuId   = $menuInfo["menu_id"];
+                $menuName = $menuInfo["menu_name"];
+                $fileName = $menuInfo["file_name"];
+
+                if (isset($menuInfo["error"])) {
+                    $error    = $menuInfo["error"];
+                    if (array_key_exists($menuGroupId, $retUnImportAry)) {
+                        $key = array_search($menuId, array_column($tmpRetImportAry[$menuGroupId]["menu"], "menu_id"));
+                        $retUnImportAry[$menuGroupId][$key]["menu"][] = array(
+                            "menu_id"   => $menuId,
+                            "menu_name" => $menuName,
+                            "file_name" => $fileName,
+                            "error"     => $error
+                        );
+                    }
+                    else {
+                        $retUnImportAry[$menuGroupId] = array(
+                            "menu_group_name" => $menuGroupInfo["menu_group_name"],
+                            "menu"            => array(
+                                "menu_id"   => $menuId,
+                                "menu_name" => $menuName,
+                                "file_name" => $fileName,
+                                "error"     => $error
+                            )
+                        );
+                    }
+                } else {
+                    if (array_key_exists($menuGroupId, $retImportAry)) {
+                        $key = array_search($menuId, array_column($tmpRetImportAry[$menuGroupId]["menu"], "menu_id"));
+                        $retImportAry[$menuGroupId][$key]["menu"][] = array(
+                            "menu_id"   => $menuId,
+                            "menu_name" => $menuName,
+                            "file_name" => $fileName,
+                        );
+                    }
+                    else {
+                        $retImportAry[$menuGroupId] = array(
+                            "menu_group_name" => $menuGroupInfo["menu_group_name"],
+                            "menu"            => array(
+                                "menu_id"   => $menuId,
+                                "menu_name" => $menuName,
+                                "file_name" => $fileName,
+                            )
+                        );
+                    }
+                }
+            }
+        }
+        if (empty($retImportAry)) {
+            throw new Exception($g['objMTS']->getSomeMessage("ITABASEH-ERR-2100000330_16"));
+        }
 
         $resultFlg = true;
         $intResultCode= "000";
@@ -271,6 +329,8 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
     $arrayResult["data_portability_upload_file_name"] = $objJSONOfReceptedData['zipfile']['name'];
 
     if( $intResultCode == "000" )$arrayResult["IMPORT_LIST"] = $retImportAry;
+    if( $intResultCode == "000" )$arrayResult["UNIMPORT_LIST"] = $retUnImportAry;
+
     $arrayResult["RESULTCODE"] = $intResultCode;
     $arrayResult['RESULTINFO'] = strip_tags(trim($resultMsg));
 
