@@ -1930,19 +1930,17 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
 
 
                 $strFileReceptUniqueNumber = $strModeMark."_".$strLogTimeStamp."_".basename($bk_strUpTmpFileFullname);
-                $strMovedFileFullname = $editSourceDir."/".$strUpTmpFileFullnameForMoved2.".log";
+                $strMovedFileFullname = $editSourceDir."/".$tmpStrUpTmpFileFullname.".log";
 
-                $cmd = "mv $strUpTmpFileFullname $strMovedFileFullname";
-                exec($cmd, $output, $return_var);
 
-                if(0 != $return_var){
+                $res = rename($bk_strUpTmpFileFullname, $editSourceDir."/".$tmpStrUpTmpFileFullname.".log");
+                if (!$res) {
                     //----ファイルの移動に失敗した
                     $intErrorType = 802;
                     $intErrorPlaceMark = 1000;
                     throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     //ファイルの移動に失敗した----
-                }
-                else{
+                } else {
                     $strIUDSourceFullname = $strMovedFileFullname;
                 }
             }

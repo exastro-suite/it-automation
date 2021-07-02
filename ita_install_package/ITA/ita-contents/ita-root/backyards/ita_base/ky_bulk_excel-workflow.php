@@ -300,6 +300,16 @@ try {
                 $privilege = getPrivilegeAuthByUserId($menuId, $userId);
                 if ($privilege == 1) {
                     $objTable = getInfoOfLoadTable(strval($menuId));
+                    if (!file_exists(ROOT_DIR_PATH."/temp/bulk_excel/import/import/$taskId/$fileName")) {
+                        // ファイルがないエラー
+                        $resFilePath = RESULT_PATH."/ResultData_$taskId.log";
+                        $menuInfo    = getMenuInfoByMenuId($menuId);
+                        $title       = $menuInfo["MENU_GROUP_ID"]."_".$menuInfo["MENU_GROUP_NAME"].":".$menuId."_".$menuInfo["MENU_NAME"];
+                        $msg         = $title."\n".$objMTS->getSomeMessage("ITAWDCH-ERR-1101")."\n";
+
+                        dumpResultMsg($msg, $taskId);
+                        break;
+                    }
 
                     $files = array(
                         "file" => array(
@@ -320,7 +330,9 @@ try {
                                                           array('B_BULK_EXCEL_TASK',basename(__FILE__), __LINE__));
                         $res = setStatus($task['TASK_ID'], STATUS_FAILURE);
                         outputLog(LOG_PREFIX, $logMsg);
-                        continue;
+                        $msg         = $res["response"]["text"]."\n";
+                        dumpResultMsg($msg, $taskId);
+                        break;
                     }
                 } else {
                     // 権限エラー
