@@ -20,32 +20,31 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-/* ルートディレクトリの取得 */
-if ( empty($root_dir_path) ){
-    $root_dir_temp = array();
-    $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
-    $root_dir_path = $root_dir_temp[0] . "ita-root";
-}
-require_once ($root_dir_path . '/libs/backyardlibs/common/common_db_access.php');
-require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_functions.php');
-require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
-require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
-$wanted_filename = "ita_ansible-driver";
-$ansible_driver  = false;
-if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
-    $ansible_driver = true;
-}
-$wanted_filename = "ita_terraform-driver";    
-$terraform_driver  = false;
-if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
-    $terraform_driver = true;
-}
-
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
-    global $ansible_driver;
-    global $terraform_driver;
+    global $root_dir_path;
+
+    // メニュー作成経由対応
+    if ( empty($root_dir_path) ){
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+    }
+    require_once ($root_dir_path . '/libs/backyardlibs/common/common_db_access.php');
+    require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_functions.php');
+    require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
+    require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
+    $wanted_filename = "ita_ansible-driver";
+    $ansible_driver  = false;
+    if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+        $ansible_driver = true;
+    }
+    $wanted_filename = "ita_terraform-driver";    
+    $terraform_driver  = false;
+    if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+        $terraform_driver = true;
+    }
 
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030000");
@@ -622,7 +621,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
                 return $retArray;
         };
-        $c = new IDColumn('SYNC_LAST_UPDATE_USER',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032800"),'A_ACCOUNT_LIST','USER_ID','USERNAME','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        $c = new IDColumn('SYNC_LAST_UPDATE_USER',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032800"),'D_CICD_ACCT_LINK','ACCT_ROW_ID','USERNAME','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032801"));//エクセル・ヘッダでの説明
         // OutputType一覧  ----
         // filter 一覧 excel関連のみ表示
@@ -1039,15 +1038,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setOutputType('update_table',   new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText,true)));
         // OutputType一覧  ----
         // 隠しカラム
-        $c->getOutputType('filter_table')->setVisible(false);
-        $c->getOutputType('print_table')->setVisible(false);
+        //$c->getOutputType('filter_table')->setVisible(false);
+        //$c->getOutputType('print_table')->setVisible(false);
         $c->getOutputType('update_table')->setVisible(false);
         $c->getOutputType('register_table')->setVisible(false);
         $c->getOutputType('delete_table')->setVisible(false);
-        $c->getOutputType('print_journal_table')->setVisible(false);
-        $c->getOutputType('excel')->setVisible(false);
-        $c->getOutputType('csv')->setVisible(false);
-        $c->getOutputType('json')->setVisible(false);
+        //$c->getOutputType('print_journal_table')->setVisible(false);
+        //$c->getOutputType('excel')->setVisible(false);
+        //$c->getOutputType('csv')->setVisible(false);
+        //$c->getOutputType('json')->setVisible(false);
         // ----  OutputType一覧
         // ----  エクセル/CSVからのアップロードを禁止する。
         $c->setAllowSendFromFile(false);
@@ -1110,11 +1109,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $retLinkable = "disabled";
                 // 再開ボタン 活性・非活性制御
                 if( array_key_exists('DEL_EXEC_INS_NO', $rowData) === true &&
-                    array_key_exists('DEL_MENU_ID', $rowData)  === true &&
+                    array_key_exists('DEL_MENU_NO', $rowData)  === true &&
                     array_key_exists('DISUSE_FLAG', $rowData)      === true ) {
                     // 作業インスタンスNoと作業実行ドライバ区分が設定されているか判定
                     if((strlen($rowData['DEL_EXEC_INS_NO']) != 0) &&
-                       (strlen($rowData['DEL_MENU_ID']) != 0) &&
+                       (strlen($rowData['DEL_MENU_NO']) != 0) &&
                        ($rowData['DISUSE_FLAG'] == 0)) {
                         // 自動同期　有効(未選択)の場合
                             $retLinkable = "";
@@ -1128,9 +1127,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $c->setDBColumn(false);
             $c->setHiddenMainTableColumn(false);
             $c->setOutputType('print_table', new OutputType(new SortedTabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array(""))));
-            $c->setEvent("print_table", "onClick", "monitor_execution", array('this',':DEL_EXEC_INS_NO',':DEL_MENU_ID'));
+            $c->setEvent("print_table", "onClick", "monitor_execution", array('this',':DEL_EXEC_INS_NO',':DEL_MENU_NO'));
             $c->setOutputType('print_journal_table', new OutputType(new SortedTabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array(""))));
-            $c->setEvent("print_journal_table", "onClick", "monitor_execution", array('this',':DEL_EXEC_INS_NO',':DEL_MENU_ID'));
+            $c->setEvent("print_journal_table", "onClick", "monitor_execution", array('this',':DEL_EXEC_INS_NO',':DEL_MENU_NO'));
             //$c->getOutputType('print_journal_table')->setVisible(false);
             $cg->addColumn($c);
         }

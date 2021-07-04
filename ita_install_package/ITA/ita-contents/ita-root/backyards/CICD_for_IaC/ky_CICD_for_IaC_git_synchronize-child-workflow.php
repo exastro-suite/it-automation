@@ -292,6 +292,13 @@
             $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$addlogstr);
             throw new Exception($FREE_LOG);
         }
+        // リモートリポジトリ管理の排他処理をしていないので
+        // UIから廃止または自動同期を無効にしていないかチェックする。
+        if(($RepoListRow['DISUSE_FLAG'] == '1') ||
+           ($RepoListRow['AUTO_SYNC_FLG'] == TD_B_CICD_REPOSITORY_LIST::C_AUTO_SYNC_FLG_OFF)) {
+            // exit
+            exit(0);
+        }
 
         $cloneRepoDir = $LFCobj->getLocalCloneDir($RepoId);
         $libPath      = $LFCobj->getLocalShellDir();
@@ -1042,13 +1049,13 @@
         global $TDRepoobj;
         global $TDSyncStsobj;
 
+        // 廃止かは判定しない。
         $sqlBody   = "SELECT 
                         TAB_A.*
                       FROM
                         %s TAB_A
                       WHERE
-                        TAB_A.REPO_ROW_ID = :REPO_ROW_ID AND
-                        TAB_A.DISUSE_FLAG = '0'";
+                        TAB_A.REPO_ROW_ID = :REPO_ROW_ID ";
         $sqlBody = sprintf($sqlBody,$TDRepoobj->getTableName(),$TDSyncStsobj->getTableName());
         $arrayBind = array("REPO_ROW_ID"=>$RepoId);
         $objQuery  = $DBobj->SelectForSimple($sqlBody,$arrayBind);
@@ -1809,16 +1816,24 @@
                 }
             }
             if($go === true) {
+
+                $DelvFlg = 0;
+                if((strlen($row['DEL_OPE_ID']) != 0) &&
+                    (strlen($row['DEL_MOVE_ID']) != 0)) {
+                    $DelvFlg = 1;
+                }
+
                 ///////////////////////////////////////////////////////////////////////////////////////
                 // 資材紐付を行う孫プロセス起動
                 ///////////////////////////////////////////////////////////////////////////////////////
                 $MatlLinkId = $row['MATL_LINK_ROW_ID'];
-                $ret = ExecuteGrandChildProcess($RepoId,$MatlLinkId,$logfile);
+                $RestUserId = $row['ACCT_ROW_ID'];
+                $ret = ExecuteGrandChildProcess($RepoId,$MatlLinkId,$RestUserId,$DelvFlg);
             }
         }
         return true;
     }
-    function ExecuteGrandChildProcess($RepoId,$MatlLinkId,$logfile) {
+    function ExecuteGrandChildProcess($RepoId,$MatlLinkId,$RestUserId,$DelvFlg) {
         global $cmDBobj;
         global $DBobj;
         global $error_flag;
@@ -1839,11 +1854,11 @@
         // 改行コードが付いている場合に取り除く
         $php_command = str_replace("\n","",$php_command);
 
-        $cmd = sprintf("%s %s/backyards/CICD_for_IaC/%s  %s %s 2>&1",
+        $cmd = sprintf("%s %s/backyards/CICD_for_IaC/%s %s %s %s %s 2>&1",
                        $php_command,
                        $root_dir_path,
                        $LFCobj->getGrandChildProcessExecName(),
-                       $RepoId,$MatlLinkId);
+                       $RepoId,$MatlLinkId,$RestUserIdi,$DelvFlg);
 
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ) {
