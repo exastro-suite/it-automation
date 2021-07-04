@@ -1858,7 +1858,7 @@
                        $php_command,
                        $root_dir_path,
                        $LFCobj->getGrandChildProcessExecName(),
-                       $RepoId,$MatlLinkId,$RestUserIdi,$DelvFlg);
+                       $RepoId,$MatlLinkId,$RestUserId,$DelvFlg);
 
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ) {
