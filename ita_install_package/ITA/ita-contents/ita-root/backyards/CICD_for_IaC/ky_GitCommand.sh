@@ -29,18 +29,16 @@ CMD="git --git-dir "$CLONE_REPO"/.git --work-tree="$CLONE_REPO" "$GIT_CMD
 
 if [ "${TYPE}" = "pass" ]; then
     expect -c "
-    set timeout 5 
+    set timeout  5
     spawn $CMD
     expect {
-        \"Cloning into\" {
-            exp_continue
-        } \"Username for \" {
+        \"Username for \" {
             send \"${REMOTE_USER}\n\"
             exp_continue
         } \"Password for \" {
             send \"${REMOTE_PASSWORD}\n\"
             exp_continue
-        } \"remote: \" {
+        } \"HEAD branch:\" {
             set timeout -1
             exp_continue
         } timeout {
@@ -69,20 +67,18 @@ if [ "${TYPE}" = "pass" ]; then
     }"
 else
     expect -c "
-    set timeout 5 
+    set timeout  5
     spawn $CMD
     expect {
-        \"Cloning into\" {
-            exp_continue
-        } \"Username for \" {
+        \"Username for \" {
             exit 201
         } \"Password for \" {
             exit 202
-        } \"remote: \" {
+        } \"HEAD branch:\" {
             set timeout -1
             exp_continue
         } timeout {
-            exit 200
+            exit 205
         } eof {
             catch wait result
     

@@ -30,9 +30,9 @@
         $root_dir_path = $root_dir_temp[0] . "ita-root";
     }
     ////////////////////////////////////////////////////////////////
-    // 起動パラメータ取得   リモードリポジトリ項番 資材紐管理項番
+    // 起動パラメータ取得   リモードリポジトリ項番 資材紐管理項番 RestUserID Movement実行有無
     ///////////////////////////////////////////////////////////////
-    if($argc != 3) {
+    if($argc != 5) {
         echo ("Invalid parameter count");
         exit(2);
     }
@@ -46,6 +46,22 @@
         exit(2);
     }
     $MatlLinkId = (int)$argv[2];
+    if(is_numeric($argv[3]) === false) {
+        echo ("Invalid parameter argv[3]");
+        exit(2);
+    }
+    $RestUserId = (int)$argv[3];
+    if(is_numeric($argv[4]) === false) {
+        echo ("Invalid parameter argv[4]");
+        exit(2);
+    }
+    $DelvExecFlg = (int)$argv[4];   // 0:Movement実行なし　1:Movement実行あり
+    if($DelvExecFlg == 0) {
+        $DelvExecFlg = false;
+    } else {
+        $DelvExecFlg = true;
+    }
+
 
     ////////////////////////////////
     // $log_output_dirを取得      //
@@ -83,14 +99,16 @@
     $warning_flag                    = 0; // 警告フラグ(1：警告発生)
     $error_flag                      = 0; // 異常フラグ(1：異常発生)
 
-    $MatlLinkUpdate_Flg              = false;  // 資材紐付管理状態更新　状態 false:未更新 true:更新済
-    $UIDelvExecInsNo                 = "";     // 資材紐付管理　デリバリー作業インスタンスNo
-    $UIDelvExecMenuId                = "";     // 資材紐付管理　デリバリー作業メニューID
-    $UIMatlUpdateStatusID            = "";     // 資材紐付管理　同期状態
-    $UIMatlUpdateStatusDisplayMsg    = "";     // 資材紐付管理　同期結果メッセージ
-    $UIDelvStatusDisplayMsg          = "";     // 資材紐付管理　デリバリー結果メッセージ 
-    $AddRepoIdMatlLinkIdStr          = "";     // ログメッセージに追加するメッセージ
-    $AddMatlLinkIdStr                = "";     // ログメッセージに追加するメッセージ
+    $MatlLinkUpdate_Flg              = false;        // 資材紐付管理状態更新　状態 false:未更新 true:更新済
+    // 資材紐付管理 同期状態/デリバリ状態に記録する情報退避変数
+    $UIRestUserId                    = $RestUserId;   // 資材紐付管理  RestユーザID
+    $UIDelvExecInsNo                 = "";           // 資材紐付管理　デリバリー作業インスタンスNo
+    $UIDelvExecMenuId                = "";           // 資材紐付管理　デリバリー作業メニューID
+    $UIMatlUpdateStatusID            = "";           // 資材紐付管理　同期状態
+    $UIMatlUpdateStatusDisplayMsg    = "";           // 資材紐付管理　同期結果メッセージ
+    $UIDelvStatusDisplayMsg          = "";           // 資材紐付管理　デリバリー結果メッセージ 
+    $AddRepoIdMatlLinkIdStr          = "";           // ログメッセージに追加するメッセージ
+    $AddMatlLinkIdStr                = "";           // ログメッセージに追加するメッセージ
 
     $db_access_user_id               = -130000;
 
@@ -258,10 +276,10 @@
             $UpdateColumnAry['SYNC_STATUS_ROW_ID']     = $reyAry[2];
             $UpdateColumnAry['SYNC_ERROR_NOTE']        = $reyAry[0];
             $UpdateColumnAry['SYNC_LAST_TIME']         = date("Y/m/d H:i:s",time())  . ".000000";
-            $UpdateColumnAry['SYNC_LAST_UPDATE_USER']  = $db_access_user_id;
+            $UpdateColumnAry['SYNC_LAST_UPDATE_USER']  = $UIRestUserId;
             $UpdateColumnAry['DEL_ERROR_NOTE']         = $reyAry[1];
             $UpdateColumnAry['DEL_EXEC_INS_NO']        = $reyAry[3];
-            $UpdateColumnAry['DEL_MENU_ID']            = $reyAry[4];
+            $UpdateColumnAry['DEL_MENU_NO']            = $reyAry[4];
 
             $ret = UpdateMatlLinkSyncStatus($MatlLinkId,$UpdateColumnAry);
             if($ret !== true)  {
@@ -325,16 +343,15 @@
         }
     }
     if($MatlLinkUpdate_Flg === false) {
-    
         $reyAry = getUIMatlSyncStatus();
         $UpdateColumnAry  = array();
         $UpdateColumnAry['SYNC_STATUS_ROW_ID']     = $reyAry[2];
         $UpdateColumnAry['SYNC_ERROR_NOTE']        = $reyAry[0];
         $UpdateColumnAry['SYNC_LAST_TIME']         = date("Y/m/d H:i:s",time())  . ".000000";
-        $UpdateColumnAry['SYNC_LAST_UPDATE_USER']  = $db_access_user_id;
+        $UpdateColumnAry['SYNC_LAST_UPDATE_USER']  = $UIRestUserId;
         $UpdateColumnAry['DEL_ERROR_NOTE']         = $reyAry[1];
         $UpdateColumnAry['DEL_EXEC_INS_NO']        = $reyAry[3];
-        $UpdateColumnAry['DEL_MENU_ID']            = $reyAry[4];
+        $UpdateColumnAry['DEL_MENU_NO']            = $reyAry[4];
 
         $ret = UpdateMatlLinkSyncStatus($MatlLinkId,$UpdateColumnAry);
         if($ret !== true) {
@@ -363,8 +380,8 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-ERR-50001");
             require ($root_dir_path . $log_output_php );
         }
-        
-        exit(2);
+        // 呼び元でexit codeをチェックしているので 0 でexit 
+        exit(0);
     }
     elseif( $warning_flag != 0 ){
         // 終了メッセージ
@@ -372,7 +389,8 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-ERR-50002");
             require ($root_dir_path . $log_output_php );
         }
-        exit(2);
+        // 呼び元でexit codeをチェックしているので 0 でexit 
+        exit(0);
     }
     else{
         // 終了メッセージ
@@ -391,9 +409,14 @@
         global $UIMatlUpdateStatusID;
         global $UIDelvExecInsNo;
         global $UIDelvExecMenuId;
+        global $DelvExecFlg;
     
         $UIMatlUpdateStatusDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
-        $UIDelvStatusDisplayMsg       = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4001");
+        if($DelvExecFlg === true) {
+            $UIDelvStatusDisplayMsg       = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4001");
+        } else {
+            $UIDelvStatusDisplayMsg       = "";
+        }
         $UIMatlUpdateStatusID         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
         $UIDelvExecInsNo              = "";
         $UIDelvExecMenuId             = "";
@@ -406,10 +429,15 @@
         global $UIMatlUpdateStatusID;
         global $UIDelvExecInsNo;
         global $UIDelvExecMenuId;
+        global $DelvExecFlg;
 
         $UIMatlUpdateStatusDisplayMsg = $UIMatlSyncMsg;
         if($UIDelvMsg == "def") {
-            $UIDelvStatusDisplayMsg       = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4001");
+            if($DelvExecFlg === true) {
+                $UIDelvStatusDisplayMsg       = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4001");
+            } else {
+                $UIDelvStatusDisplayMsg       = "";
+            }
         } else {
             $UIDelvStatusDisplayMsg       = $UIDelvMsg;
         }
@@ -577,7 +605,7 @@
         $Tobj = new TQ_REPO_LIST_ALL_JOIN($ansible_driver,$terraform_driver);
         $sqlBody = $Tobj->getSql($ansible_driver,$terraform_driver);
         $sqlBody = $sqlBody . 
-                   " WHERE 
+                   " WHERE
                           T1.MATL_LINK_ROW_ID  =  :MATL_LINK_ROW_ID ";
 
         $arrayBind                       = array();
@@ -599,6 +627,7 @@
         while ( $row = $objQuery->resultFetch() ){
             $tgtMatlLinkRow[] = $row;
         }
+
         unset($objQuery);
         return true;
     }
@@ -637,6 +666,7 @@
         global $terraform_driver;
         global $LFCobj;
         global $MatlLinkUpdate_Flg;
+        global $DelvExecFlg;
 
         // 資材紐付管理より対象レコード取得
         $tgtMatlLinkRow = array();
@@ -656,6 +686,7 @@
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
             return $FREE_LOG;
         }
+
         // 処理対象か判定
         if(count($tgtMatlLinkRow) == 0)  {
             // 対象レコードなし
@@ -679,36 +710,40 @@
 
              // 廃止レコードか判定
              if($row['DISUSE_FLAG'] == '1') {
-                 // 異常フラグON
-                 $error_flag = 1;
-
-                 // 資材紐付管理が廃止状態です。資材紐付処理をスキップします。(リモートリポジトリ管理 項番:{} 資材紐付管理 項番:{})";
-                 $LogStr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2041",array($RepoId,$MatlLinkId));
-                 $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
-                 $UIMatlSyncMsg   = $LogStr;
-                 $UIDelvMsg       = "def";
-                 $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
-                 $DelvExecInsNo   = "";
-                 $DelvExecMenuId  = "";
-                 setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
-                 return $FREE_LOG;
+                 // UIで廃止できてしまうので、廃止されていたらexitする。
+                 exit(0);
+//                 // 異常フラグON
+//                 $error_flag = 1;
+//
+//                 // 資材紐付管理が廃止状態です。資材紐付処理をスキップします。(リモートリポジトリ管理 項番:{} 資材紐付管理 項番:{})";
+//                 $LogStr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2041",array($RepoId,$MatlLinkId));
+//                 $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
+//                 $UIMatlSyncMsg   = $LogStr;
+//                 $UIDelvMsg       = "def";
+//                 $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+//                 $DelvExecInsNo   = "";
+//                 $DelvExecMenuId  = "";
+//                 setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
+//                 return $FREE_LOG;
              } else {
                  // 自動同期が無効か判定
                  if($row['AUTO_SYNC_FLG'] == TD_B_CICD_MATERIAL_LINK_LIST::C_AUTO_SYNC_FLG_OFF) {
-                     // 異常フラグON
-                     $error_flag = 1;
-
-                     // 対象レコードなし
-                     // 資材紐付管理の自動同期が無効です。資材紐付処理をスキップします。(リモートリポジトリ管理 項番:{} 資材紐付管理 項番:{})";
-                     $LogStr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2042",array($RepoId,$MatlLinkId));
-                     $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
-                     $UIMatlSyncMsg   = $LogStr;
-                     $UIDelvMsg       = "def";
-                     $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
-                     $DelvExecInsNo   = "";
-                     $DelvExecMenuId  = "";
-                     setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
-                     return $FREE_LOG;
+                     // UIで自動同期を無効にできてしまうので、無効にされていたらexitする。
+                     exit(0);
+//                     // 異常フラグON
+//                     $error_flag = 1;
+//
+//                     // 対象レコードなし
+//                     // 資材紐付管理の自動同期が無効です。資材紐付処理をスキップします。(リモートリポジトリ管理 項番:{} 資材紐付管理 項番:{})";
+//                     $LogStr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2042",array($RepoId,$MatlLinkId));
+//                     $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
+//                     $UIMatlSyncMsg   = $LogStr;
+//                     $UIDelvMsg       = "def";
+//                     $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+//                     $DelvExecInsNo   = "";
+//                     $DelvExecMenuId  = "";
+//                     setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
+//                     return $FREE_LOG;
                  }
              }
         }
@@ -892,12 +927,6 @@
             break;
         }
 
-        $DelvFlg = false;
-        if((strlen($row['DEL_OPE_ID']) != 0) &&
-           (strlen($row['DEL_MOVE_ID']) != 0)) {
-            $DelvFlg = true;
-        } 
-
         /////////////////////////////////////////////////////////
         // 資材更新
         /////////////////////////////////////////////////////////
@@ -922,7 +951,13 @@
                 if($row['SYNC_STATUS_ROW_ID'] != TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL) {
                     $LogStr  = $ErrorMsgHeder;
                     $UIMatlSyncMsg   = "";
-                    $UIDelvMsg       = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2058");
+                    // Movementが登録されているか判定
+                    if($DelvExecFlg === true) {
+                        //$UIDelvMsg       = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2058");
+                        $UIDelvMsg       = "";
+                    } else {
+                        $UIDelvMsg       = "";
+                    }
                     $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL;
                     $DelvExecInsNo   = "";
                     $DelvExecMenuId  = "";
@@ -931,6 +966,7 @@
                 } else {
                     // 状態更新が不要であることをマーク
                     $MatlLinkUpdate_Flg = true;
+                    return true;
                 }
             }
         } else {
@@ -950,7 +986,7 @@
         }
 
         // 作業実行が不要な場合
-        if($DelvFlg === false) {
+        if($DelvExecFlg === false) {
             $UIMatlSyncMsg   = "";
             $UIDelvMsg       = "";
             $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL;
@@ -1017,7 +1053,7 @@
             $FREE_LOG        = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,$AddLogStr);
             $UIMatlSyncMsg   = "";
             $UIDelvMsg       = $ErrorMsgHeder . "\n" . $AddLogStr;
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL;
+            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);

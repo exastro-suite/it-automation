@@ -1153,19 +1153,51 @@ function buttonDisableControl(mode,strTid,objButton){
     }
     return retValue;
 }
-function Journal1Tbl_monitor_execution( objButton,execution_no,menu_no ){
-    // 遷移先URLを作成
-    var url = '/default/menu/01_browse.php?no=' + menu_no + '&execution_no=' + execution_no;
+var cicdifinfoURL;
+function getcicdifinfoURL() {
+    const URL = '/common/common_getcicdifinfo.php';
+    $.ajax({
+      type: 'get',
+      url: URL,
+      dataType: 'text',
+      async : false
+    }).done( function( result ) {
+        cicdifinfoURL = JSON.parse( result );
+    }).fail( function( result ) {
+    });
+}
+function Journal1Tbl_monitor_execution( objButton,execution_no,menu_no,abc){
 
-    // 作業状態確認メニューに遷移
-    open( url, "_blank") ;
+    // cicd インターフェース情報取得
+    getcicdifinfoURL();
+    if(cicdifinfoURL["STATUS"]  == "OK") {
+       // 遷移先URLを作成
+       var url = cicdifinfoURL["URL"] + '/default/menu/01_browse.php?no=' + menu_no + '&execution_no=' + execution_no;
+
+       // 作業状態確認メニューに遷移
+       open( url, "_blank") ;
+    }else{
+        window.alert(cicdifinfoURL["ERROR_MSG"]);
+    }
 }
 function Mix1_1_monitor_execution( objButton,execution_no,menu_no ){
-    // 遷移先URLを作成
-    var url = '/default/menu/01_browse.php?no=' + menu_no + '&execution_no=' + execution_no;
 
-    // 作業状態確認メニューに遷移
-    open( url, "_blank") ;
+    // cicd インターフェース情報取得
+    getcicdifinfoURL();
+    if(cicdifinfoURL["STATUS"]  == "OK") {
+       // 遷移先URLを作成
+       var url = cicdifinfoURL["URL"] + '/default/menu/01_browse.php?no=' + menu_no + '&execution_no=' + execution_no;
+
+       // 作業状態確認メニューに遷移
+       open( url, "_blank") ;
+    }else{
+        window.alert(cicdifinfoURL["ERROR_MSG"]);
+    }
+//    // 遷移先URLを作成
+//    var url = '/default/menu/01_browse.php?no=' + menu_no + '&execution_no=' + execution_no;
+//
+//    // 作業状態確認メニューに遷移
+//    open( url, "_blank") ;
 }
 
 // ここまでカスタマイズした場合の一般メソッド配置域----

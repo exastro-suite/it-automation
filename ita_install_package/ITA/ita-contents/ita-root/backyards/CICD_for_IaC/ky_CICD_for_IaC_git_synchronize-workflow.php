@@ -212,9 +212,16 @@
             throw new Exception($FREE_LOG);
         }
         foreach($tgtRepoListRow as $row) {
+
+            // テーブルの排他処理をしていないのでchkRepoListAndSyncStatusRowからgetTargetRepoListRowの間で
+            // リモートリポジトリ管理にレコードが追加された場合のガード処理
+            if($row['REPO_ROW_ID'] != $row['ROW_ID']) {
+                // 次回の周期で処理
+                continue;
+            }
             // 現在時間
             $ExecuteTime = time();
-            $RepoId      = $row['ROW_ID'];
+            $RepoId      = $row['REPO_ROW_ID'];
             switch($row['SYNC_STATUS_ROW_ID']){
             // 同期状態を判定
             case TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL:   // 正常

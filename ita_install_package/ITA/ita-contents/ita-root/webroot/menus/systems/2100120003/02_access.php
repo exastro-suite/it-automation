@@ -19,6 +19,10 @@
     //-- サイト個別PHP要素、ここまで--
     require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_02_access.php");
     //-- サイト個別PHP要素、ここから--
+    require_once ($root_dir_path . '/libs/backyardlibs/common/common_db_access.php');
+    require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_functions.php');
+    require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
+    require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
     //-- サイト個別PHP要素、ここまで--
     class Db_Access extends Db_Access_Core {
         //-- サイト個別PHP要素、ここから--
@@ -41,11 +45,16 @@
 
             $p_last_updatetime_for_update = rawurldecode(base64_decode($p_last_updatetime_for_update));
 
+web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
+web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
             try {
+web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
 
                 $cmDBobj = new CommonDBAccessCoreClass($db_model_ch,$g['objDBCA'],$g['objMTS'],$g['login_id']);
+web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
 
                 $DBobj = new LocalDBAccessClass($db_model_ch,$cmDBobj,$g['objDBCA'],$g['objMTS'],$g['login_id'],$logfile,$log_level,$RepositoryNo);
+web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
 
                 $objTextVldt = new SingleTextValidator(22,22,false);
                 if( $objTextVldt->isValid($p_last_updatetime_for_update) === false ){
@@ -62,6 +71,7 @@
                     throw new Exception($FREE_LOG);
                 }
 
+web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
                 $dbAcction      = "SELECT FOR UPDATE";
                 $BindArray      = array('WHERE'=>"MATL_LINK_ROW_ID=:MATL_LINK_ROW_ID AND DISUSE_FLAG=:DISUSE_FLAG");
                 $TDobj          = new TD_B_CICD_MATERIAL_LINK_LIST();
@@ -104,6 +114,7 @@
                 }
                 if($intErrorType == 0) {
 
+web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
                     // 同期状態を再開に設定
                     $row['SYNC_STATUS_ROW_ID']    = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART;
                     // 詳細情報を空白に設定
@@ -112,7 +123,7 @@
                     $row['SYNC_LAST_UPDATE_USER'] = "";
                     $row['SYNC_LAST_TIME']        = "";
                     $row['DEL_ERROR_NOTE']        = "";
-                    $row['DEL_MENU_ID']           = "";
+                    $row['DEL_MENU_NO']           = "";
                     $row['DEL_EXEC_INS_NO']       = "";
 
 
@@ -127,6 +138,7 @@
                         $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
                         throw new Exception($FREE_LOG);
                     }
+web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
 
                     $ret = $DBobj->transactionCommit();
                     if($ret !== true) {
@@ -138,6 +150,8 @@
             }
             catch (Exception $e){
                 $tmpErrMsgBody = $e->getMessage();
+
+web_log(__FILE__.__LINE__.print_r($tmpErrMsgBody,true));
 
                 if ( $intErrorType == 0) $intErrorType = 500;
 
