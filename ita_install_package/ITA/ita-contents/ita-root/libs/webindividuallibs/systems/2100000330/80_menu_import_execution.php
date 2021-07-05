@@ -330,6 +330,7 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
 
     if( $intResultCode == "000" )$arrayResult["IMPORT_LIST"] = $retImportAry;
     if( $intResultCode == "000" )$arrayResult["UNIMPORT_LIST"] = $retUnImportAry;
+    if( $intResultCode == "002" ) unset($arrayResult["upload_id"]);
 
     $arrayResult["RESULTCODE"] = $intResultCode;
     $arrayResult['RESULTINFO'] = strip_tags(trim($resultMsg));

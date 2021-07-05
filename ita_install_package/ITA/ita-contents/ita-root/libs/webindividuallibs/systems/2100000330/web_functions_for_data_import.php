@@ -497,9 +497,11 @@ function getMenuIdFileList(){
         if (!preg_match("/^#/",$menuIdFileInfo)) {
             if (!empty($menuIdFileInfo)) {
                 $menuIdFileInfo = explode(":", $menuIdFileInfo);
-                $menuId         = $menuIdFileInfo[0];
-                $menuFileName   = $menuIdFileInfo[1];
-                $retImportAry[$menuId] = $menuFileName;
+                if (count($menuIdFileInfo) == 2) {
+                    $menuId         = $menuIdFileInfo[0];
+                    $menuFileName   = $menuIdFileInfo[1];
+                    $retImportAry[$menuId] = $menuFileName;
+                }
             }
         }
     }
