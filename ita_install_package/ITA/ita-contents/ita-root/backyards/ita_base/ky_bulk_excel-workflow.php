@@ -234,7 +234,7 @@ try {
                 $res = exec("unzip $editBakerPath -d ".EXPORT_PATH."/$taskId/tmp_zip");
                 if ($res != 0) {
                     // ステータスを完了(異常)にする
-                    $logMsg = "コピーに失敗しました。";
+                    $logMsg = $objMTS->getSomeMessage('ITACREPAR-ERR-5010', array($editBakerPath, EXPORT_PATH."/$taskId/tmp_zip"));
                     outputLog(LOG_PREFIX, $logMsg);
                     outputLog(LOG_PREFIX, EXPORT_PATH."/$taskId/editorBaker.zip");
                     setStatus($task['TASK_ID'], STATUS_FAILURE);
@@ -327,7 +327,6 @@ try {
                         // ステータスを完了(異常)にする
                         $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
                                                           array('B_BULK_EXCEL_TASK',basename(__FILE__), __LINE__));
-                        $res = setStatus($task['TASK_ID'], STATUS_FAILURE);
                         outputLog(LOG_PREFIX, $logMsg);
                         $msg         = $resArray["response"]["text"];
                         if ($msg == "") {
