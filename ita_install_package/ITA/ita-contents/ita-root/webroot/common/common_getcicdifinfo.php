@@ -79,7 +79,11 @@ try {
     }
     $tgtRepoListRow = array();
     while ( $row = $objQuery->resultFetch() ){
-        $url = sprintf("%s://%s:%s",$row['PROTOCOL'],$row['HOSTNAME'],$row['PORT']);
+        if(trim($row['HOSTNAME']) == "127.0.0.1") {
+            $url = "";
+        } else {
+            $url = sprintf("%s://%s:%s",$row['PROTOCOL'],$row['HOSTNAME'],$row['PORT']);
+        }
     }
     $ErrorMsg = "";
     HttpResponse("OK",$url,"");
