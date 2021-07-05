@@ -1150,8 +1150,28 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $objLU4UColumn = $tmpAryColumn[$table->getRequiredUpdateDate4UColumnID()];
 
     $objFunction = function($objClientValidator, $value, $strNumberForRI, $arrayRegData, $arrayVariant){
-        global $ansible_driver;
-        global $terraform_driver;
+        global $root_dir_path;
+
+        // メニュー作成経由対応
+        if ( empty($root_dir_path) ){
+            $root_dir_temp = array();
+            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+            $root_dir_path = $root_dir_temp[0] . "ita-root";
+        }
+        require_once ($root_dir_path . '/libs/backyardlibs/common/common_db_access.php');
+        require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_functions.php');
+        require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
+        require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
+        $wanted_filename = "ita_ansible-driver";
+        $ansible_driver  = false;
+        if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+            $ansible_driver = true;
+        }
+        $wanted_filename = "ita_terraform-driver";    
+        $terraform_driver  = false;
+        if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+            $terraform_driver = true;
+        }
 
         $getColumnDataFunction = function($strModeId,$columnName,$Type,$arrayVariant,$arrayRegData) {
             $UIbase = "";
