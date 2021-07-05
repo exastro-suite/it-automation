@@ -139,7 +139,6 @@ try {
             $request = array();
             foreach ($menuIdArray as $menuId) {
                 $privilege = getPrivilegeAuthByUserId($menuId, $userId);
-                outputLog(LOG_PREFIX, "privilege => $privilege");
                 if ($privilege == 1 || $privilege == 2) {
                     $objTable = getInfoOfLoadTable($menuId);
                     $menuInfo = getMenuInfoByMenuId($menuId);
@@ -300,7 +299,7 @@ try {
                 $privilege = getPrivilegeAuthByUserId($menuId, $userId);
                 if ($privilege == 1) {
                     $objTable = getInfoOfLoadTable(strval($menuId));
-                    if (!file_exists(ROOT_DIR_PATH."/temp/bulk_excel/import/import/$taskId/$fileName")) {
+                    if (!file_exists(ROOT_DIR_PATH."/temp/bulk_excel/import/import/$taskId/$fileName") || $fileName == "") {
                         // ファイルがないエラー
                         $resFilePath = RESULT_PATH."/ResultData_$taskId.log";
                         $menuInfo    = getMenuInfoByMenuId($menuId);
@@ -330,8 +329,11 @@ try {
                                                           array('B_BULK_EXCEL_TASK',basename(__FILE__), __LINE__));
                         $res = setStatus($task['TASK_ID'], STATUS_FAILURE);
                         outputLog(LOG_PREFIX, $logMsg);
-                        $msg         = $res["response"]["text"]."\n";
-                        dumpResultMsg($msg, $taskId);
+                        $msg         = $resArray["response"]["text"];
+                        if ($msg == "") {
+                            $msg = $objMTS->getSomeMessage("ITAWDCH-ERR-3001");
+                        }
+                        dumpResultMsg($msg."\n", $taskId);
                         break;
                     }
                 } else {
