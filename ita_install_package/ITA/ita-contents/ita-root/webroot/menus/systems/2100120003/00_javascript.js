@@ -430,6 +430,7 @@ callback.prototype = {
         if( ary_result[0] == "000" ){
             // 同期の再開を受け付けました。
             window.alert(getSomeMessage("ITAWDCC100001"));
+            Filter1Tbl_search_async('orderFromFilterCmdBtn');
         }else if( ary_result[0] == "001" ){
             window.alert(ary_result[1])
             // ボタン再活性
@@ -1193,11 +1194,6 @@ function Mix1_1_monitor_execution( objButton,execution_no,menu_no ){
     }else{
         window.alert(cicdifinfoURL["ERROR_MSG"]);
     }
-//    // 遷移先URLを作成
-//    var url = '/default/menu/01_browse.php?no=' + menu_no + '&execution_no=' + execution_no;
-//
-//    // 作業状態確認メニューに遷移
-//    open( url, "_blank") ;
 }
 
 // ここまでカスタマイズした場合の一般メソッド配置域----

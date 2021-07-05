@@ -20,16 +20,18 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-/* ルートディレクトリの取得 */
-if ( empty($root_dir_path) ){
-    $root_dir_temp = array();
-    $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
-    $root_dir_path = $root_dir_temp[0] . "ita-root";
-}
-require_once ( $root_dir_path . "/libs/backyardlibs/CICD_for_IaC/local_functions.php");
-require_once ( $root_dir_path . "/libs/backyardlibs/CICD_for_IaC/table_definition.php");
-
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
+
+    global $root_dir_path;
+    /* ルートディレクトリの取得 */
+    if ( empty($root_dir_path) ){
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+    }
+    require_once ( $root_dir_path . "/libs/backyardlibs/CICD_for_IaC/local_functions.php");
+    require_once ( $root_dir_path . "/libs/backyardlibs/CICD_for_IaC/table_definition.php");
+
     global $g;
 
     $arrayWebSetting = array();
@@ -187,6 +189,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c = new IDColumn('AUTO_SYNC_FLG',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011300"),'B_VALID_INVALID_MASTER','FLAG_ID','FLAG_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200011301"));
         $c->setHiddenMainTableColumn(true);
+        $c->setDefaultValue("register_table", TD_B_CICD_MATERIAL_LINK_LIST::C_AUTO_SYNC_FLG_ON);
         $c->setRequired(true);
         $cg->addColumn($c);
 

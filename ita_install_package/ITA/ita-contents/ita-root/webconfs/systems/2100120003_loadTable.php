@@ -451,6 +451,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c = new IDColumn('AUTO_SYNC_FLG',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031100"),'B_VALID_INVALID_MASTER','FLAG_ID','FLAG_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031101"));
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+        $c->setDefaultValue("register_table", TD_B_CICD_MATERIAL_LINK_LIST::C_AUTO_SYNC_FLG_ON);
         $c->setRequired(true);
         $cg->addColumn($c);
 
