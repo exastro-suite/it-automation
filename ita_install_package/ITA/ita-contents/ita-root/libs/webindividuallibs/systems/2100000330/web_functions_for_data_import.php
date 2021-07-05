@@ -186,7 +186,6 @@ function checkZipFile(){
     $errCnt = 0;
 
     foreach ($fileAry as $file) {
-
         $filePath = $importPath . $uploadId . '/' . $file;
 
         $res = file_exists($filePath);
@@ -202,12 +201,14 @@ function checkZipFile(){
             $tmpFileStrAry = explode("/", $file);
             $lastIndex = count($tmpFileStrAry)-1;
             $tmpFileName = $tmpFileStrAry[$lastIndex];
+            
             $renamedFileName = "'".$tmpFileName."'";
+
             unset($tmpFileStrAry[$lastIndex]);
             $tmpFileStrAry[] = $renamedFileName;
             $file = implode("/", $tmpFileStrAry);
 
-            $cmd = "sudo mv $file $importPath$uploadId";
+            $cmd = "sudo mv '$file' '$importPath$uploadId'";
             exec($cmd, $output, $return_var);
 
             if(0 != $return_var){
@@ -347,7 +348,7 @@ function makeImportCheckbox(){
                 }
             }
             // ファイルの拡張子チェック
-            elseif (getExtension($menuFileName) != "scsv" && getExtension($menuFileName) != "xlsx") {
+            elseif (getExtension($menuFileName) != "scsv" && getExtension($menuFileName) != "xlsx" && $menuFileName != "") {
                 $tmpMenuInfo = array(
                     "menu_id"   => $menuId,
                     "menu_name" => $menuName,
@@ -436,7 +437,7 @@ function makeImportCheckbox(){
                     );
                     if (array_key_exists($menuGroupId, $retImportAry)) {
                         // メニューグループは存在するがメニューがない場合
-                        if (!$declare_key) {
+                        if ($declare_key === false) {
                             $retImportAry[$menuGroupId]["menu"][] = $tmpMenuInfo;
                         }
                     } else {
