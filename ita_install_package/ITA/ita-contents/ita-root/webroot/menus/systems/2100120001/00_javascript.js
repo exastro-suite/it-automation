@@ -438,6 +438,7 @@ callback.prototype = {
         if( ary_result[0] == "000" ){
             // 同期の再開を受け付けました。
             window.alert(getSomeMessage("ITAWDCC100001"));
+            search_async('orderFromFilterCmdBtn');
         }else if( ary_result[0] == "001" ){
             window.alert(ary_result[1])
             // ボタン再活性
