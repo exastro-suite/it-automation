@@ -872,6 +872,9 @@
              $tgtFileName = $outRolesDir . "/" . $zipFileName;
         }
         $tgtFileBase64enc = base64_encode(file_get_contents($tgtFileName));
+        // zipファイル削除
+        $cmd = "/bin/rm -rf $outRolesDir";
+        exec($cmd);
 
         //////////////////////////////////////////////////////////////////
         // Restユーザのデフォルトアクセス権のあるロール名リストを取得

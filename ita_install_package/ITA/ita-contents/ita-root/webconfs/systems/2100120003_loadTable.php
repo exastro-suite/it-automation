@@ -329,6 +329,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $objVarBFmtReg = new SelectTabBFmt();
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+        // 複製対応
+        //$objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
         $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
         $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
         
@@ -926,6 +928,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $objVarBFmtReg = new SelectTabBFmt();
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+        // 複製対応
+        //$objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
         $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
         $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
     
