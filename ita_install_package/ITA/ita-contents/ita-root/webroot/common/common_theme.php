@@ -782,8 +782,29 @@ background-position: 0 -64px;
 .password_eye.password_see {
 background-position: -16px -64px;
 }
+/* #symphony_footer disabled button */
+#symphony_footer input[type="button"][disabled],
+#symphony_footer input[type="button"][disabled]:hover,
+#symphony_footer input[type="button"][disabled]:active,
+#symphony_footer input[type="submit"][disabled],
+#symphony_footer input[type="submit"][disabled]:hover,
+#symphony_footer input[type="submit"][disabled]:active {
+	background-color: rgba( 0,0,0,.5 );
+	border-color:  rgba( 0,0,0,.8 );
+}
 
-
+/* Movement 作業実行 */
+#KIZI #orchestratorInfoHeader,
+#KIZI #orchestratorInfoFooter {
+background-color: #272A2C;
+color: #D0D1D1;
+}
+#KIZI #operation_info_area {
+background-color: rgba( 0,0,0,.2 );
+}
+#KIZI #operation_info_area .heightAndWidthFixed01 label {
+color: #D0D1D1!important;
+}
 
 .select2-container--default .select2-results__option[aria-selected=true] {
 background-color: #444;
