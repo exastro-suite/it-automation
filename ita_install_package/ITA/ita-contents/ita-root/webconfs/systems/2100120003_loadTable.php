@@ -185,7 +185,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 return $retArray;
         };
 
-        $c = new IDColumn('MATL_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030400"),'B_CICD_MATERIAL_LIST','MATL_ROW_ID','MATL_FILE_PATH','', array('SELECT_ADD_FOR_ORDER'=>array('MATL_FILE_PATH'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        $c = new IDColumn('MATL_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030400"),'D_CICD_MATL_PATH_LIST','MATL_ROW_ID','MATL_FILE_PATH','', array('SELECT_ADD_FOR_ORDER'=>array('MATL_FILE_PATH'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030401"));
 
 
@@ -205,16 +205,19 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $RepoRowID = $aryVariant['REPO_ROW_ID'];
         
                 // RBAC対応 ----
-                $strQuery = "SELECT "
-                           ." TAB_1.MATL_ROW_ID     KEY_COLUMN "
-                           .",TAB_1.MATL_FILE_PATH  DISP_COLUMN "
-                           .",TAB_1.ACCESS_AUTH     ACCESS_AUTH "
-                           ."FROM "
-                           ." B_CICD_MATERIAL_LIST TAB_1 "
-                           ."WHERE "
-                           ."     TAB_1.DISUSE_FLAG = '0' "
-                           ." AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID "
-                           ."ORDER BY KEY_COLUMN ";
+                $strQuery = " SELECT
+                                 TAB_1.MATL_ROW_ID     KEY_COLUMN
+                                ,TAB_1.MATL_FILE_PATH  DISP_COLUMN
+                                ,TAB_1.ACCESS_AUTH     ACCESS_AUTH
+                                ,TAB_2.ACCESS_AUTH     ACCESS_AUTH_01
+                              FROM
+                                          B_CICD_MATERIAL_LIST     TAB_1
+                                LEFT JOIN B_CICD_REPOSITORY_LIST  TAB_2 ON (TAB_1.REPO_ROW_ID = TAB_2.REPO_ROW_ID)
+                              WHERE
+                                    TAB_1.DISUSE_FLAG = '0'
+                                AND TAB_2.DISUSE_FLAG = '0'
+                                AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID 
+                              ORDER BY KEY_COLUMN ";
         
                 $aryForBind['REPO_ROW_ID'] = $RepoRowID;
         
@@ -268,17 +271,19 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
                 $RepoRowID = $rowData['REPO_ROW_ID'];
 
-                $strQuery = "SELECT "
-                           ." TAB_1.MATL_ROW_ID        KEY_COLUMN "
-                           .",TAB_1.MATL_FILE_PATH     DISP_COLUMN "
-                           .",TAB_1.ACCESS_AUTH        ACCESS_AUTH "
-                           ."FROM "
-                           ." B_CICD_MATERIAL_LIST TAB_1 "
-                           ."WHERE "
-                           ."     TAB_1.DISUSE_FLAG = '0' "
-                           ." AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID "
-                           ."ORDER BY KEY_COLUMN ";
-        
+                $strQuery = " SELECT
+                                 TAB_1.MATL_ROW_ID     KEY_COLUMN
+                                ,TAB_1.MATL_FILE_PATH  DISP_COLUMN
+                                ,TAB_1.ACCESS_AUTH     ACCESS_AUTH
+                                ,TAB_2.ACCESS_AUTH     ACCESS_AUTH_01
+                              FROM
+                                          B_CICD_MATERIAL_LIST     TAB_1
+                                LEFT JOIN B_CICD_REPOSITORY_LIST  TAB_2 ON (TAB_1.REPO_ROW_ID = TAB_2.REPO_ROW_ID)
+                              WHERE
+                                    TAB_1.DISUSE_FLAG = '0'
+                                AND TAB_2.DISUSE_FLAG = '0'
+                                AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID 
+                              ORDER BY KEY_COLUMN ";
                 $aryForBind['REPO_ROW_ID']  = $RepoRowID;
         
                 if( 0 < strlen($RepoRowID) ){
