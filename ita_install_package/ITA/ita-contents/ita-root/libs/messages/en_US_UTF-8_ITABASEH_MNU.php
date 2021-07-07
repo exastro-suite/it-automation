@@ -781,6 +781,7 @@ $ary["ITABASEH-MNU-920026"]         = "Auto-input";
 $ary["ITABASEH-MNU-920027"]         = "Execution user";
 $ary["ITABASEH-MNU-920028"]         = "User to run Symphony (The registered/updated user will be automatically filled in)";
 $ary["ITABASEH-MNU-2100000329_1"]   = "The following functions are provided.<br>&nbsp;&nbsp;&nbsp;・Excel Bulk Export<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select the menu that you want to export data from and click the \"Export\" button.<br>Obsolete information<br>&nbsp;&nbsp;&nbsp;・Include obsolote<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports with obsolete records<br>&nbsp;&nbsp;&nbsp;・Do not include Obsolete<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports without obsolete records";
+$ary["ITABASEH-MNU-2100000329_2"]   = "Excel Bulk Export";
 $ary["ITABASEH-MNU-2100000330_1"]   = "Import target
 ";
 $ary["ITABASEH-MNU-2100000330_2"]   = "Menu group";
@@ -789,6 +790,8 @@ $ary["ITABASEH-MNU-2100000330_4"]   = "Menu Id";
 $ary["ITABASEH-MNU-2100000330_5"]   = "File name";
 $ary["ITABASEH-MNU-2100000330_6"]   = "Error";
 $ary["ITABASEH-MNU-2100000330_7"]   = "The following functions are provided.<br>・Upload import data<br>&nbsp;&nbsp;&nbsp;&nbsp;Upload the zip file containing the compressed data to import<br><br>・Import data<br>&nbsp;&nbsp;&nbsp;&nbsp;A list of importable menus is displayed.<br>&nbsp;&nbsp;&nbsp;&nbsp;Select the menus to import and click the import button.<br>&nbsp;&nbsp;&nbsp;&nbsp;The status of imported data can be checked from the \"Excel Bulk Export/Import list\".";
-$ary["ITABASEH-MNU-2100000331_1"]   = "The following functions are provided.<br>・View of Excel Bulk Export/Import
- list";
+$ary["ITABASEH-MNU-2100000330_8"]   = "Are you sure you want to import?\n※The import operation will follow the order listed in MENU_LIST.txt\nIf you are importing multiple menu data, make sure that you are aware about the data's consistency before executing.";
+$ary["ITABASEH-MNU-2100000330_9"]   = "Excel Bulk Import";
+$ary["ITABASEH-MNU-2100000331_1"]   = "The following functions are provided.<br>・View of Excel Bulk Export・Import list";
+$ary["ITABASEH-MNU-2100000331_2"]   = "Excel Bulk Export・Import list";
 ?>

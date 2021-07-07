@@ -37,12 +37,12 @@ $(window).on('load', function(){
 });
 </script>
 
-<h2 class="menu_name"><?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-900006'); ?></h2>
+<h2 class="menu_name"><?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-2100000329_2'); ?></h2>
 <?php if ($resultFlg === true): ?>
 <form method="post" action="/default/menu/01_browse.php?no=2100000331&task_no=<?php echo $task_no;?>">
     <div style="margin:10px 0 0 10px;">
         <p class="text"><?php echo $resultMsg; ?></p>
-        <input type="submit" value="<?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-900008'); ?>">
+        <input type="submit" value="<?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-2100000331_2'); ?>">
         <input type="hidden" name="menu_on" value="<?php echo $menuOn;?>">
     </div>
 </form>
