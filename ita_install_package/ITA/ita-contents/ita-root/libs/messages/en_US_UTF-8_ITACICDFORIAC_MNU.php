@@ -14,7 +14,7 @@
 //   limitations under the License.
 //
 ////en_US_UTF-8_ITACICDFORIAC_MNU
-$ary[ITACICDFORIAC-MNU-1200010000] = "Since the Remote Repository clone is created in ITA, it is possible to maintain it's information (View/Register/Update/Abolish).<BR>
+$ary["ITACICDFORIAC-MNU-1200010000"] = "Since the Remote Repository clone is created in ITA, it is possible to maintain it's information (View/Register/Update/Abolish).<BR>
 Set the \"Remote repository URL\" and \"Branch\" to the values of the arguments you want to pass to the Git clone command.<BR>
 git clone 「Remote Repository」「Local Repository path」 -b「Branch」<BR>
  The「Local Repository path」is the following /exastro/ita-root/repositorys/0000000001(Item number: The last 10 digits).";
