@@ -97,6 +97,8 @@ class TableControlAgent {
 
     protected $strAccessAuthColumnName; // ACCESS_AUTH Column Name
 
+    protected $dispRestrictValue;
+
 	public function __construct($strDBMainTableId, $strRIColumnId, $strRIColumnLabel="", $strDBJournalTableId=null, $arrayVariant=array()){
 		global $g;
 		if( $strRIColumnLabel == "" ){
@@ -1395,6 +1397,15 @@ class TableControlAgent {
 		return getMainTableColumnStatus($mode, $this);
 	}
 	//デバッグ用----
+
+	//----特定の値のみを表示させる
+	public function setDispRestrictValue($arrayValue = array()){
+		$this->dispRestrictValue = $arrayValue;
+	}
+	public function getDispRestrictValue(){
+		return $this->dispRestrictValue;
+	}
+	//----特定の値のみを表示させる
 
 }
 

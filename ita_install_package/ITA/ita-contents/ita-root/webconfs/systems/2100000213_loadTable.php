@@ -93,6 +93,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
+    //実行ユーザの値が$g['login_id']か空欄と一致するレコードのみを表示させる
+    $dispRestrictColumn = array();
+    $dispRestrictColumn['EXECUTE_USER'] = array($g['login_id'], ""); //ログインユーザIDおよび空欄(null)のみ表示する
+    $table->setDispRestrictValue($dispRestrictColumn);
+
     $table->fixColumn();
 
     $tmpAryColumn = $table->getColumns();

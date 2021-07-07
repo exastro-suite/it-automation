@@ -99,6 +99,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(false);//登録/更新時には、入力必須
     $table->addColumn($c);
 
+    //実行ユーザの値が$g['login_id']と一致するレコードのみを表示させる
+    $dispRestrictColumn = array();
+    $dispRestrictColumn['EXECUTE_USER'] = array($g['login_id']); //ログインユーザIDおよび空欄(null)のみ表示する
+    $table->setDispRestrictValue($dispRestrictColumn);
+
 
     $table->fixColumn();
 

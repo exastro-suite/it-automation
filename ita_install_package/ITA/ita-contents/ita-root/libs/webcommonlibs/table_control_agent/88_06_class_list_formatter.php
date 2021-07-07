@@ -617,6 +617,34 @@ class CSVFormatter extends ListFormatter {
                 $objQuery =& $retArray[1];
                 $chkobj = null;
                 while ( $row = $objQuery->resultFetch() ){
+                    // ----dispRestrictValue対応
+                    $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                    if($aryDispRestrictValue != null){
+                        $matchFlg = false;
+                        foreach($aryDispRestrictValue as $columnName => $aryValue){
+                            if(array_key_exists($columnName, $row)){
+                                foreach($aryValue as $value){
+                                    //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                    if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                        if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                            $matchFlg = true;
+                                        }
+                                    }else{
+                                        if($row[$columnName] == $value){
+                                            $matchFlg = true;
+                                        }
+                                    }
+                                }
+
+                                //一致する値が無い場合は、処理をスキップ
+                                if($matchFlg == false){
+                                    continue 2;
+                                }
+                            }
+                        }
+                    }
+                    // dispRestrictValue対応----
+
                     // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
                     list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
                     if($ret === false) {
@@ -761,6 +789,34 @@ function writeToFileHistory($sql, $arrayFileterBody, $objTable, $objFunction01Fo
             $objQuery =& $retArray[1];
             $chkobj = null;
             while ( $row = $objQuery->resultFetch() ){
+                // ----dispRestrictValue対応
+                $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                if($aryDispRestrictValue != null){
+                    $matchFlg = false;
+                    foreach($aryDispRestrictValue as $columnName => $aryValue){
+                        if(array_key_exists($columnName, $row)){
+                            foreach($aryValue as $value){
+                                //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                    if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                        $matchFlg = true;
+                                    }
+                                }else{
+                                    if($row[$columnName] == $value){
+                                        $matchFlg = true;
+                                    }
+                                }
+                            }
+
+                            //一致する値が無い場合は、処理をスキップ
+                            if($matchFlg == false){
+                                continue 2;
+                            }
+                        }
+                    }
+                }
+                // dispRestrictValue対応----
+
                 // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
                 list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
                 if($ret === false) {
@@ -985,6 +1041,34 @@ class JSONFormatter extends ListFormatter {
                     // ---- RBAC対応
                     $chkobj = null;
                     while ( $row = $objQuery->resultFetch() ){
+                        // ----dispRestrictValue対応
+                        $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                        if($aryDispRestrictValue != null){
+                            $matchFlg = false;
+                            foreach($aryDispRestrictValue as $columnName => $aryValue){
+                                if(array_key_exists($columnName, $row)){
+                                    foreach($aryValue as $value){
+                                        //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                        if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                            if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                                $matchFlg = true;
+                                            }
+                                        }else{
+                                            if($row[$columnName] == $value){
+                                                $matchFlg = true;
+                                            }
+                                        }
+                                    }
+
+                                    //一致する値が無い場合は、処理をスキップ
+                                    if($matchFlg == false){
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                        // dispRestrictValue対応----
+
                         // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
                         list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
                         if($ret === false) {
@@ -2481,6 +2565,34 @@ class ExcelFormatter extends ListFormatter {
                     // ---- RBAC対応
                     $chkobj = null;
                     while ( $row = $objQuery->resultFetch() ){
+                        // ----dispRestrictValue対応
+                        $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                        if($aryDispRestrictValue != null){
+                            $matchFlg = false;
+                            foreach($aryDispRestrictValue as $columnName => $aryValue){
+                                if(array_key_exists($columnName, $row)){
+                                    foreach($aryValue as $value){
+                                        //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                        if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                            if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                                $matchFlg = true;
+                                            }
+                                        }else{
+                                            if($row[$columnName] == $value){
+                                                $matchFlg = true;
+                                            }
+                                        }
+                                    }
+
+                                    //一致する値が無い場合は、処理をスキップ
+                                    if($matchFlg == false){
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                        // dispRestrictValue対応----
+
                         // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
                         list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
                         if($ret === false) {
@@ -2602,6 +2714,34 @@ class ExcelFormatter extends ListFormatter {
                     // ---- RBAC対応
                     $chkobj = null;
                     while ( $row = $objQuery->resultFetch() ){
+                        // ----dispRestrictValue対応
+                        $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                        if($aryDispRestrictValue != null){
+                            $matchFlg = false;
+                            foreach($aryDispRestrictValue as $columnName => $aryValue){
+                                if(array_key_exists($columnName, $row)){
+                                    foreach($aryValue as $value){
+                                        //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                        if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                            if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                                $matchFlg = true;
+                                            }
+                                        }else{
+                                            if($row[$columnName] == $value){
+                                                $matchFlg = true;
+                                            }
+                                        }
+                                    }
+
+                                    //一致する値が無い場合は、処理をスキップ
+                                    if($matchFlg == false){
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                        // dispRestrictValue対応----
+
                         // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
                         list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
                         if($ret === false) {
