@@ -782,6 +782,7 @@ $ary["ITABASEH-MNU-920026"]         = "自動入力";
 $ary["ITABASEH-MNU-920027"]         = "実行ユーザ";
 $ary["ITABASEH-MNU-920028"]         = "Symphonyを実行するユーザ（登録/更新したユーザが自動的に入力されます）";
 $ary["ITABASEH-MNU-2100000329_1"]   = "下記の機能を提供しています。<br>・Excel一括エクスポート<br>&nbsp;&nbsp;&nbsp;&nbsp;データをエクスポートするメニューを選択し、エクスポートボタンをクリックしてください。<br>&nbsp;&nbsp;&nbsp;&nbsp;廃止情報<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・廃止を含む<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止したレコードを含めてエクスポートします。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・廃止を含まない<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止したレコードを除いてエクスポートします。";
+$ary["ITABASEH-MNU-2100000329_2"]   = "Excel一括エクスポート";
 $ary["ITABASEH-MNU-2100000330_1"]   = "インポート対象";
 $ary["ITABASEH-MNU-2100000330_2"]   = "メニューグループ名";
 $ary["ITABASEH-MNU-2100000330_3"]   = "メニュー名";
@@ -790,5 +791,7 @@ $ary["ITABASEH-MNU-2100000330_5"]   = "ファイル名";
 $ary["ITABASEH-MNU-2100000330_6"]   = "エラー内容";
 $ary["ITABASEH-MNU-2100000330_7"]   = "下記の機能を提供しています。<br>・インポートデータのアップロード<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするデータを圧縮したzipファイルをアップロードしてください。<br><br>・Excel一括インポート<br>&nbsp;&nbsp;&nbsp;&nbsp;インポート可能なメニューが一覧表示されます。<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするメニューを選択し、インポートボタンをクリックしてください。<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするデータの状態はExcel一括エクスポート・インポート管理で確認できます。";
 $ary["ITABASEH-MNU-2100000330_8"]   = "インポートを実行しますか？\n※MENU_LIST.txtに記載されている順にインポート作業を実行します。\n複数のメニューデータをインポートする場合は、データの整合性をご理解頂いた上で実行するようお願いいたします。";
+$ary["ITABASEH-MNU-2100000330_9"]   = "Excel一括インポート";
 $ary["ITABASEH-MNU-2100000331_1"]   = "下記の機能を提供しています。<br>・Excel一括エクスポート・インポートデータの閲覧";
+$ary["ITABASEH-MNU-2100000331_2"]   = "Excel一括エクスポート・インポート管理";
 ?>
