@@ -176,10 +176,9 @@ class ControlGit {
             $output = NULL;
             $this->ClearGitCommandLastErrorMsg();
             exec($cmd, $output, $return_var);
-
             if(0 != $return_var){
                 // リトライ中のログは表示しない。
-                usleep($this->retryWaitTime);
+                if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
             } else {
                 $comd_ok = true;
                 break;
@@ -237,7 +236,7 @@ class ControlGit {
             if($return_var == 0) {
                 break;
             }
-            usleep($this->retryWaitTime);
+            if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
         }
         if($return_var == 0) {
             $stdout = $output[0];
@@ -298,7 +297,7 @@ class ControlGit {
                 if($return_var == 0) {
                     break;
                 }
-                usleep($this->retryWaitTime);
+                if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
             }
             if($return_var != 0) {
                 //Git remote show origin commandに失敗しました。
@@ -332,7 +331,7 @@ class ControlGit {
             if($return_var == 0){
                 break;
             }
-            usleep($this->retryWaitTime);
+            if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
         }
         if($return_var != 0) {
             //Git remote show origin commandに失敗しました。
@@ -378,7 +377,7 @@ class ControlGit {
             if($return_var == 0) {
                 break;
             }
-            usleep($this->retryWaitTime);
+            if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
         }
         if($return_var == 0) {
             $Files = $output;
@@ -423,7 +422,7 @@ class ControlGit {
             exec($cmd, $output, $return_var);
             if(0 != $return_var){
                 // リトライ中のログは表示しない。
-                usleep($this->retryWaitTime);
+                if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
             } else {
                 $saveoutput = $output;
                 $format_ok = false;

@@ -700,7 +700,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         /////////////////////////////////////////////////////////
         // Excel/Rest用 Movement  必須入力:false  ユニーク:false
         ///////////////////////////////////////////////////////// 
-        $c = new IDColumn('REST_DEL_MOVE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031700"),'D_CICD_MATL_PATTERN_LIST','MATL_PTN_NAME_PULLKEY','MATL_PTN_NAME_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MATL_PTN_NAME_PULLDOWN'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        // インストールされているドライバを判断し資材タイプに紐付るViewを決定
+        $chkarry               = array();
+        $chkarry[true][true]   = "D_CICD_MATL_PATTERN_LIST_ALL";
+        $chkarry[true][false]  = "D_CICD_MATL_PATTERN_LIST_ANS";
+        $chkarry[false][true]  = "D_CICD_MATL_PATTERN_LIST_TERRA";
+        $chkarry[false][false] = "D_CICD_MATL_PATTERN_LIST_NULL";
+        $view_name = $chkarry[$ansible_driver][$terraform_driver];
+
+        $c = new IDColumn('REST_DEL_MOVE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031700"),$view_name,'MATL_PTN_NAME_PULLKEY','MATL_PTN_NAME_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MATL_PTN_NAME_PULLDOWN'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031701"));//エクセル・ヘッダでの説明
         $c->getOutputType('filter_table')->setVisible(false);
         $c->getOutputType('print_table')->setVisible(false);
