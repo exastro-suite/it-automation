@@ -65,10 +65,12 @@ class ControlGit {
         if($this->retryCount == "") {
            $this->retryCount = 3;
         }
+        $this->retryCount = $this->retryCount + 1;
         $this->retryWaitTime = $retryWaitTime;
         if($this->retryWaitTime == "") {
            $this->retryWaitTime = 1000;  //単位:ms
         }
+        $this->retryWaitTime = $this->retryWaitTime * 1000; // us
         $this->ProxyAddress = $ProxyAddress;
         $this->ProxyPort    = $ProxyPort;
         if(strlen(trim($ProxyAddress)) != 0) {

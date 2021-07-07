@@ -19,8 +19,8 @@ $ary["ITACICDFORIAC-MNU-1200010000"]   = "リモートリポジトリのクロ�
 　　git clone 「リモートリポジトリURL」「ローカルリポジトリパス」 -b「ブランチ」<BR>
 　　「ローカルリポジトリパス」は/exastro/ita-root/repositorys/0000000001(項番 右詰10桁)になります。";
 $ary["ITACICDFORIAC-MNU-1200010001"]   = "項番";
-$ary["ITACICDFORIAC-MNU-1200010002"]   = "リモートリポジトリ管理";
-$ary["ITACICDFORIAC-MNU-1200010003"]   = "リモートリポジトリ管理";
+$ary["ITACICDFORIAC-MNU-1200010002"]   = "リモートリポジトリ";
+$ary["ITACICDFORIAC-MNU-1200010003"]   = "リモートリポジトリ";
 $ary["ITACICDFORIAC-MNU-1200010100"]   = "リモートリポジトリ名";
 $ary["ITACICDFORIAC-MNU-1200010101"]   = "ITAでリモートリポジトリを示す名称を入力して下さい。
 [最大長] 256バイト";
@@ -80,10 +80,10 @@ $ary["ITACICDFORIAC-MNU-1200012201"]   = "通信に失敗した場合、通信�
 $ary["ITACICDFORIAC-MNU-1200020000"]   = "リモートリポジトリに登録されていた資材が表示されます。<BR>
 フィルタ表示されている資材を一括ダウンロードすることもできます。";
 $ary["ITACICDFORIAC-MNU-1200020001"]   = "項番";
-$ary["ITACICDFORIAC-MNU-1200020002"]   = "資材管理";
+$ary["ITACICDFORIAC-MNU-1200020002"]   = "リモートリポジトリ資材";
 $ary["ITACICDFORIAC-MNU-1200020003"]   = "リモートリポジトリに登録されている資材をメンテナンス(閲覧)できます。";
 $ary["ITACICDFORIAC-MNU-1200020100"]   = "リモートリポジトリ名";
-$ary["ITACICDFORIAC-MNU-1200020101"]   = "[元データ]リモートリポジトリ管理";
+$ary["ITACICDFORIAC-MNU-1200020101"]   = "[元データ]リモートリポジトリ";
 $ary["ITACICDFORIAC-MNU-1200020200"]   = "資材パス";
 $ary["ITACICDFORIAC-MNU-1200020201"]   = "リモートリポジトリ内の資材パス
 [元データ]リモートリポジトリ";
@@ -92,8 +92,8 @@ $ary["ITACICDFORIAC-MNU-1200020301"]   = "資材タイプ";
 $ary["ITACICDFORIAC-MNU-1200030000"]   = "リモートリポジトリの資材と他コンソールで使用する資材との紐付をメンテナンス(閲覧/登録/更新/廃止)できます。
 紐付先の資材はリモートリポジトリ側の資材が更新される度に自動反映されるようになります。";
 $ary["ITACICDFORIAC-MNU-1200030001"]   = "項番";
-$ary["ITACICDFORIAC-MNU-1200030002"]   = "資材紐付管理";
-$ary["ITACICDFORIAC-MNU-1200030003"]   = "資材紐付管理";
+$ary["ITACICDFORIAC-MNU-1200030002"]   = "資材紐付";
+$ary["ITACICDFORIAC-MNU-1200030003"]   = "資材紐付";
 $ary["ITACICDFORIAC-MNU-1200030100"]   = "紐付先資材名";
 $ary["ITACICDFORIAC-MNU-1200030101"]   = "紐付先に登録する資材名を入力してください。
 紐付先資材タイプで選択している資材に入力した資材名が存在しない場合、新規登録されます。
@@ -101,9 +101,9 @@ $ary["ITACICDFORIAC-MNU-1200030101"]   = "紐付先に登録する資材名を�
 [最大長] 256バイト";
 $ary["ITACICDFORIAC-MNU-1200030200"]   = "Git リポジトリ(From)";
 $ary["ITACICDFORIAC-MNU-1200030300"]   = "リモートリポジトリ";
-$ary["ITACICDFORIAC-MNU-1200030301"]   = "[元データ]リモートリポジトリ管理";
+$ary["ITACICDFORIAC-MNU-1200030301"]   = "[元データ]リモートリポジトリ";
 $ary["ITACICDFORIAC-MNU-1200030400"]   = "資材パス";
-$ary["ITACICDFORIAC-MNU-1200030401"]   = "[元データ]資材管理";
+$ary["ITACICDFORIAC-MNU-1200030401"]   = "[元データ]リモートリポジトリ資材";
 $ary["ITACICDFORIAC-MNU-1200030500"]   = "Exastro IT automation(To)";
 $ary["ITACICDFORIAC-MNU-1200030600"]   = "紐付先資材タイプ";
 $ary["ITACICDFORIAC-MNU-1200030601"]   = "紐付先の資材タイプを選択します。";
@@ -134,10 +134,10 @@ $ary["ITACICDFORIAC-MNU-1200031800"]   = "ドライラン";
 $ary["ITACICDFORIAC-MNU-1200031801"]   = "Movementをドライランで実行したい場合、●を選択して下さい。
 デフォルトはドライランでは実行しません。";
 $ary["ITACICDFORIAC-MNU-1200031900"]   = "作業インスタンスNo";
-$ary["ITACICDFORIAC-MNU-1200031901"]   = "Movemntを実行した際に採番された作業インスタンスNoです。";
+$ary["ITACICDFORIAC-MNU-1200031901"]   = "Movementを実行した際に採番された作業インスタンスNoです。";
 $ary["ITACICDFORIAC-MNU-1200032000"]   = "Restユーザ";
 $ary["ITACICDFORIAC-MNU-1200032001"]   = "RestAPI経由で紐付先資材を更新する為のユーザを選択して下さい。
-[元データ]Restユーザ管理";
+[元データ]登録アカウント";
 $ary["ITACICDFORIAC-MNU-1200032100"]   = "詳細情報";
 $ary["ITACICDFORIAC-MNU-1200032101"]   = "デリバリでエラーが発生した場合、エラー情報が表示されます。";
 $ary["ITACICDFORIAC-MNU-1200032200"]   = "アクセス許可ロール付与";
@@ -189,16 +189,15 @@ httpsの場合:443
 $ary["ITACICDFORIAC-MNU-1200050000"]   = "ITAとRestAPIを行う為のユーザ情報をメンテナンス(閲覧/登録/更新/廃止)できます。
 ITAとRestAPIを行う為のユーザは、管理コンソール/ユーザ管理に登録しておく必要があります。";
 $ary["ITACICDFORIAC-MNU-1200050001"]   = "項番";
-$ary["ITACICDFORIAC-MNU-1200050002"]   = "Restユーザ管理";
-$ary["ITACICDFORIAC-MNU-1200050003"]   = "Restユーザ管理";
-$ary["ITACICDFORIAC-MNU-1200050100"]   = "Restユーザ";
+$ary["ITACICDFORIAC-MNU-1200050002"]   = "登録アカウント";
+$ary["ITACICDFORIAC-MNU-1200050003"]   = "登録アカウント";
+$ary["ITACICDFORIAC-MNU-1200050004"] = "Exastro IT Automationアカウント";
+$ary["ITACICDFORIAC-MNU-1200050100"]   = "ログインID";
 $ary["ITACICDFORIAC-MNU-1200050101"]   = "CI/CD For IaC用のロールに紐づいているユーザを選択して下さい。
 [元データ]管理コンソール/ユーザ管理";
-//["ITAWDCH-MNU-1070203"]
-$ary["ITACICDFORIAC-MNU-1200050200"]   = "Restパスワード";
+$ary["ITACICDFORIAC-MNU-1200050200"]   = "ログインPW";
 $ary["ITACICDFORIAC-MNU-1200050201"]   = "Restユーザのパスワードです。
 管理コンソール/ユーザ管理で設定したパスワードを入力して下さい。
 文字数は8～30バイト、半角英数字と利用可能な記号（!#$%&'()*+./;<=>?@[]^\\_`{|}~）で入力して下さい。";
-//["ITAWDCH-MNU-1070303"]
 $ary["ITACICDFORIAC-MNU-1200050202"]   = "半角英数字と利用可能な記号（!\"#$%&'()*+,./:;<=>?@[]^\\_`{|}）";
 ?>

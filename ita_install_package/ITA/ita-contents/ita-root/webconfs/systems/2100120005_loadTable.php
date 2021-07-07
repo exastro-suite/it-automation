@@ -53,25 +53,29 @@ Restユーザー管理
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
-    ////////////////////////////////////////////////////
-    //RESTユーザー 必須入力:true ユニーク:true
-    ////////////////////////////////////////////////////
-    $c = new IDColumn('USER_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050100"),'A_ACCOUNT_LIST','USER_ID','USERNAME','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050101"));//エクセル・ヘッダでの説明
-    $c->setRequired(true);
-    $c->setUnique(true);
-    $table->addColumn($c);
+    $cg1 = new ColumnGroup($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050004"));
 
-    ////////////////////////////////////////////////////
-    //RESTパスワード 必須入力:true ユニーク:false
-    ////////////////////////////////////////////////////
-    $c = new PasswordColumn('LOGIN_PW',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050200"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050201"));//エクセル・ヘッダでの説明
-    $c->setValidator( new TextValidator(8, 30, false, '/^[a-zA-Z0-9-!"#$%&\'()*+,.\/:;<=>?@[\]^\\_`{|}~]+$/', $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050202")));
-    $c->setRequired(true);
-    $c->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
-    $c->setEncodeFunctionName("ky_encrypt");
-    $table->addColumn($c);
+        ////////////////////////////////////////////////////
+        //RESTユーザー 必須入力:true ユニーク:true
+        ////////////////////////////////////////////////////
+        $c = new IDColumn('USER_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050100"),'A_ACCOUNT_LIST','USER_ID','USERNAME','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050101"));//エクセル・ヘッダでの説明
+        $c->setRequired(true);
+        $c->setUnique(true);
+        $cg1->addColumn($c);
+
+        ////////////////////////////////////////////////////
+        //RESTパスワード 必須入力:true ユニーク:false
+        ////////////////////////////////////////////////////
+        $c = new PasswordColumn('LOGIN_PW',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050200"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050201"));//エクセル・ヘッダでの説明
+        $c->setValidator( new TextValidator(8, 30, false, '/^[a-zA-Z0-9-!"#$%&\'()*+,.\/:;<=>?@[\]^\\_`{|}~]+$/', $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050202")));
+        $c->setRequired(true);
+        $c->setUpdateRequireExcept(1);//1は空白の場合は維持、それ以外はNULL扱いで更新
+        $c->setEncodeFunctionName("ky_encrypt");
+        $cg1->addColumn($c);
+
+    $table->addColumn($cg1);
 
     $table->fixColumn();
 
