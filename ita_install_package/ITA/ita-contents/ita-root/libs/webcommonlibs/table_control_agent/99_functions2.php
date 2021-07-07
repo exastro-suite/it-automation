@@ -2685,7 +2685,8 @@ EOD;
                                            $disuseColumnOfMasterTable, 
                                            $AccessAuthColumUse = false, 
                                            $AccessAuthColumnNames = array(),
-                                           $aryEtcetera=array(), $strWhereAddBody="", $strGetColIdOfKey="C1", $strGetColIdOfDisp="C2") { // RBAC対応
+                                           $aryEtcetera=array(), $strWhereAddBody="", $strGetColIdOfKey="C1", $strGetColIdOfDisp="C2", // RBAC対応
+                                           $dispRestrictValueFlg=false) {  //dispRestrictValue対応
         // ---- RBAC対応
         global $g;
         if(isset($aryEtcetera['OrderSortSeqType'])){
@@ -2720,27 +2721,53 @@ EOD;
         } 
         // ---- RBAC対応
 
-        $query = "SELECT "
-                ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} {$mainQueryAddstring} "
-                ."FROM "
-                ."    (SELECT "
-                ."         {$keyColumnOfMainTable} "
-                ."     FROM "
-                ."         {$mainTableBody}"
-                ."     WHERE "
-                ."         {$disuseColumnOfMainTable} IN ('0','1') "
-                ."         {$strWhereAddBody} "
-                ."    ) MT1 "
-                ."    INNER JOIN "
-                ."    (SELECT "
-                ."         {$keyColumnOfMasterTable} IDCOLUMN, {$dispColumnOfMasterTable} DISPCOLUMN {$queryPartSelectAdd} {$SubQueryAddstring}"
-                ."     FROM "
-                ."         {$masterTableBody} "
-                ."     WHERE "
-                ."         {$disuseColumnOfMasterTable} IN ('0','1') "
-                ."    ) JM1 "
-                ."    ON MT1.{$keyColumnOfMainTable} = JM1.IDCOLUMN "
-                ."{$queryPartOrd}";
+        if($dispRestrictValueFlg == true){
+            //dispRestrictValueの利用がある場合、$mainTableBodyのすべてのカラムをSELECTする（dispRestrictValueで指定したカラムの値を比較させるため）。
+            $query = "SELECT "
+                    ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} {$mainQueryAddstring}, MT1.* "
+                    ."FROM "
+                    ."    (SELECT "
+                    ."         * "
+                    ."     FROM "
+                    ."         {$mainTableBody}"
+                    ."     WHERE "
+                    ."         {$disuseColumnOfMainTable} IN ('0','1') "
+                    ."         {$strWhereAddBody} "
+                    ."    ) MT1 "
+                    ."    INNER JOIN "
+                    ."    (SELECT "
+                    ."         {$keyColumnOfMasterTable} IDCOLUMN, {$dispColumnOfMasterTable} DISPCOLUMN {$queryPartSelectAdd} {$SubQueryAddstring}"
+                    ."     FROM "
+                    ."         {$masterTableBody} "
+                    ."     WHERE "
+                    ."         {$disuseColumnOfMasterTable} IN ('0','1') "
+                    ."    ) JM1 "
+                    ."    ON MT1.{$keyColumnOfMainTable} = JM1.IDCOLUMN "
+                    ."{$queryPartOrd}";
+        }else{
+            $query = "SELECT "
+                    ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} {$mainQueryAddstring} "
+                    ."FROM "
+                    ."    (SELECT "
+                    ."         {$keyColumnOfMainTable} "
+                    ."     FROM "
+                    ."         {$mainTableBody}"
+                    ."     WHERE "
+                    ."         {$disuseColumnOfMainTable} IN ('0','1') "
+                    ."         {$strWhereAddBody} "
+                    ."    ) MT1 "
+                    ."    INNER JOIN "
+                    ."    (SELECT "
+                    ."         {$keyColumnOfMasterTable} IDCOLUMN, {$dispColumnOfMasterTable} DISPCOLUMN {$queryPartSelectAdd} {$SubQueryAddstring}"
+                    ."     FROM "
+                    ."         {$masterTableBody} "
+                    ."     WHERE "
+                    ."         {$disuseColumnOfMasterTable} IN ('0','1') "
+                    ."    ) JM1 "
+                    ."    ON MT1.{$keyColumnOfMainTable} = JM1.IDCOLUMN "
+                    ."{$queryPartOrd}";
+        }
+
 	    // ---- RBAC対応
         return $query;
     }

@@ -1018,7 +1018,14 @@ class Column extends ColumnGroup {
 				// SQLに埋め込むアクセス権のカラム名生成
         			$addStrQuery = sprintf("%s.%s",$strWpTblSelfAlias,$AccessAuthColum);
 			}
-			$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} ";
+			// ----dispRestrictValue対応
+			$aryDispRestrictValue = $objTable->getDispRestrictValue();
+			if($aryDispRestrictValue != null){
+				$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} , {$strWpTblSelfAlias}.* ";
+			}else{
+				$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} ";
+			}
+			// dispRestrictValue対応----
 			if($addStrQuery != "") {
 				// アクセス権のカラム名をSELECT文に埋め込む
 				$retStrQuery  .= ",".$addStrQuery." ";
@@ -2269,6 +2276,14 @@ class IDColumn extends Column {
 
 			$addStrQuery = "";
 
+			// ----dispRestrictValue対応
+			$dispRestrictValueFlg = false;
+			$aryDispRestrictValue = $objTable->getDispRestrictValue();
+			if($aryDispRestrictValue != null){
+				$dispRestrictValueFlg = true;
+			}
+			// dispRestrictValue対応----
+
 			$retStrQuery = genSQLforGetMasValsInMainTbl($mainTableBody
 								, $strThisIdColumnId
 								, $strDUColumnOfMainTable
@@ -2279,7 +2294,8 @@ class IDColumn extends Column {
                                                                 , $AccessAuthColumUse
                                                                 , $AccessAuthColumnNames
 								, $aryEtcetera,$strWhereAddBody
-								,"KEY_COLUMN","DISP_COLUMN");
+								,"KEY_COLUMN","DISP_COLUMN"
+								, $dispRestrictValueFlg);
 		}catch (Exception $e){
 			web_log($e->getMessage());
 			$intErrorType = 500;
@@ -6862,8 +6878,14 @@ class AutoUpdateUserColumn extends TextColumn {
 
 		$strBodyFrom  = "{$strWpTableId} {$strWpTblSelfAlias} LEFT JOIN {$strTableJoin} {$strTblJoinAlias} ";
 		$strBodyFrom .= "ON ( {$strWpTblSelfAlias}.{$strWpColId} = {$strTblJoinAlias}.{$strJoinColKey} ) ";
-
-		$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM} ";
+		// ----dispRestrictValue対応
+		$aryDispRestrictValue = $objTable->getDispRestrictValue();
+		if($aryDispRestrictValue != null){
+			$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM}, {$strWpTblSelfAlias}.* ";
+		}else{
+			$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM} ";
+		}
+		// dispRestrictValue対応----
 		$retStrQuery .= $addStrQuery;  // RBAC対応
 		$retStrQuery .= "FROM {$strBodyFrom} ";
 		$retStrQuery .= "WHERE {$strWpTblSelfAlias}.{$strWpColId} IS NOT NULL ";
