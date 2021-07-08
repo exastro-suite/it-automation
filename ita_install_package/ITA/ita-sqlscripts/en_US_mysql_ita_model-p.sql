@@ -549,29 +549,55 @@ FROM
     LEFT JOIN T_CICD_SYNC_STATUS TAB_B ON ( TAB_A.REPO_ROW_ID = TAB_B.ROW_ID );
 
 -- -------------------------------------------------
--- -- 資材紐付管理のRestユーザ一覧用View
+-- -- 資材紐付管理のRestユーザ一覧プルダウン用
 -- -------------------------------------------------
-CREATE VIEW D_CICD_ACCT_LINK AS
+CREATE VIEW D_CICD_UACC_RUCC_LINKLINK AS
 SELECT
     TAB_A.*,
     TAB_B.USERNAME,
+    TAB_A.ACCT_ROW_ID                                USERNAME_PULLKEY,
+    CONCAT(TAB_A.ACCT_ROW_ID,':',TAB_B.USERNAME)     USERNAME_PULLDOWN,
     TAB_B.DISUSE_FLAG AS A_ACCT_DISUSE_FLAG,
     TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM
     B_CICD_REST_ACCOUNT_LIST TAB_A
-    LEFT JOIN A_ACCOUNT_LIST TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID );
+    LEFT JOIN A_ACCOUNT_LIST TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID )
+WHERE
+    TAB_B.DISUSE_FLAG = '0';
 
-
-CREATE VIEW D_CICD_ACCT_LINK_JNL AS
+CREATE VIEW D_CICD_UACC_RUCC_LINKLINK_JNL AS
 SELECT
     TAB_A.*,
     TAB_B.USERNAME,
+    TAB_A.ACCT_ROW_ID                                USERNAME_PULLKEY,
+    CONCAT(TAB_A.ACCT_ROW_ID,':',TAB_B.USERNAME)     USERNAME_PULLDOWN,
     TAB_B.DISUSE_FLAG AS A_ACCT_DISUSE_FLAG,
     TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM
     B_CICD_REST_ACCOUNT_LIST_JNL TAB_A
-    LEFT JOIN A_ACCOUNT_LIST_JNL TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID );
+    LEFT JOIN A_ACCOUNT_LIST_JNL TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID )
+WHERE
+    TAB_B.DISUSE_FLAG = '0';
 
+-- -------------------------------------------------
+-- -- 登録アカウントのRestユーザ一覧プルダウン用
+-- -------------------------------------------------
+CREATE VIEW D_CICD_USER_ACCT_LIST AS
+SELECT
+    TAB_A.*,
+    TAB_A.USER_ID                            USERNAME_PULLKEY,
+    CONCAT(TAB_A.USER_ID,':',TAB_A.USERNAME) USERNAME_PULLDOWN
+FROM
+    A_ACCOUNT_LIST TAB_A;
+
+CREATE VIEW D_CICD_USER_ACCT_LIST_JNL AS
+SELECT
+    TAB_A.*,
+    TAB_A.USER_ID                            USERNAME_PULLKEY,
+    CONCAT(TAB_A.USER_ID,':',TAB_A.USERNAME) USERNAME_PULLDOWN
+FROM
+    A_ACCOUNT_LIST_JNL TAB_A;
+    
 -- -------------------------------------------------
 -- -- 資材紐付管理の紐付先資材タイプ　プルダウン用 
 -- -- (ansible/terrafome各インストール有無用)

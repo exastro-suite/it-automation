@@ -58,7 +58,7 @@ Restユーザー管理
         ////////////////////////////////////////////////////
         //RESTユーザー 必須入力:true ユニーク:true
         ////////////////////////////////////////////////////
-        $c = new IDColumn('USER_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050100"),'A_ACCOUNT_LIST','USER_ID','USERNAME','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        $c = new IDColumn('USER_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050100"),'D_CICD_USER_ACCT_LIST','USERNAME_PULLKEY','USERNAME_PULLDOWN','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME_PULLKEY'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200050101"));//エクセル・ヘッダでの説明
         $c->setRequired(true);
         $c->setUnique(true);
