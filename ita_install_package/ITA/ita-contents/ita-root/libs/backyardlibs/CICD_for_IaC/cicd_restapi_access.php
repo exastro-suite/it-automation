@@ -633,7 +633,8 @@ class CicdRestAccessAgent {
                         //RequestData、FILTER結果差分件数チェック
                         $intDiffcnt = 0;
                         foreach ($RequestData as $tmpkey => $tmpval) {
-                           if( isset( $arrDataBody[1][$tmpkey] ) == true ){
+                           // 項目値が空の場合はNULLで返却される。
+                           if(array_key_exists($tmpkey, $arrDataBody[1]) == true ){
                                 if( $arrDataBody[1][$tmpkey] != $tmpval ){
                                     $intDiffcnt++;
                                 }
