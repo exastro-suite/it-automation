@@ -1618,7 +1618,6 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
             $tmpErrMsgBody = $e->getMessage();
             dev_log($tmpErrMsgBody, $intControlDebugLevel01);
             outputLog(LOG_PREFIX, $tmpErrMsgBody);
-            outputLog(LOG_PREFIX, $intControlDebugLevel01);
             
             // ----一般訪問ユーザに見せてよいメッセージを作成
             switch($intErrorStatus){
