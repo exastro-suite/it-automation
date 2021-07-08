@@ -947,7 +947,7 @@
                                                 $row['M_PROTOCOL'],
                                                 $row['M_PORT'],
                                                 $NoUpdateFlg);
-        if((int)$retAry[0] == 0) {
+        if($retAry[0] == "000") {
             // 差分なし判定
             if($NoUpdateFlg === true) {
                 // 資材に差分がなく、同期状態が正常でない場合は、状態を正常に設定
@@ -1040,7 +1040,7 @@
                                             $row['M_PROTOCOL'],
                                             $row['M_PORT']);
 
-        if((int)$retAry[0] == 0) {
+        if($retAry[0] == "000") {
             $UIMatlSyncMsg   = "";
             $UIDelvMsg       = "";
             $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL;
