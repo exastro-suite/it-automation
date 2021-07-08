@@ -79,7 +79,9 @@ try {
     }
     $tgtRepoListRow = array();
     while ( $row = $objQuery->resultFetch() ){
-        if(trim($row['HOSTNAME']) == "127.0.0.1") {
+        $loopbackip ="/^127\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$/";
+        $ret = preg_match($loopbackip,trim($row['HOSTNAME']));
+        if($ret == 1) {
             $url = "";
         } else {
             $url = sprintf("%s://%s:%s",$row['PROTOCOL'],$row['HOSTNAME'],$row['PORT']);
