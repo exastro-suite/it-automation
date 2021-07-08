@@ -85,7 +85,7 @@ if (isset($_REQUEST['zip']) === false) { // 初期表示時
 
         // データ登録
         $taskNo = insertTask();
-        $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900024', array($taskNo));
+        $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-2100000329_3', array($taskNo));
         $_SESSION['data_export_task_no'] = $taskNo;
 
         renameExportDir($dirName, $taskNo);

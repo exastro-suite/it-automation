@@ -325,9 +325,6 @@ try {
 
                     if ($resArray["result"] == false) {
                         // ステータスを完了(異常)にする
-                        $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
-                                                          array('B_BULK_EXCEL_TASK',basename(__FILE__), __LINE__));
-                        outputLog(LOG_PREFIX, $logMsg);
                         $msg         = $resArray["response"]["text"];
                         if ($msg == "") {
                             $msg = $objMTS->getSomeMessage("ITAWDCH-ERR-3001");
