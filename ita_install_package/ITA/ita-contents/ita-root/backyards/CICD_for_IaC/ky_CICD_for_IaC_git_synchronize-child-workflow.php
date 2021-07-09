@@ -299,6 +299,16 @@
             // exit
             exit(0);
         }
+        // 同期状態が異常でないことを確認する。 
+        if($RepoListRow['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR) {
+            // exit
+            exit(0);
+        }
+        // 同期状態が再開か空白の場合
+        if(($RepoListRow['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART) ||
+           (strlen($RepoListRow['SYNC_STATUS_ROW_ID']) == 0)) {
+            $MatlListUpdateExeFlg = true;
+        } 
 
         $cloneRepoDir = $LFCobj->getLocalCloneDir($RepoId);
         $libPath      = $LFCobj->getLocalShellDir();
@@ -1572,7 +1582,7 @@
                               FROM 
                                   %s TAB_B 
                               WHERE 
-                                    TAB_B.MATL_FILE_PATH LIKE CONCAT(TAB_A.MATL_FILE_PATH,'%s') 
+                                    TAB_B.MATL_FILE_PATH LIKE CONCAT(TAB_A.MATL_FILE_PATH,'/%s') 
                                 AND TAB_B.MATL_FILE_TYPE_ROW_ID=:FILE_TYPE_ID
                                 AND TAB_B.REPO_ROW_ID=:REPO_ROW_ID
                                 AND TAB_B.DISUSE_FLAG ='0'
