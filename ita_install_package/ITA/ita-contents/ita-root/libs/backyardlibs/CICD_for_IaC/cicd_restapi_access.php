@@ -591,13 +591,15 @@ class CicdRestAccessAgent {
                     $RecordLength = $aryRetBody['ResponsContents']['CONTENTS']['RECORD_LENGTH'];
                 }
                 
+                $targetNum = 0;
+                
                 //FILTER成功(レコードなし) [1]
                 if( $RecordLength == 0 ){
                     //レコード 0件
                     $editType = $objMTS->getSomeMessage("ITAWDCH-STD-12202"); //登録/Register
 
                 //FILTER成功(レコードあり) 
-                }elseif( $RecordLength == 1 ){
+                }elseif( $RecordLength >= 1 ){
 
                     $arrDataBody     = $aryRetBody['ResponsContents']['CONTENTS']['BODY']; 
                     $arrDataUploadFile = $aryRetBody['ResponsContents']['CONTENTS']['UPLOAD_FILE'];
@@ -605,13 +607,32 @@ class CicdRestAccessAgent {
                     $lastUpdateNo     = array_search($objMTS->getSomeMessage("ITAWDCH-STD-11901") ,  $arrDataBody[0] );//更新用の最終更新日時
                     $lastUpdateUserNo = array_search($objMTS->getSomeMessage("ITAWDCH-STD-12101") ,  $arrDataBody[0] );//最終更新者
 
+                    //対象のkey指定 
+                    if( $RecordLength == 1 ){
+                        $targetNum = 1;
+                    }else{
+                        //1件以上の場合
+                        foreach ($arrDataBody as $tmpkey => $tmpval) {
+                            if( $tmpkey != 0 ){
+                                //廃止でないもの
+                                if( $tmpval[1] == "" ){
+                                    $targetNum = $tmpkey;
+                                }        
+                            }
+                        }
+                        //すべて廃止の場合、最新を対象とする
+                        if( $targetNum == 0 ){
+                            $targetNum = $RecordLength;
+                        }
+                    }
+
                     //レコードあり [2]
-                    if( $arrDataBody[1][1] != "" ){
+                    if( $arrDataBody[$targetNum][1] != "" ){
                         //レコードあり(廃止) 
                          $editType = $objMTS->getSomeMessage("ITAWDCH-STD-12205");   //復活/Restore
                         
                         //ファイル差分ある場合、復活 ＋ 更新（後続）処理  更新のフラグON  1:復活＋更新[2-1] / 0:復活[2-2]
-                        if( $arrDataUploadFile[1][$fileUploadNo] != $base64file ){
+                        if( $arrDataUploadFile[$targetNum][$fileUploadNo] != $base64file ){
                             $restExecFlg = 1; //復活＋更新
                         }
 
@@ -621,20 +642,21 @@ class CicdRestAccessAgent {
                         
                         // 最終更新者に差分ある場合、復活＋更新処理のフラグON [3-1]
                         #if( $RequestData[$lastUpdateUserNo] != $arrDataBody[1][$lastUpdateUserNo] ){
-                        if( $UserName != $arrDataBody[1][$lastUpdateUserNo] ){
+                        if( $UserName != $arrDataBody[$targetNum][$lastUpdateUserNo] ){
                             $lastUserDiffFlg = 1;
                         }
                         
                         //ファイル差分無しの場合SKIP  更新のフラグON  [3-3]
-                        if( $arrDataUploadFile[1][$fileUploadNo] == $base64file ){
+                        if( $arrDataUploadFile[$targetNum][$fileUploadNo] == $base64file ){
                             $restExecFlg = 2; //SKIP
                         }
 
                         //RequestData、FILTER結果差分件数チェック
                         $intDiffcnt = 0;
                         foreach ($RequestData as $tmpkey => $tmpval) {
-                           if( isset( $arrDataBody[1][$tmpkey] ) == true ){
-                                if( $arrDataBody[1][$tmpkey] != $tmpval ){
+                           // 項目値が空の場合はNULLで返却される。
+                           if(array_key_exists($tmpkey, $arrDataBody[$targetNum]) == true ){
+                                if( $arrDataBody[$targetNum][$tmpkey] != $tmpval ){
                                     $intDiffcnt++;
                                 }
                             }
@@ -678,11 +700,11 @@ class CicdRestAccessAgent {
 
                         //ID (登録以外)
                         if( $editType != $objMTS->getSomeMessage("ITAWDCH-STD-12202") ){
-                            $tmpRequestData[2]     = $arrDataBody[1][2];
+                            $tmpRequestData[2]     = $arrDataBody[$targetNum][2];
                             //更新用の最終更新日時
-                            $tmpRequestData[$lastUpdateNo]     = $arrDataBody[1][$lastUpdateNo];
+                            $tmpRequestData[$lastUpdateNo]     = $arrDataBody[$targetNum][$lastUpdateNo];
                             #$RequestData[$lastUpdateNo]     = "T_20210618103458338508";
-                            $strMaterialID = $arrDataBody[1][2];
+                            $strMaterialID = $arrDataBody[$targetNum][2];
                         }
 
                         //廃止/復活時のみ
@@ -775,13 +797,32 @@ class CicdRestAccessAgent {
                                 }
                                 
                                 //FILTER成功(レコードあり)
-                                if( $RecordLength == 1 ){
+                                if( $RecordLength >= 1 ){
                                     $arrDataBody     = $aryRetBody['ResponsContents']['CONTENTS']['BODY']; 
                                     $arrDataUploadFile = $aryRetBody['ResponsContents']['CONTENTS']['UPLOAD_FILE'];
 
+                                    //対象レコードの指定 
+                                    if( $RecordLength == 1 ){
+                                        $targetNum = 1;
+                                    }else{
+                                        //1件以上の場合
+                                        foreach ($arrDataBody as $tmpkey => $tmpval) {
+                                            if( $tmpkey != 0 ){
+                                                //廃止でないもの
+                                                if( $tmpval[1] == "" ){
+                                                    $targetNum = $tmpkey;
+                                                }        
+                                            }
+                                        }
+                                        //すべて廃止の場合、最新を対象とする
+                                        if( $targetNum == 0 ){
+                                            $targetNum = $RecordLength;
+                                        }
+                                    }
+                                    
                                     //レコードあり
-                                    if( $arrDataBody[1][1] == "" ){
-                                        $strMaterialID = $arrDataBody[1][2];
+                                    if( $arrDataBody[$targetNum][1] == "" ){
+                                        $strMaterialID = $arrDataBody[$targetNum][2];
                                     }
                                 }
                             }
@@ -796,10 +837,10 @@ class CicdRestAccessAgent {
                             //実行種別
                             $tmpRequestData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12203");   //更新/Update;
 
-                            $tmpRequestData[2] = $arrDataBody[1][2];
+                            $tmpRequestData[2] = $arrDataBody[$targetNum][2];
                             //更新用の最終更新日時
-                            $tmpRequestData[$lastUpdateNo]     = $arrDataBody[1][$lastUpdateNo];
-                            $strMaterialID = $arrDataBody[1][2];
+                            $tmpRequestData[$lastUpdateNo]     = $arrDataBody[$targetNum][$lastUpdateNo];
+                            $strMaterialID = $arrDataBody[$targetNum][2];
 
                             ksort($tmpRequestData);
                             $arrRequestContentsEdit[] = $tmpRequestData;
@@ -862,7 +903,7 @@ class CicdRestAccessAgent {
                         //ファイル差分無し時にSKIP
                         $NoUpdeteFlg = true;
 
-                        $strMaterialID = $arrDataBody[1][2];
+                        $strMaterialID = $arrDataBody[$targetNum][2];
                         $intErrorType = '000';
                         $strErrMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-5014" );#"項目、ファイルに差分がないため、RESTAPI（EDIT）の実施をSKIPします。";
                     } 

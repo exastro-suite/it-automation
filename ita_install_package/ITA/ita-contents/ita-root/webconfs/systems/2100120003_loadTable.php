@@ -217,7 +217,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                                     TAB_1.DISUSE_FLAG = '0'
                                 AND TAB_2.DISUSE_FLAG = '0'
                                 AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID 
-                              ORDER BY KEY_COLUMN ";
+                              ORDER BY DISP_COLUMN ";
         
                 $aryForBind['REPO_ROW_ID'] = $RepoRowID;
         
@@ -283,7 +283,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                                     TAB_1.DISUSE_FLAG = '0'
                                 AND TAB_2.DISUSE_FLAG = '0'
                                 AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID 
-                              ORDER BY KEY_COLUMN ";
+                              ORDER BY DISP_COLUMN ";
                 $aryForBind['REPO_ROW_ID']  = $RepoRowID;
         
                 if( 0 < strlen($RepoRowID) ){
@@ -335,7 +335,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
         // 複製対応
-        //$objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
+        $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
         $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
         $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
         
@@ -412,7 +412,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 /////////////////////////////////////////////////////////
                 // 対話種別  必須入力:false ユニーク:false
                 /////////////////////////////////////////////////////////
-                $c = new IDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030800"),'B_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME','');
+                $c = new IDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030800"),'B_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('DIALOG_TYPE_NAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
                 $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030801"));
                 $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
                 $cg3->addColumn($c);
@@ -420,7 +420,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 /////////////////////////////////////////////////////////
                 // OS種別  必須入力:false ユニーク:false
                 /////////////////////////////////////////////////////////
-                $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030900"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
+                $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030900"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('OS_TYPE_NAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
                 $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030901"));
                 $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
                 $cg3->addColumn($c);
@@ -431,7 +431,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         /////////////////////////////////////////////////////////
         // Restユーザー   必須入力:true ユニーク:false
         /////////////////////////////////////////////////////////
-        $c = new IDColumn('ACCT_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032000"),'D_CICD_ACCT_LINK','ACCT_ROW_ID','USERNAME','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        $c = new IDColumn('ACCT_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032000"),'D_CICD_UACC_RUCC_LINKLINK','USERNAME_PULLKEY','USERNAME_PULLDOWN','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME_PULLKEY'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032001"));
         $c->setRequired(true);
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
@@ -629,7 +629,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
                 return $retArray;
         };
-        $c = new IDColumn('SYNC_LAST_UPDATE_USER',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032800"),'D_CICD_ACCT_LINK','ACCT_ROW_ID','USERNAME','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        $c = new IDColumn('SYNC_LAST_UPDATE_USER',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032800"),'D_CICD_UACC_RUCC_LINKLINK','USERNAME_PULLKEY','USERNAME_PULLDOWN','', array('SELECT_ADD_FOR_ORDER'=>array('USERNAME_PULLKEY'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032801"));//エクセル・ヘッダでの説明
         // OutputType一覧  ----
         // filter 一覧 excel関連のみ表示
@@ -700,7 +700,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         /////////////////////////////////////////////////////////
         // Excel/Rest用 Movement  必須入力:false  ユニーク:false
         ///////////////////////////////////////////////////////// 
-        $c = new IDColumn('REST_DEL_MOVE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031700"),'D_CICD_MATL_PATTERN_LIST','MATL_PTN_NAME_PULLKEY','MATL_PTN_NAME_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MATL_PTN_NAME_PULLDOWN'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+        // インストールされているドライバを判断し資材タイプに紐付るViewを決定
+        $chkarry               = array();
+        $chkarry[true][true]   = "D_CICD_MATL_PATTERN_LIST_ALL";
+        $chkarry[true][false]  = "D_CICD_MATL_PATTERN_LIST_ANS";
+        $chkarry[false][true]  = "D_CICD_MATL_PATTERN_LIST_TERRA";
+        $chkarry[false][false] = "D_CICD_MATL_PATTERN_LIST_NULL";
+        $view_name = $chkarry[$ansible_driver][$terraform_driver];
+
+        $c = new IDColumn('REST_DEL_MOVE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031700"),$view_name,'MATL_PTN_NAME_PULLKEY','MATL_PTN_NAME_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MATL_PTN_NAME_PULLDOWN'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031701"));//エクセル・ヘッダでの説明
         $c->getOutputType('filter_table')->setVisible(false);
         $c->getOutputType('print_table')->setVisible(false);
@@ -738,7 +746,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 return $retArray;
         };
 
-        $c = new IDColumn('DEL_MOVE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031700"),'C_PATTERN_PER_ORCH','PATTERN_ID','PATTERN_NAME','',array('OrderByThirdColumn'=>'PATTERN_ID'));
+        $c = new IDColumn('DEL_MOVE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031700"),'C_PATTERN_PER_ORCH','PATTERN_ID','PATTERN_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('PATTERN_NAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031701"));//エクセル・ヘッダでの説明
 
         /////////////////////////////////////////////////////////
@@ -934,7 +942,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
         // 複製対応
-        //$objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
+        $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
         $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
         $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
     

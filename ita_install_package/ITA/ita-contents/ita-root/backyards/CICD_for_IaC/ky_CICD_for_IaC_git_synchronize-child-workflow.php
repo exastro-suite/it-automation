@@ -273,7 +273,7 @@
         }
 
         /////////////////////////////////////////////////////////////////
-        // シーケンスロックはしないで
+        // git制御を並列で動かす為にシーケンスロックはしないで
         // リモートリポジトリ管理の情報を取得
         /////////////////////////////////////////////////////////////////
         $RepoListRow = array();
@@ -299,6 +299,16 @@
             // exit
             exit(0);
         }
+        // 同期状態が異常でないことを確認する。 
+        if($RepoListRow['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR) {
+            // exit
+            exit(0);
+        }
+        // 同期状態が再開か空白の場合
+        if(($RepoListRow['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART) ||
+           (strlen($RepoListRow['SYNC_STATUS_ROW_ID']) == 0)) {
+            $MatlListUpdateExeFlg = true;
+        } 
 
         $cloneRepoDir = $LFCobj->getLocalCloneDir($RepoId);
         $libPath      = $LFCobj->getLocalShellDir();
@@ -429,6 +439,29 @@
 
                 $ret = MatlListRolesRecodeUpdate($RepoId);
 
+                ///////////////////////////////////////////////////
+                // 資材一覧を更新したタイミングでコミット
+                ///////////////////////////////////////////////////
+                $ret = $DBobj->transactionCommit();
+                if($ret !== true) {
+                    // 異常フラグON
+                    $error_flag = 1;
+        
+                    // "トランザクション処理に失敗しました。";
+                    $logstr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1003");  // 2002
+                    $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+
+                    // UIに表示するメッセージ
+                    // 想定外のエラーか発生しました。
+                    $UIDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
+
+                    // 戻り値編集
+                    $retary = array();
+                    $RetCode = -1;
+                    $retary = makeReturnArray($RetCode,$FREE_LOG,$UIDisplayMsg);
+                    throw new Exception($retary);
+                }
+
                 //トレースメッセージ
                 if ( $log_level === 'DEBUG' ){
                     $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2025",array($RepoId));
@@ -438,8 +471,55 @@
             }
         } catch (Exception $e){
             // 例外処理
-            // 異常フラグONi($error_flag)  UIに表示するエラーメッセージ設定(setUIDisplayMsg)  throw new Exception
+            if( $objDBCA->getTransactionMode() ){
+                ///////////////////////////////////////////////////
+                // 一旦ロールバック
+                ///////////////////////////////////////////////////
+                $ret = $DBobj->transactionRollBack();
+                if($ret === false) {
+                    // 異常フラグON
+                    $error_flag = 1;
+
+                    // "トランザクション処理に失敗しました。";
+                    $logstr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1003");  // 2002
+                    $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+                    require ($root_dir_path . $log_output_php );
+                }
+            }
+
+            // 異常フラグON($error_flag)  UIに表示するエラーメッセージ設定(setUIDisplayMsg)  throw new Exception
             ExceptionRecive($RepoId,$e->getMessage(),__FILE__,__LINE__);
+        }
+
+        // トランザクション再開
+        $ret = $DBobj->transactionExit();
+        if($ret !== true) {
+            // UIに表示するエラーメッセージ設定
+            setDefaultUIDisplayMsg();
+
+            // 異常フラグON
+            $error_flag = 1;
+
+            // "トランザクション処理に失敗しました。";
+            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1003");  //2002
+            $addlogstr = $DBobj->GetLastErrorMsg();
+            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$addlogstr);
+            throw new Exception( $FREE_LOG );
+        }
+
+        $ret = $DBobj->transactionStart();
+        if($ret !== true) {
+            // UIに表示するエラーメッセージ設定
+            setDefaultUIDisplayMsg();
+
+            // 異常フラグON
+            $error_flag = 1;
+
+            // "トランザクション処理に失敗しました。";
+            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1003");  //2002
+            $addlogstr = $DBobj->GetLastErrorMsg();
+            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$addlogstr);
+            throw new Exception( $FREE_LOG );
         }
 
         /////////////////////////////////////////////////////////////////
@@ -479,7 +559,7 @@
 
         /////////////////////////////////////////////////////////////////
         // 資材管理のジャーナルシーケンスのロックを開放しないと
-        // 別ブランチのプロセスがシーケンスロックで止まってしまうので
+        // 別リポジトリのプロセスがシーケンスロックで止まってしまうので
         // 資材管理を更新したタイミングでトランザクションを終了する。
         /////////////////////////////////////////////////////////////////
         $ret = $DBobj->transactionCommit();
@@ -881,6 +961,10 @@
         $cloneRepoDir = $LFCobj->getLocalCloneDir($RepoId);
         $ret = $Gitobj->LocalCloneDirClean($Gitobj);
         if($ret === false) {
+            // 該当のリモートリポジトリに紐づいている資材を資材一覧から廃止。
+            // 戻りは確認しない
+            MatlListRecodeDisuse($RepoId);
+
             // 異常フラグON
             $error_flag = 1;
 
@@ -913,6 +997,10 @@
 
         $ret = $Gitobj->GitClone($AuthTypeName);
         if($ret !== true) {
+            // 該当のリモートリポジトリに紐づいている資材を資材一覧から廃止。
+            // 戻りは確認しない
+            MatlListRecodeDisuse($RepoId);
+
             // 異常フラグON
             $error_flag = 1;
 
@@ -1494,7 +1582,7 @@
                               FROM 
                                   %s TAB_B 
                               WHERE 
-                                    TAB_B.MATL_FILE_PATH LIKE CONCAT(TAB_A.MATL_FILE_PATH,'%s') 
+                                    TAB_B.MATL_FILE_PATH LIKE CONCAT(TAB_A.MATL_FILE_PATH,'/%s') 
                                 AND TAB_B.MATL_FILE_TYPE_ROW_ID=:FILE_TYPE_ID
                                 AND TAB_B.REPO_ROW_ID=:REPO_ROW_ID
                                 AND TAB_B.DISUSE_FLAG ='0'
@@ -1949,5 +2037,108 @@
         unset($objQuery);
         return true;
     }
+    
+    // 資材一覧を廃止
+    function MatlListRecodeDisuse($RepoId) {
+        global $cmDBobj;
+        global $DBobj;
+        global $LFCobj;
+        global $Gitobj;
+        global $error_flag;
+        global $warning_flag;
 
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+
+        global $objMTS;
+
+        global $TDMatlobj;
+
+        // 資材一覧のレコードを全て廃止
+        $ret = MatlListRecodeDisuseUpdate($RepoId);
+
+        // トランザクションをコミット・ロールバック
+        if($ret === true) {
+            $ret = $DBobj->transactionCommit();
+            if($ret !== true) {
+                // Clone異常時の処理なのでログを出力してReturn;
+                $logstr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1003");  // 2002
+                $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+                require ($root_dir_path . $log_output_php );
+                return false;
+            }
+        } else {
+            $ret = $DBobj->transactionRollBack();
+            if($ret !== true) {
+                // Clone異常時の処理なのでログを出力してReturn;
+                $logstr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1003");  // 2002
+                $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+                require ($root_dir_path . $log_output_php );
+                return false;
+            }
+        }
+        return true;
+    }
+    function MatlListRecodeDisuseUpdate($RepoId) {
+        global $cmDBobj;
+        global $DBobj;
+        global $LFCobj;
+        global $Gitobj;
+        global $error_flag;
+        global $warning_flag;
+
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+
+        global $objMTS;
+
+        global $TDMatlobj;
+
+        $dbAcction         = "SELECT";
+        $BindArray         = array('WHERE'=>"REPO_ROW_ID=:REPO_ROW_ID AND DISUSE_FLAG='0'");
+        $ColumnConfigArray = $TDMatlobj->setColumnConfigAttr();
+        $ColumnValueArray  = $TDMatlobj->getColumnDefine();
+        $objQueryArray = $DBobj->makeSelectSQLString($dbAcction,$BindArray,$TDMatlobj,$ColumnConfigArray,$ColumnValueArray);
+        if($objQueryArray === false) {
+            // Clone異常時の処理なのでログを出力してReturn;
+            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1005");
+            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+            require ($root_dir_path . $log_output_php );
+            return false;
+
+        }
+        $arrayBind = array("REPO_ROW_ID"=>$RepoId);
+        $objQuery  = $DBobj->SelectForSimple($objQueryArray[1],$arrayBind);
+        if($objQuery === false) {
+            // Clone異常時の処理なのでログを出力してReturn;
+            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1005");
+            $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+            require ($root_dir_path . $log_output_php );
+            return false;
+        }
+        while($row = $objQuery->resultFetch()) {
+            $ColumnConfigArray                = $TDMatlobj->setColumnConfigAttr();
+            $ColumnValueArray                 = $TDMatlobj->getColumnDefine();
+            $ColumnValueArray                 = $row;
+            $ColumnValueArray["DISUSE_FLAG"]  = '1';
+            $JnlInsert_Flag                   = true;   // 履歴出力あり
+
+            $BindArray = array();
+            $ret = $DBobj->UpdateRow($BindArray,$TDMatlobj,$ColumnConfigArray,$ColumnValueArray,$JnlInsert_Flag);
+            if($ret === false) {
+                // Clone異常時の処理なのでログを出力してReturn;
+                $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1005");
+                $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
+                require ($root_dir_path . $log_output_php );
+                return false;
+            }
+        }
+        return true;
+    }
 ?>

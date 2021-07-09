@@ -50,7 +50,7 @@ CREATE TABLE B_CICD_REST_ACCOUNT_LIST
 ACCT_ROW_ID                       INT                               , -- 識別シーケンス項番
 -- --
 USER_ID                           INT                               , -- ユーザー管理(A_ACCOUNT_LIST) USER_ID
-LOGIN_PW                          VARCHAR (32)                      , -- ユーザー管理(A_ACCOUNT_LIST)に合わせる
+LOGIN_PW                          VARCHAR (64)                      , -- ユーザー管理(A_ACCOUNT_LIST)に合わせる UI 30Byte
 -- --
 ACCESS_AUTH                       TEXT                              ,
 DISP_SEQ                          INT                               , -- 表示順序
@@ -70,7 +70,7 @@ JOURNAL_ACTION_CLASS              VARCHAR (8)                       , -- 履歴�
 ACCT_ROW_ID                       INT                               , -- 識別シーケンス項番
 -- --
 USER_ID                           INT                               , -- ユーザー管理(A_ACCOUNT_LIST) USER_ID
-LOGIN_PW                          VARCHAR (32)                      , -- ユーザー管理(A_ACCOUNT_LIST)に合わせる
+LOGIN_PW                          VARCHAR (64)                      , -- ユーザー管理(A_ACCOUNT_LIST)に合わせる UI 30Byte
 -- --
 ACCESS_AUTH                       TEXT                              ,
 DISP_SEQ                          INT                               , -- 表示順序
@@ -549,29 +549,55 @@ FROM
     LEFT JOIN T_CICD_SYNC_STATUS TAB_B ON ( TAB_A.REPO_ROW_ID = TAB_B.ROW_ID );
 
 -- -------------------------------------------------
--- -- 資材紐付管理のRestユーザ一覧用View
+-- -- 資材紐付管理のRestユーザ一覧プルダウン用
 -- -------------------------------------------------
-CREATE VIEW D_CICD_ACCT_LINK AS
+CREATE VIEW D_CICD_UACC_RUCC_LINKLINK AS
 SELECT
     TAB_A.*,
     TAB_B.USERNAME,
+    TAB_A.ACCT_ROW_ID                                USERNAME_PULLKEY,
+    CONCAT(TAB_A.ACCT_ROW_ID,':',TAB_B.USERNAME)     USERNAME_PULLDOWN,
     TAB_B.DISUSE_FLAG AS A_ACCT_DISUSE_FLAG,
     TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM
     B_CICD_REST_ACCOUNT_LIST TAB_A
-    LEFT JOIN A_ACCOUNT_LIST TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID );
+    LEFT JOIN A_ACCOUNT_LIST TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID )
+WHERE
+    TAB_B.DISUSE_FLAG = '0';
 
-
-CREATE VIEW D_CICD_ACCT_LINK_JNL AS
+CREATE VIEW D_CICD_UACC_RUCC_LINKLINK_JNL AS
 SELECT
     TAB_A.*,
     TAB_B.USERNAME,
+    TAB_A.ACCT_ROW_ID                                USERNAME_PULLKEY,
+    CONCAT(TAB_A.ACCT_ROW_ID,':',TAB_B.USERNAME)     USERNAME_PULLDOWN,
     TAB_B.DISUSE_FLAG AS A_ACCT_DISUSE_FLAG,
     TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
 FROM
     B_CICD_REST_ACCOUNT_LIST_JNL TAB_A
-    LEFT JOIN A_ACCOUNT_LIST_JNL TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID );
+    LEFT JOIN A_ACCOUNT_LIST_JNL TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID )
+WHERE
+    TAB_B.DISUSE_FLAG = '0';
 
+-- -------------------------------------------------
+-- -- 登録アカウントのRestユーザ一覧プルダウン用
+-- -------------------------------------------------
+CREATE VIEW D_CICD_USER_ACCT_LIST AS
+SELECT
+    TAB_A.*,
+    TAB_A.USER_ID                            USERNAME_PULLKEY,
+    CONCAT(TAB_A.USER_ID,':',TAB_A.USERNAME) USERNAME_PULLDOWN
+FROM
+    A_ACCOUNT_LIST TAB_A;
+
+CREATE VIEW D_CICD_USER_ACCT_LIST_JNL AS
+SELECT
+    TAB_A.*,
+    TAB_A.USER_ID                            USERNAME_PULLKEY,
+    CONCAT(TAB_A.USER_ID,':',TAB_A.USERNAME) USERNAME_PULLDOWN
+FROM
+    A_ACCOUNT_LIST_JNL TAB_A;
+    
 -- -------------------------------------------------
 -- -- 資材紐付管理の紐付先資材タイプ　プルダウン用 
 -- -- (ansible/terrafome各インストール有無用)
@@ -677,7 +703,7 @@ WHERE
 -- -- 資材紐付管理のExcel/Rest用の　プルダウン用 
 -- -- Movement用
 -- -------------------------------------------------
-CREATE VIEW D_CICD_MATL_PATTERN_LIST AS
+CREATE VIEW D_CICD_MATL_PATTERN_LIST_ALL AS
 SELECT
   TAB_A.*,
   TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
@@ -690,7 +716,7 @@ WHERE
   TAB_A.DISUSE_FLAG = '0' AND
   TAB_B.DISUSE_FLAG = '0';
 
-CREATE VIEW D_CICD_MATL_PATTERN_LIST_JNL AS
+CREATE VIEW D_CICD_MATL_PATTERN_LIST_ALL_JNL AS
 SELECT
   TAB_A.*,
   TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
@@ -702,6 +728,91 @@ FROM
 WHERE
   TAB_A.DISUSE_FLAG = '0' AND
   TAB_B.DISUSE_FLAG = '0';
+
+
+CREATE VIEW D_CICD_MATL_PATTERN_LIST_ANS AS
+SELECT
+  TAB_A.*,
+  TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
+  CONCAT(TAB_B.ITA_EXT_STM_NAME,':',TAB_A.PATTERN_NAME) MATL_PTN_NAME_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM 
+            C_PATTERN_PER_ORCH    TAB_A
+  LEFT JOIN B_ITA_EXT_STM_MASTER  TAB_B ON (TAB_A.ITA_EXT_STM_ID = TAB_B.ITA_EXT_STM_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0' AND
+  TAB_A.ITA_EXT_STM_ID in (3,4,5);
+
+CREATE VIEW D_CICD_MATL_PATTERN_LIST_ANS_JNL AS
+SELECT
+  TAB_A.*,
+  TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
+  CONCAT(TAB_B.ITA_EXT_STM_NAME,':',TAB_A.PATTERN_NAME) MATL_PTN_NAME_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM 
+            C_PATTERN_PER_ORCH_JNL    TAB_A
+  LEFT JOIN B_ITA_EXT_STM_MASTER_JNL  TAB_B ON (TAB_A.ITA_EXT_STM_ID = TAB_B.ITA_EXT_STM_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0' AND
+  TAB_A.ITA_EXT_STM_ID in (3,4,5);
+  
+CREATE VIEW D_CICD_MATL_PATTERN_LIST_TERRA AS
+SELECT
+  TAB_A.*,
+  TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
+  CONCAT(TAB_B.ITA_EXT_STM_NAME,':',TAB_A.PATTERN_NAME) MATL_PTN_NAME_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM 
+            C_PATTERN_PER_ORCH    TAB_A
+  LEFT JOIN B_ITA_EXT_STM_MASTER  TAB_B ON (TAB_A.ITA_EXT_STM_ID = TAB_B.ITA_EXT_STM_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0' AND
+  TAB_A.ITA_EXT_STM_ID in (10);
+
+CREATE VIEW D_CICD_MATL_PATTERN_LIST_TERRA_JNL AS
+SELECT
+  TAB_A.*,
+  TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
+  CONCAT(TAB_B.ITA_EXT_STM_NAME,':',TAB_A.PATTERN_NAME) MATL_PTN_NAME_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM 
+            C_PATTERN_PER_ORCH_JNL    TAB_A
+  LEFT JOIN B_ITA_EXT_STM_MASTER_JNL  TAB_B ON (TAB_A.ITA_EXT_STM_ID = TAB_B.ITA_EXT_STM_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0' AND
+  TAB_A.ITA_EXT_STM_ID in (10);
+
+CREATE VIEW D_CICD_MATL_PATTERN_LIST_NULL AS
+SELECT
+  TAB_A.*,
+  TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
+  CONCAT(TAB_B.ITA_EXT_STM_NAME,':',TAB_A.PATTERN_NAME) MATL_PTN_NAME_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM 
+            C_PATTERN_PER_ORCH    TAB_A
+  LEFT JOIN B_ITA_EXT_STM_MASTER  TAB_B ON (TAB_A.ITA_EXT_STM_ID = TAB_B.ITA_EXT_STM_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0' AND
+  TAB_A.ITA_EXT_STM_ID is null;
+
+CREATE VIEW D_CICD_MATL_PATTERN_LIST_NULL_JNL AS
+SELECT
+  TAB_A.*,
+  TAB_A.PATTERN_ID                                      MATL_PTN_NAME_PULLKEY,
+  CONCAT(TAB_B.ITA_EXT_STM_NAME,':',TAB_A.PATTERN_NAME) MATL_PTN_NAME_PULLDOWN,
+  TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM 
+            C_PATTERN_PER_ORCH_JNL    TAB_A
+  LEFT JOIN B_ITA_EXT_STM_MASTER_JNL  TAB_B ON (TAB_A.ITA_EXT_STM_ID = TAB_B.ITA_EXT_STM_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0' AND
+  TAB_A.ITA_EXT_STM_ID is null;
 
 -- -------------------------------------------------
 -- -- 資材紐付管理の資材パス　プルダウン用 
@@ -725,6 +836,31 @@ FROM
 LEFT JOIN B_CICD_REPOSITORY_LIST_JNL  TAB_2 ON (TAB_1.REPO_ROW_ID = TAB_2.REPO_ROW_ID)
 WHERE
      TAB_2.DISUSE_FLAG = '0';
+     
+
+-- -------------------------------------------------
+-- -- 資材紐付管理のRestユーザ一覧用View バックヤード用
+-- -------------------------------------------------
+CREATE VIEW D_CICD_ACCT_LINK AS
+SELECT
+    TAB_A.*,
+    TAB_B.USERNAME,
+    TAB_B.DISUSE_FLAG AS A_ACCT_DISUSE_FLAG,
+    TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM
+    B_CICD_REST_ACCOUNT_LIST TAB_A
+    LEFT JOIN A_ACCOUNT_LIST TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID );
+
+
+CREATE VIEW D_CICD_ACCT_LINK_JNL AS
+SELECT
+    TAB_A.*,
+    TAB_B.USERNAME,
+    TAB_B.DISUSE_FLAG AS A_ACCT_DISUSE_FLAG,
+    TAB_B.ACCESS_AUTH AS ACCESS_AUTH_01
+FROM
+    B_CICD_REST_ACCOUNT_LIST_JNL TAB_A
+    LEFT JOIN A_ACCOUNT_LIST_JNL TAB_B ON ( TAB_A.USER_ID = TAB_B.USER_ID );
 INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_CICD_IF_INFO_RIC',2,'2100120004',2101200001,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
 INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_CICD_IF_INFO_JSQ',2,'2100120004',2101200002,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));

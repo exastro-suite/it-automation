@@ -163,7 +163,7 @@ class ControlGit {
         $comd_ok = false;
         
         // Git Cloneコマンドが失敗した場合、指定時間Waitし指定回数リトライする。
-        for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+        for($idx =0;$idx < $this->retryCount;$idx++) {
             $shell = sprintf("%s/ky_GitClone.sh",$this->libPath);
             $cmd = sprintf("sudo -i  %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
                                                       escapeshellarg($this->ProxyURL),
@@ -176,9 +176,9 @@ class ControlGit {
             $output = NULL;
             $this->ClearGitCommandLastErrorMsg();
             exec($cmd, $output, $return_var);
-
             if(0 != $return_var){
                 // リトライ中のログは表示しない。
+                if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
             } else {
                 $comd_ok = true;
                 break;
@@ -229,13 +229,14 @@ class ControlGit {
         $cmd = sprintf("sudo git %s remote -v 2>&1",$this->gitOption);
 
         // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
-        for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+        for($idx =0;$idx < $this->retryCount;$idx++) {
             $output = NULL;
             $return_var = 0;
             exec($cmd, $output, $return_var);
             if($return_var == 0) {
                 break;
             }
+            if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
         }
         if($return_var == 0) {
             $stdout = $output[0];
@@ -290,12 +291,13 @@ class ControlGit {
                                                           escapeshellarg($this->password));
 
             // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
-            for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+            for($idx =0;$idx < $this->retryCount;$idx++) {
                 $output1 = NULL;
                 exec($cmd1, $output1, $return_var);
                 if($return_var == 0) {
                     break;
                 }
+                if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
             }
             if($return_var != 0) {
                 //Git remote show origin commandに失敗しました。
@@ -323,12 +325,13 @@ class ControlGit {
         $cmd2 = sprintf("sudo -i git %s branch 2>&1",$this->gitOption);
 
         // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
-        for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+        for($idx =0;$idx < $this->retryCount;$idx++) {
             $output2 = NULL;
             exec($cmd2, $output2, $return_var);
             if($return_var == 0){
                 break;
             }
+            if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
         }
         if($return_var != 0) {
             //Git remote show origin commandに失敗しました。
@@ -340,7 +343,12 @@ class ControlGit {
             $this->SetLastErrorMsg($FREE_LOG);
             return -1;
         } else {
-            $CurrentBranch = substr($output2[0],2);
+            // 空リポジトリ対応 空リポジトリの場合はremote show originの結果が(unknown)になるので(unknown)設定
+            if(count($output2) == 0) {
+                $CurrentBranch = "(unknown)";
+            } else {
+                $CurrentBranch = substr($output2[0],2);
+            }
         }
         if($this->branch  == "__undefine_branch__") {
             if($DefaultBranch != $CurrentBranch) {
@@ -362,13 +370,14 @@ class ControlGit {
         $cmd = sprintf("sudo -i git %s ls-files 2>&1",$this->gitOption);
 
         // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
-        for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+        for($idx =0;$idx < $this->retryCount;$idx++) {
             $output = NULL;
             $return_var = 0;
             exec($cmd, $output, $return_var);
             if($return_var == 0) {
                 break;
             }
+            if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
         }
         if($return_var == 0) {
             $Files = $output;
@@ -398,7 +407,7 @@ class ControlGit {
 
         $ResultParsStr = $this->GitCmdRsltParsAry['pull']['allrady-up-to-date'];
         // Git Cloneコマンドが失敗した場合、指定時間Waitし指定回数リトライする。
-        for($idx =0;$idx < $this->retryCount;usleep($this->retryWaitTime),$idx++) {
+        for($idx =0;$idx < $this->retryCount;$idx++) {
             $output = NULL;
             $return_var = 0;
             $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
@@ -413,6 +422,7 @@ class ControlGit {
             exec($cmd, $output, $return_var);
             if(0 != $return_var){
                 // リトライ中のログは表示しない。
+                if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
             } else {
                 $saveoutput = $output;
                 $format_ok = false;

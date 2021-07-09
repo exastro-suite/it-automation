@@ -14,7 +14,7 @@
 //   limitations under the License.
 //
 ////en_US_UTF-8_ITACICDFORIAC_MNU
-$ary[ITACICDFORIAC-MNU-1200010000] = "Since the Remote Repository clone is created in ITA, it is possible to maintain it's information (View/Register/Update/Abolish).<BR>
+$ary["ITACICDFORIAC-MNU-1200010000"] = "Since the Remote Repository clone is created in ITA, it is possible to maintain it's information (View/Register/Update/Abolish).<BR>
 Set the \"Remote repository URL\" and \"Branch\" to the values of the arguments you want to pass to the Git clone command.<BR>
 git clone 「Remote Repository」「Local Repository path」 -b「Branch」<BR>
  The「Local Repository path」is the following /exastro/ita-root/repositorys/0000000001(Item number: The last 10 digits).";
@@ -131,9 +131,9 @@ $ary["ITACICDFORIAC-MNU-1200031801"] = "If you want to dry run a Movement, pleas
 The default is without dry run.";
 $ary["ITACICDFORIAC-MNU-1200031900"] = "Operaiton instance number";
 $ary["ITACICDFORIAC-MNU-1200031901"] = "The operation instance number that was taken when Movement was executed.";
-$ary["ITACICDFORIAC-MNU-1200032000"] = "Rest User";
-$ary["ITACICDFORIAC-MNU-1200032001"] = "Please select a user to update the Link file via RestAPI.
-[Source data] Registered account.";
+$ary["ITACICDFORIAC-MNU-1200032000"] = "Execution Login ID";
+$ary["ITACICDFORIAC-MNU-1200032001"] = "Select the User that is going to execute the file linking.
+[Source data]Register Account";
 $ary["ITACICDFORIAC-MNU-1200032100"] = "Detailed information";
 $ary["ITACICDFORIAC-MNU-1200032101"] = "If an error occurs during Delivery, the error information will be displayed.";
 $ary["ITACICDFORIAC-MNU-1200032200"] = "Assign Access permission role.";
@@ -160,8 +160,8 @@ $ary["ITACICDFORIAC-MNU-1200032500"] = "Operation Execution check Menu ID";
 $ary["ITACICDFORIAC-MNU-1200032501"] = "Operation Execution check Menu ID";
 $ary["ITACICDFORIAC-MNU-1200032600"] = "Operation status check";
 $ary["ITACICDFORIAC-MNU-1200032601"] = "Operation status check";
-$ary["ITACICDFORIAC-MNU-1200032800"] = "Last updatd by";
-$ary["ITACICDFORIAC-MNU-1200032801"] = "File Synchronization information last updated by";
+$ary["ITACICDFORIAC-MNU-1200032800"] = "Last Executer's Login ID";
+$ary["ITACICDFORIAC-MNU-1200032801"] = "Linked by:";
 $ary["ITACICDFORIAC-MNU-1200035001"] = "Please select a Repository.";
 $ary["ITACICDFORIAC-MNU-1200035002"] = "Select a link file type.";
 $ary["ITACICDFORIAC-MNU-1200040000"] = "It is possible to maintain (View/Update) the Connection interface information needed to use RestAPI for ITA.";
@@ -180,18 +180,17 @@ $ary["ITACICDFORIAC-MNU-1200040501"] = "Please input the Connection port.
 Default is:
 http:80
 https:443.";
-$ary["ITACICDFORIAC-MNU-1200050000"] = "It is possible to maintain (View/Register/Update/Abolish) the User information needed to use RestAPI for ITA.
-The user for ITA and RestAPI must be registered in the Management console/user list.";
+$ary["ITACICDFORIAC-MNU-1200050000"] = "It is possible to maintain (Viewv/Register/Update/Abolish) the information of the user that executes file linking. 
+The user must be registered to the Management Console/User list.";
 $ary["ITACICDFORIAC-MNU-1200050001"] = "Item number";
 $ary["ITACICDFORIAC-MNU-1200050002"] = "Registered account";
 $ary["ITACICDFORIAC-MNU-1200050003"] = "Registered account";
 $ary["ITACICDFORIAC-MNU-1200050004"] = "Exastro IT Automation account";
 $ary["ITACICDFORIAC-MNU-1200050100"] = "Login Id";
-$ary["ITACICDFORIAC-MNU-1200050101"] = "Please select the user linked to the role for CI/CD For IaC.
-[Source data]Management console/User list";
+$ary["ITACICDFORIAC-MNU-1200050101"] = "Please select the Login ID of the user that is going to execute the File linking. 
+ [Source Data]Management Console/User list";
 $ary["ITACICDFORIAC-MNU-1200050200"] = "Login Password";
-$ary["ITACICDFORIAC-MNU-1200050201"] = "Rest user Password. 
-Please input the password set in the Management console/User list.
+$ary["ITACICDFORIAC-MNU-1200050201"] = "Please Input the password for the Login ID.
 The characters can be between 8-30 bytes and can contain alphanumeric characters and the following symbols(! #$%&'()*+. /;<=>? @[]^\\_`{|}~).";
 $ary["ITACICDFORIAC-MNU-1200050202"] = "Alphanumeric characters and available symbols (! #$%&'()*+. /;<=>? @[]^\\_`{|}~).";
 ?>

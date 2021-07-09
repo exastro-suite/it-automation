@@ -81,7 +81,7 @@ $ary["ITACICDFORIAC-MNU-1200020000"]   = "リモートリポジトリに登録�
 フィルタ表示されている資材を一括ダウンロードすることもできます。";
 $ary["ITACICDFORIAC-MNU-1200020001"]   = "項番";
 $ary["ITACICDFORIAC-MNU-1200020002"]   = "リモートリポジトリ資材";
-$ary["ITACICDFORIAC-MNU-1200020003"]   = "リモートリポジトリに登録されている資材をメンテナンス(閲覧)できます。";
+$ary["ITACICDFORIAC-MNU-1200020003"]   = "リモートリポジトリ資材";
 $ary["ITACICDFORIAC-MNU-1200020100"]   = "リモートリポジトリ名";
 $ary["ITACICDFORIAC-MNU-1200020101"]   = "[元データ]リモートリポジトリ";
 $ary["ITACICDFORIAC-MNU-1200020200"]   = "資材パス";
@@ -135,8 +135,8 @@ $ary["ITACICDFORIAC-MNU-1200031801"]   = "Movementをドライランで実行し
 デフォルトはドライランでは実行しません。";
 $ary["ITACICDFORIAC-MNU-1200031900"]   = "作業インスタンスNo";
 $ary["ITACICDFORIAC-MNU-1200031901"]   = "Movementを実行した際に採番された作業インスタンスNoです。";
-$ary["ITACICDFORIAC-MNU-1200032000"]   = "Restユーザ";
-$ary["ITACICDFORIAC-MNU-1200032001"]   = "RestAPI経由で紐付先資材を更新する為のユーザを選択して下さい。
+$ary["ITACICDFORIAC-MNU-1200032000"]   = "実行ログインID";
+$ary["ITACICDFORIAC-MNU-1200032001"]   = "資材紐付を行うユーザを選択して下さい。
 [元データ]登録アカウント";
 $ary["ITACICDFORIAC-MNU-1200032100"]   = "詳細情報";
 $ary["ITACICDFORIAC-MNU-1200032101"]   = "デリバリでエラーが発生した場合、エラー情報が表示されます。";
@@ -164,8 +164,8 @@ $ary["ITACICDFORIAC-MNU-1200032500"]   = "作業実行確認メニューID";
 $ary["ITACICDFORIAC-MNU-1200032501"]   = "作業実行確認メニューID";
 $ary["ITACICDFORIAC-MNU-1200032600"]   = "作業状態確認";
 $ary["ITACICDFORIAC-MNU-1200032601"]   = "作業状態確認";
-$ary["ITACICDFORIAC-MNU-1200032800"]   = "最終更新者";
-$ary["ITACICDFORIAC-MNU-1200032801"]   = "素材同期情報の最終更新者";
+$ary["ITACICDFORIAC-MNU-1200032800"]   = "最終実行ログインID";
+$ary["ITACICDFORIAC-MNU-1200032801"]   = "資材紐付を行ったユーザです。";
 $ary["ITACICDFORIAC-MNU-1200035001"]   = "リポジトリを選択して下さい";
 $ary["ITACICDFORIAC-MNU-1200035002"]   = "紐付先資材タイプを選択して下さい";
 $ary["ITACICDFORIAC-MNU-1200040000"]   = "ITAとRestAPIを行う為の接続インターフェース情報をメンテナンス(閲覧/更新)できます。";
@@ -186,18 +186,17 @@ $ary["ITACICDFORIAC-MNU-1200040501"]   = "接続ポートを入力して下さ�
 httpの場合:80
 httpsの場合:443
 です。";
-$ary["ITACICDFORIAC-MNU-1200050000"]   = "ITAとRestAPIを行う為のユーザ情報をメンテナンス(閲覧/登録/更新/廃止)できます。
-ITAとRestAPIを行う為のユーザは、管理コンソール/ユーザ管理に登録しておく必要があります。";
+$ary["ITACICDFORIAC-MNU-1200050000"]   = "資材紐付を実行するユーザ情報をメンテナンス(閲覧/登録/更新/廃止)できます。 
+資材紐付を実行を行うユーザは、管理コンソール/ユーザ管理に登録しておく必要があります。";
 $ary["ITACICDFORIAC-MNU-1200050001"]   = "項番";
 $ary["ITACICDFORIAC-MNU-1200050002"]   = "登録アカウント";
 $ary["ITACICDFORIAC-MNU-1200050003"]   = "登録アカウント";
 $ary["ITACICDFORIAC-MNU-1200050004"] = "Exastro IT Automationアカウント";
 $ary["ITACICDFORIAC-MNU-1200050100"]   = "ログインID";
-$ary["ITACICDFORIAC-MNU-1200050101"]   = "CI/CD For IaC用のロールに紐づいているユーザを選択して下さい。
-[元データ]管理コンソール/ユーザ管理";
+$ary["ITACICDFORIAC-MNU-1200050101"]   = " 資材紐付を実行するログインIDを選択して下さい。
+ [元データ]管理コンソール/ユーザ管理";
 $ary["ITACICDFORIAC-MNU-1200050200"]   = "ログインPW";
-$ary["ITACICDFORIAC-MNU-1200050201"]   = "Restユーザのパスワードです。
-管理コンソール/ユーザ管理で設定したパスワードを入力して下さい。
-文字数は8～30バイト、半角英数字と利用可能な記号（!#$%&'()*+./;<=>?@[]^\\_`{|}~）で入力して下さい。";
+$ary["ITACICDFORIAC-MNU-1200050201"]   = " ログインIDのパスワードを入力して下さい。
+ 文字数は8～30バイト、半角英数字と利用可能な記号（!#$%&'()*+./;<=>?@[]^\_`{|}~）で入力して下さい。";
 $ary["ITACICDFORIAC-MNU-1200050202"]   = "半角英数字と利用可能な記号（!\"#$%&'()*+,./:;<=>?@[]^\\_`{|}）";
 ?>
