@@ -150,7 +150,7 @@ EOD;
                 <form method="post" action="/menus/systems/<?php echo $g['page_dir']; ?>/03_data_import.php?no=<?php echo $g['page_dir']; ?>" id="import_form">
                 <p><label><input type="checkbox" value="" id="import_whole"><strong><font size="4"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900018');?></font></strong></label></p>
                 <p style="margin-bottom: 10px;"></p>
-<div id="table_area" class="table_area" style="width: 868px;">
+<div id="table_area" class="table_area">
     <div class="fakeContainer_Filter1Print">
         <div id="Mix1_1_itaTable" class="itaTable def tableSticky">
             <div id="Mix1_1_itaTableBody" class="itaTableBody scrollRight">
@@ -170,11 +170,21 @@ EOD;
                                     <td class="thSticky left">
                                         <input class="menu_id_checkbox" type="checkbox" <?php if($menuInfo['disabled']==1)echo 'disabled checked="false"'; ?> name="import_<?php echo $menuGroupId; ?>[]" value="<?php echo $menuInfo['menu_id']; ?>" id="<?php echo $menuGroupId; ?>" class="import_<?php echo $menuGroupId; ?> menu">
                                     </td>
-                                    <td><?php echo $menuGroupInfo["menu_group_name"]; ?></td>
-                                    <td><?php echo $menuInfo["menu_name"]; ?></td>
-                                    <td><?php echo $menuInfo["menu_id"]; ?></td>
-                                    <td><?php echo $menuInfo["file_name"]; ?></td>
-                                    <td><?php if (isset($menuInfo["error"])) echo $menuInfo["error"]; ?></td>
+                                    <td style="max-width: 80px">
+                                        <div class="tdInner"><?php echo $menuGroupInfo["menu_group_name"]; ?></div>
+                                    </td>
+                                    <td style="max-width: 200px">
+                                        <div class="tdInner"><?php echo $menuInfo["menu_name"]; ?></div>
+                                    </td>
+                                    <td style="max-width: 70px">
+                                        <div class="tdInner"><?php echo $menuInfo["menu_id"]; ?></div>
+                                    </td>
+                                    <td style="max-width: 300px">
+                                        <div class="tdInner"><?php echo $menuInfo["file_name"]; ?></div>
+                                    </td>
+                                    <td style="max-width: 220px">
+                                        <div class="tdInner"><?php if (isset($menuInfo["error"])) echo $menuInfo["error"]; ?></div>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endforeach; ?>
@@ -189,6 +199,7 @@ EOD;
                 <input type="hidden" name="post_kind" value="import">
                 <input type="hidden" name="menu_on" value="" class="menu_on">
                 </form>
+                <script type="text/javascript">itaTable( 'Mix1_1' );</script>
 <?php endif; ?>
 <?php endif; ?>
             

@@ -62,7 +62,7 @@ $(function(){
     for (let i = 0; i < checkboxList.length; i++) {
         let trList = checkboxList[i].parentNode.parentNode;
         trList.addEventListener('click', function(e){
-            checkClick(e.target.parentNode.children[0].children[0]);
+            checkClick(checkboxList[i]);
             for (let l = 0; l < checkboxList.length; l++) {
                 if (checkboxList[l].checked == false) {
                     import_whole.checked = false;
