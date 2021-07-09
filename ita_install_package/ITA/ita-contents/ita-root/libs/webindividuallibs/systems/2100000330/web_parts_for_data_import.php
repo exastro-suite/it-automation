@@ -116,7 +116,7 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
 
             // データ登録
             $taskNo = insertBulkExcelTask();
-            $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900009', array($taskNo));
+            $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-2100000330_10', array($taskNo));
             $_SESSION['data_import_task_no'] = $taskNo;
 
             renameImportFiles($taskNo);
