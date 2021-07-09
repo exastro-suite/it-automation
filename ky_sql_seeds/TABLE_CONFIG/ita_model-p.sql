@@ -50,7 +50,7 @@ CREATE TABLE B_CICD_REST_ACCOUNT_LIST
 ACCT_ROW_ID                       %INT%                             , -- 識別シーケンス項番
 -- --
 USER_ID                           %INT%                             , -- ユーザー管理(A_ACCOUNT_LIST) USER_ID
-LOGIN_PW                          %VARCHR%(32)                      , -- ユーザー管理(A_ACCOUNT_LIST)に合わせる
+LOGIN_PW                          %VARCHR%(64)                      , -- ユーザー管理(A_ACCOUNT_LIST)に合わせる UI 30Byte
 -- --
 ACCESS_AUTH                       TEXT                              ,
 DISP_SEQ                          %INT%                             , -- 表示順序
@@ -70,7 +70,7 @@ JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴�
 ACCT_ROW_ID                       %INT%                             , -- 識別シーケンス項番
 -- --
 USER_ID                           %INT%                             , -- ユーザー管理(A_ACCOUNT_LIST) USER_ID
-LOGIN_PW                          %VARCHR%(32)                      , -- ユーザー管理(A_ACCOUNT_LIST)に合わせる
+LOGIN_PW                          %VARCHR%(64)                      , -- ユーザー管理(A_ACCOUNT_LIST)に合わせる UI 30Byte
 -- --
 ACCESS_AUTH                       TEXT                              ,
 DISP_SEQ                          %INT%                             , -- 表示順序

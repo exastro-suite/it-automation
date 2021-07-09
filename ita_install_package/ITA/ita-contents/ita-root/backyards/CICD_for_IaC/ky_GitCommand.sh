@@ -38,9 +38,6 @@ if [ "${TYPE}" = "pass" ]; then
         } \"Password for \" {
             send \"${REMOTE_PASSWORD}\n\"
             exp_continue
-        } \"HEAD branch:\" {
-            set timeout -1
-            exp_continue
         } timeout {
             exit 200
         } eof {
@@ -74,9 +71,6 @@ else
             exit 201
         } \"Password for \" {
             exit 202
-        } \"HEAD branch:\" {
-            set timeout -1
-            exp_continue
         } timeout {
             exit 205
         } eof {
