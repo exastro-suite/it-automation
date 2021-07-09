@@ -2480,6 +2480,12 @@ class ExcelFormatter extends ListFormatter {
             $tmpMenuGroupNameAry = explode("/", $menuInfo["MENU_GROUP_NAME"]);
             $menuGroupName = implode("_", $tmpMenuGroupNameAry);
             $dirName = $menuGroupId."_".$menuGroupName;
+            // windowsのフォルダ名制限対策で244文字以内に収める
+            if (strlen($dirName) > 200) {
+                web_log("dirName => $dirName");
+                $dirName = substr($dirName, 0, 200);
+                web_log("dirName => $dirName");
+            }
 
             //----保存
             $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($X, "Xlsx");
@@ -2489,13 +2495,13 @@ class ExcelFormatter extends ListFormatter {
             if (!is_dir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/")) {
                 $res = mkdir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/");
                 if ($res == false) {
-                    throw new Exception("Error Processing Request", 1);
+                    throw new Exception($g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55202", array($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/")));
                 }
             }
             if (!is_dir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName")) {
                 $res = mkdir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName");
                 if ($res == false) {
-                    throw new Exception("Error Processing Request", 1);
+                    throw new Exception($g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55202", array($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName")));
                 }
             }
             $tmpFilePath = $g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName/$fileName";

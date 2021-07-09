@@ -198,15 +198,6 @@ function checkZipFile(){
         $files = glob("$filePath/*");
         foreach ($files as $file) {
             // ファイル名にカッコがある可能性があるため、ファイル名のみシングルクォーテーションで囲む
-            $tmpFileStrAry = explode("/", $file);
-            $lastIndex = count($tmpFileStrAry)-1;
-            $tmpFileName = $tmpFileStrAry[$lastIndex];
-            
-            $renamedFileName = "'".$tmpFileName."'";
-
-            unset($tmpFileStrAry[$lastIndex]);
-            $tmpFileStrAry[] = $renamedFileName;
-            $file = implode("/", $tmpFileStrAry);
 
             $cmd = "sudo mv '$file' '$importPath$uploadId'";
             exec($cmd, $output, $return_var);

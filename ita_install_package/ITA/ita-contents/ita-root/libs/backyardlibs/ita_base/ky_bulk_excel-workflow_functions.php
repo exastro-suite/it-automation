@@ -1088,6 +1088,10 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                     $tmpMenuGroupNameAry = explode("/", $menuInfo["MENU_GROUP_NAME"]);
                     $menuGroupName = implode("_", $tmpMenuGroupNameAry);
                     $dirName = $menuGroupId."_".$menuGroupName;
+                    // windowsのフォルダ名制限対策で200文字以内に収める
+                    if (strlen($dirName) > 200) {
+                        $dirName = substr($dirName, 0, 200);
+                    }
 
                     $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId);
                     if (!is_dir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/")) {
@@ -1110,9 +1114,6 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                     // ----テンポラリファイルを削除する
                     unlink("$strTmpFilename");
                     // テンポラリファイルを削除する----
-
-                    // アクセスログへ記録
-                    outputLog(LOG_PREFIX, $objMTS->getSomeMessage("ITAWDCH-STD-460",array($ACRCM_id, $strOutputFileType, $strCSVOutputFileType, $strDLFilename)));
                 }
                 else{
                     $intErrorType = 501;
@@ -1610,8 +1611,6 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
             }
             $intErrorStatus = 0;
             
-            // WebAPIログへサクセスを記録
-            outputLog(LOG_PREFIX, $objMTS->getSomeMessage("ITAWDCH-STD-440",array($ACRCM_id,$upOrgFilename)));
             return array("result" => true);
         }
         catch (Exception $e){
@@ -1659,9 +1658,6 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                 unset($tmp_DevStr);
                 //ロードテーブルカスタマイズ向けメッセージを作成----
             }
-            
-            // WebAPIログへエラーを記録
-            outputLog(LOG_PREFIX, $objMTS->getSomeMessage("ITAWDCH-ERR-271",array($ACRCM_id,$upOrgFilename,$intErrorStatus)));
         }
 
         $response = array();
@@ -1670,8 +1666,6 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
         $response['text'] = nl2br($ret_str);
         $response['error'] = $intErrorStatus;
 
-        dev_log($objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-        outputLog(LOG_PREFIX, $objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
         return array("result" => false, "response" => $response);
     }
 
