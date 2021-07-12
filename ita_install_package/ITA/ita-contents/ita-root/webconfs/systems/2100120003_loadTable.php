@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2019 NEC Corporation
+//   Copyright 2019 NEC Corporation 
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -1157,6 +1157,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     if($ansible_driver === true) {
         //tail of setting [multi-set-unique]----
         $table->addUniqueColumnSet(array('DIALOG_TYPE_ID','OS_TYPE_ID'));
+        $table->addUniqueColumnSet(array('MATL_LINK_NAME','MATL_TYPE_ROW_ID'));
         //----head of setting [multi-set-unique]
     }
 
