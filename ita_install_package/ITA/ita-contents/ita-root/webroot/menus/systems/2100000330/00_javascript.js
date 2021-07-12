@@ -71,6 +71,16 @@ $(function(){
                 import_whole.checked = true;
             }
         });
+        checkboxList[i].addEventListener('click', function(e){
+            checkClick(checkboxList[i]);
+            for (let l = 0; l < checkboxList.length; l++) {
+                if (checkboxList[l].checked == false) {
+                    import_whole.checked = false;
+                    break;
+                }
+                import_whole.checked = true;
+            }
+        });
     }
 
     $("#import_whole").click(function(e){
