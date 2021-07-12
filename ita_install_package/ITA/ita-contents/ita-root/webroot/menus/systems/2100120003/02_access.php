@@ -45,16 +45,11 @@
 
             $p_last_updatetime_for_update = rawurldecode(base64_decode($p_last_updatetime_for_update));
 
-web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
-web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
             try {
-web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
 
                 $cmDBobj = new CommonDBAccessCoreClass($db_model_ch,$g['objDBCA'],$g['objMTS'],$g['login_id']);
-web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
 
                 $DBobj = new LocalDBAccessClass($db_model_ch,$cmDBobj,$g['objDBCA'],$g['objMTS'],$g['login_id'],$logfile,$log_level,$RepositoryNo);
-web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
 
                 $objTextVldt = new SingleTextValidator(22,22,false);
                 if( $objTextVldt->isValid($p_last_updatetime_for_update) === false ){
@@ -71,7 +66,6 @@ web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
                     throw new Exception($FREE_LOG);
                 }
 
-web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
                 $dbAcction      = "SELECT FOR UPDATE";
                 $BindArray      = array('WHERE'=>"MATL_LINK_ROW_ID=:MATL_LINK_ROW_ID AND DISUSE_FLAG=:DISUSE_FLAG");
                 $TDobj          = new TD_B_CICD_MATERIAL_LINK_LIST();
@@ -114,7 +108,6 @@ web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
                 }
                 if($intErrorType == 0) {
 
-web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
                     // 同期状態を再開に設定
                     $row['SYNC_STATUS_ROW_ID']    = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART;
                     // 詳細情報を空白に設定
@@ -138,7 +131,6 @@ web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
                         $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
                         throw new Exception($FREE_LOG);
                     }
-web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
 
                     $ret = $DBobj->transactionCommit();
                     if($ret !== true) {
@@ -150,8 +142,6 @@ web_log(__FILE__.__LINE__."aaaaaaaaaaaaaaaaaaaaaaaaa");
             }
             catch (Exception $e){
                 $tmpErrMsgBody = $e->getMessage();
-
-web_log(__FILE__.__LINE__.print_r($tmpErrMsgBody,true));
 
                 if ( $intErrorType == 0) $intErrorType = 500;
 
