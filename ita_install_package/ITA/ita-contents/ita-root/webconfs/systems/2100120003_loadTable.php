@@ -159,7 +159,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('csv')->setVisible(false);
         $c->getOutputType('json')->setVisible(false);
 
-// enomoto
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         $cg1->addColumn($c);
@@ -352,7 +351,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('csv')->setVisible(false);
         $c->getOutputType('json')->setVisible(false);
         
-//enomoto        
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         // 組み合わせバリデータで必須チェック
@@ -965,7 +963,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
 
-// enomoto        
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         $cg->addColumn($c);
