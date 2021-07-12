@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2019 NEC Corporation 
+//   Copyright 2019 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -117,6 +117,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setHiddenMainTableColumn(false);  //コンテンツのソースがヴューの場合、登録/更新の対象外
         // 組み合わせバリデータで必須チェック
         //$c->setRequired(true);
+        $c->setRequiredMark(true);//必須マークのみ付与
         $cg1->addColumn($c);
 
         /////////////////////////////////////////////////////////
@@ -148,6 +149,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setEvent('register_table', 'onchange', 'repo_reg');
         // 組み合わせバリデータで必須チェック
         //$c->setRequired(true);
+        $c->setRequiredMark(true);//必須マークのみ付与
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
         //エクセル/CSVからのアップロードを禁止する。
         $c->setAllowSendFromFile(false);
@@ -355,6 +357,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         // 組み合わせバリデータで必須チェック
         //$c->setRequired(true);
+        $c->setRequiredMark(true);//必須マークのみ付与
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
         $cg1->addColumn($c);
 
