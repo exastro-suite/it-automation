@@ -118,6 +118,8 @@
         global $objDBCA;
         global $objMTS;
 
+        $SyncStatusNameobj = new TD_SYNC_STATUS_NAME_DEFINE($objMTS);
+
         $cmDBobj = new CommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,$db_access_user_id);
 
         $DBobj = new LocalDBAccessClass($db_model_ch,$cmDBobj,$objDBCA,$objMTS,$db_access_user_id,$logfile,$log_level);
@@ -224,7 +226,7 @@
             $RepoId      = $row['REPO_ROW_ID'];
             switch($row['SYNC_STATUS_ROW_ID']){
             // 同期状態を判定
-            case TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL:   // 正常
+            case $SyncStatusNameobj->NORMAL():   // 正常
                 $ExecMode = "Normal";   // 資材一覧の更新はしない。
                 break;
             default:
@@ -384,6 +386,7 @@
         global $log_level;
 
         global $objMTS;
+        global $SyncStatusNameobj;
 
         $tgtRepoListRow = array();
         $TDRepoobj    = new TD_B_CICD_REPOSITORY_LIST();
@@ -408,7 +411,7 @@
           
         $arrayBind                       = array();
         $arrayBind['AUTO_SYNC_FLG']      = TD_B_CICD_REPOSITORY_LIST::C_AUTO_SYNC_FLG_ON;
-        $arrayBind['SYNC_STATUS_ROW_ID'] = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+        $arrayBind['SYNC_STATUS_ROW_ID'] = $SyncStatusNameobj->ERROR();
 
         $objQuery = $DBobj->SelectForSimple($sqlBody,$arrayBind);
         if($objQuery === false) {

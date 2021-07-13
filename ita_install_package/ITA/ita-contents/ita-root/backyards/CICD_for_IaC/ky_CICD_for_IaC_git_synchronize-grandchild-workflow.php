@@ -158,6 +158,8 @@
         global $objDBCA;
         global $objMTS;
 
+        $SyncStatusNameobj = new TD_SYNC_STATUS_NAME_DEFINE($objMTS);
+
         $cmDBobj = new CommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,$db_access_user_id);
 
         $DBobj = new LocalDBAccessClass($db_model_ch,$cmDBobj,$objDBCA,$objMTS,$db_access_user_id,$logfile,$log_level,$RepoId);
@@ -410,6 +412,7 @@
         global $UIDelvExecInsNo;
         global $UIDelvExecMenuId;
         global $DelvExecFlg;
+        global $SyncStatusNameobj;
     
         $UIMatlUpdateStatusDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
         if($DelvExecFlg === true) {
@@ -417,7 +420,7 @@
         } else {
             $UIDelvStatusDisplayMsg       = "";
         }
-        $UIMatlUpdateStatusID         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+        $UIMatlUpdateStatusID         = $SyncStatusNameobj->ERROR();
         $UIDelvExecInsNo              = "";
         $UIDelvExecMenuId             = "";
     }
@@ -667,6 +670,7 @@
         global $LFCobj;
         global $MatlLinkUpdate_Flg;
         global $DelvExecFlg;
+        global $SyncStatusNameobj;
 
         // 資材紐付管理より対象レコード取得
         $tgtMatlLinkRow = array();
@@ -680,7 +684,7 @@
             // 想定外のエラー
             $UIMatlSyncMsg   = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
             $UIDelvMsg       = "def";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -699,7 +703,7 @@
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
             $UIMatlSyncMsg   = $LogStr;
             $UIDelvMsg       = "def";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -760,7 +764,7 @@
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
             $UIMatlSyncMsg   = $LogStr;
             $UIDelvMsg       = "def";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -779,7 +783,7 @@
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
             $UIMatlSyncMsg   = $LogStr;
             $UIDelvMsg       = "def";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -798,7 +802,7 @@
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
             $UIMatlSyncMsg   = $LogStr;
             $UIDelvMsg       = "def";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -817,7 +821,7 @@
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
             $UIMatlSyncMsg   = $LogStr;
             $UIDelvMsg       = "def";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -839,7 +843,7 @@
             // 想定外のエラー
             $UIMatlSyncMsg   = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
             $UIDelvMsg       = "def";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -863,7 +867,7 @@
                  // 想定外のエラー
                  $UIMatlSyncMsg   = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
                  $UIDelvMsg       = "def";
-                 $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+                 $SyncSts         = $SyncStatusNameobj->ERROR();
                  $DelvExecInsNo   = "";
                  $DelvExecMenuId  = "";
                  setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -892,7 +896,7 @@
             // 想定外のエラー
             $UIMatlSyncMsg   = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
             $UIDelvMsg       = "def";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -951,7 +955,7 @@
             // 差分なし判定
             if($NoUpdateFlg === true) {
                 // 資材に差分がなく、同期状態が正常でない場合は、状態を正常に設定
-                if($row['SYNC_STATUS_ROW_ID'] != TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL) {
+                if($row['SYNC_STATUS_ROW_ID'] != $SyncStatusNameobj->NORMAL()) {
                     $LogStr  = $ErrorMsgHeder;
                     $UIMatlSyncMsg   = "";
                     // Movementが登録されているか判定
@@ -961,7 +965,7 @@
                     } else {
                         $UIDelvMsg       = "";
                     }
-                    $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL;
+                    $SyncSts         = $SyncStatusNameobj->NORMAL();
                     $DelvExecInsNo   = "";
                     $DelvExecMenuId  = "";
                     setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -981,7 +985,7 @@
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,$AddLogStr);
             $UIMatlSyncMsg   = $ErrorMsgHeder . "\n" . var_export($retAry,true);
             $UIDelvMsg       = "def";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -992,7 +996,7 @@
         if($DelvExecFlg === false) {
             $UIMatlSyncMsg   = "";
             $UIDelvMsg       = "";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL;
+            $SyncSts         = $SyncStatusNameobj->NORMAL();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -1043,7 +1047,7 @@
         if($retAry[0] == "000") {
             $UIMatlSyncMsg   = "";
             $UIDelvMsg       = "";
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL;
+            $SyncSts         = $SyncStatusNameobj->NORMAL();
             $DelvExecInsNo   = $retAry[1];
             $DelvExecMenuId  = $UIDelvExecMenuId;
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
@@ -1056,7 +1060,7 @@
             $FREE_LOG        = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,$AddLogStr);
             $UIMatlSyncMsg   = "";
             $UIDelvMsg       = $ErrorMsgHeder . "\n" . $AddLogStr;
-            $SyncSts         = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncSts         = $SyncStatusNameobj->ERROR();
             $DelvExecInsNo   = "";
             $DelvExecMenuId  = "";
             setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);

@@ -34,6 +34,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     global $g;
 
+    $SyncStatusNameobj = new TD_SYNC_STATUS_NAME_DEFINE($g['objMTS']);
+
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010000");
 
@@ -356,13 +358,16 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         ///////////////////////////////////////////////////////// 
         if( $g['privilege'] === '1' ){
             $objFunction = function($rowData){
+                global $g;
+                $SyncStatusNameobj = new TD_SYNC_STATUS_NAME_DEFINE($g['objMTS']);
+
                 $retLinkable = "disabled";
                 // 再開ボタン 活性・非活性制御
                 if( array_key_exists('SYNC_STATUS_ROW_ID', $rowData) === true &&
                     array_key_exists('AUTO_SYNC_FLG', $rowData)      === true && 
                     array_key_exists('DISUSE_FLAG', $rowData)      === true ) {
                     // 同期状態が異常かつ廃止レコードでない場合
-                    if(($rowData['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR) &&
+                    if(($rowData['SYNC_STATUS_ROW_ID'] == $SyncStatusNameobj->ERROR()) &&
                        ($rowData['DISUSE_FLAG'] == 0)) { 
                         // 自動同期　有効(未選択)の場合
                         if($rowData['AUTO_SYNC_FLG'] != TD_B_CICD_REPOSITORY_LIST::C_AUTO_SYNC_FLG_OFF) {

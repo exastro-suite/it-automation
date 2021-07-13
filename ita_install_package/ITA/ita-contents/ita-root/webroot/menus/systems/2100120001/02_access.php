@@ -22,6 +22,7 @@
     require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_functions.php');
     require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
     require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
+
     //-- サイト個別PHP要素、ここまで--
     class Db_Access extends Db_Access_Core {
         //-- サイト個別PHP要素、ここから--
@@ -45,6 +46,7 @@
             $p_last_updatetime_for_update = rawurldecode(base64_decode($p_last_updatetime_for_update));
 
             try {
+                $SyncStatusNameobj = new TD_SYNC_STATUS_NAME_DEFINE($g['objMTS']);
 
                 $cmDBobj = new CommonDBAccessCoreClass($db_model_ch,$g['objDBCA'],$g['objMTS'],$g['login_id']);
 
@@ -100,7 +102,7 @@
                         $intErrorType = 1;
                     }
                     // 同期状態が異常でない場合
-                    if( $row['SYNC_STATUS_ROW_ID'] != TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR){
+                    if( $row['SYNC_STATUS_ROW_ID'] != $SyncStatusNameobj->ERROR()){
                         $strMsgBody = $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2007",array($tgtRepoId));
                         $intErrorType = 1;
                     }
@@ -108,7 +110,7 @@
                 if($intErrorType == 0) {
 
                     // 同期状態を再開に設定
-                    $row['SYNC_STATUS_ROW_ID'] = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART;
+                    $row['SYNC_STATUS_ROW_ID'] = $SyncStatusNameobj->RESTART();
                     // 詳細情報をクリア
                     $row['SYNC_ERROR_NOTE'] = "";
 

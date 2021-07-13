@@ -35,6 +35,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_functions.php');
     require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
     require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/table_definition.php');
+
+    $SyncStatusNameobj = new TD_SYNC_STATUS_NAME_DEFINE($g['objMTS']);
+
     $wanted_filename = "ita_ansible-driver";
     $ansible_driver  = false;
     if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
@@ -655,13 +658,16 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         /////////////////////////////////////////////////////////
         if( $g['privilege'] === '1' ){
             $objFunction = function($rowData){
+                global $g;
+                $SyncStatusNameobj = new TD_SYNC_STATUS_NAME_DEFINE($g['objMTS']);
+
                 $retLinkable = "disabled";
                 // 再開ボタン 活性・非活性制御
                 if( array_key_exists('SYNC_STATUS_ROW_ID', $rowData) === true &&
                     array_key_exists('AUTO_SYNC_FLG', $rowData)      === true &&
                     array_key_exists('DISUSE_FLAG', $rowData)      === true ) {
                     // 同期状態が異常かつ廃止レコードでない場合
-                    if(($rowData['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR) &&
+                    if(($rowData['SYNC_STATUS_ROW_ID'] == $SyncStatusNameobj->ERROR()) &&
                        ($rowData['DISUSE_FLAG'] == 0)) {
                         // 自動同期　有効(未選択)の場合
                         if($rowData['AUTO_SYNC_FLG'] != TD_B_CICD_MATERIAL_LINK_LIST::C_AUTO_SYNC_FLG_OFF) {
