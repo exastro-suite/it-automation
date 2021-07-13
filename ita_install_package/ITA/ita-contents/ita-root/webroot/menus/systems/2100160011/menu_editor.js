@@ -291,7 +291,9 @@ const languageText = {
 '0044':[getSomeMessage("ITACREPAR_1253"),''],
 '0045':[getSomeMessage("ITACREPAR_1254"),''],
 '0046':[getSomeMessage("ITACREPAR_1276"),''],
-'0047':[getSomeMessage("ITACREPAR_1280"),'']
+'0047':[getSomeMessage("ITACREPAR_1280"),''],
+'0048':[getSomeMessage("ITACREPAR_1285"),''],
+'0049':[getSomeMessage("ITACREPAR_1286"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
@@ -714,7 +716,7 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
 
 //参照項目を選択するモーダル表示イベント
 $menuEditor.on('click', '.reference-item-select', function() {
-  itaModalOpen('Reference Item select', modalReferenceItemList, 'reference' , $(this));
+  itaModalOpen(textCode('0049'), modalReferenceItemList, 'reference' , $(this));
 });
 
 //選択項目変更時、参照項目を空にする
@@ -1998,7 +2000,7 @@ const modalRoleList = function() {
 // ロールセレクトモーダルを開く
 const $roleSlectButton = $('#permission-role-select');
 $roleSlectButton.on('click', function() {
-  itaModalOpen('Permission role select', modalRoleList, 'role');
+  itaModalOpen(textCode('0048'), modalRoleList, 'role');
 });
 
 
