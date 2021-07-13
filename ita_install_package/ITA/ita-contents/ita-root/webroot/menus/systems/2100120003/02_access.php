@@ -47,6 +47,8 @@
 
             try {
 
+                $SyncStatusNameobj = new TD_SYNC_STATUS_NAME_DEFINE($g['objMTS']);
+
                 $cmDBobj = new CommonDBAccessCoreClass($db_model_ch,$g['objDBCA'],$g['objMTS'],$g['login_id']);
 
                 $DBobj = new LocalDBAccessClass($db_model_ch,$cmDBobj,$g['objDBCA'],$g['objMTS'],$g['login_id'],$logfile,$log_level,$RepositoryNo);
@@ -101,7 +103,7 @@
                         $intErrorType = 1;
                     }
                     // 同期状態が異常でない場合
-                    if( $row['SYNC_STATUS_ROW_ID'] != TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR){
+                    if( $row['SYNC_STATUS_ROW_ID'] != $SyncStatusNameobj->ERROR()){
                         $strMsgBody = $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2021",array($tgtMaltLinkId));
                         $intErrorType = 1;
                     }
@@ -109,7 +111,7 @@
                 if($intErrorType == 0) {
 
                     // 同期状態を再開に設定
-                    $row['SYNC_STATUS_ROW_ID']    = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART;
+                    $row['SYNC_STATUS_ROW_ID']    = $SyncStatusNameobj->RESTART();
                     // 詳細情報を空白に設定
                     $row['SYNC_STATUS_ROW_ID']    = "";
                     $row['SYNC_ERROR_NOTE']       = "";
