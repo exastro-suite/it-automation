@@ -485,7 +485,7 @@ EOD;
               </tbody>
             </table>
             <ul class="property-button-group">
-              <li><button id="create-menu-group-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</button></li>
+              <li><button id="create-menu-group-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104260")}</button></li>
             </ul>
           </div>
 
@@ -616,7 +616,7 @@ EOD;
               </tbody>
             </table>
             <ul class="property-button-group">
-              <li><button id="create-menu-group-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104218")}</button></li>
+              <li><button id="create-menu-group-select" class="property-button">{$g['objMTS']->getSomeMessage("ITACREPAR-MNU-104260")}</button></li>
             </ul>
           </div>
 

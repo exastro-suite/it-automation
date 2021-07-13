@@ -69,7 +69,7 @@ $ary["ITACREPAR_1250"]       = "Do you want to perform menu initialization? \n*T
 $ary["ITACREPAR_1251"]       = "There are no items available for reference.";
 $ary["ITACREPAR_1252"]       = "Reference item";
 $ary["ITACREPAR_1253"]       = "[Referenced value]";
-$ary["ITACREPAR_1254"]       = "Select a reference item";
+$ary["ITACREPAR_1254"]       = "Select reference item";
 $ary["ITACREPAR_1255"]       = "Exchange ID has failed({})";
 $ary["ITACREPAR_1256"]       = "Enter the item name to be displayed on the menu. \nThe maximum size is 256 bytes.\nDo not use \"/\" in the item names.\n\"Names [numbers] used in the repeat frame\" cannot be used for item names outside the repeat frame.";
 $ary["ITACREPAR_1257"]       = "Move item.";
@@ -100,4 +100,6 @@ $ary["ITACREPAR_1281"]       = "No items.";
 $ary["ITACREPAR_1282"]       = "Delete";
 $ary["ITACREPAR_1283"]       = "Add a pattern";
 $ary["ITACREPAR_1284"]       = "No patterns.";
+$ary["ITACREPAR_1285"]       = "Permission role";
+$ary["ITACREPAR_1286"]       = "Reference Item";
 ?>
