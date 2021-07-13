@@ -94,7 +94,7 @@ BRANCH_NAME                        %VARCHR%(256)                    , -- ブラ�
 GIT_PROTOCOL_TYPE_ROW_ID           %INT%                            , -- プロトコルタイプ
 GIT_REPO_TYPE_ROW_ID               %INT%                            , -- リポジトリタイプ
 GIT_USER                           %VARCHR%(128)                    , -- Git ユーザー
-GIT_PASSWORD                       %VARCHR%(256)                    , -- Git パスワード
+GIT_PASSWORD                       TEXT                             , -- Git パスワード
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
 SYNC_INTERVAL                      %INT%                            , -- 同期周期(単位:分)
 SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
@@ -128,7 +128,7 @@ BRANCH_NAME                        %VARCHR%(256)                    , -- ブラ�
 GIT_PROTOCOL_TYPE_ROW_ID           %INT%                            , -- プロトコルタイプ
 GIT_REPO_TYPE_ROW_ID               %INT%                            , -- リポジトリタイプ
 GIT_USER                           %VARCHR%(128)                    , -- Git ユーザー
-GIT_PASSWORD                       %VARCHR%(256)                    , -- Git パスワード
+GIT_PASSWORD                       TEXT                             , -- Git パスワード
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
 SYNC_INTERVAL                      %INT%                            , -- 同期周期(単位:分)
 SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
