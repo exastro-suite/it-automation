@@ -643,15 +643,18 @@ th.sortTriggerInTbl:hover {
 	background-color: {$color->hex($c['HEADING'][0],100)};
 	color: {$color->hex($c['HEADING'][2],100)};
 }
+#create_menu_form h3,
 #export_form .export_all_div {
 	background-color: {$color->hex($c['TABLE'][0],100)};
 	border-color: {$color->hex($c['TABLE'][1],100)};
   color: #FFF;
 }
+#create_menu_form h3 + div,
 #export_form .export_all_div + div {
   background-color: {$color->hex($c['TABLE'][2],20,$c['REVERSE'][1])};
 	border-color: {$color->hex($c['TABLE'][1],100)};
 }
+#create_menu_form label:hover,
 #export_form label:hover {
   background-color: {$color->hex($c['TABLE'][4],100)};
 }
@@ -776,6 +779,13 @@ color: #AAA;
 background-color: #272B38!important;
 border-color: #4F80FF!important;
 }
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+background-color: rgba( 255,255,255,.1 )!important;
+border-color: rgba( 255,255,255,.2 )!important;
+}
+.select2-search__field {
+color: #EEE!important;
+}
 .password_eye {
 background-position: 0 -64px;
 }
@@ -835,6 +845,10 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .start::after, .end::after,
 .arrow::after, .highlight::after {
   background-color: #666666!important;
+}
+.movement2 .tips_box .areaRight .inLineDiv {
+background-color: #444!important;
+border-color: #777!important;
 }
 
 /* -------------------------------------------------- *
