@@ -82,7 +82,17 @@ function MatlLinkColumnValidator1($ColumnValueArray,$RepoId,$MatlLinkId,$objMTS,
         }
         break;
     case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_MODULE:       //Module素材
+        break;
     case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY:       //Policy管理
+        if(strlen($ColumnValueArray['MATL_LINK_NAME']['COMMIT']) != 0) {
+            $ret = preg_match("/^[a-zA-Z0-9_\-]+$/", $ColumnValueArray['MATL_LINK_NAME']['COMMIT']);
+            if($ret != 1) {
+                // 紐付先資材タイプがTerraformコンソール/Policy管理の場合、紐付先資材名は正規表記(/^[a-zA-Z0-9_\-]+$/)に一致するデータを入力してください。(資材紐付 項番:{})";
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n"; }
+                $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2072",array($MatlLinkId));
+                $retBool = false;
+            }
+        }
         break;
     }  
         
