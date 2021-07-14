@@ -119,19 +119,19 @@ EOD;
                     <p class="export_radio_label_block">
                         <label id="abolished_type_1" class="export_label">
                             <input type="radio" class="export_radio" value="1" name="abolished_type" for="abolished_type_1" checked="true">
-                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITAWDCH-ERR-11201');?></span>
+                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-2100000329_4');?></span>
                         </label>
                     </p>
                     <p class="export_radio_label_block">
                         <label id="abolished_type_2" class="export_label">
                             <input type="radio" class="export_radio" value="2" name="abolished_type" for="abolished_type_2" checked="true">
-                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITAWDCH-ERR-11202');?></span>
+                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-2100000329_5');?></span>
                         </label>
                     </p>
                     <p class="export_radio_label_block">
                         <label id="abolished_type_3" class="export_label">
                             <input type="radio" class="export_radio" value="3" name="abolished_type" for="abolished_type_3">
-                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITAWDCH-ERR-11203');?></span>
+                            <span class="export_label_name"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-2100000329_6');?></span>
                         </label>
                     </p>
                 </div>

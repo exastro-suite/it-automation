@@ -785,8 +785,10 @@ $ary["ITABASEH-MNU-920028"]         = "User to run Symphony (The registered/upda
 $ary["ITABASEH-MNU-2100000329_1"]   = "The following functions are provided.<br>&nbsp;&nbsp;&nbsp;・Excel Bulk Export<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select the menu that you want to export data from and click the \"Export\" button.<br>Obsolete information<br>&nbsp;&nbsp;&nbsp;・All records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports all records<br>&nbsp;&nbsp;&nbsp;・Exclude discarded records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports without obsolete records<br>&nbsp;&nbsp;&nbsp;・Only discarded records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports only obsolete records";
 $ary["ITABASEH-MNU-2100000329_2"]   = "Excel Bulk Export";
 $ary["ITABASEH-MNU-2100000329_3"]   = "Excel batch export process accepted.<br>Execution No.：[<strong>{}</strong>]";
-$ary["ITABASEH-MNU-2100000330_1"]   = "Import target
-";
+$ary["ITABASEH-MNU-2100000329_4"]   = "All records";
+$ary["ITABASEH-MNU-2100000329_5"]   = "Exclude discarded records";
+$ary["ITABASEH-MNU-2100000329_6"]   = "Only discarded records";
+$ary["ITABASEH-MNU-2100000330_1"]   = "Import target";
 $ary["ITABASEH-MNU-2100000330_2"]   = "Menu group";
 $ary["ITABASEH-MNU-2100000330_3"]   = "Menu";
 $ary["ITABASEH-MNU-2100000330_4"]   = "Menu Id";
