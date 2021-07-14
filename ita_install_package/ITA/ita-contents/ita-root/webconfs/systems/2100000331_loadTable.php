@@ -58,12 +58,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     // 廃止情報
     $c = new IDColumn('ABOLISHED_TYPE',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900028'),'B_BULK_EXCEL_ABOLISHED_TYPE','ROW_ID','ABOLISHED_TYPE','');
-    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-2100000331_3'));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
     // 実行ユーザ
-    $c = new IDColumn('EXECUTE_USER',$g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-103100'),'A_ACCOUNT_LIST','USER_ID','USERNAME','');
-    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
+    $c = new IDColumn('EXECUTE_USER',$g['objMTS']->getSomeMessage('ITABASEH-MNU-2100000331_4'),'A_ACCOUNT_LIST','USER_ID','USERNAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-2100000331_5'));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
     //ファイル名

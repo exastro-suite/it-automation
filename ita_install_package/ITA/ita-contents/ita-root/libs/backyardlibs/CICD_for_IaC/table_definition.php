@@ -206,11 +206,26 @@ class TD_C_PATTERN_PER_ORCH  extends TDBase {
 //////////////////////////////////////////////////////////////////////
 // リモートリポジトリ・資材紐付　同期状態マスタ
 //////////////////////////////////////////////////////////////////////
-class TD_B_CICD_REPO_SYNC_STATUS_NAME  extends TDBase {
+class TD_SYNC_STATUS_NAME_DEFINE {
     // 同期状態:SYNC_STATUS_ROW_ID 値リスト
-    const C_SYNC_STATUS_ROW_ID_NORMAL   = '正常';
-    const C_SYNC_STATUS_ROW_ID_ERROR    = '異常';
-    const C_SYNC_STATUS_ROW_ID_RESTART  = '再開';
+    public  $objMTS;
+    function __construct($objMTS) {
+        $this->objMTS = $objMTS;
+    }
+    //正常
+    function NORMAL() {
+        return $this->objMTS->getSomeMessage("ITACICDFORIAC-STD-2030");//'正常';
+    }
+    //異常
+    function ERROR() {
+        return $this->objMTS->getSomeMessage("ITACICDFORIAC-STD-2031");//'異常';
+    }
+    //再開
+    function RESTART() {
+        return $this->objMTS->getSomeMessage("ITACICDFORIAC-STD-2032");//'再開';
+    }
+}
+class TD_B_CICD_REPO_SYNC_STATUS_NAME  extends TDBase {
 
     public  $PKColumnName;
     public  $tblColumndefine;

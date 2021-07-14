@@ -163,6 +163,8 @@
         global $objDBCA;
         global $objMTS;
 
+        $SyncStatusNameobj = new TD_SYNC_STATUS_NAME_DEFINE($objMTS);
+
         $cmDBobj = new CommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS,$db_access_user_id);
 
         $DBobj = new LocalDBAccessClass($db_model_ch,$cmDBobj,$objDBCA,$objMTS,$db_access_user_id,$logfile,$log_level,$RepoId);
@@ -300,12 +302,12 @@
             exit(0);
         }
         // 同期状態が異常でないことを確認する。 
-        if($RepoListRow['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR) {
+        if($RepoListRow['SYNC_STATUS_ROW_ID'] == $SyncStatusNameobj->ERROR()) {
             // exit
             exit(0);
         }
         // 同期状態が再開か空白の場合
-        if(($RepoListRow['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART) ||
+        if(($RepoListRow['SYNC_STATUS_ROW_ID'] == $SyncStatusNameobj->RESTART()) ||
            (strlen($RepoListRow['SYNC_STATUS_ROW_ID']) == 0)) {
             $MatlListUpdateExeFlg = true;
         } 
@@ -541,7 +543,7 @@
             }
         }
         if($RepoListSyncStatusUpdate_Flg === false) {
-            $SyncStatus = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL;
+            $SyncStatus = $SyncStatusNameobj->NORMAL();
             $ret = UpdateRepoListSyncStatus($RepoId,$SyncStatus);
             if($ret !== true)  {
                 // 異常フラグON
@@ -673,9 +675,9 @@
     }
     if($RepoListSyncStatusUpdate_Flg === false) {
         if(strlen($UIDisplayMsg) == 0) {
-            $SyncStatus = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL;
+            $SyncStatus = $SyncStatusNameobj->NORMAL();
         } else {
-            $SyncStatus = TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR;
+            $SyncStatus = $SyncStatusNameobj->ERROR();
         }
         $ret = UpdateRepoListSyncStatus($RepoId,$SyncStatus);
         if($ret !== true)  {
@@ -1740,11 +1742,12 @@
 
         global $objMTS;
         global $UIDisplayMsg;
+        global $SyncStatusNameobj;
 
         $UpdateColumnAry                       = array();
         $UpdateColumnAry['REPO_ROW_ID']        = $RepoId;
         $UpdateColumnAry['SYNC_STATUS_ROW_ID'] = $SyncStatus;
-        if($SyncStatus == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_NORMAL) {
+        if($SyncStatus == $SyncStatusNameobj->NORMAL()) {
             $UpdateColumnAry['SYNC_ERROR_NOTE']    = "";
         } else {
             $UpdateColumnAry['SYNC_ERROR_NOTE']    = $UIDisplayMsg;
@@ -1869,6 +1872,7 @@
 
         global $objMTS;
         global $LFCobj;
+        global $SyncStatusNameobj;
 
         /////////////////////////////////////////////////////////////////
         // ＤＢは更新のみなのでトランザクションは使用しない
@@ -1893,12 +1897,12 @@
             $go = false;
             if(($MargeExeFlg === true) || ($MatlListUpdateExeFlg === true)) {
                 // 同期状態が異常以外の場合を判定
-                if($row['SYNC_STATUS_ROW_ID'] != TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_ERROR) {
+                if($row['SYNC_STATUS_ROW_ID'] != $SyncStatusNameobj->ERROR()) {
                     $go = true;
                 }
             } else {
                 // 同期状態が再開か空白の場合を判定
-                if(($row['SYNC_STATUS_ROW_ID'] == TD_B_CICD_REPO_SYNC_STATUS_NAME::C_SYNC_STATUS_ROW_ID_RESTART) ||
+                if(($row['SYNC_STATUS_ROW_ID'] == $SyncStatusNameobj->RESTART()) ||
                    (strlen($row['SYNC_STATUS_ROW_ID']) == 0)) {
                     $go = true;
                 }

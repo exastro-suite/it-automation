@@ -43,6 +43,9 @@ $ary["ITACICDFORIAC-STD-2026"] = "[Process] Update last synchronized date/time (
 $ary["ITACICDFORIAC-STD-2027"] = "[Process] Update Remote Repository Synchronized state (Remote repository Item number:{})";
 $ary["ITACICDFORIAC-STD-2028"] = "[Process] Remote Repository Synchronized state update note required.(Remote repository Item number:{})";
 $ary["ITACICDFORIAC-STD-2029"] = "[Process] Detect Remote Repository Branch updates (Remote repository Item number:{})";
+$ary["ITACICDFORIAC-STD-2030"]  = "Normal";
+$ary["ITACICDFORIAC-STD-2031"]  = "Abnormal";
+$ary["ITACICDFORIAC-STD-2032"]  = "Resume";
 $ary["ITACICDFORIAC-STD-3000"] = "(Remote repository Item number:{}, File link Item number:{})";
 $ary["ITACICDFORIAC-STD-3001"] = "{}, File link Item number:{})";
 ?>
