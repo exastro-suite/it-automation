@@ -114,6 +114,7 @@ $ary["ITACICDFORIAC-ERR-2068"] = "Could not specify Remote Repository from the F
 $ary["ITACICDFORIAC-ERR-2069"] = "Could not specify Movement";
 $ary["ITACICDFORIAC-ERR-2070"] = "This item is required (Item：Remote Repository)";
 $ary["ITACICDFORIAC-ERR-2071"] = "This item is required (Item：File path)";
+$ary["ITACICDFORIAC-ERR-2072"] = "If the Link file type is for Terraform Console/Policy list type, please enter data that matches regular notation (/^[a-zA-Z0-9_\-]+$/) for the file name. （File link Item number:{})";
 $ary["ITACICDFORIAC-ERR-4000"] = "An unexpected error has occured.";
 $ary["ITACICDFORIAC-ERR-4001"] = "Failed to update the Link file. Could not execute the Movement.";
 $ary["ITACICDFORIAC-ERR-5000"] = "The Driver type valid is invalid.  ({})";

@@ -114,6 +114,7 @@ $ary["ITACICDFORIAC-ERR-2068"]  = "資材パスからリモートリポジトリ
 $ary["ITACICDFORIAC-ERR-2069"]  = "Movementを特定できませんでした。";
 $ary["ITACICDFORIAC-ERR-2070"]  = "必須入力です。(項目：リモートリポジトリ)";
 $ary["ITACICDFORIAC-ERR-2071"]  = "必須入力です。(項目：資材パス)";
+$ary["ITACICDFORIAC-ERR-2072"]  = "紐付先資材タイプがTerraformコンソール/Policy管理の場合、紐付先資材名は正規表記(/^[a-zA-Z0-9_\-]+$/)に一致するデータを入力してください。(資材紐付 項番:{})";
 $ary["ITACICDFORIAC-ERR-4000"]  = "想定外のエラーか発生しました。";
 $ary["ITACICDFORIAC-ERR-4001"]  = "紐付資材の更新が失敗しています。Movementは実行しませんでした。";
 $ary["ITACICDFORIAC-ERR-5000"]  = "ドライバー種別が不正な値です。 ({})";
