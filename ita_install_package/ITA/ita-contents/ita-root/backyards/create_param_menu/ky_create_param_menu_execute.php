@@ -3103,13 +3103,15 @@ EOD;
         $zip = NULL;
 
         //////////////////////////
-        // メニュー定義一覧の「メニュー作成状態」を更新する（2（作成済み）にする）
+        // メニュー定義一覧の「メニュー作成状態」を更新する（2（作成済み）にする）。（すでに「作成済み」の場合はスキップ）
         //////////////////////////
-        $result = updateMenuCreateFlag($cmiData);
-        if(true !== $result){
-            // パラメータシート作成管理更新処理を行う
-            updateMenuStatus($targetData, "4", $result, true, true);
-            continue;
+        if($cmiData['MENU_CREATE_STATUS'] != 2){
+            $result = updateMenuCreateFlag($cmiData);
+            if(true !== $result){
+                // パラメータシート作成管理更新処理を行う
+                updateMenuStatus($targetData, "4", $result, true, true);
+                continue;
+            }
         }
 
         //////////////////////////
