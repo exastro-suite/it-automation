@@ -1493,6 +1493,7 @@
             // ローカル変数宣言
             $arrayResult = array();
             $returnDataArray = array();
+            $userIdCreateParam = '-101601'; //「メニュー作成機能」ユーザID
 
             require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
             
@@ -1591,6 +1592,28 @@
                 $findFlag = false;
                 foreach($createMenuInfoArray as $createMenuInfoData){
                     if($createMenuInfoData['CREATE_MENU_ID'] == $createMenuId){
+                        $dispLastUpdateTimestamp = $createMenuInfoData['LAST_UPDATE_TIMESTAMP'];
+
+                        //最終更新者が-101601(メニュー作成機能)の場合、履歴テーブルから最終更新者が「メニュー作成機能」以外で最新の対象を取得する。
+                        if($createMenuInfoData['LAST_UPDATE_USER'] == $userIdCreateParam){
+                            $sql = $createMenuInfoTable->createSselectJnl("WHERE LAST_UPDATE_TIMESTAMP = (SELECT max(LAST_UPDATE_TIMESTAMP) FROM F_CREATE_MENU_INFO_JNL WHERE DISUSE_FLAG = '0' AND NOT LAST_UPDATE_USER = :USER_ID_CREATE_PARAM AND CREATE_MENU_ID = :CREATE_MENU_ID)");
+                            $sqlBind = array('CREATE_MENU_ID' => $createMenuId, 'USER_ID_CREATE_PARAM' => $userIdCreateParam);
+
+                            // SQL実行
+                            $result = $createMenuInfoTable->selectTable($sql, $sqlBind);
+                            if(!is_array($result)){
+                                $msg = $g['objMTS']->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                                $arrayResult = array("999","",$msg); 
+                                throw new Exception();
+                            }
+                            $latestCreateMenuInfoArray = $result;
+                            foreach($latestCreateMenuInfoArray as $latestData){
+                                web_log(json_encode($latestData));
+                                $createMenuInfoData['LAST_UPDATE_USER'] = $latestData['LAST_UPDATE_USER']; //最終更新ユーザを差し替え
+                                $dispLastUpdateTimestamp = $latestData['LAST_UPDATE_TIMESTAMP']; //表示用最終更新日時を差し替え
+                            }
+                        }
+
                         $findFlag = true;
                         $username = "";
                         foreach($accountListArray as $accountListData){
@@ -1599,7 +1622,7 @@
                             }
                         }
                         
-                        $date = DateTime::createFromFormat('Y-m-d H:i:s.u', $createMenuInfoData['LAST_UPDATE_TIMESTAMP']);
+                        $date = DateTime::createFromFormat('Y-m-d H:i:s.u', $dispLastUpdateTimestamp);
                         
                         $returnDataArray['menu'] = array(
                             "CREATE_MENU_ID"           => $createMenuInfoData['CREATE_MENU_ID'],
