@@ -370,6 +370,37 @@ class TD_B_CICD_GIT_REPOSITORY_TYPE_NAME  extends TDBase {
         return $array;
     }
 }
+
+/////////////////////////////////////////////////////////
+// アクセス許可ロール付与フラグマスタ
+/////////////////////////////////////////////////////////
+class TD_B_CICD_RBAC_FLG_NAME  extends TDBase {
+    // Gitリポジトリタイプ:Gitリポジトリタイプ 値リスト
+    const C_RBAC_FLG_ROW_ID_OFF          = 1;  // なし
+    const C_RBAC_FLG_ROW_ID_ON           = 2;  // あり
+
+    public  $PKColumnName;
+    public  $tblColumndefine;
+    public  $jnlColumndefine;
+    public  $LastErrorMsg;
+    public  $TableName;
+
+    function __construct(){
+        $this->PKColumnName;
+        $this->tblColumndefine = array();
+        $this->jnlColumndefine = array();
+        $this->LastErrorMsg = "";
+        $this->TableName = "B_CICD_RBAC_FLG_NAME";
+    }
+
+    function setColumnConfigAttr() {
+        // DATETIME型など型の設定が必要なカラムの設定
+        //$array["DATETIME"] = "DATETIME";
+        $array = $this->getColumndefine();
+        return $array;
+    }
+}
+
 /////////////////////////////////////////////////////////
 // 同期状態管理テーブル(履歴なし)
 /////////////////////////////////////////////////////////
