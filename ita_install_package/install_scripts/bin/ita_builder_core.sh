@@ -180,7 +180,7 @@ yum_repository() {
 
             # Check Creating repository
             if [[ "$repo" =~ .*epel-release.* ]]; then
-                yum-config-manager --enable epel
+                yum-config-manager --enable epel >> "$ITA_BUILDER_LOG_FILE" 2>&1
                 create_repo_check epel >> "$ITA_BUILDER_LOG_FILE" 2>&1
             elif [[ "$repo" =~ .*remi-release-7.* ]]; then
                 create_repo_check remi-safe >> "$ITA_BUILDER_LOG_FILE" 2>&1
