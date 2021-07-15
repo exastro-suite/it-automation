@@ -518,7 +518,7 @@ initialize_mariadb() {
     systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
     error_check
 
-    # mysql_secure_installationへ送信するdb_root_passwordのエスケープをしておく
+    # mariadb-secure-installationへ送信するdb_root_passwordのエスケープをしておく
     local send_db_root_password="$db_root_password"
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\\/\\\\\\\\/g')
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\$/\\\\\\$/g')
@@ -526,13 +526,13 @@ initialize_mariadb() {
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\[/\\\\\\[/g')
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\t/\\011/g')
 
-    # Exec mysql_secure_installation with expect
+    # Exec mariadb-secure-installation with expect
     #   see https://mariadb.com/kb/en/authentication-plugin-unix-socket/
     if [ "${distro_mariadb}" = "yes" ] && [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
         # Exactly say, MariaDB 10.4.2 or lower
         expect -c "
             set timeout -1
-            spawn mysql_secure_installation
+            spawn mariadb-secure-installation
             expect \"Enter current password for root \\(enter for none\\):\"
             send \"\\r\"
             expect { 
@@ -562,7 +562,7 @@ initialize_mariadb() {
         # Exactly say, MariaDB 10.4.3 or higher
         expect -c "
             set timeout -1
-            spawn mysql_secure_installation
+            spawn mariadb-secure-installation
             expect \"Enter current password for root \\(enter for none\\):\"
             send \"\\r\"
             expect -re \"Switch to unix_socket authentication.* $\"

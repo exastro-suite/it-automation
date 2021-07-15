@@ -21,6 +21,7 @@ transaction-isolation=READ-COMMITTED
 innodb_buffer_pool_size = 512MB
 innodb_log_buffer_size=64M
 innodb_log_file_size=256M
+innodb_read_only_compressed=0
 min_examined_row_limit=100
 join_buffer_size=128M
 query_cache_size=512M
@@ -66,4 +67,7 @@ character-set-server = utf8
 disable_unix_socket
 
 [mariadb-10.5]
+disable_unix_socket
+
+[mariadb-10.6]
 disable_unix_socket
