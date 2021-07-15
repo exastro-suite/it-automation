@@ -180,6 +180,7 @@ yum_repository() {
 
             # Check Creating repository
             if [[ "$repo" =~ .*epel-release.* ]]; then
+                yum-config-manager --enable epel >> "$ITA_BUILDER_LOG_FILE" 2>&1
                 create_repo_check epel >> "$ITA_BUILDER_LOG_FILE" 2>&1
             elif [[ "$repo" =~ .*remi-release-7.* ]]; then
                 create_repo_check remi-safe >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -483,6 +484,13 @@ configure_mariadb() {
             systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
             error_check
 
+            which mysql_secure_installation >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -eq 0 ]; then
+                SECURE_COMMAND="mysql_secure_installation"
+            else
+                SECURE_COMMAND="mariadb-secure-installation"
+            fi
+
             #Confirm whether root password has been changed
             env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? == 0 ]; then
@@ -490,7 +498,7 @@ configure_mariadb() {
             else
                 expect -c "
                     set timeout -1
-                    spawn mysql_secure_installation
+                    spawn ${SECURE_COMMAND}
                     expect \"Enter current password for root \\(enter for none\\):\"
                     send \"\\r\"
                     expect -re \"Switch to unix_socket authentication.* $\"
@@ -546,9 +554,16 @@ configure_mariadb() {
             systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
             error_check
             
+            which mysql_secure_installation >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -eq 0 ]; then
+                SECURE_COMMAND="mysql_secure_installation"
+            else
+                SECURE_COMMAND="mariadb-secure-installation"
+            fi
+
             expect -c "
                 set timeout -1
-                spawn mysql_secure_installation
+                spawn ${SECURE_COMMAND}
                 expect \"Enter current password for root \\(enter for none\\):\"
                 send \"\\r\"
                 expect -re \"Switch to unix_socket authentication.* $\"
@@ -596,9 +611,16 @@ configure_mariadb() {
             if [ $? == 0 ]; then
                 log "Root password of MariaDB is already setting."
             else
+                which mysql_secure_installation >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                if [ $? -eq 0 ]; then
+                    SECURE_COMMAND="mysql_secure_installation"
+                else
+                    SECURE_COMMAND="mariadb-secure-installation"
+                fi
+
                 expect -c "
                     set timeout -1
-                    spawn mysql_secure_installation
+                    spawn ${SECURE_COMMAND}
                     expect \"Enter current password for root \\(enter for none\\):\"
                     send \"\\r\"
                     expect { 
@@ -657,9 +679,16 @@ configure_mariadb() {
             systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
             error_check
             
+            which mysql_secure_installation >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -eq 0 ]; then
+                SECURE_COMMAND="mysql_secure_installation"
+            else
+                SECURE_COMMAND="mariadb-secure-installation"
+            fi
+
             expect -c "
                 set timeout -1
-                spawn mysql_secure_installation
+                spawn ${SECURE_COMMAND}
                 expect \"Enter current password for root \\(enter for none\\):\"
                 send \"\\r\"
                 expect { 
