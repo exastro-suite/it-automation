@@ -883,24 +883,30 @@
         //////////////////////////////////////////////////////////////////
         // Restユーザのデフォルトアクセス権のあるロール名リストを取得
         //////////////////////////////////////////////////////////////////
-        $RoleList = array();
-        $obj = new RoleBasedAccessControl($objDBCA);
-        $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($row['M_REST_USER_ID'],'NAME',true);  // 廃止を含む
-        unset($obj);
-        if($DefaultAccessRoleString === false) {
-            // 異常フラグON
-            $error_flag = 1;
+        $DefaultAccessRoleString = "";
+        if(strlen($row['RBAC_FLG_ROW_ID']) == 0){
+            $row['RBAC_FLG_ROW_ID'] = TD_B_CICD_RBAC_FLG_NAME::C_RBAC_FLG_ROW_ID_OFF;
+        }
+        if($row['RBAC_FLG_ROW_ID'] == TD_B_CICD_RBAC_FLG_NAME::C_RBAC_FLG_ROW_ID_ON) {
+            $RoleList = array();
+            $obj = new RoleBasedAccessControl($objDBCA);
+            $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($row['M_REST_USER_ID'],'NAME',true);  // 廃止を含む
+            unset($obj);
+            if($DefaultAccessRoleString === false) {
+                // 異常フラグON
+                $error_flag = 1;
 
-            $LogStr  = "Failed get Role information. (User ID : " . $row['M_REST_USER_ID'] . ")";
-            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
-            // 想定外のエラー
-            $UIMatlSyncMsg   = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
-            $UIDelvMsg       = "def";
-            $SyncSts         = $SyncStatusNameobj->ERROR();
-            $DelvExecInsNo   = "";
-            $DelvExecMenuId  = "";
-            setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
-            return $FREE_LOG;
+                $LogStr  = "Failed get Role information. (User ID : " . $row['M_REST_USER_ID'] . ")";
+                $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,"");
+                // 想定外のエラー
+                $UIMatlSyncMsg   = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
+                $UIDelvMsg       = "def";
+                $SyncSts         = $SyncStatusNameobj->ERROR();
+                $DelvExecInsNo   = "";
+                $DelvExecMenuId  = "";
+                setUIMatlSyncStatus($UIMatlSyncMsg,$UIDelvMsg,$SyncSts,$DelvExecInsNo,$DelvExecMenuId);
+                return $FREE_LOG;
+            }
         }
 
         switch($row['MATL_TYPE_ROW_ID']) {
