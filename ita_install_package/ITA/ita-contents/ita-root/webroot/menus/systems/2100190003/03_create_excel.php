@@ -84,6 +84,7 @@ if(array_key_exists('no', $_GET)){
         if ( isset($_POST['BASE_TIMESTAMP_1']) )$strBaseTime1=htmlspecialchars($_POST['BASE_TIMESTAMP_1']);
         if ( isset($_POST['HOST_LIST']) )$strhostlist = htmlspecialchars($_POST['HOST_LIST']);   
         if ( isset($_POST['FORMATTER_ID']) )$strFormat = htmlspecialchars($_POST['FORMATTER_ID']);
+        if ( isset($_POST['OUTPUT_TYPE']) )$outputType = htmlspecialchars($_POST['OUTPUT_TYPE']);
 
         if ( isset($_POST['CONTRAST_ID']) === true ){
             //比較定義リスト表示用
@@ -106,7 +107,7 @@ if(array_key_exists('no', $_GET)){
             $outputfilename = $strContrastName . "_" . $outputdate;
 
             //比較結果取得 
-            $arrayResult =  getContrastResult($intContrastid,$strBaseTime0,$strBaseTime1,$strhostlist);
+            $arrayResult =  getContrastResult($intContrastid,$strBaseTime0,$strBaseTime1,$strhostlist,$outputType);
 
             //出力処理
             switch ( $strFormat ) {
