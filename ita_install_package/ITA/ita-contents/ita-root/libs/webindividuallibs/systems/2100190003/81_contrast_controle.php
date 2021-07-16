@@ -2127,6 +2127,7 @@ EOD;
             <input type="submit" value="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310219")}">
             <input type="hidden" name="filteroutputfiletype" value="excel">
             <input type="hidden" name="FORMATTER_ID" value="excel">
+            <input type="hidden" name="OUTPUT_TYPE" value="{$outputType}">
         </form>
         <!-------------------------------- 比較結果出力(Excel) -------------------------------->
 EOD;
@@ -2145,6 +2146,7 @@ EOD;
             <input type="submit" value="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310220")}">
             <input type="hidden" name="filteroutputfiletype" value="csv">
             <input type="hidden" name="FORMATTER_ID" value="csv">
+            <input type="hidden" name="OUTPUT_TYPE" value="{$outputType}">
         </form>
         <!-------------------------------- 比較結果出力(CSV) -------------------------------->
 EOD;
