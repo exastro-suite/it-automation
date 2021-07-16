@@ -106,7 +106,7 @@ func_set_total_cnt() {
     fi
 
     if [ "$CICD_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+4))
     fi
 
     echo $PROCCESS_TOTAL_CNT
@@ -359,6 +359,7 @@ RELEASE_PLASE=(
 CONFIG_PLACE=(
     ANSIBLE_FLG
     COBBLER_FLG
+    CICD_FLG
 )
 
 #サービスの登録作成関数用配列
