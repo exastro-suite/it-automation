@@ -491,7 +491,7 @@ class LocalDBAccessClass {
        global $log_file_prefix;
        global $log_level;
 
-       $file = "/exastro/ita-root/confs/backyardconfs/CICD_For_IaC/innodb_lock_wait_timeout.txt";
+       $file = $root_dir_path . "/confs/backyardconfs/CICD_For_IaC/innodb_lock_wait_timeout.txt";
        if(file_exists($file)) {
             $TimerValue = file_get_contents($file);
             if($TimerValue === false) {
