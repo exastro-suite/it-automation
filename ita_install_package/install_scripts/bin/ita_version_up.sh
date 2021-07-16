@@ -200,6 +200,7 @@ VERSION_UP_DIR="$BASE_DIR/version_up"
 LOG_FILE="$LOG_DIR/ita_version_up.log"
 ANSWER_FILE="$BASE_DIR/ita_answers.txt"
 SOURCE_DIR="${BASE_DIR}/../ITA/ita-contents/ita-root"
+CONFS_DIR="${BASE_DIR}/../ITA/ita-confs"
 
 #log用ディレクトリ作成
 if [ ! -e "$LOG_DIR" ]; then
@@ -623,6 +624,7 @@ log "INFO : Updating sources."
 ############################################################
 #ITAの資材を入れ替える
 cp -rp ${SOURCE_DIR} ${ITA_DIRECTORY}
+cp -rpn ${CONFS_DIR}/* ${ITA_DIRECTORY}/ita-root/confs/
 
 EXEC_VERSION=${NOW_VERSION}
 while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do

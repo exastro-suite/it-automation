@@ -1,0 +1,2 @@
+/ita-root/confs/backyardconfs/CICD_For_IaC/gitCommandResultParsingStringDefinition.ini
+/ita-root/confs/backyardconfs/CICD_For_IaC/innodb_lock_wait_timeout.txt
