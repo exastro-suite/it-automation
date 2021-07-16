@@ -1,4 +1,4 @@
-Exastro IT Automation 1.8.0 (2021-07-XX)
+Exastro IT Automation 1.8.0 (2021-07-16)
 ==================================================
 
 
@@ -134,6 +134,7 @@ Exastro IT Automation 1.7.2 (2021-06-03)
 Installer
 ---------------
  * Updated to Version v1.7.2 #1117
+ * Fixed an Issue where the installer would fail if MariaDB v10.6 and later were used #1369
 
 Management Console
 ---------------
