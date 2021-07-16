@@ -199,8 +199,8 @@ Ansible（Legacy Role）ロールパッケージ一覧
             } else {
                 $PkeyID = array_key_exists('ROLE_PACKAGE_ID',$arrayRegData)?$arrayRegData['ROLE_PACKAGE_ID']:null;
             }
-            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_9',$arrayRegData)?
-                               $arrayRegData['tmp_file_COL_IDSOP_9']:null;
+            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_10',$arrayRegData)?
+                               $arrayRegData['tmp_file_COL_IDSOP_10']:null;
             $strTempFileFullname = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
 
             $role_package_name = array_key_exists('ROLE_PACKAGE_NAME',$arrayRegData)?

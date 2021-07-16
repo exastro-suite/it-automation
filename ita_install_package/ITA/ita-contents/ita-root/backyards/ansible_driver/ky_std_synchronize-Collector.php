@@ -491,6 +491,10 @@
 
     $NOTICE_FLG = 0;
 
+    $RESTEXEC_FLG = 0;
+
+    $FREE_LOG = "";
+
     ////////////////////////////////
     // グローバル変数宣言         //
     ////////////////////////////////
@@ -720,8 +724,9 @@
 
             $aryConfigForIUD = $tmpConfigForMovementIUD;
 
-            $aryTempForSql = array('WHERE'=> "STATUS_ID IN ('5') AND COLLECT_STATUS IS NULL AND DISUSE_FLAG IN ('0') ORDER BY EXECUTION_NO ASC ");
-
+            #$aryTempForSql = array('WHERE'=> "STATUS_ID IN ('5') AND COLLECT_STATUS IS NULL AND DISUSE_FLAG IN ('0') ORDER BY EXECUTION_NO ASC ");
+            //作業終了　[完了,(完了(異常),想定外エラー,緊急停止,予約取消] + 収集未実行
+            $aryTempForSql = array('WHERE'=> "STATUS_ID IN ('5','6','7','8','10') AND COLLECT_STATUS IS NULL AND DISUSE_FLAG IN ('0') ORDER BY EXECUTION_NO ASC ");
             $arySqlBind = array();
 
             $aryBaseSourceForBind = array();
@@ -735,7 +740,10 @@
             
             //Movement毎に実施
             foreach ($aryMovements as $aryMovement) {
-
+                $NOTICE_FLG = 0;
+                $RESTEXEC_FLG = 0;
+                $FREE_LOG = "";
+      
                 //オーケストレータID
                 $varOrchestratorId = $intCollectOrcNo;
 
@@ -760,188 +768,233 @@
                     }
                 }
 
-                //対象のDIRがある場合
-                $aryRetBody = getTargetPath($strCollectTargetPath);
-
-                //inに無い場合、outを確認
-                if( $aryRetBody == array() ){
-                    $strCollectTargetPath = $strCollectBasePath ."/". $arrAllowCollectOrc[$varOrchestratorId] . "/" . sprintf('%010d', $aryMovement['EXECUTION_NO'] ) . "/out/" . $strCollectTargetDir ;
+                //完了の場合
+                if( $aryMovement['STATUS_ID'] == 5){
+                    //対象のDIRがある場合
                     $aryRetBody = getTargetPath($strCollectTargetPath);
 
-                }
+                    //inに無い場合、outを確認
+                    if( $aryRetBody == array() ){
+                        $strCollectTargetPath = $strCollectBasePath ."/". $arrAllowCollectOrc[$varOrchestratorId] . "/" . sprintf('%010d', $aryMovement['EXECUTION_NO'] ) . "/out/" . $strCollectTargetDir ;
+                        $aryRetBody = getTargetPath($strCollectTargetPath);
 
-                $arrTargetfiles = $aryRetBody;
-
-                //---ファイルアップロードカラム対応 #449 
-                //収取対象ファイルのPATH作成              
-                $strCollectTargetFilesPath = $strCollectBasePath ."/". $arrAllowCollectOrc[$varOrchestratorId] . "/" . sprintf('%010d', $aryMovement['EXECUTION_NO'] ) . "/in/" . $strCollectTargetFilesDir_ ;
-
-                //対象のDIRがある場合
-                $aryRetBody = getTargetPath($strCollectTargetFilesPath);
-
-                //inに無い場合、outを確認
-                if( $aryRetBody == array() ){
-                    $strCollectTargetFilesPath = $strCollectBasePath ."/". $arrAllowCollectOrc[$varOrchestratorId] . "/" . sprintf('%010d', $aryMovement['EXECUTION_NO'] ) . "/out/" . $strCollectTargetFilesDir_ ;
-                    $aryRetBody = getTargetPath($strCollectTargetFilesPath);
-
-                }
-                $arrTargetUploadfiles = $aryRetBody;
-
-                //ファイルアップロードカラム対応 #449 ---
-
-
-                //---ロール情報の取得、確認 #517
-                $strRoleList="";
-                $arrAccessAuth = explode(",", $aryMovement['ACCESS_AUTH']);
-
-                $aryTempForSql = array('WHERE'=>"ROLE_ID = :ROLE_ID AND DISUSE_FLAG IN ('0') ORDER BY ROLE_ID ASC");
-                
-                // 更新用のテーブル定義
-                $aryConfigForIUD = $aryConfigForRoleIUD;
-
-                // BIND用のベースソース
-                $aryBaseSourceForBind = $aryConfigForRoleIUD;
-                $tmpRoleList = array();
-                foreach ($arrAccessAuth as $intAccessAuth) {
-                    $arySqlBind = array( 
-                                        'ROLE_ID' => $intAccessAuth
-                                        );
-
-                    $aryRole =  getRoleInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
-                    
-                    if( $aryRole !== false ){
-                        $tmpRoleList[] = $aryRole['ROLE_NAME'];
                     }
 
-                   
-                }
-                $strRoleList = implode(",", $tmpRoleList);
-                //ロール情報の取得、確認 #517---
+                    $arrTargetfiles = $aryRetBody;
 
-                //---Operationの取得、確認
-                $intOpeNoUAPK = $aryMovement['OPERATION_NO_UAPK'];
-                
-                //Operationの取得
-                $aryTempForSql = array('WHERE'=>"OPERATION_NO_UAPK = :OPERATION_NO_UAPK AND DISUSE_FLAG IN ('0') ORDER BY OPERATION_NO_UAPK ASC");
-                
-                // 更新用のテーブル定義
-                $aryConfigForIUD = $aryConfigForOpeIUD;
-                
-                // BIND用のベースソース
-                $aryBaseSourceForBind = $aryOpeValueTmpl;
+                    //---ファイルアップロードカラム対応 #449 
+                    //収取対象ファイルのPATH作成              
+                    $strCollectTargetFilesPath = $strCollectBasePath ."/". $arrAllowCollectOrc[$varOrchestratorId] . "/" . sprintf('%010d', $aryMovement['EXECUTION_NO'] ) . "/in/" . $strCollectTargetFilesDir_ ;
 
-                $arySqlBind = array( 
-                                    'OPERATION_NO_UAPK' => $intOpeNoUAPK
-                                    );
+                    //対象のDIRがある場合
+                    $aryRetBody = getTargetPath($strCollectTargetFilesPath);
 
-                $aryOperation =  getOperationInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
-                
-                //Operationの取得、確認---
+                    //inに無い場合、outを確認
+                    if( $aryRetBody == array() ){
+                        $strCollectTargetFilesPath = $strCollectBasePath ."/". $arrAllowCollectOrc[$varOrchestratorId] . "/" . sprintf('%010d', $aryMovement['EXECUTION_NO'] ) . "/out/" . $strCollectTargetFilesDir_ ;
+                        $aryRetBody = getTargetPath($strCollectTargetFilesPath);
 
-                if( is_array($aryOperation) === true ){
+                    }
+                    $arrTargetUploadfiles = $aryRetBody;
 
-                    //REST用のオペレーションパラメータ
-                    $strOpeName = $aryOperation['OPERATION_NAME'];
-                    preg_match('|\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}|', $aryOperation['OPERATION_DATE'], $tmpOpedate);
-                    $strOpedate = str_replace('-', '/', $tmpOpedate[0]);
-                    $strOpeInfo = $strOpedate . "_" . $intOpeNoUAPK . ":" . $strOpeName ;
+                    //ファイルアップロードカラム対応 #449 ---
 
-                    $resultprm = array();
-                    $arrTargetLists = array();
-                    $arrTargetUploadLists = array();
-                    $intParseTypeID = 1;    //1:yaml
 
-                    //対象のファイル有の場合
-                    if( $arrTargetfiles !== false ){
-                       
-                        //対象ホスト、ファイルのリスト作成
-                        foreach ($arrTargetfiles as $strTargetfile) {
-                            $targetHosts =  explode( "/", str_replace( $strCollectTargetPath , "" , $strTargetfile ) );
-                            $ext = substr($strTargetfile, strrpos($strTargetfile, '.') + 1);
-                            $targetFileName =  str_replace( ".".$ext , "" ,  basename($strTargetfile) );
-                            $arrTargetLists[$targetHosts[1]][]=$strTargetfile;
-                        }
+                    //---ロール情報の取得、確認 #517
+                    $strRoleList="";
+                    $arrAccessAuth = explode(",", $aryMovement['ACCESS_AUTH']);
+
+                    $aryTempForSql = array('WHERE'=>"ROLE_ID = :ROLE_ID AND DISUSE_FLAG IN ('0') ORDER BY ROLE_ID ASC");
+                    
+                    // 更新用のテーブル定義
+                    $aryConfigForIUD = $aryConfigForRoleIUD;
+
+                    // BIND用のベースソース
+                    $aryBaseSourceForBind = $aryConfigForRoleIUD;
+                    $tmpRoleList = array();
+                    foreach ($arrAccessAuth as $intAccessAuth) {
+                        $arySqlBind = array( 
+                                            'ROLE_ID' => $intAccessAuth
+                                            );
+
+                        $aryRole =  getRoleInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
                         
-                        //パラメータ取得変換
-                        foreach ($arrTargetLists as $strTargetHost => $arrfileslists) {
-                            foreach ($arrfileslists as $strTargetfile) {
+                        if( $aryRole !== false ){
+                            $tmpRoleList[] = $aryRole['ROLE_NAME'];
+                        }
+
+                       
+                    }
+                    $strRoleList = implode(",", $tmpRoleList);
+                    //ロール情報の取得、確認 #517---
+
+                    //---Operationの取得、確認
+                    $intOpeNoUAPK = $aryMovement['OPERATION_NO_UAPK'];
+                    
+                    //Operationの取得
+                    $aryTempForSql = array('WHERE'=>"OPERATION_NO_UAPK = :OPERATION_NO_UAPK AND DISUSE_FLAG IN ('0') ORDER BY OPERATION_NO_UAPK ASC");
+                    
+                    // 更新用のテーブル定義
+                    $aryConfigForIUD = $aryConfigForOpeIUD;
+                    
+                    // BIND用のベースソース
+                    $aryBaseSourceForBind = $aryOpeValueTmpl;
+
+                    $arySqlBind = array( 
+                                        'OPERATION_NO_UAPK' => $intOpeNoUAPK
+                                        );
+
+                    $aryOperation =  getOperationInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
+                    
+                    //Operationの取得、確認---
+
+                    if( is_array($aryOperation) === true ){
+
+                        //REST用のオペレーションパラメータ
+                        $strOpeName = $aryOperation['OPERATION_NAME'];
+                        preg_match('|\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}|', $aryOperation['OPERATION_DATE'], $tmpOpedate);
+                        $strOpedate = str_replace('-', '/', $tmpOpedate[0]);
+                        $strOpeInfo = $strOpedate . "_" . $intOpeNoUAPK . ":" . $strOpeName ;
+
+                        $resultprm = array();
+                        $arrTargetLists = array();
+                        $arrTargetUploadLists = array();
+                        $intParseTypeID = 1;    //1:yaml
+
+                        //対象のファイル有の場合
+                        if( is_array($arrTargetfiles) && $arrTargetfiles != array() ){
+                           
+                            //対象ホスト、ファイルのリスト作成
+                            foreach ($arrTargetfiles as $strTargetfile) {
+                                $targetHosts =  explode( "/", str_replace( $strCollectTargetPath , "" , $strTargetfile ) );
                                 $ext = substr($strTargetfile, strrpos($strTargetfile, '.') + 1);
-                                $targetFileName =   str_replace( ".".$ext , "" ,  basename($strTargetfile) );
-                                $tmpresultprm = yamlParseAnalysis($strTargetfile);
-                                //yaml形式の場合(yaml_parse_file可の場合)
-                                if( is_array($tmpresultprm)  ){
-                                    $resultprm[$strTargetHost][$targetFileName] = $tmpresultprm;
+                                $targetFileName =  str_replace( ".".$ext , "" ,  basename($strTargetfile) );
+                                $arrTargetLists[$targetHosts[1]][]=$strTargetfile;
+                            }
+                            
+                            //パラメータ取得変換
+                            foreach ($arrTargetLists as $strTargetHost => $arrfileslists) {
+                                foreach ($arrfileslists as $strTargetfile) {
+                                    $ext = substr($strTargetfile, strrpos($strTargetfile, '.') + 1);
+                                    $targetFileName =   str_replace( ".".$ext , "" ,  basename($strTargetfile) );
+                                    $tmpresultprm = yamlParseAnalysis($strTargetfile);
+                                    //yaml形式の場合(yaml_parse_file可の場合)
+                                    if( is_array($tmpresultprm)  ){
+                                        $resultprm[$strTargetHost][$targetFileName] = $tmpresultprm;
+                                    }else{
+                                    //収集対象の形式でない場合
+                                        #$FREE_LOG = "[処理]収集対象のファイル形式ではありません。( ホスト名: $strTargetHost ファイル名:$targetFileName )";
+                                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80010",array( $strTargetHost,$targetFileName ));
+                                        outputLog($strCollectlogPath,$FREE_LOG);
+                                        require ($root_dir_path . $log_output_php ); 
+                                        $NOTICE_FLG = 3; //対象外
+                                    }
                                 }
                             }
-                        }
 
-                        //対象ホスト、ファイルのリスト作成
-                        foreach ($arrTargetUploadfiles as $strTargetUploadfile) {
-                            //ホスト名、ファイル名、パス
-                            $arrTargetUploadLists[$targetHosts[1]][basename($strTargetUploadfile)]=$strTargetUploadfile;
+                            //対象ホスト、ファイルのリスト作成
+                            foreach ($arrTargetUploadfiles as $strTargetUploadfile) {
+                                //ホスト名、ファイル名、パス
+                                $arrTargetUploadLists[$targetHosts[1]][basename($strTargetUploadfile)]=$strTargetUploadfile;
 
-                        }
+                            }
 
-                        //ホスト毎に実施
-                        foreach ($resultprm as $hostname => $parmdata ) {
-                            
-                            //---ホスト名の取得、確認
-
-                            //ホスト名から対象機器のID取得
-                            $aryTempForSql = array('WHERE'=>"HOSTNAME = :HOSTNAME AND DISUSE_FLAG IN ('0') ORDER BY SYSTEM_ID ASC");
-
-                            // 更新用のテーブル定義
-                            $aryConfigForIUD = $aryConfigForSTMIUD;
-                            
-                            // BIND用のベースソース
-                            $aryBaseSourceForBind = $arySTMValueTmpl;
-
-                            $arySqlBind = array( 
-                                                'HOSTNAME' => $hostname
-                                                );
-
-                            $aryhostInfo =  getHostInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
-                            //ホスト名の取得、確認---
-
-                            $arrTableForMenuLists=array();
-
-                            //機器一覧に対象がある場合
-                            if( is_array( $aryhostInfo ) === true ){
-                                $hostid = $aryhostInfo['SYSTEM_ID'];
+                            //ホスト毎に実施
+                            foreach ($resultprm as $hostname => $parmdata ) {
                                 
-                                $arrSqlinsertParm = array();
-                                $arrFileUploadList = array();
-                                //ソースファイルからパラメータ整形　（ファイル名、メニューID、項目名、値）
-                                foreach ( $parmdata as $filename => $vardata) {
-                                    foreach ($vardata as $varname => $varvalue) {
+                                //---ホスト名の取得、確認
 
-                                        // 更新用のテーブル定義
-                                        $aryConfigForIUD = $aryConfigForCMDBLinkIUD;
-                                        
-                                        // BIND用のベースソース
-                                        $aryBaseSourceForBind = $aryCMDBLinkValueTmpl;
+                                //ホスト名から対象機器のID取得
+                                $aryTempForSql = array('WHERE'=>"HOSTNAME = :HOSTNAME AND DISUSE_FLAG IN ('0') ORDER BY SYSTEM_ID ASC");
 
-                                        //配列、ハッシュ構造の場合(メンバー変数名あり)
-                                        if( is_array( $varvalue ) ){
-                                            foreach ($varvalue as $varmember => $varmembermembervalue) {
+                                // 更新用のテーブル定義
+                                $aryConfigForIUD = $aryConfigForSTMIUD;
+                                
+                                // BIND用のベースソース
+                                $aryBaseSourceForBind = $arySTMValueTmpl;
+
+                                $arySqlBind = array( 
+                                                    'HOSTNAME' => $hostname
+                                                    );
+
+                                $aryhostInfo =  getHostInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
+                                //ホスト名の取得、確認---
+
+                                $arrTableForMenuLists=array();
+
+                                //機器一覧に対象がある場合
+                                if( is_array( $aryhostInfo ) === true ){
+                                    $hostid = $aryhostInfo['SYSTEM_ID'];
+                                    
+                                    $arrSqlinsertParm = array();
+                                    $arrFileUploadList = array();
+                                    //ソースファイルからパラメータ整形　（ファイル名、メニューID、項目名、値）
+                                    foreach ( $parmdata as $filename => $vardata) {
+                                        foreach ($vardata as $varname => $varvalue) {
+
+                                            // 更新用のテーブル定義
+                                            $aryConfigForIUD = $aryConfigForCMDBLinkIUD;
+                                            
+                                            // BIND用のベースソース
+                                            $aryBaseSourceForBind = $aryCMDBLinkValueTmpl;
+
+                                            //配列、ハッシュ構造の場合(メンバー変数名あり)
+                                            if( is_array( $varvalue ) ){
+                                                foreach ($varvalue as $varmember => $varmembermembervalue) {
+                                                    $aryBaseSourceForBind=array(
+                                                        "PARSE_TYPE_ID" => $intParseTypeID ,
+                                                        "FILE_PREFIX" => $filename ,
+                                                        "VARS_NAME" => $varname ,
+                                                        "VRAS_MEMBER_NAME" => $varmember
+                                                    );
+
+                                                    $aryTempForSql = array('WHERE'=> " PARSE_TYPE_ID = :PARSE_TYPE_ID AND FILE_PREFIX = :FILE_PREFIX AND VARS_NAME = :VARS_NAME AND VRAS_MEMBER_NAME = :VRAS_MEMBER_NAME AND DISUSE_FLAG IN ('0') ORDER BY COLUMN_ID ASC");
+                                                    $retResult = getInfocmdbLinkInfo($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
+                                                    
+                                                    if( $retResult != array() ){
+                                                        foreach ($retResult as $tmpkey => $tmpvalue) {
+
+                                                            $tmpBaseSourceForBind=array(
+                                                                "TABLE_NAME" => $retResult[$tmpkey]['TABLE_NAME'] ,
+                                                            );
+                                                            $tmpTempForSql = array('WHERE'=> " TABLE_NAME = :TABLE_NAME AND PRIVILEGE IN ('1')  ORDER BY LINK_ID ASC");
+                                                            $writemenuinfo = getInfoWriteMenuInfo($objDBCA,$db_model_ch,$aryConfigForIUD,$tmpBaseSourceForBind,$tmpTempForSql,$strFxName);
+                                                            //メンテンナンス可能なメニューIDを取得
+                                                            if( $writemenuinfo != ""){
+                                                                $writemenuid = $writemenuinfo['MENU_ID'];
+                                                            }else{
+                                                                //縦メニューは登録前に、メンテナンス可能な入力用メニュー、ID、テーブルを別途検索
+                                                                $writemenuid = $retResult[$tmpkey]['MENU_ID'];
+                                                            }
+                                                            $arrSqlinsertParm[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $varmembermembervalue;
+                                                            $arrTableForMenuLists[$writemenuid]=$retResult[$tmpkey]['TABLE_NAME'];
+                                                            if( $retResult[$tmpkey]['COL_CLASS'] == "FileUploadColumn" ){
+                                                                $arrFileUploadList[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $retResult[$tmpkey]['COL_CLASS'];
+                                                            } 
+                                                        }
+                                                    }
+
+                                                }
+                                            }else{
+                                                //メンバ変数無し
                                                 $aryBaseSourceForBind=array(
-                                                    "PARSE_TYPE_ID" => $intParseTypeID ,
+                                                    "PARSE_TYPE_ID" => 1 ,
                                                     "FILE_PREFIX" => $filename ,
-                                                    "VARS_NAME" => $varname ,
-                                                    "VRAS_MEMBER_NAME" => $varmember
+                                                    "VARS_NAME" => $varname
                                                 );
 
-                                                $aryTempForSql = array('WHERE'=> " PARSE_TYPE_ID = :PARSE_TYPE_ID AND FILE_PREFIX = :FILE_PREFIX AND VARS_NAME = :VARS_NAME AND VRAS_MEMBER_NAME = :VRAS_MEMBER_NAME AND DISUSE_FLAG IN ('0') ORDER BY COLUMN_ID ASC");
+                                                $aryTempForSql = array('WHERE'=> " PARSE_TYPE_ID = :PARSE_TYPE_ID AND FILE_PREFIX = :FILE_PREFIX AND VARS_NAME = :VARS_NAME AND DISUSE_FLAG IN ('0') ORDER BY COLUMN_ID ASC");
                                                 $retResult = getInfocmdbLinkInfo($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
-                                                
+
                                                 if( $retResult != array() ){
                                                     foreach ($retResult as $tmpkey => $tmpvalue) {
-
+                                                        //メンテナンス可能なメニューIDの検索
                                                         $tmpBaseSourceForBind=array(
                                                             "TABLE_NAME" => $retResult[$tmpkey]['TABLE_NAME'] ,
                                                         );
                                                         $tmpTempForSql = array('WHERE'=> " TABLE_NAME = :TABLE_NAME AND PRIVILEGE IN ('1')  ORDER BY LINK_ID ASC");
                                                         $writemenuinfo = getInfoWriteMenuInfo($objDBCA,$db_model_ch,$aryConfigForIUD,$tmpBaseSourceForBind,$tmpTempForSql,$strFxName);
+
                                                         //メンテンナンス可能なメニューIDを取得
                                                         if( $writemenuinfo != ""){
                                                             $writemenuid = $writemenuinfo['MENU_ID'];
@@ -949,378 +1002,483 @@
                                                             //縦メニューは登録前に、メンテナンス可能な入力用メニュー、ID、テーブルを別途検索
                                                             $writemenuid = $retResult[$tmpkey]['MENU_ID'];
                                                         }
-                                                        $arrSqlinsertParm[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $varmembermembervalue;
+
+                                                        $arrSqlinsertParm[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $varvalue;
                                                         $arrTableForMenuLists[$writemenuid]=$retResult[$tmpkey]['TABLE_NAME'];
                                                         if( $retResult[$tmpkey]['COL_CLASS'] == "FileUploadColumn" ){
                                                             $arrFileUploadList[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $retResult[$tmpkey]['COL_CLASS'];
                                                         } 
+
                                                     }
-                                                }
-
-                                            }
-                                        }else{
-                                            //メンバ変数無し
-                                            $aryBaseSourceForBind=array(
-                                                "PARSE_TYPE_ID" => 1 ,
-                                                "FILE_PREFIX" => $filename ,
-                                                "VARS_NAME" => $varname
-                                            );
-
-                                            $aryTempForSql = array('WHERE'=> " PARSE_TYPE_ID = :PARSE_TYPE_ID AND FILE_PREFIX = :FILE_PREFIX AND VARS_NAME = :VARS_NAME AND DISUSE_FLAG IN ('0') ORDER BY COLUMN_ID ASC");
-                                            $retResult = getInfocmdbLinkInfo($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
-
-                                            if( $retResult != array() ){
-                                                foreach ($retResult as $tmpkey => $tmpvalue) {
-                                                    //メンテナンス可能なメニューIDの検索
-                                                    $tmpBaseSourceForBind=array(
-                                                        "TABLE_NAME" => $retResult[$tmpkey]['TABLE_NAME'] ,
-                                                    );
-                                                    $tmpTempForSql = array('WHERE'=> " TABLE_NAME = :TABLE_NAME AND PRIVILEGE IN ('1')  ORDER BY LINK_ID ASC");
-                                                    $writemenuinfo = getInfoWriteMenuInfo($objDBCA,$db_model_ch,$aryConfigForIUD,$tmpBaseSourceForBind,$tmpTempForSql,$strFxName);
-
-                                                    //メンテンナンス可能なメニューIDを取得
-                                                    if( $writemenuinfo != ""){
-                                                        $writemenuid = $writemenuinfo['MENU_ID'];
-                                                    }else{
-                                                        //縦メニューは登録前に、メンテナンス可能な入力用メニュー、ID、テーブルを別途検索
-                                                        $writemenuid = $retResult[$tmpkey]['MENU_ID'];
-                                                    }
-
-                                                    $arrSqlinsertParm[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $varvalue;
-                                                    $arrTableForMenuLists[$writemenuid]=$retResult[$tmpkey]['TABLE_NAME'];
-                                                    if( $retResult[$tmpkey]['COL_CLASS'] == "FileUploadColumn" ){
-                                                        $arrFileUploadList[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $retResult[$tmpkey]['COL_CLASS'];
-                                                    } 
-
                                                 }
                                             }
                                         }
                                     }
-                                }
 
-                                $tmpFilter = array();
+                                    $tmpFilter = array();
 
-                                if( $arrSqlinsertParm != array() ){
-                                    foreach ( $arrSqlinsertParm as $filename => $tmparr3) {
-                                        #$FREE_LOG=" Collect START ( HOSTNAME:$hostname TARGETFILE:$filename )";
-                                        $FREE_LOG1 = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80001",array($hostname,$filename));
-                                        outputLog($strCollectlogPath,$FREE_LOG1);   
-                                        foreach ($tmparr3 as $menuid => $tgtSource_row) {
+                                    if( $arrSqlinsertParm != array() ){
+                                        foreach ( $arrSqlinsertParm as $filename => $tmparr3) {
+                                            #$FREE_LOG=" Collect START ( HOSTNAME:$hostname TARGETFILE:$filename )";
+                                            $FREE_LOG1 = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80001",array($hostname,$filename));
+                                            outputLog($strCollectlogPath,$FREE_LOG1);   
+                                            foreach ($tmparr3 as $menuid => $tgtSource_row) {
 
-                                            //メニューID桁埋め
-                                            $strmenuid = sprintf('%010d', $menuid);
-                                            $strMenuType = "";
+                                                //メニューID桁埋め
+                                                $strmenuid = sprintf('%010d', $menuid);
+                                                $strMenuType = "";
 
-                                            //テーブル名
-                                            $tablename = $arrTableForMenuLists[$menuid];  
-                                            
-                                            //テーブル名（縦メニュー）
-                                            $tablenameConv = str_replace("_H", "_CONV_H", $arrTableForMenuLists[$menuid]);
-
-                                            //縦メニュー判定
-                                            $aryConfigForIUD = $tmpConfigForMenuTableLinkIUD;
-
-                                            $aryTempForSql = array('WHERE'=>"TABLE_NAME =:TABLE_NAME AND DISUSE_FLAG IN ('0') ORDER BY MENU_TABLE_LINK_ID ASC");
-                                            
-                                            $arySqlBind = array( 
-                                                                'TABLE_NAME' => $tablenameConv
-                                                                );
-                                            $aryBaseSourceForBind = array();
-
-                                            $tmpResult =  getInfoFromTablename($objDBCA,$db_model_ch,"F_MENU_TABLE_LINK","MENU_TABLE_LINK_ID",$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
-                                            
-                                            if( $tmpResult != array() ) {
-                                                $strMenuType = "Vertical";
-                                                $tablename = $tablenameConv;
-                                                $strmenuid = $strmenuid = sprintf('%010d', $tmpResult[0]['MENU_ID']);
-                                            }
-                                            
-                                            
-                                            //INFO取得（REST）
-                                            $tmpParm = $aryParm;
-                                            $tmpParm['xCommand'] = "INFO";
-                                            $tmpParm['requestURI'] = $tmpParm['requestURI'] .  $strmenuid ; 
-                                            
-                                            $tmpRestInfo = execute_rest($tmpParm,$devmode);
-                                            if( $tmpRestInfo[0] == 200 ){
-
-                                                $arrRestInfo =  $tmpRestInfo[1]['CONTENTS']['INFO'];
-
-                                                // #517
-                                                $tmppramGroup = $objMTS->getSomeMessage("ITAWDCH-MNU-1300001");
-                                                $tmppramName = $objMTS->getSomeMessage("ITAWDCH-MNU-1300002");
-                                                ###$numAccessAuth = "アクセス権/アクセス許可ロール"; 
-                                                $numAccessAuth =  "$tmppramGroup/$tmppramName"; 
-                                                $arrRestAUTH =  array_search( $numAccessAuth , $arrRestInfo );
+                                                //テーブル名
+                                                $tablename = $arrTableForMenuLists[$menuid];  
                                                 
-                                                //登録、更新種別判定用データ検索
-                                                $aryConfigForIUD = $tmpConfigForCMDBbaseIUD;
-                                                if( $strMenuType == "Vertical" )$aryConfigForIUD['INPUT_ORDER']= "";
+                                                //テーブル名（縦メニュー）
+                                                $tablenameConv = str_replace("_H", "_CONV_H", $arrTableForMenuLists[$menuid]);
 
-                                                $aryTempForSql = array('WHERE'=>"HOST_ID = :HOST_ID AND OPERATION_ID = :OPERATION_ID AND DISUSE_FLAG IN ('0') ORDER BY ROW_ID ASC");
+                                                //縦メニュー判定
+                                                $aryConfigForIUD = $tmpConfigForMenuTableLinkIUD;
 
+                                                $aryTempForSql = array('WHERE'=>"TABLE_NAME =:TABLE_NAME AND DISUSE_FLAG IN ('0') ORDER BY MENU_TABLE_LINK_ID DESC");//ASC
+                                                
                                                 $arySqlBind = array( 
-                                                                    'HOST_ID' => $hostid
-                                                                    ,'OPERATION_ID' => $intOpeNoUAPK
+                                                                    'TABLE_NAME' => $tablenameConv
                                                                     );
-
                                                 $aryBaseSourceForBind = array();
 
-                                                $tmpResult =  getInfoFromTablename($objDBCA,$db_model_ch,$tablename,"ROW_ID",$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
+                                                $tmpResult =  getInfoFromTablename($objDBCA,$db_model_ch,"F_MENU_TABLE_LINK","MENU_TABLE_LINK_ID",$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
                                                 
-                                                $tmpFilter = array();   
-                                                $insertData = array();
-                                                $UpdateFileData = array();
+                                                if( $tmpResult != array() ) {
+                                                    $strMenuType = "Vertical";
+                                                    $tablename = $tablenameConv;
+                                                    $strmenuid = $strmenuid = sprintf('%010d', $tmpResult[0]['MENU_ID']);
+                                                }
+                                                
+                                                
+                                                //INFO取得（REST）
+                                                $tmpParm = $aryParm;
+                                                $tmpParm['xCommand'] = "INFO";
+                                                $tmpParm['requestURI'] = $tmpParm['requestURI'] .  $strmenuid ; 
+                                                
+                                                $tmpRestInfo = execute_rest($tmpParm,$devmode);
+                                                if( $tmpRestInfo[0] == 200 ){
 
-                                                //RESTパラメータ生成（横メニュー）
-                                                if( $strMenuType == "" ){
+                                                    $arrRestInfo =  $tmpRestInfo[1]['CONTENTS']['INFO'];
 
-                                                    foreach ( $arrRestInfo as $parmNO => $pramName ) {
-                                                        if( isset($tgtSource_row[$pramName]) ){
-                                                            $insertData[$parmNO]=$tgtSource_row[$pramName];
+                                                    // #517
+                                                    $tmppramGroup = $objMTS->getSomeMessage("ITAWDCH-MNU-1300001");
+                                                    $tmppramName = $objMTS->getSomeMessage("ITAWDCH-MNU-1300002");
+                                                    ###$numAccessAuth = "アクセス権/アクセス許可ロール"; 
+                                                    $numAccessAuth =  "$tmppramGroup/$tmppramName"; 
+                                                    $arrRestAUTH =  array_search( $numAccessAuth , $arrRestInfo );
+                                                    
+                                                    //登録、更新種別判定用データ検索
+                                                    $aryConfigForIUD = $tmpConfigForCMDBbaseIUD;
+                                                    if( $strMenuType == "Vertical" )$aryConfigForIUD['INPUT_ORDER']= "";
 
-                                                            // #449 ファイルアップロードカラム対応
-                                                            if(isset($arrFileUploadList[$filename][$menuid]) == true ){
-                                                                if( array_key_exists($pramName, $arrFileUploadList[$filename][$menuid] ) ){
-                                                                    if( isset($arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]] ) == true ){
-                                                                        $upload_filepath = $arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]];
-                                                                        if( is_file( $upload_filepath ) == true ){
-                                                                            $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
-                                                                        }
-                                                                    }else{
-                                                                        $insertData[$parmNO]="";
-                                                                        $UpdateFileData[$parmNO] ="";
-                                                                    }
-                                                                }                                                                
-                                                            }
+                                                    $aryTempForSql = array('WHERE'=>"HOST_ID = :HOST_ID AND OPERATION_ID = :OPERATION_ID AND DISUSE_FLAG IN ('0') ORDER BY ROW_ID ASC");
 
-                                                        }else{
-                                                            $insertData[$parmNO]="";
-                                                        }
-                                                    }
+                                                    $arySqlBind = array( 
+                                                                        'HOST_ID' => $hostid
+                                                                        ,'OPERATION_ID' => $intOpeNoUAPK
+                                                                        );
 
-                                                    if( $tmpResult == array() ){
-                                                        $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12202"); //登録
-                                                    }else{
-                                                        $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12203"); //更新
-                                                        $insertData[2] = $tmpResult[0]['ROW_ID'];
-                                                        $updeatetimeNo = count($arrRestInfo)-2;
-                                                        $insertData[$updeatetimeNo] = $tmpResult[0]['UPD_UPDATE_TIMESTAMP'];
-                                                    }
+                                                    $aryBaseSourceForBind = array();
 
-                                                    //共通
-                                                    $insertData[3] = $hostname;
-                                                    $insertData[9] = $strOpeInfo;
-
-                                                    if( $arrRestAUTH != "" ){
-                                                        $insertData[$arrRestAUTH] = $strRoleList;
-                                                    }
-
-                                                    ksort($insertData);
-                                                    $tmpFilter[] = $insertData;
-
-                                                    // #449 ファイルアップロードカラム対応
-                                                    if( $UpdateFileData != array() ){
-                                                        #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
-                                                        $tmpFilter['UPLOAD_FILE'][] = $UpdateFileData;
-
-                                                    }
-
-                                                }else{
-                                                    //RESTパラメータ生成（縦メニュー）
+                                                    $tmpResult =  getInfoFromTablename($objDBCA,$db_model_ch,$tablename,"ROW_ID",$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
+                                                    
+                                                    $tmpFilter = array();   
                                                     $insertData = array();
+                                                    $insertNullflg=array();
+                                                    $tmpFilternullflg=array();
+                                                    $UpdateFileData = array();
 
-                                                    $intColmun=0;
-                                                    $intColmunnum = count($arrRestInfo) - count($arrVertivalRestBase) +1;
+                                                    //RESTパラメータ生成（横メニュー）
+                                                    if( $strMenuType == "" ){
 
-
-                                                    $regData =  array();
-                                                    foreach ($tmpResult as $tmpkey => $tmpvalue) {
-                                                        $regData[] = array(
-                                                            'ROW_ID' => $tmpvalue['ROW_ID'],
-                                                            'UPD_UPDATE_TIMESTAMP' => $tmpvalue['UPD_UPDATE_TIMESTAMP'],
-                                                            'INPUT_ORDER' => $tmpvalue['INPUT_ORDER']
-                                                        );
-                                                        
-                                                    }
-
-                                                    $regData =  $tmpResult;
-
-                                                    foreach ($tgtSource_row as $tgtSource_key => $value) {
                                                         foreach ( $arrRestInfo as $parmNO => $pramName ) {
-                                                            //項目名：完全一致
-                                                            if( $pramName == $tgtSource_key ){
-                                                                $insertData[10]=1;
-                                                                $insertData[$parmNO]=$value;
-                                                            //項目名：リピート部分[X]
-                                                            }elseif(mb_strpos($tgtSource_key,$pramName) !== false){
+                                                            if( isset($tgtSource_row[$pramName]) ){
+                                                                $insertData[$parmNO]=$tgtSource_row[$pramName];
+                                                                if( gettype( $tgtSource_row[$pramName] ) === "NULL" ) $insertNullflg[$parmNO] = 1;
 
-                                                                $tmpColname =preg_replace('/\[[0-9]+?\]/u',"",$tgtSource_key);
-                                                                if( $tmpColname == $pramName ){
-                                                                    $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
-                                                                    $insertData[$parmNO]=$value;
+                                                                // #449 ファイルアップロードカラム対応
+                                                                if(isset($arrFileUploadList[$filename][$menuid]) == true ){
+                                                                    if( array_key_exists($pramName, $arrFileUploadList[$filename][$menuid] ) ){
+                                                                        if( isset($arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]] ) == true ){
+                                                                            $upload_filepath = $arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]];
+                                                                            if( is_file( $upload_filepath ) == true ){
+                                                                                $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                            }
+                                                                        }else{
+                                                                            $insertData[$parmNO]="";
+                                                                            $UpdateFileData[$parmNO] ="";
+                                                                        }
+                                                                    }                                                                
                                                                 }
-                                                            //その他
-                                                            }else{
-                                                                if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]="";
-                                                            }
 
-                                                            // #449 ファイルアップロードカラム対応
-                                                            if(isset($arrFileUploadList[$filename][$menuid]) == true ){
-                                                                if( array_key_exists($pramName, $arrFileUploadList[$filename][$menuid] ) ){
-                                                                    if( isset($arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]] ) == true ){
-                                                                        $upload_filepath = $arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]];
-                                                                        if( is_file( $upload_filepath ) == true ){
-                                                                            $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                            }else{
+                                                                $insertData[$parmNO]=null;
+                                                            }
+                                                        }
+
+                                                        if( $tmpResult == array() ){
+                                                            $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12202"); //登録
+                                                        }else{
+                                                            $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12203"); //更新
+                                                            $insertData[2] = $tmpResult[0]['ROW_ID'];
+                                                            $updeatetimeNo = count($arrRestInfo)-2;
+                                                            $insertData[$updeatetimeNo] = $tmpResult[0]['UPD_UPDATE_TIMESTAMP'];
+                                                        }
+
+                                                        //共通
+                                                        $insertData[3] = $hostname;
+                                                        $insertData[9] = $strOpeInfo;
+
+                                                        if( $arrRestAUTH != "" ){
+                                                            $insertData[$arrRestAUTH] = $strRoleList;
+                                                        }
+
+                                                        ksort($insertData);
+                                                        $tmpFilter[] = $insertData;
+
+                                                        if( $insertNullflg != array() ){
+                                                            $tmpFilternullflg[] = $insertNullflg;
+                                                        }
+                                                        // #449 ファイルアップロードカラム対応
+                                                        if( $UpdateFileData != array() ){
+                                                            #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
+                                                            $tmpFilter['UPLOAD_FILE'][] = $UpdateFileData;
+
+                                                        }
+
+                                                    }else{
+                                                        //RESTパラメータ生成（縦メニュー）
+                                                        $insertData = array();
+                                                        $UpdateFileData = array();
+                                                        $insertNullflg=array();
+                                                        $intColmun=0;
+                                                        $intColmunnum = count($arrRestInfo) - count($arrVertivalRestBase) +1;
+
+
+                                                        $regData =  array();
+                                                        foreach ($tmpResult as $tmpkey => $tmpvalue) {
+                                                            $regData[] = array(
+                                                                'ROW_ID' => $tmpvalue['ROW_ID'],
+                                                                'UPD_UPDATE_TIMESTAMP' => $tmpvalue['UPD_UPDATE_TIMESTAMP'],
+                                                                'INPUT_ORDER' => $tmpvalue['INPUT_ORDER']
+                                                            );
+                                                            
+                                                        }
+
+                                                        $regData =  $tmpResult;
+
+                                                        foreach ($tgtSource_row as $tgtSource_key => $value) {
+                                                            foreach ( $arrRestInfo as $parmNO => $pramName ) {
+                                                                //項目名：完全一致
+                                                                if( $pramName == $tgtSource_key ){
+                                                                    if( isset($insertData[10]) !== true ){
+                                                                        if( array_key_exists(10, $insertData ) !== true ){
+                                                                            $insertData[10] = 1;
+                                                                        }else{
+                                                                            if( $insertData[10] == "" ){
+                                                                                $insertData[10]=1;   
+                                                                            }                                                                            
+                                                                        }
+                                                                    }
+                                                                    $insertData[$parmNO]=$value;
+                                                                    if(gettype( $value ) == "NULL" ) $insertNullflg[$parmNO] = 1;
+                                                                //項目名：リピート部分[X]
+                                                                }elseif(mb_strpos($tgtSource_key,$pramName) !== false){
+
+                                                                    $tmpColname =preg_replace('/\[[0-9]+?\]/u',"",$tgtSource_key);
+                                                                    if( $tmpColname == $pramName ){
+                                                                        $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
+                                                                        $insertData[$parmNO]=$value;
+                                                                        if(gettype( $value ) == "NULL" ) $insertNullflg[$parmNO] = 1;
+                                                                    }
+                                                                //その他
+                                                                }else{
+                                                                    if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]=null;
+                                                                }
+
+                                                                // #449 ファイルアップロードカラム対応
+                                                                if(isset($arrFileUploadList[$filename][$menuid]) == true ){
+                                                                    if( array_key_exists($pramName, $arrFileUploadList[$filename][$menuid] ) ){
+                                                                        if( isset($arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]] ) == true ){
+                                                                            $upload_filepath = $arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]];
+                                                                            if( is_file( $upload_filepath ) == true ){
+                                                                                $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                            }
+                                                                        }else{
+                                                                            $insertData[$parmNO]="";
+                                                                            unset($UpdateFileData[$parmNO]);
                                                                         }
                                                                     }else{
-                                                                        $insertData[$parmNO]="";
-                                                                        $UpdateFileData[$parmNO] ="";
-                                                                    }
-                                                                }                                                                
-                                                            }
-
-                                                            if(  ( count($arrRestInfo)  ==  count($insertData) ) ){
-                                                                if( isset($regData[$intColmun]) != true ){
-                                                                    $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12202"); //登録
-                                                                }else{
-                                                                    $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12203"); //更新
-                                                                    $insertData[2] = $regData[$intColmun]['ROW_ID'];
-                                                                    $updeatetimeNo = count($arrRestInfo)-2;
-                                                                    $insertData[$updeatetimeNo] = $regData[$intColmun]['UPD_UPDATE_TIMESTAMP'];
+                                                                         //値がNULLの項目を除外　#1050,1051
+                                                                        if( array_key_exists($tgtSource_key, $arrFileUploadList[$filename][$menuid] ) ){
+                                                                            $tmpColname =preg_replace('/\[[0-9]+?\]/u',"",$tgtSource_key);
+                                                                            if( $tmpColname == $pramName ){
+                                                                                if( isset($arrTargetUploadLists[$hostname][$value] ) == true ){
+                                                                                    $upload_filepath = $arrTargetUploadLists[$hostname][$value];
+                                                                                    if( is_file( $upload_filepath ) == true ){
+                                                                                        $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                                    }
+                                                                                }else{
+                                                                                    $insertData[$parmNO]="";
+                                                                                    unset($UpdateFileData[$parmNO]);
+                                                                                }                                                                                
+                                                                            }
+                                                                        }
+                                                                    }                                                                
                                                                 }
-                                                                if(isset($insertData[0])){
-                                                                    //共通
-                                                                    $insertData[3] = $hostname;
-                                                                    $insertData[9] = $strOpeInfo;
-                                                                    ksort($insertData);
 
-                                                                    //同一代入順序、パラメータ結合
-                                                                    $inputorderwflg=0;
-                                                                    foreach ( $tmpFilter as $insertDataNO => $tmpinsertData) {
+                                                                if(  ( count($arrRestInfo)  ==  count($insertData) ) ){
+                                                                    //登録更新種別判定　#1050,1051
+                                                                    foreach ( $regData as $regkey => $arrRegDate) {
+                                                                        if(  $arrRegDate['INPUT_ORDER'] == $insertData[10] ){
+                                                                            $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12203"); //更新
+                                                                            $insertData[2] = $arrRegDate['ROW_ID'];
+                                                                            $updeatetimeNo = count($arrRestInfo)-2;
+                                                                            $insertData[$updeatetimeNo] = $arrRegDate['UPD_UPDATE_TIMESTAMP'];
+                                                                        }
+                                                                    }
 
-                                                                        if ( isset( $tmpinsertData[10] ) ){
-                                                                            if( $tmpinsertData[10] == $insertData[10] ){
-                                                                                foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
-                                                                                    if( $tmpinsertDatavalue == "") {
-                                                                                        $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
-                                                                                        $inputorderwflg =1;
+                                                                    if( $insertData[0] !== $objMTS->getSomeMessage("ITAWDCH-STD-12203") ){
+                                                                        $insertData[0] = $objMTS->getSomeMessage("ITAWDCH-STD-12202"); //登録
+                                                                    }
+                                                                    if(isset($insertData[0])){
+                                                                        //共通
+                                                                        $insertData[3] = $hostname;
+                                                                        $insertData[9] = $strOpeInfo;
+                                                                        ksort($insertData);
+
+                                                                        //同一代入順序、パラメータ結合
+                                                                        $inputorderwflg=0;
+                                                                        foreach ( $tmpFilter as $insertDataNO => $tmpinsertData) {
+
+                                                                            if ( isset( $tmpinsertData[10] ) ){
+                                                                                if( $tmpinsertData[10] == $insertData[10] ){
+                                                                                    foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
+                                                                                        if( $tmpinsertDatavalue == "") {
+                                                                                            $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                            if( isset($UpdateFileData[$tmpinsertDatakey]) ){
+                                                                                                $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
+                                                                                            }
+                                                                                            $inputorderwflg =1;
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                        if( $inputorderwflg == 0 ){
+                                                                            if( $arrRestAUTH != "" ){
+                                                                                $insertData[$arrRestAUTH] = $strRoleList;
+                                                                            }
+                                                                            //種別、オペレーション、ホスト、代入順序　#1050,1051
+                                                                            if( isset($insertData[0]) && isset($insertData[3]) && isset($insertData[9]) && isset($insertData[10]) ){
+                                                                                $tmpFilter[$intColmun] = $insertData;
+
+                                                                                if( $insertNullflg != array() ){
+                                                                                    $tmpFilternullflg[$intColmun] = $insertNullflg;
+                                                                                }
+                                                                                
+                                                                                // #449 ファイルアップロードカラム対応
+                                                                                if( $UpdateFileData != array() ){
+                                                                                    #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
+                                                                                    $tmpFilter['UPLOAD_FILE'][$intColmun] = $UpdateFileData;
+                                                                                }
+                                                                                $intColmun++;                                                                                
+                                                                            }
+
+                                                                        }
+
+                                                                        $insertData=array();
+                                                                    }
+                                                                }else{
+                                                                     //同一代入順序、パラメータ結合[X]無し時対応　#1050,1051
+                                                                    if( isset($insertData[10]) ){
+                                                                        foreach ( $tmpFilter as $insertDataNO => $tmpinsertData) {
+                                                                            if ( isset( $tmpinsertData[10] ) ){
+                                                                                if( $tmpinsertData[10] == $insertData[10] ){
+                                                                                    foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
+                                                                                        if( isset($insertData[$tmpinsertDatakey]) ) {
+                                                                                            if( $insertData[$tmpinsertDatakey] != "" ) {
+                                                                                                $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                                if( isset($UpdateFileData[$tmpinsertDatakey]) ){
+                                                                                                    $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
+                                                                                                }
+                                                                                            }
+                                                                                        }
                                                                                     }
                                                                                 }
                                                                             }
                                                                         }
                                                                     }
-
-                                                                    if( $inputorderwflg == 0 ){
-                                                                        if( $arrRestAUTH != "" ){
-                                                                            $insertData[$arrRestAUTH] = $strRoleList;
-                                                                        }
-
-                                                                        $tmpFilter[] = $insertData;
-                                                                         $intColmun++;
-                                                                        // #449 ファイルアップロードカラム対応
-                                                                        if( $UpdateFileData != array() ){
-                                                                            #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
-                                                                            $tmpFilter['UPLOAD_FILE'][] = $UpdateFileData;
-                                                                        } 
-                                                                    }
-
-                                                                    $insertData=array();
                                                                 }
                                                             }
                                                         }
                                                     }
-                                                }
 
-                                                //登録、更新（EDIT）
-                                                $tmpParm = $aryParm;
-                                                $tmpParm['requestURI'] = $tmpParm['requestURI'] .  $strmenuid ; 
-                                                $tmpParm['xCommand'] = "EDIT";
-                                                
-                                                $tmpParm['strParaJsonEncoded'] = json_encode($tmpFilter,
-                                                                                  JSON_UNESCAPED_UNICODE
-                                                                                 );
+                                                    //登録、更新（EDIT）
+                                                    $tmpParm = $aryParm;
+                                                    $tmpParm['requestURI'] = $tmpParm['requestURI'] .  $strmenuid ; 
+                                                    $tmpParm['xCommand'] = "EDIT";
+                                                    
+                                                    //値がNULLの項目を除外　#1050,1051
+                                                    foreach ( $tmpFilter as $tk => $tarr) {
+                                                        if( is_numeric($tk) === true ){
+                                                            foreach ( $tarr as $tk1 => $tval) {
+                                                                if( gettype($tval) === "NULL" ){
+                                                                    if( !isset( $tmpFilternullflg[$tk][$tk1] ) ){
+                                                                        unset( $tmpFilter[$tk][$tk1] ); 
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    ksort($tmpFilter);
+                                                    $tmpParm['strParaJsonEncoded'] = json_encode($tmpFilter,
+                                                                                      JSON_UNESCAPED_UNICODE
+                                                                                     );
+                                                    $RESTEXEC_FLG = 1;
+                                                    $arrRestInfo = execute_rest($tmpParm,$devmode);
+                                                    if( $arrRestInfo[0] == 200 ){
+                                                        #FREE_LOG=" REST DATA ( Hostname: $hostname MenuID: $strmenuid OperationNO: $intOpeNoUAPK )";
+                                                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80007", array($hostname,$strmenuid,$intOpeNoUAPK) );
+                                                        outputLog($strCollectlogPath,$FREE_LOG, array($arrRestInfo[2],$arrRestInfo[3],json_encode(json_decode($arrRestInfo[4],true),JSON_UNESCAPED_UNICODE) ) );
 
-                                                $arrRestInfo = execute_rest($tmpParm,$devmode);
-                                                if( $arrRestInfo[0] == 200 ){
+                                                        if( $arrRestInfo[1]['LIST']['NORMAL']['error']['ct'] != 0 ){
+                                                            
+                                                            #$FREE_LOG = "[処理]CMDBへのデータ登録、更新に失敗しました。({}件)";
+                                                            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80003",array( $arrRestInfo[1]['LIST']['NORMAL']['error']['ct'] ."/". count($tmpFilter) ) );
+                                                            outputLog($strCollectlogPath,$FREE_LOG);
+                                                            require ($root_dir_path . $log_output_php );
+
+                                                            $NOTICE_FLG = 2; //収集済み（通知あり）
+                                                        }else{
+                                                            //異常がすでにある場合、通知あり
+                                                            if( $NOTICE_FLG != 0 ){
+                                                                $NOTICE_FLG = 2; //収集済み（通知あり）
+                                                            }
+                                                        }
+     
+                                                    }else{
+                                                        #$FREE_LOG = "[処理]RESTアクセスに失敗しました。";
+                                                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80002");
+                                                        outputLog($strCollectlogPath,$FREE_LOG, array($arrRestInfo[2],$arrRestInfo[3],json_encode(json_decode($arrRestInfo[4],true),JSON_UNESCAPED_UNICODE)  ) );
+                                                        require ($root_dir_path . $log_output_php );
+                                                        #break;
+                                                        $NOTICE_FLG = 2; //収集済み（通知あり）
+
+                                                    }
+                                                }else{
+                                                    #$FREE_LOG = "[処理]RESTアクセスに失敗しました。"
+                                                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80002");
+                                                    outputLog($strCollectlogPath,$FREE_LOG);
+
                                                     #FREE_LOG=" REST DATA ( Hostname: $hostname MenuID: $strmenuid OperationNO: $intOpeNoUAPK )";
                                                     $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80007", array($hostname,$strmenuid,$intOpeNoUAPK) );
-                                                    outputLog($strCollectlogPath,$FREE_LOG, array($arrRestInfo[2],$arrRestInfo[3],$arrRestInfo[4] ) );
+                                                    outputLog($strCollectlogPath,$FREE_LOG, array($tmpRestInfo[2],$tmpRestInfo[3],json_encode(json_decode($tmpRestInfo[4],true),JSON_UNESCAPED_UNICODE ) ) );
 
-                                                    if( $arrRestInfo[1]['LIST']['NORMAL']['error']['ct'] != 0 ){
-                                                        
-                                                        #$FREE_LOG = "[処理]CMDBへのデータ登録、更新に失敗しました。({}件)";
-                                                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80003",array( $arrRestInfo[1]['LIST']['NORMAL']['error']['ct'] ."/". count($tmpFilter) ) );
-                                                        outputLog($strCollectlogPath,$FREE_LOG);
-                                                        require ($root_dir_path . $log_output_php );
-
-                                                        $NOTICE_FLG = 1;
-                                                    }
- 
-                                                }else{
-                                                 #$FREE_LOG = "[処理]RESTアクセスに失敗しました。";
-                                                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80002");
-                                                    outputLog($strCollectlogPath,$FREE_LOG, array($arrRestInfo[2],$arrRestInfo[3],$arrRestInfo[4]  ) );
                                                     require ($root_dir_path . $log_output_php );
                                                     #break;
-                                                    $NOTICE_FLG = 1;
-
+                                                    $NOTICE_FLG = 2; //収集済み（通知あり）                                          
                                                 }
-                                            }else{
-                                                #$FREE_LOG = "[処理]RESTアクセスに失敗しました。"
-                                                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80002");
-                                                outputLog($strCollectlogPath,$FREE_LOG);
-
-                                                require ($root_dir_path . $log_output_php );
-                                                #break;
-                                                $NOTICE_FLG = 1;                                             
                                             }
+                                            #$FREE_LOG=" Collect END ( HOSTNAME:$hostname TARGETFILE:$filename )";
+                                            $FREE_LOG=$objMTS->getSomeMessage("ITAANSIBLEH-STD-80005",array( $hostname , $filename ) );
+                                            outputLog($strCollectlogPath,$FREE_LOG );  
                                         }
-                                        #$FREE_LOG=" Collect END ( HOSTNAME:$hostname TARGETFILE:$filename )";
-                                        $FREE_LOG=$objMTS->getSomeMessage("ITAANSIBLEH-STD-80005",array( $hostname , $filename ) );
-                                        outputLog($strCollectlogPath,$FREE_LOG );  
+                                    }else{
+                                        //収集項目値管理上の対象ファイル無しの場合
+                                        #$FREE_LOG = "[処理]収集項目値管理で指定されたファイルがありません。 ";
+                                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80008" );
+                                        outputLog($strCollectlogPath,$FREE_LOG); 
+                                        require ($root_dir_path . $log_output_php );
+                                        
+                                        if( $RESTEXEC_FLG == 1 ){
+                                            $NOTICE_FLG = 2; //収集済み（通知あり）   
+                                        }else{
+                                            $NOTICE_FLG = 3; ///対象外   
+                                        }
                                     }
+                                }elseif( $aryhostInfo === false ){
+                                    //ホストが存在しない
+                                    #$FREE_LOG = "[処理]対象機器が登録されていないか、廃止されています。 hostname:${hostname} "
+                                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80004",array( $hostname ));
+                                    outputLog($strCollectlogPath,$FREE_LOG);
+                                    require ($root_dir_path . $log_output_php );
+
+                                    if( $RESTEXEC_FLG == 1 ){
+                                        $NOTICE_FLG = 2; //収集済み（通知あり）   
+                                    }else{
+                                        $NOTICE_FLG = 4; //収集エラー用    
+                                    }
+                                    
                                 }
-                            }elseif( $aryhostInfo === false ){
-                                //ホストが存在しない
-                                #$FREE_LOG = "[処理]対象機器が登録されていないか、廃止されています。 hostname:${hostname} "
-                                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80004",array( $hostname ));
-                                outputLog($strCollectlogPath,$FREE_LOG);
-                                require ($root_dir_path . $log_output_php );
-                                $NOTICE_FLG = 1;
                             }
+                        }else{
+                            //対象のファイル無しの場合
+                            #$FREE_LOG = "[処理]収集対象ディレクトリにファイルがありません。 ";
+                            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80009");
+                            outputLog($strCollectlogPath,$FREE_LOG);
+
+                            require ($root_dir_path . $log_output_php );
+                            $NOTICE_FLG = 3; //対象外       
                         }
+                    }elseif( $aryOperation === false ){
+                        //Operationが廃止済み
+                        #$FREE_LOG = "[処理]Operationが廃止されています。 OperationNo:${intOpeNoUAPK} ";
+                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80006",array( $intOpeNoUAPK ));
+                        outputLog($strCollectlogPath,$FREE_LOG);
+
+                        require ($root_dir_path . $log_output_php );
+                        $NOTICE_FLG = 4; //収集エラー用
                     }
-                }elseif( $aryOperation === false ){
-                    //Operationが廃止済み
-                    #$FREE_LOG = "[処理]Operationが廃止されています。 OperationNo:${intOpeNoUAPK} ";
-                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80006",array( $intOpeNoUAPK ));
-                    outputLog($strCollectlogPath,$FREE_LOG);
 
-                    require ($root_dir_path . $log_output_php );
-                    $NOTICE_FLG = 1;
-                }
+                    $tmpMovement = $aryMovement ;
 
-                $tmpMovement = $aryMovement ;
+                    if( file_exists($strCollectlogPath) ){
+                        $tmpMovement['COLLECT_LOG'] = $tmpCollectlogfile;
 
-                if( file_exists($strCollectlogPath) ){
-                    $tmpMovement['COLLECT_LOG'] = $tmpCollectlogfile;
-                    $tmpMovement['COLLECT_STATUS'] ="1";
-                    if( $NOTICE_FLG != 0 ){
-                        $tmpMovement['COLLECT_STATUS'] ="2";
-                    }                    
+                        switch ( $NOTICE_FLG ) {
+                            case '0': // 収集済み：正常終了
+                                $tmpMovement['COLLECT_STATUS'] ="1";
+                                break;
+                            case '2': // 収集済み（通知あり）：REST（登録、更新）で正常終了以外含む、機器一覧に対象ホスト無し
+                                $tmpMovement['COLLECT_STATUS'] ="2";
+                                break;
+                            case '3': //対象外：ファイル無し、YAMLファイル無し、YAMLパース失敗
+                                $tmpMovement['COLLECT_STATUS'] ="3";     
+                                break;
+                            case '4': // 収集エラー：オペレーション廃止済み
+                                $tmpMovement['COLLECT_STATUS'] ="4";
+                                break;
+                        }
+                    }else{
+                        $tmpMovement['COLLECT_LOG'] = "";
+                        $tmpMovement['COLLECT_STATUS'] ="3";
+                    }
+
+
+
+                    $tmpMovement['LAST_UPDATE_USER'] = $db_access_user_id;
+
+                    $aryRetBody = updateMovmentInstance($objDBCA,$db_model_ch,$tmpConfigForMovementIUD,$db_access_user_id,$tmpMovement,$strCollectOrcTablename,$strMovKeyname,$aryBaseSourceForBind,$strFxName);
+
                 }else{
+                ////完了以外の場合対象外へ [(完了(異常),想定外エラー,緊急停止,予約取消]
+                    #$FREE_LOG = "[処理]収集機能対象外です。";
+                    #$FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80002");
+                    #outputLog($strCollectlogPath,$FREE_LOG);
+
+                    $strMovKeyname = "EXECUTION_NO";
+                    $tmpMovement = $aryMovement ;
+                    #$tmpMovement['COLLECT_LOG'] = $tmpCollectlogfile;
                     $tmpMovement['COLLECT_LOG'] = "";
                     $tmpMovement['COLLECT_STATUS'] ="3";
+                    $tmpMovement['LAST_UPDATE_USER'] = $db_access_user_id;
+                    $aryRetBody = updateMovmentInstance($objDBCA,$db_model_ch,$tmpConfigForMovementIUD,$db_access_user_id,$tmpMovement,$strCollectOrcTablename,$strMovKeyname,$aryBaseSourceForBind,$strFxName);
                 }
-
-                $FREE_LOG ="";
-                $NOTICE_FLG="";
-
-                $tmpMovement['LAST_UPDATE_USER'] = $db_access_user_id;
-
-                $aryRetBody = updateMovmentInstance($objDBCA,$db_model_ch,$tmpConfigForMovementIUD,$db_access_user_id,$tmpMovement,$strCollectOrcTablename,$strMovKeyname,$aryBaseSourceForBind,$strFxName);
-
             }
 
         }
@@ -1628,7 +1786,7 @@ function getTargetPath( $TargetPath ){
 //yaml配列構造変換
 function yamlParseAnalysis($strTargetfile){
 
-    $arrTargetParm = yaml_parse_file($strTargetfile);
+    $arrTargetParm = @yaml_parse_file($strTargetfile);
 
     if( $arrTargetParm == false){
         return false;

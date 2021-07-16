@@ -546,6 +546,13 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                     }else{
                         $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170002");                    
                     }
+                    if( isset($terminalnameinfo['edge']) ){
+                        if( $terminalnameinfo['edge'] == "" ){
+                            $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170002");
+                        }
+                    }else{
+                        $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170002");
+                    }
                 }
             }else{
                 $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170002");
@@ -661,9 +668,9 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                     $strErrStepIdInFx="00002600";
                     $intErrorType = 2;
                     if($aryDataForMovement['type'] == "call"){
-                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170020",array($aryDataForMovement['CONDUCTOR_CLASS_NO'],$tmpStrOpeNoIDBH)); //ConductorCall - オペレーションIDの値が不正です。(Conductor:{} オペレーションID:{})
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170020",array($aryDataForMovement['CALL_CONDUCTOR_ID'],$tmpStrOpeNoIDBH)); //ConductorCall - オペレーションIDの値が不正です。(Conductor:{} オペレーションID:{})
                     }elseif($aryDataForMovement['type'] == "call_s"){
-                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170021",array($aryDataForMovement['CONDUCTOR_CLASS_NO'],$tmpStrOpeNoIDBH)); //ConductorCall - オペレーションIDの値が不正です。(Conductor:{} オペレーションID:{})
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170021",array($aryDataForMovement['CALL_CONDUCTOR_ID'],$tmpStrOpeNoIDBH)); //ConductorCall - オペレーションIDの値が不正です。(Conductor:{} オペレーションID:{})
                     }else{
                         $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170004",array($tmpStrPatternID,$tmpStrOpeNoIDBH)); //"Movement - オペレーションIDの値が不正です。(MovementID:{} オペレーションID:{})";
                     }
@@ -682,9 +689,9 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                     if( $tmpAryRetBody[1] == 101 ){
                         $intErrorType = 2;
                         if($aryDataForMovement['type'] == "call"){
-                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170022",array($aryDataForMovement['CONDUCTOR_CLASS_NO'])); //ConductorCall - オペレーションIDが存在している必要があります。(Conductor:{})
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170022",array($aryDataForMovement['CALL_CONDUCTOR_ID'])); //ConductorCall - オペレーションIDが存在している必要があります。(Conductor:{})
                         }elseif($aryDataForMovement['type'] == "call_s"){
-                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170023",array($aryDataForMovement['CONDUCTOR_CLASS_NO'])); //SymphonyCall - オペレーションIDが存在している必要があります。(Symphony:{})
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170023",array($aryDataForMovement['CALL_SYMPHONY_ID'])); //SymphonyCall - オペレーションIDが存在している必要があります。(Symphony:{})
                         }else{
                             $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170005",array($tmpStrPatternID)); //Movement - オペレーションIDが存在している必要があります。(Movement:{})
                         }
@@ -721,7 +728,7 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                 }
 
             }
-
+            
             if( !isset( $aryDataForMovement['CALL_CONDUCTOR_ID'] ) )$aryDataForMovement['CALL_CONDUCTOR_ID']="";
             if( !isset( $aryDataForMovement['note'] ) )$aryDataForMovement['note']="";
             if( !isset( $aryDataForMovement['NEXT_PENDING_FLAG'] ) )$aryDataForMovement['NEXT_PENDING_FLAG']="";
@@ -854,13 +861,9 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
                     $aryRetBody = $objOLA->getInfoOfOneSymphony($aryDataForMovement['CALL_SYMPHONY_ID'],-1);
                     
                     if( $aryRetBody[1] !== null ){
-                        // エラーフラグをON
-                        // 例外処理へ
-                        $strErrStepIdInFx="00000200";
-                        $intErrorType = $aryRetBody[1];
-                        //
-                        $aryErrMsgBody = $aryRetBody[2];
-                        //
+                        $intErrorType = 2;
+                        $strErrStepIdInFx="00002800";
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170015");
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                     }
                     $arrMVList = $aryRetBody[4];
@@ -1106,20 +1109,36 @@ function checkNodeUseCaseValidate($aryNodeData){
 
     try{
         foreach ($aryNodeData as $key => $value) {
-            $nodetype = $value['type'];
+            if(isset($value['type'])){
+                $nodetype = $value['type'];
+            }
             $arrTerminal=array();
-            foreach ($value['terminal'] as $tkey => $tvalue) {
-                $arrTerminal[$tvalue['type']]=$tvalue['targetNode'];
+            if(isset($value['terminal'])){
+                foreach ($value['terminal'] as $tkey => $tvalue) {
+                    if(isset($tvalue['type'])){
+                        $arrTerminal[$tvalue['type']]=$tvalue['targetNode'];
+                    }else{
+                        $aryErrMsgBody[] = $objMTS->getSomeMessage("ITAWDCH-ERR-26000",array($nodetype));
+                        $strErrStepIdInFx="00000300";
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                }
+            }else{
+                $aryErrMsgBody[] = $objMTS->getSomeMessage("ITAWDCH-ERR-26000",array($nodetype));
+                $strErrStepIdInFx="00000300";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
 
             foreach ($arrTerminal as $tkey => $tvalue) {
                 $nodetype2 = $aryNodeData[$tvalue]['type'];
-
-                $retNodeValidate = in_array($nodetype2,$arrNodeVariList[$nodetype][$tkey]);
-                if( $retNodeValidate == false ){
-                        $aryErrMsgBody[] = $objMTS->getSomeMessage("ITAWDCH-ERR-26000",array($nodetype));
-                        $strErrStepIdInFx="00000300";
-                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                
+                if(isset($arrNodeVariList[$nodetype][$tkey])){
+                    $retNodeValidate = in_array($nodetype2,$arrNodeVariList[$nodetype][$tkey]);
+                    if( $retNodeValidate == false ){
+                            $aryErrMsgBody[] = $objMTS->getSomeMessage("ITAWDCH-ERR-26000",array($nodetype));
+                            $strErrStepIdInFx="00000300";
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
                 }
 
             }

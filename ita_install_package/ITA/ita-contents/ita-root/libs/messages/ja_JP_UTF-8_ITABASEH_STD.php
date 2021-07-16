@@ -66,6 +66,7 @@ $ary["ITABASEH-STD-160013"]         = "定期実行管理プロシージャ";
 $ary["ITABASEH-STD-170001"]         = "コンダクター管理プロシージャ";
 $ary["ITABASEH-STD-170002"]         = "Conductoryの現在のNodeのシーケンスを調査します。(ConductorインスタンスID:{})";
 $ary["ITABASEH-STD-170003"]         = "Conductorの現在のNodeのシーケンスです。(Conductor:{}, Node シーケンス:{})";
+$ary["ITABASEH-STD-170004"]         = "{} [ Node instance ID :{} ]";
 $ary["ITABASEH-STD-900001"]         = "ファイルをアップロードしました。";
 $ary["ITABASEH-STD-900002"]         = "データをインポートしました。";
 $ary["ITABASEH-STD-900003"]         = "メニューインポート開始";
@@ -129,4 +130,6 @@ $ary["ITABASEH-STD-10908045"]       = "MovementID";
 $ary["ITABASEH-STD-10908050"]       = "Movement名";
 $ary["ITABASEH-STD-10908055"]       = "オペレーションID";
 $ary["ITABASEH-STD-10908060"]       = "オペレーション名";
+$ary["ITABASEH-STD-2100000331_1"]   = "結果";
+
 ?>

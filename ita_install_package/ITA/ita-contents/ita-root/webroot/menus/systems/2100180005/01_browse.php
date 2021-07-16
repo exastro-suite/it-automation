@@ -142,12 +142,62 @@ EOD;
     
     $strDeveloperArea = "";
     
+    $interval = 3000;  //エラー等の場合の初期値
+
+    $strQuery = "SELECT CONDUCTOR_REFRESH_INTERVAL FROM C_CONDUCTOR_IF_INFO WHERE DISUSE_FLAG = '0'";
+
+    $aryForBind = array();
+    $strFxName  = "";
+    $tmpStrInterVal = "";
+    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+
+    if( $aryRetBody[0] === true ){
+        $objQuery = $aryRetBody[1];
+
+        
+
+        if($objQuery->effectedRowCount() == 0) {
+            web_log($objMTS->getSomeMessage("ITABASEH-ERR-170103"));
+            
+
+        } else {
+            if($objQuery->effectedRowCount() == 1) {
+                $row = $objQuery->resultFetch();
+                $tmpStrInterVal = $row['CONDUCTOR_REFRESH_INTERVAL'];
+            } else {
+                web_log($objMTS->getSomeMessage("ITABASEH-ERR-170104"));
+            }
+        }
+        unset($objQuery);
+    }else{
+        web_log($objMTS->getSomeMessage("ITABASEH-ERR-1990009",array("C_CONDUCTOR_IF_INFO")));
+    }
+    if( 0 < strlen($tmpStrInterVal) ){
+        if( is_numeric($tmpStrInterVal) === true ){
+            $tmpIntInterVal = intval($tmpStrInterVal);
+            if( $tmpIntInterVal <= 0 ){
+                //----[WARNING: SETTING CONDUCTOR INSTANCE MONITOR INTERVAL IS LESS THAN OVER EQUAL TO 0.]
+                web_log($objMTS->getSomeMessage("ITABASEH-ERR-170105"));
+            }
+            else{
+                $interval = $tmpIntInterVal;
+            }
+        }
+        else{
+            //----[WARNING: SETTING CONDUCTOR INSTANCE MONITOR INTERVAL IS NOT NUMERIC.]
+            web_log($objMTS->getSomeMessage("ITABASEH-ERR-170106"));
+        }
+    }    unset($tmpStrInterVal);
+    unset($tmpIntInterVal);
+    
     //$strPageInfo = "説明";
     $strPageInfo = $g['objMTS']->getSomeMessage("ITABASEH-MNU-204040");
 
     print 
 <<< EOD
     <!-------------------------------- ユーザ・コンテンツ情報 -------------------------------->
+    <div id="intervalOfDisp" style="display:none" class="text">{$interval}</div>
     <div id="privilege" style="display:none" class="text">{$privilege}</div>
     <div id="sysJSCmdText01" style="display:none" class="text">{$strCmdWordAreaOpen}</div>
     <div id="sysJSCmdText02" style="display:none" class="text">{$strCmdWordAreaClose}</div>
@@ -210,7 +260,20 @@ EOD;
                 <div id="art-board">      
                 </div><!-- / .art-board -->
               </div><!-- / .canvas -->
-            </div><!-- / .canvas-wrap -->
+            </div><!-- / .canvas-visible-area -->
+            
+            <div id="editor-display">
+              <div id="editor-explanation">
+                <dl class="explanation-list">
+                  <dt class="explanation-term"><span class="mouse-icon mouse-left"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309057")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309062")}</dd>
+                  <dt class="explanation-term"><span class="mouse-icon mouse-wheel"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309053")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309054")}</dd>
+                  <dt class="explanation-term"><span class="mouse-icon mouse-right"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309055")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309056")}</dd>
+                </dl>
+              </div>
+            </div><!-- / #editor-display -->
             
           </div>
         </div><!-- /#editor-edit -->

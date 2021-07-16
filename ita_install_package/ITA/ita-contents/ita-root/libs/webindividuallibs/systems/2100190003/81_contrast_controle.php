@@ -36,7 +36,7 @@ function getContrastList($mode=""){
     $strErrStepIdInFx = "";
     
     $strExpectedErrMsgBodyForUI = "";
-    
+
     $strFxName = __FUNCTION__;
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-1",__FILE__),$intControlDebugLevel01);
     
@@ -443,7 +443,7 @@ function gethostList( $intContrastid ){
 }
 
 //比較結果出力　
-function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",$strhostlist="" ){
+function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",$strhostlist="",$outputType=1 ){
     global $g;
 
     // 各種ローカル定数を定義
@@ -489,6 +489,13 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
         "LAST_UPDATE_USER" => "",
     );
 
+    global $root_dir_path;
+    if ( empty($root_dir_path) ){
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+    }
+    
     // 処理開始
     try{
 
@@ -1332,7 +1339,8 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                     foreach ($tmpmenucol as $menuid => $colInfo) {
                         //loadtable読み込み
                         $MenuID = sprintf('%010d', $menuid );
-                        $g['root_dir_path'] = "/exastro/ita-root/";
+
+                        $g['root_dir_path'] = $root_dir_path;
                         $sheetFile = "{$g['root_dir_path']}/webconfs/sheets/{$MenuID}_loadTable.php";
 
                         if(file_exists($sheetFile)){
@@ -1968,7 +1976,21 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
 
             }                        
         }
-  
+
+
+        //差分のみ出力
+        if( $outputType == 2 ){
+            //差分なし除外
+            foreach ($arrConstResult as $tmpkey => $tmpval ) {
+                foreach ($tmpval as $colnum => $value) {
+                    if( $value == $g['objMTS']->getSomeMessage("ITABASEH-MNU-310223") ){
+                        unset($arrConstResult[$tmpkey]);
+                        unset($arrConstResultflg[$tmpkey]);
+                    }
+                }
+            }
+        }
+
         $strStreamOfContrastResult = array($arrConstResult,$arrConstResultflg);
 
     }
@@ -1994,7 +2016,7 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
 }
 
 //比較結果のテーブル出力
-function gethtmlContrast($strContrastListID,$arrBasetime1,$arrBasetime2,$strhostlist){
+function gethtmlContrast($strContrastListID,$arrBasetime1,$arrBasetime2,$strhostlist,$outputType){
 
     global $g;
 
@@ -2024,7 +2046,7 @@ function gethtmlContrast($strContrastListID,$arrBasetime1,$arrBasetime2,$strhost
     // 処理開始
     try{
         
-        $arrayResult = getContrastResult($strContrastListID,$arrBasetime1,$arrBasetime2,$strhostlist);
+        $arrayResult = getContrastResult($strContrastListID,$arrBasetime1,$arrBasetime2,$strhostlist,$outputType);
         
         //比較対象データ有
         if( isset($arrayResult[2][0][0] ) ){
@@ -2105,6 +2127,7 @@ EOD;
             <input type="submit" value="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310219")}">
             <input type="hidden" name="filteroutputfiletype" value="excel">
             <input type="hidden" name="FORMATTER_ID" value="excel">
+            <input type="hidden" name="OUTPUT_TYPE" value="{$outputType}">
         </form>
         <!-------------------------------- 比較結果出力(Excel) -------------------------------->
 EOD;
@@ -2123,9 +2146,16 @@ EOD;
             <input type="submit" value="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-310220")}">
             <input type="hidden" name="filteroutputfiletype" value="csv">
             <input type="hidden" name="FORMATTER_ID" value="csv">
+            <input type="hidden" name="OUTPUT_TYPE" value="{$outputType}">
         </form>
         <!-------------------------------- 比較結果出力(CSV) -------------------------------->
 EOD;
+
+            //絞り込み等で比較結果が0件の場合
+            if( count($arrtdmainlist) == 0 ){
+                $strhtml = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310221");#"指定した条件で比較対象となるデータがありません";
+            }
+
         }else{
             //比較対象データ無し
             $strhtml = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310221");#"指定した条件で比較対象となるデータがありません";

@@ -365,6 +365,58 @@ callback.prototype = {
         }
         showForDeveloper(result);
     },
+    Mix1_1_duplicate : function( result ){
+        var strMixOuterFrameName = 'Mix2_Nakami';
+        var strMixInnerFramePrefix = 'Mix2_';
+  
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+  
+        var resultContentTag = ary_result[2];
+  
+        var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
+  
+        if( ary_result[0] == "000" ){
+  
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+  
+            switch( ary_result[1] ){
+                case "100":
+                    window.alert(resultContentTag);
+                    objRegiterArea.innerHTML = "";
+                    Filter1Tbl_search_async();
+                    break;
+                case "201":
+                    // エラーなく登録完了
+                default:                
+                    objRegiterArea.innerHTML="";
+                    $(objRegiterArea).html(resultContentTag);
+  
+                    objAlertArea.style.display = "none";
+                    
+                    adjustTableAuto (strMixInnerFramePrefix+'1',
+                                    "sDefault",
+                                    "fakeContainer_Register2",
+                                    webStdTableHeight,
+                                    webStdTableWidth );
+                    linkDateInputHelper(strMixOuterFrameName);
+            }
+        }else if( ary_result[0] == "002" ){
+            window.alert(getSomeMessage("ITAWDCC90102"));
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+            setInputButtonDisable(strMixOuterFrameName,'disableAfterPush',false);
+        }else if( ary_result[0] == "003" ){
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+            objRegiterArea.innerHTML="";
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+  
+        showForDeveloper(result);
+    }
     //---- ここからカスタマイズした場合の[callback]メソッド配置域
     // ここまでカスタマイズした場合の[callback]メソッド配置域----
 }
@@ -1321,9 +1373,9 @@ function setSchedule(target_area_id){
 //////// ----Symphony作業一覧へのリンク ////////
 function Mix1_1_jumpToSymphonyIntList(obj){
     var targetRecort = $(obj).parents('tr');
-    var strSymphonyName = targetRecort.find('td').eq(5).text(); //symphony名称
-    var strOperationName = targetRecort.find('td').eq(6).text(); //オペレーション名
-    var strUserName = targetRecort.find('td').eq(8).text(); //実行ユーザ
+    var strSymphonyName = targetRecort.find('td').eq(6).text(); //symphony名称
+    var strOperationName = targetRecort.find('td').eq(7).text(); //オペレーション名
+    var strUserName = targetRecort.find('td').eq(9).text(); //実行ユーザ
 
     //エンコード
     strSymphonyName = encodeURIComponent(strSymphonyName);

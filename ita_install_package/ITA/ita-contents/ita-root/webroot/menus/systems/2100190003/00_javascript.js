@@ -75,7 +75,7 @@ callback.prototype = {
         var resulthostlist = ary_result[2];
         
         var inputDataValue = 'ins-host-id="host_data"';
-        //console.log( resulthostlist );
+
         const modal = new itaEditorFunctions ;
         if( ary_result[0] == "000" ){
               if ( resulthostlist !== '') {
@@ -87,11 +87,11 @@ callback.prototype = {
                         $input = $('input[' + inputDataValue + ']');
                   if ( $input.length ) {
                       const initValue = $input.val();
-                      //console.log( initValue );
+                      
                       // 決定時の処理    
                       const okEvent = function( newRoleList ) {
                         $input.val( newRoleList );
-                        console.log( $input.val( newRoleList ) );
+                        
                         const $target = $input.closest('.tdInner'),
                               inputHTML = newRoleList + $input.prop('outerHTML');
                         $target.html( inputHTML ).trigger('roleChange');
@@ -203,6 +203,8 @@ function contrastResultHtml(){
     var strBaseTime1  = $('[name="BASE_TIMESTAMP_1"]').val();
     var arrhostlist   = $('[name="HOST_LIST[]"]').val();
     var strhostlist   = arrhostlist;
+    
+    var outputType  = $('[name="OUTPUT_TYPE"]:checked').val();
 
    if ( Array.isArray(arrhostlist) === true ) {
         var strhostlist = arrhostlist.join(',');
@@ -213,7 +215,7 @@ function contrastResultHtml(){
     // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
     restruct_for_IE();
 
-    proxy.contrastResultHtml( intContrastid , strBaseTime0 , strBaseTime1 , strhostlist );
+    proxy.contrastResultHtml( intContrastid , strBaseTime0 , strBaseTime1 , strhostlist , outputType );
 
 }
 //////////////////////////////////////////////////////
@@ -251,8 +253,7 @@ function setHostSelectModalBody( roleList, initData, okCallback, cancelCallBack,
         var strhostlist = $('input:hidden[name="HOST_LIST[]"]').val();
         var arrhostlist = strhostlist.split(',');
         var tmproleID = roleList[i]['SYSTEM_ID'];
-        console.log( strhostlist  ); 
-                console.log( arrhostlist  ); 
+        
         if ( roleName !== hideRoleName ) {
           const roleID = roleList[i]['SYSTEM_ID'],
                 checkValue = ( valueType === 'name')? roleName: roleID,

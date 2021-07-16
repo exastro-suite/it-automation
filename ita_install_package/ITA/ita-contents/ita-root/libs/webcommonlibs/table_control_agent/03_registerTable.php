@@ -20,7 +20,7 @@
     //
     //////////////////////////////////////////////////////////////////////
 
-    function registerTableMain($intBaseMode, $reqRegisterData=null, $strTCASRKey=null, $ordMode=0, &$aryVariant=array(), &$arySetting=array()){
+    function registerTableMain($intBaseMode, $reqRegisterData=null, $strTCASRKey=null, $ordMode=0, &$aryVariant=array(), &$arySetting=array(), $strNumberForRI=null){
         global $g;
         require_once ( "{$g['root_dir_path']}/libs/webcommonlibs/table_control_agent/99_functions2.php");
         
@@ -524,6 +524,24 @@
                     break;
                     
                     // 登録実行処理＆結果画面(mode=2)----
+                case 3 :
+                    // ----登録フォーム画面 複製(mode=3)
+                    // ----対象レコードをSELECT
+                    $arrayResult = selectRowForUpdate($objTable, $strNumberForRI, $ordMode, 0);
+                    $selectRowLength = $arrayResult[0];
+                    $editTgtRow = $arrayResult[1];
+                    $intErrorType = $arrayResult[2];
+                    // 対象レコードをSELECT----
+
+                    if($selectRowLength == 1){
+                        $strOutputStr = $objListFormatter->printWebUIEditFormDuplicate($arySetting,$objTable,$aryVariant,$strFormatterId,$strNumberForRI,$editTgtRow);
+                    }else{
+                        $objColumn = $arrayObjColumn[$objTable->getRIColumnID()];
+                        $error_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-171",array($objColumn->getColLabel(true),$strNumberForRI,$selectRowLength));
+                    }
+                    break;
+                    
+                    // 登録フォーム画面 複製(mode=3)----
                 default:
                     throw new Exception( '00002100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     break;

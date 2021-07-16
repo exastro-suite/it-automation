@@ -822,12 +822,13 @@ ETH_WOL_NET_DEVICE                %VARCHR%(256)              , -- ETH_WAKE_ON_LA
 PROTOCOL_ID                       %INT%                     ,
 LOGIN_USER                        %VARCHR%(30)              ,
 LOGIN_PW_HOLD_FLAG                %INT%                     ,
-LOGIN_PW                          %VARCHR%(60)              ,
-LOGIN_PW_ANSIBLE_VAULT            %VARCHR%(512)             , -- パスワード ansible-vault暗号化文字列　隠しカラム
+LOGIN_PW                          TEXT                      ,
+LOGIN_PW_ANSIBLE_VAULT            TEXT                      , -- パスワード ansible-vault暗号化文字列　隠しカラム
 LOGIN_AUTH_TYPE                   %INT%                     ,
 WINRM_PORT                        %INT%                     , -- WinRM接続プロトコル
 WINRM_SSL_CA_FILE                 %VARCHR%(256)             , -- WinRM接続 SSLサーバー証明書
 OS_TYPE_ID                        %INT%                     ,
+PIONEER_LANG_ID                   %INT%                     , -- loginuser LANG
 SSH_EXTRA_ARGS                    %VARCHR%(512)             , -- ssh追加パラメータ
 HOSTS_EXTRA_ARGS                  %VARCHR%(512)             , -- インベントリファイル(hosts)追加パラメータ
 CREDENTIAL_TYPE_ID                %INT%                     , -- Ansible-Tower認証情報　接続タイプ
@@ -876,12 +877,13 @@ ETH_WOL_NET_DEVICE                %VARCHR%(256)             , -- ETH_WAKE_ON_LAN
 PROTOCOL_ID                       %INT%                     ,
 LOGIN_USER                        %VARCHR%(30)              ,
 LOGIN_PW_HOLD_FLAG                %INT%                     ,
-LOGIN_PW                          %VARCHR%(60)              ,
-LOGIN_PW_ANSIBLE_VAULT            %VARCHR%(512)             , -- パスワード ansible-vault暗号化文字列　隠しカラム
+LOGIN_PW                          TEXT                      ,
+LOGIN_PW_ANSIBLE_VAULT            TEXT                      , -- パスワード ansible-vault暗号化文字列　隠しカラム
 LOGIN_AUTH_TYPE                   %INT%                     ,
 WINRM_PORT                        %INT%                     , -- WinRM接続プロトコル
 WINRM_SSL_CA_FILE                 %VARCHR%(256)             , -- WinRM接続 SSLサーバー証明書
 OS_TYPE_ID                        %INT%                     ,
+PIONEER_LANG_ID                   %INT%                     , -- loginuser LANG
 SSH_EXTRA_ARGS                    %VARCHR%(512)             , -- ssh追加パラメータ
 HOSTS_EXTRA_ARGS                  %VARCHR%(512)             , -- インベントリファイル(hosts)追加パラメータ
 CREDENTIAL_TYPE_ID                %INT%                     , -- Ansible-Tower認証情報　接続タイプ
@@ -1619,6 +1621,7 @@ DP_MODE                           %INT%                             , -- 処理�
 ABOLISHED_TYPE                    %INT%                             , -- 廃止情報
 SPECIFIED_TIMESTAMP               %DATETIME6%                       , -- 指定時刻
 FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
+EXECUTE_USER                      %INT%                             , -- 実行ユーザ
 DISP_SEQ                          %INT%                             , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
@@ -1641,6 +1644,7 @@ DP_MODE                           %INT%                             , -- 処理�
 ABOLISHED_TYPE                    %INT%                             , -- 廃止情報
 SPECIFIED_TIMESTAMP               %DATETIME6%                       , -- 指定時刻
 FILE_NAME                         %VARCHR%(64)                      , -- ファイル名
+EXECUTE_USER                      %INT%                             , -- 実行ユーザ
 DISP_SEQ                          %INT%                             , -- 表示順序
 ACCESS_AUTH                       TEXT                              ,
 NOTE                              %VARCHR%(4000)                    , -- 備考
@@ -2517,6 +2521,7 @@ CONDUCTOR_CALLER_NO               %INT%                      ,
 TIME_BOOK                         %DATETIME6%                ,
 TIME_START                        %DATETIME6%                ,
 TIME_END                          %DATETIME6%                ,
+EXEC_LOG                          TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2549,6 +2554,7 @@ CONDUCTOR_CALLER_NO               %INT%                      ,
 TIME_BOOK                         %DATETIME6%                ,
 TIME_START                        %DATETIME6%                ,
 TIME_END                          %DATETIME6%                ,
+EXEC_LOG                          TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -3303,6 +3309,8 @@ SELECT TAB_A.SYSTEM_ID                        SYSTEM_ID                     ,
        TAB_A.LOGIN_AUTH_TYPE                  LOGIN_AUTH_TYPE               ,
        TAB_A.WINRM_PORT                       WINRM_PORT                    ,
        TAB_A.OS_TYPE_ID                       OS_TYPE_ID                    ,
+       TAB_A.PIONEER_LANG_ID                  PIONEER_LANG_ID               ,
+       
        TAB_A.HOSTNAME                         SYSTEM_NAME                   ,
        TAB_A.COBBLER_PROFILE_ID               COBBLER_PROFILE_ID            ,
        TAB_A.INTERFACE_TYPE                   INTERFACE_TYPE                ,
@@ -3344,6 +3352,8 @@ SELECT TAB_A.JOURNAL_SEQ_NO                   JOURNAL_SEQ_NO                ,
        TAB_A.LOGIN_AUTH_TYPE                  LOGIN_AUTH_TYPE               ,
        TAB_A.WINRM_PORT                       WINRM_PORT                    ,
        TAB_A.OS_TYPE_ID                       OS_TYPE_ID                    ,
+       TAB_A.PIONEER_LANG_ID                  PIONEER_LANG_ID               ,
+
        TAB_A.HOSTNAME                         SYSTEM_NAME                   ,
        TAB_A.COBBLER_PROFILE_ID               COBBLER_PROFILE_ID            ,
        TAB_A.INTERFACE_TYPE                   INTERFACE_TYPE                ,
@@ -4270,6 +4280,72 @@ SELECT TAB_A.ROW_ID,
 FROM B_ER_DATA TAB_A
 LEFT JOIN D_ER_MENU_TABLE_LINK_LIST TAB_B ON (TAB_A.MENU_TABLE_LINK_ID = TAB_B.ROW_ID);
 
+-- -------------------------------------------------------
+-- --Excel一括
+-- -------------------------------------------------------
+CREATE TABLE B_BULK_EXCEL_TASK
+(
+TASK_ID                           %INT%                            , -- 識別シーケンス
+TASK_STATUS                       %INT%                            , -- タスクのステータス
+TASK_TYPE                         %INT%                            , -- タスクの種類
+FILE_NAME                         TEXT                             , -- ファイル名
+RESULT_FILE_NAME                  TEXT                             , -- 結果ファイル
+EXECUTE_USER                      %INT%                            , -- 実行ユーザ
+ABOLISHED_TYPE                    %INT%                            , -- 廃止情報
+DISP_SEQ                          %INT%                            , -- 表示順
+NOTE                              %VARCHR%(4000)                   , -- 備考
+ACCESS_AUTH                       TEXT                             ,
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+PRIMARY KEY(TASK_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_BULK_EXCEL_TASK_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+
+TASK_ID                           %INT%                            , -- 識別シーケンス
+TASK_STATUS                       %INT%                            , -- ステータス
+TASK_TYPE                         %INT%                            , -- 処理種別
+FILE_NAME                         TEXT                             , -- ファイル名
+RESULT_FILE_NAME                  TEXT                             , -- 結果ファイル
+EXECUTE_USER                      %INT%                            , -- 実行ユーザ
+ABOLISHED_TYPE                    %INT%                            , -- 廃止情報
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_BULK_EXCEL_ABOLISHED_TYPE
+(
+ROW_ID                            %INT%                             , -- 識別シーケンス
+ABOLISHED_TYPE                    %VARCHR%(100)                     , -- 廃止情報
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE B_BULK_EXCEL_NG_MENU_LIST
+(
+ROW_ID                            %INT%                             , -- 識別シーケンス
+MENU_ID                           %INT%                             , -- メニューID
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (ROW_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
 
 
 -- *****************************************************************************

@@ -190,6 +190,7 @@ $ary["ITAANSIBLEH-ERR-56212"]       = "機器一覧のログインパスワー�
 $ary["ITAANSIBLEH-ERR-56213"]       = "機器一覧のプロトコルが未入力なのでplaybookでITA独自変数は使用できません。(playbook:{} ITA独自変数:{} host:{})";
 $ary["ITAANSIBLEH-ERR-56214"]       = "Movement一覧でwinrm接続が選択されているMovementの場合、機器一覧の認証方式がパスワード認証(winrm)以外の機器を作業対象ホストで設定出来ません。(host:{})";
 $ary["ITAANSIBLEH-ERR-56215"]       = "Movement一覧でwinrm接続が選択されていないMovementの場合、機器一覧の認証方式がパスワード認証(winrm)の機器を作業対象ホストで設定出来ません。(host:{})";
+$ary["ITAANSIBLEH-ERR-56216"]       = "機器一覧のLANGが不正です。(host:{})";
 $ary["ITAANSIBLEH-ERR-56230"]       = "機器一覧の認証方式がパスワード認証の場合、ログインパスワードは必須項目です。(host:{})";
 $ary["ITAANSIBLEH-ERR-56231"]       = "機器一覧の認証方式が鍵認証(パスフレーズなし)の場合、秘密鍵ファイル(id_rsa)は必須項目です。(host:{})";
 $ary["ITAANSIBLEH-ERR-56232"]       = "機器一覧の認証方式が鍵認証(パスフレーズあり)の場合、秘密鍵ファイル(id_rsa)は必須項目です。(host:{})";

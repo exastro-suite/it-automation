@@ -230,6 +230,25 @@ callback.prototype = {
                 var action = 'update';
                 selectValue(action, $('#' + action + '_table2').val());
                 selectTargetAction(action); 
+
+                var menuCreateFlagArea = $('#Mix1_1').find('input[name="COL_IDSOP_17"]');
+                var menuCreateFlag = menuCreateFlagArea.val();
+                if(menuCreateFlag == 1){
+                    //「メニュー作成状態」をIDから文字列表記に変換(未作成)
+                    var creFlagEle = getSomeMessage("ITACREPAR_1277")+'<input type="hidden" id="update_table9" name="COL_IDSOP_17" value="'+menuCreateFlag+'">';
+                    menuCreateFlagArea.parent('div').html(creFlagEle);
+                }else if(menuCreateFlag == 2){
+                    //「メニュー作成状態」をIDから文字列表記に変換(作成済み)
+                    var creFlagEle = getSomeMessage("ITACREPAR_1278")+'<input type="hidden" id="update_table9" name="COL_IDSOP_17" value="'+menuCreateFlag+'">';
+                    menuCreateFlagArea.parent('div').html(creFlagEle);
+
+                    //「メニュー名」の入力欄を非アクティブ化
+                    var menuNameArea = $('#Mix1_1').find('input[name="COL_IDSOP_8"]');
+                    var menuName = menuNameArea.val();
+                    var menuNameEle = menuName+'<input type="hidden" id="update_table1" name="COL_IDSOP_8" value="'+menuName+'">';
+                    menuNameArea.parent('div').html(menuNameEle);
+                }
+
             }());
         }
     },
@@ -372,6 +391,58 @@ callback.prototype = {
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
+        showForDeveloper(result);
+    },
+    Mix1_1_duplicate : function( result ){
+        var strMixOuterFrameName = 'Mix2_Nakami';
+        var strMixInnerFramePrefix = 'Mix2_';
+  
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+  
+        var resultContentTag = ary_result[2];
+  
+        var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
+  
+        if( ary_result[0] == "000" ){
+  
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+  
+            switch( ary_result[1] ){
+                case "100":
+                    window.alert(resultContentTag);
+                    objRegiterArea.innerHTML = "";
+                    Filter1Tbl_search_async();
+                    break;
+                case "201":
+                    // エラーなく登録完了
+                default:                
+                    objRegiterArea.innerHTML="";
+                    $(objRegiterArea).html(resultContentTag);
+  
+                    objAlertArea.style.display = "none";
+                    
+                    adjustTableAuto (strMixInnerFramePrefix+'1',
+                                    "sDefault",
+                                    "fakeContainer_Register2",
+                                    webStdTableHeight,
+                                    webStdTableWidth );
+                    linkDateInputHelper(strMixOuterFrameName);
+            }
+        }else if( ary_result[0] == "002" ){
+            window.alert(getSomeMessage("ITAWDCC90102"));
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+            setInputButtonDisable(strMixOuterFrameName,'disableAfterPush',false);
+        }else if( ary_result[0] == "003" ){
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+            objRegiterArea.innerHTML="";
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+  
         showForDeveloper(result);
     }
     //---- ここからカスタマイズした場合の[callback]メソッド配置域

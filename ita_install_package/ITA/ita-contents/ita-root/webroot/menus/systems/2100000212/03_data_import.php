@@ -37,11 +37,11 @@ $(window).on('load', function() {
 });
 </script>
 
-<h2><?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-900007'); ?></h2>
+<h2 class="menu_name"><?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-900007'); ?></h2>
 <?php if ($resultFlg === true): ?>
 <form method="post" action="/default/menu/01_browse.php?no=2100000213&task_no=<?php echo $task_no;?>">
     <div style="margin:10px 0 0 10px;">
-        <p><?php echo $resultMsg; ?></p>
+        <p class="text"><?php echo $resultMsg; ?></p>
         <input type="submit" value="<?php echo $g['objMTS']->getSomeMessage('ITABASEH-MNU-900008'); ?>">
         <input type="hidden" name="menu_on" value="<?php echo $menuOn;?>">
     </div>
@@ -49,7 +49,7 @@ $(window).on('load', function() {
 <?php else: ?>
 <form method="post" action="/default/menu/01_browse.php?no=<?php echo $g['page_dir']; ?>">
     <div style="margin:10px 0 0 10px;">
-        <p><?php echo $resultMsg; ?></p>
+        <p class="text"><?php echo $resultMsg; ?></p>
         <input type="submit" value="<?php echo $g['objMTS']->getSomeMessage('ITAWDCH-MNU-1040060'); ?>">
     </div>
 </form>

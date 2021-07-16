@@ -208,7 +208,22 @@ EOD;
                 <div id="art-board">      
                 </div><!-- / .art-board -->
               </div><!-- / .canvas -->
-            </div><!-- / .canvas-wrap -->
+            </div><!-- / .canvas-visible-area -->
+            
+            <div id="editor-display">
+              <div id="editor-explanation">
+                <dl class="explanation-list">
+                  <dt class="explanation-term"><span class="mouse-icon mouse-left"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309057")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309058")}</dd>
+                  <dt class="explanation-term"><span class="mouse-icon mouse-left"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309059")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309060")}</dd>
+                  <dt class="explanation-term"><span class="mouse-icon mouse-wheel"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309053")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309054")}</dd>
+                  <dt class="explanation-term"><span class="mouse-icon mouse-right"></span>{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309055")}</dt>
+                  <dd class="explanation-description">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309056")}</dd>
+                </dl>
+              </div>
+            </div><!-- / #editor-display -->
             
           </div>
         </div><!-- /#editor-edit -->
@@ -262,7 +277,7 @@ EOD;
                   <li class="editor-tab-menu-item" data-tab="function">Function</li>
                   <li class="editor-tab-menu-item" data-tab="conditional-branch">Conditional branch</li>
                   <li class="editor-tab-menu-item" data-tab="parallel-branch">Parallel branch</li>
-                  <li class="editor-tab-menu-item" data-tab="merge">Merge</li>
+                  <li class="editor-tab-menu-item" data-tab="merge">Parallel merge</li>
                   <li class="editor-tab-menu-item" data-tab="call">Conductor call</li>
                   <li class="editor-tab-menu-item" data-tab="call_s">Symphony call</li>
                   <li class="editor-tab-menu-item" data-tab="multiple">Node</li>

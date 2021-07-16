@@ -126,10 +126,10 @@ class BaseTable_CPM {
     /**
      * SELECT
      */
-    public function selectTable($sql){
+    public function selectTable($sql, $arrayUtnBind=null){
 
         // SQL実行
-        $result = $this->execQuery($sql, NULL, $objQuery);
+        $result = $this->execQuery($sql, $arrayUtnBind, $objQuery);
         if(true !== $result){
             return $result;
         }
@@ -476,6 +476,7 @@ class CreateMenuInfoTable extends BaseTable_CPM {
                                     'MENUGROUP_FOR_INPUT',
                                     'MENUGROUP_FOR_SUBST',
                                     'MENUGROUP_FOR_VIEW',
+                                    'MENU_CREATE_STATUS',
                                     'DISP_SEQ',
                                     'DESCRIPTION',
                                     'ACCESS_AUTH',
@@ -1086,6 +1087,7 @@ class ReferenceItemTable extends BaseTable_CPM {
         $this->jnlSeqName   = $this->tableName . '_JSQ';
         $this->columnNames  = array('ITEM_ID',
                                     'LINK_ID',
+                                    'MENU_ID',
                                     'DISP_SEQ',
                                     'TABLE_NAME',
                                     'PRI_NAME',
@@ -1095,7 +1097,33 @@ class ReferenceItemTable extends BaseTable_CPM {
                                     'DESCRIPTION',
                                     'INPUT_METHOD_ID',
                                     'SENSITIVE_FLAG',
-                                    'MASTER_COL_FLAG',
+                                    'ORIGINAL_MENU_FLAG',
+                                    'ACCESS_AUTH',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * 一意制約(複数項目)管理テーブルクラス
+ */
+class UniqueConstraintTable extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'F_UNIQUE_CONSTRAINT';
+        $this->seqName      = $this->tableName . '_RIC';
+        $this->jnlSeqName   = $this->tableName . '_JSQ';
+        $this->columnNames  = array('UNIQUE_CONSTRAINT_ID',
+                                    'CREATE_MENU_ID',
+                                    'UNIQUE_CONSTRAINT_ITEM',
                                     'ACCESS_AUTH',
                                     'NOTE',
                                     'DISUSE_FLAG',

@@ -1480,7 +1480,7 @@ function InsertAccessPermission() {
 // 参照項目一覧取得・選択
 //////////////////////////////////////////////////////
 // モーダル Body HTML
-function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancelCallBack, closeCallBack, selectMasterId, valueType ) {
+function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancelCallBack, closeCallBack, valueType ) {
       if ( valueType === undefined ) valueType = 'id';
       const $modalBody = $('.editor-modal-body');
       const $modalFooterMenu = $('.editor-modal-footer-menu');
@@ -1489,50 +1489,46 @@ function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancel
 
       // 入力値を取得する
       const checkList = ( initData !== null || initData !== undefined )? initData.split(','): [''];
-      const itemLength = itemList.length;
 
-      //itemListから表示させたいアイテムだけを抽出
-      let extractItemList = [];
-      for ( let i = 0; i < itemLength; i++ ) {
-        if(itemList[i]['LINK_ID'] == selectMasterId && itemList[i]['MASTER_COL_FLAG'] != 1){
-            extractItemList.push(itemList[i]);
-        }
-      }
-      const extractItemLength = extractItemList.length;
-
-      if(extractItemLength != 0){
-          itemSelectHTML = '<div class="modal-table-wrap">'
-                            + '<form id="modal-reference-item-select">'
-                            + '<table class="modal-table modal-select-table">'
-                              + '<thead>'
-                                + '<th class="select">Select</th><th class="id">ID</th><th class="name">Name</th>'
-                              + '</thead>'
-                              + '<tbody>';
+      if(itemList != null){
+          const itemLength = itemList.length;
+          if(itemLength != 0){
+              itemSelectHTML = '<div class="modal-table-wrap">'
+                                + '<form id="modal-reference-item-select">'
+                                + '<table class="modal-table modal-select-table">'
+                                  + '<thead>'
+                                    + '<th class="select">Select</th><th class="id">ID</th><th class="name">Name</th>'
+                                  + '</thead>'
+                                  + '<tbody>';
 
 
-          for ( let i = 0; i < extractItemLength; i++ ) {
-            const itemName = extractItemList[i]['ITEM_NAME'],
-                  itemID = extractItemList[i]['ITEM_ID'],
-                  masterID = extractItemList[i]['MASTER_COLUMN_ID'],
-                  checkValue = ( valueType === 'name')? itemName: itemID,
-                  checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
-                  value = ( valueType === 'name')? itemName: itemID;
-            itemSelectHTML += '<tr>'
-            + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
-            + '<th>' + itemID + '</th><td>' + itemName + '</td></tr>';
+              for ( let i = 0; i < itemLength; i++ ) {
+                const itemName = itemList[i]['ITEM_NAME'],
+                      itemID = itemList[i]['ITEM_ID'],
+                      checkValue = ( valueType === 'name')? itemName: itemID,
+                      checkedFlag = ( checkList.indexOf( checkValue ) !== -1 )? ' checked': '',
+                      value = ( valueType === 'name')? itemName: itemID;
+                itemSelectHTML += '<tr>'
+                + '<th><input value="' + value + '" class="modal-checkbox" type="checkbox"' + checkedFlag + '></th>'
+                + '<th>' + itemID + '</th><td>' + itemName + '</td></tr>';
+              }
+
+              itemSelectHTML += ''      
+                  + '</tbody>'
+                + '</table>'
+                + '</form>'
+              + '</div>';
+          }else{
+              //ボタンを「閉じる」に変更
+              $modalFooterMenu.children().remove();
+              $modalFooterMenu.append('<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">' + getSomeMessage("ITAWDCC92003") + '</li>');
+              itemSelectHTML = '<p class="modal-one-message">'+getSomeMessage("ITACREPAR_1251")+'</p>';
           }
-
-          itemSelectHTML += ''      
-              + '</tbody>'
-            + '</table>'
-            + '</form>'
-          + '</div>';
-
       }else{
           //ボタンを「閉じる」に変更
           $modalFooterMenu.children().remove();
           $modalFooterMenu.append('<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">' + getSomeMessage("ITAWDCC92003") + '</li>');
-          itemSelectHTML = '<p class="modal-one-message">'+getSomeMessage("ITACREPAR_1251")+'</p>';
+          itemSelectHTML = '<p class="modal-one-message">'+getSomeMessage("ITACREPAR_1279")+'</p>';
       }
 
       $modalBody.html( itemSelectHTML );
@@ -1561,7 +1557,7 @@ function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancel
               checkboxArray.push( $( this ).val() );
             });
             const newItemList = checkboxArray.join(',');
-            okCallback( newItemList, extractItemList );
+            okCallback( newItemList, itemList );
             break;
           case 'cancel':
             cancelCallBack();
@@ -1573,3 +1569,171 @@ function setRerefenceItemSelectModalBody( itemList, initData, okCallback, cancel
       });
 }
 
+//////////////////////////////////////////////////////
+// 一意制約
+//////////////////////////////////////////////////////
+// モーダル Body HTML
+function setUniqueConstraintModalBody(columnItemData, initmodalUniqueConstraintList, okCallback, cancelCallBack, closeCallBack) {
+    const $modalBody = $('.editor-modal-body');
+    const $modalFooterMenu = $('.editor-modal-footer-menu');
+    const initUniqueConstraintArray = (initmodalUniqueConstraintList == '') ? new Array : initmodalUniqueConstraintList.split(',');
+    const initUniqueConstraintLength = initUniqueConstraintArray.length;
+    const columnItemDataLength = columnItemData.length;
+    let uniqueConstraintSelectHTML;
+
+    if(columnItemData.length == 0){
+        //項目が0個の場合、メッセージを表示
+        noColumnHTML = '<div class="column-none-message">' + getSomeMessage("ITACREPAR_1281") + '</div>';
+        $modalBody.html( noColumnHTML );
+
+        //ボタンを「閉じる」に変更
+        $modalFooterMenu.children().remove();
+        $modalFooterMenu.append('<li class="editor-modal-footer-menu-item"><button class="editor-modal-footer-menu-button negative" data-button-type="close">' + getSomeMessage("ITAWDCC92003") + '</li>');
+    }else{
+        //項目の数だけチェックボックスを作成する「パターン」のテンプレート
+        uniqueConstraintLineTemplate = '<div class="unique-constraint-pattern-tmp unique-constraint-box" data-unique-ptn="">'
+                                         +'<span>';
+
+        for (let i = 0; i < columnItemDataLength; i++){
+            const columnID = columnItemData[i]['columnId'],
+                  itemName = columnItemData[i]['itemName'],
+                  itemID = columnItemData[i]['itemId'];
+            uniqueConstraintLineTemplate += '<div class="unique-edit-check-wrap">'
+                                            + '<input type="checkbox" id="" class="unique-constraint-checkbox unique-edit-check" data-item-id="'+ itemID +'" data-column-id="'+ columnID +'">'
+                                            + '<label class="unique-constraint-label unique-edit-label" for="">' + itemName + '</label>'
+                                          + '</div>';
+
+        }
+
+        uniqueConstraintLineTemplate += '</span>'
+                                    +'<div class="line-delete-button-wrap"><button type="button" class="line-delete-button">' + getSomeMessage("ITACREPAR_1282") + '</button></div>'
+                                +'</div>';
+
+        uniqueConstraintSelectHTML = ''
+                      +'<div id="modal-unique-constraint-area" class="">'
+                      + uniqueConstraintLineTemplate
+                        + '<ul class="add-unique-pattern">'
+                          + '<li class=""><button class="add-unique-pattern-button positive" data-button-type="add">' + getSomeMessage("ITACREPAR_1283") + '</li>'
+                        + '</ul>'
+                        + '<form id="modal-unique-constraint-select">'
+                        + '<div class="unique-none-message" hidden>' + getSomeMessage("ITACREPAR_1284") + '</div>'
+                        + '<br>';
+
+        uniqueConstraintSelectHTML += ''
+                        + '</form>'
+                      + '</div>';
+
+        $modalBody.html( uniqueConstraintSelectHTML );
+
+
+        //初期表示およびパターン追加処理
+        const $uniqueConstraintArea = $('#modal-unique-constraint-area');
+        const $addPatternButton = $uniqueConstraintArea.find('.add-unique-pattern-button');
+        const $patternTemplate = $uniqueConstraintArea.find('.unique-constraint-pattern-tmp');
+        const $addArea = $('#modal-unique-constraint-select');
+        const $noneMsg = $uniqueConstraintArea.find('.unique-none-message');
+        let patternCount = 0;
+
+        //パターン追加関数
+        function addPattern($newPattern){
+            $newPattern.show(); //非表示を解除
+            $newPattern.removeClass('unique-constraint-pattern-tmp').addClass('unique-constraint-pattern'); //Class入れ替え
+            patternCount++;
+            $newPattern.attr('data-unique-ptn', 'p'+patternCount); //連番を設定
+            $newPattern.find('.unique-constraint-checkbox').each(function(){
+                let itemId = $(this).attr('data-column-id');
+                $(this).attr('id', 'p'+patternCount+itemId); //idを設定
+                $(this).next('label').attr('for', 'p'+patternCount+itemId); //forを設定
+            });
+            $addArea.append($newPattern);
+
+            //「削除」ボタンにイベント追加
+            $newPattern.find('.line-delete-button').on('click', function(){
+                //対象のパターンを削除
+                $(this).parents('.unique-constraint-box').remove();
+
+                //パターンが0の場合はメッセージを表示
+                $pattern = $addArea.find('.unique-constraint-box');
+                if($pattern.length == 0){
+                    $noneMsg.show();
+                }
+            });
+        }
+
+        
+        if(initUniqueConstraintLength == 0){
+            //一意制約の設定値がない場合、メッセージを表示
+            $noneMsg.show();
+        }else{
+            ///一意制約の設定値がある場合、パターンの数だけループ処理
+            for (let i = 0; i < initUniqueConstraintLength; i++){
+                //パターンを生成
+                let $newPattern = $patternTemplate.clone(true);
+                addPattern($newPattern);
+
+                //初期チェック状態を設定
+                const patternStr = initUniqueConstraintArray[i];
+                const patternArray = patternStr.split('-'); //「-」で連結したIDを配列化
+                const patternLength = patternArray.length;
+                for(let j = 0; j < patternLength; j++){
+                    //入力済みの設定値を反映
+                    const patternId = patternArray[j];
+                    $target = $newPattern.find('[data-column-id="'+patternId+'"]'); //対象をdata-column-idで検索
+                    if($target.length != 0){
+                        $target.prop('checked', true);
+                    }
+                }
+            }
+        }
+
+        //「パターンを追加」ボタン
+        $addPatternButton.on('click', function(){
+            //パターンが無い場合のメッセージを非表示
+            if(!$noneMsg.is('hidden')){
+                $noneMsg.hide();
+            }
+
+            //新しいパターンを生成
+            let $newPattern = $patternTemplate.clone(true);
+            addPattern($newPattern);
+        });
+    }
+
+    // 決定・取り消しボタン
+    const $modalButton = $('.editor-modal-footer-menu-button');
+    $modalButton.prop('disabled', false ).on('click', function() {
+        const $button = $( this ),
+              btnType = $button.attr('data-button-type');
+        switch( btnType ) {
+          case 'ok':
+            //設定値を格納する配列を定義
+            let currentUniqueConstraintArray = new Array;
+            // 選択しているチェックボックスを取得
+            $modalBody.find('.unique-constraint-box').each(function(){
+                $targetPattern = $(this);
+                if($targetPattern.hasClass('unique-constraint-pattern-tmp') == true){
+                    return true;
+                }
+                let currentPatternArray = new Array;
+                $targetPattern.find('.unique-constraint-checkbox:checked').each(function(){
+                    let columnId = $(this).attr('data-column-id');
+                    let itemName = $(this).next('label').html();
+                    let idName = {[columnId] : itemName};
+                    currentPatternArray.push(idName);
+                });
+
+                currentUniqueConstraintArray.push(currentPatternArray);
+            });
+
+            okCallback(currentUniqueConstraintArray);
+            break;
+          case 'cancel':
+            cancelCallBack();
+            break;
+          case 'close':
+            closeCallBack();
+            break;
+        }
+     });
+
+}

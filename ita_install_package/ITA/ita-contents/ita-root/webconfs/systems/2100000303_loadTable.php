@@ -164,10 +164,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             else if($strModeId == "DTUP_singleRecDelete"){
                 list($strLoginPw   ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayVariant,array('edit_target_row','LOGIN_PW')          ,"");
             }
-            
+
             if( $strModeId == "DTUP_singleRecDelete" || $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
                 if($value == 1){
-                    if(strlen($strLoginPw) === 0){
+                    if(strlen($strLoginPw) === 0 || (isset($arrayRegData["del_password_flag_COL_IDSOP_17"]) && $arrayRegData["del_password_flag_COL_IDSOP_17"] == "on")){
                         $retBool = false;
                         // [102071] = "ログインパスワード管理を●とする場合、ログインパス ワードの入力は必須です。"
                         $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102071");
@@ -298,7 +298,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             return $retArray;
         };
 
-        $objVldt = new SingleTextValidator(0,30,false);
+        $objVldt = new SingleTextValidator(0,128,false);
         $c = new PasswordColumn('LOGIN_PW',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102070"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102080"));//エクセル・ヘッダでの説明
         $c->setHiddenMainTableColumn(true);
@@ -366,10 +366,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                         list($strLoginPw   ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW')          ,"");
                         list($intPwHoldFlag,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayRegData,array('LOGIN_PW_HOLD_FLAG'),"");
                     }
-// enomoto                    
+
                     if( $strModeId == "DTUP_singleRecDelete" || $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
                         $boolPasswordInput = false;
                         $strErrorMsgPreBody = "";
+                       
                         //if( strlen($value) == 0 || $value == 1 ){
                         if((strlen($value) == 0) || ($value == 1) || ($value == 3) || ($value == 4)){
                             //----鍵認証系の場合
@@ -386,6 +387,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                             }
                             //入力値がない場合または鍵認証の場合----
                         }else if(( $value == 2 ) || ($value == 5)) {
+
                             //----パスワード認証の場合
                             if( $intPwHoldFlag == 1 ){
                                 //----パスワード管理が●とされている場合
@@ -492,6 +494,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
                 $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102090"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-103010"));//エクセル・ヘッダでの説明
+                $cg->addColumn($c);
+
+                $c = new IDColumn('PIONEER_LANG_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102100"),'B_ANS_PNS_LANG_MASTER','ID','NAME','',array('SELECT_ADD_FOR_ORDER'=>array('ID'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
+                $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102101"));//エクセル・ヘッダでの説明
                 $cg->addColumn($c);
 
         $cg2->addColumn($cg);
@@ -753,8 +759,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             // FileUploadColumnはファイルの更新がないと$arrayRegDataの設定は空になっているので
             // ダウンロード済みのファイルが削除されていると$arrayRegData['del_flag_COL_IDSOP_xx']がonになる
             // 更新されていない場合は設定済みのファイル名($arrayVariant['edit_target_row'])を取得
-            $strsshKeyFileDel  = array_key_exists('del_flag_COL_IDSOP_17',$arrayRegData)?
-                                    $arrayRegData['del_flag_COL_IDSOP_17']:null;
+            $strsshKeyFileDel  = array_key_exists('del_flag_COL_IDSOP_18',$arrayRegData)?
+                                    $arrayRegData['del_flag_COL_IDSOP_18']:null;
             if($strsshKeyFileDel == 'on') {
                 $strsshKeyFile = "";
             } else {

@@ -60,6 +60,7 @@
 
         $lcRequiredDisuseFlagColumnId = $objTable->getRequiredDisuseColumnID(); //"DISUSE_FLAG"
         $lcRequiredUpdateButtonColumnId = $objTable->getRequiredUpdateButtonColumnID(); //"UPDATE"
+        $lcDuplicateButtonColumnId = $objTable->getDupButtonColumnID(); //"DUPLICATE"
 
         //----出力されるタグの属性値
 

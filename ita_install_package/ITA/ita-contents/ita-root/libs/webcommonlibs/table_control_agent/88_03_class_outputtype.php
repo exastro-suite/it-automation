@@ -296,6 +296,18 @@ class OutputType {
 	}
 	//htmlタグ取得用(2014-12-01名前にTagを追加)----
 
+	function getBodyTagDuplicate($rowData, $aryVariant, $option){
+		//----$rowData「NULLまたは連想配列を想定」
+		global $g;
+		$intControlDebugLevel01=200;
+		$strFxName = __CLASS__."::".__FUNCTION__;
+		$strInitedColId = $this->objColumn->getID();
+		$aryVariant['callerClass'] = get_class($this);
+		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+		return $this->body->getDataDuplicate($rowData, $aryVariant, $option);
+	}
+
 	//NEW[29]
 	public function setDescription($strDescription){
 		$this->strDescription = $strDescription;
@@ -407,6 +419,34 @@ class OutputType {
 						
 						//----最終更新日時
 						while ( $row = $objQuery->resultFetch() ){
+							// ----dispRestrictValue対応
+							$aryDispRestrictValue = $objTable->getDispRestrictValue();
+							if($aryDispRestrictValue != null){
+								$matchFlg = false;
+								foreach($aryDispRestrictValue as $columnName => $aryValue){
+									if(array_key_exists($columnName, $row)){
+										foreach($aryValue as $value){
+											//対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+											if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+												if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+													$matchFlg = true;
+												}
+											}else{
+												if($row[$columnName] == $value){
+													$matchFlg = true;
+												}
+											}
+										}
+
+										//一致する値が無い場合は、処理をスキップ
+										if($matchFlg == false){
+											continue 2;
+										}
+									}
+								}
+							}
+							// dispRestrictValue対応----
+
 							// ---- RBAC対応
 			                                // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
 							list($ret,$permission) = chkTargetRecodeMultiPermission($objTable->getAccessAuth(),$chkobj,$row);
@@ -420,7 +460,6 @@ class OutputType {
 							if($permission === false) {
 								// アクセス権がないので処理対象から外す
 								continue;
-contionue;
 							}
 			                                // 対象レコードのACCESS_AUTHカラムでアクセス権を判定 ----
 							//  RBAC対応 ----
@@ -441,6 +480,9 @@ contionue;
 								if("IDColumn" === get_class($objColumn) && $objColumn->getDateFormat() !== null){
 									$valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
 								}
+								if("LinkIDColumn" === get_class($objColumn) && $objColumn->getDateFormat() !== null){
+									$valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
+								}
 								//date型の型変換----
 
 								$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody);
@@ -458,6 +500,34 @@ contionue;
 						//----その他一般[IDcolumnを想定しない。TextColumnが基本的な処理対象]
 						//
 						while ( $row = $objQuery->resultFetch() ){
+							// ----dispRestrictValue対応
+							$aryDispRestrictValue = $objTable->getDispRestrictValue();
+							if($aryDispRestrictValue != null){
+								$matchFlg = false;
+								foreach($aryDispRestrictValue as $columnName => $aryValue){
+									if(array_key_exists($columnName, $row)){
+										foreach($aryValue as $value){
+											//対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+											if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+												if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+													$matchFlg = true;
+												}
+											}else{
+												if($row[$columnName] == $value){
+													$matchFlg = true;
+												}
+											}
+										}
+
+										//一致する値が無い場合は、処理をスキップ
+										if($matchFlg == false){
+											continue 2;
+										}
+									}
+								}
+							}
+							// dispRestrictValue対応----
+
 							// ---- RBAC対応
 			                                // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
 							list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
@@ -729,6 +799,9 @@ class TraceOutputType extends OutputType {
             if("IDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
                 $strSearchKeyValue = date($this->objColumn->getDateFormat(), strtotime($strSearchKeyValue));
             }
+            if("LinkIDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
+                $strSearchKeyValue = date($this->objColumn->getDateFormat(), strtotime($strSearchKeyValue));
+            }
             //date型の型変換----
 
 			$rowData[$strInitedColId] = $strSearchKeyValue;
@@ -878,6 +951,12 @@ class IDOutputType extends OutputType {
                             }
                             $utnMasterTable = $arrayTmp;
                         }
+                        if("LinkIDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
+                            foreach($utnMasterTable as $key => $value){
+                                $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
+                            }
+                            $utnMasterTable = $arrayTmp;
+                        }
                         //date型の型変換----
 
 						$rowData[$strInitedColId] = $utnMasterTable[$mainIdColVal];
@@ -935,6 +1014,12 @@ class IDOutputType extends OutputType {
                         //----date型の型変換
                         $arrayTmp = array();
                         if("IDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
+                            foreach($jnlMasterTable as $key => $value){
+                                $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
+                            }
+                            $jnlMasterTable = $arrayTmp;
+                        }
+                        if("LinkIDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
                             foreach($jnlMasterTable as $key => $value){
                                 $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
                             }

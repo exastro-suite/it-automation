@@ -279,7 +279,7 @@ function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target
         }
 
         for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 1; $i++){
-            if($inputTable->columnNames[$i] != $inputTable->columnNames[$i]){
+            if($inputTable->columnNames[$i] != $outputTable->columnNames[$i]){
                 $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5006', array($inputTable->tableName, $outputTable->tableName));
                 outputLog($msg);
                 throw new Exception($msg);
@@ -346,7 +346,7 @@ function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target
             // 優先順位を入力データと紐付ける
             $matchFlg = false;
             foreach($hostGroupListArray as $hostGroupList) {
-                if($inputData['KY_KEY'] === $hostGroupList['ROW_ID'] + 10000) {
+                if($inputData['KY_KEY'] === $hostGroupList['ROW_ID'] + 10000000) {
                     $inputData['STRENGTH'] = $hostGroupList['STRENGTH'];
                     $matchFlg = true;
                 }
@@ -538,7 +538,7 @@ function splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy,
         }
 
         for($i = $idxs['FREE_START']; $i < $idxs['FREE_END'] + 1; $i++){
-            if($inputTable->columnNames[$i] != $inputTable->columnNames[$i]){
+            if($inputTable->columnNames[$i] != $outputTable->columnNames[$i]){
                 $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5006', array($inputTable->tableName, $outputTable->tableName));
                 outputLog($msg);
                 throw new Exception($msg);
@@ -606,7 +606,7 @@ function splitHostGrpVertical($inputTable, $outputTable, $treeArray, $hierarchy,
             // 優先順位を入力データと紐付ける
             $matchFlg = false;
             foreach($hostGroupListArray as $hostGroupList) {
-                if($inputData['KY_KEY'] === $hostGroupList['ROW_ID'] + 10000) {
+                if($inputData['KY_KEY'] === $hostGroupList['ROW_ID'] + 10000000) {
                     $inputData['STRENGTH'] = $hostGroupList['STRENGTH'];
                     $matchFlg = true;
                 }
@@ -771,7 +771,7 @@ function makeHostData($idxs, $outputDataArray, &$updateArray, $sameIdArray, $tre
         foreach($aloneDataArray as $aloneData){
 
             // ホストグループの場合は無視する
-            if($aloneData['KY_KEY'] > 10000){
+            if($aloneData['KY_KEY'] > 10000000){
                 continue;
             }
 

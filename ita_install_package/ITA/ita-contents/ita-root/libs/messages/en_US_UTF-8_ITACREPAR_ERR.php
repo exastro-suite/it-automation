@@ -178,6 +178,13 @@ $ary["ITACREPAR-ERR-1169"]          = "If \"Menu group: Menu:Item\" is not selec
 $ary["ITACREPAR-ERR-1170"]          = "Only comma-separated IDs can be entered in the Reference item\" field.";
 $ary["ITACREPAR-ERR-1171"]          = "Failed to search \"Reference item information\" table. SQL error = [{}].";
 $ary["ITACREPAR-ERR-1172"]          = "Contains a reference item ID that cannot be selected.。";
+$ary["ITACREPAR-ERR-1173"]          = "If you have already created a menu, you cannot change the \"Menu name\".";
+$ary["ITACREPAR-ERR-1174"]          = "Item name cannot contain \"/\".";
+$ary["ITACREPAR-ERR-1175"]          = "The target \"Pulldown selection\" could not be identified.";
+$ary["ITACREPAR-ERR-1176"]          = "Menu is not selected.";
+$ary["ITACREPAR-ERR-1177"]          = "Only comma-separated IDs can be entered in the \"Unique Constraint(Multiple Items)\" field.";
+$ary["ITACREPAR-ERR-1178"]          = "\"Unique Constraint(Multiple Items)\" requires multiple items to be set in one pattern.";
+$ary["ITACREPAR-ERR-1179"]          = "The specified ID is not registered in the target menu item.";
 $ary["ITACREPAR-ERR-5001"]          = "File does not exist. File=[{}].";
 $ary["ITACREPAR-ERR-5002"]          = "Failed to read the file. File=[{}].";
 $ary["ITACREPAR-ERR-5003"]          = "Failed to execute SQL. SQL error = [{}].";
@@ -201,4 +208,6 @@ $ary["ITACREPAR-ERR-5020"]          = "Failed to create directory. directory = [
 $ary["ITACREPAR-ERR-5021"]          = "Failed to change permission. target = [{}], permission = [{}].";
 $ary["ITACREPAR-ERR-5022"]          = "Failed to copy file. src = [{}], destination = [{}].";
 $ary["ITACREPAR-ERR-5023"]          = "Failed to create the table update SQL for menu editing.";
+$ary["ITACREPAR-ERR-5024"]          = "Failed to update the menu creation status.";
+$ary["ITACREPAR-ERR-5025"]          = "\"Unique constraint(Multiple items)\" contains an ID that cannot be specified.";
 ?>

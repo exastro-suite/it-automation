@@ -558,7 +558,8 @@ EOD;
         $retArray = array();
         $dlcHtmlBody = "";
 
-        $strLimitRowWarningMsgBody="";
+        $strLimitRowWarningMsgBodyLatest="";
+        $strLimitRowWarningMsgBodyHistory="";
 
         try{
             $retArray = checkCommonSettingVariants($strFxName, $objTable, $aryVariant, $arySetting, "QMFileSendAreaFormatter", $strFormatterId);
@@ -614,7 +615,8 @@ EOD;
                 unset($tmpAryRet);
                 throw new Exception( '00001000-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
-            $rowLength = $tmpAryRet[0];
+            $latestRowLength = $tmpAryRet[0];
+            $historyRowLength = countHistoryRowLength($objTable, $aryVariant, $arySetting, $strFormatterId)[0];
             unset($tmpAryRet);
 
             $dlcHtmlBody =
@@ -629,6 +631,8 @@ EOD;
                 $flag_ExcelHidden = $objTable->getGeneObject("linkExcelHidden",$refRetKeyExists);
             }
             $flag_CSVShow = $objListFormatter->getGeneValue("linkCSVFormShow",$refRetKeyExists);
+            $flag_LatestCSVShow = $flag_CSVShow;
+            $flag_HistoryCSVShow = $flag_CSVShow;
             if( $flag_CSVShow===null && $refRetKeyExists===false ){
                 $flag_CSVShow = $objTable->getGeneObject("linkCSVFormShow",$refRetKeyExists);
             }
@@ -650,19 +654,37 @@ EOD;
 
             if($flag_ExcelHidden !== true){
                 //----無条件で隠す、という設定ではない
-                $btnXlsDlFlag = "";
+                $btnLatestXlsDlFlag = "";
+                $btnHistoryXlsDlFlag = "";
                 $intXlsLimit = isset($g['menu_xls_limit'])?$g['menu_xls_limit']:null;
 
-                if( $intXlsLimit !== null && $intXlsLimit < $rowLength ){
+                if( $intXlsLimit !== null && ( $intXlsLimit < $latestRowLength || $intXlsLimit < $historyRowLength ) ){
                     //----エクセル出力の最大行を超えていた場合
-                    $btnXlsDlFlag = "disabled=true ";
-                    if( 0 < $intXlsLimit ){
-                        $strLimitRowWarningMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-321",array($rowLength, $intXlsLimit));
+                    if ($intXlsLimit < $latestRowLength) {
+                        // 全件ダウンロード
+                        $btnLatestXlsDlFlag = "disabled=true ";
+                        if( $flag_LatestCSVShow!==false ){
+                            //----無条件でCSVを隠す、という設定ではない
+                            $flag_CSVShow = true;
+                            $flag_LatestCSVShow = true;
+                            //無条件でCSVを隠す、という設定ではない----
+                        }
+                        if( 0 < $intXlsLimit ){
+                            $strLimitRowWarningMsgBodyLatest = $g['objMTS']->getSomeMessage("ITAWDCH-STD-321",array($latestRowLength, $intXlsLimit));
+                        }
                     }
-                    if( $flag_CSVShow!==false ){
-                        //----無条件でCSVを隠す、という設定ではない
-                        $flag_CSVShow = true;
-                        //無条件でCSVを隠す、という設定ではない----
+                    if ( $intXlsLimit < $historyRowLength ) {
+                        // 変更履歴全件ダウンロード
+                        $btnHistoryXlsDlFlag = "disabled=true ";
+                        if( $flag_HistoryCSVShow!==false ){
+                            //----無条件でCSVを隠す、という設定ではない
+                            $flag_CSVShow = true;
+                            $flag_HistoryCSVShow = true;
+                            //無条件でCSVを隠す、という設定ではない----
+                        }
+                        if( 0 < $intXlsLimit ){
+                            $strLimitRowWarningMsgBodyHistory = $g['objMTS']->getSomeMessage("ITAWDCH-STD-321",array($historyRowLength, $intXlsLimit));
+                        }
                     }
                     //エクセル出力の最大行を超えていた場合----
                 }
@@ -677,20 +699,24 @@ EOD;
                 }else{
                     $dlcHtmlBody .=
 <<<EOD
-            <form name="reqExcelDL_print_table" action="{$g['scheme_n_authority']}/default/menu/04_all_dump_excel.php?no={$g['page_dir']}" method="POST" >
-                <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-322")}" {$btnXlsDlFlag}>
+            <div class="midashi_class">{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30061")}</div>
+            <br>
+            <form style="display:inline" name="reqExcelDL_print_table" action="{$g['scheme_n_authority']}/default/menu/04_all_dump_excel.php?no={$g['page_dir']}" method="POST" >
+                <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-322")}" {$btnLatestXlsDlFlag}>
                 <input type="hidden" name="filteroutputfiletype" value="excel">
                 <input type="hidden" name="FORMATTER_ID" value="{$strLinkExcelFormatterId}">
+                <input type="hidden" name="datatype" value="latest">
                 {$htmlFirstBake_AddArea_reqExcelDL}
             </form>
-            {$strLimitRowWarningMsgBody}
+            <br>
+            {$strLimitRowWarningMsgBodyLatest}
             <br>
 EOD;
                 //無条件で隠す、という設定ではない----
                 }
             }
 
-            if( $flag_CSVShow===true ){
+            if( $flag_LatestCSVShow===true ){
                 //----CSV系の常時ダウンロードを無条件で隠すという設定ではない場合、または、エクセルダウンロード上限数以上の場合
 
                 if( $strLinkCSVFormatterId === null){
@@ -707,17 +733,20 @@ EOD;
                     if(array_key_exists("FirstBake_AddArea_reqCsvDL", $tmpArray)===true){
                         $htmlFirstBake_AddArea_reqCsvDL = $tmpArray['FirstBake_AddArea_reqCsvDL'];
                     }
-
+                    if ( $flag_LatestCSVShow ) {
                     $dlcHtmlBody .=
 <<<EOD
             <form style="display:inline" name="reqCsvDL" action="{$g['scheme_n_authority']}/default/menu/04_all_dump_excel.php?no={$g['page_dir']}" method="POST" >
                 <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-325")}({$fileTypeNameBody})" >
                 <input type="hidden" name="filteroutputfiletype" value="csv">
                 <input type="hidden" name="FORMATTER_ID" value="{$strLinkCSVFormatterId}">
+                <input type="hidden" name="datatype" value="latest">
                 {$htmlFirstBake_AddArea_reqCsvDL}
             </form>
             <br>
 EOD;
+                    }
+
                     $strOutputFileType = $objTable->getFormatter($strLinkCSVFormatterId)->getGeneValue("outputFileType");
                     if($strOutputFileType == "SafeCSV"){
                         $dlcHtmlBody .= 
@@ -731,11 +760,13 @@ EOD;
                 <input type="hidden" name="filteroutputfiletype" value="excel">
                 <input type="hidden" name="FORMATTER_ID" value="{$strLinkCSVFormatterId}">
                 <input type="hidden" name="requestuserclass" value="visitor">
+                <input type="hidden" name="datatype" value="latest">
             </form>
             <br>
             <br>
             <br>
 EOD;
+
                     }
                 }
                 //CSV系の常時ダウンロードを無条件で隠すという設定ではない場合、または、エクセルダウンロード上限数以上の場合----
@@ -820,6 +851,71 @@ EOD;
 
                 //メンテナンス権限があった場合----
             }
+            if($historyRowLength !== -1){
+                if($flag_ExcelHidden !== true){
+                    if( $strLinkExcelFormatterId === null){
+                    //----エクセル用のフォーマットIDがnullだった
+                    //エクセル用のフォーマットIDがnullだった----
+                    }else{
+                        $dlcHtmlBody .=
+<<<EOD
+        <br>
+        <br>
+        <div class="midashi_class">{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")}{$g['objMTS']->getSomeMessage("ITAWDCH-STD-325")}</div>
+        <br>
+        <form style="display:inline" name="reqHistoryExcelDL_print_table" action="{$g['scheme_n_authority']}/default/menu/04_all_dump_excel.php?no={$g['page_dir']}" method="POST" >
+            <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")}{$g['objMTS']->getSomeMessage("ITAWDCH-STD-322")}" {$btnHistoryXlsDlFlag}>
+            <input type="hidden" name="filteroutputfiletype" value="excel">
+            <input type="hidden" name="FORMATTER_ID" value="{$strLinkExcelFormatterId}">
+            <input type="hidden" name="datatype" value="history">
+            {$htmlFirstBake_AddArea_reqExcelDL}
+        </form>
+        <br>
+        {$strLimitRowWarningMsgBodyHistory}
+        <br>
+EOD;
+                    }
+                }
+                if( $flag_HistoryCSVShow===true ){
+                    //----CSV系の常時ダウンロードを無条件で隠すという設定ではない場合、または、エクセルダウンロード上限数以上の場合
+                    if( $strLinkCSVFormatterId === null){
+                        //----CSV用のフォーマットIDがnullだった
+                        //CSV用のフォーマットIDがnullだった----
+                    }else{$strOutputFileType = $objTable->getFormatter($strLinkCSVFormatterId)->getGeneValue("outputFileType");
+                        if($strOutputFileType=="SafeCSV"){
+                            $fileTypeNameBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-323");
+                        }else{
+                            $fileTypeNameBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-324");
+                        }
+
+                        if(array_key_exists("FirstBake_AddArea_reqCsvDL", $tmpArray)===true){
+                            $htmlFirstBake_AddArea_reqCsvDL = $tmpArray['FirstBake_AddArea_reqCsvDL'];
+                        }
+                        $dlcHtmlBody .=
+<<<EOD
+                <form style="display:inline" name="reqHistoryCsvDL" action="{$g['scheme_n_authority']}/default/menu/04_all_dump_excel.php?no={$g['page_dir']}" method="POST" >
+                    <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")}{$g['objMTS']->getSomeMessage("ITAWDCH-STD-325")}({$fileTypeNameBody})" >
+                    <input type="hidden" name="filteroutputfiletype" value="csv">
+                    <input type="hidden" name="FORMATTER_ID" value="{$strLinkCSVFormatterId}">
+                    <input type="hidden" name="datatype" value="history">
+                    {$htmlFirstBake_AddArea_reqCsvDL}
+                </form>
+                <br>
+                <form style="display:inline" name="reqToolDL" action="{$g['scheme_n_authority']}/webdbcore/editorBaker.zip">
+                    <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-326")}" >
+                </form>
+                <br>
+                <form style="display:inline" name="reqExcelDL" action="{$g['scheme_n_authority']}/default/menu/04_all_dump_excel.php?no={$g['page_dir']}" method="POST" >
+                    <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")}{$g['objMTS']->getSomeMessage("ITAWDCH-STD-327")}" >
+                    <input type="hidden" name="filteroutputfiletype" value="excel">
+                    <input type="hidden" name="FORMATTER_ID" value="{$strLinkCSVFormatterId}">
+                    <input type="hidden" name="requestuserclass" value="visitor">
+                    <input type="hidden" name="datatype" value="history">
+                </form>
+EOD;
+                    }
+                }
+            } 
             $dlcHtmlBody .= 
 <<<EOD
             </div>
@@ -921,6 +1017,88 @@ EOD;
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
         return $retArray;
     }
+    
+    function countHistoryRowLength($objTable, &$aryVariant=array(), &$arySetting=array(), $strFormatterId="all_dump_table"){
+        global $g;
+        //----SQL指定がない限り、廃止前('0')と廃止('1')のレコードの合計行数を返す。
+        $intControlDebugLevel01=200;
+        $strFxName = __FUNCTION__;
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        
+        $intRowLength = null;
+        $intErrorType = null;
+        $aryErrorMsgBody = array();
+        
+        $aryRetBody = checkCommonSettingVariants($strFxName, $objTable, $aryVariant, $arySetting, "QMFileSendAreaFormatter", $strFormatterId);
+        $checkFormatterId = $aryRetBody[1];
+        $objListFormatter = $aryRetBody[2];
+
+
+        // RBAC対応 ----
+        // ACCESS_AUTHカラムの有無を判定----
+        if($objTable->getAccessAuth()) {
+            $sql_type = 3;   // ACCESS_AUTHカラムあり
+        } else {
+            $sql_type = 1;   // ACCESS_AUTHカラムなし
+        }
+        // ----ACCESS_AUTHカラムの有無を判定
+        $query = generateJournalSelectSQL($sql_type, $objTable); 
+        // ----RBAC対応
+        
+        $aryForBind = $objTable->getFilterArray(true);
+        
+        $arySettingOnLF = $objListFormatter->getGeneValue("countTableRowLength"); /* #28　OK */
+        
+        if( array_key_exists("countTableRowLength",$arySetting)===true ){
+            $tmpArray = $arySettingOnLF["countTableRowLength"];
+            if( is_array($tmpArray)===true ){
+                if( array_key_exists("sql",$tmpArray) ){
+                    $query = $tmpArray["sql"];
+                    if( array_key_exists("bindArray",$tmpArray) ){
+                        if( is_array($tmpArray["bindArray"]) ){
+                            $aryForBind = $tmpArray["bindArray"];
+                        }
+                    }
+                }
+            }
+        }
+
+        $intUnixTimeBegin=time();
+        $intRowLength = 0;
+
+        $aryRetBody = singleSQLExecuteAgent($query, $aryForBind, $strFxName);
+        if( $aryRetBody[0] === true ){
+            $objQuery = $aryRetBody[1];
+            // RBAC対応 ----
+            // ACCESS_AUTHカラムの有無を判定し対象レコードをカウント
+            $ret = getTargetRecodeCount($objTable,$objQuery,$intRowLength);
+            unset($objQuery);
+            if($ret === false) {
+                $intErrorType = 500;
+                $intRowLength = -1;
+                web_log( '00010701-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            // ----RBAC対応
+        }
+        else{
+            $intErrorType = 500;
+            $intRowLength = -1;
+            web_log( '00010701-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        
+
+        $intUnixTimeFin=time();
+
+        //レコード行数を取得する----
+        
+        if($intUnixTimeBegin + 10 <= $intUnixTimeFin){
+            $intTimeSecond = $intUnixTimeFin - $intUnixTimeBegin;
+            web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-2001",array($intTimeSecond, $query)));
+        }
+        $retArray = array($intRowLength, $intErrorType, $aryErrorMsgBody);
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        return $retArray;
+    }
     //07-全件ダウンロード領域系部品----
 
     //----08-履歴フィルタ作成部品
@@ -963,7 +1141,7 @@ EOD;
     }
     //08-履歴フィルタ作成部品----
 
-    function DTiSFilterCheckValid($objTable, $strFormatterId, $aryFilterData, &$aryVariant=array(), &$arySetting=array()){
+    function DTiSFilterCheckValid($objTable, $strFormatterId, $aryFilterData, &$aryVariant=array(), &$arySetting=array(), $strApiFlg=false){
         global $g;
         $intControlDebugLevel01=50;
 
@@ -1061,9 +1239,13 @@ EOD;
                             if($objColumn->getValidator()->isValid($strValue, $strRIValueNumeric, $aryFilterData, $aryVariant)){
                                 $objColumn->addRichFilterValue($strValue);
                             }else{
-                                $intErrCount+=1;
-                                foreach($objColumn->getValidator()->getValidRule() as $strData){
-                                    $aryErrorMsgBody[] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-101", array($strData, $objColumn->getColLabel(true)));
+                                if($strApiFlg === true){
+                                    $objColumn->addRichFilterValue($strValue);
+                                }else{
+                                    $intErrCount+=1;
+                                    foreach($objColumn->getValidator()->getValidRule() as $strData){
+                                        $aryErrorMsgBody[] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-101", array($strData, $objColumn->getColLabel(true)));
+                                    }
                                 }
                             }
                         }else{
@@ -2294,20 +2476,31 @@ EOD;
     //UTN複数行SELECT用(2)----
 
     //----[5]履歴複数行SELECT用
-    function generateJournalSelectSQL($objTable,$boolSchZenHanDistinct=true){
+    function generateJournalSelectSQL($mode,$objTable,$boolSchZenHanDistinct=true){
         // SELECT文を生成する関数
         global $g;
+        $dbQM=$objTable->getDBQuoteMark();
 
         $arrayObjColumn = $objTable->getColumns();
 
-        $arraySqlSelectCols = array();
-
-        foreach($arrayObjColumn as $objColumn){
-            if($objColumn->isDBColumn()){
-                $arraySqlSelectCols[] = $objColumn->getPartSqlInSelectZone();
+        if($mode == 1){
+            $objRIColumn = $arrayObjColumn[$objTable->getRowIdentifyColumnID()];
+            $strColStream = "COUNT({$dbQM}{$objTable->getShareTableAlias()}{$dbQM}.{$dbQM}{$objRIColumn->getID()}{$dbQM}) {$dbQM}REC_CNT{$dbQM}";
+        }else if($mode == 2){
+            $arraySqlSelectCols = array();
+    
+            foreach($arrayObjColumn as $objColumn){
+                if($objColumn->isDBColumn()){
+                    $arraySqlSelectCols[] = $objColumn->getPartSqlInSelectZone();
+                }
             }
+            $strColStream = implode(",",$arraySqlSelectCols);
+        // RBAC対応
+        } else if($mode == 3){
+            // ACCESS_AUTHカラムが有る場合のSELECT項目を調整
+            $objRIColumn = $arrayObjColumn[$objTable->getRowIdentifyColumnID()];
+            $strColStream = "{$dbQM}{$objTable->getShareTableAlias()}{$dbQM}.{$dbQM}{$objTable->getAccessAuthColumnName()}{$dbQM} {$objTable->getAccessAuthColumnName()}";
         }
-        $strColStream = implode(",",$arraySqlSelectCols);
 
         if(is_bool($boolSchZenHanDistinct)===false) $boolSchZenHanDistinct = true;
 
@@ -2319,14 +2512,18 @@ EOD;
         }
 
         // ----ORDER BY句を付加
-        $strOrderStream = " ORDER BY {$objTable->getRequiredJnlSeqNoColumnID()} DESC";
+        if ($mode == 2) {
+            $strOrderStream = "ORDER BY {$objTable->getDBSortText()}, {$objTable->getRequiredJnlSeqNoColumnID()} DESC";
+        } else {
+            $strOrderStream = "ORDER BY {$objTable->getRequiredJnlSeqNoColumnID()} DESC";
+        }
         // ORDER BY句を付加----
 
         $query  = "SELECT {$strColStream} ";
         $query .= "FROM {$objTable->getDBJournalTableBody()} {$objTable->getShareTableAlias()} ";
         $query .= "{$objTable->getLeftJoinTableQuery()} ";
         $query .= "{$strWhereStream} {$strOrderStream}";
-
+        
         return $query;
     }
     //[5]履歴複数行SELECT用----
@@ -2488,7 +2685,8 @@ EOD;
                                            $disuseColumnOfMasterTable, 
                                            $AccessAuthColumUse = false, 
                                            $AccessAuthColumnNames = array(),
-                                           $aryEtcetera=array(), $strWhereAddBody="", $strGetColIdOfKey="C1", $strGetColIdOfDisp="C2") { // RBAC対応
+                                           $aryEtcetera=array(), $strWhereAddBody="", $strGetColIdOfKey="C1", $strGetColIdOfDisp="C2", // RBAC対応
+                                           $dispRestrictValueFlg=false) {  //dispRestrictValue対応
         // ---- RBAC対応
         global $g;
         if(isset($aryEtcetera['OrderSortSeqType'])){
@@ -2523,27 +2721,53 @@ EOD;
         } 
         // ---- RBAC対応
 
-        $query = "SELECT "
-                ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} {$mainQueryAddstring} "
-                ."FROM "
-                ."    (SELECT "
-                ."         {$keyColumnOfMainTable} "
-                ."     FROM "
-                ."         {$mainTableBody}"
-                ."     WHERE "
-                ."         {$disuseColumnOfMainTable} IN ('0','1') "
-                ."         {$strWhereAddBody} "
-                ."    ) MT1 "
-                ."    INNER JOIN "
-                ."    (SELECT "
-                ."         {$keyColumnOfMasterTable} IDCOLUMN, {$dispColumnOfMasterTable} DISPCOLUMN {$queryPartSelectAdd} {$SubQueryAddstring}"
-                ."     FROM "
-                ."         {$masterTableBody} "
-                ."     WHERE "
-                ."         {$disuseColumnOfMasterTable} IN ('0','1') "
-                ."    ) JM1 "
-                ."    ON MT1.{$keyColumnOfMainTable} = JM1.IDCOLUMN "
-                ."{$queryPartOrd}";
+        if($dispRestrictValueFlg == true){
+            //dispRestrictValueの利用がある場合、$mainTableBodyのすべてのカラムをSELECTする（dispRestrictValueで指定したカラムの値を比較させるため）。
+            $query = "SELECT "
+                    ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} {$mainQueryAddstring}, MT1.* "
+                    ."FROM "
+                    ."    (SELECT "
+                    ."         * "
+                    ."     FROM "
+                    ."         {$mainTableBody}"
+                    ."     WHERE "
+                    ."         {$disuseColumnOfMainTable} IN ('0','1') "
+                    ."         {$strWhereAddBody} "
+                    ."    ) MT1 "
+                    ."    INNER JOIN "
+                    ."    (SELECT "
+                    ."         {$keyColumnOfMasterTable} IDCOLUMN, {$dispColumnOfMasterTable} DISPCOLUMN {$queryPartSelectAdd} {$SubQueryAddstring}"
+                    ."     FROM "
+                    ."         {$masterTableBody} "
+                    ."     WHERE "
+                    ."         {$disuseColumnOfMasterTable} IN ('0','1') "
+                    ."    ) JM1 "
+                    ."    ON MT1.{$keyColumnOfMainTable} = JM1.IDCOLUMN "
+                    ."{$queryPartOrd}";
+        }else{
+            $query = "SELECT "
+                    ."    JM1.IDCOLUMN {$strGetColIdOfKey}, JM1.DISPCOLUMN {$strGetColIdOfDisp} {$mainQueryAddstring} "
+                    ."FROM "
+                    ."    (SELECT "
+                    ."         {$keyColumnOfMainTable} "
+                    ."     FROM "
+                    ."         {$mainTableBody}"
+                    ."     WHERE "
+                    ."         {$disuseColumnOfMainTable} IN ('0','1') "
+                    ."         {$strWhereAddBody} "
+                    ."    ) MT1 "
+                    ."    INNER JOIN "
+                    ."    (SELECT "
+                    ."         {$keyColumnOfMasterTable} IDCOLUMN, {$dispColumnOfMasterTable} DISPCOLUMN {$queryPartSelectAdd} {$SubQueryAddstring}"
+                    ."     FROM "
+                    ."         {$masterTableBody} "
+                    ."     WHERE "
+                    ."         {$disuseColumnOfMasterTable} IN ('0','1') "
+                    ."    ) JM1 "
+                    ."    ON MT1.{$keyColumnOfMainTable} = JM1.IDCOLUMN "
+                    ."{$queryPartOrd}";
+        }
+
 	    // ---- RBAC対応
         return $query;
     }

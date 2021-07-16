@@ -368,6 +368,7 @@ Ansible（Legacy Role）代入値管理
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADJsEvent('onChange','pattern_reg');
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -377,6 +378,7 @@ Ansible（Legacy Role）代入値管理
     $c->setOutputType('register_table',$objOTForReg);
 
     $c->setEvent('update_table','onChange','pattern_upd',array());
+    $c->setEvent('register_table','onChange','pattern_reg',array());
 
     $c->setJournalTableOfMaster('E_ANSIBLE_LRL_PATTERN_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -584,6 +586,7 @@ Ansible（Legacy Role）代入値管理
 
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -791,11 +794,14 @@ Ansible（Legacy Role）代入値管理
     $objVarBFmtReg->setFADJsEvent('onChange','vars_reg');
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+    $objOTForReg->setJsEvent('onChange','vars_reg');
     $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
 
     $c->setOutputType('update_table',$objOTForUpd);
     $c->setOutputType('register_table',$objOTForReg);
+    
 
     $c->setJournalTableOfMaster('D_ANS_LRL_PTN_VARS_LINK_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -1228,9 +1234,11 @@ Ansible（Legacy Role）代入値管理
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
     $objVarBFmtReg->setFunctionForGetFADMainDataOverride($objFunction04);
 
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+    $objOTForReg->setJsEvent('onChange','vars_reg');
     $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
 
     $c->setOutputType('update_table',$objOTForUpd);

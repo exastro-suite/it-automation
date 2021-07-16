@@ -643,6 +643,40 @@
         return $result;
     }
 
+    // 未実行(予約)のSymphony/Conductor取得
+    function b_get_symphony_conductor( $days = null ){
+        if (!is_login_status()) {
+            $result = array(
+                "100",
+                "000",
+                ""
+            );
+            return $result;
+        }
+
+        $sym_menu_id = "2100000310";
+        $con_menu_id = "2100180006";
+
+        if ( can_get_menu_info($sym_menu_id) ) {
+            $sym_list = get_symphony_reserve($days);
+        } else {
+            $sym_list = array();
+        }
+
+        if ( can_get_menu_info($con_menu_id) ) {
+            $con_list = get_conductor_reserve($days);
+        } else {
+            $con_list = array();
+        }
+
+        $result = array(
+            "symphony" => $sym_list,
+            "conductor" => $con_list
+        );
+       
+        return $result;
+    }
+
     function get_panel_list(){
         global $g;
         $objMTS = $g['objMTS'];
@@ -868,6 +902,174 @@
                             $result[$row["SYMPHONY_INSTANCE_NO"]] = array(
                                 "status" => $row["SYM_EXE_STATUS_NAME"],
                                 "end" => $row["TIME_END"],
+                            );
+                        }
+                    }
+                }
+            }
+
+            // DBアクセス事後処理
+            unset($objQuery);
+
+            return $result;
+        }
+        catch (Exception $e){
+            $result = array(
+                "100",
+                "000",
+                $e->getMessage()
+            );
+            return $result;
+        }
+    }
+
+    //----------------------------------------------
+    // 未実行（予約）のSymphony取得
+    // $days：指定日数後までのデータを取得
+    //----------------------------------------------
+    function get_symphony_reserve( $days=null ){
+        global $g;
+        $root_dir_path = $g["root_dir_path"];
+
+        $user_id = $g["login_id"];
+        $objDBCA = $g["objDBCA"];
+        $err_msg = "";
+        try{
+            require_once($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
+            $obj = new RoleBasedAccessControl($objDBCA);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            //----------------------------------------------
+            // 共通モジュールの呼び出し
+            //----------------------------------------------
+            $objMTS = $g['objMTS'];
+            // 未実行（予約）= 2
+            $where_sql = " WHERE C_SYMPHONY_INSTANCE_MNG.STATUS_ID = 2";
+            $where_sql .= " AND C_SYMPHONY_INSTANCE_MNG.TIME_BOOK >= CURRENT_TIMESTAMP ";
+
+            if( isset($days) ){
+                $where_d = date("Y-m-d",strtotime("+$days day"));
+                $where_d .= " 23:59:59";
+                $where_sql .= " AND C_SYMPHONY_INSTANCE_MNG.TIME_BOOK <= '$where_d' ";
+            }
+
+            $order_by_sql = " ORDER BY C_SYMPHONY_INSTANCE_MNG.TIME_BOOK ASC;";
+            //----------------------------------------------
+            // Symphony情報取得
+            //----------------------------------------------
+            // SQL作成
+            $sql = "SELECT C_SYMPHONY_INSTANCE_MNG.SYMPHONY_INSTANCE_NO,"
+                            ."C_SYMPHONY_INSTANCE_MNG.I_SYMPHONY_NAME,"
+                            ."C_SYMPHONY_INSTANCE_MNG.ACCESS_AUTH,"
+                            ."C_SYMPHONY_INSTANCE_MNG.I_OPERATION_NAME,"
+                            ."C_SYMPHONY_INSTANCE_MNG.TIME_BOOK,"
+                            ."SYM_EXE_STATUS_NAME "
+                            ."FROM C_SYMPHONY_INSTANCE_MNG "
+                            ."LEFT OUTER JOIN B_SYM_EXE_STATUS "
+                            ."ON C_SYMPHONY_INSTANCE_MNG.STATUS_ID = B_SYM_EXE_STATUS.SYM_EXE_STATUS_ID "
+                            .$where_sql . $order_by_sql;
+
+            $rows = array();
+            $tmpAryBind = array();
+            $retArray = singleSQLExecuteAgent($sql, $tmpAryBind,  __FUNCTION__);
+            $result = array();
+            if($retArray[0] === true){
+                $objQuery =& $retArray[1];
+                while ( $row = $objQuery->resultFetch() ){
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                        throw new Exception($err_msg);
+                    } else {
+                        if($permission === true) {
+                            $result[$row["SYMPHONY_INSTANCE_NO"]] = array(
+                                "symphony_name" => $row["I_SYMPHONY_NAME"],
+                                "operation_name" => $row["I_OPERATION_NAME"],
+                                "time_book" => date("Y/m/d H:i", strtotime($row["TIME_BOOK"])),
+                                "status" => $row["SYM_EXE_STATUS_NAME"],
+                            );
+                        }
+                    }
+                }
+            }
+
+            // DBアクセス事後処理
+            unset($objQuery);
+
+            return $result;
+        }
+        catch (Exception $e){
+            $result = array(
+                "100",
+                "000",
+                $e->getMessage()
+            );
+            return $result;
+        }
+    }
+
+    //----------------------------------------------
+    // 未実行（予約）のConductor取得
+    // $days：指定日数後までのデータを取得
+    //----------------------------------------------
+    function get_conductor_reserve( $days=null ){
+        global $g;
+        $root_dir_path = $g["root_dir_path"];
+
+        $user_id = $g["login_id"];
+        $objDBCA = $g["objDBCA"];
+        $err_msg = "";
+        try{
+            require_once($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
+            $obj = new RoleBasedAccessControl($objDBCA);
+            $ret  = $obj->getAccountInfo($g['login_id']);
+            //----------------------------------------------
+            // 共通モジュールの呼び出し
+            //----------------------------------------------
+            $objMTS = $g['objMTS'];
+            // 未実行（予約）= 2
+            $where_sql = " WHERE C_CONDUCTOR_INSTANCE_MNG.STATUS_ID = 2";
+            $where_sql .= " AND C_CONDUCTOR_INSTANCE_MNG.TIME_BOOK >= CURRENT_TIMESTAMP ";
+
+            if( isset($days) ){
+                $where_d = date("Y-m-d",strtotime("+$days day"));
+                $where_d .= " 23:59:59";
+                $where_sql .= " AND C_CONDUCTOR_INSTANCE_MNG.TIME_BOOK <= '$where_d' ";
+            }
+
+            $order_by_sql = " ORDER BY C_CONDUCTOR_INSTANCE_MNG.TIME_BOOK ASC;";
+            //----------------------------------------------
+            // conductor情報取得
+            //----------------------------------------------
+            // SQL作成
+            $sql = "SELECT C_CONDUCTOR_INSTANCE_MNG.CONDUCTOR_INSTANCE_NO,"
+                            ."C_CONDUCTOR_INSTANCE_MNG.I_CONDUCTOR_NAME,"
+                            ."C_CONDUCTOR_INSTANCE_MNG.ACCESS_AUTH,"
+                            ."C_CONDUCTOR_INSTANCE_MNG.I_OPERATION_NAME,"
+                            ."C_CONDUCTOR_INSTANCE_MNG.TIME_BOOK,"
+                            ."SYM_EXE_STATUS_NAME "
+                            ."FROM C_CONDUCTOR_INSTANCE_MNG "
+                            ."LEFT OUTER JOIN B_SYM_EXE_STATUS "
+                            ."ON C_CONDUCTOR_INSTANCE_MNG.STATUS_ID = B_SYM_EXE_STATUS.SYM_EXE_STATUS_ID "
+                            .$where_sql . $order_by_sql;
+                            
+            $rows = array();
+            $tmpAryBind = array();
+            $retArray = singleSQLExecuteAgent($sql, $tmpAryBind,  __FUNCTION__);
+            $result = array();
+            if($retArray[0] === true){
+                $objQuery =& $retArray[1];
+                while ( $row = $objQuery->resultFetch() ){
+                    list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
+
+                    if($ret === false) {
+                        throw new Exception($err_msg);
+                    } else {
+                        if($permission === true) {
+                            $result[$row["CONDUCTOR_INSTANCE_NO"]] = array(
+                                "conductor_name" => $row["I_CONDUCTOR_NAME"],
+                                "operation_name" => $row["I_OPERATION_NAME"],
+                                "time_book" => date("Y/m/d H:i", strtotime($row["TIME_BOOK"])),
+                                "status" => $row["SYM_EXE_STATUS_NAME"],
                             );
                         }
                     }

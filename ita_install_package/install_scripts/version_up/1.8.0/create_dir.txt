@@ -1,0 +1,5 @@
+/ita-root/repositorys
+/ita-root/temp/bulk_excel/export
+/ita-root/temp/bulk_excel/import
+/ita-root/temp/bulk_excel/import/import
+/ita-root/temp/bulk_excel/import/upload

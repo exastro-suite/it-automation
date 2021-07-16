@@ -363,6 +363,58 @@ callback.prototype = {
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
+    },
+    Mix1_1_duplicate : function( result ){
+        var strMixOuterFrameName = 'Mix2_Nakami';
+        var strMixInnerFramePrefix = 'Mix2_';
+
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+
+        var resultContentTag = ary_result[2];
+
+        var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
+
+        if( ary_result[0] == "000" ){
+
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+
+            switch( ary_result[1] ){
+                case "100":
+                    window.alert(resultContentTag);
+                    objRegiterArea.innerHTML = "";
+                    Filter1Tbl_search_async();
+                    break;
+                case "201":
+                    // エラーなく登録完了
+                default:
+                    objRegiterArea.innerHTML="";
+                    $(objRegiterArea).html(resultContentTag);
+
+                    objAlertArea.style.display = "none";
+
+                    adjustTableAuto (strMixInnerFramePrefix+'1',
+                                    "sDefault",
+                                    "fakeContainer_Register2",
+                                    webStdTableHeight,
+                                    webStdTableWidth );
+                    linkDateInputHelper(strMixOuterFrameName);
+            }
+        }else if( ary_result[0] == "002" ){
+            window.alert(getSomeMessage("ITAWDCC90102"));
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+            setInputButtonDisable(strMixOuterFrameName,'disableAfterPush',false);
+        }else if( ary_result[0] == "003" ){
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+            objRegiterArea.innerHTML="";
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+
+        showForDeveloper(result);
     }
     //---- ここからカスタマイズした場合の[callback]メソッド配置域
 
@@ -874,11 +926,11 @@ function queryDataToFilter(){
 }
 function newOpenWindow(current_element){
   var current_id = current_element.offsetParent.id;
-  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "4";
-  var searchText1 = document.getElementById(target_id).children[0].innerHTML;
   var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "5";
-  var searchText2 = document.getElementById(target_id).children[0].innerText;
+  var searchText1 = document.getElementById(target_id).children[0].innerHTML;
   var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "6";
+  var searchText2 = document.getElementById(target_id).children[0].innerText;
+  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "7";
   var searchText3 = document.getElementById(target_id).children[0].innerHTML;
   var url = "01_browse.php?no=2100020109&filter=on&Filter1Tbl_2=" + searchText1 + "&Filter1Tbl_3=" + searchText2 + "&Filter1Tbl_4=" + searchText3;
   window.open(url, '_blank');

@@ -37,7 +37,8 @@ Ansibleインターフェース情報
         'TT_SYS_06_LUP_USER_ID'=>'LAST_UPDATE_USER',
         'TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'=>'ROW_EDIT_BY_FILE',
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
-        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
+        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP',
+        'TT_SYS_08_DUPLICATE_ID'=>'WEB_BUTTON_DUPLICATE'
     );
 
     $table = new TableControlAgent('B_ANSIBLE_IF_INFO','ANSIBLE_IF_INFO_ID', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202030"), 'B_ANSIBLE_IF_INFO_JNL', $tmpAry);
@@ -193,10 +194,29 @@ Ansibleインターフェース情報
 	$tcg -> addColumn($c);
 	//実行時データ削除----
 
-
-
     $table -> addColumn($tcg);
     //Ansible Tower情報----
+
+   $cg = new ColumnGroup($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000021'));
+        //************************************************************************************
+        //----Proxyアドレス
+        //************************************************************************************
+        $c = new TextColumn('ANSIBLE_PROXY_ADDRESS', $g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000022'));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000023'));//エクセル・ヘッダでの説明
+        $c->setHiddenMainTableColumn(true);
+        $c->setValidator(new SingleTextValidator(0,128,false));
+        $cg->addColumn($c);
+
+        //************************************************************************************
+        //----Proxyポート
+        //************************************************************************************
+        $c = new NumColumn('ANSIBLE_PROXY_PORT', $g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000024'));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000025'));//エクセル・ヘッダでの説明
+        $c->setHiddenMainTableColumn(true);
+        $c->setSubtotalFlag(false);
+        $c->setValidator(new IntNumValidator(1,65535));
+        $cg->addColumn($c);
+    $table->addColumn($cg);
 
     //--------------------------------------------------------------
     //----データリレイストレージパス(ITA)
@@ -419,6 +439,13 @@ Ansibleインターフェース情報
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_journal_table')->setVisible(false);
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('excel')->setVisible(false);
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('json')->setVisible(false);
+
+    // 複製ボタン
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_journal_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('json')->setVisible(false);
 
     return $table;
 };

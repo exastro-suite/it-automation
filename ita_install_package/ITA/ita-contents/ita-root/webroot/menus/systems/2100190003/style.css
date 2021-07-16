@@ -1,0 +1,18 @@
+/* radio */
+.compare_label {
+    cursor: pointer;
+    box-sizing: content-box;
+    padding: 2px 8px;
+    word-break: break-all;
+    display: inline-flex;
+    white-space: nowrap !important;
+    align-items: center;
+}
+.compare_label_name {
+    margin-left: 5px;
+    margin-top: 5px;
+}
+.compare_radio {
+    width: 20px;
+    height: 20px;
+}

@@ -702,7 +702,7 @@ $ary["ITAANSIBLEH-MNU-1207101"]     = "status";
 $ary["ITAANSIBLEH-MNU-1207102"]     = "Displays the collection status.";
 $ary["ITAANSIBLEH-MNU-1207103"]     = "Collection log";
 $ary["ITAANSIBLEH-MNU-1207104"]     = "You can download the run-time log at the time of collection.";
-$ary["ITAANSIBLEH-MNU-1207200"]     = "You can maintain (view / update) the connection interface information for the REST API used by the collection function. <br> This menu must be one record.";
+$ary["ITAANSIBLEH-MNU-1207200"]     = "You can maintain (view / update) the connection interface information for the REST API used by the collection function. <br> This menu must be one record. <br>If the REST user and REST password are not entered, the collection function will not be executed.";
 $ary["ITAANSIBLEH-MNU-1207201"]     = "ID";
 $ary["ITAANSIBLEH-MNU-1207202"]     = "Collection interface information";
 $ary["ITAANSIBLEH-MNU-1207203"]     = "Collection interface information";
@@ -713,7 +713,8 @@ $ary["ITAANSIBLEH-MNU-1207207"]     = "[Maximum length] 15 bytes
 Please enter in the format xxx.xxx.xxx.xxx. ";
 $ary["ITAANSIBLEH-MNU-1207208"]     = "REST user";
 $ary["ITAANSIBLEH-MNU-1207209"]     = "Users associated with the role of system administrator,
-Alternatively, create an equivalent role and enter the user associated with it. ";
+Alternatively, create an equivalent role and enter the user associated with it. 
+If the REST user and REST password are not entered, the collection function will not be executed.";
 $ary["ITAANSIBLEH-MNU-1207210"]     = "REST password";
 $ary["ITAANSIBLEH-MNU-1207211"]     = "[Maximum length] 30 bytes";
 $ary["ITAANSIBLEH-MNU-1207212"]     = "REST method";
@@ -1273,6 +1274,11 @@ $ary["ITAANSIBLEH-MNU-9010000017"]  = "Ansible execution environment directory b
 $ary["ITAANSIBLEH-MNU-9010000018"]  = "It is a required item. (Item:{})";
 $ary["ITAANSIBLEH-MNU-9010000019"]  = "Host list";
 $ary["ITAANSIBLEH-MNU-9010000020"]  = "A list of Ansible Tower hosts. \nFor cluster configuration, register the host information of ansible tower that configures the cluster.";
+$ary["ITAANSIBLEH-MNU-9010000021"]  = "Proxy";
+$ary["ITAANSIBLEH-MNU-9010000022"]  = "Address";
+$ary["ITAANSIBLEH-MNU-9010000023"]  = "Proxy server address";
+$ary["ITAANSIBLEH-MNU-9010000024"]  = "Port";
+$ary["ITAANSIBLEH-MNU-9010000025"]  = "Proxy server port";
 $ary["ITAANSIBLEH-MNU-9010001000"]  = "Maintenance (view/update) can be performe Ansible Tower host information.\ncase of cluster configuration, it is necessary to register the host information of ansible tower that constitutes the cluster.";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "No.";
 $ary["ITAANSIBLEH-MNU-9010001002"]  = "AnsibleTowerHostList";

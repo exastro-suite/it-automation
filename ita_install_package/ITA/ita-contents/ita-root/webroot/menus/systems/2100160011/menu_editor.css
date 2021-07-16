@@ -7,13 +7,14 @@ box-sizing: border-box;
 height: 100%;
 }
 #INDEX {
-overflow: hidden;
+overflow: auto;
 }
 #HEADER {
 box-sizing: border-box;
 height: 86px;
 }
 #KIZI {
+min-height: auto!important;
 box-sizing: border-box;
 height: calc( 100% - 123px );
 padding: 0;
@@ -1342,4 +1343,137 @@ color: #F44;
 }
 .error .logLevel {
 background-color: #C00;
+}
+
+
+
+
+/* 一意制約 */
+#modal-unique-constraint-select {
+counter-reset: uniquePatternNumber;
+}
+#modal-unique-constraint-select br {
+display: none;
+}
+
+.column-none-message,
+.unique-none-message,
+.unique-constraint-box {
+width: calc( 100% - 1px );
+margin: 16px 0; padding: 8px;
+background-image: linear-gradient( #444, #444 8px, #4A4A4A );
+border: solid 1px #222;
+box-shadow: 1px 1px 0 0 rgba( 255,255,255,.1 ),
+            1px 1px 0 0 rgba( 255,255,255,.1 ) inset;
+}
+.unique-constraint-pattern {
+display: table!important;
+}
+.unique-constraint-pattern > * {
+display: table-cell;
+vertical-align: middle;
+}
+.unique-constraint-pattern::before {
+display: table-cell;
+counter-increment: uniquePatternNumber 1;
+content: counter(uniquePatternNumber);
+width: 8px;
+padding: 6px 12px 6px 8px;
+border-right: 1px solid rgba( 255,255,255,.2 );
+white-space: nowrap;
+vertical-align: middle;
+color: #EEE;
+}
+.line-delete-button-wrap {
+width: 8px;
+padding: 0 4px 0 8px;
+border-left: 1px solid rgba( 255,255,255,.2 );
+}
+.line-delete-button {
+white-space: nowrap;
+}
+.unique-constraint-pattern > span {
+padding: 0 8px;
+}
+.unique-constraint-check {
+color: #EEE;
+}
+.unique-none-message,
+.column-none-message {
+color: #CCC;
+}
+.unique-edit-check-wrap {
+display: inline-block;
+position: relative;
+z-index: 1;
+padding: 4px;
+}
+.unique-edit-check {
+position: absolute;
+left: -9999px;
+opacity: 0;
+}
+.unique-edit-label {
+display: inline-block;
+padding: 4px 8px;
+background-color: rgba( 0,0,0,.2 );
+border: 1px solid rgba( 0,0,0,.4 );
+border-radius: 2px;
+word-break: break-all;
+font-size: 14px;
+color: #AAA;
+cursor: pointer;
+}
+.unique-edit-label:hover {
+background-color: rgba( 0,0,0,.3 );
+}
+.unique-edit-check:checked + .unique-edit-label {
+background-color: rgba( 96,198,13,.5 );
+border: 1px solid rgba( 096,198,13,.6 );
+color: #EEE;
+cursor: pointer;
+}
+.unique-edit-check:focus + .unique-edit-label {
+box-shadow: 0 0 0 1px #4F80FF;
+}
+.unique-constraint-pattern-tmp {
+display: none;
+}
+
+/* ボタン */
+.add-unique-pattern {
+list-style: none;
+}
+.add-unique-pattern-button,
+.line-delete-button {
+margin: 0;
+background-color: #666;
+border: 1px solid;
+border-top-color: rgba( 255,255,255,.1 );
+border-left-color: rgba( 255,255,255,.1 );
+border-right-color: rgba( 0,0,0,.2 );
+border-bottom-color: rgba( 0,0,0,.2 );
+border-radius: 2px;
+box-shadow: 0 0 0 1px #111;
+text-shadow: 1px 1px 1px rgba( 0,0,0,.6 );
+font-size: 11px;
+color: #EEE;
+cursor: pointer;
+}
+.add-unique-pattern-button:focus,
+.line-delete-button:focus {
+box-shadow: 0 0 0 1px #111, 0 0 1px 2px #4F80FF;
+outline: none;
+}
+.add-unique-pattern-button:hover,
+.line-delete-button:hover {
+background-color: #777;
+}
+.add-unique-pattern-button:active,
+.line-delete-button:active {
+padding-top: 1px;
+background-color: #606060;
+box-shadow: 0 0 0 1px #111, 0 0 4px rgba( 0,0,0,.2 ) inset;
+border-color: rgba( 0,0,0,.3 );
+outline: none;
 }

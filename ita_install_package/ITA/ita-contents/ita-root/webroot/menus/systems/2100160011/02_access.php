@@ -155,7 +155,8 @@
                 // メニュー作成項目情報を登録
                 //////////////////////////
                 $repeatCount = 0;
-                foreach($menuData['item'] as &$itemData){
+                $columnIdConvArray = array(); //一意制約の項目ID変換用
+                foreach($menuData['item'] as $key => &$itemData){
                     if($itemData['REPEAT_ITEM'] == true){
                         $repeatCount += 1;
                     }
@@ -230,6 +231,9 @@
                     }
                     
                     $itemData['CREATE_ITEM_ID'] = json_decode($arrayResult[2],true)['CREATE_ITEM_ID'];
+
+                    //columnIdとITEM_IDを紐つける
+                    $columnIdConvArray[$key] = $itemData['CREATE_ITEM_ID'];
                 }
                 unset($itemData);
                 
@@ -261,6 +265,44 @@
 
                     if($arrayResult[0] !== "000"){
                         throw new Exception();
+                    }
+                }
+
+                //////////////////////////
+                // 一意制約(複数項目)を登録
+                //////////////////////////
+                if($menuData['menu']['UNIQUE_CONSTRAINT'] != ""){
+                    $uniqueConstraintArray = explode(",", $menuData['menu']['UNIQUE_CONSTRAINT']);
+                    foreach($uniqueConstraintArray as $idPattern){
+                        //columnId「i1」をITEM_IDに置換する。
+                        $idPatternArray = explode("-", $idPattern);
+                        $idPatternConv = "";
+                        foreach($idPatternArray as $id){
+                            if(isset($columnIdConvArray[$id])){
+                                $convId = $columnIdConvArray[$id];
+                                if($idPatternConv == ""){
+                                    $idPatternConv = $convId;
+                                }else{
+                                    $idPatternConv = $idPatternConv . "," . $convId;
+                                }  
+                            }else{
+                                continue;
+                            }
+                        }
+
+                        $arrayRegisterData = array("CREATE_MENU_ID" => $menuData['menu']['CREATE_MENU_ID'],
+                                                   "UNIQUE_CONSTRAINT_ITEM" => $idPatternConv,
+                                                   "ACCESS_AUTH"    => $menuData['menu']['ACCESS_AUTH'],
+                                                  );
+
+                        $g["page_dir"] = "2100160018";
+
+                        // 登録処理
+                        $arrayResult = registerTableMain(2, $arrayRegisterData, "2100160018", 4);
+
+                        if($arrayResult[0] !== "000"){
+                            throw new Exception();
+                        }
                     }
                 }
 
@@ -421,11 +463,30 @@
                 $convertParamInfoArray = $result;
 
                 //////////////////////////
+                // 一意制約(複数項目)情報を取得
+                //////////////////////////
+                $uniqueConstraintTable = new UniqueConstraintTable($g['objDBCA'], $g['db_model_ch']);
+                $sql = $uniqueConstraintTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+                // SQL実行
+                $result = $uniqueConstraintTable->selectTable($sql);
+                if(!is_array($result)){
+                    $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                    $arrayResult = array("999","",$msg); 
+                    throw new Exception();
+                }
+                $uniqueConstraintArray = $result;
+
+                //////////////////////////
                 // メニュー作成情報を更新
                 //////////////////////////
                 $arrayUpdateData = NULL;
+                $menuCreateFlag = NULL;
                 foreach($createMenuInfoArray as $createMenuInfoData){
                     if($createMenuInfoData['CREATE_MENU_ID'] == $menuData['menu']['CREATE_MENU_ID']){
+                         //メニュー作成履歴のMENU_CREATE_TYPE判定のためMENU_CREATE_STATUSを取得
+                         $menuCreateFlag = $createMenuInfoData['MENU_CREATE_STATUS'];
+
                          //「編集」の場合は「作業対象」「縦メニュー利用」「ホストグループ利用」に変更がないことをチェック
                          if($menuData['type'] === 'update'){
                             if($createMenuInfoData['TARGET'] != $menuData['menu']['TARGET']){
@@ -570,20 +631,12 @@
                                             if($itemData['MAX_LENGTH'] != $createItemInfoData['MAX_LENGTH']){
                                                 $changedFlg = true;
                                             }
-                                            //正規表現
-                                            if($itemData['PREG_MATCH'] != $createItemInfoData['PREG_MATCH']){
-                                                $changedFlg = true;
-                                            }
                                         }
 
                                         //文字列(複数行)の場合
                                         if($itemData['INPUT_METHOD_ID'] == 2){
                                             //最大バイト数
                                             if($itemData['MULTI_MAX_LENGTH'] != $createItemInfoData['MULTI_MAX_LENGTH']){
-                                                $changedFlg = true;
-                                            }
-                                            //正規表現
-                                            if($itemData['MULTI_PREG_MATCH'] != $createItemInfoData['MULTI_PREG_MATCH']){
                                                 $changedFlg = true;
                                             }
                                         }
@@ -687,7 +740,8 @@
                 }
                 // IDがいる項目を更新
                 $repeatCount = 0;
-                foreach($menuData['item'] as &$itemData){
+                $columnIdConvArray = array(); //一意制約の項目ID変換用
+                foreach($menuData['item'] as $key => &$itemData){
                     if($itemData['REPEAT_ITEM'] === true){
                         $repeatCount += 1;
                     }
@@ -765,12 +819,15 @@
                             throw new Exception();
                         }
                         $itemData['CREATE_ITEM_ID'] = json_decode($arrayResult[2],true)['CREATE_ITEM_ID'];
+
+                        //columnIdとITEM_IDを紐つける
+                        $columnIdConvArray[$key] = $itemData['CREATE_ITEM_ID'];
                     }
                 }
                 unset($itemData);
-                
+
                 // IDがいない項目を新規登録
-                foreach($menuData['item'] as &$itemData){
+                foreach($menuData['item'] as $key => &$itemData){
                     if($itemData['CREATE_ITEM_ID'] == ""){
                         if($itemData['REQUIRED'] === true){
                             $required = "1";
@@ -842,6 +899,9 @@
                             throw new Exception();
                         }
                         $itemData['CREATE_ITEM_ID'] = json_decode($arrayResult[2],true)['CREATE_ITEM_ID'];
+
+                        //columnIdとITEM_IDを紐つける
+                        $columnIdConvArray[$key] = $itemData['CREATE_ITEM_ID'];
                     }
                 }
                 unset($itemData);
@@ -931,7 +991,64 @@
                     }
                 }
                 
-                
+                //////////////////////////
+                // 一意制約(複数項目)を登録
+                //////////////////////////
+                //既存の一意制約(複数項目)を廃止
+                foreach($uniqueConstraintArray as $uniqueConstraintData){
+                    if($uniqueConstraintData['CREATE_MENU_ID'] == $menuData['menu']['CREATE_MENU_ID']){
+                        $strNumberForRI = $uniqueConstraintData['UNIQUE_CONSTRAINT_ID'];       // 主キー
+                        $reqDeleteData = array("DISUSE_FLAG"          => "0",
+                                               "UPD_UPDATE_TIMESTAMP" => "T_" . preg_replace("/[^a-zA-Z0-9]/", "", $uniqueConstraintData['LAST_UPDATE_TIMESTAMP'])
+                                              );
+
+                        $g["page_dir"] = "2100160018";
+
+                        // 廃止処理
+                        $intBaseMode = 3;       // 3:廃止、5:復活
+                        $arrayResult = deleteTableMain($intBaseMode, $strNumberForRI, $reqDeleteData, "2100160018", 4);
+                        if($arrayResult[0] !== "000"){
+                            throw new Exception();
+                        }
+                    }
+                }
+
+                //一意制約(複数項目)を登録
+                if($menuData['menu']['UNIQUE_CONSTRAINT'] != ""){
+                    $uniqueConstraintArray = explode(",", $menuData['menu']['UNIQUE_CONSTRAINT']);
+                    foreach($uniqueConstraintArray as $idPattern){
+                        //columnId「i1」をITEM_IDに置換する。
+                        $idPatternArray = explode("-", $idPattern);
+                        $idPatternConv = "";
+                        foreach($idPatternArray as $id){
+                            if(isset($columnIdConvArray[$id])){
+                                $convId = $columnIdConvArray[$id];
+                                if($idPatternConv == ""){
+                                    $idPatternConv = $convId;
+                                }else{
+                                    $idPatternConv = $idPatternConv . "," . $convId;
+                                }  
+                            }else{
+                                continue;
+                            }
+                        }
+
+                        $arrayRegisterData = array("CREATE_MENU_ID" => $menuData['menu']['CREATE_MENU_ID'],
+                                                   "UNIQUE_CONSTRAINT_ITEM" => $idPatternConv,
+                                                   "ACCESS_AUTH"    => $menuData['menu']['ACCESS_AUTH'],
+                                                  );
+
+                        $g["page_dir"] = "2100160018";
+
+                        // 登録処理
+                        $arrayResult = registerTableMain(2, $arrayRegisterData, "2100160018", 4);
+
+                        if($arrayResult[0] !== "000"){
+                            throw new Exception();
+                        }
+                    }
+                }
+
                 //////////////////////////
                 // メニュー作成管理テーブルに登録
                 //////////////////////////
@@ -942,7 +1059,12 @@
                 if($menuData['type'] === 'update'){
                     $insertData['MENU_CREATE_TYPE_ID'] = "3"; //編集
                 }else{
-                    $insertData['MENU_CREATE_TYPE_ID'] = "2"; //初期化
+                    //メニュー作成状態が2(作成済み)の場合は「初期化」に、それ以外(1(未作成))なら「新規作成」
+                    if($menuCreateFlag == "2"){
+                        $insertData['MENU_CREATE_TYPE_ID'] = "2"; //初期化
+                    }else{
+                        $insertData['MENU_CREATE_TYPE_ID'] = "1"; //新規作成
+                    }
                 }
                 $insertData['FILE_NAME'] = "";
                 $insertData['ACCESS_AUTH'] = $menuData['menu']['ACCESS_AUTH'];
@@ -1265,6 +1387,7 @@
             foreach($result as $pdData){
                 $addArray = array();
                 $addArray['LINK_ID']       = $pdData['LINK_ID'];
+                $addArray['MENU_ID']       = $pdData['MENU_ID'];
                 $addArray['LINK_PULLDOWN'] = $pdData['LINK_PULLDOWN'];
                 $filteredData[] = $addArray;
             }
@@ -1282,62 +1405,78 @@
         }
 
         /////////////////////
-        // 参照項目リスト取得
+        // 参照項目リスト取得（メニュー内の項目で選択されている「プルダウン選択」で利用できる「参照項目」のみ取得。ページ内で名前を変換するために利用。）
         /////////////////////
-        function selectReferenceItemList(){
+        function selectReferenceItemList($itemArray){
             // グローバル変数宣言
             global $g;
             
             // ローカル変数宣言
             $arrayResult = array();
 
-            require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
-            $referenceItemTable = new ReferenceItemTable($g["objDBCA"], $g["db_model_ch"]);
-            $sql = $referenceItemTable->createSselect("WHERE DISUSE_FLAG = '0' ORDER BY LINK_ID, DISP_SEQ");
-            $result = $referenceItemTable->selectTable($sql);
-            if(!is_array($result)){
-                $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
-                $arrayResult = array("999","", $result);
-                return makeAjaxProxyResultStream($arrayResult);
-            }
+            if(!empty($itemArray)){
+                require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
 
-            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
-            $obj = new RoleBasedAccessControl($g['objDBCA']);
-            $ret = $obj->getAccountInfo($g['login_id']);
-            if($ret === false) {
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
-                $arrayResult = array("999","", "");
-                return makeAjaxProxyResultStream($arrayResult);
-            }
+                //項目に使われている「プルダウン選択」のLINK_IDを抽出
+                $targetOtherMenuLinkIdList = array();
+                foreach($itemArray as $itemData){
+                    if($itemData['INPUT_METHOD_ID'] == 7){
+                        array_push($targetOtherMenuLinkIdList, $itemData['OTHER_MENU_LINK_ID']);
+                    }
+                }
+                //重複排除
+                $targetOtherMenuLinkIdList = array_unique($targetOtherMenuLinkIdList);
 
-            // 権限があるデータのみに絞る
-            $ret = $obj->chkRecodeArrayAccessPermission($result);
-            if($ret === false) {
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
-                $arrayResult = array("999","", "");
-                return makeAjaxProxyResultStream($arrayResult);
-            }
+                //他メニュー連携IDから、そのメニューのIDを取得
+                $targetMenuIdList = array();
+                $otherMenuLinkTable = new OtherMenuLinkTable($g["objDBCA"], $g["db_model_ch"]);
+                foreach($targetOtherMenuLinkIdList as $linkId){
+                    $sql = $otherMenuLinkTable->createSselect("WHERE DISUSE_FLAG = '0'AND LINK_ID = " . $linkId);
 
-            $filteredData = array();
+                    // SQL実行
+                    $result = $otherMenuLinkTable->selectTable($sql);
+                    if(!is_array($result)){
+                        $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                        $arrayResult = array("999","", $result);
+                        return makeAjaxProxyResultStream($arrayResult);
+                    }
+                    if(!empty($result)){
+                        array_push($targetMenuIdList, $result[0]['MENU_ID']);
+                    }
+                }
+                //重複排除
+                $targetMenuIdList = array_unique($targetMenuIdList);
 
-            foreach($result as $pdData){
-                $addArray = array();
-                $addArray['ITEM_ID']         = $pdData['ITEM_ID'];
-                $addArray['LINK_ID']         = $pdData['LINK_ID'];
-                $addArray['DISP_SEQ']        = $pdData['DISP_SEQ'];
-                $addArray['COL_GROUP_NAME']  = $pdData['COL_GROUP_NAME'];
-                $addArray['ITEM_NAME']       = $pdData['ITEM_NAME'];
-                $addArray['MASTER_COL_FLAG'] = $pdData['MASTER_COL_FLAG'];
-                $filteredData[] = $addArray;
-            }
-            $arrayResult = array("000","", json_encode($filteredData));
+                //メニューIDにヒットする参照項目を取得
+                $filteredData = array();
+                $referenceItemTable = new ReferenceItemTable($g["objDBCA"], $g["db_model_ch"]);
+                foreach($targetMenuIdList as $menuId){
+                    $sql = $referenceItemTable->createSselect("WHERE DISUSE_FLAG = '0' AND MENU_ID = " . $menuId ." ORDER BY DISP_SEQ");
+                    $result = $referenceItemTable->selectTable($sql);
+                    if(!is_array($result)){
+                        $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                        $arrayResult = array("999","", $result);
+                        return makeAjaxProxyResultStream($arrayResult);
+                    }
 
-            if($arrayResult[0]=="000"){
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
-            }else if(intval($arrayResult[0])<500){
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+                    foreach($result as $pdData){
+                        $addArray = array();
+                        $addArray['ITEM_ID']         = $pdData['ITEM_ID'];
+                        $addArray['LINK_ID']         = $pdData['LINK_ID'];
+                        $addArray['MENU_ID']         = $pdData['MENU_ID'];
+                        $addArray['DISP_SEQ']        = $pdData['DISP_SEQ'];
+                        $addArray['COL_GROUP_NAME']  = $pdData['COL_GROUP_NAME'];
+                        $addArray['ITEM_NAME']       = $pdData['ITEM_NAME'];
+                        $addArray['ORIGINAL_MENU_FLAG'] = $pdData['ORIGINAL_MENU_FLAG'];
+                        $filteredData[] = $addArray;
+                    }
+                }
+
+                $arrayResult = array("000","", json_encode($filteredData));
+
             }else{
-                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $filteredData = array();
+                $arrayResult =  array("000","", json_encode($filteredData));
             }
 
             return makeAjaxProxyResultStream($arrayResult);
@@ -1354,6 +1493,7 @@
             // ローカル変数宣言
             $arrayResult = array();
             $returnDataArray = array();
+            $userIdCreateParam = '-101601'; //「メニュー作成機能」ユーザID
 
             require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
             
@@ -1432,11 +1572,48 @@
                     throw new Exception();
                 }
                 $convertParamInfoArray = $result;
+
+                //////////////////////////
+                // 一意制約(複数項目)情報を取得
+                //////////////////////////
+                $uniqueConstraintTable = new UniqueConstraintTable($g['objDBCA'], $g['db_model_ch']);
+                $sql = $uniqueConstraintTable->createSselect("WHERE DISUSE_FLAG = '0'");
+
+                // SQL実行
+                $result = $uniqueConstraintTable->selectTable($sql);
+                if(!is_array($result)){
+                    $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                    $arrayResult = array("999","",$msg); 
+                    throw new Exception();
+                }
+                $uniqueConstraintArray = $result;
                 
                 // メニュー情報詰め込み
                 $findFlag = false;
                 foreach($createMenuInfoArray as $createMenuInfoData){
                     if($createMenuInfoData['CREATE_MENU_ID'] == $createMenuId){
+                        $dispLastUpdateTimestamp = $createMenuInfoData['LAST_UPDATE_TIMESTAMP'];
+
+                        //最終更新者が-101601(メニュー作成機能)の場合、履歴テーブルから最終更新者が「メニュー作成機能」以外で最新の対象を取得する。
+                        if($createMenuInfoData['LAST_UPDATE_USER'] == $userIdCreateParam){
+                            $sql = $createMenuInfoTable->createSselectJnl("WHERE LAST_UPDATE_TIMESTAMP = (SELECT max(LAST_UPDATE_TIMESTAMP) FROM F_CREATE_MENU_INFO_JNL WHERE DISUSE_FLAG = '0' AND NOT LAST_UPDATE_USER = :USER_ID_CREATE_PARAM AND CREATE_MENU_ID = :CREATE_MENU_ID)");
+                            $sqlBind = array('CREATE_MENU_ID' => $createMenuId, 'USER_ID_CREATE_PARAM' => $userIdCreateParam);
+
+                            // SQL実行
+                            $result = $createMenuInfoTable->selectTable($sql, $sqlBind);
+                            if(!is_array($result)){
+                                $msg = $g['objMTS']->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                                $arrayResult = array("999","",$msg); 
+                                throw new Exception();
+                            }
+                            $latestCreateMenuInfoArray = $result;
+                            foreach($latestCreateMenuInfoArray as $latestData){
+                                web_log(json_encode($latestData));
+                                $createMenuInfoData['LAST_UPDATE_USER'] = $latestData['LAST_UPDATE_USER']; //最終更新ユーザを差し替え
+                                $dispLastUpdateTimestamp = $latestData['LAST_UPDATE_TIMESTAMP']; //表示用最終更新日時を差し替え
+                            }
+                        }
+
                         $findFlag = true;
                         $username = "";
                         foreach($accountListArray as $accountListData){
@@ -1445,7 +1622,7 @@
                             }
                         }
                         
-                        $date = DateTime::createFromFormat('Y-m-d H:i:s.u', $createMenuInfoData['LAST_UPDATE_TIMESTAMP']);
+                        $date = DateTime::createFromFormat('Y-m-d H:i:s.u', $dispLastUpdateTimestamp);
                         
                         $returnDataArray['menu'] = array(
                             "CREATE_MENU_ID"           => $createMenuInfoData['CREATE_MENU_ID'],
@@ -1456,6 +1633,7 @@
                             "MENUGROUP_FOR_INPUT"      => $createMenuInfoData['MENUGROUP_FOR_INPUT'],
                             "MENUGROUP_FOR_SUBST"      => $createMenuInfoData['MENUGROUP_FOR_SUBST'],
                             "MENUGROUP_FOR_VIEW"       => $createMenuInfoData['MENUGROUP_FOR_VIEW'],
+                            "MENU_CREATE_STATUS"       => $createMenuInfoData['MENU_CREATE_STATUS'],
                             "DISP_SEQ"                 => $createMenuInfoData['DISP_SEQ'],
                             "DESCRIPTION"              => $createMenuInfoData['DESCRIPTION'],
                             "ACCESS_AUTH"              => $createMenuInfoData['ACCESS_AUTH'],
@@ -1753,7 +1931,32 @@
                 
                 $returnDataArray['menu']['number-item']  = count($returnDataArray['item']);
                 $returnDataArray['menu']['number-group'] = count($returnDataArray['group']);
-                
+
+                //一意制約(複数項目)
+                $addUniqueConstraintArray = array();
+                foreach($uniqueConstraintArray as $uniqueConstraintData){
+                    if($uniqueConstraintData['CREATE_MENU_ID'] == $createMenuId){
+                        array_push($addUniqueConstraintArray, $uniqueConstraintData['UNIQUE_CONSTRAINT_ITEM']);
+                    }
+                }
+
+                //UNIQUE_CONSTRAINT_ITEMのID部分をcolumnId（「i1」「i2」など）に変換し配列に格納。
+                $currentUniqueConstraintArray = array();
+                foreach($addUniqueConstraintArray as $idPattern){
+                    $idPatternArray = explode(",", $idPattern);
+                    $currentPatternArray= array();
+                    foreach($idPatternArray as $id){
+                        foreach($returnDataArray['item'] as $key => $item){
+                            if($id == $item['CREATE_ITEM_ID']){
+                                array_push($currentPatternArray, array($key=>$item['ITEM_NAME']));
+                            }
+                        }
+                    }
+                    array_push($currentUniqueConstraintArray, $currentPatternArray);
+                }
+                $returnDataArray['menu']['unique-constraints-current'] = $currentUniqueConstraintArray;
+
+
                 $arrayResult = array("000", "",json_encode($returnDataArray));
 
                 if($arrayResult[0]=="000"){

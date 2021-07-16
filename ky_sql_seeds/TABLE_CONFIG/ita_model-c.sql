@@ -57,6 +57,8 @@ ANSIBLE_STORAGE_PATH_ANS        %VARCHR%(256)                     ,
 SYMPHONY_STORAGE_PATH_ANS       %VARCHR%(256)                     ,
 CONDUCTOR_STORAGE_PATH_ANS      %VARCHR%(256)                     ,
 ANSIBLE_EXEC_OPTIONS            %VARCHR%(512)                     , -- ansible-playbook実行時のオプションパラメータ
+ANSIBLE_PROXY_ADDRESS           %VARCHR%(128)                     ,
+ANSIBLE_PROXY_PORT              %INT%                             ,
 -- ansible独自情報
 ANSIBLE_EXEC_USER               %VARCHR%(64)                      , -- ansible-playbook実行ユーザー
 ANSIBLE_ACCESS_KEY_ID           %VARCHR%(64)                      , 
@@ -104,6 +106,8 @@ ANSIBLE_STORAGE_PATH_ANS        %VARCHR%(256)                     ,
 SYMPHONY_STORAGE_PATH_ANS       %VARCHR%(256)                     ,
 CONDUCTOR_STORAGE_PATH_ANS      %VARCHR%(256)                     ,
 ANSIBLE_EXEC_OPTIONS            %VARCHR%(512)                     , -- ansible-playbook実行時のオプションパラメータ
+ANSIBLE_PROXY_ADDRESS           %VARCHR%(128)                     ,
+ANSIBLE_PROXY_PORT              %INT%                             ,
 -- ansible独自情報
 ANSIBLE_EXEC_USER               %VARCHR%(64)                      , -- ansible-playbook実行ユーザー
 ANSIBLE_ACCESS_KEY_ID           %VARCHR%(64)                      , 
@@ -135,7 +139,7 @@ CREATE TABLE B_ANS_TWR_HOST (
   ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
   ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
-  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_PASSWORD           TEXT                              , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
   ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
@@ -160,7 +164,7 @@ CREATE TABLE B_ANS_TWR_HOST_JNL (
   ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
   ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
-  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_PASSWORD           TEXT                              , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
   ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
@@ -368,6 +372,47 @@ ANS_TEMPLATE_FILE                 %VARCHR%(256)                    ,
 VAR_STRUCT_ANAL_JSON_STRING_FILE  %VARCHR%(100)                    , -- 変数解析結果を保存する為のFileUploadカラム(隠し)
 VARS_LIST                         %VARCHR%(8192)                   , -- 変数定義
 ROLE_ONLY_FLAG                    %VARCHR%(1)                      , -- 多段変数定義有無　1:定義有
+
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+-- ------------------------------
+-- -- Pioner LANGマスタ
+-- ------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_PNS_LANG_MASTER
+(
+ID                                %INT%                            ,
+
+NAME                              %VARCHR%(64)                     ,
+
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+
+PRIMARY KEY (ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_PNS_LANG_MASTER_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+ID                                %INT%                            ,
+
+NAME                              %VARCHR%(64)                     ,
 
 DISP_SEQ                          %INT%                            , -- 表示順序
 ACCESS_AUTH                       TEXT                             ,

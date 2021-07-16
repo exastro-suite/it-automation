@@ -17,7 +17,7 @@
     require_once("{$g['root_dir_path']}/libs/webcommonlibs/table_control_agent/08_dumpToFile.php");
     require_once("{$g['root_dir_path']}/libs/webcommonlibs/table_control_agent/07_TableIUbyFIle.php");
 
-    function ReSTCommandDeal($strCalledRestVer,$strCommand,$objJSONOfReceptedData,$objTable){
+    function ReSTCommandDeal($strCalledRestVer,$strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg=false){
         global $g;
         $strFxName = __FUNCTION__;
 
@@ -29,14 +29,14 @@
                                       );
         }
         else{
-            if( $strCommand == "INFO" || $strCommand == "GET" || $strCommand == "FILTER" ){
+            if( $strCommand == "INFO" || $strCommand == "GET" || $strCommand == "FILTER" || $strCommand == "FILTER_DATAONLY"){
                 //----GETまたはFILTER
-                $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable);
+                $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
                 //GETまたはFILTER----
             }
             else if( $strCommand == "EDIT" ){
                 //----EDIT
-                $aryForResultData = ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable);
+                $aryForResultData = ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
                 //EDIT----
             }
             else{
@@ -89,7 +89,7 @@
         //JSON形式で返す----
     }
 
-    function ReSTCommandFilterExecute($strCommand, $objJSONOfReceptedData, $objTable){
+    function ReSTCommandFilterExecute($strCommand, $objJSONOfReceptedData, $objTable, $strApiFlg=false){
         global $g;
         // ----ローカル変数宣言
         $intControlDebugLevel01=250;
@@ -139,7 +139,7 @@
                 throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
 
-            if( $strCommand == "GET" || $strCommand == "FILTER" ){
+            if( $strCommand == "GET" || $strCommand == "FILTER" || $strCommand == "FILTER_DATAONLY" ){
                 //----全部一覧または一部一覧の取得
                 $aryLabelListOfOpendColumn = $objListFormatter->getLabelListOfOpendColumn(true);
 
@@ -251,7 +251,7 @@
                                                                             )
                                                               );
 
-                $aryResultOfDump = dumpDataFromTable(array('to_area_type'=>'toReturn'), $objTable, $tmpArrayVariant, $tmpArraySetting);
+                $aryResultOfDump = dumpDataFromTable(array('to_area_type'=>'toReturn'), $objTable, $tmpArrayVariant, $tmpArraySetting, $strApiFlg);
                 $aryForResultData = $aryResultOfDump[0];
                 if( $aryResultOfDump[1] !== null ){
                     //----エラー発生
@@ -276,11 +276,20 @@
                     //----正常終了（リスト全体[ヘッダーとレコード]とレコード行を返す）
                     $intResultStatusCode = 200;
                     $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
-                    $aryForResultData['resultdata'] = array('CONTENTS'=>array('RECORD_LENGTH'=>count($aryResultOfDump[0]) - 1,
+                    if( $strCommand == "FILTER_DATAONLY" ){
+                        array_shift($aryResultOfDump[0]);
+                        $aryForResultData['resultdata'] = array('CONTENTS'=>array('RECORD_LENGTH'=>count($aryResultOfDump[0]),
                                                                               'BODY'=>$aryResultOfDump[0],
                                                                               'UPLOAD_FILE'=>$aryResultOfDump[4],
                                                                              )
                                                            );
+                    }else{
+                        $aryForResultData['resultdata'] = array('CONTENTS'=>array('RECORD_LENGTH'=>count($aryResultOfDump[0]) - 1,
+                                                                              'BODY'=>$aryResultOfDump[0],
+                                                                              'UPLOAD_FILE'=>$aryResultOfDump[4],
+                                                                             )
+                                                           );
+                    }
                 }
                 //全部一覧または一部一覧の取得----
             }
@@ -316,11 +325,11 @@
         }
         $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
                               'ResultData'=>$aryForResultData);
-        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);        
         return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
     }
 
-    function ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable){
+    function ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg=false){
         global $g;
         // ----ローカル変数宣言
         $intControlDebugLevel01=250;
@@ -366,7 +375,7 @@
 
             $tmpArrayVariant['objTable'] = $objTable;
 
-            $aryResultOfTableIUD = tableIUDByQMFile($tmpStrTempFilename,null,2,$strFormatterId,$tmpArrayVariant,$tmpArraySetting);
+            $aryResultOfTableIUD = tableIUDByQMFile($tmpStrTempFilename,null,2,$strFormatterId,$tmpArrayVariant,$tmpArraySetting,$strApiFlg);
             $aryNormalResultOfEditExecute = $aryResultOfTableIUD[4];
             $aryRawResultOfEditExecute = $aryResultOfTableIUD[5];
             if( $aryResultOfTableIUD[1] !== null ){

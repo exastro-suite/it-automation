@@ -981,6 +981,10 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
         $strDRSRPathFromWeb = $row_if_info[$strColIdOfDRSRPathFromWebSv];
         $strDRSRPathFromDrv = $row_if_info[$strColIdOfDRSRPathFromDrvSv];
 
+        $proxySetting              = array();
+        $proxySetting['address']   = $row_if_info["ANSIBLE_PROXY_ADDRESS"];
+        $proxySetting['port']      = $row_if_info["ANSIBLE_PROXY_PORT"];
+
         if($strExecMode == DF_EXEC_MODE_ANSIBLE) {
             $strProtocol        = $row_if_info[$strColIdOfRestAPIProtocol];
             $strHostname        = $row_if_info[$strColIdOfRestAPIHostName];
@@ -1011,7 +1015,8 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
                                                        ,$strSecretAccessKey
                                                        ,$strRequestURI
                                                        ,$strMethod
-                                                       ,$aryRequestContents );
+                                                       ,$aryRequestContents
+                                                       ,$proxySetting );
         
             // 結果判定
             if( $aryRestAPIResponse['StatusCode'] != 200 ){
@@ -1044,7 +1049,8 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
             $restApiCaller = new RestApiCaller($strProtocol,
                                                $strHostname,
                                                $strPort,
-                                               $strAuthToken); // 暗号復号は内部処理
+                                               $strAuthToken,
+                                               $proxySetting); // 暗号復号は内部処理
 
             $log_file_prefix = 'ky_pioneer_' . basename( __FILE__, '.php' ) . "_";
             $restApiCaller->setUp($aryVariant['root_dir_path'] . '/libs/backyardlibs/backyard_log_output.php', $aryVariant['root_dir_path'] . '/logs/backyardlogs', $log_file_prefix, 'NORMAL', ' ', ' ');

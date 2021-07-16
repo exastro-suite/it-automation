@@ -31,6 +31,12 @@ ita_language:ja_JP
 #   the RHEL7 and RHEL8 libraries, please do so in advance.
 linux_os:
 
+# Install MariaDB provided by distro or not.
+#   yes : Install MariaDB provided by distro
+#   no  : Install Official MariaDB (https://mariadb.org/)
+# Note: If "linux_os" is "CentOS7" or "RHEL7", ignore this flag and install distro's one.
+distro_mariadb:yes
+
 # Enter the MariaDB root user's password
 # e.g) db_root_password:sample_root_password
 db_root_password:
@@ -47,12 +53,12 @@ db_password:
 # yes : need
 # no  : no need
 ita_base:yes
-material:no
 createparam:yes
 hostgroup:yes
 ansible_driver:yes
 cobbler_driver:no
 terraform_driver:yes
+cicd_for_iac:no
 
 # Enter the ita domain name.
 # e.g) ita_domain:exastro-it-automation.local

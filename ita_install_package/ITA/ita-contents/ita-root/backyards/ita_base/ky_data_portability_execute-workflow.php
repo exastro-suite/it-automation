@@ -311,7 +311,7 @@ function registData($record, &$importedTableAry){
 
     // キーと値の関係を維持しつつ、値を基準に、昇順で並べ替える
     asort($lockLAry);
-    array_unique($lockLAry);
+    $lockLAry = array_unique($lockLAry);
 
     // シーケンステーブルをロックする
     foreach($lockLAry as $strSeqName) {
@@ -1417,6 +1417,7 @@ function setStatus($taskId, $status, $uploadFile=NULL){
         'ABOLISHED_TYPE' => '',
         'SPECIFIED_TIMESTAMP' => '',
         'FILE_NAME' => '',
+        'EXECUTE_USER' => '',
         'DISP_SEQ' => '',
         'NOTE' => '',
         'DISUSE_FLAG' => '',
@@ -1442,6 +1443,7 @@ function setStatus($taskId, $status, $uploadFile=NULL){
         'ABOLISHED_TYPE' => $resAry[0]['ABOLISHED_TYPE'],
         'SPECIFIED_TIMESTAMP' => $resAry[0]['SPECIFIED_TIMESTAMP'],
         'FILE_NAME' => $fileName,
+        'EXECUTE_USER' => $resAry[0]['EXECUTE_USER'],
         'DISP_SEQ' => $resAry[0]['DISP_SEQ'],
         'NOTE' => $resAry[0]['NOTE'],
         'DISUSE_FLAG' => $resAry[0]['DISUSE_FLAG'],
@@ -1543,7 +1545,7 @@ function getRecordById($id){
     global $objDBCA, $objMTS;
 
     $errFlg = 0;
-    $sql  = 'SELECT TASK_ID, TASK_STATUS, DP_TYPE, DP_MODE, ABOLISHED_TYPE, SPECIFIED_TIMESTAMP, FILE_NAME, DISP_SEQ, NOTE, DISUSE_FLAG,';
+    $sql  = 'SELECT TASK_ID, TASK_STATUS, DP_TYPE, DP_MODE, ABOLISHED_TYPE, SPECIFIED_TIMESTAMP, FILE_NAME, EXECUTE_USER, DISP_SEQ, NOTE, DISUSE_FLAG,';
     $sql .= ' LAST_UPDATE_TIMESTAMP, LAST_UPDATE_USER';
     $sql .= ' FROM B_DP_STATUS';
     $sql .= ' WHERE DISUSE_FLAG="0" AND TASK_ID = :TASK_ID';
@@ -2303,7 +2305,7 @@ function getInfoOfLTUsingIdOfMenuForDBtoDBLink($strMenuIdNumeric){
             unset($retUploadAry[$key]);
         }
     }
-    array_values($retUploadAry);
+    $retUploadAry = array_values($retUploadAry);
 
     return array($retAry, $retUploadAry);
 }

@@ -480,6 +480,7 @@ function insertTask($dp_info){
         'ABOLISHED_TYPE' => $abolished_type,
         "SPECIFIED_TIMESTAMP" => $specified_timestamp,
         'FILE_NAME' => '',
+        'EXECUTE_USER' => $g["login_id"],
         'DISP_SEQ' => '',
         'NOTE' => '',
         'DISUSE_FLAG' => '',
@@ -500,11 +501,12 @@ function insertTask($dp_info){
         'ABOLISHED_TYPE' => $abolished_type,
         "SPECIFIED_TIMESTAMP" => $specified_timestamp,
         'FILE_NAME' => $filePath,
+        'EXECUTE_USER' => $g["login_id"],
         'DISP_SEQ' => '',
         'NOTE' => '',
         'DISUSE_FLAG' => '0',
         'LAST_UPDATE_TIMESTAMP' => '',
-        'LAST_UPDATE_USER' => ACCOUNT_NAME
+        'LAST_UPDATE_USER' => $g["login_id"]
     );
 
     $resAry = makeSQLForUtnTableUpdate(

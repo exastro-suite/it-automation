@@ -180,6 +180,7 @@ yum_repository() {
 
             # Check Creating repository
             if [[ "$repo" =~ .*epel-release.* ]]; then
+                yum-config-manager --enable epel >> "$ITA_BUILDER_LOG_FILE" 2>&1
                 create_repo_check epel >> "$ITA_BUILDER_LOG_FILE" 2>&1
             elif [[ "$repo" =~ .*remi-release-7.* ]]; then
                 create_repo_check remi-safe >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -245,7 +246,7 @@ yum_repository() {
 mariadb_repository() {
     #Not used for offline installation
     if [ "${REPOSITORY}" != "yum_all" ]; then
-        if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+        if [ "${distro_mariadb}" == "no" ]; then
             local repo=$1
 
             curl -sS "$repo" | bash >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -376,14 +377,15 @@ configure_yum_env() {
             yum_install ${YUM__ENV_PACKAGE}
         else
             # initialize /var/lib/ita
-            rm -rf $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            mkdir -p $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ ! -e $LOCAL_BASE_DIR ]; then
+                mkdir -p $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            fi
             cp -R "$DOWNLOAD_BASE_DIR"/* "$ITA_EXT_FILE_DIR" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             cp -R $ITA_EXT_FILE_DIR/yum/ $LOCAL_BASE_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
             yum localinstall -y --nogpgcheck ${YUM__ENV_PACKAGE} >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
-            ls /etc/yum.repos.d/ita.repo >> "$ITA_BUILDER_LOG_FILE" 2>&1 | xargs grep "yum_all" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            ls /etc/yum.repos.d/ita.repo 2>&1 | tee -a "$ITA_BUILDER_LOG_FILE" 2>&1 | xargs grep -s "yum_all" >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
             if [ $? != 0 ]; then
                 echo "["yum_all"]
@@ -391,7 +393,7 @@ name="yum_all"
 baseurl=file://"${YUM_ALL_PACKAGE_LOCAL_DIR}"
 gpgcheck=0
 enabled=0
-" >> /etc/yum.repos.d/ita.repo
+" > /etc/yum.repos.d/ita.repo
 
                 #create repository "ita_repo"
                 createrepo "${YUM_ALL_PACKAGE_LOCAL_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -464,7 +466,60 @@ configure_mariadb() {
         mkdir -p -m 777 /var/log/mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
-    # mysql_secure_installationへ送信するdb_root_passwordのエスケープをしておく
+    # check MariaDB is installed
+    # The command "yum list" is case insensitive, so both "mariadb-server" and "MariaDB-Server" will be matched.
+    yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+        log "Install and initialize MariaDB"
+        install_mariadb
+        initialize_mariadb
+    else
+        log "Confirm whether root password has been changed"
+        env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ $? == 0 ]; then
+            log "Root password of MariaDB is already setting."
+        else
+            log "Initialize MariaDB"
+            initialize_mariadb
+        fi
+    fi
+}
+
+
+# MariaDB (install)
+install_mariadb() {
+    # Determine RPM repository and package names
+    if [ "${distro_mariadb}" = "yes" ]; then
+        local MARIADB_PACKAGE_NAMES=(mariadb mariadb-server expect)
+    else
+        mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
+        local MARIADB_PACKAGE_NAMES=(MariaDB MariaDB-server expect)
+    fi
+
+    # Install MariaDB packages
+    echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    yum install -y "${MARIADB_PACKAGE_NAMES[@]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+    # Check yum status
+    if [ $? != 0 ]; then
+        log "ERROR:Installation failed[MariaDB]"
+        ERR_FLG="false"
+        func_exit_and_delete_file
+    fi
+
+    # Check installation status
+    yum_package_check "${MARIADB_PACKAGE_NAMES[@]}"
+}
+
+# MariaDB (initialize)
+initialize_mariadb() {
+    # enable and start MariaDB Server
+    systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    error_check
+    systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    error_check
+
+    # mariadb-secure-installationへ送信するdb_root_passwordのエスケープをしておく
     local send_db_root_password="$db_root_password"
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\\/\\\\\\\\/g')
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\$/\\\\\\$/g')
@@ -472,230 +527,77 @@ configure_mariadb() {
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\[/\\\\\\[/g')
     send_db_root_password=$(echo "$send_db_root_password"|sed -e 's/\t/\\011/g')
 
-    if [ "$LINUX_OS" == "RHEL7" -o "$LINUX_OS" == "CentOS7" ]; then
-        #Confirm whether it is installed
-        yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        if [ $? == 0 ]; then
-            log "MariaDB has already been installed."
+    which mysql_secure_installation >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    if [ $? -eq 0 ]; then
+        SECURE_COMMAND="mysql_secure_installation"
+    else
+        SECURE_COMMAND="mariadb-secure-installation"
+    fi
 
-            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-
-            #Confirm whether root password has been changed
-            env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            if [ $? == 0 ]; then
-                log "Root password of MariaDB is already setting."
-            else
-                expect -c "
-                    set timeout -1
-                    spawn mysql_secure_installation
-                    expect \"Enter current password for root \\(enter for none\\):\"
-                    send \"\\r\"
-                    expect -re \"Switch to unix_socket authentication.* $\"
-                    send \"\\r\"
+    # Exec mariadb-secure-installation with expect
+    #   see https://mariadb.com/kb/en/authentication-plugin-unix-socket/
+    if [ "${distro_mariadb}" = "yes" ] && [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+        # Exactly say, MariaDB 10.4.2 or lower
+        expect -c "
+            set timeout -1
+            spawn ${SECURE_COMMAND}
+            expect \"Enter current password for root \\(enter for none\\):\"
+            send \"\\r\"
+            expect { 
+                -re \"Switch to unix_socket authentication.* $\" {
+                    send \"n\\r\"
                     expect -re \"Change the root password\\?.* $\"
-                    send \"\\r\"
-                    expect \"New password:\"
-                    send \""${send_db_root_password}\\r"\"
-                    expect \"Re-enter new password:\"
-                    send \""${send_db_root_password}\\r"\"
-                    expect -re \"Remove anonymous users\\?.* $\"
                     send \"Y\\r\"
-                    expect -re \"Disallow root login remotely\\?.* $\"
-                    send \"Y\\r\"
-                    expect -re \"Remove test database and access to it\\?.* $\"
-                    send \"Y\\r\"
-                    expect -re \"Reload privilege tables now\\?.* $\"
-                    send \"Y\\r\"
-                " >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                
-                # copy MariaDB charset file
-                copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                
-                # restart MariaDB Server
-                #--------CentOS7/8,RHEL7/8--------
-                systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                error_check
-            fi
-            
-        else
-
-            # enable MariaDB repository
-            mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
-
-            # install some packages
-            echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            #Installation
-            yum install -y MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
-
-            #Check installation
-            if [ $? != 0 ]; then
-                log "ERROR:Installation failed[MariaDB]"
-                ERR_FLG="false"
-                func_exit_and_delete_file
-            fi
-            
-            yum_package_check MariaDB MariaDB-server expect
-
-            # enable and start (initialize) MariaDB Server
-            #--------CentOS7,RHEL7--------
-            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-            
-            expect -c "
-                set timeout -1
-                spawn mysql_secure_installation
-                expect \"Enter current password for root \\(enter for none\\):\"
-                send \"\\r\"
-                expect -re \"Switch to unix_socket authentication.* $\"
-                send \"n\\r\"
-                expect -re \"Change the root password\\?.* $\"
-                send \"Y\\r\"
-                expect \"New password:\"
-                send \""${send_db_root_password}\\r"\"
-                expect \"Re-enter new password:\"
-                send \""${send_db_root_password}\\r"\"
-                expect -re \"Remove anonymous users\\?.* $\"
-                send \"Y\\r\"
-                expect -re \"Disallow root login remotely\\?.* $\"
-                send \"Y\\r\"
-                expect -re \"Remove test database and access to it\\?.* $\"
-                send \"Y\\r\"
-                expect -re \"Reload privilege tables now\\?.* $\"
-                send \"Y\\r\"
-            " >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            
-            # copy MariaDB charset file
-            copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            
-            # restart MariaDB Server
-            #--------CentOS7,RHEL7--------
-            systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-
-        fi
-    fi
-
-    if [ "$LINUX_OS" == "RHEL8" -o "$LINUX_OS" == "CentOS8" ]; then
-        #Confirm whether it is installed
-        yum list installed mariadb-server >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        if [ $? == 0 ]; then
-            log "MariaDB has already been installed."
-
-            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-
-            #Confirm whether root password has been changed
-            env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            if [ $? == 0 ]; then
-                log "Root password of MariaDB is already setting."
-            else
-                expect -c "
-                    set timeout -1
-                    spawn mysql_secure_installation
-                    expect \"Enter current password for root \\(enter for none\\):\"
-                    send \"\\r\"
-                    expect { 
-                        -re \"Switch to unix_socket authentication.* $\" {
-                            send \"n\\r\"
-                            expect -re \"Change the root password\\?.* $\"
-                            send \"Y\\r\"
-                        }
-                        -re \"Set root password\\?.* $\" {
-                            send \"Y\\r\"
-                        }
-                    }
-                    expect \"New password:\"
-                    send \""${send_db_root_password}\\r"\"
-                    expect \"Re-enter new password:\"
-                    send \""${send_db_root_password}\\r"\"
-                    expect -re \"Remove anonymous users\\?.* $\"
-                    send \"Y\\r\"
-                    expect -re \"Disallow root login remotely\\?.* $\"
-                    send \"Y\\r\"
-                    expect -re \"Remove test database and access to it\\?.* $\"
-                    send \"Y\\r\"
-                    expect -re \"Reload privilege tables now\\?.* $\"
-                    send \"Y\\r\"
-                " >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                
-                # copy MariaDB charset file
-                copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                
-                # restart MariaDB Server
-                #--------CentOS8,RHEL8--------
-                systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-                error_check
-            fi
-            
-        else
-
-            # install some packages
-            echo "----------Installation[MariaDB]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            #Installation
-            yum install -y mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
-
-            #Check installation
-            if [ $? != 0 ]; then
-                log "ERROR:Installation failed[MariaDB]"
-                ERR_FLG="false"
-                func_exit_and_delete_file
-            fi
-            
-            yum_package_check mariadb mariadb-server expect
-
-            # enable and start (initialize) MariaDB Server
-            #--------CentOS8,RHEL8--------
-            systemctl enable mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-            systemctl start mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-            
-            expect -c "
-                set timeout -1
-                spawn mysql_secure_installation
-                expect \"Enter current password for root \\(enter for none\\):\"
-                send \"\\r\"
-                expect { 
-                    -re \"Switch to unix_socket authentication.* $\" {
-                        send \"n\\r\"
-                        expect -re \"Change the root password\\?.* $\"
-                        send \"Y\\r\"
-                    }
-                    -re \"Set root password\\?.* $\" {
-                        send \"Y\\r\"
-                    }
                 }
-                expect \"New password:\"
-                send \""${send_db_root_password}\\r"\"
-                expect \"Re-enter new password:\"
-                send \""${send_db_root_password}\\r"\"
-                expect -re \"Remove anonymous users\\?.* $\"
-                send \"Y\\r\"
-                expect -re \"Disallow root login remotely\\?.* $\"
-                send \"Y\\r\"
-                expect -re \"Remove test database and access to it\\?.* $\"
-                send \"Y\\r\"
-                expect -re \"Reload privilege tables now\\?.* $\"
-                send \"Y\\r\"
-            " >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            
-            # copy MariaDB charset file
-            copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            
-            # restart MariaDB Server
-            #--------CentOS8,RHEL8--------
-            systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
-            error_check
-
-        fi
+                -re \"Set root password\\?.* $\" {
+                    send \"Y\\r\"
+                }
+            }
+            expect \"New password:\"
+            send \""${send_db_root_password}\\r"\"
+            expect \"Re-enter new password:\"
+            send \""${send_db_root_password}\\r"\"
+            expect -re \"Remove anonymous users\\?.* $\"
+            send \"Y\\r\"
+            expect -re \"Disallow root login remotely\\?.* $\"
+            send \"Y\\r\"
+            expect -re \"Remove test database and access to it\\?.* $\"
+            send \"Y\\r\"
+            expect -re \"Reload privilege tables now\\?.* $\"
+            send \"Y\\r\"
+        " >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    else
+        # Exactly say, MariaDB 10.4.3 or higher
+        expect -c "
+            set timeout -1
+            spawn ${SECURE_COMMAND}
+            expect \"Enter current password for root \\(enter for none\\):\"
+            send \"\\r\"
+            expect -re \"Switch to unix_socket authentication.* $\"
+            send \"n\\r\"
+            expect -re \"Change the root password\\?.* $\"
+            send \"Y\\r\"
+            expect \"New password:\"
+            send \""${send_db_root_password}\\r"\"
+            expect \"Re-enter new password:\"
+            send \""${send_db_root_password}\\r"\"
+            expect -re \"Remove anonymous users\\?.* $\"
+            send \"Y\\r\"
+            expect -re \"Disallow root login remotely\\?.* $\"
+            send \"Y\\r\"
+            expect -re \"Remove test database and access to it\\?.* $\"
+            send \"Y\\r\"
+            expect -re \"Reload privilege tables now\\?.* $\"
+            send \"Y\\r\"
+        " >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
+
+    # copy MariaDB charset file
+    copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    
+    # restart MariaDB Server
+    systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    error_check
 }
 
 # Apache HTTP Server
@@ -870,7 +772,7 @@ configure_ansible() {
     # Check installation some pip packages.
     for key in ${PIP_PACKAGE_ANSIBLE["remote"]}; do
         echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        pip3 list --format=columns 2> "$ITA_BUILDER_LOG_FILE" | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pip3 list --format=columns 2>> "$ITA_BUILDER_LOG_FILE" | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 log "ERROR:Package not installed [$key]"
                 ERR_FLG="false"
@@ -959,7 +861,7 @@ make_ita() {
     log "php install and setting"
     configure_php
         
-    if [ "$material" == "yes" ]; then
+    if [ "$cicd_for_iac" == "yes" ]; then
         log "git install and setting"
         configure_git
     fi
@@ -1006,13 +908,19 @@ download() {
     # Enable mariadb repositories.
     mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
     
-    # MriaDB download packages.
+    # MariaDB package names.
+    if [ "${distro_mariadb}" = "yes" ]; then
+        local MARIADB_PACKAGE_NAMES=(mariadb mariadb-server expect)
+    else
+        local MARIADB_PACKAGE_NAMES=(MariaDB MariaDB-server expect)
+    fi
+
+    # MariaDB download packages.
+    log "Download packages[${MARIADB_PACKAGE_NAMES[*]}]"
     if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
-        log "Download packages[mariadb mariadb-server expect]"
-        dnf download --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} mariadb mariadb-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        dnf download --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} "${MARIADB_PACKAGE_NAMES[@]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     elif [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
-        log "Download packages[MariaDB MariaDB-server expect]"
-        yumdownloader --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} MariaDB MariaDB-server expect >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        yumdownloader --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} "${MARIADB_PACKAGE_NAMES[@]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
     download_check
 
@@ -1150,8 +1058,8 @@ read_setting_file "$ITA_ANSWER_FILE"
 
 if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
     #check (ita_answers.txt)-----
-    if [ "${material}" != 'yes' -a "${material}" != 'no' ]; then
-        log "ERROR:material should be set to yes or no"
+    if [ "${cicd_for_iac}" != 'yes' -a "${cicd_for_iac}" != 'no' ]; then
+        log "ERROR:cicd_for_iac should be set to yes or no"
         ERR_FLG="false"
         func_exit_and_delete_file
     fi
@@ -1209,6 +1117,14 @@ if [ "${exec_mode}" == "1" -o "${exec_mode}" == "3" ]; then
     fi
 fi
 
+# OSディストリビューションのMariaDBを使うかどうか
+# 使う(distro_mariadb=yes)と指定されていても、CentOS7/RHEL7の場合は公式のMariaDBを利用する
+if [ "${distro_mariadb}" = "no" ] || [ "$LINUX_OS" == "RHEL7" ] || [ "$LINUX_OS" == "CentOS7" ]; then
+    distro_mariadb=no
+else
+    distro_mariadb=yes
+fi
+
 ################################################################################
 # base
 
@@ -1261,7 +1177,9 @@ YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO=(
 declare -A YUM_REPO_PACKAGE_MARIADB;
 YUM_REPO_PACKAGE_MARIADB=(
     ["RHEL7"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
+    ["RHEL8"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
     ["CentOS7"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
+    ["CentOS8"]="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
     ["yum_all"]=""
 )
 
@@ -1453,7 +1371,7 @@ PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR="${DOWNLOAD_DIR["php-tar-gz"]}/PhpSpr
 COMPOSER=https://getcomposer.org/installer
 
 # PhpSpreadsheet
-PHPSPREADSHEET=""phpoffice/phpspreadsheet":"1.14.1""
+PHPSPREADSHEET=""phpoffice/phpspreadsheet":"*""
 
 ################################################################################
 # main

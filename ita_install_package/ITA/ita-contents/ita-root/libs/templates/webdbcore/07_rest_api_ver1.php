@@ -28,5 +28,5 @@
     //-- サイト個別PHP要素、ここから--
     //-- サイト個別PHP要素、ここまで--
 
-    ReSTCommandDeal($strCalledRestVer,$strCommand,$objJSONOfReceptedData,$objTable);
+    ReSTCommandDeal($strCalledRestVer,$strCommand,$objJSONOfReceptedData,$objTable,true);
 ?>

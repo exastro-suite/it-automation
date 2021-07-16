@@ -452,6 +452,9 @@ margin-right: 0;
 	box-shadow: 0 0 8px rgba( 0, 0, 0, 0.2 );
 	overflow: hidden;
 }
+#KIZI .text hr{
+	display: block;
+}
 #KIZI .text > div {
 	margin-left: 0!important;
 }
@@ -562,6 +565,11 @@ input.historyBtnInTbl[type="button"] {
 	border-color: #16A23A;
 	box-shadow: 0 2px 0 #12822E;
 }
+input.duplicateBtnInTbl[type="button"] {
+	background-color: #8d1eff;
+	border-color: #8d1eff;
+	box-shadow: 0 2px 0 #7118cc;
+}
 
 /* default button:hover */
 input[type="button"]:hover, input[type="submit"]:hover,
@@ -587,11 +595,16 @@ input.historyBtnInTbl[type="button"]:hover {
 	border-color: #149234;
 	box-shadow: 0 1px 0 #0F7129;
 }
+input.duplicateBtnInTbl[type="button"]:hover {
+	background-color: #7e1ce6;
+	border-color: #7e1ce6;
+	box-shadow: 0 1px 0 #6616b8;
+}
 
 /* default button:active */
 input[type="button"]:active, input[type="submit"]:active,
 button.linkBtnInTbl:active {
-	box-shadow: none;
+	box-shadow: none!important;
 	transform: translateY( 0 );
 }
 
@@ -610,16 +623,18 @@ button.linkBtnInTbl[disabled],  button.linkBtnInTbl[disabled]:hover,  button.lin
 }
 
 /* buttons for supertable */
-input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl, input.historyBtnInTbl,
+input.updateBtnInTbl, input.deleteBtnInTbl, input.linkBtnInTbl,
+input.historyBtnInTbl, input.duplicateBtnInTbl,
 button.linkBtnInTbl {
 	min-width: 100%;
 	width: 100%;
 	max-width: 300px;
 	margin: auto;
-	padding: 0;
+  margin-top: 2px;
+	padding: 0 2px;
 	border-radius: 3px;
 	font-size: 90%;
-	height: 20px;
+	height: 18px;
 }
 button.linkBtnInTbl {
   min-width: 200px; min-height: auto;
@@ -906,7 +921,7 @@ z-index: 2;
 transform: translateY(-50%);
 width: 16px; height: 16px;
 background: url("../imgs/ita_icon_sprite.png") 0 0 no-repeat;
-background-size: 160px 128px;
+background-size: 160px 144px;
 user-select: none;
 -moz-user-select: none;
 -webkit-user-select: none;

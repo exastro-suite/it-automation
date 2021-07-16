@@ -383,6 +383,7 @@ Ansible（Pioneer）代入値管理
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADJsEvent('onChange','pattern_reg');
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -392,6 +393,7 @@ Ansible（Pioneer）代入値管理
     $c->setOutputType('register_table',$objOTForReg);
 
     $c->setEvent('update_table','onChange','pattern_upd',array());
+    $c->setEvent('register_table','onChange','pattern_reg',array());
 
     $c->setJournalTableOfMaster('E_ANSIBLE_PNS_PATTERN_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -650,6 +652,7 @@ Ansible（Pioneer）代入値管理
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADJsEvent('onChange','pattern_reg');
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -914,6 +917,7 @@ Ansible（Pioneer）代入値管理
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
     $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
 

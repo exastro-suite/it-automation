@@ -506,6 +506,7 @@ Ansible（Legacy Role）代入値自動登録設定
 
         $objVarBFmtReg = new SelectTabBFmt();
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+        $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
         $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);

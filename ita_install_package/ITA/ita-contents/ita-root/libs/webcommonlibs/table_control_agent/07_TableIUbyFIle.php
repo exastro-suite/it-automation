@@ -49,7 +49,7 @@
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
         exit();
     }
-    
+
     function noRetTableIUDByQMFileCallAgent($objTable, &$aryVariant=array(), &$arySetting=array()){
         global $g;
         // ----ローカル変数宣言
@@ -205,36 +205,36 @@
                     //CSVが隠されている場合----
                 }
             }
-            
+
             if( $modeFileCh == -1 ){
                 $intErrorStatus = 205;
                 throw new Exception( '00000800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
-            
+
             $aryVariant['objTable'] = $objTable;
             $aryVariant['tableIUDByQMFile']  = array('vars'=>array('strUpTmpFileFullname'=>$upTmpFileFullname,'strOrgFileNameOfUpTmpFile'=>$upOrgFilename));
             $aryRetBody = tableIUDByQMFile(null, null, $modeFileCh, $strFormatterId, $aryVariant);
             $ret_str = $aryRetBody[0];
             $intErrorStatus = $aryRetBody[1];
-            
+
             if( $intErrorStatus !== null ){
                 throw new Exception( '00000900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
             $intErrorStatus = 0;
-            
+
             // WebAPIログへサクセスを記録
             web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-440",array($ACRCM_id,$upOrgFilename)));
         }
         catch (Exception $e){
             $tmpErrMsgBody = $e->getMessage();
             dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-            
+
             // ----一般訪問ユーザに見せてよいメッセージを作成
             switch($intErrorStatus){
                 case 201 :
                     switch($varErrorOfFileupload){
                         case 1  : $ret_str .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-251");break;
-                        case 2  : $ret_str .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-252");break; 
+                        case 2  : $ret_str .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-252");break;
                         case 3  : $ret_str .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-253");break;
                         case 4  : $ret_str .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-254");break;
                         default : $ret_str .= $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");break;
@@ -268,7 +268,7 @@
                 unset($tmp_DevStr);
                 //ロードテーブルカスタマイズ向けメッセージを作成----
             }
-            
+
             // WebAPIログへエラーを記録
             web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-271",array($ACRCM_id,$upOrgFilename,$intErrorStatus)));
         }
@@ -325,7 +325,7 @@
         return $retStrBody;
     }
 
-    function tableIUDByQMFile($strIUDSourceFullname, $varLoadTableSetting=null, $intModeFileCh=0, $strQMFileSendAreaFormatterId, &$aryVariant=array(), &$arySetting=array()){
+    function tableIUDByQMFile($strIUDSourceFullname, $varLoadTableSetting=null, $intModeFileCh=0, $strQMFileSendAreaFormatterId, &$aryVariant=array(), &$arySetting=array(), $strApiFlg=false){
         global $g;
         // ----ローカル変数宣言
         $intControlDebugLevel01=250;
@@ -448,7 +448,7 @@
                 throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                 // TCAクラスではない----
             }
-            
+
             if( is_string($strQMFileSendAreaFormatterId) !== true ){
                 // ----TCAクラスではない
                 // 許容されない引数範囲(製造元内部開発者であっても、指定禁止なので、システムエラーに位置付)
@@ -487,7 +487,7 @@
                 default:
                     // 許容されない引数範囲(製造元内部開発者であっても、指定禁止なので、システムエラーに位置付)
                     $intErrorType = 701;
-                    $intErrorPlaceMark = 100; 
+                    $intErrorPlaceMark = 100;
                     throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     break;
             }
@@ -748,9 +748,9 @@
                                 //行番号を作成----
                             }
                             //CSVの行を、$aryRowFromCsv[]へ格納----
-                            
+
                             fclose($tmpFileFp);
-                            
+
                             //ここまで動作保証範囲外----
                         }
                         else{
@@ -770,7 +770,7 @@
                 //CSVの行を、$aryRowFromCsv[]へ格納----
 
                 //ファイルを開いて配列へ格納----
-                
+
                 //"※上記の行数はExcel上の行番号です。\n";
                 $expAddBody01 = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-281");
                 //CSVモード----
@@ -966,7 +966,7 @@
                     $intErrorPlaceMark = 3000;
                     throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                 }
-                
+
                 $dlcLTColumnCount = count($arrayCheckHeader);
                 $dlcCSVHeaderDataColumnCount = count($csvHeaderData);
                 if( $dlcLTColumnCount == $dlcCSVHeaderDataColumnCount ){
@@ -984,7 +984,7 @@
                     $intErrorPlaceMark = 3200;
                     throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                 }
-                
+
                 //CSVモード----
             }
             else if( $intModeFileCh == 2 ){
@@ -1031,7 +1031,7 @@
                 //JSONモード----
             }
             //列の一致チェック----
-            
+
             //----エラー出力形式が個別には設定されていなかった
             if( $upload_log_print === null ){
                 $upload_log_print = $objTable->getGeneObject("uploadLogPrint",$refRetKeyExists);
@@ -1055,7 +1055,7 @@
             }
             $strLineExplainHead = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-282");
             $strLineExplainTail = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-283");
-            
+
             if( $objTable->getCommitSpanOnTableIUDByFile() === 0 ){
                 //----トランザクション開始
                 $varTrzStart = $g['objDBCA']->transactionStart();
@@ -1110,13 +1110,10 @@
                     //----JSONモード
                     for($dlcFnv2 = 0; $dlcFnv2 < $intColNoOfLastColumn; $dlcFnv2++ ){
                         $colKey = $tableHeaderId[$dlcFnv2];
-
                         if(!array_key_exists($dlcFnv2, $aryRowFromJson[$row_i])){
                             continue;
                         }
-
                         $inputArray[$colKey] = $aryRowFromJson[$row_i][$dlcFnv2];
-
                         // アップロードファイルを登録する
                         foreach($arrayObjColumn as $objColumn){
                             if($colKey === $objColumn->getID() && "FileUploadColumn" === get_class($objColumn) && $objColumn->isAllowUploadColmnSendRestApi()){
@@ -1166,11 +1163,66 @@
                             }
                         }
                     }
+                    //更新に足りない項目を追加
+                    $strPrimaryKeyName = $objTable->getRowIdentifyColumnID();
+                    if(isset($inputArray[$strPrimaryKeyName])){
+                        $tmpArraySetting = array('system_function_control'=>array('DTiSFilterCheckValid'=>array('HiddenVars'=>array('DecodeOfSelectTagStringEscape'=>false))));
+                        $tmpArrayVariant['search_filter_data'] = array();
+                        $tmpArrayVariant['dumpDataFromTable'] = array('vars'=>array('strOutputFileType'=>'arraysForJSON',
+                                                                            'strFormatterId'=>"json"
+                                                                            )
+                                                              );
+                        $objTableTmp = loadTable($varLoadTableSetting);
+                        $aryResultOfDump = dumpDataFromTable(array('to_area_type'=>'toReturn'), $objTableTmp, $tmpArrayVariant, $tmpArraySetting,true);
+                        if( $aryResultOfDump[1] !== null ){
+                            //----エラー発生
+                            $aryPreErrorData = $aryResultOfDump[2];
+                            switch($aryResultOfDump[1]){
+                                case 1: //権限がない
+                                    $intResultStatusCode = 403;
+                                    break;
+                                case 2: //バリデーションエラー
+                                    $intResultStatusCode = 400;
+                                    break;
+                                default:
+                                    $intResultStatusCode = 500;
+                                    break;
+                            }
+
+                            $intErrorPlaceMark = 800;
+                            $strErrorPlaceFmt = "%08d";
+                            throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            //エラー発生----
+                        }
+
+                        //プライマリーキー取得
+                        $strPrimaryKey = array_keys($tableHeaderId, $strPrimaryKeyName);
+                        if(count($strPrimaryKey) == 0){
+                          $intErrorPlaceMark = 800;
+                          $strErrorPlaceFmt = "%08d";
+                          throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                        }
+                        foreach ($aryResultOfDump[0] as $key => $value) {
+                          if($inputArray[$strPrimaryKeyName] == $value[$strPrimaryKey[0]]){
+                            foreach ($tableHeaderId as $subkey => $subvalue) {
+                              //指定パラメータの中に含まれないDBの値を追加
+                              if(!(array_key_exists($subvalue,$inputArray))){
+                                //更新用の最終更新日時は追加しない
+                                if($subvalue != "UPD_UPDATE_TIMESTAMP"){
+                                  $inputArray[$subvalue] = $value[$subkey];
+                                }else{
+                                  $inputArray[$subvalue] = "";
+                                }
+                              }
+                            }
+                          }
+                        }
+                    }
                     //JSONモード----
                 }
-                
+
                 //----テーブルへのアクセスを実行
-                $arrayRetResult = $objREBFColumn->editExecute($inputArray, $dlcOrderMode, $aryVariant);             
+                $arrayRetResult = $objREBFColumn->editExecute($inputArray, $dlcOrderMode, $aryVariant, $strApiFlg);
                 //DB更新後処理用の情報取得（全行Commit時用）
                 $tmparrRetResults[]=$arrayRetResult;
                 unset($arrayRetResult[99]);
@@ -1206,19 +1258,19 @@
             //bodyTop行目から最後までループ----
 
             $aryNormalResultOfEditExecute = $objREBFColumn->getResultCount();
-            
+
             //----結果出力
             //
             $strRetStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-STD-451",$strOrgFileNameOfUpTmpFile);
             $strResultList = "";
             $aryResultCountList = array();
-            
+
             $intSuccess =0;
             $intError =0;
-            
+
             $strErrCountExplainHead = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-284");
             $strErrCountExplainTail = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-285");
-            
+
             foreach($aryNormalResultOfEditExecute as $strKey=>$aryData){
                 $strResultList .= $strErrCountExplainHead.sprintf("%s:%10d",$aryData['name'],$aryData['ct']).$strErrCountExplainTail."\n";
                 $aryResultCountList[] = array($aryData['name'],$aryData['ct'],$strErrCountExplainHead.sprintf("%s:%10d",$aryData['name'],$aryData['ct']).$strErrCountExplainTail."\n");
@@ -1244,7 +1296,7 @@
                     $aryNormalResultOfEditExecute['error']['ct'] = $aryNormalResultOfEditExecute['error']['ct'] + $typect ;
                 }else{
                     //JSONモード時
-                    if( $intModeFileCh == 2 ){                        
+                    if( $intModeFileCh == 2 ){
                         foreach ($tmparrRetResults as $tmpRetResult) {
                             if( isset( $tmpRetResult[99] ) ){
                                 $exeRegisterData=$tmpRetResult[99]['exeData'];
@@ -1261,13 +1313,13 @@
                                         $error_str = $arrayTmp[3];
                                         $strErrorBuf = $arrayTmp[4];
                                         throw new Exception( '00001900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                                    }  
-                                }                                
+                                    }
+                                }
                             }
-                        }                   
+                        }
                     }
-                }    
-            } 
+                }
+            }
 
             //エラー発生時不要なtempファイル削除
             if( $aryNormalResultOfEditExecute['error']['ct'] != 0){
@@ -1278,10 +1330,10 @@
                                 $findfilenames = $tempFile ."*";
                                 foreach (glob($findfilenames) as $findfilename ) {
                                     $boolUnlink = unlink($findfilename);
-                                }                            
+                                }
                             }
                         }
-                    } 
+                    }
                 }
             }
 
@@ -1328,7 +1380,7 @@
             else{
                 $strRetStrBody .= $strResultList;
             }
-            
+
             if( $varRollBack !== true ){
                 $refValue = array(
                                "caller"=>"tableIUDByQMFile",
@@ -1339,10 +1391,10 @@
                                "intSuccess"=>$intSuccess,
                                "intError"=>$intError
                             );
-                
+
                 $objTable->commonEventHandlerExecute($refValue);
             }
-            
+
             if( $strErrorStreamFromEditExecute != "" ){
                 if( $upload_log_print == "toHtml" ){
                     $strRetStrBody .= "<table class=\"tableIUDByQMFileErrorReport\" border=\"1\">".$strErrorStreamFromEditExecute."</table>\n";
@@ -1381,7 +1433,7 @@
         //
         //----大量行のアップロードに備えて、タイムリミットを「30」に戻す
         //大量行のアップロードに備えて、タイムリミットを「30」に戻す----
-        
+
         //結果出力----
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
         return array($strRetStrBody,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryNormalResultOfEditExecute,$aryRawResultOfEditExecute);
@@ -1434,30 +1486,30 @@
                 $intErrorType = 601;
                 throw new Exception( '00000200-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
-            
+
             echo $log_string;
-            
+
             // アクセスログ出力
             web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4051",array($strFxName,$file_neme)));
         }
         catch (Exception $e){
             $tmpErrMsgBody = $e->getMessage();
             dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-            
+
             // ----一般訪問ユーザに見せてよいメッセージを作成
             switch($intErrorType){
                 case 601: $strNoFileMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-289",$file_neme);
                 default : $strErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001",$intErrorType);break;
             }
             // 一般訪問ユーザに見せてよいメッセージを作成----
-            
+
             if( 0 < $g['dev_log_developer'] ){
                 //----ロードテーブルカスタマイザー向けメッセージを作成
                 //ロードテーブルカスタマイザー向けメッセージを作成----
             }
-            
+
             header("Content-Type: text/html; charset=UTF-8");
-            print 
+            print
 <<< EOD
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
 <html>
@@ -1480,7 +1532,7 @@ EOD;
             // アクセスログ出力
             web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody)));
         }
-        
+
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     }
 ?>

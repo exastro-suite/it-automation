@@ -62,7 +62,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
 
     // 項目名
-    $objVldt = new SingleTextValidator(1,256,false);
+    $objVldt = new ItemNameValidator(1, 256, false);
     $c = new TextColumn('ITEM_NAME',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102107"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102108"));//エクセル・ヘッダでの説明
     $c->getOutputType('filter_table')->setTextTagLastAttr('style = "ime-mode :active"');
@@ -213,7 +213,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // 参照項目
     $c = new TextColumn('REFERENCE_ITEM',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102147"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102148"));//エクセル・ヘッダでの説明
-    $objVldt = new ReferenceItemValidator();
+    $objVldt = new ReferenceItemValidator(0, 4096, false);
     $c->setValidator($objVldt);
     $cg->addColumn($c);
 

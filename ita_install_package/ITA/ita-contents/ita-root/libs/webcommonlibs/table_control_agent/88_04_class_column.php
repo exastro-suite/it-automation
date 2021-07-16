@@ -1018,7 +1018,14 @@ class Column extends ColumnGroup {
 				// SQLに埋め込むアクセス権のカラム名生成
         			$addStrQuery = sprintf("%s.%s",$strWpTblSelfAlias,$AccessAuthColum);
 			}
-			$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} ";
+			// ----dispRestrictValue対応
+			$aryDispRestrictValue = $objTable->getDispRestrictValue();
+			if($aryDispRestrictValue != null){
+				$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} , {$strWpTblSelfAlias}.* ";
+			}else{
+				$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} ";
+			}
+			// dispRestrictValue対応----
 			if($addStrQuery != "") {
 				// アクセス権のカラム名をSELECT文に埋め込む
 				$retStrQuery  .= ",".$addStrQuery." ";
@@ -1570,6 +1577,22 @@ class Column extends ColumnGroup {
 		$aryErrMsgBody = array();
 		$strErrMsg = "";
 		$strErrorBuf = "";
+
+		$strColId = $this->getID();
+		$strColMark = $strColId;
+
+		if( $this->getColumnIDHidden() === true ){
+			$strColMark = $this->getIDSOP();
+		}
+	
+		if( array_key_exists("del_password_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_password_flag_'.$strColMark] == "on" ){
+			//----パスワード削除オーダーがあった場合
+			 $boolActionFlag = true;
+			 $aryVariant['edit_target_row'][$strColId] = "";
+			 $exeQueryData[$strColId] = "";			
+			//パスワード削除オーダーがあった場合----
+		}
+
 		//$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
 		if( is_null($this->aryFunctionsForEvent)===true ){
 			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
@@ -1780,6 +1803,15 @@ class Column extends ColumnGroup {
 			return $this->aryObjOutputType[$strFormatterId]->getBodyTag($aryRawRecord,$aryVariant);
 		}
 	}
+
+	function getOutputBodyDuplicate($strFormatterId, $aryRawRecord, $option){
+		//----各Formatterクラスから呼ばれる
+		if( isset($this->aryObjOutputType[$strFormatterId]) === true && $this->aryObjOutputType[$strFormatterId]->isVisible() === true ){
+			$aryVariant = array();
+			return $this->aryObjOutputType[$strFormatterId]->getBodyTagDuplicate($aryRawRecord, $aryVariant, $option);
+		}
+	}
+
 	//NEW[96]
 	function setDefaultValue($strFormatterId, $value){
 		//inputタグ系のデフォルト値を設定する
@@ -2244,6 +2276,14 @@ class IDColumn extends Column {
 
 			$addStrQuery = "";
 
+			// ----dispRestrictValue対応
+			$dispRestrictValueFlg = false;
+			$aryDispRestrictValue = $objTable->getDispRestrictValue();
+			if($aryDispRestrictValue != null){
+				$dispRestrictValueFlg = true;
+			}
+			// dispRestrictValue対応----
+
 			$retStrQuery = genSQLforGetMasValsInMainTbl($mainTableBody
 								, $strThisIdColumnId
 								, $strDUColumnOfMainTable
@@ -2254,7 +2294,8 @@ class IDColumn extends Column {
                                                                 , $AccessAuthColumUse
                                                                 , $AccessAuthColumnNames
 								, $aryEtcetera,$strWhereAddBody
-								,"KEY_COLUMN","DISP_COLUMN");
+								,"KEY_COLUMN","DISP_COLUMN"
+								, $dispRestrictValueFlg);
 		}catch (Exception $e){
 			web_log($e->getMessage());
 			$intErrorType = 500;
@@ -2341,7 +2382,7 @@ class IDColumn extends Column {
 
 		//----参照先マスタテーブル
 		$strWpColKeyIdOfMaster  = "{$dbQM}{$this->getKeyColumnIDOfMaster()}{$dbQM}";
-		$strWpColDispIdOfMaster = "{$dbQM}{$this->getDispColumnIDOfMaster()}{$dbQM}";
+		$strWpColDispIdOfMaster = "CONVERT({$this->getDispColumnIDOfMaster()} USING utf8)";
 		$strWpColDisuseFlagIdOfMaster = "{$dbQM}{$this->getRequiredDisuseColumnID()}{$dbQM}";
 		//参照先マスタテーブル----
 
@@ -4867,6 +4908,12 @@ class MultiTextColumn extends TextColumn {
 		$aryErrMsgBody = array();
 		$strErrMsg = "";
 		$strErrorBuf = "";
+
+                $arrayTmp = parent::beforeTableIUDAction($exeQueryData, $reqOrgData, $aryVariant);
+                if($arrayTmp[0]===false){
+                    return $arrayTmp;
+                }
+
 		if( $this->getParaGpaphMode()===1 ){
 			//----CrLfがあったらLfへ統一するモード
 			$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
@@ -5968,9 +6015,7 @@ class DateColumn extends Column {
 					if($flag===true){
 						$retStrQuery .= " AND ";
 					}
-					//----期間の終わりは約1日足す
-					$retStrQuery .= "{$strSelfAliasStrConColId} < ".$this->getFilterConvertValue(":{$this->getID()}__1")."+1-(1/86400) ";
-					//期間の終わりは約1日足す----
+					$retStrQuery .= "{$strSelfAliasStrConColId} <= ".$this->getFilterConvertValue(":{$this->getID()}__1");
 				}
 			}
 		}
@@ -6833,8 +6878,14 @@ class AutoUpdateUserColumn extends TextColumn {
 
 		$strBodyFrom  = "{$strWpTableId} {$strWpTblSelfAlias} LEFT JOIN {$strTableJoin} {$strTblJoinAlias} ";
 		$strBodyFrom .= "ON ( {$strWpTblSelfAlias}.{$strWpColId} = {$strTblJoinAlias}.{$strJoinColKey} ) ";
-
-		$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM} ";
+		// ----dispRestrictValue対応
+		$aryDispRestrictValue = $objTable->getDispRestrictValue();
+		if($aryDispRestrictValue != null){
+			$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM}, {$strWpTblSelfAlias}.* ";
+		}else{
+			$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM} ";
+		}
+		// dispRestrictValue対応----
 		$retStrQuery .= $addStrQuery;  // RBAC対応
 		$retStrQuery .= "FROM {$strBodyFrom} ";
 		$retStrQuery .= "WHERE {$strWpTblSelfAlias}.{$strWpColId} IS NOT NULL ";
@@ -8692,7 +8743,7 @@ class RowEditByFileColumn extends Column{
 	//登録時に、主キー値が指定されていた場合----
 
 	//NEW[11]
-	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array()){
+	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array(), $strApiFlg=false){
 		global $g;
 		$arrayRetResult = array();
 
@@ -8821,8 +8872,17 @@ class RowEditByFileColumn extends Column{
 				//----更新が入力されていた場合
 				$boolUniqueCheckSkip = false; //ユニークチェックをスキップするか？(原則：スキップしない)
 				$boolRequiredColumnCheckSkip = false; //必須カラムの送信チェックをスキップするか？(原則：スキップしない)
+				if($strApiFlg === true){
+				  $boolRequiredColumnCheckSkip = true;
+				}
 
-				$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
+				if(array_key_exists($this->objTable->getRIColumnID(), $inputArray)){
+					$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
+				}
+				else{
+					$strNumberForRI = NULL;
+				}
+
 				$mode = 3;  //実行モード
 
 				//----ここではRIColumnも削除される
@@ -9079,7 +9139,7 @@ class RowEditByFileColumnForReview extends RowEditByFileColumn{
 	}
 	//FixColumnイベント系----
 
-	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array()){
+	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array(), $strApiFlg=false){
 		global $g;
 		$arrayRetResult = array();
 
@@ -10627,6 +10687,48 @@ class JournalBtnColumn extends Column {
     }
     //AddColumnイベント系----
     //ここまで継承メソッドの上書き処理----
+}
+
+class DuplicateBtnColumn extends Column {
+
+    protected $strCheckDisuseColumnId;
+    //----ここから継承メソッドの上書き処理
+    function __construct($strColId, $strColLabel){
+        parent::__construct($strColId, $strColLabel);
+        $this->setDBColumn(false);
+        $this->setHeader(true);
+        $outputType = new OutputType(new TabHFmt(), new DupButtonTabBFmt());
+        $this->setOutputType("print_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+        $outputType->setVisible(false);
+        $this->setOutputType("print_journal_table", $outputType);
+        $this->getOutputType("filter_table")->setVisible(false);
+        $this->getOutputType("update_table")->setVisible(false);
+        $this->getOutputType("register_table")->setVisible(false);
+        $this->getOutputType("delete_table")->setVisible(false);
+        $this->getOutputType("excel")->setVisible(false);
+        $this->getOutputType("csv")->setVisible(false);
+        $this->getOutputType("json")->setVisible(false);
+    }
+    //----AddColumnイベント系
+    function initTable($objTable, $colNo=null){
+        parent::initTable($objTable, $colNo);
+        $this->setEvent("print_table", "onclick", "duplicate_async", array(3, ":".$this->objTable->getRIColumnID()));
+    }
+    //AddColumnイベント系----
+    //ここまで継承メソッドの上書き処理----
+
+	//----ここから新規メソッドの定義宣言処理
+	//NEW[1]
+	function setCheckDisuseColumnID($strColname){
+		$this->strCheckDisuseColumnId = $strColname;
+	}
+	//NEW[2]
+	function getCheckDisuseColumnID(){
+		return $this->strCheckDisuseColumnId;
+	}
+
+	//ここまで新規メソッドの定義宣言処理----
 }
 
 class EditStatusControlBtnColumn extends Column {

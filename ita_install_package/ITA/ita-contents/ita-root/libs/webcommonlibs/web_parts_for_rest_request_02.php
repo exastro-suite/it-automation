@@ -126,6 +126,7 @@
         case "GET":
         case "INFO":
         case "FILTER":
+        case "FILTER_DATAONLY":
         case "EDIT":
             break;
         default:

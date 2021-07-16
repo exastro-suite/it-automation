@@ -192,6 +192,10 @@
             $objJournalColumn = $aryObjColumn[$objTable1->getJnlButtonColumnID()];
             $objJournalColumn->getOutputType('print_table')->setVisible(false);
 
+            // 複製ボタン
+            $objDuplicateColumn = $aryObjColumn[$objTable1->getDupButtonColumnID()];
+            $objDuplicateColumn->getOutputType('print_table')->setVisible(false);
+
             // 本体ロジックをコール
 
             $arySetting['tail_scene_rec_n0_prv1'] = '';
@@ -356,6 +360,10 @@
             // 履歴ボタン
             $objJournalColumn = $aryObjColumn[$objTable2->getJnlButtonColumnID()];
             $objJournalColumn->getOutputType('print_table')->setVisible(false);
+
+            // 複製ボタン
+            $objDuplicateColumn = $aryObjColumn[$objTable2->getDupButtonColumnID()];
+            $objDuplicateColumn->getOutputType('print_table')->setVisible(false);
 
             // 本体ロジックをコール
 

@@ -710,7 +710,7 @@ $ary["ITAANSIBLEH-MNU-1207101"]     = "ステータス";
 $ary["ITAANSIBLEH-MNU-1207102"]     = "収集状況を表示します。";
 $ary["ITAANSIBLEH-MNU-1207103"]     = "収集ログ";
 $ary["ITAANSIBLEH-MNU-1207104"]     = "収集時の実行時のログをDLできます。";
-$ary["ITAANSIBLEH-MNU-1207200"]     = "収集機能で使用するRESTAPI用の接続インターフェース情報をメンテナンス(閲覧/更新)できます。<br>本メニューは必ず1レコードである必要があります。";
+$ary["ITAANSIBLEH-MNU-1207200"]     = "収集機能で使用するRESTAPI用の接続インターフェース情報をメンテナンス(閲覧/更新)できます。<br>本メニューは必ず1レコードである必要があります。<br>RESTユーザー、RESTパスワードが未入力の場合、収集機能は実行されません。";
 $ary["ITAANSIBLEH-MNU-1207201"]     = "ID";
 $ary["ITAANSIBLEH-MNU-1207202"]     = "収集インターフェース情報";
 $ary["ITAANSIBLEH-MNU-1207203"]     = "収集インターフェース情報";
@@ -721,7 +721,8 @@ $ary["ITAANSIBLEH-MNU-1207207"]     = "[最大長]15バイト
 xxx.xxx.xxx.xxxの形式で入力してください。";
 $ary["ITAANSIBLEH-MNU-1207208"]     = "RESTユーザー";
 $ary["ITAANSIBLEH-MNU-1207209"]     = "システム管理者のロールに紐づいたユーザー、
-又は、同等のロールを作成し、そちらへ紐づいたユーザーを入力してください。";
+又は、同等のロールを作成し、そちらへ紐づいたユーザーを入力してください。
+RESTユーザー、RESTパスワードが未入力の場合は、収集機能は実行されません。";
 $ary["ITAANSIBLEH-MNU-1207210"]     = "RESTパスワード";
 $ary["ITAANSIBLEH-MNU-1207211"]     = "[最大長]30バイト";
 $ary["ITAANSIBLEH-MNU-1207212"]     = "REST方式";
@@ -1282,6 +1283,11 @@ $ary["ITAANSIBLEH-MNU-9010000017"]  = "virtualenvで構築されているansible
 $ary["ITAANSIBLEH-MNU-9010000018"]  = "必須項目です。(項目:{})";
 $ary["ITAANSIBLEH-MNU-9010000019"]  = "ホスト一覧";
 $ary["ITAANSIBLEH-MNU-9010000020"]  = "Ansible Towerのホスト一覧です。\nクラスタ構成の場合、クラスタを構成しているAnsible Towerのホスト情報を登録します。";
+$ary["ITAANSIBLEH-MNU-9010000021"]  = "Proxy";
+$ary["ITAANSIBLEH-MNU-9010000022"]  = "Address";
+$ary["ITAANSIBLEH-MNU-9010000023"]  = "Proxyサーバのアドレス";
+$ary["ITAANSIBLEH-MNU-9010000024"]  = "Port";
+$ary["ITAANSIBLEH-MNU-9010000025"]  = "Proxyサーバのポート";
 $ary["ITAANSIBLEH-MNU-9010001000"]  = "Ansible Towerのホスト情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>クラスタ構成の場合、クラスタを構成しているAnsible Towerのホスト情報を登録する必要があります。";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "項番";
 $ary["ITAANSIBLEH-MNU-9010001002"]  = "AnsibleTowerホスト一覧";

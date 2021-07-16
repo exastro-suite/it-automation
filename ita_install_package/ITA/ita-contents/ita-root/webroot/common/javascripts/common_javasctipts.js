@@ -371,10 +371,100 @@ function set_initial_filter(){
       const observer = new MutationObserver( function(){
         // フィルターが表示されているか確認する
         if ( $area.find('div[class^="fakeContainer_Filter"]').length ) {
+        
+          // 名称での検索用にTableの見出しテキストを配列に格納
+          const tableArray = new Array();                
+          $area.find('.defaultExplainRow').each( function( rowN ){
+            const $tr = $( this );
+            if( tableArray[rowN] === undefined ) tableArray[rowN] = new Array();
+            $tr.find('th').each( function( colN ){
+              const $td = $( this ),
+                    text = $td.text(),
+                    colspan = ( $td.attr('colspan') === undefined )? 1: $td.attr('colspan'),
+                    rowspan = ( $td.attr('rowspan') === undefined )? 1: $td.attr('rowspan');
+              
+              // 開始列を調べる
+              let colStart = 0;
+              const numCheck = function( num ){
+                if ( tableArray[rowN][num] === undefined ) {
+                  colStart = num;
+                } else {
+                  numCheck( num + 1 );
+                }
+              };
+              numCheck(colN);
+              
+              // Rowspan - Colspanループ
+              for ( let i = 0; i < rowspan; i++ ) {
+                const cRow = rowN + i;
+                if( tableArray[cRow] === undefined ) tableArray[cRow] = new Array();
+                for ( let j = 0; j < colspan; j++ ) {
+                  const cCol = colStart + j;
+                  // textとrowspanフラグ
+                  tableArray[cRow][cCol] = {
+                    't': text,
+                    'f': i
+                  }
+                }
+              }
+            });
+          });
+          
+          // 項目親子関係
+          const levelList = new Array(),
+                levelLength = tableArray.length,
+                itemLength = tableArray[0].length;
+          for ( let i = 0; i < itemLength; i++ ) {
+            const levelArray = new Array();
+            for ( let j = 0; j < levelLength; j++ ) {
+              if ( tableArray[j][i].f === 0 ) {
+                levelArray.push( tableArray[j][i].t );
+              }
+            }
+            levelList.push( levelArray.join('\\') );
+          }
+          
           for ( let key in param ) {
-            const $target = $area.find('#' + key );
-            if ( $target.length && $target.is('input[type="text"]') ) {
-              $target.val( param[key] );
+            try {
+              const idKey = decodeURIComponent( key ),
+                    value = param[key];
+              let   targetNum = levelList.indexOf(idKey);
+              
+              // 見つからなかった場合項目名のみでも検索する
+              if ( targetNum === -1 ) {
+                const itemLength = tableArray[ levelLength - 1 ].length;
+                for ( let i = 0; i < itemLength; i++ ) {
+                  if ( tableArray[ levelLength - 1 ][i].t === idKey ) {
+                    targetNum = i;
+                    break;
+                  }
+                }
+              }
+              
+              if ( targetNum !== -1 ) {
+                // 項目名が一致した場合
+                const $target = $area.find('tr').last().find('td').eq( targetNum ).find('input, select');
+                if ( $target.length >= 2 && value.indexOf('~') !== -1 ) {
+                  // 対象が２つの場合かつ、「~」が含まれている場合
+                  const inputValues = param[key].split('~'),
+                        inputLength = inputValues.length;
+                  for ( let i = 0; i < inputLength; i++ ) {
+                    $target.eq(i).val( inputValues[i] );
+                  }
+                } else {
+                  $target.val( value );
+                }
+              } else {
+                // 項目名が一致しない場合IDで調べる
+                if ( !idKey.match(/\/|%|<|>/) ) {
+                  const $target = $area.find('#' + idKey );
+                  if ( $target.length ) {
+                    $target.val( param[key] );
+                  } 
+                }
+              }
+            } catch(e) {
+              window.console.error(e);
             }
           }
           // Filterボタンをクリック
@@ -390,11 +480,8 @@ function set_initial_filter(){
     // フィルターフラグをチェック
     if ( param['filter'] !== undefined && param['filter'] === 'on' ) {
       delete param['filter'];
-      filterSet( $filterArea );
-    }
-    if ( param['filter2'] !== undefined && param['filter2'] === 'on' ) {
-      delete param['filter2'];
-      filterSet( $filter2Area );
+      if ( $filterArea.length ) filterSet( $filterArea );
+      if ( $filter2Area.length ) filterSet( $filter2Area );
     }
   }
 }
@@ -432,7 +519,7 @@ function userNameAllDisplay() {
 
 //////// ----変更履歴遷移用ファンクション ////////
 function Mix1_1_journal_async( mode, inner_seq ){
-  var ele = document.getElementsByName("COL_IDSOP_7");
+  var ele = document.getElementsByName("COL_IDSOP_8");
   ele[0].value = inner_seq;
   Journal1Tbl_search_async();
   if( document.getElementById("Journal1_Nakami").style.display == "none" ) {
@@ -443,7 +530,7 @@ function Mix1_1_journal_async( mode, inner_seq ){
 }
 
 function journal_async( mode, inner_seq ){
-  var ele = document.getElementsByName("COL_IDSOP_7");
+  var ele = document.getElementsByName("COL_IDSOP_8");
   ele[0].value = inner_seq;
   Journal1Tbl_search_async();
   if( document.getElementById("Journal1_Nakami").style.display == "none" ) {
@@ -453,3 +540,74 @@ function journal_async( mode, inner_seq ){
   jumpToSelfHtml('Journal1_Midashi');
 }
 //////// 変更履歴遷移用ファンクション---- ////////
+
+//////// ----複製用ファンクション ////////
+function Mix1_1_duplicate_async( mode, inner_seq ){
+  
+  var registerAreaWrap = 'Mix2_Nakami';
+
+  // アラート用エリアを初期化
+  var objAlertArea = $('#'+registerAreaWrap+' .alert_area').get()[0];
+  objAlertArea.innerHTML = '';
+  objAlertArea.style.display = "none";
+
+  // registerTableファンクション呼び出し要否フラグ
+  var exec_flag = true;
+
+  if( document.getElementById(registerAreaWrap).style.display == "block" ) {
+      //----登録中ですが中断してよろしいですか？
+      if( window.confirm( getSomeMessage("ITAWDCC20202")) == false ){
+        exec_flag = false;
+      }
+  }
+
+  // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
+  restruct_for_IE();
+
+  if( exec_flag ){
+      // proxy.registerTable実行
+      var registerData = $('#'+registerAreaWrap+' :input').serializeArray();
+      proxy.Mix1_1_duplicate( mode, inner_seq, registerData);
+
+      if( document.getElementById(registerAreaWrap).style.display == "none" ) {
+          show('Mix2_Midashi',registerAreaWrap);
+      }
+      // Mix2_Midashiのところまでジャンプ
+      jumpToSelfHtml('Mix2_Midashi');
+  }
+}
+
+function duplicate_async( mode, inner_seq ){
+
+  var registerAreaWrap = 'Mix2_Nakami';
+
+  // アラート用エリアを初期化
+  var objAlertArea = $('#'+registerAreaWrap+' .alert_area').get()[0];
+  objAlertArea.innerHTML = '';
+  objAlertArea.style.display = "none";
+
+  // registerTableファンクション呼び出し要否フラグ
+  var exec_flag = true;
+
+  if( document.getElementById(registerAreaWrap).style.display == "block" ) {
+      //----登録中ですが中断してよろしいですか？
+      if( window.confirm( getSomeMessage("ITAWDCC20202")) == false ){
+        exec_flag = false;
+      }
+  }
+
+  // IEのときだけ全見開きを開閉して画面を再構築するファンクションを呼び出し
+  restruct_for_IE();
+
+  if( exec_flag ){
+      // proxy.registerTable実行
+      var registerData = $('#'+registerAreaWrap+' :input').serializeArray();
+      proxy.Mix1_1_duplicate( mode, inner_seq, registerData);
+
+      if( document.getElementById(registerAreaWrap).style.display == "none" ) {
+          show('Mix2_Midashi',registerAreaWrap);
+      }
+      // Mix2_Midashiのところまでジャンプ
+      jumpToSelfHtml('Mix2_Midashi');
+  }
+}

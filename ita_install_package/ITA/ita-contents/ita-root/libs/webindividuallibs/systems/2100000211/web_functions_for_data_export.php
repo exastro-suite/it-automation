@@ -225,6 +225,8 @@ function removeFiles($path, $recursive=false){
 function insertTask(){
     global $g;
 
+    $user_id = $g["login_id"];
+
     // トランザクション開始
     $varTrzStart = $g['objDBCA']->transactionStart();
     if ($varTrzStart === false) {
@@ -314,6 +316,7 @@ function insertTask(){
         'ABOLISHED_TYPE' => $p_abolished_type,
         'SPECIFIED_TIMESTAMP' => $p_specified_timestamp,
         'FILE_NAME' => '',
+        'EXECUTE_USER' => $user_id,
         'DISP_SEQ' => '',
         'NOTE' => '',
         'DISUSE_FLAG' => '',
@@ -332,11 +335,12 @@ function insertTask(){
         'ABOLISHED_TYPE' => $p_abolished_type,
         'SPECIFIED_TIMESTAMP' => $p_specified_timestamp,
         'FILE_NAME' => '',
+        'EXECUTE_USER' => $user_id,
         'DISP_SEQ' => '',
         'NOTE' => '',
         'DISUSE_FLAG' => '0',
         'LAST_UPDATE_TIMESTAMP' => '',
-        'LAST_UPDATE_USER' => ACCOUNT_NAME
+        'LAST_UPDATE_USER' => $user_id
     );
 
     $resAry = makeSQLForUtnTableUpdate(

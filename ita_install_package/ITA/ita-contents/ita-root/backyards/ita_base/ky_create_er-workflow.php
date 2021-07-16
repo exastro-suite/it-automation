@@ -35,6 +35,9 @@ define('STATUS_FAILURE',       4); // 完了(異常)
 define('LOG_PREFIX',           basename( __FILE__, '.php' ) . '_');
 define('LOG_DIR',              '/logs/backyardlogs/');
 
+// ER作成対象外メニュー
+$execlusionMenuIdAry = array('2100000306', '2100180003');
+
 
 try {
     require_once ROOT_DIR_PATH . '/libs/commonlibs/common_php_req_gate.php';
@@ -169,7 +172,7 @@ function getDbConnectParams(){
  * @return   array    $erInfo    ER図の表示に必要な情報
  */
 function getERDiagram(){
-    global $objDBCA;
+    global $objDBCA, $execlusionMenuIdAry;
 
     require_once ROOT_DIR_PATH . '/libs/commonlibs/common_getInfo_LoadTable.php';
 
@@ -193,6 +196,11 @@ function getERDiagram(){
                 "DISP_SEQ" => $dispSeq,
                 "NAME"     => $menuInfo["MENU_NAME"]
             );
+
+            // ER作成対象外の場合はスキップ
+            if(in_array($menuId, $execlusionMenuIdAry)){
+                continue;
+            }
 
             $getInfoOfLoadTableER = getInfoOfLoadTableForER($menuId);
 
@@ -1523,8 +1531,8 @@ function updateSequence($paramAry){
         $count++;
     }
 
+    $last_update_timestamp = date("Y-m-d H:i:s");
     if(1 === $count){
-        $last_update_timestamp = date("Y-m-d H:i:s");
         $sql = "UPDATE A_SEQUENCE
                 SET VALUE = :value,
                 LAST_UPDATE_TIMESTAMP = '$last_update_timestamp'
