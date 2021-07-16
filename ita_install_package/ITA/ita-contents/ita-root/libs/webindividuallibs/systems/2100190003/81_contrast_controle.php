@@ -36,7 +36,7 @@ function getContrastList($mode=""){
     $strErrStepIdInFx = "";
     
     $strExpectedErrMsgBodyForUI = "";
-    
+
     $strFxName = __FUNCTION__;
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-1",__FILE__),$intControlDebugLevel01);
     
@@ -489,6 +489,13 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
         "LAST_UPDATE_USER" => "",
     );
 
+    global $root_dir_path;
+    if ( empty($root_dir_path) ){
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+    }
+    
     // 処理開始
     try{
 
@@ -1332,7 +1339,8 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                     foreach ($tmpmenucol as $menuid => $colInfo) {
                         //loadtable読み込み
                         $MenuID = sprintf('%010d', $menuid );
-                        $g['root_dir_path'] = "/exastro/ita-root/";
+
+                        $g['root_dir_path'] = $root_dir_path;
                         $sheetFile = "{$g['root_dir_path']}/webconfs/sheets/{$MenuID}_loadTable.php";
 
                         if(file_exists($sheetFile)){
