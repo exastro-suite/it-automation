@@ -14,6 +14,7 @@ VERTICAL                            %INT%                           ,
 MENUGROUP_FOR_INPUT                 %INT%                           ,
 MENUGROUP_FOR_SUBST                 %INT%                           ,
 MENUGROUP_FOR_VIEW                  %INT%                           ,
+MENU_CREATE_STATUS                  %VARCHR% (1)                    ,
 DISP_SEQ                            %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 ACCESS_AUTH                         TEXT                            ,
@@ -38,6 +39,7 @@ VERTICAL                            %INT%                           ,
 MENUGROUP_FOR_INPUT                 %INT%                           ,
 MENUGROUP_FOR_SUBST                 %INT%                           ,
 MENUGROUP_FOR_VIEW                  %INT%                           ,
+MENU_CREATE_STATUS                  %VARCHR% (1)                    ,
 DISP_SEQ                            %INT%                           ,
 DESCRIPTION                         %VARCHR%(1024)                  ,
 ACCESS_AUTH                         TEXT                            ,
@@ -444,12 +446,43 @@ PRIMARY KEY (JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 
 -- -------------------------
+-- 一意制約管理
+-- -------------------------
+CREATE TABLE F_UNIQUE_CONSTRAINT (
+UNIQUE_CONSTRAINT_ID          %INT%             ,
+CREATE_MENU_ID                %INT%             ,
+UNIQUE_CONSTRAINT_ITEM        TEXT              ,
+ACCESS_AUTH                   TEXT              ,
+NOTE                          %VARCHR% (4000)   ,
+DISUSE_FLAG                   %VARCHR% (1)      ,
+LAST_UPDATE_TIMESTAMP         %DATETIME6%       ,
+LAST_UPDATE_USER              %INT%             ,
+PRIMARY KEY (UNIQUE_CONSTRAINT_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_UNIQUE_CONSTRAINT_JNL (
+JOURNAL_SEQ_NO                %INT%             ,
+JOURNAL_REG_DATETIME          %DATETIME6%       ,
+JOURNAL_ACTION_CLASS          %VARCHR% (8)      ,
+UNIQUE_CONSTRAINT_ID          %INT%             ,
+CREATE_MENU_ID                %INT%             ,
+UNIQUE_CONSTRAINT_ITEM        TEXT              ,
+ACCESS_AUTH                   TEXT              ,
+NOTE                          %VARCHR% (4000)   ,
+DISUSE_FLAG                   %VARCHR% (1)      ,
+LAST_UPDATE_TIMESTAMP         %DATETIME6%       ,
+LAST_UPDATE_USER              %INT%             ,
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+-- -------------------------
 -- 参照項目情報
 -- -------------------------
 CREATE TABLE F_MENU_REFERENCE_ITEM
 (
 ITEM_ID                             %INT%                             , -- 識別シーケンス項番
 LINK_ID                             %INT%                             ,
+MENU_ID                             %INT%                             ,
 DISP_SEQ                            %INT%                             ,
 TABLE_NAME                          %VARCHR% (64)                     ,
 PRI_NAME                            %VARCHR% (64)                     ,
@@ -459,7 +492,7 @@ COL_GROUP_NAME                      TEXT                              ,
 DESCRIPTION                         TEXT                              ,
 INPUT_METHOD_ID                     %INT%                             ,
 SENSITIVE_FLAG                      %VARCHR% (1)                      ,
-MASTER_COL_FLAG                     %VARCHR% (1)                      ,
+ORIGINAL_MENU_FLAG                  %VARCHR% (1)                      ,
 ACCESS_AUTH                         TEXT                              ,
 NOTE                                %VARCHR% (4000)                   , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                      , -- 廃止フラグ
@@ -476,6 +509,7 @@ JOURNAL_ACTION_CLASS                %VARCHR% (8)                      , -- 履�
 
 ITEM_ID                             %INT%                             , -- 識別シーケンス項番
 LINK_ID                             %INT%                             ,
+MENU_ID                             %INT%                             ,
 DISP_SEQ                            %INT%                             ,
 TABLE_NAME                          %VARCHR% (64)                     ,
 PRI_NAME                            %VARCHR% (64)                     ,
@@ -485,7 +519,7 @@ COL_GROUP_NAME                      TEXT                              ,
 DESCRIPTION                         TEXT                              ,
 INPUT_METHOD_ID                     %INT%                             ,
 SENSITIVE_FLAG                      %VARCHR% (1)                      ,
-MASTER_COL_FLAG                     %VARCHR% (1)                      ,
+ORIGINAL_MENU_FLAG                  %VARCHR% (1)                      ,
 ACCESS_AUTH                         TEXT                              ,
 NOTE                                %VARCHR% (4000)                  , -- 備考
 DISUSE_FLAG                         %VARCHR% (1)                     , -- 廃止フラグ
@@ -495,6 +529,101 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 
 
+-- -------------------------
+-- メニュー作成状態マスタ
+-- -------------------------
+CREATE TABLE F_MENU_CREATE_STATUS
+(
+MENU_CREATE_STATUS                  %INT%                           ,
+MENU_CREATE_STATUS_SELECT           %VARCHR% (256)                  ,
+ACCESS_AUTH                         TEXT                            ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY (MENU_CREATE_STATUS)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_MENU_CREATE_STATUS_JNL
+(
+JOURNAL_SEQ_NO                      %INT%                           , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME                %DATETIME6%                     , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS                %VARCHR% (8)                    , -- 履歴用変更種別
+
+MENU_CREATE_STATUS                  %INT%                           ,
+MENU_CREATE_STATUS_SELECT           %VARCHR% (256)                  ,
+ACCESS_AUTH                         TEXT                            ,
+NOTE                                %VARCHR% (4000)                 , -- 備考
+DISUSE_FLAG                         %VARCHR% (1)                    , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP               %DATETIME6%                     , -- 最終更新日時
+LAST_UPDATE_USER                    %INT%                           , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+-- -------------------------
+-- フラグ管理マスタ
+-- -------------------------
+CREATE TABLE F_FLAG_ALT_MASTER
+(
+FLAG_ID                           %INT%                             , -- 識別シーケンス
+YESNO_STATUS                      %VARCHR%(64)                      , -- ステータス
+TRUEFALSE_STATUS                  %VARCHR%(64)                      ,
+DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (FLAG_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_FLAG_ALT_MASTER_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                             , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴用変更種別
+
+FLAG_ID                           %INT%                             , -- 識別シーケンス
+YESNO_STATUS                      %VARCHR%(64)                      , -- ステータス
+TRUEFALSE_STATUS                  %VARCHR%(64)                      ,
+DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_FLAG_MASTER
+(
+FLAG_ID                           %INT%                             , -- 識別シーケンス
+ASTBLANK_STATUS                   %VARCHR%(64)                      ,
+DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (FLAG_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE F_FLAG_MASTER_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                             , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                       , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                       , -- 履歴用変更種別
+
+FLAG_ID                           %INT%                             , -- 識別シーケンス
+ASTBLANK_STATUS                   %VARCHR%(64)                      ,
+DISP_SEQ                          %INT%                             , -- 表示順序
+ACCESS_AUTH                       TEXT                              ,
+NOTE                              %VARCHR%(4000)                    , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                       , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                       , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                             , -- 最終更新ユーザ
+PRIMARY KEY (JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
 
 -- *****************************************************************************
 -- *** ***** Views                                                           ***
@@ -664,8 +793,9 @@ WHERE TAB_B.VERTICAL != ""
 -- 参照項目情報（メニュー作成用）
 -- -------------------------
 CREATE VIEW G_CREATE_REFERENCE_ITEM AS 
-SELECT TAB_A.CREATE_ITEM_ID ITEM_ID               ,
-       TAB_C.LINK_ID LINK_ID                      ,
+SELECT DISTINCT TAB_A.CREATE_ITEM_ID ITEM_ID      ,
+       NULL AS LINK_ID                            ,
+       TAB_C.MENU_ID MENU_ID                      ,
        TAB_A.DISP_SEQ DISP_SEQ                    ,
        TAB_C.TABLE_NAME TABLE_NAME                ,
        TAB_C.PRI_NAME PRI_NAME                    ,
@@ -675,11 +805,7 @@ SELECT TAB_A.CREATE_ITEM_ID ITEM_ID               ,
        TAB_A.DESCRIPTION DESCRIPTION              ,
        TAB_A.INPUT_METHOD_ID INPUT_METHOD_ID      ,
        CASE WHEN TAB_A.INPUT_METHOD_ID = 8 THEN 2 ELSE 1 END AS SENSITIVE_FLAG,
-       CASE WHEN CHAR_LENGTH(TAB_A.CREATE_ITEM_ID) <= 4 THEN
-           CASE WHEN CONCAT('KY_AUTO_COL_', lpad(TAB_A.CREATE_ITEM_ID, 4, '0')) = TAB_C.COLUMN_NAME THEN 1 ELSE '' END
-       ELSE
-           CASE WHEN CONCAT('KY_AUTO_COL_', TAB_A.CREATE_ITEM_ID) = TAB_C.COLUMN_NAME THEN 1 ELSE '' END
-       END AS MASTER_COL_FLAG                     ,
+       NULL AS ORIGINAL_MENU_FLAG                 ,
        TAB_A.ACCESS_AUTH                          ,
        TAB_A.NOTE                                 ,
        TAB_A.DISUSE_FLAG                          ,
@@ -697,11 +823,12 @@ WHERE NOT TAB_A.INPUT_METHOD_ID = 7 AND TAB_B.DISUSE_FLAG='0' AND TAB_C.DISUSE_F
 
 
 CREATE VIEW G_CREATE_REFERENCE_ITEM_JNL AS 
-SELECT TAB_A.JOURNAL_SEQ_NO                       ,
+SELECT DISTINCT TAB_A.JOURNAL_SEQ_NO              ,
        TAB_A.JOURNAL_REG_DATETIME                 ,
        TAB_A.JOURNAL_ACTION_CLASS                 ,
        TAB_A.CREATE_ITEM_ID ITEM_ID               ,
-       TAB_C.LINK_ID LINK_ID                      ,
+       NULL AS LINK_ID                            ,
+       TAB_C.MENU_ID MENU_ID                      ,
        TAB_A.DISP_SEQ DISP_SEQ                    ,
        TAB_C.TABLE_NAME TABLE_NAME                ,
        TAB_C.PRI_NAME PRI_NAME                    ,
@@ -711,11 +838,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                       ,
        TAB_A.DESCRIPTION DESCRIPTION              ,
        TAB_A.INPUT_METHOD_ID INPUT_METHOD_ID      ,
        CASE WHEN TAB_A.INPUT_METHOD_ID = 8 THEN 2 ELSE 1 END AS SENSITIVE_FLAG,
-       CASE WHEN CHAR_LENGTH(TAB_A.CREATE_ITEM_ID) <= 4 THEN
-           CASE WHEN CONCAT('KY_AUTO_COL_', lpad(TAB_A.CREATE_ITEM_ID, 4, '0')) = TAB_C.COLUMN_NAME THEN 1 ELSE '' END
-       ELSE
-           CASE WHEN CONCAT('KY_AUTO_COL_', TAB_A.CREATE_ITEM_ID) = TAB_C.COLUMN_NAME THEN 1 ELSE '' END
-       END AS MASTER_COL_FLAG                     ,
+       NULL AS ORIGINAL_MENU_FLAG                 ,
        TAB_A.ACCESS_AUTH                          ,
        TAB_A.NOTE                                 ,
        TAB_A.DISUSE_FLAG                          ,
@@ -737,6 +860,7 @@ WHERE NOT TAB_A.INPUT_METHOD_ID = 7 AND TAB_B.DISUSE_FLAG='0' AND TAB_C.DISUSE_F
 CREATE VIEW G_MENU_REFERENCE_ITEM AS 
 SELECT TAB_A.ITEM_ID  ITEM_ID                            ,
        TAB_A.LINK_ID  LINK_ID                            ,
+       TAB_A.MENU_ID  MENU_ID                            ,
        TAB_A.DISP_SEQ DISP_SEQ                           ,
        TAB_A.TABLE_NAME TABLE_NAME                       ,
        TAB_A.PRI_NAME PRI_NAME                           ,
@@ -746,7 +870,7 @@ SELECT TAB_A.ITEM_ID  ITEM_ID                            ,
        TAB_A.DESCRIPTION DESCRIPTION                     ,
        TAB_A.INPUT_METHOD_ID INPUT_METHOD_ID             ,
        TAB_A.SENSITIVE_FLAG SENSITIVE_FLAG               ,
-       TAB_A.MASTER_COL_FLAG MASTER_COL_FLAG             ,
+       TAB_A.ORIGINAL_MENU_FLAG ORIGINAL_MENU_FLAG       ,
        TAB_A.ACCESS_AUTH ACCESS_AUTH                     ,
        TAB_A.NOTE NOTE                                   ,
        TAB_A.DISUSE_FLAG DISUSE_FLAG                     ,
@@ -757,6 +881,7 @@ WHERE TAB_A.DISUSE_FLAG = '0'
 UNION ALL
 SELECT TAB_B.ITEM_ID  ITEM_ID                            ,
        TAB_B.LINK_ID  LINK_ID                            ,
+       TAB_B.MENU_ID  MENU_ID                            ,
        TAB_B.DISP_SEQ DISP_SEQ                           ,
        TAB_B.TABLE_NAME TABLE_NAME                       ,
        TAB_B.PRI_NAME PRI_NAME                           ,
@@ -766,7 +891,7 @@ SELECT TAB_B.ITEM_ID  ITEM_ID                            ,
        TAB_B.DESCRIPTION DESCRIPTION                     ,
        TAB_B.INPUT_METHOD_ID INPUT_METHOD_ID             ,
        TAB_B.SENSITIVE_FLAG SENSITIVE_FLAG               ,
-       TAB_B.MASTER_COL_FLAG MASTER_COL_FLAG             ,
+       TAB_B.ORIGINAL_MENU_FLAG ORIGINAL_MENU_FLAG       ,
        TAB_B.ACCESS_AUTH ACCESS_AUTH                     ,
        TAB_B.NOTE NOTE                                   ,
        TAB_B.DISUSE_FLAG DISUSE_FLAG                     ,
@@ -783,6 +908,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                              ,
        TAB_A.JOURNAL_ACTION_CLASS                        ,
        TAB_A.ITEM_ID  ITEM_ID                            ,
        TAB_A.LINK_ID  LINK_ID                            ,
+       TAB_A.MENU_ID  MENU_ID                            ,
        TAB_A.DISP_SEQ DISP_SEQ                           ,
        TAB_A.TABLE_NAME TABLE_NAME                       ,
        TAB_A.PRI_NAME PRI_NAME                           ,
@@ -792,7 +918,7 @@ SELECT TAB_A.JOURNAL_SEQ_NO                              ,
        TAB_A.DESCRIPTION DESCRIPTION                     ,
        TAB_A.INPUT_METHOD_ID INPUT_METHOD_ID             ,
        TAB_A.SENSITIVE_FLAG SENSITIVE_FLAG               ,
-       TAB_A.MASTER_COL_FLAG MASTER_COL_FLAG             ,
+       TAB_A.ORIGINAL_MENU_FLAG ORIGINAL_MENU_FLAG       ,
        TAB_A.ACCESS_AUTH ACCESS_AUTH                     ,
        TAB_A.NOTE NOTE                                   ,
        TAB_A.DISUSE_FLAG DISUSE_FLAG                     ,
@@ -806,6 +932,7 @@ SELECT TAB_B.JOURNAL_SEQ_NO                              ,
        TAB_B.JOURNAL_ACTION_CLASS                        ,
        TAB_B.ITEM_ID  ITEM_ID                            ,
        TAB_B.LINK_ID  LINK_ID                            ,
+       TAB_B.MENU_ID  MENU_ID                            ,
        TAB_B.DISP_SEQ DISP_SEQ                           ,
        TAB_B.TABLE_NAME TABLE_NAME                       ,
        TAB_B.PRI_NAME PRI_NAME                           ,
@@ -815,7 +942,7 @@ SELECT TAB_B.JOURNAL_SEQ_NO                              ,
        TAB_B.DESCRIPTION DESCRIPTION                     ,
        TAB_B.INPUT_METHOD_ID INPUT_METHOD_ID             ,
        TAB_B.SENSITIVE_FLAG SENSITIVE_FLAG               ,
-       TAB_B.MASTER_COL_FLAG MASTER_COL_FLAG             ,
+       TAB_B.ORIGINAL_MENU_FLAG ORIGINAL_MENU_FLAG       ,
        TAB_B.ACCESS_AUTH ACCESS_AUTH                     ,
        TAB_B.NOTE NOTE                                   ,
        TAB_B.DISUSE_FLAG DISUSE_FLAG                     ,

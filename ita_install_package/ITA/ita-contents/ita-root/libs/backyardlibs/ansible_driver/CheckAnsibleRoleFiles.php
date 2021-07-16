@@ -105,7 +105,6 @@ require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_com
 //    F4005  getVarStructAnalJsonStringFileInfo
 //    F4006  putVarStructAnalJsonStringFileInfo
 //    F4007  getRolePackageInfo
-//    F4008  getRolePackageFileName
 //    F4009  getRolePackegeFileInfo
 //    F4010  getVarEntryISTPFvars
 //    F4011  getTemplateUseVarsStructiMain
@@ -624,7 +623,6 @@ class CheckAnsibleRoleFiles {
             $f_line = "";
             $f_name = "";
             $ret = $chkObj->FirstAnalysis($yaml_parse_array,$tgt_role_pkg_name,$tgt_role_name,$tgt_file_name, $ina_ITA2User_var_list[$in_rolename], $ina_User2ITA_var_list[$in_rolename], $parent_vars_list,$errmsg,$f_name,$f_line);
-
             if($ret === false) {
                 $errmsg = $errmsg . "(" . $f_line . ")";
                 $this->SetLastError(basename(__FILE__),__LINE__,$errmsg);
@@ -3595,7 +3593,6 @@ class YAMLFileAnalysis{
 //    F4005  getVarStructAnalJsonStringFileInfo
 //    F4006  putVarStructAnalJsonStringFileInfo
 //    F4007  getRolePackageInfo
-//    F4008  getRolePackageFileName
 //    F4009  getRolePackegeFileInfo
 //    F4010  getVarEntryISTPFvars
 //    F4011  getTemplateUseVarsStructiMain
@@ -3771,15 +3768,6 @@ class VarStructAnalysisFileAccess{
         }
         return true;
     }
-    // F4008
-    function getRolePackageFileName($pkey,$file) {
-        $root_dir_temp = array();
-        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
-        $root_dir_path = $root_dir_temp[0] . "ita-root";
-        $file = sprintf("%s/uploadfiles/2100020303/ROLE_PACKAGE_FILE/%010d/%s",$dir,$pkey,$file);
-        return($file);
-    }
-
     // F4009
     function getRolePackegeFileInfo($role_package_name,$zipfile,&$var_list) {
 
