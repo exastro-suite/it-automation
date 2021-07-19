@@ -194,11 +194,6 @@
             $strActionUrl = "{$scheme_n_authority}/common/common_change_password_form.php?grp={$ASJTM_grp_id}&no={$ASJTM_id}";
             //ログインしている場合----
         }
-        else{
-            //----ログインしていない場合
-            $strActionUrl = "{$scheme_n_authority}/common/common_change_password_form.php?grp={$ASJTM_grp_id}&no={$ASJTM_id}";
-            //ログインしていない場合----
-        }
         $strExpiry = "";
         if( isset($_POST['expiry'] )){
             $strExpiry = htmlspecialchars($_POST['expiry'], ENT_QUOTES, "UTF-8");
