@@ -189,11 +189,7 @@
     else{
         //----パスワード変更に失敗した
         $strErrShowBody .= $err_msg;
-        if($auth->checkAuth()){
-            //----ログインしている場合
-            $strActionUrl = "{$scheme_n_authority}/common/common_change_password_form.php?grp={$ASJTM_grp_id}&no={$ASJTM_id}";
-            //ログインしている場合----
-        }
+        $strActionUrl = "{$scheme_n_authority}/common/common_change_password_form.php?grp={$ASJTM_grp_id}&no={$ASJTM_id}";
         $strExpiry = "";
         if( isset($_POST['expiry'] )){
             $strExpiry = htmlspecialchars($_POST['expiry'], ENT_QUOTES, "UTF-8");
