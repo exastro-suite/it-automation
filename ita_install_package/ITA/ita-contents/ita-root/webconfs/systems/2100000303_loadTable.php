@@ -55,7 +55,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     unset($tmpAryColumn);
 
     $table->setJsEventNamePrefix(true);
-
+    
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-101040"));
     // エクセルのシート名
@@ -93,7 +93,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $retLinkable = "disabled";
                 if( array_key_exists('ETH_WOL_MAC_ADDRESS', $rowData) === true
                     && array_key_exists('ETH_WOL_NET_DEVICE', $rowData) === true ){
-                    if( 0 < strlen($rowData['ETH_WOL_MAC_ADDRESS'])
+                    if( 0 < strlen($rowData['ETH_WOL_MAC_ADDRESS']) 
                         && 0 < strlen($rowData['ETH_WOL_NET_DEVICE']) ){
                         $retLinkable = "";
                     }
@@ -203,7 +203,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $aryErrMsgBody = array();
             $strErrMsg = "";
             $strErrorBuf = "";
-
+                   
             if( array_key_exists($objColumn->getID(), $exeQueryData) === true ){
                 $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
                 if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
@@ -338,7 +338,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         // Ansible利用情報
         $cg2 = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-102024"));
 
-            // WinRM接続プロトコル追加
+            // WinRM接続プロトコル追加 
             // Ansible-Legacy/Legacy-Role利用情報
             $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-102085"));
                 //----汎用性の必要がないバリデーター定義
@@ -347,14 +347,14 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     $retBool = true;
                     $retStrBody = '';
                     $strModeId = "";
-
+                    
                     if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
                         if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
                             $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
                             $strModeId = $aryTcaAction["ACTION_MODE"];
                         }
                     }
-
+                    
                     if($strModeId == "DTUP_singleRecDelete"){
                         $strLoginPw = "";
                         list($strLoginPwEnCoded   ,$boolRefKeyExists) = isSetInArrayNestThenAssign($arrayVariant,array('edit_target_row','LOGIN_PW')          ,"");
@@ -371,7 +371,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     if( $strModeId == "DTUP_singleRecDelete" || $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
                         $boolPasswordInput = false;
                         $strErrorMsgPreBody = "";
-
+                       
                         //if( strlen($value) == 0 || $value == 1 ){
                         if((strlen($value) == 0) || ($value == 1) || ($value == 3) || ($value == 4)){
                             //----鍵認証系の場合
@@ -412,7 +412,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                             $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-102075");
                             //想定外の値の場合----
                         }
-
+                        
                         if( $retBool === true ){
                             if( $boolPasswordInput === true ){
                                 //----ログインパスワードが必須入力の場合
@@ -420,7 +420,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                                     $retBool = false;
                                     $retStrBody = $strErrorMsgPreBody;
                                 }
-
+                                
                                 //----更新の場合（敗者復活的なチェック）
                                 if( $retBool === false && $strModeId == "DTUP_singleRecUpdate" ){
                                     //----直近入力値は0文字だった場合
@@ -434,7 +434,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                                     //直近入力値は0文字だった場合----
                                 }
                                 //更新の場合（敗者復活的なチェック）----
-
+                                
                                 //ログインパスワードが必須入力の場合----
                             }
                             else{
@@ -448,13 +448,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     return $retBool;
                 };
                 //汎用性の必要がないバリデーター定義----
-
+                
                 $objVarVali = new VariableValidator();
                 //----廃止/復活時にも、バリデーションチェックを走らせるためのフラグをON
                 $objVarVali->setCheckType("DeleteTableFormatterOff");
                 $objVarVali->setErrShowPrefix(false);
                 $objVarVali->setFunctionForIsValid($objFunction01);
-
+                
                 $c = new IDColumn('LOGIN_AUTH_TYPE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102088"),'B_LOGIN_AUTH_TYPE','LOGIN_AUTH_TYPE_ID','LOGIN_AUTH_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102089"));//エクセル・ヘッダでの説明
                 $c->addValidator($objVarVali);

@@ -351,7 +351,7 @@ Ansible（Legacy Role）代入値管理
                 $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
                 return $retArray;
     };
-
+    
     $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1303010"),'E_ANSIBLE_LRL_PATTERN','PATTERN_ID','PATTERN','',array('OrderByThirdColumn'=>'PATTERN_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1303020"));//エクセル・ヘッダでの説明
 
@@ -571,7 +571,7 @@ Ansible（Legacy Role）代入値管理
                 $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
                 return $retArray;
     };
-
+    
     $c = new IDColumn('SYSTEM_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1303040"),'E_STM_LIST','SYSTEM_ID','HOST_PULLDOWN','',array('OrderByThirdColumn'=>'SYSTEM_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1303050"));//エクセル・ヘッダでの説明
 
@@ -801,7 +801,7 @@ Ansible（Legacy Role）代入値管理
 
     $c->setOutputType('update_table',$objOTForUpd);
     $c->setOutputType('register_table',$objOTForReg);
-
+    
 
     $c->setJournalTableOfMaster('D_ANS_LRL_PTN_VARS_LINK_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -1174,7 +1174,7 @@ Ansible（Legacy Role）代入値管理
                 $intErrorType = 503;
             }
         }
-        //親変数かどうか、を調べる----
+        //親変数かどうか、を調べる----                
 
         if( $intVarType == 1 ){
             $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
@@ -1267,7 +1267,7 @@ Ansible（Legacy Role）代入値管理
 
     // データベース更新前のファンクション登録
     $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
-
+    
     $table->addColumn($c);
     unset($objFunction01);
     unset($objFunction02);
@@ -1386,7 +1386,7 @@ Ansible（Legacy Role）代入値管理
                 $intErrorType = 503;
             }
         }
-        //親変数かどうか、を調べる----
+        //親変数かどうか、を調べる---- 
         if( $intVarType === 1 ){
             //親変数の場合
             //$aryOverWrite["value"] = "";
@@ -1412,7 +1412,7 @@ Ansible（Legacy Role）代入値管理
     $c = new NumColumn('ASSIGN_SEQ',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1304051"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1304052"));//エクセル・ヘッダでの説明
     $c->setOutputType('update_table',$objOTForUpd);
-    $c->setOutputType('register_table',$objOTForReg);
+    $c->setOutputType('register_table',$objOTForReg); 
     $c->setSubtotalFlag(false);
 
     // 代入順序の入力 1～ に設定
@@ -1439,7 +1439,7 @@ Ansible（Legacy Role）代入値管理
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
-    $c->getOutputType('json')->setVisible(false);
+    $c->getOutputType('json')->setVisible(false);    
     $table->addColumn($c);
     //デフォルト値----
 
@@ -1502,7 +1502,7 @@ Ansible（Legacy Role）代入値管理
                 // 廃止の場合のみ
                 $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
                 if( $modeValue_sub == "on" ){
-
+                
                     $strQuery = "UPDATE A_PROC_LOADED_LIST "
                                ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
                                ."WHERE ROW_ID IN (2100020006) ";
@@ -1786,7 +1786,7 @@ Ansible（Legacy Role）代入値管理
         $g['COL_SEQ_COMBINATION_ID_UPDATE_VALUE'] = "";
         //----呼出元がUIがRestAPI/Excel/CSVかを判定
         // COL_SEQ_COMBINATION_ID;未設定 REST_COL_SEQ_COMBINATION_ID:設定 => RestAPI/Excel/CSV
-        // その他はUI
+        // その他はUI  
         // REST_COL_SEQ_COMBINATION_ID未入力のケースがあるのでMovemwnt+変数の入力有無で判定する。
         //呼出元がUIがRestAPI/Excel/CSVかを判定----
         if($rest_call === true){
@@ -2174,7 +2174,7 @@ function CheckDefaultValueSameDefine($objDBCA, $objMTS, $objPtnID, $objVarID, $o
     // システム設定のデフォルト値定義のチェック区分を取得
     // 未定義または 1 以外はチェック無の扱いとす。
     $strQuery  =  "SELECT                                    ";
-    $strQuery .=  "  VALUE                                   ";
+    $strQuery .=  "  VALUE                                   "; 
     $strQuery .=  "FROM                                      ";
     $strQuery .=  "  A_SYSTEM_CONFIG_LIST                    ";
     $strQuery .=  "WHERE                                     ";

@@ -30,9 +30,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table = new TableControlAgent('A_SYSTEM_CONFIG_LIST','ITEM_ID', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1010101"), 'A_SYSTEM_CONFIG_LIST_JNL');
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1010002"));
     $table->getFormatter("excel")->setGeneValue("sheetNameForEditByFile",$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1010003"));
-
+    
     $table->setAccessAuth(true);    // データごとのRBAC設定
-
+    
     $table->setJsEventNamePrefix(true);
     $table->setGeneObject("webSetting", $arrayWebSetting);
 

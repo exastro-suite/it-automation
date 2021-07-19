@@ -304,10 +304,10 @@
                 else{
                     $intErrorPlaceMark = 900;
                     throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                }
+                } 
                 //カラム対応情報の取得----
             }
-
+            
             if( headers_sent() === true ){
                 $intErrorType = 900;
                 $intErrorPlaceMark = 1000;
@@ -325,7 +325,7 @@
         }
         $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
                               'ResultData'=>$aryForResultData);
-        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);        
         return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
     }
 
