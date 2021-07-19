@@ -1126,12 +1126,12 @@ Ansible（Legacy Role）代入値自動登録設定
 
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                $tmpBoolWhiteKeyAdd = false;
 
                 if( is_array($varAddResultData) === true ){
                     if( array_key_exists(0,$varAddResultData) === true ){
                         if(in_array($varAddResultData[0], array("PARENT_VAR"))){
-                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
                         }else if(in_array($varAddResultData[0], array("NORMAL_VAR_0", "NORMAL_VAR_1"))){
                             $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                         }
@@ -1161,7 +1161,7 @@ Ansible（Legacy Role）代入値自動登録設定
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
 
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                $tmpBoolWhiteKeyAdd = false;
 
                 $strFxName = "";
 
@@ -1235,7 +1235,7 @@ Ansible（Legacy Role）代入値自動登録設定
                 //親変数かどうか、を調べる----
 
                 if( $intVarType == 1 ){
-                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
                 }else if( $intVarType === 0 ){
                     $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                 }
@@ -2013,12 +2013,12 @@ Ansible（Legacy Role）代入値自動登録設定
 
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                $tmpBoolWhiteKeyAdd = false;
 
                 if( is_array($varAddResultData) === true ){
                     if( array_key_exists(0,$varAddResultData) === true ){
                         if(in_array($varAddResultData[0], array("PARENT_VAR"))){
-                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
                         }else if(in_array($varAddResultData[0], array("NORMAL_VAR_0", "NORMAL_VAR_1"))){
                             $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                         }
@@ -2048,7 +2048,7 @@ Ansible（Legacy Role）代入値自動登録設定
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
 
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                $tmpBoolWhiteKeyAdd = false;
 
                 $strFxName = "";
 
@@ -2121,7 +2121,7 @@ Ansible（Legacy Role）代入値自動登録設定
                 //親変数かどうか、を調べる----
 
                 if( $intVarType == 1 ){
-                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
                 }else if( $intVarType === 0 ){
                     $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                 }

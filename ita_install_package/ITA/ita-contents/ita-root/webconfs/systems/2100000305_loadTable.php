@@ -49,7 +49,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         if($objQuery->effectedRowCount() == 0) {
             $message = sprintf("Recode not found. (Table:B_ANSIBLE_IF_INFO");
             if( $arrayReqInfo[0] == "web" ){
-                web_log(basename(__FILE__),__LINE__,$message);
+                web_log('[FILE]' .basename(__FILE__) .'[LINE]' .__LINE__ .$message);
             }
             else if( $arrayReqInfo[0] == "backyard" ){
             }

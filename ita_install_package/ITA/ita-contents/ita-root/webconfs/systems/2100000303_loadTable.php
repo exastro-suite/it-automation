@@ -245,6 +245,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
             // 変更前と変更後のパスワードを判定し、違う場合にansible-vaultで暗号化した文字列を初期化
             global $g;
+            $root_dir_path = $g['root_dir_path'];
             if ( empty($root_dir_path) ){
                 $root_dir_temp = array();
                 $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
