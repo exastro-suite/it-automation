@@ -49,7 +49,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         if($objQuery->effectedRowCount() == 0) {
             $message = sprintf("Recode not found. (Table:B_ANSIBLE_IF_INFO");
             if( $arrayReqInfo[0] == "web" ){
-                web_log(basename(__FILE__),__LINE__,$message);
+                web_log('[FILE]' .basename(__FILE__) .'[LINE]' .__LINE__ .$message);
             }
             else if( $arrayReqInfo[0] == "backyard" ){
             }
@@ -85,7 +85,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     unset($tmpAryColumn);
 
     $table->setJsEventNamePrefix(true);
-    
+
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-107090"));
     // エクセルのシート名
@@ -138,7 +138,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-108110"));//エクセル・ヘッダでの説明
             $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true    )であることも必要。
             $cg->addColumn($c);
-            
+
             /* 親Playbookのヘッダーセクション */
             $objVldt = new MultiTextValidator(0,512,false);
             $c = new MultiTextColumn('ANS_PLAYBOOK_HED_DEF',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000008"));

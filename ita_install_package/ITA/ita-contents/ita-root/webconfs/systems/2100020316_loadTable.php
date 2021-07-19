@@ -1126,7 +1126,9 @@ Ansible（Legacy Role）代入値自動登録設定
 
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                if($boolWhiteKeyAdd != false){
+                  $boolWhiteKeyAdd = false;
+                }
 
                 if( is_array($varAddResultData) === true ){
                     if( array_key_exists(0,$varAddResultData) === true ){
@@ -1161,7 +1163,9 @@ Ansible（Legacy Role）代入値自動登録設定
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
 
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                if($boolWhiteKeyAdd != false){
+                  $boolWhiteKeyAdd = false;
+                }
 
                 $strFxName = "";
 
@@ -1273,7 +1277,7 @@ Ansible（Legacy Role）代入値自動登録設定
 
             $objVarBFmtReg = new SelectTabBFmt();
 
-            $objVarBFmtReg->setFADJsEvent('onChange','key_chlVar_reg'); 
+            $objVarBFmtReg->setFADJsEvent('onChange','key_chlVar_reg');
             $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);    // 登録時のonChange設定
 
             // フォームの表示直後、トリガーカラムが選ばれていない場合のメッセージ
@@ -2013,7 +2017,9 @@ Ansible（Legacy Role）代入値自動登録設定
 
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                if($boolWhiteKeyAdd != false){
+                  $boolWhiteKeyAdd = false;
+                }
 
                 if( is_array($varAddResultData) === true ){
                     if( array_key_exists(0,$varAddResultData) === true ){
@@ -2048,7 +2054,9 @@ Ansible（Legacy Role）代入値自動登録設定
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
 
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                if($boolWhiteKeyAdd != false){
+                  $boolWhiteKeyAdd = false;
+                }
 
                 $strFxName = "";
 
