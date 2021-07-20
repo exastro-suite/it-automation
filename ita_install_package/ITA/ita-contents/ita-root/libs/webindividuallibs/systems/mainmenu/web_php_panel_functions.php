@@ -286,8 +286,8 @@
                 );
                 return $result;
             } else {
-                throw new Exception($err_msg);
                 $err_msg = $objMTS->getSomeMessage("ITAWDCH-ERR-11404");
+                throw new Exception($err_msg);
             }
             unset($objQuery);
         }
@@ -1182,8 +1182,8 @@
                 $ric = $objQuery->resultFetch();
                 return $ric["VALUE"];
             } else {
-                throw new Exception($err_msg);
                 $err_msg = $objMTS->getSomeMessage("ITAWDCH-ERR-11404");
+                throw new Exception($err_msg);
             }
         } catch (Exception $e){
             return "";
@@ -1217,8 +1217,8 @@
                 );
                 return $result;
             } else {
-                throw new Exception($err_msg);
                 $err_msg = $objMTS->getSomeMessage("ITAWDCH-ERR-11404");
+                throw new Exception($err_msg);
             }
         } catch (Exception $e){
             $result = array(

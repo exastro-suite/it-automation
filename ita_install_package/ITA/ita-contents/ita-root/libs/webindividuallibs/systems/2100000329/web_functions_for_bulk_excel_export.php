@@ -286,7 +286,6 @@ function makeBulkExcelExportMenuList($taskId){
 
     // メニューが一つも選択されていない場合はエラー
     if (empty($_POST["menu_list"])) {
-        return count($_POST["menu_list"]);
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900047'));
     }
 

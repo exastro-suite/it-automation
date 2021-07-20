@@ -23,7 +23,7 @@
     require_once( dirname(__FILE__) ."/82_conductor_no_register.php" );
 
     if($strCommand == "EDIT"){
-        $aryForResultData = conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData,true);
+        $aryForResultData = conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
 
     }else if ($strCommand == "FILTER" || $strCommand == "FILTER_DATAONLY"){
          $filterArray = array();
@@ -50,7 +50,6 @@
              $aryForResultData[0]['ResultData']['resultdata']['CONTENTS']['BODY'][0] = conductorJsonGetTitle();
              if($subStrCommand == "FILTER_DATAONLY"){
                unset($aryForResultData[0]['ResultData']['resultdata']['CONTENTS']['BODY'][0]);
-               array_values($aryForResultData[0]['ResultData']['resultdata']['CONTENTS']['BODY']);
              }
              for ($i=0; $i < $aryForResultData[0]['ResultData']['resultdata']['CONTENTS']['RECORD_LENGTH']; $i++) {
                $intConductorClassId = $aryForResultData[0]['ResultData']['resultdata']['CONTENTS']['BODY'][$i+1][2];
