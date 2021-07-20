@@ -279,7 +279,7 @@ function conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecep
         }
         $tmpErrMsgBody = $e->getMessage();
         dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-        web_log($tmpErrMsgBody, $intControlDebugLevel01);
+        web_log($tmpErrMsgBody." ".$intControlDebugLevel01);
         if( $intResultStatusCode === null ) $intResultStatusCode = 500;
         if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
         if( 500 <= $intErrorType ) $strSysErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));

@@ -426,7 +426,6 @@ function updateTableMain($intBaseMode, $strNumberForRI, $reqUpdateData=null, $st
                         $error_str = $arrayTmp[3];
                         $strErrorBuf = $arrayTmp[4];
                         throw new Exception( '00002000-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                        break;
                     }
                 }
                 
@@ -478,7 +477,6 @@ function updateTableMain($intBaseMode, $strNumberForRI, $reqUpdateData=null, $st
                         $error_str = $arrayTmp[3];
                         $strErrorBuf = $arrayTmp[4];
                         throw new Exception( '00002400-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                        break;
                     }
                 }
 

@@ -641,6 +641,7 @@ function recursiveCopyFiles($srcPath, $dstPath){
  * 指定したディレクトリ内を再帰的に削除する
  */
 function removeFiles($path){
+    global $g;
 
     $output = NULL;
     $cmd = "sudo rm -rf $path 2>&1";
