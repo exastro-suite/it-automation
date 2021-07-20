@@ -812,7 +812,7 @@ EOD;
         // ローカル変数宣言----
         
         $strOutputStr .= 
-<<<EOD
+<<< EOD
 EOD;
         //
         return $strOutputStr;

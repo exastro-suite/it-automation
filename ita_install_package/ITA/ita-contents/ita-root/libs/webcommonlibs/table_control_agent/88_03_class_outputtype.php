@@ -892,6 +892,8 @@ class IDOutputType extends OutputType {
 		$strInitedColId = $this->objColumn->getID();
 		$aryVariant['callerClass'] = get_class($this);
 		$aryVariant['callerVars'] = array();
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = null;
 
 		$aryConvValue['value'] = "";
 		$aryConvValue['rawValue'] = ""; //$aryVariant['callerVars']['free']['rawValue']で取得可能
@@ -1037,7 +1039,8 @@ class IDOutputType extends OutputType {
 		}
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 		//----親クラスの変数（$this->body）のメソッドgetData($rowData)を実行する;
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>$aryConvValue);
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = $aryConvValue;
 		return $this->body->getData($rowData,$aryVariant);
 	}
 	//htmlタグ取得用(2014-12-01名前にTagを追加)----
@@ -1064,6 +1067,8 @@ class AUUOutputType extends OutputType {
 
 		$aryVariant['callerClass'] = get_class($this);
 		$aryVariant['callerVars'] = array();
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = null;
 
 		$aryConvValue['value'] = "";
 
@@ -1117,7 +1122,8 @@ class AUUOutputType extends OutputType {
 			}
 		}
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>$aryConvValue);
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = $aryConvValue;
 		return $this->body->getData($rowData,$aryVariant);
 	}
 
@@ -1143,6 +1149,8 @@ class FileLinkOutputType extends OutputType {
 		
 		$aryVariant['callerClass'] = get_class($this);
 		$aryVariant['callerVars'] = array();
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = null;
 
 		$aryConvValue['url'] = "";
 		$aryConvValue['innerHtml'] = "";
@@ -1226,7 +1234,8 @@ class FileLinkOutputType extends OutputType {
 			}
 		}
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>$aryConvValue);
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = $aryConvValue;
 		return $this->body->getData($rowData,$aryVariant);
 	}
 
