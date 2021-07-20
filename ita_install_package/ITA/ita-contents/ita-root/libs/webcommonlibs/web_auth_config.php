@@ -30,6 +30,7 @@
         $strLoginFormTailBody = "";
 
         // ルートディレクトリを取得
+        $root_dir_path = $g['root_dir_path'];
         if (empty($root_dir_path)) {
             $root_dir_path = getApplicationRootDirPath();
         }
@@ -147,7 +148,7 @@
             case "locked_pw_error":
             case "locked_pw_match":
                 // アクセスログ出力(ロック)
-                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-11"),array($checkStatus,$strCheckTriggerName));
+                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-11", array($checkStatus,$strCheckTriggerName)));
                 
                 // アカウントロック画面にリダイレクト
                 //insideRedirectCodePrint("/common/common_account_locked_error.php",0);
@@ -288,6 +289,8 @@
     function saLoginAuthentication() {
         global $pwl_expiry, $pwl_threshold, $pwl_countmax, $strExternalAuthSettingsFilename, $objDBCA, $strErrMsgBody, $objMTS;
 
+        $strCheckTriggerName = __FUNCTION__;
+
         // 接続必須情報の初期化
         $account_list = [];
         $strUsername = "";
@@ -353,7 +356,7 @@
             case "locked_pw_error":
             case "locked_pw_match":
                 // アクセスログ出力(ロック)
-                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-11"),array($checkStatus,$strCheckTriggerName));
+                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-11", array($checkStatus,$strCheckTriggerName)));
 
                 // アカウントロック画面にリダイレクト
                 webRequestForceQuitFromEveryWhere(403,10310602);

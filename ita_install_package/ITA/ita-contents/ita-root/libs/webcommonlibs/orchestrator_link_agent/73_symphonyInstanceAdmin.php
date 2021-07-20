@@ -1807,7 +1807,7 @@ function symphonyInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $str
         //$strPreserveDatetimeの形式チェック----
 
         //----形式的バリデーションチェック
-        $retArray = sortedDataDecodeForConstruct($strOptionOrderStream,$aryOptionOrderOverride);
+        $retArray = sortedDataDecodeForConstruct($strOptionOrderStream);
         if( $retArray[1] !== null ){
             // エラーフラグをON
             // 例外処理へ

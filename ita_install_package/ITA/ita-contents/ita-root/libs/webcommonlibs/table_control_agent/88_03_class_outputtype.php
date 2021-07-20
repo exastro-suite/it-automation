@@ -891,7 +891,7 @@ class IDOutputType extends OutputType {
 		$boolOutReferfence = false;
 		$strInitedColId = $this->objColumn->getID();
 		$aryVariant['callerClass'] = get_class($this);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+		$aryVariant['callerVars'] = array();
 
 		$aryConvValue['value'] = "";
 		$aryConvValue['rawValue'] = ""; //$aryVariant['callerVars']['free']['rawValue']で取得可能
@@ -1063,7 +1063,7 @@ class AUUOutputType extends OutputType {
 		$strInitedColId = $this->objColumn->getID();
 
 		$aryVariant['callerClass'] = get_class($this);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+		$aryVariant['callerVars'] = array();
 
 		$aryConvValue['value'] = "";
 
@@ -1142,7 +1142,7 @@ class FileLinkOutputType extends OutputType {
 		$strInitedColId = $this->objColumn->getID();
 		
 		$aryVariant['callerClass'] = get_class($this);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+		$aryVariant['callerVars'] = array();
 
 		$aryConvValue['url'] = "";
 		$aryConvValue['innerHtml'] = "";

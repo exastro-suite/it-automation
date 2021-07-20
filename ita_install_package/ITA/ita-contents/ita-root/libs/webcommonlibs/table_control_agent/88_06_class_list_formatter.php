@@ -183,7 +183,7 @@ class CSVFormatter extends ListFormatter {
         return $boolRet;
     }
 
-    function fileStreamAdd($strStream,$refIntRet=null){
+    function fileStreamAdd($strStream){
         $boolRet = false;
         if( $this->handleTmpFile !== null ){
             $tmpRet = @fwrite($this->handleTmpFile, $strStream);
@@ -191,7 +191,6 @@ class CSVFormatter extends ListFormatter {
                 $boolRet = false;
             }else{
                 $boolRet = true;
-                $refIntRet = $tmpRet;
             }
         }
         return $boolRet;
@@ -1189,12 +1188,8 @@ class ExcelFormatter extends ListFormatter {
     function cashModeAdjust($intMode=0){
         global $g;
 
-        switch($intMode){
-            default:
-                $strCacheDirPath = $g['root_dir_path'] . "/temp";
-                $cashSettings = array('dir'=>$strCacheDirPath);
-                break;
-        }
+        $strCacheDirPath = $g['root_dir_path'] . "/temp";
+        $cashSettings = array('dir'=>$strCacheDirPath);
     }
 
     function setTemplateFilePath($filePath, $requireFormatFlag=TRUE, $bodyTopColumn=3, $bodyTopRow=10){

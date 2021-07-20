@@ -1156,9 +1156,6 @@
             $strConcatMid = ",";
             $strConcatTail = ")";
             break;
-        case 1:
-            // mySQL/mariaDB
-            break;
         default:
             break;
         }

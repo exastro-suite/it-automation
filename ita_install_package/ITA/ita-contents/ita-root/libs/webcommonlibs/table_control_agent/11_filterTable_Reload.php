@@ -114,9 +114,7 @@
             
             $strResultCode = sprintf("%03d", $intErrorType);
             // ----一般訪問ユーザに見せてよいメッセージを作成
-            switch($intErrorType){
-                default : $error_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");break;
-            }
+            $error_str = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
             // 一般訪問ユーザに見せてよいメッセージを作成----
             if( 0 < $g['dev_log_developer'] ){
                 //----ロードテーブルカスタマイザー向けメッセージを作成
