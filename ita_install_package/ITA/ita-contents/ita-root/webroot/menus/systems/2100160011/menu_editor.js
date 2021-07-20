@@ -674,15 +674,16 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
       $menuEditor.find('.menu-column-title-input').each( function( i ){
         nameList[ i ] = $( this ).val();
       });
-      const condition = true;
+      let condition = true;
       while( condition ) {
         if ( nameList.indexOf( name ) !== -1 ) {
           number++;
           name = title + ' ' + number;
         } else {
-          return name;
+          condition = false;
         }
       }
+      return name;
     }
     $addColumnInput.val( checkName( title + ' ' + number ) );
   } else {
