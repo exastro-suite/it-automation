@@ -446,8 +446,9 @@ function transactionStart() {
         }
     } catch (Exception $e) {
         // 例外処理
+        $message = $e->getMessage();
         $objDBCA->transactionRollBack();
-        exception("FROM([FILE]{$trace[0]['file']},[FUNCTION]{$trace[0]['function']},[LINE]{$trace[0]['line']}) $errMsg");
+        exception("FROM([FILE]{$trace[0]['file']},[FUNCTION]{$trace[0]['function']},[LINE]{$trace[0]['line']}) {$message}");
     }
 }
 
@@ -481,10 +482,13 @@ function exception ($message) {
 
 // ----エラーページ表示
 function error_notice ($strErrorMsg = null) {
+    global $g;
+
     // HTTP Response Code
     http_response_code(401);
 
     // ルートディレクトリを取得
+    $root_dir_path = $g['root_dir_path'];
     if (empty($root_dir_path)) {
         $root_dir_temp = [];
         $root_dir_temp = explode('ita-root', dirname(__FILE__));

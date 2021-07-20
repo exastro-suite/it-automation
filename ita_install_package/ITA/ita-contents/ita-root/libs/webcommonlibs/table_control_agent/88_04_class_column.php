@@ -323,6 +323,7 @@ class ColumnGroup {
 	//NEW[14]
 	public function setColNoRef($strFormatterId, $inNumber=0){
 		//----再帰関数
+		global $g;
 		//ColumnGroup::calcSpanLength、から呼ばれる
 		$intRet = $inNumber;
 		try{
@@ -2244,8 +2245,6 @@ class IDColumn extends Column {
 		$strErrMsg = "";
 		$retArrayForBind = array();
 
-		$objTable = $this->getTable();
-
 		$mainTableBody = $objTable->getDBMainTableBody();
 		$strThisIdColumnId = $this->getID();
 		$strDUColumnOfMainTable = $objTable->getRequiredDisuseColumnID();
@@ -2256,6 +2255,8 @@ class IDColumn extends Column {
 		$refMasterTableBody = $this->getMasterTableBodyForFilter();
 		$refMasterDUColumn = $this->getRequiredDisuseColumnID();
 		$aryEtcetera = $this->getEtceteraParameter();
+
+		$strFxName = __CLASS__."::".__FUNCTION__;
 
 		// RBAC対応 ----
 		try {
@@ -2805,11 +2806,6 @@ class IDColumn extends Column {
 				//マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する----
                                 // RBAC対応 ----
 
-				if(is_array($this->arrayMasterSetFromMainTable)===true && 0 < count($this->arrayMasterSetFromMainTable)){
-					//----正常に配列を取得できた
-					//正常に配列を取得できた----
-				}else{
-				}
 				//フィルターテーブル用のデフォルト・データセットを作成----
 			}
 		}
@@ -2822,6 +2818,7 @@ class IDColumn extends Column {
 	}
 	//NEW[38]
 	function getMasterTableArrayFromJournalTable(){
+		global $g;
 		//(1)IDColumn、がTableにAddされていない場合は「null」を返す。
 		//(2)setMasterTableArrayFromMainTable、で、null、をセットしたとしても、通常は、配列を返す。
 		if($this->arrayMasterSetFromJournalTable === null){
@@ -2852,12 +2849,6 @@ class IDColumn extends Column {
 				//マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する----
                                 // RBAC対応 ----
 
-				if(is_array($this->arrayMasterSetFromJournalTable)===true && 0 < count($this->arrayMasterSetFromJournalTable)){
-					//----正常に配列を取得できた
-					//正常に配列を取得できた----
-				}else{
-					//$this->arrayMasterSetFromJournalTable = null;
-				}
 				//フィルターテーブル用のデフォルト・データセットを作成----
 			}
 		}
@@ -3399,11 +3390,7 @@ class EditStatusControlIDColumn extends IDColumn {
                     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
                     foreach($exeQueryData as $key=>$value){
                         if( in_array($key, $remainColKeys) === true ){
-                            if( is_array($value) === true ){
-                                dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                            }else{
-                                dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                            }
+                            dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
                         }else{
                             dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
                             if($arrayObjColumn[$key]->compareRow($exeQueryData, $reqOrgData, $aryVariant)===true){
@@ -4730,7 +4717,7 @@ class PasswordColumn extends TextColumn {
 		$this->setOutputType("json", $outputType);
 
 		if( array_key_exists("updateRequireExcept", $aryEtcetera) === true ){
-			$this->updateRequireExcept = $updateRequireExcept['updateRequireExcept'];
+			$this->updateRequireExcept = $aryEtcetera['updateRequireExcept'];
 		}
 		$this->setEncodeFunctionName("md5");
 		$this->setSelectTagCallerShow(false);
@@ -4871,7 +4858,7 @@ class MaskColumn extends TextColumn {
         $this->setOutputType("json", $outputType);
 
         if( array_key_exists("updateRequireExcept", $aryEtcetera) === true ){
-            $this->updateRequireExcept = $updateRequireExcept['updateRequireExcept'];
+            $this->updateRequireExcept = $aryEtcetera['updateRequireExcept'];
         }
         $this->setSelectTagCallerShow(false);
 
@@ -5262,6 +5249,8 @@ class JournalSeqNoColumn extends NumColumn {
 	//----ここから継承メソッドの上書き処理
 
 	function __construct($strColId="JOURNAL_SEQ_NO", $strColExplain="", $strSequenceId=null){
+		global $g;
+
 		if( $strColExplain == "" ){
 			$strColExplain = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11301");
 		}
@@ -7667,7 +7656,6 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 		$boolExecute = true;
 
 		$objMainColumn = $this->objIDColumn;
-		$objTable = $this->getTable();
 
 		$mainTableBody = $objTable->getDBMainTableBody();
 
@@ -9972,9 +9960,7 @@ class FileUploadColumn extends Column{
 			$strSysErrMsgBody = "";
 			$boolRet = false;
 			// ----一般訪問ユーザに見せてよいメッセージを作成
-			switch($intErrorType){
-				default : $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");break;
-			}
+			$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
 			// 一般訪問ユーザに見せてよいメッセージを作成----
 			if( 0 < $g['dev_log_developer'] ){
 				//----ロードテーブルカスタマイザー向け追加メッセージを作成
@@ -10266,9 +10252,7 @@ class FileUploadColumn extends Column{
 			$boolFlagBody = false;
 			$tmpErrMsgBody = $e->getMessage();
 			// ----一般訪問ユーザに見せてよいメッセージを作成
-			switch($intErrorCode){
-				default : $strErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");break;
-			}
+			$strErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
 			// 一般訪問ユーザに見せてよいメッセージを作成----
 			if( 0 < $g['dev_log_developer'] ){
 				//----ロードテーブルカスタマイザー向け追加メッセージを作成

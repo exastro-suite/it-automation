@@ -618,7 +618,6 @@
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
                             throw new Exception( '00002500-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                            break;
                         }
                     }
                     
@@ -677,7 +676,6 @@
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
                             throw new Exception( '00002900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                            break;
                         }
                     }
                     

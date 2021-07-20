@@ -28,6 +28,7 @@
         $objTable = loadTable();
 
         // ルートディレクトリを取得
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -2893,9 +2894,12 @@ class RoleBasedAccessControl {
         return true;
     }
     function chkMovementAccessAuth($OperationNoUAPK,$PatternId,$objDBCA,$objMTS,$restAPI=false,$login_id=0) {
+        global $g;
+
         ////////////////////////////////
         // ルートディレクトリを取得   //
         ////////////////////////////////
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -3015,7 +3019,6 @@ class RoleBasedAccessControl {
     }
     // RBAC対応 ----
     function ky_debug($file,$func,$line,$title,$data) {
-       return;
        try {
          $dump = var_export($data,true);
          $tmpVarTimeStamp = time();
@@ -3033,7 +3036,6 @@ class RoleBasedAccessControl {
        }
     }
     function ky_backtrace($file,$func,$line,$title) {
-       return;
        try {
          $print_backtrace = "------backtrace--\n";
          $tmpVarTimeStamp = time();

@@ -1179,6 +1179,7 @@ class OrchestratorLinkAgent {
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
             $aryRetBody = $this->getInfoOfOneSymphony($fxVarsIntSymphonyClassId, $fxVarsIntMode);
+            $objMTS = $this->getMessageTemplateStorage();
             if( $aryRetBody[1] !== null ){
                 // エラーフラグをON
                 // 例外処理へ
@@ -4454,6 +4455,7 @@ class OrchestratorLinkAgent {
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
             $aryRetBody = $this->getInfoOfOneConductor($fxVarsIntConductorClassId, $fxVarsIntMode,$getmode);
+            $objMTS = $this->getMessageTemplateStorage();
 
             if( $aryRetBody[1] !== null ){
                 // エラーフラグをON
@@ -5466,10 +5468,8 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
             $aryRowOfSymClassTable=$aryRetBody[4];
 
-            $fxVarsStrLT4UBody = 'T_'.$aryRetBody[4]['LUT4U'];
-
             //追い越しチェック　
-            if( $fxVarsStrLT4UBody != 'T_'.$aryRowOfSymClassTable['LUT4U'] ){
+            if( 'T_'.$aryRetBody[4]['LUT4U'] != 'T_'.$aryRowOfSymClassTable['LUT4U'] ){
                 // エラーフラグをON
                 // 例外処理へ
                 $strErrStepIdInFx="00001200";
@@ -7324,7 +7324,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
 
                 }elseif( $strExeAccesAuth != "" && $strSpOpeAccesAuth == "" ){
 
-                    $strExeAccesAuth = $strExeAccesAuth;
+                    continue;
                 }else{
                     $arrExeAccesAuth = explode(",", $strExeAccesAuth);
                     $tmpSpOpeAccesAuth = explode(",", $strSpOpeAccesAuth);
