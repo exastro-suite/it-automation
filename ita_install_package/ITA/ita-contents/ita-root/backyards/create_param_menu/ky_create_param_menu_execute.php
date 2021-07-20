@@ -3874,34 +3874,16 @@ function updateMenuList($cmiData, &$hgMenuId, &$hostMenuId, &$hostSubMenuId,&$vi
             }
             // ホストグループなし
             else{
-                // 縦メニューあり
-                if(true === $createConvFlg){
-                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
-                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
-                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
-                }
-                // 縦メニューなし
-                else{
-                    $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
-                    $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
-                    $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
-                }
+                $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+                $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+                $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
             }
         }
         // 作成対象:パラメータシート(オペレーションあり)
         else if("3" == $cmiData['TARGET']){
-            // 縦メニューあり
-            if(true === $createConvFlg){
-                $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
-                $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
-                $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
-            }
-            // 縦メニューなし
-            else{
-                $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
-                $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
-                $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
-            }
+            $targetArray[] = array('MATCH_FLG' => $inputMatchFlg, 'DATA' => $inputMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_INPUT']);
+            $targetArray[] = array('MATCH_FLG' => $substMatchFlg, 'DATA' => $substMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_SUBST']);
+            $targetArray[] = array('MATCH_FLG' => $viewMatchFlg, 'DATA' => $viewMenuList, 'MENU_GROUP' => $cmiData['MENUGROUP_FOR_VIEW']);
         }
         // 作成対象; データシート
         else if("2" == $cmiData['TARGET']){
@@ -4631,7 +4613,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             outputLog($msg);
             throw new Exception($msg);
         }
-        $otherMenuLinkArray = $result;
+        $otherMenuLinkArrayTmp = $result;
 
         //////////////////////////
         // 参照項目情報テーブルを検索
@@ -4670,8 +4652,8 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
                 continue;
             }
             if(7 == $itemInfo['INPUT_METHOD_ID']){
-                $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArray, 'LINK_ID'));
-                $otherMenuLink = $otherMenuLinkArray[$matchIdx];
+                $matchIdx = array_search($itemInfo['OTHER_MENU_LINK_ID'], array_column($otherMenuLinkArrayTmp, 'LINK_ID'));
+                $otherMenuLink = $otherMenuLinkArrayTmp[$matchIdx];
                 if(5 == $otherMenuLink['COLUMN_TYPE'] || 6 == $otherMenuLink['COLUMN_TYPE'] || 8 == $otherMenuLink['COLUMN_TYPE'] || 9 == $otherMenuLink['COLUMN_TYPE']){
                     continue;
                 }
@@ -4729,7 +4711,7 @@ function updateLinkTargetColumn($hostMenuId, $itemInfoArray, $itemColumnGrpArray
             $otherPriName = null;
             $otherColumnName = null;
             if("" != $itemInfo['OTHER_MENU_LINK_ID']){
-                foreach($otherMenuLinkArray as $otherMenuLink){
+                foreach($otherMenuLinkArrayTmp as $otherMenuLink){
                     if($itemInfo['OTHER_MENU_LINK_ID'] == $otherMenuLink['LINK_ID']){
                         $otherTableName = $otherMenuLink['TABLE_NAME'];
                         $otherPriName = $otherMenuLink['PRI_NAME'];
