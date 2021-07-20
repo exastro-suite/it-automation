@@ -168,7 +168,8 @@ function tableSort(header_rows, objTriggerTag, tablebodyid_prefix, num, sfunc, w
     var rows_num = rows.length - 1;
     
     //----ソート対象の値 と 行オブジェクトを取得
-    for(i=0;i<rows_num - (header_rows - 1);i++){
+    var loop_end = rows_num - (header_rows - 1);
+    for(i=0;i<loop_end;i++){
         xbox[i] = Object(getStr(rows[i+header_rows].cells[num]));
         xbox[i].row = rows[i+header_rows];
     }

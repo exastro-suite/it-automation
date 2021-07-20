@@ -80,7 +80,7 @@ line-height: 27px;
 text-align: center;
 text-shadow: 1px 1px 0 rgba( 0,0,0,.8 );
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 font-weight: bold;
 color: #FFDD00;
 }
@@ -745,7 +745,7 @@ border-spacing: 1px;
 .modal-table td {
 padding: 4px 8px;
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 }
 .modal-table td {
@@ -891,7 +891,7 @@ background-color: rgba( 255,255,255,.04 );
 margin: 0; padding: 2px 8px;
 line-height: 1.5;
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #CCC;
 animation: addLog .5s;
 }
