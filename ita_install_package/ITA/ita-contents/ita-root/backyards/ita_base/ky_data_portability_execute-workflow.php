@@ -1622,16 +1622,16 @@ function getRunningRecord(){
 
     $objQuery = $objDBCA->sqlPrepare($sql);
     if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
         throw new Exception($objMTS->getSomeMessage('ITABASEH-ERR-900054',
                                                     array(basename(__FILE__), __LINE__)));
-        outputLog(LOG_PREFIX, $objQuery->getLastError());
     }
 
     $res = $objQuery->sqlExecute();
     if ($res === false) {
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
         throw new Exception($objMTS->getSomeMessage('ITABASEH-ERR-900054',
                                                     array(basename(__FILE__), __LINE__)));
-        outputLog(LOG_PREFIX, $objQuery->getLastError());
     }
 
     while ($row = $objQuery->resultFetch()){
@@ -2752,9 +2752,8 @@ function getPrimarykey($table_name) {
         outputLog(LOG_PREFIX, $objQuery->getLastError());
         return false;
     }
-    while ($row = $objQuery->resultFetch()) {
-        return $row['Column_name'];
-    }
+    $row = $objQuery->resultFetch();
+    return $row['Column_name'];
 }
 
 /**
