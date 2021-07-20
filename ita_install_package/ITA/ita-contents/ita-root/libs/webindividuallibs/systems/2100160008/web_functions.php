@@ -91,7 +91,7 @@ function updateChildCol($columnGroupTable, $dirId, $dirNameFullpath, $lastUpdate
             //////////////////////////
             $result = $columnGroupTable->updateTable($updateData);
             if(true !== $result){
-                return $objMTS->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                return $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
             }
 
             // 子ディレクトリのパスを変更する

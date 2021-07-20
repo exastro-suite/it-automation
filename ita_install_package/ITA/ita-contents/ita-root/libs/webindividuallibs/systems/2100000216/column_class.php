@@ -98,6 +98,7 @@ class RowIdentifyTextColumn extends TextColumn {
 }
 
 class JournalSeqNoColumnDummy extends TextColumn {
+    global $g;
     //通常時は表示しない
 
     protected $strSequenceId;
