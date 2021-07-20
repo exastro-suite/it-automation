@@ -279,7 +279,7 @@
         $strDeveloperArea = $tmpRetArray[1];
         
         // CURフィルタエリア
-        $tmpRetArray = getFilterCommandArea($objTable1,$aryVariant,$arySetting,"filter_table","Filter1Tbl","FilterConditionTableFormatter");
+        $tmpRetArray = getFilterCommandArea($objTable1,$aryVariant,$arySetting,"filter_table","Filter1Tbl");
         $strHtmlFilter1Commnad = $tmpRetArray[1];
         
         //----登録対象絞り込み用フィルター
@@ -288,7 +288,7 @@
             $pageType = $objTable1->getPageType();
             $aryTempVariant = array('pageType'=>'view');
             $objTable2 = loadTable($registeredKey,$aryTempVariant);
-            $tmpRetArray = getRegisterFilterCommandArea($objTable2,$aryVariant,$arySetting,"register_table","Filter2Tbl","RegisterTableFormatter");
+            $tmpRetArray = getRegisterFilterCommandArea($objTable2,$aryVariant,$arySetting,"register_table","Filter2Tbl");
             $registerFilterCommand = $tmpRetArray[1];
             
             if( $pageType=="confirm" ){
@@ -2592,6 +2592,8 @@ EOD;
         $lc_db_model_ch = $g['objDBCA']->getModelChannel();
 
         $strSearchTableBody = $arySingleTraceQuery['TRACE_TARGET_TABLE'];
+
+        $strFxName = __FUNCTION__;
 
         // ---- RBAC対応
         // SELECT項目になっているACCESS_AUTHカラムを取得

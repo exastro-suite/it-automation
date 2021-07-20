@@ -716,15 +716,13 @@ class FileNameValidator extends TextValidator {
 
 	function __construct($strFSName="ext4"){
 		global $g;
-		if( $strFSName="ext4" ){
-			$min = 0;
-			$max = 255;
-			$strRegexpFormat = "/^[^,\"\t\/\r\n]*$/s";
+
+		$min = 0;
+		$max = 255;
+		$strRegexpFormat = "/^[^,\"\t\/\r\n]*$/s";
+		if( $strFSName == "ext4" ){
 			$strDisplayFormat = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10801");
 		}else{
-			$min = 0;
-			$max = 255;
-			$strRegexpFormat = "/^[^,\"\t\/\r\n]*$/s";
 			$strDisplayFormat = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10802");
 		}
 		parent::__construct($min, $max, false, $strRegexpFormat, $strDisplayFormat);
@@ -1076,17 +1074,18 @@ class LinkRequireValidator extends Validator {
 		$aryObjColumn = $objTable->getColumns();
 		$objLinkColumn = $aryObjColumn[$this->strLinkColumnId];
 		$strColumnLabel = $objLinkColumn->getColLabel(true);
+		$arrayDispSelectTagTmp = Null;
 		if(is_a($this->objOwnerColumn,'IDColumn')){
-			$arrayDispSelectTag = $this->objOwnerColumn->getArrayMasterTableByFormatName($strMsgMode);
-			if($arrayDispSelectTag === null){
+			$arrayDispSelectTagTmp = $this->objOwnerColumn->getArrayMasterTableByFormatName($strMsgMode);
+			if($arrayDispSelectTagTmp === null){
 				if($this->objOwnerColumn->getMasterTableBodyForInput() != ""){
-					$arrayDispSelectTag = $this->objOwnerColumn->getMasterTableArrayForInput();
+					$arrayDispSelectTagTmp = $this->objOwnerColumn->getMasterTableArrayForInput();
 				}else{
-					$arrayDispSelectTag = $this->objOwnerColumn->getMasterTableArrayForFilter();
+					$arrayDispSelectTagTmp = $this->objOwnerColumn->getMasterTableArrayForFilter();
 				}
 			}
-			if( array_key_exists($value, $arrayDispSelectTag) === true ){
-				$strDispBody = $arrayDispSelectTag[$value];
+			if( array_key_exists($value, $arrayDispSelectTagTmp) === true ){
+				$strDispBody = $arrayDispSelectTagTmp[$value];
 			}else{
 				$strDispBody = $this->objOwnerColumn->getErrMsgHead()."(".$value.")".$this->objOwnerColumn->getErrMsgTail();
 			}
@@ -1296,39 +1295,19 @@ class IDValidator extends Validator{
 			if($boolExeContinue === true){
 				if( $this->objInfoBaseColumn->getAddSelectTagPrintType()===0 ){
 					//----仮想マスタモード
-					if( $strModeId==="DTiS_richFilterDefault" ){
-						//----リッチフィルタだが、仮想のマスタの鍵キーとなる列の型次第で、正規表現で規制する
-						$minorMode = $this->objInfoBaseColumn->getPrimeMasterDisplayColumnType();
-						if( $minorMode===0 ){
-							// 表示列が数値型の場合
-							$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Num");
-						}else{
-							// 表示列が文字列型の場合
-							$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Chr");
-						}
-						if( preg_match($strRegexpFormat, $value)===1 ){
-							$retBool = true;
-						}else{
-							$retBool = false;
-						}
-						//リッチフィルタだが、仮想のマスタの鍵キーとなる列の型次第で、正規表現で規制する----
+					$minorMode = $this->objInfoBaseColumn->getPrimeMasterDisplayColumnType();
+					if( $minorMode===0 ){
+						// 表示列が数値型の場合
+						$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Num");
 					}else{
-						//----テキスト検索は、正規表現で規制する
-						$minorMode = $this->objInfoBaseColumn->getPrimeMasterDisplayColumnType();
-						if( $minorMode===0 ){
-							// 表示列が数値型の場合
-							$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Num");
-						}else{
-							// 表示列が文字列型の場合
-							$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Chr");
-						}
+						// 表示列が文字列型の場合
+						$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Chr");
+					}
 
-						if( preg_match($strRegexpFormat, $value)===1 ){
-							$retBool = true;
-						}else{
-							$retBool = false;
-						}
-						//テキスト検索は、正規表現で規制する----
+					if( preg_match($strRegexpFormat, $value)===1 ){
+						$retBool = true;
+					}else{
+						$retBool = false;
 					}
 					//仮想マスタモード----
 				}else{
@@ -2171,7 +2150,7 @@ class RequiredForConfirmValidator extends Validator {
                                     $boolInputNull = true;
                                 }
                                 if($boolInputNull===true){
-                                    $objClientValidator->setErrShowPrefix(false);
+                                    $this->setErrShowPrefix(false);
                                     $arrayColumnName[] = "(".str_replace(array("<br>","<br/>","<br />"),"・",$tmpAryColumn[$strValue]->getColLabel(true)).")";
                                 }
                                 //送信されてきていないが、すでにレコードの中に値は存在しているか？----
@@ -2191,7 +2170,7 @@ class RequiredForConfirmValidator extends Validator {
             }
         }
         if($retBool===false){
-            $objClientValidator->setValidRule($retStrBody);
+            $this->setValidRule($retStrBody);
         }
         return $retBool;
     }

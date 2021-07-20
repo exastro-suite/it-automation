@@ -811,7 +811,7 @@ class TableControlAgent {
 	}
 	//----シノニム
 	public function setRIColumnID($strColIdText){
-		return $this->setRowIdentifyColumnID($strColIdText);
+		$this->strRowIdentifyColumnId = $strColIdText;
 	}
 	//シノニム----
 
@@ -1041,6 +1041,7 @@ class TableControlAgent {
                                                                               $pkeyColumnName,
                                                                               $pkeyID);
                             $objQuery = $g['objDBCA']->sqlPrepare($sql);
+                            $error_msg1 = "[%s:%s]:DB Access Error. (SQL: %s)";
                             if($objQuery->getStatus()===false){
                                 $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$sql);
                                 $message .= "\n" . $objQuery->getLastError();
@@ -1361,7 +1362,7 @@ class TableControlAgent {
         catch (Exception $e){
             $tmpErrMsgBody = $e->getMessage();
             dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5001",array($tmpErrMsgBody,$intErrorStatus)));
+            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5001",array($tmpErrMsgBody,$this->getSelfInfoForLog())));
             webRequestForceQuitFromEveryWhere(500,90410103);
             exit();
         }

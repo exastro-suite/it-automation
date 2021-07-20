@@ -125,7 +125,7 @@
         // ----ログイン状態である、と判定された場合
         $username = $strReqUsername;
 
-        $tmpAryRetBody = getUserInfosByUsername($username,$objDBCA,$db_model_ch);
+        $tmpAryRetBody = getUserInfosByUsername($username,$objDBCA);
         if( $tmpAryRetBody[1] !== null ){
             $tmpStrErrMsgBody = $tmpAryRetBody[3];
 

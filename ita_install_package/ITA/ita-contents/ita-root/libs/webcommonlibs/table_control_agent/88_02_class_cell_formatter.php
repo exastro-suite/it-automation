@@ -2774,12 +2774,7 @@ class InputTabBFmt extends TabBFmt {
 
 	public function getFSTNameForIdentify(){
 		// フィルター系側が1タグと限らないので、フィルター系と、この関数を共有をしない
-		$retStrVal = "";
-		if( $this->getColumnIdHidden()===true ){
-			$retStrVal = $this->getIDSynonym();
-		}else{
-			$retStrVal = $this->getIDSynonym();
-		}
+		$retStrVal = $this->getIDSynonym();
 		return $retStrVal;
 	}
 
@@ -6329,19 +6324,7 @@ class EditLockUpdButtonTabBFmt extends ReviewTemplateTableTabBFmt {
                 //活性中の場合----
             }else{
                 //----活性中ではない場合
-                if( $strValueOfDisuseFlag === "1" ){
-                    //----廃止されている場合
-
-                    $strUpdable="disabled";
-
-                    //廃止されている場合----
-                }else{
-                    //----そのほかのステータスの場合
-
-                    $strUpdable="disabled";
-
-                    //そのほかのステータスの場合----
-                }
+                $strUpdable="disabled";
                 //活性中ではない場合----
             }
             if( $strPageType == "apply" ){

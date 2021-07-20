@@ -1,13 +1,13 @@
 <?= $strLoginFormHeadBody ?>
 <div id="gateLoginContainer" class="gateContainer">
  <form id="gateLoginForm" class="inputUserInfoForm" method="POST" name="loginform" action="<?= $strGateUrl ?>?login&grp=<?= $ASJTM_grp_id ?>&no=<?= $ASJTM_id ?>">
-   <table id="gateLoginItemTable" class="headerLeftTable inputItemTable" border="0">
+   <table id="gateLoginItemTable" class="headerLeftTable inputItemTable" border="0" aria-describedby="">
      <tr>
-       <th class="inputItemExplain"><?= $strLoginIDCaption ?></th>
+       <th id="" class="inputItemExplain"><?= $strLoginIDCaption ?></th>
        <td class="inputItemWrapper"><input class="inputUserId" type="text" name="username" /></td>
      </tr>
      <tr>
-       <th class="inputItemExplain"><?= $strLoginPWCaption ?></th>
+       <th id="" class="inputItemExplain"><?= $strLoginPWCaption ?></th>
        <td class="inputItemWrapper"><div class="input_password"><input class="inputUserPw" type="password" name="password" /><div class="password_eye"></div></td>
      </tr>
    </table>

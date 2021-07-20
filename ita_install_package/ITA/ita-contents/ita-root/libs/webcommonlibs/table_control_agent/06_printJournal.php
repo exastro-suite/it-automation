@@ -273,7 +273,6 @@
                                     $intErrorType = 500;
                                     throw new Exception( '00010801-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
 	                        }
-	                        break;
 
 	                    }
 	                } else {

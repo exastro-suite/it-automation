@@ -263,38 +263,36 @@
                                     $intErrorType = 2;
                                 }
                             }
-                            if( true ){
-                                if($value != null){
-                                    if($boolZenHanDistinct === false){
-                                        //----a:全角英数を半角英数に、s:全角スペースを半角スペースに、KV:半角カタカナを全角カタカナに変換(濁点付きは全角1文字へ)
-                                        $value = convert_mb_kana_for_fazzyMode($value);
-                                        //a:全角英数を半角英数に、s:全角スペースを半角スペースに、KV:半角カタカナを全角カタカナに変換(濁点付きは全角1文字へ)----
-                                    }
+                            if($value != null){
+                                if($boolZenHanDistinct === false){
+                                    //----a:全角英数を半角英数に、s:全角スペースを半角スペースに、KV:半角カタカナを全角カタカナに変換(濁点付きは全角1文字へ)
+                                    $value = convert_mb_kana_for_fazzyMode($value);
+                                    //a:全角英数を半角英数に、s:全角スペースを半角スペースに、KV:半角カタカナを全角カタカナに変換(濁点付きは全角1文字へ)----
                                 }
-                                $dlcValidateSkip = false;
-                                if($objColumn->isRegisterRequireExcept()!==false){
-                                    if($value == "" && $objColumn->isRegisterRequireExcept()===1 ){
-                                        $dlcValidateSkip = true;
-                                    }
+                            }
+                            $dlcValidateSkip = false;
+                            if($objColumn->isRegisterRequireExcept()!==false){
+                                if($value == "" && $objColumn->isRegisterRequireExcept()===1 ){
+                                    $dlcValidateSkip = true;
                                 }
-                                if($dlcValidateSkip !== true){
-                                    $objMultiValidator = $objColumn->getValidator();
-                                    if($objMultiValidator->isValid($value, $numWkPk, $reqRegisterData, $aryVariant)===true){
-                                        $exeRegisterData[$key] = $value;
-                                    }else{
-                                        $arrayRule=$objMultiValidator->getValidRule();
-                                        $arrayPrefix=$objMultiValidator->getShowPrefixs();
-                                        $intColumnErrSeq=0;
-                                        foreach($arrayRule as $data){
-                                            $intColumnErrSeq+=1;
-                                            if($arrayPrefix[$intColumnErrSeq - 1]!==false){
-                                                $error_str .= $objColumn->getColLabel(true).":{$data}\n";
-                                            }else{
-                                                $error_str .= "{$data}\n";
-                                            }
+                            }
+                            if($dlcValidateSkip !== true){
+                                $objMultiValidator = $objColumn->getValidator();
+                                if($objMultiValidator->isValid($value, $numWkPk, $reqRegisterData, $aryVariant)===true){
+                                    $exeRegisterData[$key] = $value;
+                                }else{
+                                    $arrayRule=$objMultiValidator->getValidRule();
+                                    $arrayPrefix=$objMultiValidator->getShowPrefixs();
+                                    $intColumnErrSeq=0;
+                                    foreach($arrayRule as $data){
+                                        $intColumnErrSeq+=1;
+                                        if($arrayPrefix[$intColumnErrSeq - 1]!==false){
+                                            $error_str .= $objColumn->getColLabel(true).":{$data}\n";
+                                        }else{
+                                            $error_str .= "{$data}\n";
                                         }
-                                        $intErrorType = 2;
                                     }
+                                    $intErrorType = 2;
                                 }
                             }
                         }
@@ -383,7 +381,6 @@
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
                             throw new Exception( '00001400-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                            break;
                         }
                     }
                     

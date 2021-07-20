@@ -677,21 +677,11 @@
                     $objExcelFormatter->cashModeAdjust();
 
                     // ----XLSXファイル名の設定
-                    if( $strPrintTypeMode != "forDeveloper" ){
-                        if($strOutputDataType === "latest"){
-                            $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
-                        }
-                        else if($strOutputDataType === "history"){
-                            $strDLFilename = $objExcelFormatter->makeLocalFileNameHistory(".xlsx",$intUnixTime);
-                        }
+                    if($strOutputDataType === "latest"){
+                        $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
                     }
-                    else{
-                        if($strOutputDataType === "latest"){
-                            $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
-                        }
-                        else if($strOutputDataType === "history"){
-                            $strDLFilename = $objExcelFormatter->makeLocalFileNameHistory(".xlsx",$intUnixTime);
-                        }
+                    else if($strOutputDataType === "history"){
+                        $strDLFilename = $objExcelFormatter->makeLocalFileNameHistory(".xlsx",$intUnixTime);
                     }
                     if( $strDLFilename === null ){
                         $intErrorType = 501;
@@ -882,7 +872,7 @@
 
                     if( $strToAreaType == "toStd" ){
                         // ----MIMEタイプの設定
-                        printHeaderForProvideFileStream($strDLFilename,"",null,array("ContentExcelType"=>"EXCEL2007"));
+                        printHeaderForProvideFileStream($strDLFilename,"",null);
                         // MIMEタイプの設定----
                     }
 
