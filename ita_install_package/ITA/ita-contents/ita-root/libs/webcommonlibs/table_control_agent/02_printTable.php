@@ -621,7 +621,7 @@ EOD;
 
                 if($strOutputFileType == "SafeCSV"){
                     $strOutputStr .= 
-<<<EOD
+<<< EOD
             <form style="display:inline" name="reqToolDL" action="{$g['scheme_n_authority']}/webdbcore/editorBaker.zip">
                 <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-346")}" >
             </form>
@@ -890,7 +890,7 @@ EOD;
         }
         //
         $strOutputStr = 
-<<<EOD
+<<< EOD
                 {$htmlPrintTableAreaTailCommon}
                 {$htmlPrintTableAreaTailPriSome}
 EOD;
