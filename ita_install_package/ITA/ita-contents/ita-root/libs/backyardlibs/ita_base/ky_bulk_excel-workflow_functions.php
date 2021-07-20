@@ -2190,7 +2190,7 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                 $strSheetName = $objTable->getFormatter($strLinkFormatterId)->getGeneValue("sheetNameForEditByFile",$refRetKeyExists);
 
                 if( $strSheetName == "" ){
-                    $strSheetNとふぃtsssame = $objTable->getDBMainTableLabel();
+                    $strSheetName = $objTable->getDBMainTableLabel();
                 }
 
                 // 31文字に短縮する
