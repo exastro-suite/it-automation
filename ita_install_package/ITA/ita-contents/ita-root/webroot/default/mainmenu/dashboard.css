@@ -38,7 +38,7 @@ html, body,
 .stacked-graph-item-title,
 .stacked-graph-popup-date,
 .pie-chart-ratio {
-    font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+    font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 }
 
 /* -------------------------------------------------- *
@@ -870,7 +870,7 @@ padding: 4px;
 border-top: 1px solid #CCC;
 border-bottom: 1px solid #CCC;
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 }
 .dashboard-table tr:nth-of-type(odd) {
 background-color: #FFF;

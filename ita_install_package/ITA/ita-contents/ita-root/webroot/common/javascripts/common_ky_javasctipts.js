@@ -454,7 +454,7 @@ function Graph_onmouse(type, order){
 
 function checkTypicalFlagInHADACResult(ary_result){
     var retBoolContinue = true;
-    if( ! ary_result instanceof Array){
+    if( !(ary_result instanceof Array) ){
         //----配列ではなかった
         //配列ではなかった----
     }else{
@@ -469,7 +469,7 @@ function checkTypicalFlagInHADACResult(ary_result){
 
 function checkTypicalFlagInHAGResult(ary_result){
     var retBoolContinue = true;
-    if( ! ary_result instanceof Array){
+    if( !(ary_result instanceof Array) ){
         //----配列ではなかった
         //配列ではなかった----
     }else{
@@ -548,7 +548,7 @@ function redirectTo(mode,redirectUrl,ary_post_key,intkeyStartIndex,objTgtDoc){
         }
     }
     //exit();
-    exit;
+    exec_flag_ret = false;
 }
 
 function jumpToSelfHtml(strElementId){
@@ -1310,7 +1310,7 @@ function relayout() {
 
 //////// 何もしないダミーファンクション ////////
 function do_nothing( ){
-    null;
+    return;
 }
 
 //////////////////////////////////////////////////////

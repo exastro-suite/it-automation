@@ -203,7 +203,7 @@ var superTable = function (tableId, options) {
 			alpha = this.sDataTable.tBodies[0].rows[0].cells[0];
 			beta = [alpha.currentStyle["borderRightWidth"], alpha.currentStyle["borderLeftWidth"]];
 			if(/px/i.test(beta[0]) && /px/i.test(beta[1])) {
-				beta = [parseInt(beta[0]), parseInt(beta[1])].sort();
+				beta = [parseInt(beta[0]), parseInt(beta[1])].sort((a, b) => (a - b));
 				this.sFHeaderWidth += Math.ceil(parseInt(beta[1]) / 2);
 			}
 		}

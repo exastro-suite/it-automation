@@ -760,13 +760,6 @@ $canvasVisibleArea.on( mousewheelevent, function( e ){
             delta = e.originalEvent.deltaY ? - ( e.originalEvent.deltaY ) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : - ( e.originalEvent.detail );
 
       if ( e.shiftKey ) {
-        // 横スクロール
-        if ( delta < 0 ){
-          //
-        } else {
-          //
-        }
-
       } else {
         // 縦スクロール
         if ( delta < 0 ){
@@ -1578,7 +1571,7 @@ const createNodeHTML = function( nodeID ) {
           + '<dd class="node-operation-data">' + nodeOperationData + '</dd>'
         + '</dl>'
         + '<div class="node-operation-border"></div>'
-      + '</div>',
+      + '</div>'
       + '<div class="node-status"><p></p></div>';
     }
 
@@ -4843,7 +4836,6 @@ const conductorStatusUpdate = function( exeNumber ) {
       case '1':
         itaPopup( $node.find('.node-result'), $node.attr('id') );
         return false;
-        break;
       case '2':
         // 準備中
         nodeJump();
@@ -4851,7 +4843,6 @@ const conductorStatusUpdate = function( exeNumber ) {
         itaPopup( $node.find('.node-result'), $node.attr('id') );
         $inEdge.attr('data-status', 'running');
         return false;
-        break;
       case '3':
       case '4':
         // 実行中
@@ -4860,7 +4851,6 @@ const conductorStatusUpdate = function( exeNumber ) {
         itaPopup( $node.find('.node-result'), $node.attr('id') );
         $inEdge.attr('data-status', 'running');
         return false;
-        break;
       case '5':
       case '9':
         endMessage = 'DONE';

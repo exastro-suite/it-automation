@@ -416,7 +416,7 @@ border-top: none;border-radius: 0 0 4px 4px;
 	font-weight: bold;
 	color: #FFF;
 	line-height: 32px;
-	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 }
 .movement2 .delete:hover::before {
 	content: 'DELETE';

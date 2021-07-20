@@ -392,13 +392,6 @@ $canvasWindow.on( mousewheelevent, function( e ){
             delta = e.originalEvent.deltaY ? - ( e.originalEvent.deltaY ) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : - ( e.originalEvent.detail );
 
       if ( e.shiftKey ) {
-        // 横スクロール
-        if ( delta < 0 ){
-          //
-        } else {
-          //
-        }
-
       } else {
         // 縦スクロール
         if ( delta < 0 ){

@@ -1230,7 +1230,7 @@ border-radius: 50%;
 text-align: center;
 line-height: 58px;
 text-shadow: 1px 1px 1px rgba( 0,0,0,.6 );
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 font-weight: bold;
 font-size: 24px;
 color: #EEE;
@@ -1257,7 +1257,7 @@ transform: scale(.8,.6) translateY(4px);
 .node-name {
 overflow: hidden;
 max-width: 400px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 }
 .drag .node-name {
 white-space: nowrap;
@@ -1355,7 +1355,7 @@ line-height: 1;
 letter-spacing: 0.2em;
 font-size: 10px;
 font-weight: bold;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #DDD;
 }
 .node-out.node-terminal::before {
@@ -1633,7 +1633,7 @@ border-radius: 2px;
 line-height: 1;
 text-align: center;
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 }
 .branch-type li.done { background-color: #4D9E0A; }
@@ -1654,7 +1654,7 @@ border-radius: 2px;
 line-height: 20px;
 text-align: center;
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 }
 .merge-status span.standby {
@@ -1696,7 +1696,7 @@ line-height: 1;
 letter-spacing: 0.2em;
 font-size: 10px;
 font-weight: bold;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #DDD;
 }
 .function-merge .node-terminal.node-out::before {
@@ -1782,7 +1782,7 @@ line-height: 1;
 letter-spacing: normal;
 font-size: 11px;
 white-space: nowrap;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 cursor: grab;
 }
@@ -1952,7 +1952,7 @@ border-right: 1px solid rgba( 0,0,0,.8 );
 border-radius: 0 0 4px 4px;
 line-height: 1;
 font-size: 10px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 white-space: nowrap;
 }
@@ -2040,7 +2040,7 @@ stroke-width: 1px;
 #select-area rect {
 fill: rgba( 96,198,13,.1 );
 stroke: #60C60D;
-storke-width: 1px;
+stroke-width: 1px;
 }
 
 
@@ -2258,7 +2258,7 @@ border-spacing: 1px;
 .modal-table td {
 padding: 4px 8px;
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 }
 .modal-table thead th {
