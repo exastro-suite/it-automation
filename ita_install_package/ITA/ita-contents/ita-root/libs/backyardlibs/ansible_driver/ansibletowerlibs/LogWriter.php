@@ -35,8 +35,8 @@ class LogWriter {
     private $log_output_dir;
     private $log_file_prefix;
    
-    private $UIExecLogPath;
-    private $UIErrorLogPath;
+    private $UIExecLogPath = "";
+    private $UIErrorLogPath = "";
 
     // singleton
     private static $INSTANCE = null;

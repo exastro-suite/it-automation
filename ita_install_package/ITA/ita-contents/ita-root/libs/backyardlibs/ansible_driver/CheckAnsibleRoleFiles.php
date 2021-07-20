@@ -667,6 +667,7 @@ class CheckAnsibleRoleFiles {
         $result_code    = true;
         $tasks_dir      = false;
         $defaults_his   = false;
+        $tmp_in_role_pkg_name = "";
 
         foreach ($files as $file){
             $fullpath = rtrim($in_dir,'/') . '/' . $file;
@@ -722,11 +723,11 @@ class CheckAnsibleRoleFiles {
                        $array_vars_list  = array();
                        $varsval_list     = array();
                        // defaultsディレクトリ内の変数定義を読み取る
-                       $in_role_pkg_name = $this->lva_msg_role_pkg_name;
+                       $tmp_in_role_pkg_name = $this->lva_msg_role_pkg_name;
                        $ret = $this->AnalysisDefaultVarsFiles(LC_RUN_MODE_STD,
                                                               $in_base_dir,
                                                               $fullpath,
-                                                              $in_role_pkg_name,
+                                                              $tmp_in_role_pkg_name,
                                                               $in_rolename,
                                                               $parent_vars_list,
                                                               $vars_list,
@@ -2684,10 +2685,7 @@ class DefaultVarsFileAnalysis{
             }
             else{
                 $wk_var_name_path = $var;
-                if(is_numeric($var) === false)
-                    $wk_var_name = $var;
-                else
-                    $wk_var_name = $var;
+                $wk_var_name = $var;
             }
             // 配列の開始かを判定する。
             if($col_array_f == "I"){
@@ -4186,7 +4184,6 @@ class VarStructAnalysisFileAccess{
             $ret = preg_match("/^LCA_[a-zA-Z0-9_]*/",$var_name);
             if($ret != 0) {
                 return "LCA";
-                $LCA_vars_use = true;
             } else {
                 // グローバル変数の場合
                 $ret = preg_match("/^GBL_[a-zA-Z0-9_]*/",$var_name);
@@ -4288,6 +4285,7 @@ class VarStructAnalysisFileAccess{
                                 &$save_vars_list) {
         global $g;
 
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -4466,7 +4464,7 @@ class VarStructAnalysisFileAccess{
                         $Array_vars_use   = false;
                         $GBL_vars_info    = array();
                         $VarVal_list      = array();
-                        $PkeyID           = $row['ANS_TEMPLATE_ID']; 
+                        $strPkeyID        = $row['ANS_TEMPLATE_ID']; 
                         $strVarsList      = $row['VARS_LIST']; 
 
                         // 変数定義の解析結果を取得
@@ -4474,7 +4472,7 @@ class VarStructAnalysisFileAccess{
 
                         // 変数定義の解析結果をファイルから取得
                         // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
-                        $ret = $fileObj->getVarStructAnalysis($PkeyID,
+                        $ret = $fileObj->getVarStructAnalysis($strPkeyID,
                                                               $strVarName,
                                                               $strVarsList,
                                                               $Vars_list,
@@ -4704,6 +4702,8 @@ class VarStructAnalysisFileAccess{
         $var_struct_errmag    = "";
         $all_err_vars_list    = array();
 
+        global $g;
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -4872,6 +4872,8 @@ class VarStructAnalysisFileAccess{
         $var_struct_errmag    = "";
         $all_err_vars_list    = array();
 
+        global $g;
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );

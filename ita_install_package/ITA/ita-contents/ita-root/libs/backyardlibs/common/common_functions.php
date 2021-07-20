@@ -310,7 +310,7 @@ function zip($dirPath, $dstPath, $zipPath=null) {
  */
 function unZip($zipPath, $dstName){
     $result = false;
-    $res = exec("unzip -r {$dstPath} {$zipPath}");
+    $res = exec("unzip -r {$dstName} {$zipPath}");
     if ($res == 0) {
         $result = true;
     }
@@ -552,7 +552,7 @@ function getUserRole($userId){
 
     $res = $objQuery->sqlBind(
         array(
-            "MENU_ID" => $menuId,
+            "USER_ID" => $userId,
         )
     );
 

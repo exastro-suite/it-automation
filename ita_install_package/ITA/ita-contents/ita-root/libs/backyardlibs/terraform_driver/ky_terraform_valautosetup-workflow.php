@@ -410,13 +410,13 @@
         // P0004
         //   紐付メニューから具体値を取得する。
         ////////////////////////////////////////////////////////////////////////////////
-        $ret = GetMenuData($lva_table_nameTOsql_list,
-                           $lva_table_nameTOid_list,
-                           $lva_table_col_list,
-                           $lva_vars_ass_list,
-                           $lva_vars_ass_chk_list,
-                           $lva_error_column_id_list,
-                           $warning_flag);
+        GetMenuData($lva_table_nameTOsql_list,
+                    $lva_table_nameTOid_list,
+                    $lva_table_col_list,
+                    $lva_vars_ass_list,
+                    $lva_vars_ass_chk_list,
+                    $lva_error_column_id_list,
+                    $warning_flag);
 
         // 不要となった配列変数を開放
         unset($lva_table_nameTOsql_list);

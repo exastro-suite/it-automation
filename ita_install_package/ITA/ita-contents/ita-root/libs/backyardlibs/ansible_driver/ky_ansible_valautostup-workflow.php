@@ -561,16 +561,16 @@
         // P0004
         //   紐付メニューから具体値を取得する。
         ////////////////////////////////////////////////////////////////////////////////
-        $ret = GetMenuData($vg_driver_name,
-                           $lva_table_nameTOsql_list,
-                           $lva_table_nameTOid_list,
-                           $lva_table_col_list,
-                           $lva_child_vars_ass_list,
-                           $lva_child_vars_ass_chk_list,
-                           $lva_vars_ass_list,
-                           $lva_vars_ass_chk_list,
-                           $lva_error_column_id_list,
-                           $warning_flag);
+        GetMenuData($vg_driver_name,
+                    $lva_table_nameTOsql_list,
+                    $lva_table_nameTOid_list,
+                    $lva_table_col_list,
+                    $lva_child_vars_ass_list,
+                    $lva_child_vars_ass_chk_list,
+                    $lva_vars_ass_list,
+                    $lva_vars_ass_chk_list,
+                    $lva_error_column_id_list,
+                    $warning_flag);
 
         // 不要となった配列変数を開放
         unset($lva_table_nameTOsql_list);
@@ -1841,9 +1841,9 @@
                                     // プルダウン選択先のレコードが廃止されている
                                     if ( $log_level === 'DEBUG' ){
                                         $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90135",
-                                                                          array($in_tableNameToMenuIdList[$table_name],
+                                                                          array($ina_table_nameTOid_list[$table_name],
                                                                                 $row[DF_ITA_LOCAL_PKEY],
-                                                                                $col_data['COL_TITLE']));
+                                                                                $ina_col_list['COL_TITLE']));
                                         LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                                         $warning_flag = true;
                                         continue;
