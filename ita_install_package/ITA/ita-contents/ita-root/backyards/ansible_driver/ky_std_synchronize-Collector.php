@@ -1748,9 +1748,9 @@ function updateMovmentInstance($objDBCA,$db_model_ch,$tmpConfigForMovementIUD,$d
     $aryConfigForIUD = $tmpConfigForMovementIUD;
 
     // BIND用のベースソース
-    $aryBaseSourceForBind = $aryCollectTgtSource;
+    $aryBaseSourceForBindTmp = $aryCollectTgtSource;
 
-    $aryRetBody = insertFromTablename($objDBCA,$db_model_ch,"UPDATE",$strCollectTablename,$strCollectKeyname,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+    $aryRetBody = insertFromTablename($objDBCA,$db_model_ch,"UPDATE",$strCollectTablename,$strCollectKeyname,$aryConfigForIUD,$aryBaseSourceForBindTmp,$strFxName);
 
     return $aryRetBody;
 }
@@ -1897,10 +1897,7 @@ function yamlParseAnalysis($strTargetfile){
             }
             else{
                 $wk_var_name_path = $var;
-                if(is_numeric($var) === false)
-                    $wk_var_name = $var;
-                else
-                    $wk_var_name = $var;
+                $wk_var_name = $var;
             }
             // 配列の開始かを判定する。
             if($col_array_f == "I"){

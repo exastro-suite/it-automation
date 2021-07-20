@@ -773,9 +773,8 @@ function getPrimarykey($table_name) {
         outputLog(LOG_PREFIX, $objQuery->getLastError());
         return false;
     }
-    while ($row = $objQuery->resultFetch()) {
-        return $row['Column_name'];
-    }
+    $row = $objQuery->resultFetch();
+    return $row['Column_name'];
 }
 
 /**

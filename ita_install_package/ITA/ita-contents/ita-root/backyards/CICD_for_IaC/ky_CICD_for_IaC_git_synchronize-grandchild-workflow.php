@@ -964,13 +964,7 @@
                 if($row['SYNC_STATUS_ROW_ID'] != $SyncStatusNameobj->NORMAL()) {
                     $LogStr  = $ErrorMsgHeder;
                     $UIMatlSyncMsg   = "";
-                    // Movementが登録されているか判定
-                    if($DelvExecFlg === true) {
-                        //$UIDelvMsg       = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2058");
-                        $UIDelvMsg       = "";
-                    } else {
-                        $UIDelvMsg       = "";
-                    }
+                    $UIDelvMsg       = "";
                     $SyncSts         = $SyncStatusNameobj->NORMAL();
                     $DelvExecInsNo   = "";
                     $DelvExecMenuId  = "";
