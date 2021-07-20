@@ -471,7 +471,7 @@ margin-right: 0;
 
 
 #KIZI textarea, #KIZI input[type="text"], #KIZI input[type="password"] {
-	font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", MS Gothic, sans-serif;
+	font-family: MS Gothic, sans-serif;
 	font-size: 13px;
 	padding: 2px;
 	margin-bottom: 2px;
