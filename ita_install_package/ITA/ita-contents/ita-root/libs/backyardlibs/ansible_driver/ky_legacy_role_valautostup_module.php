@@ -187,12 +187,12 @@
         $lv_varsAssList          = array();
         $lv_arrayVarsAssList     = array();
 
-        $ret = getCMDBdata($lv_tableNameToSqlList,
-                           $lv_tableNameToMenuIdList,
-                           $lv_tabColNameToValAssRowList,
-                           $lv_varsAssList,
-                           $lv_arrayVarsAssList,
-                           $warning_flag);
+        getCMDBdata($lv_tableNameToSqlList,
+                    $lv_tableNameToMenuIdList,
+                    $lv_tabColNameToValAssRowList,
+                    $lv_varsAssList,
+                    $lv_arrayVarsAssList,
+                    $warning_flag);
 
        // 不要となった配列変数を開放
        unset($lv_tableNameToSqlList);
@@ -965,8 +965,7 @@ function readValAssign(&$inout_tableNameToMenuIdList,
 
     while($row = $objQuery->resultFetch()) {
         // CMDB代入値紐付メニューが廃止されているか判定
-        if(($row['TBL_DISUSE_FLAG'] != '0') ||
-           ($row['TBL_DISUSE_FLAG'] != '0')) {
+        if($row['TBL_DISUSE_FLAG'] != '0') {
             if($log_level === "DEBUG"){
                 $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90014",array($row['COLUMN_ID']));
                 LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -3148,6 +3147,8 @@ function recordSelect($sqlUtnBody, $arrayUtnBind) {
 
 // シーケンスをロックして、採番した数値を返却
 function getAndLockSeq($strSeqOfTable) {
+  
+    $objMTS = $g['objMTS'];
 
     // シーケンスをロック
     $retArray = getSequenceLockInTrz($strSeqOfTable, "A_SEQUENCE");

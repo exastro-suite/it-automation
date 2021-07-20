@@ -376,6 +376,8 @@ function dbaccessUpdateEach($targetTable, $specificColumn, $targetColumns, $upda
 }
 
 function dbaccessGetSequence($tableName) {
+  
+    $objMTS = $g['objMTS'];
 
     ////////////////////////////////////////////////////////////////
     // テーブルシーケンスをロック                                 //

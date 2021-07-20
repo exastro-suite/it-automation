@@ -626,6 +626,7 @@ class CreateAnsibleExecFiles {
                                      $in_conductor_instance_no
                                      ){
         global $root_dir_path;
+        global $g;
 
         $this->run_operation_id = $in_operation_id;
 
@@ -961,6 +962,7 @@ class CreateAnsibleExecFiles {
 
             // ロールパッケージファイル名(ZIP)を取得
             $zipfile = $this->getAnsible_RolePackage_file($in_zipdir,$in_role_rolepackage_id,$role_package_file);
+            $pkey = "";
 
             // ロールパッケージファイル名(ZIP)の存在確認
             if( file_exists($zipfile) === false ){
@@ -1838,6 +1840,7 @@ class CreateAnsibleExecFiles {
 
                     // ky_encryptで中身がスクランブルされているので復元する
                     $ret = ky_file_decrypt($ssh_key_file_path,$ssh_key_file_path);
+                    $in_system_id = $ina_hostinfolist[$host_name]['SYSTEM_ID'];
                     if($ret === false) {
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -1898,6 +1901,7 @@ class CreateAnsibleExecFiles {
                                                     $win_ca_file_path);
                     // ky_encryptで中身がスクランブルされているので、復元
                     $ret = ky_file_decrypt($win_ca_file_path,$win_ca_file_path);
+                    $in_system_id = $ina_hostinfolist[$host_name]['SYSTEM_ID'];
                     if($ret === false) {
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -9466,6 +9470,7 @@ class CreateAnsibleExecFiles {
                "   TBL_1.DISUSE_FLAG = '0';                            \n";
 
         $objQuery = $this->lv_objDBCA->sqlPrepare($sql);
+        $in_pattern_id = "";
         if($objQuery->getStatus()===false){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -12863,8 +12868,9 @@ if(isset($Expansion_root)) {
             $operationStr = sprintf("%s_%s:%s", $row['OPERATION_DATE'],
                                     $in_operation_id,
                                     $row['OPERATION_NAME']);
-            break;
-           
+            if(1==1){
+              break;
+            }
         }
 
         // DBアクセス事後処理

@@ -122,25 +122,25 @@ class RestApiCaller {
     function restCall($method, $apiUri, $content = array(), $header = array(), $Rest_stdout_flg=false) {
 
         $httpContext = array();
-        $header      = array();
+        $arrHeader      = array();
 
         if($Rest_stdout_flg == false) {
             // コンテンツ付与
             if(!empty($content)) {
                 $httpContext['http']['content'] = json_encode($content);
-                $header[] = "Content-type: application/json";
+                $arrHeader[] = "Content-type: application/json";
             }
 
             // Header精査
             if(!empty($this->accessToken)) {
                 // AnsibleTowe 2.3以前の認証方法---------
-                //$header[] = "Authorization: Token " . $this->accessToken;
+                //$arrHeader[] = "Authorization: Token " . $this->accessToken;
                 // ------------AnsibleTowe 2.3以前の認証方法
-                $header[] = "Authorization: Bearer " . $this->accessToken;
+                $arrHeader[] = "Authorization: Bearer " . $this->accessToken;
             }
 
-            if(empty($header) || self::hasHeaderField($header, "Accept:") == false) {
-                $header[] = "Accept: application/json";
+            if(empty($arrHeader) || self::hasHeaderField($arrHeader, "Accept:") == false) {
+                $arrHeader[] = "Accept: application/json";
             }
         }
         else
@@ -148,13 +148,13 @@ class RestApiCaller {
             if(!empty($content)) {
                 $httpContext['http']['content'] = json_encode($content);
             }
-            $header[] = "Authorization: Bearer " . $this->accessToken;
+            $arrHeader[] = "Authorization: Bearer " . $this->accessToken;
         }
 
         // HTTPコンテキスト作成
         $httpContext['http']['method']          = $method;
         $httpContext['http']['ignore_errors']   = true;
-        $httpContext['http']['header']          = implode("\r\n", $header);
+        $httpContext['http']['header']          = implode("\r\n", $arrHeader);
 
         ////////////////////////////////
         // Proxy設定                  //
@@ -218,9 +218,9 @@ class RestApiCaller {
             } else {
                 $response_array['responseHeaders']  = $http_response_header;
                 $response_array['responseContents'] = $responseContents;
-                foreach($response_array['responseHeaders'] as $header) {
-                    if( preg_match("/^(\s)*Content-Type:/",$header) == 1) {
-                        if( preg_match("/(\s)*application\/json/",$header) == 1) {
+                foreach($response_array['responseHeaders'] as $arrHeader) {
+                    if( preg_match("/^(\s)*Content-Type:/",$arrHeader) == 1) {
+                        if( preg_match("/(\s)*application\/json/",$arrHeader) == 1) {
                             $response_array['responseContents'] = json_decode($responseContents, true);
                         }
                     }
