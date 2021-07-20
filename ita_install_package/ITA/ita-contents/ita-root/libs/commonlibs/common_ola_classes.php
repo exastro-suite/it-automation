@@ -5469,7 +5469,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $aryRowOfSymClassTable=$aryRetBody[4];
 
             //追い越しチェック　
-            if( $'T_'.$aryRetBody[4]['LUT4U'] != 'T_'.$aryRowOfSymClassTable['LUT4U'] ){
+            if( 'T_'.$aryRetBody[4]['LUT4U'] != 'T_'.$aryRowOfSymClassTable['LUT4U'] ){
                 // エラーフラグをON
                 // 例外処理へ
                 $strErrStepIdInFx="00001200";
