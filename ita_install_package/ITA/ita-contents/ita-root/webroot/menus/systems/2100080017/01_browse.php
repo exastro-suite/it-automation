@@ -35,9 +35,9 @@ require_once ( $root_dir_path . '/libs/webcommonlibs/table_control_agent/web_par
 
 <!-------------------------------- 説明 -------------------------------->
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="">
         <tr>
-            <td><div onClick=location.href="javascript:show('SetsumeiMidashi','SetsumeiNakami');" class="midashi_class" ><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106010'); ?></div></td>
+            <th scope="col"><div onClick=location.href="javascript:show('SetsumeiMidashi','SetsumeiNakami');" class="midashi_class" ><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106010'); ?></div></th>
             <td>
                 <div id="SetsumeiMidashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('SetsumeiMidashi','SetsumeiNakami');" >
@@ -54,9 +54,9 @@ require_once ( $root_dir_path . '/libs/webcommonlibs/table_control_agent/web_par
 <!-------------------------------- 説明 -------------------------------->
 <!---------------------------- Organization登録管理 ---------------------------->
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="">
         <tr>
-            <td><div onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" class="midashi_class"><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106030');?></div></td>
+            <th scope="col"><div onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" class="midashi_class"><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106030');?></div></th>
             <td>
                 <div id="Mix1_Midashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" >
@@ -77,9 +77,9 @@ require_once ( $root_dir_path . '/libs/webcommonlibs/table_control_agent/web_par
 <!---------------------------- Organization登録管理 ---------------------------->
 <!---------------------------- Workspace登録管理 ---------------------------->
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="">
         <tr>
-            <td><div onClick=location.href="javascript:show('Mix2_Midashi','Mix2_Nakami');" class="midashi_class"><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106050');?></div></td>
+            <th scope="col"><div onClick=location.href="javascript:show('Mix2_Midashi','Mix2_Nakami');" class="midashi_class"><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106050');?></div></th>
             <td>
                 <div id="Mix2_Midashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('Mix2_Midashi','Mix2_Nakami');" >
@@ -100,9 +100,9 @@ require_once ( $root_dir_path . '/libs/webcommonlibs/table_control_agent/web_par
 <!---------------------------- Workspace登録管理 ---------------------------->
 <!---------------------------- Policy登録管理 ---------------------------->
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="">
         <tr>
-            <td><div onClick=location.href="javascript:show('Mix3_Midashi','Mix3_Nakami');" class="midashi_class"><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106070');?></div></td>
+            <th scope="col"><div onClick=location.href="javascript:show('Mix3_Midashi','Mix3_Nakami');" class="midashi_class"><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106070');?></div></th>
             <td>
                 <div id="Mix3_Midashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('Mix3_Midashi','Mix3_Nakami');" >
@@ -123,9 +123,9 @@ require_once ( $root_dir_path . '/libs/webcommonlibs/table_control_agent/web_par
 <!---------------------------- Policy登録管理 ---------------------------->
 <!---------------------------- PolicySet登録管理 ---------------------------->
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="">
         <tr>
-            <td><div onClick=location.href="javascript:show('Mix4_Midashi','Mix4_Nakami');" class="midashi_class"><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106090');?></div></td>
+            <th scope="col"><div onClick=location.href="javascript:show('Mix4_Midashi','Mix4_Nakami');" class="midashi_class"><?php echo $objMTS->getSomeMessage('ITATERRAFORM-MNU-106090');?></div></th>
             <td>
                 <div id="Mix4_Midashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('Mix4_Midashi','Mix4_Nakami');" >
