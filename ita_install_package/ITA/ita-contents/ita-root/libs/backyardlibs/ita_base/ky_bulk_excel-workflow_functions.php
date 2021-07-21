@@ -1110,6 +1110,10 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                     file_put_contents($tmpFilePath, $strCsvHeaderStream);
 
                     return $tmpFilePath;
+
+                    // ----テンポラリファイルを削除する
+                    unlink("$strTmpFilename");
+                    // テンポラリファイルを削除する----
                 }
                 else{
                     $intErrorType = 501;
@@ -1163,7 +1167,12 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                     $objExcelFormatter->cashModeAdjust();
 
                     // ----XLSXファイル名の設定
-                    $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
+                    if( $strPrintTypeMode != "forDeveloper" ){
+                        $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
+                    }
+                    else{
+                        $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
+                    }
                     if( $strDLFilename === null ){
                         $intErrorType = 501;
                         $intErrorPlaceMark = 2900;
@@ -1318,7 +1327,7 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
 
                     if( $strToAreaType == "toStd" ){
                         // ----MIMEタイプの設定
-                        printHeaderForProvideFileStream($strDLFilename,"",null);
+                        printHeaderForProvideFileStream($strDLFilename,"",null,array("ContentExcelType"=>"EXCEL2007"));
                         // MIMEタイプの設定----
                     }
 
@@ -1335,6 +1344,8 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
 
 
                     //このメソッド内で、出力する。----
+
+                    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
 
                     if( $strToAreaType == "toStd" ){
                         // アクセスログへ記録
@@ -2576,6 +2587,7 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                                                               array(basename(__FILE__), __LINE__)));
                 outputLog(LOG_PREFIX, $sql);
                 outputLog(LOG_PREFIX, $objQuery->getLastError());
+                throw new Exception( $ErrorMsg );
                 return false;
             }
         } else {
