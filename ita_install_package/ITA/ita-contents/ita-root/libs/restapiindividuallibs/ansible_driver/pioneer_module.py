@@ -273,10 +273,7 @@ def main():
     loger = str(os.environ)
     exec_log_output(exec_name)
 
-    if sys.version_info.major == 2:
-      p = pexpect.spawn(exec_cmd,  encoding=lang ,codec_errors='replace')
-    else:
-      p = pexpect.spawn(exec_cmd,  encoding=lang ,codec_errors='replace')
+    p = pexpect.spawn(exec_cmd,  encoding=lang ,codec_errors='replace')
 
     # ドライランモードを退避しタイムアウト値を5秒にする。
     if module.check_mode:
@@ -416,7 +413,7 @@ def main():
               private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
 
         # localaction実行
-        exec_localaction(module,p,log_file_name,host_name,exec_cmd,ignore_errors)
+        exec_localaction(module,log_file_name,host_name,exec_cmd,ignore_errors)
 
       # state command ?
       elif 'state' in input:
@@ -4406,7 +4403,7 @@ def exec_command(p,log_file_name,host_name,cmd):
 
   private_log_output(log_file_name,host_name,"Ok")
 
-def exec_localaction(module,p,log_file_name,host_name,cmd,ignore_errors):
+def exec_localaction(module,log_file_name,host_name,cmd,ignore_errors):
   global localaction_log_str
   global exec_log
   global vault_vars_def
