@@ -53,7 +53,7 @@
     require_once($g['root_dir_path'] . "/webconfs/systems/{$ansible_legacy_pattern_dir}_loadTable.php");
     $objTable1 = loadTable($ansible_legacy_pattern_dir,$aryTmpVariant1,$aryTmpSetting1);
     
-    $tmpRetArray = getFilterCommandArea($objTable1,$aryTmpVariant1,$aryTmpSetting1,"filter_table","Filter1Tbl","FilterConditionTableFormatter");
+    $tmpRetArray = getFilterCommandArea($objTable1,$aryTmpVariant1,$aryTmpSetting1,"filter_table","Filter1Tbl");
     $strHtmlFilter1Commnad = $tmpRetArray[1];
     //作業パターン用----
     
@@ -65,7 +65,7 @@
     require_once($g['root_dir_path'] . "/webconfs/systems/{$op_dir}_loadTable.php");
     $objTable2 = loadTable($op_dir,$aryTmpVariant2,$aryTmpSetting2);
     
-    $tmpRetArray = getFilterCommandArea($objTable2,$aryTmpVariant2,$aryTmpSetting2,"filter_table","Filter2Tbl","FilterConditionTableFormatter");
+    $tmpRetArray = getFilterCommandArea($objTable2,$aryTmpVariant2,$aryTmpSetting2,"filter_table","Filter2Tbl");
     $strHtmlFilter2Commnad = $tmpRetArray[1];
     //オペレーション用----
     
