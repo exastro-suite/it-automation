@@ -529,9 +529,8 @@ const getSetID = function() {
     setIdList.push( $( this ).attr('id') );
   });
   
-  const flag = true;
   let setID = 'widget' + widgetCount++;
-  while( flag ) {
+  while( true ) {
     if ( setIdList.indexOf( setID ) === -1 ) {
       break;
     }
