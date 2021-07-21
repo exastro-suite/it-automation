@@ -103,7 +103,7 @@
     require_once($g['root_dir_path'] . "/webconfs/systems/2100000310_loadTable.php");
     $objTable1 = loadTable($symphony_instance_dir,$aryTmpVariant1,$aryTmpSetting1);
     
-    $tmpRetArray = getFilterCommandArea($objTable1,$aryTmpVariant1,$aryTmpSetting1,"filter_table","Filter1Tbl","FilterConditionTableFormatter");
+    $tmpRetArray = getFilterCommandArea($objTable1,$aryTmpVariant1,$aryTmpSetting1,"filter_table","Filter1Tbl");
     $strHtmlFilter1Commnad = $tmpRetArray[1];
     //シンフォニー用----
     
