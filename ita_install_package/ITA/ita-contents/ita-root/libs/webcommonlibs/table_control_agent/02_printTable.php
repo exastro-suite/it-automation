@@ -811,9 +811,6 @@ EOD;
         $strOutputStr = "";
         // ローカル変数宣言----
         
-        $strOutputStr .= 
-<<< EOD
-EOD;
         //
         return $strOutputStr;
         //

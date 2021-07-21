@@ -331,6 +331,9 @@
 		}
 
 		function setInterfaceInfo(){		
+			//グローバル変数宣言
+			global $g;
+			
 			$interfaceData = array();
 			$retInterfaceInfo = getInterfaceInfo();
 			if($retInterfaceInfo[0] == false){
