@@ -77,9 +77,9 @@ EOD;
 
 <!-------------------------------- 説明 -------------------------------->
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="">
         <tr>
-            <td><div onClick=location.href="javascript:show('SetsumeiMidashi','SetsumeiNakami');" class="midashi_class"><?php echo $headerLabel1; ?></div></td>
+            <th scope="col"><div onClick=location.href="javascript:show('SetsumeiMidashi','SetsumeiNakami');" class="midashi_class"><?php echo $headerLabel1; ?></div></th>
             <td>
                 <div id="SetsumeiMidashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('SetsumeiMidashi','SetsumeiNakami');" >
@@ -98,9 +98,9 @@ EOD;
 <!-------------------------------- 説明 -------------------------------->
 <!---------------------------- アップロード ---------------------------->
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="">
         <tr>
-            <td><div onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" class="midashi_class"><?php echo $uploadLabel1; ?></div></td>
+        <th scope="col"><div onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" class="midashi_class"><?php echo $uploadLabel1; ?></div></th>
             <td>
                 <div id="Mix1_Midashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" >
@@ -123,9 +123,9 @@ EOD;
 <!---------------------------- アップロード ---------------------------->
 <!----------------------------- インポート ----------------------------->
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="">
         <tr>
-            <td><div onClick=location.href="javascript:show('Mix2_Midashi','Mix2_Nakami');" class="midashi_class"><?php echo $importLabel1; ?></div></td>
+        <th scope="col"><div onClick=location.href="javascript:show('Mix2_Midashi','Mix2_Nakami');" class="midashi_class"><?php echo $importLabel1; ?></div></th>
             <td>
                 <div id="Mix2_Midashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('Mix2_Midashi','Mix2_Nakami');" >
@@ -184,7 +184,7 @@ EOD;
                 </div>
             </div>
                 <form method="post" action="/menus/systems/<?php echo $g['page_dir']; ?>/03_data_import.php?no=<?php echo $g['page_dir']; ?>" id="import_form">
-                <p><label><input type="checkbox" value="" id="import_whole"><strong><font size="4"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900018');?></font></strong></label></p>
+                <p><label><input type="checkbox" value="" id="import_whole"><strong><span class="export_whole"><?php echo $objMTS->getSomeMessage('ITABASEH-MNU-900018');?></span></strong></label></p>
                 <p style="margin-bottom: 10px;"></p>
 <?php foreach($retImportAry as $key => $value): ?>
                     <div class="import_all_div">

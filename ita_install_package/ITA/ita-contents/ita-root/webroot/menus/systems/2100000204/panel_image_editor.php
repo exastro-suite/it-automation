@@ -128,14 +128,14 @@ EOD;
       <div id="icon-document" class="panel layer-property">
 
         <div class="property-item">
-          <table class="property-table">
+          <table class="property-table" aria-describedby="">
             <tbody>
               <tr>
-                <th class="property-th">Name:</th><td class="property-td" colspan="3"><input id="document-name" class="property-text" type="text"></td>
+                <th class="property-th" scope="col">Name:</th><td class="property-td" colspan="3"><input id="document-name" class="property-text" type="text"></td>
               </tr>
               <tr>
-                <th class="property-th">Width:</th><td class="property-td"><input id="document-width" class="property-number" type="number" value="400"><label for="document-width" class="property-input-label">px</label></td>
-                <th class="property-th">Height:</th><td class="property-td"><input id="document-height" class="property-number" type="number" value="400"><label for="document-height" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Width:</th><td class="property-td"><input id="document-width" class="property-number" type="number" value="400"><label for="document-width" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Height:</th><td class="property-td"><input id="document-height" class="property-number" type="number" value="400"><label for="document-height" class="property-input-label">px</label></td>
               </tr>
             </tbody>
           </table>
@@ -159,47 +159,47 @@ EOD;
 
       <div id="layer-property-common" class="panel layer-property">
         <div class="property-item">
-          <table class="property-table">
+          <table class="property-table" aria-describedby="">
             <tbody>
               <tr>
-                <th class="property-th">Name:</th><td class="property-td" colspan="3"><input id="property-layer-name" class="property-text" type="text"></td>
+                <th class="property-th" scope="col">Name:</th><td class="property-td" colspan="3"><input id="property-layer-name" class="property-text" type="text"></td>
               </tr>
               <tr>
-                <th class="property-th">X:</th><td class="property-td"><input id="property-x" class="property-number" type="number"><label for="property-x" class="property-input-label">px</label></td>
-                <th class="property-th">Y:</th><td class="property-td"><input id="property-y" class="property-number" type="number"><label for="property-y" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">X:</th><td class="property-td"><input id="property-x" class="property-number" type="number"><label for="property-x" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Y:</th><td class="property-td"><input id="property-y" class="property-number" type="number"><label for="property-y" class="property-input-label">px</label></td>
               </tr>
               <tr class="property-type-not-text">
-                <th class="property-th">Width:</th><td class="property-td"><input id="property-width" class="property-number" type="number"><label for="property-width" class="property-input-label">px</label></td>
-                <th class="property-th">Height:</th><td class="property-td"><input id="property-height" class="property-number" type="number"><label for="property-height" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Width:</th><td class="property-td"><input id="property-width" class="property-number" type="number"><label for="property-width" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Height:</th><td class="property-td"><input id="property-height" class="property-number" type="number"><label for="property-height" class="property-input-label">px</label></td>
               </tr>
               <tr class="property-type-not-image">
-                <th class="property-th">Color<span class="property-type-symbol"> 1</span>:</th><td class="property-td"><div class="property-color-set"><input id="property-color" class="property-color" type="color"><label for="property-color" class="property-color-label"></label></div></td>
-                <th class="property-th">Opacity<span class="property-type-symbol"> 1</span>:</th><td class="property-td"><input id="property-opacity" class="property-number" type="number"><label for="property-opacity" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Color<span class="property-type-symbol"> 1</span>:</th><td class="property-td"><div class="property-color-set"><input id="property-color" class="property-color" type="color"><label for="property-color" class="property-color-label"></label></div></td>
+                <th class="property-th" scope="col">Opacity<span class="property-type-symbol"> 1</span>:</th><td class="property-td"><input id="property-opacity" class="property-number" type="number"><label for="property-opacity" class="property-input-label">%</label></td>
               </tr>
               <tr class="property-type-symbol symbol-color-2">
-                <th class="property-th">Color 2:</th><td class="property-td"><div class="property-color-set"><input id="property-color2" class="property-color" type="color"><label for="property-color2" class="property-color-label"></label></div></td>
-                <th class="property-th">Opacity 2:</th><td class="property-td"><input id="property-opacity2" class="property-number" type="number"><label for="property-opacity2" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Color 2:</th><td class="property-td"><div class="property-color-set"><input id="property-color2" class="property-color" type="color"><label for="property-color2" class="property-color-label"></label></div></td>
+                <th class="property-th" scope="col">Opacity 2:</th><td class="property-td"><input id="property-opacity2" class="property-number" type="number"><label for="property-opacity2" class="property-input-label">%</label></td>
               </tr>
               <tr class="property-type-symbol symbol-color-3">
-                <th class="property-th">Color 3:</th><td class="property-td"><div class="property-color-set"><input id="property-color3" class="property-color" type="color"><label for="property-color3" class="property-color-label"></label></div></td>
-                <th class="property-th">Opacity 3:</th><td class="property-td"><input id="property-opacity3" class="property-number" type="number"><label for="property-opacity3" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Color 3:</th><td class="property-td"><div class="property-color-set"><input id="property-color3" class="property-color" type="color"><label for="property-color3" class="property-color-label"></label></div></td>
+                <th class="property-th" scope="col">Opacity 3:</th><td class="property-td"><input id="property-opacity3" class="property-number" type="number"><label for="property-opacity3" class="property-input-label">%</label></td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="property-item property-type-text">
           <hr class="property-hr">
-          <table class="property-table">
+          <table class="property-table" aria-describedby="">
             <tbody>
               <tr>
-                <th class="property-th">Text:</th><td class="property-td" colspan="3"><input id="property-text" class="property-text" type="text"></td>
+                <th class="property-th" scope="col">Text:</th><td class="property-td" colspan="3"><input id="property-text" class="property-text" type="text"></td>
               </tr>
               <tr>
-                <th class="property-th">Font:</th><td class="property-td" colspan="3"><input id="property-font" class="property-text" type="text"></td>
+                <th class="property-th" scope="col">Font:</th><td class="property-td" colspan="3"><input id="property-font" class="property-text" type="text"></td>
               </tr>
               <tr>
-                <th class="property-th">Size:</th><td class="property-td"><input id="property-font-size" class="property-number" type="number"><label for="property-font-size" class="property-input-label">px</label></td>
-                <th class="property-th">Weight:</th><td class="property-td">
+                <th class="property-th" scope="col">Size:</th><td class="property-td"><input id="property-font-size" class="property-number" type="number"><label for="property-font-size" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Weight:</th><td class="property-td">
                   <select id="property-font-weight" class="property-select">
                     <option value="normal">Normal</option>
                     <option value="bold">Bold</option>
@@ -210,22 +210,22 @@ EOD;
         </div>
         <div class="property-item property-type-image">
           <hr class="property-hr">
-          <table class="property-table">
+          <table class="property-table" aria-describedby="">
             <tbody>
               <tr>
-                <th class="property-th">Image:</th>
+                <th class="property-th" scope="col">Image:</th>
                 <td class="property-td"><button id="property-image-load" class="property-button">Select image</button></td>
                 <td colspan="2"></td>
               </tr>
               <tr>
-                <th class="property-th">Size:</th><td class="property-td">
+                <th class="property-th" scope="col">Size:</th><td class="property-td">
                   <select id="property-image-size" class="property-select">
                     <option value="auto">Auto</option>
                     <option value="full">Full</option>
                     <option value="contain">Contain</option>
                     <option value="cover">Cover</option>
                   </select></td>
-                <th class="property-th">Repeat:</th><td class="property-td">
+                <th class="property-th" scope="col">Repeat:</th><td class="property-td">
                   <select id="property-image-repeat" class="property-select">
                     <option value="no-repeat">No Repeat</option>
                     <option value="repeat">Repeat</option>
@@ -240,13 +240,13 @@ EOD;
 
       <div id="layer-property-ime" class="panel layer-property">
         <div class="property-item property-type-text">
-          <table class="property-table">
+          <table class="property-table" aria-describedby="">
             <tbody>
               <tr>
-                <th class="property-th">Text:</th><td class="property-td" colspan="3"><input id="property-text-ime" class="property-text" type="text"></td>
+                <th class="property-th" scope="col">Text:</th><td class="property-td" colspan="3"><input id="property-text-ime" class="property-text" type="text"></td>
               </tr>
               <tr>
-                <th class="property-th">Type:</th>
+                <th class="property-th" scope="col">Type:</th>
                 <td class="property-td" colspan="3">
                   <select id="property-ime-type" class="property-select">
                   </select>
@@ -264,11 +264,11 @@ EOD;
 
       <div id="layer-property-border" class="panel layer-property">
         <div class="property-item property-type-not-image">
-          <table class="property-table">
+          <table class="property-table" aria-describedby="">
             <tbody>
               <tr>
-                <th class="property-th">Width:</th><td class="property-td"><input id="property-border-width" class="property-number" type="number"><label for="property-border-width" class="property-input-label">px</label></td>
-                <th class="property-th">Join:</th><td class="property-td">
+                <th class="property-th" scope="col">Width:</th><td class="property-td"><input id="property-border-width" class="property-number" type="number"><label for="property-border-width" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Join:</th><td class="property-td">
                   <select id="property-border-join" class="property-select">
                     <option value="miter">Miter</option>
                     <option value="round">Round</option>
@@ -276,8 +276,8 @@ EOD;
                     </select></td>
               </tr>
               <tr>
-                <th class="property-th">Color:</th><td class="property-td"><div class="property-color-set"><input id="property-border-color" class="property-color" type="color"><label for="property-border-color" class="property-color-label"></label></div></td>
-                <th class="property-th">Opacity:</th><td class="property-td"><input id="property-border-opacity" class="property-number" type="number"><label for="property-border-opacity" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Color:</th><td class="property-td"><div class="property-color-set"><input id="property-border-color" class="property-color" type="color"><label for="property-border-color" class="property-color-label"></label></div></td>
+                <th class="property-th" scope="col">Opacity:</th><td class="property-td"><input id="property-border-opacity" class="property-number" type="number"><label for="property-border-opacity" class="property-input-label">%</label></td>
               </tr>
             </tbody>
           </table>
@@ -286,15 +286,15 @@ EOD;
 
       <div id="layer-property-transform" class="panel layer-property">
         <div class="property-item">
-          <table class="property-table">
+          <table class="property-table" aria-describedby="">
             <tbody>
               <tr>
-                <th class="property-th">Scale X:</th><td class="property-td"><input id="property-scale-x" class="property-number" type="number"><label for="property-scale-x" class="property-input-label">%</label></td>
-                <th class="property-th">Scale Y:</th><td class="property-td"><input id="property-scale-y" class="property-number" type="number"><label for="property-scale-y" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Scale X:</th><td class="property-td"><input id="property-scale-x" class="property-number" type="number"><label for="property-scale-x" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Scale Y:</th><td class="property-td"><input id="property-scale-y" class="property-number" type="number"><label for="property-scale-y" class="property-input-label">%</label></td>
               </tr>
               <tr>
-                <th class="property-th">Rotate:</th><td class="property-td"><input id="property-rotate" class="property-number" type="number"><label for="property-rotate" class="property-input-label">deg</label></td>
-                <th class="property-th">Skew:</th><td class="property-td"><input id="property-skew" class="property-number" type="number"><label for="property-skew" class="property-input-label">deg</label></td>
+                <th class="property-th" scope="col">Rotate:</th><td class="property-td"><input id="property-rotate" class="property-number" type="number"><label for="property-rotate" class="property-input-label">deg</label></td>
+                <th class="property-th" scope="col">Skew:</th><td class="property-td"><input id="property-skew" class="property-number" type="number"><label for="property-skew" class="property-input-label">deg</label></td>
               </tr>
             </tbody>
           </table>
@@ -303,40 +303,40 @@ EOD;
 
       <div id="layer-property-filter" class="panel layer-property">
         <div class="property-item property-type-not-image">
-          <table class="property-table">
+          <table class="property-table" aria-describedby="">
             <tbody>
               <tr>
-                <th class="property-th">Blur:</th><td class="property-td"><input id="property-filter-blur" class="property-number" type="number"><label for="property-filter-blur" class="property-input-label">px</label></td>
-                <th class="property-th">Opacity:</th><td class="property-td"><input id="property-filter-opacity" class="property-number" type="number"><label for="property-filter-opacity" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Blur:</th><td class="property-td"><input id="property-filter-blur" class="property-number" type="number"><label for="property-filter-blur" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Opacity:</th><td class="property-td"><input id="property-filter-opacity" class="property-number" type="number"><label for="property-filter-opacity" class="property-input-label">%</label></td>
               </tr>
               <tr>
-                <th class="property-th">Brightness:</th><td class="property-td"><input id="property-filter-brightness" class="property-number" type="number"><label for="property-filter-brightness" class="property-input-label">%</label></td>
-                <th class="property-th">Contrast:</th><td class="property-td"><input id="property-filter-contrast" class="property-number" type="number"><label for="property-filter-contrast" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Brightness:</th><td class="property-td"><input id="property-filter-brightness" class="property-number" type="number"><label for="property-filter-brightness" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Contrast:</th><td class="property-td"><input id="property-filter-contrast" class="property-number" type="number"><label for="property-filter-contrast" class="property-input-label">%</label></td>
               </tr>
               <tr>
-                <th class="property-th">Grayscale:</th><td class="property-td"><input id="property-filter-grayscale" class="property-number" type="number"><label for="property-filter-grayscale" class="property-input-label">%</label></td>
-                <th class="property-th">Sepia:</th><td class="property-td"><input id="property-filter-sepia" class="property-number" type="number"><label for="property-filter-sepia" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Grayscale:</th><td class="property-td"><input id="property-filter-grayscale" class="property-number" type="number"><label for="property-filter-grayscale" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Sepia:</th><td class="property-td"><input id="property-filter-sepia" class="property-number" type="number"><label for="property-filter-sepia" class="property-input-label">%</label></td>
               </tr>
               <tr>
-                <th class="property-th">Saturate:</th><td class="property-td"><input id="property-filter-saturate" class="property-number" type="number"><label for="property-filter-saturate" class="property-input-label">%</label></td>
-                <th class="property-th">Invert:</th><td class="property-td"><input id="property-filter-invert" class="property-number" type="number"><label for="property-filter-invert" class="property-input-label">%</label></td>          
+                <th class="property-th" scope="col">Saturate:</th><td class="property-td"><input id="property-filter-saturate" class="property-number" type="number"><label for="property-filter-saturate" class="property-input-label">%</label></td>
+                <th class="property-th" scope="col">Invert:</th><td class="property-td"><input id="property-filter-invert" class="property-number" type="number"><label for="property-filter-invert" class="property-input-label">%</label></td>          
               </tr>
               <tr>
-                <th class="property-th">Hue-rotate:</th><td class="property-td"><input id="property-filter-hue" class="property-number" type="number"><label for="property-filter-hue" class="property-input-label">deg</label></td>
+                <th class="property-th" scope="col">Hue-rotate:</th><td class="property-td"><input id="property-filter-hue" class="property-number" type="number"><label for="property-filter-hue" class="property-input-label">deg</label></td>
                 <td colspan="2"></td>
               </tr>
             </tbody>
           </table>
           <hr class="property-hr">
-          <table class="property-table">
+          <table class="property-table" aria-describedby="">
             <tbody>
               <tr>
-                <th class="property-th">Shadow:</th><td class="property-td"><div class="property-color-set"><input id="property-filter-shadow-color" class="property-color" type="color"><label for="property-filter-shadow-color" class="property-color-label"></label></div></td>
-                <th class="property-th">Blur:</th><td class="property-td"><input id="property-filter-shadow-blur" class="property-number" type="number"><label for="property-filter-shadow-blur" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Shadow:</th><td class="property-td"><div class="property-color-set"><input id="property-filter-shadow-color" class="property-color" type="color"><label for="property-filter-shadow-color" class="property-color-label"></label></div></td>
+                <th class="property-th" scope="col">Blur:</th><td class="property-td"><input id="property-filter-shadow-blur" class="property-number" type="number"><label for="property-filter-shadow-blur" class="property-input-label">px</label></td>
               </tr>
               <tr>
-                <th class="property-th">X:</th><td class="property-td"><input id="property-filter-shadow-x" class="property-number" type="number"><label for="property-filter-shadow-x" class="property-input-label">px</label></td>
-                <th class="property-th">Y:</th><td class="property-td"><input id="property-filter-shadow-y" class="property-number" type="number"><label for="property-filter-shadow-y" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">X:</th><td class="property-td"><input id="property-filter-shadow-x" class="property-number" type="number"><label for="property-filter-shadow-x" class="property-input-label">px</label></td>
+                <th class="property-th" scope="col">Y:</th><td class="property-td"><input id="property-filter-shadow-y" class="property-number" type="number"><label for="property-filter-shadow-y" class="property-input-label">px</label></td>
               </tr>
             </tbody>
           </table>

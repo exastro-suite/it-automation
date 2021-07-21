@@ -30,7 +30,6 @@
 
             // ローカル変数宣言
             $arrayResult = array();
-            $aryVariant = array();
             $arySetting = array();
 
             $arrayRegisterData = array();
