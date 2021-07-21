@@ -529,11 +529,11 @@ const getSetID = function() {
     setIdList.push( $( this ).attr('id') );
   });
   
-  let flag = true;
+  const flag = true;
   let setID = 'widget' + widgetCount++;
   while( flag ) {
     if ( setIdList.indexOf( setID ) === -1 ) {
-      flag = false;
+      break;
     }
     setID = 'widget' + widgetCount++;
   }  
