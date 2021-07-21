@@ -1336,28 +1336,11 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                     //----このメソッド内で、出力する。
                     if ($dumpInfo["filteroutputfiletype"] == "excel" && $dumpInfo["FORMATTER_ID"] == "csv") {
                         $result = $objTable->getPrintFormatBulkExcel("excel", null, null, $taskId, $strDLFilename, $menuId);
-                        return $result;
                     } else {
                         $result = $objTable->getPrintFormatBulkExcel($strFormatterId, null, null, $taskId, $strDLFilename, $menuId);
-                        return $result;
                     }
 
-
-                    //このメソッド内で、出力する。----
-
-                    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-
-                    if( $strToAreaType == "toStd" ){
-                        // アクセスログへ記録
-                        //"SUCCESS, DUMP TO FILE. [MENU:[｛｝] PRINTMODE:[｛｝] PRINTTYPE:[｛｝] FILENAME[｛｝]]. ";
-                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage("ITAWDCH-STD-461",array($ACRCM_id, $strOutputFileType, $strPrintTypeMode, $strDLFilename)));
-                    }
-                    else{
-                        $varRetBody = $strTmpFilename;
-                    }
-                    // デフォルト（EXCELでの出力）----
-
-                    return true;
+                    return $result;
                 }
             }
         }
@@ -2568,12 +2551,12 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
 
             $objQuery = $objDBCA->sqlPrepare($sql);
             if ($objQuery->getStatus() === false) {
+                $errMsg = $objMTS->getSomeMessage('ITAANSIBLEH-ERR-59853', array($taskId));
                 outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
                                                   array(basename(__FILE__), __LINE__)));
                 outputLog(LOG_PREFIX, $sql);
                             outputLog(LOG_PREFIX, $objQuery->getLastError());
-                throw new Exception( $ErrorMsg );
-                // return false;
+                throw new Exception( $errMsg );
             }
             $res = $objQuery->sqlBind(
                 array(
@@ -2583,20 +2566,21 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
             );
             $res = $objQuery->sqlExecute();
             if ($res === false) {
+                $errMsg = $objMTS->getSomeMessage('ITAANSIBLEH-ERR-59853', array($taskId));
                 outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
                                                               array(basename(__FILE__), __LINE__)));
                 outputLog(LOG_PREFIX, $sql);
                 outputLog(LOG_PREFIX, $objQuery->getLastError());
-                throw new Exception( $ErrorMsg );
-                return false;
+                throw new Exception( $errMsg );
             }
         } else {
             $res = file_put_contents("$uploadFilePath", "$msg\n", FILE_APPEND);
             if ($res == false) {
-                return false;
+                $errMsg = $objMTS->getSomeMessage('ITAANSIBLEH-ERR-59853', array($taskId));
+                outputLog(LOG_PREFIX, $errMsg);
+                throw new Exception( $errMsg );
             }
         }
-        return true;
     }
 
     /**
