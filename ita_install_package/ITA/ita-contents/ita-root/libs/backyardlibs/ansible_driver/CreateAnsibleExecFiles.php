@@ -12864,15 +12864,10 @@ if(isset($Expansion_root)) {
         }
     
         $operationStr = "";
-        while ( $row = $objQuery->resultFetch() ){
-            $operationStr = sprintf("%s_%s:%s", $row['OPERATION_DATE'],
-                                    $in_operation_id,
-                                    $row['OPERATION_NAME']);
-            if(1==1){
-              break;
-            }
-        }
-
+        $row = $objQuery->resultFetch();
+        $operationStr = sprintf("%s_%s:%s", $row['OPERATION_DATE'],
+                                $in_operation_id,
+                                $row['OPERATION_NAME']);
         // DBアクセス事後処理
         unset($objQuery);
 

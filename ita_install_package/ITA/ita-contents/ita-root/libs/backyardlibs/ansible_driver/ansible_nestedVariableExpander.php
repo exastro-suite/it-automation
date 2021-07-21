@@ -377,6 +377,7 @@ function dbaccessUpdateEach($targetTable, $specificColumn, $targetColumns, $upda
 
 function dbaccessGetSequence($tableName) {
   
+    global $g;
     $objMTS = $g['objMTS'];
 
     ////////////////////////////////////////////////////////////////

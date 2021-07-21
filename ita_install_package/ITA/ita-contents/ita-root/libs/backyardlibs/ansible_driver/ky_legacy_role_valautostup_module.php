@@ -3148,6 +3148,7 @@ function recordSelect($sqlUtnBody, $arrayUtnBind) {
 // シーケンスをロックして、採番した数値を返却
 function getAndLockSeq($strSeqOfTable) {
   
+    global $g;
     $objMTS = $g['objMTS'];
 
     // シーケンスをロック
