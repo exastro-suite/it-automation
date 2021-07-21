@@ -112,8 +112,6 @@
 
                     // 同期状態を再開に設定
                     $row['SYNC_STATUS_ROW_ID']    = $SyncStatusNameobj->RESTART();
-                    // 詳細情報を空白に設定
-                    $row['SYNC_STATUS_ROW_ID']    = "";
                     $row['SYNC_ERROR_NOTE']       = "";
                     $row['SYNC_LAST_UPDATE_USER'] = "";
                     $row['SYNC_LAST_TIME']        = "";
