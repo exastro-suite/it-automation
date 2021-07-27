@@ -45,6 +45,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->setAccessAuth(false);    // データごとのRBAC設定
 
+    // 逆順
+    $table->setDBSortKey(array("TASK_ID" => "DESC"));
+
     $c = new IDColumn('TASK_STATUS',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900014'),'B_DP_STATUS_MASTER','TASK_ID','TASK_STATUS','');
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900016'));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
