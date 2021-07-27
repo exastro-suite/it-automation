@@ -88,7 +88,7 @@ if(array_key_exists('no', $_GET)){
 
         if ( isset($_POST['CONTRAST_ID']) === true ){
             //比較定義リスト表示用
-            $arrayResult =  getContrastList();
+            $arrayResult =  getContrastList(1);
             $arrContrastList = $arrayResult[2];
 
             $strContrastName="";
