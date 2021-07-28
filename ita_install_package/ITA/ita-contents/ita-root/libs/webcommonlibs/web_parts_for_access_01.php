@@ -45,7 +45,10 @@
         unset($tmpValue2);
         unset($tmpBool);
     }
-    
+
+    $array_except_referer[] = "/menus/systems/".sprintf("%010d", $_GET['no'])."/03_data_export.php?no=" . sprintf("%010d", $_GET['no']);
+    $array_except_referer[] = "/menus/systems/".sprintf("%010d", $_GET['no'])."/03_data_import.php?no=" . sprintf("%010d", $_GET['no']);
+
     $boolRefererCheck = false;
     foreach($array_except_referer as $value){
         if( strstr($host, $value) !== false ){
@@ -53,7 +56,7 @@
             break;
         }
     }
-    
+
     // 代表PHPファイルからのリダイレクトでない場合はNG
     if( $boolRefererCheck === false ){
         // アクセスログ出力(リダイレクト判定NG)
