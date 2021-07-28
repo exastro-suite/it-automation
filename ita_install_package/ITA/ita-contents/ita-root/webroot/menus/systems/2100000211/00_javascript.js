@@ -13,6 +13,10 @@
 //   limitations under the License.
 //
 $(function(){
+    // 横幅をそろえる
+    let label_list = document.getElementsByClassName("export_radio_label_block");
+    max_width_label = (label_list[0].clientWidth > label_list[2].clientWidth) ? label_list[2].style.width = `${label_list[0].clientWidth}px` : label_list[0].style.width = `${label_list[2].clientWidth}px`;
+
     var menu_on = $('.menu-on').attr('id');
     $('.menu_on').val(menu_on);
     $( 'input[name="dp_mode"]:radio' ).change( function() {

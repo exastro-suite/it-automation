@@ -19,7 +19,7 @@ $(function(){
 
     $('#import_form').submit(function(){
         
-        var checked_num = $('#Mix2_Nakami :checked').length;
+        var checked_num = $('#Mix2_Nakami .menu:checked').length;
         if(checked_num == 0) {
             $('#importMsg').text(getSomeMessage('ITABASEC090003'));
             return false;
@@ -55,6 +55,28 @@ $(function(){
         $('#uploadMsg').text('');
         $('#importMsg').text('');
         $('#zipInputSubmit').prop('disabled', true);
+    });
+
+    $('#Mix2_Nakami .menu:checked').change(function(e){
+        var checked_num = $('#Mix2_Nakami .menu:checked').length;
+        if(checked_num == 0) {
+            $('#importMsg').text(getSomeMessage('ITABASEC090003'));
+            $('#importButton').prop("disabled", true);
+            return false;
+        } else {
+            $('#importButton').prop("disabled", false);
+            $('#importMsg').text('');
+        }
+    });
+    $("#import_whole, #import_all").change(function(e){
+        var checked_num = $('#Mix2_Nakami .menu:checked').length;
+        if(checked_num == 0) {
+            $('#importMsg').text(getSomeMessage('ITABASEC090003'));
+            $('#importButton').prop("disabled", true);
+        } else {
+            $('#importButton').prop("disabled", false);
+            $('#importMsg').text('');
+        }
     });
 
     show('SetsumeiMidashi', 'SetsumeiNakami');
