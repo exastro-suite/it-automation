@@ -1714,8 +1714,7 @@ function exportData($record){
     $exportPath = EXPORT_PATH . $taskId;
 
     if(!is_dir($exportPath)){
-        outputLog(LOG_PREFIX, "Export infomation is not exists.Directory=[{$exportPath}].");
-        return false;
+        mkdir($exportPath);
     }
 
     $json = file_get_contents($exportPath . '/MENU_ID_LIST');
@@ -1726,8 +1725,9 @@ function exportData($record){
     $resAry = $tmpAry[0];
 
     $uploadAry = $tmpAry[1];
-    if ( $dpMode == 2 ) {
-        // 時刻指定モードではUploadFileを後から指定するためここでは省く
+
+    if ( $abolishedType == 2 || $dpMode == 2 ) {
+        // 廃止を除くもしくは時刻指定モードではuploadFileを後から指定するためここでは省く
         foreach ($uploadAry as $menuId => $menuFileAry) {
             $i = 0;
             foreach ($menuFileAry as $target) {
@@ -2001,9 +2001,15 @@ function exportData($record){
         }
 
         // UploadFile処理
-        if ( $dpMode == 1 ) {
-            // 環境移行/
+        if ( $dpMode == 1 && $abolishedType == 1 ) {
+            // 環境移行/廃止を含む
             $sql = "";
+        } elseif ( $dpMode == 1 && $abolishedType == 2 ) {
+            // 環境移行/廃止を除く
+            $sql = "SELECT {$value['PRIMARY_KEY']} FROM {$value['TABLE_NAME']}
+                    WHERE DISUSE_FLAG<>'1'
+                    OR (DISUSE_FLAG='1' AND {$value['PRIMARY_KEY']} > 200000000)
+                    ";
         } elseif ( $dpMode == 2 && $abolishedType == 1 ) {
             // 時刻指定/廃止を含む
             $sql = "SELECT {$value['PRIMARY_KEY']} FROM {$value['TABLE_NAME']}
