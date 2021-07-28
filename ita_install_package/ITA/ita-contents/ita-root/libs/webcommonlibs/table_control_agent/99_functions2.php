@@ -616,7 +616,10 @@ EOD;
                 throw new Exception( '00001000-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
             $latestRowLength = $tmpAryRet[0];
-            $historyRowLength = countHistoryRowLength($objTable, $aryVariant, $arySetting, $strFormatterId)[0];
+            $historyRowLength = 0;
+            if(get_class($objTable) == "TableControlAgent"){
+                $historyRowLength = countHistoryRowLength($objTable, $aryVariant, $arySetting, $strFormatterId)[0];
+            }
             unset($tmpAryRet);
 
             $dlcHtmlBody =
