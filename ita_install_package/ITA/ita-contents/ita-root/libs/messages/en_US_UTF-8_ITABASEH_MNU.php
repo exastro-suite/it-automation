@@ -745,6 +745,8 @@ $ary["ITABASEH-MNU-900104"]         = "Operation ID (Specified individually)";
 $ary["ITABASEH-MNU-910001"]         = "version";
 $ary["ITABASEH-MNU-910002"]         = "driver";
 $ary["ITABASEH-MNU-910003"]         = "version";
+$ary["ITABASEH-MNU-910004"]         = "Exastro IT Automation Version";
+$ary["ITABASEH-MNU-910005"]         = "Installed Driver";
 $ary["ITABASEH-MNU-920001"]         = "Symphony can be run periodically according to a schedule.
 <br>Select the target symphony, operation, and enter detailed settings from \"Schedule Setting\".";
 $ary["ITABASEH-MNU-920002"]         = "RegularlyID";
