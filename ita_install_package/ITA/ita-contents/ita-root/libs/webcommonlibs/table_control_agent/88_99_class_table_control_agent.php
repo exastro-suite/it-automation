@@ -684,7 +684,7 @@ class TableControlAgent {
 		return $this->strPrintingTableId;
 	}
 
-	public function getPrintFormat($strFormatterId, $strIdOfTableTag=null, $strNumberForRI=null){
+	public function getPrintFormat($strFormatterId, $strIdOfTableTag=null, $strNumberForRI=null, $historyCsvFlg=null){
 		global $g;
 		$retStrVal = "";
 		$intControlDebugLevel01 = 250;
@@ -707,7 +707,11 @@ class TableControlAgent {
 			$this->setPrintingTableID($strNowPrintingId);
 			//瞬間存在値なのでセット----
 
-			$retStrVal = $this->aryObjFormatter[$strFormatterId]->format($strIdOfTableTag);
+			if($strFormatterId == "csv" && $historyCsvFlg == 1){
+				$retStrVal = $this->aryObjFormatter[$strFormatterId]->format($strIdOfTableTag, $historyCsvFlg);
+			}else{
+				$retStrVal = $this->aryObjFormatter[$strFormatterId]->format($strIdOfTableTag);
+			}
 
 			//----瞬間存在値なのでクリア
 			$this->setPrintingTableID(null);
