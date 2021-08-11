@@ -113,13 +113,15 @@ function conductorNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRec
 
             $aryRetBody = conductorInstanceConstuct($intSymphonyClassId, $intOperationNo, $strPreserveDatetime, $strOptionOrderStream, $aryForOptionOrderOvRd);
 
+            $strSymphonyInstanceId = (string)$aryRetBody[4];
+            $intResultStatusCode = 200;
+            
             //SymphonyクラスIDの不備
             if( $aryRetBody[1] !== null ){
                 $intErrorType = $aryRetBody[1];
                 $intErrorPlaceMark = 3000;
                 if( $intErrorType == 2 || $intErrorType == 3 ){
                     $strExpectedErrMsgBodyForUI = $aryRetBody[5];
-                    $intResultStatusCode = 400;
                     $intResultInfoCode="001";
                 }
             }
@@ -129,15 +131,13 @@ function conductorNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRec
                 $intErrorPlaceMark = 4000;
                 throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
-            $strSymphonyInstanceId = (string)$aryRetBody[4];
-            $intResultStatusCode = 200;   
 
         }else{
             // オペレーションID不備
-            $intErrorType = $aryRetBody[1];
+            $intErrorType = $aryOpRetBody[1];
             $intErrorPlaceMark = 2000;
             if( $intErrorType == 2 || $intErrorType == 3 ){
-                $strExpectedErrMsgBodyForUI = $aryRetBody[5];
+                $strExpectedErrMsgBodyForUI = $aryOpRetBody[5];
                 $intResultInfoCode="001";
             }
         }
@@ -146,7 +146,7 @@ function conductorNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRec
         $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
         $aryForResultData['resultdata'] = array('CONDUCTOR_INSTANCE_ID'=>$strSymphonyInstanceId);
         $aryForResultData['resultdata']['RESULTCODE'] = $intResultInfoCode;
-        $aryForResultData['resultdata']['RESULTINFO'] = $aryRetBody[5];
+        $aryForResultData['resultdata']['RESULTINFO'] = $strExpectedErrMsgBodyForUI;
 
     }
     catch (Exception $e){
