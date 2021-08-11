@@ -94,7 +94,7 @@ function conductorInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $st
         // ---ConductorクラスIDの廃止チェック
         $aryRetBody = $objOLA->getInfoFromOneOfConductorClass($intShmphonyClassId, 0,0,0,1);
 
-        $disuseFlg = '';
+        $disuseFlg = 1;
         if( isset( $aryRetBody[4]['DISUSE_FLAG'] ) === true ) $disuseFlg = $aryRetBody[4]['DISUSE_FLAG'];
 
         if( $disuseFlg != 0 ){
