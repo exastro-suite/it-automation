@@ -168,7 +168,7 @@ Ansibleテンプレート
 
             $strQuery = "UPDATE A_PROC_LOADED_LIST "
                        ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                       ."WHERE ROW_ID IN (2100020001,2100020003,2100020005) ";
+                       ."WHERE ROW_ID IN (2100020001,2100020003,2100020005,2100020002,2100020004,2100020006,2100080002) ";
 
             $aryForBind = array();
 
