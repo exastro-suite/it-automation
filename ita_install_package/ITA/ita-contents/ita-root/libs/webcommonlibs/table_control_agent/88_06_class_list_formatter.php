@@ -201,7 +201,7 @@ class CSVFormatter extends ListFormatter {
         return $tmpRet;
     }
 
-    function format($tableTagId = null){
+    function format($tableTagId = null, $historyCsvFlg = null){
         //----クラス(Table)のメソッド(getPrintFormat)から呼ばれる。
 
         $aryObjColumn = $this->objTable->getColumns();
@@ -240,7 +240,10 @@ class CSVFormatter extends ListFormatter {
                 $arrayMasterData=$this->getRowArrayFromIdColumns();
                 for($dlcFnv1=0;$dlcFnv1<count($arrayMasterData);$dlcFnv1++){
                     $arrayMasterRows=$arrayMasterData[$dlcFnv1];
-                    $strHdd.=$objSCSVAdmin->makeSafeCSVRecordRowFromRowArray($arrayMasterRows,array("\r","\n",",","SAFECSV"),array("%R","%L","%C","%escTag"));
+                    // 変更履歴の場合、実行処理種別出力しない
+                    if($historyCsvFlg != 1 || ($arrayMasterRows[0] != "実行処理種別" && $arrayMasterRows[0] != "Execution process type")){
+                        $strHdd.=$objSCSVAdmin->makeSafeCSVRecordRowFromRowArray($arrayMasterRows,array("\r","\n",",","SAFECSV"),array("%R","%L","%C","%escTag"));
+                    }
                 }
                 $strHdd.="</SAFECSV>\r\n"; 
 
@@ -269,7 +272,10 @@ class CSVFormatter extends ListFormatter {
                         }else{
                             $objColumn->getOutputType($this->strFormatterId)->getHead()->setOutputPrintType("noWrapLabel", $strColSepa);
                         }
-                        $arrayColumn[]=$objColumn->getOutputHeader($this->strFormatterId);
+                        // 変更履歴の場合、実行処理種別・更新用の最終更新日時を出力しない
+                        if( $historyCsvFlg != 1 || ($objColumn->getID() != $lcRequiredUpdateDate4UColumnId && $objColumn->getID() != $lcRequiredRowEditByFileColumnId) ){
+                            $arrayColumn[]=$objColumn->getOutputHeader($this->strFormatterId);
+                        }
 
                         $objColumn->getOutputType($this->strFormatterId)->getBody()->setOutputPrintType("noWrapData", $strColSepa);
                         //Class(CSVHFmt系)----
@@ -292,7 +298,9 @@ class CSVFormatter extends ListFormatter {
                                 }
                             }
                             //----Class(CSVBFmt系)
-                            $arrayFocusRow[] = $objColumn->getOutputBody($this->strFormatterId,$objRow->getRowData());
+                            if( $historyCsvFlg != 1 || ($objColumn->getID() != $lcRequiredUpdateDate4UColumnId && $objColumn->getID() != $lcRequiredRowEditByFileColumnId) ){
+                                $arrayFocusRow[] = $objColumn->getOutputBody($this->strFormatterId,$objRow->getRowData());
+                            }
                             //Class(CSVBFmt系)----
                         }
                     }
@@ -682,7 +690,12 @@ class CSVFormatter extends ListFormatter {
                     $objTable->addData($row, false);
                     if( ($intFetchCount % 10000) === 0){
                         //----10000行ずつファイルへ書き込み
-                        $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
+                        if($strOutputDataType === "history"){
+                            $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId, null, null, 1));
+                        }else{
+                            $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
+                        } 
+
                         if( $boolRet !== true ){
                             $intErrorType = 501;
                             throw new Exception( '00000200-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
@@ -743,6 +756,20 @@ function writeToFileHistory($sql, $arrayFileterBody, $objTable, $objFunction01Fo
     $aryErrMsgBody = array();
     $strErrMsg = "";
     $datalatest = array();
+    //----データタイプを判別する
+    // latest / history のみの想定
+    // history は $strOutputFileType が csv or excel の場合のみ独自処理が存在
+    // 値が存在しない場合は latest とする
+    list($strOutputDataType,$boolKeyExists) = isSetInArrayNestThenAssign($_POST,array('datatype'),"latest");
+    switch ($strOutputDataType) {
+        case 'history':
+            break;
+        default:
+            // 規定値以外は latest とする
+            $strOutputDataType = "latest";
+            break;
+    }
+    //データタイプを判別する----
 
     $strFxName = __CLASS__."::".__FUNCTION__;
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
@@ -827,9 +854,14 @@ function writeToFileHistory($sql, $arrayFileterBody, $objTable, $objFunction01Fo
                 }
                 $intFetchCount += 1;
                 $objTable->addData($row, false);
+                
                 if( ($intFetchCount % 10000) === 0){
                     //----10000行ずつファイルへ書き込み
-                    $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
+                    if($strOutputDataType === "history"){
+                        $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId, null, null, 1));
+                    }else{
+                        $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
+                    }
                     if( $boolRet !== true ){
                         $intErrorType = 501;
                         throw new Exception( '00000200-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
@@ -843,7 +875,13 @@ function writeToFileHistory($sql, $arrayFileterBody, $objTable, $objFunction01Fo
             // RBAC対応 ----
 
             if( ($intFetchCount % 10000) !== 0 ){
-                $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
+
+                if($strOutputDataType === "history"){
+                    $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId, null, null, 1));
+                }else{
+                    $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
+                } 
+
                 if( $boolRet !== true ){
                     $intErrorType = 501;
                     throw new Exception( '00000300-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
@@ -2679,6 +2717,7 @@ class ExcelFormatter extends ListFormatter {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $datalatest = array();
+        $lcRequiredUpdateDate4UColumnId = $objTable->getRequiredUpdateDate4UColumnID(); //"UPD_UPDATE_TIMESTAMP"
 
         $strFxName = __CLASS__."::".__FUNCTION__;
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
@@ -2822,13 +2861,20 @@ class ExcelFormatter extends ListFormatter {
     function editWorkSheetHistoryNonusedData() {
         $this->objFocusWB->setActiveSheetIndex(0);
         $sheet = $this->objFocusWB->getActiveSheet();
-        for($r = 1; $r <= 5; ++$r){
-            $row_hide = $r + $this->headerRows;
-            $sheet->getRowDimension($row_hide)->setVisible(false);
-        }
-        $sheet->getColumnDimension('A')->setVisible(false);
-        $sheet->getColumnDimension('B')->setVisible(false);
-        $sheet->getColumnDimension('C')->setVisible(false);
+        $mergeCells = $sheet->getMergeCells();
+
+        $sheet->unmergeCells(reset($mergeCells));
+        $sheet->unmergeCells(current(array_slice($mergeCells, 1, 1, true)));
+        $sheet->unmergeCells(current(array_slice($mergeCells, 2, 1, true)));
+        
+        $sheet -> removeRow($this->headerRows+1,5);
+        $sheet->removeColumn('A',3);
+        $max_col = $sheet -> getHighestColumn();
+        $max_colvalue =  \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($max_col);
+        $max_colvalue--;
+        $delete_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($max_colvalue);
+
+        $sheet->removeColumn($delete_col,1);
     }
 }
 
