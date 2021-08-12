@@ -77,6 +77,22 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $strErrMsg = $aryRetBody[2];
                 $intErrorType = 500;
             }
+            else{
+                // 登録/更新/廃止/復活があった場合、代入値自動登録設定のbackyard処理の処理済みフラグをOFFにする
+                $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                           ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                           ."WHERE ROW_ID IN (2100020002,2100020004,2100020006,2100080002) ";
+
+                $aryForBind = array();
+
+                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+                if( $aryRetBody[0] !== true ){
+                    $boolRet = false;
+                    $strErrMsg = $aryRetBody[2];
+                    $intErrorType = 500;
+                }
+            }
         }
         $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
         return $retArray;
