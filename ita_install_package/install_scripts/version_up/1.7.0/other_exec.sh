@@ -15,6 +15,17 @@ for ITEM in ${RELEASE_FILE_LIST[@]}; do
     fi
 done
 
+# ソースファイルの削除
+RELEASE_FILE_LIST=("${ITA_DIRECTORY}/ita-root/webconfs/systems/2100000211_loadTable.php"
+                   "${ITA_DIRECTORY}/ita-root/webconfs/systems/2100000212_loadTable.php"
+                  )
+
+for ITEM in ${RELEASE_FILE_LIST[@]}; do
+    if test -e ${ITEM} ; then
+        rm -rf ${ITEM}
+    fi
+done
+
 #サービスの削除
 SERVICE_FILE_LIST=("ky_hostgroup_make_var.service"
                    "ky_hostgroup_regist_var_legacy.service"
