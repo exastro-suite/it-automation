@@ -980,6 +980,25 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         }
          //-バリデーションチェック(CALL呼び出しのループバリデーション)---
 
+        // ----代入値自動登録設定のbackyard処理の処理済みフラグをOFFにする
+        $sql = "UPDATE A_PROC_LOADED_LIST "
+               ."SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
+               ."WHERE ROW_ID IN (2100020002,2100020004,2100020006,2100080002)";
+
+        $objDBCA->setQueryTime();
+        $aryForBind = array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP' => $objDBCA->getQueryTime());
+
+        // SQL実行
+        $retArray = singleSQLCoreExecute($objDBCA, $sql, $aryForBind, "");
+        if( $retArray[0] !== true ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00001600";
+            //
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        // 代入値自動登録設定のbackyard処理の処理済みフラグをOFFにする----
+
         // ----トランザクション終了
         $boolResult = $objDBCA->transactionCommit();
         if ( $boolResult === false ){
@@ -995,8 +1014,6 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
 
         $retBool = true;
         $intConductorClassId = $intShmphonyClassId;
-
-
 
     }
     catch (Exception $e){
