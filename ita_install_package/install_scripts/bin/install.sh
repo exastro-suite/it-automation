@@ -976,64 +976,61 @@ if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_base ; then
     fi
 fi
 
-if [ "$DRIVER_CNT" -ne 0 ]; then
 
-    ###################################################
-    #データリレイストレージ作成
-    ###################################################
-    for VAL in ${CREATE_DATARELAYSTORAGE[@]}; do
-        func_create_datarelaystorage $VAL
+###################################################
+#データリレイストレージ作成
+###################################################
+for VAL in ${CREATE_DATARELAYSTORAGE[@]}; do
+    func_create_datarelaystorage $VAL
+done
+
+###################################################
+#テーブル作成
+###################################################
+if ! test -e "$BIN_DIR/create-tables-and-views.sh" ; then
+    log "WARNING : create-tables-and-views.sh does not be found."
+else
+    for VAL in ${CREATE_TABLES[@]}; do
+        func_create_tables $VAL
     done
 
-    ###################################################
-    #テーブル作成
-    ###################################################
-    if ! test -e "$BIN_DIR/create-tables-and-views.sh" ; then
-        log "WARNING : create-tables-and-views.sh does not be found."
-    else
-        for VAL in ${CREATE_TABLES[@]}; do
-            func_create_tables $VAL
-        done
-    
-    fi
-
-    ###################################################
-    #リリースファイル設置
-    ###################################################
-    for VAL in ${RELEASE_PLASE[@]}; do
-        func_release_place $VAL
-    done
-
-    ###################################################
-    #コンフィグファイル設置確認
-    ###################################################
-    for VAL in ${CONFIG_PLACE[@]}; do
-        func_config_place $VAL
-    done
-    
-    ###################################################
-    #サービス登録
-    ###################################################
-    if [ ! -e "$BIN_DIR/register-services_RHEL.sh" ]; then
-        log 'WARNING : register-services_RHEL.sh does not be found.'
-    else
-        for VAL in ${SERVICES_SET[@]}; do
-            func_services_set $VAL
-        done
-    
-    fi
-    ###################################################
-    #クーロンタブ設定
-    ###################################################
-    if ! test -e "$BIN_DIR/register-crontab.sh" ; then
-        log "WARNING : register-crontab.sh does not be found."
-    else
-        for VAL in ${CRONTAB_SET[@]}; do
-            func_crontab_set $VAL
-        done
-    fi
 fi
 
+###################################################
+#リリースファイル設置
+###################################################
+for VAL in ${RELEASE_PLASE[@]}; do
+    func_release_place $VAL
+done
+
+###################################################
+#コンフィグファイル設置確認
+###################################################
+for VAL in ${CONFIG_PLACE[@]}; do
+    func_config_place $VAL
+done
+
+###################################################
+#サービス登録
+###################################################
+if [ ! -e "$BIN_DIR/register-services_RHEL.sh" ]; then
+    log 'WARNING : register-services_RHEL.sh does not be found.'
+else
+    for VAL in ${SERVICES_SET[@]}; do
+        func_services_set $VAL
+    done
+
+fi
+###################################################
+#クーロンタブ設定
+###################################################
+if ! test -e "$BIN_DIR/register-crontab.sh" ; then
+    log "WARNING : register-crontab.sh does not be found."
+else
+    for VAL in ${CRONTAB_SET[@]}; do
+        func_crontab_set $VAL
+    done
+fi
 
 
 if [ "$BASE_FLG" -eq 1 ]; then
