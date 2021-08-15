@@ -690,12 +690,7 @@ class CSVFormatter extends ListFormatter {
                     $objTable->addData($row, false);
                     if( ($intFetchCount % 10000) === 0){
                         //----10000行ずつファイルへ書き込み
-                        if($strOutputDataType === "history"){
-                            $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId, null, null, 1));
-                        }else{
-                            $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
-                        } 
-
+                        $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
                         if( $boolRet !== true ){
                             $intErrorType = 501;
                             throw new Exception( '00000200-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
@@ -854,7 +849,7 @@ function writeToFileHistory($sql, $arrayFileterBody, $objTable, $objFunction01Fo
                 }
                 $intFetchCount += 1;
                 $objTable->addData($row, false);
-                
+
                 if( ($intFetchCount % 10000) === 0){
                     //----10000行ずつファイルへ書き込み
                     if($strOutputDataType === "history"){
