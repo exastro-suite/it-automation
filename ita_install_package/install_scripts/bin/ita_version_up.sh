@@ -137,6 +137,9 @@ func_install_messasge() {
     if [ HOSTGROUP_FLG = ${1} ]; then
         MESSAGE="Hostgroup"
     fi
+    if [ CICD_FLG = ${1} ]; then
+        MESSAGE="CI/CD for IaC"
+    fi
 
     echo "$MESSAGE"
 }
@@ -166,6 +169,7 @@ CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 CREATEPARAM3_FLG=0
 HOSTGROUP_FLG=0
+CICD_FLG=0
 
 #インストール済みフラグ配列
 INSTALLED_FLG_LIST=(
@@ -177,6 +181,7 @@ INSTALLED_FLG_LIST=(
     CREATEPARAM2_FLG
     CREATEPARAM3_FLG
     HOSTGROUP_FLG
+    CICD_FLG
 )
 
 #リリースファイル設置作成関数用配列
@@ -188,6 +193,7 @@ RELEASE_PLASE=(
     ita_terraform-driver
     ita_createparam
     ita_hostgroup
+    ita_cicd
 )
 
 #ディレクトリ変数定義
@@ -429,6 +435,10 @@ fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_hostgroup" ; then
     HOSTGROUP_FLG=1
 fi
+if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_cicd" ; then
+    CICD_FLG=1
+fi
+
 
 ############################################################
 log 'INFO : Stopping Apache.'
