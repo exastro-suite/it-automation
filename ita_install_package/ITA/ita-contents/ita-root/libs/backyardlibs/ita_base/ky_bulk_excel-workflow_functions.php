@@ -1167,12 +1167,8 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                     $objExcelFormatter->cashModeAdjust();
 
                     // ----XLSXファイル名の設定
-                    if( $strPrintTypeMode != "forDeveloper" ){
-                        $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
-                    }
-                    else{
-                        $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
-                    }
+                    $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
+
                     if( $strDLFilename === null ){
                         $intErrorType = 501;
                         $intErrorPlaceMark = 2900;
@@ -1336,28 +1332,10 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                     //----このメソッド内で、出力する。
                     if ($dumpInfo["filteroutputfiletype"] == "excel" && $dumpInfo["FORMATTER_ID"] == "csv") {
                         $result = $objTable->getPrintFormatBulkExcel("excel", null, null, $taskId, $strDLFilename, $menuId);
-                        return $result;
                     } else {
                         $result = $objTable->getPrintFormatBulkExcel($strFormatterId, null, null, $taskId, $strDLFilename, $menuId);
-                        return $result;
                     }
-
-
-                    //このメソッド内で、出力する。----
-
-                    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-
-                    if( $strToAreaType == "toStd" ){
-                        // アクセスログへ記録
-                        //"SUCCESS, DUMP TO FILE. [MENU:[｛｝] PRINTMODE:[｛｝] PRINTTYPE:[｛｝] FILENAME[｛｝]]. ";
-                        outputLog(LOG_PREFIX, $objMTS->getSomeMessage("ITAWDCH-STD-461",array($ACRCM_id, $strOutputFileType, $strPrintTypeMode, $strDLFilename)));
-                    }
-                    else{
-                        $varRetBody = $strTmpFilename;
-                    }
-                    // デフォルト（EXCELでの出力）----
-
-                    return true;
+                    return $result;
                 }
             }
         }
@@ -2190,7 +2168,7 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                 $strSheetName = $objTable->getFormatter($strLinkFormatterId)->getGeneValue("sheetNameForEditByFile",$refRetKeyExists);
 
                 if( $strSheetName == "" ){
-                    $strSheetNとふぃtsssame = $objTable->getDBMainTableLabel();
+                    $strSheetName = $objTable->getDBMainTableLabel();
                 }
 
                 // 31文字に短縮する
@@ -2536,11 +2514,11 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
     }
 
     /**
-    * dump結果の登録・ファイル作成
+    * dump結果のファイル作成
     * 
-    * @param  string $msg       エラーメッセージ
-    * @param  int    $taskId    タスクID
-    * @return array  $result    未実行レコード一覧
+    * @param  string  $msg       エラーメッセージ
+    * @param  int     $taskId    タスクID
+    * @return boolean            true/false
     */
     function dumpResultMsg($msg, $taskId) {
         global $g, $objMTS, $objDBCA;
@@ -2555,47 +2533,62 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
             if ($res == false) {
                 return false;
             }
-            // ファイル名をレコードに登録
-            $sql = "
-                UPDATE
-                    B_BULK_EXCEL_TASK
-                SET
-                    RESULT_FILE_NAME = :RESULT_FILE_NAME
-                WHERE
-                    TASK_ID = :TASK_ID
-                AND
-                    DISUSE_FLAG = 0";
-
-            $objQuery = $objDBCA->sqlPrepare($sql);
-            if ($objQuery->getStatus() === false) {
-                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
-                                                  array(basename(__FILE__), __LINE__)));
-                outputLog(LOG_PREFIX, $sql);
-                            outputLog(LOG_PREFIX, $objQuery->getLastError());
-                throw new Exception( $ErrorMsg );
-                // return false;
-            }
-            $res = $objQuery->sqlBind(
-                array(
-                    "TASK_ID"          => $taskId,
-                    "RESULT_FILE_NAME" => $resultFileName
-                )
-            );
-            $res = $objQuery->sqlExecute();
-            if ($res === false) {
-                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
-                                                              array(basename(__FILE__), __LINE__)));
-                outputLog(LOG_PREFIX, $sql);
-                outputLog(LOG_PREFIX, $objQuery->getLastError());
-                throw new Exception( $ErrorMsg );
-                return false;
-            }
         } else {
             $res = file_put_contents("$uploadFilePath", "$msg\n", FILE_APPEND);
             if ($res == false) {
                 return false;
             }
         }
+        return true;
+    }
+
+    /**
+    * dump結果ファイルの登録
+    * 
+    * @param  int    $taskId    タスクID
+    * @return boolean
+    */
+    function registerResultFile($taskId) {
+        global $g, $objMTS, $objDBCA;
+
+        $uploadDir = ROOT_DIR_PATH."/uploadfiles/2100000331/FILE_RESULT";
+        $resultFileName = "ResultData_$taskId.log";
+        $uploadFilePath = "$uploadDir/$resultFileName";
+
+        // ファイル名をレコードに登録
+        $sql = "
+            UPDATE
+                B_BULK_EXCEL_TASK
+            SET
+                RESULT_FILE_NAME = :RESULT_FILE_NAME
+            WHERE
+                TASK_ID = :TASK_ID
+            AND
+                DISUSE_FLAG = 0";
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if ($objQuery->getStatus() === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                              array(basename(__FILE__), __LINE__)));
+            outputLog(LOG_PREFIX, $sql);
+                        outputLog(LOG_PREFIX, $objQuery->getLastError());
+            throw new Exception( $ErrorMsg );
+        }
+        $res = $objQuery->sqlBind(
+            array(
+                "TASK_ID"          => $taskId,
+                "RESULT_FILE_NAME" => $resultFileName
+            )
+        );
+        $res = $objQuery->sqlExecute();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                          array(basename(__FILE__), __LINE__)));
+            outputLog(LOG_PREFIX, $sql);
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            throw new Exception( $ErrorMsg );
+        }
+
         return true;
     }
 

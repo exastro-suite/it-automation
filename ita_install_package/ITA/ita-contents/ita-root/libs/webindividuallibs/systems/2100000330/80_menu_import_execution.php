@@ -250,10 +250,10 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
         unzipImportData();
 
         // zipファイルの中身確認
-        checkZipFile();
+        $declare_list = checkZipFile();
 
         //メニューリストの取得
-        $tmpRetImportAry = makeImportCheckbox();
+        $tmpRetImportAry = makeImportCheckbox($declare_list);
         if (empty($tmpRetImportAry)) {
             throw new Exception($g['objMTS']->getSomeMessage("ITABASEH-ERR-2100000330_16"));
         }
