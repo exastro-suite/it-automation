@@ -138,6 +138,8 @@ try {
 
             $request = array();
             foreach ($menuIdArray as $menuId) {
+                // ファイル名が重複しないためにsleep
+                sleep(1);
                 $privilege = getPrivilegeAuthByUserId($menuId, $userId);
                 if ($privilege == 1 || $privilege == 2) {
                     $objTable = getInfoOfLoadTable($menuId);
@@ -282,8 +284,6 @@ try {
             $taskId = $task["TASK_ID"];
             $userId = $task["EXECUTE_USER"];
             
-            $res = setStatus($task['TASK_ID'], STATUS_PROCESSED);
-
             if (substr(sprintf('%o', fileperms(DST_PATH)), -4) != 0777) {
                 chmod(DST_PATH, 0777);
             }
@@ -307,7 +307,7 @@ try {
                         $msg         = $title."\n".$objMTS->getSomeMessage("ITAWDCH-ERR-1101")."\n";
 
                         dumpResultMsg($msg, $taskId);
-                        break;
+                        continue;
                     }
 
                     $files = array(
@@ -330,7 +330,7 @@ try {
                             $msg = $objMTS->getSomeMessage("ITAWDCH-ERR-3001");
                         }
                         dumpResultMsg($msg."\n", $taskId);
-                        break;
+                        continue;
                     }
                 } else {
                     // 権限エラー
@@ -341,6 +341,17 @@ try {
 
                     dumpResultMsg($msg, $taskId);
                 }
+            }
+
+            // ファイル名の登録
+            $res = registerResultFile($taskId);
+            if (!$res) {
+                // ステータスを完了(異常)にする
+                $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
+                                                  array('B_BULK_EXCEL_TASK',basename(__FILE__), __LINE__));
+                $res = setStatus($task['TASK_ID'], STATUS_FAILURE);
+                outputLog(LOG_PREFIX, $logMsg);
+                continue;
             }
 
             // ステータスを完了にする
