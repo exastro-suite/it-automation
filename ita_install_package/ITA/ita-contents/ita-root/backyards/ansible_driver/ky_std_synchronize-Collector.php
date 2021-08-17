@@ -886,7 +886,12 @@
                                         #$FREE_LOG = "[処理]収集対象のファイル形式ではありません。( ホスト名: $strTargetHost ファイル名:$targetFileName )";
                                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80010",array( $strTargetHost,$targetFileName ));
                                         outputLog($strCollectlogPath,$FREE_LOG);
-                                        require ($root_dir_path . $log_output_php ); 
+                                        
+                                        // トレースメッセージ
+                                        if ( $log_level === 'DEBUG' ){
+                                            require ($root_dir_path . $log_output_php );
+                                        }
+                                        
                                         $NOTICE_FLG = 3; //対象外
                                     }
                                 }
@@ -1351,7 +1356,11 @@
                                                             #$FREE_LOG = "[処理]CMDBへのデータ登録、更新に失敗しました。({}件)";
                                                             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80003",array( $arrRestInfo[1]['LIST']['NORMAL']['error']['ct'] ."/". count($tmpFilter) ) );
                                                             outputLog($strCollectlogPath,$FREE_LOG);
-                                                            require ($root_dir_path . $log_output_php );
+                                                            
+                                                            // トレースメッセージ
+                                                            if ( $log_level === 'DEBUG' ){
+                                                                require ($root_dir_path . $log_output_php );
+                                                            }
 
                                                             $NOTICE_FLG = 2; //収集済み（通知あり）
                                                         }else{
@@ -1365,7 +1374,10 @@
                                                         #$FREE_LOG = "[処理]RESTアクセスに失敗しました。";
                                                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80002");
                                                         outputLog($strCollectlogPath,$FREE_LOG, array($arrRestInfo[2],$arrRestInfo[3],json_encode(json_decode($arrRestInfo[4],true),JSON_UNESCAPED_UNICODE)  ) );
-                                                        require ($root_dir_path . $log_output_php );
+                                                        // トレースメッセージ
+                                                        if ( $log_level === 'DEBUG' ){
+                                                            require ($root_dir_path . $log_output_php );
+                                                        }
                                                         #break;
                                                         $NOTICE_FLG = 2; //収集済み（通知あり）
 
@@ -1374,12 +1386,19 @@
                                                     #$FREE_LOG = "[処理]RESTアクセスに失敗しました。"
                                                     $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80002");
                                                     outputLog($strCollectlogPath,$FREE_LOG);
+                                                    // トレースメッセージ
+                                                    if ( $log_level === 'DEBUG' ){
+                                                        require ($root_dir_path . $log_output_php );
+                                                    }
 
                                                     #FREE_LOG=" REST DATA ( Hostname: $hostname MenuID: $strmenuid OperationNO: $intOpeNoUAPK )";
                                                     $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80007", array($hostname,$strmenuid,$intOpeNoUAPK) );
                                                     outputLog($strCollectlogPath,$FREE_LOG, array($tmpRestInfo[2],$tmpRestInfo[3],json_encode(json_decode($tmpRestInfo[4],true),JSON_UNESCAPED_UNICODE ) ) );
 
-                                                    require ($root_dir_path . $log_output_php );
+                                                    // トレースメッセージ
+                                                    if ( $log_level === 'DEBUG' ){
+                                                        require ($root_dir_path . $log_output_php );
+                                                    }
                                                     #break;
                                                     $NOTICE_FLG = 2; //収集済み（通知あり）                                          
                                                 }
@@ -1393,7 +1412,11 @@
                                         #$FREE_LOG = "[処理]収集項目値管理で指定されたファイルがありません。 ";
                                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80008" );
                                         outputLog($strCollectlogPath,$FREE_LOG); 
-                                        require ($root_dir_path . $log_output_php );
+                                        
+                                        // トレースメッセージ
+                                        if ( $log_level === 'DEBUG' ){
+                                            require ($root_dir_path . $log_output_php );
+                                        }
                                         
                                         if( $RESTEXEC_FLG == 1 ){
                                             $NOTICE_FLG = 2; //収集済み（通知あり）   
@@ -1406,7 +1429,11 @@
                                     #$FREE_LOG = "[処理]対象機器が登録されていないか、廃止されています。 hostname:${hostname} "
                                     $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80004",array( $hostname ));
                                     outputLog($strCollectlogPath,$FREE_LOG);
-                                    require ($root_dir_path . $log_output_php );
+                                    
+                                    // トレースメッセージ
+                                    if ( $log_level === 'DEBUG' ){
+                                        require ($root_dir_path . $log_output_php );
+                                    }
 
                                     if( $RESTEXEC_FLG == 1 ){
                                         $NOTICE_FLG = 2; //収集済み（通知あり）   
@@ -1422,7 +1449,10 @@
                             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80009");
                             outputLog($strCollectlogPath,$FREE_LOG);
 
-                            require ($root_dir_path . $log_output_php );
+                            // トレースメッセージ
+                             if ( $log_level === 'DEBUG' ){
+                                require ($root_dir_path . $log_output_php );
+                            }
                             $NOTICE_FLG = 3; //対象外       
                         }
                     }elseif( $aryOperation === false ){
@@ -1431,7 +1461,10 @@
                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80006",array( $intOpeNoUAPK ));
                         outputLog($strCollectlogPath,$FREE_LOG);
 
-                        require ($root_dir_path . $log_output_php );
+                        // トレースメッセージ
+                        if ( $log_level === 'DEBUG' ){
+                            require ($root_dir_path . $log_output_php );
+                        }
                         $NOTICE_FLG = 4; //収集エラー用
                     }
 
