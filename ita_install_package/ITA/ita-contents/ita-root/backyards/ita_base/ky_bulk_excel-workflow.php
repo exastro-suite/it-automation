@@ -78,9 +78,6 @@ try {
     }
 
     foreach ($unExecutedTaskAry as $task) {
-        // ファイル名が重複しないためにsleep
-        sleep(1);
-
         // 実行フラグ
         $execFlg = true;
 
