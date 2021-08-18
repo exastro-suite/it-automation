@@ -560,7 +560,7 @@ function unzipImportData(){
 
         // zipを展開する
         $output = NULL;
-        $cmd = "sudo unzip -O sjis '" . $uploadPath . $fileName . "' -d '" . $uploadPath . $uploadId . "' 2>&1";
+        $cmd = "sudo LC_ALL=ja_JP.UTF-8 unzip -O sjis '" . $uploadPath . $fileName . "' -d '" . $uploadPath . $uploadId . "' 2>&1";
         exec($cmd, $output, $return_var);
 
         if(0 != $return_var){
