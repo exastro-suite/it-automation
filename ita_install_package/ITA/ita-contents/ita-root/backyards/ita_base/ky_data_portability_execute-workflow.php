@@ -76,8 +76,6 @@ try {
         // ファイル名が重複しないためにsleep
         sleep(1);
 
-        $execFlg = true;
-
         $res = setStatus($record['TASK_ID'], STATUS_RUNNING);
         if ($res === false) {
             $logMsg = $objMTS->getSomeMessage('ITABASEH-ERR-900046',
@@ -157,6 +155,8 @@ try {
         // メニューインポートを行う
         /////////////////////////////////
         else if(2 == $record['DP_TYPE']){
+
+            $execFlg = true;
 
             // サービスを停止する
             stopService();
