@@ -57,7 +57,7 @@ $log_file_prefix = basename( __FILE__, '.php' ) . "_";
 ////////////////////////////////
 // $log_levelを取得           //
 ////////////////////////////////
-$log_level =  //getenv('LOG_LEVEL'); // 'DEBUG';
+$log_level =  getenv('LOG_LEVEL'); // 'DEBUG';
 
 ////////////////////////////////
 // PHPエラー時のログ出力先設定//
@@ -245,6 +245,7 @@ $arrayHideMenuColumnList = array(
 $arrayTargetClassList = array(
     "TextColumn",
     "IDColumn",
+    "LinkIDColumn",
     "NumColumn",
     "MaskColumn",
     "MultiTextColumn",
@@ -607,7 +608,7 @@ try{
                 continue;
             }
             // IDColumnの場合、紐づけ先のColumn Class取得 
-            if($list[5] == 'IDColumn') {
+            if($list[5] == 'IDColumn' || $list[5] == 'LinkIDColumn') {
                 $clomn_class = getColumnClass($list[2],$list[4]);
                 if($clomn_class === false) {
                     continue;
@@ -2122,7 +2123,7 @@ function getColumnClass($ref_table,$ref_column) {
 
             foreach($aryValue['ALL_COLUMNS'] as $no=>$list){
                 if(($list[0] == $ref_column) &&
-                   ($list[5] != 'IDColumn')) {
+                   ($list[5] != 'IDColumn' && $list[5] != 'LinkIDColumn')) {
                     $ret_class = $list[5];
                     return $ret_class;
                 }
