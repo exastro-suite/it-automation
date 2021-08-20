@@ -843,6 +843,152 @@
                     $apply_msg = $apply_msg . $tfe_apply_log . "\n";
                     file_put_contents($apply_log, $apply_msg);
 
+                    // Conductorからの実行ならOutputsの出力ファイルを作成
+                    //----------------------------------------------
+                    // Conductorからの実行か判定
+                    //----------------------------------------------
+                    //SQL作成
+                    $sql = "SELECT CONDUCTOR_INSTANCE_NO
+                            FROM   C_TERRAFORM_EXE_INS_MNG
+                            WHERE  DISUSE_FLAG = '0'
+                            AND    CONDUCTOR_INSTANCE_NO IS NOT NULL";
+
+                    //SQL準備
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    if( $objQuery->getStatus()===false ){
+                        // 異常フラグON
+                        $error_flag = 1;
+                        // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                        throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000100")) );
+                    }
+
+                    //SQL発行
+                    $r = $objQuery->sqlExecute();
+                    if (!$r){
+                        // 異常フラグON
+                        $error_flag = 1;
+                        // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                        throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000200")) );
+                    }
+
+                    //呼び出し元ConductorのインスタンスNoを取得
+                    while ( $row = $objQuery->resultFetch() ){
+                        $conductor_instance_no = $row["CONDUCTOR_INSTANCE_NO"];
+                    }
+                    //FETCH行数を取得
+                    $num_of_rows = $objQuery->effectedRowCount();
+
+                    // Conductorから呼び出されていた場合
+                    if ($num_of_rows > 0) {
+                        // state_version_output_idを取得する
+                        $statusCode = 0;
+                        $count = 0;
+                        while ($statusCode != 200 && $count < $apiRetryCount){
+                            $apiResponse = get_workspace_state_version($lv_terraform_hostname, $lv_terraform_token, $organization_name, $workspace_name, 10, $proxy_setting);
+                            $statusCode = $apiResponse['StatusCode'];
+                            if($statusCode == 200){
+                                //返却StatusCodeが正常なので終了
+                                break;
+                            }else{
+                                //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                sleep(3);
+                                $count++;
+                            }
+                        }
+                        //API結果を判定
+                        if($statusCode != 200){
+                            //error_logにメッセージを追記
+                            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141250"); //[API Error]stateバージョン情報の取得に失敗しました。
+                            LocalLogPrint($error_log, $message);
+
+                            // 異常フラグON
+                            $error_flag = 1;
+                            // 例外処理へ
+                            $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141251",array(__FILE__,__LINE__,$statusCode));
+                            throw new Exception( $backyard_log );
+                        }
+                        $responsContents = $apiResponse['ResponsContents'];
+
+                        // 出力予定の配列
+                        $outputs_data = array();
+                        // outpurtsの中身
+                        $outputs = $responsContents["data"][0]["relationships"]["outputs"]["data"];
+                        // outputsの内容の有無を確認
+                        if (count($outputs) > 0) {
+                            foreach ($outputs as $output) {
+                                $state_version_output_id = $output["id"];
+                                // -------------------------------
+                                $statusCode = 0;
+                                $count = 0;
+                                while ($statusCode != 200 && $count < $apiRetryCount){
+                                    $outputsApiResponse = get_outputs($lv_terraform_hostname, $lv_terraform_token, $state_version_output_id ,$proxy_setting);
+                                    $statusCode = $outputsApiResponse['StatusCode'];
+                                    if($statusCode == 200){
+                                        //返却StatusCodeが正常なので終了
+                                        break;
+                                    }else{
+                                        //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                        sleep(3);
+                                        $count++;
+                                    }
+                                }
+                                //API結果を判定
+                                if($statusCode != 200){
+                                    //error_logにメッセージを追記
+                                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142012"); //[API Error]stateバージョン情報の取得に失敗しました。
+                                    LocalLogPrint($error_log, $message);
+
+                                    // 異常フラグON
+                                    $error_flag = 1;
+                                    // 例外処理へ
+                                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142013",array(__FILE__,__LINE__,$statusCode));
+                                    throw new Exception( $backyard_log );
+                                }
+                                $outputs_name = $outputsApiResponse["ResponsContents"]["data"]["attributes"]["name"];
+                                $outputs_value = $outputsApiResponse["ResponsContents"]["data"]["attributes"]["value"];
+                                $outputs_data[$outputs_name] = $outputs_value;
+
+                                //----------------------------------------------
+                                // データリレイストレージパスの取得
+                                //----------------------------------------------
+                                //SQL作成
+                                $sql = "SELECT CONDUCTOR_STORAGE_PATH_ITA
+                                        FROM   C_CONDUCTOR_IF_INFO
+                                        WHERE  DISUSE_FLAG = '0'";
+
+                                //SQL準備
+                                $objQuery = $objDBCA->sqlPrepare($sql);
+                                if( $objQuery->getStatus()===false ){
+                                    // 異常フラグON
+                                    $error_flag = 1;
+                                    // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                                    throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000100")) );
+                                }
+
+                                //SQL発行
+                                $r = $objQuery->sqlExecute();
+                                if (!$r){
+                                    // 異常フラグON
+                                    $error_flag = 1;
+                                    // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                                    throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000200")) );
+                                }
+
+                                //呼び出し元ConductorのインスタンスNoを取得
+                                while ( $row = $objQuery->resultFetch() ){
+                                    $conductor_storage_path = $row["CONDUCTOR_STORAGE_PATH_ITA"];
+                                }
+                                // ConductorインスタンスNoを文字列化
+                                $str_conductor_instance_no = sprintf("%010d",$conductor_instance_no);
+                                // 実行Noを文字列化
+                                $str_tgt_execution_no = sprintf("%010d",$tgt_execution_no);
+                                // outputをjson化
+                                $json = json_encode($outputs_data, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+                                file_put_contents("$conductor_storage_path/$str_conductor_instance_no/terraform_output_$str_tgt_execution_no.json", $json);
+                            }
+                        }
+                    }
+
                     //----------------------------------------------
                     // applyの結果判定
                     //----------------------------------------------
