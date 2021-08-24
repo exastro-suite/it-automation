@@ -2055,6 +2055,11 @@ function getColumnClass($ref_table,$ref_column) {
         return false;
     }
 
+    //$ref_tableが「D_MENU_LIST」、$ref_columnが「MENU_PULLDOWN」の場合は、例外として強制的に"TextColumn"を返す。（loadTable側にこのカラムの記載がないく、クラス情報を取得できないため。）
+    if($ref_table == "D_MENU_LIST" && $ref_column == "MENU_PULLDOWN"){
+        return "TextColumn";
+    }
+
     foreach($table_array as $table) {
         $cmd = sprintf("grep -lR %s %s",$ref_column,$table);
         $column_array = array();
