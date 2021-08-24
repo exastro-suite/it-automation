@@ -1608,7 +1608,6 @@
                             }
                             $latestCreateMenuInfoArray = $result;
                             foreach($latestCreateMenuInfoArray as $latestData){
-                                web_log(json_encode($latestData));
                                 $createMenuInfoData['LAST_UPDATE_USER'] = $latestData['LAST_UPDATE_USER']; //最終更新ユーザを差し替え
                                 $dispLastUpdateTimestamp = $latestData['LAST_UPDATE_TIMESTAMP']; //表示用最終更新日時を差し替え
                             }
