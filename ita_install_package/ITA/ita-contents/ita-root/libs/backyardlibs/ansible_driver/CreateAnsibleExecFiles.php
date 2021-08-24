@@ -11051,6 +11051,7 @@ class CreateAnsibleExecFiles {
                     return false;
                 }
                 $use_gbl_vars_list[$var_name] = 1;
+                $this->lv_use_gbl_vars_list[$var_name] = 1;
             }
         }
 
