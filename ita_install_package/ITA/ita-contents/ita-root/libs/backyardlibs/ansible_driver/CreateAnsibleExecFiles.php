@@ -71,7 +71,8 @@
 //  F0045 CreateLegacyRoleCopyFiles
 //  F0046 getDBTranslationTable
 //  F0047 CheckConcreteValueIsVar
-//  F0048 CheckConcreteValueIsVarTemplatefile
+//  F0048-1 CheckConcreteValueIsVarTemplatefile
+//  F0048-2 LegacyRoleCheckConcreteValueIsVarTemplatefile
 //  F0049 LegacyRoleCheckConcreteValueIsVar
 //  F0050 CommitHostVarsfiles
 //  F0051 initCommandInfo
@@ -340,6 +341,10 @@ class CreateAnsibleExecFiles {
     private  $lv_vault_value_list;        // ansible-vaultで暗号化した具体値配列
     private  $lv_vault_value_update_list; // ansible-vaultで暗号化した具体値の更新が済んでいる代入値管理のKey配列
 
+    // LegacyRoleCheckConcreteValueIsVarで必要とする情報
+    private  $LegacyRoleCheckConcreteValueIsVar_use_host_name;
+    private  $LegacyRoleCheckConcreteValueIsVar_use_var_list;
+
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
     //   コンストラクタ
@@ -490,6 +495,9 @@ class CreateAnsibleExecFiles {
         $this->lv_vault_pass_update_list    = array();
         $this->lv_vault_value_list          = array();
         $this->lv_vault_value_update_list   = array();
+
+        $this->LegacyRoleCheckConcreteValueIsVar_use_host_name = "";
+        $this->LegacyRoleCheckConcreteValueIsVar_use_var_list  = array();
 
     }
 
@@ -2209,6 +2217,12 @@ class CreateAnsibleExecFiles {
                                     $in_mode="w"){
         $parent_vars_list = array();
 
+        // LegacyRoleCheckConcreteValueIsVarで必要な情報を退避
+        $this->LegacyRoleCheckConcreteValueIsVar_use_host_name = $in_host_ipaddr;
+        if($in_var_type == "VAR") {
+             $this->LegacyRoleCheckConcreteValueIsVar_use_var_list[$in_host_ipaddr] = $ina_var_list;
+        }
+
         if(@is_array($this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr]) === false){
             $this->lv_legacy_Role_cpf_vars_list[$in_host_ipaddr] = array();
         }
@@ -2320,7 +2334,6 @@ class CreateAnsibleExecFiles {
                 }
                 $parent_vars_list[$var] = 0;
             
-// 999
                 //ホスト変数ファイルのレコード生成
                 //変数名: 具体値
                 //複数行具体値の場合に複数行の扱い記号を付ける ----
@@ -10980,7 +10993,7 @@ class CreateAnsibleExecFiles {
         return true;
     }
     ////////////////////////////////////////////////////////////////////////////////
-    // F0048
+    // F0048-1
     // 処理内容
     //   Legacy用 
     //   変数の具体値にテンプレート変数が使用されていた場合にテンプレートで使用
@@ -11189,7 +11202,205 @@ class CreateAnsibleExecFiles {
         }
         return($result_code);
     }
+    ////////////////////////////////////////////////////////////////////////////////
+    // F0048-2
+    // 処理内容
+    //   LegacyRole用 
+    //   変数の具体値にテンプレート変数が使用されていた場合にテンプレートで使用
+    //   している変数がホスト変数に登録されているかチェックする。
+    // パラメータ
+    //   $in_tpf_val_name:      テンプレート変数名
+    //
+    //   $in_tpf_key:           テンプレートファイルPkey
+    // 
+    //   $in_tpf_file_name:     テンプレートファイル名
+    // 
+    //   $ina_tpf_vars_struct_array:
+    //                          テンプレートで使用している変数の変数構造
+    //                          [Vars_list] => stdClass Object
+    //                          (
+    //                              [VAR_legacy_VAR] => 0
+    //                              [GBL_legacy_VAR] => 0
+    //                          )
+    //                          [GBL_vars_info] => stdClass Object
+    //                          (
+    //                              [1] => stdClass Object
+    //                              (
+    //                                  [GBL_legacy_VAR] => 0
+    //                              )
+    //
+    //                          )
+    //                          [Array_vars_list] => Array
+    //                          [LCA_vars_use] =>
+    //                          [Array_vars_use] =>
+    //
+    // 戻り値
+    //   true:   正常
+    //   false:  異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function LegacyRoleCheckConcreteValueIsVarTemplatefile($in_host_name,$ina_var_list,
+                                                           $in_tpf_val_name,$in_tpf_key,$in_tpf_file_name,
+                                                           $ina_tpf_vars_struct_array){
+        
+
+        $result_code = true;
+        ///////////////////////////////////////////////////////////////////
+        // テンプレートで使用している変数がホストの変数に登録されているか判定
+        ///////////////////////////////////////////////////////////////////
+        $templatefile = $this->getITA_template_file($in_tpf_key,$in_tpf_file_name);
+
+        // テンプレートに登録されている変数を抜出す。
+        $dataString = file_get_contents($templatefile);
+
+        if($dataString === false){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000015",
+                                                        array(basename($templatefile)));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+
+        $use_gbl_vars_list = array();
+        if(isset($ina_tpf_vars_struct_array['GBL_vars_info']['1'])) {
+            // テンプレートに登録されているグローバル変数のデータベース登録確認
+            foreach($ina_tpf_vars_struct_array['GBL_vars_info']['1'] as $var_name=>$dummy) {
+                if(@count($this->lva_global_vars_list[$var_name]) == 0){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000016",
+                                                                array(basename($templatefile),
+                                                                      $var_name));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                $use_gbl_vars_list[$var_name] = 1;
+                $this->lv_use_gbl_vars_list[$var_name] = 1;
+            }
+        }
+
+        // ローカル変数のリスト作成
+        $local_vars = array();
+        $local_vars[] = self::LC_ANS_PROTOCOL_VAR_NAME;
+        $local_vars[] = self::LC_ANS_USERNAME_VAR_NAME;
+        $local_vars[] = self::LC_ANS_PASSWD_VAR_NAME;
+        $local_vars[] = self::LC_ANS_LOGINHOST_VAR_NAME;
+        $local_vars[] = self::LC_ANS_OUTDIR_VAR_NAME;
+        $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
+        $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
+
+        $file_vars_list = array();
+        // テンプレートからローカル変数を抜出す
+        $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$local_vars);
+        $file_vars_list = $objWSRA->getTPFVARSParsedResult();
+        unset($objWSRA);
+
+        // VAR変数ほ除外する。
+        foreach($file_vars_list as $no=>$var_name) {
+            $ret = preg_match("/^VAR_/",$var_name); 
+            if($ret == 1) {
+                unset($file_vars_list[$no]);
+            }
+        }
+
+        if(isset($ina_tpf_vars_struct_array['Vars_list'])) {
+            foreach($ina_tpf_vars_struct_array['Vars_list'] as $var_name=>$dummy) {
+                // グローバル変数を除外する。
+                if(isset($use_gbl_vars_list[$var_name])) {
+                    continue;
+                }
+                // テンプレートで使用している変数を追加
+                $file_vars_list[] = $var_name;
+            }
+        }
     
+        // テンプレートで変数が使用されているか判定
+        if(count($file_vars_list) > 0){
+            if(count($ina_var_list) == 0){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000019",
+                                                            array($in_host_name,
+                                                                  basename($templatefile)));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+        // テンプレートに登録されている変数のデータベース登録確認 
+        foreach( $file_vars_list as $var_name ){
+            if(!array_key_exists($var_name,$ina_var_list)) {
+                if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000020",
+                                                                array(basename($templatefile),
+                                                                      $var_name,
+                                                                      $in_host_name));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    $result_code = false;
+                }
+                elseif($var_name == self::LC_ANS_USERNAME_VAR_NAME){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000021",
+                                                                array(basename($templatefile),
+                                                                      $var_name,
+                                                                      $in_host_name));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    $result_code = false;
+                }
+                elseif($var_name == self::LC_ANS_PASSWD_VAR_NAME){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000022",
+                                                                array(basename($templatefile),
+                                                                      $var_name,
+                                                                      $in_host_name));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    $result_code = false;
+                }
+                elseif($var_name == self::LC_ANS_LOGINHOST_VAR_NAME){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000023",
+                                                                array(basename($templatefile),
+                                                                      $var_name,
+                                                                      $in_host_name));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    $result_code = false;
+                }
+            }
+            else{
+                //予約変数を使用している場合に対象システム一覧に該当データが登録されているか判定
+                if($ina_var_list[$var_name] == self::LC_ANS_UNDEFINE_NAME){
+                    // プロトコル未登録
+                    if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000025",
+                                                                    array(basename($templatefile),
+                                                                          $var_name,
+                                                                          $in_host_name));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        $result_code = false;
+                    }
+                    // ユーザー名未登録
+                    elseif($var_name == self::LC_ANS_USERNAME_VAR_NAME){
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000026",
+                                                                    array(basename($templatefile),
+                                                                          $var_name,
+                                                                          $in_host_name));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        $result_code = false;
+                    }
+                    // ログインパスワード未登録
+                    elseif($var_name == self::LC_ANS_PASSWD_VAR_NAME){
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000027",
+                                                                    array(basename($templatefile),
+                                                                          $var_name,
+                                                                          $in_host_name));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        $result_code = false;
+                    }
+                    // ホスト名未登録
+                    elseif($var_name == self::LC_ANS_LOGINHOST_VAR_NAME){
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000028",
+                                                                    array(basename($templatefile),
+                                                                          $var_name,
+                                                                          $in_host_name));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        $result_code = false;
+                    }
+                }
+            }
+        }
+        return($result_code);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////
     // F0049
     // 処理内容
@@ -11287,39 +11498,52 @@ class CreateAnsibleExecFiles {
                     ///////////////////////////////////////////////////////////////////
                     // テンプレート変数に紐づくファイルの情報を取得
                     ///////////////////////////////////////////////////////////////////
-                    $key       = "";
-                    $file_name = "";
-                    $role_only = "";
-                    $vars_struct_array = array();
+                    $tpf_var_name  = $var_name;
+                    $tpf_key       = "";
+                    $tpf_file_name = "";
+                    $role_only     = "";
+                    $tpf_vars_struct_array = array();
                     // template変数名からtemplateファイル名とPkeyを取得する。
-                    $ret = $this->getDBTemplateMaster($var_name,$key,$file_name,$role_only,
-                                                      $vars_struct_array);
+                    $ret = $this->getDBTemplateMaster($tpf_var_name,$tpf_key,$tpf_file_name,$role_only,
+                                                      $tpf_vars_struct_array);
                     if( $ret == false ) {
                         //エラーが発生した場合は処理終了
                         return false;
                     }
                     else{
                         // テンプレートファイル名が未登録の場合
-                        if($file_name == "" ){
+                        if($tpf_file_name == "" ){
                             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000006",
-                                                                        array($var_name));
+                                                                        array($tpf_var_name));
                             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 
                             return false;
                         }
                     }
                     // inディレクトリ配下のテンプレートファイルバスを取得
-                    $path = $this->getHostvarsfile_template_file_value($key,$file_name);
+                    $path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
 
                     $path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
                                         $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                         $path);
 
                     // $ina_legacy_Role_tpf_vars_list[copy変数]=inディレクトリ配下のテンプレートファイルパス
-                    $ina_legacy_Role_tpf_vars_list[$var_name] = $path;
+                    $ina_legacy_Role_tpf_vars_list[$tpf_var_name] = $path;
 
                     // テンプレートファイルのpkeyとファイル名を退避
-                    $tpf_fileInfo[$key]=$file_name;
+                    $tpf_fileInfo[$tpf_key]=$tpf_file_name;
+
+                    // 呼び元からパラメータで受け取ることが困難なので、クラス変数経由で受け取る
+                    $host_name = $this->LegacyRoleCheckConcreteValueIsVar_use_host_name;
+
+                    // テンプレートファイル内のホスト変数を確認
+                    $ret = $this->LegacyRoleCheckConcreteValueIsVarTemplatefile($host_name,
+                                                                                $this->LegacyRoleCheckConcreteValueIsVar_use_var_list[$host_name],
+                                                                                $tpf_var_name,$tpf_key,$tpf_file_name,
+                                                                                $tpf_vars_struct_array);
+                    if( $ret === false ){
+                        return false;
+                    }
                 }
             }
 
