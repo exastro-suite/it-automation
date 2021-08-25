@@ -550,7 +550,7 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
                         ." AND TAB_A.MENU_ID = :MENU_ID "
                         ." AND TAB_A.SHEET_TYPE IN ('1','4') "
                         ." AND TAB_B.COL_CLASS   <>  'PasswordColumn' "
-                        ."ORDER BY TAB_A.COLUMN_LIST_ID"
+                        ."ORDER BY TAB_A.COL_TITLE_DISP_SEQ"
                         ."";
             //メニュー１取得
             $strMenuIDNumeric=$contrastDate[0]['CONTRAST_MENU_ID_1'];
