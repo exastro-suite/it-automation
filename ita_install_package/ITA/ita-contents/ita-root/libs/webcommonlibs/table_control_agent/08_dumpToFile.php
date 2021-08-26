@@ -484,7 +484,12 @@
                 if( $objCsvFormatter->getGeneValue("csvFieldRowHide",$refRetKeyExists) !== false ){
                     $objCsvFormatter->setGeneValue("csvFieldRowAdd",true);
                     $objCsvFormatter->setGeneValue("csvRecordShowAdd",false);
-                    $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId);
+                    
+                    if($strOutputDataType === "history"){
+                        $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId, null, null, 1);
+                    }else{
+                        $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId);
+                    } 
                 }
                 $strCSVOutputFileType = $objCsvFormatter->getGeneValue("outputFileType",$refRetKeyExists);
                 if( $strCSVOutputFileType == "SafeCSV" ){

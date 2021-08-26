@@ -1297,6 +1297,36 @@ color: #888;
 opacity: .5;
 }
 
+
+.edit-shortcut-menu {
+padding-bottom: 8px;
+list-style: none;
+letter-spacing: -0.4em;
+}
+.edit-shortcut-menu-item {
+display: inline-block;
+position: relative;
+z-index: 0;
+margin-right: 8px;
+vertical-align: bottom;
+}
+.edit-shortcut-menu-separate {
+margin-right: 16px;
+padding-right: 16px;
+}
+.edit-shortcut-menu-separate::after {
+content: '';
+display: block;
+position: absolute;
+right: 0; top: 0;
+width: 2px; height: 100%; 
+border-right: 1px solid rgba( 255,255,255,.2 );
+border-left: 1px solid rgba( 0,0,0,.6 );
+}
+.edit-shortcut-file {
+display: none;
+}
+
 .edit-shortcut-table {
 width: 100%;
 border-collapse: collapse;
@@ -1399,14 +1429,17 @@ outline: none;
 background-color: #444;
 color: #AAA;
 }
-.edit-shortcut-remove-button {
-width: 28px; height: 28px;
-padding: 0;
+.edit-shortcut-button {
+height: 28px;
+padding: 0 8px;
 text-align: center;
 line-height: 26px;
 }
-.edit-shortcut-remove-button,
-.edit-shortcut-add-button {
+.edit-shorcut-button[data-type="remove"] {
+width: 28px;
+padding: 0;
+}
+.edit-shortcut-button {
 margin: 0;
 background-color: #666;
 border: 1px solid;
@@ -1421,22 +1454,14 @@ font-size: 11px;
 color: #EEE;
 cursor: pointer;
 }
-.edit-shortcut-add-button {
-height: 28px;
-margin: 4px 4px 0 0; padding: 0 8px;
-line-height: 26px;
-}
-.edit-shortcut-remove-button:focus,
-.edit-shortcut-add-button:focus {
+.edit-shortcut-button:focus {
 box-shadow: 0 0 0 1px #111, 0 0 1px 2px #4F80FF;
 outline: none;
 }
-.edit-shortcut-remove-button:hover,
-.edit-shortcut-add-button:hover {
+.edit-shortcut-button:hover {
 background-color: #777;
 }
-.edit-shortcut-remove-button:active,
-.edit-shortcut-add-button:active {
+.edit-shortcut-button:active {
 padding-top: 1px;
 background-color: #606060;
 box-shadow: 0 0 0 1px #111, 0 0 4px rgba( 0,0,0,.2 ) inset;
