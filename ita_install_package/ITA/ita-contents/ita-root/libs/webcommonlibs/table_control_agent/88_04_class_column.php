@@ -8794,6 +8794,29 @@ class RowEditByFileColumn extends Column{
 						$this->arrayCounter['error']['ct']++;
 					}
 				}
+				
+				$errFlg = false;
+				foreach($inputArray as $key2 => $value2){
+					if(array_key_exists($key2,$arrayObjColumn) && array_key_exists("uploadfiles_".$arrayObjColumn[$key2]->getIDSOP(),$inputArray)){
+						if($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル値なし"){
+							$errFlg = true;
+							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-5000038');
+						}elseif($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル名なし"){
+							$errFlg = true;
+							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-5000039');
+						}
+					}
+				}
+				if($errFlg === true){
+					$arrayTempRet[0] = "002";
+					$arrayTempRet[1] = "000";
+					$arrayTempRet[2] = $errMsg;
+					$retRetMsgBody = $arrayTempRet[2];
+					$boolExeCountinue = false;
+					$this->arrayCounter['error']['ct']++;
+				}
 
 				if($boolExeCountinue === true){
 					//----ここではRIColumnも削除される
