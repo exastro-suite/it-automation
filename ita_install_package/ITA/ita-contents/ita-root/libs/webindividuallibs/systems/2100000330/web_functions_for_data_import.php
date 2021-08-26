@@ -185,6 +185,25 @@ function checkZipFile(){
     exec($cmd);
     $errCnt = 0;
 
+    $declare_check_list = array();
+    foreach ($fileAry as $file) {
+        $filePath = $importPath . $uploadId . '/' . $file;
+        $res = file_exists($filePath);
+        if ($res === false) {
+            $errCnt++;
+            break;
+        }
+        $files = glob("$filePath/*");
+        foreach ($files as $file) {
+            if ($file != "") {
+                $tmpFileAry = explode("/", $file);
+                $fileName = $tmpFileAry[count($tmpFileAry) - 1];
+                $declare_check_list[] = $fileName;
+            }
+        }
+    }
+    $declare_list = array_count_values($declare_check_list);
+
     foreach ($fileAry as $file) {
         $filePath = $importPath . $uploadId . '/' . $file;
 
@@ -232,7 +251,7 @@ function checkZipFile(){
 
     removeFiles($uploadPath . $uploadId);
 
-    return;
+    return $declare_list;
 }
 
 /**
@@ -240,7 +259,7 @@ function checkZipFile(){
  *
  * @return   array     $retImportAry    インポートするメニューのチェックボックス一覧
  */
-function makeImportCheckbox(){
+function makeImportCheckbox($declare_list){
     global $g;
     $path = $g['root_dir_path'] . '/temp/bulk_excel/import/import/';
 
@@ -368,7 +387,7 @@ function makeImportCheckbox(){
                     if (array_key_exists($menuGroupId, $retImportAry)) {
                         // メニューグループは存在するがメニューがない場合
                         // 同名ファイルが複数あった場合
-                        if ($declare_file_name_key !== false) {
+                        if ($declare_list[$menuFileName] > 1) {
                             $tmpMenuInfo = array(
                                 "menu_id"   => $menuId,
                                 "menu_name" => $menuName,
@@ -406,17 +425,32 @@ function makeImportCheckbox(){
                             );
                         }
                     } else {
-                        $retImportAry[$menuGroupId] = array(
-                            "menu_group_name" => $menuGroupName,
-                            "menu"            => array(
-                                array(
-                                    "menu_id"   => $menuId,
-                                    "menu_name" => $menuName,
-                                    "disabled"  => false,
-                                    "file_name" => $menuFileName
+                        if ($declare_list[$menuFileName] > 1) {
+                            $retImportAry[$menuGroupId] = array(
+                                "menu_group_name" => $menuGroupName,
+                                "menu"            => array(
+                                    array(
+                                        "menu_id"   => $menuId,
+                                        "menu_name" => $menuName,
+                                        "disabled"  => true,
+                                        "error"     => $g['objMTS']->getSomeMessage('ITABASEH-ERR-2100000330_12'),
+                                        "file_name" => $menuFileName
+                                    )
                                 )
-                            )
-                        );
+                            );
+                        } else {
+                            $retImportAry[$menuGroupId] = array(
+                                "menu_group_name" => $menuGroupName,
+                                "menu"            => array(
+                                    array(
+                                        "menu_id"   => $menuId,
+                                        "menu_name" => $menuName,
+                                        "disabled"  => false,
+                                        "file_name" => $menuFileName
+                                    )
+                                )
+                            );
+                        }
                     }
                 } else {
                     $tmpMenuInfo = array(
@@ -526,7 +560,7 @@ function unzipImportData(){
 
         // zipを展開する
         $output = NULL;
-        $cmd = "sudo unzip -O sjis '" . $uploadPath . $fileName . "' -d '" . $uploadPath . $uploadId . "' 2>&1";
+        $cmd = "sudo LC_ALL=ja_JP.UTF-8 unzip -O sjis '" . $uploadPath . $fileName . "' -d '" . $uploadPath . $uploadId . "' 2>&1";
         exec($cmd, $output, $return_var);
 
         if(0 != $return_var){

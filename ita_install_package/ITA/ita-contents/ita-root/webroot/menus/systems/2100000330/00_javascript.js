@@ -19,7 +19,7 @@ $(function(){
 
     $('#import_form').submit(function(){
         
-        var checked_num = $('#Mix2_Nakami :checked').length;
+        var checked_num = $('#Mix2_Nakami .menu_id_checkbox:checked:not(:disabled)').length;
         if(checked_num == 0) {
             $('#importMsg').text(getSomeMessage('ITABASEC090003'));
             return false;
@@ -31,11 +31,6 @@ $(function(){
         if(!confirm(getSomeMessage('ITABASEC2100000330_1'))) {
             return false;
         } else {
-            if(!$('#import_whole').prop('checked')) {
-                if(!confirm(getSomeMessage('ITABASEC090006'))) {
-                    return false;
-                }
-            }
             $('#zipInputSubmit').prop('disabled',true);
         }
     });
@@ -99,12 +94,31 @@ $(function(){
         }
     });
 
+    $("#import_whole").change(function(e){
+        let checked_num = $('#Mix2_Nakami .menu_id_checkbox:checked:not(:disabled)').length;
+        if(checked_num == 0) {
+            $('#importMsg').text(getSomeMessage('ITABASEC090003'));
+            $('#importButton').prop("disabled", true);
+        } else {
+            $('#importButton').prop("disabled", false);
+            $('#importMsg').text('');
+        }
+    });
+
     function checkClick(trg) {
         if (!trg.disabled) {
             if (trg.checked == true) {
                 trg.checked = false;
             } else if (trg.checked == false) {
                 trg.checked = true;
+            }
+            let checked_num = $('#Mix2_Nakami .menu_id_checkbox:checked:not(:disabled)').length;
+            if(checked_num == 0) {
+                $('#importMsg').text(getSomeMessage('ITABASEC090003'));
+                $('#importButton').prop("disabled", true);
+            } else {
+                $('#importButton').prop("disabled", false);
+                $('#importMsg').text('');
             }
         }
     }

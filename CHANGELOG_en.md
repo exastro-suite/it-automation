@@ -1,3 +1,42 @@
+Exastro IT Automation 1.8.1 (2021-08-26)
+==================================================
+
+
+Installer
+---------------
+ *  Updated to Version v1.8.1 #1438
+ *  Fixed an issue where the install log would display wrong numbers when only "ita_base" in the answer.txt file is set to "yes" in the answer.txt file. #1454
+
+General
+---------------
+ * Added a menu that allows users to link with OASE roles #1380
+ * [Aubstitution value auto-registration settings]Fixed an issue where the menu would not display the updated values when the pulldown menu's reference source was updated. #1437 
+
+Management Console
+---------------
+ * Renamed the "SSO Basic information list" and "SSO Attribute preference" menu's excel file name to better fit it's function  #1460
+
+Export/Import
+---------------
+ * Fixed an issue where "Export/Import"  would be included in the "Excel export" menu group when updating.#1449
+ * Fixed an issue where the excel bundle import log would stop #1461
+ * Fixed an issue where if the a file name with japanese characters with it are used when using Excel bundle import with CentOS8, an error would occur #1469
+
+Compare
+---------------
+Fixed an issue where recreated menus could not be compared when selecting "Match all cases". #1489
+
+Ansible-Driver
+---------------
+ * [Collect Function]Fixed an issue where the updating/registering a file would reset the target. #1433
+ * [Substitution value auto-registration setting]Fixed an issue where exporting would display that the parameter item failed to convert ID #1464
+ * Fixed an issue that would occur if the the template variable, "TPF" was set to the specific value in the substitute value list. #1481
+
+Terraform-Driver
+---------------
+ * [Substitution value auto-registration setting]Fixed an issue where exporting would display that the parameter item failed to convert ID #1464
+
+
 Exastro IT Automation 1.8.0 (2021-07-16)
 ==================================================
 
@@ -16,13 +55,13 @@ General
 ---------------
  * Added a clone button to the "List/Update" sub menu in all of the parameters. #174
  * Fixed an issue with the Excel output by phpspreadhseet v1.15.0 #329
- * Fixed an issue in the Filter selection (ID Column) where error 400 would occur when trying to search for an ID that doesnÅft exist in LIST with RestAPI.
+ * Fixed an issue in the Filter selection (ID Column) where error 400 would occur when trying to search for an ID that doesn't exist in LIST with RestAPI.
  * Made it possible to download the Change history in an Excel file #482
  * Made it possible to check reserved Symphony/Conductors from the Main menu #488
  * Made adjustments to Exastro OASE user's initial Role/Menu link value #752
  * Created a function that allows users to delete Password items #753
  * Fixed an issue where the "Execution process type" headline cell is not combined when downloading the Excel file #831
- * Fixed an issue where menus users donÅft have permission to see would be displayed #987
+ * Fixed an issue where menus users don't have permission to see would be displayed #987
  * Fixed an issue where the display filter's date items would not search properly when the "from" and "to" date are the same as the item the user is searching for #1027
  * Fixed an issue where the screen would not be displayed correctly when the display filter's "Pulldown search" button is pressed repeatedly #1147
  * Fixed an issue where the screen would not be displayed correctly when Darkmode is selected #1147
@@ -240,7 +279,7 @@ General
  * Adjusted Menu names  and collumn names #596
  * Fixed an issue in the display filter where the Pulldown search name would be cut out if it was too long #618
  * Implemented Encrypted File upload collumns #637
- * Fixed an issue where some abolished roles could be restored when they shouldnÅft be able to #638
+ * Fixed an issue where some abolished roles could be restored when they shouldn't be able to #638
  * Fixed an error message that would appear when restoring an abolished record that contained an ID change fail #651
  * Adjusted the output items of the Web log #654
  * Fixed a bug with the Operation History widget on the Dashboard #698
@@ -248,7 +287,7 @@ General
  * Fixed issue where access control would not function properly when updating/abolishing/restoring records when using RESTAPI #774
  * Fixed issue where access control settings would not function properly when updating/abolishing/restoring records when using RESTAPI #775
  * Improved the URL Pass/Query gathering process #855
- * Fixed an issue where the Operation status check's Sub menus' initial settings doesnÅft function properly #876
+ * Fixed an issue where the Operation status check's Sub menus' initial settings doesn't function properly #876
  * Fixed an issue where the Excel file created cannot be opened if the IDCollumn's source collumn does not exist #892
 
 Dashboard
@@ -344,7 +383,7 @@ Terraform-Driver
 ---------------
  * Fixed issue where Movement list access permissions got set to the Operation history access permission #523
  * Improved the Operation list display when data is returned using the menu import function #650
- * Fixed an issue where the access permission roles wouldnÅft be displayed correctly in the Operation list's Change History table #675
+ * Fixed an issue where the access permission roles wouldn't be displayed correctly in the Operation list's Change History table #675
  * Added a Jump button and made it easier to understand what menus they connect to #706
  * Fixed an issue where an error would occur when holding the Enter button over the "Register","Update","Delete" button in the "WorkSpace list" #781
  * Changed the "Terraform Registration list" to "Linked Terraform management" #806
@@ -423,13 +462,13 @@ Export/Import
 Symphony
 ---------------
  * Fixed an issue where the pop-up window that would be displayed in the Regular Execution menu's "Schedule settings" would move downwards when the user is dragging it with the mouse #382
- * Fixed an issue where users were able to executes Movements they didnÅft have access to #458
+ * Fixed an issue where users were able to executes Movements they didn't have access to #458
  * Fixed an issue where users could not check the Access access permission to the device's Movement when executing Symphonies/Conductors from the regular Execution menu #515
 
 Conductor
 ---------------
  * ixed an issue where the pop-up window that would be displayed in the Regular Execution menu's "Schedule settings" would move downwards when the user is dragging it with the mouse #382
- * Fixed an issue where users were able to executes Movements they didnÅft have access to #458
+ * Fixed an issue where users were able to executes Movements they didn't have access to #458
  * Fixed an issue where users could not check the Access access permission to the device's Movement when executing Symphonies/Conductors from the regular Execution menu #515
  * Made it so the role of the user who executed the operation gets access to the Conductor Class List #519
 
@@ -447,7 +486,7 @@ Ansible-Driver
  * Made it possible to configure access permission roles for the Collect function #517
  * Fixed an issue where data that should not be created gets created when the user is using Access permission role #525
  * Improved the Collection function status text #527
- * Fixed an issue where the Null link wouldnÅft work against Template list Variable definitions #528
+ * Fixed an issue where the Null link wouldn't work against Template list Variable definitions #528
  * Added OperationID to Reservation variables #585
  * Fixed an issue where the Movement list access permission would be configured to the Operation history access permission #522
 
@@ -473,7 +512,7 @@ Installer
  * Fixed issue with the ITA issued Self Certificate #7
  * Fixed an issue where including symbols in the MariaDB password would cause an error #179
  * Changed the Install Script construction #181
- * Fixed an issue where the process would stop if the user doesnÅft have permission to execute in the parent directory #204
+ * Fixed an issue where the process would stop if the user doesn't have permission to execute in the parent directory #204
  * Fixed an issue where the return value would be 0 if sh ita_builder_online.sh fails #217
  * Fixed an issue where using Composer v2.0 or later would stop the installer #347
  * Fixed an issue with the RHUI3 Repository #360
@@ -714,7 +753,7 @@ General
  * Added a "release password" button #48
  * Fixed an issue where excess files would be left when RestAPI Registration to menus with upload files failed #49
  * Put http access settings as a comment in vhost #51
- * Fixed issue where the Unique constraint wouldnÅft work properly when using RestAPI and the unique constrainted character string is "0" #69
+ * Fixed issue where the Unique constraint wouldn't work properly when using RestAPI and the unique constrainted character string is "0" #69
  * Raised the set value for DB and PHP Resources when installing ITA #71
  * Changed the HTML_AJAX Time out value #81
 
@@ -766,7 +805,7 @@ Ansible-Driver
  * Fixed problem with Ansible-vault when using HA Configuration #65
  * Fixed problem with the legacy-Role Rolepackage "Register/Update" button #66
  * Fixed issue when the Automatic substitute valu registration setting's Backyard process exceeds the memory_limit(PHP) #67
- * Fixed issue where the Automatic Substitute value registration settings wouldnÅft be displayed when the "Defaults" directory doesnÅft exist and the user is using Ansible-role's ITA_Readme file #68
+ * Fixed issue where the Automatic Substitute value registration settings wouldn't be displayed when the "Defaults" directory doesn't exist and the user is using Ansible-role's ITA_Readme file #68
  * Increased the Maximum amount of bytes that can be used for Specific values in the Global Variable list from 1024 to 8192 bytes #74
  * Fixed issue when template variables are set as the Specific values in the Ansible Role Substitute Value list #75
  * Fixed issue where Ansible Operations executed with Ansible Tower 3.6 through ITA would have it's status display "Complete (Abnormal)" #78
