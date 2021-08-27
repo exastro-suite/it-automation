@@ -2214,6 +2214,35 @@ class ExcelFormatter extends ListFormatter {
             $this->aryValidationTailHeader[0] = $intThisStartRow;                  // Column Top
             $this->aryValidationTailHeader[1] = $dataValidation;                   // ValidationObject
         }
+
+        //空白欄に初期値データを埋め込む ----
+        $i_col = self::DATA_START_COL;
+        foreach($aryObjColumn as $objColumn){
+            if( $objColumn->getOutputType($this->strPrintTargetListFormatterId)->isVisible()===false ){
+                if( $varMinorPrintTypeMode!="forDeveloper"){
+                    continue;
+                }
+            }
+            $defaultValue = $objColumn->getDefaultValue();
+            if($defaultValue != ''){
+                if(is_a($objColumn, "IDColumn") === true){
+                    //IDは文字列に変換
+                    $aryMasterData = $objColumn->getMasterTableArrayForInput();
+                    if(array_key_exists($defaultValue, $aryMasterData)){
+                        $defaultValue = $aryMasterData[$defaultValue];
+                    }else{
+                        $defaultValue = "";
+                    }
+                }
+                //空白欄に初期値データを入れる
+                for($i = $intThisStartRow; $i <= $intThisStartRow+self::WHITE_ROWS; ++$i){
+                    $sheet->setCellValueExplicitByColumnAndRow($i_col-1, $i ,$defaultValue, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                }
+            }
+            $i_col++;
+        }
+        //---- 空白欄に初期値データを埋め込む
+
         //処理種別カラムの設定----
 
         $maxCol = $this->intEditSheetMaxCol;

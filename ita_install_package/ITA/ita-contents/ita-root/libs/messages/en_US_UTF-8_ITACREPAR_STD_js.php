@@ -102,4 +102,13 @@ $ary["ITACREPAR_1283"]       = "Add a pattern";
 $ary["ITACREPAR_1284"]       = "No patterns.";
 $ary["ITACREPAR_1285"]       = "Permission role";
 $ary["ITACREPAR_1286"]       = "Reference Item";
+$ary["ITACREPAR_1287"]       = "Default value";
+$ary["ITACREPAR_1288"]       = "Failed to get the Default value";
+$ary["ITACREPAR_1289"]       = "When registering from the created menu, set the value to be entered in the input field by default.\nYou cannot set a value that exceeds the \"Maximum number of bytes\" or a value that does not match the \"Regular expression\".";
+$ary["ITACREPAR_1290"]       = "When registering from the created menu, set the value to be entered in the input field by default.\nYou cannot set a Values outside the range of \"Maximum value\" and \"Minimum value\".";
+$ary["ITACREPAR_1291"]       = "When registering from the created menu, set the value to be entered in the input field by default.\nYou cannot set a Values outside the range of \"Maximum value\" and \"Minimum value\" and \"Digit number\".";
+$ary["ITACREPAR_1292"]       = "When registering from the created menu, set the value to be entered in the input field by default.";
+$ary["ITACREPAR_1293"]       = "When registering from the created menu, set the value to be entered in the input field by default.\nYou cannot set a value that exceeds the \"Maximum number of bytes\".";
+$ary["ITACREPAR_1294"]       = "When registering from the created menu, Set the value selected by default.";
+$ary["ITACREPAR_1295"]       = "Please Wait... Loading";
 ?>

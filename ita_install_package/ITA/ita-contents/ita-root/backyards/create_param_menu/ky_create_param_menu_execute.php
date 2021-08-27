@@ -884,6 +884,41 @@ try{
                     $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
                     $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
+
+                    //登録時の初期値
+                    if("" == $itemInfo['PULLDOWN_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $pulldownDefaultValue = $itemInfo['PULLDOWN_DEFAULT_VALUE'];
+                        $pulldownDefaultValue = str_replace('\'', '\\\'', $pulldownDefaultValue); //シングルクォーテーションをエスケープ
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $pulldownDefaultValue , $work);
+                    }
+                }
+                // 文字列(単一行)の場合
+                if(1 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['SINGLE_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $singleDefaultValue = $itemInfo['SINGLE_DEFAULT_VALUE'];
+                        $singleDefaultValue = str_replace('\'', '\\\'', $singleDefaultValue); //シングルクォーテーションをエスケープ
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $singleDefaultValue , $work);
+                    }
+                }
+                // 文字列(複数行)の場合
+                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['MULTI_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $multiDefaultValue = $itemInfo['MULTI_DEFAULT_VALUE'];
+                        $multiDefaultValue = str_replace('\'', '\\\'', $multiDefaultValue); //シングルクォーテーションをエスケープ
+                        $multiDefaultValue = str_replace(array("\r", "\n"), '\'."\n".\'', $multiDefaultValue); //改行コードを文字列の「\n」に変換し左右に結合する。
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $multiDefaultValue , $work);
+                    }
                 }
                 // 整数の場合
                 if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -898,6 +933,13 @@ try{
                     }
                     else{
                         $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                    }
+                    //登録時の初期値
+                    if("" == $itemInfo['INT_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $itemInfo['INT_DEFAULT_VALUE'] , $work);
                     }
                 }
                 // 小数の場合
@@ -919,6 +961,51 @@ try{
                     }
                     else{
                         $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                    }
+                    //登録時の初期値
+                    if("" == $itemInfo['FLOAT_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $itemInfo['FLOAT_DEFAULT_VALUE'] , $work);
+                    }
+                }
+                // 日時の場合
+                if(5 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['DATETIME_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $datetimeFormat = "";
+                        $datetimeDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfo['DATETIME_DEFAULT_VALUE']);
+                        if($datetimeDefaultValue != false) $datetimeFormat = $datetimeDefaultValue->format('Y/m/d H:i:s');
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $datetimeFormat , $work);
+                    }
+                }
+                // 日付の場合
+                if(6 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['DATE_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $dateFormat = "";
+                        $dateDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfo['DATE_DEFAULT_VALUE']);
+                        if($dateDefaultValue != false) $dateFormat = $dateDefaultValue->format('Y/m/d');
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $dateFormat , $work);
+                    }
+                }
+                // リンクの場合
+                if(10 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['LINK_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $linkDefaultValue = $itemInfo['LINK_DEFAULT_VALUE'];
+                        $linkDefaultValue = str_replace('\'', '\\\'', $linkDefaultValue); //シングルクォーテーションをエスケープ
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $linkDefaultValue , $work);
                     }
                 }
                 $cmdbLoadTableVal .= $work . "\n";
@@ -1102,6 +1189,41 @@ try{
                         $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
                         $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                         $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
+
+                        //登録時の初期値
+                        if("" == $itemInfo['PULLDOWN_DEFAULT_VALUE']){
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                        }
+                        else{
+                            $pulldownDefaultValue = $itemInfo['PULLDOWN_DEFAULT_VALUE'];
+                            $pulldownDefaultValue = str_replace('\'', '\\\'', $pulldownDefaultValue); //シングルクォーテーションをエスケープ
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, $pulldownDefaultValue , $work);
+                        }
+                    }
+                    // 文字列(単一行)の場合
+                    if(1 == $itemInfo['INPUT_METHOD_ID']){
+                        //登録時の初期値
+                        if("" == $itemInfo['SINGLE_DEFAULT_VALUE']){
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                        }
+                        else{
+                            $singleDefaultValue = $itemInfo['SINGLE_DEFAULT_VALUE'];
+                            $singleDefaultValue = str_replace('\'', '\\\'', $singleDefaultValue); //シングルクォーテーションをエスケープ
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, $singleDefaultValue , $work);
+                        }
+                    }
+                    // 文字列(複数行)の場合
+                    if(2 == $itemInfo['INPUT_METHOD_ID']){
+                        //登録時の初期値
+                        if("" == $itemInfo['MULTI_DEFAULT_VALUE']){
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                        }
+                        else{
+                            $multiDefaultValue = $itemInfo['MULTI_DEFAULT_VALUE'];
+                            $multiDefaultValue = str_replace('\'', '\\\'', $multiDefaultValue); //シングルクォーテーションをエスケープ
+                            $multiDefaultValue = str_replace(array("\r", "\n"), '\'."\n".\'', $multiDefaultValue); //改行コードを文字列の「\n」に変換し左右に結合する。
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, $multiDefaultValue , $work);
+                        }
                     }
                     // 整数の場合
                     if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -1116,6 +1238,13 @@ try{
                         }
                         else{
                             $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                        }
+                        //登録時の初期値
+                        if("" == $itemInfo['INT_DEFAULT_VALUE']){
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                        }
+                        else{
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, $itemInfo['INT_DEFAULT_VALUE'] , $work);
                         }
                     }
                     // 小数の場合
@@ -1137,6 +1266,51 @@ try{
                         }
                         else{
                             $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                        }
+                        //登録時の初期値
+                        if("" == $itemInfo['FLOAT_DEFAULT_VALUE']){
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                        }
+                        else{
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, $itemInfo['FLOAT_DEFAULT_VALUE'] , $work);
+                        }
+                    }
+                    // 日時の場合
+                    if(5 == $itemInfo['INPUT_METHOD_ID']){
+                        //登録時の初期値
+                        if("" == $itemInfo['DATETIME_DEFAULT_VALUE']){
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                        }
+                        else{
+                            $datetimeFormat = "";
+                            $datetimeDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfo['DATETIME_DEFAULT_VALUE']);
+                            if($datetimeDefaultValue != false) $datetimeFormat = $datetimeDefaultValue->format('Y/m/d H:i:s');
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, $datetimeFormat , $work);
+                        }
+                    }
+                    // 日付の場合
+                    if(6 == $itemInfo['INPUT_METHOD_ID']){
+                        //登録時の初期値
+                        if("" == $itemInfo['DATE_DEFAULT_VALUE']){
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                        }
+                        else{
+                            $dateFormat = "";
+                            $dateDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfo['DATE_DEFAULT_VALUE']);
+                            if($dateDefaultValue != false) $dateFormat = $dateDefaultValue->format('Y/m/d');
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, $dateFormat , $work);
+                        }
+                    }
+                    // リンクの場合
+                    if(10 == $itemInfo['INPUT_METHOD_ID']){
+                        //登録時の初期値
+                        if("" == $itemInfo['LINK_DEFAULT_VALUE']){
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                        }
+                        else{
+                            $linkDefaultValue = $itemInfo['LINK_DEFAULT_VALUE'];
+                            $linkDefaultValue = str_replace('\'', '\\\'', $linkDefaultValue); //シングルクォーテーションをエスケープ
+                            $work = str_replace(REPLACE_DEFAULT_VALUE, $linkDefaultValue , $work);
                         }
                     }
                     $hgLoadTableVal .= $work . "\n";
@@ -1321,6 +1495,41 @@ try{
                     $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
                     $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
+
+                    //登録時の初期値
+                    if("" == $itemInfo['PULLDOWN_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $pulldownDefaultValue = $itemInfo['PULLDOWN_DEFAULT_VALUE'];
+                        $pulldownDefaultValue = str_replace('\'', '\\\'', $pulldownDefaultValue); //シングルクォーテーションをエスケープ
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $pulldownDefaultValue , $work);
+                    }
+                }
+                // 文字列(単一行)の場合
+                if(1 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['SINGLE_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $singleDefaultValue = $itemInfo['SINGLE_DEFAULT_VALUE'];
+                        $singleDefaultValue = str_replace('\'', '\\\'', $singleDefaultValue); //シングルクォーテーションをエスケープ
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $singleDefaultValue , $work);
+                    }
+                }
+                // 文字列(複数行)の場合
+                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['MULTI_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $multiDefaultValue = $itemInfo['MULTI_DEFAULT_VALUE'];
+                        $multiDefaultValue = str_replace('\'', '\\\'', $multiDefaultValue); //シングルクォーテーションをエスケープ
+                        $multiDefaultValue = str_replace(array("\r", "\n"), '\'."\n".\'', $multiDefaultValue); //改行コードを文字列の「\n」に変換し左右に結合する。
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $multiDefaultValue , $work);
+                    }
                 }
                 // 整数の場合
                 if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -1335,6 +1544,13 @@ try{
                     }
                     else{
                         $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                    }
+                    //登録時の初期値
+                    if("" == $itemInfo['INT_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $itemInfo['INT_DEFAULT_VALUE'] , $work);
                     }
                 }
                 // 小数の場合
@@ -1356,6 +1572,51 @@ try{
                     }
                     else{
                         $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                    }
+                    //登録時の初期値
+                    if("" == $itemInfo['FLOAT_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $itemInfo['FLOAT_DEFAULT_VALUE'] , $work);
+                    }
+                }
+                // 日時の場合
+                if(5 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['DATETIME_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $datetimeFormat = "";
+                        $datetimeDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfo['DATETIME_DEFAULT_VALUE']);
+                        if($datetimeDefaultValue != false) $datetimeFormat = $datetimeDefaultValue->format('Y/m/d H:i:s');
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $datetimeFormat , $work);
+                    }
+                }
+                // 日付の場合
+                if(6 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['DATE_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $dateFormat = "";
+                        $dateDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfo['DATE_DEFAULT_VALUE']);
+                        if($dateDefaultValue != false) $dateFormat = $dateDefaultValue->format('Y/m/d');
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $dateFormat , $work);
+                    }
+                }
+                // リンクの場合
+                if(10 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['LINK_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $linkDefaultValue = $itemInfo['LINK_DEFAULT_VALUE'];
+                        $linkDefaultValue = str_replace('\'', '\\\'', $linkDefaultValue); //シングルクォーテーションをエスケープ
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $linkDefaultValue , $work);
                     }
                 }
                 $hostLoadTableVal .= $work . "\n";
@@ -1838,6 +2099,41 @@ try{
                     $work = str_replace(REPLACE_LINK_ID_URL1, $url1, $work);
                     $work = str_replace(REPLACE_LINK_ID_URL2, $url2, $work);
                     $work = str_replace(REPLACE_URL_OPTION, $urlOption, $work);
+
+                    //登録時の初期値
+                    if("" == $itemInfo['PULLDOWN_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $pulldownDefaultValue = $itemInfo['PULLDOWN_DEFAULT_VALUE'];
+                        $pulldownDefaultValue = str_replace('\'', '\\\'', $pulldownDefaultValue); //シングルクォーテーションをエスケープ
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $pulldownDefaultValue , $work);
+                    }
+                }
+                // 文字列(単一行)の場合
+                if(1 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['SINGLE_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $singleDefaultValue = $itemInfo['SINGLE_DEFAULT_VALUE'];
+                        $singleDefaultValue = str_replace('\'', '\\\'', $singleDefaultValue); //シングルクォーテーションをエスケープ
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $singleDefaultValue , $work);
+                    }
+                }
+                // 文字列(複数行)の場合
+                if(2 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['MULTI_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $multiDefaultValue = $itemInfo['MULTI_DEFAULT_VALUE'];
+                        $multiDefaultValue = str_replace('\'', '\\\'', $multiDefaultValue); //シングルクォーテーションをエスケープ
+                        $multiDefaultValue = str_replace(array("\r", "\n"), '\'."\n".\'', $multiDefaultValue); //改行コードを文字列の「\n」に変換し左右に結合する。
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $multiDefaultValue , $work);
+                    }
                 }
                 // 整数の場合
                 if(3 == $itemInfo['INPUT_METHOD_ID']){
@@ -1852,6 +2148,13 @@ try{
                     }
                     else{
                         $work = str_replace(REPLACE_INT_MIN, $itemInfo['INT_MIN'], $work);
+                    }
+                    //登録時の初期値
+                    if("" == $itemInfo['INT_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $itemInfo['INT_DEFAULT_VALUE'] , $work);
                     }
                 }
                 // 小数の場合
@@ -1873,6 +2176,51 @@ try{
                     }
                     else{
                         $work = str_replace(REPLACE_FLOAT_DIGIT, $itemInfo['FLOAT_DIGIT'], $work);
+                    }
+                    //登録時の初期値
+                    if("" == $itemInfo['FLOAT_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $itemInfo['FLOAT_DEFAULT_VALUE'] , $work);
+                    }
+                }
+                // 日時の場合
+                if(5 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['DATETIME_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $datetimeFormat = "";
+                        $datetimeDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfo['DATETIME_DEFAULT_VALUE']);
+                        if($datetimeDefaultValue != false) $datetimeFormat = $datetimeDefaultValue->format('Y/m/d H:i:s');
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $datetimeFormat , $work);
+                    }
+                }
+                // 日付の場合
+                if(6 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['DATE_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $dateFormat = "";
+                        $dateDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfo['DATE_DEFAULT_VALUE']);
+                        if($dateDefaultValue != false) $dateFormat = $dateDefaultValue->format('Y/m/d');
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $dateFormat , $work);
+                    }
+                }
+                // リンクの場合
+                if(10 == $itemInfo['INPUT_METHOD_ID']){
+                    //登録時の初期値
+                    if("" == $itemInfo['LINK_DEFAULT_VALUE']){
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, '' , $work);
+                    }
+                    else{
+                        $linkDefaultValue = $itemInfo['LINK_DEFAULT_VALUE'];
+                        $linkDefaultValue = str_replace('\'', '\\\'', $linkDefaultValue); //シングルクォーテーションをエスケープ
+                        $work = str_replace(REPLACE_DEFAULT_VALUE, $linkDefaultValue , $work);
                     }
                 }
                 $convertLoadTableVal .= $work . "\n";
