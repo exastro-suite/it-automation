@@ -73,6 +73,9 @@ const getWidgetMessage = function( id ) {
       '50':getSomeMessage("ITAWDCC92168"), // 日
       '51':getSomeMessage("ITAWDCC92169"), // 時間
       '52':getSomeMessage("ITAWDCC92170"), // 分
+      '53':getSomeMessage("ITAWDCC92171"), // リンクリスト保存
+      '54':getSomeMessage("ITAWDCC92172"), // リンクリスト読込
+      '55':getSomeMessage("ITAWDCC92173"), // ファイルの読み込みに失敗しました。
     };
 
     if ( message[ id ] ) {
@@ -1072,14 +1075,20 @@ const editWidget = function( setID ) {
           + '<td class="edit-shortcut-cell edit-shortcut-name"><input data-max-length="32" class="edit-shortcut-input edit-shortcut-input-name" type="text" value="' + editor.textEntities( name ) + '"></td>'
           + '<td class="edit-shortcut-cell edit-shortcut-url"><input data-max-length="256" class="edit-shortcut-input edit-shortcut-input-url" type="text" value="' + editor.textEntities( url ) + '"></td>'
           + '<td class="edit-shortcut-cell edit-shortcut-target"><input data-max-length="16" class="edit-shortcut-input edit-shortcut-input-target" type="text" value="' + editor.textEntities( target ) + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-remove"><button class="edit-shortcut-remove-button"><span class="cross-mark"></span></button></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-remove"><button type="button" class="edit-shortcut-button" data-type="remove"><span class="cross-mark"></span></button></td>'
         + '</tr>';
       };
       
       widgetEditHTML += getRowHTML( getWidgetMessage('6'), getRadioHTML('link-col', [[1,1],[2,2],[3,3],[4,4]], Number( widgetData['data']['link_col_number'] ) ) );
       
       const listLength = widgetData['data']['list'].length;
-      let shortcutHTML = '<table class="edit-shortcut-table">'
+      let shortcutHTML = ''
+      + '<ul class="edit-shortcut-menu">'
+        + '<li class="edit-shortcut-menu-item edit-shortcut-menu-separate"><button type="button" class="edit-shortcut-button" data-type="add">' + getWidgetMessage('8') + '</button></li>'
+        + '<li class="edit-shortcut-menu-item"><button type="button" class="edit-shortcut-button" data-type="save">' + getWidgetMessage('53') + '</button></li>'
+        + '<li class="edit-shortcut-menu-item"><button type="button" class="edit-shortcut-button" data-type="read">' + getWidgetMessage('54') + '</button><input type="file" class="edit-shortcut-file"></li>'
+      + '</ul>'
+      + '<table class="edit-shortcut-table">'
         + '<thead><tr>'
           + '<th class="edit-shortcut-cell edit-shortcut-name">' + getWidgetMessage('3') + '</th>'
           + '<th class="edit-shortcut-cell edit-shortcut-url">URL</th>'
@@ -1098,14 +1107,88 @@ const editWidget = function( setID ) {
       shortcutHTML += getShortcutInputRow('','','');
       shortcutHTML += '</tbody></table>';
       
-      widgetEditHTML += getRowHTML( getWidgetMessage('7') + '<br><button class="edit-shortcut-add-button">' + getWidgetMessage('8') + '</button>', shortcutHTML );
+      widgetEditHTML += getRowHTML( getWidgetMessage('7'), shortcutHTML );
       
-      // 追加・削除ボタン
-      $modalBody.on('click', '.edit-shortcut-add-button', function(){
-        $modalBody.find('.edit-shortcut-table tbody').append( getShortcutInputRow('','','') );
+      // 読み込み
+      $modalBody.on('change', '.edit-shortcut-file', function(e){
+        const file = e.target.files[0];
+        if ( file ) {
+          const fileReader = new FileReader();
+          fileReader.readAsText( file );
+          fileReader.onload = function() {
+            
+            try {
+              linkList = JSON.parse( fileReader.result );
+              const $body = $modalBody.find('.edit-shortcut-table > tbody'),
+                    linkLength = linkList.length;
+              $body.empty();
+              for ( let i = 0; i < linkLength; i++ ) {
+                const name = linkList[i]['name'],
+                      url = linkList[i]['url'],
+                      target = linkList[i]['target'];
+                $body.append( getShortcutInputRow( name, url, target ) );
+              }
+            } catch(e) {
+              alert( getWidgetMessage('55') );
+              return false;
+            }
+          };
+        }
       });
-      $modalBody.on('click', '.edit-shortcut-remove-button', function(){
-        $( this ).closest('.edit-shortcut-row').remove();
+      
+      // ボタン
+      $modalBody.on('click', '.edit-shortcut-button', function(){
+        const $button = $( this ),
+              type = $button.attr('data-type');
+        switch( type ) {
+          case 'add':
+            $modalBody.find('.edit-shortcut-table > tbody').append( getShortcutInputRow('','','') );
+            break;
+          case 'remove':
+            $button.closest('.edit-shortcut-row').remove();
+            break;  
+          case 'save':
+            // リンクリストの作成
+            const linkList = [];
+            $modalBody.find('.edit-shortcut-table > tbody > tr').each(function(i){
+              const $tr = $( this ),
+                    name = $tr.find('.edit-shortcut-input-name').val();
+              if ( name !== '') {
+                linkList[i] = {
+                  'name': name,
+                  'url': $tr.find('.edit-shortcut-input-url').val(),
+                  'target': $tr.find('.edit-shortcut-input-target').val()
+                };
+              }
+            });
+            
+            //　作成したリストをダウンロードする
+            const blobText = new Blob( [ JSON.stringify( linkList ) ], { type : 'text/plain' }),
+                  $downloadAnchor = $('<a />'),
+                  userName = $('#HEADER').find('.itaLoginUserName > .userDataText').text().slice( 0, 128 ),
+                  fileName = userName + '_link-list.txt';
+
+            // 一時リンクを作成しダウンロード
+            $downloadAnchor.attr({
+              'href' : window.URL.createObjectURL( blobText ),
+              'download' : fileName,
+              'target' : '_blank'
+            });
+            $modalBody.prepend( $downloadAnchor );
+            $downloadAnchor.get(0).click();
+
+            // 生成したBlobを削除しておく
+            setTimeout( function(){
+              $downloadAnchor.remove()
+              window.URL.revokeObjectURL( blobText );
+            }, 100 );
+            break;
+          case 'read':
+            const $input = $modalBody.find('.edit-shortcut-file');
+            $input.val('');
+            $input.get(0).click();
+            break;
+        }
       });
       } break;
     case '7':

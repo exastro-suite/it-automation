@@ -322,7 +322,7 @@
                             //----TABLEを表示/更新させる設定の場合
                         }
                         if( $boolAddInfo === true ){
-                            if("IDColumn" === get_class($objColumn)){
+                            if("IDColumn" === get_class($objColumn) || "LinkIDColumn" === get_class($objColumn)){
                                 $aryColumnInfo01[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
                                 $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
                             }
@@ -332,7 +332,7 @@
                             }
                         }
                         else{
-                            if("IDColumn" === get_class($objColumn)){
+                            if("IDColumn" === get_class($objColumn)  || "LinkIDColumn" === get_class($objColumn)){
                                 $aryColumnInfo02[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
                                 $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
                             }
