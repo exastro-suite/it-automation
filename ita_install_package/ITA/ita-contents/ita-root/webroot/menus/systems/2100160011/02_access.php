@@ -194,6 +194,14 @@
                     if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
                     if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
                     if(!array_key_exists("REFERENCE_ITEM",$itemData))       $itemData["REFERENCE_ITEM"] = "";
+                    if(!array_key_exists("SINGLE_DEFAULT_VALUE",$itemData)) $itemData["SINGLE_DEFAULT_VALUE"] = "";
+                    if(!array_key_exists("MULTI_DEFAULT_VALUE",$itemData))  $itemData["MULTI_DEFAULT_VALUE"] = "";
+                    if(!array_key_exists("INT_DEFAULT_VALUE",$itemData))    $itemData["INT_DEFAULT_VALUE"] = "";
+                    if(!array_key_exists("FLOAT_DEFAULT_VALUE",$itemData))  $itemData["FLOAT_DEFAULT_VALUE"] = "";
+                    if(!array_key_exists("DATETIME_DEFAULT_VALUE",$itemData)) $itemData["DATETIME_DEFAULT_VALUE"] = "";
+                    if(!array_key_exists("DATE_DEFAULT_VALUE",$itemData))   $itemData["DATE_DEFAULT_VALUE"] = "";
+                    if(!array_key_exists("PULLDOWN_DEFAULT_VALUE",$itemData)) $itemData["PULLDOWN_DEFAULT_VALUE"] = "";
+                    if(!array_key_exists("LINK_DEFAULT_VALUE",$itemData))   $itemData["LINK_DEFAULT_VALUE"] = "";
                     
                     $arrayRegisterData = array("CREATE_MENU_ID"     => $menuData['menu']['CREATE_MENU_ID'],
                                                "ITEM_NAME"          => $itemData['ITEM_NAME'],
@@ -216,6 +224,14 @@
                                                "UPLOAD_MAX_SIZE"    => $itemData['UPLOAD_MAX_SIZE'],
                                                "LINK_LENGTH"        => $itemData['LINK_LENGTH'],
                                                "REFERENCE_ITEM"     => $itemData['REFERENCE_ITEM'],
+                                               "SINGLE_DEFAULT_VALUE"   => $itemData['SINGLE_DEFAULT_VALUE'],
+                                               "MULTI_DEFAULT_VALUE"    => $itemData['MULTI_DEFAULT_VALUE'],
+                                               "INT_DEFAULT_VALUE"      => $itemData['INT_DEFAULT_VALUE'],
+                                               "FLOAT_DEFAULT_VALUE"    => $itemData['FLOAT_DEFAULT_VALUE'],
+                                               "DATETIME_DEFAULT_VALUE" => $itemData['DATETIME_DEFAULT_VALUE'],
+                                               "DATE_DEFAULT_VALUE"     => $itemData['DATE_DEFAULT_VALUE'],
+                                               "PULLDOWN_DEFAULT_VALUE" => $itemData['PULLDOWN_DEFAULT_VALUE'],
+                                               "LINK_DEFAULT_VALUE"     => $itemData['LINK_DEFAULT_VALUE'],
                                                "DESCRIPTION"        => $itemData['DESCRIPTION'],
                                                "ACCESS_AUTH"        => $menuData['menu']['ACCESS_AUTH'],
                                                "NOTE"               => $itemData['NOTE']
@@ -783,7 +799,15 @@
                         if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
                         if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
                         if(!array_key_exists("REFERENCE_ITEM",$itemData))       $itemData["REFERENCE_ITEM"] = "";
-                        
+                        if(!array_key_exists("SINGLE_DEFAULT_VALUE",$itemData)) $itemData["SINGLE_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("MULTI_DEFAULT_VALUE",$itemData))  $itemData["MULTI_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("INT_DEFAULT_VALUE",$itemData))    $itemData["INT_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("FLOAT_DEFAULT_VALUE",$itemData))  $itemData["FLOAT_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("DATETIME_DEFAULT_VALUE",$itemData)) $itemData["DATETIME_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("DATE_DEFAULT_VALUE",$itemData))   $itemData["DATE_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("PULLDOWN_DEFAULT_VALUE",$itemData)) $itemData["PULLDOWN_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("LINK_DEFAULT_VALUE",$itemData))   $itemData["LINK_DEFAULT_VALUE"] = "";
+
                         $strNumberForRI = $itemData['CREATE_ITEM_ID'];
                         $arrayUpdateData = array("CREATE_MENU_ID"       => $menuData['menu']['CREATE_MENU_ID'],
                                                  "ITEM_NAME"            => $itemData['ITEM_NAME'],
@@ -806,6 +830,14 @@
                                                  "UPLOAD_MAX_SIZE"      => $itemData['UPLOAD_MAX_SIZE'],
                                                  "LINK_LENGTH"          => $itemData['LINK_LENGTH'],
                                                  "REFERENCE_ITEM"       => $itemData['REFERENCE_ITEM'],
+                                                 "SINGLE_DEFAULT_VALUE"   => $itemData['SINGLE_DEFAULT_VALUE'],
+                                                 "MULTI_DEFAULT_VALUE"    => $itemData['MULTI_DEFAULT_VALUE'],
+                                                 "INT_DEFAULT_VALUE"      => $itemData['INT_DEFAULT_VALUE'],
+                                                 "FLOAT_DEFAULT_VALUE"    => $itemData['FLOAT_DEFAULT_VALUE'],
+                                                 "DATETIME_DEFAULT_VALUE" => $itemData['DATETIME_DEFAULT_VALUE'],
+                                                 "DATE_DEFAULT_VALUE"     => $itemData['DATE_DEFAULT_VALUE'],
+                                                 "PULLDOWN_DEFAULT_VALUE" => $itemData['PULLDOWN_DEFAULT_VALUE'],
+                                                 "LINK_DEFAULT_VALUE"     => $itemData['LINK_DEFAULT_VALUE'],
                                                  "DESCRIPTION"          => $itemData['DESCRIPTION'],
                                                  "ACCESS_AUTH"          => $menuData['menu']['ACCESS_AUTH'],
                                                  "NOTE"                 => $itemData['NOTE'],
@@ -863,7 +895,15 @@
                         if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
                         if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
                         if(!array_key_exists("REFERENCE_ITEM",$itemData))       $itemData["REFERENCE_ITEM"] = "";
-                        
+                        if(!array_key_exists("SINGLE_DEFAULT_VALUE",$itemData)) $itemData["SINGLE_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("MULTI_DEFAULT_VALUE",$itemData))  $itemData["MULTI_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("INT_DEFAULT_VALUE",$itemData))    $itemData["INT_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("FLOAT_DEFAULT_VALUE",$itemData))  $itemData["FLOAT_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("DATETIME_DEFAULT_VALUE",$itemData)) $itemData["DATETIME_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("DATE_DEFAULT_VALUE",$itemData))   $itemData["DATE_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("PULLDOWN_DEFAULT_VALUE",$itemData)) $itemData["PULLDOWN_DEFAULT_VALUE"] = "";
+                        if(!array_key_exists("LINK_DEFAULT_VALUE",$itemData))   $itemData["LINK_DEFAULT_VALUE"] = "";
+
                         $arrayRegisterData = array("CREATE_MENU_ID"         => $menuData['menu']['CREATE_MENU_ID'],
                                                    "ITEM_NAME"              => $itemData['ITEM_NAME'],
                                                    "DISP_SEQ"               => $itemData['DISP_SEQ'],
@@ -885,6 +925,14 @@
                                                    "UPLOAD_MAX_SIZE"        => $itemData['UPLOAD_MAX_SIZE'],
                                                    "LINK_LENGTH"            => $itemData['LINK_LENGTH'],
                                                    "REFERENCE_ITEM"         => $itemData['REFERENCE_ITEM'],
+                                                   "SINGLE_DEFAULT_VALUE"   => $itemData['SINGLE_DEFAULT_VALUE'],
+                                                   "MULTI_DEFAULT_VALUE"    => $itemData['MULTI_DEFAULT_VALUE'],
+                                                   "INT_DEFAULT_VALUE"      => $itemData['INT_DEFAULT_VALUE'],
+                                                   "FLOAT_DEFAULT_VALUE"    => $itemData['FLOAT_DEFAULT_VALUE'],
+                                                   "DATETIME_DEFAULT_VALUE" => $itemData['DATETIME_DEFAULT_VALUE'],
+                                                   "DATE_DEFAULT_VALUE"     => $itemData['DATE_DEFAULT_VALUE'],
+                                                   "PULLDOWN_DEFAULT_VALUE" => $itemData['PULLDOWN_DEFAULT_VALUE'],
+                                                   "LINK_DEFAULT_VALUE"     => $itemData['LINK_DEFAULT_VALUE'],
                                                    "DESCRIPTION"            => $itemData['DESCRIPTION'],
                                                    "ACCESS_AUTH"            => $menuData['menu']['ACCESS_AUTH'],
                                                    "NOTE"                   => $itemData['NOTE']
@@ -1608,7 +1656,6 @@
                             }
                             $latestCreateMenuInfoArray = $result;
                             foreach($latestCreateMenuInfoArray as $latestData){
-                                web_log(json_encode($latestData));
                                 $createMenuInfoData['LAST_UPDATE_USER'] = $latestData['LAST_UPDATE_USER']; //最終更新ユーザを差し替え
                                 $dispLastUpdateTimestamp = $latestData['LAST_UPDATE_TIMESTAMP']; //表示用最終更新日時を差し替え
                             }
@@ -1760,6 +1807,18 @@
                     else{
                         $uniqued = false;
                     }
+
+                    $datetimeFormat = "";
+                    $dateFormat = "";
+                    if($itemInfoData['DATETIME_DEFAULT_VALUE'] != ""){
+                        $datetimeDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfoData['DATETIME_DEFAULT_VALUE']);
+                        if($datetimeDefaultValue != false) $datetimeFormat = $datetimeDefaultValue->format('Y/m/d H:i:s');
+                    }
+                    if($itemInfoData['DATE_DEFAULT_VALUE'] != ""){
+                        $dateDefaultValue = DateTime::createFromFormat('Y-m-d H:i:s.u', $itemInfoData['DATE_DEFAULT_VALUE']);
+                        if($dateDefaultValue != false) $dateFormat = $dateDefaultValue->format('Y/m/d');
+                    }
+
                     $returnDataArray['item']['i' . $itemNum] = array(
                         "CREATE_MENU_ID"        => $itemInfoData['CREATE_MENU_ID'],
                         "CREATE_ITEM_ID"        => $itemInfoData['CREATE_ITEM_ID'],
@@ -1784,6 +1843,14 @@
                         "UPLOAD_MAX_SIZE"       => $itemInfoData['UPLOAD_MAX_SIZE'],
                         "LINK_LENGTH"           => $itemInfoData['LINK_LENGTH'],
                         "REFERENCE_ITEM"        => $itemInfoData['REFERENCE_ITEM'],
+                        "SINGLE_DEFAULT_VALUE"  => $itemInfoData['SINGLE_DEFAULT_VALUE'],
+                        "MULTI_DEFAULT_VALUE"   => $itemInfoData['MULTI_DEFAULT_VALUE'],
+                        "INT_DEFAULT_VALUE"     => $itemInfoData['INT_DEFAULT_VALUE'],
+                        "FLOAT_DEFAULT_VALUE"   => $itemInfoData['FLOAT_DEFAULT_VALUE'],
+                        "DATETIME_DEFAULT_VALUE" => $datetimeFormat,
+                        "DATE_DEFAULT_VALUE"    => $dateFormat,
+                        "PULLDOWN_DEFAULT_VALUE" => $itemInfoData['PULLDOWN_DEFAULT_VALUE'],
+                        "LINK_DEFAULT_VALUE"    => $itemInfoData['LINK_DEFAULT_VALUE'],
                         "DESCRIPTION"           => $itemInfoData['DESCRIPTION'],
                         "REPEAT_ITEM"           => $repeatItem,
                         "MIN_WIDTH"             => "",
