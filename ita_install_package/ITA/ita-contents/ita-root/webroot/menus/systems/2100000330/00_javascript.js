@@ -31,11 +31,6 @@ $(function(){
         if(!confirm(getSomeMessage('ITABASEC2100000330_1'))) {
             return false;
         } else {
-            if(!$('#import_whole').prop('checked')) {
-                if(!confirm(getSomeMessage('ITABASEC090006'))) {
-                    return false;
-                }
-            }
             $('#zipInputSubmit').prop('disabled',true);
         }
     });
