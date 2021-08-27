@@ -356,7 +356,6 @@ function updateExcelZipFileName($taskId, $fileName) {
 * @param  int    $taskId   タスクID
 * @return string $result   INSERT/UPDATE
 */
-
 function getJNLActClass($sequenceName){
     global $objDBCA, $objMTS;
     $result = "UPDATE";
@@ -1165,6 +1164,7 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
 
                     // ----XLSXファイル名の設定
                     $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
+
                     if( $strDLFilename === null ){
                         $intErrorType = 501;
                         $intErrorPlaceMark = 2900;
@@ -1331,7 +1331,6 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
                     } else {
                         $result = $objTable->getPrintFormatBulkExcel($strFormatterId, null, null, $taskId, $strDLFilename, $menuId);
                     }
-
                     return $result;
                 }
             }
@@ -2511,11 +2510,11 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
     }
 
     /**
-    * dump結果の登録・ファイル作成
+    * dump結果のファイル作成
     * 
-    * @param  string $msg       エラーメッセージ
-    * @param  int    $taskId    タスクID
-    * @return array  $result    未実行レコード一覧
+    * @param  string  $msg       エラーメッセージ
+    * @param  int     $taskId    タスクID
+    * @return boolean            true/false
     */
     function dumpResultMsg($msg, $taskId) {
         global $g, $objMTS, $objDBCA;
@@ -2530,49 +2529,63 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
             if ($res == false) {
                 return false;
             }
-            // ファイル名をレコードに登録
-            $sql = "
-                UPDATE
-                    B_BULK_EXCEL_TASK
-                SET
-                    RESULT_FILE_NAME = :RESULT_FILE_NAME
-                WHERE
-                    TASK_ID = :TASK_ID
-                AND
-                    DISUSE_FLAG = 0";
-
-            $objQuery = $objDBCA->sqlPrepare($sql);
-            if ($objQuery->getStatus() === false) {
-                $errMsg = $objMTS->getSomeMessage('ITAANSIBLEH-ERR-59853', array($taskId));
-                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
-                                                  array(basename(__FILE__), __LINE__)));
-                outputLog(LOG_PREFIX, $sql);
-                            outputLog(LOG_PREFIX, $objQuery->getLastError());
-                throw new Exception( $errMsg );
-            }
-            $res = $objQuery->sqlBind(
-                array(
-                    "TASK_ID"          => $taskId,
-                    "RESULT_FILE_NAME" => $resultFileName
-                )
-            );
-            $res = $objQuery->sqlExecute();
-            if ($res === false) {
-                $errMsg = $objMTS->getSomeMessage('ITAANSIBLEH-ERR-59853', array($taskId));
-                outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
-                                                              array(basename(__FILE__), __LINE__)));
-                outputLog(LOG_PREFIX, $sql);
-                outputLog(LOG_PREFIX, $objQuery->getLastError());
-                throw new Exception( $errMsg );
-            }
         } else {
             $res = file_put_contents("$uploadFilePath", "$msg\n", FILE_APPEND);
             if ($res == false) {
-                $errMsg = $objMTS->getSomeMessage('ITAANSIBLEH-ERR-59853', array($taskId));
-                outputLog(LOG_PREFIX, $errMsg);
-                throw new Exception( $errMsg );
+                return false;
             }
         }
+        return true;
+    }
+
+    /**
+    * dump結果ファイルの登録
+    * 
+    * @param  int    $taskId    タスクID
+    * @return boolean
+    */
+    function registerResultFile($taskId) {
+        global $g, $objMTS, $objDBCA;
+
+        $uploadDir = ROOT_DIR_PATH."/uploadfiles/2100000331/FILE_RESULT";
+        $resultFileName = "ResultData_$taskId.log";
+        $uploadFilePath = "$uploadDir/$resultFileName";
+
+        // ファイル名をレコードに登録
+        $sql = "
+            UPDATE
+                B_BULK_EXCEL_TASK
+            SET
+                RESULT_FILE_NAME = :RESULT_FILE_NAME
+            WHERE
+                TASK_ID = :TASK_ID
+            AND
+                DISUSE_FLAG = 0";
+
+        $objQuery = $objDBCA->sqlPrepare($sql);
+        if ($objQuery->getStatus() === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                              array(basename(__FILE__), __LINE__)));
+            outputLog(LOG_PREFIX, $sql);
+                        outputLog(LOG_PREFIX, $objQuery->getLastError());
+            throw new Exception( $ErrorMsg );
+        }
+        $res = $objQuery->sqlBind(
+            array(
+                "TASK_ID"          => $taskId,
+                "RESULT_FILE_NAME" => $resultFileName
+            )
+        );
+        $res = $objQuery->sqlExecute();
+        if ($res === false) {
+            outputLog(LOG_PREFIX, $objMTS->getSomeMessage('ITABASEH-ERR-900054',
+                                                          array(basename(__FILE__), __LINE__)));
+            outputLog(LOG_PREFIX, $sql);
+            outputLog(LOG_PREFIX, $objQuery->getLastError());
+            throw new Exception( $ErrorMsg );
+        }
+
+        return true;
     }
 
     /**

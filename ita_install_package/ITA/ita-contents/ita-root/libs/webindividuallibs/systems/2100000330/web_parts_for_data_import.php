@@ -84,9 +84,9 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
         unzipImportData();
 
         // zipファイルの中身確認
-        checkZipFile();
+        $declare_list = checkZipFile();
 
-        $retImportAry = makeImportCheckbox();
+        $retImportAry = makeImportCheckbox($declare_list);
 
     } catch (Exception $e) {
         web_log($e->getMessage());
