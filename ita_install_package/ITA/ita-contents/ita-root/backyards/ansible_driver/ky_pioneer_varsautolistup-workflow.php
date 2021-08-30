@@ -1821,6 +1821,8 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
 
         $chk_tfp_var_name_list = array();
 
+        $result_code = true;
+
         //////////////////////////////////////////////
         // 子PlayBookに登録されているテンプレート変数を抜出す。
         //////////////////////////////////////////////
@@ -1849,50 +1851,34 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
         $playbookdataString = file_get_contents($file_name);
 
         // 子PlayBookに登録されている変数を抜出。
-        $local_vars = array();
-        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$playbookdataString,$local_vars);
-
-        $aryResultParse = $objWSRA->getParsedResult();
-        unset($objWSRA);
+        $local_vars    = array();
+        $varsLineArray = array();
+        $varsArray     = array();
+        $FillterVars   = false;  // Fillterを含む変数の抜き出しあり
+        SimpleFillterVerSearch(DF_HOST_VAR_HED,$playbookdataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
 
         // 子PlayBookに登録されている変数退避
-        foreach( $aryResultParse[1] as $var_name ){
+        foreach( $varsArray as $var_name ){
             // 変数名を一意にする。
             $ina_vars[$var_name] = 1;
         }
 
 // <<<<<<<<<<pioneer/legacy差分箇所>>>>>>>>>>
         // 子PlayBookに登録されているテンプレート変数を抜出す。
-        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_TPF_HED,$playbookdataString);
-        $aryResultParse = $objWSRA->getTPFvarsarrayResult();
-        // $la_tpf_vars[行番号]=>テンプレート変数名
-        $la_tpf_vars     = $aryResultParse[0];
-        $la_tpf_errors   = $aryResultParse[1];
-        unset($objWSRA);
-
-        $result_code = true;
-        // エラーが発生しているか確認
-        if(count($la_tpf_errors) > 0){
-            foreach( $la_tpf_errors as $line_no => $errcode ){
-                if($log_level == 'DEBUG')
-                {
-                    //現在のエラーリスト
-                    $msgstr = $objMTS->getSomeMessage($errcode,
-                                                      array(basename($in_filename),
-                                                            $line_no));
-                    LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                }
-                $result_code = false;
-            }
-        }
+        $local_vars    = array();
+        $varsLineArray = array();
+        $varsArray     = array();
+        $FillterVars   = false;  // Fillterを含む変数の抜き出しあり
+        SimpleFillterVerSearch(DF_HOST_TPF_HED,$playbookdataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+        $la_tpf_vars = $varsLineArray;
 
         ///////////////////////////////////////////////////////////////////
         // テンプレート変数に紐づくテンプレートファイルの情報を取得
         ///////////////////////////////////////////////////////////////////
-        foreach( $la_tpf_vars as $line_no => $tpf_var_name ){
-            // WrappedStringReplaceAdmin(DF_HOST_TPF_HED,$playbookdataString) グローバル変数と一般変数も抜出すように修正
+        foreach( $varsLineArray as $row ){
+          foreach( $row as $line_no => $tpf_var_name ){
             // グローバル変数か一般変数の場合は処理スキップ
-            $ret = preg_match_all('/(' . DF_HOST_VAR_HED . '|' . DF_HOST_GBL_HED . ')[a-zA-Z0-9_]*/',$tpf_var_name,$var_match1);
+            $ret = preg_match_all('/^(' . DF_HOST_VAR_HED . '|' . DF_HOST_GBL_HED . ')[a-zA-Z0-9_]*/',$tpf_var_name,$var_match1);
             if($ret == 1){
                 continue;
             }
@@ -1909,7 +1895,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
                 }
 
                 $result_code = false;
-                continue;
+                continue 2;
             }
             
             // テンプレート情報取得
@@ -1936,7 +1922,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
                         LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     }
                     $result_code = false;
-                    continue;
+                    continue 2;
                 }
                 // テンプレートで使用している変数を退避
                 if(isset($tpf_vars_list['VAR'])) {
@@ -1956,16 +1942,19 @@ LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マス�
             }
             // テンプレート情報取得済みのテンプレート変数更新
             $chk_tfp_var_name_list[$tpf_var_name] = 0;
+          }
         }
 
         ///////////////////////////////////////////////
         // グローバル変数をPlayBookから抜きす
         ///////////////////////////////////////////////
         $local_vars = array();
-        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_GBL_HED,$playbookdataString,$local_vars);
-        $aryResultParse = $objWSRA->getParsedResult();
-        $file_global_vars_list = $aryResultParse[1];
-
+        $local_vars    = array();
+        $varsLineArray = array();
+        $varsArray     = array();
+        $FillterVars   = false;  // Fillterを含む変数の抜き出しあり
+        SimpleFillterVerSearch(DF_HOST_GBL_HED,$playbookdataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+        $file_global_vars_list = $varsArray;
         
         if(isset($tpf_vars_list['GBL_list'])) {
             foreach($tpf_vars_list['GBL_list'] as $gbl_var_name=>$dummy) {

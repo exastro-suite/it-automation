@@ -106,24 +106,19 @@ Ansible(Legacy)作業対象ホスト管理
         $strFxName = "";
 
         $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
-        if( $modeValue=="DTUP_singleRecDelete" ){
-            // 廃止の場合のみ
-            $modeValue_sub = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
-            if( $modeValue_sub == "on" ){
-                $strQuery = "UPDATE A_PROC_LOADED_LIST "
-                           ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                           ."WHERE ROW_ID in (2100020002) ";
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+            $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                       ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                       ."WHERE ROW_ID in (2100020001,2100020002) ";
 
-                $aryForBind = array();
+            $aryForBind = array();
 
-                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
 
-
-                if( $aryRetBody[0] !== true ){
-                    $boolRet = false;
-                    $strErrMsg = $aryRetBody[2];
-                    $intErrorType = 500;
-                }
+            if( $aryRetBody[0] !== true ){
+                $boolRet = false;
+                $strErrMsg = $aryRetBody[2];
+                $intErrorType = 500;
             }
         }
         $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);

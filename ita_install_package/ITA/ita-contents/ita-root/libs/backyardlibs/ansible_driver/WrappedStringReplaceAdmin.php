@@ -48,43 +48,6 @@ class WrappedStringReplaceAdmin{
         $this->aryVarsElementFromSourceString = array();
 
         //配列を初期化----
-
-        if( $in_var_heder_id == DF_HOST_VAR_HED){
-            // playbook/対話ファイルで使用しているホスト変数取得
-            $this->parseWrappedString($in_var_heder_id,$strSourceString,$arrylocalvars);
-
-            // playbookで使用している {% %}で囲まれているホスト変数取得
-            $this->getSpecialVARSParsed("BOOK",$strSourceString);
-        }
-        elseif( $in_var_heder_id == DF_HOST_TPF_HED){
-            // playbookで使用しているtemplate変数取得
-            $this->serchTPFVars($in_var_heder_id,$strSourceString);
-        }
-        elseif( $in_var_heder_id == DF_HOST_CPF_HED){
-            // playbookで使用しているcopyモジュールの変数取得
-            $this->parseWrappedString($in_var_heder_id,$strSourceString,$arrylocalvars);
-        }
-        elseif( $in_var_heder_id == DF_HOST_GBL_HED){
-            // playbook/対話ファイルで使用しているホスト変数取得
-            $this->parseWrappedString($in_var_heder_id,$strSourceString,$arrylocalvars);
-
-            // playbookで使用している {% %}で囲まれているホスト変数取得
-            $this->getSpecialVARSParsed_GBLVARonly("BOOK",$strSourceString);
-        }
-        elseif( $in_var_heder_id == DF_HOST_TEMP_GBL_HED){
-            // テンプレートファイルで使用しているグローバル変数取得
-            $this->parseTPFWrappedString(DF_HOST_GBL_HED,$strSourceString,$arrylocalvars);
-
-            // temprateで使用している {% %}で囲まれているグローバル変数取得
-            $this->getSpecialVARSParsed_GBLVARonly("TEMP",$strSourceString);
-        }
-        else{
-            // テンプレートファイルで使用しているホスト変数取得
-            $this->parseTPFWrappedString(DF_HOST_VAR_HED,$strSourceString,$arrylocalvars);
-
-            // temprateで使用している {% %}で囲まれているホスト変数取得
-            $this->getSpecialVARSParsed("TEMP",$strSourceString);
-        }
     }
     //----解析用のプロパティ
     function setHeadPattern($strValue){
@@ -112,12 +75,6 @@ class WrappedStringReplaceAdmin{
     //解析用のプロパティ----
 
     //----解析結果利用のためのプロパティ
-
-    //----解析結果を取得するプロパティ
-    function getParsedResult(){
-        return array($this->aryFixedElementFromSourceString, $this->aryReplaceElementFromSourceString);
-    }
-    //解析結果を取得するプロパティ----
 
     //----置き換え結果取得メソッド
     function getReplacedString(){
@@ -177,92 +134,6 @@ class WrappedStringReplaceAdmin{
     }
     //置き換え用のメソッド----
 
-
-    //----ホスト変数解析用のメソッド
-    function parseWrappedString($in_var_heder,$in_strSourceString,$arrylocalvars){
-        $boolRet = false;
-
-        //
-        $this->aryFixedElementFromSourceString = array();
-        $this->aryReplaceElementFromSourceString = array();
-        //
-        $strHeadPattern = $this->getHeadPattern();
-        $strTailPattern = $this->getTailPattern();
-        //
-        $numLengthOfHeadPattern = mb_strlen($strHeadPattern, "UTF-8");
-        $numLengthOfTailPattern = mb_strlen($strTailPattern, "UTF-8");
-
-        // 入力データを行単位に分解
-        $arry_list = explode("\n",$in_strSourceString);
-        foreach($arry_list as $strSourceString){
-            $strSourceString = $strSourceString . "\n";
-            // コメント行は読み飛ばす
-            if(mb_strpos($strSourceString,"#",0,"UTF-8") === 0){
-                $this->aryFixedElementFromSourceString[] = $strSourceString;
-                continue;
-            }
-            // エスケープコード付きの#を一時的に改行に置換
-            $wstr = $strSourceString;
-            $rpstr  = mb_ereg_replace("\\\\#","\n\n",$wstr);
-            // コメント( #)マーク以降の文字列を削除する。
-            // #の前の文字がスペースの場合にコメントとして扱う
-            $wspstr = explode(" #",$rpstr);
-            $strSourceString = $wspstr[0];
-            if( is_string($strSourceString)===true ){
-                $boolRet = true;
-                $strRemainString = $strSourceString;
-
-                do{
-                    $numLengthOfRemainString = mb_strlen($strRemainString, "UTF-8");
-                    $numResultOfSearchHead = mb_strpos($strRemainString, $strHeadPattern, 0,"UTF-8");
-                    if( $numResultOfSearchHead===false ){
-                        //----先頭パターンが見つからなかった
-                        $this->aryFixedElementFromSourceString[] = $strRemainString;
-                        break;
-                        //先頭パターンが見つからなかった----
-                    }else{
-                        $strTempStr1Body = mb_substr($strRemainString, 0, $numResultOfSearchHead);
-
-                        $strTempRemainString = mb_substr($strRemainString, $numResultOfSearchHead + $numLengthOfHeadPattern, $numLengthOfRemainString - $numResultOfSearchHead - $numLengthOfHeadPattern, "UTF-8");
-                        $numResultOfSearchTail = mb_strpos($strTempRemainString, $strTailPattern, 0, "UTF-8");
-                        if( $numResultOfSearchTail===false ){
-                            //----末尾パターンが見つからなかった
-                            $this->aryFixedElementFromSourceString[] = $strRemainString;
-                            break;
-                            //末尾パターンが見つからなかった----
-                        }else{
-                            $this->aryFixedElementFromSourceString[] = $strTempStr1Body;
-
-                            $strWrappedString = mb_substr($strTempRemainString, 0, $numResultOfSearchTail, "UTF-8");
-                            //ローカル予約変数か判定する。
-                            foreach( $arrylocalvars as $lvarname ){
-                                if($strWrappedString == $lvarname){
-                                    //変数名を退避する
-                                    $this->aryReplaceElementFromSourceString[] = $strWrappedString;
-                                }
-                            }
-                            //変数名の先頭がユーザー変数を表す文字列となっているか判定
-                            if(mb_strpos($strWrappedString,$in_var_heder,0,"UTF-8")===0){
-                                // 変数名が英数字と_かチェック これ以外の場合は変数として扱わない
-                                $strWrappedString = trim($strWrappedString);
-                                $ret = preg_match("/^" . $in_var_heder . "[a-zA-Z0-9_]*$/",$strWrappedString);
-                                if($ret === 1){
-                                    //変数名を退避する
-                                    $this->aryReplaceElementFromSourceString[] = $strWrappedString;
-                                }
-                           }
-
-                            $numLengthOfTempRemainString = mb_strlen($strTempRemainString, "UTF-8");
-                            $strRemainString = mb_substr($strTempRemainString, $numResultOfSearchTail + $numLengthOfTailPattern, $numLengthOfTempRemainString - $numResultOfSearchTail - $numLengthOfTailPattern, "UTF-8");
-                        }
-                    }
-                }while( $numResultOfSearchHead!==false && $numResultOfSearchTail!==false );
-            }
-        }
-        return $boolRet;
-    }
-    //解析用のメソッド----
-
     //----template変数解析結果を取得するプロパティ
     function getTPFvarsarrayResult(){
         return array($this->la_aryvarsarray,$this->la_aryErrorinfo);
@@ -274,237 +145,6 @@ class WrappedStringReplaceAdmin{
     }
     //copy解析結果を取得するプロパティ----
 
-    //----テンプレートファイル内のホスト変数解析用のメソッド
-    function parseTPFWrappedString($in_var_heder,$in_strSourceString,$arrylocalvars){
-        $boolRet = false;
-
-        $this->aryVarsElementFromSourceString = array();
-
-        $strHeadPattern = $this->getHeadPattern();
-        $strTailPattern = $this->getTailPattern();
-        //
-        $numLengthOfHeadPattern = mb_strlen($strHeadPattern, "UTF-8");
-        $numLengthOfTailPattern = mb_strlen($strTailPattern, "UTF-8");
-
-        // 入力データを行単位に分解
-        $arry_list = explode("\n",$in_strSourceString);
-        foreach($arry_list as $strSourceString){
-            if( is_string($strSourceString)===true ){
-                $boolRet = true;
-                $strRemainString = $strSourceString;
-
-                do{
-                    $numLengthOfRemainString = mb_strlen($strRemainString, "UTF-8");
-                    $numResultOfSearchHead = mb_strpos($strRemainString, $strHeadPattern, 0,"UTF-8");
-                    if( $numResultOfSearchHead===false ){
-                        //----先頭パターンが見つからなかった
-                        break;
-                        //先頭パターンが見つからなかった----
-                    }else{
-                        $strTempStr1Body = mb_substr($strRemainString, 0, $numResultOfSearchHead);
-
-                        $strTempRemainString = mb_substr($strRemainString, $numResultOfSearchHead + $numLengthOfHeadPattern, $numLengthOfRemainString - $numResultOfSearchHead - $numLengthOfHeadPattern, "UTF-8");
-                        $numResultOfSearchTail = mb_strpos($strTempRemainString, $strTailPattern, 0, "UTF-8");
-                        if( $numResultOfSearchTail===false ){
-                            //----末尾パターンが見つからなかった
-                            break;
-                            //末尾パターンが見つからなかった----
-                        }else{
-                            $strWrappedString = mb_substr($strTempRemainString, 0, $numResultOfSearchTail, "UTF-8");
-                            //ローカル予約変数か判定する。
-                            foreach( $arrylocalvars as $lvarname ){
-                                if($strWrappedString == $lvarname){
-                                    //変数名を退避する
-                                    $this->aryVarsElementFromSourceString[] = $strWrappedString;
-                                }
-                            }
-                            //変数名の先頭がユーザー変数を表す文字列となっているか判定
-                            if(mb_strpos($strWrappedString,$in_var_heder,0,"UTF-8")===0){
-                                // 変数名が英数字と_かチェック これ以外の場合は変数として扱わない
-                                $strWrappedString= trim($strWrappedString);
-                                $ret = preg_match("/^" . $in_var_heder . "[a-zA-Z0-9_]*$/",$strWrappedString);
-                                if($ret === 1){
-                                    //変数名を退避する
-                                    $this->aryVarsElementFromSourceString[] = $strWrappedString;
-                                }
-                            }
-
-                            $numLengthOfTempRemainString = mb_strlen($strTempRemainString, "UTF-8");
-                            $strRemainString = mb_substr($strTempRemainString, $numResultOfSearchTail + $numLengthOfTailPattern, $numLengthOfTempRemainString - $numResultOfSearchTail - $numLengthOfTailPattern, "UTF-8");
-                        }
-                    }
-                }while( $numResultOfSearchHead!==false && $numResultOfSearchTail!==false );
-            }
-        }
-        return $boolRet;
-    }
-    //解析用のメソッド----
-
-    //----テンプレートファイル内のホスト変数解析結果を取得するプロパティ
-    function getTPFVARSParsedResult(){
-        return $this->aryVarsElementFromSourceString;
-    }
-    //解析結果を取得するプロパティ----
-    function getSpecialVARSParsed($in_type,$in_strSourceString){
-        $strChkString = "";
-
-        // 入力データを行単位に分解
-        $arry_list = explode("\n",$in_strSourceString);
-        foreach($arry_list as $strSourceString){
-            if($in_type == "BOOK"){
-                // Playbookの場合はコメント行は読み飛ばす
-                if(mb_strpos($strSourceString,"#",0,"UTF-8") === 0){
-                    continue;
-                }
-                // コメント( #)マーク以降の文字列を削除する。
-                // #の前の文字がスペースの場合にコメントとして扱う
-                $wspstr = explode(" #",$strSourceString);
-                $strRemainString = $wspstr[0];
-                if( is_string($strRemainString)===true ){
-                    $strChkString = $strChkString . $strRemainString;
-                }
-            }
-            else{
-                // temprateの場合
-                $strChkString = $strChkString . $strSourceString;
-            }
-        }
-        // 改行をスペースにする 制御コードを取除く
-        $strChkString = preg_replace("/\n/"," ",$strChkString);
-        // tabをスペースにする  制御コードを取除く
-        $strChkString = preg_replace("/\t/"," ",$strChkString);
-        // {% %}で囲まれている文字列を検索
-        $ret = preg_match_all("/{%.+?%}/",$strChkString,$match);
-        if($ret !== false){
-            // {% %}で囲まれている文字列から変数定義を抜出す
-            for($idx1=0;$idx1 < count($match[0]);$idx1++){
-                // 変数名　△VAR_xxxx△ を取出す   xxxx::半角英数字か__
-                $ret = preg_match_all("/(\s)VAR_[a-zA-Z0-9_]*(\s)/",$match[0][$idx1],$var_match);
-                if($ret !== false){
-                    for($idx2=0;$idx2 < count($var_match[0]);$idx2++){
-                        // playbookかtemprateの判定
-                        if($in_type == "BOOK"){
-                            //playbookの変数名を退避する
-                            $this->aryReplaceElementFromSourceString[] = trim($var_match[0][$idx2]);
-                        }
-                        else{
-                            //temprateの変数名を退避する
-                            $this->aryVarsElementFromSourceString[] = trim($var_match[0][$idx2]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    function getIndentPos($in_String){
-        if(strlen($in_String)===0){
-            return -1;
-        }
-        $space_count=0;
-        $read_array = str_split($in_String);
-        for($idx=0;$idx<count($read_array);$idx++){
-            // - もスペースとしてカウント
-            if($read_array[$idx] == " " || $read_array[$idx] == "-"){
-               $space_count++;
-            }
-            else{
-                break;
-            }
-        }
-        return $space_count;
-    }
-    //----テンプレート変数の抜き出しメソッド
-    function serchTPFVars($in_var_heder_id,$in_strSourceString){
-        $boolRet = true;
-
-        $this->la_aryErrorinfo = array();
-        $this->la_aryvarsarray = array();
-    
-        // 入力データを行単位に分解
-        $arry_list = explode("\n",$in_strSourceString);
-        $line = 0;
-        foreach($arry_list as $strSourceString){
-            // 行番号
-            $line = $line + 1;
-
-            $strSourceString = $strSourceString . "\n";
-            // コメント行は読み飛ばす
-            if(mb_strpos($strSourceString,"#",0,"UTF-8") === 0){
-                continue;
-            }
-            // エスケープコード付きの#を一時的に改行に置換
-            $wstr = $strSourceString;
-            // コメント( #)マーク以降の文字列を削除する。
-            // #の前の文字がスペースの場合にコメントとして扱う
-            $wspstr = explode(" #",$wstr);
-            $strRemainString = $wspstr[0];
-            if( is_string($strRemainString)===true ){
-                //空行は読み飛ばす
-                if(strlen(trim($strRemainString)) == 0){
-                    continue;
-                }
-                // 変数名　{{ ???_[a-zA-Z0-9_] }} を取出す
-                $ret = preg_match_all("/{{(\s)" . $in_var_heder_id . "[a-zA-Z0-9_]*(\s)}}/",$strRemainString,$var_match);
-                if($ret == 1){
-                    //変数名を退避する
-                    $ret = preg_match_all("/" . $in_var_heder_id . "[a-zA-Z0-9_]*/",$var_match[0][0],$var_name_match);
-                    $this->la_aryvarsarray[$line] = trim($var_name_match[0][0]);
-                }
-            }
-        }
-        return $boolRet;
-    }
-    function getSpecialVARSParsed_GBLVARonly($in_type,$in_strSourceString){
-        $strChkString = "";
-
-        // 入力データを行単位に分解
-        $arry_list = explode("\n",$in_strSourceString);
-        foreach($arry_list as $strSourceString){
-            if($in_type == "BOOK"){
-                // Playbookの場合はコメント行は読み飛ばす
-                if(mb_strpos($strSourceString,"#",0,"UTF-8") === 0){
-                    continue;
-                }
-                // コメント( #)マーク以降の文字列を削除する。
-                // #の前の文字がスペースの場合にコメントとして扱う
-                $wspstr = explode(" #",$strSourceString);
-                $strRemainString = $wspstr[0];
-                if( is_string($strRemainString)===true ){
-                    $strChkString = $strChkString . $strRemainString;
-                }
-            }
-            else{
-                // temprateの場合
-                $strChkString = $strChkString . $strSourceString;
-            }
-        }
-        // 改行をスペースにする 制御コードを取除く
-        $strChkString = preg_replace("/\n/"," ",$strChkString);
-        // tabをスペースにする  制御コードを取除く
-        $strChkString = preg_replace("/\t/"," ",$strChkString);
-        // {% %}で囲まれている文字列を検索
-        $ret = preg_match_all("/{%.+?%}/",$strChkString,$match);
-        if($ret !== false){
-            // {% %}で囲まれている文字列から変数定義を抜出す
-            for($idx1=0;$idx1 < count($match[0]);$idx1++){
-                // 変数名　△VAR_xxxx△ を取出す   xxxx::半角英数字か__
-                $ret = preg_match_all("/(\s)GBL_[a-zA-Z0-9_]*(\s)/",$match[0][$idx1],$var_match);
-                if($ret !== false){
-                    for($idx2=0;$idx2 < count($var_match[0]);$idx2++){
-                        // playbookかtemprateの判定
-                        if($in_type == "BOOK"){
-                            //playbookの変数名を退避する
-                            $this->aryReplaceElementFromSourceString[] = trim($var_match[0][$idx2]);
-                        }
-                        else{
-                            //temprateの変数名を退避する
-                            $this->aryVarsElementFromSourceString[] = trim($var_match[0][$idx2]);
-                        }
-                    }
-                }
-            }
-        }
-    }
     function mb_str_replace($search, $replace, $haystack, $encoding="UTF-8"){
         // 検索文字列の文字数取得
         $search_len = mb_strlen($search, $encoding);
@@ -526,17 +166,26 @@ class WrappedStringReplaceAdmin{
 
 ////////////////////////////////////////////////////////////////////////
 // 概要
-//   指定された文字列から変数を抜出す。
+//   指定された文字列から変数(Fillter付)を抜出す。
 // パラメータ
 //   $in_var_heder_id:    変数名の先頭文字列　TPF_
 //   $in_strSourceString: ファイルの内容
-//   $ina_varsarray:      取得した変数配列
+//   $ina_varsLineArray:  取得した変数位置配列
 //                        $ina_varsarray[][行番号][変数名]
+//   $ina_varsarray:      取得した変数配列
+//                        $ina_varsarray[][変数名]
 // 戻り値
 //   true
 ////////////////////////////////////////////////////////////////////////
-function SimpleVerSearch($in_var_heder_id,$in_strSourceString,&$ina_varsarray){
-    $ina_varsarray = array();
+function SimpleFillterVerSearch($in_var_heder_id,$in_strSourceString,&$ina_varsLineArray,&$ina_varsArray,$arrylocalvars,$FillterVars=false){
+    $ina_varsLineArray= array();
+    $ina_varsArray= array();
+    // Fillter定義されている変数も抜出すか判定
+    if($FillterVars === true) {
+        $tailmarke = "([\s]}}|[\s]+\|)";
+    } else {
+        $tailmarke = "[\s]}}";
+    }
     // 入力データを行単位に分解
     $arry_list = explode("\n",$in_strSourceString);
     $line = 0;
@@ -560,15 +209,30 @@ function SimpleVerSearch($in_var_heder_id,$in_strSourceString,&$ina_varsarray){
             if(strlen(trim($strRemainString)) == 0){
                 continue;
             }
-            // 変数名　{{ ???_[a-zA-Z0-9_] }} を取出す
-            $ret = preg_match_all("/{{(\s)" . $in_var_heder_id . "[a-zA-Z0-9_]*(\s)}}/",$strRemainString,$var_match);
+            // 変数名　{{ ???_[a-zA-Z0-9_] | Fillter function }} を取出す
+            $ret = preg_match_all("/{{[\s]" . $in_var_heder_id . "[a-zA-Z0-9_]*" . $tailmarke . "/",$strRemainString,$var_match);
             if($ret !== false){
                 for($idx2=0;$idx2 < count($var_match[0]);$idx2++){
                     //変数名を退避する
                     $array = array();
                     $ret = preg_match_all("/" . $in_var_heder_id . "[a-zA-Z0-9_]*/",$var_match[0][$idx2],$var_name_match);
                     $array[$line] = trim($var_name_match[0][0]);
-                    $ina_varsarray[] = $array;
+                    $ina_varsLineArray[] = $array;
+                    $ina_varsArray[]     = trim($var_name_match[0][0]);
+                }
+            }
+            // 予約変数　{{ 予約変数 | Fillter function }}　の抜き出し
+            foreach($arrylocalvars as $localvarname) {
+                $ret = preg_match_all("/{{[\s]" . $localvarname . $tailmarke . "/",$strRemainString,$var_match);
+                if($ret !== false){
+                    for($idx2=0;$idx2 < count($var_match[0]);$idx2++){
+                        //変数名を退避する
+                        $array = array();
+                        $ret = preg_match_all("/" . $localvarname . "/",$var_match[0][$idx2],$var_name_match);
+                        $array[$line] = trim($var_name_match[0][0]);
+                        $ina_varsLineArray[] = $array;
+                        $ina_varsArray[]     = trim($var_name_match[0][0]);
+                    }
                 }
             }
         }

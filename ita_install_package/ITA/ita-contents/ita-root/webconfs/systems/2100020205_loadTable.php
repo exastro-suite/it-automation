@@ -234,7 +234,8 @@ Ansible(Pioneer)対話素材集
                     if( ! file_exists($TPFVarListfile)) {
                         // 共通変数を抜き出す。
                         $obj = new AnsibleCommonLibs(LC_RUN_MODE_VARFILE);
-                        $retArray = $obj->CommonVarssAanalys($tmpfilepath,$TPFVarListfile);
+                        $FillterVars  = false;  // Fillterを含む変数の抜き出しなし
+                        $retArray = $obj->CommonVarssAanalys($tmpfilepath,$TPFVarListfile,$FillterVars);
                         unset($obj);
                     }
                     $json_VarsAry = file_get_contents($TPFVarListfile);

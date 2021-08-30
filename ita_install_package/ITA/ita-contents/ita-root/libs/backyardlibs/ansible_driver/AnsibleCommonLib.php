@@ -596,12 +596,12 @@ class AnsibleCommonLibs {
     // パラメータ
     //   $inFilename:           アップロードされたデータが格納されているファイル名
     //   $outFilename:          抜き出した共通変数をJSON形式で退避するファイル名
+    //   $FillterVars:          フィルター付き変数の抜き出し有無
     //
     // 戻り値
     //   checkTempFileBeforeMoveOnPreLoadイベントと同様
     ////////////////////////////////////////////////////////////////////////////////
-    function CommonVarssAanalys($inFilename,$outFilename) {
-
+    function CommonVarssAanalys($inFilename,$outFilename,$FillterVars=false) {
         global $g;
         $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
@@ -627,30 +627,39 @@ class AnsibleCommonLibs {
         $playbookdataString = file_get_contents($inFilename);
 
         // ファイル内で定義されていたCPF変数を抜き出す
-        $vars_list = array();
+        $local_vars    = array();
+        $varsLineArray = array();
+        $varsArray     = array();
+        // インベントリ追加オプションに定義されている変数を抜き出す。
+        SimpleFillterVerSearch(DF_HOST_CPF_HED,$playbookdataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
         $cpf_vars_list = array();
-        SimpleVerSearch(DF_HOST_CPF_HED,$playbookdataString,$vars_list);
-        foreach( $vars_list as $no => $vars_info ){
+        foreach( $varsLineArray as $no => $vars_info ){
             foreach( $vars_info as $line_no  => $var_name ){
                 $cpf_vars_list['dummy']['Upload file'][$line_no][$var_name] = 0;
             }
         }
-
+        
         // ファイル内で定義されていたTPF変数を抜き出す
-        $vars_list = array();
+        $local_vars    = array();
+        $varsLineArray = array();
+        $varsArray     = array();
+        // インベントリ追加オプションに定義されている変数を抜き出す。
+        SimpleFillterVerSearch(DF_HOST_TPF_HED,$playbookdataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
         $tpf_vars_list = array();
-        SimpleVerSearch(DF_HOST_TPF_HED,$playbookdataString,$vars_list);
-        foreach( $vars_list as $no => $vars_info ){
+        foreach( $varsLineArray as $no => $vars_info ){
             foreach( $vars_info as $line_no  => $var_name ){
                 $tpf_vars_list['dummy']['Upload file'][$line_no][$var_name] = 0;
             }
         }
 
         // ファイル内で定義されていたGBL変数を抜き出す
-        $vars_list = array();
+        $local_vars    = array();
+        $varsLineArray = array();
+        $varsArray     = array();
+        // インベントリ追加オプションに定義されている変数を抜き出す。
+        SimpleFillterVerSearch(DF_HOST_GBL_HED,$playbookdataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
         $gbl_vars_list = array();
-        SimpleVerSearch(DF_HOST_GBL_HED,$playbookdataString,$vars_list);
-        foreach( $vars_list as $no => $vars_info ){
+        foreach( $varsLineArray as $no => $vars_info ){
             foreach( $vars_info as $line_no  => $var_name ){
                 $gbl_vars_list['dummy']['Upload file'][$line_no][$var_name] = 0;
             }
@@ -1162,6 +1171,98 @@ class ValAutoRegInputParameterCheck {
             break;
         }
         return $retStrBody;
+    }
+}
+class InventryFileAddOptionContlorl {
+    private $objDBCA;
+    function __construct($objDBCA){
+        $this->objDBCA     = $objDBCA;
+    }
+    function InventryFileAddOptionCheckFormat($in_string,&$out_yaml_array,&$error_line) {
+        $out_yaml_array = array();
+        $SplitVarKageName = array();
+        // インベントリファイル追加オプションをYAML形式を検査する
+        $String = $in_string;
+        $out_yaml_array = explode("\n", $String);
+        $error_line = 0;
+        foreach($out_yaml_array as $record) {
+            $error_line++;
+            $VarKageName  = trim($record);
+            if(empty($VarKageName)){ // 空文字列 正常
+                // スペースを取り除くと空の時
+                continue;
+            }
+            $ret = preg_match("/^(\S)+(\s)*:(\s)+(\S)/", $record);
+            if($ret !== 1){
+                // 式が正しくない
+                return false;
+            }
+        }
+        return true;
+    }
+    function getVariablesDefinedInDeviceList($PHOLinkTbl,&$la_InventryFileAddOptionAry) {
+
+        $la_InventryFileAddOptionAry = array();
+        
+        if($PHOLinkTbl == "B_ANSIBLE_LNS_PHO_LINK") {
+            $sqlUtnBody = "SELECT
+                             TAB_A.OPERATION_NO_UAPK,
+                             TAB_A.PATTERN_ID,
+                             TAB_A.SYSTEM_ID,
+                             TAB_B.IP_ADDRESS,
+                             TAB_B.HOSTS_EXTRA_ARGS
+                           FROM 
+                             B_ANSIBLE_LNS_PHO_LINK               TAB_A
+                             LEFT JOIN C_STM_LIST                 TAB_B ON ( TAB_A.SYSTEM_ID         = TAB_B.SYSTEM_ID )
+                             LEFT JOIN E_ANSIBLE_LNS_PATTERN      TAB_C ON ( TAB_A.PATTERN_ID        = TAB_C.PATTERN_ID )
+                             LEFT JOIN C_OPERATION_LIST           TAB_D ON ( TAB_A.OPERATION_NO_UAPK = TAB_D.OPERATION_NO_UAPK )
+                             LEFT JOIN B_ANSIBLE_LNS_PATTERN_LINK TAB_E ON ( TAB_A.PATTERN_ID         = TAB_E.PATTERN_ID )
+                             LEFT JOIN B_ANSIBLE_LNS_PLAYBOOK     TAB_F ON ( TAB_E.PLAYBOOK_MATTER_ID = TAB_F.PLAYBOOK_MATTER_ID )
+                           WHERE
+                             TAB_A.DISUSE_FLAG = '0' AND
+                             TAB_B.DISUSE_FLAG = '0' AND
+                             TAB_C.DISUSE_FLAG = '0' AND
+                             TAB_D.DISUSE_FLAG = '0' AND
+                             TAB_E.DISUSE_FLAG = '0' AND
+                             TAB_F.DISUSE_FLAG = '0'";
+        } else {
+            $sqlUtnBody = "SELECT
+                             TAB_A.OPERATION_NO_UAPK,
+                             TAB_A.PATTERN_ID,
+                             TAB_A.SYSTEM_ID,
+                             TAB_B.IP_ADDRESS,
+                             TAB_B.HOSTS_EXTRA_ARGS,
+                             TAB_E.ROLE_PACKAGE_ID,
+                             TAB_F.ROLE_PACKAGE_NAME
+                           FROM
+                             B_ANSIBLE_LRL_PHO_LINK                 TAB_A
+                             LEFT JOIN C_STM_LIST                   TAB_B ON ( TAB_A.SYSTEM_ID         = TAB_B.SYSTEM_ID )
+                             LEFT JOIN E_ANSIBLE_LRL_PATTERN        TAB_C ON ( TAB_A.PATTERN_ID        = TAB_C.PATTERN_ID )
+                             LEFT JOIN C_OPERATION_LIST             TAB_D ON ( TAB_A.OPERATION_NO_UAPK = TAB_D.OPERATION_NO_UAPK )
+                             LEFT JOIN B_ANSIBLE_LRL_PATTERN_LINK   TAB_E ON ( TAB_A.PATTERN_ID        = TAB_E.PATTERN_ID )
+                             LEFT JOIN B_ANSIBLE_LRL_ROLE_PACKAGE   TAB_F ON ( TAB_E.ROLE_PACKAGE_ID   = TAB_F.ROLE_PACKAGE_ID )
+                           WHERE
+                             TAB_A.DISUSE_FLAG = '0' AND
+                             TAB_B.DISUSE_FLAG = '0' AND
+                             TAB_C.DISUSE_FLAG = '0' AND
+                             TAB_D.DISUSE_FLAG = '0' AND
+                             TAB_E.DISUSE_FLAG = '0' AND
+                             TAB_F.DISUSE_FLAG = '0'";
+        }
+
+        $objQueryUtn = $this->objDBCA->sqlPrepare($sqlUtnBody);
+        if( $objQueryUtn->getStatus()===false ){
+            return $objQueryUtn->getLastError();
+        }
+        $r = $objQueryUtn->sqlExecute();
+        if (!$r){
+            return $objQueryUtn->getLastError();
+        }
+        while ( $row = $objQueryUtn->resultFetch() ){
+            $la_InventryFileAddOptionAry[] = $row;
+        }
+        unset($objQueryUtn);
+        return true;
     }
 }
     function getMasterAccessAuth(&$lva_OpeAccessAuth_list,&$lva_HostAccessAuth_list,&$lva_PatternAccessAuth_list) {
