@@ -1018,7 +1018,6 @@ LocalLogPrint(basename(__FILE__),__LINE__,"変数マスタ 更新($strSqlType)\n
                     // 異常フラグON  例外処理へ
                     $error_flag = 1;
                     throw new Exception($FREE_LOG);
-                    return false;
                 }
             }
 
