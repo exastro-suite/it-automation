@@ -697,7 +697,7 @@ class CheckAnsibleRoleFiles {
                                               $ina_system_vars);
                    break;
                case "meta":
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false,  false, true, true, false, true,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  false, true, true, false, true,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
@@ -1021,24 +1021,13 @@ class CheckAnsibleRoleFiles {
 
                 // ホスト変数の抜出が指定されている場合
                 if($in_get_rolevar === true){
-                    if($in_dirname == "templates"){
-                        // テンプレートからグローバル変数を抜出す
-                        $local_vars = array();
-                        $varsLineArray = array();
-                        $file_global_vars_list = array();
-                        $FillterVars   = true;  // Fillterを含む変数の抜き出しあり
-                        SimpleFillterVerSearch(DF_HOST_GBL_HED,$dataString,$varsLineArray,$file_global_vars_list,$local_vars,$FillterVars);
+                    // テンプレートからグローバル変数を抜出す
+                    $local_vars = array();
+                    $varsLineArray = array();
+                    $file_global_vars_list = array();
+                    $FillterVars   = true;  // Fillterを含む変数の抜き出しあり
+                    SimpleFillterVerSearch(DF_HOST_GBL_HED,$dataString,$varsLineArray,$file_global_vars_list,$local_vars,$FillterVars);
 
-                    }
-                    else{
-                        // テンプレート以外からグローバル変数を抜出す
-                        $local_vars = array();
-                        $varsLineArray = array();
-                        $file_global_vars_list = array();
-                        $FillterVars   = true;  // Fillterを含む変数の抜き出しあり
-                        SimpleFillterVerSearch(DF_HOST_GBL_HED,$dataString,$varsLineArray,$file_global_vars_list,$local_vars,$FillterVars);
-
-                    }
                     // ファイル内で定義されていた変数を退避
                     if(count($file_vars_list) > 0){
                          foreach ($file_vars_list as $var){
