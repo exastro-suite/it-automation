@@ -560,8 +560,6 @@ class Column extends ColumnGroup {
 
 	protected $allowUploadColmnSendRestApi;    // as boolean FileUploadColumnクラスのRestAPIからの送信を許すか
 
-	protected $defaultValue; // 入力欄の初期値
-
 	//----ここから継承メソッドの上書き処理
 
 	function __construct($strColId, $strColLabel){
@@ -642,8 +640,6 @@ class Column extends ColumnGroup {
         $this->allowUploadColmnSendRestApi = false;
 
 		$this->setRequiredMark(false);
-
-		$this->defaultValue = "";
 	}
 
 	//----オブジェクト間・値連絡系
@@ -1820,14 +1816,9 @@ class Column extends ColumnGroup {
 	//NEW[96]
 	function setDefaultValue($strFormatterId, $value){
 		//inputタグ系のデフォルト値を設定する
-		$this->defaultValue = $value;
 		$this->getOutputType($strFormatterId)->setDefaultInputValue($value);
 	}
 
-	//NEW[96-2]
-	function getDefaultValue(){
-		return $this->defaultValue;
-	}
 	//NEW[97]
 	function setEvent($type, $eventName, $jsFunctionName, $jsFunctionArgs=array()){
 		$this->getOutputType($type)->setJsEvent($eventName, $jsFunctionName, $jsFunctionArgs);
