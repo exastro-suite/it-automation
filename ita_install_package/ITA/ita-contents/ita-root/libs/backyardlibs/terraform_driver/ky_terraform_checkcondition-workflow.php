@@ -929,6 +929,162 @@
                             //ファイルに中身を追記
                             file_put_contents($state_file, ky_encrypt($state_file_content), FILE_APPEND);
 
+                            // Conductorからの実行ならOutputsの出力ファイルを作成
+                            //----------------------------------------------
+                            // Conductorからの実行か判定
+                            //----------------------------------------------
+                            //SQL作成
+                            $sql = "SELECT CONDUCTOR_INSTANCE_NO
+                                    FROM   C_TERRAFORM_EXE_INS_MNG
+                                    WHERE  DISUSE_FLAG = '0'
+                                    AND    I_TERRAFORM_RUN_ID = :I_TERRAFORM_RUN_ID
+                                    AND    CONDUCTOR_INSTANCE_NO IS NOT NULL";
+
+                            //SQL準備
+                            $objQuery = $objDBCA->sqlPrepare($sql);
+                            if( $objQuery->getStatus()===false ){
+                                // 異常フラグON
+                                $error_flag = 1;
+                                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000100")) );
+                            }
+
+                            $bindArray = array(
+                                "I_TERRAFORM_RUN_ID" => $target_run_id
+                            );
+
+                            //SQL発行
+                            $r = $objQuery->sqlBind($bindArray);
+                            $r = $objQuery->sqlExecute();
+                            if (!$r){
+                                // 異常フラグON
+                                $error_flag = 1;
+                                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000200")) );
+                            }
+
+                            //呼び出し元ConductorのインスタンスNoを取得
+                            while ( $row = $objQuery->resultFetch() ){
+                                $conductor_instance_no = $row["CONDUCTOR_INSTANCE_NO"];
+                            }
+                            //FETCH行数を取得
+                            $num_of_rows = $objQuery->effectedRowCount();
+
+                            // Conductorから呼び出されていた場合
+                            if ($num_of_rows > 0) {
+
+                                //取得したStateの一覧をループし、RUN-IDが一致する対象を取得
+                                $target_run_id = "";
+                                $state_download_url = "";
+                                $state_file_content = "";
+                                $cnt = 0;
+                                $tgt_cnt = "";
+                                foreach($responsContents['data'] as $data){
+                                    $target_run_id = $data['relationships']['run']['data']['id'];
+                                    if($tfe_run_id == $target_run_id){
+                                        $state_download_url = $tfe_apply_log_read_url;
+                                        $state_id = $data['id'];
+                                        $tgt_cnt = $cnt;
+                                        break;
+                                    }
+                                    $cnt = $cnt + 1;
+                                }
+
+                                if ($state_download_url == "") {
+                                    //stateファイルの取得に失敗。(作業No:{} FILE:{} LINE:{})
+                                    $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-121050",array($tgt_execution_no, __FILE__ , __LINE__));
+                                    require ($root_dir_path . $log_output_php );
+                                    $warning_flag = 1;
+                                    LocalLogPrint($error_log, $FREE_LOG);
+                                } else {
+                                    // outpurtsの中身
+                                    $outputs = $responsContents['data'][$tgt_cnt]["relationships"]["outputs"]["data"];
+                                    // 出力予定の配列
+                                    $outputs_data = array();
+                                    // outputsの内容の有無を確認
+                                    if (count($outputs) > 0) {
+                                        foreach ($outputs as $output) {
+                                            $state_version_output_id = $output["id"];
+                                            // -------------------------------
+                                            $statusCode = 0;
+                                            $count = 0;
+                                            while ($statusCode != 200 && $count < $apiRetryCount){
+                                                $outputsApiResponse = get_outputs($lv_terraform_hostname, $lv_terraform_token, $state_version_output_id ,$proxy_setting);
+                                                $statusCode = $outputsApiResponse['StatusCode'];
+                                                if($statusCode == 200){
+                                                    //返却StatusCodeが正常なので終了
+                                                    break;
+                                                }else{
+                                                    //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                                                    sleep(3);
+                                                    $count++;
+                                                }
+                                            }
+                                            //API結果を判定
+                                            if($statusCode != 200){
+                                                //error_logにメッセージを追記
+                                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142012"); //[API Error]stateバージョン情報の取得に失敗しました。
+                                                LocalLogPrint($error_log, $message);
+
+                                                // 異常フラグON
+                                                $error_flag = 1;
+                                                // 例外処理へ
+                                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142013",array(__FILE__,__LINE__,$statusCode));
+                                                throw new Exception( $backyard_log );
+                                            }
+                                            $outputs_name = $outputsApiResponse["ResponsContents"]["data"]["attributes"]["name"];
+                                            $outputs_value = $outputsApiResponse["ResponsContents"]["data"]["attributes"]["value"];
+                                            $outputs_data[$outputs_name] = $outputs_value;
+                                        }
+                                        if (!empty($outputs_data)) {
+                                            //----------------------------------------------
+                                            // データリレイストレージパスの取得
+                                            //----------------------------------------------
+                                            //SQL作成
+                                            $sql = "SELECT CONDUCTOR_STORAGE_PATH_ITA
+                                                    FROM   C_CONDUCTOR_IF_INFO
+                                                    WHERE  DISUSE_FLAG = '0'";
+
+                                            //SQL準備
+                                            $objQuery = $objDBCA->sqlPrepare($sql);
+                                            if( $objQuery->getStatus()===false ){
+                                                // 異常フラグON
+                                                $error_flag = 1;
+                                                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                                                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000100")) );
+                                            }
+
+                                            //SQL発行
+                                            $r = $objQuery->sqlExecute();
+                                            if (!$r){
+                                                // 異常フラグON
+                                                $error_flag = 1;
+                                                // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
+                                                throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000200")) );
+                                            }
+
+                                            //呼び出し元ConductorのインスタンスNoを取得
+                                            while ( $row = $objQuery->resultFetch() ){
+                                                $conductor_storage_path = $row["CONDUCTOR_STORAGE_PATH_ITA"];
+                                            }
+                                            // ConductorインスタンスNoを文字列化
+                                            $str_conductor_instance_no = sprintf("%010d",$conductor_instance_no);
+                                            // 実行Noを文字列化
+                                            $str_tgt_execution_no = sprintf("%010d",$tgt_execution_no);
+                                            // outputをjson化
+                                            $json = json_encode($outputs_data, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+                                            if(json_last_error() !== JSON_ERROR_NONE){
+                                                // エラーメッセージをエラーログに出力
+                                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-142014",array(json_last_error()));
+                                                //error_logにメッセージを追記
+                                                LocalLogPrint($error_log, $message);
+                                            } else {
+                                                file_put_contents("$conductor_storage_path/$str_conductor_instance_no/terraform_output_$str_tgt_execution_no.json", $json);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }else{
                             //stateファイルの取得に失敗。(作業No:{} FILE:{} LINE:{})
                             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-121050",array($tgt_execution_no, __FILE__ , __LINE__));
@@ -1493,6 +1649,7 @@
             fclose($filepointer);
         }
     }
+
 
 
 
