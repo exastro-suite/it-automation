@@ -21,8 +21,16 @@
     //////////////////////////////////////////////////////////////////////
 
     require_once( dirname(__FILE__) ."/80_menu_export_execution.php" );
-
-    $aryForResultData = menuExportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
-
-
+    if( $strCommand == "EXECUTE" && is_array($objJSONOfReceptedData) !== true ){
+      $intResultStatusCode = 400;
+      $arrayRetBody = $g['requestByREST']['preResponsContents']['errorInfo'];
+      $arrayRetBody['Error'] = array();
+      $arrayRetBody['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+      $arrayRetBody['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+      $aryForResultData[0] = array('ResultStatusCode'=>$intResultStatusCode,
+                                   'ResultData'=>$arrayRetBody);
+      $aryForResultData[1] = null;
+    }else{
+      $aryForResultData = menuExportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
+    }
 ?>

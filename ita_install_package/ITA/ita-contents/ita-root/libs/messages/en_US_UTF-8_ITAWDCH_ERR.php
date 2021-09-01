@@ -143,6 +143,7 @@ $ary["ITAWDCH-ERR-313"]             = "You have exceeded the maximum number of d
 $ary["ITAWDCH-ERR-314"]             = "Update record not found.";
 $ary["ITAWDCH-ERR-315"]             = "There are multiple records to be updated.";
 $ary["ITAWDCH-ERR-316"]             = "This record cannot be updated because the access permission role of the record to be updated and the access permission role of the logged-in user do not match.";
+$ary["ITAWDCH-ERR-317"]             = "The JSON format of the content parameter is invalid.";
 $ary["ITAWDCH-ERR-349"]             = "WARNING:DETAIL:(FILE UPLOAD FOR COLUMN. MENU:[{}] ERROR:[{}] PARAM1:[{}]) UPLOAD ERROR. ";
 $ary["ITAWDCH-ERR-367"]             = "WARNING:DETAIL:(MAKE ADD SELECT TAG MENU:[{}] ERROR:[{}]) PROCESS ERROR. ";
 $ary["ITAWDCH-ERR-373"]             = "WARNING:DETAIL:(MAKE FILTER　SETTING TABLE TAG MENU:[{}] ERROR:[{}]) PROCESS ERROR. ";
