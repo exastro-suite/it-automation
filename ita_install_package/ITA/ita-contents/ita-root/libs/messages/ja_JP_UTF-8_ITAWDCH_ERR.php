@@ -143,6 +143,7 @@ $ary["ITAWDCH-ERR-313"]             = "Excel形式でのダウンロード上限
 $ary["ITAWDCH-ERR-314"]             = "更新対象のレコードを特定出来ません。";
 $ary["ITAWDCH-ERR-315"]             = "更新対象のレコードが複数あります。";
 $ary["ITAWDCH-ERR-316"]             = "更新対象のレコードのアクセス許可ロールとログインユーザーのアクセス許可ロールが適合していないので,このレコードは更新出来ません。";
+$ary["ITAWDCH-ERR-317"]             = "contentパラメータのJSONの形式が不正です。";
 $ary["ITAWDCH-ERR-349"]             = "WARNING:DETAIL:(FILE UPLOAD FOR COLUMN. MENU:[{}] ERROR:[{}] PARAM1:[{}]) UPLOAD ERROR. ";
 $ary["ITAWDCH-ERR-367"]             = "WARNING:DETAIL:(MAKE ADD SELECT TAG MENU:[{}] ERROR:[{}]) PROCESS ERROR. ";
 $ary["ITAWDCH-ERR-373"]             = "WARNING:DETAIL:(MAKE FILTER　SETTING TABLE TAG MENU:[{}] ERROR:[{}]) PROCESS ERROR. ";

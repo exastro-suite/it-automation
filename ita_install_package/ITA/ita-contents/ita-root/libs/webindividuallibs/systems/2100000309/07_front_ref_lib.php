@@ -21,6 +21,21 @@
     //////////////////////////////////////////////////////////////////////
     
     require_once( dirname(__FILE__) ."/81_symphony_ins_control.php" );
+    if($strCommand == "CANCEL" || $strCommand == "SCRAM"){
+      if( is_array($objJSONOfReceptedData) !== true ){
+        $intResultStatusCode = 400;
+        $arrayRetBody = $g['requestByREST']['preResponsContents']['errorInfo'];
+        $arrayRetBody['Error'] = array();
+        $arrayRetBody['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+        $arrayRetBody['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+        $aryForResultData[0] = array('ResultStatusCode'=>$intResultStatusCode,
+                                     'ResultData'=>$arrayRetBody);
+        $aryForResultData[1] = null;
+      }else{
+        $aryForResultData = symphonyInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
+      }
+    }else{
+      $aryForResultData = symphonyInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
+    }
     
-    $aryForResultData = symphonyInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
 ?>
