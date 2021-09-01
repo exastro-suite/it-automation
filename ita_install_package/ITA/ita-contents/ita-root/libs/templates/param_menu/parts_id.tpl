@@ -16,3 +16,4 @@
     $objOT->setTraceQuery($aryTraceQuery);
     $c★★★NUMBER★★★->setOutputType('print_journal_table',$objOT);
     $c★★★NUMBER★★★->setDateFormat(★★★DATE_FORMAT★★★);
+    $c★★★NUMBER★★★->setDefaultValue('register_table', '★★★DEFAULT_VALUE★★★');

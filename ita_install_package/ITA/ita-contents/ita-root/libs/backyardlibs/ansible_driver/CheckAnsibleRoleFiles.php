@@ -303,7 +303,7 @@ class CheckAnsibleRoleFiles {
         $this->lva_rolename = array();
 
         // role変数名一覧 初期化
-        $this->llva_varname = array();
+        $this->lva_varname = array();
 
         // roleグローバル変数名一覧
         $this->lva_globalvarname = array();
@@ -697,7 +697,7 @@ class CheckAnsibleRoleFiles {
                                               $ina_system_vars);
                    break;
                case "meta":
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false,  false, true, true, false, true,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  false, true, true, false, true,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
@@ -1021,34 +1021,13 @@ class CheckAnsibleRoleFiles {
 
                 // ホスト変数の抜出が指定されている場合
                 if($in_get_rolevar === true){
-                    if($in_dirname == "templates"){
-                        // テンプレートから変数を抜出す
-                        $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$ina_system_vars); 
-                        $file_vars_list = $objWSRA->getTPFVARSParsedResult();
-                        unset($objWSRA);
+                    // テンプレートからグローバル変数を抜出す
+                    $local_vars = array();
+                    $varsLineArray = array();
+                    $file_global_vars_list = array();
+                    $FillterVars   = true;  // Fillterを含む変数の抜き出しあり
+                    SimpleFillterVerSearch(DF_HOST_GBL_HED,$dataString,$varsLineArray,$file_global_vars_list,$local_vars,$FillterVars);
 
-                        // テンプレートからグローバル変数を抜出す
-                        $system_vars = array();
-                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_TEMP_GBL_HED ,$dataString,$system_vars); 
-                        $file_global_vars_list = $objWSRA->getTPFVARSParsedResult();
-                        unset($objWSRA);
-
-                    }
-                    else{
-                        // テンプレート以外から変数を抜出す
-                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$ina_system_vars); 
-                        $aryResultParse = $objWSRA->getParsedResult();
-                        $file_vars_list = $aryResultParse[1];
-                        unset($objWSRA);
-
-                        // テンプレート以外からグローバル変数を抜出す
-                        $system_vars = array();
-                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_GBL_HED,$dataString,$system_vars); 
-                        $aryResultParse = $objWSRA->getParsedResult();
-                        $file_global_vars_list = $aryResultParse[1];
-                        unset($objWSRA);
-
-                    }
                     // ファイル内で定義されていた変数を退避
                     if(count($file_vars_list) > 0){
                          foreach ($file_vars_list as $var){
@@ -1066,8 +1045,12 @@ class CheckAnsibleRoleFiles {
                 if($in_get_var_tgt_dir === true) {
                     $tgt_file = $in_rolename . "/" . $in_dirname . "/" . $file;
                     if($in_get_copyvar === true) {
-                        $la_cpf_vars = array();
-                        SimpleVerSearch(DF_HOST_CPF_HED,$dataString,$la_cpf_vars);
+                        $local_vars    = array();
+                        $la_cpf_vars   = array();
+                        $varsArray     = array();
+                        $FillterVars       = true;  // Fillterを含む変数の抜き出しあり
+                        SimpleFillterVerSearch(DF_HOST_CPF_HED,$dataString,$la_cpf_vars,$varsArray,$local_vars,$FillterVars);
+
                         // ファイル内で定義されていたCPF変数を退避
                         if(count($la_cpf_vars) > 0){
                             foreach( $la_cpf_vars as $no => $cpf_var_list ){
@@ -1078,8 +1061,12 @@ class CheckAnsibleRoleFiles {
                         }
                     }
                     if($in_get_tpfvar === true) {
-                        $la_tpf_vars = array();
-                        SimpleVerSearch(DF_HOST_TPF_HED,$dataString,$la_tpf_vars);
+                        $local_vars    = array();
+                        $la_tpf_vars   = array();
+                        $varsArray     = array();
+                        $FillterVars       = true;  // Fillterを含む変数の抜き出しあり
+                        SimpleFillterVerSearch(DF_HOST_TPF_HED,$dataString,$la_tpf_vars,$varsArray,$local_vars,$FillterVars);
+
                         // ファイル内で定義されていたCPF変数を退避
                         if(count($la_tpf_vars) > 0){
                             foreach( $la_tpf_vars as $no => $tpf_var_list ){
@@ -2853,7 +2840,7 @@ class DefaultVarsFileAnalysis{
          }
          foreach($ina_play_global_vars_list as $role_name=>$vars_list){
              foreach($vars_list as $vars_name=>$dummy){
-                 if(@count($ina_global_vars_list[$vars_name])===0){
+                 if(array_key_exists($vars_name,$ina_global_vars_list) === false){
                      $in_errmsg = $in_errmsg . "\n" . $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90242",
                                                                             array($role_name,$vars_name));
                      $ret_code  = false;

@@ -405,7 +405,7 @@
     // P0005-1　全ロールパッケージファイルで読替変数と任意変数の組合せが一致しないものをリストアップ
     // P0005-2　全ロールパッケージファイルで定義変数で変数の構造が違うものをリストアップ
     // P0006　ロールパッケージファイル ロール名リストのロール名をロール管理に反映
-    // P0007　ロール内のPlaybookで使用している変数名をロール変数管理に反映
+    // P0007　ロール内定義している変数名をロール変数管理に反映
     // P0008　デフォルト変数定義ファイルのみに定義されている変数をロール変数名をロール変数管理に反映
     // P0009　デフォルト変数定義ファイルのみに定義されている多次元変数をロール変数名をロール変数管理に反映
     // P0010　ロール管理に登録されているロールでロールパッケージファイルで使用していないロールを廃止する。
@@ -501,6 +501,14 @@
     $ansible_nestedVariableExpanders_php = '/libs/backyardlibs/ansible_driver/ansible_nestedVariableExpander.php';   
 
     $db_access_user_id   = -100013;
+
+    //----機器一覧テーブル関連
+    $strSeqOfCurDeviceList = "C_STM_LIST_RIC";
+    $strSeqOfJnlDeviceList = "C_STM_LIST_JSQ";
+
+    //----作業対象ホストテーブル関連
+    $strSeqOfCurPHOLink    = "B_ANSIBLE_LNS_PHO_LINK_RIC";
+    $strSeqOfJnlPHOLink    = "B_ANSIBLE_LNS_PHO_LINK_JSQ";
 
     //----変数名テーブル関連
     $strCurTableAnsVarsTable = "B_ANSIBLE_LRL_VARS_MASTER";
@@ -1030,7 +1038,11 @@
             $strSeqOfCurTableMemberColComb,
             $strSeqOfJnlTableMemberColComb,
             $strSeqOfCurTableRpRepVar,
-            $strSeqOfJnlTableRpRepVar
+            $strSeqOfJnlTableRpRepVar,
+            $strSeqOfCurDeviceList,
+            $strSeqOfJnlDeviceList,
+            $strSeqOfCurPHOLink,
+            $strSeqOfJnlPHOLink,
         );
         // キーと値の関係を維持しつつ、値を基準に、昇順で並べ替える
         asort($aryTgtOfSequenceLock);
@@ -1313,6 +1325,28 @@ if ( $log_level === 'DEBUG' ){
         unset($Obj);
 
         ///////////////////////////////////////////////////////////////////////////
+        // P0005-3
+        // 機器一覧のインベントリファイル追加パラメータに登録されている変数で
+        // ロールパッケージファイルに定義されていない変数を抽出し、
+        // ロールパッケージファイルに定義されている変数リストにマージする
+        ///////////////////////////////////////////////////////////////////////////
+        $defvarsList = array();
+        // ロールパッケージファイルに定義されていない変数を抽出
+        $ret = makeVariableDefineList($ifa_role_def_var_list,$ifa_role_array_vars_list,$defvarsList);
+
+        // 機器一覧のインベントリファイル追加パラメータに登録されている変数を抽出
+        $lva_InventryFileAddOption_vars_list = array();
+        $ret = getVariablesDefinedInDeviceList($lva_InventryFileAddOption_vars_list);
+        if($ret !== true) {
+            // 異常フラグON  例外処理へ
+            $error_flag = 1;
+            throw new Exception( $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(basename(__FILE__),__LINE__,"00001010")) );
+        }
+
+        // ロールパッケージファイルに定義されている変数リストにマージする
+        $ret = addInventryFileAddOptionVariablesDefine($lva_InventryFileAddOption_vars_list,$ifa_role_name_list,$defvarsList,$ifa_role_def_var_list,$ifa_role_array_vars_list);
+
+        ///////////////////////////////////////////////////////////////////////////
         // P0006
         // ロールパッケージファイル ロール名リストのロール名をロール管理に反映
         ///////////////////////////////////////////////////////////////////////////
@@ -1367,7 +1401,9 @@ if ( $log_level === 'DEBUG' ){
 
         //////////////////////////////////////////////////////////////////////////////////
         // P0007
-        // ロール内のPlaybookで使用している変数名をロール変数管理に反映
+        // ロール内定義している変数名をロール変数管理に反映
+        // Movement詳細でのロール紐付けとは関係なく、単純にロール内で定義されている変数
+        // をロール変数管理に登録
         //////////////////////////////////////////////////////////////////////////////////
         // T0016 現在未使用
         $aryChildVarNameFromFiles          = array();
@@ -3100,10 +3136,7 @@ if ( $log_level === 'DEBUG' ){
                         // DEBUGログに変更
                         if ( $log_level === 'DEBUG' ){
 // 更新ログ
-ob_start();
-var_dump($arrayValue);
-$msgstr = ob_get_contents();
-ob_clean();
+$msgstr = var_export($arrayValue,true);
 LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マスタ  更新($strSqlType)\n$msgstr");
                         }
                         setDBUpdateflg();
@@ -3284,10 +3317,7 @@ LocalLogPrint(basename(__FILE__),__LINE__,$objMTS->getSomeMessage("ITAANSIBLEH-S
                 // DEBUGログに変更
                 if ( $log_level === 'DEBUG' ){
 // 更新ログ
-ob_start();
-var_dump($arrayValue);
-$msgstr = ob_get_contents();
-ob_clean();
+$msgstr = var_export($arrayValue,true);
 LocalLogPrint(basename(__FILE__),__LINE__,"作業パターン変数紐付マスタ  廃止($strSqlType)\n$msgstr");
                 }
                 setDBUpdateflg();
@@ -6551,5 +6581,98 @@ LocalLogPrint(basename(__FILE__),__LINE__,$objMTS->getSomeMessage("ITAANSIBLEH-E
         $beforeTime  = $unixtime;
         LocalLogPrint("","","$strtime,$difftime," . $logdata);
         return array($strtime,$unixtime);
+    }
+    function getVariablesDefinedInDeviceList(&$lva_InventryFileAddOption_vars_list) {
+        global $objDBCA;
+        global $objMTS;
+        global $log_level;
+
+        $InventryFileAddOptionStrAry                  = array();
+        /////////////////////////////////////////////////////////////////////////
+        // 機器一覧のインベントリ追加オプションに定義されている変数を抜き出す。
+        /////////////////////////////////////////////////////////////////////////
+        $obj = new InventryFileAddOptionContlorl($objDBCA);
+        $lva_InventryFileAddOption_vars_list = array();
+        $ret = $obj->getVariablesDefinedInDeviceList("B_ANSIBLE_LRL_PHO_LINK",$InventryFileAddOptionStrAry);
+        if($ret !== true) {
+            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
+            $FREE_LOG .= sprintf("\n%s",$ret);
+            LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+            return false;
+        }
+        foreach($InventryFileAddOptionStrAry as $DeviceListRow) {
+            $InventryFileAddOptionStr = $DeviceListRow['HOSTS_EXTRA_ARGS'];
+            $role_package_id          = $DeviceListRow['ROLE_PACKAGE_ID'];
+            $host_name                = $DeviceListRow['IP_ADDRESS'];
+
+            $out_yaml_array = "";
+            $error_line     = "";
+            $ret = $obj->InventryFileAddOptionCheckFormat($InventryFileAddOptionStr,$out_yaml_array,$error_line);
+            if($ret === false) {
+                if ( $log_level === 'DEBUG' ){
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000076",array($host_name,$error_line));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                    return false;
+                }
+            }
+            $local_vars = array();
+            $varsLineArray = array();
+            $varsArray     = array();
+            $FillterVars       = true;  // Fillterを含む変数の抜き出しあり
+            // インベントリ追加オプションに定義されている変数を抜き出す。
+            SimpleFillterVerSearch(DF_HOST_VAR_HED,$InventryFileAddOptionStr,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+            foreach($varsArray as $var_name) {
+                $lva_InventryFileAddOption_vars_list[$role_package_id][$var_name] = 0;
+            }
+
+       }
+       return true;
+    }
+    function makeVariableDefineList($ifa_role_def_var_list,$ifa_role_array_vars_list,&$defvarsList) {
+        $defvarsList = array();
+        foreach($ifa_role_def_var_list as $role_package_id=>$role_name_list){
+            foreach($role_name_list as $role_name=>$role_vars_name_list){
+                foreach($role_vars_name_list as $role_vars_name=>$dummy){
+                    $defvarsList[$role_vars_name] = $dummy;
+                }
+            }
+        }
+        foreach($ifa_role_array_vars_list as $role_package_id=>$role_name_list){
+            foreach($role_name_list as $role_name=>$var_list){
+                foreach($var_list as $role_vars_name=>$info_list){
+                    $defvarsList[$role_vars_name] = $info_list;
+                }
+            }
+        }
+        return true;
+    }
+    function addInventryFileAddOptionVariablesDefine($lva_InventryFileAddOption_vars_list,$ifa_role_name_list,$defvarsList,&$ifa_role_def_var_list,&$ifa_role_array_vars_list) {
+        global $objDBCA;
+        global $objMTS;
+        global $log_level;
+        foreach($lva_InventryFileAddOption_vars_list as $role_package_id=>$add_var_name_list) {
+            if( ! array_key_exists($role_package_id,$ifa_role_name_list)) {
+                if ( $log_level === 'DEBUG' ){
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55286",array($role_package_id,print_r($add_var_name_list,true)));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                    continue;
+                }
+            }
+            foreach($add_var_name_list as $add_var_name=>$dummy) {
+                if(array_key_exists($add_var_name,$defvarsList)) {
+                    $add_var_type = $defvarsList[$add_var_name];
+                } else {
+                    $add_var_type = 0;
+                }
+                foreach($ifa_role_name_list[$role_package_id] as $role_name) {
+                    if(is_array( $add_var_type)) {
+                        $ifa_role_array_vars_list[$role_package_id][$role_name][$add_var_name] = $add_var_type;
+                    } else {
+                        $ifa_role_def_var_list[$role_package_id][$role_name][$add_var_name] = $add_var_type;
+                    }
+                }
+            }
+        }
+        return true;
     }
 ?>

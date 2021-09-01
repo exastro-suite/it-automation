@@ -129,6 +129,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new PregMatchValidator(0,8192));
     $cg->addColumn($c);
 
+    // 文字列(単一行)/初期値
+    $c = new TextColumn('SINGLE_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102152"));//エクセル・ヘッダでの説明
+    $c->setValidator(new SingleDefaultValueValidator(0,8192));
+    $cg->addColumn($c);
+
     $table->addColumn($cg);
 
     // 文字列(複数行)
@@ -150,6 +156,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new PregMatchValidator(0,8192));
     $cg->addColumn($c);
 
+    // 文字列(複数行)/初期値
+    $c = new MultiTextColumn('MULTI_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102152"));//エクセル・ヘッダでの説明
+    $c->setValidator(new MultiDefaultValueValidator(0,8192));
+    $cg->addColumn($c);
+
     $table->addColumn($cg);
     
     // 整数
@@ -169,6 +181,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102131"));
     $c->setValidator($objVldt);
     $c->setSubtotalFlag(false);
+    $cg->addColumn($c);
+
+    // 整数/初期値
+    $c = new NumColumn('INT_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102153"));//エクセル・ヘッダでの説明
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new IntDefaultValueValidator(null, null));
     $cg->addColumn($c);
 
     $table->addColumn($cg);
@@ -200,14 +219,52 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
+    // 小数/初期値
+    $c = new NumColumn('FLOAT_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"),14);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102154"));//エクセル・ヘッダでの説明
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new FloatDefaultValueValidator(-99999999999999,99999999999999,14));
+    $cg->addColumn($c);
+
     $table->addColumn($cg);
-    
+
+
+    // 日時
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102149"));
+
+    // 日時/初期値
+    $c = new DateTimeColumn('DATETIME_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102155"));//エクセル・ヘッダでの説明
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
+
+    // 日付
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102150"));
+
+    // 日付/初期値
+    $c = new DateColumn('DATE_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102155"));//エクセル・ヘッダでの説明
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
+
+
     // プルダウン選択
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102126"));
 
     // プルダウン選択/メニューグループ：メニュー：項目
     $c = new IDColumn('OTHER_MENU_LINK_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102123"),'G_OTHER_MENU_LINK','LINK_ID','LINK_PULLDOWN','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102124"));//エクセル・ヘッダでの説明
+    $cg->addColumn($c);
+
+    // プルダウン選択/初期値
+    $objVldt = new IntNumValidator(null,null);
+    $c = new NumColumn('PULLDOWN_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102156"));//エクセル・ヘッダでの説明
+    $c->setValidator($objVldt);
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new PulldownDefaultValueValidator());
     $cg->addColumn($c);
 
     // 参照項目
@@ -261,6 +318,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new IntNumValidator(1,8192));
     $cg->addColumn($c);
 
+    // リンク/初期値
+    $c = new TextColumn('LINK_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102157"));//エクセル・ヘッダでの説明
+    $c->setValidator(new SingleDefaultValueValidator(0,8192));
+    $cg->addColumn($c);
 
     $table->addColumn($cg);
 

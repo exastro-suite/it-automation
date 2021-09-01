@@ -1281,5 +1281,28 @@
 
     }
 
+    ///////////////////////////////
+    // outputsを取得する//
+    ///////////////////////////////
+    function get_outputs($hostname, $token, $state_version_output_id, $proxySetting){
+        //requestURI
+        $requestURI = "api/v2/state-version-outputs/$state_version_output_id";
+        //method
+        $method = "GET";
+
+        //restApiResponse
+        $restApiResponse = terraform_restapi_access(
+            $hostname, //hostname
+            $token, //token
+            $requestURI, //requestURI
+            $method, //method
+            null, //requestContents
+            $proxySetting //proxySetting
+        );
+
+        return $restApiResponse;
+
+    }
+
 
 ?>

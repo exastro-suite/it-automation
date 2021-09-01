@@ -1818,6 +1818,7 @@ class Column extends ColumnGroup {
 		//inputタグ系のデフォルト値を設定する
 		$this->getOutputType($strFormatterId)->setDefaultInputValue($value);
 	}
+
 	//NEW[97]
 	function setEvent($type, $eventName, $jsFunctionName, $jsFunctionArgs=array()){
 		$this->getOutputType($type)->setJsEvent($eventName, $jsFunctionName, $jsFunctionArgs);
