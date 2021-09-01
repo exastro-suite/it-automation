@@ -68,6 +68,16 @@
                     throw new Exception();
                 }
 
+                // リピート数のチェック
+                if($menuData['menu']['VERTICAL'] == 1 && array_key_exists('r1',$menuData['repeat'])){
+                    if($menuData['repeat']['r1']['REPEAT_CNT'] < 2 || $menuData['repeat']['r1']['REPEAT_CNT'] > 99) {
+                        $arrayResult[0] = "002";
+                        $arrayResult[1] = "";
+                        $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1025');
+                        throw new Exception();
+                    }
+                }
+
                 //////////////////////////
                 // メニュー作成情報を登録
                 //////////////////////////
@@ -416,6 +426,16 @@
                     $arrayResult[1] = "";
                     $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1024');
                     throw new Exception();
+                }
+
+                // リピート数のチェック
+                if($menuData['menu']['VERTICAL'] == 1 && array_key_exists('r1',$menuData['repeat'])){
+                    if($menuData['repeat']['r1']['REPEAT_CNT'] < 2 || $menuData['repeat']['r1']['REPEAT_CNT'] > 99) {
+                        $arrayResult[0] = "002";
+                        $arrayResult[1] = "";
+                        $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1025');
+                        throw new Exception();
+                    }
                 }
 
                 //////////////////////////
