@@ -74,6 +74,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new NumColumn('REPEAT_CNT',  $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104009"));
     $c->setDescription( $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104010"));
     $c->setSubtotalFlag(false);
+    $c->setValidator(new IntNumValidator(2,99));
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
