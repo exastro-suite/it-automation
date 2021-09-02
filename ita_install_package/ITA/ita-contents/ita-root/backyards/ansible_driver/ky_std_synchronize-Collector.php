@@ -1868,6 +1868,15 @@ function yamlParseAnalysis($strTargetfile){
                             }else{
                                 $arrVarsList[$key1][ $value3['VAR_NAME_PATH'] ][] = $value3['VAR_VALUE'] ;
                             }
+                        }else{
+                            foreach ( $value3['VAR_VALUE'] as $key4 => $value4 ) {
+                                if( is_numeric( $key4 ) ){
+                                    if( !is_array( $value4 ) ){
+                                        //----　　$arrVarsList　に値設定   --------//
+                                        $arrVarsList[$key1][ $value3['VAR_NAME_PATH'].'['.$key4.']' ] = $value4 ;
+                                    }                              
+                                }
+                            }
                         }
                     }
                 }
