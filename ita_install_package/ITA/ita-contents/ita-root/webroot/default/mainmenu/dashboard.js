@@ -736,7 +736,7 @@ const getWidgetData = function( setID ) {
             const $link = $( this );
             newWidgetInfo['data']['list'][i] = {
               'name': $link.text(),
-              'url': decodeURIComponent( $link.attr('href') ),
+              'url': decodeURI( $link.attr('href') ),
               'target': $link.attr('target')
             };
           });
@@ -749,9 +749,9 @@ const getWidgetData = function( setID ) {
           newWidgetInfo['data']['html'] = widgetTemp[ setID ]['html'];
           break;
         case '9': {
-          const link = decodeURIComponent( $widget.find('.widget-image-link').attr('href') ),
+          const link = decodeURI( $widget.find('.widget-image-link').attr('href') ),
                 target = $widget.find('.widget-image-link').attr('target')
-          newWidgetInfo['data']['image'] = decodeURIComponent( $widget.find('.widget-image').attr('src') );
+          newWidgetInfo['data']['image'] = decodeURI( $widget.find('.widget-image').attr('src') );
           newWidgetInfo['data']['link'] = ( link === undefined || link === 'undefined')? '': link;
           newWidgetInfo['data']['target'] = ( target === undefined || link === 'undefined')? '': target;
           console.log(newWidgetInfo['data']['link'])
