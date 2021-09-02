@@ -1203,6 +1203,7 @@ class FileLinkOutputType extends OutputType {
 				
 				$aryConvValue['url'] = "";
 				$aryConvValue['innerHtml'] = $fileNameOfData;
+				
 			}
 			//ここまで履歴の場合の例外的処理----
 		}else{
@@ -1236,7 +1237,13 @@ class FileLinkOutputType extends OutputType {
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
 		$aryVariant['callerVars']['free'] = $aryConvValue;
-		return $this->body->getData($rowData,$aryVariant);
+		$FileEncryptFunctionName = $this->objColumn->getFileEncryptFunctionName();
+
+		if($FileEncryptFunctionName == "ky_file_encrypt"){
+			return $this->body->getData($rowData,$aryVariant,1);
+		}else{
+			return $this->body->getData($rowData,$aryVariant);
+		}
 	}
 
 	//----ここまで継承メソッドの上書き処理

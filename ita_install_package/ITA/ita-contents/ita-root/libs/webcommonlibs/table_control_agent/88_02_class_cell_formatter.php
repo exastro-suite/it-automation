@@ -2456,7 +2456,8 @@ class StaticTextTabBFmt extends TabBFmt {
 
 class LinkTabBFmt extends TextTabBFmt{
 
-	public function getData($rowData,$aryVariant){
+	# $linkOff==1の場合、ダウンロード不可
+	public function getData($rowData,$aryVariant,$linkOff=null){
 		global $g;
 		$intControlDebugLevel01=250;
 		$strFxName = __CLASS__."::".__FUNCTION__;
@@ -2469,7 +2470,7 @@ class LinkTabBFmt extends TextTabBFmt{
 			if(array_key_exists("innerHtml", $aryConvValue)===true){
 				$escapedData = $this->makeSafeValueForBrowse($aryConvValue['innerHtml']);
 				$strUrl = $aryConvValue['url'];
-				if( 0 < strlen($strUrl) ){
+				if( 0 < strlen($strUrl) && $linkOff==null ){
 					$strTagInnerBody = "<a href=\"{$strUrl}\" target=\"_blank\">{$escapedData}</a>";
 				}else{
 					$strTagInnerBody = $escapedData;
@@ -4148,13 +4149,15 @@ class FileUploadTabBFmt extends InputTabBFmt {
 		$aryOverWrite = array();
 
 		$retStrVal = "";
-
+		
 		$intControlDebugLevel01 = 50;
 
 		$boolProcessContinue = true;
 		$strTagInnerBody = "";
 
 		$arrayTempRet = $this->getCheckStorageSetting();
+
+		$FileEncryptFunctionName = $this->objColumn->getFileEncryptFunctionName();
 
 		$boolProcessContinue = $arrayTempRet[0];
 		$strTagInnerBody = $arrayTempRet[2];
@@ -4216,7 +4219,13 @@ class FileUploadTabBFmt extends InputTabBFmt {
 
 				$strLAPathOfRefTargetFile = $this->getLAPathOfAnchorHrefTarget($rowData);
 				if( file_exists($strLAPathOfRefTargetFile) === true ){
-					$strAnchorTag = "<a href=\"{$url}\" target=\"_blank\">{$fileName}</a>";
+
+					if($FileEncryptFunctionName == "ky_file_encrypt"){
+						$strAnchorTag = "{$fileName}";
+					}else{
+						$strAnchorTag = "<a href=\"{$url}\" target=\"_blank\">{$fileName}</a>";
+					}
+					
 				}else{
 					//$strAnchorTag="ファイル({$fileName})が見つかません。";
 					$strAnchorTag = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12102",$fileName);
