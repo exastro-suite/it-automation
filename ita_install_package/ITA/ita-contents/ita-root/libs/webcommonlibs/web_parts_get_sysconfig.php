@@ -85,6 +85,7 @@
             case 'natural':
             case 'gorgeous':
             case 'oase':
+            case 'epoch':
             case 'darkmode':
                 $design_type = $arySYSCON['DESIGN_TYPE'];           
                 break;
