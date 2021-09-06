@@ -140,6 +140,17 @@
             }
 
             if( $strCommand == "GET" || $strCommand == "FILTER" || $strCommand == "FILTER_DATAONLY" ){
+               if( is_array($objJSONOfReceptedData) !== true ){
+                   $intResultStatusCode = 400;
+                   $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+                   $aryForResultData['Error'] = array();
+                   $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+                   $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+                   $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                         'ResultData'=>$aryForResultData);
+                   return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+               }
+                
                 //----全部一覧または一部一覧の取得
                 $aryLabelListOfOpendColumn = $objListFormatter->getLabelListOfOpendColumn(true);
 
@@ -329,7 +340,7 @@
         return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
     }
 
-    function ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg=false){
+    function ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg=false,$registSkipFlg=false){
         global $g;
         // ----ローカル変数宣言
         $intControlDebugLevel01=250;
@@ -350,6 +361,16 @@
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
         try{
+            if( is_array($objJSONOfReceptedData) !== true ){
+              $intResultStatusCode = 400;
+              $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+              $aryForResultData['Error'] = array();
+              $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+              $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+              $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                    'ResultData'=>$aryForResultData);
+              return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+            }
             $tmpArrayReqHeaderRaw = getallheaders();
             list($strFormatterId,$boolKeyExists) = isSetInArrayNestThenAssign($tmpArrayReqHeaderRaw,array('Formatter'),"all_dump_table");
             unset($tmpArrayReqHeaderRaw);

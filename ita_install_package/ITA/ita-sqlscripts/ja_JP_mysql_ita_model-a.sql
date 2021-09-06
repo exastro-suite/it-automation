@@ -3815,14 +3815,14 @@ CREATE VIEW D_CMDB_MENU_LIST_SHEET_TYPE_1 AS
 SELECT
  *
 FROM D_CMDB_MENU_LIST TAB_A
-WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
 ;
 
 CREATE VIEW D_CMDB_MENU_LIST_SHEET_TYPE_1_JNL AS
 SELECT
  *
 FROM D_CMDB_MENU_LIST_JNL TAB_A
-WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
 ;
 
 CREATE VIEW D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_1 AS
@@ -3849,7 +3849,6 @@ FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_1         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
-  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
@@ -3863,7 +3862,6 @@ FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_1_JNL         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
-  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
@@ -4633,8 +4631,8 @@ INSERT INTO A_SYSTEM_CONFIG_LIST (ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUS
 INSERT INTO A_SYSTEM_CONFIG_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-8,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000008,'AUTH_IDLE_EXPIRY','認証継続期間：未操作（秒）','3600',CONCAT('未操作時に認証(セッション)を継続する期間（秒）','\n','正の数(整数のみ)：上記の通り','\n','(ただしphp.iniの「session.gc_maxlifetime」で指定の値より小さい値)','\n','ゼロ以下：設定不可'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_SYSTEM_CONFIG_LIST (ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000009,'AUTH_SES_EXPIRY','認証継続期間：最長（秒）','10800',CONCAT('認証(セッション)を継続する最長期間（秒）','\n','正の数(整数のみ)：上記の通り','\n','(ただしphp.iniの「session.gc_maxlifetime」で指定の値より小さい値)','\n','ゼロ以下：設定不可'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_SYSTEM_CONFIG_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-9,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000009,'AUTH_SES_EXPIRY','認証継続期間：最長（秒）','10800',CONCAT('認証(セッション)を継続する最長期間（秒）','\n','正の数(整数のみ)：上記の通り','\n','(ただしphp.iniの「session.gc_maxlifetime」で指定の値より小さい値)','\n','ゼロ以下：設定不可'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_SYSTEM_CONFIG_LIST (ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000010,'DESIGN_TYPE','画面デザイン選択','default',CONCAT('画面のデザイン設定','\n','設定値を以下のいずれかのキーに指定することで画面のデザインの変更が可能。','\n','未入力や誤った設定値の場合はdefaultを自動選択。','\n','・default(青色を基調とした初期デザイン)','\n','・red(赤色を基調としたデザイン)','\n','・green(緑色を基調としたデザイン)','\n','・blue(青色を基調としたデザイン)','\n','・orange(オレンジ色を基調としたデザイン)','\n','・yellow(黄色を基調としたデザイン)','\n','・purple(紫色を基調としたデザイン)','\n','・brown(茶色を基調としたデザイン)','\n','・gray(灰色を基調としたデザイン)','\n','・cool(寒色を基調としたデザイン)','\n','・cute(ピンク色を基調としたデザイン)','\n','・natural(自然をイメージしたデザイン)','\n','・gorgeous(赤と黒を基調としたゴージャスなデザイン)','\n','・oase(ExastroOASEをイメージしたデザイン)','\n','・darkmode(夜間などに最適な暗色デザイン)'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_SYSTEM_CONFIG_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-10,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000010,'DESIGN_TYPE','画面デザイン選択','default',CONCAT('画面のデザイン設定','\n','設定値を以下のいずれかのキーに指定することで画面のデザインの変更が可能。','\n','未入力や誤った設定値の場合はdefaultを自動選択。','\n','・default(青色を基調とした初期デザイン)','\n','・red(赤色を基調としたデザイン)','\n','・green(緑色を基調としたデザイン)','\n','・blue(青色を基調としたデザイン)','\n','・orange(オレンジ色を基調としたデザイン)','\n','・yellow(黄色を基調としたデザイン)','\n','・purple(紫色を基調としたデザイン)','\n','・brown(茶色を基調としたデザイン)','\n','・gray(灰色を基調としたデザイン)','\n','・cool(寒色を基調としたデザイン)','\n','・cute(ピンク色を基調としたデザイン)','\n','・natural(自然をイメージしたデザイン)','\n','・gorgeous(赤と黒を基調としたゴージャスなデザイン)','\n','・oase(ExastroOASEをイメージしたデザイン)','\n','・darkmode(夜間などに最適な暗色デザイン)'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_SYSTEM_CONFIG_LIST (ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000010,'DESIGN_TYPE','画面デザイン選択','default',CONCAT('画面のデザイン設定','\n','設定値を以下のいずれかのキーに指定することで画面のデザインの変更が可能。','\n','未入力や誤った設定値の場合はdefaultを自動選択。','\n','・default(青色を基調とした初期デザイン)','\n','・red(赤色を基調としたデザイン)','\n','・green(緑色を基調としたデザイン)','\n','・blue(青色を基調としたデザイン)','\n','・orange(オレンジ色を基調としたデザイン)','\n','・yellow(黄色を基調としたデザイン)','\n','・purple(紫色を基調としたデザイン)','\n','・brown(茶色を基調としたデザイン)','\n','・gray(灰色を基調としたデザイン)','\n','・cool(寒色を基調としたデザイン)','\n','・cute(ピンク色を基調としたデザイン)','\n','・natural(自然をイメージしたデザイン)','\n','・gorgeous(赤と黒を基調としたゴージャスなデザイン)','\n','・oase(ExastroOASEをイメージしたデザイン)','\n','・epoch(ExastroEPOCHをイメージしたデザイン)','\n','・darkmode(夜間などに最適な暗色デザイン)'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_SYSTEM_CONFIG_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-10,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000010,'DESIGN_TYPE','画面デザイン選択','default',CONCAT('画面のデザイン設定','\n','設定値を以下のいずれかのキーに指定することで画面のデザインの変更が可能。','\n','未入力や誤った設定値の場合はdefaultを自動選択。','\n','・default(青色を基調とした初期デザイン)','\n','・red(赤色を基調としたデザイン)','\n','・green(緑色を基調としたデザイン)','\n','・blue(青色を基調としたデザイン)','\n','・orange(オレンジ色を基調としたデザイン)','\n','・yellow(黄色を基調としたデザイン)','\n','・purple(紫色を基調としたデザイン)','\n','・brown(茶色を基調としたデザイン)','\n','・gray(灰色を基調としたデザイン)','\n','・cool(寒色を基調としたデザイン)','\n','・cute(ピンク色を基調としたデザイン)','\n','・natural(自然をイメージしたデザイン)','\n','・gorgeous(赤と黒を基調としたゴージャスなデザイン)','\n','・oase(ExastroOASEをイメージしたデザイン)','\n','・epoch(ExastroEPOCHをイメージしたデザイン)','\n','・darkmode(夜間などに最適な暗色デザイン)'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_SYSTEM_CONFIG_LIST (ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000011,'INTERVAL_TIME','Symphony / Conductor インターバル時間（分）','3',CONCAT('定期作業実行に登録されたSymphony・Conductorが未実行（予約）ステータスに遷移するまでのインターバル時間（分）','\n','1～525600：設定した値','\n','上記以外：3'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_SYSTEM_CONFIG_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-11,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000011,'INTERVAL_TIME','Symphony / Conductor インターバル時間（分）','3',CONCAT('定期作業実行に登録されたSymphony・Conductorが未実行（予約）ステータスに遷移するまでのインターバル時間（分）','\n','1～525600：設定した値','\n','上記以外：3'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 

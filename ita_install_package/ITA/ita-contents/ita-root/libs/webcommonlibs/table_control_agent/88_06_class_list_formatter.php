@@ -2215,7 +2215,7 @@ class ExcelFormatter extends ListFormatter {
             $this->aryValidationTailHeader[1] = $dataValidation;                   // ValidationObject
         }
 
-        //空白欄に初期値データを埋め込む ----
+        //空白欄に登録用の初期値データを埋め込む ----
         $i_col = self::DATA_START_COL;
         foreach($aryObjColumn as $objColumn){
             if( $objColumn->getOutputType($this->strPrintTargetListFormatterId)->isVisible()===false ){
@@ -2223,20 +2223,20 @@ class ExcelFormatter extends ListFormatter {
                     continue;
                 }
             }
-            $defaultValue = $objColumn->getDefaultValue();
-            if($defaultValue != ''){
+            $registerDefaultValue = $objColumn->getOutputType('register_table')->getDefaultInputValue();
+            if($registerDefaultValue != ''){
                 if(is_a($objColumn, "IDColumn") === true){
                     //IDは文字列に変換
                     $aryMasterData = $objColumn->getMasterTableArrayForInput();
-                    if(array_key_exists($defaultValue, $aryMasterData)){
-                        $defaultValue = $aryMasterData[$defaultValue];
+                    if(array_key_exists($registerDefaultValue, $aryMasterData)){
+                        $registerDefaultValue = $aryMasterData[$registerDefaultValue];
                     }else{
-                        $defaultValue = "";
+                        $registerDefaultValue = "";
                     }
                 }
                 //空白欄に初期値データを入れる
                 for($i = $intThisStartRow; $i <= $intThisStartRow+self::WHITE_ROWS; ++$i){
-                    $sheet->setCellValueExplicitByColumnAndRow($i_col-1, $i ,$defaultValue, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicitByColumnAndRow($i_col-1, $i ,$registerDefaultValue, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 }
             }
             $i_col++;
