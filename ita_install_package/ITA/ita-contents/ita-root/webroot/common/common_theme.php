@@ -237,6 +237,24 @@ switch( $theme ) {
     $b['KIZI'] = $backgroundPatterns['STRIPE2'];
     break;
     
+  case 'epoch':
+    $c['BODY'] = '313C3A';
+    $c['HEADER'] = '1F8C78';
+    $c['FOOTER'] = '1F8C78';
+    $c['MENU'] = array('5A6361','46504E','46504E','000000','FFFFFF');
+    $c['TEXT'] = array('444444','FFFFFF');
+    $c['TABLE'] = array('1F8C78','4CA393','F4F9F8','CCCCCC','FFFF8F');
+    $c['TABLE_F'] = array('1F8C78','007A7C','F4F9F8','CCCCCC');
+    $c['HEADING'] = array('FFFFFF','1F8C78','333333');
+    $c['BASE'] = 'FFFFFF';
+    $c['KIZI'] = 'F2F2F2';
+    $c['MENU_NAME'] = '444444';
+    $b['BODY'] = $backgroundPatterns['NONE'];
+    $b['HEADER'] = $backgroundPatterns['NONE'];
+    $b['MENU'] = $backgroundPatterns['NONE'];
+    $b['BASE'] = $backgroundPatterns['NONE'];
+    break;
+    
   case 'darkmode':
     $c['BODY'] = '1D2123';
     $c['HEADER'] = '272A2C';
@@ -697,6 +715,65 @@ background-color: #F2F2F2;
 #KIZI .stacked-graph,
 #KIZI .widget-sub-name {
 background-color: #FFF;
+}
+
+EOF;
+}
+
+if ( $theme == 'epoch' ) {
+
+echo <<< EOF
+/* ********************************************************************* *
+   EPOCH
+ * ********************************************************************* */
+#HEADER,
+#FOOTER {
+background-image: linear-gradient( -45deg, rgba(255,255,255,.1) 50%, rgba(255,255,255,0) 50%);
+}
+#KIZI {
+padding-top: 0!important;
+padding-right: 0!important;
+padding-left: 0!important;
+}
+html.ita-fixed-layout #KIZI {
+padding-top: 80px!important;
+}
+#MENU h2 {
+margin-bottom: 4px;
+}
+#MENU li {
+margin-bottom: 4px;
+}
+#MENU li.menu-on a,
+#MENU li.menu-on a:hover {
+background-color: #6F7775;
+color: #FFF;
+}
+
+#KIZI .text {
+margin: 0;
+background-color: #FFF;
+border: none;
+border-radius: 0;
+box-shadow: none;
+border-bottom: 1px solid #79BAAE;
+}
+#KIZI h2 {
+margin: 0;
+border-bottom: 1px solid #79BAAE;
+}
+#KIZI #sysInitialFilter + h2,
+#KIZI .midashi_class {
+background-color: #D2E8E4;
+border: none;
+color: #1F8C78;
+}
+#KIZI #sysInitialFilter + h2:hover,
+#KIZI .midashi_class:hover {
+background-color: #D2E8E4;
+}
+.itaTable.tableSticky .fixedBorder {
+border-color: #1F8C78;
 }
 
 EOF;
