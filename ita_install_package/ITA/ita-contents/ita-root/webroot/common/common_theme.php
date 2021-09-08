@@ -746,10 +746,10 @@ margin-bottom: 4px;
 }
 #MENU li.menu-on a,
 #MENU li.menu-on a:hover {
+padding-right: 10px;
 background-color: #6F7775;
 color: #FFF;
 }
-
 #KIZI .text {
 margin: 0;
 background-color: #FFF;
@@ -775,7 +775,19 @@ background-color: #D2E8E4;
 .itaTable.tableSticky .fixedBorder {
 border-color: #1F8C78;
 }
-
+#KIZI h2.menu_name {
+padding: 24px 24px 12px;
+}
+#KIZI h2.menu_name + form > div {
+margin: 0!important;
+}
+#KIZI h2.menu_name + form .text {
+margin-bottom: 32px;
+padding: 16px 24px;
+}
+#KIZI h2.menu_name + form input[type="submit"] {
+margin-left: 24px;
+}
 EOF;
 }
 
