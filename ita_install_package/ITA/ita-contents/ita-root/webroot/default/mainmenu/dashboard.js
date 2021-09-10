@@ -227,7 +227,7 @@ const getWidgetItem = function( widgetID ) {
         'background': '0',
         'unique': '0',
         'data': {
-          'image': '/common/imgs/ita_icon.png',
+          'image': '/common/imgs/widget_default_image.png',
           'link': '',
           'target': '_blank'
         }
