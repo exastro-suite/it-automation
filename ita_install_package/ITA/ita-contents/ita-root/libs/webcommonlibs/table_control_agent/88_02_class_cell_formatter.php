@@ -2451,6 +2451,9 @@ class StaticTextTabBFmt extends TabBFmt {
 		$this->text = $text;
 	}
 
+	public function getText(){
+		return $this->text;
+	}
 
 }
 
