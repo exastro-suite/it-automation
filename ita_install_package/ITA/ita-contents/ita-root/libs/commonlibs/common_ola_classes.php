@@ -8633,7 +8633,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                 $restApiResponseInfo = "";
 
                 //抑止期間ありなら比較用に
-                if( array_key_exists('SUPPRESS_START', $tmpNotice) &&  array_key_exists('SUPPRESS_START', $tmpNotice) ){
+                if( array_key_exists('SUPPRESS_START', $tmpNotice) &&  array_key_exists('SUPPRESS_END', $tmpNotice) ){
                     //日時(strtotime)
                     $nowDate = strtotime( date('Y/m/d H:i:s.u') );
                     $suppressStartDate = strtotime( $tmpNotice['SUPPRESS_START'] );
