@@ -195,6 +195,21 @@ callback.prototype = {
     },
     //Conductor系メソッド----
     
+    // ---- Notice ----- //
+    printNoticeList : function( result ) {
+      conductorUseList.noticeList = JSON.parse( result );
+      if ( conductorGetMode === 'starting') {
+        proxy.printNoticeStatusList();
+      }
+    },
+    printNoticeStatusList : function( result ) {
+      conductorUseList.noticeStatusList = JSON.parse( result );
+      if ( conductorGetMode === 'starting') {
+        proxy.printOperationList();
+      }
+    }
+    // Notice ----
+    
 }
 
 // ロール一覧を取得する
@@ -484,7 +499,7 @@ const conductorClassID = editor.getParam('conductor_class_id');
 // DOM読み込み完了
 $( function(){
     // リスト取得開始
-    proxy.printOperationList();
+    proxy.printNoticeList( conductorClassID )
     // タブ切り替え
     editor.tabMenu();
     // 画面縦リサイズ

@@ -23,6 +23,8 @@
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
+    $strLrWebRootToThisPageDir = substr(basename(__FILE__), 0, 10);
+
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITABASEH-MNU-306010");
 /*
@@ -127,6 +129,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new DateTimeColumn('TIME_END',$g['objMTS']->getSomeMessage("ITABASEH-MNU-203080"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-203090"));//エクセル・ヘッダでの説明
 	$c->setValidator(new DateTimeValidator(null,null));
+    $table->addColumn($c);
+
+
+    //通知ログ
+    $c = new FileUploadColumn( 'NOTICE_LOG', $g['objMTS']->getSomeMessage("ITABASEH-MNU-203091") , "{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$strLrWebRootToThisPageDir}");//'通知ログ'
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-203092"));
+    $c->setMaxFileSize(4*1024*1024*1024);
+    $c->setFileHideMode(true);
+    $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
 
 

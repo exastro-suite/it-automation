@@ -65,6 +65,7 @@ callback.prototype = {
 
         if ( conductorGetMode === 'starting') {
             var conductorID = Number( conductorUseList.conductorStatus.CONDUCTOR_INSTANCE_INFO.CONDUCTOR_CLASS_NO );
+            proxy.printNoticeList( conductorID );
             proxy.printconductorClass( conductorID );
         } else {
             $( window ).trigger('conductorStatusUpdate');
@@ -105,7 +106,22 @@ callback.prototype = {
         } else {
           editor.log.set('error', 'Pause release error');
         }
+    },
+    
+    // ---- Notice ----- //
+    printNoticeList : function( result ) {
+      conductorUseList.noticeList = JSON.parse( result );
+      if ( conductorGetMode === 'starting') {
+        proxy.printNoticeStatusList();
+      }
+    },
+    printNoticeStatusList : function( result ) {
+      conductorUseList.noticeStatusList = JSON.parse( result );
+      if ( conductorGetMode === 'starting') {
+        proxy.printOperationList();
+      }
     }
+    // Notice ----
 
 }
 
@@ -132,7 +148,7 @@ $( function(){
         location.href = url;
       }
       // リスト取得開始
-      proxy.printOperationList();
+      proxy.printNoticeList();
       // タブ切り替え
       editor.tabMenu();
       // 画面縦リサイズ
