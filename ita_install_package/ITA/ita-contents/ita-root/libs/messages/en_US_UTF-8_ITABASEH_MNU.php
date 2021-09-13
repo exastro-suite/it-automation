@@ -293,6 +293,8 @@ $ary["ITABASEH-MNU-203060"]         = "Start";
 $ary["ITABASEH-MNU-203070"]         = "[Format]YYYY/MM/DD HH:MM";
 $ary["ITABASEH-MNU-203080"]         = "End";
 $ary["ITABASEH-MNU-203090"]         = "[Format]YYYY/MM/DD HH:MM";
+$ary["ITABASEH-MNU-203091"]         = "Notification log";
+$ary["ITABASEH-MNU-203092"]         = "Output log file.";
 $ary["ITABASEH-MNU-204010"]         = "Display order";
 $ary["ITABASEH-MNU-204020"]         = "To control display order";
 $ary["ITABASEH-MNU-204030"]         = "Select";
@@ -691,6 +693,80 @@ $ary["ITABASEH-MNU-310224"]         = "Exchange ID has failed (";
 $ary["ITABASEH-MNU-310225"]         = "Output:";
 $ary["ITABASEH-MNU-310226"]         = "ALL";
 $ary["ITABASEH-MNU-310227"]         = "Difference Only";
+$ary["ITABASEH-MNU-311000"]         = 'PUse PHPs cURL function to handle notifications.<br>
+■Notification setting  using Webhook<br>
+▼Example: Teams / Slack　 <br>
+&nbsp -Notification destination (CURLOPT_URL) Example: <br>
+&nbsp&nbsp&nbsp&nbspEnter the service webhook URL<br>
+&nbsp -Header (CURLOPT_HTTPHEADER)) Example: <br>
+&nbsp&nbsp&nbsp&nbsp[ "Content-Type: application/json" ]<br>
+&nbsp -Message (CURLOPT_POSTFIELDS)) Example:: <br>
+&nbsp&nbsp&nbsp&nbsp{"text": "Notification name：__NOTICE_NAME__,  &lt;br&gt;Conductor name: __CONDUCTOR_NAME__,  &lt;br&gt; Conductor instance ID:__CONDUCTOR_INSTANCE_ID__,&lt;br&gt; status: __STATUS_NAME__, &lt;br&gt; Work confirmation URL : __JUMP_URL__, &lt;br&gt; "}<br><br>
+
+※For the input format of Message (CURLOPT_POSTFIELDS) and the notation method of line breaks, refer to Sending a message by Webhook of each service.<br>
+<br>
+■About each setting item<br>
+<table>
+    <thead>
+        <tr><td>&nbsp</td><td>Input items</td><td>:</td><td>discription</td></tr>
+    </thead>
+    <tbody>
+    <tr><td>&nbsp</td><td>Notification destination (CURLOPT_URL) </td><td>:</td><td>Please enter the URL of the notification destination.</td></tr>
+    <tr><td>&nbsp</td><td>Header (CURLOPT_HTTPHEADER) </td><td>:</td><td>Please enter the header</td></tr>
+    <tr><td>&nbsp</td><td>Message (CURLOPT_POSTFIELDS) </td><td>:</td><td>Please enter the content of the notification</td></tr>
+    <tr><td>&nbsp</td><td>PROXY / URL(CURLOPT_PROXY) </td><td>:</td><td>If you need to set PROXY, please enter the URL.</td></tr>
+    <tr><td>&nbsp</td><td>PROXY / PORT(CURLOPT_PROXYPORT) </td><td>:</td><td>If you need to set PROXY, enter PORT.</td></tr>
+    <tr><td>&nbsp</td><td>Work confirmation URL (FQDN)</td><td>:</td><td>Enter the FQDN to be used in the reserved variable of the work confirmation URL.</td></tr>
+    <tr><td>&nbsp</td><td>Other </td><td>:</td><td>Please enter in JSON format.<br>（Only the options corresponding to curl_setopt () are available.<br>For more information, see PHP cURL function.</td></tr>
+    </tbody>
+</table>
+<br>
+■The following reserved variables are available in Message (CURLOPT_POSTFIELDS).<br>
+<table>
+    <thead>
+        <tr><td>&nbsp</td><td>Reserved variables</td><td>:</td><td>Item name</td></tr>
+    </thead>
+    <tbody>
+        <tr><td>&nbsp</td><td>__CONDUCTOR_INSTANCE_ID__ </td><td>:</td><td>Conductor instance ID </td></tr>
+        <tr><td>&nbsp</td><td>__CONDUCTOR_NAME__ </td><td>:</td><td>Conductor name </td></tr>
+        <tr><td>&nbsp</td><td>__OPERATION_ID__ </td><td>:</td><td>Operation ID </td></tr>
+        <tr><td>&nbsp</td><td>__OPERATION_NAME__ </td><td>:</td><td>Operation name</td></tr>
+        <tr><td>&nbsp</td><td>__STATUS_ID__ </td><td>:</td><td>Status ID </td></tr>
+        <tr><td>&nbsp</td><td>__STATUS_NAME__ </td><td>:</td><td>Status name </td></tr>
+        <tr><td>&nbsp</td><td>__EXECUTION_USER__ </td><td>:</td><td>Execution user </td></tr>
+        <tr><td>&nbsp</td><td>__TIME_BOOK__ </td><td>:</td><td>Scheduled date/time </td></tr>
+        <tr><td>&nbsp</td><td>__TIME_START__ </td><td>:</td><td>Start </td></tr>
+        <tr><td>&nbsp</td><td>__TIME_END__ </td><td>:</td><td>End </td></tr>
+        <tr><td>&nbsp</td><td>__JUMP_URL__ </td><td>:</td><td>Work confirmation URL </td></tr>
+        <tr><td>&nbsp</td><td>__NOTICE_NAME__ </td><td>:</td><td>Notification name </td></tr>
+    </tbody>
+</table>
+';
+$ary["ITABASEH-MNU-311001"]         = "Conductor notification definition";
+$ary["ITABASEH-MNU-311002"]         = "Notification name";
+$ary["ITABASEH-MNU-311003"]         = "[Maximum length] 128 bytes";
+$ary["ITABASEH-MNU-311004"]         = "HTTP Request Options";
+$ary["ITABASEH-MNU-311005"]         = "Notification destination (CURLOPT_URL)";
+$ary["ITABASEH-MNU-311006"]         = "The URL of the notification destination.";
+$ary["ITABASEH-MNU-311007"]         = "Header (CURLOPT_HTTPHEADER)";
+$ary["ITABASEH-MNU-311008"]         = "Enter HTTP header fields in JSON format.";
+$ary["ITABASEH-MNU-311009"]         = "Message (CURLOPT_POSTFIELDS)";
+$ary["ITABASEH-MNU-311010"]         = "Enter according to the specifications of the service to be notified.";
+$ary["ITABASEH-MNU-311011"]         = "PROXY";
+$ary["ITABASEH-MNU-311012"]         = "URL (CURLOPT_PROXY)";
+$ary["ITABASEH-MNU-311013"]         = "If you need to set PROXY, please enter the URL.";
+$ary["ITABASEH-MNU-311014"]         = "PORT (CURLOPT_PROXYPORT)";
+$ary["ITABASEH-MNU-311015"]         = "If you need to set PROXY, enter PORT.";
+$ary["ITABASEH-MNU-311016"]         = "Work confirmation URL (FQDN)";
+$ary["ITABASEH-MNU-311017"]         = "Use in the reserved variable of the work confirmation URL, enter the FQDN. \nExample:\nhttp://<FQDN>\nhttps://<FQDN>";
+$ary["ITABASEH-MNU-311018"]         = "Other";
+$ary["ITABASEH-MNU-311019"]         = 'Please enter in JSON format. \nAs for the available options, the one corresponding to the curl_setopt () option is available. See PHPs cURL function. Example: {"CURLOPT_CONNECTTIMEOUT": 10}';
+$ary["ITABASEH-MNU-311020"]         =  "Deterrence period";
+$ary["ITABASEH-MNU-311021"]         =  "Start date and time";
+$ary["ITABASEH-MNU-311022"]         =  "When the Conductor work is executed, the notification is suppressed if it is after the start date and time.";
+$ary["ITABASEH-MNU-311023"]         =  "End date and time";
+$ary["ITABASEH-MNU-311024"]         =  "When the Conductor work is executed, the notification is suppressed if it is before the end date and time.";
+
 $ary["ITABASEH-MNU-900001"]         = "Export";
 $ary["ITABASEH-MNU-900002"]         = "Upload";
 $ary["ITABASEH-MNU-900003"]         = "Import";

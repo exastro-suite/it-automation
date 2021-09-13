@@ -69,6 +69,8 @@
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
         "EXEC_LOG"=>"",
+        "I_NOTICE_INFO"=>"",
+        "NOTICE_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -95,6 +97,8 @@
         "TIME_START"=>"",
         "TIME_END"=>"",
         "EXEC_LOG"=>"",
+        "I_NOTICE_INFO"=>"",
+        "NOTICE_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -3125,6 +3129,100 @@
                             $strErrStepIdInFx="00002100";
                             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
+
+                        #312
+                        //更新後の状態取得 
+                        $arySqlBind=array(
+                            "CONDUCTOR_INSTANCE_NO" => $arySymInsUpdateTgtSource['CONDUCTOR_INSTANCE_NO'],
+                            );   
+                        $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
+                        $aryConInsInfo = $aryRetBody[0];
+                        
+                        //---通知関連処理 
+                        if( isset($aryConInsInfo['CONDUCTOR_INSTANCE_NO']) ){
+
+                            $tmpNoticeInfo = json_decode($aryConInsInfo['I_NOTICE_INFO'],true);
+                            $arrNoticeInfo = $tmpNoticeInfo['NOTICE_INFO'];
+
+                            //作業No
+                            $execNo  = $rowOfConductor['CONDUCTOR_INSTANCE_NO'];
+                            //通知結果　ログ出力先
+                            $tmpNoticelogdir = $root_dir_path . "/uploadfiles/2100180006/NOTICE_LOG/" . sprintf('%010d', $execNo) ;
+                            $tmpNoticelogfile = "NoticeLog_". sprintf('%010d', $execNo) . ".log" ;
+                            $logPath = $tmpNoticelogdir . "/" . $tmpNoticelogfile;
+
+                            //ログ出力先チェック、ディレクトリ作成
+                            if( !is_dir($tmpNoticelogdir) ){
+                                if ( mkdir($tmpNoticelogdir,0777,true) ){
+                                    chmod($tmpNoticelogdir, 0777);
+                                }
+                            }
+
+                            //通知設定がある場合
+                            if( $arrNoticeInfo != array() ){
+                                foreach ($arrNoticeInfo as $strNoticeList => $strNoticeStatus) {
+                                    //通知、ステータス設定時のみ実施
+                                    if( $strNoticeStatus != "" && $strNoticeList != "" ){
+                                        //通知実行ステータス判定
+                                        if( array_search($aryConInsInfo['STATUS_ID'], explode( ",", $strNoticeStatus ) ) !== false ){
+                                            //通知処理呼び出し
+                                            $aryRetBody = $objOLA->getExecNotice($aryConInsInfo,$strNoticeList,$strNoticeStatus);
+                                            if( $aryRetBody[1] !== null ){
+                                                // 例外処理へ
+                                                $strErrStepIdInFx="00000100";
+                                                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                            }
+                                            //廃止済み通知のログ出力
+                                            if( $aryRetBody[2] !== array() ){
+                                                //通知ログ出力
+                                                foreach ($aryRetBody[2] as $subject ) {
+                                                    error_log(print_r( date('Y-m-d H:i:s') . " " . $subject . "\n", true), 3, $logPath );
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }else{
+                                if( is_file($logPath) !== true ){
+                                    //通知ログ出力
+                                    $subject = $objMTS->getSomeMessage("ITABASEH-STD-171006");//"仮：通知設定がされていない為、通知は実行されませんでした。";    
+                                    error_log(print_r( date('Y-m-d H:i:s') . " " . $subject . "\n", true), 3, $logPath );
+                                }
+                            }
+
+                            //通知ログ初回のみ登録
+                            if( $aryConInsInfo['NOTICE_LOG'] == "" && is_file($logPath) === true ){
+                                // 更新用のテーブル定義
+                                $aryConfigForIUD = array(
+                                        "JOURNAL_SEQ_NO"=>"",
+                                        "JOURNAL_ACTION_CLASS"=>"",
+                                        "JOURNAL_REG_DATETIME"=>"",
+                                        "CONDUCTOR_INSTANCE_NO"=>"",
+                                        "NOTICE_LOG"=>"",
+                                        "LAST_UPDATE_TIMESTAMP"=>"",
+                                        "LAST_UPDATE_USER"=>""
+                                    );
+                                $aryConfigForIUD = $aryConfigForSymInsIUD;
+
+
+                                // BIND用のベースソース
+                                $aryBaseSourceForBind = $aryConInsInfo;
+
+                                $aryBaseSourceForBind['NOTICE_LOG'] = "NoticeLog_". sprintf('%010d', $aryConInsInfo['CONDUCTOR_INSTANCE_NO']) . ".log" ;
+                                $aryBaseSourceForBind['TIME_BOOK'] = str_replace("-","/",$aryBaseSourceForBind['TIME_BOOK']) ;
+                                $aryBaseSourceForBind['TIME_START'] = str_replace("-","/",$aryBaseSourceForBind['TIME_START']) ;
+                                $aryBaseSourceForBind['TIME_END'] = str_replace("-","/",$aryBaseSourceForBind['TIME_END']) ;
+
+                                $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+
+                                if( $aryRetBody !== true  ){
+                                    // 例外処理へ
+                                    $strErrStepIdInFx="00002100";
+                                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                }
+                            }                            
+                        }
+
                     }elseif( $tmpexecLogMessage != "" ){
                         //待機状態で、ログのみ更新の場合　#749対応
                         // 更新用のテーブル定義
@@ -3430,9 +3528,18 @@ function getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName){
 
 
     $strQuery = "SELECT "
-                 ." * "
+               ." SINS.* , "
+               ." SYSSTATUS.SYM_EXE_STATUS_NAME AS STATUS_NAME , "
+               ." SYSABORT.SYM_ABORT_FLAG_NAME AS ABORT_FLAG_NAME "
                ." FROM "
                ." C_CONDUCTOR_INSTANCE_MNG SINS "
+               ."LEFT JOIN "
+               ." B_SYM_EXE_STATUS SYSSTATUS "
+               ." ON SINS.STATUS_ID = SYSSTATUS.SYM_EXE_STATUS_ID "
+               ."LEFT JOIN "
+               ." B_SYM_ABORT_FLAG SYSABORT "
+               ." ON SINS.ABORT_EXECUTE_FLAG = SYSABORT.SYM_ABORT_FLAG_ID "
+
                ."WHERE "
                ."    SINS.DISUSE_FLAG IN ('0') "
                ."AND SINS.CONDUCTOR_INSTANCE_NO = :CONDUCTOR_INSTANCE_NO "

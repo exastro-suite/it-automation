@@ -3799,6 +3799,151 @@ const modalRoleList = function() {
   
 };
 
+// 通知設定が登録済みか表示する
+const noticeStatusUpdate = function() {
+  const $noticeStatus = $('#conductor-notice-status');
+  if ( conductorData.conductor.NOTICE_INFO !== undefined &&
+       Object.keys( conductorData.conductor.NOTICE_INFO ).length ) {
+    $noticeStatus.text(getSomeMessage("ITAWDCC92174"));
+  } else {
+    $noticeStatus.text('');
+  }
+};
+// 通知設定モーダル
+const modalNoticeList = function() {
+  const $modalBody = $('.editor-modal-body'),
+        $modalButton = $('.editor-modal-footer-menu-button'),
+        noticeLength = conductorUseList.noticeList.length,
+        statusLength = conductorUseList.noticeStatusList.length,
+        noticeListURL = '/default/menu/01_browse.php?no=2100180012',
+        hideNoticeName = getSomeMessage("ITAWDCC92008"); // ********
+  let noticelistHTML = '';
+  
+  // チェック状態
+  const noticeInfo = ( conductorEditorMode === 'checking')?
+          conductorUseList.conductorStatus.CONDUCTOR_INSTANCE_INFO.NOTICE_INFO:
+          conductorData.conductor.NOTICE_INFO,
+        noticeCheckData = {};
+  if ( noticeInfo !== undefined ) {
+    for ( const key in noticeInfo ) {
+      noticeCheckData[key] = noticeInfo[key].split(',');
+    }
+  }
+  
+  // EDITモード以外の場合決定ボタンを削除
+  if ( conductorEditorMode !== 'edit') {
+    $modalButton.filter('[data-button-type="ok"]').remove();
+  }
+  
+  // 通知一覧が登録済みか？
+  if ( noticeLength > 0 ) {
+    const noticeNmaeWidth = 30,
+          noticeStatusWidth = Math.round( ( 100 - noticeNmaeWidth ) / statusLength * 1000 ) / 1000;
+    noticelistHTML += ''
+    + '<div class="modal-table-wrap">'
+      + '<form id="notice-list-form">'
+      + '<table class="modal-table modal-select-table modal-notice-select-table">'
+        + '<thead>'
+          + '<tr>'
+            + '<th class="notice-name" scope="col" style="width:' + noticeNmaeWidth + '%"></th>';
+    
+    for ( let i = 0; i < statusLength; i++ ) {
+      const statusName = editor.textEntities( conductorUseList.noticeStatusList[i].STATUS_NAME ),
+            statusID = conductorUseList.noticeStatusList[i].STATUS_ID;
+      noticelistHTML += '<th class="notice-status" scope="col" style="width:' + noticeStatusWidth + '%">'
+      + '<span class="notice-status-bar notice-status-' + statusID + '"></span>'
+      + statusName
+      + '</th>';
+    }
+    noticelistHTML += '</tr></thead><tbody>'
+
+    for ( let i = 0; i < noticeLength; i++ ) {
+      const noticeID = conductorUseList.noticeList[i].NOTICE_ID,
+            noticeName = editor.textEntities( conductorUseList.noticeList[i].NOTICE_NAME );
+      if ( noticeName === hideNoticeName ) {
+        noticelistHTML += '<tr class="hide-notice-row">'
+        + '<th class="notice-name" scope="row">'
+        + noticeName + '(' + noticeID + ')';
+      } else {
+        noticelistHTML += '<tr>'
+        + '<th class="notice-name" scope="row">'
+        + noticeName;
+      }
+      for ( let j = 0; j < statusLength; j++ ) {
+        const statusValue = conductorUseList.noticeStatusList[j].STATUS_ID,
+              statusID = 'notice' + noticeID + '-' + statusValue,
+              check = ( noticeCheckData[noticeID] !== undefined && noticeCheckData[noticeID].indexOf( statusValue ) !== -1 )? true: false;
+
+        noticelistHTML += '<td class="notice-status">';
+        if ( noticeName !== hideNoticeName ) {
+          if ( conductorEditorMode === 'edit') {
+            // EDITモード
+            const checked = ( check )? ' checked': '';
+            noticelistHTML += '<div class="modal-checkbox-wrap">'
+            + '<input id="' + statusID + '" class="modal-checkbox" type="checkbox" name="' + noticeID + '" value="' + statusValue + '"' + checked + '>'
+            + '<label for="' + statusID + '" class="modal-checkbox-label">'
+            + '</label></div>';
+          } else {
+            noticelistHTML += '<div class="modal-checkbox-wrap">';
+            if ( check ) {
+              noticelistHTML += '<span class="modal-checkbox-check-mark"></span>';
+            }
+            noticelistHTML += '</div>';
+          }
+        } else {
+          noticelistHTML += '<div class="modal-checkbox-wrap"><span class="modal-checkbox-check-hide">-</span></div>';
+        }
+        noticelistHTML += '</td>';
+      }
+      noticelistHTML += '</tr>'
+    }
+    noticelistHTML += '</tbody>'
+      + '</table></form>'
+    + '</div>';
+  } else {
+    //noticelistHTML += '<div class="">通知先の登録が。<a ref="' + noticeListURL + '">Conductor通知一覧</a>より登録してください。</div>';
+    noticelistHTML += '<div class="">' + getSomeMessage("ITAWDCC92175") + '</div>';
+    noticelistHTML += '<div class="">' + getSomeMessage("ITAWDCC92176") + '(<a href="' + noticeListURL + ' " target="_blank" rel="noopener noreferrer">'+  getSomeMessage("ITAWDCC92177") + '</a>)</div>';
+  }
+  
+  $modalBody.html( noticelistHTML );
+  
+  // 決定・取り消しボタン
+  $modalButton.prop('disabled', false ).on('click', function() {
+    const $button = $( this ),
+          btnType = $button.attr('data-button-type');
+    switch( btnType ) {
+      case 'ok':
+        if ( conductorEditorMode === 'edit') {
+          // チェック状態を取得
+          const noticeCheck = {};
+          $modalBody.find('.modal-checkbox:checked').each(function(){
+            const $check = $( this ),
+                  cName = $check.attr('name'),
+                  cVal = $check.val();
+            if ( noticeCheck[ cName ] === undefined ) {
+              noticeCheck[ cName ] = cVal;
+            } else {
+              noticeCheck[ cName ] += ',' + cVal;
+            }
+          });
+          conductorData.conductor.NOTICE_INFO = noticeCheck;
+          noticeStatusUpdate();
+          editor.modalClose();
+        }
+        break;
+      case 'cancel':
+        editor.modalClose();
+        break;
+    }
+  });
+  
+};
+
+// Notice select
+$('#conductor-notice-select').on('click', function(){
+  editor.modalOpen('Notice list', modalNoticeList, 'notice' );
+});
 // Role select
 $('#conductor-role-select').on('click', function(){
   editor.modalOpen('Permission role select', modalRoleList, 'role' );
@@ -4378,6 +4523,8 @@ const panelConductorReset = function() {
   }
   $('#conductor-class-name-view').text('');
   $('#conductor-view-role').text( getRoleListIdToName( conductorData['conductor']['ACCESS_AUTH'] ) );
+  
+  noticeStatusUpdate();
 };
 
 // リセット
@@ -4573,7 +4720,8 @@ const loadConductor = function( loadConductorData, mode ) {
       $('#conductor-class-name-view').text( conductorData['conductor'].conductor_name );
       $('#conductor-class-note-view').text( conductorNoteText );
       $('#conductor-view-role').text( getRoleListIdToName( conductorData['conductor'].ACCESS_AUTH ) );
-
+      
+      noticeStatusUpdate();
       nodeReSet( conductorData );
       nodeViewAll( 0 );
       

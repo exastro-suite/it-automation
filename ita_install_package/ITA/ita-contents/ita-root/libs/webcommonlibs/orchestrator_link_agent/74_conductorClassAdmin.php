@@ -513,6 +513,34 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         }
         unset($objMLTxtVali);
 
+        #312
+        if( array_key_exists("NOTICE_INFO",$aryExecuteData) === true ){
+            
+            //通知設定ありの場合
+            if( count( $aryExecuteData['NOTICE_INFO'] ) != 0 ){
+                $steNoticeList = implode( ",", array_keys($aryExecuteData['NOTICE_INFO']) );
+
+                //通知の存在チェック
+                $retArray = $objOLA->getNoticeInfo( $steNoticeList );                
+                if( count($retArray[4]) == 0 ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $intErrorType = 2;
+                    $tmpnoticeIDs = implode(",",  array_keys($retArray[2]) );
+                    $strErrMsg = $objMTS->getSomeMessage("ITABASEH-ERR-5733205",array($tmpnoticeIDs));//"選択された通知が不正です。(". $tmpnoticeIDs .")";
+
+                }elseif( count($retArray[2]) != 0  ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $intErrorType = 2;
+                    $tmpnoticeIDs = implode(",",  array_keys($retArray[2]) );
+                    $strErrMsg = $objMTS->getSomeMessage("ITABASEH-ERR-5733205",array($tmpnoticeIDs));//"選択された通知が不正です。(". $tmpnoticeIDs .")";
+
+                }
+            }
+        }
+
+
         if( $strErrMsg != "" ){
             // エラーフラグをON
             // 例外処理へ

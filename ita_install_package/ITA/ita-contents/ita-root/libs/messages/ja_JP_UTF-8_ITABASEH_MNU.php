@@ -296,6 +296,8 @@ $ary["ITABASEH-MNU-203060"]         = "開始日時";
 $ary["ITABASEH-MNU-203070"]         = "[形式]YYYY/MM/DD HH:MM:SS";
 $ary["ITABASEH-MNU-203080"]         = "終了日時";
 $ary["ITABASEH-MNU-203090"]         = "[形式]YYYY/MM/DD HH:MM:SS";
+$ary["ITABASEH-MNU-203091"]         = "通知ログ";
+$ary["ITABASEH-MNU-203092"]         = "ログファイルを出力します。";
 $ary["ITABASEH-MNU-204010"]         = "表示順序";
 $ary["ITABASEH-MNU-204020"]         = "表示順序の制御用";
 $ary["ITABASEH-MNU-204030"]         = "選択";
@@ -693,6 +695,80 @@ $ary["ITABASEH-MNU-310224"]         = "ID変換失敗(";
 $ary["ITABASEH-MNU-310225"]         = "出力内容：";
 $ary["ITABASEH-MNU-310226"]         = "全件出力";
 $ary["ITABASEH-MNU-310227"]         = "差分のみ";
+$ary["ITABASEH-MNU-311000"]         = 'PHPのcURL 関数を使用して、通知処理を行います。<br>
+■Webhookを利用した通知の設定例<br>
+▼Teams / Slack　の例 <br>
+&nbsp -通知先(CURLOPT_URL) の入力例: <br>
+&nbsp&nbsp&nbsp&nbsp各サービスのWebhook URL を入力<br>
+&nbsp -ヘッダー(CURLOPT_HTTPHEADER)) の入力例: <br>
+&nbsp&nbsp&nbsp&nbsp[ "Content-Type: application/json" ]<br>
+&nbsp -メッセージ(CURLOPT_POSTFIELDS)) の入力例: <br>
+&nbsp&nbsp&nbsp&nbsp{"text": "通知名：__NOTICE_NAME__,  &lt;br&gt;Conductor名称: __CONDUCTOR_NAME__,  &lt;br&gt; ConductorインスタンスID:__CONDUCTOR_INSTANCE_ID__,&lt;br&gt; ステータス: __STATUS_NAME__, &lt;br&gt; 作業URL: __JUMP_URL__, &lt;br&gt; "}<br><br>
+
+※メッセージ(CURLOPT_POSTFIELDS)の入力形式、改行の表記方法については、各サービスのWebhookによるメッセージの送信についてご参照ください。<br>
+<br>
+■各設定項目について<br>
+<table>
+    <thead>
+        <tr><td>&nbsp</td><td>入力項目</td><td>:</td><td>説明</td></tr>
+    </thead>
+    <tbody>
+    <tr><td>&nbsp</td><td>通知先(CURLOPT_URL) </td><td>:</td><td>通知先のURLを入力してください。</td></tr>
+    <tr><td>&nbsp</td><td>ヘッダー(CURLOPT_HTTPHEADER) </td><td>:</td><td>ヘッダーを入力してください</td></tr>
+    <tr><td>&nbsp</td><td>メッセージ(CURLOPT_POSTFIELDS) </td><td>:</td><td>通知内容を入力してください</td></tr>
+    <tr><td>&nbsp</td><td>PROXY / URL(CURLOPT_PROXY) </td><td>:</td><td>PROXYの設定が必要な場合、URLを入力してください。</td></tr>
+    <tr><td>&nbsp</td><td>PROXY / PORT(CURLOPT_PROXYPORT) </td><td>:</td><td>PROXYの設定が必要な場合、PORTを入力してください。</td></tr>
+    <tr><td>&nbsp</td><td>作業確認URL(FQDN) </td><td>:</td><td>作業確認用URLの予約変数で使用する,FQDNを入力してください</td></tr>
+    <tr><td>&nbsp</td><td>その他 </td><td>:</td><td>JSON形式で入力してください。<br>（使用できるオプションについては、curl_setopt() に対応するもののみ使用可能です。<br>詳しくは、PHPのcURL 関数についてご参照ください。</td></tr>
+    </tbody>
+</table>
+<br>
+■メッセージ(CURLOPT_POSTFIELDS)にて以下の予約変数が利用可能です。　<br>
+<table>
+    <thead>
+        <tr><td>&nbsp</td><td>予約変数</td><td>:</td><td>項目名</td></tr>
+    </thead>
+    <tbody>
+        <tr><td>&nbsp</td><td>__CONDUCTOR_INSTANCE_ID__ </td><td>:</td><td>ConductorインスタンスID　</td></tr>
+        <tr><td>&nbsp</td><td>__CONDUCTOR_NAME__ </td><td>:</td><td>Conductorインスタンス名　</td></tr>
+        <tr><td>&nbsp</td><td>__OPERATION_ID__ </td><td>:</td><td>オペレーションID　</td></tr>
+        <tr><td>&nbsp</td><td>__OPERATION_NAME__ </td><td>:</td><td>オペレーション名　</td></tr>
+        <tr><td>&nbsp</td><td>__STATUS_ID__ </td><td>:</td><td>ステータスID　</td></tr>
+        <tr><td>&nbsp</td><td>__STATUS_NAME__ </td><td>:</td><td>ステータス名　</td></tr>
+        <tr><td>&nbsp</td><td>__EXECUTION_USER__ </td><td>:</td><td>実行ユーザー　</td></tr>
+        <tr><td>&nbsp</td><td>__TIME_BOOK__ </td><td>:</td><td>予約日時　</td></tr>
+        <tr><td>&nbsp</td><td>__TIME_START__ </td><td>:</td><td>開始日時　</td></tr>
+        <tr><td>&nbsp</td><td>__TIME_END__ </td><td>:</td><td>終了日時　</td></tr>
+        <tr><td>&nbsp</td><td>__JUMP_URL__ </td><td>:</td><td>作業確認URL　</td></tr>
+        <tr><td>&nbsp</td><td>__NOTICE_NAME__ </td><td>:</td><td>通知名称　</td></tr>
+    </tbody>
+</table>
+';
+$ary["ITABASEH-MNU-311001"]         = "Conductor通知先定義";
+$ary["ITABASEH-MNU-311002"]         = "通知名称";
+$ary["ITABASEH-MNU-311003"]         = "[最大長]128バイト";
+$ary["ITABASEH-MNU-311004"]         = "HTTPリクエストオプション";
+$ary["ITABASEH-MNU-311005"]         = "通知先(CURLOPT_URL)";
+$ary["ITABASEH-MNU-311006"]         = "通知先のURLです。";
+$ary["ITABASEH-MNU-311007"]         = "ヘッダー(CURLOPT_HTTPHEADER)";
+$ary["ITABASEH-MNU-311008"]         = "HTTP ヘッダフィールドをJSON形式で入力してください。";
+$ary["ITABASEH-MNU-311009"]         = "メッセージ(CURLOPT_POSTFIELDS)";
+$ary["ITABASEH-MNU-311010"]         = "通知先のサービスの仕様に沿って入力してください。";
+$ary["ITABASEH-MNU-311011"]         = "PROXY";
+$ary["ITABASEH-MNU-311012"]         = "URL(CURLOPT_PROXY)";
+$ary["ITABASEH-MNU-311013"]         = "PROXYの設定が必要な場合、URLを入力してください。";
+$ary["ITABASEH-MNU-311014"]         = "PORT(CURLOPT_PROXYPORT)";
+$ary["ITABASEH-MNU-311015"]         = "PROXYの設定が必要な場合、PORTを入力してください。";
+$ary["ITABASEH-MNU-311016"]         = "作業確認URL(FQDN)";
+$ary["ITABASEH-MNU-311017"]         = "作業確認用URLの予約変数で使用する,FQDNを入力してください。\n例:\nhttp://<FQDN>\nhttps://<FQDN>";
+$ary["ITABASEH-MNU-311018"]         = "その他";
+$ary["ITABASEH-MNU-311019"]         ='JSON形式で入力してください。\n使用できるオプションについては、curl_setopt() のオプションに対応するものは使用可能です。PHPのcURL 関数について参照してください。
+例：{"CURLOPT_CONNECTTIMEOUT": 10}';
+$ary["ITABASEH-MNU-311020"]         = "抑止期間";
+$ary["ITABASEH-MNU-311021"]         = "開始日時";
+$ary["ITABASEH-MNU-311022"]         = "Conductor作業実行時に、開始日時以降であれば、通知を抑止します。";
+$ary["ITABASEH-MNU-311023"]         = "終了日時";
+$ary["ITABASEH-MNU-311024"]         = "Conductor作業実行時に、終了日時以前であれば、通知を抑止します。";
 $ary["ITABASEH-MNU-900001"]         = "エクスポート";
 $ary["ITABASEH-MNU-900002"]         = "アップロード";
 $ary["ITABASEH-MNU-900003"]         = "インポート";

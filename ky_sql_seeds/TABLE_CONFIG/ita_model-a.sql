@@ -2184,6 +2184,63 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- Conductorインターフェース----
 
+
+
+-- ----Conductor通知先定義
+CREATE TABLE C_CONDUCTOR_NOTICE_INFO
+(
+NOTICE_ID                         %INT%                      ,
+
+NOTICE_NAME                       %VARCHR%(128)              ,
+
+NOTICE_URL                        %VARCHR%(512)              ,
+HEADER                            %VARCHR%(512)              ,
+FIELDS                            %VARCHR%(4000)             ,
+FQDN                              %VARCHR%(128)              ,
+PROXY_URL                         %VARCHR%(128)              ,
+PROXY_PORT                        %INT%                      ,
+OTHER                             %VARCHR%(256)              ,
+SUPPRESS_START                    %DATETIME6%                ,
+SUPPRESS_END                      %DATETIME6%                ,
+
+ACCESS_AUTH                       TEXT                       ,
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (NOTICE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_CONDUCTOR_NOTICE_INFO_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+
+NOTICE_ID                         %INT%                      ,
+
+NOTICE_NAME                       %VARCHR%(128)              ,
+
+NOTICE_URL                        %VARCHR%(512)              ,
+HEADER                            %VARCHR%(512)              ,
+FIELDS                            %VARCHR%(4000)             ,
+FQDN                              %VARCHR%(128)              ,
+PROXY_URL                         %VARCHR%(128)              ,
+PROXY_PORT                        %INT%                      ,
+OTHER                             %VARCHR%(256)              ,
+SUPPRESS_START                    %DATETIME6%                ,
+SUPPRESS_END                      %DATETIME6%                ,
+
+ACCESS_AUTH                       TEXT                       ,
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Conductor通知先定義----
+
 -- ----Conductorクラス(編集用)
 CREATE TABLE C_CONDUCTOR_EDIT_CLASS_MNG
 (
@@ -2191,6 +2248,7 @@ CONDUCTOR_CLASS_NO                %INT%                      ,
 
 CONDUCTOR_NAME                    %VARCHR%(256)              ,
 DESCRIPTION                       %VARCHR%(4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2212,6 +2270,7 @@ CONDUCTOR_CLASS_NO                %INT%                      ,
 
 CONDUCTOR_NAME                    %VARCHR%(256)              ,
 DESCRIPTION                       %VARCHR%(4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2352,6 +2411,7 @@ CONDUCTOR_CLASS_NO                %INT%                      ,
 
 CONDUCTOR_NAME                    %VARCHR%(256)              ,
 DESCRIPTION                       %VARCHR%(4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2373,6 +2433,7 @@ CONDUCTOR_CLASS_NO                %INT%                      ,
 
 CONDUCTOR_NAME                    %VARCHR%(256)              ,
 DESCRIPTION                       %VARCHR%(4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2522,6 +2583,8 @@ TIME_BOOK                         %DATETIME6%                ,
 TIME_START                        %DATETIME6%                ,
 TIME_END                          %DATETIME6%                ,
 EXEC_LOG                          TEXT                       ,
+I_NOTICE_INFO                     TEXT                       ,
+NOTICE_LOG                        %VARCHR%(256)              ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2555,6 +2618,8 @@ TIME_BOOK                         %DATETIME6%                ,
 TIME_START                        %DATETIME6%                ,
 TIME_END                          %DATETIME6%                ,
 EXEC_LOG                          TEXT                       ,
+I_NOTICE_INFO                     TEXT                       ,
+NOTICE_LOG                        %VARCHR%(256)              ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,

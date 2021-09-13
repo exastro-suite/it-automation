@@ -2184,6 +2184,63 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
 -- Conductorインターフェース----
 
+
+
+-- ----Conductor通知先定義
+CREATE TABLE C_CONDUCTOR_NOTICE_INFO
+(
+NOTICE_ID                         INT                        ,
+
+NOTICE_NAME                       VARCHAR (128)              ,
+
+NOTICE_URL                        VARCHAR (512)              ,
+HEADER                            VARCHAR (512)              ,
+FIELDS                            VARCHAR (4000)             ,
+FQDN                              VARCHAR (128)              ,
+PROXY_URL                         VARCHAR (128)              ,
+PROXY_PORT                        INT                        ,
+OTHER                             VARCHAR (256)              ,
+SUPPRESS_START                    DATETIME(6)                ,
+SUPPRESS_END                      DATETIME(6)                ,
+
+ACCESS_AUTH                       TEXT                       ,
+NOTE                              VARCHAR (4000)             , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                , -- 最終更新日時
+LAST_UPDATE_USER                  INT                        , -- 最終更新ユーザ
+
+PRIMARY KEY (NOTICE_ID)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+
+CREATE TABLE C_CONDUCTOR_NOTICE_INFO_JNL
+(
+JOURNAL_SEQ_NO                    INT                        , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              DATETIME(6)                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              VARCHAR (8)                , -- 履歴用変更種別
+
+NOTICE_ID                         INT                        ,
+
+NOTICE_NAME                       VARCHAR (128)              ,
+
+NOTICE_URL                        VARCHAR (512)              ,
+HEADER                            VARCHAR (512)              ,
+FIELDS                            VARCHAR (4000)             ,
+FQDN                              VARCHAR (128)              ,
+PROXY_URL                         VARCHAR (128)              ,
+PROXY_PORT                        INT                        ,
+OTHER                             VARCHAR (256)              ,
+SUPPRESS_START                    DATETIME(6)                ,
+SUPPRESS_END                      DATETIME(6)                ,
+
+ACCESS_AUTH                       TEXT                       ,
+NOTE                              VARCHAR (4000)             , -- 備考
+DISUSE_FLAG                       VARCHAR (1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             DATETIME(6)                , -- 最終更新日時
+LAST_UPDATE_USER                  INT                        , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8;
+-- Conductor通知先定義----
+
 -- ----Conductorクラス(編集用)
 CREATE TABLE C_CONDUCTOR_EDIT_CLASS_MNG
 (
@@ -2191,6 +2248,7 @@ CONDUCTOR_CLASS_NO                INT                        ,
 
 CONDUCTOR_NAME                    VARCHAR (256)              ,
 DESCRIPTION                       VARCHAR (4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          INT                        , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2212,6 +2270,7 @@ CONDUCTOR_CLASS_NO                INT                        ,
 
 CONDUCTOR_NAME                    VARCHAR (256)              ,
 DESCRIPTION                       VARCHAR (4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          INT                        , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2352,6 +2411,7 @@ CONDUCTOR_CLASS_NO                INT                        ,
 
 CONDUCTOR_NAME                    VARCHAR (256)              ,
 DESCRIPTION                       VARCHAR (4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          INT                        , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2373,6 +2433,7 @@ CONDUCTOR_CLASS_NO                INT                        ,
 
 CONDUCTOR_NAME                    VARCHAR (256)              ,
 DESCRIPTION                       VARCHAR (4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          INT                        , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2522,6 +2583,8 @@ TIME_BOOK                         DATETIME(6)                ,
 TIME_START                        DATETIME(6)                ,
 TIME_END                          DATETIME(6)                ,
 EXEC_LOG                          TEXT                       ,
+I_NOTICE_INFO                     TEXT                       ,
+NOTICE_LOG                        VARCHAR (256)              ,
 
 DISP_SEQ                          INT                        , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2555,6 +2618,8 @@ TIME_BOOK                         DATETIME(6)                ,
 TIME_START                        DATETIME(6)                ,
 TIME_END                          DATETIME(6)                ,
 EXEC_LOG                          TEXT                       ,
+I_NOTICE_INFO                     TEXT                       ,
+NOTICE_LOG                        VARCHAR (256)              ,
 
 DISP_SEQ                          INT                        , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -4612,6 +4677,10 @@ INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) 
 
 INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_BULK_EXCEL_TASK_JSQ',1,'2100000331',2100130332,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_CONDUCTOR_NOTICE_INFO_RIC',1,'2100180012',2100150015,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('C_CONDUCTOR_NOTICE_INFO_JSQ',1,'2100180012',2100150016,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
 
 INSERT INTO A_SYSTEM_CONFIG_LIST (ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000001,'IP_FILTER','IP address restrictions ',NULL,CONCAT('You can enable/disable the access control that has used the IP address','\n','You can edit the White list for controlling access on the IP address filter list menu ','\n','Blank: disable','\n','1: Enable'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_SYSTEM_CONFIG_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ITEM_ID,CONFIG_ID,CONFIG_NAME,VALUE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000001,'IP_FILTER','IP address restrictions ',NULL,CONCAT('You can enable/disable the access control that has used the IP address','\n','You can edit the White list for controlling access on the IP address filter list menu ','\n','Blank: disable','\n','1: Enable'),'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -4765,6 +4834,8 @@ INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRI
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-300330,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000330,2100000004,'Excel Bulk Import',NULL,NULL,NULL,1,0,2,2,80,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000331,2100000004,'Excel Bulk Export・Import list',NULL,NULL,NULL,1,0,1,2,80,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-300331,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000331,2100000004,'Excel Bulk Export・Import list',NULL,NULL,NULL,1,0,1,2,80,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100180012,2100090001,'Conductor notification definition',NULL,NULL,NULL,1,0,1,1,15,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-326,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100180012,2100090001,'Conductor notification definition',NULL,NULL,NULL,1,0,1,1,15,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_ROLE_LIST (ROLE_ID,ROLE_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'System Administrator','System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROLE_ID,ROLE_NAME,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'System Administrator','System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -4924,6 +4995,8 @@ INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-300330,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000330,1,2100000330,2,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000331,1,2100000331,2,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-300331,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000331,1,2100000331,2,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100180012,1,2100180012,1,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-300332,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100180012,1,2100180012,1,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_ROLE_ACCOUNT_LINK_LIST (LINK_ID,ROLE_ID,USER_ID,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,1,1,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_ACCOUNT_LINK_LIST_JNL  (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,USER_ID,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,1,1,'System Administrator','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
