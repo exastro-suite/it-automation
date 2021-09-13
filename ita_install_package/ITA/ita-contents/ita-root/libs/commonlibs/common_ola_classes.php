@@ -8597,12 +8597,10 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
 
         ////////////////////////////////
         // ルートディレクトリを取得   //
-        ////////////////////////////////
-        if ( empty($root_dir_path) ){
-            $root_dir_temp = array();
-            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
-            $root_dir_path = $root_dir_temp[0] . "ita-root";
-        }
+        ////////////////////////////////       
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
 
         try{
             $objMTS = $this->getMessageTemplateStorage();
@@ -8635,7 +8633,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                 $restApiResponseInfo = "";
 
                 //抑止期間ありなら比較用に
-                if( isset($tmpNotice['SUPPRESS_START']) && isset($tmpNotice['SUPPRESS_END']) ){
+                if( array_key_exists('SUPPRESS_START', $tmpNotice) &&  array_key_exists('SUPPRESS_START', $tmpNotice) ){
                     //日時(strtotime)
                     $nowDate = strtotime( date('Y/m/d H:i:s.u') );
                     $suppressStartDate = strtotime( $tmpNotice['SUPPRESS_START'] );
@@ -8643,20 +8641,19 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                 }
 
                 //抑止期間設定あり
-                if( $suppressStartDate != "" || $suppressStartDate != "" ){
+                if( $suppressStartDate != "" || $suppressEndDate != "" ){
                     if( $suppressStartDate < $nowDate && $nowDate < $suppressEndDate  ){
                         //抑止期間中
                         $suppressflg = 1; //抑止
                     }elseif ( $nowDate < $suppressStartDate && $nowDate > $suppressEndDate ){
                         //抑止開始が未来 , 抑止終了が過去
                         $suppressflg = "";
-                    }elseif ( $nowDate < $suppressStartDate ){
-                        $suppressflg = "";
-                    }elseif ( $nowDate > $suppressEndDate ){
-                        $suppressflg = "";
+                    }elseif ( $nowDate > $suppressStartDate ){
+                        $suppressflg = 1;
+                    }elseif ( $nowDate < $suppressEndDate ){
+                        $suppressflg = 1;
                     }
                 }
-
                 //抑止フラグOFF時
                 if( $suppressflg == "" ){
                     //通知名の初期化
@@ -8824,7 +8821,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
             }
 
             if( $aryRetBody[1] !== null ){
-                $strErrMsg = $objMTS->getSomeMessage("ITABASEH-STD-171003",array($strNoticeStatus) );//"通知対象が不正なため、通知処理をSKIPしました。";
+                $strErrMsg = $objMTS->getSomeMessage("ITABASEH-STD-171003" );//"通知対象が不正なため、通知処理をSKIPしました。";
                 // 例外処理へ
                 $strErrStepIdInFx="00000100";
                 throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );

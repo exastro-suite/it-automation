@@ -184,9 +184,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     $boolExecuteContinue = false;
                     //廃止の場合はチェックしない----
                 }else{
-                    if( strlen($intContrastId) === 0 ){
-                        $boolSystemErrorFlag = true;
-                    }
+                    $boolSystemErrorFlag = true;
                 }
 
                 //更新前のレコードから、各カラムの値を取得----
