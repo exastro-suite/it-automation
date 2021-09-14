@@ -4579,7 +4579,7 @@ class OrchestratorLinkAgent {
         }
 
         #312
-        $arr_json['conductor']['NOTICE_INFO'] = "";
+        $arr_json['conductor']['NOTICE_INFO'] = array();
         if( isset( $arrConductorData['NOTICE_INFO'] )  == true ){
             $arr_json['conductor']['NOTICE_INFO']= json_decode( $arrConductorData['NOTICE_INFO'] , true );
         }
