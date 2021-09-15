@@ -2276,10 +2276,10 @@ class SingleDefaultValueValidator extends SingleTextValidator {
                     //文字列(単一行)の場合のみ正規表現チェック
                     if($inputMethodId == 1){
                         // 正規表現と初期値の条件一致をチェック
-                        if($pregMatch != ''){
+                        if(@preg_match($pregMatch, "") !== false && $pregMatch != ''){
                             if(preg_match($pregMatch, $value) !== 1){
                                 $retBool = false;
-                                $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-125");
+                                $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1253");
                             }
                         }
                     }
@@ -2356,7 +2356,7 @@ class MultiDefaultValueValidator extends MultiTextValidator {
                     }
 
                     // 正規表現と初期値の条件一致をチェック
-                    if($pregMatch != ''){
+                    if(@preg_match($pregMatch, "") !== false && $pregMatch != ''){
                         if(preg_match($pregMatch, $value) !== 1){
                             $retBool = false;
                             $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1253");
