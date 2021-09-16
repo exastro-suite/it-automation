@@ -62,6 +62,19 @@
         require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/web_parts_db_access_exception.php");
     }
     
+    //----デフォルトのロードテーブル関数をコレクション
+    $systemFile = "{$g['root_dir_path']}/webconfs/systems/{$g['page_dir']}_loadTable.php";
+    $userFile = "{$g['root_dir_path']}/webconfs/users/{$g['page_dir']}_loadTable.php";
+    if(file_exists($systemFile)){
+        require_once($systemFile);
+    }
+    else if(file_exists($userFile)){
+        require_once($userFile);
+    }
+
+    $objTable = loadTable();
+    
+    require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/99_functions_for_rest_request.php");
     require_once ( $g['root_dir_path'] . "/libs/webindividuallibs/systems/{$g['page_dir']}/07_front_ref_lib.php" );
 
     $intResultStatusCode = $aryForResultData[0]['ResultStatusCode'];

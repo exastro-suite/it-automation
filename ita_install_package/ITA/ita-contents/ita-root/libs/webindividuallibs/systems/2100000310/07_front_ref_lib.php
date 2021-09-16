@@ -22,17 +22,21 @@
 
     require_once( dirname(__FILE__) ."/82_symphony_download.php" );
 
-    if( is_array($objJSONOfReceptedData) !== true ){
-      $intResultStatusCode = 400;
-      $arrayRetBody = $g['requestByREST']['preResponsContents']['errorInfo'];
-      $arrayRetBody['Error'] = array();
-      $arrayRetBody['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
-      $arrayRetBody['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
-      $aryForResultData[0] = array('ResultStatusCode'=>$intResultStatusCode,
-                                   'ResultData'=>$arrayRetBody);
-      $aryForResultData[1] = null;
+    if($strCommand == "INFO" || $strCommand == "FILTER" || $strCommand == "FILTER_DATAONLY"){
+      $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable,true);
     }else{
-      $aryForResultData = symphonyDownloadFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData,true);
+      if( is_array($objJSONOfReceptedData) !== true ){
+        $intResultStatusCode = 400;
+        $arrayRetBody = $g['requestByREST']['preResponsContents']['errorInfo'];
+        $arrayRetBody['Error'] = array();
+        $arrayRetBody['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+        $arrayRetBody['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+        $aryForResultData[0] = array('ResultStatusCode'=>$intResultStatusCode,
+                                     'ResultData'=>$arrayRetBody);
+        $aryForResultData[1] = null;
+      }else{
+        $aryForResultData = symphonyDownloadFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData,true);
+      }
     }
     
 ?>

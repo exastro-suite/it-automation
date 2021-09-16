@@ -15,7 +15,7 @@
 //
 global $g;
 
-function symphonyDownloadFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData){
+function conductorDownloadFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData){
     global $g;
     $tmpAry=explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);
   
