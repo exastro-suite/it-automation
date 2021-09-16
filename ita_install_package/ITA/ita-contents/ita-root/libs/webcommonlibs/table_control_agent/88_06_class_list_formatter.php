@@ -229,6 +229,8 @@ class CSVFormatter extends ListFormatter {
 
         $objREBFColumn = $aryObjColumn[$lcRequiredRowEditByFileColumnId];
 
+        $passwordMaskStr = "********";
+
         if( $strOutputFileType == "SafeCSV" ){
             //----SafeCSVモード出力の場合
 
@@ -299,7 +301,17 @@ class CSVFormatter extends ListFormatter {
                             }
                             //----Class(CSVBFmt系)
                             if( $historyCsvFlg != 1 || ($objColumn->getID() != $lcRequiredUpdateDate4UColumnId && $objColumn->getID() != $lcRequiredRowEditByFileColumnId) ){
-                                $arrayFocusRow[] = $objColumn->getOutputBody($this->strFormatterId,$objRow->getRowData());
+                                //IDColumn系かつprint_tableに表示する文字列が『********』なら値を空に上書き。（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                                $printStaticText = "";
+                                if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                                    $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                                }
+
+                                if( is_a($objColumn, "IDColumn") === true && $printStaticText == $passwordMaskStr){
+                                    $arrayFocusRow[] = "";
+                                }else{
+                                    $arrayFocusRow[] = $objColumn->getOutputBody($this->strFormatterId,$objRow->getRowData());
+                                }
                             }
                             //Class(CSVBFmt系)----
                         }
@@ -549,6 +561,8 @@ class CSVFormatter extends ListFormatter {
 
         $strHeaderType = $this->getGeneValue("csvHeaderType");
 
+        $passwordMaskStr = "********";
+
         if($boolUPDColHide !== true){
             $intIDColumnLen += 1;
 
@@ -569,7 +583,13 @@ class CSVFormatter extends ListFormatter {
         }
         foreach($aryObjColumn as $objColumn){
             if( $objColumn->getOutputType($this->strFormatterId)->isVisible() === true ){
-                if(is_a($objColumn, "IDColumn") === true ){
+                //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ。（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                $printStaticText = "";
+                if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                    $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                }
+
+                if(is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
 
                     $intIDColumnLen += 1;
 
@@ -993,6 +1013,8 @@ class JSONFormatter extends ListFormatter {
 
         $aryRowsOfDataHeader = $this->getLabelListOfOpendColumn();
 
+        $passwordMaskStr = "********";
+
         //----ここからレコード本体行を処理
         $aryRowsOfData = array();
         $aryUploadFile = array();
@@ -1024,6 +1046,16 @@ class JSONFormatter extends ListFormatter {
 
                     }
                     // RBAC対応 ----
+
+                    //IDColumn系かつprint_tableに表示する文字列が『********』なら値を空に上書き。（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                    $printStaticText = "";
+                    if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                        $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                    }
+
+                    if( is_a($objColumn, "IDColumn") === true && $printStaticText == $passwordMaskStr){
+                        $arrayFocusRow[$intPrinteSeq] = "";
+                    }
 
                     // アップロードファイルがある場合、中身を復号化する
                     if("FileUploadColumn" === get_class($objColumn)){
@@ -1295,6 +1327,8 @@ class ExcelFormatter extends ListFormatter {
         $aryObjColumn = $this->objTable->getColumns();
         $objREBFColumn = $aryObjColumn[$lcRequiredRowEditByFileColumnId];
 
+        $passwordMaskStr = "********";
+
         $sheet = $X->createSheet();
         if( $mode == 0 ){
             $sheet->setTitle($strTextExplain01);
@@ -1314,7 +1348,14 @@ class ExcelFormatter extends ListFormatter {
             //----ヘッダを追加
             $sheet->setCellValue(self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet,1), $objColumn->getColLabel(true));
             //ヘッダを追加----
-            if( is_a($objColumn, "IDColumn") === true ){
+
+            //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+            $printStaticText = "";
+            if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+            }
+
+            if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
                 $intFocusRowOfMasterSheet = self::DATA_START_ROW_ON_MASTER;
                 if( $mode == 0 ){
                     //----入力制限版をフィルタに設定する
@@ -1872,6 +1913,8 @@ class ExcelFormatter extends ListFormatter {
         $strFormula1FilterID = "";             // マスターテーブルのID文字列用変数 setFormula1引数用の結合文字列に利用
         $aryValidationCellPropaties = array();
 
+        $passwordMaskStr = "********";
+
         $i_col = 0;
         foreach($aryObjColumn as $objColumn){
             if( $objColumn->getID() == $lcRequiredRowEditByFileColumnId ){
@@ -1884,7 +1927,13 @@ class ExcelFormatter extends ListFormatter {
             // データシート開始行フェッチ時初回のみバリデーション設定列情報を取得
             if( $intEditSheetRecordCount === 0 ){
 
-                if( is_a($objColumn, "IDColumn") === true ){
+                //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                $printStaticText = "";
+                if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                    $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                }
+
+                if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
                     //----IDColumnは文字をマスタテーブルのIDに置き換える。
                     if($varMinorPrintTypeMode == ""){
 
@@ -1932,6 +1981,15 @@ class ExcelFormatter extends ListFormatter {
                         $rowData = $row->getRowData();
                         $inputType=0;
                         $focusValue = $objColumn->getOutputBody($this->strPrintTargetListFormatterId, $rowData);
+
+                        //IDColumn系かつprint_tableに表示する文字列が『********』なら$focusValueに空を上書き。（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                        $printStaticText = "";
+                        if(method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                            $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                        }
+                        if(is_a($objColumn, "IDColumn") === true && $printStaticText == $passwordMaskStr){
+                            $focusValue = "";
+                        }
 
                         if( get_class($objColumn) == "NumColumn" ){
                             $inputType = 1;
@@ -2143,6 +2201,8 @@ class ExcelFormatter extends ListFormatter {
         $strFormula1FilterID = "";             // マスターテーブルのID用変数 setFormula1用の結合文字列に利用
         $aryValidationCellPropaties = array();
 
+        $passwordMaskStr = "********";
+
         // ---- RBAC対応
         $RoleList = array();
         $obj = new RoleBasedAccessControl($g['objDBCA']);
@@ -2176,7 +2236,13 @@ class ExcelFormatter extends ListFormatter {
                 }
             }
             // RBAC対応 ----
-            if( is_a($objColumn, "IDColumn") === true ){
+
+            //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+            $printStaticText = "";
+            if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+            }
+            if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
                 //----IDColumnは文字をマスタテーブルのIDに置き換える。
                 if($varMinorPrintTypeMode == ""){
                     $strFormula1FilterID = $objColumn->getID();
@@ -2322,6 +2388,8 @@ class ExcelFormatter extends ListFormatter {
         $strFormula1FilterID = "";             // マスターテーブルのID用変数 setFormula1用の結合文字列に利用
         $aryValidationCellPropaties = array();
 
+        $passwordMaskStr = "********";
+
         // ---- RBAC対応
         $RoleList = array();
         $obj = new RoleBasedAccessControl($g['objDBCA']);
@@ -2355,7 +2423,13 @@ class ExcelFormatter extends ListFormatter {
                 }
             }
             // RBAC対応 ----
-            if( is_a($objColumn, "IDColumn") === true ){
+
+            //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+            $printStaticText = "";
+            if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+            }
+            if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
                 //----IDColumnは文字をマスタテーブルのIDに置き換える。
                 if($varMinorPrintTypeMode == ""){
                     $strFormula1FilterID = $objColumn->getID();

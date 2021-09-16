@@ -227,7 +227,7 @@ const getWidgetItem = function( widgetID ) {
         'background': '0',
         'unique': '0',
         'data': {
-          'image': '/common/imgs/ita_icon.png',
+          'image': '/common/imgs/widget_default_image.png',
           'link': '',
           'target': '_blank'
         }
@@ -414,12 +414,17 @@ const deselection = function() {
 //   Widget HTML
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// ショートカットリストHTML
 const getWidgetShortcutHTML = function( shortcutList ) {
     const shortcutLength = shortcutList.length;
     let shortcutHTML = '<ul class="shortcut-list">';
     for ( let i = 0; i < shortcutLength; i++ ) {
+      const href = encodeURI( shortcutList[i]['url'] ),
+            target = editor.textEntities( shortcutList[i]['target'], false ),
+            text = editor.textEntities( shortcutList[i]['name'], false ).replace(/^ | $/g, '&nbsp');
       shortcutHTML += '<li class="shortcut-item" data-link-id="' + shortcutCount + '">'
-        + '<a class="shortcut-link" href="' + encodeURI( shortcutList[i]['url'] ) + '" target="' + editor.textEntities( shortcutList[i]['target'] ) + '">' + editor.textEntities( shortcutList[i]['name'] ) + '</a>'
+        + '<a class="shortcut-link" href="' + href + '" target="' + target + '">' + text + '</a>'
         + '</li>';
       shortcutCount++;
     }
@@ -427,6 +432,8 @@ const getWidgetShortcutHTML = function( shortcutList ) {
     
     return shortcutHTML;
 };
+
+// Widget基本HTML
 const getWidgetHTML = function( widgetSetID, widgetData ) {
 
     const loadingWaitHTML = '<div class="widget-loading"></div>';
@@ -731,7 +738,7 @@ const getWidgetData = function( setID ) {
               'name': $link.text(),
               'url': decodeURI( $link.attr('href') ),
               'target': $link.attr('target')
-            }
+            };
           });
           newWidgetInfo['data']['link_col_number'] = $widget.attr('data-link-col');
           } break;
@@ -745,8 +752,9 @@ const getWidgetData = function( setID ) {
           const link = decodeURI( $widget.find('.widget-image-link').attr('href') ),
                 target = $widget.find('.widget-image-link').attr('target')
           newWidgetInfo['data']['image'] = decodeURI( $widget.find('.widget-image').attr('src') );
-          newWidgetInfo['data']['link'] = ( link === undefined )? '': link;
-          newWidgetInfo['data']['target'] = ( target === undefined )? '': target;
+          newWidgetInfo['data']['link'] = ( link === undefined || link === 'undefined')? '': link;
+          newWidgetInfo['data']['target'] = ( target === undefined || link === 'undefined')? '': target;
+          console.log(newWidgetInfo['data']['link'])
           } break;
         case '10':
           newWidgetInfo['data']['days'] = $widget.attr('data-days');
@@ -831,7 +839,6 @@ const setWidgetSpan = function( area, row, col, setID ) {
     }
   }
 };
-
 
 const widgetMenuButton = function() {
 
@@ -1072,9 +1079,9 @@ const editWidget = function( setID ) {
     case '3': {
       const getShortcutInputRow = function( name, url, target ) {
         return '<tr class="edit-shortcut-row">'
-          + '<td class="edit-shortcut-cell edit-shortcut-name"><input data-max-length="32" class="edit-shortcut-input edit-shortcut-input-name" type="text" value="' + editor.textEntities( name ) + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-url"><input data-max-length="256" class="edit-shortcut-input edit-shortcut-input-url" type="text" value="' + editor.textEntities( url ) + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-target"><input data-max-length="16" class="edit-shortcut-input edit-shortcut-input-target" type="text" value="' + editor.textEntities( target ) + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-name"><input data-max-length="32" class="edit-shortcut-input edit-shortcut-input-name" type="text" value="' + editor.textEntities( name, false ) + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-url"><input data-max-length="256" class="edit-shortcut-input edit-shortcut-input-url" type="text" value="' + editor.textEntities( url, false ) + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-target"><input data-max-length="16" class="edit-shortcut-input edit-shortcut-input-target" type="text" value="' + editor.textEntities( target, false ) + '"></td>'
           + '<td class="edit-shortcut-cell edit-shortcut-remove"><button type="button" class="edit-shortcut-button" data-type="remove"><span class="cross-mark"></span></button></td>'
         + '</tr>';
       };

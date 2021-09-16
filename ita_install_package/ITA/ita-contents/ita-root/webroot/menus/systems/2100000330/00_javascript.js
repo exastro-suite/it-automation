@@ -123,6 +123,22 @@ $(function(){
         }
     }
 
+    // インポート可能なメニューがあるかチェック
+    importableMenuCheck();
+    function importableMenuCheck() {
+        let checkboxList = document.getElementsByClassName('menu_id_checkbox');
+        let importableMenuFlg = false;
+        for (let i = 0; i < checkboxList.length; i++) {
+            if (checkboxList[i].disabled == false) {
+                importableMenuFlg = true;
+            }
+        }
+        if (!importableMenuFlg) {
+            $('#importMsg').text(getSomeMessage('ITABASEC090003'));
+            $('#importButton').prop("disabled", true);
+            $("#import_whole").prop("disabled", true);
+        }
+    }
 
     show('SetsumeiMidashi', 'SetsumeiNakami');
     show('Mix2_Midashi', 'Mix2_Nakami');

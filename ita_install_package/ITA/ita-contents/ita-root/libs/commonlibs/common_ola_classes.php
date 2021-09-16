@@ -2520,6 +2520,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"DATETIME",
             "TIME_START"=>"DATETIME",
             "TIME_END"=>"DATETIME",
+            "I_NOTICE_INFO"=>"",
             "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
@@ -3042,6 +3043,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"DATETIME",
             "TIME_START"=>"DATETIME",
             "TIME_END"=>"DATETIME",
+            "I_NOTICE_INFO"=>"",
             "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
@@ -3067,6 +3069,7 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"",
             "TIME_START"=>"",
             "TIME_END"=>"",
+            "I_NOTICE_INFO"=>"",
             "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
@@ -3218,7 +3221,33 @@ class OrchestratorLinkAgent {
             $register_tgt_row['I_DESCRIPTION']         = $aryRowOfSymClassTable['DESCRIPTION'];
             $register_tgt_row['ACCESS_AUTH']           = $aryRowOfSymClassTable['ACCESS_AUTH'];
 
-            //上位アクセス権継承
+            #312
+            $arrNoticeInfo = array();
+            $tmpNoticeInfo = array();
+            $strNoticeList = implode( ",", array_keys( json_decode($aryRowOfSymClassTable['NOTICE_INFO'],true)  ) );
+            
+            //通知情報取得
+            $retArray = $this->getNoticeInfo($strNoticeList);
+            if( $retArray[0] === true ){
+                $arrNoticeRows = $retArray[4];
+                foreach ( $arrNoticeRows as $arrNoticeRow ) {
+                    $arrNoticeInfo[ $arrNoticeRow['NOTICE_ID'] ] = $arrNoticeRow['NOTICE_NAME'];
+                } 
+            }
+            //通知対象ステータス取得
+            $retArray = $this->getInfoOfNoticeStatusList();
+            if( $retArray[0] === true ){
+                $arrNoticeStatusRows = $retArray[4];
+                foreach ( $arrNoticeStatusRows as $arrNoticeStatusRow ) {
+                    $tmpNoticeInfo["STATUS_NAME"][ $arrNoticeStatusRow['SYM_EXE_STATUS_ID'] ] = $arrNoticeStatusRow['SYM_EXE_STATUS_NAME'];
+                } 
+            }
+            $tmpNoticeInfo['NOTICE_INFO'] = json_decode($aryRowOfSymClassTable['NOTICE_INFO'],true);
+            $tmpNoticeInfo['NOTICE_NAME'] = $arrNoticeInfo;
+
+            $register_tgt_row['I_NOTICE_INFO'] = json_encode($tmpNoticeInfo,JSON_UNESCAPED_UNICODE);
+
+            //上位アクセス権継承 
             if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
                 $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
             }
@@ -3980,6 +4009,7 @@ class OrchestratorLinkAgent {
                 "CONDUCTOR_CLASS_NO"=>"",
                 "CONDUCTOR_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "NOTICE_INFO"=>"",
                 "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
@@ -3995,6 +4025,7 @@ class OrchestratorLinkAgent {
                 "CONDUCTOR_CLASS_NO"=>"",
                 "CONDUCTOR_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "NOTICE_INFO"=>"",
                 "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
@@ -4547,6 +4578,11 @@ class OrchestratorLinkAgent {
             $arr_json['conductor']['ACCESS_AUTH']=$arrConductorData['ACCESS_AUTH'];
         }
 
+        #312
+        $arr_json['conductor']['NOTICE_INFO'] = array();
+        if( isset( $arrConductorData['NOTICE_INFO'] )  == true ){
+            $arr_json['conductor']['NOTICE_INFO']= json_decode( $arrConductorData['NOTICE_INFO'] , true );
+        }
 
         $intNodeNumber=0;
         $intTerminalNumber=0;
@@ -5186,6 +5222,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "CONDUCTOR_CLASS_NO"=>"",
         "CONDUCTOR_NAME"=>"",
         "DESCRIPTION"=>"",
+        "NOTICE_INFO"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -5200,6 +5237,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "CONDUCTOR_CLASS_NO"=>"",
         "CONDUCTOR_NAME"=>"",
         "DESCRIPTION"=>"",
+        "NOTICE_INFO"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -5446,6 +5484,20 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row['DISUSE_FLAG']       = '0';
             $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
 
+            #312 
+            $register_tgt_row['NOTICE_INFO'] = "";
+            if(isset($aryExecuteData['NOTICE_INFO'])){
+                //通知チェック,廃止除外
+                $retArray = $this->getNoticeInfo( implode( ",", array_keys($aryExecuteData['NOTICE_INFO']) ) );
+                $tmpnoticeIDs = array_keys($retArray[2]);
+                if( $tmpnoticeIDs !== array() ){
+                    foreach ($tmpnoticeIDs as $tmpnoticeID ) {
+                        unset($aryExecuteData['NOTICE_INFO'][$tmpnoticeID]);
+                    }
+                }
+              $register_tgt_row['NOTICE_INFO']       = json_encode( $aryExecuteData['NOTICE_INFO'] );
+            }
+
             $register_tgt_row['ACCESS_AUTH'] = "";
 
             if( isset( $aryExecuteData['ACCESS_AUTH'] ) === true ){
@@ -5490,6 +5542,20 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             }
             $register_tgt_row['DISUSE_FLAG']       = '0';
             $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
+
+            #312 
+            $register_tgt_row['NOTICE_INFO'] = "";
+            if(isset($aryExecuteData['NOTICE_INFO'])){
+                //通知チェック,廃止除外
+                $retArray = $this->getNoticeInfo( implode( ",", array_keys($aryExecuteData['NOTICE_INFO']) ) );
+                $tmpnoticeIDs = array_keys($retArray[2]);
+                if( $tmpnoticeIDs !== array() ){
+                    foreach ($tmpnoticeIDs as $tmpnoticeID ) {
+                        unset($aryExecuteData['NOTICE_INFO'][$tmpnoticeID]);
+                    }
+                }
+                $register_tgt_row['NOTICE_INFO']       = json_encode( $aryExecuteData['NOTICE_INFO'] );
+            }
 
             $register_tgt_row['ACCESS_AUTH'] = "";
             if( isset( $aryExecuteData['ACCESS_AUTH'] )  == true ){
@@ -8372,6 +8438,596 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
 
         return $retArray;
     }
+
+//----通知の取得 #312 
+    function getNoticeInfo($strNoticeList,$intSearchMode=0){
+        /////////////////////////////////////////////////////////////
+        // 通知の取得                                //
+        /////////////////////////////////////////////////////////////
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $aryRowOfNotificationTable = array();
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+        //
+        try{
+            #/*
+            $objDBCA = $this->getDBConnectAgent();
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            $objMTS = $this->getMessageTemplateStorage();
+
+            #$tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
+            #$strSelectMaxLastUpdateTimestamp = "";#"CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
+
+            // ----全行および全行中、最後に更新された日時を取得する
+            $arrayConfigForSelect = array(
+                "JOURNAL_SEQ_NO" => "" ,
+                "JOURNAL_REG_DATETIME" => "",
+                "JOURNAL_ACTION_CLASS" => "",
+                "NOTICE_ID" => "" ,
+                "NOTICE_NAME" => "" ,
+                "NOTICE_URL" => "" ,
+                "HEADER" => "" ,
+                "FIELDS" => "" ,
+                "PROXY_URL" => "" ,
+                "PROXY_PORT" => "" ,
+                "FQDN" => "" ,
+                "OTHER" => "" ,
+                "SUPPRESS_START" => "" ,
+                "SUPPRESS_END" => "" ,
+                "ACCESS_AUTH" => "" ,
+                "NOTE" => "" ,
+                "DISUSE_FLAG" => "" ,
+                "LAST_UPDATE_TIMESTAMP" => "" ,
+                "LAST_UPDATE_USER" => "" ,
+            );
+
+            $arrayValueTmpl = array(
+                "JOURNAL_SEQ_NO" => "" ,
+                "JOURNAL_REG_DATETIME" => "",
+                "JOURNAL_ACTION_CLASS" => "",
+                "NOTICE_ID" => "" ,
+                "NOTICE_NAME" => "" ,
+                "NOTICE_URL" => "" ,
+                "HEADER" => "" ,
+                "FIELDS" => "" ,
+                "PROXY_URL" => "" ,
+                "PROXY_PORT" => "" ,
+                "FQDN" => "" ,
+                "OTHER" => "" ,
+                "SUPPRESS_START" => "" ,
+                "SUPPRESS_END" => "" ,
+                "ACCESS_AUTH" => "" ,
+                "NOTE" => "" ,
+                "DISUSE_FLAG" => "" ,
+                "LAST_UPDATE_TIMESTAMP" => "" ,
+                "LAST_UPDATE_USER" => "" ,
+            );
+            $arrayValue = $arrayValueTmpl;
+
+            $strSelectMode = "SELECT";
+            $strSelectForUpdateLock = "";
+            $strColumnIdForSearch = "NOTICE_ID";
+            #*/
+            $arrNotificationList = explode(",", $strNoticeList);
+
+            foreach ($arrNotificationList as $NotificationId ) {
+                
+                $temp_array = array('WHERE'=>"{$strColumnIdForSearch} = :{$strColumnIdForSearch} AND DISUSE_FLAG IN ('0') {$strSelectForUpdateLock}");
+
+                $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
+                                                    ,$strSelectMode
+                                                    ,"NOTICE_ID"
+                                                    ,"C_CONDUCTOR_NOTICE_INFO"
+                                                    ,"C_CONDUCTOR_NOTICE_INFO_JNL"
+                                                    ,$arrayConfigForSelect
+                                                    ,$arrayValue
+                                                    ,$temp_array );
+                $sqlUtnBody = $retArray[1];
+                $arrayUtnBind = $retArray[2];
+
+                $arrayUtnBind[$strColumnIdForSearch] = $NotificationId;
+
+                $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);    
+                 
+                if( $retArray[0]!==true ){
+                    $intErrorType = $retArray[1];
+                    $aryErrMsgBody = $retArray[2];
+                    $strErrMsg = $retArray[4];
+                    // 例外処理へ
+                    $strErrStepIdInFx="00000200";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                $objQueryUtn =& $retArray[3];
+ 
+                //----発見行だけループ
+                $intCount = 0;
+                $aryRowOfTable = array();
+                while ( $row = $objQueryUtn->resultFetch() ){
+                    if( $intCount==0 ){
+                        $aryRowOfTable = $row;
+                    }
+                    $intCount += 1;
+                }
+                //発見行だけループ----
+
+                if( $intCount == 1 ){
+                    $aryRowOfNotificationTable[] =  $aryRowOfTable;
+                }else{
+                    $aryErrMsgBody[$NotificationId] = $objMTS->getSomeMessage("ITABASEH-STD-171004",array($NotificationId) );//"対象の通知が見つかりません。レコードが廃止されている可能性があります。()"
+                }
+                unset($objQueryUtn);
+                unset($retArray);
+            }
+            if( count($aryRowOfNotificationTable) == 0 ){
+                $boolRet = false;
+            }else{
+                $boolRet = true;
+            }
+
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfNotificationTable);
+        return $retArray;
+    }
+//通知の取得----
+
+//----通知実行 #312 
+    function execNotice($arrNoticeRows,$arrDefinedList=array() ){
+        /////////////////////////////////////////////////////////////
+        // 通知実行(curl_exec)                                //
+        /////////////////////////////////////////////////////////////
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $aryRowOfexecNotification = array();
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+
+        ////////////////////////////////
+        // ルートディレクトリを取得   //
+        ////////////////////////////////       
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+
+        try{
+            $objMTS = $this->getMessageTemplateStorage();
+
+            //作業No
+            $execNo  = $arrDefinedList['__CONDUCTOR_INSTANCE_ID__'];
+            //通知結果　ログ出力先
+            $tmpNoticelogdir = $root_dir_path . "/uploadfiles/2100180006/NOTICE_LOG/" . sprintf('%010d', $execNo) ;
+            $tmpNoticelogfile = "NoticeLog_". sprintf('%010d', $execNo) . ".log" ;
+            $logPath = $tmpNoticelogdir . "/" . $tmpNoticelogfile;
+
+            //ログ出力先チェック、ディレクトリ作成
+            if( !is_dir($tmpNoticelogdir) ){
+                if ( mkdir($tmpNoticelogdir,0777,true) ){
+                    chmod($tmpNoticelogdir, 0777);
+                }
+            }
+
+            foreach( $arrNoticeRows as $tmpNotice ){
+
+                $suppressflg = "";
+                $nowDate = "";
+                $suppressStartDate = "";
+                $suppressEndDat = "";
+                $subject = "";
+                $arrNoticeResult = array();
+                $strURL = "";
+
+                $restApiResponse = "";
+                $restApiResponseInfo = "";
+
+                //抑止期間ありなら比較用に
+                if( array_key_exists('SUPPRESS_START', $tmpNotice) &&  array_key_exists('SUPPRESS_END', $tmpNotice) ){
+                    //日時(strtotime)
+                    $nowDate = strtotime( date('Y/m/d H:i:s.u') );
+                    $suppressStartDate = strtotime( $tmpNotice['SUPPRESS_START'] );
+                    $suppressEndDate = strtotime( $tmpNotice['SUPPRESS_END'] );
+                }
+
+                //抑止期間設定あり
+                if( $suppressStartDate != "" || $suppressEndDate != "" ){
+                    if( $suppressStartDate < $nowDate && $nowDate < $suppressEndDate  ){
+                        //抑止期間中
+                        $suppressflg = 1; //抑止
+                    }elseif ( $nowDate < $suppressStartDate && $nowDate > $suppressEndDate ){
+                        //抑止開始が未来 , 抑止終了が過去
+                        $suppressflg = "";
+                    }elseif ( $nowDate > $suppressStartDate ){
+                        $suppressflg = 1;
+                    }elseif ( $nowDate < $suppressEndDate ){
+                        $suppressflg = 1;
+                    }
+                }
+                //抑止フラグOFF時
+                if( $suppressflg == "" ){
+                    //通知名の初期化
+                    $arrDefinedList['__NOTICE_NAME__'] = "";
+                    if( isset($tmpNotice['NOTICE_NAME']) === true ){
+                        $arrDefinedList['__NOTICE_NAME__'] = $tmpNotice['NOTICE_NAME'];
+                    }else{
+                        $arrDefinedList['__NOTICE_NAME__'] = $objMTS->getSomeMessage("ITABASEH-STD-171005");//"不明な通知"; 
+                    }
+
+                    $strURL = $tmpNotice['FQDN'] . $arrDefinedList['___TMP_URL___'];
+
+                    //作業確認URLの初期化
+                    $arrDefinedList['__JUMP_URL__'] = $strURL; 
+
+                    //上書き禁止項目
+                    $arrConstList = array(
+                        "CURLOPT_URL",
+                        "CURLOPT_HTTPHEADER",
+                        "CURLOPT_POSTFIELDS",
+                        "CURLOPT_PROXY",
+                        "CURLOPT_PROXYPORT",
+                        "CURLOPT_RETURNTRANSFER",
+                    );
+
+                    //基本設定値
+                    $method = "POST";                
+                    $Notificationurl = $tmpNotice['NOTICE_URL'];
+                    $str_header = $tmpNotice['HEADER'];
+                    $arr_header = json_decode($str_header);
+                    if( is_array($arr_header) !== true ){
+                        $arr_header = array( 
+                            "Content-Type: application/json"
+                        );
+                    }
+
+                    $str_post_data =  $tmpNotice['FIELDS'];
+                    $proxy_url  = $tmpNotice['PROXY_URL'];
+                    $proxy_port = $tmpNotice['PROXY_PORT'];
+
+                    //予約変数置換
+                    foreach ($arrDefinedList as $tmpkey => $tmpval) {
+                        $str_post_data = str_replace( $tmpkey, $tmpval , $str_post_data);
+                    }
+
+                    //curl_setoptオプションリスト
+                    $arrCurlPptList = array();
+                    //初期設定固定値
+                    $arrCurlPptList['CURLOPT_CUSTOMREQUEST']    = $method;  //初期値:POST
+                    $arrCurlPptList['CURLOPT_HEADER']           = FALSE;    //true を設定すると、ヘッダの内容も出力します。
+                    $arrCurlPptList['CURLOPT_SSL_VERIFYPEER']   = FALSE;    //false を設定すると、cURL はサーバー証明書の検証を行いません。
+                    $arrCurlPptList['CURLOPT_SSL_VERIFYHOST']   = 0;        //0 は、名前をチェックしません。
+                    $arrCurlPptList['CURLOPT_TIMEOUT']   = 5;               //cURL 関数の実行にかけられる時間の最大値。
+                    $arrCurlPptList['CURLOPT_CONNECTTIMEOUT']   = 2;        //接続の試行を待ち続ける秒数。0 は永遠に待ち続けることを意味します。
+                    $arrCurlPptList['CURLOPT_RETURNTRANSFER']   = TRUE;     //true を設定すると、curl_exec() の返り値を 文字列で返します。
+                    $arrCurlPptList['CURLOPT_HTTPPROXYTUNNEL']  = TRUE;
+                    //WEB入力項目
+                    $arrCurlPptList['CURLOPT_URL']              = $Notificationurl;
+                    $arrCurlPptList['CURLOPT_HTTPHEADER']       = $arr_header;
+                    $arrCurlPptList['CURLOPT_POSTFIELDS']       = $str_post_data;
+                    $arrCurlPptList['CURLOPT_PROXY']            = $proxy_url;
+                    $arrCurlPptList['CURLOPT_PROXYPORT']        = $proxy_port;
+
+                    $arrOtherOption = json_decode( $tmpNotice['OTHER'] ,true );
+
+                    //形式不正の場合、その他無効
+                    if( is_array($arrOtherOption) !== true ){
+                        $arrOtherOption =array();
+                    }
+
+                    //その他のオプションを設定
+                    foreach ($arrOtherOption as $curlkey => $curlval ) {
+                        if( array_search($curlkey, $arrConstList) === false ){
+                            if($curlval === null || $curlval === "" ){
+                            }else{
+                                $arrCurlPptList[$curlkey] =  $curlval;        
+                            }
+                        }else{
+                            if(strpos($curlkey,'__FORCED__') !== false){
+                                $curlkey = str_replace('__FORCED__','',$curlkey);
+                                $arrCurlPptList[$curlkey] =  $curlval;
+                            }
+                        }
+                    }
+
+                    //CURL実行準備
+                    $curl = curl_init();
+                    //curl_setopt設定
+                    foreach ($arrCurlPptList as $curlkey => $curlval) {
+                        if($curlval === null || $curlval === "" ){
+                        }else{  
+                            curl_setopt($curl, constant($curlkey), $curlval );    
+                        }
+                    }
+                    //CURL実行
+                    $restApiResponse = curl_exec($curl);
+                    $restApiResponseInfo = curl_getinfo($curl);
+
+                    $aryRowOfexecNotification[$tmpNotice['NOTICE_ID']] = $restApiResponseInfo;
+
+                    //通知ログ出力
+                    $strNoticeStatus = $tmpNotice['NOTICE_ID'].":". $tmpNotice['NOTICE_NAME'] .",". $arrDefinedList['__STATUS_ID__'] .":". $arrDefinedList['__STATUS_NAME__'];
+                    $subject = $objMTS->getSomeMessage("ITABASEH-STD-171000",array($strNoticeStatus) );//通知実行結果()
+                    $arrNoticeResult = array(
+                        "RETURN_MSG" => $restApiResponse,
+                        "OPTION"  => $arrCurlPptList,
+                        "RESSULT" => $aryRowOfexecNotification[$tmpNotice['NOTICE_ID']],
+                        
+                    );
+                    error_log(print_r( date('Y-m-d H:i:s') . " " . $subject . "\n", true), 3, $logPath );
+
+                    if( $arrNoticeResult != "" || $arrNoticeResult != array() ){
+                        error_log(print_r( $arrNoticeResult, true ), 3, $logPath );
+                    }
+                     //CURL終了
+                    curl_close($curl);
+
+                }else{
+                    $strNoticeStatus = $tmpNotice['NOTICE_ID'].":". $tmpNotice['NOTICE_NAME'] .",". $arrDefinedList['__STATUS_ID__'] .":". $arrDefinedList['__STATUS_NAME__'];
+                    $aryRowOfexecNotification[$tmpNotice['NOTICE_ID']]  = $objMTS->getSomeMessage("ITABASEH-STD-171001",array($strNoticeStatus) );//通知を抑止しました。()
+                    //通知ログ出力
+                    $subject = $aryRowOfexecNotification[$tmpNotice['NOTICE_ID']];
+                    error_log(print_r( date('Y-m-d H:i:s') . " " . $subject . "\n", true), 3, $logPath );
+                }
+            }
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfexecNotification);
+        return $retArray;
+    }
+//通知実行----
+
+//----通知取得、実行 #312 
+    function getExecNotice($aryConInsInfo,$strNoticeList,$strNoticeStatusList){
+        /////////////////////////////////////////////////////////////
+        // 通知の取得、実行                                //
+        /////////////////////////////////////////////////////////////
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $aryResultNotice = array();
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+        //
+        try{
+            $objMTS = $this->getMessageTemplateStorage();
+
+            //通知情報取得
+            $aryRetBody = $this->getNoticeInfo($strNoticeList);
+
+            if( $aryRetBody[0] !== true ){
+                $strErrMsg = $objMTS->getSomeMessage("ITABASEH-STD-171002" );//"通知対象がありません"
+
+                if( $aryRetBody[2] != array() ){
+                    $aryErrMsgBody = $aryRetBody[2];
+                }
+            }
+
+            if( $aryRetBody[1] !== null ){
+                $strErrMsg = $objMTS->getSomeMessage("ITABASEH-STD-171003" );//"通知対象が不正なため、通知処理をSKIPしました。";
+                // 例外処理へ
+                $strErrStepIdInFx="00000100";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            //通知処理設定
+            $arrNoticeRows = $aryRetBody[4];
+            
+            //通知用予約変数：値の設定（デフォルト空）
+            $arrDefinedList = array(
+                "__CONDUCTOR_INSTANCE_ID__" => "",  //ConductorインスタンスID
+                "__CONDUCTOR_NAME__"        => "",  //Conductorインスタンス名
+                "__OPERATION_ID__"          => "",  //オペレーションID
+                "__OPERATION_NAME__"        => "",  //オペレーション名
+                "__STATUS_ID__"             => "",  //ステータスID
+                "__STATUS_NAME__"           => "",  //ステータス名
+                "__EXECUTION_USER__"        => "",  //実行ユーザー
+                "__TIME_BOOK__"             => "",  //予約日時
+                "__TIME_START__"            => "",  //開始日時
+                "__TIME_END__"              => "",  //終了日時
+                "__JUMP_URL__"              => "",  //作業確認URL
+                "___TMP_URL___"              => "",  //作業確認URLの/defaultから
+            );
+
+            //通知用予約変数：値の設定
+            if( isset($aryConInsInfo['CONDUCTOR_INSTANCE_NO']) === true ) $arrDefinedList['__CONDUCTOR_INSTANCE_ID__']  = $aryConInsInfo['CONDUCTOR_INSTANCE_NO'];
+            if( isset($aryConInsInfo['I_CONDUCTOR_NAME'])      === true ) $arrDefinedList['__CONDUCTOR_NAME__']         = $aryConInsInfo['I_CONDUCTOR_NAME'];
+            if( isset($aryConInsInfo['OPERATION_NO_UAPK'])     === true ) $arrDefinedList['__OPERATION_ID__']           = $aryConInsInfo['OPERATION_NO_UAPK'];
+            if( isset($aryConInsInfo['I_OPERATION_NAME'])      === true ) $arrDefinedList['__OPERATION_NAME__']         = $aryConInsInfo['I_OPERATION_NAME'];
+            if( isset($aryConInsInfo['STATUS_ID'])             === true ) $arrDefinedList['__STATUS_ID__']              = $aryConInsInfo['STATUS_ID'];
+            if( isset($aryConInsInfo['STATUS_NAME'])           === true ) $arrDefinedList['__STATUS_NAME__']            = $aryConInsInfo['STATUS_NAME'];
+            if( isset($aryConInsInfo['EXECUTION_USER'])        === true ) $arrDefinedList['__EXECUTION_USER__']         = $aryConInsInfo['EXECUTION_USER'];
+            if( isset($aryConInsInfo['ABORT_FLAG_NAME'])       === true ) $arrDefinedList['__ABORT_FLAG__']             = $aryConInsInfo['ABORT_FLAG_NAME'];
+            if( isset($aryConInsInfo['TIME_BOOK'])             === true ) $arrDefinedList['__TIME_BOOK__']              = date('Y/m/d H:i:s',  strtotime($aryConInsInfo['TIME_BOOK']));
+            if( isset($aryConInsInfo['TIME_START'])            === true ) $arrDefinedList['__TIME_START__']             = date('Y/m/d H:i:s',  strtotime($aryConInsInfo['TIME_START']));
+            if( isset($aryConInsInfo['TIME_END'])              === true ) $arrDefinedList['__TIME_END__']               = date('Y/m/d H:i:s',  strtotime($aryConInsInfo['TIME_END']));
+            
+            if( isset($aryConInsInfo['CONDUCTOR_INSTANCE_NO']) === true ){                            
+                ###URL　作業確認URLのFQDN    
+                $arrDefinedList['___TMP_URL___'] = "/default/menu/01_browse.php?no=2100180005&conductor_instance_id=".$aryConInsInfo['CONDUCTOR_INSTANCE_NO'];
+
+            //通知実行
+                $arrNoticeStatusList =  explode(',', $strNoticeStatusList);
+
+                if( array_search( $aryConInsInfo['STATUS_ID'] , $arrNoticeStatusList ) !== false || $strNoticeStatusList !== "" && count($arrNoticeRows) != 0 ){
+                    $aryRetBody = $this->execNotice($arrNoticeRows,$arrDefinedList);
+                    if( $aryRetBody[2] != array() ){
+                        $aryErrMsgBody = $aryRetBody[2];
+                    }
+                    $aryResultNotice = $aryRetBody[4];
+                }
+
+            }else{
+                $strErrStepIdInFx="00000100";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryResultNotice);
+        return $retArray;
+    }
+//通知取得、実行----
+
+
+//----通知一覧を取得する #312 
+    function getInfoOfNoticeList(){
+        /////////////////////////////////////////////////////////////
+        // 通知一覧を取得                                //
+        /////////////////////////////////////////////////////////////
+
+        global $g;
+
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $rows = array();
+        $user_id = "";
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+        //
+        try{
+            $objDBCA = $this->getDBConnectAgent();
+            $objMTS = $this->getMessageTemplateStorage();
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            $objRBAC = new RoleBasedAccessControl($objDBCA);
+
+            #$g['login_id'] = "4";
+            if( isset($g['login_id']) === true ){
+                $user_id = $g['login_id'];
+                $ret  = $objRBAC->getAccountInfo($user_id);
+            }
+
+            // 表示データをSELECT
+            $sql =  " SELECT "
+                   ." * "
+                   ." FROM C_CONDUCTOR_NOTICE_INFO TAB_A "
+                   ." WHERE TAB_A.DISUSE_FLAG='0' "
+                   ."";
+
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            $r = $objQuery->sqlExecute();
+            $rows = array();
+
+            while($row = $objQuery->resultFetch()) {
+                list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($row);
+
+                if( $user_id != "" ){
+                    if($ret === false) {
+                        // 例外処理へ
+                        $strErrStepIdInFx="00000100";
+                        $intErrorType = 1; //システムエラー
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    } else {
+                        if($permission !== true) {
+                            //アクセス権限を持っていない場合 伏字対応
+                            $row["NOTICE_NAME"] = $objMTS->getSomeMessage("ITAWDCH-STD-11102");
+                        }
+                    }
+                }
+                $rows[] = $row;
+            }
+
+            unset($objQuery);
+            unset($r);
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$rows);
+        return $retArray;
+    }
+//通知一覧を取得する----
+
+//----ステータスス一覧を取得する #312 
+    function getInfoOfNoticeStatusList($getmode=""){
+        /////////////////////////////////////////////////////////////
+        // ステータス一覧を取得                                //
+        /////////////////////////////////////////////////////////////
+
+        global $g;
+
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $rows = array();
+        $user_id = "";
+        $strStatusList = "";
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+        //
+        try{
+            $objDBCA = $this->getDBConnectAgent();
+            $objMTS = $this->getMessageTemplateStorage();
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            $objRBAC = new RoleBasedAccessControl($objDBCA);
+            
+            if( $getmode == "" ){
+                $arrStatusList = array(3,4,5,6,7,8); //実行中,実行中(遅延),正常終了,緊急停止,異常終了,想定外エラー
+                $strStatusList = implode(",", $arrStatusList);
+            }
+            
+            // 表示データをSELECT
+            $sql =  " SELECT "
+                   ." * "
+                   ." FROM B_SYM_EXE_STATUS TAB_A "
+                   ." WHERE TAB_A.DISUSE_FLAG='0' "
+                   ."";
+            if( $getmode == "" ){
+                $sql .=" AND TAB_A.SYM_EXE_STATUS_ID IN ({$strStatusList}) ";;               
+            }
+
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            $r = $objQuery->sqlExecute();
+            $rows = array();
+
+            while($row = $objQuery->resultFetch()) {
+                $rows[] = $row;
+            }
+
+            unset($objQuery);
+            unset($r);
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$rows);
+        return $retArray;
+    }
+//ステータス一覧を取得する----
 
 //ここまでConductor用----
 

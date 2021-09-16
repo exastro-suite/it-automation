@@ -293,15 +293,20 @@ EOD;
                       <tbody>
                         <tr>
                           <th class="panel-th">ID :</th>
-                          <td class="panel-td"><span id="conductor-class-id" class="panel-span"></span></td>
+                          <td class="panel-td" colspan="2"><span id="conductor-class-id" class="panel-span"></span></td>
                         </tr>
                         <tr title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309048")}">
                           <th class="panel-th">Name :</th>
-                          <td class="panel-td"><input maxlength="256" id="conductor-class-name" class="edit panel-text" type="text"><span id="conductor-class-name-view" class="view panel-span"></span></td>
+                          <td class="panel-td" colspan="2"><input maxlength="256" id="conductor-class-name" class="edit panel-text" type="text"><span id="conductor-class-name-view" class="view panel-span"></span></td>
+                        </tr>
+                        <tr>
+                          <th class="panel-th">Notice :</th>
+                          <td class="panel-td"><span id="conductor-notice-status" class="panel-span"></span></td>
+                          <td class="panel-td panel-td-button"><button id="conductor-notice-select" class="panel-button">Select</button></td>
                         </tr>
                         <tr class="view">
                           <th class="panel-th">Role :</th>
-                          <td class="panel-td"><span id="conductor-view-role" class="panel-span"></span></td>
+                          <td class="panel-td" colspan="2"><span id="conductor-view-role" class="panel-span"></span></td>
                         </tr>
                       </tbody>
                     </table>

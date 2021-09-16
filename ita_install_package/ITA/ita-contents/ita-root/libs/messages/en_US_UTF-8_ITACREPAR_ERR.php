@@ -36,6 +36,7 @@ $ary["ITACREPAR-ERR-1021"]          = "Enter the form of the first argument of P
 $ary["ITACREPAR-ERR-1022"]          = "When you select \"Parameter Sheet(Host/Operataion)\", \"Use\" is required.";
 $ary["ITACREPAR-ERR-1023"]          = "When you select \"Parameter Sheet(Host/Operataion)\", \"Menu group for Substitution value auto-registration\" and \"Menu Group for View\" are required.";
 $ary["ITACREPAR-ERR-1024"]          = "When you select \"Create as vertical menu\", \"Rpeat\" is required.";
+$ary["ITACREPAR-ERR-1025"]          = "Only single byte integer from 2 to 99 can be set for \"REPEAT\"";
 $ary["ITACREPAR-ERR-1026"]          = "\"Use\" can not be set when \"Data Sheet\" is set.";
 $ary["ITACREPAR-ERR-1027"]          = "\"Vertical\" can not be set when \"Data Sheet\" is set.";
 $ary["ITACREPAR-ERR-1028"]          = "\"Menu group for Substitution value auto-registration\", \"Menu Group of View\" can not be set when \"Data Sheet\" is set.";

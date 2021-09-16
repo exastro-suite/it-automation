@@ -314,6 +314,65 @@
             }
             return $arrayResult[2];
         }
+
+        ////////////////////////////////
+        //  通知一覧の表示  //
+        ////////////////////////////////
+
+        function printNoticeList( $conductorClassID="", $mode="" ){
+            // グローバル変数宣言
+            global $g;
+            
+            // ローカル変数宣言
+            $arrayResult = array();
+
+            if( gettype($conductorClassID) == "NULL" )$conductorClassID = "";
+
+
+            $ola_common_lib_dir = "libs/webcommonlibs/orchestrator_link_agent";
+            require_once($g['root_dir_path']."/".$ola_common_lib_dir."/71_basic_common_lib.php");
+            require_once($g['root_dir_path']."/libs/webindividuallibs/systems/".$g['page_dir']."/81_print_conductor_info.php");
+        
+            $arrayResult =  printNoticeListInfoRegConductor( $conductorClassID , $mode );
+
+            // 結果判定
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return $arrayResult[2];
+        }
+
+        ////////////////////////////////
+        //  ステータスの表示  //
+        ////////////////////////////////
+
+        function printNoticeStatusList(){
+            // グローバル変数宣言
+            global $g;
+            
+            // ローカル変数宣言
+            $arrayResult = array();
+            
+            $ola_common_lib_dir = "libs/webcommonlibs/orchestrator_link_agent";
+            require_once($g['root_dir_path']."/".$ola_common_lib_dir."/71_basic_common_lib.php");
+            require_once($g['root_dir_path']."/libs/webindividuallibs/systems/".$g['page_dir']."/81_print_conductor_info.php");
+        
+            $arrayResult =  printNoticeStatusListInfoRegConductor();
+            // 結果判定
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return $arrayResult[2];
+        }
+
     }
 
 

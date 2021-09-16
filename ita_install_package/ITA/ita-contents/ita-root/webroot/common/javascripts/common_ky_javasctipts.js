@@ -629,6 +629,7 @@ function formControlForFUCFileUpLoad(objTrigger,strIdOfForm,strIdOfResultArea,st
                     $('#'+strIdOfResultArea+'').html('<span class=error>'+uploadData.text+'</span>');
                 }
                 $('#'+strIdOfInputButton+'').removeAttr('disabled');
+                $('#'+strIdOfForm+' [name=file]').val('');
             });
         });
         $('#'+strIdOfInputButton+'').click(function(){

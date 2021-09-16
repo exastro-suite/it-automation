@@ -1273,6 +1273,8 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
         "EXEC_LOG"=>"",
+        "I_NOTICE_INFO"=>"",
+        "NOTICE_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -1299,6 +1301,8 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
         "EXEC_LOG"=>"",
+        "I_NOTICE_INFO"=>"",
+        "NOTICE_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -1892,6 +1896,9 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
     
+        $tmpNoticeInfo = json_decode($aryRowOfSymInstanceTable['I_NOTICE_INFO'],true);
+        $arrNoticeInfo = $tmpNoticeInfo['NOTICE_INFO'];
+
         //----Conductor(インスタンス)情報を固める
         $arySymphonySource = array('CONDUCTOR_INSTANCE_ID'=>$intSymphonyInstanceId
                                   ,'CONDUCTOR_CLASS_NO'=>$aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO']
@@ -1904,6 +1911,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
                                   ,'TIME_START'=>$aryRowOfSymInstanceTable['TIME_START']
                                   ,'TIME_END'=>$aryRowOfSymInstanceTable['TIME_END']
                                   ,'EXEC_LOG'=> htmlspecialchars($aryRowOfSymInstanceTable['EXEC_LOG'])
+                                  ,'NOTICE_INFO'=> $arrNoticeInfo,
         );
         //Conductor(インスタンス)情報を固める----
 
