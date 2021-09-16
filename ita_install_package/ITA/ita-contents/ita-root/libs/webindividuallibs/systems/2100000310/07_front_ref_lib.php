@@ -35,7 +35,7 @@
                                      'ResultData'=>$arrayRetBody);
         $aryForResultData[1] = null;
       }else{
-        $aryForResultData = symphonyDownloadFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData,true);
+        $aryForResultData = symphonyDownloadFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
       }
     }
     
