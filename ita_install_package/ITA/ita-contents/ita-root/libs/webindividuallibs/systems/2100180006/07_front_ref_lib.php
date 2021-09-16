@@ -35,7 +35,7 @@
                                      'ResultData'=>$arrayRetBody);
         $aryForResultData[1] = null;
       }else{
-        $aryForResultData = conductorDownloadFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData,true);
+        $aryForResultData = conductorDownloadFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
       }
     }
     
