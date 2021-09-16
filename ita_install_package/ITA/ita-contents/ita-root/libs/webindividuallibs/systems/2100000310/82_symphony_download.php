@@ -270,7 +270,7 @@ function symphonyDownloadFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
         $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
         $aryForResultData['resultdata'] = array('CONTENTS'=>array('RECORD_LENGTH'=>$dataCnt++,
                                                               'BODY'=>$tmparrayResult,
-                                                              'UPLOAD_FILE'=>$tmparrayFileResult,
+                                                              'DOWNLOAD_FILE'=>$tmparrayFileResult,
                                                              )
                                            );
 
