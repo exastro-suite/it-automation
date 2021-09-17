@@ -375,10 +375,12 @@
                                 $type = "update_table";
                                 break;
                             }
-                            // リクエスト元とカラムの出力先が適合しない場合は、ID変換失敗のチェックはしない。
-                            // 二重チェックを防止
-                            if( ! $objFocusCol->getOutputType($type)->isVisible()) {
-                                continue;
+                            if( $colKey != "UPD_UPDATE_TIMESTAMP" ) {
+                                // リクエスト元とカラムの出力先が適合しない場合は、ID変換失敗のチェックはしない。
+                                // 二重チェックを防止
+                                if( ! $objFocusCol->getOutputType($type)->isVisible()) {
+                                    continue;
+                                }
                             }
                             if( $objFocusCol->isDBColumn()===true && $objFocusCol->getDeleteOffBeforeCheck()!==false ){
                                 //----廃止前・個別チェック
