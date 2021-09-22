@@ -167,6 +167,14 @@
                 $repeatCount = 0;
                 $columnIdConvArray = array(); //一意制約の項目ID変換用
                 foreach($menuData['item'] as $key => &$itemData){
+                    //作成対象「データシート」で入力方式「パラメータシート参照」(ID:11)を利用している場合はエラー
+                    if($menuData['menu']['TARGET'] == 2 && $itemData['INPUT_METHOD_ID'] == 11){
+                        $arrayResult[0] = "002";
+                        $arrayResult[1] = "";
+                        $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5026');
+                        throw new Exception();
+                    }
+
                     if($itemData['REPEAT_ITEM'] == true){
                         $repeatCount += 1;
                     }
@@ -204,6 +212,7 @@
                     if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
                     if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
                     if(!array_key_exists("REFERENCE_ITEM",$itemData))       $itemData["REFERENCE_ITEM"] = "";
+                    if(!array_key_exists("TYPE3_REFERENCE",$itemData))      $itemData["TYPE3_REFERENCE"] = "";
                     if(!array_key_exists("SINGLE_DEFAULT_VALUE",$itemData)) $itemData["SINGLE_DEFAULT_VALUE"] = "";
                     if(!array_key_exists("MULTI_DEFAULT_VALUE",$itemData))  $itemData["MULTI_DEFAULT_VALUE"] = "";
                     if(!array_key_exists("INT_DEFAULT_VALUE",$itemData))    $itemData["INT_DEFAULT_VALUE"] = "";
@@ -234,6 +243,7 @@
                                                "UPLOAD_MAX_SIZE"    => $itemData['UPLOAD_MAX_SIZE'],
                                                "LINK_LENGTH"        => $itemData['LINK_LENGTH'],
                                                "REFERENCE_ITEM"     => $itemData['REFERENCE_ITEM'],
+                                               "TYPE3_REFERENCE"    => $itemData['TYPE3_REFERENCE'],
                                                "SINGLE_DEFAULT_VALUE"   => $itemData['SINGLE_DEFAULT_VALUE'],
                                                "MULTI_DEFAULT_VALUE"    => $itemData['MULTI_DEFAULT_VALUE'],
                                                "INT_DEFAULT_VALUE"      => $itemData['INT_DEFAULT_VALUE'],
@@ -745,6 +755,14 @@
                                             }
                                         }
 
+                                        //パラメータシート参照の場合
+                                        if($itemData['INPUT_METHOD_ID'] == 11){
+                                            //選択項目
+                                            if($itemData['TYPE3_REFERENCE'] != $createItemInfoData['TYPE3_REFERENCE']){
+                                                $changedFlg = true;
+                                            }
+                                        }
+
                                         //変更があった場合にバリデーションエラー
                                         if($changedFlg == true){
                                             $arrayResult[0] = "002";
@@ -778,6 +796,13 @@
                 $repeatCount = 0;
                 $columnIdConvArray = array(); //一意制約の項目ID変換用
                 foreach($menuData['item'] as $key => &$itemData){
+                    //作成対象「データシート」で入力方式「パラメータシート参照」(ID:11)を利用している場合はエラー
+                    if($menuData['menu']['TARGET'] == 2 && $itemData['INPUT_METHOD_ID'] == 11){
+                        $arrayResult[0] = "002";
+                        $arrayResult[1] = "";
+                        $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5026');
+                        throw new Exception();
+                    }
                     if($itemData['REPEAT_ITEM'] === true){
                         $repeatCount += 1;
                     }
@@ -819,6 +844,7 @@
                         if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
                         if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
                         if(!array_key_exists("REFERENCE_ITEM",$itemData))       $itemData["REFERENCE_ITEM"] = "";
+                        if(!array_key_exists("TYPE3_REFERENCE",$itemData))      $itemData["TYPE3_REFERENCE"] = "";
                         if(!array_key_exists("SINGLE_DEFAULT_VALUE",$itemData)) $itemData["SINGLE_DEFAULT_VALUE"] = "";
                         if(!array_key_exists("MULTI_DEFAULT_VALUE",$itemData))  $itemData["MULTI_DEFAULT_VALUE"] = "";
                         if(!array_key_exists("INT_DEFAULT_VALUE",$itemData))    $itemData["INT_DEFAULT_VALUE"] = "";
@@ -850,6 +876,7 @@
                                                  "UPLOAD_MAX_SIZE"      => $itemData['UPLOAD_MAX_SIZE'],
                                                  "LINK_LENGTH"          => $itemData['LINK_LENGTH'],
                                                  "REFERENCE_ITEM"       => $itemData['REFERENCE_ITEM'],
+                                                 "TYPE3_REFERENCE"      => $itemData['TYPE3_REFERENCE'],
                                                  "SINGLE_DEFAULT_VALUE"   => $itemData['SINGLE_DEFAULT_VALUE'],
                                                  "MULTI_DEFAULT_VALUE"    => $itemData['MULTI_DEFAULT_VALUE'],
                                                  "INT_DEFAULT_VALUE"      => $itemData['INT_DEFAULT_VALUE'],
@@ -881,6 +908,13 @@
                 // IDがいない項目を新規登録
                 foreach($menuData['item'] as $key => &$itemData){
                     if($itemData['CREATE_ITEM_ID'] == ""){
+                        //作成対象「データシート」で入力方式「パラメータシート参照」(ID:11)を利用している場合はエラー
+                        if($menuData['menu']['TARGET'] == 2 && $itemData['INPUT_METHOD_ID'] == 11){
+                            $arrayResult[0] = "002";
+                            $arrayResult[1] = "";
+                            $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5026');
+                            throw new Exception();
+                        }
                         if($itemData['REQUIRED'] === true){
                             $required = "1";
                         }
@@ -915,6 +949,7 @@
                         if(!array_key_exists("UPLOAD_MAX_SIZE",$itemData))      $itemData["UPLOAD_MAX_SIZE"] = "";
                         if(!array_key_exists("LINK_LENGTH",$itemData))          $itemData["LINK_LENGTH"] = "";
                         if(!array_key_exists("REFERENCE_ITEM",$itemData))       $itemData["REFERENCE_ITEM"] = "";
+                        if(!array_key_exists("TYPE3_REFERENCE",$itemData))      $itemData["TYPE3_REFERENCE"] = "";
                         if(!array_key_exists("SINGLE_DEFAULT_VALUE",$itemData)) $itemData["SINGLE_DEFAULT_VALUE"] = "";
                         if(!array_key_exists("MULTI_DEFAULT_VALUE",$itemData))  $itemData["MULTI_DEFAULT_VALUE"] = "";
                         if(!array_key_exists("INT_DEFAULT_VALUE",$itemData))    $itemData["INT_DEFAULT_VALUE"] = "";
@@ -945,6 +980,7 @@
                                                    "UPLOAD_MAX_SIZE"        => $itemData['UPLOAD_MAX_SIZE'],
                                                    "LINK_LENGTH"            => $itemData['LINK_LENGTH'],
                                                    "REFERENCE_ITEM"         => $itemData['REFERENCE_ITEM'],
+                                                   "TYPE3_REFERENCE"        => $itemData['TYPE3_REFERENCE'],
                                                    "SINGLE_DEFAULT_VALUE"   => $itemData['SINGLE_DEFAULT_VALUE'],
                                                    "MULTI_DEFAULT_VALUE"    => $itemData['MULTI_DEFAULT_VALUE'],
                                                    "INT_DEFAULT_VALUE"      => $itemData['INT_DEFAULT_VALUE'],
@@ -1551,6 +1587,129 @@
         }
 
         /////////////////////
+        // パラメータシート参照リスト取得(メニューのみ)
+        /////////////////////
+        function selectReferenceSheetType3List(){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $arrayResult = array();
+
+            require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
+            //パラメータシート参照の選択候補となる対象のメニューを取得
+            $referenceSheetType3View = new ReferenceSheetType3View($g["objDBCA"], $g["db_model_ch"]);
+            $sql = "SELECT DISTINCT MENU_NAME, MENU_ID, MENU_GROUP_NAME, ACCESS_AUTH, ACCESS_AUTH_01, ACCESS_AUTH_02, ACCESS_AUTH_03, ACCESS_AUTH_04 FROM G_CREATE_REFERENCE_SHEET_TYPE_3 WHERE DISUSE_FLAG = '0' ORDER BY MENU_ID, DISP_SEQ;"; //重複削除条件をつけたいため、記述したSELECT文を採用
+
+            // SQL実行
+            $result = $referenceSheetType3View->selectTable($sql);
+            if(!is_array($result)){
+                $msg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                $arrayResult = array("999","", $result);
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+            $obj = new RoleBasedAccessControl($g['objDBCA']);
+            $ret = $obj->getAccountInfo($g['login_id']);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            // 権限があるデータのみに絞る
+            $ret = $obj->chkRecodeArrayAccessPermission($result);
+            if($ret === false) {
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+                $arrayResult = array("999","", "");
+                return makeAjaxProxyResultStream($arrayResult);
+            }
+
+            $filteredData = array();
+            $arrayMenuId = array();
+            foreach($result as $pdData){
+                //MENU_IDの重複チェック
+                if(!in_array($pdData['MENU_ID'], $arrayMenuId)){
+                  array_push($arrayMenuId, $pdData['MENU_ID']);
+                }else{
+                  continue;
+                }
+                $addArray = array();
+                $addArray['MENU_ID']       = $pdData['MENU_ID'];
+                $addArray['MENU_NAME_PULLDOWN'] = $pdData['MENU_GROUP_NAME'].":".$pdData['MENU_NAME'];
+                $filteredData[] = $addArray;
+            }
+            $arrayResult = array("000","", json_encode($filteredData));
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+
+            return makeAjaxProxyResultStream($arrayResult);
+
+        }
+
+        /////////////////////
+        // パラメータシート参照の項目からメニューIDを取得（「パラメータシート参照」について、登録されている項目IDから対象のメニューIDを取得し、セレクトボックスの初期値を決定するため。）
+        /////////////////////
+        function selectReferenceSheetType3ItemData($itemArray){
+            // グローバル変数宣言
+            global $g;
+            
+            // ローカル変数宣言
+            $arrayResult = array();
+
+            if(!empty($itemArray)){
+                require_once ( $g["root_dir_path"] . "/libs/backyardlibs/create_param_menu/ky_create_param_menu_classes.php");
+                $referenceSheetType3View = new ReferenceSheetType3View($g["objDBCA"], $g["db_model_ch"]);
+
+                //項目に使われている「プルダウン選択」のLINK_IDを抽出
+                $targetType3ReferenceItemData = array();
+                $filteredData = array();
+                foreach($itemArray as $itemData){
+                    if($itemData['INPUT_METHOD_ID'] == 11){
+                        $itemId = $itemData['TYPE3_REFERENCE'];
+                        //項目IDからメニューIDを取得する
+                        $sql = $referenceSheetType3View->createSselect("WHERE DISUSE_FLAG = '0' AND ITEM_ID = :ITEM_ID");
+                        $sqlBind = array('ITEM_ID' => $itemId);
+
+                        // SQL実行
+                        $result = $referenceSheetType3View->selectTable($sql, $sqlBind);
+                        if(!is_array($result)){
+                            $msg = $g['objMTS']->getSomeMessage('ITACREPAR-ERR-5003', $result);
+                            $arrayResult = array("999","",$msg); 
+                            throw new Exception();
+                        }
+                        $targetType3ReferenceData = $result;
+
+                        if(!empty($targetType3ReferenceData)){
+                          //メニューIDを取得（レコードは1つの想定）
+                          $menuId = $targetType3ReferenceData[0]['MENU_ID'];
+                        }else{
+                          continue;
+                        }
+
+                        //項目IDをkey、メニューIDをvalueにいれる。
+                        $targetType3ReferenceItemData[$itemId] = $menuId;
+                    }
+                }
+                $filteredData = $targetType3ReferenceItemData;
+                $arrayResult = array("000","", json_encode($filteredData));
+
+            }else{
+                $filteredData = array();
+                $arrayResult =  array("000","", json_encode($filteredData));
+            }
+
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+
+        /////////////////////
         // メニュー作成情報関連データ取得
         /////////////////////
         function selectMenuInfo($createMenuId){
@@ -1863,6 +2022,7 @@
                         "UPLOAD_MAX_SIZE"       => $itemInfoData['UPLOAD_MAX_SIZE'],
                         "LINK_LENGTH"           => $itemInfoData['LINK_LENGTH'],
                         "REFERENCE_ITEM"        => $itemInfoData['REFERENCE_ITEM'],
+                        "TYPE3_REFERENCE"       => $itemInfoData['TYPE3_REFERENCE'],
                         "SINGLE_DEFAULT_VALUE"  => $itemInfoData['SINGLE_DEFAULT_VALUE'],
                         "MULTI_DEFAULT_VALUE"   => $itemInfoData['MULTI_DEFAULT_VALUE'],
                         "INT_DEFAULT_VALUE"     => $itemInfoData['INT_DEFAULT_VALUE'],

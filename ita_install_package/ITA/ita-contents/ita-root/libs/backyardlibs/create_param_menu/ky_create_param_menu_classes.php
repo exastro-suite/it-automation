@@ -524,6 +524,7 @@ class CreateItemInfoTable extends BaseTable_CPM {
                                     'UPLOAD_MAX_SIZE',
                                     'LINK_LENGTH',
                                     'REFERENCE_ITEM',
+                                    'TYPE3_REFERENCE',
                                     'SINGLE_DEFAULT_VALUE',
                                     'MULTI_DEFAULT_VALUE',
                                     'INT_DEFAULT_VALUE',
@@ -1137,6 +1138,50 @@ class UniqueConstraintTable extends BaseTable_CPM {
                                     'DISUSE_FLAG',
                                     'LAST_UPDATE_TIMESTAMP',
                                     'LAST_UPDATE_USER',
+                                   );
+    }
+}
+
+/**
+ * パラメータシート参照用管理ビュー
+ */
+class ReferenceSheetType3View extends BaseTable_CPM {
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct($objDBCA, $db_model_ch) {
+
+        parent::__construct($objDBCA, $db_model_ch);
+        $this->tableName    = 'G_CREATE_REFERENCE_SHEET_TYPE_3';
+        $this->seqName      = '';
+        $this->jnlSeqName   = '';
+        $this->columnNames  = array('ITEM_ID',
+                                    'MENU_NAME',
+                                    'MENUGROUP_FOR_SUBST',
+                                    'MENU_ID',
+                                    'MENU_GROUP_ID',
+                                    'MENU_GROUP_NAME',
+                                    'MENU_TABLE_LINK_ID',
+                                    'TABLE_NAME',
+                                    'CREATE_ITEM_ID',
+                                    'ITEM_NAME',
+                                    'INPUT_METHOD_ID',
+                                    'COL_GROUP_ID',
+                                    'FULL_COL_GROUP_NAME',
+                                    'COL_TITLE',
+                                    'MENU_PULLDOWN',
+                                    'COLUMN_NAME',
+                                    'DISP_SEQ',
+                                    'ACCESS_AUTH',
+                                    'NOTE',
+                                    'DISUSE_FLAG',
+                                    'LAST_UPDATE_TIMESTAMP',
+                                    'LAST_UPDATE_USER',
+                                    'ACCESS_AUTH_01',
+                                    'ACCESS_AUTH_02',
+                                    'ACCESS_AUTH_03',
+                                    'ACCESS_AUTH_04',
                                    );
     }
 }

@@ -76,6 +76,7 @@ define('FILE_PARTS_PW',                 'parts_password.tpl');                  
 define('FILE_PARTS_UPL',                'parts_upload.tpl');                        // 00_loadTable.tplのデータ部テンプレート(ファイルアップロード用)
 define('FILE_PARTS_LNK',                'parts_link.tpl');                          // 00_loadTable.tplのデータ部テンプレート(リンク用)
 define('FILE_PARTS_REF',                'parts_reference.tpl');                     // 00_loadTable.tplのデータ部テンプレート(プルダウン選択の参照項目用)
+define('FILE_PARTS_TYPE3',              'parts_type3reference.tpl');                // 00_loadTable.tplのデータ部テンプレート(パラメータシート参照用)
 
 define('FILE_PARTS_VIEW_SNG',           'parts_view_string.tpl');                   // 00_loadTable.tpl(VIEW用)のデータ部テンプレート(単一行文字列用)
 define('FILE_PARTS_VIEW_MUL',           'parts_view_multiString.tpl');              // 00_loadTable.tpl(VIEW用)のデータ部テンプレート(複数行文字列用)
@@ -89,6 +90,7 @@ define('FILE_PARTS_VIEW_PW',            'parts_view_password.tpl');             
 define('FILE_PARTS_VIEW_UPL',           'parts_view_upload.tpl');                   // 00_loadTable.tpl(VIEW用)のデータ部テンプレート(ファイルアップロード用)
 define('FILE_PARTS_VIEW_LNK',           'parts_view_link.tpl');                     // 00_loadTable.tpl(VIEW用)のデータ部テンプレート(リンク用)
 define('FILE_PARTS_VIEW_REF',           'parts_view_reference.tpl');                // 00_loadTable.tpl(VIEW用)のデータ部テンプレート(プルダウン選択の参照項目用)
+define('FILE_PARTS_VIEW_TYPE3REF',      'parts_view_type3reference.tpl');           // 00_loadTable.tpl(VIEW用)のデータ部テンプレート(パラメータシート参照用)
 
 
 define('TABLE_PREFIX',                  'KY_AUTO_TABLE_');                          // テーブル名の接頭語

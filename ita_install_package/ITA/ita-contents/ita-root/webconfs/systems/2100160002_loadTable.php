@@ -326,7 +326,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->addColumn($cg);
 
-    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102134"));
+    // パラメータシート参照
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102158"));
+
+    // パラメータシート参照/メニューグループ：メニュー：項目
+    $c = new IDColumn('TYPE3_REFERENCE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102159"),'G_CREATE_REFERENCE_SHEET_TYPE_3','ITEM_ID','MENU_PULLDOWN','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102160"));//エクセル・ヘッダでの説明
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
 
     // 説明
     $objVldt = new MultiTextValidator(0,1024,false);

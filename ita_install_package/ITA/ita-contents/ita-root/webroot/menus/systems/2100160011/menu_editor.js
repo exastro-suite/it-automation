@@ -301,7 +301,9 @@ const languageText = {
 '0047':[getSomeMessage("ITACREPAR_1280"),''],
 '0048':[getSomeMessage("ITACREPAR_1285"),''],
 '0049':[getSomeMessage("ITACREPAR_1286"),''],
-'0050':[getSomeMessage("ITACREPAR_1287"),'']
+'0050':[getSomeMessage("ITACREPAR_1287"),''],
+'0051':[getSomeMessage("ITACREPAR_1296"),''],
+'0052':[getSomeMessage("ITACREPAR_1297"),'']
 }
 // テキスト呼び出し用
 const textCode = function( code ) {
@@ -320,7 +322,8 @@ const selectDummyText = {
   '7' : ['','','select'],
   '8' : [getSomeMessage("ITACREPAR_1237"),'','string'],
   '9' : [getSomeMessage("ITACREPAR_1247"),'','string'],
-  '10' : [getSomeMessage("ITACREPAR_1248"),'','string']
+  '10' : [getSomeMessage("ITACREPAR_1248"),'','string'],
+  '11' : [getSomeMessage("ITACREPAR_1298"),'','string']
 };
 
 const titleHeight = 32;
@@ -431,6 +434,14 @@ for ( let i = 0; i < selectPulldownListDataLength ; i++ ) {
   selectPulldownListHTML += '<option value="' + selectPulldownListData[i].LINK_ID + '">' + selectPulldownListData[i].LINK_PULLDOWN + '</option>';
 }
 
+//パラメータシート参照 select
+const type3PulldownListData = menuEditorArray.selectReferenceSheetType3List,
+      type3PulldownListDataLength = type3PulldownListData.length;
+let type3PulldownListHTML = '';
+for ( let i = 0; i < type3PulldownListDataLength ; i++ ) {
+  type3PulldownListHTML += '<option value="' + type3PulldownListData[i].MENU_ID + '">' + type3PulldownListData[i].MENU_NAME_PULLDOWN + '</option>';
+}
+
 // 作成対象 select
 if ( menuEditorMode !== 'view') {
     const selectParamTargetData = menuEditorArray.selectParamTarget,
@@ -502,6 +513,19 @@ const columnHTML = ''
             + '<th>' + textCode('0042') + '<span class="input_required">*</span></th>'
             + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
           + '</tr>'
+          + '</tr>'
+          + '<tr class="type3" title="' + textEntities(getSomeMessage("ITACREPAR_1299"),1) + '">'
+            + '<th>' + textCode('0051') + '<span class="input_required">*</span></th>'
+            + '<td>'
+              + '<select class="config-select type3-reference-menu"'+modeDisabled+''+modeKeepData+'>' + type3PulldownListHTML + '</select>'
+            + '</td>'
+          + '</tr>'
+          + '<tr class="type3" title="' + textEntities(getSomeMessage("ITACREPAR_1299"),1) + '">'
+            + '<th>' + textCode('0052') + '<span class="input_required">*</span></th>'
+            + '<td class="type3-item-area">'
+              + '<select class="config-select type3-reference-item"'+modeDisabled+'></select>'
+            + '</td>'
+          + '</tr>'
           + '<tr class="single" title="' + textEntities(getSomeMessage("ITACREPAR_1289"),1) + '">'
             + '<th>' + textCode('0050') + '</th>'
             + '<td><input class="config-text single-default-value" type="text" value=""'+modeDisabled+'></td>'
@@ -536,7 +560,7 @@ const columnHTML = ''
               + '<select class="config-select pulldown-default-select"'+modeDisabled+'></select>'
             + '</td>'
           + '</tr>'
-          + '<tr class="all">'
+          + '<tr class="single multiple number-int number-float date-time date password select file link">'
             + '<td colspan="2">'
               + '<label class="required-label'+onHover+'" title="' + textEntities(getSomeMessage("ITACREPAR_1271"),1) + '"><input class="config-checkbox required'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0017') + '</label>'
               + '<label class="unique-label'+onHover+'" title="' + textEntities(getSomeMessage("ITACREPAR_1272"),1) + '"><input class="config-checkbox unique'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0018') + '</label>'
@@ -644,6 +668,7 @@ const history = {
     resetSelect2( $menuTable );
     resetDatetimepicker( $menuTable );
     resetEventPulldownDefaultValue( $menuTable );
+    resetEventPulldownParameterSheetReference( $menuTable );
     updateUniqueConstraintDispData();
   },
   'redo' : function() {
@@ -654,6 +679,7 @@ const history = {
     resetSelect2( $menuTable );
     resetDatetimepicker( $menuTable );
     resetEventPulldownDefaultValue( $menuTable );
+    resetEventPulldownParameterSheetReference( $menuTable );
     updateUniqueConstraintDispData();
   },
   'clear' : function() {
@@ -859,6 +885,87 @@ const resetEventPulldownDefaultValue = function($menuTable){
 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   パラメータシート参照の項目取得
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+const setEventPulldownParameterSheetReference = function($item){
+  $item.on('change', '.menu-column-type-select, .type3-reference-menu', function(){
+    let typeId;
+
+    if($(this).hasClass('menu-column-type-select')){
+      typeId = $(this).val();
+    }
+
+    if($(this).hasClass('type3-reference-menu')){
+      typeId = $item.find('.menu-column-type-select').val();
+    }
+
+    //「パラメータシート参照」時のみ
+    if(typeId == 11){
+      getpulldownParameterSheetReferenceList($item, "");
+    }
+
+  });
+}
+
+const getpulldownParameterSheetReferenceList = function($item, itemId = ""){
+  let loadNowSelect = '<option value="">'+getSomeMessage("ITACREPAR_1295")+'</option>';
+  let faildSelect = '<option value="">'+getSomeMessage("ITACREPAR_1300")+'</option>';
+  $item.find('.type3-reference-item').html(loadNowSelect); //最初に読み込み中メッセージのセレクトボックスを挿入
+  const selectMenuId = $item.find('.type3-reference-menu option:selected').val();
+
+  //「選択項目」のメニューで初期値として利用可能な値のリストを作成する。
+  let selectParameterSheetReferenceList;
+  const printselectParameterSheetReferenceURL = '/common/common_printParameterSheetReference.php?menu_id=' + selectMenuId + '&user_id=' +gLoginUserID;
+  $.ajax({
+    type: 'get',
+    url: printselectParameterSheetReferenceURL,
+    dataType: 'text'
+  }).done( function( result ) {
+      if(JSON.parse( result ) == 'failed'){
+        selectParameterSheetReferenceList = null;
+        //エラーメッセージ入りセレックとボックスを挿入
+        $item.find('.type3-reference-item').html(faildSelect);
+        history.add(); //historyを更新
+      }else{
+        //選択可能な参照項目の一覧を取得し、セレクトボックスを生成
+        selectParameterSheetReferenceList = JSON.parse( result );
+        const selectParameterSheetReferenceListLength = selectParameterSheetReferenceList.length;
+        let selectParameterSheetReferenceListHTML = '<option value=""></option>'; //一つ目に空を追加
+        let referenceCheckFlg = false;
+        for ( let i = 0; i < selectParameterSheetReferenceListLength ; i++ ) {
+          if(itemId == selectParameterSheetReferenceList[i].itemId){
+            selectParameterSheetReferenceListHTML += '<option value="' + selectParameterSheetReferenceList[i].itemId + '" selected>' + selectParameterSheetReferenceList[i].itemPulldown + '</option>';
+            referenceCheckFlg = true;
+          }else{
+            selectParameterSheetReferenceListHTML += '<option value="' + selectParameterSheetReferenceList[i].itemId + '">' + selectParameterSheetReferenceList[i].itemPulldown + '</option>';
+          }
+        }
+        //選択項目を持っているが一致するレコードが無い場合、ID変換失敗(ID)の選択肢を追加。
+        if(referenceCheckFlg == false && itemId){
+          selectParameterSheetReferenceListHTML += '<option value="' + itemId + '" selected>' + getSomeMessage("ITACREPAR_1255", {0:itemId}) + '</option>';
+        }
+        $item.find('.type3-reference-item').html(selectParameterSheetReferenceListHTML);
+        history.add(); //historyを更新
+      }
+
+  }).fail( function( result ) {
+    selectParameterSheetReferenceList = null;
+    //エラーメッセージ入りセレックとボックスを挿入
+    $item.find('.type3-reference-item').html(faildSelect);
+    history.add(); //historyを更新
+  });
+}
+
+const resetEventPulldownParameterSheetReference = function($menuTable){
+  const $item = $menuTable.find('.menu-column');
+  $item.each(function(){
+    setEventPulldownParameterSheetReference($(this));
+  });
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -887,6 +994,8 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
         $newColumnTarget.find('.config-number'+'.password-max-byte').prop('disabled', false); //パスワード最大バイト数
         $newColumnTarget.find('.config-number'+'.file-max-size').prop('disabled', false); //ファイル最大バイト数
         $newColumnTarget.find('.config-text'+'.reference-item').prop('disabled', false); //参照項目
+        $newColumnTarget.find('.config-select'+'.type3-reference-menu').prop('disabled', false); //パラメータシート参照(メニュー選択)
+        $newColumnTarget.find('.config-select'+'.type3-reference-item').prop('disabled', false); //パラメータシート参照(項目選択)
         $newColumnTarget.find('.reference-item-select').prop('disabled', false); //参照項目を選択ボタン
         $newColumnTarget.find('.config-checkbox'+'.required').prop('disabled', false); //必須
         $newColumnTarget.find('.config-checkbox'+'.unique').prop('disabled', false); //一意制
@@ -897,6 +1006,8 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
       }
       //プルダウン選択の初期値を取得するイベントを設定
       setEventPulldownDefaultValue($newColumnTarget);
+      //パラメータシート参照の選択項目を取得するイベントを設定
+      setEventPulldownParameterSheetReference($newColumnTarget);
       break;
     case 'newColumnGroup':
       addColumn( $menuTable, 'group', groupCounter++ );
@@ -1414,6 +1525,10 @@ $menuEditor.on('click', '.menu-column-copy', function(){
     //日付と時日時の初期値入力欄にdatetimepickerを設定
     $clone.find(".callDateTimePicker").datetimepicker({format:'Y/m/d H:i:s', step:5, lang:LangStream});
     $clone.find(".callDateTimePicker2").datetimepicker({timepicker:false, format:'Y/m/d', lang:LangStream});
+    // プルダウン選択の初期値取得eventを再適用する
+    resetEventPulldownDefaultValue( $menuTable );
+    // パラメータ参照の項目取得eventを再適用する
+    resetEventPulldownParameterSheetReference( $menuTable );
 
     history.add();
     previewTable();
@@ -1806,6 +1921,8 @@ const repeatRemoveConfirm = function() {
           resetDatetimepicker( $menuTable );
           // プルダウン選択の初期値取得eventを再適用する
           resetEventPulldownDefaultValue( $menuTable );
+          // パラメータ参照の項目取得eventを再適用する
+          resetEventPulldownParameterSheetReference( $menuTable );
         }
         emptyCheck();
         previewTable();
@@ -2385,32 +2502,33 @@ const deleteUniqueConstraintDispData = function(targetColumnId){
 //項目名が変更されるアクションがあったとき、一意制約(複数項目)で表示している項目名をセットしなおす。
 const updateUniqueConstraintDispData = function(){
   let currentUniqueConstraintData = menuEditorArray['unique-constraints-current'];
-  let newCurrentUniqueConstraintData = currentUniqueConstraintData;
-  let uniqueConstraintLength = currentUniqueConstraintData.length;
-  for (let i = 0; i < uniqueConstraintLength; i++){
-      let targetIdLength = currentUniqueConstraintData[i].length;
-      for (let j = 0; j < targetIdLength; j++){
-        for (let columnId in currentUniqueConstraintData[i][j]){
-          let $itemNameArea = $menuTable.find('#'+columnId).find('.menu-column-title-input');
-          if($itemNameArea.length != 0){
-            let itemName = $itemNameArea.val();
-            newCurrentUniqueConstraintData[i][j] = {[columnId] : itemName}; //項目名を再設定
+  if(currentUniqueConstraintData != null){
+    let newCurrentUniqueConstraintData = currentUniqueConstraintData;
+    let uniqueConstraintLength = currentUniqueConstraintData.length;
+    for (let i = 0; i < uniqueConstraintLength; i++){
+        let targetIdLength = currentUniqueConstraintData[i].length;
+        for (let j = 0; j < targetIdLength; j++){
+          for (let columnId in currentUniqueConstraintData[i][j]){
+            let $itemNameArea = $menuTable.find('#'+columnId).find('.menu-column-title-input');
+            if($itemNameArea.length != 0){
+              let itemName = $itemNameArea.val();
+              newCurrentUniqueConstraintData[i][j] = {[columnId] : itemName}; //項目名を再設定
+            }
           }
         }
-      }
+    }
+
+    //更新後の値をページに反映
+    const uniqueConstraintData = getUniqueConstraintDispData(newCurrentUniqueConstraintData);
+    const uniqueConstraintConv = uniqueConstraintData.conv;
+    const uniqueConstraintName = uniqueConstraintData.name;
+    const $input = $('#unique-constraint-list');
+    $input.attr('data-unique-list', uniqueConstraintConv); //一意制約のIDの組み合わせをセット
+    $input.text(uniqueConstraintName); //一意制約の項目名の組み合わせをセット
+
+    //新しい配列をセット
+    menuEditorArray['unique-constraints-current'] = newCurrentUniqueConstraintData;
   }
-
-  //更新後の値をページに反映
-  const uniqueConstraintData = getUniqueConstraintDispData(newCurrentUniqueConstraintData);
-  const uniqueConstraintConv = uniqueConstraintData.conv;
-  const uniqueConstraintName = uniqueConstraintData.name;
-  const $input = $('#unique-constraint-list');
-  $input.attr('data-unique-list', uniqueConstraintConv); //一意制約のIDの組み合わせをセット
-  $input.text(uniqueConstraintName); //一意制約の項目名の組み合わせをセット
-
-  //新しい配列をセット
-  menuEditorArray['unique-constraints-current'] = newCurrentUniqueConstraintData;
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2541,8 +2659,8 @@ const createRegistrationData = function( type ){
               'MENU_NAME' : createMenuJSON['menu']['MENU_NAME'],
               'ITEM_NAME' : itemName,
               'DISP_SEQ' : order,
-              'REQUIRED' : $column.find('.required').prop('checked'),
-              'UNIQUED' : $column.find('.unique').prop('checked'),
+              'REQUIRED' : (selectTypeValue == '11') ? false : $column.find('.required').prop('checked'), //パラメータシート参照の場合「必須」はfalse
+              'UNIQUED' : (selectTypeValue == '11') ? false : $column.find('.unique').prop('checked'),　//パラメータシート参照の場合「一意制約」はfalse
               'COL_GROUP_ID' : parents,
               'INPUT_METHOD_ID' : selectTypeValue,
               'DESCRIPTION' : $column.find('.explanation').val(),
@@ -2594,6 +2712,9 @@ const createRegistrationData = function( type ){
               case '10':
                 createMenuJSON['item'][key]['LINK_LENGTH'] = $column.find('.max-byte').val();
                 createMenuJSON['item'][key]['LINK_DEFAULT_VALUE'] = $column.find('.link-default-value').val();
+                break;
+              case '11':
+                createMenuJSON['item'][key]['TYPE3_REFERENCE'] = $column.find('.type3-reference-item').val();
                 break;
             }
           // Item end
@@ -2844,9 +2965,15 @@ const loadMenu = function() {
               $item.find('.max-byte').val( itemData['LINK_LENGTH'] ).change();
               $item.find('.link-default-value').val( itemData['LINK_DEFAULT_VALUE'] ).change();
               break;
-          }
+            case '11':
+              let type3ReferenceMenuId = menuEditorArray.referenceSheetType3ItemData[itemData['TYPE3_REFERENCE']];
+              $item.find('.type3-reference-menu').val( type3ReferenceMenuId ).change();
+              getpulldownParameterSheetReferenceList($item, itemData['TYPE3_REFERENCE']); //「プルダウン選択」の初期値として選べる値を取得し、初期値に設定されているものをselectedにする。
+              break;          }
           //プルダウン選択の初期値を取得するイベントを設定
           setEventPulldownDefaultValue($item);
+          //パラメータシート参照の選択項目を取得するイベントを設定
+          setEventPulldownParameterSheetReference($item);
         }
 
       }
@@ -3093,6 +3220,8 @@ if ( menuEditorMode === 'new' ) {
   //プルダウン選択の初期値を取得するイベントを設定
   const $newColumnTarget = $menuEditor.find('#i'+currentItemCounter);
   setEventPulldownDefaultValue($newColumnTarget);
+  //パラメータシート参照の選択項目を取得するイベントを設定
+  setEventPulldownParameterSheetReference($newColumnTarget);
 } else {
   loadMenu();
 }
