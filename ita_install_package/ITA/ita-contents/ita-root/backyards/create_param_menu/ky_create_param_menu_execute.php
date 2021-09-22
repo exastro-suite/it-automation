@@ -401,7 +401,8 @@ try{
             $repeatItemArray = array();
             $afterItemArray = array();
             $startFlg = false;
-            $repeatItemCnt = $cpiData['COL_CNT'] * $cpiData['REPEAT_CNT'];
+            $repeatCnt = $cpiData['REPEAT_CNT'];
+            $repeatItemCnt = $cpiData['COL_CNT'] * $repeatCnt;
 
             // 項目を振り分ける
             foreach($itemInfoArray as $itemInfo){
@@ -422,7 +423,7 @@ try{
             }
 
             // 件数が合わない場合
-            if(count($repeatItemArray) != $cpiData['COL_CNT'] * $cpiData['REPEAT_CNT']){
+            if(count($repeatItemArray) != $cpiData['COL_CNT'] * $repeatCnt){
                 $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5015');
                 outputLog($msg);
                 // パラメータシート作成管理更新処理を行う
@@ -445,7 +446,7 @@ try{
             $linkLengthArray        = array();
             $errFlg = false;
 
-            for($i = 0; $i < $cpiData['REPEAT_CNT']; $i ++){
+            for($i = 0; $i < $repeatCnt; $i ++){
                 for($j = 0; $j < $cpiData['COL_CNT']; $j ++){
 
                     if($i === 0){
@@ -2535,6 +2536,7 @@ try{
                     $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
+                    $work = str_replace(REPLACE_REPEAT_CNT, $repeatCnt,             $work);
                     $convertLoadTable = $work;
                     $work = $convHostLoadTableTmpl;
                     $work = str_replace(REPLACE_INFO,       $description,           $work);
@@ -2542,6 +2544,7 @@ try{
                     $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
+                    $work = str_replace(REPLACE_REPEAT_CNT, $repeatCnt,             $work);
                     $convertHostLoadTable = $work;
                 }
                 else if("1" == $cmiData['TARGET']){
@@ -2551,6 +2554,7 @@ try{
                     $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
+                    $work = str_replace(REPLACE_REPEAT_CNT, $repeatCnt,             $work);
                     $convertLoadTable = $work;
                 }
                 else if("3" == $cmiData['TARGET']){
@@ -2560,6 +2564,7 @@ try{
                     $work = str_replace(REPLACE_UNIQUE_CONSTRAINT, $uniqueConstraintSet, $work);
                     $work = str_replace(REPLACE_MENU,       $menuName,              $work);
                     $work = str_replace(REPLACE_ITEM,       $convertLoadTableVal,   $work);
+                    $work = str_replace(REPLACE_REPEAT_CNT, $repeatCnt,             $work);
                     $convertLoadTable = $work;
                 }
             }
