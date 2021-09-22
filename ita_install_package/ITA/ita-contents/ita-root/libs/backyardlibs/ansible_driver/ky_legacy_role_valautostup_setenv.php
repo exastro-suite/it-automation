@@ -158,6 +158,7 @@
         "COL_SEQ_COMBINATION_ID"=>""  ,
         "VARS_ENTRY"=>""              ,
         "SENSITIVE_FLAG"=>""          ,
+        "VARS_ENTRY_FILE"=>""         ,
         "VARS_ENTRY_USE_TPFVARS"=>""  ,
         "ASSIGN_SEQ"=>""              ,
         "ACCESS_AUTH"=>""                 , // RBAC

@@ -445,7 +445,8 @@
                                             $in_exec_playbook_hed_def,
                                             $in_exec_option,
                                             $in_OrchestratorSubId_dir,
-                                            $in_root_dir_path,$in_log_output_php){
+                                            $in_root_dir_path,$in_log_output_php,
+                                            $in_ans_if_info){
         global $objMTS;
         global $log_level;
         global $log_output_dir;
@@ -549,7 +550,8 @@
                                          $hostprotocollist,
                                          $hostostypelist,
                                          $hostinfolist,
-                                         $in_winrm_id);
+                                         $in_winrm_id, 
+                                         $in_ans_if_info);
         if($ret <> true){
             // 例外処理へ
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00010000"));
@@ -639,7 +641,8 @@
                                             $vault_vars,
                                             $vault_host_vars_file_list,
                                             $host_child_vars,
-                                            $DB_child_vars_master);
+                                            $DB_child_vars_master,
+                                            $in_ans_if_info);
             if($ret <> true){
                 // 例外処理へ
                 $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00010003"));
@@ -657,7 +660,9 @@
             $ret = $in_ansdrv->getDBRoleVarList($in_pattern_id,
                                                 $in_operation_id,
                                                 $host_vars,
-                                                $MultiArray_vars_list,$All_vars_list);   // #1200 2017/06/19 Append
+                                                $MultiArray_vars_list,
+                                                $All_vars_list,
+                                                $in_ans_if_info);
 
             if($ret <> true){
                 // 例外処理へ
@@ -1295,7 +1300,9 @@
                                                   $exec_playbook_hed_def,
                                                   $exec_option,
                                                   $vg_OrchestratorSubId_dir,
-                                                  $root_dir_path,$log_output_php);
+                                                  $root_dir_path,$log_output_php,
+// enomoto
+                                                  $in_ans_if_info);
             if($ret !== true) {
                 $prepare_err_flag = 1;
             }

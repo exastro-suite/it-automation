@@ -1377,4 +1377,205 @@ class InventryFileAddOptionContlorl {
         }
         return true;
     }
+    function  chkSubstitutionValueListRecodedifference($BefInfo,&$AftInfo) {
+        $diff       = false;
+        $befFileDel = false;
+        $AftFileCpy = false;
+        if(($AftInfo['COL_CLASS'] == 'FileUploadColumn') &&
+           ($AftInfo['REG_TYPE']  == 'Value')) {
+            $AftInfo['VARS_ENTRY_FILE'] = $AftInfo['VARS_ENTRY'];
+            $AftInfo['VARS_ENTRY']      = "";
+        } else {
+            $AftInfo['VARS_ENTRY_FILE'] = "";
+        }
+
+        if(($BefInfo['ACCESS_AUTH']           != $AftInfo['ACCESS_AUTH']) ||
+            ($BefInfo['SENSITIVE_FLAG']        != $AftInfo['SENSITIVE_FLAG']) ||
+            ($BefInfo['VARS_ENTRY_FILE']       != $AftInfo['VARS_ENTRY_FILE']) ||
+            ($BefInfo['VARS_ENTRY_FILE_MD5']   != $AftInfo['COL_FILEUPLOAD_MD5']) ||
+            ($BefInfo['VARS_ENTRY']            != $AftInfo['VARS_ENTRY'])) {
+            $diff = true;
+        }
+        if($diff === true) {
+           // 代入値管理の具体値がファイルの場合
+           if(($BefInfo['VARS_ENTRY_FILE']       != $AftInfo['VARS_ENTRY_FILE']) || 
+              ($BefInfo['VARS_ENTRY_FILE_MD5']   != $AftInfo['COL_FILEUPLOAD_MD5'])) {
+               if($BefInfo['VARS_ENTRY_FILE']       != "") {
+                   $befFileDel = true;
+               }
+           }
+           // パラメータシートの具体値がファイルの場合
+           if(($BefInfo['VARS_ENTRY_FILE']       != $AftInfo['VARS_ENTRY_FILE'])       ||
+              ($BefInfo['VARS_ENTRY_FILE_MD5']   != $AftInfo['COL_FILEUPLOAD_MD5'])) {
+               if(($AftInfo['VARS_ENTRY_FILE']       != "") &&
+                  ($AftInfo['REG_TYPE']              == 'Value')) {
+                   $AftFileCpy = true;
+               }
+           }
+        }
+        return [$diff,$befFileDel,$AftFileCpy];
+    }
+    function chkSpecificsValueInput($arrayRegData, $arrayVariant, $objMTS, $UpLoadFile, $DelFlag ,$ordMode, $tgtTableName) {
+        global $g;
+
+        $retBool             = false;
+        $boolSystemErrorFlag = false;
+        $retStrBody          = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55294");
+
+        $strModeId = "";
+        if(array_key_exists("TCA_PRESERVED", $arrayVariant)) {
+            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])) {
+                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                $strModeId = $aryTcaAction["ACTION_MODE"];
+            }
+        }
+        $modeValue_sub = "";
+        if($strModeId == "DTUP_singleRecDelete") {
+            $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];
+        }
+
+        $BefVarsEntry       = isset($arrayVariant['edit_target_row']['VARS_ENTRY'])?
+                                    $arrayVariant['edit_target_row']['VARS_ENTRY']:null;
+        $BefVarsEntryFile   = isset($arrayVariant['edit_target_row']['VARS_ENTRY_FILE'])?
+                                    $arrayVariant['edit_target_row']['VARS_ENTRY_FILE']:null;
+        $BefSensitiveFlag   = isset($arrayVariant['edit_target_row']['SENSITIVE_FLAG'])?
+                                    $arrayVariant['edit_target_row']['SENSITIVE_FLAG']:null;
+        $AftVarsEntry       = array_key_exists('VARS_ENTRY',$arrayRegData)?
+                                 $arrayRegData['VARS_ENTRY']:null;
+        $AftVarsEntryFile   = array_key_exists('VARS_ENTRY_FILE',$arrayRegData)?
+                                 $arrayRegData['VARS_ENTRY_FILE']:null;
+        $AftSensitiveFlag   = array_key_exists('SENSITIVE_FLAG',$arrayRegData)?
+                                 $arrayRegData['SENSITIVE_FLAG']:null;
+        $AftUpLoadFile      = array_key_exists($UpLoadFile,$arrayRegData)?
+                                 $arrayRegData[$UpLoadFile]:null;
+        $AftDelFlag         = array_key_exists($DelFlag,$arrayRegData)?
+                                 $arrayRegData[$DelFlag]:null;
+        // Excelからの場合、該当レコードの具体値にファイルがアップロードされているか確認
+        if($ordMode == 1) {
+            // 更新・復活の場合か判定
+            if(($strModeId == "DTUP_singleRecUpdate") ||
+               (($strModeId == "DTUP_singleRecUpdate") && ($modeValue_sub == "off"))) {
+                $Pkey   = isset($arrayVariant['edit_target_row']['ASSIGN_ID'])?
+                                $arrayVariant['edit_target_row']['ASSIGN_ID']:null;
+                $query =  "SELECT                                             "
+                         ."  TBL_A.VARS_ENTRY_FILE                            "
+                         ."FROM                                               "
+                         ."  $tgtTableName  TBL_A                             "
+                         ."WHERE                                              "
+                         ."  TBL_A.ASSIGN_ID    = :ASSIGN_ID                  ";
+                $aryForBind = array();
+                $aryForBind['ASSIGN_ID'] = $Pkey;
+                $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+                if( $retArray[0] === true ){
+                    $objQuery =& $retArray[1];
+                    while($row = $objQuery->resultFetch() ) {
+                        if( $row['VARS_ENTRY_FILE'] != '') {
+                            // 該当レコードの具体値にファイルが設定されている場合、Excelからの更新は許可しない
+                            $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55296");
+                            $retBool = false;
+                            $boolSystemErrorFlag = false;
+                            return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                        }
+                    }
+                }else{
+                    $retStrBody = "DB Access error file:" . basename(__FILE__) . " line:" . __LINE__;
+                    web_log($retStrBody);
+                    $retBool             = false;
+                    $boolSystemErrorFlag = true;
+                    $retStrBody          = "";
+                    return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                }
+                unset($retArray);
+            }
+        }
+        // 0:[ブラウザからの新規登録
+        // 1:[EXCEL]からの新規登録
+        // 2:[CSV]からの新規登録
+        // 3:[JSON]からの新規登録
+        // 4:[ブラウザからの新規登録(SQLトランザクション無し)
+        switch($ordMode) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            switch($strModeId) {
+            case "DTUP_singleRecRegister":
+                if(($AftVarsEntry     != "") &&
+                   ($AftVarsEntryFile != "")) {
+                    return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                }
+                break;
+            case "DTUP_singleRecUpdate":
+                $FileSet = false;
+                $StrSet  = false;
+                // ファイル削除がチェックされているか判定
+                if($AftDelFlag == "on") {
+                    $FileSet = false;
+                } else {
+                    // 新規ファイルがアップロードされているか判定
+                    if($AftUpLoadFile == "") {
+                        // 変更前にファイルがアップロードされているか判定
+                        if($BefVarsEntryFile == "") {
+                            $FileSet = false;
+                        } else {
+                            $FileSet = true;
+                        }
+                    } else {
+                        $FileSet = true;
+                    }
+                }
+                // 具体値が設定されているか判定
+                if($AftVarsEntry     == "") {
+                    // SENSITIVE設定がONか判定
+                    if($AftSensitiveFlag == 2) {
+                         // 変更前のSENSITIVE設定がONか判定
+                        if($BefSensitiveFlag == 2) {
+                            // 変更前の具体値が設定されているか判定
+                            if($BefVarsEntry == "") {
+                                $StrSet  = false;
+                            } else {
+                                $StrSet  = true;
+                            }
+                        } else {
+                            // 具体値は空白になる
+                            $StrSet  = false;
+                        }
+                    } else {
+                        $StrSet  = false;
+                    }
+                } else {
+                    $StrSet  = true;
+                }
+                if(($FileSet === true) && ($StrSet === true)) {
+                    return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                }
+                break;
+            case "DTUP_singleRecDelete":
+                if($modeValue_sub == "off") {
+                    if(($BefVarsEntry     != "") &&
+                       ($BefVarsEntryFile != "")) {
+                        $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55295");
+                        return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                    }
+                }
+                break;
+            default:
+                break;
+            }
+            break;
+        default:
+            $retStrBody = "Illegal value for ModeType. file:" . basename(__FILE__) . " line:" . __LINE__;
+            web_log($retStrBody);
+            $retBool             = false;
+            $boolSystemErrorFlag = true;
+            $retStrBody          = "";
+            return [$retBool,$boolSystemErrorFlag,$retStrBody];
+            // break;
+        }
+        $retBool             = true;
+        $boolSystemErrorFlag = false;
+        $retStrBody          = "";
+        return [$retBool,$boolSystemErrorFlag,$retStrBody];
+    }
 ?>

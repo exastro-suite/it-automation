@@ -17,11 +17,26 @@
 //
 //  【処理概要】
 //    ・WebDBCore機能を用いたWebページの中核設定を行う。
+//  【特記事項】
+//   ●●●●●●●●
+//    ・カラムの増減する場合「tmp_file_COL_IDSOP_17・del_flag_COL_IDSOP_17」
+//      のKey名の変更が必要となる場合がある。
+//   ●●●●●●●●
 //
 //////////////////////////////////////////////////////////////////////
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
+
+    global $root_dir_path;
+    if ( empty($root_dir_path) ){
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+    }
+
+    // 共通モジュールをロード
+    require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
 
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-502010");
@@ -951,6 +966,9 @@ Ansible（Pioneer）代入値管理
     $table->addColumn($c);
     //変数名----
 
+    $cg1 = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-310000"));
+    $cg2 = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-310001"));
+
     //----Sensitive設定
     $c = new IDColumn('SENSITIVE_FLAG',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010002000"), 'B_SENSITIVE_FLAG', 'VARS_SENSITIVE', 'VARS_SENSITIVE_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('VARS_SENSITIVE'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010002010")); //エクセル・ヘッダでの説明
@@ -960,7 +978,7 @@ Ansible（Pioneer）代入値管理
     $c->setHiddenMainTableColumn(true);
     $c->setDefaultValue("register_table", 1);
 
-    $table->addColumn($c);
+    $cg2->addColumn($c);
 
     //----具体値
     $objVldt = new SingleTextValidator(0,8192,false);
@@ -973,8 +991,22 @@ Ansible（Pioneer）代入値管理
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
 
-    $table->addColumn($c);
-    //----具体値
+    $cg2->addColumn($c);
+    $cg1->addColumn($cg2);
+    //具体値----
+
+    // ---- 具体値ファイル
+    $c = new FileUploadColumn('VARS_ENTRY_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-310002"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-310003"));//エクセル・ヘッダでの説明
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
+    $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+    $c->setFileHideMode(true);
+    $c->setHiddenMainTableColumn(true);
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+    $cg1->addColumn($c);
+
+    $table->addColumn($cg1);
+    // 具体値ファイル----
 
 
     //----具体値でTPF変数使用有無
@@ -1213,6 +1245,22 @@ Ansible（Pioneer）代入値管理
             if(($ret !== false) && ($ret > 0)){
                 $g['VARS_ENTRY_USE_TPFVARS_VAULE'] = "1";
             }
+        }
+        // カラムの増減する場合「tmp_file_COL_IDSOP_17・del_flag_COL_IDSOP_17」
+        // のKey名の変更が必要となる場合がある。
+        $UpLoadFile = "tmp_file_COL_IDSOP_17";
+        $DelFlag    = "del_flag_COL_IDSOP_17";
+        $tgtTableName = "B_ANSIBLE_PNS_VARS_ASSIGN";
+        // $g['ModeType']  03_registerTable.php/04_updateTable.php/05_deleteTable.phpで設定
+        // 0:[ブラウザからの新規登録
+        // 1:[EXCEL]からの新規登録
+        // 2:[CSV]からの新規登録
+        // 3:[JSON]からの新規登録
+        // 4:[ブラウザからの新規登録(SQLトランザクション無し)
+        list($ret,$boolSystemErrorFlag,$retStrBody) = chkSpecificsValueInput($arrayRegData, $arrayVariant, $g['objMTS'], $UpLoadFile, $DelFlag, $g['ModeType'], $tgtTableName);
+        if($ret === false) {
+            $boolExecuteContinue = false;
+            $retBool = false;
         }
 
         $g['PATTERN_ID_UPDATE_VALUE']        = "";
